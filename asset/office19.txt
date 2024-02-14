@@ -1,0 +1,11 @@
+ACTION NEEDED Your license isn't genuine, and you may be a victim of software counterfeiting. Avoid interruption and keep your files safe with genuine Office today or Avoid security risks and get a genuine office now
+I get this message when I open Office 2019. Get Genuine Office you may be a victim of software counterfeiting. Avoid security risks and get a genuine office now. When I click on Get Genuine Office it takes me to a Get Office 365 page. My office 2019 is Genuine. Is this a way to sell 365? Is there a way to stop the message?
+======================================================================
+SOLUTION
+======================================================================
+Step 1: Open CMD as Admin
+Step 2: Write the following commands and hit enter
+1: cd "\Program Files\Common Files\microsoft shared\ClickToRun"
+2: OfficeC2rclient.exe /update user updatetoversion=16.0.13801.20266
+Step 3: Disable office update open word or excel or ppt - Goto Files - Account - Update Options - Disable Updates
+That’s it

@@ -1,0 +1,6 @@
+>#download file from onedrive and use in scoop (not working as sharelink changes)
+#Replace "URL_HERE" with the actual download link
+$downloadLink = "URL"
+$outputPath = "path/filename" # Replace with your desired output file path and name
+#Download the file using Invoke-WebRequest
+Invoke-WebRequest -Uri $downloadLink -OutFile $outputPath

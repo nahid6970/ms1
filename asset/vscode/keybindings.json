@@ -1,0 +1,54 @@
+// Place your key bindings in this file to override the defaultsauto[]
+[
+
+
+
+/*  Script Files */
+{ "key": "ctrl+m ctrl+e", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\AppData\\Roaming\\.emacs.d\\config.org"]},
+{ "key": "ctrl+m ctrl+v", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua"]},
+{ "key": "ctrl+m ctrl+a", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\OneDrive\\Git\\ms1\\scripts\\ahkscripts.ahk"]},
+{ "key": "ctrl+m ctrl+b", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\OneDrive\\Git\\ms1\\scripts\\backup.ps1"]},
+{ "key": "ctrl+m ctrl+d", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\OneDrive\\Git\\ms1\\scripts\\delta.ps1"]},
+{ "key": "ctrl+m ctrl+s", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\OneDrive\\Git\\ms1\\scripts\\startup.ps1"]},
+{ "key": "ctrl+m ctrl+u", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\OneDrive\\Git\\ms1\\scripts\\update.ps1"]},
+
+/* HTML Files */
+{ "key": "ctrl+m ctrl+Numpad1", "command": "htmlRelatedLinks.openFile", "args": ["C:\\Users\\nahid\\OneDrive\\Git\\ms2\\1.html"]},
+{ "key": "ctrl+m ctrl+Numpad2", "command": "htmlRelatedLinks.openFile", "args": ["C:\\Users\\nahid\\OneDrive\\Git\\ms2\\2.html"]},
+{ "key": "ctrl+m ctrl+Numpad3", "command": "htmlRelatedLinks.openFile", "args": ["C:/Users/nahid/OneDrive/Git/ms2/Files/MyOrg.org"]},
+
+/* Keyboard Related */
+{ "key": "ctrl+k ctrl+Numpad2", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\scoop\\apps\\vscode\\current\\data\\user-data\\User\\keybindings.json"]},
+{ "key": "ctrl+k ctrl+Numpad3", "command": "htmlRelatedLinks.openFile", "args": [ "C:\\Users\\nahid\\OneDrive\\Git\\ms2\\content\\keymapping.html"]},
+
+/*  Cool Shortcuts */
+{ "key": "alt+j", "command": "editor.action.joinLines" },
+{ "key": "alt+m", "command": "editor.action.toggleMinimap" },
+{ "key": "ctrl+alt+k", "command": "-bookmarks.toggle", "when": "editorTextFocus" },
+{ "key": "ctrl+alt+v", "command": "toggleVim" },
+{ "key": "shift+alt+s", "command": "editor.action.sortLinesAscending" },
+
+/* Extension Shortcuts Changed by me */
+{ "key": "ctrl+alt+t c", "command": "-extension.table.formatCurrent", "when": "editorTextFocus" },
+{ "key": "ctrl+b ctrl+b", "command": "bookmarks.toggle", "when": "editorTextFocus" },
+{ "key": "ctrl+b ctrl+l", "command": "bookmarks.listFromAllFiles" },
+{
+    "key": "ctrl+k ctrl+numpad1",
+    "command": "workbench.action.openGlobalKeybindings"
+},
+{ "key": "ctrl+k ctrl+s", "command": "-workbench.action.openGlobalKeybindings" },
+{ "key": "ctrl+numpad1 ctrl+numpad1", "command": "editor.action.removeDuplicateLines" },
+{ "key": "ctrl+numpad6 ctrl+numpad6", "command": "workbench.action.newGroupRight" },
+{
+    "key": "ctrl+shift+alt+m",
+    "command": "vscode-neovim.disable"
+},
+{ "key": "ctrl+shift+alt+n", "command": "vscode-neovim.enable" },
+{ "key": "ctrl+t ctrl+t", "command": "extension.table.formatCurrent", "when": "editorTextFocus" },
+{ "key": "shift+alt+;", "command": "align-columns.align" },
+{ "key": "shift+alt+a", "command": "-align.by.regex", "when": "editorHasSelection" },
+{ "key": "shift+alt+r", "command": "-revealFileInOS", "when": "!editorFocus" },
+{ "key": "shift+alt+r", "command": "align.by.regex", "when": "editorHasSelection" },
+{ "key": "shift+alt+s", "command": "-PowerShell.ShowAdditionalCommands", "when": "editorTextFocus && editorLangId == 'powershell'" },
+{ "key": "ctrl+alt+;", "command": "workbench.action.output.show.vscodevim.vim.Vim" },
+]

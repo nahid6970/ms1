@@ -1,0 +1,5 @@
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+convert to packer
+
+use ('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})

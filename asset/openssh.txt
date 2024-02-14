@@ -1,0 +1,153 @@
+C:\ProgramData\ssh\sshd_config
+ssh u0_a827@192.168.1.102 -p 8022      #connect pc --> Android
+scp  file.exe nahid@192.168.1.101:/D:/
+scp -r "storage/shared/Download/root/" nahid@192.168.1.101:/D:/Dhoom3/  #use -r for directory
+
+
+
+
+how to setup ssh in windows powershell and android termux and also share or access the D:\Downloads folder using ssh from pc to android
+
+2 / 2
+
+
+ChatGPT
+To set up SSH for file sharing between a Windows PC and an Android device using Termux, you can follow these general steps:
+
+Install an SSH Server on Windows:
+
+You can use a third-party SSH server like OpenSSH for Windows.
+
+Download and install OpenSSH for Windows from the official GitHub repository: OpenSSH for Windows.
+
+Follow the installation instructions provided on the GitHub page.
+
+After installation, make sure the OpenSSH server is running. You can use the following PowerShell command to start the SSH server:
+
+powershell
+Copy code
+Start-Service sshd
+You may also want to set the service to start automatically:
+
+powershell
+Copy code
+Set-Service -Name sshd -StartupType 'Automatic'
+Allow SSH Access through Windows Firewall:
+
+Ensure that your Windows Firewall allows SSH traffic. You can do this by adding a rule to allow incoming connections on port 22 (the default SSH port).
+
+Open PowerShell as an administrator and run the following command:
+
+powershell
+Copy code
+New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
+Find the Windows PC's IP Address:
+
+Open PowerShell and run the following command to find the IP address of your Windows PC:
+
+powershell
+Copy code
+ipconfig
+Look for the IPv4 Address under the network adapter currently in use.
+
+Install SSH Client on Android (Termux):
+
+Install the Termux app from the Google Play Store.
+
+Open Termux and install the SSH client:
+
+bash
+Copy code
+pkg install openssh
+Connect from Android to Windows:
+
+In Termux, use the following command to connect to your Windows PC:
+
+bash
+Copy code
+ssh username@windows_ip_address
+here password is myhotmail password which is 18---Cd0
+Replace username with your Windows username and windows_ip_address with the actual IP address of your Windows PC.
+
+Enter your Windows password when prompted.
+
+Access the D:\Downloads Folder:
+
+Once connected via SSH, you can navigate to the D:\Downloads folder using standard commands. For example:
+
+bash
+Copy code
+cd /d/Downloads
+To copy files from Windows to Android, you can use the scp command. For example, to copy a file named example.txt from Windows to the current directory on Android:
+
+bash
+Copy code
+scp username@windows_ip_address:/d/Downloads/example.txt .
+To copy a file from Android to Windows:
+
+bash
+Copy code
+scp example.txt username@windows_ip_address:/d/Downloads/
+This setup assumes that both devices are on the same local network. If you're connecting from outside your local network, you'll need to configure port forwarding on your router and use your public IP address or a dynamic DNS service.
+
+Keep in mind that using SSH without encryption may expose your data to potential security risks. If security is a concern, consider using additional encryption methods or tools like SFTP (Secure File Transfer Protocol).
+
+
+
+
+
+
+
+
+
+
+
+
+
+User
+okay when i am using termux to access my pc its using cmd instead of powershell
+ChatGPT
+When you connect from Termux to your Windows PC using SSH, the default shell that is used is determined by the SSH server configuration on your Windows machine. If you are seeing the Command Prompt (cmd) instead of PowerShell, it may be because the default shell for the SSH server is set to cmd.
+
+To change the default shell for the OpenSSH server on your Windows PC, you can do the following:
+
+Edit the sshd_config file:
+
+Open the sshd_config file in a text editor. You can use Notepad or any other text editor of your choice.
+makefile
+Copy code
+C:\ProgramData\ssh\sshd_config
+Change the default shell:
+
+Look for the line that starts with Subsystem and add the following lines below it to specify the default shell:
+
+mathematica
+Copy code
+Subsystem       powershell C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -sshs -NoLogo -NoProfile
+Save the changes to the sshd_config file.
+
+Restart the SSH server:
+
+Open PowerShell as an administrator.
+
+Restart the SSH server using the following command:
+
+powershell
+Copy code
+Restart-Service sshd
+Now, when you connect from Termux to your Windows PC using SSH, it should use PowerShell as the default shell.
+
+Remember that modifying the server configuration requires administrative privileges on your Windows machine. Additionally, make sure to restart the SSH server for the changes to take effect. If you encounter any issues, check the server logs or event viewer on your Windows PC for any error messages related to the SSH server.
+
+
+
+
+
+
+
+
+
+
+
+termux openssh setup
+https://www.learntermux.tech/2020/10/Termux-SSH-Use-Termux-Windows.html

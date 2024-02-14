@@ -1,0 +1,18 @@
+#+TITLE: Configuring Emacs
+#+AUTHOR: Derek Taylor (DT)
+#+DESCRIPTION: These configs are a part of a video series on the DistroTube channel on YouTube.
+#+STARTUP: showeverything
+#+OPTIONS: toc:2
+
+
+* ABOUT THE "CONFIGURING EMACS" VIDEO SERIES
+"Configuring Emacs" is a series of videos where I take a standard installation of GNU Emacs and configure it into something more akin to Doom Emacs, complete with Evil Mode and all the customizations needed to make Emacs into something special.  This repo is broken up into subdirectories that are numbered (starting at 01).  The subdirectory numbers correspond to the number of the video in the series.  In each subdirectory you will find the Emacs configuration files as they existed at the time of that video.
+
+* THE VIDEOS  
++ [[https://www.youtube.com/watch?v=d1fgypEiQkE][A New Beginning With GNU Emacs - Configuring Emacs 01]]
++ [[https://www.youtube.com/watch?v=4ZH9pobulDo][Fixing Some Major Bugs And Minor Annoyances - Configuring Emacs 02]]
++ [[https://www.youtube.com/watch?v=A4UothfExBM][Ivy, Shells and Custom Theming - Configuring Emacs 03]]
++ [[https://www.youtube.com/watch?v=GUIq7ZJoEGY][App Launchers, Dashboard & Language Support Configuring Emacs 04]]
++ [[https://www.youtube.com/watch?v=uj-GBVWdxcA][Dired, Neotree and True Transparency - Configuring Emacs 05]]
++ [[https://www.youtube.com/watch?v=tT1foT5Ccdo][Cleaning Up My Emacs Config - Configuring Emacs 06]]
++ [[https://www.youtube.com/watch?v=Be041087PVI][Putting The Final Touches On Emacs - Configuring Emacs 07]]

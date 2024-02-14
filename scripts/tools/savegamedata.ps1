@@ -1,0 +1,1 @@
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Local\CPPFPS" -Target "C:\Users\nahid\OneDrive\savegame\CPPFPS" -Force #pwsh

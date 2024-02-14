@@ -1,0 +1,45 @@
+<#
+function req {
+param (
+[string]$content,
+[scriptblock[]]$styles,
+[scriptblock]$onClick
+)
+
+$button = New-Object Windows.Controls.button
+$button.Content = $content
+$styles | ForEach-Object { & $_ $button }
+$button.Add_Click($onClick)
+
+return $button
+}
+ #>
+
+
+
+$cs2 = {
+param(
+[string]$content,
+[scriptblock]$onClick,
+[scriptblock]$onBackClick
+)
+$label = New-Object Windows.Controls.Label
+$label.Content = $content
+$label.Add_MouseLeftButtonDown($onClick)
+$label.HorizontalAlignment = [Windows.HorizontalAlignment]::Center
+$label.HorizontalAlignment = [Windows.HorizontalAlignment]::Center
+$label.HorizontalContentAlignment = [Windows.HorizontalAlignment]::Center
+$label.VerticalContentAlignment = [Windows.HorizontalAlignment]::Center
+$label.Height = 40
+$label.Width = 250
+$label.Cursor = [Windows.Input.Cursors]::Hand
+$label.FontFamily = New-Object Windows.Media.FontFamily("JetBrainsMono Nerd Font")
+
+$label.Background = New-Object Windows.Media.SolidColorBrush ([Windows.Media.Color]::Fromrgb(255, 255, 255) )
+$label.Foreground = New-Object Windows.Media.SolidColorBrush ([Windows.Media.Color]::Fromrgb(55, 255, 255) )
+$label.Add_MouseEnter({ $this.Background = New-Object Windows.Media.SolidColorBrush ([Windows.Media.Color]::FromRgb(0, 0, 0)) })
+$label.Add_MouseEnter({ $this.Foreground = New-Object Windows.Media.SolidColorBrush ([Windows.Media.Color]::FromRgb(255, 255, 255)) })
+$label.Add_MouseLeave({ $this.Background = New-Object Windows.Media.SolidColorBrush ([Windows.Media.Color]::FromRgb(255, 0, 0)) })
+$label.Add_MouseLeave({ $this.Foreground = New-Object Windows.Media.SolidColorBrush ([Windows.Media.Color]::FromRgb(255, 255, 255)) })
+return $label
+}

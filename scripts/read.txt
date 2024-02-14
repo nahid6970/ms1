@@ -1,0 +1,8 @@
+combined.ps1 -ScriptName "script1.ps1"
+
+# add to profile for shortcut
+function su {scoop update}
+function sua {scoop update *}
+function scc {scoop cleanup *}
+function wu {winget upgrade --all --include-unknown}
+function valoqbit {D:\@git\ms1\scripts\valo.qbit.ps1}

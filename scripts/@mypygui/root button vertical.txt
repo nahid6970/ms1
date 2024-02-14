@@ -1,0 +1,12 @@
+BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="ne", pady=(3,0),padx=(0,3))
+
+LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#E81123", fg="#FFFFFF", width=" 2", height="1", highlightthickness=1, text="X", font= ("agency", 10, "bold")) ; LB_XXX.pack     (side="right", anchor="ne", padx=(0,3), pady=(5,0)) ; LB_XXX.bind("<Button-1>", close_window)
+LB_MXM = tk.Label  (BOX_ROW_ROOT, bg="#0000FF", fg="#FFFFFF", width=" 2", height="1", highlightthickness=1, text="M", font= ("agency", 10, "bold")) ; LB_MXM.pack     (side="right", anchor="ne", padx=(0,3), pady=(5,0)) ; LB_MXM.bind("<Button-1>", toggle_window_size)
+window_state = 'normal'
+
+BOX_ROW_ROOT2 = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT2.pack(side="top", anchor="ne", pady=(0,0),padx=(0,3))
+LB_CPU = tk.Label  (BOX_ROW_ROOT2, bg="#FFFFFF", fg="#FF0000", width=" 6", height="1", highlightthickness=1, text=" ", font= ("agency", 8, "bold")) ; LB_CPU.pack     (side="top", anchor="ne", padx=(0,3), pady=(5,0))
+LB_RAM = tk.Label  (BOX_ROW_ROOT2, bg="#FFFFFF", fg="#FF0000", width=" 6", height="1", highlightthickness=1, text=" ", font= ("agency", 8, "bold")) ; LB_RAM.pack     (side="top", anchor="ne", padx=(0,3), pady=(5,0))
+LB_DUC = tk.Label  (BOX_ROW_ROOT2, bg="#FFFFFF", fg="#FF0000", width=" 6", height="1", highlightthickness=1, text=" ", font= ("agency", 8, "bold")) ; LB_DUC.pack     (side="top", anchor="ne", padx=(0,3), pady=(5,0))
+LB_DUD = tk.Label  (BOX_ROW_ROOT2, bg="#FFFFFF", fg="#FF0000", width=" 6", height="1", highlightthickness=1, text=" ", font= ("agency", 8, "bold")) ; LB_DUD.pack     (side="top", anchor="ne", padx=(0,3), pady=(5,0))
+LB_NET = tk.Label  (BOX_ROW_ROOT2, bg="#FFFFFF", fg="#000000", width=" 6", height="1", highlightthickness=1, text=" ", font= ("agency", 8, "bold")) ; LB_NET.pack     (side="top", anchor="ne", padx=(0,3), pady=(5,0))

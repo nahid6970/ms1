@@ -1,0 +1,24 @@
+#! Resize Window
+def toggle_window_size(event):
+    global window_state
+    if window_state == 'normal':
+        ROOT.geometry('450x38')
+        #ROOT.geometry('400x38+{0}+{1}'.format(ROOT.winfo_x(), ROOT.winfo_screenheight() - 38))
+        ROOT.configure(bg='red')
+        LB_MXM.config(text ='M',bg="Green", fg="#ffffff", height=1, width=2, highlightthickness=1, font=("agency", 10, "bold"))
+        window_state = 'shrunken'
+    elif window_state == 'shrunken': #! this is actually 3rd window based on size property 1.Root (400*700) 2.Normal which is (450*38) 3.Shrunken/Bigger version after small bar (450*700) 
+        ROOT.geometry('450x700')  # Set your desired default size
+        #ROOT.geometry('400x700+{0}+{1}'.format(ROOT.winfo_x(), ROOT.winfo_screenheight() - 700))
+        ROOT.configure(bg='#1d2027')  # Set your desired default color
+        LB_MXM.config(text ='M',bg="blue", fg="#ffffff", height=1, width=2, highlightthickness=1, font=("agency", 10, "bold"))
+        window_state = 'normal'
+    ROOT.update_idletasks()  # Ensure the window size is updated
+    #!alt 1
+    #ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{ROOT.winfo_screenwidth() - ROOT.winfo_width()}+{ROOT.winfo_y()}') #!alt1 will always adjust to right side of the current horizontal line of window
+    #!alt 2
+    # Calculate the x-coordinate for the top-right corner, shifted a bit towards the left
+    # Adjust the 220 value as needed
+    # Set the window geometry
+    # Now can manully set big window position and little window position
+    x_coordinate = ROOT.winfo_screenwidth() - ROOT.winfo_width() - 220 ; ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+0')  #!alt2 Adjust the 220 value as needed   # now the small bar will start at top right corner and wont go to the right side

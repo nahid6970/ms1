@@ -1,0 +1,36 @@
+""" # Create buttons in main frame
+x_bt      = tk.Button(main_frame, text="X",          command =close_window, bg                                         ="#e81123", fg="#000000", height=1, width      =2, font      =("JetBrainsMono Nerd Font", 8, "bold") )
+backup_bt = tk.Button(main_frame, text="[B]ackup",   command =open_backup, height                                      =2, width     =15, bg           ="#21a366", fg ="#ffffff", bd=0, highlightthickness                   =0, anchor="w", font=("JetBrainsMono Nerd Font", 12, "bold"))
+update_bt = tk.Button(main_frame, text="[U]pdate",   command =open_update, height                                      =2, width     =15, bg           ="#0047ab", fg ="#ffffff", bd=0, highlightthickness                   =0, anchor="w", font=("JetBrainsMono Nerd Font", 12, "bold"))
+FFmpeg_bt = tk.Button(main_frame, text="[F]Fmpeg",   command =lambda: switch_to_frame(ffmpeg_frame, main_frame), height=2, width     =15, bg           ="#7e57c2", fg ="#1D2027", bd=0, highlightthickness                   =0, anchor="w", font=("JetBrainsMono Nerd Font", 12, "bold"))
+find_bt   = tk.Button(main_frame, text="[F]ind",     command =lambda: switch_to_frame(find_frame, main_frame), height  =2, width     =15, bg           ="#ffffff", fg ="#1D2027", bd=0, highlightthickness                   =0, anchor="w", font=("JetBrainsMono Nerd Font", 12, "bold"))
+Folder_bt = tk.Button(main_frame, text="[F]olders",  command =lambda: switch_to_frame(folder_frame, main_frame), height=2, width     =15, bg           ="#ffd86a", fg ="#1D2027", bd=0, highlightthickness                   =0, anchor="w", font=("JetBrainsMono Nerd Font", 12, "bold"))
+Tools_bt  = tk.Button(main_frame, text="[T]ools",    command =lambda: switch_to_frame(tools_frame, main_frame), height =2, width     =15, bg           ="white", fg   ="#1D2027", bd=0, highlightthickness                   =0, anchor="w", font=("JetBrainsMono Nerd Font", 12, "bold"))
+Valo_bt   = tk.Button(main_frame, text="[V]alorant", command =lambda: switch_to_frame(valo_frame, main_frame), height  =2, width     =15, bg           ="#ed4857", fg ="#ffffff", bd=0, highlightthickness                   =0, anchor="w", font=("JetBrainsMono Nerd Font", 12, "bold"))
+ """
+
+""" x_bt.pack(pady=3, padx=3, anchor="e")
+backup_bt.pack(pady=0)
+update_bt.pack(pady=0)
+FFmpeg_bt.pack(pady=0, anchor="n")  # Align to the left
+find_bt.pack(pady=0, anchor="n")  # Align to the left
+Folder_bt.pack(pady=0)
+Tools_bt.pack(pady=0)
+Valo_bt.pack(pady=0) """
+
+
+
+
+
+
+""" x_bt.grid( row=1, column=2, sticky=tk.W, pady=3, padx=3)
+backup_bt.grid( row=2, column=1, sticky=tk.W, pady=0, padx=0)
+update_bt.grid( row=3, column=1, sticky=tk.N, pady=0, padx=0)
+FFmpeg_bt.grid( row=4, column=1, sticky=tk.S, pady=0, padx=0)  # Align to the left
+find_bt.grid( row=5, column=1, sticky=tk.NSEW, pady=0, padx=0)  # Align to the left
+Folder_bt.grid( row=6, column=1, sticky=tk.W, pady=0, padx=0)
+Tools_bt.grid( row=7, column=1, sticky=tk.W, pady=0, padx=0)
+Valo_bt.grid( row=8, column=1, sticky=tk.W, pady=0, padx=0) """
+
+
+

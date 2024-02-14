@@ -1,0 +1,13 @@
+M-x install list
+all-the-icons-install-fonts --[must download font and install all tff]
+zoom
+
+
+
+Elpaca --M-x Package-install
+Melpa  --M-x package-list-packages
+
+
+
+
+change alpaca version to latest version to solve for version mismatch

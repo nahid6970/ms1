@@ -1,0 +1,65 @@
+emacs
+alacrity --> fish
+obs
+kdenlive [to edit video]
+
+desktop environment
+GNOME: GNOME is the default desktop environment for many Linux distros, including Ubuntu and Fedora. It is a modern and user-friendly desktop environment with a focus on productivity and simplicity. GNOME features a consistent design, smooth animations, and a wide range of extensions for customization. 
+
+KDE Plasma: KDE Plasma is another popular desktop environment known for its flexibility and customization options. It offers a traditional desktop experience with a customizable panel, widgets, and themes. KDE Plasma is well-suited for power users who want to personalize their desktop environment. 
+
+XFCE: XFCE is a lightweight desktop environment that is known for its resource efficiency and simplicity. It is a good choice for users with older or less powerful computers. XFCE is still actively developed and has a large community of users and developers. 
+
+LXDE: LXDE is another lightweight desktop environment that is even more minimal than XFCE. It is a good choice for users who need a very basic desktop environment that uses minimal resources. LXDE is still actively developed but has a smaller community than XFCE. 
+
+Cinnamon: Cinnamon is a fork of GNOME 3 that aims to provide a more traditional desktop experience. It features a customizable panel, applets, and themes. Cinnamon is a good choice for users who want a familiar desktop environment with a modern look and feel. 
+
+Enlightenment: Enlightenment is a unique desktop environment that is known for its eye-catching graphical effects and innovative features. It is a good choice for users who want a visually stunning desktop environment that is not like anything else. 
+
+MATE: MATE is a fork of GNOME 2 that aims to provide a more traditional desktop experience. It features a customizable panel, applets, and themes. MATE is a good choice for users who want a familiar desktop environment with a classic look and feel. 
+
+
+tiling window manager 
+i3
+xmoned
+qtile
+awesome
+openbox
+dwm
+most replayed
+
+
+
+Customizing the top bar, also known as the panel or taskbar, is a common practice among Linux users to personalize their desktop environment. The specific methods for customizing the top bar vary depending on the desktop environment or window manager in use. Here's an overview of top bar customization in different Linux distros:
+
+GNOME Shell:
+Extensions: GNOME Shell offers a wide range of extensions that can customize the top bar's appearance and functionality. Popular extensions include Dash to Panel, Top Bar Hider, and Applications Menu.
+
+Themes: GNOME Shell themes can also modify the top bar's look, including colors, fonts, and icon styles. These themes can be found in GNOME Shell's Appearance settings or installed from third-party sources.
+
+KDE Plasma:
+Plasma Workspace: KDE Plasma's Plasma Workspace component provides extensive customization options for the top bar, including its layout, widgets, and appearance.
+KDE Widgets: KDE Plasma utilizes widgets for adding various functionalities to the top bar, such as clock, weather, and notifications. These widgets can be configured and 
+rearranged to suit individual preferences.
+
+Xfce:
+Panel: Xfce's panel, the equivalent of the top bar, can be customized through the Panel Properties window. Options include panel position, size, and appearance.
+XFCE Plugins: XFCE offers a variety of plugins that can enhance the panel's functionality, such as clock, network monitor, and task manager.
+
+LXDE:
+LXPanel: LXDE's LXPanel can be customized through the Panel Preferences window. Options include panel position, size, and appearance.
+LXDE AppMenu: LXDE utilizes the LXDE AppMenu for accessing applications. This menu can be customized by editing its configuration file.
+
+Openbox:
+Strut: Openbox's strut feature allows users to define a margin around the screen edges, effectively customizing the top bar's position and size.
+Themes: Openbox themes can modify the top bar's appearance, including colors, fonts, and icon styles. These themes can be found online or created from scratch.
+These are just a few examples of how to customize the top bar in different Linux distros. The specific methods and options available may vary depending on the desktop environment and window manager in use.
+
+
+
+
+Ubuntu by default uses GNOME desktop environment, which includes GNOME Shell as the window manager and Dash to Panel as the taskbar.
+
+GNOME Shell is a modern window manager that is designed to be easy to use and efficient. It provides a consistent and familiar experience across all GNOME applications. GNOME Shell also includes a number of features that are designed to improve productivity, such as the ability to quickly switch between applications and windows.
+
+Dash to Panel is a GNOME Shell extension that turns the top bar into a traditional taskbar. This makes it easier to access and manage applications. Dash to Panel also includes a number of customization options, such as the ability to change the size, position, and appearance of the taskbar.

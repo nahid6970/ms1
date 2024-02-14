@@ -1,0 +1,5 @@
+""" dxdiag_button.pack(pady=10)
+# Bind events
+dxdiag_button.bind("<Enter>", on_hover_enter)
+dxdiag_button.bind("<Leave>", on_hover_leave) """
+
