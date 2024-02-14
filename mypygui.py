@@ -269,9 +269,9 @@ def update_info_labels():
 
     # Set background color based on GPU usage
     if gpu_usage == "0":
-        LB_GPU.config(bg="#1d2027" , fg="#eb75ff")
+        LB_GPU.config(bg="#1d2027" , fg="#ff5416")
     elif float(gpu_usage) < 25:
-        LB_GPU.config(bg="#1d2027" , fg="#eb75ff")
+        LB_GPU.config(bg="#1d2027" , fg="#ff5416")
     elif 10 <= float(gpu_usage) < 50:
         LB_GPU.config(bg="#a451b2" , fg="#000000")
     elif 50 <= float(gpu_usage) < 80:
