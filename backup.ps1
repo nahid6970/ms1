@@ -45,8 +45,8 @@ function terminal {
 
 function rclone_config {
     $rclone_src    = "C:\Users\nahid\scoop\apps\rclone\current\rclone.conf"
-    $rclone_dst    = "C:\Users\nahid\OneDrive\backup\rclone_logs\"
-    # Create_DirectoryIfNotExists -Path $rclone_dst
+    $rclone_dst    = "C:\Users\nahid\OneDrive\backup\rclone\"
+    Create_DirectoryIfNotExists -Path $rclone_dst
     Copy-Item -Path $rclone_src -Destination $rclone_dst
 }
 
