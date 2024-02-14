@@ -269,15 +269,15 @@ def update_info_labels():
 
     # Set background color based on GPU usage
     if gpu_usage == "0":
-        LB_GPU.config(bg="#1d2027" , fg="#ff5416")
+        LB_GPU.config(bg="#1d2027" , fg="#ff1227")
     elif float(gpu_usage) < 25:
-        LB_GPU.config(bg="#1d2027" , fg="#ff5416")
+        LB_GPU.config(bg="#1d2027" , fg="#ff1227")
     elif 10 <= float(gpu_usage) < 50:
-        LB_GPU.config(bg="#a451b2" , fg="#000000")
+        LB_GPU.config(bg="#ff9282" , fg="#000000")
     elif 50 <= float(gpu_usage) < 80:
-        LB_GPU.config(bg="#4d2092" , fg="#FFFFFF")
+        LB_GPU.config(bg="#ff6b54" , fg="#FFFFFF")
     else:
-        LB_GPU.config(bg="#32145e" , fg="#FFFFFF")
+        LB_GPU.config(bg="#ff3010" , fg="#FFFFFF")
 
     # Set background color based on upload speed
     if upload_speed == "0":
