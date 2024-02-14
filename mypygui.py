@@ -186,9 +186,9 @@ def toggle_window_size(size):
     if size == '◀':
         ROOT.geometry('112x36')
         ROOT.configure(bg='red')
-        LB_S.config(text='◀', bg="#000000", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#FFFFFF", fg="#000000", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='࿘', bg="#FFFFFF", fg="#000000", height=1, width=2, font=("agency", 10, "bold"))
+        LB_S.config(text='◀', bg="#1d2027", fg="#14bcff", height=1, width=2, font=("ink free", 10, "bold"))
+        LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
+        LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'small'
         x_coordinate = 0
         window_height = 36  # Assuming the window height is 38 pixels
@@ -200,9 +200,9 @@ def toggle_window_size(size):
     elif size == '▼':
         ROOT.geometry('500x36')
         ROOT.configure(bg='red')
-        LB_S.config(text='◀', bg="#FFFFFF", fg="#000000", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#000000", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='࿘', bg="#FFFFFF", fg="#000000", height=1, width=2, font=("agency", 10, "bold"))
+        LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
+        LB_L.config(text='▼', bg="#1d2027", fg="#14bcff", height=1, width=2, font=("agency", 10, "bold"))
+        LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'medium'
         x_coordinate = 0
         window_height = 36  # Assuming the window height is 38 pixels
@@ -214,9 +214,9 @@ def toggle_window_size(size):
     elif size == '࿘':
         ROOT.geometry('500x700')
         ROOT.configure(bg='#1d2027')
-        LB_S.config(text='◀', bg="#FFFFFF", fg="#000000", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#FFFFFF", fg="#000000", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='࿘', bg="#000000", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
+        LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
+        LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
+        LB_M.config(text='■', bg="#1d2027", fg="#14bcff", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'large'
         x_coordinate = 0
         window_height = 700  # Assuming the window height is 38 pixels
@@ -375,7 +375,7 @@ BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="bottom", a
 LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#E81123", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, text="X", font= ("AGENCY", 10, "bold")) ; LB_XXX.pack     (side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
 
 LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="■", font=("calibri", 10, "bold")) ; LB_M.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('࿘'))
-LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold")) ; LB_L.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
+LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#14bcff", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold")) ; LB_L.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="◀", font=("ink free", 10, "bold")) ; LB_S.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
 
 LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, text="▲", font= ("agency", 10, "bold")) ; LB_UPLOAD.pack  (side="right", anchor="e", padx=(0,3), pady=(0,0))
