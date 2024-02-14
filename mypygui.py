@@ -281,9 +281,9 @@ def update_info_labels():
 
     # Set background color based on upload speed
     if upload_speed == "0":
-        LB_UPLOAD.config(bg='#FFFFFF', fg="#000000")
+        LB_UPLOAD.config(bg='#1d2027', fg="#FFFFFF")
     elif float(upload_speed) < 0.1:  # Less than 100 KB
-        LB_UPLOAD.config(bg='#D9F3D9', fg="#000000")
+        LB_UPLOAD.config(bg='#1d2027', fg="#FFFFFF")
     elif 0.1 <= float(upload_speed) < 0.5:  # 100 KB to 499 KB
         LB_UPLOAD.config(bg='#A8E4A8', fg="#000000")
     elif 0.5 <= float(upload_speed) < 1:  # 500 KB to 1 MB
@@ -292,9 +292,9 @@ def update_info_labels():
         LB_UPLOAD.config(bg='#32AB32', fg='#000000')  # Dark green
     # Set background color based on download speed
     if download_speed == "0":
-        LB_DWLOAD.config(bg='#FFFFFF' , fg="#000000")
+        LB_DWLOAD.config(bg='#1d2027' , fg="#FFFFFF")
     elif float(download_speed) < 0.1:  # Less than 100 KB
-        LB_DWLOAD.config(bg='#D9F3D9', fg="#000000")
+        LB_DWLOAD.config(bg='#1d2027', fg="#FFFFFF")
     elif 0.1 <= float(download_speed) < 0.5:  # 100 KB to 499 KB
         LB_DWLOAD.config(bg='#A8E4A8', fg="#000000")
     elif 0.5 <= float(download_speed) < 1:  # 500 KB to 1 MB
@@ -339,9 +339,9 @@ def check_git_status(git_path, status_label):
     os.chdir(git_path)
     git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
     if "nothing to commit, working tree clean" in git_status.stdout:
-        status_label.config(fg="#00ff21")
+        status_label.config(fg="#00ff21", text="✔️")
     else:
-        status_label.config(fg="#fe1616")
+        status_label.config(fg="#fe1616", text="❌")
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
         print("Invalid path")
@@ -378,13 +378,13 @@ LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1"
 LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#14bcff", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold")) ; LB_L.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="◀", font=("ink free", 10, "bold")) ; LB_S.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
 
-LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, text="▲", font= ("agency", 10, "bold")) ; LB_UPLOAD.pack  (side="right", anchor="e", padx=(0,3), pady=(0,0))
-LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, text="▼", font= ("agency", 10, "bold")) ; LB_DWLOAD.pack  (side="right", anchor="e", padx=(0,3), pady=(0,0))
-LB_DUD = tk.Label   (BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text=" ", font= ("agency", 10, "bold")) ; LB_DUD.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
-LB_DUC = tk.Label   (BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text=" ", font= ("agency", 10, "bold")) ; LB_DUC.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
-LB_RAM = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text=" ", font= ("agency", 10, "bold")) ; LB_RAM.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
-LB_GPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text=" ", font= ("agency", 10, "bold")) ; LB_GPU.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
-LB_CPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text=" ", font= ("agency", 10, "bold")) ; LB_CPU.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
+LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▲", font=     ("agency", 10, "bold")); LB_UPLOAD.pack  (side="right", anchor="e", padx=(0,3), pady=(0,0))
+LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=     ("agency", 10, "bold")); LB_DWLOAD.pack  (side="right", anchor="e", padx=(0,3), pady=(0,0))
+LB_DUD = tk.Label   (BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk D", font= ("agency", 10, "bold")); LB_DUD.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
+LB_DUC = tk.Label   (BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk C", font= ("agency", 10, "bold")); LB_DUC.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
+LB_RAM = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="RAM", font=    ("agency", 10, "bold")); LB_RAM.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
+LB_GPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU", font=    ("agency", 10, "bold")); LB_GPU.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
+LB_CPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU", font=    ("agency", 10, "bold")); LB_CPU.pack     (side="right", anchor="e", padx=(0,3), pady=(0,0))
 
 STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold")) ; STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1")) ; STATUS_MS1.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold")) ; STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2")) ; STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
