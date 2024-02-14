@@ -302,9 +302,9 @@ def update_info_labels():
     else:
         LB_DWLOAD.config(bg='#32AB32', fg='#000000')  # Dark green
 
-           # Write speed information to a text file
-    with open("d:\\netspeed_download_upload.log", "a") as logfile:
-        logfile.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - Download: {download_speed}, Upload: {upload_speed}\n")
+    #        # Write speed information to a text file
+    # with open("d:\\netspeed_download_upload.log", "a") as logfile:
+    #     logfile.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - Download: {download_speed}, Upload: {upload_speed}\n")
     
     # Change background and foreground color based on usage thresholds
     LB_RAM.config(bg='#f12c2f' if ram_usage > 80 else '#1d2027', fg='#FFFFFF' if ram_usage > 80 else '#ff934b')
