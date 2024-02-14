@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import font
+from tkinter import font, colorchooser
 import pyperclip
 
 def update_text(event=None):
@@ -17,8 +17,11 @@ def update_text(event=None):
             style += "underline "
         if strikethrough_var.get():
             style += "overstrike "
-            
-        output_text.config(text=text, font=(font_family, 12, style))
+
+        bg_color = bg_entry.get()
+        fg_color = fg_entry.get()
+
+        output_text.config(text=text, font=(font_family, 12, style), bg=bg_color, fg=fg_color)
     else:
         output_text.config(text="Please select a font family", font=("Arial", 12))
 
@@ -56,6 +59,20 @@ def copy_font_family():
         print("Font family copied:", font_family)
     else:
         print("No font family selected.")
+
+def choose_bg_color():
+    color = colorchooser.askcolor()[1]
+    if color:
+        bg_entry.delete(0, tk.END)
+        bg_entry.insert(tk.END, color)
+        update_text()
+
+def choose_fg_color():
+    color = colorchooser.askcolor()[1]
+    if color:
+        fg_entry.delete(0, tk.END)
+        fg_entry.insert(tk.END, color)
+        update_text()
 
 # Create the Tkinter window
 root = tk.Tk()
@@ -108,6 +125,27 @@ underline_check = tk.Checkbutton(root, text="Underline", variable=underline_var,
 strikethrough_check = tk.Checkbutton(root, text="Strikethrough", variable=strikethrough_var, command=update_text)
 underline_check.pack(side=tk.RIGHT, padx=5, pady=5)
 strikethrough_check.pack(side=tk.RIGHT, padx=5, pady=5)
+
+# Create entry for background color
+bg_label = tk.Label(root, text="BG Color:")
+bg_label.pack(side=tk.LEFT, padx=5, pady=5)
+bg_entry = tk.Entry(root, width=7)
+bg_entry.pack(side=tk.LEFT, padx=5, pady=5)
+bg_entry.insert(tk.END, "#FFFFFF")  # Default to white
+
+# Create entry for foreground color
+fg_label = tk.Label(root, text="FG Color:")
+fg_label.pack(side=tk.LEFT, padx=5, pady=5)
+fg_entry = tk.Entry(root, width=7)
+fg_entry.pack(side=tk.LEFT, padx=5, pady=5)
+fg_entry.insert(tk.END, "#000000")  # Default to black
+
+# Create buttons to choose background and foreground colors
+bg_color_button = tk.Button(root, text="Choose BG Color", command=choose_bg_color)
+bg_color_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+fg_color_button = tk.Button(root, text="Choose FG Color", command=choose_fg_color)
+fg_color_button.pack(side=tk.LEFT, padx=5, pady=5)
 
 # Create a "Copy" button
 copy_button = tk.Button(root, text="Copy Font Family", command=copy_font_family)
