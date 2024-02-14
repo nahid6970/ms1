@@ -623,7 +623,7 @@ BT_FOLDER_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_fra
 FR_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_FOLDER.pack_propagate(False)
 BT_BACK = tk.Button(FR_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FOLDER), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
-BOX_ROW_FOLDER = tk.Frame(FR_FOLDER, bg="#1d9027") ; BOX_ROW_FOLDER.pack(side="left", anchor="center", pady=(0,0),padx=(0,0))
+BOX_ROW_FOLDER = tk.Frame(FR_FOLDER, bg="#1d9027") ; BOX_ROW_FOLDER.pack(side="top", anchor="center", pady=(0,0),padx=(0,0))
 All_Apps_bt        = tk.Button(BOX_ROW_FOLDER, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appsfolder_fd , text="All Apps"       ) ; All_Apps_bt.pack      (side="top", pady=(1,0))
 AppData_bt         = tk.Button(BOX_ROW_FOLDER, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appdata_fd    , text="AppData"        ) ; AppData_bt.pack       (side="top", pady=(1,0))
 Git_Projects_bt    = tk.Button(BOX_ROW_FOLDER, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_git_fd        , text="Git Projects"   ) ; Git_Projects_bt.pack  (side="top", pady=(1,0))
