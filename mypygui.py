@@ -356,21 +356,6 @@ def update_status():
         # Update the status every second
         time.sleep(1)
 
-#!This is for ROW 2
-#! Terminal & SYNC & Ruler
-def open_sync(event=None):
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\sync.ps1"])
-def open_terminal(even=None):
-    subprocess.Popen(["wt"])
-def shortcut_scaleruler(event=None):
-    pyautogui.hotkey('win', 'shift', 'm')
-def shortcut_TextExtract(event=None):
-    pyautogui.hotkey('win', 'shift', 't')
-def regedit_run(event=None):
-    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
-def python_screenshot(event=None):
-    subprocess.Popen(["powershell", "Start", "D:\\@git\\ms1\\scripts\\screenshot.py"], shell=True)
-
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="bottom", anchor="e", pady=(0,7),padx=(5,3))
 
@@ -397,10 +382,22 @@ STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief
 
 #????????????????????????????????????????????????????????????w
 #????????????????????????????????????????????????????????????
+#!This is for ROW 2
+#! Terminal & SYNC & Ruler
+def open_sync(event=None):
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\sync.ps1"])
+def open_terminal(even=None):
+    subprocess.Popen(["wt"])
+def shortcut_scaleruler(event=None):
+    pyautogui.hotkey('win', 'shift', 'm')
+def shortcut_TextExtract(event=None):
+    pyautogui.hotkey('win', 'shift', 't')
+def regedit_run(event=None):
+    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
 
 
 BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW2_ROOT.pack(side="bottom", anchor="e", pady=(0,7),padx=(5,3))
-LB_SCRSHOT = tk.Label (BOX_ROW2_ROOT, bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="C") ; LB_SCRSHOT.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_SCRSHOT.bind("<Button-1>", python_screenshot)
+
 LB_RULERSR = tk.Label (BOX_ROW2_ROOT, bg="#FFFFFF", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("ink free", 10, "bold"), text="📏") ; LB_RULERSR.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", shortcut_scaleruler)
 LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, bg="#ff6600", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="TE") ; LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", shortcut_TextExtract)
 LB_REGEDIT = tk.Label (BOX_ROW2_ROOT, bg="#52d3ff", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="RE") ; LB_REGEDIT.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_REGEDIT.bind("<Button-1>", regedit_run)
