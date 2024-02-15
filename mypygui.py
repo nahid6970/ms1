@@ -363,15 +363,23 @@ LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#3bda00", width=" 2", height="1"
 LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold")) ; LB_L.pack(side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="◀", font=("ink free", 10, "bold")) ; LB_S.pack(side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
 
-LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#1d2027", fg="#ff0000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#ff0000", padx=1, pady=0, text="X", font= ("Arial Black", 10, "bold")) ; LB_XXX.pack     (side="left", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#1d2027", fg="#ff0000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#ff0000", padx=1, pady=0, text="X", font= ("Arial Black", 10, "bold")) ; LB_XXX.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
 
-LB_CPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU", font=    ("agency", 10, "bold")); LB_CPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_GPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU", font=    ("agency", 10, "bold")); LB_GPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_RAM = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="RAM", font=    ("agency", 10, "bold")); LB_RAM.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_DUD = tk.Label   (BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk D", font= ("agency", 10, "bold")); LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_DUC = tk.Label   (BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk C", font= ("agency", 10, "bold")); LB_DUC.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▲", font=     ("agency", 10, "bold")); LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=     ("agency", 10, "bold")); LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_CPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU", font=    ("agency", 10, "bold")) 
+LB_GPU = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU", font=    ("agency", 10, "bold")) 
+LB_RAM = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="RAM", font=    ("agency", 10, "bold")) 
+LB_DUD = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk D", font= ("agency", 10, "bold")) 
+LB_DUC = tk.Label   (BOX_ROW_ROOT, width="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk C", font= ("agency", 10, "bold")) 
+LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▲", font=     ("agency", 10, "bold"))  
+LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=     ("agency", 10, "bold"))  
+
+LB_CPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_GPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_RAM.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_DUC.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 
 STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold")) ; STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1")) ; STATUS_MS1.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold")) ; STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2")) ; STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
@@ -434,8 +442,10 @@ def update_time():
     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(25,3),padx=(0,0))
-LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" ) ; LB_TIME.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
-LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" ) ; LB_DATE.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
+LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" ) 
+LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" ) 
+LB_TIME.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
+LB_DATE.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
 update_time()  # Initial call to display time
 
 MAIN_FRAME.pack(expand=True)
