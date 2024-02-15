@@ -469,7 +469,7 @@ def switch_to_ffmpeg_frame():
 
 BT_FFMPEG_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "FFmpeg", switch_to_ffmpeg_frame, bg="#408b40", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#408b40", font=("JetBrainsMono NF", 13, "bold")) ; BT_FFMPEG_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
 FR_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=500, height=700) ; FR_FFMPEG.pack_propagate(False)
-BT_BACK = tk.Button(FR_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FFMPEG), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+BT_BACK = tk.Button(FR_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FFMPEG), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
 BT_TRIMM=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_trimm, text="Trim"          ) ; BT_TRIMM.pack     (pady=(35,0))
 BT_CONVT=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_convt, text="Convert"       ) ; BT_CONVT.pack     (pady=(1,0))
@@ -551,7 +551,7 @@ def switch_to_find_frame():
 
 BT_FIND_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Find", switch_to_find_frame, bg="#FFFFFF", fg="#1D2027", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#FFFFFF", font=("JetBrainsMono NF", 13, "bold")) ; BT_FIND_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
 FR_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_FIND.pack_propagate(False)
-BT_BACK = tk.Button(FR_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FIND), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+BT_BACK = tk.Button(FR_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FIND), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
 BT_FF= tk.Button(FR_FIND, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_file, text="Find File"   ) ; BT_FF.pack(pady=(35,0))
 BT_FP= tk.Button(FR_FIND, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_patt, text="Find Pattern") ; BT_FP.pack(pady=(1,0))
@@ -624,7 +624,7 @@ def switch_to_tools_frame():
 
 BT_FOLDER_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame,image=icon_image, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=40, width=300, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#e7d86a", font=("JetBrainsMono NF", 13, "bold")) ; BT_FOLDER_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
 FR_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_FOLDER.pack_propagate(False)
-BT_BACK = tk.Button(FR_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FOLDER), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+BT_BACK = tk.Button(FR_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FOLDER), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
 BOX_ROW_FOLDER = tk.Frame(FR_FOLDER, bg="#1d9027") ; BOX_ROW_FOLDER.pack(side="top", anchor="center", pady=(0,0),padx=(0,0))
 All_Apps_bt        = tk.Button(BOX_ROW_FOLDER, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appsfolder_fd , text="All Apps"       ) ; All_Apps_bt.pack      (side="top", pady=(1,0))
@@ -655,7 +655,7 @@ def switch_to_process_frame():
 
 BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_process_frame, bg="#cc2400", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#cc2400", font=("JetBrainsMono NF", 13, "bold")) ; BT_PROCESS_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
 FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_PROCESS.pack_propagate(False)
-BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
 
 # Install Autoruns using winget and check first
@@ -880,7 +880,7 @@ BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(25,0))
 
 Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; Page1.pack_propagate(False)
 
-BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
 
 LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
@@ -987,7 +987,7 @@ def switch_to_tools_frame():
 
 BT_TOOLS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "TOOLS", switch_to_tools_frame, bg="#454545", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#454545", font=("JetBrainsMono NF", 13, "bold")) ; BT_TOOLS_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
 FR_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_TOOLS.pack_propagate(False)
-BT_BACK = tk.Button(FR_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_TOOLS), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+BT_BACK = tk.Button(FR_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_TOOLS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
 adapter_bt      = tk.Button(FR_TOOLS, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("calibri", 14, "bold"), command=advanced_adapter,  text="Advanced Adapter",         ) ; adapter_bt.pack     (pady=(35,0))
 chkdsk_bt       = tk.Button(FR_TOOLS, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("calibri", 14, "bold"), command=open_chkdsk,       text="CheckDisk",                ) ; chkdsk_bt.pack      (pady=(1,0))
@@ -1018,8 +1018,8 @@ def switch_to_pythontool_frame():
     switch_to_frame(FR_PYTHON_TOOL, MAIN_FRAME)
 
 BT_PYTHON_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Python Tools", switch_to_pythontool_frame, bg="#366c9c", fg="#f6d24a", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#366c9c", font=("JetBrainsMono NF", 13, "bold")) ; BT_PYTHON_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
-FR_PYTHON_TOOL = tk.Frame(BORDER_FRAME, bg="#1D2327", width=500, height=700) ; FR_PYTHON_TOOL.pack_propagate(False)
-BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#4b6a86", fg="#000", height=1, width=2, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+FR_PYTHON_TOOL = tk.Frame(BORDER_FRAME, bg="#1d2027", width=500, height=700) ; FR_PYTHON_TOOL.pack_propagate(False)
+BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
 
 BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_1.pack(side="top", anchor="center", pady=(10,0), padx=(0,0))
