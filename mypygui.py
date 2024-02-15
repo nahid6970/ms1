@@ -407,7 +407,7 @@ def capture_screenshot():
     filename = f"D:\\@gallery\\{timestamp}.png"
     
     # Capture the screenshot without the Tkinter window
-    screenshot = pyautogui.screenshot(region=(0, 0, root.winfo_screenwidth(), root.winfo_screenheight()))
+    screenshot = pyautogui.screenshot(region=(0, 0, ROOT.winfo_screenwidth(), ROOT.winfo_screenheight()))
     
     # Save the screenshot
     screenshot.save(filename)
@@ -463,7 +463,6 @@ root.title("Screenshot Capture")
 root.attributes('-topmost', True)  # Set always on top
 root.geometry("150x50")
 root.attributes('-topmost', True)  # Set always on top
-
 
 # Create the button to capture the screenshot
 capture_button = tk.Button(root, text="Capture Screenshot", command=capture_screenshot) ; capture_button.pack(padx=10, pady=10)
