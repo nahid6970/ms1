@@ -423,7 +423,6 @@ def capture_screenshot():
     options_frame.geometry("200x50")
     options_frame.attributes('-topmost', True)  # Set always on top
 
-
     # Function to handle user choice
     def handle_choice(choice):
         options_frame.destroy()
@@ -436,16 +435,10 @@ def capture_screenshot():
         elif choice == "Delete":
             os.remove(filename)
 
-
-    
-    
     # Create buttons for user options
     paint_button = tk.Button(options_frame, text="Paint", command=lambda: handle_choice("Paint")) ; paint_button.pack(side="left", padx=5, pady=5)
-    
     view_button = tk.Button(options_frame, text="View", command=lambda: handle_choice("View")) ; view_button.pack(side="left", padx=5, pady=5)
-    
     copy_button = tk.Button(options_frame, text="Copy", command=lambda: handle_choice("Copy")) ; copy_button.pack(side="left", padx=5, pady=5)
-    
     delete_button = tk.Button(options_frame, bg="red", fg="white", text="Delete", command=lambda: handle_choice("Delete")) ; delete_button.pack(side="left", padx=5, pady=5)
 
 # Calculate the screen width and height
