@@ -384,8 +384,8 @@ LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width ="5", height="1", relief="flat", highli
 LB_CPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
 LB_GPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
 LB_RAM.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
 LB_DUC.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
 LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 
