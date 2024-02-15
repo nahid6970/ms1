@@ -50,13 +50,17 @@ def capture_screenshot():
     
     
     # Create buttons for user options
-    paint_button = tk.Button(options_frame, text="Paint", command=lambda: handle_choice("Paint")) ; paint_button.pack(side="left", padx=5, pady=5)
+    paint_button = tk.Button(options_frame, text="Paint", command=lambda: handle_choice("Paint"))
+    paint_button.pack(side="left", padx=5, pady=5)
     
-    view_button = tk.Button(options_frame, text="View", command=lambda: handle_choice("View")) ; view_button.pack(side="left", padx=5, pady=5)
+    view_button = tk.Button(options_frame, text="View", command=lambda: handle_choice("View"))
+    view_button.pack(side="left", padx=5, pady=5)
     
-    copy_button = tk.Button(options_frame, text="Copy", command=lambda: handle_choice("Copy")) ; copy_button.pack(side="left", padx=5, pady=5)
+    copy_button = tk.Button(options_frame, text="Copy", command=lambda: handle_choice("Copy"))
+    copy_button.pack(side="left", padx=5, pady=5)
     
-    delete_button = tk.Button(options_frame, bg="red", fg="white", text="Delete", command=lambda: handle_choice("Delete")) ; delete_button.pack(side="left", padx=5, pady=5)
+    delete_button = tk.Button(options_frame, bg="red", fg="white", text="Delete", command=lambda: handle_choice("Delete"))
+    delete_button.pack(side="left", padx=5, pady=5)
 
 # Calculate the screen width and height
     screen_width = options_frame.winfo_screenwidth()
@@ -83,7 +87,8 @@ root.attributes('-topmost', True)  # Set always on top
 
 
 # Create the button to capture the screenshot
-capture_button = tk.Button(root, text="Capture Screenshot", command=capture_screenshot) ; capture_button.pack(padx=10, pady=10)
+capture_button = tk.Button(root, text="Capture Screenshot", command=capture_screenshot)
+capture_button.pack(padx=10, pady=10)
 
 # Calculate the screen width and height
 screen_width = root.winfo_screenwidth()
