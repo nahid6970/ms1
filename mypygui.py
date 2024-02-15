@@ -359,15 +359,15 @@ def update_status():
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="bottom", anchor="w", pady=(0,7),padx=(5,3))
 
-LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#3bda00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="■", font=("calibri", 10, "bold"))
-LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold"))
+LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#3bda00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="■", font=("calibri", 10, "bold" ))
+LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold"  ))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="◀", font=("ink free", 10, "bold"))
 LB_M.pack(side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('࿘'))
 LB_L.pack(side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.pack(side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
 
 LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#1d2027", fg="#ff0000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#ff0000", padx=1, pady=0, text="X", font= ("Arial Black", 10, "bold"))
-LB_XXX.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+LB_XXX.pack(side="left", anchor="e", padx=(0,3), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
 
 LB_CPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU",    font = ("agency", 10, "bold"))
 LB_GPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU",    font = ("agency", 10, "bold"))
