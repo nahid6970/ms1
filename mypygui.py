@@ -425,11 +425,7 @@ def shortcut_mousepointercross(event=None):
     pyautogui.hotkey('win', 'alt', 'p')
 def regedit_run(event=None):
     subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
-    
 
-import atexit
-
-# Function to get system uptime
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
     current_time = datetime.now().timestamp()
@@ -437,28 +433,23 @@ def get_system_uptime():
     hours, remainder = divmod(uptime, 3600)
     minutes, seconds = divmod(remainder, 60)
     return int(hours), int(minutes), int(seconds)
-# Function to format uptime
+
 def format_uptime():
     hours, minutes, seconds = get_system_uptime()
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-# Function to update uptime label
+
 def update_uptime_label():
     uptime_str = format_uptime()
     uptime_label.config(text=f"Uptime: {uptime_str}")
     uptime_label.after(1000, update_uptime_label)  # Update every second
-# Function to save system uptime log
-def save_system_uptime_log():
-    uptime_str = format_uptime()
-    log_filename = os.path.join("C:", os.sep, "Users", "nahid", "OneDrive", "backup", "py_logs", "system_uptime_log.txt")
-    with open(log_filename, "a") as log_file:
-        log_file.write(f"{datetime.now().isoformat()} - System uptime: {uptime_str}\n")
-# Register function to save system uptime log when program exits
-atexit.register(save_system_uptime_log)
+    # Update uptime label periodically
+
 
 BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW2_ROOT.pack(side="top", anchor="e", pady=(0,7),padx=(5,3))
 
 uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
 uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
+
 
 LB_RULERSR = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10, "bold"), text="📏") ; LB_RULERSR.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", shortcut_scaleruler)
 LB_MICECRS = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10, "bold"), text="🖱️") ; LB_MICECRS.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", shortcut_mousepointercross)
@@ -475,7 +466,7 @@ BT_CLR = tk.Button(BOX_ROW3_ROOT, bg="#1d2027", fg="white" ,  width=2, height=1,
 # CPU / RAM / DRIVES / NET SPEED
 update_info_labels()
 # Resize Window (seems to have no effect may be coz of modification)
-window_state = 'normal' #! dont know what its doing
+window_state = 'normal'
 # Start a separate thread for updating the git status
 status_thread = threading.Thread(target=update_status, daemon=True)
 status_thread.start()
