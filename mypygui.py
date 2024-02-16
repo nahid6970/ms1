@@ -486,15 +486,13 @@ def update_time():
     LB_DATE['text'] = current_date
     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(70,3),padx=(0,0))
-LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1d2027", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
-LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1d2027", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#ffda73") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(75,3),padx=(0,0), fill="x")
+LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#ffda73", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#ffda73", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
+LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#ffda73", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#ffda73", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
 LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 
-# Create label for uptime
-
-update_time()  # Initial call to display time
+update_time()
 
 
 #! Backup & Update
@@ -510,64 +508,93 @@ update_time()  # Initial call to display time
 # UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0,) ; UPDATE_BT.bind("<Button-1>", open_update)
 
 
-# Global variable to store the last clicked time for the update button
-# Global variable to store the last clicked time
-# Variables to track the last click time for backup and update buttons
-last_click_times = {"backup": None, "update": None}
-
-def open_operation(operation, event=None):
-    global last_click_times
-    last_click_times[operation] = datetime.now()  # Update the last clicked time
-    subprocess.Popen(["powershell", "start", f"D:\\@git\\ms1\\{operation}.ps1"], shell=True)
-    update_last_click_time(operation)
-
-def update_last_click_time(operation):
-    global last_click_times
-    if last_click_times[operation]:
-        time_diff = datetime.now() - last_click_times[operation]
+last_backup_click_time = None
+def open_backup(event=None):
+    global last_backup_click_time
+    last_backup_click_time = datetime.now()  # Update the last clicked time
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\backup.ps1"], shell=True)
+    update_last_backup_click_time()
+def update_last_backup_click_time():
+    global last_backup_click_time
+    if last_backup_click_time:
+        time_diff = datetime.now() - last_backup_click_time
         time_str = f"{time_diff.seconds // 3600:02d}:{(time_diff.seconds // 60) % 60:02d}"  # Format as HH:MM
-        buttons[operation].config(text=f"{operation.capitalize()} ({time_str})")
+        BACKUP_BT.config(text=f"Backup ({time_str})")
         # Write last click time to log file
-        with open(f"D:\\py_{operation}.log", "w") as log_file:
-            log_file.write(last_click_times[operation].isoformat())
+        with open("D:\\py.log", "w") as log_file:
+            log_file.write(last_backup_click_time.isoformat())
     else:
-        buttons[operation].config(text=f"{operation.capitalize()}")
+        BACKUP_BT.config(text="Backup")
 
     # Schedule the next update after 1 minute
-    buttons[operation].after(60000, update_last_click_time, operation)
-
-def load_last_click_time(operation):
-    global last_click_times
+    BACKUP_BT.after(60000, update_last_backup_click_time)
+def load_last_backup_click_time():
+    global last_backup_click_time
     try:
-        with open(f"D:\\py_{operation}.log", "r") as log_file:
-            last_click_time_str = log_file.read().strip()
-            if last_click_time_str:
-                last_click_times[operation] = datetime.fromisoformat(last_click_time_str)
+        with open("D:\\py.log", "r") as log_file:
+            last_backup_click_time_str = log_file.read().strip()
+            if last_backup_click_time_str:
+                last_backup_click_time = datetime.fromisoformat(last_backup_click_time_str)
+    except FileNotFoundError:
+        pass
+# Create a frame to hold the button
+ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#21a366") ; ROOT_ROW_BOX.pack(side="top", fill="x")
+# Create the backup button
+BACKUP_BT = tk.Label(ROOT_ROW_BOX, bg="#21a366", fg="#ffffff", height=1, width=28, relief="flat", highlightthickness=1, highlightbackground="#21a366", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Backup")
+BACKUP_BT.pack(side="top", padx=(0, 0), pady=0) ; BACKUP_BT.bind("<Button-1>", open_backup)
+# Load last click time from log file
+load_last_backup_click_time()
+
+# Update the last click time periodically
+update_last_backup_click_time()
+
+last_update_click_time = None
+
+def open_update(event=None):
+    global last_update_click_time
+    last_update_click_time = datetime.now()  # Update the last clicked time
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"],  shell=True)
+    update_last_update_click_time()
+
+def update_last_update_click_time():
+    global last_update_click_time
+    if last_update_click_time:
+        time_diff = datetime.now() - last_update_click_time
+        time_str = f"{time_diff.seconds // 3600:02d}:{(time_diff.seconds // 60) % 60:02d}"  # Format as HH:MM
+        UPDATE_BT.config(text=f"Update ({time_str})")
+        # Write last click time to log file
+        with open("D:\\py_update.log", "w") as log_file:
+            log_file.write(last_update_click_time.isoformat())
+    else:
+        UPDATE_BT.config(text="Update")
+
+    # Schedule the next update after 1 minute
+    UPDATE_BT.after(60000, update_last_update_click_time)
+
+def load_last_update_click_time():
+    global last_update_click_time
+    try:
+        with open("D:\\py_update.log", "r") as log_file:
+            last_update_click_time_str = log_file.read().strip()
+            if last_update_click_time_str:
+                last_update_click_time = datetime.fromisoformat(last_update_click_time_str)
     except FileNotFoundError:
         pass
 
-# Create a frame to hold the buttons
-ROOT_ROW_BOX = tk.Frame(MAIN_FRAME)
-ROOT_ROW_BOX.pack(side="top", padx=(0,0), pady=(0,2))
+# Create a frame to hold the button
+ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#0047ab")
+ROOT_ROW_BOX.pack(side="top", fill="x")
 
-# Define the button labels and operations
-button_data = [("Backup", "backup", "#21a366"), ("Update", "update", "#1493df")]
+# Create the update button
+UPDATE_BT = tk.Label(ROOT_ROW_BOX, bg="#0047ab", fg="#ffffff", height=1, width=28, relief="flat", highlightthickness=1, highlightbackground="#0047ab", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Update")
+UPDATE_BT.pack(side="top", padx=(0, 0), pady=0)
+UPDATE_BT.bind("<Button-1>", open_update)
 
-# Create and pack the buttons
-buttons = {}
-for label, operation, color in button_data:
-    buttons[operation] = tk.Label(ROOT_ROW_BOX, bg=color, fg="#000000", height=1, width=13, relief="flat", 
-                                  highlightthickness=1, highlightbackground=color, padx=3, pady=0, 
-                                  font=("Book Antiqua", 13, "bold"), text=label)
-    buttons[operation].pack(side="left", padx=(0, 0), pady=0)
-    buttons[operation].bind("<Button-1>", lambda event, operation=operation: open_operation(operation))
+# Load last update click time from log file
+load_last_update_click_time()
 
-    # Load last click time from log file
-    load_last_click_time(operation)
-
-    # Update the last click time periodically
-    update_last_click_time(operation)
-
+# Update the last update click time periodically
+update_last_update_click_time()
 
 #! Drive size analyze using rclone
 
