@@ -154,6 +154,7 @@ bitwarden
 bizhawk
 bkchem
 bleachbit
+blender-benchmark-cli
 blender-launcher
 blender
 blink1control2
@@ -1156,6 +1157,7 @@ openshot
 opentabletdriver
 opentoonz
 opentrack
+openutau
 openvpn-connect
 openvpn
 openwithplusplus
@@ -1536,6 +1538,8 @@ spotify-qt
 spotify
 spotube
 springboot
+spyder-lite
+spyder
 spytify
 sql-workbench
 sqlitebrowser
