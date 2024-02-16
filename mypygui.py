@@ -486,11 +486,11 @@ def update_time():
     LB_DATE['text'] = current_date
     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(60,3),padx=(0,0))
-LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
-LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
-LB_TIME.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
-LB_DATE.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(70,3),padx=(0,0))
+LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1d2027", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
+LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1d2027", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
+LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
+LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 
 # Create label for uptime
 
