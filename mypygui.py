@@ -470,7 +470,6 @@ LB_DATE.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
 update_time()  # Initial call to display time
 
 
-
 #! Backup & Update
 # def open_backup(event=None):
 #     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\backup.ps1"], shell=True)
@@ -542,6 +541,7 @@ for label, operation, color in button_data:
     # Update the last click time periodically
     update_last_click_time(operation)
 
+
 #! Drive size analyze using rclone
 
 def c_size(event=None):
@@ -582,21 +582,22 @@ def open_ffmpeg_merge():
 
 #! FRAME Function
 def switch_to_ffmpeg_frame():
-    switch_to_frame(FR_FFMPEG, MAIN_FRAME)
+    switch_to_frame(FRAME_FFMPEG, MAIN_FRAME)
 
 BT_FFMPEG = M1_hold_release(MAIN_FRAME, "FFmpeg", switch_to_ffmpeg_frame, bg="#408b40", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#408b40", font=("JetBrainsMono NF", 13, "bold"))
 BT_FFMPEG.pack(padx=(0,0),pady=(0,0))
 
-FR_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=500, height=700) ; FR_FFMPEG.pack_propagate(False)
+FRAME_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=500, height=700) ; FRAME_FFMPEG.pack_propagate(False)
 
-BT_BACK = tk.Button(FR_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FFMPEG), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
+BT_BACK = tk.Button(FRAME_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FFMPEG), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
-BT_TRIMM=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_trimm, text="Trim"          ) ; BT_TRIMM.pack     (pady=(35,0))
-BT_CONVT=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_convt, text="Convert"       ) ; BT_CONVT.pack     (pady=(1,0))
-BT_DIMNS=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_dimns, text="Dimension"     ) ; BT_DIMNS.pack     (pady=(1,0))
-BT_IMGDM=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_imgdm, text="Imagedimension") ; BT_IMGDM.pack     (pady=(1,0))
-BT_MERGE=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_merge, text="Merge"         ) ; BT_MERGE.pack     (pady=(1,0))
+BOX_1 = tk.Frame(FRAME_FFMPEG, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(60,0), padx=(0,0))
+BT_TRIMM=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_trimm, text="Trim"          ) ; BT_TRIMM.pack     (pady=(1,0))
+BT_CONVT=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_convt, text="Convert"       ) ; BT_CONVT.pack     (pady=(1,0))
+BT_DIMNS=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_dimns, text="Dimension"     ) ; BT_DIMNS.pack     (pady=(1,0))
+BT_IMGDM=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_imgdm, text="Imagedimension") ; BT_IMGDM.pack     (pady=(1,0))
+BT_MERGE=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_merge, text="Merge"         ) ; BT_MERGE.pack     (pady=(1,0))
 
 
 #  ███████╗██╗███╗   ██╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -668,27 +669,29 @@ def ack_d():
 
 #! FRAME Function
 def switch_to_find_frame():
-    switch_to_frame(FR_FIND, MAIN_FRAME)
+    switch_to_frame(FRAME_FIND, MAIN_FRAME)
 
 BT_FIND = M1_hold_release(MAIN_FRAME, "Find", switch_to_find_frame, bg="#FFFFFF", fg="#1D2027", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#FFFFFF", font=("JetBrainsMono NF", 13, "bold"))
 BT_FIND.pack(padx=(0,0),pady=(0,0))
 
-FR_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_FIND.pack_propagate(False)
+FRAME_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_FIND.pack_propagate(False)
 
-BT_BACK = tk.Button(FR_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_FIND), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
+BT_BACK = tk.Button(FRAME_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FIND), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
-BT_FF= tk.Button(FR_FIND, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_file, text="Find File"   ) ; BT_FF.pack(pady=(35,0))
-BT_FP= tk.Button(FR_FIND, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_patt, text="Find Pattern") ; BT_FP.pack(pady=(1,0))
-BT_FS= tk.Button(FR_FIND, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_size, text="Find Size"   ) ; BT_FS.pack(pady=(1,0))
+BOX_1 = tk.Frame(FRAME_FIND, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(60,0), padx=(0,0))
 
-BT_FZF_C= tk.Button(FR_FIND, height=1, bg="#f80069", fg ="#b0e1bd", width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=fzf_c, text="FZF-->C:\\") ; BT_FZF_C.pack(pady=(1,0))
-BT_FZF_D= tk.Button(FR_FIND, height=1, bg="#f80069", fg ="#b0e1bd", width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=fzf_d, text="FZF-->D:\\") ; BT_FZF_D.pack(pady=(1,0))
+BT_FF= tk.Button(BOX_1, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_file, text="Find File"   ) ; BT_FF.pack(pady=(1,0))
+BT_FP= tk.Button(BOX_1, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_patt, text="Find Pattern") ; BT_FP.pack(pady=(1,0))
+BT_FS= tk.Button(BOX_1, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_size, text="Find Size"   ) ; BT_FS.pack(pady=(1,0))
+
+BT_FZF_C= tk.Button(BOX_1, height=1, bg="#f80069", fg ="#b0e1bd", width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=fzf_c, text="FZF-->C:\\") ; BT_FZF_C.pack(pady=(1,0))
+BT_FZF_D= tk.Button(BOX_1, height=1, bg="#f80069", fg ="#b0e1bd", width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=fzf_d, text="FZF-->D:\\") ; BT_FZF_D.pack(pady=(1,0))
 
 # Assuming you have a Tkinter Entry widget for user input
-FZF_SEARCH_WIDGET = tk.Entry(FR_FIND, width=30, fg="black", bg="#7D879E", relief="flat", font=("calibri", 18, "bold", "italic"), justify="center") ; FZF_SEARCH_WIDGET.pack(pady=(10,1))
-BT_ACK_C= tk.Button(FR_FIND, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=ack_c, text="ACK-->C:\\") ; BT_ACK_C.pack(pady=(1,0))
-BT_ACK_D= tk.Button(FR_FIND, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=ack_d, text="ACK-->D:\\") ; BT_ACK_D.pack(pady=(1,0))
+FZF_SEARCH_WIDGET = tk.Entry(BOX_1, width=30, fg="black", bg="#7D879E", relief="flat", font=("calibri", 18, "bold", "italic"), justify="center") ; FZF_SEARCH_WIDGET.pack(pady=(10,1))
+BT_ACK_C= tk.Button(BOX_1, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=ack_c, text="ACK-->C:\\") ; BT_ACK_C.pack(pady=(1,0))
+BT_ACK_D= tk.Button(BOX_1, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=ack_d, text="ACK-->D:\\") ; BT_ACK_D.pack(pady=(1,0))
 
 
 #  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -737,10 +740,6 @@ def open_Winapps_fd():
 def open_programdata_fd():
     subprocess.run(["explorer", "C:\\ProgramData"])
 
-
-#TODO Folder_bt = tk.Button(MAIN_FRAME, text="Folders", command=lambda: switch_to_frame(FRAME_FOLDER, MAIN_FRAME), height=1, width=30, bg="#ffd86a", fg="#1D2027", bd=0, highlightthickness=5, anchor="center", font=("calibri", 14, "bold"))
-#TODO Folder_bt.pack(pady=2, padx=0)
-
 icon_path = "C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"
 icon_image = ImageTk.PhotoImage(Image.open(icon_path))
 
@@ -755,7 +754,7 @@ FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRA
 BT_BACK = tk.Button(FRAME_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FOLDER), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
-BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027") ; BOX_1.pack(side="top", anchor="center", pady=(0,0),padx=(0,0))
+BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027") ; BOX_1.pack(side="top", anchor="center", pady=(60,0),padx=(0,0))
 All_Apps_bt        = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appsfolder_fd , text="All Apps"       ) ; All_Apps_bt.pack      (side="top", pady=(1,0))
 AppData_bt         = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appdata_fd    , text="AppData"        ) ; AppData_bt.pack       (side="top", pady=(1,0))
 Git_Projects_bt    = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_git_fd        , text="Git Projects"   ) ; Git_Projects_bt.pack  (side="top", pady=(1,0))
@@ -786,7 +785,6 @@ BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_p
 FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_PROCESS.pack_propagate(False)
 BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
 
-
 # Install Autoruns using winget and check first
 def check_autoruns_installed():
     autoruns_installed = os.path.exists(r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\autoruns.exe')
@@ -808,7 +806,7 @@ def launch_autoruns():
         print(f"Error launching Autoruns: {e}")
 
 BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, height=1, width=20, bg="#1d2027", fg="#fff", bd=0, highlightthickness=0, font=("times", 14, "bold"))
-BT_AUTORUNS.pack(pady=(30, 0))
+BT_AUTORUNS.pack(pady=(60, 0))
 
 def process_name():
     # Assuming you have a Tkinter Entry widget for input
@@ -973,28 +971,29 @@ def scoop_uninstall_fzf():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-BOX_ROW_STORE = tk.Frame(FR_PROCESS, bg="green") ; BOX_ROW_STORE.pack(pady=(100,2))
-WIDGET_STORE = tk.Entry(BOX_ROW_STORE, width=30, fg="#fff", bg="#1d2027", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat") ; WIDGET_STORE.pack(padx=2, pady=2)
+BOX_1 = tk.Frame(FR_PROCESS, bg="green") ; BOX_1.pack(pady=(100,2))
+WIDGET_STORE = tk.Entry(BOX_1, width=30, fg="#fff", bg="#1d2027", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat") ; WIDGET_STORE.pack(padx=2, pady=2)
 
-BOX_WINGET_STORE = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_WINGET_STORE.pack(pady=2)
-LB_WINGET_TITLE=tk.Label (BOX_WINGET_STORE, bg="#FFFFFF", fg="#000000", height=1, width=5, highlightthickness=3, font=("calibri",14,"bold"), text="Winget") ; LB_WINGET_TITLE.pack(side="left",pady=1,padx=1)
-BT_WINGET_SEARC=tk.Button(BOX_WINGET_STORE, bg="#1d2027", fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="🔍", command = winget_search ) ; BT_WINGET_SEARC.pack(side="left",pady=1,padx=1)
-BT_WINGET_INSTL=tk.Button(BOX_WINGET_STORE, bg="#1d2027", fg="#6ae56a", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="🔽", command = winget_instal ) ; BT_WINGET_INSTL.pack(side="left",pady=(1,8),padx=1)
-BT_WINGET_UINST=tk.Button(BOX_WINGET_STORE, bg="#1d2027", fg="#ff3046", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="❌", command = winget_uninst ) ; BT_WINGET_UINST.pack(side="left",pady=1,padx=1)
-BT_WINGET_INFOO=tk.Button(BOX_WINGET_STORE, bg="#1d2027", fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="❓", command = winget_infooo ) ; BT_WINGET_INFOO.pack(side="left",pady=1,padx=1)
-BT_WINGET_FINST=tk.Button(BOX_WINGET_STORE, bg="#1d2027", fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="🔎", command = wget_inst_fzf ) ; BT_WINGET_FINST.pack(side="left",pady=(1,8),padx=1)
-BT_WINGET_FUNIN=tk.Button(BOX_WINGET_STORE, bg="#1d2027", fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="❌", command = wget_unin_fzf ) ; BT_WINGET_FUNIN.pack(side="left",pady=1,padx=1)
+BOX_2 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_2.pack(side="left", pady=2)
+LB_WINGET_TITLE=tk.Label (BOX_2, bg="#FFFFFF", fg="#000000", height=1, width=5, highlightthickness=3, font=("calibri",14,"bold"), text="Winget") ; LB_WINGET_TITLE.pack(side="top",pady=1,padx=1)
+BT_WINGET_SEARC=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search", command = winget_search ) ; BT_WINGET_SEARC.pack(side="top",pady=1,padx=1)
+BT_WINGET_INSTL=tk.Button(BOX_2, bg="#1d2027", fg="#6ae56a", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Install", command = winget_instal ) ; BT_WINGET_INSTL.pack(side="top",pady=(1,8),padx=1)
+BT_WINGET_UINST=tk.Button(BOX_2, bg="#1d2027", fg="#ff3046", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall", command = winget_uninst ) ; BT_WINGET_UINST.pack(side="top",pady=1,padx=1)
+BT_WINGET_INFOO=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Info", command = winget_infooo ) ; BT_WINGET_INFOO.pack(side="top",pady=1,padx=1)
+
+BT_WINGET_FINST=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search-FZF", command = wget_inst_fzf ) ; BT_WINGET_FINST.pack(side="top",pady=(1,8),padx=1)
+BT_WINGET_FUNIN=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall-FZF", command = wget_unin_fzf ) ; BT_WINGET_FUNIN.pack(side="top",pady=1,padx=1)
 
 
-BOX_SCOOP_STORE = tk.Frame(FR_PROCESS, bg="#1d2027")
-BOX_SCOOP_STORE.pack(pady=2)
-LB_SCOOP_TITLE = tk.Label(BOX_SCOOP_STORE, text="Scoop", fg="#000", bg="#fff", width=5, height=1, font=("calibri", 14, "bold"), highlightthickness=3) ; LB_SCOOP_TITLE.pack(side="left", pady=1, padx=1)
-BT_SCOOP_SEARC = tk.Button(BOX_SCOOP_STORE, bg="#1d2027",fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_search       , text="🔍" ) ; BT_SCOOP_SEARC.pack(side="left", pady=1, padx=1)
-BT_SCOOP_INSTL = tk.Button(BOX_SCOOP_STORE, bg="#1d2027",fg="#6ae56a", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install      , text="🔽" ) ; BT_SCOOP_INSTL.pack(side="left", pady=(1,8), padx=1)
-BT_SCOOP_UINST = tk.Button(BOX_SCOOP_STORE, bg="#1d2027",fg="#ff3046", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall    , text="❌" ) ; BT_SCOOP_UINST.pack(side="left", pady=1, padx=1)
-BT_SCOOP_INFOO = tk.Button(BOX_SCOOP_STORE, bg="#1d2027",fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_info         , text="❓" ) ; BT_SCOOP_INFOO.pack(side="left", pady=1, padx=1)
-BT_SCOOP_FINST = tk.Button(BOX_SCOOP_STORE, bg="#1d2027",fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install_fzf  , text="🔎" ) ; BT_SCOOP_FINST.pack(side="left", pady=(1,8), padx=1)
-BT_SCOOP_FUNIN = tk.Button(BOX_SCOOP_STORE, bg="#1d2027",fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall_fzf, text="❌" ) ; BT_SCOOP_FUNIN.pack(side="left", pady=1, padx=1)
+BOX_3 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_3.pack(side="right", pady=2)
+LB_SCOOP_TITLE = tk.Label(BOX_3, text="Scoop", fg="#000", bg="#fff", width=5, height=1, font=("calibri", 14, "bold"), highlightthickness=3) ; LB_SCOOP_TITLE.pack(side="top", pady=1, padx=1)
+BT_SCOOP_SEARC = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_search       , text="-Search" ) ; BT_SCOOP_SEARC.pack(side="top", pady=1, padx=1)
+BT_SCOOP_INSTL = tk.Button(BOX_3, bg="#1d2027",fg="#6ae56a", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install      , text="-Install" ) ; BT_SCOOP_INSTL.pack(side="top", pady=(1,8), padx=1)
+BT_SCOOP_UINST = tk.Button(BOX_3, bg="#1d2027",fg="#ff3046", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall    , text="-Uninstall" ) ; BT_SCOOP_UINST.pack(side="top", pady=1, padx=1)
+BT_SCOOP_INFOO = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_info         , text="-Info" ) ; BT_SCOOP_INFOO.pack(side="top", pady=1, padx=1)
+
+BT_SCOOP_FINST = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install_fzf  , text="-Search-FZF" ) ; BT_SCOOP_FINST.pack(side="top", pady=(1,8), padx=1)
+BT_SCOOP_FUNIN = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall_fzf, text="-Uninstall-FZF" ) ; BT_SCOOP_FUNIN.pack(side="top", pady=1, padx=1)
 
 
 #   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
