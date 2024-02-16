@@ -423,12 +423,33 @@ def shortcut_TextExtract(event=None):
     pyautogui.hotkey('win', 'shift', 't')
 def regedit_run(event=None):
     subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
+def get_system_uptime():
+    uptime_seconds = psutil.boot_time()
+    current_time = datetime.now().timestamp()
+    uptime = current_time - uptime_seconds
+    hours, remainder = divmod(uptime, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return int(hours), int(minutes), int(seconds)
+
+def format_uptime():
+    hours, minutes, seconds = get_system_uptime()
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+def update_uptime_label():
+    uptime_str = format_uptime()
+    uptime_label.config(text=f"Uptime: {uptime_str}")
+    uptime_label.after(1000, update_uptime_label)  # Update every second
+    # Update uptime label periodically
 
 
 BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW2_ROOT.pack(side="top", anchor="e", pady=(0,7),padx=(5,3))
 
-LB_RULERSR = tk.Label (BOX_ROW2_ROOT, bg="#FFFFFF", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("ink free", 10, "bold"), text="📏") ; LB_RULERSR.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", shortcut_scaleruler)
-LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, bg="#ff6600", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="TE") ; LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", shortcut_TextExtract)
+uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
+uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
+
+
+LB_RULERSR = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10, "bold"), text="📏") ; LB_RULERSR.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", shortcut_scaleruler)
+LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="TE") ; LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", shortcut_TextExtract)
 LB_REGEDIT = tk.Label (BOX_ROW2_ROOT, bg="#52d3ff", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="RE") ; LB_REGEDIT.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_REGEDIT.bind("<Button-1>", regedit_run)
 LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, bg="#21a366", fg="#FFFFFF", height="1", width="2", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="S") ; LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", open_sync)
 LB_TERMINL = tk.Label (BOX_ROW2_ROOT, bg="#000000", fg="#FFFFFF", height="1", width="2", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="T") ; LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", open_terminal)
@@ -462,11 +483,14 @@ def update_time():
     LB_DATE['text'] = current_date
     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(40,3),padx=(0,0))
-LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
-LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(60,3),padx=(0,0))
+LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
+LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
 LB_TIME.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
 LB_DATE.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
+
+# Create label for uptime
+
 update_time()  # Initial call to display time
 
 
