@@ -487,9 +487,9 @@ def update_time():
     LB_DATE['text'] = current_date
     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#ffda73") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(75,3),padx=(0,0), fill="x")
-LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#ffda73", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#ffda73", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
-LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#ffda73", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#ffda73", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1493df") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(75,3),padx=(0,0), fill="x")
+LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
+LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
 LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 
@@ -853,7 +853,7 @@ def launch_autoruns():
         print(f"Error launching Autoruns: {e}")
 
 BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, height=1, width=20, bg="#1d2027", fg="#fff", bd=0, highlightthickness=0, font=("times", 14, "bold"))
-BT_AUTORUNS.pack(pady=(60, 0))
+BT_AUTORUNS.pack(pady=(80, 0))
 
 def process_name():
     # Assuming you have a Tkinter Entry widget for input
