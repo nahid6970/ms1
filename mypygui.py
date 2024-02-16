@@ -1113,38 +1113,16 @@ BT_NCDU_C.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", c
 BT_NCDU_D.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", d_size)
 
 #! Backup & Update
-# Global variable to store the last clicked time
-last_click_time = None
-
 def open_backup(event=None):
-    global last_click_time
-    last_click_time = datetime.now()  # Update the last clicked time
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\backup.ps1"], shell=True)
+def open_update(event=None):
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"],  shell=True)
 
-def update_last_click_time():
-    global last_click_time
-    if last_click_time:
-        time_diff = datetime.now() - last_click_time
-        time_str = f"{time_diff.seconds // 3600:02d}:{(time_diff.seconds // 60) % 60:02d}"  # Format as HH:MM
-        BACKUP_BT.config(text=f"Backup ({time_str})")
-    else:
-        BACKUP_BT.config(text="Backup")
-
-    # Schedule the next update after 1 minute
-    BACKUP_BT.after(1000, update_last_click_time)
-
-
-# Create a frame to hold the button
-ROOT_ROW_BOX = tk.Frame(ROOT, bg="#21a366")
-ROOT_ROW_BOX.pack(side="top", fill="x")
-
-# Create the backup button
-BACKUP_BT = tk.Label(ROOT_ROW_BOX, bg="#21a366", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#21a366", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Backup")
-BACKUP_BT.pack(side="left", padx=(0, 0), pady=0)
-BACKUP_BT.bind("<Button-1>", open_backup)
-
-# Update the last click time periodically
-update_last_click_time()
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="black") ; BOX_ROW_MAIN.pack(pady=(5,0))
+BACKUP_BT = tk.Label(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#21a366", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Backup")
+UPDATE_BT = tk.Label(BOX_ROW_MAIN, bg="#0047ab", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#0047ab", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Update")
+BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0,) ; BACKUP_BT.bind("<Button-1>", open_backup)
+UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0,) ; UPDATE_BT.bind("<Button-1>", open_update)
 
 #! Top Most Toggle
 def check_window_topmost():
