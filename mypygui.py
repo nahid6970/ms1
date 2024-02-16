@@ -558,7 +558,7 @@ buttons = {}
 for label, operation, color in button_data:
     buttons[operation] = tk.Label(ROOT_ROW_BOX, bg=color, fg="#000000", height=1, width=13, relief="flat", 
                                   highlightthickness=1, highlightbackground=color, padx=3, pady=0, 
-                                  font=("Bahnschrift Condensed", 20, "bold"), text=label)
+                                  font=("Book Antiqua", 13, "bold"), text=label)
     buttons[operation].pack(side="left", padx=(0, 0), pady=0)
     buttons[operation].bind("<Button-1>", lambda event, operation=operation: open_operation(operation))
 
