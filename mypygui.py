@@ -545,7 +545,7 @@ def load_last_click_time(operation):
 
 # Create a frame to hold the buttons
 ROOT_ROW_BOX = tk.Frame(MAIN_FRAME)
-ROOT_ROW_BOX.pack(side="top")
+ROOT_ROW_BOX.pack(side="top", padx=(0,0), pady=(0,2))
 
 # Define the button labels and operations
 button_data = [("Backup", "backup", "#21a366"), ("Update", "update", "#1493df")]
