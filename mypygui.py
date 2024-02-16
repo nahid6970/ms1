@@ -837,6 +837,76 @@ BOX_ROW_APPID2.pack(pady=2)
 BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍"); BT_GET_ID.pack(side="left", pady=0)
 BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌"); BT_KIL_ID.pack(side="left", pady=0)
 
+#   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
+#  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝    ██╔══██╗██╔══██╗██╔══██╗██╔════╝
+#  ██║     ███████║█████╗  ██║     █████╔╝     ███████║██████╔╝██████╔╝███████╗
+#  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗     ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║
+#  ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗    ██║  ██║██║     ██║     ███████║
+#   ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝
+
+BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#fff", fg="#000", width=20, highlightthickness=5, anchor="center", font=("times", 12, "bold"))
+BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(25,0))
+
+Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; Page1.pack_propagate(False)
+
+BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
+
+
+LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
+LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(0,0))
+
+def check_installation(app_name, paths_to_check, chkbx_var, chkbox_bt):
+    application_installed = any(os.path.exists(path) for path in paths_to_check)
+    chkbx_var.set(1 if application_installed else 0)
+
+    # Change text color based on installation status if not already checked
+    if not chkbx_var.get():
+        text_color = "green" if application_installed else "red"
+        chkbox_bt.config(foreground=text_color)
+
+def install_application(app_name, install_command, chkbx_var, chkbox_bt):
+    subprocess.Popen(install_command)
+    chkbx_var.set(1)
+
+    # After installation, set the text color to green if not already checked
+    if not chkbx_var.get():
+        chkbox_bt.config(foreground="green")
+
+# Variable to track checkbox state
+chkbx_rclone = tk.IntVar()
+chkbx_powertoys = tk.IntVar()
+chkbx_sonarr = tk.IntVar()
+chkbx_radarr = tk.IntVar()
+chkbx_prowlarr = tk.IntVar()
+chkbx_bazarr = tk.IntVar()
+
+# Define applications and their information
+applications = [
+    {"name": "Rclone", "paths": [r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe', r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue \'- Scoop Install\' ; scoop install rclone"', "chkbx_var": chkbx_rclone},
+    {"name": "Powertoys", "paths": [r'C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe', r'C:\Program Files\PowerToys\PowerToys.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Scoop Install\' ; scoop install PowerToys"', "chkbx_var": chkbx_powertoys},
+    {"name": "Sonarr", "paths": [r'C:\ProgramData\Sonarr\bin\Sonarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamSonarr.Sonarr"', "chkbx_var": chkbx_sonarr},
+    {"name": "Radarr", "paths": [r'C:\ProgramData\Radarr\bin\Radarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamRadarr.Radarr"', "chkbx_var": chkbx_radarr},
+    {"name": "Prowlarr", "paths": [r'C:\ProgramData\Prowlarr\bin\Prowlarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamProwlarr.Prowlarr"', "chkbx_var": chkbx_prowlarr},
+    {"name": "Bazarr", "paths": [r'C:\ProgramData\Bazarr\bin\Bazarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install Morpheus.Bazarr"', "chkbx_var": chkbx_bazarr},
+    # Add more applications here
+]
+
+# Create and pack checkboxes, check buttons, and install buttons for each application
+for app in applications:
+    frame = tk.Frame(Page1, bg="#1d2027")
+    frame.pack( padx=(5,0), pady=(5,0), anchor="ne")
+
+    chkbox_bt = tk.Checkbutton(frame, text=app["name"], variable=app["chkbx_var"], font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="solid", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
+    chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
+    ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda app=app: install_application(app["name"], app["install_command"], app["chkbx_var"], chkbox_bt))
+
+    chkbox_bt.pack(side="left", padx=(0,5  ), pady=(0,0))
+    chk_bt.pack   (side="left", padx=(10,0 ), pady=(0,0))
+    ins_bt.pack   (side="left", padx=(0,100), pady=(0,0))
+
+    # Check installation status at the start
+    check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt)
+
 
 #?   ██╗ ██╗     ██╗    ██╗       ██╗       ███████╗
 #?  ████████╗    ██║    ██║       ██║       ██╔════╝
@@ -971,100 +1041,29 @@ def scoop_uninstall_fzf():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-BOX_1 = tk.Frame(FR_PROCESS, bg="green") ; BOX_1.pack(pady=(100,2))
+BOX_1 = tk.Frame(FR_PROCESS, bg="green") ; BOX_1.pack(pady=(50,2))
 WIDGET_STORE = tk.Entry(BOX_1, width=30, fg="#fff", bg="#1d2027", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat") ; WIDGET_STORE.pack(padx=2, pady=2)
 
-BOX_2 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_2.pack(side="left", pady=2)
-LB_WINGET_TITLE=tk.Label (BOX_2, bg="#FFFFFF", fg="#000000", height=1, width=5, highlightthickness=3, font=("calibri",14,"bold"), text="Winget") ; LB_WINGET_TITLE.pack(side="top",pady=1,padx=1)
-BT_WINGET_SEARC=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search", command = winget_search ) ; BT_WINGET_SEARC.pack(side="top",pady=1,padx=1)
-BT_WINGET_INSTL=tk.Button(BOX_2, bg="#1d2027", fg="#6ae56a", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Install", command = winget_instal ) ; BT_WINGET_INSTL.pack(side="top",pady=(1,8),padx=1)
-BT_WINGET_UINST=tk.Button(BOX_2, bg="#1d2027", fg="#ff3046", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall", command = winget_uninst ) ; BT_WINGET_UINST.pack(side="top",pady=1,padx=1)
-BT_WINGET_INFOO=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Info", command = winget_infooo ) ; BT_WINGET_INFOO.pack(side="top",pady=1,padx=1)
+BOX_2 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_2.pack(side="left", anchor="center", pady=2)
+LB_WINGET_TITLE=tk.Label (BOX_2, bg="#FFFFFF", fg="#000000", height=1, highlightthickness=3, font=("calibri",14,"bold"), text="Winget") ; LB_WINGET_TITLE.pack(side="top", anchor="e", pady=(1,1),padx=(1,1))
+BT_WINGET_SEARC=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search", command = winget_search ) ; BT_WINGET_SEARC.pack       (side="top", anchor="e", pady=(1,1), padx=(100,1))
+BT_WINGET_INSTL=tk.Button(BOX_2, bg="#1d2027", fg="#6ae56a", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Install", command = winget_instal ) ; BT_WINGET_INSTL.pack      (side="top", anchor="e", pady=(1,1), padx=(100,1))
+BT_WINGET_UINST=tk.Button(BOX_2, bg="#1d2027", fg="#ff3046", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall", command = winget_uninst ) ; BT_WINGET_UINST.pack    (side="top", anchor="e", pady=(1,1), padx=(100,1))
+BT_WINGET_INFOO=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Info", command = winget_infooo ) ; BT_WINGET_INFOO.pack         (side="top", anchor="e", pady=(1,1), padx=(100,1))
 
-BT_WINGET_FINST=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search-FZF", command = wget_inst_fzf ) ; BT_WINGET_FINST.pack(side="top",pady=(1,8),padx=1)
-BT_WINGET_FUNIN=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall-FZF", command = wget_unin_fzf ) ; BT_WINGET_FUNIN.pack(side="top",pady=1,padx=1)
-
-
-BOX_3 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_3.pack(side="right", pady=2)
-LB_SCOOP_TITLE = tk.Label(BOX_3, text="Scoop", fg="#000", bg="#fff", width=5, height=1, font=("calibri", 14, "bold"), highlightthickness=3) ; LB_SCOOP_TITLE.pack(side="top", pady=1, padx=1)
-BT_SCOOP_SEARC = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_search       , text="-Search" ) ; BT_SCOOP_SEARC.pack(side="top", pady=1, padx=1)
-BT_SCOOP_INSTL = tk.Button(BOX_3, bg="#1d2027",fg="#6ae56a", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install      , text="-Install" ) ; BT_SCOOP_INSTL.pack(side="top", pady=(1,8), padx=1)
-BT_SCOOP_UINST = tk.Button(BOX_3, bg="#1d2027",fg="#ff3046", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall    , text="-Uninstall" ) ; BT_SCOOP_UINST.pack(side="top", pady=1, padx=1)
-BT_SCOOP_INFOO = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_info         , text="-Info" ) ; BT_SCOOP_INFOO.pack(side="top", pady=1, padx=1)
-
-BT_SCOOP_FINST = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install_fzf  , text="-Search-FZF" ) ; BT_SCOOP_FINST.pack(side="top", pady=(1,8), padx=1)
-BT_SCOOP_FUNIN = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, width=4, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall_fzf, text="-Uninstall-FZF" ) ; BT_SCOOP_FUNIN.pack(side="top", pady=1, padx=1)
+BT_WINGET_FINST=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search-FZF", command = wget_inst_fzf ) ; BT_WINGET_FINST.pack   (side="top", anchor="e", pady=(1,1), padx=(100,1))
+BT_WINGET_FUNIN=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall-FZF", command = wget_unin_fzf ) ; BT_WINGET_FUNIN.pack(side="top", anchor="e", pady=(1,1), padx=(100,1))
 
 
-#   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
-#  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝    ██╔══██╗██╔══██╗██╔══██╗██╔════╝
-#  ██║     ███████║█████╗  ██║     █████╔╝     ███████║██████╔╝██████╔╝███████╗
-#  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗     ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║
-#  ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗    ██║  ██║██║     ██║     ███████║
-#   ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝
+BOX_3 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_3.pack( anchor="center", side="right", pady=2)
+LB_SCOOP_TITLE = tk.Label (BOX_3, text="Scoop", fg="#000", bg="#fff", height=1, font=("calibri", 14, "bold"), highlightthickness=3) ; LB_SCOOP_TITLE.pack(side="top", anchor="w", pady=(1,1), padx=(1,1))
+BT_SCOOP_SEARC = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_search       , text="-Search" ) ; BT_SCOOP_SEARC.pack       (side="top", anchor="w", pady=(1,1), padx=(1,100))
+BT_SCOOP_INSTL = tk.Button(BOX_3, bg="#1d2027",fg="#6ae56a", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install      , text="-Install" ) ; BT_SCOOP_INSTL.pack      (side="top", anchor="w", pady=(1,1), padx=(1,100))
+BT_SCOOP_UINST = tk.Button(BOX_3, bg="#1d2027",fg="#ff3046", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall    , text="-Uninstall" ) ; BT_SCOOP_UINST.pack    (side="top", anchor="w", pady=(1,1), padx=(1,100))
+BT_SCOOP_INFOO = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_info         , text="-Info" ) ; BT_SCOOP_INFOO.pack         (side="top", anchor="w", pady=(1,1), padx=(1,100))
 
-BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#fff", fg="#000", width=20, highlightthickness=5, anchor="center", font=("times", 12, "bold"))
-BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(25,0))
-
-Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; Page1.pack_propagate(False)
-
-BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,60))
-
-
-LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
-LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(0,0))
-
-def check_installation(app_name, paths_to_check, chkbx_var, chkbox_bt):
-    application_installed = any(os.path.exists(path) for path in paths_to_check)
-    chkbx_var.set(1 if application_installed else 0)
-
-    # Change text color based on installation status if not already checked
-    if not chkbx_var.get():
-        text_color = "green" if application_installed else "red"
-        chkbox_bt.config(foreground=text_color)
-
-def install_application(app_name, install_command, chkbx_var, chkbox_bt):
-    subprocess.Popen(install_command)
-    chkbx_var.set(1)
-
-    # After installation, set the text color to green if not already checked
-    if not chkbx_var.get():
-        chkbox_bt.config(foreground="green")
-
-# Variable to track checkbox state
-chkbx_rclone = tk.IntVar()
-chkbx_powertoys = tk.IntVar()
-chkbx_sonarr = tk.IntVar()
-chkbx_radarr = tk.IntVar()
-chkbx_prowlarr = tk.IntVar()
-chkbx_bazarr = tk.IntVar()
-
-# Define applications and their information
-applications = [
-    {"name": "Rclone", "paths": [r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe', r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue \'- Scoop Install\' ; scoop install rclone"', "chkbx_var": chkbx_rclone},
-    {"name": "Powertoys", "paths": [r'C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe', r'C:\Program Files\PowerToys\PowerToys.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Scoop Install\' ; scoop install PowerToys"', "chkbx_var": chkbx_powertoys},
-    {"name": "Sonarr", "paths": [r'C:\ProgramData\Sonarr\bin\Sonarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamSonarr.Sonarr"', "chkbx_var": chkbx_sonarr},
-    {"name": "Radarr", "paths": [r'C:\ProgramData\Radarr\bin\Radarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamRadarr.Radarr"', "chkbx_var": chkbx_radarr},
-    {"name": "Prowlarr", "paths": [r'C:\ProgramData\Prowlarr\bin\Prowlarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamProwlarr.Prowlarr"', "chkbx_var": chkbx_prowlarr},
-    {"name": "Bazarr", "paths": [r'C:\ProgramData\Bazarr\bin\Bazarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install Morpheus.Bazarr"', "chkbx_var": chkbx_bazarr},
-    # Add more applications here
-]
-
-# Create and pack checkboxes, check buttons, and install buttons for each application
-for app in applications:
-    frame = tk.Frame(Page1, bg="#1d2027")
-    frame.pack( padx=(5,0), pady=(5,0), anchor="ne")
-
-    chkbox_bt = tk.Checkbutton(frame, text=app["name"], variable=app["chkbx_var"], font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="solid", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
-    chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
-    ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda app=app: install_application(app["name"], app["install_command"], app["chkbx_var"], chkbox_bt))
-
-    chkbox_bt.pack(side="left", padx=(0,5  ), pady=(0,0))
-    chk_bt.pack   (side="left", padx=(10,0 ), pady=(0,0))
-    ins_bt.pack   (side="left", padx=(0,100), pady=(0,0))
-
-    # Check installation status at the start
-    check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt)
+BT_SCOOP_FINST = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install_fzf  , text="-Search-FZF" ) ; BT_SCOOP_FINST.pack   (side="top", anchor="w", pady=(1,1), padx=(1,100))
+BT_SCOOP_FUNIN = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall_fzf, text="-Uninstall-FZF" ) ; BT_SCOOP_FUNIN.pack(side="top", anchor="w", pady=(1,1), padx=(1,100))
 
 
 #  ████████╗ ██████╗  ██████╗ ██╗     ███████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
