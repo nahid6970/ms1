@@ -544,7 +544,6 @@ BACKUP_BT = tk.Label(ROOT_ROW_BOX, bg="#21a366", fg="#ffffff", height=1, width=2
 BACKUP_BT.pack(side="top", padx=(0, 0), pady=0) ; BACKUP_BT.bind("<Button-1>", open_backup)
 # Load last click time from log file
 load_last_backup_click_time()
-
 # Update the last click time periodically
 update_last_backup_click_time()
 
@@ -555,7 +554,6 @@ def open_update(event=None):
     last_update_click_time = datetime.now()  # Update the last clicked time
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"],  shell=True)
     update_last_update_click_time()
-
 def update_last_update_click_time():
     global last_update_click_time
     if last_update_click_time:
@@ -567,7 +565,6 @@ def update_last_update_click_time():
             log_file.write(last_update_click_time.isoformat())
     else:
         UPDATE_BT.config(text="Update")
-
     # Schedule the next update after 1 minute
     UPDATE_BT.after(60000, update_last_update_click_time)
 
@@ -580,19 +577,14 @@ def load_last_update_click_time():
                 last_update_click_time = datetime.fromisoformat(last_update_click_time_str)
     except FileNotFoundError:
         pass
-
 # Create a frame to hold the button
-ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#0047ab")
-ROOT_ROW_BOX.pack(side="top", fill="x")
-
+ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#0047ab") ; ROOT_ROW_BOX.pack(side="top", fill="x")
 # Create the update button
 UPDATE_BT = tk.Label(ROOT_ROW_BOX, bg="#0047ab", fg="#ffffff", height=1, width=28, relief="flat", highlightthickness=1, highlightbackground="#0047ab", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Update")
 UPDATE_BT.pack(side="top", padx=(0, 0), pady=0)
 UPDATE_BT.bind("<Button-1>", open_update)
-
 # Load last update click time from log file
 load_last_update_click_time()
-
 # Update the last update click time periodically
 update_last_update_click_time()
 
