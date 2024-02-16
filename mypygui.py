@@ -462,7 +462,7 @@ def update_time():
     LB_DATE['text'] = current_date
     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(25,3),padx=(0,0))
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(40,3),padx=(0,0))
 LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
 LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1d2027", fg="#FFFFFF", width="13", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
 LB_TIME.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0))
@@ -485,9 +485,7 @@ update_time()  # Initial call to display time
 
 
 # Global variable to store the last clicked time for the update button
-
 # Global variable to store the last clicked time
-
 # Variables to track the last click time for backup and update buttons
 last_click_times = {"backup": None, "update": None}
 
@@ -522,10 +520,6 @@ def load_last_click_time(operation):
     except FileNotFoundError:
         pass
 
-# Create the main frame
-MAIN_FRAME = tk.Tk()
-MAIN_FRAME.title("Operation Buttons")
-
 # Create a frame to hold the buttons
 ROOT_ROW_BOX = tk.Frame(MAIN_FRAME)
 ROOT_ROW_BOX.pack(side="top")
@@ -536,7 +530,7 @@ button_data = [("Backup", "backup", "#21a366"), ("Update", "update", "#0047ab")]
 # Create and pack the buttons
 buttons = {}
 for label, operation, color in button_data:
-    buttons[operation] = tk.Label(ROOT_ROW_BOX, bg=color, fg="#ffffff", height=1, width=28, relief="flat", 
+    buttons[operation] = tk.Label(ROOT_ROW_BOX, bg=color, fg="#ffffff", height=1, width=14, relief="flat", 
                                   highlightthickness=1, highlightbackground=color, padx=3, pady=0, 
                                   font=("JetBrainsMono NF", 14, "bold"), text=label)
     buttons[operation].pack(side="left", padx=(0, 0), pady=0)
@@ -560,8 +554,7 @@ BT_NCDU_C = tk.Label(BOX_ROW_MAIN, bg="#57a9f4", fg="#000000", height=1, width=1
 BT_NCDU_D = tk.Label(BOX_ROW_MAIN, bg="#57a9f4", fg="#000000", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#57a9f4", padx=3, font=("JetBrainsMono NF", 14, "bold"), text="D:\\ Drive" )
 BT_NCDU_C.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", c_size)
 BT_NCDU_D.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", d_size)
-# Run the main loop
-MAIN_FRAME.mainloop()
+
 MAIN_FRAME.pack(expand=True)
 
 
