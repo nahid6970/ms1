@@ -590,7 +590,7 @@ BT_FFMPEG.pack(padx=(0,0),pady=(0,0))
 FRAME_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=500, height=700) ; FRAME_FFMPEG.pack_propagate(False)
 
 BT_BACK = tk.Button(FRAME_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FFMPEG), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,10))
+BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 BOX_1 = tk.Frame(FRAME_FFMPEG, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(60,0), padx=(0,0))
 BT_TRIMM=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_trimm, text="Trim"          ) ; BT_TRIMM.pack     (pady=(1,0))
@@ -677,7 +677,7 @@ BT_FIND.pack(padx=(0,0),pady=(0,0))
 FRAME_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_FIND.pack_propagate(False)
 
 BT_BACK = tk.Button(FRAME_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FIND), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,10))
+BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 BOX_1 = tk.Frame(FRAME_FIND, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(60,0), padx=(0,0))
 
@@ -752,7 +752,7 @@ BT_FOLDER.pack(padx=(0,0),pady=(0,0))
 FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_FOLDER.pack_propagate(False)
 
 BT_BACK = tk.Button(FRAME_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FOLDER), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,10))
+BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027") ; BOX_1.pack(side="top", anchor="center", pady=(60,0),padx=(0,0))
 All_Apps_bt        = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appsfolder_fd , text="All Apps"       ) ; All_Apps_bt.pack      (side="top", pady=(1,0))
@@ -783,7 +783,7 @@ def switch_to_process_frame():
 
 BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_process_frame, bg="#cc2400", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#cc2400", font=("JetBrainsMono NF", 13, "bold")) ; BT_PROCESS_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
 FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_PROCESS.pack_propagate(False)
-BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,10))
+BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 # Install Autoruns using winget and check first
 def check_autoruns_installed():
@@ -849,7 +849,7 @@ BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(25,0))
 
 Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; Page1.pack_propagate(False)
 
-BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,10))
+BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 
 LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
@@ -1118,7 +1118,7 @@ BT_TOOLS.pack(padx=(0,0),pady=(0,0))
 FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_TOOLS.pack_propagate(False)
 
 BT_BACK = tk.Button(FRAME_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_TOOLS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,10))
+BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(60,0), padx=(0,0))
 adapter_bt      = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("calibri", 14, "bold"), command=advanced_adapter,  text="Advanced Adapter",         ) ; adapter_bt.pack     (pady=(1,0))
@@ -1151,7 +1151,8 @@ def switch_to_pythontool_frame():
 
 BT_PYTHON_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Python Tools", switch_to_pythontool_frame, bg="#366c9c", fg="#f6d24a", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#366c9c", font=("JetBrainsMono NF", 13, "bold")) ; BT_PYTHON_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
 FR_PYTHON_TOOL = tk.Frame(BORDER_FRAME, bg="#1d2027", width=500, height=700) ; FR_PYTHON_TOOL.pack_propagate(False)
-BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,10))
+BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
+BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 
 BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_1.pack(side="top", anchor="center", pady=(60,0), padx=(0,0))
