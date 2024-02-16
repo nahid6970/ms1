@@ -184,6 +184,8 @@ def close_window(event=None):
 #! Resize Window
 def toggle_window_size(size):
     global window_state
+    global x_coordinate  # Make these variables accessible within the function
+    global y_coordinate
     if size == '◀':
         ROOT.geometry('112x36')
         ROOT.configure(bg='red')
@@ -212,7 +214,7 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 1002, 1038
         # x_coordinate, y_coordinate = 920, 1038
         # x_coordinate, y_coordinate = 1180, 0
-    elif size == '࿘':
+    elif size == '■':
         ROOT.geometry('500x700')
         ROOT.configure(bg='#1d2027')
         LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
@@ -226,9 +228,24 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 1002, 374
         # x_coordinate, y_coordinate = 1420, 162
         # x_coordinate, y_coordinate = 1180, 0
+        
     ROOT.focus_force()
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+{y_coordinate}')
+
+def on_key_press(event):
+    if event.keysym == 'Left':
+        toggle_window_size('◀')
+    elif event.keysym == 'Down':
+        toggle_window_size('▼')
+    elif event.keysym == 'Up':
+        toggle_window_size('■')
+
+# Bind arrow key events to toggle window size
+ROOT.bind("<Left>", on_key_press)
+ROOT.bind("<Down>", on_key_press)
+ROOT.bind("<Up>", on_key_press)
+
 
 #? CPU / RAM / DRIVES / NET SPEED
 def get_cpu_ram_info():
@@ -365,7 +382,7 @@ LB_XXX.pack(side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Bu
 LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#3bda00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="■", font=("calibri", 10, "bold" ))
 LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold"  ))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="◀", font=("ink free", 10, "bold"))
-LB_M.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('࿘'))
+LB_M.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
 

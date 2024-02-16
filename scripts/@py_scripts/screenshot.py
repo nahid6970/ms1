@@ -8,7 +8,6 @@ def capture_screenshot():
     # Hide the Tkinter window
     root.withdraw()
 
-    
     # Get the current date and time
     now = datetime.now()
     timestamp = now.strftime("%Y_%m_%d_%H_%M_%S")
@@ -22,33 +21,37 @@ def capture_screenshot():
     # Save the screenshot
     screenshot.save(filename)
     
+    # Get the modified time of the file
+    modified_time = os.path.getmtime(filename)
+    modified_timestamp = datetime.fromtimestamp(modified_time).strftime("%Y_%m_%d_%H_%M_%S")
+    
+    # Construct the new filename with modified timestamp
+    new_filename = f"D:\\@gallery\\{modified_timestamp}.png"
+    
+    # Rename the file
+    os.rename(filename, new_filename)
+    
     # Restore the Tkinter window
     root.deiconify()
     
     # Create buttons for user options
     options_frame = tk.Toplevel(root)
     options_frame.title("Options")
- 
-    options_frame.title("Screenshot Capture")
     options_frame.geometry("200x50")
     options_frame.attributes('-topmost', True)  # Set always on top
-
 
     # Function to handle user choice
     def handle_choice(choice):
         options_frame.destroy()
         if choice == "Paint":
-            os.system(f"mspaint {filename}")
+            os.system(f"mspaint {new_filename}")
         elif choice == "View":
-            os.startfile(filename)
+            os.startfile(new_filename)
         elif choice == "Copy":
-            os.system(f"copy {filename} NUL")
+            os.system(f"copy {new_filename} NUL")
         elif choice == "Delete":
-            os.remove(filename)
+            os.remove(new_filename)
 
-
-    
-    
     # Create buttons for user options
     paint_button = tk.Button(options_frame, text="Paint", command=lambda: handle_choice("Paint"))
     paint_button.pack(side="left", padx=5, pady=5)
@@ -62,16 +65,13 @@ def capture_screenshot():
     delete_button = tk.Button(options_frame, bg="red", fg="white", text="Delete", command=lambda: handle_choice("Delete"))
     delete_button.pack(side="left", padx=5, pady=5)
 
-# Calculate the screen width and height
+    # Set the window position
     screen_width = options_frame.winfo_screenwidth()
     screen_height = options_frame.winfo_screenheight()
-
-    # Calculate the x and y coordinates to center the window
-    x = (screen_width - 210) // 1  #  higher means left side lower means right side
-    y = (screen_height - 240) // 1  #  higher means top side lower means bottom side
-
-    # Set the geometry of the window
-    options_frame.geometry(f"200x50+{x}+{y}") #! overall size of the window
+    x = (screen_width - 210) // 1
+    y = (screen_height - 240) // 1
+    options_frame.geometry(f"200x50+{x}+{y}")  # Overall size of the window
+    
 
 # Create the Tkinter window
     
