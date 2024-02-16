@@ -421,6 +421,8 @@ def shortcut_scaleruler(event=None):
     pyautogui.hotkey('win', 'shift', 'm')
 def shortcut_TextExtract(event=None):
     pyautogui.hotkey('win', 'shift', 't')
+def shortcut_mousepointercross(event=None):
+    pyautogui.hotkey('win', 'alt', 'p')
 def regedit_run(event=None):
     subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
 def get_system_uptime():
@@ -449,6 +451,7 @@ uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_upt
 
 
 LB_RULERSR = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10, "bold"), text="📏") ; LB_RULERSR.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", shortcut_scaleruler)
+LB_MICECRS = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10, "bold"), text="🖱️") ; LB_MICECRS.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", shortcut_mousepointercross)
 LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="TE") ; LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", shortcut_TextExtract)
 LB_REGEDIT = tk.Label (BOX_ROW2_ROOT, bg="#52d3ff", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="RE") ; LB_REGEDIT.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_REGEDIT.bind("<Button-1>", regedit_run)
 LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, bg="#21a366", fg="#FFFFFF", height="1", width="2", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="S") ; LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", open_sync)
