@@ -228,11 +228,9 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 1002, 374
         # x_coordinate, y_coordinate = 1420, 162
         # x_coordinate, y_coordinate = 1180, 0
-        
     ROOT.focus_force()
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+{y_coordinate}')
-
 def on_key_press(event):
     if event.keysym == 'Left':
         toggle_window_size('◀')
@@ -240,14 +238,13 @@ def on_key_press(event):
         toggle_window_size('▼')
     elif event.keysym == 'Up':
         toggle_window_size('■')
-
 # Bind arrow key events to toggle window size
 ROOT.bind("<Left>", on_key_press)
 ROOT.bind("<Down>", on_key_press)
 ROOT.bind("<Up>", on_key_press)
 
 
-#? CPU / RAM / DRIVES / NET SPEED
+#! CPU / RAM / DRIVES / NET SPEED
 def get_cpu_ram_info():
     cpu_usage = psutil.cpu_percent(interval=None)
     ram_usage = psutil.virtual_memory().percent
