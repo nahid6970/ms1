@@ -508,7 +508,7 @@ update_time()
 # BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0,) ; BACKUP_BT.bind("<Button-1>", open_backup)
 # UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0,) ; UPDATE_BT.bind("<Button-1>", open_update)
 
-
+#! Backup
 last_backup_click_time = None
 def open_backup(event=None):
     global last_backup_click_time
@@ -548,8 +548,8 @@ load_last_backup_click_time()
 # Update the last click time periodically
 update_last_backup_click_time()
 
+#! Update
 last_update_click_time = None
-
 def open_update(event=None):
     global last_update_click_time
     last_update_click_time = datetime.now()  # Update the last clicked time
@@ -832,6 +832,40 @@ BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_p
 FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FR_PROCESS.pack_propagate(False)
 BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
+def process_name():
+    # Assuming you have a Tkinter Entry widget for input
+    additional_text = WIDGET_APPID.get()
+    return additional_text
+def get_process():
+    additional_text = process_name()
+    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }}'
+    try:
+        subprocess.Popen(["powershell", "-Command", command])
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def kil_process():
+    additional_text = process_name()
+    command = f'Stop-Process -Name {additional_text}'
+    try:
+        subprocess.Popen(["powershell", "-Command", command])
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff") ; BOX_WIDGET_APPID.pack(pady=(80,0))
+WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#fff", bg="#ff4f00", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
+WIDGET_APPID.pack(padx=2, pady=2)
+
+BOX_ROW_APPID2 = tk.Frame(FR_PROCESS, bg="black")
+BOX_ROW_APPID2.pack(pady=2)
+BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍"); BT_GET_ID.pack(side="left", pady=0)
+BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌"); BT_KIL_ID.pack(side="left", pady=0)
+
+#   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
+#  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝    ██╔══██╗██╔══██╗██╔══██╗██╔════╝
+#  ██║     ███████║█████╗  ██║     █████╔╝     ███████║██████╔╝██████╔╝███████╗
+#  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗     ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║
+#  ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗    ██║  ██║██║     ██║     ███████║
+#   ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝
 # Install Autoruns using winget and check first
 def check_autoruns_installed():
     autoruns_installed = os.path.exists(r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\autoruns.exe')
@@ -853,43 +887,9 @@ def launch_autoruns():
         print(f"Error launching Autoruns: {e}")
 
 BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, height=1, width=20, bg="#1d2027", fg="#fff", bd=0, highlightthickness=0, font=("times", 14, "bold"))
-BT_AUTORUNS.pack(pady=(80, 0))
+BT_AUTORUNS.pack(pady=(10, 0))
 
-def process_name():
-    # Assuming you have a Tkinter Entry widget for input
-    additional_text = WIDGET_APPID.get()
-    return additional_text
-def get_process():
-    additional_text = process_name()
-    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }}'
-    try:
-        subprocess.Popen(["powershell", "-Command", command])
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def kil_process():
-    additional_text = process_name()
-    command = f'Stop-Process -Name {additional_text}'
-    try:
-        subprocess.Popen(["powershell", "-Command", command])
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
 
-BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="red")
-BOX_WIDGET_APPID.pack(pady=1)
-WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#fff", bg="#1d2027", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
-WIDGET_APPID.pack(padx=2, pady=2)
-
-BOX_ROW_APPID2 = tk.Frame(FR_PROCESS, bg="black")
-BOX_ROW_APPID2.pack(pady=2)
-BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍"); BT_GET_ID.pack(side="left", pady=0)
-BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌"); BT_KIL_ID.pack(side="left", pady=0)
-
-#   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
-#  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝    ██╔══██╗██╔══██╗██╔══██╗██╔════╝
-#  ██║     ███████║█████╗  ██║     █████╔╝     ███████║██████╔╝██████╔╝███████╗
-#  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗     ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║
-#  ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗    ██║  ██║██║     ██║     ███████║
-#   ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝
 
 BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#fff", fg="#000", width=20, highlightthickness=5, anchor="center", font=("times", 12, "bold"))
 BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(25,0))
@@ -1088,8 +1088,8 @@ def scoop_uninstall_fzf():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-BOX_1 = tk.Frame(FR_PROCESS, bg="green") ; BOX_1.pack(pady=(50,2))
-WIDGET_STORE = tk.Entry(BOX_1, width=30, fg="#fff", bg="#1d2027", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat") ; WIDGET_STORE.pack(padx=2, pady=2)
+BOX_1 = tk.Frame(FR_PROCESS, bg="#14bcff") ; BOX_1.pack(pady=(50,2))
+WIDGET_STORE = tk.Entry(BOX_1, width=30, fg="#fff", bg="#21a366", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat") ; WIDGET_STORE.pack(padx=2, pady=2)
 
 BOX_2 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_2.pack(side="left", anchor="center", pady=2)
 LB_WINGET_TITLE=tk.Label (BOX_2, bg="#FFFFFF", fg="#000000", height=1, highlightthickness=3, font=("calibri",14,"bold"), text="Winget") ; LB_WINGET_TITLE.pack(side="top", anchor="e", pady=(1,1),padx=(1,1))
