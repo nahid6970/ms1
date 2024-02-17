@@ -559,7 +559,7 @@ def update_last_update_click_time():
         time_str = f"{time_diff.seconds // 3600:02d}:{(time_diff.seconds // 60) % 60:02d}"  # Format as HH:MM
         UPDATE_BT.config(text=f"Update ({time_str})")
         # Write last click time to log file
-        with open("D:\\py_update.log", "w") as log_file:
+        with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\update_bt.log", "w") as log_file:
             log_file.write(last_update_click_time.isoformat())
     else:
         UPDATE_BT.config(text="Update")
@@ -569,7 +569,7 @@ def update_last_update_click_time():
 def load_last_update_click_time():
     global last_update_click_time
     try:
-        with open("D:\\py_update.log", "r") as log_file:
+        with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\update_bt.log", "r") as log_file:
             last_update_click_time_str = log_file.read().strip()
             if last_update_click_time_str:
                 last_update_click_time = datetime.fromisoformat(last_update_click_time_str)
