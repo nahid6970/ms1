@@ -221,9 +221,12 @@ def toggle_window_size(size):
         LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
         LB_M.config(text='■', bg="#1d2027", fg="#3bda00", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'large'
-        x_coordinate = 0
-        window_height = 700  # Assuming the window height is 38 pixels
-        y_coordinate = screen_height - window_height
+        # x_coordinate = 0
+        # window_height = 700  
+        # y_coordinate = screen_height - window_height
+
+        x_coordinate = screen_width - 500
+        y_coordinate = screen_height - 920
         # x_coordinate, y_coordinate = 0, 374
         # x_coordinate, y_coordinate = 1002, 374
         # x_coordinate, y_coordinate = 1420, 162
