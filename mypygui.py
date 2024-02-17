@@ -402,8 +402,6 @@ LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
 LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 
-
-
 # Create label to display git path and status for ms1 project
 #path_label2 = tk.Label(BOX_ROW_ROOT, text="ms2") ; path_label2.pack(pady=(10, 0))
 #path_label1 = tk.Label(BOX_ROW_ROOT, text="ms1") ; path_label1.pack(pady=(10, 0))
