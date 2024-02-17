@@ -243,7 +243,6 @@ ROOT.bind("<Left>", on_key_press)
 ROOT.bind("<Down>", on_key_press)
 ROOT.bind("<Up>", on_key_press)
 
-
 #! CPU / RAM / DRIVES / NET SPEED
 def get_cpu_ram_info():
     cpu_usage = psutil.cpu_percent(interval=None)
@@ -290,7 +289,7 @@ def update_info_labels():
     elif 10 <= float(gpu_usage) < 50:
         LB_GPU.config(bg="#ff9282" , fg="#000000")
     elif 50 <= float(gpu_usage) < 80:
-        LB_GPU.config(bg="#ff6b54" , fg="#FFFFFF")
+        LB_GPU.config(bg="#ff6b54" , fg="#000000")
     else:
         LB_GPU.config(bg="#ff3010" , fg="#FFFFFF")
 
