@@ -413,15 +413,15 @@ LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 #????????????????????????????????????????????????????????????
 #!This is for ROW 2
 #! Terminal & SYNC & Ruler
-def open_sync(event=None):
+def rclone_sync(event=None):
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\sync.ps1"])
-def open_terminal(even=None):
+def windows_terminal(even=None):
     subprocess.Popen(["wt"])
-def shortcut_scaleruler(event=None):
+def powertoys_ruler(event=None):
     pyautogui.hotkey('win', 'shift', 'm')
-def shortcut_TextExtract(event=None):
+def powertoys_TextExtract(event=None):
     pyautogui.hotkey('win', 'shift', 't')
-def shortcut_mousepointercross(event=None):
+def powertoys_mouse_crosshair(event=None):
     pyautogui.hotkey('win', 'alt', 'p')
 
 def get_system_uptime():
@@ -449,11 +449,19 @@ uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg
 uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
 
 
-LB_RULERSR = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10), text="📏") ; LB_RULERSR.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", shortcut_scaleruler)
-LB_MICECRS = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10), text="🖱️") ; LB_MICECRS.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", shortcut_mousepointercross)
-LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10), text="TE") ; LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", shortcut_TextExtract)
-LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#3bda00", height="1", width="2", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10), text="♾️") ; LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", open_sync)
-LB_TERMINL = tk.Label (BOX_ROW2_ROOT, bg="#000000", fg="#FFFFFF", height="1", width="2", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10), text="T") ; LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", open_terminal)
+LB_RULERSR = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📏", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
+LB_MICECRS = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="🖱", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
+LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📝", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
+LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="♾️", bg="#1d2027", fg="#3bda00", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
+LB_TERMINL = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="💻", bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
+LB_RULERSR.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", powertoys_ruler)
+LB_MICECRS.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", powertoys_mouse_crosshair)
+LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", powertoys_TextExtract)
+LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", rclone_sync)
+LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", windows_terminal)
+
+
+
 
 BOX_ROW3_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW3_ROOT.pack(side="bottom", anchor="e", pady=(0,7),padx=(5,3))
 BT_CLR = tk.Button(BOX_ROW3_ROOT, bg="#1d2027", fg="white" ,  width=2, height=1, relief="flat",highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="❌", command=clear_screen) ; BT_CLR.pack( side="bottom", anchor="e", pady=(0,0), padx=(0,0))
