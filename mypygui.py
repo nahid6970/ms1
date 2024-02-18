@@ -423,8 +423,6 @@ def shortcut_TextExtract(event=None):
     pyautogui.hotkey('win', 'shift', 't')
 def shortcut_mousepointercross(event=None):
     pyautogui.hotkey('win', 'alt', 'p')
-def regedit_run(event=None):
-    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
 
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
@@ -454,7 +452,6 @@ uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_upt
 LB_RULERSR = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10), text="📏") ; LB_RULERSR.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", shortcut_scaleruler)
 LB_MICECRS = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10), text="🖱️") ; LB_MICECRS.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", shortcut_mousepointercross)
 LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10), text="TE") ; LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", shortcut_TextExtract)
-LB_REGEDIT = tk.Label (BOX_ROW2_ROOT, bg="#52d3ff", fg="#000000", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10), text="RE") ; LB_REGEDIT.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_REGEDIT.bind("<Button-1>", regedit_run)
 LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, bg="#1d2027", fg="#3bda00", height="1", width="2", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, font=("ink free", 10), text="♾️") ; LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,3), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", open_sync)
 LB_TERMINL = tk.Label (BOX_ROW2_ROOT, bg="#000000", fg="#FFFFFF", height="1", width="2", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10), text="T") ; LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", open_terminal)
 
@@ -1209,13 +1206,19 @@ def Keybinding():
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\@py_scripts\\Keybinding.py"],  shell=True)
 def dictionary():
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\@py_scripts\\dictionary.py"],  shell=True)
+def regedit_run(event=None):
+    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
+
 
 BT_font =        tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=font_style, text="Font Style")
 BT_KeyBindings = tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=Keybinding, text="KeyBindngs")
 BT_Dictionary =  tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=dictionary, text="Dictionary")
+LB_REGEDIT = tk.Label (BOX_PYTHON_1,  bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), text="Registry Editor-Run")
+
 BT_font       .pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 BT_KeyBindings.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 BT_Dictionary .pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+LB_REGEDIT.pack(side="top", anchor='center', padx=(0,0), pady=(0,0)) ; LB_REGEDIT.bind("<Button-1>", regedit_run)
 
 #! ██████╗ ███████╗███████╗████████╗ █████╗ ██████╗ ████████╗       ██╗       ███████╗██╗  ██╗██╗   ██╗████████╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
 #! ██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝       ██║       ██╔════╝██║  ██║██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗██║    ██║████╗  ██║
