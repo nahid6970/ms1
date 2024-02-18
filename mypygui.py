@@ -222,7 +222,7 @@ def toggle_window_size(size):
         LB_M.config(text='■', bg="#1d2027", fg="#3bda00", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'large'
         # x_coordinate = 0
-        # window_height = 700  
+        # window_height = 700
         # y_coordinate = screen_height - window_height
 
         x_coordinate = screen_width - 500
@@ -449,11 +449,11 @@ uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg
 uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
 
 
-LB_RULERSR = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📏", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
-LB_MICECRS = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="🖱", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
-LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📝", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
-LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="♾️", bg="#1d2027", fg="#3bda00", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
-LB_TERMINL = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="💻", bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0) 
+LB_RULERSR = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📏", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+LB_MICECRS = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="🖱", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📝", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="♾️", bg="#1d2027", fg="#3bda00", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+LB_TERMINL = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="💻", bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
 LB_RULERSR.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", powertoys_ruler)
 LB_MICECRS.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", powertoys_mouse_crosshair)
 LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", powertoys_TextExtract)
@@ -726,7 +726,7 @@ def switch_to_find_frame():
 BT_FIND = M1_hold_release(MAIN_FRAME, "Find", switch_to_find_frame, bg="#FFFFFF", fg="#1D2027", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#FFFFFF", font=("JetBrainsMono NF", 13, "bold"))
 BT_FIND.pack(padx=(0,0),pady=(0,0))
 
-FRAME_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_FIND.pack_propagate(False)
+FRAME_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_FIND.pack_propagate(True)
 
 BT_BACK = tk.Button(FRAME_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FIND), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
@@ -741,9 +741,15 @@ BT_FZF_C= tk.Button(BOX_1, height=1, bg="#f80069", fg ="#b0e1bd", width=20, reli
 BT_FZF_D= tk.Button(BOX_1, height=1, bg="#f80069", fg ="#b0e1bd", width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=fzf_d, text="FZF-->D:\\") ; BT_FZF_D.pack(pady=(1,0))
 
 # Assuming you have a Tkinter Entry widget for user input
-FZF_SEARCH_WIDGET = tk.Entry(BOX_1, width=30, fg="black", bg="#7D879E", relief="flat", font=("calibri", 18, "bold", "italic"), justify="center") ; FZF_SEARCH_WIDGET.pack(pady=(10,1))
-BT_ACK_C= tk.Button(BOX_1, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=ack_c, text="ACK-->C:\\") ; BT_ACK_C.pack(pady=(1,0))
-BT_ACK_D= tk.Button(BOX_1, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=ack_d, text="ACK-->D:\\") ; BT_ACK_D.pack(pady=(1,0))
+BOX_3 = tk.Frame(FRAME_FIND, bg="#1d2027") ; BOX_3.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
+
+FZF_SEARCH_WIDGET = tk.Entry(BOX_3, width=30, fg="black", bg="#7D879E", relief="flat", font=("calibri", 18, "bold", "italic"), justify="center")
+BT_ACK_C= tk.Button(BOX_3, text="ACK-->C:\\", font=("calibri", 14, "bold"), command=ack_c, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0)
+BT_ACK_D= tk.Button(BOX_3, text="ACK-->D:\\", font=("calibri", 14, "bold"), command=ack_d, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0)
+FZF_SEARCH_WIDGET.pack(pady=(10,1))
+BT_ACK_C.pack(side="left", anchor="e", pady=(1,0))
+BT_ACK_D.pack(side="left", anchor="e", pady=(1,0))
+
 
 
 #  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -801,7 +807,7 @@ def switch_to_tools_frame():
 BT_FOLDER = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame,image=icon_image, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=40, width=300, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#e7d86a", font=("JetBrainsMono NF", 13, "bold"))
 BT_FOLDER.pack(padx=(0,0),pady=(0,0))
 
-FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_FOLDER.pack_propagate(False)
+FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) ; FRAME_FOLDER.pack_propagate(True)
 
 BT_BACK = tk.Button(FRAME_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FOLDER), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
