@@ -142,10 +142,10 @@ screen_height = ROOT.winfo_screenheight()
 #? START of alts
 #! alt 1 (original)
 # Calculate the x and y coordinates to center the window
-x = (screen_width - 500) // 1  # 400 is the width of your window higher means left side lower means right side
-y = (screen_height - 755) // 2  # 700 is the height of your window higher means top side lower means bottom side
+x = screen_width - 520   # 400 is the width of your window higher means left side lower means right side
+y = screen_height//2 - 755//2  # 700 is the height of your window higher means top side lower means bottom side
 # Set the geometry of the window
-ROOT.geometry(f"500x700+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"520x700+{x}+{y}") #! overall size of the window
 
 #! alt 2 (modified)
 
@@ -201,7 +201,7 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 1308, 1038
         # x_coordinate, y_coordinate = 1590, 0
     elif size == '▼':
-        ROOT.geometry('500x30')
+        ROOT.geometry('520x30')
         ROOT.configure(bg='red')
         LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
         LB_L.config(text='▼', bg="#1d2027", fg="#3bda00", height=1, width=2, font=("agency", 10, "bold"))
@@ -215,7 +215,7 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 920, 1038
         # x_coordinate, y_coordinate = 1180, 0
     elif size == '■':
-        ROOT.geometry('500x700')
+        ROOT.geometry('520x700')
         ROOT.configure(bg='#1d2027')
         LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
         LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
@@ -225,7 +225,7 @@ def toggle_window_size(size):
         # window_height = 700
         # y_coordinate = screen_height - window_height
 
-        x_coordinate = screen_width - 500
+        x_coordinate = screen_width - 520
         y_coordinate = screen_height - 920
         # x_coordinate, y_coordinate = 0, 374
         # x_coordinate, y_coordinate = 1002, 374
@@ -382,11 +382,11 @@ LB_XXX.pack(side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Bu
 LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#3bda00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="■", font=("calibri", 10, "bold" ))
 LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold"  ))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="◀", font=("ink free", 10, "bold"))
-LB_E = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=0, pady=0, text="1", font=("ink free", 8, "bold"))
+LB_E = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="1", font=("ink free", 10, "bold"))
 LB_M.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
-LB_E.pack(side="right", anchor="e", padx=(0,0), pady=(0,0)) ; LB_E.bind("<Button-1>", lambda event: extra_bar())
+LB_E.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_E.bind("<Button-1>", lambda event: extra_bar())
 
 
 STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
