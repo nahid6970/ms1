@@ -5,7 +5,7 @@ import pyautogui
 import ctypes
 
 def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "D:\@git\\ms1\\sync.ps1"])
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\sync.ps1"])
 
 def windows_terminal(event=None):
     subprocess.Popen(["wt"])
