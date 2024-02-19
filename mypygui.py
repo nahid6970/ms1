@@ -145,7 +145,7 @@ screen_height = ROOT.winfo_screenheight()
 x = screen_width - 520   # 400 is the width of your window higher means left side lower means right side
 y = screen_height//2 - 755//2  # 700 is the height of your window higher means top side lower means bottom side
 # Set the geometry of the window
-ROOT.geometry(f"520x700+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
 
 #! alt 2 (modified)
 
@@ -165,7 +165,7 @@ ROOT.geometry(f"520x700+{x}+{y}") #! overall size of the window
 
 
 # Create main frame
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=700) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 
@@ -464,12 +464,8 @@ LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TEXTCPP.bi
 LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", rclone_sync)
 LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", windows_terminal)
 
-
-
-
 BOX_ROW3_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW3_ROOT.pack(side="bottom", anchor="e", pady=(0,7),padx=(5,3))
 BT_CLR = tk.Button(BOX_ROW3_ROOT, bg="#1d2027", fg="white" ,  width=2, height=1, relief="flat",highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="❌", command=clear_screen) ; BT_CLR.pack( side="bottom", anchor="e", pady=(0,0), padx=(0,0))
-
 
 #! Here are all the exit function for row 1 and 2 and 3
 # CPU / RAM / DRIVES / NET SPEED
@@ -503,6 +499,53 @@ LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 
 update_time()
+
+#! ALL CPU CORES
+def get_cpu_core_usage():
+    # Get CPU usage for each core
+    cpu_usage_per_core = psutil.cpu_percent(interval=None, percpu=True)
+    return cpu_usage_per_core
+def update_cpu_core_bars():
+    # Get CPU usage for each core
+    cpu_core_usage = get_cpu_core_usage()
+    # Update the bars for each CPU core
+    for i, usage in enumerate(cpu_core_usage):
+        core_bar = cpu_core_bars[i]
+        # Clear the previous bar
+        core_bar.delete("all")
+        # Calculate the height of the bar based on usage percentage
+        bar_height = int((usage / 100) * BAR_HEIGHT)
+        # Determine the color based on usage percentage
+        bar_color = determine_color(usage)
+        # Draw the bar with the determined color
+        core_bar.create_rectangle(0, BAR_HEIGHT - bar_height, BAR_WIDTH, BAR_HEIGHT, fill=bar_color)
+        # Display the usage percentage at the top of the bar
+        core_bar.create_text(BAR_WIDTH // 2, 5, text=f"{usage}%", fill="white")
+    # Schedule the next update
+    ROOT.after(1000, update_cpu_core_bars)
+def determine_color(usage):
+    if usage >= 90:
+        return "#8B0000"  # Dark red for usage >= 90%
+    elif usage >= 80:
+        return "#f12c2f"  # Red for usage >= 80%
+    elif usage >= 50:
+        return "#ff9282"  # Light red for usage >= 50%
+    else:
+        return "#14bcff"  # Default color
+# Constants for bar appearance
+BAR_WIDTH = 35
+BAR_HEIGHT = 50
+# Create a frame to hold the CPU core usage bars
+cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027")
+cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=10, fill="x")
+# Create canvas widgets for CPU core bars
+cpu_core_bars = []
+for i in range(psutil.cpu_count()):
+    core_bar = tk.Canvas(cpu_core_frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
+    core_bar.pack(side="left", anchor="center", padx=(10,10), pady=0, expand=True)
+    cpu_core_bars.append(core_bar)
+# Update CPU core bars
+update_cpu_core_bars()
 
 
 #! Backup & Update
