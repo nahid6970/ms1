@@ -19,7 +19,7 @@ $shortcutPath = [System.IO.Path]::Combine($env:APPDATA, 'Microsoft\Windows\Start
 if (-not (Test-Path $shortcutPath)) {
 $WshShell = New-Object -ComObject WScript.Shell
 $shortcut = $WshShell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = "D:\@git\ms1\scripts\ahkscripts.ahk"
+$shortcut.TargetPath = "C:\git\ms1\scripts\ahkscripts.ahk"
 $shortcut.Save() } })
 
 $Startup_CheckBox.Add_Unchecked({

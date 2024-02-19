@@ -309,17 +309,17 @@ def show_git_changes(git_path):
 
 def update_status():
     while True:
-        check_git_status("D:\\@git\\ms1", STATUS_MS1)
-        check_git_status("D:\\@git\\ms2", STATUS_MS2)
+        check_git_status("C:\git\\ms1", STATUS_MS1)
+        check_git_status("C:\git\\ms2", STATUS_MS2)
         # Update the status every second
         time.sleep(1)
 
 STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#000000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#76acfa", text="m1", font= ("agency", 10, "bold"))
-STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1"))
+STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\git\\ms1"))
 STATUS_MS1.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 
 STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#000000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#76acfa", text="m2", font= ("agency", 10, "bold"))
-STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2"))
+STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\git\\ms2"))
 STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 
 # Create label to display git path and status for ms1 project
@@ -360,7 +360,7 @@ BT_CLR.pack( side="bottom", anchor="n", pady=(0,25), padx=(0,0))
 
 #! Terminal & SYNC & Ruler
 def open_sync(event=None):
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\sync.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\git\\ms1\\sync.ps1"])
 
 def open_terminal(even=None):
     subprocess.Popen(["wt"])
@@ -372,10 +372,10 @@ def shortcut_TextExtract(event=None):
     pyautogui.hotkey('win', 'shift', 't')
 
 def python_regedit_run(event=None):
-    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
+    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "C:\git\\ms1\\scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
 
 def python_screenshot(event=None):
-    subprocess.Popen(["powershell", "Start", "D:\\@git\\ms1\\scripts\\screenshot.py"], shell=True)
+    subprocess.Popen(["powershell", "Start", "C:\git\\ms1\\scripts\\screenshot.py"], shell=True)
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN.pack(side="top", anchor="e", pady=(4,3),padx=(0,3))
 LB_SCRSHOT = tk.Label (BOX_ROW_MAIN, bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=0, pady=0, font=("AGENCY", 11, "bold"), text="C") ; LB_SCRSHOT.pack(side="left", anchor='e', padx=(0,3), pady=(28,0)) ; LB_SCRSHOT.bind("<Button-1>", python_screenshot)
@@ -403,10 +403,10 @@ update_time()  # Initial call to display time
 
 #! Backup & Update
 def open_backup():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\backup.ps1"], shell=True)
+    subprocess.Popen(["powershell", "start", "C:\git\\ms1\\backup.ps1"], shell=True)
     
 def open_update():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\git\\ms1\\update.ps1"],  shell=True)
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="black") ; BOX_ROW_MAIN.pack(pady=2)
 BT_BACKUP_MAIN_FRAME = tk.Button(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=12, relief="flat", highlightthickness=3, padx=5, pady=0, font=("terminess nerd font", 16, "bold"), command=open_backup, text="Backup") ; BT_BACKUP_MAIN_FRAME.pack(side="left", anchor="center", padx=(0,1), pady=0,)
@@ -435,19 +435,19 @@ MAIN_FRAME.pack(expand=True)
 #  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 def open_ffmpeg_trimm():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\trim.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\git\\ms1\\scripts\\ffmpeg\\trim.ps1"])
 
 def open_ffmpeg_convt():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\convert.ps1"])
+    subprocess.run(["powershell", "start", "C:\git\\ms1\\scripts\\ffmpeg\\convert.ps1"])
 
 def open_ffmpeg_dimns():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
+    subprocess.run(["powershell", "start", "C:\git\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
 
 def open_ffmpeg_imgdm():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
+    subprocess.run(["powershell", "start", "C:\git\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
 
 def open_ffmpeg_merge():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\merge.ps1"])
+    subprocess.run(["powershell", "start", "C:\git\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
 #! FRAME Function
 def switch_to_ffmpeg_frame():
@@ -472,13 +472,13 @@ BT_MERGE=tk.Button(FR_FFMPEG, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=
 #  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 def find_file():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\find\\find_file.ps1"])
+    subprocess.run(["powershell", "start", "C:\git\\ms1\\scripts\\find\\find_file.ps1"])
 
 def find_patt():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\find\\find_pattern.ps1"])
+    subprocess.run(["powershell", "start", "C:\git\\ms1\\scripts\\find\\find_pattern.ps1"])
 
 def find_size():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\find\\find_size.ps1"])
+    subprocess.run(["powershell", "start", "C:\git\\ms1\\scripts\\find\\find_size.ps1"])
 
 def fzf_c():
     command = 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'
@@ -801,7 +801,7 @@ def scoop_info():
 
 def scoop_install_fzf():
     # Path to the Python script generating the package list
-    python_script = r"D:\@git\ms1\scripts\scoop\package_list_from_buckets.py"
+    python_script = r"C:\git\ms1\scripts\scoop\package_list_from_buckets.py"
 
     # Run the Python script to generate the package list
     try:
@@ -811,7 +811,7 @@ def scoop_install_fzf():
         return
 
     # Path to the text file containing package list
-    package_list_file = r"D:\@git\ms1\scripts\scoop\package_list_bucket.txt"
+    package_list_file = r"C:\git\ms1\scripts\scoop\package_list_bucket.txt"
 
     # Command to read from the text file and pipe it to fzf
     command = f"type {package_list_file} | fzf --multi --preview 'scoop info {{1}}' | ForEach-Object {{ scoop install $_.split()[0] }}"

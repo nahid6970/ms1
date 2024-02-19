@@ -173,7 +173,7 @@ $car = { param ( [Windows.Controls.Button]$button ) $button.HorizontalContentAli
 
 #rgb(255, 18, 60)
 
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cls_mx_mn_bk.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cls_mx_mn_bk.ps1
 Add-Type -AssemblyName PresentationFramework
 
 $Main_Panel = New-Object Windows.Window
@@ -194,9 +194,9 @@ $mouseDown = [Windows.Input.MouseButtonEventHandler]{ param( [Object]$senderr, [
 $Main_Panel.Add_MouseLeftButtonDown($mouseDown)
 
 $Main_Panel.Content = New-Object Windows.Controls.StackPanel
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Main_Panel.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Main_Panel.ps1
 
-$backup_bt       = req ` -content "[B]ackup"          ` -styles @($ff10, $b, $fg01, $bg02, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\backup.ps1`"" }
+$backup_bt       = req ` -content "[B]ackup"          ` -styles @($ff10, $b, $fg01, $bg02, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\backup.ps1`"" }
 $FFmpeg_bt       = req ` -content "[F]Fmpeg"          ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $FFmpeg_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Find_bt         = req ` -content "[F]ind"            ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Find_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Folder_bt       = req ` -content "[F]olders"         ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Folder_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
@@ -206,7 +206,7 @@ $Rclone_bt       = req ` -content "[R]clone"          ` -styles @($ff10, $b, $fg
 $StartStop_bt    = req ` -content "[S]top [R]estart"  ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $StartStop_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Startupapps_bt  = req ` -content "[S]tartup Apps"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $StartupApps_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Tools_bt        = req ` -content "[T]ools"           ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Tools_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
-$Update_bt       = req ` -content "[U]pdate"          ` -styles @($ff10, $b, $fg01, $bg03, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\update.ps1`"" }
+$Update_bt       = req ` -content "[U]pdate"          ` -styles @($ff10, $b, $fg01, $bg03, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\update.ps1`"" }
 $Valorant_bt     = req ` -content "[V]alorant"        ` -styles @($ff10, $b, $fg01, $bg05, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Valorant_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 
 $Main_Panel.Content.Children.Add($backup_bt)
@@ -226,7 +226,7 @@ $Main_Panel.Content.Children.Add($Valorant_bt)
 
 $Tools_Panel = New-Object Windows.Controls.StackPanel
 $Tools_Panel.Margin = New-Object Windows.Thickness(0, 0, 0, 0)
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Tool_Panel.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Tool_Panel.ps1
 
 # Create WrapPanel for the first two buttons (dxdiag and systeminfo)
 $wrapPanel = New-Object Windows.Controls.WrapPanel
@@ -262,7 +262,7 @@ $Tools_Panel.Children.Add($stackPanel)
 
 $Package_Panel = New-Object Windows.Controls.StackPanel
 $Package_Panel.Margin = New-Object Windows.Thickness(0, 0, 0, 0)
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Package_Panel.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Package_Panel.ps1
 
 $scp_bckt_bt = req ` -content "Buckets Update (Scoop)"      ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w300, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -Command scoop update && Set-Location " ; $Main_Panel.Content = $Package_Panel }
 $scp_sts_bt  = req ` -content "Check Lates Version (Scoop)" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w300, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -Command scoop status && Set-Location " ; $Main_Panel.Content = $Package_Panel }
@@ -278,12 +278,12 @@ $Package_Panel.Children.Add($scp_cln_bt)
 
 $Rclone_Panel = New-Object Windows.Controls.StackPanel
 $Rclone_Panel.Margin = New-Object Windows.Thickness(0, 0, 0, 0)
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Rclone_Panel.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Rclone_Panel.ps1
 
-$sync_bt           = req ` -content "Sync"             ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
-$about_bt          = req ` -content "Storage Info"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\about.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
-$delete_trashgu_bt = req ` -content "Delete GU Trash"  ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\delete_gu.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
-$touch_bt          = req ` -content "Touch Drives"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\touch.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$sync_bt           = req ` -content "Sync"             ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$about_bt          = req ` -content "Storage Info"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\about.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$delete_trashgu_bt = req ` -content "Delete GU Trash"  ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\delete_gu.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$touch_bt          = req ` -content "Touch Drives"     ` -styles @($ff10, $b, $fg00, $bg06, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\touch.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 
 $Rclone_Panel.Children.Add($sync_bt)
 $Rclone_Panel.Children.Add($about_bt)
@@ -304,7 +304,7 @@ $Health_UpperPart.HorizontalAlignment = [Windows.HorizontalAlignment]::Right
 #$Health_UpperPart.VerticalAlignment = [Windows.VerticalAlignment]::Center
 
 # Create buttons for the top wrap panel
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Health_Grid.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Health_Grid.ps1
 
 # Create WrapPanel for buttons at the bottom
 $Health_LowerPart = New-Object Windows.Controls.WrapPanel
@@ -409,13 +409,13 @@ $Health_Grid.Children.Add($Health_LowerPart)
 
 $FFmpeg_Panel = New-Object Windows.Controls.StackPanel
 $FFmpeg_Panel.Margin = New-Object Windows.Thickness 0
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\FFmpeg_Panel.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\FFmpeg_Panel.ps1
 
-$trim_bt      =  req ` -content "Trim"            ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\trim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$convert_bt   =  req ` -content "Convert Video"   ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\convert.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$dimension_bt =  req ` -content "Video Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$imgdim_bt    =  req ` -content "Image Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$merge_bt     =  req ` -content "Merge Videos"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\merge.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$trim_bt      =  req ` -content "Trim"            ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\trim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$convert_bt   =  req ` -content "Convert Video"   ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\convert.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$dimension_bt =  req ` -content "Video Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$imgdim_bt    =  req ` -content "Image Dimension" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$merge_bt     =  req ` -content "Merge Videos"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\merge.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 
 $FFmpeg_Panel.Children.Add($convert_bt)
 $FFmpeg_Panel.Children.Add($dimension_bt)
@@ -427,11 +427,11 @@ $FFmpeg_Panel.Children.Add($trim_bt)
 
 $Find_Panel = New-Object Windows.Controls.StackPanel
 $Find_Panel.Margin = New-Object Windows.Thickness 0
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Find_Panel.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Find_Panel.ps1
 
-$find_file_bt    = req ` -content "Find File"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\find\find_file.ps1`"" ; $Main_Panel.Content = $Find_Panel }
-$find_size_bt    = req ` -content "Find Size"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\find\find_size.ps1`"" ; $Main_Panel.Content = $Find_Panel }
-$find_pattern_bt = req ` -content "Find Pattern" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\find\find_pattern.ps1`"" ; $Main_Panel.Content = $Find_Panel }
+$find_file_bt    = req ` -content "Find File"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\find\find_file.ps1`"" ; $Main_Panel.Content = $Find_Panel }
+$find_size_bt    = req ` -content "Find Size"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\find\find_size.ps1`"" ; $Main_Panel.Content = $Find_Panel }
+$find_pattern_bt = req ` -content "Find Pattern" ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\find\find_pattern.ps1`"" ; $Main_Panel.Content = $Find_Panel }
 
 $Find_Panel.Children.Add($find_file_bt)
 $Find_Panel.Children.Add($find_size_bt)
@@ -441,11 +441,11 @@ $Find_Panel.Children.Add($find_pattern_bt)
 
 $Folder_Panel = New-Object Windows.Controls.stackPanel      #WrapPanel
 $Folder_Panel.Margin = New-Object Windows.Thickness 0
-Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Folder_Panel.ps1
+Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\Folder_Panel.ps1
 
 $appdata_bt     = req ` -content "AppData"        ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { start-Process "C:\Users\nahid\AppData" ; $Main_Panel.Content = $Folder_Panel }
 $apps_bt        = req ` -content "All Apps"       ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { start-Process "shell:appsfolder" ; $Main_Panel.Content = $Folder_Panel }
-$git_bt         = req ` -content "Git Projects"   ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { start-Process "D:\@git" ; $Main_Panel.Content = $Folder_Panel }
+$git_bt         = req ` -content "Git Projects"   ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { start-Process "C:\git" ; $Main_Panel.Content = $Folder_Panel }
 $Packages_bt    = req ` -content "Packages"       ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { start-Process "C:\Users\nahid\AppData\Local\Packages" ; $Main_Panel.Content = $Folder_Panel }
 $scoop_bt       = req ` -content "Scoop"          ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { start-Process C:\Users\nahid\scoop ; $Main_Panel.Content = $Folder_Panel }
 $sftr_bt        = req ` -content "Software"       ` -styles @($ff10, $b, $fg00, $bg04, $fz16, $w250, $h040) ` -onClick { start-Process "D:\software" ; $Main_Panel.Content = $Folder_Panel }

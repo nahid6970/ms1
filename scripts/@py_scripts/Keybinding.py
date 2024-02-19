@@ -4,7 +4,7 @@ def search_and_display():
     search_term = search_entry.get()
     if search_term:
         try:
-            with open("D:\\@git\\ms1\\asset\\keybindings.txt", "r+", encoding="utf-8") as file:
+            with open("C:\git\\ms1\\asset\\keybindings.txt", "r+", encoding="utf-8") as file:
                 clear_output()
                 lines = file.readlines()
                 output_text.delete("1.0", tk.END)  # Clear the existing content
@@ -19,7 +19,7 @@ def clear_output():
 
 def save_changes():
     try:
-        with open("D:\\@git\\ms1\\asset\\keybindings.txt", "r+", encoding="utf-8") as file:
+        with open("C:\git\\ms1\\asset\\keybindings.txt", "r+", encoding="utf-8") as file:
             lines = file.readlines()
             file.seek(0)
             for line in lines:

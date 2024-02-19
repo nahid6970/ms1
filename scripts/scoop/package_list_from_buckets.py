@@ -10,7 +10,7 @@ folders = [
 ]
 
 # Set the output text file
-output_file = "D:\\@git\\ms1\\scripts\\scoop\\package_list_bucket.txt"
+output_file = "C:\git\\ms1\\scripts\\scoop\\package_list_bucket.txt"
 
 # Function to list packages from a folder
 def list_packages(folder):
