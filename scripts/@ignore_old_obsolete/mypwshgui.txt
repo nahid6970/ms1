@@ -1,10 +1,10 @@
 $StartupApps_Panel = New-Object Windows.Controls.StackPanel
-Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs_mx_mm_bk\StartupApps_Panel.ps1
+Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs_mx_mm_bk\StartupApps_Panel.ps1
 
-Import-Module C:\git\ms1\scripts\@pwsggui\startup\AHKScript.ps1
-Import-Module C:\git\ms1\scripts\@pwsggui\startup\Ditto.ps1
-Import-Module C:\git\ms1\scripts\@pwsggui\startup\FDM.ps1
-Import-Module C:\git\ms1\scripts\@pwsggui\startup\Jackett.ps1
-Import-Module C:\git\ms1\scripts\@pwsggui\startup\keypirinha.ps1
-Import-Module C:\git\ms1\scripts\@pwsggui\startup\Powertoys.ps1
-Import-Module C:\git\ms1\scripts\@pwsggui\startup\startup_pwsh.ps1
+Import-Module D:\@git\ms1\scripts\@pwsggui\startup\AHKScript.ps1
+Import-Module D:\@git\ms1\scripts\@pwsggui\startup\Ditto.ps1
+Import-Module D:\@git\ms1\scripts\@pwsggui\startup\FDM.ps1
+Import-Module D:\@git\ms1\scripts\@pwsggui\startup\Jackett.ps1
+Import-Module D:\@git\ms1\scripts\@pwsggui\startup\keypirinha.ps1
+Import-Module D:\@git\ms1\scripts\@pwsggui\startup\Powertoys.ps1
+Import-Module D:\@git\ms1\scripts\@pwsggui\startup\startup_pwsh.ps1

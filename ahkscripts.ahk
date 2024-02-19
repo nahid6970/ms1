@@ -39,13 +39,13 @@
 ; }
 ; else
 ; {
-; Run, "C:\git\ms1\mypygui.py"
+; Run, "D:\@git\ms1\mypygui.py"
 ; }
 ; return
 
 ; ;!alt2 🎯 Launch My PYGui
 #x:: 
-Run, "C:\git\ms1\mypygui.py"
+Run, "D:\@git\ms1\mypygui.py"
 return
 
 ; ;!alt3 🎯 Launch My PYGui
@@ -59,7 +59,7 @@ return
 ;         Process, Close, %pid%
 ; }
 ; ; Run My PYGui script
-; Run, "C:\git\ms1\mypygui.py"
+; Run, "D:\@git\ms1\mypygui.py"
 ; return
 
 
@@ -73,7 +73,7 @@ return
 ; }
 ; else
 ; {
-; Run, "C:\git\ms1\scripts\mypwshgui.ps1"
+; Run, "D:\@git\ms1\scripts\mypwshgui.ps1"
 ; }
 ; return
 
@@ -88,7 +88,7 @@ IfWinExist, ahk_exe pwsh.exe
 else
 {
     ; If pwsh window does not exist, run the pwsh script
-    Run, pwsh.exe -File "C:\git\ms1\scripts\mypwshgui.ps1"
+    Run, pwsh.exe -File "D:\@git\ms1\scripts\mypwshgui.ps1"
 }
 return
 
@@ -97,7 +97,7 @@ return
 
 
 #v:: ; Win + V
-Run, C:\git\ms1\scripts\valorant\valo.ahk
+Run, D:\@git\ms1\scripts\valorant\valo.ahk
 return
 
 
@@ -148,7 +148,7 @@ return
 
 ; 🎯 Close All And Reload Main Ahk Script
 ::cc-close::
-Run, "C:\git\ms1\scripts\ahkcloseopen.py"
+Run, "D:\@git\ms1\scripts\ahkcloseopen.py"
 return    
 
 

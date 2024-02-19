@@ -1,4 +1,4 @@
-Import-Module -Name C:\git\ms1\scripts\@pwsggui\cs.ps1
+Import-Module -Name D:\@git\ms1\scripts\@pwsggui\cs.ps1
 
 Add-Type -AssemblyName PresentationFramework
 
@@ -28,8 +28,8 @@ $FFmpeg_bt = & $cs1 -content "FFmpeg 📺" -onClick({ $Prev_Content = $Main_Pane
 $Find_bt = & $cs1 -content "Find 🔎" -onClick({ $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Find_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content })
 $Folder_bt = & $fldr -content "Folders 📂" -onClick({ $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Folder_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content })
 $Valorant_bt = & $vlr -content "Valorant 🎮" -onClick({ $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Valorant_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content })
-$backup_bt = & $bkup -content "Backup 🔃" -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\backup.ps1`"" }
-$Update_bt = & $updt -content "Update 👍🏻" -onClick({ Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\update.ps1`"" })
+$backup_bt = & $bkup -content "Backup 🔃" -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\backup.ps1`"" }
+$Update_bt = & $updt -content "Update 👍🏻" -onClick({ Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\update.ps1`"" })
 
 $Main_Panel.Content.Children.Add($close_bt)
 $Main_Panel.Content.Children.Add($maximize_bt)
@@ -92,10 +92,10 @@ $Rclone_Panel.Children.Add($maximize_bt)
 $Rclone_Panel.Children.Add($minimize_bt)
 $Rclone_Panel.Children.Add($BackToMain_bt)
 
-$sync_bt = & $cs2 -content "Sync" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
-$about_bt = & $cs2 -content "Storage Info" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\about.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
-$delete_trashgu_bt = & $cs2 -content "Delete GU Trash" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\delete_gu.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
-$touch_bt = & $cs2 -content "Touch Drives" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\rclone\touch.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$sync_bt = & $cs2 -content "Sync" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\sync.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$about_bt = & $cs2 -content "Storage Info" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\about.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$delete_trashgu_bt = & $cs2 -content "Delete GU Trash" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\delete_gu.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
+$touch_bt = & $cs2 -content "Touch Drives" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\rclone\touch.ps1`"" ; $Main_Panel.Content = $Rclone_Panel  }
 
 $Rclone_Panel.Children.Add($sync_bt)
 $Rclone_Panel.Children.Add($about_bt)
@@ -239,11 +239,11 @@ $FFmpeg_Panel.Children.Add($maximize_bt)
 $FFmpeg_Panel.Children.Add($minimize_bt)
 $FFmpeg_Panel.Children.Add($BackToMain_bt)
 
-$trim_bt = & $cs2 -content "Trim" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\trim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$convert_bt = & $cs2 -content "Convert Video" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\convert.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$dimension_bt = & $cs2 -content "Video Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$imgdim_bt = & $cs2 -content "Image Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
-$merge_bt = & $cs2 -content "Merge Videos" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\ffmpeg\merge.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$trim_bt = & $cs2 -content "Trim" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\trim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$convert_bt = & $cs2 -content "Convert Video" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\convert.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$dimension_bt = & $cs2 -content "Video Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\dimension.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$imgdim_bt = & $cs2 -content "Image Dimension" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\imgdim.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
+$merge_bt = & $cs2 -content "Merge Videos" -onClick {  Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\ffmpeg\merge.ps1`"" ; $Main_Panel.Content = $FFmpeg_Panel  }
 
 $FFmpeg_Panel.Children.Add($convert_bt)
 $FFmpeg_Panel.Children.Add($dimension_bt)
@@ -268,9 +268,9 @@ $Find_Panel.Children.Add($maximize_bt)
 $Find_Panel.Children.Add($minimize_bt)
 $Find_Panel.Children.Add($BackToMain_bt)
 
-$find_file_bt = & $cs2 -content "Find File" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\find\find_file.ps1`"" ; $Main_Panel.Content = $Find_Panel }
-$find_size_bt = & $cs2 -content "Find Size" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\find\find_size.ps1`"" ; $Main_Panel.Content = $Find_Panel }
-$find_pattern_bt = & $cs2 -content "Find Pattern" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\find\find_pattern.ps1`"" ; $Main_Panel.Content = $Find_Panel }
+$find_file_bt = & $cs2 -content "Find File" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\find\find_file.ps1`"" ; $Main_Panel.Content = $Find_Panel }
+$find_size_bt = & $cs2 -content "Find Size" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\find\find_size.ps1`"" ; $Main_Panel.Content = $Find_Panel }
+$find_pattern_bt = & $cs2 -content "Find Pattern" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\find\find_pattern.ps1`"" ; $Main_Panel.Content = $Find_Panel }
 
 $Find_Panel.Children.Add($find_file_bt)
 $Find_Panel.Children.Add($find_size_bt)
@@ -303,7 +303,7 @@ $temp1_bt = & $fldr -content "TempAppDate 🗑️" -onClick  { start-Process "C:
 $temp2_bt = & $fldr -content "TempWindows 🗑️" -onClick  { start-Process "C:\Windows\Temp" ; $Main_Panel.Content = $Folder_Panel }
 $song_bt = & $fldr -content "Song 🎶" -onClick  { start-Process "D:\song" ; $Main_Panel.Content = $Folder_Panel }
 $sftr_bt = & $fldr -content "Software 🍎" -onClick  { start-Process "D:\software" ; $Main_Panel.Content = $Folder_Panel }
-$git_bt = & $fldr -content "Git Projects" -onClick  { start-Process "C:\git" ; $Main_Panel.Content = $Folder_Panel }
+$git_bt = & $fldr -content "Git Projects" -onClick  { start-Process "D:\@git" ; $Main_Panel.Content = $Folder_Panel }
 
 $Folder_Panel.Children.Add($appdata_bt)
 $Folder_Panel.Children.Add($apps_bt)
@@ -334,8 +334,8 @@ $Valorant_Panel.Children.Add($maximize_bt)
 $Valorant_Panel.Children.Add($minimize_bt)
 $Valorant_Panel.Children.Add($BackToMain_bt)
 
-$valo_ahk_bt = & $vlr -content "Valorant-AHK" -onClick { C:\git\ms1\scripts\valorant\valo.ahk; $Main_Panel.Content = $Valorant_Panel}
-$valorant_qbit_bt = & $vlr -content "Valorant + Qbit" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\git\ms1\scripts\valorant\valo_qbit.ps1`"" ; $Main_Panel.Content = $Valorant_Panel }
+$valo_ahk_bt = & $vlr -content "Valorant-AHK" -onClick { D:\@git\ms1\scripts\valorant\valo.ahk; $Main_Panel.Content = $Valorant_Panel}
+$valorant_qbit_bt = & $vlr -content "Valorant + Qbit" -onClick  { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"D:\@git\ms1\scripts\valorant\valo_qbit.ps1`"" ; $Main_Panel.Content = $Valorant_Panel }
 
 $Valorant_Panel.Children.Add($valo_ahk_bt)
 $Valorant_Panel.Children.Add($valorant_qbit_bt)

@@ -2,7 +2,7 @@
 $sourceFolderPath = "C:\Users\nahid\scoop\apps\"
 
 # Specify the destination text file path
-$destinationFilePath = "C:\git\ms1\asset\installedApps\scoop_apps.txt"
+$destinationFilePath = "D:\@git\ms1\asset\installedApps\scoop_apps.txt"
 
 # Get the list of folder names in the source folder, excluding "scoop"
 $folderNames = Get-ChildItem -Path $sourceFolderPath -Directory | Where-Object { $_.Name -ne 'scoop' } | Select-Object -ExpandProperty Name

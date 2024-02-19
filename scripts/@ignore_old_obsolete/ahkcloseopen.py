@@ -2,7 +2,7 @@ import os
 import psutil
 
 # Specify the path to the AHK script file
-ahk_script_path = r"C:\git\ms1\scripts\ahkscripts.ahk"
+ahk_script_path = r"D:\@git\ms1\scripts\ahkscripts.ahk"
 
 # Find and terminate the "AutoHotkeyU64" process
 for process in psutil.process_iter(['pid', 'name']):

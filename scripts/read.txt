@@ -5,4 +5,4 @@ function su {scoop update}
 function sua {scoop update *}
 function scc {scoop cleanup *}
 function wu {winget upgrade --all --include-unknown}
-function valoqbit {C:\git\ms1\scripts\valo.qbit.ps1}
+function valoqbit {D:\@git\ms1\scripts\valo.qbit.ps1}
