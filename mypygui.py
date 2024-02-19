@@ -372,7 +372,7 @@ def update_status():
         # Update the status every second
         time.sleep(1)
 def extra_bar(event=None):
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\@py_scripts\\bar_1.py"], shell=True)
+    subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\@py_scripts\\bar_1.py", "-WindowStyle", "Hidden"])
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3),padx=(5,3))
 
