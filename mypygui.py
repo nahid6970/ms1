@@ -527,7 +527,7 @@ def update_last_backup_click_time():
         days = time_diff.days
         hours, remainder = divmod(time_diff.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
-        BACKUP_BT.config(text=f"Backup ({days} days, {hours} hours, {minutes} minutes)")
+        BACKUP_BT.config(text=f"Backup ({days}d {hours}h {minutes}m)")
         # Write last click time to log file
         with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\backup_bt.log", "w") as log_file:
             log_file.write(last_backup_click_time.isoformat())
@@ -568,7 +568,7 @@ def update_last_update_click_time():
         days = time_diff.days
         hours, remainder = divmod(time_diff.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
-        UPDATE_BT.config(text=f"Update ({days} days, {hours} hours, {minutes} minutes)")
+        UPDATE_BT.config(text=f"Update ({days}d {hours}h {minutes}m)")
         # Write last click time to log file
         with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\update_bt.log", "w") as log_file:
             log_file.write(last_update_click_time.isoformat())
