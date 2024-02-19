@@ -382,7 +382,7 @@ LB_XXX.pack(side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Bu
 LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#3bda00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="■", font=("calibri", 10, "bold" ))
 LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold"  ))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="◀", font=("ink free", 10, "bold"))
-LB_E = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="1", font=("ink free", 10, "bold"))
+LB_E = tk.Label(BOX_ROW_ROOT, bg="#f6d24a", fg="#000000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="1", font=("ink free", 10, "bold"))
 LB_M.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
