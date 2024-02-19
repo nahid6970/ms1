@@ -1,5 +1,4 @@
 import tkinter as tk
-from datetime import datetime
 import subprocess
 import pyautogui
 import ctypes
