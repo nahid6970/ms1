@@ -562,7 +562,7 @@ update_last_backup_click_time()
 last_update_click_time = None
 def open_update(event=None):
     global last_update_click_time
-    last_update_click_time = datetime.now() if last_update_click_time is None else last_update_click_time
+    last_update_click_time = datetime.now()
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"], shell=True)
     update_last_update_click_time()
 def update_last_update_click_time():
@@ -588,16 +588,15 @@ def load_last_update_click_time():
     except FileNotFoundError:
         pass
 # Create a frame to hold the button
-ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#0047ab")
-ROOT_ROW_BOX.pack(side="top", fill="x")
+ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#0047ab") ; ROOT_ROW_BOX.pack(side="top", fill="x")
 # Create the update button
 UPDATE_BT = tk.Label(ROOT_ROW_BOX, bg="#0047ab", fg="#ffffff", height=1, width="0", relief="flat", highlightthickness=1, highlightbackground="#0047ab", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Update")
 UPDATE_BT.pack(side="top", padx=(0, 0), pady=0)
 UPDATE_BT.bind("<Button-1>", open_update)
 # Load last update click time from log file
-load_last_update_click_time()
 # Update the last update click time periodically
 update_last_update_click_time()
+load_last_update_click_time()
 
 #! Drive size analyze using rclone
 def c_size(event=None):
