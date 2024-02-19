@@ -562,9 +562,10 @@ update_last_backup_click_time()
 last_update_click_time = None
 def open_update(event=None):
     global last_update_click_time
-    last_update_click_time = datetime.now() if last_update_click_time is None else last_update_click_time
+    last_update_click_time = datetime.now()
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"], shell=True)
     update_last_update_click_time()
+
 def update_last_update_click_time():
     global last_update_click_time
     if last_update_click_time:
