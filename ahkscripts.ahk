@@ -44,23 +44,23 @@
 ; return
 
 ; ;!alt2 🎯 Launch My PYGui
-; #x:: 
-; Run, "C:\git\ms1\mypygui.py"
-; return
-
-; ;!alt3 🎯 Launch My PYGui
 #x:: 
-IfWinExist, ahk_exe python.exe
-{
-    ; If Python is running, find its process ID (PID)
-    WinGet, pid, PID, ahk_exe python.exe
-    ; If PID is found, terminate the process
-    if (pid)
-        Process, Close, %pid%
-}
-; Run My PYGui script
 Run, "C:\git\ms1\mypygui.py"
 return
+
+; ;!alt3 🎯 Launch My PYGui
+; #x:: 
+; IfWinExist, ahk_exe python.exe
+; {
+;     ; If Python is running, find its process ID (PID)
+;     WinGet, pid, PID, ahk_exe python.exe
+;     ; If PID is found, terminate the process
+;     if (pid)
+;         Process, Close, %pid%
+; }
+; ; Run My PYGui script
+; Run, "C:\git\ms1\mypygui.py"
+; return
 
 
 
