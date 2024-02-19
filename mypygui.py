@@ -371,7 +371,8 @@ def update_status():
         check_git_status("D:\\@git\\ms2", STATUS_MS2)
         # Update the status every second
         time.sleep(1)
-
+def extra_bar(event=None):
+    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\OneDrive\\Desktop\\test.py"], shell=True)
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3),padx=(5,3))
 
@@ -381,9 +382,12 @@ LB_XXX.pack(side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Bu
 LB_M = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#3bda00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="■", font=("calibri", 10, "bold" ))
 LB_L = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="▼", font=("AGENCY", 10, "bold"  ))
 LB_S = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=1, pady=0, text="◀", font=("ink free", 10, "bold"))
+LB_E = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFF", padx=0, pady=0, text="1", font=("ink free", 8, "bold"))
 LB_M.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.pack(side="right", anchor="e", padx=(0,3), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
+LB_E.pack(side="right", anchor="e", padx=(0,0), pady=(0,0)) ; LB_E.bind("<Button-1>", lambda event: extra_bar())
+
 
 STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
 STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
