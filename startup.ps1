@@ -32,7 +32,7 @@ function valo_qbit             { Start-Process "D:\@git\ms1\scripts\valorant\val
 # rssowl
 bazarr
 # capture2text
-flaresolver
+# flaresolver
 powertoys
 prowlarr
 radarr
