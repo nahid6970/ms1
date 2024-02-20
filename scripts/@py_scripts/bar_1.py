@@ -2,7 +2,6 @@ import tkinter as tk
 from datetime import datetime
 import subprocess
 import pyautogui
-# import ctypes
 
 def rclone_sync(event=None):
     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\sync.ps1"])
@@ -17,7 +16,6 @@ def powertoys_TextExtract(event=None):
     pyautogui.hotkey('win', 'shift', 't')
 
 def capture2text(event=None):
-    # Define the capture2text function with a delay
     ROOT.after(3000, pyautogui.hotkey, 'win', 'ctrl', 'alt', 'shift', 'q')
 
 def powertoys_mouse_crosshair(event=None):
@@ -25,10 +23,6 @@ def powertoys_mouse_crosshair(event=None):
 
 def stop_wsa(event=None):
     subprocess.Popen(["powershell", "Stop-Process -Name WsaClient -Force"])
-
-
-# def set_console_title(title):
-#     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
 def close_window(event=None):
     ROOT.destroy()
@@ -48,13 +42,10 @@ def on_click(label, initial_color, command):
 def on_release(label, release_color):
     label.config(bg=release_color)
 
-
-#! set_console_title("1")
-# Create the main Tkinter window
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
-ROOT.attributes('-topmost', True)  # Set always on top
-ROOT.overrideredirect(True)  # Remove default borders
+ROOT.attributes('-topmost', True) 
+ROOT.overrideredirect(True)
 ROOT.configure(bg="#282c34")
 
 def create_custom_border(parent):
@@ -64,45 +55,31 @@ def create_custom_border(parent):
 
 BORDER_FRAME = create_custom_border(ROOT)
 
-# Calculate the screen width and height
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = 0
 y = screen_height - 308
 
-ROOT.geometry(f"40x260+{x}+{y}")  # Overall size of the window
+ROOT.geometry(f"40x260+{x}+{y}")  
 
-# Create a frame for the buttons
 button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
 button_frame.pack(side="top", padx=1, pady=10, fill="both")
 
+button_properties = [
+("❌",  close_window             ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
+("📏",  powertoys_ruler          ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
+("🐭",  powertoys_mouse_crosshair,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
+("📝",  powertoys_TextExtract    ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
+("📝",  capture2text             ,"#1d2027", "#db1725", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
+("♾️",  rclone_sync              ,"#1d2027", "#3bda00", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
+("💻",  windows_terminal         ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
+("📵",  stop_wsa                 ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0))
+]
 
-# Define button texts, commands, background colors, and foreground colors
-button_texts          = ["❌"         ,"📏"           ,"🖱"                     ,"📝"                 ,"📝"        ,"♾️"       ,"💻"            ,"W"  ]
-button_commands       = [close_window,powertoys_ruler,powertoys_mouse_crosshair,powertoys_TextExtract,capture2text,rclone_sync,windows_terminal,stop_wsa ]
-bg_colors             = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ,"#1d2027"]
-fg_colors             = ["#FF0000"   ,"#FFFFFF"      ,"#FFFFFF"                ,"#FFFFFF"            ,"#db1725"   ,"#3bda00"  ,"#FFFFFF"       ,"#FF0000"]
-initial_colors        = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ,"#1d2027"]
-release_colors        = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ,"#1d2027"]
-anchors               = ["center"    ,"center"       ,"center"                 ,"center"             ,"center"    ,"center"   ,"center"        ,"center" ]
-sides                 = ["top"       ,"top"          ,"top"                    ,"top"                ,"top"       ,"top"      ,"top"           ,"top"    ]
-widths                = [10          ,10             ,10                       ,10                   ,10          ,10         ,10              ,10       ]
-heights               = [1           ,1              ,1                        ,1                    ,1           ,1          ,1               ,1        ]
-reliefs               = ["flat"      ,"flat"         ,"flat"                   ,"flat"               ,"flat"      ,"flat"     ,"flat"          ,"flat"   ]
-highlight_colors      = ["#FFFFFF"   ,"#FFFFFF"      ,"#FFFFFF"                ,"#FFFFFF"            ,"#FFFFFF"   ,"#FFFFFF"  ,"#FFFFFF"       ,"#FFFFFF"]
-highlight_thicknesses = [0           ,0              ,0                        ,0                    ,0           ,0          ,0               ,0        ]
-
-
-
-padx_values           = [(0, 0),     (0, 0),           (0, 0),                   (0, 0),                 (0, 0),       (0, 0),      (0, 0),  (0, 0)]
-pady_values           = [(0, 0),     (0, 0),           (0, 0),                   (0, 0),                 (0, 0),       (0, 0),      (0, 0),  (0, 0)]
-font_styles           = [("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16)]
-
-# Create individual labels
 labels = []
-for text, command, bg_color, fg_color, initial_color, release_color, anchor, side, width, height, font_style, relief, highlight_color, highlight_thickness, padx_val, pady_val in zip(button_texts, button_commands, bg_colors, fg_colors, initial_colors, release_colors, anchors, sides, widths, heights, font_styles, reliefs, highlight_colors, highlight_thicknesses, padx_values, pady_values):
-    label = create_label(text, command, bg_color, fg_color, initial_color, release_color, anchor, side, width, height, font_style, relief, highlight_color, highlight_thickness, padx_val, pady_val)
+for props in button_properties:
+    label = create_label(*props)
     labels.append(label)
 
 ROOT.mainloop()
