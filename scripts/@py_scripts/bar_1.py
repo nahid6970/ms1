@@ -67,7 +67,7 @@ screen_height = ROOT.winfo_screenheight()
 x = 0
 y = screen_height - 288
 
-ROOT.geometry(f"50x240+{x}+{y}")  # Overall size of the window
+ROOT.geometry(f"40x240+{x}+{y}")  # Overall size of the window
 
 # Create a frame for the buttons
 button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
