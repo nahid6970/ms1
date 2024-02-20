@@ -1085,6 +1085,7 @@ nirlauncher
 nmkoder
 node-compiler
 nohboard
+noi
 nomacs
 nordpass
 nosleep
@@ -1511,6 +1512,7 @@ so
 soapui
 solvespace
 sonic-pi
+sonic-visualiser
 sonixd
 sophiapp
 sorayomi
@@ -2805,6 +2807,7 @@ ouch
 outwit
 ov
 oxipng
+oxlint
 p4
 pack
 packer
@@ -3925,6 +3928,8 @@ openrgb-nightly
 openscad-dev
 openssh-msys
 openssl-light
+openssl-lts-light
+openssl-lts
 openssl1-light
 openssl1
 openvpn-w7
