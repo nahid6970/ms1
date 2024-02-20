@@ -23,6 +23,10 @@ def capture2text(event=None):
 def powertoys_mouse_crosshair(event=None):
     pyautogui.hotkey('win', 'alt', 'p')
 
+def stop_wsa(event=None):
+    subprocess.Popen(["powershell", "Stop-Process -Name WsaClient -Force"])
+
+
 # def set_console_title(title):
 #     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
@@ -65,9 +69,9 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = 0
-y = screen_height - 288
+y = screen_height - 308
 
-ROOT.geometry(f"40x240+{x}+{y}")  # Overall size of the window
+ROOT.geometry(f"40x260+{x}+{y}")  # Overall size of the window
 
 # Create a frame for the buttons
 button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
@@ -75,22 +79,25 @@ button_frame.pack(side="top", padx=1, pady=10, fill="both")
 
 
 # Define button texts, commands, background colors, and foreground colors
-button_texts          = ["❌"        ,"📏"         ,"🖱"                   ,"📝"               ,"📝"      ,"♾️"     ,"💻"          ]
-button_commands       = [close_window,powertoys_ruler,powertoys_mouse_crosshair,powertoys_TextExtract,capture2text,rclone_sync,windows_terminal]
-bg_colors             = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ]
-fg_colors             = ["#FF0000"   ,"#FFFFFF"      ,"#FFFFFF"                ,"#FFFFFF"            ,"#db1725"   ,"#3bda00"  ,"#FFFFFF"       ]
-initial_colors        = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ]
-release_colors        = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ]
-anchors               = ["center"    ,"center"       ,"center"                 ,"center"             ,"center"    ,"center"   ,"center"        ]
-sides                 = ["top"       ,"top"          ,"top"                    ,"top"                ,"top"       ,"top"      ,"top"           ]
-widths                = [10          ,10             ,10                       ,10                   ,10          ,10         ,10              ]
-heights               = [1           ,1              ,1                        ,1                    ,1           ,1          ,1               ]
-reliefs               = ["flat"      ,"flat"         ,"flat"                   ,"flat"               ,"flat"      ,"flat"     ,"flat"          ]
-highlight_colors      = ["#FFFFFF"   ,"#FFFFFF"      ,"#FFFFFF"                ,"#FFFFFF"            ,"#FFFFFF"   ,"#FFFFFF"  ,"#FFFFFF"       ]
-highlight_thicknesses = [0           ,0              ,0                        ,0                    ,0           ,0          ,0               ]
-padx_values           = [(0, 0),     (0, 0),           (0, 0),                   (0, 0),                 (0, 0),       (0, 0),      (0, 0)]
-pady_values           = [(0, 0),     (0, 0),           (0, 0),                   (0, 0),                 (0, 0),       (0, 0),      (0, 0)]
-font_styles           = [("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16)]
+button_texts          = ["❌"         ,"📏"           ,"🖱"                     ,"📝"                 ,"📝"        ,"♾️"       ,"💻"            ,"W"  ]
+button_commands       = [close_window,powertoys_ruler,powertoys_mouse_crosshair,powertoys_TextExtract,capture2text,rclone_sync,windows_terminal,stop_wsa ]
+bg_colors             = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ,"#1d2027"]
+fg_colors             = ["#FF0000"   ,"#FFFFFF"      ,"#FFFFFF"                ,"#FFFFFF"            ,"#db1725"   ,"#3bda00"  ,"#FFFFFF"       ,"#FF0000"]
+initial_colors        = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ,"#1d2027"]
+release_colors        = ["#1d2027"   ,"#1d2027"      ,"#1d2027"                ,"#1d2027"            ,"#1d2027"   ,"#1d2027"  ,"#1d2027"       ,"#1d2027"]
+anchors               = ["center"    ,"center"       ,"center"                 ,"center"             ,"center"    ,"center"   ,"center"        ,"center" ]
+sides                 = ["top"       ,"top"          ,"top"                    ,"top"                ,"top"       ,"top"      ,"top"           ,"top"    ]
+widths                = [10          ,10             ,10                       ,10                   ,10          ,10         ,10              ,10       ]
+heights               = [1           ,1              ,1                        ,1                    ,1           ,1          ,1               ,1        ]
+reliefs               = ["flat"      ,"flat"         ,"flat"                   ,"flat"               ,"flat"      ,"flat"     ,"flat"          ,"flat"   ]
+highlight_colors      = ["#FFFFFF"   ,"#FFFFFF"      ,"#FFFFFF"                ,"#FFFFFF"            ,"#FFFFFF"   ,"#FFFFFF"  ,"#FFFFFF"       ,"#FFFFFF"]
+highlight_thicknesses = [0           ,0              ,0                        ,0                    ,0           ,0          ,0               ,0        ]
+
+
+
+padx_values           = [(0, 0),     (0, 0),           (0, 0),                   (0, 0),                 (0, 0),       (0, 0),      (0, 0),  (0, 0)]
+pady_values           = [(0, 0),     (0, 0),           (0, 0),                   (0, 0),                 (0, 0),       (0, 0),      (0, 0),  (0, 0)]
+font_styles           = [("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16), ("Arial", 16)]
 
 # Create individual labels
 labels = []
