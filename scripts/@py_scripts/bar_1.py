@@ -16,6 +16,10 @@ def powertoys_ruler(event=None):
 def powertoys_TextExtract(event=None):
     pyautogui.hotkey('win', 'shift', 't')
 
+def capture2text(event=None):
+    # Define the capture2text function with a delay
+    ROOT.after(3000, pyautogui.hotkey, 'win', 'ctrl', 'alt', 'shift', 'q')
+
 def powertoys_mouse_crosshair(event=None):
     pyautogui.hotkey('win', 'alt', 'p')
 
@@ -36,7 +40,6 @@ set_console_title("1")
 # Create the main Tkinter window
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
-ROOT.geometry("50x130")
 ROOT.attributes('-topmost', True)  # Set always on top
 ROOT.overrideredirect(True)  # Remove default borders
 ROOT.configure(bg="#282c34")
@@ -53,19 +56,19 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = 0
-y = screen_height - 178
+y = screen_height - 218
 
-ROOT.geometry(f"50x130+{x}+{y}")  # Overall size of the window
+ROOT.geometry(f"50x170+{x}+{y}")  # Overall size of the window
 
 # Create a frame for the buttons
 button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
 button_frame.pack(side="top", padx=1, pady=10, fill="both")
 
 # Define button texts, commands, background colors, and foreground colors
-button_texts = ["❌", "📏", "🖱", "📝", "♾️", "💻"]
-button_commands = [close_window, powertoys_ruler, powertoys_mouse_crosshair, powertoys_TextExtract, rclone_sync, windows_terminal]
-bg_colors = ["#1d2027", "#1d2027", "#1d2027", "#1d2027", "#1d2027", "#1d2027"]
-fg_colors = ["#FF0000", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#3bda00", "#FFFFFF"]
+button_texts = ["❌", "📏", "🖱", "📝", "📝", "♾️", "💻"]
+button_commands = [close_window, powertoys_ruler, powertoys_mouse_crosshair, powertoys_TextExtract, capture2text, rclone_sync, windows_terminal]
+bg_colors = ["#1d2027", "#1d2027", "#1d2027", "#1d2027", "#1d2027", "#1d2027", "#1d2027"]
+fg_colors = ["#FF0000", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#db1725", "#3bda00", "#FFFFFF"]
 
 # Create individual buttons
 for text, command, bg_color, fg_color in zip(button_texts, button_commands, bg_colors, fg_colors):
