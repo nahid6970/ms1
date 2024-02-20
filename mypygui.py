@@ -663,7 +663,7 @@ MAIN_FRAME.pack(expand=True)
 #*  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 def open_ffmpeg_trimm():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\trim.ps1"])
+    subprocess.Popen(["alacritty.exe", "-e", "powershell", "D:\\@git\\ms1\\scripts\\ffmpeg\\trim.ps1"])
 
 def open_ffmpeg_convt():
     subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\convert.ps1"])
