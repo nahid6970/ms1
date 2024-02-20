@@ -112,7 +112,7 @@ set_console_title("🔥")
 ROOT = tk.Tk()
 ROOT.title("Python GUI")
 # ROOT.attributes('-topmost', True)  # Set always on top
-ROOT.geometry("520x800")
+# ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)  # Remove default borders
 
@@ -162,13 +162,6 @@ ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
 # # Set the window geometry
 # ROOT.geometry(f"500x36+{x_coordinate}+{y_coordinate}")
 #? END of alts
-
-
-# Create main frame
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
-MAIN_FRAME.pack_propagate(False)
-MAIN_FRAME.pack(pady=1)  # Add some padding at the top
-
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -483,6 +476,10 @@ status_thread.start()
 #?  ██║╚██╔╝██║██╔══██║██║██║╚██╗██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
 #?  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #?  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+# Create main frame
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
+MAIN_FRAME.pack_propagate(False)
+MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 
 #! Time & Date
 def update_time():
