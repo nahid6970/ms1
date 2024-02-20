@@ -112,7 +112,7 @@ set_console_title("🔥")
 ROOT = tk.Tk()
 ROOT.title("Python GUI")
 # ROOT.attributes('-topmost', True)  # Set always on top
-ROOT.geometry("520x700")
+ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)  # Remove default borders
 
@@ -143,7 +143,7 @@ screen_height = ROOT.winfo_screenheight()
 #! alt 1 (original)
 # Calculate the x and y coordinates to center the window
 x = screen_width - 520   # 400 is the width of your window higher means left side lower means right side
-y = screen_height//2 - 755//2  # 700 is the height of your window higher means top side lower means bottom side
+y = screen_height//2 - 855//2  # 700 is the height of your window higher means top side lower means bottom side
 # Set the geometry of the window
 ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
 
@@ -215,7 +215,7 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 920, 1038
         # x_coordinate, y_coordinate = 1180, 0
     elif size == '■':
-        ROOT.geometry('520x700')
+        ROOT.geometry('520x800')
         ROOT.configure(bg='#1d2027')
         LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
         LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
@@ -226,7 +226,7 @@ def toggle_window_size(size):
         # y_coordinate = screen_height - window_height
 
         x_coordinate = screen_width - 520
-        y_coordinate = screen_height - 920
+        y_coordinate = screen_height//2 - 855//2
         # x_coordinate, y_coordinate = 0, 374
         # x_coordinate, y_coordinate = 1002, 374
         # x_coordinate, y_coordinate = 1420, 162
