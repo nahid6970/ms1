@@ -860,7 +860,7 @@ BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 
 
-def create_button(text, command, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, row_button, column_button, rowspan_button, columnspan_button, padx_pack, pady_pack):
+def create_button(text, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, padx_button, pady_button, padx_pack, pady_pack):
     button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
     button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack)
     return button
@@ -869,19 +869,19 @@ BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027")
 BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
 
 button_properties = [
-    ("All Apps"      ,open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    0 ,0,1,1,   (0,0),(0,0)),
-    ("AppData"       ,open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    1 ,1,1,1,   (0,0),(0,0)),
-    ("Git Projects"  ,open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    2 ,0,1,1,   (0,0),(0,0)),
-    ("Packages"      ,open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    3 ,1,1,1,   (0,0),(0,0)),
-    ("ProgramData"   ,open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    4 ,0,1,1,   (0,0),(0,0)),
-    ("Scoop"         ,open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    5 ,1,1,1,   (0,0),(0,0)),
-    ("Software"      ,open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    6 ,0,1,1,   (0,0),(0,0)),
-    ("Song"          ,open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    7 ,1,1,1,   (0,0),(0,0)),
-    ("Startup System",open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    8 ,0,1,1,   (0,0),(0,0)),
-    ("Startup User"  ,open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    9 ,1,1,1,   (0,0),(0,0)),
-    ("Temp-AppDate"  ,open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    10,0,1,1,   (0,0),(0,0)),
-    ("Temp-Windows"  ,open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    11,1,1,1,   (0,0),(0,0)),
-    ("WindowsApp"    ,open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,    12,0,1,1,   (0,0),(0,0))
+    ("All Apps"      ,open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    0 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("AppData"       ,open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    1 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Git Projects"  ,open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    2 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Packages"      ,open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    3 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("ProgramData"   ,open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    4 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Scoop"         ,open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    5 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Software"      ,open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    6 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Song"          ,open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    7 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Startup System",open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    8 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Startup User"  ,open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    9 ,1,1,1,       0,0, (0,0),(0,0)),
+    ("Temp-AppDate"  ,open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    10,1,1,1,       0,0, (0,0),(0,0)),
+    ("Temp-Windows"  ,open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    11,1,1,1,       0,0, (0,0),(0,0)),
+    ("WindowsApp"    ,open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    12,1,1,1,       0,0, (0,0),(0,0))
 ]
 
 for button_props in button_properties:
