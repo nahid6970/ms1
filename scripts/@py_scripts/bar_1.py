@@ -69,14 +69,14 @@ def on_release(label, release_color):
     label.config(bg=release_color)
 
 button_properties = [
-("❌",  close_window             ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
-("📏",  powertoys_ruler          ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
-("🐭",  powertoys_mouse_crosshair,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
-("📝",  powertoys_TextExtract    ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
-("📝",  capture2text             ,"#1d2027", "#db1725", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
-("♾️",  rclone_sync              ,"#1d2027", "#3bda00", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
-("💻",  windows_terminal         ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
-("📵",  stop_wsa                 ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0))
+("❌",  close_window             ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("📏",  powertoys_ruler          ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("🐭",  powertoys_mouse_crosshair,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("📝",  powertoys_TextExtract    ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("📝",  capture2text             ,"#1d2027", "#db1725", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("♾️",  rclone_sync              ,"#1d2027", "#3bda00", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("💻",  windows_terminal         ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("📵",  stop_wsa                 ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0))
 ]
 
 labels = []
