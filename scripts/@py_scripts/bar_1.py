@@ -27,20 +27,7 @@ def stop_wsa(event=None):
 def close_window(event=None):
     ROOT.destroy()
 
-def create_label(text, command, bg_color, fg_color, initial_color, release_color, anchor="center", side="left", width=10, height=1, font=("Arial", 12), relief="flat", highlight_color="#FFFFFF", highlight_thickness=0, padx=(0,0), pady=(0,0)):
-    label = tk.Label(button_frame, text=text, bg=bg_color, fg=fg_color, width=width, height=height, font=font, relief=relief, highlightcolor=highlight_color, highlightthickness=highlight_thickness)
-    label.pack(side=side, anchor=anchor, padx=padx, pady=pady)
-    label.bind("<Button-1>", lambda event, l=label, ic=initial_color, c=command: on_click(l, ic, c))
-    label.bind("<ButtonRelease-1>", lambda event, l=label, rc=release_color: on_release(l, rc))
-    return label
 
-def on_click(label, initial_color, command):
-    label.config(bg=initial_color)
-    if command:
-        command()
-
-def on_release(label, release_color):
-    label.config(bg=release_color)
 
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
@@ -65,6 +52,21 @@ ROOT.geometry(f"40x260+{x}+{y}")
 
 button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
 button_frame.pack(side="top", padx=1, pady=10, fill="both")
+
+def create_label(text, command, bg_color, fg_color, initial_color, release_color, anchor="center", side="left", width=10, height=1, font=("Arial", 12), relief="flat", highlight_color="#FFFFFF", highlight_thickness=0, padx=(0,0), pady=(0,0)):
+    label = tk.Label(button_frame, text=text, bg=bg_color, fg=fg_color, width=width, height=height, font=font, relief=relief, highlightcolor=highlight_color, highlightthickness=highlight_thickness)
+    label.pack(side=side, anchor=anchor, padx=padx, pady=pady)
+    label.bind("<Button-1>", lambda event, l=label, ic=initial_color, c=command: on_click(l, ic, c))
+    label.bind("<ButtonRelease-1>", lambda event, l=label, rc=release_color: on_release(l, rc))
+    return label
+
+def on_click(label, initial_color, command):
+    label.config(bg=initial_color)
+    if command:
+        command()
+
+def on_release(label, release_color):
+    label.config(bg=release_color)
 
 button_properties = [
 ("❌",  close_window             ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0,(0,0), (0,0)),
