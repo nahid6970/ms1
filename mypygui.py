@@ -857,21 +857,32 @@ FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRA
 BT_BACK = tk.Button(FRAME_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FOLDER), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027") ; BOX_1.pack(side="top", anchor="center", pady=(80,0),padx=(0,0))
-All_Apps_bt        = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appsfolder_fd , text="All Apps"       ) ; All_Apps_bt.pack      (side="top", pady=(1,0))
-AppData_bt         = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_appdata_fd    , text="AppData"        ) ; AppData_bt.pack       (side="top", pady=(1,0))
-Git_Projects_bt    = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_git_fd        , text="Git Projects"   ) ; Git_Projects_bt.pack  (side="top", pady=(1,0))
-Packages_bt        = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_packages_fd   , text="Packages"       ) ; Packages_bt.pack      (side="top", pady=(1,0))
-Programdata_bt     = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_programdata_fd, text="ProgramData"    ) ; Programdata_bt.pack   (side="top", pady=(1,0))
-Scoop_bt           = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_scoop_fd      , text="Scoop"          ) ; Scoop_bt.pack         (side="top", pady=(1,0))
-Software_bt        = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_sofware_fd    , text="Software"       ) ; Software_bt.pack      (side="top", pady=(1,0))
-Song_bt            = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_song_fd       , text="Song"           ) ; Song_bt.pack          (side="top", pady=(1,0))
-Startup_System_bt  = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_startups_fd   , text="Startup System" ) ; Startup_System_bt.pack(side="top", pady=(1,0))
-Startup_User_bt    = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_usrstartups_fd, text="Startup User"   ) ; Startup_User_bt.pack  (side="top", pady=(1,0))
-Temp_AppDate_bt    = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_templocal_fd  , text="Temp-AppDate"   ) ; Temp_AppDate_bt.pack  (side="top", pady=(1,0))
-Temp_Windows_bt    = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_tempwin_fd    , text="Temp-Windows"   ) ; Temp_Windows_bt.pack  (side="top", pady=(1,0))
-WindowsApp_bt      = tk.Button(BOX_1, bg="#ffd86a", fg="#1D2027", height=1, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=open_Winapps_fd    , text="WindowsApp"     ) ; WindowsApp_bt.pack    (side="top", pady=(1,0))
+def create_button(text, command, bg_color, fg_color, height, width, relief, font, padx, pady, side, anchor):
+    button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx, pady=pady, command=command)
+    button.pack(side=side, anchor=anchor)
+    return button
 
+BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027")
+BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
+
+buttons = [
+    ("All Apps"      ,open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("AppData"       ,open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Git Projects"  ,open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Packages"      ,open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("ProgramData"   ,open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Scoop"         ,open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Software"      ,open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Song"          ,open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Startup System",open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Startup User"  ,open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Temp-AppDate"  ,open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("Temp-Windows"  ,open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center"),
+    ("WindowsApp"    ,open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0,"top","center")
+]
+
+for button_props in buttons:
+    create_button(*button_props)
 
 #!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗       ██╗       ██████╗ ██╗  ██╗ ██████╗
 #!  ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝       ██║       ██╔══██╗██║ ██╔╝██╔════╝
