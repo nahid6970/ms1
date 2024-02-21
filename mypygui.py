@@ -327,6 +327,9 @@ def update_info_labels():
 get_net_speed.upload_speed_last = 0
 get_net_speed.download_speed_last = 0
 
+def git_sync(event=None):
+    subprocess.Popen(["powershell", "D:\\@git\\ms1\\scripts\\Github\\ms1u.ps1"])
+
 #! Clear Button
 def clear_screen():
     try:
@@ -380,6 +383,10 @@ LB_M.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_M.bind("<Button
 LB_L.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_E.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_E.bind("<Button-1>", lambda event: extra_bar())
+
+
+bkup = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#00FF00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⭕", font= ("agency", 10, "bold"))
+bkup.bind("<Button-1>", lambda event: git_sync()) ; bkup.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 
 
 STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
