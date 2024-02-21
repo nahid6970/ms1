@@ -372,7 +372,22 @@ def extra_bar(event=None):
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(4,3),padx=(5,3))
 
-def create_label1(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack):
+def create_label1(
+                  parent,
+                  text, 
+                  bg_color, 
+                  fg_color,
+                  width,
+                  height,
+                  relief,
+                  font,
+                  padx_label,
+                  pady_label,
+                  side,
+                  anchor,
+                  padx_pack,
+                  pady_pack
+                  ):
     label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label)
     label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
     return label
