@@ -1294,22 +1294,22 @@ BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=800)
 BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
 button_properties = [
-    ("Advanced Adapter"        ,advanced_adapter ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,10,     "w") ,
-    ("CheckDisk"               ,open_chkdsk      ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,40,     "w") ,
-    ("Chris Titus Win Utility" ,ctt              ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,70,     "w") ,
-    ("Disk Cleanup"            ,open_cleanmgr    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,100,    "w") ,
-    ("DISM"                    ,open_dism        ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,130,    "w") ,
-    ("DxDiag"                  ,open_dxdiag      ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,160,    "w") ,
-    ("Flush DNS"               ,flush_dns        ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,190,    "w") ,
-    ("msconfig"                ,open_msconfig    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,220,    "w") ,
-    ("Netplwiz"                ,open_netplwiz    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,250,    "w") ,
-    ("Power Plan"              ,open_powerplan   ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,280,    "w") ,
-    ("SFC"                     ,open_sfc         ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,310,    "w") ,
-    ("Sniping Tool"            ,open_snippingtool,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,340,    "w") ,
-    ("Systeminfo"              ,open_systeminfo  ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,370,    "w") ,
-    ("UAC"                     ,open_uac         ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,400,    "w") ,
-    ("Turn on Windows Features",optionalfeatures ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,430,    "w") ,
-    ("Winsock Reset"           ,winsock_reset    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,460,    "w")
+    ("Advanced Adapter"        ,advanced_adapter ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,10,     "w") ,
+    ("CheckDisk"               ,open_chkdsk      ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,40,     "w") ,
+    ("Chris Titus Win Utility" ,ctt              ,"#000000","#FFFFFF",1,25,"solid",("agency",14,"bold"),0,0,  100,70,     "w") ,
+    ("Disk Cleanup"            ,open_cleanmgr    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,100,    "w") ,
+    ("DISM"                    ,open_dism        ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,130,    "w") ,
+    ("DxDiag"                  ,open_dxdiag      ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,160,    "w") ,
+    ("Flush DNS"               ,flush_dns        ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,190,    "w") ,
+    ("msconfig"                ,open_msconfig    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,220,    "w") ,
+    ("Netplwiz"                ,open_netplwiz    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,250,    "w") ,
+    ("Power Plan"              ,open_powerplan   ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,280,    "w") ,
+    ("SFC"                     ,open_sfc         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,310,    "w") ,
+    ("Sniping Tool"            ,open_snippingtool,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,340,    "w") ,
+    ("Systeminfo"              ,open_systeminfo  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,370,    "w") ,
+    ("UAC"                     ,open_uac         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,400,    "w") ,
+    ("Turn on Windows Features",optionalfeatures ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,430,    "w") ,
+    ("Winsock Reset"           ,winsock_reset    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,460,    "w")
 ]
 
 for button_props in button_properties:
