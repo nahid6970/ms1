@@ -374,7 +374,6 @@ BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anch
 
 def create_label1(
                   parent,
-                  text, 
                   bg_color, 
                   fg_color,
                   width,
@@ -386,39 +385,54 @@ def create_label1(
                   side,
                   anchor,
                   padx_pack,
-                  pady_pack
+                  pady_pack,
+                  text, 
                   ):
     label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label)
     label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
     return label
 
 label_properties = [
-    (BOX_ROW_ROOT, "X", "#1d2027", "#ff0000", "2", "1", "flat", ("Arial Black", 10, "bold"), 1, 0, "right", "e", (0,1), (0,0)),
-    (BOX_ROW_ROOT, "■", "#1d2027", "#26b2f3", "2", "1", "flat", ("Segoe UI", 10, "bold"), 1, 0, "right", "e", (1,1), (0,0)),
-    (BOX_ROW_ROOT, "▼", "#1d2027", "#FFFFFF", "2", "1", "flat", ("Segoe UI", 10, "bold"), 1, 0, "right", "e", (1,1), (0,0)),
-    (BOX_ROW_ROOT, "◀", "#1d2027", "#FFFFFF", "2", "1", "flat", ("Segoe UI", 10, "bold"), 1, 0, "right", "e", (1,1), (0,0)),
-    (BOX_ROW_ROOT, "1", "#1d2027", "#f6d24a", "1", "1", "flat", ("Times", 10, "bold"), 0, 0, "right", "e", (1,1), (0,0)),
-    (BOX_ROW_ROOT, "⭕", "#1d2027", "#00FF00", "2", "1", "flat", ("agency", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "⚠️", "#1d2027", "#FFFFFF", "2", "1", "flat", ("agency", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "⚠️", "#1d2027", "#FFFFFF", "2", "1", "flat", ("agency", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0))
+(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",("ArialBlack",10,"bold"),1,0,"right","e",(0,1),(0,0),  "X"),
+(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",("SegoeUI"   ,10,"bold"),1,0,"right","e",(1,1),(0,0),  "■"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("SegoeUI"   ,10,"bold"),1,0,"right","e",(1,1),(0,0),  "▼"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("SegoeUI"   ,10,"bold"),1,0,"right","e",(1,1),(0,0),  "◀"),
+(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",("Times"     ,10,"bold"),0,0,"right","e",(1,1),(0,0),  "1"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("agency"    ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),  "⚠️"),
+(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",("agency"    ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),  "⭕"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("agency"    ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),  "⚠️")
 ]
-
 labels = [create_label1(*prop) for prop in label_properties]
-
-LB_XXX, LB_M, LB_L, LB_S, LB_E, bkup, STATUS_MS1, STATUS_MS2 = labels
-
+LB_XXX, LB_M, LB_L, LB_S, LB_E,  STATUS_MS1,bkup, STATUS_MS2 = labels
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_E.bind      ("<Button-1>", lambda event: extra_bar         ())
-bkup.bind      ("<Button-1>", lambda event: git_sync          ())
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms1"))
+bkup.bind      ("<Button-1>", lambda event: git_sync          ())
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms2"))
 
 
 
-def create_label2(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack, ht, htc):
+def create_label2(
+                    parent,
+                    text,
+                    bg_color,
+                    fg_color,
+                    width,
+                    height,
+                    relief,
+                    font,
+                    padx_label,
+                    pady_label,
+                    side,
+                    anchor,
+                    padx_pack,
+                    pady_pack,
+                    ht,
+                    htc,
+                    ):
     label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightbackground=htc)
     label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
     return label
