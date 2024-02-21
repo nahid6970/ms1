@@ -394,20 +394,46 @@ STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1")) ; STATUS_MS1.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2")) ; STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 
-LB_CPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU",    font = ("comic", 10, "bold"))
-LB_GPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU",    font = ("comic", 10, "bold"))
-LB_RAM    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="RAM",    font = ("comic", 10, "bold"))
-LB_DUD    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk D", font = ("comic", 10, "bold"))
-LB_DUC    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk C", font = ("comic", 10, "bold"))
-LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width ="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▲",      font = ("comic", 10, "bold"))
-LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width ="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼",      font = ("comic", 10, "bold"))
-LB_CPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_GPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_RAM.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_DUC.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
-LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
+
+def create_label(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack):
+    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label)
+    label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
+    return label
+
+
+
+label_properties = [
+    (BOX_ROW_ROOT, "CPU", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "GPU", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "RAM", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "Disk D", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "Disk C", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "▲", "#1d2027", "#ffffff", "5", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "▼", "#1d2027", "#ffffff", "5", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0))
+]
+
+labels = [create_label(*prop) for prop in label_properties]
+
+LB_CPU, LB_GPU, LB_RAM, LB_DUD, LB_DUC, LB_UPLOAD, LB_DWLOAD = labels
+
+update_info_labels()
+
+#! BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3), padx=(5,3))  -----------------not needed as its in the first part
+
+# LB_CPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU",    font = ("comic", 10, "bold"))
+# LB_GPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU",    font = ("comic", 10, "bold"))
+# LB_RAM    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="RAM",    font = ("comic", 10, "bold"))
+# LB_DUD    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk D", font = ("comic", 10, "bold"))
+# LB_DUC    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk C", font = ("comic", 10, "bold"))
+# LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width ="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▲",      font = ("comic", 10, "bold"))
+# LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width ="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼",      font = ("comic", 10, "bold"))
+# LB_CPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_GPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_RAM.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_DUC.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 
 # Create label to display git path and status for ms1 project
 #path_label2 = tk.Label(BOX_ROW_ROOT, text="ms2") ; path_label2.pack(pady=(10, 0))
