@@ -888,6 +888,34 @@ for button_props in button_properties:
     create_button(*button_props)
 
 
+# #! Example With Place
+# def create_button(text, command, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, padx_pack, pady_pack):
+#     button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
+#     button.place(x=x_button, y=y_button)
+#     return button
+
+# BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027", width=520, height=800)
+# BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
+
+# button_properties = [
+#     ("All Apps"      ,open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 10, (0,0),(0,0)),
+#     ("AppData"       ,open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 60, (0,0),(0,0)),
+#     ("Git Projects"  ,open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 110, (0,0),(0,0)),
+#     ("Packages"      ,open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 160, (0,0),(0,0)),
+#     ("ProgramData"   ,open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 210, (0,0),(0,0)),
+#     ("Scoop"         ,open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 260, (0,0),(0,0)),
+#     ("Software"      ,open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 310, (0,0),(0,0)),
+#     ("Song"          ,open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 360, (0,0),(0,0)),
+#     ("Startup System",open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 410, (0,0),(0,0)),
+#     ("Startup User"  ,open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 460, (0,0),(0,0)),
+#     ("Temp-AppDate"  ,open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 510, (0,0),(0,0)),
+#     ("Temp-Windows"  ,open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 560, (0,0),(0,0)),
+#     ("WindowsApp"    ,open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),0,0, 10, 610, (0,0),(0,0))
+# ]
+
+# for button_props in button_properties:
+#     create_button(*button_props)
+
 
 #!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗       ██╗       ██████╗ ██╗  ██╗ ██████╗
 #!  ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝       ██║       ██╔══██╗██║ ██╔╝██╔════╝
