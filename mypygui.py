@@ -370,32 +370,36 @@ def update_status():
 def extra_bar(event=None):
     subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\@py_scripts\\bar_1.py", "-WindowStyle", "Hidden"])
 
-BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3),padx=(5,3))
+BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(4,3),padx=(5,3))
 
-LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#1d2027", fg="#ff0000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="X", font= ("Arial Black", 10, "bold"))
-LB_XXX.pack(side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+def create_label(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack):
+    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label)
+    label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
+    return label
 
-LB_M = tk.Label(BOX_ROW_ROOT, text="■", font=("Segoe UI", 10, "bold" ), bg="#1d2027", fg="#26b2f3", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_L = tk.Label(BOX_ROW_ROOT, text="▼", font=("Segoe UI", 10, "bold"  ), bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_S = tk.Label(BOX_ROW_ROOT, text="◀", font=("Segoe UI", 10, "bold"), bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_E = tk.Label(BOX_ROW_ROOT, text="1", font= ("Times", 10, "bold"), bg="#1d2027", fg="#f6d24a", width=" 1", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=0, pady=0)
-LB_M.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
-LB_L.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
-LB_S.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
-LB_E.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_E.bind("<Button-1>", lambda event: extra_bar())
+label_properties = [
+    (BOX_ROW_ROOT, "X", "#1d2027", "#ff0000", "2", "1", "flat", ("Arial Black", 10, "bold"), 1, 0, "right", "e", (0,1), (0,0)),
+    (BOX_ROW_ROOT, "■", "#1d2027", "#26b2f3", "2", "1", "flat", ("Segoe UI", 10, "bold"), 1, 0, "right", "e", (1,1), (0,0)),
+    (BOX_ROW_ROOT, "▼", "#1d2027", "#FFFFFF", "2", "1", "flat", ("Segoe UI", 10, "bold"), 1, 0, "right", "e", (1,1), (0,0)),
+    (BOX_ROW_ROOT, "◀", "#1d2027", "#FFFFFF", "2", "1", "flat", ("Segoe UI", 10, "bold"), 1, 0, "right", "e", (1,1), (0,0)),
+    (BOX_ROW_ROOT, "1", "#1d2027", "#f6d24a", "1", "1", "flat", ("Times", 10, "bold"), 0, 0, "right", "e", (1,1), (0,0)),
+    (BOX_ROW_ROOT, "⭕", "#1d2027", "#00FF00", "2", "1", "flat", ("agency", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "⚠️", "#1d2027", "#FFFFFF", "2", "1", "flat", ("agency", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
+    (BOX_ROW_ROOT, "⚠️", "#1d2027", "#FFFFFF", "2", "1", "flat", ("agency", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0))
+]
 
+labels = [create_label(*prop) for prop in label_properties]
 
-bkup = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#00FF00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⭕", font= ("agency", 10, "bold"))
-bkup.bind("<Button-1>", lambda event: git_sync()) ; bkup.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
+LB_XXX, LB_M, LB_L, LB_S, LB_E, bkup, STATUS_MS1, STATUS_MS2 = labels
 
-
-STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
-STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
-STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1")) ; STATUS_MS1.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
-STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2")) ; STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
-
-
-
+LB_XXX.bind("<Button-1>", close_window)
+LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
+LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
+LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
+LB_E.bind("<Button-1>", lambda event: extra_bar())
+bkup.bind("<Button-1>", lambda event: git_sync())
+STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1"))
+STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2"))
 
 
 
@@ -419,6 +423,28 @@ LB_CPU, LB_GPU, LB_RAM, LB_DUD, LB_DUC, LB_UPLOAD, LB_DWLOAD = labels
 update_info_labels()
 
 #! BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3), padx=(5,3))  -----------------not needed as its in the first part
+
+# LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#1d2027", fg="#ff0000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="X", font= ("Arial Black", 10, "bold"))
+# LB_XXX.pack(side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+
+# LB_M = tk.Label(BOX_ROW_ROOT, text="■", font=("Segoe UI", 10, "bold" ), bg="#1d2027", fg="#26b2f3", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_L = tk.Label(BOX_ROW_ROOT, text="▼", font=("Segoe UI", 10, "bold"  ), bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_S = tk.Label(BOX_ROW_ROOT, text="◀", font=("Segoe UI", 10, "bold"), bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_E = tk.Label(BOX_ROW_ROOT, text="1", font= ("Times", 10, "bold"), bg="#1d2027", fg="#f6d24a", width=" 1", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=0, pady=0)
+# LB_M.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
+# LB_L.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
+# LB_S.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
+# LB_E.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_E.bind("<Button-1>", lambda event: extra_bar())
+
+
+# bkup = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#00FF00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⭕", font= ("agency", 10, "bold"))
+# bkup.bind("<Button-1>", lambda event: git_sync()) ; bkup.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
+
+
+# STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
+# STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
+# STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1")) ; STATUS_MS1.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
+# STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2")) ; STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 
 # LB_CPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU",    font = ("comic", 10, "bold"))
 # LB_GPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU",    font = ("comic", 10, "bold"))
