@@ -395,27 +395,27 @@ STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1")) ;
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2")) ; STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
 
 
-def create_label(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack):
-    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label)
+
+
+
+
+def create_label(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack, ht, htc):
+    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightbackground=htc)
     label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
     return label
 
-
-
 label_properties = [
-    (BOX_ROW_ROOT, "CPU", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "GPU", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "RAM", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "Disk D", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "Disk C", "#1d2027", "#ffffff", "4", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "▲", "#1d2027", "#ffffff", "5", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0)),
-    (BOX_ROW_ROOT, "▼", "#1d2027", "#ffffff", "5", "1", "flat", ("comic", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0))
+    (BOX_ROW_ROOT,"CPU"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+    (BOX_ROW_ROOT,"GPU"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+    (BOX_ROW_ROOT,"RAM"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+    (BOX_ROW_ROOT,"Disk D","#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+    (BOX_ROW_ROOT,"Disk C","#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+    (BOX_ROW_ROOT,"▲"     ,"#1d2027","#ffffff","5","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+    (BOX_ROW_ROOT,"▼"     ,"#1d2027","#ffffff","5","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF")
 ]
 
 labels = [create_label(*prop) for prop in label_properties]
-
 LB_CPU, LB_GPU, LB_RAM, LB_DUD, LB_DUC, LB_UPLOAD, LB_DWLOAD = labels
-
 update_info_labels()
 
 #! BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3), padx=(5,3))  -----------------not needed as its in the first part
