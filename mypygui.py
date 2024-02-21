@@ -386,21 +386,23 @@ def create_label1(
                   anchor,
                   padx_pack,
                   pady_pack,
+                  ht,
+                  htc,
                   text, 
                   ):
-    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label)
+    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightcolor=htc)
     label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
     return label
 
 label_properties = [
-(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",("ArialBlack",10,"bold"),1,0,"right","e",(0,1),(0,0),  "X"),
-(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",("SegoeUI"   ,10,"bold"),1,0,"right","e",(1,1),(0,0),  "■"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("SegoeUI"   ,10,"bold"),1,0,"right","e",(1,1),(0,0),  "▼"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("SegoeUI"   ,10,"bold"),1,0,"right","e",(1,1),(0,0),  "◀"),
-(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",("Times"     ,10,"bold"),0,0,"right","e",(1,1),(0,0),  "1"),
-(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",("agency"    ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),  "⭕"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("agency"    ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),  "⚠️"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("agency"    ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),  "⚠️")
+(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",("ArialBlack" ,10,"bold"),1,0,"right","e",(0,1),(0,0),0,"#FFFFFF","X") ,
+(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",("calibri"    ,10,"bold"),1,0,"right","e",(1,1),(0,0),0,"#FFFFFF","■") ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("agency"     ,10,"bold"),1,0,"right","e",(1,1),(0,0),0,"#FFFFFF","▼") ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("ink free"   ,10,"bold"),1,0,"right","e",(1,1),(0,0),0,"#FFFFFF","◀") ,
+(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",("Times"      ,10,"bold"),0,0,"right","e",(1,1),(0,0),0,"#FFFFFF","1") ,
+(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",("agency"     ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),0,"#FFFFFF","⭕") ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("agency"     ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),0,"#FFFFFF","⚠️"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",("agency"     ,10,"bold"),1,0,"left" ,"e",(0,3),(0,0),0,"#FFFFFF","⚠️")
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_M, LB_L, LB_S, LB_E, bkup, STATUS_MS1, STATUS_MS2 = labels
@@ -438,13 +440,13 @@ def create_label2(
     return label
 
 label_properties = [
-    (BOX_ROW_ROOT,"CPU"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-    (BOX_ROW_ROOT,"GPU"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-    (BOX_ROW_ROOT,"RAM"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-    (BOX_ROW_ROOT,"Disk D","#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-    (BOX_ROW_ROOT,"Disk C","#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-    (BOX_ROW_ROOT,"▲"     ,"#1d2027","#ffffff","5","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-    (BOX_ROW_ROOT,"▼"     ,"#1d2027","#ffffff","5","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF")
+(BOX_ROW_ROOT,"CPU"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+(BOX_ROW_ROOT,"GPU"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+(BOX_ROW_ROOT,"RAM"   ,"#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+(BOX_ROW_ROOT,"Disk D","#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+(BOX_ROW_ROOT,"Disk C","#1d2027","#ffffff","4","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+(BOX_ROW_ROOT,"▲"     ,"#1d2027","#ffffff","5","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
+(BOX_ROW_ROOT,"▼"     ,"#1d2027","#ffffff","5","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF")
 ]
 
 labels = [create_label2(*prop) for prop in label_properties]
