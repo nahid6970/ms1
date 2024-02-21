@@ -328,7 +328,7 @@ get_net_speed.upload_speed_last = 0
 get_net_speed.download_speed_last = 0
 
 def git_sync(event=None):
-    subprocess.Popen(["powershell", "D:\\@git\\ms1\\scripts\\Github\\ms1u.ps1"])
+    subprocess.Popen(["powershell", "D:\\@git\\ms1\\scripts\\Github\\ms1u.ps1 | D:\\@git\\ms1\\scripts\\Github\\ms2u.ps1"])
 
 #! Clear Button
 def clear_screen():
