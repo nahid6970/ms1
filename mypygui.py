@@ -372,7 +372,7 @@ def extra_bar(event=None):
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(4,3),padx=(5,3))
 
-def create_label(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack):
+def create_label1(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack):
     label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label)
     label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
     return label
@@ -388,7 +388,7 @@ label_properties = [
     (BOX_ROW_ROOT, "⚠️", "#1d2027", "#FFFFFF", "2", "1", "flat", ("agency", 10, "bold"), 1, 0, "left", "e", (0,3), (0,0))
 ]
 
-labels = [create_label(*prop) for prop in label_properties]
+labels = [create_label1(*prop) for prop in label_properties]
 
 LB_XXX, LB_M, LB_L, LB_S, LB_E, bkup, STATUS_MS1, STATUS_MS2 = labels
 
@@ -403,7 +403,7 @@ STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2"))
 
 
 
-def create_label(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack, ht, htc):
+def create_label2(parent, text, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, side, anchor, padx_pack, pady_pack, ht, htc):
     label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightbackground=htc)
     label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
     return label
@@ -418,7 +418,7 @@ label_properties = [
     (BOX_ROW_ROOT,"▼"     ,"#1d2027","#ffffff","5","1","flat",("comic",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF")
 ]
 
-labels = [create_label(*prop) for prop in label_properties]
+labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUD, LB_DUC, LB_UPLOAD, LB_DWLOAD = labels
 update_info_labels()
 
