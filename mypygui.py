@@ -1290,7 +1290,7 @@ def create_button(text, command, bg_color, fg_color, height, width, relief, font
     button.place(x=x_button, y=y_button)
     return button
 
-BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=800)
+BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=720)
 BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
 button_properties = [
