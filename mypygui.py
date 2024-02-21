@@ -1267,23 +1267,55 @@ FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAM
 BT_BACK = tk.Button(FRAME_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_TOOLS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
-adapter_bt      = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=advanced_adapter,  text="Advanced Adapter",         ) ; adapter_bt.pack     (pady=(1,0))
-chkdsk_bt       = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_chkdsk,       text="CheckDisk",                ) ; chkdsk_bt.pack      (pady=(1,0))
-ctt_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=ctt,               text="Chris Titus Win Utility",  ) ; ctt_bt.pack         (pady=(1,0))
-diskcleanmgr_bt = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_cleanmgr,     text="Disk Cleanup",             ) ; diskcleanmgr_bt.pack(pady=(1,0))
-dism_bt         = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_dism,         text="DISM",                     ) ; dism_bt.pack        (pady=(1,0))
-dxdiag_bt       = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_dxdiag,       text="DxDiag",                   ) ; dxdiag_bt.pack      (pady=(1,0))
-flushdns_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=flush_dns,         text="Flush DNS",                ) ; flushdns_bt.pack    (pady=(1,0))
-msconfig_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_msconfig,     text="msconfig",                 ) ; msconfig_bt.pack    (pady=(1,0))
-netplwiz_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_netplwiz,     text="Netplwiz",                 ) ; netplwiz_bt.pack    (pady=(1,0))
-powerplan_bt    = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_powerplan,    text="Power Plan",               ) ; powerplan_bt.pack   (pady=(1,0))
-sfc_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_sfc,          text="SFC",                      ) ; sfc_bt.pack         (pady=(1,0))
-snip_bt         = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_snippingtool, text="Sniping Tool",             ) ; snip_bt.pack        (pady=(1,0))
-systeminfo_bt   = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_systeminfo,   text="Systeminfo",               ) ; systeminfo_bt.pack  (pady=(1,0))
-uac_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_uac,          text="UAC",                      ) ; uac_bt.pack         (pady=(1,0))
-winfeatures_bt  = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=optionalfeatures,  text="Turn on Windows Features", ) ; winfeatures_bt.pack (pady=(1,0))
-Winsock_bt      = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=winsock_reset,     text="Winsock Reset",            ) ; Winsock_bt.pack     (pady=(1,0))
+# BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
+# adapter_bt      = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=advanced_adapter,  text="Advanced Adapter",         ) ; adapter_bt.pack     (pady=(1,0))
+# chkdsk_bt       = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_chkdsk,       text="CheckDisk",                ) ; chkdsk_bt.pack      (pady=(1,0))
+# ctt_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=ctt,               text="Chris Titus Win Utility",  ) ; ctt_bt.pack         (pady=(1,0))
+# diskcleanmgr_bt = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_cleanmgr,     text="Disk Cleanup",             ) ; diskcleanmgr_bt.pack(pady=(1,0))
+# dism_bt         = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_dism,         text="DISM",                     ) ; dism_bt.pack        (pady=(1,0))
+# dxdiag_bt       = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_dxdiag,       text="DxDiag",                   ) ; dxdiag_bt.pack      (pady=(1,0))
+# flushdns_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=flush_dns,         text="Flush DNS",                ) ; flushdns_bt.pack    (pady=(1,0))
+# msconfig_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_msconfig,     text="msconfig",                 ) ; msconfig_bt.pack    (pady=(1,0))
+# netplwiz_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_netplwiz,     text="Netplwiz",                 ) ; netplwiz_bt.pack    (pady=(1,0))
+# powerplan_bt    = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_powerplan,    text="Power Plan",               ) ; powerplan_bt.pack   (pady=(1,0))
+# sfc_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_sfc,          text="SFC",                      ) ; sfc_bt.pack         (pady=(1,0))
+# snip_bt         = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_snippingtool, text="Sniping Tool",             ) ; snip_bt.pack        (pady=(1,0))
+# systeminfo_bt   = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_systeminfo,   text="Systeminfo",               ) ; systeminfo_bt.pack  (pady=(1,0))
+# uac_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_uac,          text="UAC",                      ) ; uac_bt.pack         (pady=(1,0))
+# winfeatures_bt  = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=optionalfeatures,  text="Turn on Windows Features", ) ; winfeatures_bt.pack (pady=(1,0))
+# Winsock_bt      = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=winsock_reset,     text="Winsock Reset",            ) ; Winsock_bt.pack     (pady=(1,0))
+
+def create_button(text, command, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, anchor_button):
+    button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command, anchor=anchor_button)
+    button.place(x=x_button, y=y_button)
+    return button
+
+
+BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=800)
+BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
+
+button_properties = [
+    ("Advanced Adapter"        ,advanced_adapter ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,10 ,"w") ,
+    ("CheckDisk"               ,open_chkdsk      ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,60 ,"w") ,
+    ("Chris Titus Win Utility" ,ctt              ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,110,"w") ,
+    ("Disk Cleanup"            ,open_cleanmgr    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,160,"w") ,
+    ("DISM"                    ,open_dism        ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,210,"w") ,
+    ("DxDiag"                  ,open_dxdiag      ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,260,"w") ,
+    ("Flush DNS"               ,flush_dns        ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,310,"w") ,
+    ("msconfig"                ,open_msconfig    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,360,"w") ,
+    ("Netplwiz"                ,open_netplwiz    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,410,"w") ,
+    ("Power Plan"              ,open_powerplan   ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,460,"w") ,
+    ("SFC"                     ,open_sfc         ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,510,"w") ,
+    ("Sniping Tool"            ,open_snippingtool,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,560,"w") ,
+    ("Systeminfo"              ,open_systeminfo  ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,610,"w") ,
+    ("UAC"                     ,open_uac         ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,660,"w") ,
+    ("Turn on Windows Features",optionalfeatures ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,710,"w") ,
+    ("Winsock Reset"           ,winsock_reset    ,"white","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,10,760,"w")
+]
+
+for button_props in button_properties:
+    create_button(*button_props)
+
 
 
 #?  ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗
