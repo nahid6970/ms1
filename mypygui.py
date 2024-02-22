@@ -451,7 +451,7 @@ label_properties = [
 
 labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUD, LB_DUC, LB_UPLOAD, LB_DWLOAD = labels
-update_info_labels()
+
 
 #! BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3), padx=(5,3))  -----------------not needed as its in the first part
 
@@ -491,6 +491,7 @@ update_info_labels()
 # LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
 # LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
 # LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# update_info_labels()
 
 # Create label to display git path and status for ms1 project
 #path_label2 = tk.Label(BOX_ROW_ROOT, text="ms2") ; path_label2.pack(pady=(10, 0))
