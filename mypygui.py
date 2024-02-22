@@ -399,7 +399,7 @@ label_properties = [
 (BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",1,0,"right","e",(1,1),(0,0),0,"#FFFFFF",("calibri"    ,10,"bold"),"■") ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e",(1,1),(0,0),0,"#FFFFFF",("agency"     ,10,"bold"),"▼") ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e",(1,1),(0,0),0,"#FFFFFF",("ink free"   ,10,"bold"),"◀") ,
-(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",0,0,"right","e",(1,1),(0,0),0,"#FFFFFF",("Times"      ,10,"bold"),"1") ,
+(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",0,0,"right","e",(1,1),(0,0),1,"#FFFFFF",("Times"      ,10,"bold"),"1") ,
 (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e",(0,3),(0,0),0,"#FFFFFF",("agency"     ,10,"bold"),"⭕") ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e",(0,3),(0,0),0,"#FFFFFF",("agency"     ,10,"bold"),"⚠️"),
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e",(0,3),(0,0),0,"#FFFFFF",("agency"     ,10,"bold"),"⚠️")
