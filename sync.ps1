@@ -29,7 +29,7 @@ powershell Write-Host "software" -ForegroundColor black -BackgroundColor white
     rclone sync $software_src $software_dst -P --check-first --transfers=5 --track-renames --exclude @ignore/ --fast-list --max-size 1M --log-level INFO --log-file="C:\Users\nahid\OneDrive\backup\rclone\software.txt"
     rclone sync $software_src $software_dst -P --check-first --transfers=1 --track-renames --exclude @ignore/ --fast-list               --log-level INFO --log-file="C:\Users\nahid\OneDrive\backup\rclone\software.txt"
     
-timeout /T 3600 /NOBREAK
+timeout /T 360 /NOBREAK
 Clear-Host
 }
 
