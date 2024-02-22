@@ -237,6 +237,7 @@ chromium
 cider
 cinny
 civo
+clamav
 clash-verge-rev
 clash-verge
 clash
@@ -627,6 +628,7 @@ gopher360
 gossip
 gpg4win
 gpodder
+gptscript
 gpu-z
 gpxsee
 grafana
@@ -949,6 +951,7 @@ mc
 mcomix
 mdloader
 mediacreationtool
+mediaelch
 mediainfo-gui
 mediainfo
 mednafen
