@@ -719,6 +719,7 @@ Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
 
 # Environmental Variable
 $env:PATH += ";D:\@git\ms1"
+$env:PATH += ";D:\@git\ms1\scripts"
 
 
 function Prompt {
