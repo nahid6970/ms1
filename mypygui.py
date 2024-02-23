@@ -1301,7 +1301,7 @@ def scoop_uninstall_fzf():
 
 
 # Frame for text input and buttons
-input_frame = tk.Frame(FR_PROCESS)
+input_frame = tk.Frame(FR_PROCESS, bg="#1D2027")
 input_frame.pack(pady=10)
 
 # Text input
