@@ -369,6 +369,21 @@ def update_status():
         time.sleep(1)
 def extra_bar(event=None):
     subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\@py_scripts\\bar_1.py", "-WindowStyle", "Hidden"])
+def check_window_topmost():
+    if not ROOT.attributes('-topmost'):
+        ROOT.attributes('-topmost', True)
+    if checking:  # Only continue checking if the flag is True
+        ROOT.after(500, check_window_topmost)
+
+def toggle_checking():
+    global checking
+    checking = not checking
+    if checking:
+        check_window_topmost()  # Start checking if toggled on
+        bt_topmost_switch.config(fg="#FFFFFF")  # Change text color to green
+    else:
+        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
+        bt_topmost_switch.config(fg="#3bda00")  # Change text color to white
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(5,3),padx=(5,3))
 
@@ -395,22 +410,24 @@ def create_label1(
     return label
 
 label_properties = [
-(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"right","e",   (0,1),(0,0),    0,"#FFFFFF",    ("ArialBlack" ,10,"bold"),"X") ,
-(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",1,0,"right","e",   (1,1),(0,2),    0,"#FFFFFF",    ("calibri"    ,10,"bold"),"■") ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e",   (1,1),(0,0),    0,"#FFFFFF",    ("agency"     ,10,"bold"),"▼") ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e",   (1,1),(0,0),    0,"#FFFFFF",    ("ink free"   ,10,"bold"),"◀") ,
-(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",0,0,"right","e",   (1,1),(0,0),    1,"#FFFFFF",    ("Times"      ,10,"bold"),"1") ,
-(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e",   (0,3),(0,0),    0,"#FFFFFF",    ("agency"     ,10,"bold"),"⭕") ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e",   (0,3),(0,0),    0,"#FFFFFF",    ("agency"     ,10,"bold"),"⚠️"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e",   (0,3),(0,0),    0,"#FFFFFF",    ("agency"     ,10,"bold"),"⚠️")
+(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"right","e", (0,1),(0,0), 0,"#FFFFFF", ("ArialBlack" ,10,"bold"),"X")  ,
+(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",1,0,"right","e", (1,1),(0,2), 0,"#FFFFFF", ("calibri"    ,10,"bold"),"■")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"▼")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free"   ,10,"bold"),"◀")  ,
+(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"      ,10,"bold"),"1")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("ink free"   ,10,"bold"),"📌") ,
+(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"⭕")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"⚠️") ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"⚠️")
 ]
 labels = [create_label1(*prop) for prop in label_properties]
-LB_XXX, LB_M, LB_L, LB_S, LB_E, bkup, STATUS_MS1, STATUS_MS2 = labels
+LB_XXX, LB_M, LB_L, LB_S, LB_1, LB_P, bkup, STATUS_MS1, STATUS_MS2 = labels
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
-LB_E.bind      ("<Button-1>", lambda event: extra_bar         ())
+LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
+LB_P.bind      ("<Button-1>", lambda event: toggle_checking   ())
 bkup.bind      ("<Button-1>", lambda event: git_sync          ())
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms2"))
@@ -448,7 +465,6 @@ label_properties = [
 (BOX_ROW_ROOT,"▲"     ,"#1d2027","#ffffff","5","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
 (BOX_ROW_ROOT,"▼"     ,"#1d2027","#ffffff","5","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF")
 ]
-
 labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUD, LB_DUC, LB_UPLOAD, LB_DWLOAD = labels
 
