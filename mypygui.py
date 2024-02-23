@@ -1155,13 +1155,17 @@ for app in applications:
 
 # winget / scoop text based info/show search install etc
 def insert_text():
-    # Assuming you have a Tkinter Entry widget for input
     additional_text = WIDGET_STORE.get()
     return additional_text
 
+def show_winget_options(event=None):
+    winget_menu.tk_popup(winget_button.winfo_rootx(), winget_button.winfo_rooty() + winget_button.winfo_height())
+
+def show_scoop_options(event=None):
+    scoop_menu.tk_popup(scoop_button.winfo_rootx(), scoop_button.winfo_rooty() + scoop_button.winfo_height())
+
 def winget_search():
     additional_text = insert_text()
-    # Enclose additional_text in double quotes if it contains spaces
     additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
     command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Search\' ; winget search {additional_text}"'
     try:
@@ -1169,9 +1173,8 @@ def winget_search():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-def winget_instal():
+def winget_install():
     additional_text = insert_text()
-    # Enclose additional_text in double quotes if it contains spaces
     additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
     command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget install\' ; winget install {additional_text}"'
     try:
@@ -1213,6 +1216,8 @@ def wget_unin_fzf():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
+
+
 def scoop_search():
     additional_text = insert_text()
     additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
@@ -1226,7 +1231,6 @@ def scoop_install():
     additional_text = insert_text()
     additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
     command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Install\' ; scoop install {additional_text}"'
-    print("Executing command:", command)  # Print the command before executing
     try:
         subprocess.Popen(["powershell", "-Command", command], shell=True)
     except subprocess.CalledProcessError as e:
@@ -1265,7 +1269,7 @@ def scoop_install_fzf():
     package_list_file = r"D:\@git\ms1\scripts\scoop\package_list_bucket.txt"
 
     # Command to read from the text file and pipe it to fzf
-    command = f"type {package_list_file} | fzf --multi --preview 'scoop info {{1}}' | ForEach-Object {{ scoop install $_.split()[0] }}"
+    command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf --multi --preview "scoop info {{1}}" | ForEach-Object {{ scoop install $_.split()[0] }}'
 
     try:
         subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
@@ -1279,30 +1283,39 @@ def scoop_uninstall_fzf():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-BOX_1 = tk.Frame(FR_PROCESS, bg="#14bcff") ; BOX_1.pack(pady=(50,2))
-WIDGET_STORE = tk.Entry(BOX_1, width=30, fg="#fff", bg="#21a366", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat") ; WIDGET_STORE.pack(padx=2, pady=2)
 
-BOX_2 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_2.pack(side="left", anchor="center", pady=2)
-LB_WINGET_TITLE=tk.Label (BOX_2, bg="#FFFFFF", fg="#000000", height=1, highlightthickness=3, font=("calibri",14,"bold"), text="Winget") ; LB_WINGET_TITLE.pack(side="top", anchor="e", pady=(1,1),padx=(1,1))
-BT_WINGET_SEARC=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search", command = winget_search ) ; BT_WINGET_SEARC.pack       (side="top", anchor="e", pady=(1,1), padx=(100,1))
-BT_WINGET_INSTL=tk.Button(BOX_2, bg="#1d2027", fg="#6ae56a", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Install", command = winget_instal ) ; BT_WINGET_INSTL.pack      (side="top", anchor="e", pady=(1,1), padx=(100,1))
-BT_WINGET_UINST=tk.Button(BOX_2, bg="#1d2027", fg="#ff3046", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall", command = winget_uninst ) ; BT_WINGET_UINST.pack    (side="top", anchor="e", pady=(1,1), padx=(100,1))
-BT_WINGET_INFOO=tk.Button(BOX_2, bg="#1d2027", fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Info", command = winget_infooo ) ; BT_WINGET_INFOO.pack         (side="top", anchor="e", pady=(1,1), padx=(100,1))
+# Frame for text input and buttons
+input_frame = tk.Frame(FR_PROCESS)
+input_frame.pack(pady=10)
 
-BT_WINGET_FINST=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Search-FZF", command = wget_inst_fzf ) ; BT_WINGET_FINST.pack   (side="top", anchor="e", pady=(1,1), padx=(100,1))
-BT_WINGET_FUNIN=tk.Button(BOX_2, bg="#1d2027", fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), text="-Uninstall-FZF", command = wget_unin_fzf ) ; BT_WINGET_FUNIN.pack(side="top", anchor="e", pady=(1,1), padx=(100,1))
+# Text input
+WIDGET_STORE = tk.Entry(input_frame, width=15, fg="#fff", bg="#21a366", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
+WIDGET_STORE.pack(side=tk.LEFT, padx=10)
+
+# Winget button
+winget_menu = tk.Menu(FR_PROCESS, tearoff=0)
+winget_menu.add_command(label="Search", command=winget_search)
+winget_menu.add_command(label="Install", command=winget_install)
+winget_menu.add_command(label="Uninstall", command=winget_uninst)
+winget_menu.add_command(label="Info", command=winget_infooo)
+winget_menu.add_command(label="FZF-Install", command=wget_inst_fzf, background="green")
+winget_menu.add_command(label="FZF-Uninstall", command=wget_unin_fzf, background="red")
+
+winget_button = ttk.Button(input_frame, text="Winget", command=show_winget_options)
+winget_button.pack(side=tk.LEFT, padx=10)
 
 
-BOX_3 = tk.Frame(FR_PROCESS, bg="#1d2027") ; BOX_3.pack( anchor="center", side="right", pady=2)
-LB_SCOOP_TITLE = tk.Label (BOX_3, text="Scoop", fg="#000", bg="#fff", height=1, font=("calibri", 14, "bold"), highlightthickness=3) ; LB_SCOOP_TITLE.pack(side="top", anchor="w", pady=(1,1), padx=(1,1))
-BT_SCOOP_SEARC = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_search       , text="-Search" ) ; BT_SCOOP_SEARC.pack       (side="top", anchor="w", pady=(1,1), padx=(1,100))
-BT_SCOOP_INSTL = tk.Button(BOX_3, bg="#1d2027",fg="#6ae56a", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install      , text="-Install" ) ; BT_SCOOP_INSTL.pack      (side="top", anchor="w", pady=(1,1), padx=(1,100))
-BT_SCOOP_UINST = tk.Button(BOX_3, bg="#1d2027",fg="#ff3046", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall    , text="-Uninstall" ) ; BT_SCOOP_UINST.pack    (side="top", anchor="w", pady=(1,1), padx=(1,100))
-BT_SCOOP_INFOO = tk.Button(BOX_3, bg="#1d2027",fg="#fcffef", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_info         , text="-Info" ) ; BT_SCOOP_INFOO.pack         (side="top", anchor="w", pady=(1,1), padx=(1,100))
+# Scoop button
+scoop_menu = tk.Menu(FR_PROCESS, tearoff=0)
+scoop_menu.add_command(label="Search", command=scoop_search)
+scoop_menu.add_command(label="Install", command=scoop_install)
+scoop_menu.add_command(label="Uninstall", command=scoop_uninstall)
+scoop_menu.add_command(label="info", command=scoop_info)
+scoop_menu.add_command(label="FZF-install", command=scoop_install_fzf, background="green")
+scoop_menu.add_command(label="FZF-Uninstall", command=scoop_uninstall_fzf, background="red")
 
-BT_SCOOP_FINST = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_install_fzf  , text="-Search-FZF" ) ; BT_SCOOP_FINST.pack   (side="top", anchor="w", pady=(1,1), padx=(1,100))
-BT_SCOOP_FUNIN = tk.Button(BOX_3, bg="#1d2027",fg="#2e80f7", height=1, relief="flat", highlightthickness=0, font=("calibri",14,"bold"), command = scoop_uninstall_fzf, text="-Uninstall-FZF" ) ; BT_SCOOP_FUNIN.pack(side="top", anchor="w", pady=(1,1), padx=(1,100))
-
+scoop_button = ttk.Button(input_frame, text="Scoop", command=show_scoop_options)
+scoop_button.pack(side=tk.LEFT, padx=10)
 
 #*  ████████╗ ██████╗  ██████╗ ██╗     ███████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #*  ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -1464,7 +1477,7 @@ def force_restart():
 shutdown = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown.png"))
 restart = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\restart.png"))
 
-BOX_1 = tk.Frame(MAIN_FRAME, bg="black") ; BOX_1.pack(pady=(5,0))
+BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
 # force_shutdown_bt = tk.Button(BOX_1, text="Shutdown [F]", command=force_shutdown, height=1, width=15, bg="#ff0000", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 # force_restart_bt  = tk.Button(BOX_1, text="Restart [F]",  command=force_restart,  height=1, width=15, bg="#ff6600", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 force_shutdown_bt = tk.Button(BOX_1, image=shutdown,compound=tk.TOP, text="", command=force_shutdown, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
