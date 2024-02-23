@@ -62,7 +62,7 @@
 ; Run, "D:\@git\ms1\mypygui.py"
 ; return
 
-
+; ;!alt4 🎯 Launch My PYGui
 #x::
 IfWinExist, ahk_exe python.exe
 {
