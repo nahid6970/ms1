@@ -772,7 +772,7 @@ def open_ffmpeg_merge():
 def switch_to_ffmpeg_frame():
     switch_to_frame(FRAME_FFMPEG, MAIN_FRAME)
 
-BT_FFMPEG = M1_hold_release(MAIN_FRAME, "FFmpeg", switch_to_ffmpeg_frame, bg="#408b40", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#408b40", font=("JetBrainsMono NF", 13, "bold"))
+BT_FFMPEG = M1_hold_release(MAIN_FRAME, "FFmpeg", switch_to_ffmpeg_frame, bg="#408b40", fg="#FFFFFF", height=1, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#408b40", font=("JetBrainsMono NF", 13, "bold"))
 BT_FFMPEG.pack(padx=(0,0),pady=(0,0))
 
 FRAME_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=520, height=800) ; FRAME_FFMPEG.pack_propagate(False)
@@ -859,7 +859,7 @@ def ack_d():
 def switch_to_find_frame():
     switch_to_frame(FRAME_FIND, MAIN_FRAME)
 
-BT_FIND = M1_hold_release(MAIN_FRAME, "Find", switch_to_find_frame, bg="#FFFFFF", fg="#1D2027", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#FFFFFF", font=("JetBrainsMono NF", 13, "bold"))
+BT_FIND = M1_hold_release(MAIN_FRAME, "Find", switch_to_find_frame, bg="#FFFFFF", fg="#1D2027", height=1, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#FFFFFF", font=("JetBrainsMono NF", 13, "bold"))
 BT_FIND.pack(padx=(0,0),pady=(0,0))
 
 FRAME_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAME_FIND.pack_propagate(True)
