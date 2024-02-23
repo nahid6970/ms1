@@ -960,19 +960,19 @@ BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027")
 BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
 
 button_properties = [
-    ("All Apps"      ,open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    0 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("AppData"       ,open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    1 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Git Projects"  ,open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    2 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Packages"      ,open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    3 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("ProgramData"   ,open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    4 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Scoop"         ,open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    5 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Software"      ,open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    6 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Song"          ,open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    7 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Startup System",open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    8 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Startup User"  ,open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    9 ,1,1,1,       0,0, (0,0),(0,0)),
-    ("Temp-AppDate"  ,open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    10,1,1,1,       0,0, (0,0),(0,0)),
-    ("Temp-Windows"  ,open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    11,1,1,1,       0,0, (0,0),(0,0)),
-    ("WindowsApp"    ,open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    12,1,1,1,       0,0, (0,0),(0,0))
+("All Apps"      ,open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    0 ,1,1,1,       0,0, (0,0),(0,0)),
+("AppData"       ,open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    1 ,1,1,1,       0,0, (0,0),(0,0)),
+("Git Projects"  ,open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    2 ,1,1,1,       0,0, (0,0),(0,0)),
+("Packages"      ,open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    3 ,1,1,1,       0,0, (0,0),(0,0)),
+("ProgramData"   ,open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    4 ,1,1,1,       0,0, (0,0),(0,0)),
+("Scoop"         ,open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    5 ,1,1,1,       0,0, (0,0),(0,0)),
+("Software"      ,open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    6 ,1,1,1,       0,0, (0,0),(0,0)),
+("Song"          ,open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    7 ,1,1,1,       0,0, (0,0),(0,0)),
+("Startup System",open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    8 ,1,1,1,       0,0, (0,0),(0,0)),
+("Startup User"  ,open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    9 ,1,1,1,       0,0, (0,0),(0,0)),
+("Temp-AppDate"  ,open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    10,1,1,1,       0,0, (0,0),(0,0)),
+("Temp-Windows"  ,open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    11,1,1,1,       0,0, (0,0),(0,0)),
+("WindowsApp"    ,open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    12,1,1,1,       0,0, (0,0),(0,0))
 ]
 
 for button_props in button_properties:
