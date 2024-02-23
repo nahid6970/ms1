@@ -410,15 +410,15 @@ def create_label1(
     return label
 
 label_properties = [
-(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"right","e", (0,1),(0,0), 0,"#FFFFFF", ("ArialBlack" ,10,"bold"),"X")  ,
-(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",1,0,"right","e", (1,1),(0,2), 0,"#FFFFFF", ("calibri"    ,10,"bold"),"■")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"▼")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free"   ,10,"bold"),"◀")  ,
-(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"      ,10,"bold"),"1")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("ink free"   ,10,"bold"),"📌") ,
-(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"⭕")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"⚠️") ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"     ,10,"bold"),"⚠️")
+(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"right","e", (0,1),(0,0), 0,"#FFFFFF", ("times"    ,10,"bold"),"X")  ,
+(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",1,0,"right","e", (1,1),(0,2), 0,"#FFFFFF", ("calibri"  ,10,"bold"),"■")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"▼")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"◀")  ,
+(BOX_ROW_ROOT,"#1d2027","#f6d24a","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"1")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("ink free" ,10,"bold"),"📌") ,
+(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⭕")  ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️") ,
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️")
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_M, LB_L, LB_S, LB_1, LB_P, bkup, STATUS_MS1, STATUS_MS2 = labels
