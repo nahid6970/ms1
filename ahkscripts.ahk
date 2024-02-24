@@ -164,8 +164,6 @@ return
 ; return
 
 
-; Initialize a variable to keep track of the number of presses
-pressCount := 0
 
 ; Initialize a variable to keep track of the toggle state
 toggleState := 0
@@ -194,6 +192,17 @@ toggleState := 0
     ; Toggle the state for the next time
     toggleState := !toggleState
 return
+
+
+^!r::
+    ; Run Registry Editor
+    Run, regedit.exe
+    ; Wait for Registry Editor window to open (adjust the sleep time as needed)
+    Sleep, 500
+    ; Send keys to navigate to the specified registry key
+    Send, {Tab}{Tab}{Tab}{Down 3}{Right}
+return
+
 
 
 
