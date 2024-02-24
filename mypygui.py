@@ -395,23 +395,8 @@ def update_status():
         time.sleep(1)
 def extra_bar(event=None):
     subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\@py_scripts\\bar_1.py", "-WindowStyle", "Hidden"])
-def check_window_topmost():
-    if not ROOT.attributes('-topmost'):
-        ROOT.attributes('-topmost', True)
-    if checking:  # Only continue checking if the flag is True
-        ROOT.after(500, check_window_topmost)
 
-def toggle_checking():
-    global checking
-    checking = not checking
-    if checking:
-        check_window_topmost()  # Start checking if toggled on
-        bt_topmost_switch.config(fg="#FFFFFF")  # Change text color to green
-    else:
-        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
-        bt_topmost_switch.config(fg="#3bda00")  # Change text color to white
-
-BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(5,3),padx=(5,3))
+BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(5,0),padx=(5,3))
 
 def create_label1(
                   parent,
@@ -440,20 +425,18 @@ label_properties = [
 (BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",1,0,"right","e", (1,1),(0,2), 0,"#FFFFFF", ("calibri"  ,10,"bold"),"■")  ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"▼")  ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"◀")  ,
-(BOX_ROW_ROOT,"#FFFFFF","#000000","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"|")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"📌") ,
+(BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"+")  ,
 (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⭕")  ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️") ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️")
 ]
 labels = [create_label1(*prop) for prop in label_properties]
-LB_XXX, LB_M, LB_L, LB_S, LB_1, LB_P, bkup, STATUS_MS1, STATUS_MS2 = labels
+LB_XXX, LB_M, LB_L, LB_S, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
-LB_P.bind      ("<Button-1>", lambda event: toggle_checking   ())
 bkup.bind      ("<Button-1>", lambda event: git_sync          ())
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms2"))
@@ -494,6 +477,28 @@ label_properties = [
 labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
 
+
+def check_window_topmost():
+    if not ROOT.attributes('-topmost'):
+        ROOT.attributes('-topmost', True)
+    if checking:  # Only continue checking if the flag is True
+        ROOT.after(500, check_window_topmost)
+
+def toggle_checking():
+    global checking
+    checking = not checking
+    if checking:
+        check_window_topmost()  # Start checking if toggled on
+        BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to green
+    else:
+        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
+        BT_TOPMOST.config(fg="#3bda00")  # Change text color to white
+
+checking = True
+# Create the toggle button
+BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))  ; BT_TOPMOST.pack(pady=0)
+# Call the function to check window topmost status periodically
+check_window_topmost()
 
 #! BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3), padx=(5,3))  -----------------not needed as its in the first part
 
@@ -622,7 +627,7 @@ def update_time():
     LB_DATE['text'] = current_date
     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1493df") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(75,0),padx=(0,0), fill="x")
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1493df") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(80,0),padx=(0,0), fill="x")
 LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
 LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
 LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
@@ -1537,28 +1542,7 @@ force_restart_bt.pack (pady=0, side="left", anchor="w", padx=(30,0))
 #?  ╚═╝     ╚═╝╚═╝  ╚═══╝
 
 #! Top Most Toggle
-def check_window_topmost():
-    if not ROOT.attributes('-topmost'):
-        ROOT.attributes('-topmost', True)
-    if checking:  # Only continue checking if the flag is True
-        ROOT.after(500, check_window_topmost)
 
-def toggle_checking():
-    global checking
-    checking = not checking
-    if checking:
-        check_window_topmost()  # Start checking if toggled on
-        bt_topmost_switch.config(fg="#FFFFFF")  # Change text color to green
-    else:
-        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
-        bt_topmost_switch.config(fg="#3bda00")  # Change text color to white
-
-checking = True
-# # Create the toggle button
-# BOX_ROW_MAIN2 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_ROW_MAIN2.pack(pady=(5,0))
-# bt_topmost_switch = tk.Button(BOX_ROW_MAIN2, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 14, "bold"))  ; bt_topmost_switch.pack(pady=0)
-# # Call the function to check window topmost status periodically
-check_window_topmost()
 
 
 

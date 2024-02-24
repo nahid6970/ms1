@@ -3808,8 +3808,8 @@ godot-beta
 godot-mono-beta
 godot-mono-rc
 godot-rc
-godot4-mono
-godot4
+godot3-mono
+godot3
 gogs0
 goland-eap
 goland-rc
@@ -3884,6 +3884,11 @@ mingw-winlibs-ucrt-mcf
 mingw-winlibs-ucrt
 miniconda2
 miniconda3-4
+miniconda3-py310
+miniconda3-py311
+miniconda3-py37
+miniconda3-py38
+miniconda3-py39
 mongodb-rc
 mongodb34
 mongodb36
@@ -4104,6 +4109,7 @@ winpython38cod
 winpython38ps2
 wireshark3
 wireshark3
+wixtoolset3
 wox-beta
 xampp74
 xdman-beta
