@@ -196,6 +196,8 @@ return
 
 
 
+
+
 ; 🎯 RegEdit  open Run Path
 ^!r::
     ; Open Registry Editor
@@ -215,6 +217,8 @@ return
 ::cc-close::
 Run, "D:\@git\ms1\scripts\ahkcloseopen.py"
 return    
+
+
 
 
 
@@ -241,6 +245,8 @@ return
 
 
 
+
+
 ; 🎯 Copy File Path
 ^!m::
 ClipboardBackup := ClipboardAll
@@ -260,6 +266,11 @@ Clipboard := ClipBoardContent
 TrayTip, Copy as Path, Copied "%ClipBoardContent%" to clipboard.
 }
 return
+
+
+
+
+
 
 ; 🎯 Copy WSL Path
 ^!p::
@@ -286,8 +297,6 @@ return
     }
 
     return
-
-
 
 
 
