@@ -15,6 +15,7 @@
 ; win + v = launch valo.ahk
 ; win + x = pyscript
 ; win + z = taskmanager
+; CTRL+ALT+R = RegEdit  open Run Path
 
 
 ; ;now = Current date and time
@@ -195,6 +196,7 @@ return
 
 
 
+; 🎯 RegEdit  open Run Path
 ^!r::
     ; Open Registry Editor
     Run, regedit.exe
@@ -303,11 +305,11 @@ return
 ::;vv3::stupid kids get good.
 
 
-::a;::ALT
-::c;::CTRL
-::s;::SHIFT
-::ca;::CTRL{+}ALT
-::cs;::CTRL{+}SHIFT
-::csa;::CTRL{+}SHIFT{+}ALT
-::sa;::SHIFT{+}ALT
-::ss;::<SPACE>
+::;a::ALT
+::;c::CTRL
+::;s::SHIFT
+::;ca::CTRL{+}ALT
+::;cs::CTRL{+}SHIFT
+::;csa::CTRL{+}SHIFT{+}ALT
+::;sa::SHIFT{+}ALT
+::;ss::<SPACE>
