@@ -183,7 +183,7 @@ toggleState := 0
     ; Send keys to navigate to the "Hidden files and folders" options
     Loop % (toggleState ? 8 : 7) {
         Send, {Down}
-        Sleep, 100
+        Sleep, 1
     }
     ; Toggle the option
     Send, {Space}
