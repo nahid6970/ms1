@@ -396,7 +396,7 @@ def update_status():
 def extra_bar(event=None):
     subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\@py_scripts\\bar_1.py", "-WindowStyle", "Hidden"])
 
-BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(5,0),padx=(5,3))
+BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(5,2),padx=(5,3))
 
 def create_label1(
                   parent,
@@ -489,14 +489,14 @@ def toggle_checking():
     checking = not checking
     if checking:
         check_window_topmost()  # Start checking if toggled on
-        BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to green
+        BT_TOPMOST.config(fg="#3bda00")  # Change text color to green
     else:
         ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
-        BT_TOPMOST.config(fg="#3bda00")  # Change text color to white
+        BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to white
 
 checking = True
 # Create the toggle button
-BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))  ; BT_TOPMOST.pack(pady=0)
+BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#3bda00", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))  ; BT_TOPMOST.pack(pady=0)
 # Call the function to check window topmost status periodically
 check_window_topmost()
 
