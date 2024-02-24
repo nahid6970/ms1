@@ -15,7 +15,7 @@ required_libraries = [
     "tkinter.messagebox",
     "psutil",
     "threading",
-    "pyautogui"
+    "pyautogui",
 ]
 
 def install_missing_libraries():
@@ -46,6 +46,8 @@ import time
 import psutil
 import threading
 import pyautogui
+import tksvg
+
 
 # # For topmost
 # import win32gui
@@ -1521,7 +1523,7 @@ def force_restart():
     if confirmed:
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
-shutdown = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown.png"))
+shutdown = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown11.png"))
 restart = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\restart.png"))
 
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
@@ -1533,15 +1535,6 @@ force_restart_bt  = tk.Button(BOX_1, image=restart, compound=tk.TOP, text="", co
 force_shutdown_bt.pack(pady=0, side="left", anchor="w", padx=(0,30))
 force_restart_bt.pack (pady=0, side="left", anchor="w", padx=(30,0))
 
-
-#?  ██████╗ ██╗███╗   ██╗
-#?  ██╔══██╗██║████╗  ██║
-#?  ██████╔╝██║██╔██╗ ██║
-#?  ██╔═══╝ ██║██║╚██╗██║
-#?  ██║     ██║██║ ╚████║
-#?  ╚═╝     ╚═╝╚═╝  ╚═══╝
-
-#! Top Most Toggle
 
 
 

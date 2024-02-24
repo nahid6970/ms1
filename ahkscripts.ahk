@@ -299,6 +299,28 @@ return
     return
 
 
+^!o::
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+
+    if ErrorLevel
+    {
+        MsgBox, No valid file path found.
+    }
+    else
+    {
+        ClipBoardContent := Clipboard
+        ; Double every backslash in the path
+        StringReplace, ClipBoardContent, ClipBoardContent, \, \\, All
+        
+        Clipboard := ClipboardBackup
+        Clipboard := ClipBoardContent
+        TrayTip, Copy with Doubled Backslashes, Copied "%ClipBoardContent%" to clipboard.
+    }
+
+    return
 
 
 
