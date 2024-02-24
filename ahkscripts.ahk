@@ -194,14 +194,16 @@ toggleState := 0
 return
 
 
+
 ^!r::
-    ; Run Registry Editor
+    ; Open Registry Editor
     Run, regedit.exe
-    ; Wait for Registry Editor window to open (adjust the sleep time as needed)
+    ; Wait for Registry Editor to open (adjust the sleep time as needed)
     Sleep, 500
-    ; Send keys to navigate to the specified registry key
-    Send, {Tab}{Tab}{Tab}{Down 3}{Right}
+    ; Copy the registry path to clipboard
+    Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 return
+
 
 
 
