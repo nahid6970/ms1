@@ -148,20 +148,53 @@ return
 
 
 
-; 🎯 Show/Hide Hidden Files
+; ; 🎯 Show/Hide Hidden Files
+; ^!h::
+; RegRead, HiddenFiles_Status, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden
+; If (HiddenFiles_Status = 2)
+; {
+; RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden, 1
+; SendMessage, 0x111, 4146,,, ahk_class Progman
+; }
+; Else
+; {
+; RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden, 2
+; SendMessage, 0x111, 4146,,, ahk_class Progman
+; }
+; return
+
+
+; Initialize a variable to keep track of the number of presses
+pressCount := 0
+
+; Initialize a variable to keep track of the toggle state
+toggleState := 0
+
 ^!h::
-RegRead, HiddenFiles_Status, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden
-If (HiddenFiles_Status = 2)
-{
-RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden, 1
-SendMessage, 0x111, 4146,,, ahk_class Progman
-}
-Else
-{
-RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden, 2
-SendMessage, 0x111, 4146,,, ahk_class Progman
-}
+    ; Launch Control Panel with the "folders" argument
+    Run, control.exe folders,, Max
+    ; Wait for the Control Panel window to open (adjust the sleep time as needed)
+    Sleep, 500
+    ; Send keys to navigate to the "View" tab
+    Send, ^{Tab}
+    Send, {Tab}
+
+    ; Wait for the "View" tab to be selected
+    Sleep, 500
+    ; Send keys to navigate to the "Hidden files and folders" options
+    Loop % (toggleState ? 8 : 7) {
+        Send, {Down}
+        Sleep, 100
+    }
+    ; Toggle the option
+    Send, {Space}
+    ; Close the Control Panel window
+    Send, {Tab 2}{Enter}
+
+    ; Toggle the state for the next time
+    toggleState := !toggleState
 return
+
 
 
 
