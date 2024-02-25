@@ -1,41 +1,26 @@
- 
- ██████╗ ██╗    ██╗███████╗██╗  ██╗
- ██╔══██╗██║    ██║██╔════╝██║  ██║
- ██████╔╝██║ █╗ ██║███████╗███████║
- ██╔═══╝ ██║███╗██║╚════██║██╔══██║
- ██║     ╚███╔███╔╝███████║██║  ██║
- ╚═╝      ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝
-| PWSH Keybinding | Objective                    |
-| Ctrl+Space      | Auto Completion Scoop/Winget |
-| Ctrl+Space      | Scoop-Completion             |
-| F2              | Suggestions                  |
-
- ██╗   ██╗███████╗ ██████╗ ██████╗ ██████╗ ███████╗
- ██║   ██║██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝
- ██║   ██║███████╗██║     ██║   ██║██║  ██║█████╗  
- ╚██╗ ██╔╝╚════██║██║     ██║   ██║██║  ██║██╔══╝  
-  ╚████╔╝ ███████║╚██████╗╚██████╔╝██████╔╝███████╗
-   ╚═══╝  ╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝                                                   
-| VScode Keybinding | Objective                                               |
-| ALT+L ALT+O       | Live Server                                             |
-| alt+shift+;       | Align Multi Coulmns by Separator                        |
-| ALT+SHIFT+A       | Comment                                                 |
-| ALT+SHIFT+M1      | For Coulmns Select First Point & Alt+Shift & Last Point |
-| ALT+SHIFT+R       | Align by RegEx                                          |
-| ALT+SHIFT+RIGHT   | Select All Text Between Quates                          |
-| ALT+SHIFT+S       | Sort Lines Ascending                                    |
-| ALT+SHIFT+UP/DOWN | Copy The Same Line                                      |
-| CTRL+\            | Split Same Document                                     |
-| CTRL+ALT+UP/DOWN  | Add Cursor Above/Below                                  |
-| CTRL+F2           | Select All Similar Words Simultaneously                 |
-| CTRL+K CTRL+C     | Comment                                                 |
-| CTRL+SHIFT+~      | Terminal.New                                            |
-| CTRL+SHIFT+5      | Terminal.Split                                          |
-| CTRL+SHIFT+V      | Preview                                                 |
-| CTRL+T CTRL+T     | Table Format Properly                                   |
-| ctrl+alt+shift+n  | enable neovim                                           |
-| ctrl+alt+shift+m  | disable neovim                                          |
-| ctrl+w            | close tab                                               |
+| Default | WIN+CTRL+SHIFT+B  | instantly refresh graphics driver                       |
+| PWSH    | Ctrl+Space        | Auto Completion Scoop/Winget                            |
+| PWSH    | Ctrl+Space        | Scoop-Completion                                        |
+| PWSH    | F2                | Suggestions                                             |
+| VSCODE  | ALT+L ALT+O       | Live Server                                             |
+| VSCODE  | alt+shift+;       | Align Multi Coulmns by Separator                        |
+| VSCODE  | ALT+SHIFT+A       | Comment                                                 |
+| VSCODE  | ALT+SHIFT+M1      | For Coulmns Select First Point & Alt+Shift & Last Point |
+| VSCODE  | ALT+SHIFT+R       | Align by RegEx                                          |
+| VSCODE  | ALT+SHIFT+RIGHT   | Select All Text Between Quates                          |
+| VSCODE  | ALT+SHIFT+S       | Sort Lines Ascending                                    |
+| VSCODE  | ALT+SHIFT+UP/DOWN | Copy The Same Line                                      |
+| VSCODE  | CTRL+\            | Split Same Document                                     |
+| VSCODE  | CTRL+ALT+UP/DOWN  | Add Cursor Above/Below                                  |
+| VSCODE  | CTRL+F2           | Select All Similar Words Simultaneously                 |
+| VSCODE  | CTRL+K CTRL+C     | Comment                                                 |
+| VSCODE  | CTRL+SHIFT+~      | Terminal.New                                            |
+| VSCODE  | CTRL+SHIFT+5      | Terminal.Split                                          |
+| VSCODE  | CTRL+SHIFT+V      | Preview                                                 |
+| VSCODE  | CTRL+T CTRL+T     | Table Format Properly                                   |
+| VSCODE  | ctrl+alt+shift+n  | enable neovim                                           |
+| VSCODE  | ctrl+alt+shift+m  | disable neovim                                          |
+| VSCODE  | ctrl+w            | close tab                                               |
 
 - ctrl+shift+d = select similar words upward
 - alt+j = join lines
