@@ -1,4 +1,5 @@
-| Default | WIN+CTRL+SHIFT+B  | instantly refresh graphics driver                       |
+| Default | WIN+CTRL+SHIFT+B  | Graphics driver refresh                                 |
+| Default | WIN+CTRL+L        | Captions                                                |
 | PWSH    | Ctrl+Space        | Auto Completion Scoop/Winget                            |
 | PWSH    | Ctrl+Space        | Scoop-Completion                                        |
 | PWSH    | F2                | Suggestions                                             |
