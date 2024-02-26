@@ -1072,33 +1072,123 @@ BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_p
 FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FR_PROCESS.pack_propagate(False)
 BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
+# def process_name():
+#     # Assuming you have a Tkinter Entry widget for input
+#     additional_text = WIDGET_APPID.get()
+#     return additional_text
+
+# def get_process():
+#     additional_text = process_name()
+#     command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }}'
+#     try:
+#         subprocess.Popen(["powershell", "-Command", command])
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
+# def kil_process():
+#     additional_text = process_name()
+#     command = f'Stop-Process -Name {additional_text}'
+#     try:
+#         subprocess.Popen(["powershell", "-Command", command])
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
+# BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff") ; BOX_WIDGET_APPID.pack(pady=(80,0))
+# WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#fff", bg="#ff4f00", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
+# WIDGET_APPID.pack(padx=2, pady=2)
+
+# BOX_ROW_APPID2 = tk.Frame(FR_PROCESS, bg="black")
+# BOX_ROW_APPID2.pack(pady=2)
+# BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍"); BT_GET_ID.pack(side="left", pady=0)
+# BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌"); BT_KIL_ID.pack(side="left", pady=0)
+
 def process_name():
-    # Assuming you have a Tkinter Entry widget for input
     additional_text = WIDGET_APPID.get()
     return additional_text
+
+# def get_process():
+#     additional_text = process_name()
+#     command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }}'
+#     try:
+#         # Execute the PowerShell command and capture the output
+#         output = subprocess.check_output(["powershell", "-Command", command], shell=True, text=True)
+#         # Display the output in the GUI
+#         output_text.delete(1.0, tk.END)  # Clear previous output
+#         output_text.insert(tk.END, output)
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
+# def get_process():
+#     additional_text = process_name()
+#     command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName -AutoSize | Out-String'
+#     try:
+#         # Execute the PowerShell command and capture the output
+#         output = subprocess.check_output(["powershell", "-Command", command], shell=True, text=True)
+#         # Display the output in the GUI
+#         output_text.delete(1.0, tk.END)  # Clear previous output
+#         output_text.insert(tk.END, output)
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
+def highlight_matching_string(text_widget, pattern):
+    start_index = "1.0"
+    pattern = pattern.lower()  # Convert pattern to lowercase for case-insensitive search
+    while True:
+        start_index = text_widget.search(pattern, start_index, stopindex=tk.END, nocase=True)
+        if not start_index:
+            break
+        end_index = text_widget.index(f"{start_index}+{len(pattern)}c")
+        text_widget.tag_add("match", start_index, end_index)
+        text_widget.tag_config("match", foreground="red")
+        start_index = end_index
+
+
 def get_process():
     additional_text = process_name()
-    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }}'
+    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName -AutoSize | Out-String'
     try:
-        subprocess.Popen(["powershell", "-Command", command])
+        # Execute the PowerShell command and capture the output
+        output = subprocess.check_output(["powershell", "-Command", command], shell=True, text=True)
+        # Display the output in the GUI
+        output_text.delete(1.0, tk.END)  # Clear previous output
+        output_text.insert(tk.END, output)
+        # Highlight matching string in blue
+        highlight_matching_string(output_text, additional_text)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
+
 def kil_process():
     additional_text = process_name()
     command = f'Stop-Process -Name {additional_text}'
     try:
         subprocess.Popen(["powershell", "-Command", command])
+        # Display confirmation in the GUI
+        output_text.delete(1.0, tk.END)  # Clear previous output
+        output_text.insert(tk.END, f"Process {additional_text} killed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
+        # Display error message in the GUI
+        output_text.delete(1.0, tk.END)  # Clear previous output
+        output_text.insert(tk.END, f"Error: {e}")
 
-BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff") ; BOX_WIDGET_APPID.pack(pady=(80,0))
+
+BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff")
+BOX_WIDGET_APPID.pack(pady=(80,0))
 WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#fff", bg="#ff4f00", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
 WIDGET_APPID.pack(padx=2, pady=2)
 
 BOX_ROW_APPID2 = tk.Frame(FR_PROCESS, bg="black")
 BOX_ROW_APPID2.pack(pady=2)
-BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍"); BT_GET_ID.pack(side="left", pady=0)
-BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌"); BT_KIL_ID.pack(side="left", pady=0)
+BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍")
+BT_GET_ID.pack(side="left", pady=0)
+BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌")
+BT_KIL_ID.pack(side="left", pady=0)
+
+# Output text widget
+output_text = tk.Text(FR_PROCESS, height=10, width=80, font=("calibri", 12))
+output_text.pack()
+
+
 
 #*   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
 #*  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝    ██╔══██╗██╔══██╗██╔══██╗██╔════╝
