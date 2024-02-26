@@ -202,6 +202,38 @@ ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
 def close_window(event=None):
     ROOT.destroy()
 
+def check_window_topmost():
+    if not ROOT.attributes('-topmost'):
+        ROOT.attributes('-topmost', True)
+    if checking:  # Only continue checking if the flag is True
+        ROOT.after(500, check_window_topmost)
+
+# def toggle_checking():
+#     global checking
+#     checking = not checking
+#     if checking:
+#         check_window_topmost()  # Start checking if toggled on
+#         BT_TOPMOST.config(fg="#3bda00")  # Change text color to green
+#     else:
+#         ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
+#         BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to white
+
+# checking = True
+
+
+def toggle_checking():
+    global checking
+    checking = not checking
+    if checking:
+        if ROOT.attributes('-topmost'):  # Only start checking if already topmost
+            check_window_topmost()  # Start checking if toggled on and already topmost
+        BT_TOPMOST.config(fg="#3bda00")  # Change text color to green
+    else:
+        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
+        BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to white
+
+checking = False
+
 #! Resize Window
 def toggle_window_size(size):
     global window_state
@@ -235,6 +267,8 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 1002, 1038
         # x_coordinate, y_coordinate = 920, 1038
         # x_coordinate, y_coordinate = 1180, 0
+        if ROOT.attributes('-topmost'):
+             toggle_checking()
     elif size == '■':
         ROOT.geometry('520x800')
         ROOT.configure(bg='#1d2027')
@@ -252,6 +286,8 @@ def toggle_window_size(size):
         # x_coordinate, y_coordinate = 1002, 374
         # x_coordinate, y_coordinate = 1420, 162
         # x_coordinate, y_coordinate = 1180, 0
+        if checking:
+            toggle_checking()
     ROOT.focus_force()
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+{y_coordinate}')
@@ -480,25 +516,14 @@ labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
 
 
-def check_window_topmost():
-    if not ROOT.attributes('-topmost'):
-        ROOT.attributes('-topmost', True)
-    if checking:  # Only continue checking if the flag is True
-        ROOT.after(500, check_window_topmost)
+# # Create the toggle button
+# BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#3bda00", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))  ; BT_TOPMOST.pack(pady=0)
+# # Call the function to check window topmost status periodically
+# check_window_topmost()
 
-def toggle_checking():
-    global checking
-    checking = not checking
-    if checking:
-        check_window_topmost()  # Start checking if toggled on
-        BT_TOPMOST.config(fg="#3bda00")  # Change text color to green
-    else:
-        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
-        BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to white
-
-checking = True
 # Create the toggle button
-BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#3bda00", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))  ; BT_TOPMOST.pack(pady=0)
+BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))
+BT_TOPMOST.pack(pady=0)
 # Call the function to check window topmost status periodically
 check_window_topmost()
 
