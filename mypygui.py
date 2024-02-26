@@ -396,7 +396,7 @@ def update_status():
         # Update the status every second
         time.sleep(1)
 def extra_bar(event=None):
-    subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\@py_scripts\\bar_1.py", "-WindowStyle", "Hidden"])
+    subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(2,2),padx=(5,3))
 
@@ -1305,7 +1305,7 @@ def scoop_info():
 
 def scoop_install_fzf():
     # Path to the Python script generating the package list
-    python_script = r"D:\@git\ms1\scripts\@py_scripts\scoop_list.py"
+    python_script = r"D:\@git\ms1\scripts\python\scoop_list.py"
 
     # Run the Python script to generate the package list
     try:
@@ -1488,13 +1488,13 @@ BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 def font_style():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\@py_scripts\\font_style.py"],  shell=True)
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\python\\font_style.py"],  shell=True)
 def Keybinding():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\@py_scripts\\Keybinding.py"],  shell=True)
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\python\\Keybinding.py"],  shell=True)
 def dictionary():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\@py_scripts\\dictionary.py"],  shell=True)
+    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\python\\dictionary.py"],  shell=True)
 def regedit_run(event=None):
-    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\@py_scripts\\regedit.py", "-Verb", "RunAs"], shell=True)
+    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\python\\regedit.py", "-Verb", "RunAs"], shell=True)
 
 
 BT_font =        tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=font_style, text="Font Style")
