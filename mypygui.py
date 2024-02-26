@@ -1145,6 +1145,8 @@ def highlight_matching_string(text_widget, pattern):
 
 def get_process():
     additional_text = process_name()
+    if not additional_text:  # Check if input is empty
+        return  # Do nothing if input is empty
     command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName, Id -AutoSize | Out-String'
     try:
         # Execute the PowerShell command and capture the output
@@ -1171,6 +1173,25 @@ def kil_process():
         output_text.delete(1.0, tk.END)  # Clear previous output
         output_text.insert(tk.END, f"Error: {e.output}")
 
+def custom_command():
+    additional_text = process_name()
+    if not additional_text:  # Check if input is empty
+        return  # Do nothing if input is empty
+    profile_path = r'C:\Users\nahid\OneDrive\backup\Microsoft.PowerShell_profile.ps1'
+    command = f'powershell -ExecutionPolicy Bypass -NoProfile -Command "& {{ . {profile_path}; {additional_text} }}"'
+    try:
+        # Execute the custom PowerShell command and capture the output
+        output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True, text=True)
+        # Display the output in the GUI
+        output_text.delete(1.0, tk.END)  # Clear previous output
+        output_text.insert(tk.END, output)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+        # Display error message in the GUI
+        output_text.delete(1.0, tk.END)  # Clear previous output
+        output_text.insert(tk.END, f"Error: {e.output}")
+
+
 
 
 BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff")
@@ -1184,6 +1205,9 @@ BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, widt
 BT_GET_ID.pack(side="left", pady=0)
 BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌")
 BT_KIL_ID.pack(side="left", pady=0)
+# New button and function for running custom command
+BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="Run Command")
+BT_CUSTOM_CMD.pack(side="left", pady=0)
 
 # Output text widget
 output_text = tk.Text(FR_PROCESS, height=10, width=80, font=("JetBrainsMono NF", 12))
