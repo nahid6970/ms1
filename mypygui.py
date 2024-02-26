@@ -1145,7 +1145,7 @@ def highlight_matching_string(text_widget, pattern):
 
 def get_process():
     additional_text = process_name()
-    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName -AutoSize | Out-String'
+    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName, Id -AutoSize | Out-String'
     try:
         # Execute the PowerShell command and capture the output
         output = subprocess.check_output(["powershell", "-Command", command], shell=True, text=True)
@@ -1186,7 +1186,7 @@ BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, widt
 BT_KIL_ID.pack(side="left", pady=0)
 
 # Output text widget
-output_text = tk.Text(FR_PROCESS, height=10, width=80, font=("calibri", 12))
+output_text = tk.Text(FR_PROCESS, height=10, width=80, font=("JetBrainsMono NF", 12))
 output_text.pack()
 
 
