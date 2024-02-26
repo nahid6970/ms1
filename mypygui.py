@@ -1161,7 +1161,7 @@ def kil_process():
     additional_text = process_name()
     command = f'Stop-Process -Name {additional_text}'
     try:
-        subprocess.Popen(["powershell", "-Command", command])
+        subprocess.check_output(["powershell", "-Command", command], stderr=subprocess.STDOUT, shell=True, text=True)
         # Display confirmation in the GUI
         output_text.delete(1.0, tk.END)  # Clear previous output
         output_text.insert(tk.END, f"Process {additional_text} killed successfully.")
@@ -1169,7 +1169,8 @@ def kil_process():
         print(f"Error executing command: {e}")
         # Display error message in the GUI
         output_text.delete(1.0, tk.END)  # Clear previous output
-        output_text.insert(tk.END, f"Error: {e}")
+        output_text.insert(tk.END, f"Error: {e.output}")
+
 
 
 BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff")
