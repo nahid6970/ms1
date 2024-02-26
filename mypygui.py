@@ -1622,6 +1622,56 @@ BT_KeyBindings.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 BT_Dictionary .pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 LB_REGEDIT.pack(side="top", anchor='center', padx=(0,0), pady=(0,0)) ; LB_REGEDIT.bind("<Button-1>", regedit_run)
 
+
+def load_scripts(folder_path):
+    script_files = []
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            if file.endswith(('.ahk', '.ps1', '.py')):
+                script_files.append(os.path.join(root, file))
+    return script_files
+
+def folder_selected(event):
+    selected_folder = folder_var.get()
+    script_files = load_scripts(selected_folder)
+    script_var.set("Select a script")
+    script_dropdown['menu'].delete(0, 'end') # Clear previous items
+    for script_file in script_files:
+        script_dropdown['menu'].add_command(label=os.path.basename(script_file), command=tk._setit(script_var, os.path.abspath(script_file)))
+
+def run_script():
+    selected_script = script_var.get()
+    if selected_script:
+        subprocess.Popen(selected_script, shell=True)
+
+# Folders
+folders = [
+    "D:\\@git\\ms1\\scripts\\autohotkey",
+    "D:\\@git\\ms1\\scripts\\python"
+]
+BOX_PYTHON_2 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_2.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
+# Dropdown for folders
+folder_var = tk.StringVar(BOX_PYTHON_2)
+folder_var.set("Select a folder")
+folder_dropdown = tk.OptionMenu(BOX_PYTHON_2, folder_var, *folders, command=folder_selected)
+folder_dropdown.pack(side="left", padx=5, pady=10)
+folder_dropdown.configure(width=30, background="lightgray", foreground="black")
+folder_dropdown.config(indicatoron=False)
+
+
+# Dropdown for scripts
+script_var = tk.StringVar(BOX_PYTHON_2)
+script_var.set("Select a script")
+script_dropdown = tk.OptionMenu(BOX_PYTHON_2, script_var, "Select a script")
+script_dropdown.pack(side="left", padx=5, pady=10)
+script_dropdown.configure(width=30, background="lightgray", foreground="black")
+script_dropdown.config(indicatoron=False)
+
+
+# Run Button
+run_button = tk.Button(BOX_PYTHON_2, text="Run", command=run_script)
+run_button.pack(side="left", padx=5, pady=10)
+
 #! ██████╗ ███████╗███████╗████████╗ █████╗ ██████╗ ████████╗       ██╗       ███████╗██╗  ██╗██╗   ██╗████████╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
 #! ██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝       ██║       ██╔════╝██║  ██║██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗██║    ██║████╗  ██║
 #! ██████╔╝█████╗  ███████╗   ██║   ███████║██████╔╝   ██║       ████████╗    ███████╗███████║██║   ██║   ██║   ██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
