@@ -1305,7 +1305,7 @@ def scoop_info():
 
 def scoop_install_fzf():
     # Path to the Python script generating the package list
-    python_script = r"D:\@git\ms1\scripts\scoop\package_list_from_buckets.py"
+    python_script = r"D:\@git\ms1\scripts\@py_scripts\scoop_list.py"
 
     # Run the Python script to generate the package list
     try:
