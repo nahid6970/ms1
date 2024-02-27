@@ -1231,11 +1231,11 @@ BT_GET_ID.pack(side="left", pady=0)
 BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌")
 BT_KIL_ID.pack(side="left", pady=0)
 # New button and function for running custom command
-BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="Run Command")
+BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="🏃")
 BT_CUSTOM_CMD.pack(side="left", pady=0)
 
 # Output text widget
-output_text = tk.Text(FR_PROCESS, height=10, width=80, font=("JetBrainsMono NF", 12))
+output_text = tk.Text(FR_PROCESS, height=5, width=50, font=("JetBrainsMono NF", 12), bg="#ddf581")
 output_text.pack()
 
 
@@ -1680,7 +1680,7 @@ folder_var = tk.StringVar(BOX_PYTHON_2)
 folder_var.set("Select a folder")
 folder_dropdown = tk.OptionMenu(BOX_PYTHON_2, folder_var, *folders, command=folder_selected)
 folder_dropdown.pack(side="left", padx=5, pady=10)
-folder_dropdown.configure(width=30, background="#ddf581", foreground="black")
+folder_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 8))
 folder_dropdown.config(indicatoron=False)
 
 
@@ -1689,12 +1689,11 @@ script_var = tk.StringVar(BOX_PYTHON_2)
 script_var.set("Select a script")
 script_dropdown = tk.OptionMenu(BOX_PYTHON_2, script_var, "Select a script")
 script_dropdown.pack(side="left", padx=5, pady=10)
-script_dropdown.configure(width=30, background="#ddf581", foreground="black")
+script_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 8))
 script_dropdown.config(indicatoron=False)
 
-
 # Run Button
-run_button = tk.Button(BOX_PYTHON_2, text="Run", command=run_script)
+run_button = tk.Button(BOX_PYTHON_2, text="Run", command=run_script, bg="#41abff", font=("JetBrainsMono NF", 8))
 run_button.pack(side="left", padx=5, pady=10)
 
 #! ██████╗ ███████╗███████╗████████╗ █████╗ ██████╗ ████████╗       ██╗       ███████╗██╗  ██╗██╗   ██╗████████╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
