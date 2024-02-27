@@ -1216,22 +1216,19 @@ def custom_command():
         output_text.delete(1.0, tk.END)  # Clear previous output
         output_text.insert(tk.END, f"Error: {e.output}")
 
-
-
-
 BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff")
 BOX_WIDGET_APPID.pack(pady=(80,0))
-WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#fff", bg="#ff4f00", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
+WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#FFFFFF", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
 WIDGET_APPID.pack(padx=2, pady=2)
 
 BOX_ROW_APPID2 = tk.Frame(FR_PROCESS, bg="black")
 BOX_ROW_APPID2.pack(pady=2)
-BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍")
+BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#00ff21", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍")
 BT_GET_ID.pack(side="left", pady=0)
 BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌")
 BT_KIL_ID.pack(side="left", pady=0)
 # New button and function for running custom command
-BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="🏃")
+BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#41abff", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="🏃")
 BT_CUSTOM_CMD.pack(side="left", pady=0)
 
 #?   ██╗ ██╗     ██╗    ██╗       ██╗       ███████╗
@@ -1373,8 +1370,6 @@ def scoop_uninstall_fzf():
 input_frame = tk.Frame(FR_PROCESS, bg="#1D2027")
 input_frame.pack(pady=10)
 
-# Text input
-
 # Winget button
 winget_menu = tk.Menu(FR_PROCESS, tearoff=0)
 winget_menu.add_command(label="Search", command=winget_search)
@@ -1384,9 +1379,8 @@ winget_menu.add_command(label="Info", command=winget_infooo)
 winget_menu.add_command(label="FZF-Install", command=wget_inst_fzf, background="green")
 winget_menu.add_command(label="FZF-Uninstall", command=wget_unin_fzf, background="red")
 
-winget_button = ttk.Button(input_frame, text="Winget", command=show_winget_options)
+winget_button = ttk.Button(input_frame, text="Winget", command=show_winget_options, width=35)
 winget_button.pack(side=tk.LEFT, padx=10)
-
 
 # Scoop button
 scoop_menu = tk.Menu(FR_PROCESS, tearoff=0)
@@ -1397,12 +1391,12 @@ scoop_menu.add_command(label="info", command=scoop_info)
 scoop_menu.add_command(label="FZF-install", command=scoop_install_fzf, background="green")
 scoop_menu.add_command(label="FZF-Uninstall", command=scoop_uninstall_fzf, background="red")
 
-scoop_button = ttk.Button(input_frame, text="Scoop", command=show_scoop_options)
+scoop_button = ttk.Button(input_frame, text="Scoop", command=show_scoop_options, width=35)
 scoop_button.pack(side=tk.LEFT, padx=10)
 
 
-# Output text widget
-output_text = tk.Text(FR_PROCESS, height=5, width=50, font=("JetBrainsMono NF", 12), bg="#ddf581")
+#! Output text widget
+output_text = tk.Text(FR_PROCESS, height=15, width=50, font=("JetBrainsMono NF", 12), bg="#ddf581")
 output_text.pack()
 
 #*   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
