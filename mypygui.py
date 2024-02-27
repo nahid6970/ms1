@@ -1680,7 +1680,7 @@ folder_var = tk.StringVar(BOX_PYTHON_2)
 folder_var.set("Select a folder")
 folder_dropdown = tk.OptionMenu(BOX_PYTHON_2, folder_var, *folders, command=folder_selected)
 folder_dropdown.pack(side="left", padx=5, pady=10)
-folder_dropdown.configure(width=30, background="lightgray", foreground="black")
+folder_dropdown.configure(width=30, background="#ddf581", foreground="black")
 folder_dropdown.config(indicatoron=False)
 
 
@@ -1689,7 +1689,7 @@ script_var = tk.StringVar(BOX_PYTHON_2)
 script_var.set("Select a script")
 script_dropdown = tk.OptionMenu(BOX_PYTHON_2, script_var, "Select a script")
 script_dropdown.pack(side="left", padx=5, pady=10)
-script_dropdown.configure(width=30, background="lightgray", foreground="black")
+script_dropdown.configure(width=30, background="#ddf581", foreground="black")
 script_dropdown.config(indicatoron=False)
 
 
