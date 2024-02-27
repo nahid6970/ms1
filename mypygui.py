@@ -1671,8 +1671,8 @@ def run_script():
 
 # Folders
 folders = [
-    "D:\\@git\\ms1\\scripts\\autohotkey",
-    "D:\\@git\\ms1\\scripts\\python"
+"D:\\@git\\ms1\\scripts\\autohotkey",
+"D:\\@git\\ms1\\scripts\\python"
 ]
 BOX_PYTHON_2 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_2.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 # Dropdown for folders
