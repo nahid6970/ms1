@@ -208,6 +208,19 @@ def check_window_topmost():
     if checking:  # Only continue checking if the flag is True
         ROOT.after(500, check_window_topmost)
 
+# def toggle_checking():
+#     global checking
+#     checking = not checking
+#     if checking:
+#         check_window_topmost()  # Start checking if toggled on
+#         BT_TOPMOST.config(fg="#3bda00")  # Change text color to green
+#     else:
+#         ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
+#         BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to white
+
+# checking = True
+
+
 def toggle_checking():
     global checking
     checking = not checking
@@ -502,11 +515,61 @@ label_properties = [
 labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
 
+
+# # Create the toggle button
+# BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#3bda00", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))  ; BT_TOPMOST.pack(pady=0)
+# # Call the function to check window topmost status periodically
+# check_window_topmost()
+
 # Create the toggle button
 BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))
 BT_TOPMOST.pack(pady=0)
 # Call the function to check window topmost status periodically
 check_window_topmost()
+
+#! BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(3,3), padx=(5,3))  -----------------not needed as its in the first part
+
+# LB_XXX = tk.Label  (BOX_ROW_ROOT, bg="#1d2027", fg="#ff0000", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="X", font= ("Arial Black", 10, "bold"))
+# LB_XXX.pack(side="right", anchor="e", padx=(0,1), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+
+# LB_M = tk.Label(BOX_ROW_ROOT, text="■", font=("Segoe UI", 10, "bold" ), bg="#1d2027", fg="#26b2f3", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_L = tk.Label(BOX_ROW_ROOT, text="▼", font=("Segoe UI", 10, "bold"  ), bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_S = tk.Label(BOX_ROW_ROOT, text="◀", font=("Segoe UI", 10, "bold"), bg="#1d2027", fg="#FFFFFF", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_E = tk.Label(BOX_ROW_ROOT, text="1", font= ("Times", 10, "bold"), bg="#1d2027", fg="#f6d24a", width=" 1", height="1", relief="flat", highlightthickness=1, highlightbackground="#FFFFFF", padx=0, pady=0)
+# LB_M.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('■'))
+# LB_L.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('▼'))
+# LB_S.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_S.bind("<Button-1>", lambda event: toggle_window_size('◀'))
+# LB_E.pack(side="right", anchor="e", padx=(1,1), pady=(0,0)) ; LB_E.bind("<Button-1>", lambda event: extra_bar())
+
+
+# bkup = tk.Label(BOX_ROW_ROOT, bg="#1d2027", fg="#00FF00", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⭕", font= ("agency", 10, "bold"))
+# bkup.bind("<Button-1>", lambda event: git_sync()) ; bkup.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
+
+
+# STATUS_MS1 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
+# STATUS_MS2 = tk.Label(BOX_ROW_ROOT, bg="#1d2027", width=" 2", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="⚠️", font= ("agency", 10, "bold"))
+# STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms1")) ; STATUS_MS1.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
+# STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("D:\\@git\\ms2")) ; STATUS_MS2.pack(side="left", anchor="e", padx=(0,3), pady=(0,0))
+
+# LB_CPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="CPU",    font = ("comic", 10, "bold"))
+# LB_GPU    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="GPU",    font = ("comic", 10, "bold"))
+# LB_RAM    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="RAM",    font = ("comic", 10, "bold"))
+# LB_DUD    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk D", font = ("comic", 10, "bold"))
+# LB_DUC    = tk.Label(BOX_ROW_ROOT, width ="4", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="Disk C", font = ("comic", 10, "bold"))
+# LB_UPLOAD = tk.Label(BOX_ROW_ROOT, width ="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▲",      font = ("comic", 10, "bold"))
+# LB_DWLOAD = tk.Label(BOX_ROW_ROOT, width ="5", height="1", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0, text="▼",      font = ("comic", 10, "bold"))
+# LB_CPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_GPU.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_RAM.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_DUC.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_DUD.pack     (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_UPLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# LB_DWLOAD.pack  (side="left", anchor="e", padx=(0,3), pady=(0,0))
+# update_info_labels()
+
+# Create label to display git path and status for ms1 project
+#path_label2 = tk.Label(BOX_ROW_ROOT, text="ms2") ; path_label2.pack(pady=(10, 0))
+#path_label1 = tk.Label(BOX_ROW_ROOT, text="ms1") ; path_label1.pack(pady=(10, 0))
 
 #????????????????????????????????????????????????????????????w
 #????????????????????????????????????????????????????????????
@@ -658,6 +721,89 @@ BACKUP_BT = tk.Label(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=1
 UPDATE_BT = tk.Label(BOX_ROW_MAIN, bg="#0047ab", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#0047ab", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Update")
 BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0) ; BACKUP_BT.bind("<Button-1>", open_backup)
 UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0) ; UPDATE_BT.bind("<Button-1>", open_update)
+
+#! Backup
+# last_backup_click_time = None
+# def open_backup(event=None):
+#     global last_backup_click_time
+#     last_backup_click_time = datetime.now()  # Update the last clicked time
+#     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\backup.ps1"], shell=True)
+#     update_last_backup_click_time()
+# def update_last_backup_click_time():
+#     global last_backup_click_time
+#     if last_backup_click_time:
+#         time_diff = datetime.now() - last_backup_click_time
+#         days = time_diff.days
+#         hours, remainder = divmod(time_diff.seconds, 3600)
+#         minutes, seconds = divmod(remainder, 60)
+#         BACKUP_BT.config(text=f"Backup ({days}d {hours}h {minutes}m)")
+#         # Write last click time to log file
+#         with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\backup_bt.log", "w") as log_file:
+#             log_file.write(last_backup_click_time.isoformat())
+#     else:
+#         BACKUP_BT.config(text="Backup")
+#     # Schedule the next update after 1 minute
+#     BACKUP_BT.after(60000, update_last_backup_click_time)
+# def load_last_backup_click_time():
+#     global last_backup_click_time
+#     try:
+#         with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\backup_bt.log", "r") as log_file:
+#             last_backup_click_time_str = log_file.read().strip()
+#             if last_backup_click_time_str:
+#                 last_backup_click_time = datetime.fromisoformat(last_backup_click_time_str)
+#     except FileNotFoundError:
+#         pass
+# # Create a frame to hold the button
+# ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#21a366") ; ROOT_ROW_BOX.pack(side="top", fill="x")
+# # Create the backup button
+# BACKUP_BT = tk.Label(ROOT_ROW_BOX, bg="#21a366", fg="#ffffff", height=1, width="0", relief="flat", highlightthickness=1, highlightbackground="#21a366", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Backup")
+# BACKUP_BT.pack(side="top", padx=(0, 0), pady=0) ; BACKUP_BT.bind("<Button-1>", open_backup)
+# # Load last click time from log file
+# load_last_backup_click_time()
+# # Update the last click time periodically
+# update_last_backup_click_time()
+
+#! Update
+# last_update_click_time = None
+# def open_update(event=None):
+#     global last_update_click_time
+#     last_update_click_time = datetime.now()
+#     subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"], shell=True)
+#     update_last_update_click_time()
+
+# def update_last_update_click_time():
+#     global last_update_click_time
+#     if last_update_click_time:
+#         time_diff = datetime.now() - last_update_click_time
+#         days = time_diff.days
+#         hours, remainder = divmod(time_diff.seconds, 3600)
+#         minutes, seconds = divmod(remainder, 60)
+#         UPDATE_BT.config(text=f"Update ({days}d {hours}h {minutes}m)")
+#         # Write last click time to log file
+#         with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\update_bt.log", "w") as log_file:
+#             log_file.write(last_update_click_time.isoformat())
+#     # Schedule the next update after 1 minute
+#     UPDATE_BT.after(60000, update_last_update_click_time)
+# def load_last_update_click_time():
+#     global last_update_click_time
+#     try:
+#         with open("C:\\Users\\nahid\\OneDrive\\backup\\py_logs\\update_bt.log", "r") as log_file:
+#             last_update_click_time_str = log_file.read().strip()
+#             if last_update_click_time_str:
+#                 last_update_click_time = datetime.fromisoformat(last_update_click_time_str)
+#     except FileNotFoundError:
+#         pass
+# # Create a frame to hold the button
+# ROOT_ROW_BOX = tk.Frame(MAIN_FRAME, bg="#0047ab")
+# ROOT_ROW_BOX.pack(side="top", fill="x")
+# # Create the update button
+# UPDATE_BT = tk.Label(ROOT_ROW_BOX, bg="#0047ab", fg="#ffffff", height=1, width="0", relief="flat", highlightthickness=1, highlightbackground="#0047ab", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Update")
+# UPDATE_BT.pack(side="top", padx=(0, 0), pady=0)
+# UPDATE_BT.bind("<Button-1>", open_update)
+# # Load last update click time from log file
+# load_last_update_click_time()
+# # Update the last update click time periodically
+# update_last_update_click_time()
 
 #! Drive size analyze using rclone
 def c_size(event=None):
@@ -951,10 +1097,63 @@ BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_p
 FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FR_PROCESS.pack_propagate(False)
 BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
+# def insert_input():
+#     # Assuming you have a Tkinter Entry widget for input
+#     additional_text = WIDGET_APPID.get()
+#     return additional_text
+
+# def get_process():
+#     additional_text = insert_input()
+#     command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }}'
+#     try:
+#         subprocess.Popen(["powershell", "-Command", command])
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
+# def kil_process():
+#     additional_text = insert_input()
+#     command = f'Stop-Process -Name {additional_text}'
+#     try:
+#         subprocess.Popen(["powershell", "-Command", command])
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
+# BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff") ; BOX_WIDGET_APPID.pack(pady=(80,0))
+# WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#fff", bg="#ff4f00", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
+# WIDGET_APPID.pack(padx=2, pady=2)
+
+# BOX_ROW_APPID2 = tk.Frame(FR_PROCESS, bg="black")
+# BOX_ROW_APPID2.pack(pady=2)
+# BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#1d2027", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍"); BT_GET_ID.pack(side="left", pady=0)
+# BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌"); BT_KIL_ID.pack(side="left", pady=0)
 
 def insert_input():
     additional_text = WIDGET_APPID.get()
     return additional_text
+
+# def get_process():
+#     additional_text = insert_input()
+#     command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }}'
+#     try:
+#         # Execute the PowerShell command and capture the output
+#         output = subprocess.check_output(["powershell", "-Command", command], shell=True, text=True)
+#         # Display the output in the GUI
+#         output_text.delete(1.0, tk.END)  # Clear previous output
+#         output_text.insert(tk.END, output)
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
+# def get_process():
+#     additional_text = insert_input()
+#     command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName -AutoSize | Out-String'
+#     try:
+#         # Execute the PowerShell command and capture the output
+#         output = subprocess.check_output(["powershell", "-Command", command], shell=True, text=True)
+#         # Display the output in the GUI
+#         output_text.delete(1.0, tk.END)  # Clear previous output
+#         output_text.insert(tk.END, output)
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
 
 def highlight_matching_string(text_widget, pattern):
     start_index = "1.0"
@@ -967,6 +1166,7 @@ def highlight_matching_string(text_widget, pattern):
         text_widget.tag_add("match", start_index, end_index)
         text_widget.tag_config("match", foreground="red")
         start_index = end_index
+
 
 def get_process():
     additional_text = insert_input()
@@ -1349,6 +1549,24 @@ FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAM
 
 BT_BACK = tk.Button(FRAME_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_TOOLS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
+
+# BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
+# adapter_bt      = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=advanced_adapter,  text="Advanced Adapter",         ) ; adapter_bt.pack     (pady=(1,0))
+# chkdsk_bt       = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_chkdsk,       text="CheckDisk",                ) ; chkdsk_bt.pack      (pady=(1,0))
+# ctt_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=ctt,               text="Chris Titus Win Utility",  ) ; ctt_bt.pack         (pady=(1,0))
+# diskcleanmgr_bt = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_cleanmgr,     text="Disk Cleanup",             ) ; diskcleanmgr_bt.pack(pady=(1,0))
+# dism_bt         = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_dism,         text="DISM",                     ) ; dism_bt.pack        (pady=(1,0))
+# dxdiag_bt       = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_dxdiag,       text="DxDiag",                   ) ; dxdiag_bt.pack      (pady=(1,0))
+# flushdns_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=flush_dns,         text="Flush DNS",                ) ; flushdns_bt.pack    (pady=(1,0))
+# msconfig_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_msconfig,     text="msconfig",                 ) ; msconfig_bt.pack    (pady=(1,0))
+# netplwiz_bt     = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_netplwiz,     text="Netplwiz",                 ) ; netplwiz_bt.pack    (pady=(1,0))
+# powerplan_bt    = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_powerplan,    text="Power Plan",               ) ; powerplan_bt.pack   (pady=(1,0))
+# sfc_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_sfc,          text="SFC",                      ) ; sfc_bt.pack         (pady=(1,0))
+# snip_bt         = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_snippingtool, text="Sniping Tool",             ) ; snip_bt.pack        (pady=(1,0))
+# systeminfo_bt   = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_systeminfo,   text="Systeminfo",               ) ; systeminfo_bt.pack  (pady=(1,0))
+# uac_bt          = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=open_uac,          text="UAC",                      ) ; uac_bt.pack         (pady=(1,0))
+# winfeatures_bt  = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=optionalfeatures,  text="Turn on Windows Features", ) ; winfeatures_bt.pack (pady=(1,0))
+# Winsock_bt      = tk.Button(BOX_1, bg="white", fg ="#1D2027", height =1, width=25, relief="solid", bd=0, highlightthickness=0, anchor="w", font=("agency", 14, "bold"), command=winsock_reset,     text="Winsock Reset",            ) ; Winsock_bt.pack     (pady=(1,0))
 
 def create_button(text, command, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, anchor_button):
     button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command, anchor=anchor_button)
