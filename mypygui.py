@@ -1144,13 +1144,10 @@ def scoop_install_fzf():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
         return
-
     # Path to the text file containing package list
     package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
-
     # Command to read from the text file and pipe it to fzf
     command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
-
     try:
         subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
     except subprocess.CalledProcessError as e:
