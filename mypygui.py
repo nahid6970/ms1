@@ -1101,9 +1101,9 @@ def wget_unin_fzf():
 def scoop_search():
     additional_text = insert_input()
     additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Search\' ; scoop search {additional_text}"'
+    command = f'$host.UI.RawUI.WindowTitle = "Scoop-Search" ; pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Search\' ; scoop search {additional_text}"' #! tf how it works??????????????????
     try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
+        subprocess.Popen([ "start", "powershell", "-NoExit", "-Command", command], shell=True)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
