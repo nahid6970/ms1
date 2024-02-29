@@ -1218,13 +1218,12 @@ def launch_autoruns():
     except subprocess.CalledProcessError as e:
         print(f"Error launching Autoruns: {e}")
 
-BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, height=1, width=20, bg="#1d2027", fg="#fff", bd=0, highlightthickness=0, font=("times", 14, "bold"))
+BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, height=1, width=20, bg="#FFFFFF", fg="#000000", highlightthickness=5, font=("JetBrainsMono NF", 12, "bold"))
 BT_AUTORUNS.pack(pady=(10, 0))
 
 
-
-BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#fff", fg="#000", width=20, highlightthickness=5, anchor="center", font=("times", 12, "bold"))
-BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(25,0))
+BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#fff", fg="#000", width=20, highlightthickness=5, anchor="center", font=("JetBrainsMono NF", 12, "bold"))
+BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(5,0))
 
 Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; Page1.pack_propagate(False)
 
@@ -1232,7 +1231,7 @@ BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCES
 
 
 LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
-LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(0,0))
+LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(80,0))
 
 def check_installation(app_name, paths_to_check, chkbx_var, chkbox_bt):
     application_installed = any(os.path.exists(path) for path in paths_to_check)
@@ -1273,15 +1272,15 @@ applications = [
 # Create and pack checkboxes, check buttons, and install buttons for each application
 for app in applications:
     frame = tk.Frame(Page1, bg="#1d2027")
-    frame.pack( padx=(5,0), pady=(5,0), anchor="ne")
+    frame.pack( padx=(5,0), pady=(5,0), anchor="center")
 
-    chkbox_bt = tk.Checkbutton(frame, text=app["name"], variable=app["chkbx_var"], font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="solid", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
+    chkbox_bt = tk.Checkbutton(frame, text=app["name"], variable=app["chkbx_var"], font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
     chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
     ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda app=app: install_application(app["name"], app["install_command"], app["chkbx_var"], chkbox_bt))
 
-    chkbox_bt.pack(side="left", padx=(0,5  ), pady=(0,0))
-    chk_bt.pack   (side="left", padx=(10,0 ), pady=(0,0))
-    ins_bt.pack   (side="left", padx=(0,100), pady=(0,0))
+    chkbox_bt.pack(side="left", padx=(0,0  ), pady=(0,0))
+    chk_bt.pack   (side="left", padx=(0,0 ), pady=(0,0))
+    ins_bt.pack   (side="left", padx=(0,0), pady=(0,0))
 
     # Check installation status at the start
     check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt)
