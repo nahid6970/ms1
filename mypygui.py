@@ -1443,22 +1443,24 @@ BOX_PYTHON_2 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_2.pack(side="
 folder_var = tk.StringVar(BOX_PYTHON_2)
 folder_var.set("Select a folder")
 folder_dropdown = tk.OptionMenu(BOX_PYTHON_2, folder_var, *folders, command=folder_selected)
-folder_dropdown.pack(side="left", padx=5, pady=10)
-folder_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 8))
-folder_dropdown.config(indicatoron=False)
 
+folder_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 10))
+folder_dropdown.config(indicatoron=False)
 
 # Dropdown for scripts
 script_var = tk.StringVar(BOX_PYTHON_2)
 script_var.set("Select a script")
 script_dropdown = tk.OptionMenu(BOX_PYTHON_2, script_var, "Select a script")
-script_dropdown.pack(side="left", padx=5, pady=10)
-script_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 8))
+script_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 10))
 script_dropdown.config(indicatoron=False)
 
-# Run Button
-run_button = tk.Button(BOX_PYTHON_2, text="Run", command=run_script, bg="#41abff", font=("JetBrainsMono NF", 8))
-run_button.pack(side="left", padx=5, pady=10)
+run_button = tk.Button(BOX_PYTHON_2, text="Run", command=run_script, bg="#41abff", font=("JetBrainsMono NF", 12))
+
+folder_dropdown.grid(row=0, column=1, rowspan=1, padx=5, pady=10)
+script_dropdown.grid(row=1, column=1, rowspan=1, padx=5, pady=10)
+run_button.grid(row=0, column=2, rowspan=2, padx=5, pady=10, sticky="nsew") #! nwse means full filling up down left right spaces so if ns means fullfill up and down portion
+
+
 
 #! ██████╗ ███████╗███████╗████████╗ █████╗ ██████╗ ████████╗       ██╗       ███████╗██╗  ██╗██╗   ██╗████████╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
 #! ██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝       ██║       ██╔════╝██║  ██║██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗██║    ██║████╗  ██║
