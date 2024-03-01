@@ -1234,7 +1234,7 @@ BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCES
 
 
 LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
-LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(100,0))
+LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(50,0))
 
 # # Create the search box label
 # search_label = tk.Label(Page1, text="Search:", bg="#1d2027", fg="#fff", font=("calibri", 12, "bold"))
