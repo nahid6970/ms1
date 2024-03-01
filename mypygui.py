@@ -1250,6 +1250,20 @@ def install_application(app_name, install_command, chkbx_var, chkbox_bt):
     if not chkbx_var.get():
         chkbox_bt.config(foreground="green")
 
+def uninstall_application(app_name, uninstall_command, chkbx_var, chkbox_bt):
+    subprocess.Popen(uninstall_command)
+    chkbx_var.set(0)
+    chkbox_bt.config(foreground="red")
+
+def get_installation_source(app_name):
+    scoop_path = r'C:\Users\nahid\scoop\apps'
+    app_path = os.path.join(scoop_path, app_name)
+    if os.path.exists(app_path):
+        return "[scoop]"
+    elif any(os.path.exists(path) for path in app.get("paths", [])):
+        return "[winget]"
+    return "[X]"
+
 # Variable to track checkbox state
 chkbx_rclone = tk.IntVar()
 chkbx_powertoys = tk.IntVar()
@@ -1260,27 +1274,34 @@ chkbx_bazarr = tk.IntVar()
 
 # Define applications and their information
 applications = [
-    {"name": "Rclone", "paths": [r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe', r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue \'- Scoop Install\' ; scoop install rclone"', "chkbx_var": chkbx_rclone},
-    {"name": "Powertoys", "paths": [r'C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe', r'C:\Program Files\PowerToys\PowerToys.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Scoop Install\' ; scoop install PowerToys"', "chkbx_var": chkbx_powertoys},
-    {"name": "Sonarr", "paths": [r'C:\ProgramData\Sonarr\bin\Sonarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamSonarr.Sonarr"', "chkbx_var": chkbx_sonarr},
-    {"name": "Radarr", "paths": [r'C:\ProgramData\Radarr\bin\Radarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamRadarr.Radarr"', "chkbx_var": chkbx_radarr},
-    {"name": "Prowlarr", "paths": [r'C:\ProgramData\Prowlarr\bin\Prowlarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamProwlarr.Prowlarr"', "chkbx_var": chkbx_prowlarr},
-    {"name": "Bazarr", "paths": [r'C:\ProgramData\Bazarr\bin\Bazarr.exe'], "install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install Morpheus.Bazarr"', "chkbx_var": chkbx_bazarr},
+    {"name": "Rclone"   ,"paths": [r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe'      ,r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe'],"install_command": 'pwsh -Command "cd ; write-host -foreground blue \'- Scoop Install\' ; scoop install rclone"'                   ,"uninstall_command": 'pwsh -Command "cd ; write-host -foreground blue \'- Winget Uninstall\' ; winget uninstall rclone"'    ,"chkbx_var": chkbx_rclone}   ,
+    {"name": "Powertoys","paths": [r'C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe',r'C:\Program Files\PowerToys\PowerToys.exe']                                                                                                          ,"install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Scoop Install\' ; scoop install PowerToys"'               ,"uninstall_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Uninstall\' ; winget uninstall PowerToys"',"chkbx_var": chkbx_powertoys},
+    {"name": "Sonarr"   ,"paths": [r'X:\X'                                                     ,r'C:\ProgramData\Sonarr\bin\Sonarr.exe']                                                                                                              ,"install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamSonarr.Sonarr"'     ,"uninstall_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Uninstall\' ; winget uninstall Sonarr"'   ,"chkbx_var": chkbx_sonarr}   ,
+    {"name": "Radarr"   ,"paths": [r'X:\X'                                                     ,r'C:\ProgramData\Radarr\bin\Radarr.exe' ]                                                                                                             ,"install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamRadarr.Radarr"'     ,"uninstall_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Uninstall\' ; winget uninstall Radarr"'   ,"chkbx_var": chkbx_radarr}   ,
+    {"name": "Prowlarr" ,"paths": [r'X:\X'                                                     ,r'C:\ProgramData\Prowlarr\bin\Prowlarr.exe']                                                                                                          ,"install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install TeamProwlarr.Prowlarr"' ,"uninstall_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Uninstall\' ; winget uninstall Prowlarr"' ,"chkbx_var": chkbx_prowlarr} ,
+    {"name": "Bazarr"   ,"paths": [r'X:\X'                                                     ,r'C:\ProgramData\Bazarr\bin\Bazarr.exe']                                                                                                              ,"install_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Install\' ; winget install Morpheus.Bazarr"'       ,"uninstall_command": 'pwsh -Command "cd ; write-host -foreground blue  \'- Winget Uninstall\' ; winget uninstall Bazarr"'   ,"chkbx_var": chkbx_bazarr}   ,
     # Add more applications here
 ]
 
-# Create and pack checkboxes, check buttons, and install buttons for each application
+# Update the applications dictionary with installation sources
+for app in applications:
+    app["installation_source"] = get_installation_source(app["name"])
+
+# Create and pack checkboxes, check buttons, install buttons, and uninstall buttons for each application
 for app in applications:
     frame = tk.Frame(Page1, bg="#1d2027")
     frame.pack( padx=(5,0), pady=(5,0), anchor="center")
 
-    chkbox_bt = tk.Checkbutton(frame, text=app["name"], variable=app["chkbx_var"], font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
+    app_name_with_source = f"{app['name']} {app['installation_source']}"
+    chkbox_bt = tk.Checkbutton(frame, text=app_name_with_source, variable=app["chkbx_var"], font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
     chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda app=app: check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt))
     ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda app=app: install_application(app["name"], app["install_command"], app["chkbx_var"], chkbox_bt))
+    unins_bt = tk.Button(frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda app=app: uninstall_application(app["name"], app["uninstall_command"], app["chkbx_var"], chkbox_bt))
 
     chkbox_bt.pack(side="left", padx=(0,0  ), pady=(0,0))
     chk_bt.pack   (side="left", padx=(0,0 ), pady=(0,0))
     ins_bt.pack   (side="left", padx=(0,0), pady=(0,0))
+    unins_bt.pack (side="left", padx=(0,0), pady=(0,0))
 
     # Check installation status at the start
     check_installation(app["name"], app["paths"], app["chkbx_var"], chkbox_bt)
