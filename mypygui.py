@@ -1239,8 +1239,15 @@ from tkinter import messagebox
 import os
 import subprocess
 
-def check_installation(app_name, paths_to_check, chkbx_var, chkbox_bt):
-    application_installed = any(os.path.exists(path) for path in paths_to_check)
+import tkinter as tk
+from tkinter import messagebox
+import os
+import subprocess
+
+def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
+    scoop_installed = os.path.exists(os.path.join(scoop_path, app_name))
+    winget_installed = os.path.exists(winget_path)
+    application_installed = scoop_installed or winget_installed
     chkbx_var.set(1 if application_installed else 0)
 
     # Change text color based on installation status if not already checked
@@ -1248,43 +1255,51 @@ def check_installation(app_name, paths_to_check, chkbx_var, chkbox_bt):
     chkbox_bt.config(foreground=text_color)
 
     # Update the label with installation source
-    installation_source = "[scoop]" if os.path.exists(os.path.join(r'C:\Users\nahid\scoop\apps', app_name)) else "[winget]" if application_installed else "[X]"
+    installation_source = "[scoop]" if scoop_installed else "[winget]" if winget_installed else "[X]"
     chkbox_bt.config(text=f"{app_name} {installation_source}")
 
-def install_application(app_name, chkbx_var, chkbox_bt):
+def install_application(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
     install_options = [
         {"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop install {app_name}"')},
         {"text": "Winget", "command": lambda: subprocess.Popen(f'winget install {app_name}')}
     ]
     show_options(install_options)
 
-def uninstall_application(app_name, chkbx_var, chkbox_bt):
+def uninstall_application(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
     uninstall_options = [
         {"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop uninstall {app_name}"')},
         {"text": "Winget", "command": lambda: subprocess.Popen(f'winget uninstall {app_name}')}
     ]
     show_options(uninstall_options)
 
-
-
 def show_options(options):
     top = tk.Toplevel()
     top.title("Select Installation Source")
-    top.geometry("200x100")
+    top.geometry("300x100")
     top.configure(bg="#282c34")
     # Calculate the center position of the screen
     screen_width = top.winfo_screenwidth()
     screen_height = top.winfo_screenheight()
-    x = (screen_width - 200) // 2
+    x = (screen_width - 300) // 2
     y = (screen_height - 100) // 2
     
-    top.geometry(f"200x100+{x}+{y}")
+    top.geometry(f"300x100+{x}+{y}")
     
-    frame = tk.Frame(top, bg="#1d2027") ; frame.pack(side="top", expand=True, fill="none", anchor="center")
+    frame = tk.Frame(top, bg="#1d2027") 
+    frame.pack(side="top", expand=True, fill="none", anchor="center")
 
     for option in options:
         btn = tk.Button(frame, text=option["text"], command=option["command"], foreground="#fff", background="#1d2027", padx=10, pady=5, borderwidth=2, relief="raised")
         btn.pack(side="left", padx=5, pady=5, anchor="center")
+    
+    # Add uninstall both button
+    uninstall_both_btn = tk.Button(frame, text="Uninstall Both", command=lambda: uninstall_both_from_options(options), foreground="red", background="#1d2027", padx=10, pady=5, borderwidth=2, relief="raised")
+    uninstall_both_btn.pack(side="left", padx=5, pady=5, anchor="center")
+
+def uninstall_both_from_options(options):
+    for option in options:
+        option["command"]()
+
 
 # Variable to track checkbox state
 chkbx_rclone = tk.IntVar()
@@ -1293,9 +1308,9 @@ chkbx_ruffle = tk.IntVar()
 
 # Define applications and their information
 applications = [
-    {"name": "Rclone", "scoop_name": "rclone", "winget_name": "Rclone.Rclone", "paths": [r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe', r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe'], "chkbx_var": chkbx_rclone},
-    {"name": "rufus", "scoop_name": "rufus", "winget_name": "rufus", "paths": [r'C:\Users\nahid\scoop\apps\rufus\current\rufus.exe', r'nope'], "chkbx_var": chkbx_rufus},
-    {"name": "ruffle-nightly", "scoop_name": "ruffle-nightly", "winget_name": "ruffle", "paths": [r'C:\Users\nahid\scoop\apps\ruffle-nightly\current\ruffle.exe', r'nope'], "chkbx_var": chkbx_ruffle}
+    {"name": "Rclone", "scoop_name": "rclone", "scoop_path": r'C:\Users\nahid\scoop\apps', "winget_name": "Rclone.Rclone", "winget_path": r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe', "chkbx_var": chkbx_rclone},
+    {"name": "Rufus", "scoop_name": "rufus", "scoop_path": r'C:\Users\nahid\scoop\apps', "winget_name": "rufus", "winget_path": "", "chkbx_var": chkbx_rufus},
+    {"name": "Ruffle", "scoop_name": "ruffle-nightly", "scoop_path": r'C:\Users\nahid\scoop\apps', "winget_name": "ruffle", "winget_path": "", "chkbx_var": chkbx_ruffle}
     # Add more applications here
 ]
 
@@ -1305,13 +1320,17 @@ for app in applications:
     frame.pack(padx=(5,0), pady=(5,0), anchor="center")
 
     app_name = app["name"]
+    scoop_name = app["scoop_name"]
+    scoop_path = app["scoop_path"]
+    winget_name = app["winget_name"]
+    winget_path = app["winget_path"]
     chkbx_var = app["chkbx_var"]
-    paths_to_check = app.get("paths", [])
+    
     chkbox_bt = tk.Checkbutton(frame, text=app_name, variable=chkbx_var, font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat")
-    chkbox_bt.configure(command=lambda name=app_name, var=chkbx_var, cb=chkbox_bt: check_installation(name, paths_to_check, var, cb))
-    chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, var=chkbx_var, cb=chkbox_bt: check_installation(name, paths_to_check, var, cb))
-    ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda name=app["scoop_name"], var=chkbx_var, cb=chkbox_bt: install_application(name, var, cb))
-    unins_bt = tk.Button(frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda name=app["scoop_name"], var=chkbx_var, cb=chkbox_bt: uninstall_application(name, var, cb))
+    chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
+    chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
+    ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda name=scoop_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, winget, var, cb))
+    unins_bt = tk.Button(frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda name=scoop_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, winget, var, cb))
 
     chkbox_bt.pack(side="left", padx=(0,0), pady=(0,0))
     chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
@@ -1319,7 +1338,7 @@ for app in applications:
     unins_bt.pack(side="left", padx=(0,0), pady=(0,0))
 
     # Check installation status at the start
-    check_installation(app_name, paths_to_check, chkbx_var, chkbox_bt)
+    check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
 
 
 
