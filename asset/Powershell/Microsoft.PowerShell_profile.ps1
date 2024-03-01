@@ -877,10 +877,6 @@ function wget_uninstall_fzf { winget list  "" | fzf --multi --preview 'winget sh
 
 function scoop_install_fzf { winget search  "" | fzf --multi --preview 'scoop info {1}' | ForEach-Object { scoop install $_.split()[0] } }
 function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop show {1}' | ForEach-Object { scoop uninstall $_.split()[0] } }
-#34de4b3d-13a8-4540-b76d-b9e8d3851756 PowerToys CommandNotFound module
-
-Import-Module "C:\Users\nahid\scoop\apps\PowerToys\current\WinUI3Apps\..\WinGetCommandNotFound.psd1"
-#34de4b3d-13a8-4540-b76d-b9e8d3851756
 
 
 
@@ -934,3 +930,4 @@ Import-Module "C:\Users\nahid\scoop\apps\PowerToys\current\WinUI3Apps\..\WinGetC
 #     Write-Host "To restore PSReadLine, run`n    Remove-Module PSReadLine`n    Import-Module PSReadLine"
 # }
 # Export-ModuleMember -Function PSConsoleHostReadLine
+
