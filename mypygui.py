@@ -1251,7 +1251,7 @@ def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
     chkbox_bt.config(foreground=text_color)
 
     # Update the label with installation source
-    installation_source = "[scoop]" if scoop_installed else "[winget]" if winget_installed else "[X]"
+    installation_source = "[S]" if scoop_installed else "[W]" if winget_installed else "[X]"
     chkbox_bt.config(text=f"{app_name} {installation_source}")
 
 def install_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
