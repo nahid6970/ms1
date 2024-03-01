@@ -1450,7 +1450,6 @@ canvas.configure(yscrollcommand=scrollbar.set)
 frame = tk.Frame(canvas, bg="#1d2027")
 canvas.create_window((0, 0), window=frame, anchor="nw")
 
-
 # Update the applications dictionary to store the row number for each app
 for app in applications:
     app["frame"] = tk.Frame(frame, bg="#1d2027")
@@ -1499,9 +1498,6 @@ search_entry.bind("<KeyRelease>", filter_apps)
 # Update scroll region
 frame.update_idletasks()
 canvas.config(scrollregion=canvas.bbox("all"))
-
-
-
 
 
 #*  ████████╗ ██████╗  ██████╗ ██╗     ███████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
