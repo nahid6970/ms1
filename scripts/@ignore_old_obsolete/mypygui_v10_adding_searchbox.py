@@ -1236,13 +1236,14 @@ BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCES
 LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
 LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(100,0))
 
-# # Create the search box label
-# search_label = tk.Label(Page1, text="Search:", bg="#1d2027", fg="#fff", font=("calibri", 12, "bold"))
-# search_label.pack(side="top", anchor="center", padx=(20, 0), pady=(10, 0))
+# Create the search box label
+search_label = tk.Label(Page1, text="Search:", bg="#1d2027", fg="#fff", font=("calibri", 12, "bold"))
+search_label.pack(side="top", anchor="nw", padx=(20, 0), pady=(10, 0))
 
 # Create the search entry
 search_entry = tk.Entry(Page1, font=("calibri", 12), bg="#1d2027", fg="#fff", insertbackground="#fff")
-search_entry.pack(side="top", anchor="center", padx=(20, 0), pady=(0, 10))
+search_entry.pack(side="top", anchor="nw", padx=(20, 0), pady=(0, 10))
+
 
 import tkinter as tk
 from tkinter import messagebox
@@ -1451,17 +1452,10 @@ frame = tk.Frame(canvas, bg="#1d2027")
 canvas.create_window((0, 0), window=frame, anchor="nw")
 
 
-# Update the applications dictionary to store the row number for each app
-for app in applications:
-    app["frame"] = tk.Frame(frame, bg="#1d2027")
-
-row_number = 0
-
 # Create and pack checkboxes, check buttons, install buttons, and uninstall buttons for each application inside the frame
 for app in applications:
-    app_frame = app["frame"]
-    app_frame.grid(row=row_number, column=0, padx=(150,0), pady=(0,0), sticky="ew")  # Adjusted sticky parameter
-    row_number += 1
+    app_frame = tk.Frame(frame, bg="#1d2027")
+    app_frame.pack(padx=(80,0), pady=(0,0), anchor="e")
 
     app_name = app["name"]
     scoop_name = app["scoop_name"]
@@ -1473,34 +1467,20 @@ for app in applications:
     chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat")
     chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
     chk_bt = tk.Button(app_frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-    ins_bt = tk.Button(app_frame, text=f"▼", foreground="green", background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-    unins_bt = tk.Button(app_frame, text=f"❌", foreground="red", background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    ins_bt = tk.Button(app_frame, text=f"Install", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    unins_bt = tk.Button(app_frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
 
-    chkbox_bt.grid(row=0, column=0, padx=(0,0), pady=(0,0))
+    chkbox_bt.pack(side="left", padx=(0,0), pady=(0,0))
     # chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
-    ins_bt.grid(row=0, column=1, padx=(0,0), pady=(0,0))
-    unins_bt.grid(row=0, column=2, padx=(0,0), pady=(0,0))
+    ins_bt.pack(side="left", padx=(0,0), pady=(0,0))
+    unins_bt.pack(side="left", padx=(0,0), pady=(0,0))
+
+    # Check installation status at the start
     check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
-
-# Function to filter and update displayed apps based on search query
-def filter_apps(event=None):
-    search_query = search_entry.get().lower()
-    for app in applications:
-        app_name = app["name"]
-        app_frame = app["frame"]
-        if search_query in app_name.lower():
-            app_frame.grid()
-        else:
-            app_frame.grid_remove()
-
-# Bind the filtering function to the KeyRelease event of the search entry
-search_entry.bind("<KeyRelease>", filter_apps)
 
 # Update scroll region
 frame.update_idletasks()
 canvas.config(scrollregion=canvas.bbox("all"))
-
-
 
 
 
