@@ -47,6 +47,7 @@ import psutil
 import threading
 import pyautogui
 import tksvg
+from tkinter import Canvas, Scrollbar
 
 
 # # For topmost
@@ -1233,7 +1234,7 @@ BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCES
 
 
 LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
-LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(40,0))
+LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(50,0))
 
 import tkinter as tk
 from tkinter import messagebox
@@ -1327,10 +1328,44 @@ applications = [
     {"name": "Crystal DiskInfo" , "scoop_name": "crystaldiskinfo" , "scoop_path": r'C:\Users\nahid\scoop\apps\crystaldiskinfo\current\DiskInfo64.exe' , "winget_name": "CrystalDewWorld.CrystalDiskInfo" , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
     # Add more applications here
 ]
-# Create and pack checkboxes, check buttons, install buttons, and uninstall buttons for each application
+# Import necessary modules
+
+# Create canvas and scrollbar
+canvas = Canvas(Page1, bg="#1d2027", highlightthickness=0)
+canvas.pack(side="left", fill="both", expand=True)
+
+def on_mousewheel(event):
+    canvas.yview_scroll(-1 * (event.delta // 120), "units")
+
+canvas.bind_all("<MouseWheel>", on_mousewheel)
+
+# Create a vertical scrollbar
+scrollbar = ttk.Scrollbar(Page1, orient="vertical", style="Custom.Vertical.TScrollbar")
+scrollbar.pack(side="right", fill="y")
+# Configure the style of the scrollbar
+style = ttk.Style()
+style.theme_use("default")
+# Set the background color of the scrollbar to red
+style.configure("Custom.Vertical.TScrollbar", background="red", troughcolor="blue")
+# Set the thickness of the outside bar to 10 pixels
+style.map("Custom.Vertical.TScrollbar",
+    background=[("active", "red")],  # Changed from blue to red
+)
+# Set the thickness of the inside bar to 25 pixels
+style.map("Custom.Vertical.TScrollbar",
+    troughcolor=[("active", "red")],  # Changed from blue to red
+    width=[("active", 10)]
+)
+canvas.configure(yscrollcommand=scrollbar.set)
+
+# Create a frame inside the canvas
+frame = tk.Frame(canvas, bg="#1d2027")
+canvas.create_window((0, 0), window=frame, anchor="nw")
+
+# Create and pack checkboxes, check buttons, install buttons, and uninstall buttons for each application inside the frame
 for app in applications:
-    frame = tk.Frame(Page1, bg="#1d2027")
-    frame.pack(padx=(5,0), pady=(0,0), anchor="center")
+    app_frame = tk.Frame(frame, bg="#1d2027")
+    app_frame.pack(padx=(80,0), pady=(0,0), anchor="e")
 
     app_name = app["name"]
     scoop_name = app["scoop_name"]
@@ -1339,11 +1374,11 @@ for app in applications:
     winget_path = app["winget_path"]
     chkbx_var = app["chkbx_var"]
     
-    chkbox_bt = tk.Checkbutton(frame, text=app_name, variable=chkbx_var, font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat")
+    chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat")
     chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-    chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-    ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-    unins_bt = tk.Button(frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    chk_bt = tk.Button(app_frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
+    ins_bt = tk.Button(app_frame, text=f"Install", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    unins_bt = tk.Button(app_frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
 
     chkbox_bt.pack(side="left", padx=(0,0), pady=(0,0))
     # chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
@@ -1352,6 +1387,10 @@ for app in applications:
 
     # Check installation status at the start
     check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
+
+# Update scroll region
+frame.update_idletasks()
+canvas.config(scrollregion=canvas.bbox("all"))
 
 
 
