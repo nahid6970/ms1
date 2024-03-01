@@ -1234,7 +1234,6 @@ LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat"
 LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(80,0))
 
 import tkinter as tk
-from tkinter import messagebox
 import os
 import subprocess
 
@@ -1264,27 +1263,17 @@ def uninstall_application(app_name, chkbx_var, chkbox_bt):
 def show_options(options):
     top = tk.Toplevel()
     top.title("Select Installation Source")
-    top.geometry("200x100")
-    top.configure(bg="#282c34")
-    # Calculate the center position of the screen
-    screen_width = top.winfo_screenwidth()
-    screen_height = top.winfo_screenheight()
-    x = (screen_width - 200) // 2
-    y = (screen_height - 100) // 2
-    top.geometry(f"200x100+{x}+{y}")
-    frame = tk.Frame(top, bg="#1d2027") ; frame.pack(side="top", expand=True, fill="none", anchor="center")
+    top.geometry("300x100")
     for option in options:
-        btn = tk.Button(frame, text=option["text"], command=option["command"], foreground="#fff", background="#1d2027", padx=10, pady=5, borderwidth=2, relief="raised")
-        btn.pack(side="left", padx=5, pady=5, anchor="center")
+        btn = tk.Button(top, text=option["text"], command=option["command"])
+        btn.pack()
 
 # Variable to track checkbox state
 chkbx_rclone = tk.IntVar()
-chkbx_rufus = tk.IntVar()
 
 # Define applications and their information
 applications = [
-    {"name": "Rclone", "scoop_name": "rclone", "winget_name": "Rclone.Rclone", "paths": [r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe', r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe'], "chkbx_var": chkbx_rclone},
-    {"name": "rufus", "scoop_name": "rufus", "winget_name": "rufus", "paths": [r'C:\Users\nahid\scoop\apps\rufus\current\rufus.exe', r'nope'], "chkbx_var": chkbx_rufus}
+    {"name": "Rclone", "paths": [r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe', r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe'], "chkbx_var": chkbx_rclone}
     # Add more applications here
 ]
 
@@ -1294,13 +1283,13 @@ for app in applications:
     frame.pack(padx=(5,0), pady=(5,0), anchor="center")
 
     application_installed = any(os.path.exists(path) for path in app["paths"])
-    installation_source = "[scoop]" if os.path.exists(os.path.join(r'C:\Users\nahid\scoop\apps', app["scoop_name"])) else "[winget]" if application_installed else "[X]"
+    installation_source = "[scoop]" if os.path.exists(os.path.join(r'C:\Users\nahid\scoop\apps', app["name"])) else "[winget]" if application_installed else "[X]"
     app_name_with_source = f"{app['name']} {installation_source}"
 
     chkbox_bt = tk.Checkbutton(frame, text=app_name_with_source, variable=app["chkbx_var"], font=("calibri", 14, "bold"), foreground="green" if application_installed else "red", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat", command=lambda app=app: check_installation(app["name"], app.get("paths", []), app["chkbx_var"], chkbox_bt))
     chk_bt = tk.Button(frame, text=f"Check", foreground="green", background="#1d2027", command=lambda app=app: check_installation(app["name"], app.get("paths", []), app["chkbx_var"], chkbox_bt))
-    ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda app=app: install_application(app["scoop_name"], app["chkbx_var"], chkbox_bt))
-    unins_bt = tk.Button(frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda app=app: uninstall_application(app["scoop_name"], app["chkbx_var"], chkbox_bt))
+    ins_bt = tk.Button(frame, text=f"Install", foreground="green", background="#1d2027", command=lambda app=app: install_application(app["name"], app["chkbx_var"], chkbox_bt))
+    unins_bt = tk.Button(frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda app=app: uninstall_application(app["name"], app["chkbx_var"], chkbox_bt))
 
     chkbox_bt.pack(side="left", padx=(0,0), pady=(0,0))
     chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
@@ -1309,6 +1298,7 @@ for app in applications:
 
     # Check installation status at the start
     check_installation(app["name"], app.get("paths", []), app["chkbx_var"], chkbox_bt)
+
 
 
 
