@@ -1304,22 +1304,31 @@ chkbx_powertoys = tk.IntVar()
 chkbx_rssguard = tk.IntVar()
 chkbx_ack = tk.IntVar()
 chkbx_adb = tk.IntVar()
+chkbx_alacritty = tk.IntVar()
 
 # Define applications and their information
 applications = [
-    {"name": "Rclone"   , "scoop_name": "rclone"        , "scoop_path": r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe'          , "winget_name": "Rclone.Rclone"        , "winget_path": r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe', "chkbx_var": chkbx_rclone}   ,
-    {"name": "Rufus"    , "scoop_name": "rufus"         , "scoop_path": r'C:\Users\nahid\scoop\apps\rufus\current\rufus.exe'            , "winget_name": "Rufus.Rufus"          , "winget_path": r"C:\Users\nahid\AppData\Local\Microsoft\WinGet\Links\rufus.exe"                                                                                     , "chkbx_var": chkbx_rufus}    ,
-    {"name": "Ruffle"   , "scoop_name": "ruffle-nightly", "scoop_path": r'C:\Users\nahid\scoop\apps\ruffle-nightly\current\ruffle.exe'  , "winget_name": ""                     , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_ruffle}   ,
-    {"name": "PowerToys", "scoop_name": "powertoys"     , "scoop_path": r'C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe'    , "winget_name": "Microsoft.PowerToys"  , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_powertoys},
-    {"name": "Rss Guard", "scoop_name": "rssguard"      , "scoop_path": r'C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe'      , "winget_name": "martinrotter.RSSGuard", "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_rssguard} ,
-    {"name": "ack"      , "scoop_name": "ack"           , "scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                , "winget_name": ""                     , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_ack}      ,
-    {"name": "adb"      , "scoop_name": "adb"           , "scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe' , "winget_name": ""                     , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_adb}      ,
+    {"name": "Rclone"       , "scoop_name": "rclone"        , "scoop_path": r'C:\Users\nahid\scoop\apps\rclone\current\rclone.exe'             , "winget_name": "Rclone.Rclone"         , "winget_path": r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\rclone-v1.65.2-windows-amd64\rclone.exe', "chkbx_var": chkbx_rclone}    ,
+    {"name": "Rufus"        , "scoop_name": "rufus"         , "scoop_path": r'C:\Users\nahid\scoop\apps\rufus\current\rufus.exe'               , "winget_name": "Rufus.Rufus"           , "winget_path": r"C:\Users\nahid\AppData\Local\Microsoft\WinGet\Links\rufus.exe"                                                                                     , "chkbx_var": chkbx_rufus}     ,
+    {"name": "Ruffle"       , "scoop_name": "ruffle-nightly", "scoop_path": r'C:\Users\nahid\scoop\apps\ruffle-nightly\current\ruffle.exe'     , "winget_name": "xx"                    , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_ruffle}    ,
+    {"name": "PowerToys"    , "scoop_name": "powertoys"     , "scoop_path": r'C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe'       , "winget_name": "Microsoft.PowerToys"   , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_powertoys} ,
+    {"name": "Rss Guard"    , "scoop_name": "rssguard"      , "scoop_path": r'C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe'         , "winget_name": "martinrotter.RSSGuard" , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_rssguard}  ,
+    {"name": "ack"          , "scoop_name": "ack"           , "scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                   , "winget_name": ""                      , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_ack}       ,
+    {"name": "adb"          , "scoop_name": "adb"           , "scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe'    , "winget_name": ""                      , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_adb}       ,
+    {"name": "Alacritty"    , "scoop_name": "alacritty"     , "scoop_path": r'C:\Users\nahid\scoop\apps\alacritty\current\alacritty.exe'       , "winget_name": "Alacritty.Alacritty"   , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
+    {"name": "BareGrep"     , "scoop_name": "baregrep"      , "scoop_path": r'C:\Users\nahid\scoop\apps\baregrep\current\baregrep.exe'         , "winget_name": "xx"                    , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
+    {"name": "Bat"          , "scoop_name": "bat"           , "scoop_path": r'C:\Users\nahid\scoop\apps\bat\current\bat.exe'                   , "winget_name": ""                      , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
+    {"name": "btop"         , "scoop_name": "btop"          , "scoop_path": r'C:\Users\nahid\scoop\apps\btop\current\btop.exe'                 , "winget_name": "aristocratos.btop4win" , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
+    {"name": "Capture2Text" , "scoop_name": "Capture2Text"  , "scoop_path": r'C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe' , "winget_name": "xx"                    , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
+    {"name": "clink"        , "scoop_name": "clink"         , "scoop_path": r'C:\Users\nahid\scoop\apps\clink\current\clink_x64.exe'           , "winget_name": "chrisant996.Clink"     , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
+    {"name": "Cmder"        , "scoop_name": "Cmder"         , "scoop_path": r'C:\Users\nahid\scoop\apps\cmder\current\Cmder.exe'               , "winget_name": "xx"                    , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
+    {"name": "CPU-Z"        , "scoop_name": "cpu-z"         , "scoop_path": r'C:\Users\nahid\scoop\apps\cpu-z\current\cpuz_x64.exe'               , "winget_name": "xx"                    , "winget_path": "xx"                                                                                                                                                 , "chkbx_var": chkbx_alacritty} ,
     # Add more applications here
 ]
 # Create and pack checkboxes, check buttons, install buttons, and uninstall buttons for each application
 for app in applications:
     frame = tk.Frame(Page1, bg="#1d2027")
-    frame.pack(padx=(5,0), pady=(5,0), anchor="center")
+    frame.pack(padx=(5,0), pady=(0,0), anchor="center")
 
     app_name = app["name"]
     scoop_name = app["scoop_name"]
@@ -1335,7 +1344,7 @@ for app in applications:
     unins_bt = tk.Button(frame, text=f"Uninstall", foreground="red", background="#1d2027", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
 
     chkbox_bt.pack(side="left", padx=(0,0), pady=(0,0))
-    chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
+    # chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
     ins_bt.pack(side="left", padx=(0,0), pady=(0,0))
     unins_bt.pack(side="left", padx=(0,0), pady=(0,0))
 
