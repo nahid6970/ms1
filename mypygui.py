@@ -1299,8 +1299,8 @@ def show_options(options):
 #         option["command"]()
 
 # Variable to track checkbox state
-chkbx_rufus = tk.IntVar()
 chkbx_rclone = tk.IntVar()
+chkbx_rufus = tk.IntVar()
 chkbx_ruffle = tk.IntVar()
 chkbx_powertoys = tk.IntVar()
 chkbx_rssguard = tk.IntVar()
