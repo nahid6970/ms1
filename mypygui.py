@@ -1162,7 +1162,24 @@ def scoop_uninstall_fzf():
         print(f"Error executing command: {e}")
 
 
-def create_button(text, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, columnspan, sticky, padx_button, padx_pack, pady_button, pady_pack):
+def create_button(
+        text,
+        command,
+        bg_color,
+        fg_color,
+        height,
+        width,
+        relief,
+        font,
+        padx_button,
+        padx_pack,
+        pady_button,
+        pady_pack,
+        row_button,
+        column_button,
+        columnspan,
+        sticky,
+        ):
     button = tk.Button(input_frame, text=text, command=command, width=width, fg=fg_color, bg=bg_color, font=font)
     button.grid(row=row_button, column=column_button, padx=padx_button, pady=pady_button, sticky=sticky, columnspan=columnspan)
     return button
@@ -1171,21 +1188,21 @@ input_frame = tk.Frame(FR_PROCESS, bg="#1D2027")
 input_frame.pack(pady=10)
 
 winget_scoop_button_properties = [
-("Winget"       , None               , "#FFFFFF", "#000000", 1, 12, "flat", ("calibri", 12), 1, 1,2 ,"ew", 5, 5, 0, 5),
-("Search"       , winget_search      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 1,1 ,""  , 5, 5, 0, 5),
-("Info"         , winget_infooo      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 2, 1,""  , 5, 5, 0, 5),
-("Install"      , winget_install     , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 1,1 ,""  , 5, 5, 0, 5),
-("Uninstall"    , winget_uninst      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 2, 1,""  , 5, 5, 0, 5),
-("FZF-Install"  , wget_inst_fzf      , "#1D2027", "#00FF00", 1, 12, "flat", ("calibri", 10), 4, 1, 1,""  , 5, 5, 0, 5),
-("FZF-Uninstall", wget_unin_fzf      , "#1D2027", "#FF0000", 1, 12, "flat", ("calibri", 10), 4, 2, 1,""  , 5, 5, 0, 5),
+("Winget"    , None               , "#76c2ff", "#000000", 1, 12, "flat", ("JetBrainsMono NF", 12), 5, 5, 0, 5,       1, 1,2 ,"ew"),
+("Search"    , winget_search      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 1,1 ,""  ),
+("Info"      , winget_infooo      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 2, 1,""  ),
+("Install"   , winget_install     , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 1,1 ,""  ),
+("Uninstall" , winget_uninst      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 2, 1,""  ),
+("Install"   , wget_inst_fzf      , "#1D2027", "#00FF00", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 1, 1,""  ),
+("Uninstall" , wget_unin_fzf      , "#1D2027", "#FF0000", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 2, 1,""  ),
 
-("Scoop"        , None               , "#FFFFFF", "#000000", 1, 12, "flat", ("calibri", 12), 1, 3, 2,"ew", 5, 5, 0, 5),
-("Search"       , scoop_search       , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 3, 1,""  , 5, 5, 0, 5),
-("Info"         , scoop_info         , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 4, 1,""  , 5, 5, 0, 5),
-("Install"      , scoop_install      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 3, 1,""  , 5, 5, 0, 5),
-("Uninstall"    , scoop_uninstall    , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 4, 1,""  , 5, 5, 0, 5),
-("FZF-Install"  , scoop_install_fzf  , "#1D2027", "#00FF00", 1, 12, "flat", ("calibri", 10), 4, 3, 1,""  , 5, 5, 0, 5),
-("FZF-Uninstall", scoop_uninstall_fzf, "#1D2027", "#FF0000", 1, 12, "flat", ("calibri", 10), 4, 4, 1,""  , 5, 5, 0, 5)
+("Scoop"     , None               , "#FFFFFF", "#000000", 1, 12, "flat", ("JetBrainsMono NF", 12), 5, 5, 0, 5,       1, 3, 2,"ew"),
+("Search"    , scoop_search       , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 3, 1,""  ),
+("Info"      , scoop_info         , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 4, 1,""  ),
+("Install"   , scoop_install      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 3, 1,""  ),
+("Uninstall" , scoop_uninstall    , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 4, 1,""  ),
+("Install"   , scoop_install_fzf  , "#1D2027", "#00FF00", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 3, 1,""  ),
+("Uninstall" , scoop_uninstall_fzf, "#1D2027", "#FF0000", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 4, 1,""  )
 ]
 
 # Create Winget buttons
