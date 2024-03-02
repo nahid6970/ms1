@@ -1262,13 +1262,13 @@ def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
     installation_source = ""
     if scoop_installed:
         installation_source = "[S]"
-        text_color = "white"  # Set color to white for [S]
+        text_color = "#FFFFFF"  # Set color to white for [S]
     elif winget_installed:
         installation_source = "[W]"
-        text_color = "blue"   # Set color to blue for [W]
+        text_color = "#41abff"   # Set color to blue for [W]
     else:
         installation_source = "[X]"
-        text_color = "red"    # Set color to red for [X]
+        text_color = "#FF0000"    # Set color to red for [X]
 
     chkbox_bt.config(text=f"{app_name} {installation_source}", foreground=text_color)
 
