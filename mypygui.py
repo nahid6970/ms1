@@ -957,31 +957,14 @@ def insert_input():
     additional_text = WIDGET_APPID.get()
     return additional_text
 
-def highlight_matching_string(text_widget, pattern):
-    start_index = "1.0"
-    pattern = pattern.lower()  # Convert pattern to lowercase for case-insensitive search
-    while True:
-        start_index = text_widget.search(pattern, start_index, stopindex=tk.END, nocase=True)
-        if not start_index:
-            break
-        end_index = text_widget.index(f"{start_index}+{len(pattern)}c")
-        text_widget.tag_add("match", start_index, end_index)
-        text_widget.tag_config("match", foreground="red")
-        start_index = end_index
-
 def get_process():
     additional_text = insert_input()
     if not additional_text:  # Check if input is empty
         return  # Do nothing if input is empty
-    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName, Id -AutoSize | Out-String'
+    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName, Id -AutoSize'
     try:
         # Execute the PowerShell command and capture the output
-        output = subprocess.check_output(["powershell", "-Command", command], shell=True, text=True)
-        # Display the output in the GUI
-        output_text.delete(1.0, tk.END)  # Clear previous output
-        output_text.insert(tk.END, output)
-        # Highlight matching string in blue
-        highlight_matching_string(output_text, additional_text)
+        subprocess.run(["start","powershell", "-NoExit", "-Command", command], shell=True)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
@@ -989,15 +972,10 @@ def kil_process():
     additional_text = insert_input()
     command = f'Stop-Process -Name {additional_text}'
     try:
-        subprocess.check_output(["powershell", "-Command", command], stderr=subprocess.STDOUT, shell=True, text=True)
-        # Display confirmation in the GUI
-        output_text.delete(1.0, tk.END)  # Clear previous output
-        output_text.insert(tk.END, f"Process {additional_text} killed successfully.")
+        subprocess.run(["powershell", "-Command", command], stderr=subprocess.STDOUT, shell=True)
+        print(f"Process {additional_text} killed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
-        # Display error message in the GUI
-        output_text.delete(1.0, tk.END)  # Clear previous output
-        output_text.insert(tk.END, f"Error: {e.output}")
 
 def custom_command():
     additional_text = insert_input()
@@ -1007,16 +985,9 @@ def custom_command():
     command = f'powershell -ExecutionPolicy Bypass -NoProfile -Command "& {{ . {profile_path}; {additional_text} }}"'
     try:
         # Execute the custom PowerShell command and capture the output
-        output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True, text=True)
-        # Display the output in the GUI
-        output_text.delete(1.0, tk.END)  # Clear previous output
-        output_text.insert(tk.END, output)
+        subprocess.run(command, stderr=subprocess.STDOUT, shell=True)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
-        # Display error message in the GUI
-        output_text.delete(1.0, tk.END)  # Clear previous output
-        output_text.insert(tk.END, f"Error: {e.output}")
-
 BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff")
 BOX_WIDGET_APPID.pack(pady=(80,0))
 WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#FFFFFF", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
@@ -1032,9 +1003,6 @@ BT_KIL_ID.pack(side="left", pady=0)
 BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#41abff", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="🏃")
 BT_CUSTOM_CMD.pack(side="left", pady=0)
 
-#! Output text widget
-output_text = tk.Text(FR_PROCESS, height=5, width=50, font=("JetBrainsMono NF", 12), bg="#ddf581")
-output_text.pack()
 
 #?   ██╗ ██╗     ██╗    ██╗       ██╗       ███████╗
 #?  ████████╗    ██║    ██║       ██║       ██╔════╝
