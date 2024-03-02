@@ -1541,6 +1541,8 @@ def optionalfeatures():
     subprocess.Popen(["powershell", "optionalfeatures"])
 def advanced_adapter():
     subprocess.Popen(["powershell", "control ncpa.cpl"])
+def character_map():
+    subprocess.Popen(["powershell", "charmap"])
 
 #! Tool Button
 
@@ -1579,7 +1581,8 @@ button_properties = [
     ("Systeminfo"              ,open_systeminfo  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,370,    "w") ,
     ("UAC"                     ,open_uac         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,400,    "w") ,
     ("Turn on Windows Features",optionalfeatures ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,430,    "w") ,
-    ("Winsock Reset"           ,winsock_reset    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,460,    "w")
+    ("Winsock Reset"           ,winsock_reset    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,460,    "w") ,
+    ("Character Map"           ,character_map    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,460,    "w") ,
 ]
 
 for button_props in button_properties:
