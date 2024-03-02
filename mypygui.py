@@ -1272,7 +1272,6 @@ def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
 
     chkbox_bt.config(text=f"{app_name} {installation_source}", foreground=text_color)
 
-
 def install_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
     install_options = []
     if scoop_path:
@@ -1430,7 +1429,7 @@ applications = [
 # Create canvas and scrollbar
 canvas = Canvas(Page1, bg="#1d2027", highlightthickness=0)
 canvas.pack(side="left", fill="both", expand=True)
-
+#! scrollbar Start
 def on_mousewheel(event):
     canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
@@ -1454,7 +1453,7 @@ style.map("Custom.Vertical.TScrollbar",
     width=[("active", 5)]
 )
 canvas.configure(yscrollcommand=scrollbar.set)
-
+#! scrollbar End
 
 # Create a frame inside the canvas
 frame = tk.Frame(canvas, bg="#1d2027")
@@ -1463,7 +1462,6 @@ canvas.create_window((0, 0), window=frame, anchor="nw")
 # Update the applications dictionary to store the row number for each app
 for app in applications:
     app["frame"] = tk.Frame(frame, bg="#1d2027")
-
 row_number = 0
 
 # Create and pack checkboxes, check buttons, install buttons, and uninstall buttons for each application inside the frame
@@ -1479,11 +1477,11 @@ for app in applications:
     winget_path = app["winget_path"]
     chkbx_var = app["chkbx_var"]
 
-    chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
+    chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
     chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
     chk_bt = tk.Button(app_frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-    ins_bt = tk.Button(app_frame, text=f"n", foreground="green", font=("webdings", 5),background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-    unins_bt = tk.Button(app_frame, text=f"n", foreground="red", font=("webdings", 5), background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    ins_bt = tk.Button(app_frame, text=f"n", foreground="green", background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    unins_bt = tk.Button(app_frame, text=f"n", foreground="red",  background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
 
     chkbox_bt.grid(row=0, column=0, padx=(0,0), pady=(0,0))
     # chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
