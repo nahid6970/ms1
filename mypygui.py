@@ -1250,7 +1250,6 @@ import os
 import subprocess
 
 def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
-    # scoop_installed = os.path.exists(os.path.join(scoop_path, app_name))
     scoop_installed = os.path.exists(scoop_path)
     winget_installed = os.path.exists(winget_path)
     application_installed = scoop_installed or winget_installed
@@ -1258,11 +1257,21 @@ def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
 
     # Change text color based on installation status if not already checked
     text_color = "green" if application_installed else "red"
-    chkbox_bt.config(foreground=text_color)
 
     # Update the label with installation source
-    installation_source = "[S]" if scoop_installed else "[W]" if winget_installed else "[X]"
-    chkbox_bt.config(text=f"{app_name} {installation_source}")
+    installation_source = ""
+    if scoop_installed:
+        installation_source = "[S]"
+        text_color = "white"  # Set color to white for [S]
+    elif winget_installed:
+        installation_source = "[W]"
+        text_color = "blue"   # Set color to blue for [W]
+    else:
+        installation_source = "[X]"
+        text_color = "red"    # Set color to red for [X]
+
+    chkbox_bt.config(text=f"{app_name} {installation_source}", foreground=text_color)
+
 
 def install_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
     install_options = []
