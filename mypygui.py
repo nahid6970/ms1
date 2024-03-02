@@ -1223,15 +1223,15 @@ def launch_autoruns():
 BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, height=1, width=20, bg="#FFFFFF", fg="#000000", highlightthickness=5, font=("JetBrainsMono NF", 12, "bold"))
 BT_AUTORUNS.pack(pady=(10, 0))
 
-
 #! APPLication List
 BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#fff", fg="#000", width=20, highlightthickness=5, anchor="center", font=("JetBrainsMono NF", 12, "bold"))
 BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(5,0))
 
-Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; Page1.pack_propagate(False)
+Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
+Page1.pack_propagate(False)
 
-BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
-
+BT_BACK = tk.Button(Page1, text="◀", command=lambda: switch_to_frame(FR_PROCESS, Page1 ), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
+BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 LB_INITIALSPC = tk.Label(Page1, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
 LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(50,0))
