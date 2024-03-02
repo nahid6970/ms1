@@ -1162,30 +1162,30 @@ def scoop_uninstall_fzf():
         print(f"Error executing command: {e}")
 
 
-def create_button(text, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, padx_button, padx_pack, pady_button, pady_pack):
+def create_button(text, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, columnspan, sticky, padx_button, padx_pack, pady_button, pady_pack):
     button = tk.Button(input_frame, text=text, command=command, width=width, fg=fg_color, bg=bg_color, font=font)
-    button.grid(row=row_button, column=column_button, padx=padx_button, pady=pady_button)
+    button.grid(row=row_button, column=column_button, padx=padx_button, pady=pady_button, sticky=sticky, columnspan=columnspan)
     return button
 
 input_frame = tk.Frame(FR_PROCESS, bg="#1D2027")
 input_frame.pack(pady=10)
 
 winget_scoop_button_properties = [
-("Winget"       , None               , "#FFFFFF", "#000000", 1, 12, "flat", ("calibri", 12), 1, 1,       5, 5, 0, 5),
-("Search"       , winget_search      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 1,       5, 5, 0, 5),
-("Install"      , winget_install     , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 1,       5, 5, 0, 5),
-("Uninstall"    , winget_uninst      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 4, 1,       5, 5, 0, 5),
-("Info"         , winget_infooo      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 5, 1,       5, 5, 0, 5),
-("FZF-Install"  , wget_inst_fzf      , "#1D2027", "#00FF00", 1, 12, "flat", ("calibri", 10), 6, 1,       5, 5, 0, 5),
-("FZF-Uninstall", wget_unin_fzf      , "#1D2027", "#FF0000", 1, 12, "flat", ("calibri", 10), 7, 1,       5, 5, 0, 5),
+("Winget"       , None               , "#FFFFFF", "#000000", 1, 12, "flat", ("calibri", 12), 1, 1,2 ,"ew", 5, 5, 0, 5),
+("Search"       , winget_search      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 1,1 ,""  , 5, 5, 0, 5),
+("Info"         , winget_infooo      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 2, 1,""  , 5, 5, 0, 5),
+("Install"      , winget_install     , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 1,1 ,""  , 5, 5, 0, 5),
+("Uninstall"    , winget_uninst      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 2, 1,""  , 5, 5, 0, 5),
+("FZF-Install"  , wget_inst_fzf      , "#1D2027", "#00FF00", 1, 12, "flat", ("calibri", 10), 4, 1, 1,""  , 5, 5, 0, 5),
+("FZF-Uninstall", wget_unin_fzf      , "#1D2027", "#FF0000", 1, 12, "flat", ("calibri", 10), 4, 2, 1,""  , 5, 5, 0, 5),
 
-("Scoop"        , None               , "#FFFFFF", "#000000", 1, 12, "flat", ("calibri", 12), 1, 2,       5, 5, 0, 5),
-("Search"       , scoop_search       , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 2,       5, 5, 0, 5),
-("Install"      , scoop_install      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 2,       5, 5, 0, 5),
-("Uninstall"    , scoop_uninstall    , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 4, 2,       5, 5, 0, 5),
-("Info"         , scoop_info         , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 5, 2,       5, 5, 0, 5),
-("FZF-Install"  , scoop_install_fzf  , "#1D2027", "#00FF00", 1, 12, "flat", ("calibri", 10), 6, 2,       5, 5, 0, 5),
-("FZF-Uninstall", scoop_uninstall_fzf, "#1D2027", "#FF0000", 1, 12, "flat", ("calibri", 10), 7, 2,       5, 5, 0, 5)
+("Scoop"        , None               , "#FFFFFF", "#000000", 1, 12, "flat", ("calibri", 12), 1, 3, 2,"ew", 5, 5, 0, 5),
+("Search"       , scoop_search       , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 3, 1,""  , 5, 5, 0, 5),
+("Info"         , scoop_info         , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 2, 4, 1,""  , 5, 5, 0, 5),
+("Install"      , scoop_install      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 3, 1,""  , 5, 5, 0, 5),
+("Uninstall"    , scoop_uninstall    , "#1D2027", "#FFFFFF", 1, 12, "flat", ("calibri", 10), 3, 4, 1,""  , 5, 5, 0, 5),
+("FZF-Install"  , scoop_install_fzf  , "#1D2027", "#00FF00", 1, 12, "flat", ("calibri", 10), 4, 3, 1,""  , 5, 5, 0, 5),
+("FZF-Uninstall", scoop_uninstall_fzf, "#1D2027", "#FF0000", 1, 12, "flat", ("calibri", 10), 4, 4, 1,""  , 5, 5, 0, 5)
 ]
 
 # Create Winget buttons
@@ -1607,11 +1607,14 @@ for button_props in button_properties:
 def switch_to_pythontool_frame():
     switch_to_frame(FR_PYTHON_TOOL, MAIN_FRAME)
 
-BT_PYTHON_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Python Tools", switch_to_pythontool_frame, bg="#366c9c", fg="#f6d24a", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#366c9c", font=("JetBrainsMono NF", 13, "bold")) ; BT_PYTHON_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
-FR_PYTHON_TOOL = tk.Frame(BORDER_FRAME, bg="#1d2027", width=520, height=800) ; FR_PYTHON_TOOL.pack_propagate(False)
+BT_PYTHON_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Python Tools", switch_to_pythontool_frame, bg="#366c9c", fg="#f6d24a", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#366c9c", font=("JetBrainsMono NF", 13, "bold"))
+BT_PYTHON_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
+
+FR_PYTHON_TOOL = tk.Frame(BORDER_FRAME, bg="#1d2027", width=520, height=800)
+FR_PYTHON_TOOL.pack_propagate(False)
+
 BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
-
 
 BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 def font_style():
