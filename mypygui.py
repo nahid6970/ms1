@@ -1470,11 +1470,11 @@ for app in applications:
     winget_path = app["winget_path"]
     chkbx_var = app["chkbx_var"]
 
-    chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=5, borderwidth=2, relief="flat")
+    chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("calibri", 14, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
     chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
     chk_bt = tk.Button(app_frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-    ins_bt = tk.Button(app_frame, text=f"▼", foreground="green", background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-    unins_bt = tk.Button(app_frame, text=f"❌", foreground="red", background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    ins_bt = tk.Button(app_frame, text=f"n", foreground="green", font=("webdings", 5),background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    unins_bt = tk.Button(app_frame, text=f"n", foreground="red", font=("webdings", 5), background="#1d2027",relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
 
     chkbox_bt.grid(row=0, column=0, padx=(0,0), pady=(0,0))
     # chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
