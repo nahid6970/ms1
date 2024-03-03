@@ -698,12 +698,25 @@ FRAME_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=520, height=800) ; FRA
 BT_BACK = tk.Button(FRAME_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FFMPEG), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-BOX_1 = tk.Frame(FRAME_FFMPEG, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
-BT_TRIMM=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_trimm, text="Trim"          ) ; BT_TRIMM.pack     (pady=(1,0))
-BT_CONVT=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_convt, text="Convert"       ) ; BT_CONVT.pack     (pady=(1,0))
-BT_DIMNS=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_dimns, text="Dimension"     ) ; BT_DIMNS.pack     (pady=(1,0))
-BT_IMGDM=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_imgdm, text="Imagedimension") ; BT_IMGDM.pack     (pady=(1,0))
-BT_MERGE=tk.Button(BOX_1, bg="#FFFFFF", fg="#1D2027", height=1,width=20, bd=0,highlightthickness=0, font=("calibri",14,"bold"), command=open_ffmpeg_merge, text="Merge"         ) ; BT_MERGE.pack     (pady=(1,0))
+def create_button(text, frame, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack):
+    button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
+    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
+    return button
+
+BOX_1 = tk.Frame(FRAME_FFMPEG, bg="#1d2027")
+BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
+
+button_properties = [
+("Trim"           ,BOX_1, open_ffmpeg_trimm ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 0 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Convert"        ,BOX_1, open_ffmpeg_convt ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 1 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Dimension"      ,BOX_1, open_ffmpeg_dimns ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 2 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Imagedimension" ,BOX_1, open_ffmpeg_imgdm ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 3 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Merge"          ,BOX_1, open_ffmpeg_merge ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 4 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+
+]
+
+for button_props in button_properties:
+    create_button(*button_props)
 
 
 #*  ███████╗██╗███╗   ██╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -861,36 +874,38 @@ def switch_to_tools_frame():
 BT_FOLDER = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame,image=icon_image, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=40, width=300, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#e7d86a", font=("JetBrainsMono NF", 13, "bold"))
 BT_FOLDER.pack(padx=(0,0),pady=(0,0))
 
-FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAME_FOLDER.pack_propagate(True)
+FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
+FRAME_FOLDER.pack_propagate(True)
 
 BT_BACK = tk.Button(FRAME_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FOLDER), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 
-
-
-def create_button(text, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, padx_button, pady_button, padx_pack, pady_pack):
-    button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
-    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack)
+def create_button(text, frame, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack):
+    button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
+    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
     return button
 
-BOX_1 = tk.Frame(FRAME_FOLDER, bg="#1d9027")
+BOX_1 = tk.Frame(FRAME_FOLDER, bg="#282c34")
 BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
 
+
 button_properties = [
-("All Apps"      ,open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    0 ,1,1,1,       0,0, (0,0),(0,0)),
-("AppData"       ,open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    1 ,1,1,1,       0,0, (0,0),(0,0)),
-("Git Projects"  ,open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    2 ,1,1,1,       0,0, (0,0),(0,0)),
-("Packages"      ,open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    3 ,1,1,1,       0,0, (0,0),(0,0)),
-("ProgramData"   ,open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    4 ,1,1,1,       0,0, (0,0),(0,0)),
-("Scoop"         ,open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    5 ,1,1,1,       0,0, (0,0),(0,0)),
-("Software"      ,open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    6 ,1,1,1,       0,0, (0,0),(0,0)),
-("Song"          ,open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    7 ,1,1,1,       0,0, (0,0),(0,0)),
-("Startup System",open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    8 ,1,1,1,       0,0, (0,0),(0,0)),
-("Startup User"  ,open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    9 ,1,1,1,       0,0, (0,0),(0,0)),
-("Temp-AppDate"  ,open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    10,1,1,1,       0,0, (0,0),(0,0)),
-("Temp-Windows"  ,open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    11,1,1,1,       0,0, (0,0),(0,0)),
-("WindowsApp"    ,open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"),    12,1,1,1,       0,0, (0,0),(0,0))
+("All Apps"      ,BOX_1, open_appsfolder_fd ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 0 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("AppData"       ,BOX_1, open_appdata_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 1 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("Git Projects"  ,BOX_1, open_git_fd        ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 2 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("Packages"      ,BOX_1, open_packages_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 3 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("ProgramData"   ,BOX_1, open_programdata_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 4 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("Scoop"         ,BOX_1, open_scoop_fd      ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 5 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("Software"      ,BOX_1, open_sofware_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 6 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("Song"          ,BOX_1, open_song_fd       ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 7 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
+("WindowsApp"    ,BOX_1, open_Winapps_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 8 ,1,1,2,"ew"  , 0,0, (0,0),(0,0)),
+
+("Startup System",BOX_1, open_startups_fd   ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 9 ,1,1,1,"nsew", 0,0, (0,0),(0,0)),
+("Startup User"  ,BOX_1, open_usrstartups_fd,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 9 ,2,1,1,"nsew", 0,0, (0,0),(0,0)),
+
+("Temp-AppDate"  ,BOX_1, open_templocal_fd  ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 10,1,1,1,"nsew", 0,0, (0,0),(0,0)),
+("Temp-Windows"  ,BOX_1, open_tempwin_fd    ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 10,2,1,1,"nsew", 0,0, (0,0),(0,0)),
 ]
 
 for button_props in button_properties:
@@ -937,9 +952,14 @@ for button_props in button_properties:
 def switch_to_process_frame():
     switch_to_frame(FR_PROCESS, MAIN_FRAME)
 
-BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_process_frame, bg="#cc2400", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#cc2400", font=("JetBrainsMono NF", 13, "bold")) ; BT_PROCESS_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
-FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FR_PROCESS.pack_propagate(False)
-BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold")) ; BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
+BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_process_frame, bg="#cc2400", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#cc2400", font=("JetBrainsMono NF", 13, "bold"))
+BT_PROCESS_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
+
+FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
+FR_PROCESS.pack_propagate(True)
+
+BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
+BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 
 def insert_input():
@@ -1539,7 +1559,8 @@ def switch_to_tools_frame():
 BT_TOOLS = M1_hold_release(MAIN_FRAME, "TOOLS", switch_to_tools_frame, bg="#454545", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#454545", font=("JetBrainsMono NF", 13, "bold"))
 BT_TOOLS.pack(padx=(0,0),pady=(0,0))
 
-FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAME_TOOLS.pack_propagate(False)
+FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
+FRAME_TOOLS.pack_propagate(True)
 
 BT_BACK = tk.Button(FRAME_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_TOOLS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
