@@ -203,6 +203,7 @@ ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
 def close_window(event=None):
     ROOT.destroy()
 
+#! Pin/Unpin
 def check_window_topmost():
     if not ROOT.attributes('-topmost'):
         ROOT.attributes('-topmost', True)
@@ -237,10 +238,7 @@ def toggle_window_size(size):
         x_coordinate = 0
         window_height = 30  # Assuming the window height is 38 pixels
         y_coordinate = screen_height - window_height
-        # x_coordinate, y_coordinate = 0, 1038
-        # x_coordinate, y_coordinate = 1390, 1038
-        # x_coordinate, y_coordinate = 1308, 1038
-        # x_coordinate, y_coordinate = 1590, 0
+
     elif size == '▼':
         ROOT.geometry('520x30')
         ROOT.configure(bg='red')
@@ -251,12 +249,9 @@ def toggle_window_size(size):
         x_coordinate = 0
         window_height = 30  # Assuming the window height is 38 pixels
         y_coordinate = screen_height - window_height
-        # x_coordinate, y_coordinate = 0, 1038
-        # x_coordinate, y_coordinate = 1002, 1038
-        # x_coordinate, y_coordinate = 920, 1038
-        # x_coordinate, y_coordinate = 1180, 0
         if ROOT.attributes('-topmost'):
              toggle_checking()
+
     elif size == '■':
         ROOT.geometry('520x800')
         ROOT.configure(bg='#1d2027')
@@ -264,21 +259,15 @@ def toggle_window_size(size):
         LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
         LB_M.config(text='■', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'large'
-        # x_coordinate = 0
-        # window_height = 700
-        # y_coordinate = screen_height - window_height
-
         x_coordinate = screen_width - 520
         y_coordinate = screen_height//2 - 855//2
-        # x_coordinate, y_coordinate = 0, 374
-        # x_coordinate, y_coordinate = 1002, 374
-        # x_coordinate, y_coordinate = 1420, 162
-        # x_coordinate, y_coordinate = 1180, 0
+
         if checking:
             toggle_checking()
     ROOT.focus_force()
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+{y_coordinate}')
+    
 def on_key_press(event):
     if event.keysym == 'Left':
         toggle_window_size('◀')
