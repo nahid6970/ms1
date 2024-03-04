@@ -754,21 +754,6 @@ def ack_d():
         print(f"Error executing command: {e}")
 
 #! FRAME Function
-def switch_to_ffmpeg_frame():
-    switch_to_frame(FRAME_FFMPEG, MAIN_FRAME)
-
-BT_FFMPEG = M1_hold_release(MAIN_FRAME, "FFmpeg", switch_to_ffmpeg_frame, bg="#408b40", fg="#FFFFFF", height=1, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#408b40", font=("JetBrainsMono NF", 13, "bold"))
-BT_FFMPEG.pack(padx=(0,0),pady=(0,0))
-
-FRAME_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=520, height=800) ; FRAME_FFMPEG.pack_propagate(False)
-
-BT_BACK = tk.Button(FRAME_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FFMPEG), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
-
-
-
-
-#! FRAME Function
 def switch_to_find_frame():
     switch_to_frame(FRAME_FIND, MAIN_FRAME)
 
@@ -780,24 +765,7 @@ FRAME_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAME
 BT_BACK = tk.Button(FRAME_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FIND), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-BOX_1 = tk.Frame(FRAME_FIND, bg="#1d2027") ; BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
-BT_FF= tk.Button(BOX_1, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_file, text="Find File"   ) ; BT_FF.pack(pady=(1,0))
-BT_FP= tk.Button(BOX_1, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_patt, text="Find Pattern") ; BT_FP.pack(pady=(1,0))
-BT_FS= tk.Button(BOX_1, bg="white", fg ="#1D2027", height=2, width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=find_size, text="Find Size"   ) ; BT_FS.pack(pady=(1,0))
-
-BT_FZF_C= tk.Button(BOX_1, height=1, bg="#f80069", fg ="#b0e1bd", width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=fzf_c, text="FZF-->C:\\") ; BT_FZF_C.pack(pady=(1,0))
-BT_FZF_D= tk.Button(BOX_1, height=1, bg="#f80069", fg ="#b0e1bd", width=20, relief="flat", highlightthickness=0, font=("calibri", 14, "bold"), command=fzf_d, text="FZF-->D:\\") ; BT_FZF_D.pack(pady=(1,0))
-
-# Assuming you have a Tkinter Entry widget for user input
-BOX_3 = tk.Frame(FRAME_FIND, bg="#1d2027") ; BOX_3.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
-
-FZF_SEARCH_WIDGET = tk.Entry(BOX_3, width=30, fg="black", bg="#7D879E", relief="flat", font=("calibri", 18, "bold", "italic"), justify="center")
-BT_ACK_C= tk.Button(BOX_3, text="ACK-->C:\\", font=("calibri", 14, "bold"), command=ack_c, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0)
-BT_ACK_D= tk.Button(BOX_3, text="ACK-->D:\\", font=("calibri", 14, "bold"), command=ack_d, bg="#e63a00", fg ="#fcffef", height=1, width=20, relief="flat", highlightthickness=0)
-FZF_SEARCH_WIDGET.pack(pady=(10,1))
-BT_ACK_C.pack(side="left", anchor="e", pady=(1,0))
-BT_ACK_D.pack(side="left", anchor="e", pady=(1,0))
 
 
 
@@ -1542,6 +1510,9 @@ def create_button(text, frame, command, bg_color, fg_color, height, width, relie
 BOX_1 = tk.Frame(FR_PROCESS, bg="#1d2027")
 BOX_1.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
+
+
+
 button_properties = [
 ("FFMPEG"         ,BOX_1, "none"            ,"#98c379","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
 ("Trim"           ,BOX_1, open_ffmpeg_trimm ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
@@ -1554,6 +1525,25 @@ button_properties = [
 for button_props in button_properties:
     create_button(*button_props)
 
+BOX_find = tk.Frame(FR_PROCESS, bg="#1d2027")
+BOX_find.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
+
+button_properties = [
+("Find"         ,BOX_find, "none"    ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
+("File"    ,BOX_find, find_file ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Pattern" ,BOX_find, find_patt ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Size"    ,BOX_find, find_size ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
+
+("FZF-->C:\\"    ,BOX_find, fzf_c ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
+("FZF-->D:\\"    ,BOX_find, fzf_d ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
+
+
+("ACK-->C:\\"    ,BOX_find, ack_c ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("ACK-->D:\\"    ,BOX_find, ack_d ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
+]
+
+for button_props in button_properties:
+    create_button(*button_props)
 
 
 
