@@ -12,12 +12,12 @@ $FGC = [System.ConsoleColor]::green
 $BGC = [System.ConsoleColor]::blue
 
 #Installed-Apps-Backup
-    # moved to update.ps1 scoop export > D:\@git\ms1\asset\installedApps\list_scoop.txt
-    # moved to update.ps1 winget export D:\@git\ms1\asset\installedApps\list_winget.txt > D:\@git\ms1\asset\installedApps\ex_wingetlist.txt
-   # Start-Process -FilePath "winget" -ArgumentList "export D:\@git\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "D:\@git\ms1\asset\installedApps\winget_unknown.txt" -WindowStyle Hidden #-Wait -NoNewWindow
-    #winget list > D:\@git\ms1\asset\installedApps\winget_list.txt
-    #D:\@git\ms1\scripts\scoop\scoop_list.ps1
-    #Start-Process -FilePath "winget" -ArgumentList "export D:\@git\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "D:\@git\ms1\asset\installedApps\winget_unknown.txt" #-Wait -NoNewWindow  
+    # moved to update.ps1 scoop export > C:\ms1\asset\installedApps\list_scoop.txt
+    # moved to update.ps1 winget export C:\ms1\asset\installedApps\list_winget.txt > C:\ms1\asset\installedApps\ex_wingetlist.txt
+   # Start-Process -FilePath "winget" -ArgumentList "export C:\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "C:\ms1\asset\installedApps\winget_unknown.txt" -WindowStyle Hidden #-Wait -NoNewWindow
+    #winget list > C:\ms1\asset\installedApps\winget_list.txt
+    #C:\ms1\scripts\scoop\scoop_list.ps1
+    #Start-Process -FilePath "winget" -ArgumentList "export C:\ms1\asset\installedApps\winget_apps.txt" -RedirectStandardOutput "C:\ms1\asset\installedApps\winget_unknown.txt" #-Wait -NoNewWindow  
     #[-Wait = will wait before anyother command can be executed in the same script]
     #[-NoNewWindow = wont create any new window]
     #[-WindowStyle Hidden/minimized/maximized/normal]
@@ -30,15 +30,15 @@ Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 #$emacs_src    = @( "C:\Users\nahid\AppData\Roaming\.emacs.d\config.org", "C:\Users\nahid\AppData\Roaming\.emacs.d\init.el", "C:\Users\nahid\AppData\Roaming\.emacs.d\early-init.el" )
 #$nvim_src     = "C:\Users\nahid\AppData\Local\nvim\init.lua"
 
-#$emacs_dst    = "D:\@git\ms1\asset\emacs\"
-#$nvim_dst     = "D:\@git\ms1\asset\neovim\init.lua"
+#$emacs_dst    = "C:\ms1\asset\emacs\"
+#$nvim_dst     = "C:\ms1\asset\neovim\init.lua"
 
 
 function Create_DirectoryIfNotExists { param( [string]$Path ) if (-not (Test-Path $Path -PathType Container)) { New-Item -ItemType Directory -Force -Path $Path } }
 
 function terminal {
     $terminal_src = "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-    $terminal_dst = "D:\@git\ms1\asset\terminal\settings.json"
+    $terminal_dst = "C:\ms1\asset\terminal\settings.json"
     Create_DirectoryIfNotExists -Path $terminal_dst
     Copy-Item -Path $terminal_src -Destination $terminal_dst
 }
@@ -52,7 +52,7 @@ function rclone_config {
 
 function pwsh_profile  {
     $pwsh_src      = "C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-    $pwsh_dst      = "D:\@git\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
+    $pwsh_dst      = "C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
     # Create_DirectoryIfNotExists -Path $pwsh_dst
     Copy-Item -Path $pwsh_src -Destination $pwsh_dst
 }
@@ -140,9 +140,9 @@ Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
 
 # Git-Run
-    D:\@git\ms1\scripts\Github\ms1u.ps1
+    C:\ms1\scripts\Github\ms1u.ps1
 Write-Host "Git ms1u Update ✅" -ForegroundColor $FGC
-    D:\@git\ms1\scripts\Github\ms2u.ps1
+    C:\ms1\scripts\Github\ms2u.ps1
 Write-Host "Git ms2u Update ✅" -ForegroundColor $FGC
 
 

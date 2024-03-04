@@ -40,13 +40,13 @@
 ; }
 ; else
 ; {
-; Run, "D:\@git\ms1\mypygui.py"
+; Run, "C:\ms1\mypygui.py"
 ; }
 ; return
 
 ; ;!alt2 🎯 Launch My PYGui
 ; #x:: 
-; Run, "D:\@git\ms1\mypygui.py"
+; Run, "C:\ms1\mypygui.py"
 ; return
 
 ; ;!alt3 🎯 Launch My PYGui
@@ -60,7 +60,7 @@
 ;         Process, Close, %pid%
 ; }
 ; ; Run My PYGui script
-; Run, "D:\@git\ms1\mypygui.py"
+; Run, "C:\ms1\mypygui.py"
 ; return
 
 ; ;!alt4 🎯 Launch My PYGui
@@ -75,12 +75,12 @@ IfWinExist, ahk_exe python.exe
         Process, Exist, %pid%
         fullPath := ErrorLevel
         ; Check if the process path matches the excluded scripts
-        if !(InStr(fullPath, "D:\@git\ms1\mypygui.py"))
+        if !(InStr(fullPath, "C:\ms1\mypygui.py"))
             Process, Close, %pid%
     }
 }
 ; Run My PYGui script
-Run, "D:\@git\ms1\mypygui.py"
+Run, "C:\ms1\mypygui.py"
 return
 
 
@@ -93,7 +93,7 @@ return
 ; }
 ; else
 ; {
-; Run, "D:\@git\ms1\scripts\mypwshgui.ps1"
+; Run, "C:\ms1\scripts\mypwshgui.ps1"
 ; }
 ; return
 
@@ -108,7 +108,7 @@ IfWinExist, ahk_exe pwsh.exe
 else
 {
     ; If pwsh window does not exist, run the pwsh script
-    Run, pwsh.exe -File "D:\@git\ms1\scripts\mypwshgui.ps1"
+    Run, pwsh.exe -File "C:\ms1\scripts\mypwshgui.ps1"
 }
 return
 
@@ -117,7 +117,7 @@ return
 
 
 #v:: ; Win + V
-Run, D:\@git\ms1\scripts\valorant\valo.ahk
+Run, C:\ms1\scripts\valorant\valo.ahk
 return
 
 
@@ -215,7 +215,7 @@ return
 
 ; 🎯 Close All And Reload Main Ahk Script
 ::cc-close::
-Run, "D:\@git\ms1\scripts\ahkcloseopen.py"
+Run, "C:\ms1\scripts\ahkcloseopen.py"
 return    
 
 

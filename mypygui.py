@@ -369,7 +369,7 @@ get_net_speed.upload_speed_last = 0
 get_net_speed.download_speed_last = 0
 
 def git_sync(event=None):
-    subprocess.Popen(["powershell", "D:\\@git\\ms1\\scripts\\Github\\ms1u.ps1 ; D:\\@git\\ms1\\scripts\\Github\\ms2u.ps1"])
+    subprocess.Popen(["powershell", "C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1"])
 
 #! Clear Button
 def clear_screen():
@@ -404,12 +404,12 @@ def show_git_changes(git_path):
     subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status"])
 def update_status():
     while True:
-        check_git_status("D:\\@git\\ms1", STATUS_MS1)
+        check_git_status("C:\\ms1", STATUS_MS1)
         check_git_status("D:\\@git\\ms2", STATUS_MS2)
         # Update the status every second
         time.sleep(1)
 def extra_bar(event=None):
-    subprocess.Popen(["powershell", "start-process", "D:\\@git\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
+    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(2,2),padx=(5,3))
 
@@ -453,7 +453,7 @@ LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
 bkup.bind      ("<Button-1>", lambda event: git_sync          ())
-STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms1"))
+STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms2"))
 
 
@@ -503,7 +503,7 @@ check_window_topmost()
 #!This is for ROW 2
 #! Terminal & SYNC & Ruler
 def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\sync.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
 def windows_terminal(even=None):
     subprocess.Popen(["wt"])
 def powertoys_ruler(event=None):
@@ -639,9 +639,9 @@ update_cpu_core_bars()
 
 #! Backup & Update
 def open_backup(event=None):
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\backup.ps1"], shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
 def open_update(event=None):
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\update.ps1"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="black") ; BOX_ROW_MAIN.pack(pady=(5,0))
 BACKUP_BT = tk.Label(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#21a366", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Backup")
@@ -672,19 +672,19 @@ MAIN_FRAME.pack(expand=True)
 #*  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 def open_ffmpeg_trimm():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\trim.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\trim.ps1"])
 
 def open_ffmpeg_convt():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\convert.ps1"])
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\convert.ps1"])
 
 def open_ffmpeg_dimns():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
 
 def open_ffmpeg_imgdm():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
 
 def open_ffmpeg_merge():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\ffmpeg\\merge.ps1"])
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
 #*  ███████╗██╗███╗   ██╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #*  ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -694,13 +694,13 @@ def open_ffmpeg_merge():
 #*  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 def find_file():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\find\\find_file.ps1"])
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_file.ps1"])
 
 def find_patt():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\find\\find_pattern.ps1"])
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_pattern.ps1"])
 
 def find_size():
-    subprocess.run(["powershell", "start", "D:\\@git\\ms1\\scripts\\find\\find_size.ps1"])
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
 
 def fzf_c():
     command = 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'
@@ -1121,7 +1121,7 @@ def scoop_info():
 
 def scoop_install_fzf():
     # Path to the Python script generating the package list
-    python_script = r"D:\@git\ms1\scripts\python\scoop_list.py"
+    python_script = r"C:\ms1\scripts\python\scoop_list.py"
 
     # Run the Python script to generate the package list
     try:
@@ -1627,13 +1627,13 @@ BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 def font_style():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\python\\font_style.py"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\font_style.py"],  shell=True)
 def Keybinding():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\python\\Keybinding.py"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\Keybinding.py"],  shell=True)
 def dictionary():
-    subprocess.Popen(["powershell", "start", "D:\\@git\\ms1\\scripts\\python\\dictionary.py"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\dictionary.py"],  shell=True)
 def regedit_run(event=None):
-    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "D:\\@git\\ms1\\scripts\\python\\regedit.py", "-Verb", "RunAs"], shell=True)
+    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "C:\\ms1\\scripts\\python\\regedit.py", "-Verb", "RunAs"], shell=True)
 
 
 BT_font =        tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=font_style, text="Font Style")
@@ -1670,8 +1670,8 @@ def run_script():
 
 # Folders
 folders = [
-"D:\\@git\\ms1\\scripts\\autohotkey",
-"D:\\@git\\ms1\\scripts\\python"
+"C:\\ms1\\scripts\\autohotkey",
+"C:\\ms1\\scripts\\python"
 ]
 BOX_PYTHON_2 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_2.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 # Dropdown for folders

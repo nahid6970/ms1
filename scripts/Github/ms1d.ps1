@@ -1,3 +1,3 @@
-Set-Location D:\@git\ms1
+Set-Location C:\ms1
 git pull
 Set-Location

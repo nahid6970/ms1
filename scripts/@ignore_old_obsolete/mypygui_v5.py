@@ -788,7 +788,7 @@ def scoop_info():
 
 def scoop_install_fzf():
     # Path to the Python script generating the package list
-    python_script = r"D:\@git\ms1\scripts\scoop\package_list_from_buckets.py"
+    python_script = r"C:\ms1\scripts\scoop\package_list_from_buckets.py"
 
     # Run the Python script to generate the package list
     try:
@@ -798,7 +798,7 @@ def scoop_install_fzf():
         return
 
     # Path to the text file containing package list
-    package_list_file = r"D:\@git\ms1\scripts\scoop\package_list_bucket.txt"
+    package_list_file = r"C:\ms1\scripts\scoop\package_list_bucket.txt"
 
     # Command to read from the text file and pipe it to fzf
     command = f"type {package_list_file} | fzf --multi --preview 'scoop info {{1}}' | ForEach-Object {{ scoop install $_.split()[0] }}"

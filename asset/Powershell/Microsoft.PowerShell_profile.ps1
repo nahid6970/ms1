@@ -718,8 +718,8 @@ Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
 
 
 # Environmental Variable
-$env:PATH += ";D:\@git\ms1"
-$env:PATH += ";D:\@git\ms1\scripts"
+$env:PATH += ";C:\ms1"
+$env:PATH += ";C:\ms1\scripts"
 
 
 function Prompt {
@@ -730,7 +730,7 @@ function Prompt {
 
 
 function yt {yt-dlp}
-function sync { D:\@git\ms1\sync.ps1 }
+function sync { C:\ms1\sync.ps1 }
 function trim { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 }
 Import-Module scoop-completion
 
@@ -859,7 +859,7 @@ function sonarr_stop   { Stop-Process -Name sonarr }
 function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Radarr.exe" }
 function radarr_stop   { Stop-Process -Name radarr }
 
-function ms1  { Set-Location D:\@git\ms1\ }
+function ms1  { Set-Location C:\ms1\ }
 function ms2  { Set-Location D:\@git\ms2\ }
 
 
