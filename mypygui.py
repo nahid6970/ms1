@@ -1543,11 +1543,12 @@ BOX_1 = tk.Frame(FR_PROCESS, bg="#1d2027")
 BOX_1.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
 button_properties = [
-("Trim"           ,BOX_1, open_ffmpeg_trimm ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 0 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Convert"        ,BOX_1, open_ffmpeg_convt ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 1 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Dimension"      ,BOX_1, open_ffmpeg_dimns ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 2 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Imagedimension" ,BOX_1, open_ffmpeg_imgdm ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 3 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Merge"          ,BOX_1, open_ffmpeg_merge ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 4 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("FFMPEG"         ,BOX_1, "none"            ,"#98c379","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
+("Trim"           ,BOX_1, open_ffmpeg_trimm ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Convert"        ,BOX_1, open_ffmpeg_convt ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Dimension"      ,BOX_1, open_ffmpeg_dimns ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Imagedimension" ,BOX_1, open_ffmpeg_imgdm ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Merge"          ,BOX_1, open_ffmpeg_merge ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
 ]
 
 for button_props in button_properties:
