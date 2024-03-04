@@ -42,4 +42,4 @@ Clear-Host
 #powershell Write-Host "Backup" -ForegroundColor black -BackgroundColor white
 #    rclone sync "C:\Users\nahid\OneDrive\backup"     "o0:\backup\"  -P --check-first --transfers=1 --track-renames --fast-list --stats-one-line                       # --log-level INFO  --log-file="D:\OneDrive\x.log"
 #    rclone sync "C:\ms1\"   "o0:\Git\ms1\" -P --check-first --transfers=1 --track-renames --fast-list --stats-one-line      --exclude .git/  # --log-level INFO  --log-file="D:\OneDrive\x.log"
-#    rclone sync "D:\@git\ms2\"   "o0:\Git\ms2\" -P --check-first --transfers=1 --track-renames --fast-list --stats-one-line      --exclude .git/  # --log-level INFO  --log-file="D:\OneDrive\x.log"
+#    rclone sync "C:\ms2\"   "o0:\Git\ms2\" -P --check-first --transfers=1 --track-renames --fast-list --stats-one-line      --exclude .git/  # --log-level INFO  --log-file="D:\OneDrive\x.log"

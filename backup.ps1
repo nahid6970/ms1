@@ -24,7 +24,7 @@ $BGC = [System.ConsoleColor]::blue
 Write-Host "Appslist Export ✔️" -ForegroundColor $FGC
 
 #OrgDoc Convert to html
-    pandoc -s D:\@git\ms2\Files\MyOrg.org  -o D:\@git\ms2\OrgDoc.html --toc
+    pandoc -s C:\ms2\Files\MyOrg.org  -o C:\ms2\OrgDoc.html --toc
 Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 
 #$emacs_src    = @( "C:\Users\nahid\AppData\Roaming\.emacs.d\config.org", "C:\Users\nahid\AppData\Roaming\.emacs.d\init.el", "C:\Users\nahid\AppData\Roaming\.emacs.d\early-init.el" )

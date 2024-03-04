@@ -415,7 +415,7 @@ def show_git_changes(git_path):
 def update_status():
     while True:
         check_git_status("C:\\ms1", STATUS_MS1)
-        check_git_status("D:\\@git\\ms2", STATUS_MS2)
+        check_git_status("C:\\ms2", STATUS_MS2)
         # Update the status every second
         time.sleep(1)
 def extra_bar(event=None):
@@ -464,7 +464,7 @@ LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
 bkup.bind      ("<Button-1>", lambda event: git_sync          ())
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms1"))
-STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("D:\\@git\\ms2"))
+STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms2"))
 
 
 

@@ -860,7 +860,7 @@ function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Rada
 function radarr_stop   { Stop-Process -Name radarr }
 
 function ms1  { Set-Location C:\ms1\ }
-function ms2  { Set-Location D:\@git\ms2\ }
+function ms2  { Set-Location C:\ms2\ }
 
 
 
