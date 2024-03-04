@@ -1381,10 +1381,12 @@ chkbx_sonarr = tk.IntVar()
 chkbx_radarr = tk.IntVar()
 chkbx_dotnet8 = tk.IntVar()
 chkbx_javaruntime = tk.IntVar()
+chkbx_vscode = tk.IntVar()
 
 # Define applications and their information
 applications = [
 # {"name": "AppName"                , "scoop_name": "ScoopName"                         , "scoop_path": r'xx'                                                                                 , "winget_name": "WingetName"                               , "winget_path": r"xx"                                                                                                                                                      , "chkbx_var": chkbx_xx}                               ,
+{"name": "VSCode"                , "scoop_name": "vscode"                         , "scoop_path": r''                                                                                 , "winget_name": "Microsoft.VisualStudioCode"                               , "winget_path": r"C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe", "chkbx_var": chkbx_vscode}                               ,
 {"name": "Java Runtime Environment"                , "scoop_name": ""                         , "scoop_path": r''                                                                                 , "winget_name": "Oracle.JavaRuntimeEnvironment"                               , "winget_path": r"C:\Program Files (x86)\Common Files\Oracle\Java\javapath\java.exe", "chkbx_var": chkbx_javaruntime}                               ,
 {"name": "DotNet DesktopRuntime 8"                , "scoop_name": ""                         , "scoop_path": r''                                                                                 , "winget_name": "Microsoft.DotNet.DesktopRuntime.8"                               , "winget_path": r"C:\Program Files\dotnet\dotnet.exe", "chkbx_var": chkbx_dotnet8}                               ,
 {"name": "Radarr"                   , "scoop_name": "ScoopName"                         , "scoop_path": r'xx'                                                                                 , "winget_name": "TeamRadarr.Radarr"                        , "winget_path": r"C:\ProgramData\Radarr\bin\Radarr.exe"                                                                                                                    , "chkbx_var": chkbx_radarr}                           ,
