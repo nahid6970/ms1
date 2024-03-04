@@ -1384,10 +1384,12 @@ chkbx_prowlarr = tk.IntVar()
 chkbx_fileconvert = tk.IntVar()
 chkbx_sonarr = tk.IntVar()
 chkbx_radarr = tk.IntVar()
+chkbx_dotnet8 = tk.IntVar()
 
 # Define applications and their information
 applications = [
 # {"name": "AppName"                , "scoop_name": "ScoopName"                         , "scoop_path": r'xx'                                                                                 , "winget_name": "WingetName"                               , "winget_path": r"xx"                                                                                                                                                      , "chkbx_var": chkbx_xx}                               ,
+{"name": "DotNet DesktopRuntime 8"                , "scoop_name": ""                         , "scoop_path": r''                                                                                 , "winget_name": "Microsoft.DotNet.DesktopRuntime.8"                               , "winget_path": r"C:\Program Files\dotnet\dotnet.exe", "chkbx_var": chkbx_dotnet8}                               ,
 {"name": "Radarr"                   , "scoop_name": "ScoopName"                         , "scoop_path": r'xx'                                                                                 , "winget_name": "TeamRadarr.Radarr"                        , "winget_path": r"C:\ProgramData\Radarr\bin\Radarr.exe"                                                                                                                    , "chkbx_var": chkbx_radarr}                           ,
 {"name": "Sonarr"                   , "scoop_name": ""                                  , "scoop_path": r''                                                                                   , "winget_name": "TeamSonarr.Sonarr"                        , "winget_path": r"C:\ProgramData\Sonarr\bin\Sonarr.exe"                                                                                                                    , "chkbx_var": chkbx_sonarr}                           ,
 {"name": "FileConverter"            , "scoop_name": "file-converter-np"                 , "scoop_path": r'xx'                                                                                 , "winget_name": "AdrienAllard.FileConverter"               , "winget_path": r"C:\Program Files\File Converter\FileConverter.exe"                                                                                                       , "chkbx_var": chkbx_fileconvert}                      ,
