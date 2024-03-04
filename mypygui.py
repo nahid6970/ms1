@@ -1245,10 +1245,6 @@ LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(50,0))
 search_entry = tk.Entry(Page1, font=("calibri", 12), bg="#1d2027", fg="#fff", insertbackground="#fff")
 search_entry.pack(side="top", anchor="center", padx=(20, 0), pady=(0, 10))
 
-import tkinter as tk
-from tkinter import messagebox
-import os
-import subprocess
 
 def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
     scoop_installed = os.path.exists(scoop_path)
