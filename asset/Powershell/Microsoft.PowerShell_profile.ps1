@@ -668,7 +668,6 @@ Set-PSReadLineKeyHandler -Chord 'Alt+x' `
     if ($cursor -lt 4) {
         return
     }
-
     $number = 0
     $isNumber = [int]::TryParse(
         $buffer.Substring($cursor - 4, 4),
@@ -685,7 +684,6 @@ Set-PSReadLineKeyHandler -Chord 'Alt+x' `
     } catch {
         return
     }
-
     [Microsoft.PowerShell.PSConsoleReadLine]::Delete($cursor - 4, 4)
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert($unicode)
 
@@ -718,8 +716,8 @@ Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
 
 
 # Environmental Variable
-$env:PATH += ";D:\@git\ms1"
-$env:PATH += ";D:\@git\ms1\scripts"
+$env:PATH += ";c:\ms1"
+$env:PATH += ";c:\ms1\scripts"
 
 
 function Prompt {
@@ -727,14 +725,6 @@ function Prompt {
     Write-Host ("->" + $currentLocation + " ⚡") -ForegroundColor Yellow -BackgroundColor Blue -NoNewline
     return " "
 }
-
-
-function yt {yt-dlp}
-function sync { D:\@git\ms1\sync.ps1 }
-function trim { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 }
-Import-Module scoop-completion
-
-
 
 
 
@@ -859,8 +849,13 @@ function sonarr_stop   { Stop-Process -Name sonarr }
 function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Radarr.exe" }
 function radarr_stop   { Stop-Process -Name radarr }
 
-function ms1  { Set-Location D:\@git\ms1\ }
-function ms2  { Set-Location D:\@git\ms2\ }
+function yt {yt-dlp}
+function sync { c:\ms1\sync.ps1 }
+function trim { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 }
+Import-Module scoop-completion
+
+function ms1  { Set-Location c:\ms1\ }
+function ms2  { Set-Location c:\ms2\ }
 
 
 
