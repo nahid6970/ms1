@@ -765,25 +765,6 @@ FRAME_FFMPEG = tk.Frame(BORDER_FRAME, bg="#1D2327", width=520, height=800) ; FRA
 BT_BACK = tk.Button(FRAME_FFMPEG, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FFMPEG), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-def create_button(text, frame, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack):
-    button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
-    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
-    return button
-
-BOX_1 = tk.Frame(FRAME_FFMPEG, bg="#1d2027")
-BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
-
-button_properties = [
-("Trim"           ,BOX_1, open_ffmpeg_trimm ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 0 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Convert"        ,BOX_1, open_ffmpeg_convt ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 1 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Dimension"      ,BOX_1, open_ffmpeg_dimns ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 2 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Imagedimension" ,BOX_1, open_ffmpeg_imgdm ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 3 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-("Merge"          ,BOX_1, open_ffmpeg_merge ,"#ffd86a","#1D2027",1,20,"flat",("calibri",14,"bold"), 4 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
-]
-
-for button_props in button_properties:
-    create_button(*button_props)
-
 
 
 
@@ -1225,7 +1206,7 @@ BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, he
 BT_AUTORUNS.pack(pady=(10, 0))
 
 #! APPLication List
-BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#fff", fg="#000", width=20, highlightthickness=5, anchor="center", font=("JetBrainsMono NF", 12, "bold"))
+BT_APPLIST = tk.Button(FR_PROCESS, text="App List", command=lambda: switch_to_frame(Page1, FR_PROCESS), bg="#ff6a2e", fg="#000", width=20, highlightthickness=5, anchor="center", font=("JetBrainsMono NF", 12, "bold"))
 BT_APPLIST.pack(anchor="n", padx=(0,0), pady=(5,0))
 
 Page1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
@@ -1301,14 +1282,6 @@ def show_options(options):
     for option in options:
         btn = tk.Button(frame, text=option["text"], command=option["command"], foreground="#fff", background="#1d2027", padx=10, pady=5, borderwidth=2, relief="raised")
         btn.pack(side="left", padx=5, pady=5, anchor="center")
-
-#     # Add uninstall both button
-#     uninstall_both_btn = tk.Button(frame, text="Uninstall Both", command=lambda: uninstall_both_from_options(options), foreground="red", background="#1d2027", padx=10, pady=5, borderwidth=2, relief="raised")
-#     uninstall_both_btn.pack(side="left", padx=5, pady=5, anchor="center")
-
-# def uninstall_both_from_options(options):
-#     for option in options:
-#         option["command"]()
 
 # Variable to track checkbox state
 chkbx_rclone = tk.IntVar()
@@ -1558,6 +1531,29 @@ search_entry.bind("<KeyRelease>", filter_apps)
 # Update scroll region
 frame.update_idletasks()
 canvas.config(scrollregion=canvas.bbox("all"))
+
+
+
+def create_button(text, frame, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack):
+    button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
+    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
+    return button
+
+BOX_1 = tk.Frame(FR_PROCESS, bg="#1d2027")
+BOX_1.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
+
+button_properties = [
+("Trim"           ,BOX_1, open_ffmpeg_trimm ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 0 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Convert"        ,BOX_1, open_ffmpeg_convt ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 1 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Dimension"      ,BOX_1, open_ffmpeg_dimns ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 2 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Imagedimension" ,BOX_1, open_ffmpeg_imgdm ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 3 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+("Merge"          ,BOX_1, open_ffmpeg_merge ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",12,"bold"), 4 ,1,1,2,"ew" , 0,0, (0,0),(0,0)),
+]
+
+for button_props in button_properties:
+    create_button(*button_props)
+
+
 
 
 #*  ████████╗ ██████╗  ██████╗ ██╗     ███████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
