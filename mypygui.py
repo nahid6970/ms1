@@ -1368,6 +1368,9 @@ chkbx_oh_my_posh = tk.IntVar()
 chkbx_wsa_pacman = tk.IntVar()
 chkbx_yt_dlp = tk.IntVar()
 chkbx_scrcpyplus = tk.IntVar()
+chkbx_shell = tk.IntVar()
+chkbx_autohotkey1 = tk.IntVar()
+chkbx_autohotkey2 = tk.IntVar()
 
 # Define applications and their information
 applications = [
@@ -1423,6 +1426,10 @@ applications = [
 {"name": "WizTree"               , "scoop_name": "WizTree"                           , "scoop_path": r'C:\Users\nahid\scoop\apps\wiztree\current\WizTree64.exe'                            , "winget_name": "AntibodySoftware.WizTree"        , "winget_path": "xx"                                                             , "chkbx_var": chkbx_WizTree}                          ,
 {"name": "WSA-pacman"            , "scoop_name": "wsa-pacman"                        , "scoop_path": r'C:\Users\nahid\scoop\apps\wsa-pacman\current\WSA-pacman.exe'                        , "winget_name": "alesimula.wsa_pacman"            , "winget_path": "xx"                                                             , "chkbx_var": chkbx_wsa_pacman}                       ,
 {"name": "yt-dlp"                , "scoop_name": "yt-dlp"                            , "scoop_path": r'C:\Users\nahid\scoop\apps\yt-dlp\current\yt-dlp.exe'                                , "winget_name": "yt-dlp.yt-dlp"                   , "winget_path": "xx"                                                             , "chkbx_var": chkbx_yt_dlp}                           ,
+{"name": "Nilesoft Shell"        , "scoop_name": "nilesoft-shell"                    , "scoop_path": r'xx'                                                                                 , "winget_name": "nilesoft.shell"                  , "winget_path": r"xx"                                                            , "chkbx_var": chkbx_shell}                           ,
+{"name": "AutoHotkey v1"        , "scoop_name": "autohotkey1.1"                    , "scoop_path": r'xx'                                                                                 , "winget_name": "Lexikos.AutoHotkey"                  , "winget_path": r"xx"                                                            , "chkbx_var": chkbx_autohotkey1},
+{"name": "AutoHotkey v2"        , "scoop_name": "autohotkey"                    , "scoop_path": r'xx'                                                                                 , "winget_name": "AutoHotkey.AutoHotkey"                  , "winget_path": r"xx"                                                            , "chkbx_var": chkbx_autohotkey2}                           ,
+# {"name": "AppName"        , "scoop_name": "ScoopName"                    , "scoop_path": r'xx'                                                                                 , "winget_name": "WingetName"                  , "winget_path": r"xx"                                                            , "chkbx_var": chkbx_xx}                           ,
 # Add more applications here
 ]
 # Import necessary modules
