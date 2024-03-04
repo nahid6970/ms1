@@ -1245,7 +1245,6 @@ LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(50,0))
 search_entry = tk.Entry(Page1, font=("calibri", 12), bg="#1d2027", fg="#fff", insertbackground="#fff")
 search_entry.pack(side="top", anchor="center", padx=(20, 0), pady=(0, 10))
 
-
 def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
     scoop_installed = os.path.exists(scoop_path)
     winget_installed = os.path.exists(winget_path)
@@ -1459,6 +1458,7 @@ applications = [
 # Create canvas and scrollbar
 canvas = Canvas(Page1, bg="#1d2027", highlightthickness=0)
 canvas.pack(side="left", fill="both", expand=True)
+
 #! scrollbar Start
 def on_mousewheel(event):
     canvas.yview_scroll(-1 * (event.delta // 120), "units")
@@ -1497,7 +1497,7 @@ row_number = 0
 # Create and pack checkboxes, check buttons, install buttons, and uninstall buttons for each application inside the frame
 for app in applications:
     app_frame = app["frame"]
-    app_frame.grid(row=row_number, column=0, padx=(150,0), pady=(0,0), sticky="ew")  # Adjusted sticky parameter
+    app_frame.grid(row=row_number, column=0, padx=(80,0), pady=(0,0), sticky="ew")  # Adjusted sticky parameter
     row_number += 1
 
     app_name = app["name"]
