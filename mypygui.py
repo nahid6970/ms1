@@ -732,13 +732,8 @@ def ack_d():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-def get_additional_text():
-    # Assuming you have a Tkinter Entry widget for input
-    additional_text = FZF_SEARCH_WIDGET.get()
-    return additional_text
-
 def ack_c():
-    additional_text = get_additional_text()
+    additional_text = insert_input()
     command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {additional_text}"'
     try:
         subprocess.Popen(["powershell", "-Command", command], shell=True)
@@ -746,28 +741,12 @@ def ack_c():
         print(f"Error executing command: {e}")
 
 def ack_d():
-    additional_text = get_additional_text()
+    additional_text = insert_input()
     command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {additional_text}"'
     try:
         subprocess.Popen(["powershell", "-Command", command], shell=True)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
-
-#! FRAME Function
-def switch_to_find_frame():
-    switch_to_frame(FRAME_FIND, MAIN_FRAME)
-
-BT_FIND = M1_hold_release(MAIN_FRAME, "Find", switch_to_find_frame, bg="#FFFFFF", fg="#1D2027", height=1, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#FFFFFF", font=("JetBrainsMono NF", 13, "bold"))
-BT_FIND.pack(padx=(0,0),pady=(0,0))
-
-FRAME_FIND = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAME_FIND.pack_propagate(True)
-
-BT_BACK = tk.Button(FRAME_FIND, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FIND), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
-
-
-
-
 
 #*  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #*  ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
