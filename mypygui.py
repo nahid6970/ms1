@@ -881,7 +881,6 @@ FRAME_FOLDER.pack_propagate(True)
 BT_BACK = tk.Button(FRAME_FOLDER, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_FOLDER), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-
 def create_button(text, frame, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack):
     button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
     button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
@@ -890,6 +889,8 @@ def create_button(text, frame, command, bg_color, fg_color, height, width, relie
 BOX_1 = tk.Frame(FRAME_FOLDER, bg="#282c34")
 BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
 
+BOX_2 = tk.Frame(FRAME_FOLDER, bg="#992134")
+BOX_2.pack(side="top", pady=(80,0), padx=(0,0))
 
 button_properties = [
 ("All Apps"      ,BOX_1, open_appsfolder_fd ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 0 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
@@ -902,16 +903,15 @@ button_properties = [
 ("Song"          ,BOX_1, open_song_fd       ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 7 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
 ("WindowsApp"    ,BOX_1, open_Winapps_fd    ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 8 ,1,1,2,"ew"  , 0,0, (0,0),(0,0)),
 
-("Startup System",BOX_1, open_startups_fd   ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 9 ,1,1,1,"nsew", 0,0, (0,0),(3,0)),
-("Startup User"  ,BOX_1, open_usrstartups_fd,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 9 ,2,1,1,"nsew", 0,0, (0,0),(3,0)),
+("Startup System",BOX_1, open_startups_fd   ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 9 ,1,1,1,"nsew", 0,0, (0,1),(3,0)),
+("Startup User"  ,BOX_1, open_usrstartups_fd,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 9 ,2,1,1,"nsew", 0,0, (1,0),(3,0)),
 
-("Temp-AppDate"  ,BOX_1, open_templocal_fd  ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 10,1,1,1,"nsew", 0,0, (0,0),(3,0)),
-("Temp-Windows"  ,BOX_1, open_tempwin_fd    ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 10,2,1,1,"nsew", 0,0, (0,0),(3,0)),
+("Temp-AppDate"  ,BOX_1, open_templocal_fd  ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 10,1,1,1,"nsew", 0,0, (0,1),(3,0)),
+("Temp-Windows"  ,BOX_1, open_tempwin_fd    ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 10,2,1,1,"nsew", 0,0, (1,0),(3,0)),
 ]
 
 for button_props in button_properties:
     create_button(*button_props)
-
 
 # #! Example With Place
 # def create_button(text, command, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, padx_pack, pady_pack):
