@@ -41,8 +41,6 @@ function Command_History {
     $history_dst = "C:\Users\nahid\OneDrive\backup\command_history.txt"
     Create_DirectoryIfNotExists -Path $history_dst
     Copy-Item -Path $history_src -Destination $history_dst
-
-    
 }
 
 
@@ -134,6 +132,7 @@ function filezilla {
 # jellyfin
 # whisparr
 bazarr
+Command_History
 prowlarr
 radarr
 rssguard
