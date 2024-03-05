@@ -1555,11 +1555,20 @@ for button_props in button_properties:
 #?  ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║       ██║   ╚██████╔╝╚██████╔╝███████╗███████║
 #?  ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝       ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
 
-def switch_to_pythontool_frame():
-    switch_to_frame(FR_PYTHON_TOOL, MAIN_FRAME)
-
-BT_PYTHON_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Python Tools", switch_to_pythontool_frame, bg="#366c9c", fg="#f6d24a", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#366c9c", font=("JetBrainsMono NF", 13, "bold"))
-BT_PYTHON_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
+BT_PYTHON_MAIN_FRAME = tk.Button(MAIN_FRAME,
+                     text="Python Tools",
+                     command=lambda: switch_to_frame(FR_PYTHON_TOOL, MAIN_FRAME),
+                     bg="#366c9c",
+                     fg="#f6d24a",
+                     height=2,
+                     width=30,
+                     font=("JetBrainsMono NF", 13, "bold"),
+                     anchor="w",
+                     highlightthickness=2,
+                     highlightbackground="red",
+                     relief="flat",
+                     )
+BT_PYTHON_MAIN_FRAME.pack(padx=(0, 0), pady=(0, 0))
 
 FR_PYTHON_TOOL = tk.Frame(BORDER_FRAME, bg="#1d2027", width=520, height=800)
 FR_PYTHON_TOOL.pack_propagate(False)
