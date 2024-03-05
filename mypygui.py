@@ -1,6 +1,9 @@
 import importlib
 import subprocess
 
+#? https://pypi.org/project/pretty-errors/
+
+
 required_libraries = [
     "ctypes",
     "datetime",

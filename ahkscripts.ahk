@@ -44,10 +44,20 @@
 ; }
 ; return
 
-; ;!alt2 🎯 Launch My PYGui
+
+
+; ; ;! alt1 🎯 Launch My PYGui
 ; #x:: 
 ; Run, "C:\ms1\mypygui.py"
 ; return
+
+;!alt2 🎯 Launch My PYGui
+#x::
+Run, powershell.exe -NoExit -Command "cd ~; python C:\ms1\mypygui.py"
+return
+
+
+
 
 ; ;!alt3 🎯 Launch My PYGui
 ; #x:: 
@@ -64,24 +74,24 @@
 ; return
 
 ; ;!alt4 🎯 Launch My PYGui
-#x::
-IfWinExist, ahk_exe python.exe
-{
-    ; If Python is running, find its process ID (PID)
-    WinGet, pid, PID, ahk_exe python.exe
-    ; If PID is found, check if it's one of the allowed scripts
-    if (pid) {
-        ; Get the full path of the process
-        Process, Exist, %pid%
-        fullPath := ErrorLevel
-        ; Check if the process path matches the excluded scripts
-        if !(InStr(fullPath, "C:\ms1\mypygui.py"))
-            Process, Close, %pid%
-    }
-}
-; Run My PYGui script
-Run, "C:\ms1\mypygui.py"
-return
+; #x::
+; IfWinExist, ahk_exe python.exe
+; {
+;     ; If Python is running, find its process ID (PID)
+;     WinGet, pid, PID, ahk_exe python.exe
+;     ; If PID is found, check if it's one of the allowed scripts
+;     if (pid) {
+;         ; Get the full path of the process
+;         Process, Exist, %pid%
+;         fullPath := ErrorLevel
+;         ; Check if the process path matches the excluded scripts
+;         if !(InStr(fullPath, "C:\ms1\mypygui.py"))
+;             Process, Close, %pid%
+;     }
+; }
+; ; Run My PYGui script
+; Run, "C:\ms1\mypygui.py"
+; return
 
 
 
