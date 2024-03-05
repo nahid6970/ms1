@@ -794,14 +794,28 @@ def open_Winapps_fd():
 def open_programdata_fd():
     subprocess.run(["explorer", "C:\\ProgramData"])
 
-icon_path = "C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"
-icon_image = ImageTk.PhotoImage(Image.open(icon_path))
 
-def switch_to_tools_frame():
-    switch_to_frame(FRAME_FOLDER, MAIN_FRAME)
-
-BT_FOLDER = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame,image=icon_image, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=40, width=300, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#e7d86a", font=("JetBrainsMono NF", 13, "bold"))
-BT_FOLDER.pack(padx=(0,0),pady=(0,0))
+icon_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
+BT_FOLDER = tk.Button(
+                    MAIN_FRAME,
+                    text="Folder",
+                    command=lambda: switch_to_frame(FR_PROCESS, MAIN_FRAME),
+                    image=icon_image,
+                    compound=tk.RIGHT,
+                    bg="#e7d86a",
+                    fg="#1D2027",
+                    height=40,
+                    width=300,
+                    font=("JetBrainsMono NF", 13, "bold"),
+                    anchor="w",
+                    bd=0,
+                    highlightthickness=4,
+                    relief="flat",
+                    activebackground="#000000",
+                    activeforeground="#f6d24a",
+                    cursor="hand2",
+                    )
+BT_FOLDER.pack(padx=(0, 0), pady=(0, 0))
 
 FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
 FRAME_FOLDER.pack_propagate(True)
@@ -878,11 +892,25 @@ for button_props in button_properties:
 #!  ╚═╝     ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝╚══════╝╚══════╝    ╚═════╝      ╚═╝     ╚═╝  ╚═╝ ╚═════╝
 
 #! FRAME Function
-def switch_to_process_frame():
-    switch_to_frame(FR_PROCESS, MAIN_FRAME)
 
-BT_PROCESS_MAIN_FRAME = M1_hold_release(MAIN_FRAME, "Process & PKG", switch_to_process_frame, bg="#cc2400", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#cc2400", font=("JetBrainsMono NF", 13, "bold"))
-BT_PROCESS_MAIN_FRAME.pack(padx=(0,0),pady=(0,0))
+BT_PROCESS = tk.Button(
+                    MAIN_FRAME,
+                    text="Process & PKG",
+                    command=lambda: switch_to_frame(FR_PROCESS, MAIN_FRAME),
+                    bg="#cc2400",
+                    fg="#FFFFFF",
+                    height=2,
+                    width=30,
+                    font=("JetBrainsMono NF", 13, "bold"),
+                    anchor="w",
+                    bd=0,
+                    highlightthickness=4,
+                    relief="flat",
+                    activebackground="#000000",
+                    activeforeground="#f6d24a",
+                    cursor="hand2",
+                    )
+BT_PROCESS.pack(padx=(0, 0), pady=(0, 0))
 
 FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
 FR_PROCESS.pack_propagate(True)
@@ -1499,19 +1527,23 @@ def character_map():
 
 #! Tool Button
 
-
-BT_TOOLS = tk.Button(MAIN_FRAME,
-                     text="TOOLS",
-                     command=lambda: switch_to_frame(FRAME_TOOLS, MAIN_FRAME),
-                     bg="#454545",
-                     fg="#FFFFFF",
-                     height=2,
-                     width=30,
-                     font=("JetBrainsMono NF", 13, "bold"),
-                     anchor="w",
-                     highlightthickness=2,
-                     relief="flat",
-                     )
+BT_TOOLS = tk.Button(
+                    MAIN_FRAME,
+                    text="TOOLS",
+                    command=lambda: switch_to_frame(FRAME_TOOLS, MAIN_FRAME),
+                    bg="#454545",
+                    fg="#FFFFFF",
+                    height=2,
+                    width=30,
+                    font=("JetBrainsMono NF", 13, "bold"),
+                    anchor="w",
+                    bd=0,
+                    highlightthickness=4,
+                    relief="flat",
+                    activebackground="#000000",
+                    activeforeground="#f6d24a",
+                    cursor="hand2",
+                    )
 BT_TOOLS.pack(padx=(0, 0), pady=(0, 0))
 
 FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
