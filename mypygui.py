@@ -1122,12 +1122,12 @@ for button_props in winget_scoop_button_properties:
     create_button(*button_props)
 
 
-#*   ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗     █████╗ ██████╗ ██████╗ ███████╗
-#*  ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝    ██╔══██╗██╔══██╗██╔══██╗██╔════╝
-#*  ██║     ███████║█████╗  ██║     █████╔╝     ███████║██████╔╝██████╔╝███████╗
-#*  ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗     ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║
-#*  ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗    ██║  ██║██║     ██║     ███████║
-#*   ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝
+#?    █████╗ ██████╗ ██████╗ ███████╗
+#?   ██╔══██╗██╔══██╗██╔══██╗██╔════╝
+#?   ███████║██████╔╝██████╔╝███████╗
+#?   ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║
+#?   ██║  ██║██║     ██║     ███████║
+#?   ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝
 
 # Install Autoruns using winget and check first
 def check_autoruns_installed():
@@ -1311,7 +1311,7 @@ chkbx_cheatengine = tk.IntVar()
 # Define applications and their information
 applications = [
 # {"name": "AppName"                , "scoop_name": "ScoopName"                         , "scoop_path": r'xx'                                                                                 , "winget_name": "WingetName"                               , "winget_path": r"xx"                                                                                                                                                      , "chkbx_var": chkbx_xx}                               ,
-{"name": "Cheat Engine [vOld]"      , "scoop_name": "cheat-engine"                      , "scoop_path": r'C:\Users\nahid\scoop\apps\cheat-engine\current\Cheat Engine.exe'                    , "winget_name": ""                                         , "winget_path": r""                                                                                                                                                        , "chkbx_var": chkbx_cheatengine}                      ,
+{"name": "Cheat Engine [7.4]"      , "scoop_name": "cheat-engine"                      , "scoop_path": r'C:\Users\nahid\scoop\apps\cheat-engine\current\Cheat Engine.exe'                    , "winget_name": ""                                         , "winget_path": r""                                                                                                                                                        , "chkbx_var": chkbx_cheatengine}                      ,
 {"name": "Ack [Find]"               , "scoop_name": "ack"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                                      , "winget_name": ""                                         , "winget_path": "xx"                                                                                                                                                       , "chkbx_var": chkbx_ack}                              ,
 {"name": "Adb"                      , "scoop_name": "adb"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe'                       , "winget_name": ""                                         , "winget_path": "xx"                                                                                                                                                       , "chkbx_var": chkbx_adb}                              ,
 {"name": "Alacritty [Terminal]"     , "scoop_name": "alacritty"                         , "scoop_path": r'C:\Users\nahid\scoop\apps\alacritty\current\alacritty.exe'                          , "winget_name": "Alacritty.Alacritty"                      , "winget_path": r"C:\Program Files\Alacritty\alacritty.exe"                                                                                                                , "chkbx_var": chkbx_alacritty}                        ,
