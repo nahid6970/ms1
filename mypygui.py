@@ -1211,7 +1211,7 @@ def uninstall_application(app_name, scoop_name, scoop_path, winget_name, winget_
 
 def show_options(options):
     top = tk.Toplevel()
-    top.title("Select Installation Source")
+    top.title("Select Source")
     top.geometry("300x100")
     top.configure(bg="#282c34")
     screen_width = top.winfo_screenwidth()
@@ -1226,7 +1226,6 @@ def show_options(options):
     for option in options:
         btn = tk.Button(frame, text=option["text"], command=option["command"], foreground="#fff", background="#1d2027", padx=10, pady=5, borderwidth=2, relief="raised")
         btn.pack(side="left", padx=5, pady=5, anchor="center")
-
 
 
 # Define applications and their information
@@ -1252,7 +1251,7 @@ applications = [
 {"name": "CPU-Z"                    , "scoop_name": "cpu-z"                             , "scoop_path": r'C:\Users\nahid\scoop\apps\cpu-z\current\cpuz_x64.exe'                               , "winget_name": "CPUID.CPU-Z"                            , "winget_path": "xx"                                                                                                                                                       }                                                                                           ,
 {"name": "Crystal DiskInfo"         , "scoop_name": "crystaldiskinfo"                   , "scoop_path": r'C:\Users\nahid\scoop\apps\crystaldiskinfo\current\DiskInfo64.exe'                   , "winget_name": "CrystalDewWorld.CrystalDiskInfo"        , "winget_path": "xx"                                                                                                                                                       }                                                                                           ,
 {"name": "DotNet DesktopRuntime 8"  , "scoop_name": ""                                  , "scoop_path": r''                                                                                   , "winget_name": "Microsoft.DotNet.DesktopRuntime.8"      , "winget_path": r"C:\Program Files\dotnet\dotnet.exe"                                                                                                                      }                                                                                           ,
-{"name": "eza"                      , "scoop_name": "eza"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\eza\current\eza.exe'                                      , "winget_name": "eza-community.eza"                      , "winget_path": "xx"                                                                                                                                                       }                                                                                           ,
+{"name": "eza [ls]"                      , "scoop_name": "eza"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\eza\current\eza.exe'                                      , "winget_name": "eza-community.eza"                      , "winget_path": "xx"                                                                                                                                                       }                                                                                           ,
 {"name": "FFmpeg-Batch"             , "scoop_name": "ffmpeg-batch"                      , "scoop_path": r'C:\Users\nahid\scoop\apps\ffmpeg-batch\current\FFBatch.exe'                         , "winget_name": "eibol.FFmpegBatchAVConverter"           , "winget_path": "xx"                                                                                                                                                       }                                                                                           ,
 {"name": "ffmpeg"                   , "scoop_name": "ffmpeg"                            , "scoop_path": r'C:\Users\nahid\scoop\apps\ffmpeg\current\bin\ffmpeg.exe'                            , "winget_name": "Gyan.FFmpeg"                            , "winget_path": "xx"                                                                                                                                                       }                                                                                           ,
 {"name": "FileConverter"            , "scoop_name": "file-converter-np"                 , "scoop_path": r'xx'                                                                                 , "winget_name": "AdrienAllard.FileConverter"             , "winget_path": r"C:\Program Files\File Converter\FileConverter.exe"                                                                                                       }                                                                                           ,
