@@ -57,8 +57,6 @@ Run, powershell.exe -NoExit -Command "cd ~; python C:\ms1\mypygui.py"
 return
 
 
-
-
 ; ;!alt3 🎯 Launch My PYGui
 ; #x:: 
 ; IfWinExist, ahk_exe python.exe
