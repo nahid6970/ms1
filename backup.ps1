@@ -38,7 +38,7 @@ function Create_DirectoryIfNotExists { param( [string]$Path ) if (-not (Test-Pat
 
 function Command_History {
     $history_src = "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
-    $history_dst = "C:\Users\nahid\OneDrive\backup\command_history.txt"
+    $history_dst = "C:\Users\nahid\OneDrive\backup\"
     Create_DirectoryIfNotExists -Path $history_dst
     Copy-Item -Path $history_src -Destination $history_dst
 }
