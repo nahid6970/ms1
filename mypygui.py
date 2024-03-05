@@ -643,8 +643,8 @@ def open_backup(event=None):
 def open_update(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
 
-update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\5278658-50x50.png"))
-backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\4647810-50x50.png"))
+update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\Desktop\\bitmap-50x50.png"))
+backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\Desktop\\backup-50x50.png"))
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
 BOX_ROW_MAIN.pack(pady=(5,0))
