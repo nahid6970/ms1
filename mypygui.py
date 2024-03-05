@@ -1232,6 +1232,7 @@ def show_options(options):
 # Define applications and their information
 applications = [
 # {"name": "AppName"                , "scoop_name": "ScoopName"                         , "scoop_path": r'xx'                                                                                 , "winget_name": "WingetName"                               , "winget_path": r"xx"                                                                                                                                                 }      ,
+{"name": "WhatsApp"                 , "scoop_name": "whatsapp"                          , "scoop_path": r'xx'                                                                                 , "winget_name": "WhatsApp.WhatsApp"                        , "winget_path": r"xx"                                                                                                                                                 }      ,
 {"name": "Ack [Find]"               , "scoop_name": "ack"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                                      , "winget_name": ""                                         , "winget_path": "xx"                                                                                                                                                       } ,
 {"name": "Adb"                      , "scoop_name": "adb"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe'                       , "winget_name": ""                                         , "winget_path": "xx"                                                                                                                                                       } ,
 {"name": "Alacritty [Terminal]"     , "scoop_name": "alacritty"                         , "scoop_path": r'C:\Users\nahid\scoop\apps\alacritty\current\alacritty.exe'                          , "winget_name": "Alacritty.Alacritty"                      , "winget_path": r"C:\Program Files\Alacritty\alacritty.exe"                                                                                                                } ,
@@ -1565,9 +1566,8 @@ BT_PYTHON_MAIN_FRAME = tk.Button(MAIN_FRAME,
                      font=("JetBrainsMono NF", 13, "bold"),
                      anchor="w",
                      bd=0,
+                     highlightthickness=4,
                      relief="flat",
-                     highlightthickness=2,
-                     highlightbackground="red",
                      activebackground="#000000",
                      activeforeground="#f6d24a",
                      cursor="hand2",
@@ -1582,6 +1582,7 @@ BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027")
 BOX_PYTHON_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
+
 def font_style():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\font_style.py"],  shell=True)
 def Keybinding():
