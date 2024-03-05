@@ -1170,7 +1170,7 @@ LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(50,0))
 # search_label.pack(side="top", anchor="center", padx=(20, 0), pady=(10, 0))
 
 # Create the search entry
-search_entry = tk.Entry(Page1, font=("calibri", 12), bg="#FFFFFF", fg="#000000", insertbackground="#fff")
+search_entry = tk.Entry(Page1, font=("calibri", 12), bg="#FFFFFF", fg="#000000", insertbackground="#F00")
 search_entry.pack(side="top", anchor="center", padx=(20, 0), pady=(0, 10))
 
 def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
