@@ -1432,17 +1432,16 @@ BOX_find = tk.Frame(FR_PROCESS, bg="#1d2027")
 BOX_find.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
 button_properties = [
-("Find"         ,BOX_find, "none"    ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
-("File"    ,BOX_find, find_file ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Pattern" ,BOX_find, find_patt ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Size"    ,BOX_find, find_size ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Find"       ,BOX_find, "none"    ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
+("File"       ,BOX_find, find_file ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Pattern"    ,BOX_find, find_patt ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Size"       ,BOX_find, find_size ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
 
-("FZF-->C:\\"    ,BOX_find, fzf_c ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
-("FZF-->D:\\"    ,BOX_find, fzf_d ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
+("FZF-->C:\\" ,BOX_find, fzf_c     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
+("FZF-->D:\\" ,BOX_find, fzf_d     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
 
-
-("ACK-->C:\\"    ,BOX_find, ack_c ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
-("ACK-->D:\\"    ,BOX_find, ack_d ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
+("ACK-->C:\\" ,BOX_find, ack_c     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("ACK-->D:\\" ,BOX_find, ack_d     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
 ]
 
 for button_props in button_properties:
@@ -1495,11 +1494,20 @@ def character_map():
 
 #! Tool Button
 
-def switch_to_tools_frame():
-    switch_to_frame(FRAME_TOOLS, MAIN_FRAME)
 
-BT_TOOLS = M1_hold_release(MAIN_FRAME, "TOOLS", switch_to_tools_frame, bg="#454545", fg="#FFFFFF", height=2, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#454545", font=("JetBrainsMono NF", 13, "bold"))
-BT_TOOLS.pack(padx=(0,0),pady=(0,0))
+BT_TOOLS = tk.Button(MAIN_FRAME,
+                     text="TOOLS",
+                     command=lambda: switch_to_frame(FRAME_TOOLS, MAIN_FRAME),
+                     bg="#454545",
+                     fg="#FFFFFF",
+                     height=2,
+                     width=30,
+                     font=("JetBrainsMono NF", 13, "bold"),
+                     anchor="w",
+                     highlightthickness=2,
+                     relief="flat",
+                     )
+BT_TOOLS.pack(padx=(0, 0), pady=(0, 0))
 
 FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
 FRAME_TOOLS.pack_propagate(True)
@@ -1559,7 +1567,8 @@ FR_PYTHON_TOOL.pack_propagate(False)
 BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
+BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027")
+BOX_PYTHON_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 def font_style():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\font_style.py"],  shell=True)
 def Keybinding():
