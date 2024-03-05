@@ -13,9 +13,9 @@ required_libraries = [
     "subprocess",
     "threading",
     "time",
+    "tkinter",
     # "tkinter.messagebox",
     # "tkinter.ttk",
-    "tkinter",
 ]
 
 def install_missing_libraries():
