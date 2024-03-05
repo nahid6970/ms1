@@ -643,16 +643,21 @@ def open_backup(event=None):
 def open_update(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
 
+update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\5278658-50x50.png"))
+backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\4647810-50x50.png"))
+
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
 BOX_ROW_MAIN.pack(pady=(5,0))
 BACKUP_BT = tk.Button(
                     BOX_ROW_MAIN,
-                    text="Backup",
+                    text="",
                     command=open_backup,
-                    bg="#21a366",
-                    fg="#ffffff",
-                    height=1,
-                    width=51,
+                    image=backup_image,
+                    compound=tk.RIGHT,
+                    bg="#1d2027",
+                    fg="#000000",
+                    height=50,
+                    width=50,
                     font=("JetBrainsMono NF", 13, "bold"),
                     bd=0,
                     relief="flat",
@@ -662,17 +667,17 @@ BACKUP_BT = tk.Button(
                     )
 BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
-BOX_ROW_MAIN.pack(pady=(0,0))
 UPDATE_BT = tk.Button(
                     BOX_ROW_MAIN,
-                    text="Update",
+                    text="",
                     command=open_update,
-                    bg="#0047ab",
+                    image=update_image,
+                    compound=tk.RIGHT,
+                    bg="#1d2027",
                     fg="#ffffff",
                     font=("JetBrainsMono NF", 13, "bold"),
-                    height=1,
-                    width=51,
+                    height=50,
+                    width=50,
                     bd=0,
                     relief="flat",
                     highlightthickness=4,
@@ -831,24 +836,24 @@ def open_programdata_fd():
 
 icon_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 BT_FOLDER = tk.Button(
-                    MAIN_FRAME,
-                    text="Folder",
-                    command=lambda: switch_to_frame(FR_PROCESS, MAIN_FRAME),
-                    image=icon_image,
-                    compound=tk.RIGHT,
-                    bg="#e7d86a",
-                    fg="#1D2027",
-                    height=40,
-                    width=300,
-                    font=("JetBrainsMono NF", 13, "bold"),
-                    anchor="w",
-                    bd=0,
-                    highlightthickness=4,
-                    relief="flat",
-                    activebackground="#000000",
-                    activeforeground="#f6d24a",
-                    cursor="hand2",
-                    )
+MAIN_FRAME,
+text="Folder",
+command=lambda: switch_to_frame(FR_PROCESS, MAIN_FRAME),
+image=icon_image,
+compound=tk.RIGHT,
+bg="#e7d86a",
+fg="#1D2027",
+height=40,
+width=300,
+font=("JetBrainsMono NF", 13, "bold"),
+anchor="w",
+bd=0,
+highlightthickness=4,
+relief="flat",
+activebackground="#000000",
+activeforeground="#f6d24a",
+cursor="hand2",
+)
 BT_FOLDER.pack(padx=(0, 0), pady=(0, 0))
 
 FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
