@@ -2,20 +2,20 @@ import importlib
 import subprocess
 
 required_libraries = [
-    "tkinter",
-    "subprocess",
-    "time",
-    "datetime",
-    "tkinter.ttk",
     "ctypes",
-    "pyadl",
+    "datetime",
     "os",
-    "shutil",
     "PIL",
-    "tkinter.messagebox",
     "psutil",
-    "threading",
+    "pyadl",
     "pyautogui",
+    "shutil",
+    "subprocess",
+    "threading",
+    "time",
+    "tkinter.messagebox",
+    "tkinter.ttk",
+    "tkinter",
 ]
 
 def install_missing_libraries():
@@ -30,24 +30,24 @@ def install_missing_libraries():
 install_missing_libraries()
 
 # Now import the libraries
-import tkinter as tk
-import subprocess
-from time import strftime
 from datetime import datetime
+from PIL import Image, ImageTk
+from pyadl import ADLManager
+from time import strftime
+from tkinter import Canvas, Scrollbar
+from tkinter import messagebox
+from tkinter import PhotoImage
 from tkinter import ttk
 import ctypes
-from pyadl import ADLManager
 import os
-import shutil
-from PIL import Image, ImageTk
-from tkinter import PhotoImage
-from tkinter import messagebox
-import time
 import psutil
-import threading
 import pyautogui
+import shutil
+import subprocess
+import threading
+import time
+import tkinter as tk
 import tksvg
-from tkinter import Canvas, Scrollbar
 
 
 # # For topmost
