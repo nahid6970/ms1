@@ -51,10 +51,16 @@
 ; Run, "C:\ms1\mypygui.py"
 ; return
 
-;!alt2 🎯 Launch My PYGui
+; ; ;! alt1 🎯 Launch My PYGui
 #x::
-Run, powershell.exe -NoExit -Command "cd ~; python C:\ms1\mypygui.py"
+Run, cmd.exe /c python C:\ms1\mypygui.py
 return
+
+
+;!alt2 🎯 Launch My PYGui
+; #x::
+; Run, powershell.exe -NoExit -Command "cd ~; python C:\ms1\mypygui.py"
+; return
 
 
 ; ;!alt3 🎯 Launch My PYGui
