@@ -4,7 +4,7 @@ Start-Sleep -Seconds 5
 
 function ahkscripts            { Start-Process "C:\ms1\ahkscripts.ahk" }
 function aria2c_rpc            { Start-Process -FilePath "aria2c" -ArgumentList "--enable-rpc", "--rpc-listen-all" -WindowStyle Hidden }
-function bazarr                { Start-Process -FilePath "C:\ProgramData\Bazarr\WinPython\python-3.10.0\python.exe" -ArgumentList "C:\ProgramData\Bazarr\bazarr.py" -WindowStyle Hidden }
+function bazarr                { Start-Process -FilePath "C:\Bazarr\WinPython\python-3.10.0\python.exe" -ArgumentList "C:\Bazarr\bazarr.py" -WindowStyle Hidden }
 function capture2text          { Start-Process "C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe" }
 function flaresolver           { Start-Process "C:\Users\nahid\scoop\apps\flaresolverr\current\flaresolverr.exe" -WindowStyle Hidden }
 function free_download_manager { Start-Process 'C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe' -WindowStyle Minimized }
@@ -32,7 +32,7 @@ function valo_qbit             { Start-Process "C:\ms1\scripts\valorant\valo_qbi
 # aria2c_rpc
 # free_download_manager
 # rssowl
-bazarr
+# bazarr
 capture2text
 # flaresolver
 powertoys
