@@ -29,29 +29,26 @@ def install_missing_libraries():
 # Call the function to install missing libraries
 install_missing_libraries()
 
-# Now import the libraries
+#! Now import the libraries
+# from tkinter import PhotoImage
+# import shutil
+# import tksvg
+# import win32gui
 from datetime import datetime
 from PIL import Image, ImageTk
 from pyadl import ADLManager
 from time import strftime
 from tkinter import Canvas, Scrollbar
 from tkinter import messagebox
-from tkinter import PhotoImage
 from tkinter import ttk
 import ctypes
 import os
 import psutil
 import pyautogui
-import shutil
 import subprocess
 import threading
 import time
 import tkinter as tk
-import tksvg
-
-
-# # For topmost
-# import win32gui
 
 
 def calculate_time_to_appear(start_time):
