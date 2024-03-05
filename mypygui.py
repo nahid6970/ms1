@@ -1564,9 +1564,13 @@ BT_PYTHON_MAIN_FRAME = tk.Button(MAIN_FRAME,
                      width=30,
                      font=("JetBrainsMono NF", 13, "bold"),
                      anchor="w",
+                     bd=0,
+                     relief="flat",
                      highlightthickness=2,
                      highlightbackground="red",
-                     relief="flat",
+                     activebackground="#000000",
+                     activeforeground="#f6d24a",
+                     cursor="hand2",
                      )
 BT_PYTHON_MAIN_FRAME.pack(padx=(0, 0), pady=(0, 0))
 
