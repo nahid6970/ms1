@@ -643,11 +643,17 @@ def open_backup(event=None):
 def open_update(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="black") ; BOX_ROW_MAIN.pack(pady=(5,0))
-BACKUP_BT = tk.Label(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#21a366", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Backup")
-UPDATE_BT = tk.Label(BOX_ROW_MAIN, bg="#0047ab", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#0047ab", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Update")
-BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0) ; BACKUP_BT.bind("<Button-1>", open_backup)
-UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0) ; UPDATE_BT.bind("<Button-1>", open_update)
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
+BOX_ROW_MAIN.pack(pady=(5,0))
+BACKUP_BT = tk.Button(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=51, relief="flat", highlightthickness=4, highlightbackground="#21a366",command=open_backup,bd=0, font=("JetBrainsMono NF", 13, "bold"), text="Backup")
+BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
+
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
+BOX_ROW_MAIN.pack(pady=(0,0))
+UPDATE_BT = tk.Button(BOX_ROW_MAIN, bg="#0047ab", fg="#ffffff", height=1, width=51, relief="flat", highlightthickness=4, highlightbackground="#0047ab",command=open_update,bd=0, font=("JetBrainsMono NF", 13, "bold"), text="Update")
+UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
+
+
 
 #! Drive size analyze using rclone
 def c_size(event=None):
