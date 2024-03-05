@@ -13,8 +13,8 @@ required_libraries = [
     "subprocess",
     "threading",
     "time",
-    "tkinter.messagebox",
-    "tkinter.ttk",
+    # "tkinter.messagebox",
+    # "tkinter.ttk",
     "tkinter",
 ]
 
