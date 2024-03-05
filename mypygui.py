@@ -645,7 +645,21 @@ def open_update(event=None):
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
 BOX_ROW_MAIN.pack(pady=(5,0))
-BACKUP_BT = tk.Button(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=51, relief="flat", highlightthickness=4, highlightbackground="#21a366",command=open_backup,bd=0, font=("JetBrainsMono NF", 13, "bold"), text="Backup")
+BACKUP_BT = tk.Button(
+    BOX_ROW_MAIN,
+    text="Backup",
+    command=open_backup,
+    bg="#21a366",
+    fg="#ffffff",
+    height=1,
+    width=51,
+    font=("JetBrainsMono NF", 13, "bold"),
+    bd=0,
+    relief="flat",
+    highlightthickness=4,
+    activebackground="#000000",
+    activeforeground="#FFFFFF"
+)
 BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
