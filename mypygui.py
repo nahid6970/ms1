@@ -664,7 +664,21 @@ BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
 BOX_ROW_MAIN.pack(pady=(0,0))
-UPDATE_BT = tk.Button(BOX_ROW_MAIN, bg="#0047ab", fg="#ffffff", height=1, width=51, relief="flat", highlightthickness=4, highlightbackground="#0047ab",command=open_update,bd=0, font=("JetBrainsMono NF", 13, "bold"), text="Update")
+UPDATE_BT = tk.Button(
+                    BOX_ROW_MAIN,
+                    text="Update",
+                    command=open_update,
+                    bg="#0047ab",
+                    fg="#ffffff",
+                    font=("JetBrainsMono NF", 13, "bold"),
+                    height=1,
+                    width=51,
+                    bd=0,
+                    relief="flat",
+                    highlightthickness=4,
+                    activebackground="#000000",
+                    activeforeground="#FFFFFF"
+                    )
 UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
 
 
