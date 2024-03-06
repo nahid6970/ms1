@@ -1294,8 +1294,20 @@ def show_options(options):
     frame.pack(side="top", expand=True, fill="none", anchor="center")
 
     for option in options:
-        btn = tk.Button(frame, text=option["text"], command=option["command"], foreground="#fff", background="#1d2027", padx=10, pady=5, borderwidth=2, relief="raised")
+        # Set background color based on the source type
+        if "Winget" in option["text"]:
+            bg_color = "#0078D7"
+            fg_color = "#FFFFFF"
+        elif "Scoop" in option["text"]:
+            bg_color = "#FFFFFF"
+            fg_color = "#000000"
+        else:
+            bg_color = "#1d2027"
+            fg_color = "#000000"
+
+        btn = tk.Button(frame, text=option["text"], command=option["command"], background=bg_color, foreground=fg_color, padx=10, pady=5, borderwidth=2, relief="raised")
         btn.pack(side="left", padx=5, pady=5, anchor="center")
+
 
 
 # Define applications and their information
