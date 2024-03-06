@@ -1279,6 +1279,14 @@ def uninstall_application(app_name, scoop_name, scoop_path, winget_name, winget_
         uninstall_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop uninstall {scoop_name}"')})
     show_options(uninstall_options)
 
+def open_file_location(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
+    options = []
+    if winget_path:
+        options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'explorer /select,"{winget_path}"')})
+    if scoop_path:
+        options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'explorer /select,"{scoop_path}"')})
+    show_options(options)
+
 def show_options(options):
     top = tk.Toplevel()
     top.title("Select Source")
@@ -1463,28 +1471,16 @@ for app in applications:
     chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
     chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
     chk_bt = tk.Button(app_frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-    ins_bt = tk.Button(app_frame, text=f"n", foreground="green", background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-    unins_bt = tk.Button(app_frame, text=f"n", foreground="red",  background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-    open_loc_bt = tk.Button(app_frame, text="L", foreground="#ebc254", background="#1d2027", relief="flat", command=lambda path=scoop_path if scoop_path else winget_path: open_file_location(path))
-    launch_bt = tk.Button(app_frame, text="R", foreground="#4dd1ff", background="#1d2027", relief="flat", command=lambda path=scoop_path if scoop_path else winget_path: launch_application(path))
+    ins_bt = tk.Button(app_frame, text=f"n", foreground="#00FF00", background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    unins_bt = tk.Button(app_frame, text=f"n", foreground="#FF0000",  background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    open_bt = tk.Button(app_frame, text="n", foreground="#eac353", background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: open_file_location(name, scoop, winget, var, cb))
 
     chkbox_bt.grid(row=0, column=0, padx=(0,0), pady=(0,0))
     ins_bt.grid(row=0, column=1, padx=(0,0), pady=(0,0))
     unins_bt.grid(row=0, column=2, padx=(0,0), pady=(0,0))
-    open_loc_bt.grid(row=0, column=3, padx=(0, 0), pady=(0, 0))
-    launch_bt.grid(row=0, column=4, padx=(0, 0), pady=(0, 0))
+    open_bt.grid(row=0, column=3, padx=(0, 0), pady=(0, 0))
 
     check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
-
-# Function to open file location
-def open_file_location(path):
-    if path:
-        os.startfile(os.path.dirname(path))
-
-# Function to launch application
-def launch_application(path):
-    if path:
-        subprocess.Popen(path)
 
 def filter_apps(event=None):
     search_query = search_entry.get().lower()
