@@ -1422,11 +1422,11 @@ style = ttk.Style()
 style.theme_use("default")
 
 # Set the background color of the scrollbar to red
-style.configure("Custom.Vertical.TScrollbar", background="#ff922e", troughcolor="#626c80", width=25)
+style.configure("Custom.Vertical.TScrollbar", background="#c3d7ff", troughcolor="#626c80", width=25)
 
 # Set the thickness of the outside bar to 10 pixels
 style.map("Custom.Vertical.TScrollbar",
-    background=[("active", "#ff922e")],  # Changed from blue to red
+    background=[("active", "#c3d7ff")],  # Changed from blue to red
 )
 
 # Set the thickness of the inside bar to 5 pixels
