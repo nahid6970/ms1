@@ -1265,18 +1265,18 @@ def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
 
 def install_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
     install_options = []
-    if scoop_path:
-        install_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop install {scoop_name}"')})
     if winget_path:
         install_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'winget install {winget_name}')})
+    if scoop_path:
+        install_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop install {scoop_name}"')})
     show_options(install_options)
 
 def uninstall_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
     uninstall_options = []
-    if scoop_path:
-        uninstall_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop uninstall {scoop_name}"')})
     if winget_path:
         uninstall_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'winget uninstall {winget_name}')})
+    if scoop_path:
+        uninstall_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'pwsh -Command "scoop uninstall {scoop_name}"')})
     show_options(uninstall_options)
 
 def show_options(options):
@@ -1301,7 +1301,7 @@ def show_options(options):
 # Define applications and their information
 applications = [
 # {"name": "AppName", "scoop_name": "ScoopName", "scoop_path": r'xx', "winget_name": "WingetName", "winget_path": r"xx"},
-{"name": "OBS Studio"                , "scoop_name": "obs-studio", "scoop_path": r'xx', "winget_name": "OBSProject.OBSStudio", "winget_path": r"xx"},
+{"name": "OBS Studio"                , "scoop_name": "obs-studio", "scoop_path": r'xx', "winget_name": "OBSProject.OBSStudio", "winget_path": r"C:\Program Files\obs-studio\bin\64bit\obs64.exe"},
 {"name": "Ack [Find]"               , "scoop_name": "ack"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                                      , "winget_name": ""                                       , "winget_path": r"xx"                                                                                                                                                       }                                                                                          ,
 {"name": "Adb"                      , "scoop_name": "adb"                               , "scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe'                       , "winget_name": ""                                       , "winget_path": r"xx"                                                                                                                                                       }                                                                                          ,
 {"name": "Alacritty [Terminal]"     , "scoop_name": "alacritty"                         , "scoop_path": r'C:\Users\nahid\scoop\apps\alacritty\current\alacritty.exe'                          , "winget_name": "Alacritty.Alacritty"                    , "winget_path": r"C:\Program Files\Alacritty\alacritty.exe"                                                                                                                }                                                                                           ,
@@ -1397,7 +1397,6 @@ def on_mousewheel(event):
 
 canvas.bind_all("<MouseWheel>", on_mousewheel)
 
-
 # Create a vertical scrollbar
 scrollbar = ttk.Scrollbar(Page1, orient="vertical", style="Custom.Vertical.TScrollbar")
 scrollbar.pack(side="right", fill="y")
@@ -1485,9 +1484,6 @@ def create_button(text, frame, command, bg_color, fg_color, height, width, relie
 
 BOX_1 = tk.Frame(FR_PROCESS, bg="#1d2027")
 BOX_1.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
-
-
-
 
 button_properties = [
 ("FFMPEG"         ,BOX_1, "none"            ,"#98c379","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
