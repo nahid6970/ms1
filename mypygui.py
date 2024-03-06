@@ -1313,7 +1313,7 @@ def show_options(options):
 # Define applications and their information
 applications = [
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
-{"name": "Ack [Find]"               ,"scoop_name": "ack"                               ,"scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                                      ,"winget_name": ""                                       ,"winget_path": r"xx"                                                                                                                                                      } ,
+{"name": "Ack [Find]"               ,"scoop_name": "ack"                               ,"scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                                      ,"winget_name": ""                                       ,"winget_path": r""                                                                                                                                                      } ,
 {"name": "Adb"                      ,"scoop_name": "adb"                               ,"scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe'                       ,"winget_name": ""                                       ,"winget_path": r"xx"                                                                                                                                                      } ,
 {"name": "Alacritty [Terminal]"     ,"scoop_name": "alacritty"                         ,"scoop_path": r'C:\Users\nahid\scoop\apps\alacritty\current\alacritty.exe'                          ,"winget_name": "Alacritty.Alacritty"                    ,"winget_path": r"C:\Program Files\Alacritty\alacritty.exe"                                                                                                                } ,
 {"name": "Aria2"                    ,"scoop_name": "aria2"                             ,"scoop_path": r'xx'                                                                                 ,"winget_name": "aria2.aria2"                            ,"winget_path": r"C:\Users\nahid\AppData\Local\Microsoft\WinGet\Links\aria2c.exe"                                                                                          } ,
@@ -1458,19 +1458,34 @@ for app in applications:
     winget_path = app["winget_path"]
     chkbx_var = app["chkbx_var"]
 
+
+
     chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
     chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
     chk_bt = tk.Button(app_frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
     ins_bt = tk.Button(app_frame, text=f"n", foreground="green", background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
     unins_bt = tk.Button(app_frame, text=f"n", foreground="red",  background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+    open_loc_bt = tk.Button(app_frame, text="L", foreground="#ebc254", background="#1d2027", relief="flat", command=lambda path=scoop_path if scoop_path else winget_path: open_file_location(path))
+    launch_bt = tk.Button(app_frame, text="R", foreground="#4dd1ff", background="#1d2027", relief="flat", command=lambda path=scoop_path if scoop_path else winget_path: launch_application(path))
 
     chkbox_bt.grid(row=0, column=0, padx=(0,0), pady=(0,0))
-    # chk_bt.pack(side="left", padx=(0,0), pady=(0,0))
     ins_bt.grid(row=0, column=1, padx=(0,0), pady=(0,0))
     unins_bt.grid(row=0, column=2, padx=(0,0), pady=(0,0))
+    open_loc_bt.grid(row=0, column=3, padx=(0, 0), pady=(0, 0))
+    launch_bt.grid(row=0, column=4, padx=(0, 0), pady=(0, 0))
+
     check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
 
-# Function to filter and update displayed apps based on search query
+# Function to open file location
+def open_file_location(path):
+    if path:
+        os.startfile(os.path.dirname(path))
+
+# Function to launch application
+def launch_application(path):
+    if path:
+        subprocess.Popen(path)
+
 def filter_apps(event=None):
     search_query = search_entry.get().lower()
     for app in applications:
