@@ -312,7 +312,7 @@ cpu_core_bars = []
 # cpu_core_labels = [] #!
 for i in range(psutil.cpu_count()):
     frame = tk.Frame(cpu_core_frame, bg="#1d2027")
-    frame.pack(side="left", padx=(2, 2), pady=0)
+    frame.pack(side="left", padx=(0, 0), pady=0)
     core_bar = tk.Canvas(frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
     core_bar.pack(side="top")
     cpu_core_bars.append(core_bar)
@@ -321,6 +321,12 @@ for i in range(psutil.cpu_count()):
     # cpu_core_labels.append(usage_label) #!
 # Update CPU core bars
 update_cpu_core_bars()
+
+
+
+
+
+
 
 
 
