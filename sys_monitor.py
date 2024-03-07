@@ -244,11 +244,11 @@ def create_label1(parent, bg_color, fg_color, width, height, relief, padx_label,
     return label
 
 label_properties = [
-    (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 12, "bold"), 1, 8,2, "X") ,
-    (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"e", 1,"#FFFFFF", ("agency" , 10, "bold"), 1, 7,2, "+") ,
-    (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 5,2, "S") ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","3","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 6,1, "m") ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","3","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 2,6 ,1, "m") ,
+    (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"w", 0,"#FFFFFF", ("agency" , 12, "bold"), 1, 8,2, "X") ,
+    (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"w", 1,"#FFFFFF", ("agency" , 10, "bold"), 1, 7,2, "+") ,
+    (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"w", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 5,2, "S") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","3","1","flat",1,0,"w", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 6,1, "m") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","3","1","flat",1,0,"w", 0,"#FFFFFF", ("agency" , 10, "bold"), 2,6 ,1, "m") ,
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
