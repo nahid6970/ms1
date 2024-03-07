@@ -1512,22 +1512,19 @@ def ctt():
     command= 'Invoke-RestMethod christitus.com/win | Invoke-Expression'
     subprocess.Popen(['powershell', '-Command', command])
 
-
-
 def open_dism():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "DISM"  , "-ArgumentList", '"/Online /Cleanup-Image /RestoreHealth"', "-Verb", "RunAs"], shell=True)
 def open_sfc():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "sfc"   , "-ArgumentList", '"/scannow"'                             , "-Verb", "RunAs"], shell=True)
 def open_chkdsk():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "chkdsk", "-ArgumentList", '"/f /r"'                                , "-Verb", "RunAs"], shell=True)
-def open_cleanmgr():
-    subprocess.Popen(["powershell", "Start-Process", "cleanmgr" , "-Verb" , "RunAs"]       , shell=True)
 def flush_dns():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "cmd"   , "-ArgumentList", '"/k ipconfig /flushdns"'                , "-Verb", "RunAs"], shell=True)
 def winsock_reset():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "cmd"   , "-ArgumentList", '"/k netsh winsock reset"'               , "-Verb", "RunAs"], shell=True)
 
-
+def open_cleanmgr():
+    subprocess.Popen(["powershell", "Start-Process", "cleanmgr" , "-Verb" , "RunAs"]       , shell=True)
 
 
 #! Tool Button
