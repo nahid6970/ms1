@@ -76,7 +76,6 @@ ROOT.geometry(f"500x500+{x}+{y}") #! overall size of the window
 
 #! alt 2 (modified)
 
-
 # # Calculate the x and y coordinates to center the window
 # # x_coordinate = 1420
 # x_coordinate = 0
@@ -367,28 +366,35 @@ MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 
 #! ALL CPU CORES
+import tkinter as tk
+import psutil
+import tkinter as tk
+import psutil
+
 def get_cpu_core_usage():
     # Get CPU usage for each core
     cpu_usage_per_core = psutil.cpu_percent(interval=None, percpu=True)
     return cpu_usage_per_core
+
 def update_cpu_core_bars():
     # Get CPU usage for each core
     cpu_core_usage = get_cpu_core_usage()
     # Update the bars for each CPU core
     for i, usage in enumerate(cpu_core_usage):
         core_bar = cpu_core_bars[i]
-        # Clear the previous bar
+        # usage_label = cpu_core_labels[i] #!
+        # Clear the previous bar and label
         core_bar.delete("all")
+        # usage_label.config(text=f"{usage}%") #!
         # Calculate the height of the bar based on usage percentage
         bar_height = int((usage / 100) * BAR_HEIGHT)
         # Determine the color based on usage percentage
         bar_color = determine_color(usage)
         # Draw the bar with the determined color
         core_bar.create_rectangle(0, BAR_HEIGHT - bar_height, BAR_WIDTH, BAR_HEIGHT, fill=bar_color)
-        # Display the usage percentage at the top of the bar
-        core_bar.create_text(BAR_WIDTH // 2, 5, text=f"{usage}%", fill="white")
     # Schedule the next update
     ROOT.after(1000, update_cpu_core_bars)
+
 def determine_color(usage):
     if usage >= 90:
         return "#8B0000"  # Dark red for usage >= 90%
@@ -398,20 +404,31 @@ def determine_color(usage):
         return "#ff9282"  # Light red for usage >= 50%
     else:
         return "#14bcff"  # Default color
+
 # Constants for bar appearance
-BAR_WIDTH = 35
-BAR_HEIGHT = 50
-# Create a frame to hold the CPU core usage bars
-cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027")
-cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=100, fill="x")
-# Create canvas widgets for CPU core bars
+BAR_WIDTH = 10
+BAR_HEIGHT = 30
+
+# Create a frame to hold the CPU core usage bars and border
+cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027", bd=2, relief="solid")
+cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=100)
+
+# Create canvas widgets for CPU core bars and labels for percentages
 cpu_core_bars = []
+# cpu_core_labels = [] #!
 for i in range(psutil.cpu_count()):
-    core_bar = tk.Canvas(cpu_core_frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
-    core_bar.pack(side="left", anchor="center", padx=(10,10), pady=0, expand=True)
+    frame = tk.Frame(cpu_core_frame, bg="#1d2027")
+    frame.pack(side="left", padx=(2, 2), pady=0)
+    core_bar = tk.Canvas(frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
+    core_bar.pack(side="top")
     cpu_core_bars.append(core_bar)
+    # usage_label = tk.Label(frame, text="", fg="white", bg="#1d2027", font=("jetbrainsmono nf",10)) #!
+    # usage_label.pack(side="top") #!
+    # cpu_core_labels.append(usage_label) #!
+
 # Update CPU core bars
 update_cpu_core_bars()
+
 
 
 MAIN_FRAME.pack()
