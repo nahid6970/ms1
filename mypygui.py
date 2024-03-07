@@ -950,7 +950,7 @@ BOX_2 = tk.Frame(FRAME_FOLDER, bg="#992134")
 BOX_2.pack(side="top", pady=(80,0), padx=(0,0))
 
 def open_folder(path):
-    subprocess.run(["explorer", path])
+    subprocess.Popen(["explorer", path])
 
 # Update the button properties accordingly
 button_properties = [
