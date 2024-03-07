@@ -67,10 +67,10 @@ screen_height = ROOT.winfo_screenheight()
 #? START of alts
 #! alt 1 (original)
 # Calculate the x and y coordinates to center the window
-x = screen_width - 520   # 400 is the width of your window higher means left side lower means right side
-y = screen_height//2 - 855//2  # 700 is the height of your window higher means top side lower means bottom side
+x = screen_width - 865   # 400 is the width of your window higher means left side lower means right side
+y = screen_height - 45  # 700 is the height of your window higher means top side lower means bottom side
 # Set the geometry of the window
-ROOT.geometry(f"500x500+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"450x45+{x}+{y}") #! overall size of the window
 
 #! alt 2 (modified)
 
@@ -216,7 +216,7 @@ def update_status():
 def extra_bar(event=None):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
 
-BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(2,2),padx=(5,3))
+BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="right", anchor="ne", pady=(2,2),padx=(5,3))
 
 def create_label2( parent, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, anchor, ht, htc, row, column, text ):
     label = tk.Label( parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightbackground=htc )
@@ -257,62 +257,18 @@ bkup.bind      ("<Button-1>", lambda event: git_sync())
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
 
-
+update_info_labels()
+status_thread = threading.Thread(target=update_status, daemon=True)
+status_thread.start()
 
 #????????????????????????????????????????????????????????????w
 #????????????????????????????????????????????????????????????
 #!This is for ROW 2
 #! Terminal & SYNC & Ruler
-def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
-def windows_terminal(even=None):
-    subprocess.Popen(["wt"])
-def powertoys_ruler(event=None):
-    pyautogui.hotkey('win', 'shift', 'm')
-def powertoys_TextExtract(event=None):
-    pyautogui.hotkey('win', 'shift', 't')
-def powertoys_mouse_crosshair(event=None):
-    pyautogui.hotkey('win', 'alt', 'p')
-
-def get_system_uptime():
-    uptime_seconds = psutil.boot_time()
-    current_time = datetime.now().timestamp()
-    uptime = current_time - uptime_seconds
-    hours, remainder = divmod(uptime, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return int(hours), int(minutes), int(seconds)
-
-def format_uptime():
-    hours, minutes, seconds = get_system_uptime()
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-
-def update_uptime_label():
-    uptime_str = format_uptime()
-    uptime_label.config(text=f"Uptime: {uptime_str}")
-    uptime_label.after(1000, update_uptime_label)  # Update every second
-    # Update uptime label periodically
-
-BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW2_ROOT.pack(side="top", anchor="e", pady=(0,7),padx=(5,3))
-
-uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
-uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
-
-LB_RULERSR = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📏", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_MICECRS = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="🖱", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📝", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="♾️", bg="#1d2027", fg="#3bda00", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_TERMINL = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="💻", bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_RULERSR.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", powertoys_ruler)
-LB_MICECRS.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", powertoys_mouse_crosshair)
-LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", powertoys_TextExtract)
-LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", rclone_sync)
-LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", windows_terminal)
 
 #! Here are all the exit function for row 1 and 2 and 3
 # CPU / RAM / DRIVES / NET SPEED
-update_info_labels()
-status_thread = threading.Thread(target=update_status, daemon=True)
-status_thread.start()
+
 
 
 #?  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -367,8 +323,8 @@ BAR_WIDTH = 10
 BAR_HEIGHT = 30
 
 # Create a frame to hold the CPU core usage bars and border
-cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
-cpu_core_frame.pack(side="top", anchor="w", padx=0, pady=0)
+cpu_core_frame = tk.Frame(ROOT, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
+cpu_core_frame.pack(side="right", anchor="nw", padx=0, pady=5)
 
 # Create canvas widgets for CPU core bars and labels for percentages
 cpu_core_bars = []
@@ -382,9 +338,58 @@ for i in range(psutil.cpu_count()):
     # usage_label = tk.Label(frame, text="", fg="white", bg="#1d2027", font=("jetbrainsmono nf",10)) #!
     # usage_label.pack(side="top") #!
     # cpu_core_labels.append(usage_label) #!
-
 # Update CPU core bars
 update_cpu_core_bars()
+
+
+
+def rclone_sync(event=None):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
+def windows_terminal(even=None):
+    subprocess.Popen(["wt"])
+def powertoys_ruler(event=None):
+    pyautogui.hotkey('win', 'shift', 'm')
+def powertoys_TextExtract(event=None):
+    pyautogui.hotkey('win', 'shift', 't')
+def powertoys_mouse_crosshair(event=None):
+    pyautogui.hotkey('win', 'alt', 'p')
+
+def get_system_uptime():
+    uptime_seconds = psutil.boot_time()
+    current_time = datetime.now().timestamp()
+    uptime = current_time - uptime_seconds
+    hours, remainder = divmod(uptime, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return int(hours), int(minutes), int(seconds)
+
+def format_uptime():
+    hours, minutes, seconds = get_system_uptime()
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+def update_uptime_label():
+    uptime_str = format_uptime()
+    uptime_label.config(text=f"{uptime_str}")
+    uptime_label.after(1000, update_uptime_label)  # Update every second
+    # Update uptime label periodically
+
+BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW2_ROOT.pack(side="right", anchor="nw", pady=(2,2),padx=(2,2))
+
+uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
+uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
+
+# LB_RULERSR = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📏", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_MICECRS = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="🖱", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📝", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="♾️", bg="#1d2027", fg="#3bda00", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_TERMINL = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="💻", bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
+# LB_RULERSR.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", powertoys_ruler)
+# LB_MICECRS.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", powertoys_mouse_crosshair)
+# LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", powertoys_TextExtract)
+# LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", rclone_sync)
+# LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", windows_terminal)
+
+
 
 MAIN_FRAME.pack()
 ROOT.mainloop()
