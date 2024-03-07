@@ -218,78 +218,48 @@ def extra_bar(event=None):
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(2,2),padx=(5,3))
 
-def create_label1(
-                  parent,
-                  bg_color,
-                  fg_color,
-                  width,
-                  height,
-                  relief,
-                  padx_label,
-                  pady_label,
-                  side,
-                  anchor,
-                  padx_pack,
-                  pady_pack,
-                  ht,
-                  htc,
-                  font,
-                  text,
-                  ):
-    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightcolor=htc)
-    label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
+def create_label2( parent, bg_color, fg_color, width, height, relief, font, padx_label, pady_label, anchor, ht, htc, row, column, text ):
+    label = tk.Label( parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightbackground=htc )
+    label.grid(row=row, column=column, padx=0, pady=0, sticky=anchor)
     return label
 
 label_properties = [
-(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"right","e", (0,1),(0,0), 0,"#FFFFFF", ("times"    ,10,"bold"),"X")  ,
-(BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"+")  ,
-(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⭕")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️") ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️")
+    (BOX_ROW_ROOT,     "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 1,"CPU"),
+    (BOX_ROW_ROOT,     "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 1,"GPU"),
+    (BOX_ROW_ROOT,     "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 2,"RAM"),
+    (BOX_ROW_ROOT,  "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 3,"Disk C"),
+    (BOX_ROW_ROOT,  "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 3,"Disk D"),
+    (BOX_ROW_ROOT,       "#1d2027", "#ffffff", "5", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 4,"▲"),
+    (BOX_ROW_ROOT,       "#1d2027", "#ffffff", "5", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 4,"▼")
+]
+
+labels = [create_label2(*prop) for prop in label_properties]
+LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
+
+
+
+def create_label1(parent, bg_color, fg_color, width, height, relief, padx_label, pady_label, anchor, ht, htc, font, row, column, text):
+    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightcolor=htc)
+    label.grid(row=row, column=column, padx=0, pady=0, sticky=anchor)
+    return label
+
+label_properties = [
+    (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"e", 0,"#FFFFFF", ("times" , 10, "bold"), 1, 8, "X")  ,
+    (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"e", 1,"#FFFFFF", ("Times" , 10, "bold"), 1, 7, "+")  ,
+    (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency", 10, "bold"), 1, 5, "⭕")  ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency", 10, "bold"), 1, 6, "⚠️") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency", 10, "bold"), 2,6 , "⚠️" ),
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
 
 LB_XXX.bind    ("<Button-1>", close_window)
-LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
-bkup.bind      ("<Button-1>", lambda event: git_sync          ())
-STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms1"))
-STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms2"))
+LB_1.bind      ("<Button-1>", lambda event: extra_bar())
+bkup.bind      ("<Button-1>", lambda event: git_sync())
+STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
+STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
 
 
-def create_label2(
-                    parent,
-                    text,
-                    bg_color,
-                    fg_color,
-                    width,
-                    height,
-                    relief,
-                    font,
-                    padx_label,
-                    pady_label,
-                    side,
-                    anchor,
-                    padx_pack,
-                    pady_pack,
-                    ht,
-                    htc,
-                    ):
-    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightbackground=htc)
-    label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
-    return label
-
-label_properties = [
-(BOX_ROW_ROOT,"CPU"   ,"#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"GPU"   ,"#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"RAM"   ,"#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"Disk C","#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"Disk D","#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"▲"     ,"#1d2027","#ffffff","5","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"▼"     ,"#1d2027","#ffffff","5","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF")
-]
-labels = [create_label2(*prop) for prop in label_properties]
-LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
 
 #????????????????????????????????????????????????????????????w
 #????????????????????????????????????????????????????????????
