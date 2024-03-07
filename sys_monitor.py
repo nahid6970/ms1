@@ -346,20 +346,6 @@ get_net_speed.download_speed_last = 0
 def git_sync(event=None):
     subprocess.Popen(["powershell", "C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1"])
 
-#! Clear Button
-def clear_screen():
-    try:
-        # Clear the screen
-        os.system('cls' if os.name == 'nt' else 'clear')
-        ascii_art = """
-##################################################
-************* Everything is clean ****************
-##################################################
-        """
-        print(ascii_art)
-    except Exception as e:
-        print(f"Error clearing screen: {e}")
-
 #! Github status
 def check_git_status(git_path, status_label):
     if not os.path.exists(git_path):
@@ -517,9 +503,6 @@ LB_MICECRS.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_MICECRS.bi
 LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", powertoys_TextExtract)
 LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", rclone_sync)
 LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", windows_terminal)
-
-BOX_ROW3_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW3_ROOT.pack(side="bottom", anchor="e", pady=(0,7),padx=(5,3))
-BT_CLR = tk.Button(BOX_ROW3_ROOT, bg="#1d2027", fg="white" ,  width=2, height=1, relief="flat",highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="❌", command=clear_screen) ; BT_CLR.pack( side="bottom", anchor="e", pady=(0,0), padx=(0,0))
 
 #! Here are all the exit function for row 1 and 2 and 3
 # CPU / RAM / DRIVES / NET SPEED
