@@ -224,13 +224,13 @@ def create_label2( parent, bg_color, fg_color, width, height, relief, font, padx
     return label
 
 label_properties = [
-    (BOX_ROW_ROOT,     "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 1,"CPU"),
-    (BOX_ROW_ROOT,     "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 1,"GPU"),
-    (BOX_ROW_ROOT,     "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 2,"RAM"),
-    (BOX_ROW_ROOT,  "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 3,"Disk C"),
-    (BOX_ROW_ROOT,  "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 3,"Disk D"),
-    (BOX_ROW_ROOT,       "#1d2027", "#ffffff", "5", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 4,"▲"),
-    (BOX_ROW_ROOT,       "#1d2027", "#ffffff", "5", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 4,"▼")
+    (BOX_ROW_ROOT, "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 1,"CPU")   ,
+    (BOX_ROW_ROOT, "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 1,"GPU")   ,
+    (BOX_ROW_ROOT, "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 2,"RAM")   ,
+    (BOX_ROW_ROOT, "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 3,"Disk C"),
+    (BOX_ROW_ROOT, "#1d2027", "#ffffff", "4", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 3,"Disk D"),
+    (BOX_ROW_ROOT, "#1d2027", "#ffffff", "5", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 1, 4,"▲")     ,
+    (BOX_ROW_ROOT, "#1d2027", "#ffffff", "5", "1", "flat", ("arial", 10, "bold"), 1, 0, "w", 0, "#FFFFFF", 2, 4,"▼")
 ]
 
 labels = [create_label2(*prop) for prop in label_properties]
@@ -244,11 +244,11 @@ def create_label1(parent, bg_color, fg_color, width, height, relief, padx_label,
     return label
 
 label_properties = [
-    (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"e", 0,"#FFFFFF", ("times" , 10, "bold"), 1, 8, "X")  ,
-    (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"e", 1,"#FFFFFF", ("Times" , 10, "bold"), 1, 7, "+")  ,
-    (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency", 10, "bold"), 1, 5, "⭕")  ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency", 10, "bold"), 1, 6, "⚠️") ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency", 10, "bold"), 2,6 , "⚠️" ),
+    (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"e", 0,"#FFFFFF", ("jetbrainsmono nf" , 10, "bold"), 1, 8, "❌") ,
+    (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"e", 1,"#FFFFFF", ("jetbrainsmono nf" , 10, "bold"), 1, 7, "+") ,
+    (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"e", 0,"#FFFFFF", ("jetbrainsmono nf", 10, "bold"), 1, 5, "🔅") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("jetbrainsmono nf", 10, "bold"), 1, 6, "♻️") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("jetbrainsmono nf", 10, "bold"), 2,6 , "♻️") ,
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
