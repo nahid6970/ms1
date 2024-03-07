@@ -95,31 +95,6 @@ def switch_to_frame(frame_to_show, frame_to_hide):
     frame_to_hide.pack_forget()
     frame_to_show.pack()
 
-def M1_hold_release(parent, text, command_on_release, **kwargs):
-    def on_press(event):
-        nonlocal previous_bg_color, previous_fg_color
-        button.config(relief="flat")
-        previous_bg_color = button.cget("bg")  # Store the previous background color
-        previous_fg_color = button.cget("fg")  # Store the previous foreground color
-        button.config(bg="black")
-        button.config(fg="yellow")
-
-    def on_release(event):
-        button.config(relief="flat")
-        command_on_release()
-        # Restore the previous background and foreground color
-        if previous_bg_color:
-            button.config(bg=previous_bg_color)
-            button.config(fg=previous_fg_color)
-
-    previous_bg_color = None  # Store the previous background color
-    previous_fg_color = None  # Store the previous foreground color
-    button = tk.Label(parent, text=text, **kwargs)
-    button.bind("<ButtonPress-1>", on_press)
-    button.bind("<ButtonRelease-1>", on_release)
-    button.pack(pady=2, padx=0)
-    return button
-
 def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
     BORDER_FRAME.place(relwidth=1, relheight=1)
