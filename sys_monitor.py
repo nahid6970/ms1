@@ -217,17 +217,17 @@ label_properties = [
 labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
 
-def create_label1(parent, bg_color, fg_color, width, height, relief, padx_label, pady_label, anchor, ht, htc, font, row, column,rowspan, text):
+def create_label1(parent, bg_color, fg_color, width, height, relief, padx_label, pady_label, padx, pady, anchor, ht, htc, font, row, column,rowspan, text):
     label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightcolor=htc)
-    label.grid(row=row, column=column, padx=0, pady=0, sticky=anchor, rowspan=rowspan)
+    label.grid(row=row, column=column, padx=padx, pady=pady, sticky=anchor, rowspan=rowspan)
     return label
 
 label_properties = [
-    (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",0,0,"w", 0,"#FFFFFF", ("agency" , 12, "bold"), 1, 8,2, "X") ,
-    (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"w", 1,"#FFFFFF", ("agency" , 10, "bold"), 1, 7,2, "+") ,
-    (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"w", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 5,2, "S") ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"w", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 6,1, "m") ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"w", 0,"#FFFFFF", ("agency" , 10, "bold"), 2,6 ,1, "m") ,
+    (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",0,0, (0,0),(0,0),    "w", 0,"#FFFFFF", ("agency" , 12, "bold"), 1, 8,2, "X") ,
+    (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0, (10,0),(0,0),    "w", 1,"#FFFFFF", ("agency" , 10, "bold"), 1, 7,2, "+") ,
+    (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",0,0, (10,0),(0,0),    "w", 0,"#FFFFFF", ("ink free" , 10, "bold"), 1, 5,2, "🔵") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0, (0,0),(0,0),    "w", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 6,1, "m") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0, (0,0),(0,0),    "w", 0,"#FFFFFF", ("agency" , 10, "bold"), 2,6 ,1, "m") ,
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
