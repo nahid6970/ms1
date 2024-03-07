@@ -66,7 +66,7 @@ screen_height = ROOT.winfo_screenheight()
 
 x = screen_width - 865
 y = screen_height - 45
-ROOT.geometry(f"450x45+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"420x45+{x}+{y}") #! overall size of the window
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
