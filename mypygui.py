@@ -1149,8 +1149,6 @@ for button_props in button_properties:
 #*  ██║     ██║██║ ╚████║██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-
-
 BOX_find = tk.Frame(FR_PROCESS, bg="#1d2027")
 BOX_find.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
