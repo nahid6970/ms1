@@ -1163,11 +1163,13 @@ for button_props in winget_scoop_button_properties:
 def check_autoruns_installed():
     autoruns_installed = os.path.exists(r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\autoruns.exe')
     return autoruns_installed
+
 def install_autoruns():
     try:
         subprocess.run(["winget", "install", "autoruns"], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error installing Autoruns: {e}")
+        
 def launch_autoruns():
     if not check_autoruns_installed():
         install_autoruns()
@@ -1278,8 +1280,6 @@ def show_options(options):
 
         btn = tk.Button(frame, text=option["text"], command=option["command"], background=bg_color, foreground=fg_color, padx=10, pady=5, borderwidth=2, relief="raised")
         btn.pack(side="left", padx=5, pady=5, anchor="center")
-
-
 
 # Define applications and their information
 applications = [
@@ -1459,8 +1459,6 @@ search_entry.bind("<KeyRelease>", filter_apps)
 # Update scroll region
 frame.update_idletasks()
 canvas.config(scrollregion=canvas.bbox("all"))
-
-
 
 def create_button(text, frame, command, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack):
     button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
