@@ -1531,8 +1531,7 @@ def flush_dns():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "cmd", "-ArgumentList", '"/k ipconfig /flushdns"', "-Verb", "RunAs"], shell=True)
 def winsock_reset():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "cmd", "-ArgumentList", '"/k netsh winsock reset"', "-Verb", "RunAs"], shell=True)
-def optionalfeatures():
-    subprocess.Popen(["powershell", "optionalfeatures"])
+
 def advanced_adapter():
     subprocess.Popen(["powershell", "control ncpa.cpl"])
 
@@ -1574,7 +1573,6 @@ BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
 button_properties = [
 ("Advanced Adapter"        ,advanced_adapter                                      ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,10 , "w") ,
-("Character Map"           ,lambda: open_nostart("charmap")                       ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,460, "w") ,
 ("CheckDisk"               ,open_chkdsk                                           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,40 , "w") ,
 ("Chris Titus Win Utility" ,ctt                                                   ,"#000000","#FFFFFF",1,25,"solid",("agency",14,"bold"),0,0, 100,70 , "w") ,
 ("Disk Cleanup"            ,open_cleanmgr                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,100, "w") ,
@@ -1587,9 +1585,10 @@ button_properties = [
 ("SFC"                     ,open_sfc                                              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,310, "w") ,
 ("Sniping Tool"            ,lambda: open_nostart("SnippingTool.exe")              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,340, "w") ,
 ("Systeminfo"              ,lambda: open_nostart("systeminfo")                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,370, "w") ,
-("Turn on Windows Features",optionalfeatures                                      ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,430, "w") ,
 ("UAC"                     ,lambda: open_nostart("UserAccountControlSettings.exe"),"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,400, "w") ,
+("Turn on Windows Features",lambda: open_nostart("optionalfeatures")                                      ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,430, "w") ,
 ("Winsock Reset"           ,winsock_reset                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,460, "w") ,
+("Character Map"           ,lambda: open_nostart("charmap")                       ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,460, "w") ,
 ]
 
 for button_props in button_properties:
