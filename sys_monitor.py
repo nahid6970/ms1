@@ -292,12 +292,10 @@ def update_uptime_label():
     uptime_label.after(1000, update_uptime_label)  # Update every second
     # Update uptime label periodically
 
-
 BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW2_ROOT.pack(side="top", anchor="e", pady=(0,7),padx=(5,3))
 
 uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
 uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
-
 
 LB_RULERSR = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📏", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
 LB_MICECRS = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="🖱", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
@@ -313,9 +311,6 @@ LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bi
 #! Here are all the exit function for row 1 and 2 and 3
 # CPU / RAM / DRIVES / NET SPEED
 update_info_labels()
-# Resize Window (seems to have no effect may be coz of modification)
-window_state = 'normal'
-# Start a separate thread for updating the git status
 status_thread = threading.Thread(target=update_status, daemon=True)
 status_thread.start()
 
@@ -373,7 +368,7 @@ BAR_HEIGHT = 30
 
 # Create a frame to hold the CPU core usage bars and border
 cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
-cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=100)
+cpu_core_frame.pack(side="top", anchor="w", padx=0, pady=0)
 
 # Create canvas widgets for CPU core bars and labels for percentages
 cpu_core_bars = []
