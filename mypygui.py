@@ -696,16 +696,12 @@ def scoop_uninstall_fzf():
 
 def open_ffmpeg_trimm():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\trim.ps1"])
-
 def open_ffmpeg_convt():
     subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\convert.ps1"])
-
 def open_ffmpeg_dimns():
     subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
-
 def open_ffmpeg_imgdm():
     subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
-
 def open_ffmpeg_merge():
     subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
