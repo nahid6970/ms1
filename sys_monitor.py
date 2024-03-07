@@ -200,7 +200,7 @@ def check_git_status(git_path, status_label):
     if "nothing to commit, working tree clean" in git_status.stdout:
         status_label.config(fg="#00ff21", text="✔️")
     else:
-        status_label.config(fg="#fe1616", text="❌")
+        status_label.config(fg="#fe1616", text="❓")
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
         print("Invalid path")
@@ -247,8 +247,8 @@ label_properties = [
     (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 12, "bold"), 1, 8,2, "X") ,
     (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"e", 1,"#FFFFFF", ("agency" , 10, "bold"), 1, 7,2, "+") ,
     (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 5,2, "S") ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 6,1, "m") ,
-    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 2,6 ,1, "m") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 1, 6,1, "m") ,
+    (BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","1","flat",1,0,"e", 0,"#FFFFFF", ("agency" , 10, "bold"), 2,6 ,1, "m") ,
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
