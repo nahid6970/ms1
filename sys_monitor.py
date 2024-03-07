@@ -147,12 +147,12 @@ ROOT.overrideredirect(True)  # Remove default borders
 
 
 #!############################################################
-# def check_window_topmost():
-#     if not ROOT.attributes('-topmost'):
-#         ROOT.attributes('-topmost', True)
-#     ROOT.after(500, check_window_topmost)
-# # Call the function to check window topmost status periodically
-# check_window_topmost()
+def check_window_topmost():
+    if not ROOT.attributes('-topmost'):
+        ROOT.attributes('-topmost', True)
+    ROOT.after(500, check_window_topmost)
+# Call the function to check window topmost status periodically
+check_window_topmost()
 #!############################################################
 
 
@@ -203,26 +203,6 @@ ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
 def close_window(event=None):
     ROOT.destroy()
 
-#! Pin/Unpin
-def check_window_topmost():
-    if not ROOT.attributes('-topmost'):
-        ROOT.attributes('-topmost', True)
-    if checking:  # Only continue checking if the flag is True
-        ROOT.after(500, check_window_topmost)
-
-def toggle_checking():
-    global checking
-    checking = not checking
-    if checking:
-        if ROOT.attributes('-topmost'):  # Only start checking if already topmost
-            check_window_topmost()  # Start checking if toggled on and already topmost
-        BT_TOPMOST.config(fg="#3bda00")  # Change text color to green
-    else:
-        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
-        BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to white
-
-checking = False
-
 #! Resize Window
 def toggle_window_size(size):
     global window_state
@@ -249,9 +229,7 @@ def toggle_window_size(size):
         x_coordinate = 0
         window_height = 30  # Assuming the window height is 38 pixels
         y_coordinate = screen_height - window_height
-        if ROOT.attributes('-topmost'):
-             toggle_checking()
-
+        
     elif size == '■':
         ROOT.geometry('520x800')
         ROOT.configure(bg='#1d2027')
@@ -261,9 +239,6 @@ def toggle_window_size(size):
         window_state = 'large'
         x_coordinate = screen_width - 520
         y_coordinate = screen_height//2 - 855//2
-
-        if checking:
-            toggle_checking()
     ROOT.focus_force()
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+{y_coordinate}')
@@ -447,6 +422,7 @@ label_properties = [
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_M, LB_L, LB_S, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
+
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
@@ -455,7 +431,6 @@ LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
 bkup.bind      ("<Button-1>", lambda event: git_sync          ())
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms2"))
-
 
 
 def create_label2(
@@ -491,12 +466,6 @@ label_properties = [
 ]
 labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
-
-# Create the toggle button
-BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))
-BT_TOPMOST.pack(pady=0)
-# Call the function to check window topmost status periodically
-check_window_topmost()
 
 #????????????????????????????????????????????????????????????w
 #????????????????????????????????????????????????????????????
@@ -573,22 +542,6 @@ MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 
-#! Time & Date
-def update_time():
-    current_time = strftime('%I:%M:%S')  # Format time in 12-hour format # %p is for am/pm
-    LB_TIME['text'] = current_time
-    current_date = datetime.now().strftime('%d %b %Y')  # Format date as '03 May 2023'
-    LB_DATE['text'] = current_date
-    ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
-
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1493df") ; BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(80,0),padx=(0,0), fill="x")
-LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
-LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
-LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
-LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
-
-update_time()
-
 #! ALL CPU CORES
 def get_cpu_core_usage():
     # Get CPU usage for each core
@@ -626,10 +579,15 @@ BAR_WIDTH = 35
 BAR_HEIGHT = 50
 # Create a frame to hold the CPU core usage bars
 cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027")
-cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=10, fill="x")
+cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=100, fill="x")
 # Create canvas widgets for CPU core bars
-
-
+cpu_core_bars = []
+for i in range(psutil.cpu_count()):
+    core_bar = tk.Canvas(cpu_core_frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
+    core_bar.pack(side="left", anchor="center", padx=(10,10), pady=0, expand=True)
+    cpu_core_bars.append(core_bar)
+# Update CPU core bars
+update_cpu_core_bars()
 
 
 MAIN_FRAME.pack()
