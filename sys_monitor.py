@@ -76,6 +76,7 @@ ROOT.geometry(f"500x500+{x}+{y}") #! overall size of the window
 
 #! alt 2 (modified)
 
+
 # # Calculate the x and y coordinates to center the window
 # # x_coordinate = 1420
 # x_coordinate = 0
