@@ -136,6 +136,12 @@ def long_running_function():
 # Call the long-running function
 long_running_function()
 
+def open_script(path):
+    subprocess.Popen(["powershell", "start", path])
+
+def open_folder(path):
+    subprocess.Popen(["explorer", path])
+
 set_console_title("🔥")
 # Create main window
 ROOT = tk.Tk()
@@ -712,8 +718,7 @@ def open_ffmpeg_merge():
 #*  ██║     ██║██║ ╚████║██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-def open_script(path):
-    subprocess.Popen(["powershell", "start", path])
+
 
 
 def fzf_c():
@@ -943,9 +948,6 @@ BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
 
 BOX_2 = tk.Frame(FRAME_FOLDER, bg="#992134")
 BOX_2.pack(side="top", pady=(80,0), padx=(0,0))
-
-def open_folder(path):
-    subprocess.Popen(["explorer", path])
 
 button_properties = [
     ("All Apps"      , BOX_1, lambda: open_folder("shell:AppsFolder")                                                                     , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 0 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
@@ -1477,16 +1479,16 @@ BOX_find = tk.Frame(FR_PROCESS, bg="#1d2027")
 BOX_find.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
 button_properties = [
-("Find"       ,BOX_find, "none"    ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
-("File"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_file.ps1"),"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Find"       ,BOX_find, "none"                                                          ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
+("File"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_file.ps1")    ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("Pattern"    ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_pattern.ps1") ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Size"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_size.ps1") ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Size"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_size.ps1")    ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
 
-("FZF-->C:\\" ,BOX_find, fzf_c     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
-("FZF-->D:\\" ,BOX_find, fzf_d     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
+("FZF-->C:\\" ,BOX_find, fzf_c                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
+("FZF-->D:\\" ,BOX_find, fzf_d                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
 
-("ACK-->C:\\" ,BOX_find, ack_c     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
-("ACK-->D:\\" ,BOX_find, ack_d     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
+("ACK-->C:\\" ,BOX_find, ack_c                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("ACK-->D:\\" ,BOX_find, ack_d                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 2 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
 ]
 
 for button_props in button_properties:
