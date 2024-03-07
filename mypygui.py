@@ -1147,7 +1147,6 @@ winget_scoop_button_properties = [
 ("Uninstall" , scoop_uninstall_fzf, "#1D2027", "#FF0000", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 4, 1,""  )
 ]
 
-# Create Winget buttons
 for button_props in winget_scoop_button_properties:
     create_button(*button_props)
 
@@ -1169,7 +1168,7 @@ def install_autoruns():
         subprocess.run(["winget", "install", "autoruns"], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error installing Autoruns: {e}")
-        
+
 def launch_autoruns():
     if not check_autoruns_installed():
         install_autoruns()
