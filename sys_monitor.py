@@ -64,7 +64,7 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 865
+x = screen_width - 835
 y = screen_height - 45
 ROOT.geometry(f"420x45+{x}+{y}") #! overall size of the window
 
