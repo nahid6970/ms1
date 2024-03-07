@@ -712,14 +712,9 @@ def open_ffmpeg_merge():
 #*  ██║     ██║██║ ╚████║██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-def find_file():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_file.ps1"])
+def open_script(path):
+    subprocess.Popen(["powershell", "start", path])
 
-def find_patt():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_pattern.ps1"])
-
-def find_size():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
 
 def fzf_c():
     command = 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'
@@ -952,7 +947,6 @@ BOX_2.pack(side="top", pady=(80,0), padx=(0,0))
 def open_folder(path):
     subprocess.Popen(["explorer", path])
 
-# Update the button properties accordingly
 button_properties = [
     ("All Apps"      , BOX_1, lambda: open_folder("shell:AppsFolder")                                                                     , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 0 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
     ("AppData"       , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData")                                                            , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 1 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
@@ -1484,9 +1478,9 @@ BOX_find.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
 button_properties = [
 ("Find"       ,BOX_find, "none"    ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
-("File"       ,BOX_find, find_file ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Pattern"    ,BOX_find, find_patt ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Size"       ,BOX_find, find_size ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
+("File"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_file.ps1"),"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Pattern"    ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_pattern.ps1") ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Size"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_size.ps1") ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
 
 ("FZF-->C:\\" ,BOX_find, fzf_c     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("FZF-->D:\\" ,BOX_find, fzf_d     ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
