@@ -794,46 +794,6 @@ def ack_d():
 #*  ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*  ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-def open_appdata_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "C:\\Users\\nahid\\AppData"])
-
-def open_appsfolder_fd():
-    subprocess.run(["explorer", "shell:AppsFolder"])
-
-def open_git_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "C:\\Users\\nahid\\OneDrive\\Git"])
-
-def open_packages_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "C:\\Users\\nahid\\AppData\\Local\\Packages"])
-
-def open_scoop_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "C:\\Users\\nahid\\scoop"])
-
-def open_sofware_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "D:\\software"])
-
-def open_song_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "D:\\song"])
-
-def open_startups_fd():
-    subprocess.run(["explorer", "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"])
-
-def open_usrstartups_fd():
-    subprocess.run(["explorer", "C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"])
-
-def open_templocal_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "C:\\Users\\nahid\\AppData\\Local\\Temp"])
-
-def open_tempwin_fd():
-    subprocess.run(["powershell", "-Command", "Invoke-Item", "C:\\Windows\\Temp"])
-
-def open_Winapps_fd():
-    subprocess.run(["explorer", "C:\\Program Files\\WindowsApps"])
-
-def open_programdata_fd():
-    subprocess.run(["explorer", "C:\\ProgramData"])
-
-
 icon_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 BT_FOLDER = tk.Button(
 MAIN_FRAME,
@@ -873,22 +833,24 @@ BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
 BOX_2 = tk.Frame(FRAME_FOLDER, bg="#992134")
 BOX_2.pack(side="top", pady=(80,0), padx=(0,0))
 
+def open_folder(path):
+    subprocess.run(["explorer", path])
+
+# Update the button properties accordingly
 button_properties = [
-("All Apps"      ,BOX_1, open_appsfolder_fd ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 0 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("AppData"       ,BOX_1, open_appdata_fd    ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 1 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("Git Projects"  ,BOX_1, open_git_fd        ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 2 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("Packages"      ,BOX_1, open_packages_fd   ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 3 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("ProgramData"   ,BOX_1, open_programdata_fd,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 4 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("Scoop"         ,BOX_1, open_scoop_fd      ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 5 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("Software"      ,BOX_1, open_sofware_fd    ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 6 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("Song"          ,BOX_1, open_song_fd       ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 7 ,1,1,2,"ew"   , 0,0, (0,0),(0,0)),
-("WindowsApp"    ,BOX_1, open_Winapps_fd    ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 8 ,1,1,2,"ew"  , 0,0, (0,0),(0,0)),
-
-("Startup System",BOX_1, open_startups_fd   ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 9 ,1,1,1,"nsew", 0,0, (0,1),(3,0)),
-("Startup User"  ,BOX_1, open_usrstartups_fd,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 9 ,2,1,1,"nsew", 0,0, (1,0),(3,0)),
-
-("Temp-AppDate"  ,BOX_1, open_templocal_fd  ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 10,1,1,1,"nsew", 0,0, (0,1),(3,0)),
-("Temp-Windows"  ,BOX_1, open_tempwin_fd    ,"#ffd86a","#1D2027",1,0,"flat",("calibri",14,"bold"), 10,2,1,1,"nsew", 0,0, (1,0),(3,0)),
+    ("All Apps"      , BOX_1, lambda: open_folder("shell:AppsFolder")                                                                     , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 0 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("AppData"       , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData")                                                            , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 1 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Git Projects"  , BOX_1, lambda: open_folder("C:\\Users\\nahid\\OneDrive\\Git")                                                      , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 2 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Packages"      , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData\\Local\\Packages")                                           , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 3 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("ProgramData"   , BOX_1, lambda: open_folder("C:\\ProgramData")                                                                      , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 4 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Scoop"         , BOX_1, lambda: open_folder("C:\\Users\\nahid\\scoop")                                                              , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 5 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Software"      , BOX_1, lambda: open_folder("D:\\software")                                                                         , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 6 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Song"          , BOX_1, lambda: open_folder("D:\\song")                                                                             , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 7 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("WindowsApp"    , BOX_1, lambda: open_folder("C:\\Program Files\\WindowsApps")                                                       , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 8 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Startup System", BOX_1, lambda: open_folder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup")                   , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 9 , 1, 1, 1, "nsew", 0, 0, (0, 1), (3, 0)),
+    ("Startup User"  , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"), "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 9 , 2, 1, 1, "nsew", 0, 0, (1, 0), (3, 0)),
+    ("Temp-AppDate"  , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData\\Local\\Temp")                                               , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 10, 1, 1, 1, "nsew", 0, 0, (0, 1), (3, 0)),
+    ("Temp-Windows"  , BOX_1, lambda: open_folder("C:\\Windows\\Temp")                                                                    , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 10, 2, 1, 1, "nsew", 0, 0, (1, 0), (3, 0)),
 ]
 
 for button_props in button_properties:
