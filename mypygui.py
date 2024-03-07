@@ -521,22 +521,6 @@ def fzf_d():
         print(f"Error executing command: {e}")
 
 def ack_c():
-    additional_text = input("Enter additional text: ")
-    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {additional_text}"'
-    try:
-        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def ack_d():
-    additional_text = input("Enter additional text: ")
-    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd D: ; ack {additional_text}"'
-    try:
-        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def ack_c():
     additional_text = insert_input()
     command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {additional_text}"'
     try:
