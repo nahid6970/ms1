@@ -1508,9 +1508,7 @@ for button_props in button_properties:
 #*     ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 
-def ctt():
-    command= 'Invoke-RestMethod christitus.com/win | Invoke-Expression'
-    subprocess.Popen(['powershell', '-Command', command])
+
 
 def open_dism():
     subprocess.Popen(["powershell", "Start-Process", "-FilePath", "DISM"  , "-ArgumentList", '"/Online /Cleanup-Image /RestoreHealth"', "-Verb", "RunAs"], shell=True)
@@ -1563,23 +1561,23 @@ BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=720)
 BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
 button_properties = [
-("Advanced Adapter"        ,lambda: open_nostart("control ncpa.cpl")              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,10 , "w") ,
-("CheckDisk"               ,open_chkdsk                                           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,40 , "w") ,
-("Chris Titus Win Utility" ,ctt                                                   ,"#000000","#FFFFFF",1,25,"solid",("agency",14,"bold"),0,0, 100,70 , "w") ,
-("Disk Cleanup"            ,open_cleanmgr                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,100, "w") ,
-("DISM"                    ,open_dism                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,130, "w") ,
-("DxDiag"                  ,lambda: open_script("dxdiag")                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,160, "w") ,
-("Flush DNS"               ,flush_dns                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,190, "w") ,
-("msconfig"                ,lambda: open_nostart("msconfig.exe")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,220, "w") ,
-("Netplwiz"                ,lambda: open_nostart("netplwiz.exe")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,250, "w") ,
-("Power Plan"              ,lambda: open_nostart("powercfg.cpl")                  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,280, "w") ,
-("SFC"                     ,open_sfc                                              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,310, "w") ,
-("Sniping Tool"            ,lambda: open_nostart("SnippingTool.exe")              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,340, "w") ,
-("Systeminfo"              ,lambda: open_nostart("systeminfo")                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,370, "w") ,
-("UAC"                     ,lambda: open_nostart("UserAccountControlSettings.exe"),"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,400, "w") ,
-("Turn on Windows Features",lambda: open_nostart("optionalfeatures")              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,430, "w") ,
-("Winsock Reset"           ,winsock_reset                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,460, "w") ,
-("Character Map"           ,lambda: open_nostart("charmap")                       ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,490, "w") ,
+("Advanced Adapter"        ,lambda: open_nostart("control ncpa.cpl")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,10 , "w") ,
+("CheckDisk"               ,open_chkdsk                                                                      ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,40 , "w") ,
+("Chris Titus Win Utility" ,lambda: open_nostart("Invoke-RestMethod christitus.com/win | Invoke-Expression") ,"#000000","#FFFFFF",1,25,"solid",("agency",14,"bold"),0,0, 100,70 , "w") ,
+("Disk Cleanup"            ,open_cleanmgr                                                                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,100, "w") ,
+("DISM"                    ,open_dism                                                                        ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,130, "w") ,
+("DxDiag"                  ,lambda: open_script("dxdiag")                                                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,160, "w") ,
+("Flush DNS"               ,flush_dns                                                                        ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,190, "w") ,
+("msconfig"                ,lambda: open_nostart("msconfig.exe")                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,220, "w") ,
+("Netplwiz"                ,lambda: open_nostart("netplwiz.exe")                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,250, "w") ,
+("Power Plan"              ,lambda: open_nostart("powercfg.cpl")                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,280, "w") ,
+("SFC"                     ,open_sfc                                                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,310, "w") ,
+("Sniping Tool"            ,lambda: open_nostart("SnippingTool.exe")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,340, "w") ,
+("Systeminfo"              ,lambda: open_nostart("systeminfo")                                               ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,370, "w") ,
+("UAC"                     ,lambda: open_nostart("UserAccountControlSettings.exe")                           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,400, "w") ,
+("Turn on Windows Features",lambda: open_nostart("optionalfeatures")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,430, "w") ,
+("Winsock Reset"           ,winsock_reset                                                                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,460, "w") ,
+("Character Map"           ,lambda: open_nostart("charmap")                                                  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,490, "w") ,
 ]
 
 for button_props in button_properties:
