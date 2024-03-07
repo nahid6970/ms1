@@ -310,7 +310,8 @@ def clear_screen():
 def extra_bar(event=None):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
 
-BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW_ROOT.pack(side="top", anchor="e", pady=(2,2),padx=(5,3))
+BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW_ROOT.pack(side="right", anchor="nw", pady=(2,2),padx=(5,3))
 
 def create_label1(
                   parent,
@@ -340,16 +341,16 @@ label_properties = [
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"▼")  ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"◀")  ,
 (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"+")  ,
+(BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("AGENCY"    ,10,"bold"),"❌")  ,
 ]
 labels = [create_label1(*prop) for prop in label_properties]
-LB_XXX, LB_M, LB_L, LB_S, LB_1 = labels
+LB_XXX, LB_M, LB_L, LB_S, LB_1, BT_CLR = labels
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
-LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
-
-
+LB_1.bind      ("<Button-1>", lambda event: extra_bar())
+BT_CLR.bind    ("<Button-1>", lambda event: clear_screen())
 
 # Create the toggle button
 BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))
@@ -357,62 +358,7 @@ BT_TOPMOST.pack(pady=0)
 # Call the function to check window topmost status periodically
 check_window_topmost()
 
-#????????????????????????????????????????????????????????????w
-#????????????????????????????????????????????????????????????
-#!This is for ROW 2
-#! Terminal & SYNC & Ruler
-def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
-def windows_terminal(even=None):
-    subprocess.Popen(["wt"])
-def powertoys_ruler(event=None):
-    pyautogui.hotkey('win', 'shift', 'm')
-def powertoys_TextExtract(event=None):
-    pyautogui.hotkey('win', 'shift', 't')
-def powertoys_mouse_crosshair(event=None):
-    pyautogui.hotkey('win', 'alt', 'p')
 
-def get_system_uptime():
-    uptime_seconds = psutil.boot_time()
-    current_time = datetime.now().timestamp()
-    uptime = current_time - uptime_seconds
-    hours, remainder = divmod(uptime, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return int(hours), int(minutes), int(seconds)
-
-def format_uptime():
-    hours, minutes, seconds = get_system_uptime()
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-
-def update_uptime_label():
-    uptime_str = format_uptime()
-    uptime_label.config(text=f"Uptime: {uptime_str}")
-    uptime_label.after(1000, update_uptime_label)  # Update every second
-    # Update uptime label periodically
-
-
-BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW2_ROOT.pack(side="top", anchor="e", pady=(0,7),padx=(5,3))
-
-uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
-uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
-
-
-LB_RULERSR = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📏", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_MICECRS = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="🖱", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_TEXTCPP = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="📝", bg="#1d2027", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_SYNCCCC = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="♾️", bg="#1d2027", fg="#3bda00", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_TERMINL = tk.Label (BOX_ROW2_ROOT, font=("ink free", 10), text="💻", bg="#000000", fg="#FFFFFF", height="1", width="3", relief="flat", highlightthickness=1, highlightbackground="#1d2027", padx=1, pady=0)
-LB_RULERSR.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_RULERSR.bind("<Button-1>", powertoys_ruler)
-LB_MICECRS.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_MICECRS.bind("<Button-1>", powertoys_mouse_crosshair)
-LB_TEXTCPP.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TEXTCPP.bind("<Button-1>", powertoys_TextExtract)
-LB_SYNCCCC.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_SYNCCCC.bind("<Button-1>", rclone_sync)
-LB_TERMINL.pack(side="left", anchor='e', padx=(0,1), pady=(0,0)) ; LB_TERMINL.bind("<Button-1>", windows_terminal)
-
-BOX_ROW3_ROOT = tk.Frame(ROOT, bg="#1d2027") ; BOX_ROW3_ROOT.pack(side="bottom", anchor="e", pady=(0,7),padx=(5,3))
-BT_CLR = tk.Button(BOX_ROW3_ROOT, bg="#1d2027", fg="white" ,  width=2, height=1, relief="flat",highlightthickness=1, highlightbackground="#FFFFFF", padx=1, pady=0, font=("AGENCY", 10, "bold"), text="❌", command=clear_screen) ; BT_CLR.pack( side="bottom", anchor="e", pady=(0,0), padx=(0,0))
-
-#! Here are all the exit function for row 1 and 2 and 3
-# CPU / RAM / DRIVES / NET SPEED
 
 
 #?  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
