@@ -1,49 +1,6 @@
-import importlib
-import subprocess
-
-#? https://pypi.org/project/pretty-errors/
-
-
-required_libraries = [
-    "ctypes",
-    "datetime",
-    "os",
-    "PIL",
-    "psutil",
-    "pyadl",
-    "pyautogui",
-    "shutil",
-    "subprocess",
-    "threading",
-    "time",
-    "tkinter",
-    # "tkinter.messagebox",
-    # "tkinter.ttk",
-]
-
-def install_missing_libraries():
-    for lib in required_libraries:
-        try:
-            importlib.import_module(lib)
-        except ImportError:
-            print(f"Installing {lib}...")
-            subprocess.check_call(["pip", "install", lib])
-
-# Call the function to install missing libraries
-install_missing_libraries()
-
-#! Now import the libraries
-# from tkinter import PhotoImage
-# import shutil
-# import tksvg
-# import win32gui
 from datetime import datetime
-from PIL import Image, ImageTk
 from pyadl import ADLManager
 from time import strftime
-from tkinter import Canvas, Scrollbar
-from tkinter import messagebox
-from tkinter import ttk
 import ctypes
 import os
 import psutil
@@ -54,28 +11,8 @@ import time
 import tkinter as tk
 
 
-def calculate_time_to_appear(start_time):
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Time taken to appear: {elapsed_time:.2f} seconds")
-
 start_time = time.time()
 
-# Print ASCII art in the console
-print(r"""
-
-$$\   $$\           $$\       $$\       $$\ $$\   $$\  $$$$$$\
-$$$\  $$ |          $$ |      \__|      $$ |$$$\  $$ |$$  __$$\
-$$$$\ $$ | $$$$$$\  $$$$$$$\  $$\  $$$$$$$ |$$$$\ $$ |$$ /  $$ |
-$$ $$\$$ | \____$$\ $$  __$$\ $$ |$$  __$$ |$$ $$\$$ |$$$$$$$$ |
-$$ \$$$$ | $$$$$$$ |$$ |  $$ |$$ |$$ /  $$ |$$ \$$$$ |$$  __$$ |
-$$ |\$$$ |$$  __$$ |$$ |  $$ |$$ |$$ |  $$ |$$ |\$$$ |$$ |  $$ |
-$$ | \$$ |\$$$$$$$ |$$ |  $$ |$$ |\$$$$$$$ |$$ | \$$ |$$ |  $$ |
-\__|  \__| \_______|\__|  \__|\__| \_______|\__|  \__|\__|  \__|
-
-""")
-
-# Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
 
 def start_drag(event):
@@ -91,35 +28,6 @@ def do_drag(event):
         x, y = (event.x - drag_data["x"] + ROOT.winfo_x(), event.y - drag_data["y"] + ROOT.winfo_y())
         ROOT.geometry("+%s+%s" % (x, y))
 
-def switch_to_frame(frame_to_show, frame_to_hide):
-    frame_to_hide.pack_forget()
-    frame_to_show.pack()
-
-def M1_hold_release(parent, text, command_on_release, **kwargs):
-    def on_press(event):
-        nonlocal previous_bg_color, previous_fg_color
-        button.config(relief="flat")
-        previous_bg_color = button.cget("bg")  # Store the previous background color
-        previous_fg_color = button.cget("fg")  # Store the previous foreground color
-        button.config(bg="black")
-        button.config(fg="yellow")
-
-    def on_release(event):
-        button.config(relief="flat")
-        command_on_release()
-        # Restore the previous background and foreground color
-        if previous_bg_color:
-            button.config(bg=previous_bg_color)
-            button.config(fg=previous_fg_color)
-
-    previous_bg_color = None  # Store the previous background color
-    previous_fg_color = None  # Store the previous foreground color
-    button = tk.Label(parent, text=text, **kwargs)
-    button.bind("<ButtonPress-1>", on_press)
-    button.bind("<ButtonRelease-1>", on_release)
-    button.pack(pady=2, padx=0)
-    return button
-
 def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
     BORDER_FRAME.place(relwidth=1, relheight=1)
@@ -127,14 +35,6 @@ def create_custom_border(parent):
 
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
-
-# wait this time to start the gui
-def long_running_function():
-    time.sleep(0)
-    print("Function completed!")
-
-# Call the long-running function
-long_running_function()
 
 set_console_title("🔥")
 # Create main window
@@ -145,7 +45,6 @@ ROOT.title("Python GUI")
 ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)  # Remove default borders
 
-
 #!############################################################
 def check_window_topmost():
     if not ROOT.attributes('-topmost'):
@@ -154,7 +53,6 @@ def check_window_topmost():
 # Call the function to check window topmost status periodically
 check_window_topmost()
 #!############################################################
-
 
 # Create custom border
 BORDER_FRAME = create_custom_border(ROOT)
@@ -174,7 +72,7 @@ screen_height = ROOT.winfo_screenheight()
 x = screen_width - 520   # 400 is the width of your window higher means left side lower means right side
 y = screen_height//2 - 855//2  # 700 is the height of your window higher means top side lower means bottom side
 # Set the geometry of the window
-ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"500x500+{x}+{y}") #! overall size of the window
 
 #! alt 2 (modified)
 
@@ -202,58 +100,6 @@ ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
 #! Close Window
 def close_window(event=None):
     ROOT.destroy()
-
-#! Resize Window
-def toggle_window_size(size):
-    global window_state
-    global x_coordinate  # Make these variables accessible within the function
-    global y_coordinate
-    if size == '◀':
-        ROOT.geometry('112x30')
-        ROOT.configure(bg='red')
-        LB_S.config(text='◀', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
-        window_state = 'small'
-        x_coordinate = 0
-        window_height = 30  # Assuming the window height is 38 pixels
-        y_coordinate = screen_height - window_height
-
-    elif size == '▼':
-        ROOT.geometry('520x30')
-        ROOT.configure(bg='red')
-        LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
-        window_state = 'medium'
-        x_coordinate = 0
-        window_height = 30  # Assuming the window height is 38 pixels
-        y_coordinate = screen_height - window_height
-        
-    elif size == '■':
-        ROOT.geometry('520x800')
-        ROOT.configure(bg='#1d2027')
-        LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='■', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("calibri", 10, "bold"))
-        window_state = 'large'
-        x_coordinate = screen_width - 520
-        y_coordinate = screen_height//2 - 855//2
-    ROOT.focus_force()
-    ROOT.update_idletasks()
-    ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+{y_coordinate}')
-
-def on_key_press(event):
-    if event.keysym == 'Left':
-        toggle_window_size('◀')
-    elif event.keysym == 'Down':
-        toggle_window_size('▼')
-    elif event.keysym == 'Up':
-        toggle_window_size('■')
-# Bind arrow key events to toggle window size
-ROOT.bind("<Left>", on_key_press)
-ROOT.bind("<Down>", on_key_press)
-ROOT.bind("<Up>", on_key_press)
 
 #! CPU / RAM / DRIVES / NET SPEED
 def get_cpu_ram_info():
@@ -398,21 +244,15 @@ def create_label1(
 
 label_properties = [
 (BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",1,0,"right","e", (0,1),(0,0), 0,"#FFFFFF", ("times"    ,10,"bold"),"X")  ,
-(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",1,0,"right","e", (1,1),(0,2), 0,"#FFFFFF", ("calibri"  ,10,"bold"),"■")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"▼")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"◀")  ,
 (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"+")  ,
 (BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⭕")  ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️") ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️")
 ]
 labels = [create_label1(*prop) for prop in label_properties]
-LB_XXX, LB_M, LB_L, LB_S, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
+LB_XXX, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
 
 LB_XXX.bind    ("<Button-1>", close_window)
-LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
-LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
-LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
 bkup.bind      ("<Button-1>", lambda event: git_sync          ())
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms1"))
