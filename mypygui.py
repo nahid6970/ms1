@@ -487,8 +487,6 @@ def scoop_uninstall_fzf():
 #*  ██║     ██║     ██║ ╚═╝ ██║██║     ███████╗╚██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-def open_ffmpeg_trimm():
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\trim.ps1"])
 def open_ffmpeg_convt():
     subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\convert.ps1"])
 def open_ffmpeg_dimns():
@@ -1201,7 +1199,7 @@ BOX_1.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
 button_properties = [
 ("FFMPEG"         ,BOX_1, "none"            ,"#98c379","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
-("Trim"           ,BOX_1, open_ffmpeg_trimm ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Trim"           ,BOX_1,lambda:subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\trim.ps1"]) ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("Convert"        ,BOX_1, open_ffmpeg_convt ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("Dimension"      ,BOX_1, open_ffmpeg_dimns ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("Imagedimension" ,BOX_1, open_ffmpeg_imgdm ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
@@ -1216,9 +1214,9 @@ BOX_find.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
 button_properties = [
 ("Find"       ,BOX_find, "none"                                                          ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
-("File"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_file.ps1")    ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Pattern"    ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_pattern.ps1") ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Size"       ,BOX_find, lambda: subprocess.Popen(["start","C:\\ms1\\scripts\\find\\find_size.ps1"], shell=True)    ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
+("File"    ,BOX_find,lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_file.ps1"]   ,shell=True) ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"),1 ,1,1,1,"ew" ,0,0,(1,1),(0,0)),
+("Pattern" ,BOX_find,lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_pattern.ps1"],shell=True) ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"),1 ,2,1,1,"ew" ,0,0,(1,1),(0,0)),
+("Size"    ,BOX_find,lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_size.ps1"]   ,shell=True) ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"),1 ,3,1,1,"ew" ,0,0,(1,1),(0,0)),
 
 ("FZF-->C:\\" ,BOX_find, fzf_c                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("FZF-->D:\\" ,BOX_find, fzf_d                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
