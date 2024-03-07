@@ -139,8 +139,12 @@ long_running_function()
 def open_script(path):
     subprocess.Popen(["powershell", "start", path])
 
+def open_nostart(path):
+    subprocess.Popen(["powershell", path])
+
 def open_folder(path):
     subprocess.Popen(["explorer", path])
+
 
 set_console_title("🔥")
 # Create main window
@@ -1504,8 +1508,6 @@ for button_props in button_properties:
 #*     ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 
-def open_systeminfo():
-    subprocess.run(["powershell", "systeminfo"])
 def ctt():
     command= 'Invoke-RestMethod christitus.com/win | Invoke-Expression'
     subprocess.Popen(['powershell', '-Command', command])
@@ -1586,7 +1588,7 @@ button_properties = [
 ("Power Plan"              ,open_powerplan   ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,280,    "w") ,
 ("SFC"                     ,open_sfc         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,310,    "w") ,
 ("Sniping Tool"            ,open_snippingtool,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,340,    "w") ,
-("Systeminfo"              ,open_systeminfo  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,370,    "w") ,
+("Systeminfo"              ,lambda: open_nostart("systeminfo")  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,370,    "w") ,
 ("UAC"                     ,open_uac         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,400,    "w") ,
 ("Turn on Windows Features",optionalfeatures ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,430,    "w") ,
 ("Winsock Reset"           ,winsock_reset    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,  100,460,    "w") ,
