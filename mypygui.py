@@ -142,6 +142,9 @@ def open_script(path):
 def open_nostart(path):
     subprocess.Popen(["powershell", path])
 
+def open_complex(path1, path2):
+    subprocess.Popen(["powershell", "Start-Process", "-FilePath", path1  , "-ArgumentList", path2, "-Verb", "RunAs"])
+
 def open_folder(path):
     subprocess.Popen(["explorer", path])
 
@@ -1509,22 +1512,6 @@ for button_props in button_properties:
 
 
 
-
-def open_dism():
-    subprocess.Popen(["powershell", "Start-Process", "-FilePath", "DISM"  , "-ArgumentList", '"/Online /Cleanup-Image /RestoreHealth"', "-Verb", "RunAs"], shell=True)
-def open_sfc():
-    subprocess.Popen(["powershell", "Start-Process", "-FilePath", "sfc"   , "-ArgumentList", '"/scannow"'                             , "-Verb", "RunAs"], shell=True)
-def open_chkdsk():
-    subprocess.Popen(["powershell", "Start-Process", "-FilePath", "chkdsk", "-ArgumentList", '"/f /r"'                                , "-Verb", "RunAs"], shell=True)
-def flush_dns():
-    subprocess.Popen(["powershell", "Start-Process", "-FilePath", "cmd"   , "-ArgumentList", '"/k ipconfig /flushdns"'                , "-Verb", "RunAs"], shell=True)
-def winsock_reset():
-    subprocess.Popen(["powershell", "Start-Process", "-FilePath", "cmd"   , "-ArgumentList", '"/k netsh winsock reset"'               , "-Verb", "RunAs"], shell=True)
-
-def open_cleanmgr():
-    subprocess.Popen(["powershell", "Start-Process", "cleanmgr" , "-Verb" , "RunAs"]       , shell=True)
-
-
 #! Tool Button
 
 BT_TOOLS = tk.Button(
@@ -1552,7 +1539,7 @@ FRAME_TOOLS.pack_propagate(True)
 BT_BACK = tk.Button(FRAME_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_TOOLS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-def create_button(text, command, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, anchor_button):
+def create_button(text, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, anchor_button, command):
     button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command, anchor=anchor_button)
     button.place(x=x_button, y=y_button)
     return button
@@ -1561,23 +1548,23 @@ BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=720)
 BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
 button_properties = [
-("Advanced Adapter"        ,lambda: open_nostart("control ncpa.cpl")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,10 , "w") ,
-("CheckDisk"               ,open_chkdsk                                                                      ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,40 , "w") ,
-("Chris Titus Win Utility" ,lambda: open_nostart("Invoke-RestMethod christitus.com/win | Invoke-Expression") ,"#000000","#FFFFFF",1,25,"solid",("agency",14,"bold"),0,0, 100,70 , "w") ,
-("Disk Cleanup"            ,open_cleanmgr                                                                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,100, "w") ,
-("DISM"                    ,open_dism                                                                        ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,130, "w") ,
-("DxDiag"                  ,lambda: open_script("dxdiag")                                                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,160, "w") ,
-("Flush DNS"               ,flush_dns                                                                        ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,190, "w") ,
-("msconfig"                ,lambda: open_nostart("msconfig.exe")                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,220, "w") ,
-("Netplwiz"                ,lambda: open_nostart("netplwiz.exe")                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,250, "w") ,
-("Power Plan"              ,lambda: open_nostart("powercfg.cpl")                                             ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,280, "w") ,
-("SFC"                     ,open_sfc                                                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,310, "w") ,
-("Sniping Tool"            ,lambda: open_nostart("SnippingTool.exe")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,340, "w") ,
-("Systeminfo"              ,lambda: open_nostart("systeminfo")                                               ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,370, "w") ,
-("UAC"                     ,lambda: open_nostart("UserAccountControlSettings.exe")                           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,400, "w") ,
-("Turn on Windows Features",lambda: open_nostart("optionalfeatures")                                         ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,430, "w") ,
-("Winsock Reset"           ,winsock_reset                                                                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,460, "w") ,
-("Character Map"           ,lambda: open_nostart("charmap")                                                  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,490, "w") ,
+("Advanced Adapter"        ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,10 , "w" ,lambda: open_nostart("control ncpa.cpl")),
+("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,40 , "w" ,lambda: open_complex("chkdsk", '"/f /r"')),
+("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("agency",14,"bold"),0,0, 100,70 , "w" ,lambda: open_nostart("Invoke-RestMethod christitus.com/win | Invoke-Expression")) ,
+("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,100, "w" ,lambda: open_complex("cleanmgr", "None")),
+("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,130, "w" ,lambda: open_complex("DISM", '"/Online /Cleanup-Image /RestoreHealth"')) ,
+("DxDiag"                  ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,160, "w" ,lambda: open_script("dxdiag")),
+("Flush DNS"               ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,190, "w" ,lambda: open_complex("cmd", '"/k ipconfig /flushdns"')),
+("msconfig"                ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,220, "w" ,lambda: open_nostart("msconfig.exe")),
+("Netplwiz"                ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,250, "w" ,lambda: open_nostart("netplwiz.exe")  ),
+("Power Plan"              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,280, "w" ,lambda: open_nostart("powercfg.cpl") ),
+("SFC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,310, "w" ,lambda: open_complex("sfc", '"/scannow"')),
+("Sniping Tool"            ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,340, "w" ,lambda: open_nostart("SnippingTool.exe")),
+("Systeminfo"              ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,370, "w" ,lambda: open_nostart("systeminfo") ),
+("UAC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,400, "w" ,lambda: open_nostart("UserAccountControlSettings.exe")),
+("Turn on Windows Features","#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,430, "w" ,lambda: open_nostart("optionalfeatures")),
+("Winsock Reset"           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,460, "w" ,lambda: open_complex("cmd", '"/k netsh winsock reset"')),
+("Character Map"           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0, 100,490, "w" ,lambda: open_nostart("charmap") ),
 ]
 
 for button_props in button_properties:
