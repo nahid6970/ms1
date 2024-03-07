@@ -342,7 +342,7 @@ label_properties = [
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"◀")  ,
 (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"+")  ,
 (BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"   ,10,"bold"),"❌")  ,
-(BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("JetBrainsMono NF"   ,10,"bold"),"📌")  ,
+(BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("JetBrainsMono NF" ,10,"bold"),"📌")  ,
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX, LB_M, LB_L, LB_S, LB_1, BT_CLR, BT_TOPMOST = labels
@@ -1218,7 +1218,7 @@ button_properties = [
 ("Find"       ,BOX_find, "none"                                                          ,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0)),
 ("File"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_file.ps1")    ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,1,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("Pattern"    ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_pattern.ps1") ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,2,1,1,"ew" , 0,0, (1,1),(0,0)),
-("Size"       ,BOX_find, lambda: open_script("C:\\ms1\\scripts\\find\\find_size.ps1")    ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
+("Size"       ,BOX_find, lambda: subprocess.Popen(["start","C:\\ms1\\scripts\\find\\find_size.ps1"], shell=True)    ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,3,1,1,"ew" , 0,0, (1,1),(0,0)),
 
 ("FZF-->C:\\" ,BOX_find, fzf_c                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,4,1,1,"ew" , 0,0, (1,1),(0,0)),
 ("FZF-->D:\\" ,BOX_find, fzf_d                                                           ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 1 ,5,1,1,"ew" , 0,0, (1,1),(0,0)),
