@@ -293,97 +293,6 @@ ROOT.bind("<Left>", on_key_press)
 ROOT.bind("<Down>", on_key_press)
 ROOT.bind("<Up>", on_key_press)
 
-#! CPU / RAM / DRIVES / NET SPEED
-def get_cpu_ram_info():
-    cpu_usage = psutil.cpu_percent(interval=None)
-    ram_usage = psutil.virtual_memory().percent
-    return cpu_usage, ram_usage
-def get_gpu_usage():
-    # Get the first GPU device (you can modify this if you have multiple GPUs)
-    device = ADLManager.getInstance().getDevices()[0]
-    # Get the current GPU usage
-    gpu_usage = device.getCurrentUsage()
-    return gpu_usage
-def get_disk_info():
-    disk_c_usage = psutil.disk_usage('C:').percent
-    disk_d_usage = psutil.disk_usage('D:').percent
-    return disk_c_usage, disk_d_usage
-def get_net_speed():
-    net_io = psutil.net_io_counters()
-    upload_speed = convert_bytes(net_io.bytes_sent - get_net_speed.upload_speed_last)
-    download_speed = convert_bytes(net_io.bytes_recv - get_net_speed.download_speed_last)
-    get_net_speed.upload_speed_last = net_io.bytes_sent
-    get_net_speed.download_speed_last = net_io.bytes_recv
-    return upload_speed, download_speed
-def convert_bytes(bytes):
-    mb = bytes / (1024 * 1024)
-    return f'{mb:.2f}'
-def update_info_labels():
-    cpu_usage, ram_usage = get_cpu_ram_info()
-    gpu_usage = get_gpu_usage()
-    disk_c_usage, disk_d_usage = get_disk_info()
-    upload_speed, download_speed = get_net_speed()
-    LB_CPU['text'] = f'{cpu_usage}%'
-    LB_RAM['text'] = f'{ram_usage}%'
-    LB_GPU.config(text=f'{gpu_usage}%')
-    LB_DUC['text'] = f'{disk_c_usage}%'
-    LB_DUD['text'] = f'{disk_d_usage}%'
-    LB_UPLOAD['text'] = f' ▲ {upload_speed} '
-    LB_DWLOAD['text'] = f' ▼ {download_speed} '
-
-    # Set background color based on GPU usage
-    if gpu_usage == "0":
-        LB_GPU.config(bg="#1d2027" , fg="#00ff21")
-    elif float(gpu_usage) < 25:
-        LB_GPU.config(bg="#1d2027" , fg="#00ff21")
-    elif 10 <= float(gpu_usage) < 50:
-        LB_GPU.config(bg="#ff9282" , fg="#000000")
-    elif 50 <= float(gpu_usage) < 80:
-        LB_GPU.config(bg="#ff6b54" , fg="#000000")
-    else:
-        LB_GPU.config(bg="#ff3010" , fg="#FFFFFF")
-
-    # Set background color based on upload speed
-    if upload_speed == "0":
-        LB_UPLOAD.config(bg='#1d2027', fg="#FFFFFF")
-    elif float(upload_speed) < 0.1:  # Less than 100 KB
-        LB_UPLOAD.config(bg='#1d2027', fg="#FFFFFF")
-    elif 0.1 <= float(upload_speed) < 0.5:  # 100 KB to 499 KB
-        LB_UPLOAD.config(bg='#A8E4A8', fg="#000000")
-    elif 0.5 <= float(upload_speed) < 1:  # 500 KB to 1 MB
-        LB_UPLOAD.config(bg='#67D567', fg='#000000')  # Normal green
-    else:
-        LB_UPLOAD.config(bg='#32AB32', fg='#000000')  # Dark green
-    # Set background color based on download speed
-    if download_speed == "0":
-        LB_DWLOAD.config(bg='#1d2027' , fg="#FFFFFF")
-    elif float(download_speed) < 0.1:  # Less than 100 KB
-        LB_DWLOAD.config(bg='#1d2027', fg="#FFFFFF")
-    elif 0.1 <= float(download_speed) < 0.5:  # 100 KB to 499 KB
-        LB_DWLOAD.config(bg='#A8E4A8', fg="#000000")
-    elif 0.5 <= float(download_speed) < 1:  # 500 KB to 1 MB
-        LB_DWLOAD.config(bg='#67D567', fg='#000000')  # Normal green
-    else:
-        LB_DWLOAD.config(bg='#32AB32', fg='#000000')  # Dark green
-
-    #        # Write speed information to a text file
-    # with open("d:\\netspeed_download_upload.log", "a") as logfile:
-    #     logfile.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - Download: {download_speed}, Upload: {upload_speed}\n")
-
-    # Change background and foreground color based on usage thresholds
-    LB_RAM.config(bg='#f12c2f' if ram_usage > 80 else '#1d2027', fg='#FFFFFF' if ram_usage > 80 else '#ff934b')
-    LB_CPU.config(bg='#f12c2f' if cpu_usage > 80 else '#1d2027', fg='#FFFFFF' if cpu_usage > 80 else '#14bcff')
-    LB_DUC.config(bg='#f12c2f' if disk_c_usage > 90 else '#79828b', fg='#FFFFFF' if disk_c_usage > 90 else '#1d2027')
-    LB_DUD.config(bg='#f12c2f' if disk_d_usage > 90 else '#79828b', fg='#FFFFFF' if disk_d_usage > 90 else '#1d2027')
-
-    ROOT.after(1000, update_info_labels)
-# Initialize static variables for network speed calculation
-get_net_speed.upload_speed_last = 0
-get_net_speed.download_speed_last = 0
-
-def git_sync(event=None):
-    subprocess.Popen(["powershell", "C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1"])
-
 #! Clear Button
 def clear_screen():
     try:
@@ -398,29 +307,6 @@ def clear_screen():
     except Exception as e:
         print(f"Error clearing screen: {e}")
 
-#! Github status
-def check_git_status(git_path, status_label):
-    if not os.path.exists(git_path):
-        status_label.config(text="Invalid path")
-        return
-    os.chdir(git_path)
-    git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
-    if "nothing to commit, working tree clean" in git_status.stdout:
-        status_label.config(fg="#00ff21", text="✔️")
-    else:
-        status_label.config(fg="#fe1616", text="❌")
-def show_git_changes(git_path):
-    if not os.path.exists(git_path):
-        print("Invalid path")
-        return
-    os.chdir(git_path)
-    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status"])
-def update_status():
-    while True:
-        check_git_status("C:\\ms1", STATUS_MS1)
-        check_git_status("C:\\ms2", STATUS_MS2)
-        # Update the status every second
-        time.sleep(1)
 def extra_bar(event=None):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
 
@@ -454,56 +340,16 @@ label_properties = [
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"▼")  ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"◀")  ,
 (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"+")  ,
-(BOX_ROW_ROOT,"#1d2027","#00FF00","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⭕")  ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️") ,
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"left" ,"e", (0,3),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"⚠️")
 ]
 labels = [create_label1(*prop) for prop in label_properties]
-LB_XXX, LB_M, LB_L, LB_S, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
+LB_XXX, LB_M, LB_L, LB_S, LB_1 = labels
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_1.bind      ("<Button-1>", lambda event: extra_bar         ())
-bkup.bind      ("<Button-1>", lambda event: git_sync          ())
-STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms1"))
-STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes  ("C:\\ms2"))
 
 
-
-def create_label2(
-                    parent,
-                    text,
-                    bg_color,
-                    fg_color,
-                    width,
-                    height,
-                    relief,
-                    font,
-                    padx_label,
-                    pady_label,
-                    side,
-                    anchor,
-                    padx_pack,
-                    pady_pack,
-                    ht,
-                    htc,
-                    ):
-    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightbackground=htc)
-    label.pack(side=side, anchor=anchor, padx=padx_pack, pady=pady_pack)
-    return label
-
-label_properties = [
-(BOX_ROW_ROOT,"CPU"   ,"#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"GPU"   ,"#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"RAM"   ,"#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"Disk C","#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"Disk D","#1d2027","#ffffff","4","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"▲"     ,"#1d2027","#ffffff","5","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF"),
-(BOX_ROW_ROOT,"▼"     ,"#1d2027","#ffffff","5","1","flat",("arial",10,"bold"),1,0,"left","e",(0,3),(0,0), 0, "#FFFFFF")
-]
-labels = [create_label2(*prop) for prop in label_properties]
-LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
 
 # Create the toggle button
 BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))
@@ -567,12 +413,6 @@ BT_CLR = tk.Button(BOX_ROW3_ROOT, bg="#1d2027", fg="white" ,  width=2, height=1,
 
 #! Here are all the exit function for row 1 and 2 and 3
 # CPU / RAM / DRIVES / NET SPEED
-update_info_labels()
-# Resize Window (seems to have no effect may be coz of modification)
-window_state = 'normal'
-# Start a separate thread for updating the git status
-status_thread = threading.Thread(target=update_status, daemon=True)
-status_thread.start()
 
 
 #?  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -796,54 +636,6 @@ LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 
 update_time()
-
-#! ALL CPU CORES
-def get_cpu_core_usage():
-    # Get CPU usage for each core
-    cpu_usage_per_core = psutil.cpu_percent(interval=None, percpu=True)
-    return cpu_usage_per_core
-def update_cpu_core_bars():
-    # Get CPU usage for each core
-    cpu_core_usage = get_cpu_core_usage()
-    # Update the bars for each CPU core
-    for i, usage in enumerate(cpu_core_usage):
-        core_bar = cpu_core_bars[i]
-        # Clear the previous bar
-        core_bar.delete("all")
-        # Calculate the height of the bar based on usage percentage
-        bar_height = int((usage / 100) * BAR_HEIGHT)
-        # Determine the color based on usage percentage
-        bar_color = determine_color(usage)
-        # Draw the bar with the determined color
-        core_bar.create_rectangle(0, BAR_HEIGHT - bar_height, BAR_WIDTH, BAR_HEIGHT, fill=bar_color)
-        # Display the usage percentage at the top of the bar
-        core_bar.create_text(BAR_WIDTH // 2, 5, text=f"{usage}%", fill="white")
-    # Schedule the next update
-    ROOT.after(1000, update_cpu_core_bars)
-def determine_color(usage):
-    if usage >= 90:
-        return "#8B0000"  # Dark red for usage >= 90%
-    elif usage >= 80:
-        return "#f12c2f"  # Red for usage >= 80%
-    elif usage >= 50:
-        return "#ff9282"  # Light red for usage >= 50%
-    else:
-        return "#14bcff"  # Default color
-# Constants for bar appearance
-BAR_WIDTH = 35
-BAR_HEIGHT = 50
-# Create a frame to hold the CPU core usage bars
-cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027")
-cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=10, fill="x")
-# Create canvas widgets for CPU core bars
-cpu_core_bars = []
-for i in range(psutil.cpu_count()):
-    core_bar = tk.Canvas(cpu_core_frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
-    core_bar.pack(side="left", anchor="center", padx=(10,10), pady=0, expand=True)
-    cpu_core_bars.append(core_bar)
-# Update CPU core bars
-update_cpu_core_bars()
-
 
 #! Backup & Update
 def open_backup(event=None):
