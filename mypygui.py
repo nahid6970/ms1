@@ -1179,7 +1179,7 @@ button_properties = [
 ("Systeminfo"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,370,"w" ,lambda: subprocess.Popen("systeminfo")),
 ("UAC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,400,"w" ,lambda: subprocess.Popen("UserAccountControlSettings.exe")),
 ("Turn on Windows Features","#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,430,"w" ,lambda: subprocess.Popen(["optionalfeatures"],shell=True)),
-("Winsock Reset"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,460,"w" ,lambda: open_complex("cmd"     ,'"/k netsh winsock reset"')),
+("Winsock Reset"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,460,"w" ,lambda: open_complex("cmd",'"/k netsh winsock reset"')),
 ("Character Map"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,490,"w" ,lambda: subprocess.Popen("charmap")),
 ]
 for button_props in button_properties:
