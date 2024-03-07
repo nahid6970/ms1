@@ -1176,25 +1176,23 @@ for button_props in button_properties:
 #*     ██║   ╚██████╔╝╚██████╔╝███████╗███████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*     ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-#! Tool Button
-
 BT_TOOLS = tk.Button(
-                    MAIN_FRAME,
-                    text="TOOLS",
-                    command=lambda: switch_to_frame(FRAME_TOOLS, MAIN_FRAME),
-                    bg="#454545",
-                    fg="#FFFFFF",
-                    height=2,
-                    width=30,
-                    font=("JetBrainsMono NF", 13, "bold"),
-                    anchor="w",
-                    bd=0,
-                    highlightthickness=4,
-                    relief="flat",
-                    activebackground="#000000",
-                    activeforeground="#f6d24a",
-                    cursor="hand2",
-                    )
+MAIN_FRAME,
+text="TOOLS",
+command=lambda: switch_to_frame(FRAME_TOOLS, MAIN_FRAME),
+bg="#454545",
+fg="#FFFFFF",
+height=2,
+width=30,
+font=("JetBrainsMono NF", 13, "bold"),
+anchor="w",
+bd=0,
+highlightthickness=4,
+relief="flat",
+activebackground="#000000",
+activeforeground="#f6d24a",
+cursor="hand2",
+)
 BT_TOOLS.pack(padx=(0, 0), pady=(0, 0))
 
 FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
