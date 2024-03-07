@@ -404,7 +404,7 @@ BAR_WIDTH = 10
 BAR_HEIGHT = 30
 
 # Create a frame to hold the CPU core usage bars and border
-cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027", highlightthickness=1, highlightbackground="white", relief="solid")
+cpu_core_frame = tk.Frame(MAIN_FRAME, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
 cpu_core_frame.pack(side="top", anchor="center", padx=0, pady=100)
 
 # Create canvas widgets for CPU core bars and labels for percentages
