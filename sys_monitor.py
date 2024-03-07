@@ -1,6 +1,5 @@
 from datetime import datetime
 from pyadl import ADLManager
-from time import strftime
 import ctypes
 import os
 import psutil
@@ -9,7 +8,6 @@ import subprocess
 import threading
 import time
 import tkinter as tk
-
 
 start_time = time.time()
 
@@ -366,10 +364,6 @@ MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 
 #! ALL CPU CORES
-import tkinter as tk
-import psutil
-import tkinter as tk
-import psutil
 
 def get_cpu_core_usage():
     # Get CPU usage for each core
@@ -428,8 +422,6 @@ for i in range(psutil.cpu_count()):
 
 # Update CPU core bars
 update_cpu_core_bars()
-
-
 
 MAIN_FRAME.pack()
 ROOT.mainloop()
