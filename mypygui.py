@@ -177,33 +177,12 @@ ROOT.bind("<ButtonPress-1>", start_drag)
 ROOT.bind("<ButtonRelease-1>", stop_drag)
 ROOT.bind("<B1-Motion>", do_drag)
 
-# # Calculate the screen width and height
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-#? START of alts
-#! alt 1 (original)
-# Calculate the x and y coordinates to center the window
-x = screen_width - 520   # 400 is the width of your window higher means left side lower means right side
-y = screen_height//2 - 855//2  # 700 is the height of your window higher means top side lower means bottom side
-# Set the geometry of the window
+x = screen_width - 520
+y = screen_height//2 - 855//2
 ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
-
-#! alt 2 (modified)
-
-# # Calculate the x and y coordinates to center the window
-# # x_coordinate = 1420
-# x_coordinate = 0
-# y_coordinate = 162
-# ROOT.geometry(f"500x700+{x_coordinate}+{y_coordinate}") # Overall size of the window
-
-# #! alt 3 (modified start as minimized L)
-# x_coordinate = 0
-# window_height = 36  # Assuming the window height is 38 pixels
-# y_coordinate = screen_height - window_height
-# # Set the window geometry
-# ROOT.geometry(f"500x36+{x_coordinate}+{y_coordinate}")
-#? END of alts
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
