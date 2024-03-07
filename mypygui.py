@@ -1228,11 +1228,8 @@ button_properties = [
 ("Winsock Reset"           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,100,460,"w" ,lambda: open_complex("cmd",'"/k netsh winsock reset"'                         )),
 ("Character Map"           ,"#FFFFFF","#1D2027",1,25,"solid",("agency",14,"bold"),0,0,100,490,"w" ,lambda: open_nostart("charmap"                                                     )),
 ]
-
 for button_props in button_properties:
     create_button(*button_props)
-
-
 
 #?  ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗    ████████╗ ██████╗  ██████╗ ██╗     ███████╗
 #?  ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║    ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
