@@ -9,9 +9,7 @@ function capture2text          { Start-Process "C:\Users\nahid\scoop\apps\captur
 function flaresolver           { Start-Process "C:\Users\nahid\scoop\apps\flaresolverr\current\flaresolverr.exe" -WindowStyle Hidden }
 function free_download_manager { Start-Process 'C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe' -WindowStyle Minimized }
 function monitor_size          { Start-Process "powershell.exe" -ArgumentList "-File C:\ms1\scripts\monitor_size.ps1" -Verb RunAs -WindowStyle Hidden }
-function sys_monitor {
-    Start-Process "python.exe" -ArgumentList "C:\ms1\sys_monitor.py" -Verb RunAs -WindowStyle Hidden
-}
+function sys_monitor { Start-Process "python.exe" -ArgumentList "C:\ms1\sys_monitor.py" -Verb RunAs -WindowStyle Hidden }
 function powertoys { if (Test-Path "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe") { Start-Process "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe" } 
                      elseif (Test-Path "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe") { Start-Process "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe" } 
                      else { Write-Warning "PowerToys not found in either expected location." } }
