@@ -838,7 +838,7 @@ icon_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\
 BT_FOLDER = tk.Button(
 MAIN_FRAME,
 text="Folder",
-command=lambda: switch_to_frame(FR_PROCESS, MAIN_FRAME),
+command=lambda: switch_to_frame(FRAME_FOLDER, MAIN_FRAME),
 image=icon_image,
 compound=tk.RIGHT,
 bg="#e7d86a",
