@@ -236,8 +236,6 @@ label_properties = [
 labels = [create_label2(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD = labels
 
-
-
 def create_label1(parent, bg_color, fg_color, width, height, relief, padx_label, pady_label, anchor, ht, htc, font, row, column,rowspan, text):
     label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, padx=padx_label, pady=pady_label, highlightthickness=ht, highlightcolor=htc)
     label.grid(row=row, column=column, padx=0, pady=0, sticky=anchor, rowspan=rowspan)
