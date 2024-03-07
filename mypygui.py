@@ -341,25 +341,19 @@ label_properties = [
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("agency"   ,10,"bold"),"▼")  ,
 (BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",1,0,"right","e", (1,1),(0,0), 0,"#FFFFFF", ("ink free" ,10,"bold"),"◀")  ,
 (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"    ,10,"bold"),"+")  ,
-(BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("AGENCY"    ,10,"bold"),"❌")  ,
+(BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("Times"   ,10,"bold"),"❌")  ,
+(BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,"right","e", (1,1),(0,0), 1,"#FFFFFF", ("JetBrainsMono NF"   ,10,"bold"),"📌")  ,
 ]
 labels = [create_label1(*prop) for prop in label_properties]
-LB_XXX, LB_M, LB_L, LB_S, LB_1, BT_CLR = labels
+LB_XXX, LB_M, LB_L, LB_S, LB_1, BT_CLR, BT_TOPMOST = labels
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
 LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 LB_1.bind      ("<Button-1>", lambda event: extra_bar())
 BT_CLR.bind    ("<Button-1>", lambda event: clear_screen())
-
-# Create the toggle button
-BT_TOPMOST = tk.Button(BOX_ROW_ROOT, text="📌", bg="#1d2027", fg="#FFFFFF", command=toggle_checking, font=("JetBrainsMono NF", 10, "bold"))
-BT_TOPMOST.pack(pady=0)
-# Call the function to check window topmost status periodically
+BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
 check_window_topmost()
-
-
-
 
 #?  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ████╗ ████║██╔══██╗██║████╗  ██║    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
