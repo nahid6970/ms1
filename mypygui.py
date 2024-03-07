@@ -568,6 +568,211 @@ status_thread.start()
 #?  ██║╚██╔╝██║██╔══██║██║██║╚██╗██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
 #?  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #?  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+
+
+#!   ██╗ ██╗     ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗    ██╗     ██╗███████╗████████╗
+#!  ████████╗    ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║    ██║     ██║██╔════╝╚══██╔══╝
+#!  ╚██╔═██╔╝    █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║    ██║     ██║███████╗   ██║   
+#!  ████████╗    ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║    ██║     ██║╚════██║   ██║   
+#!  ╚██╔═██╔╝    ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║    ███████╗██║███████║   ██║   
+#!   ╚═╝ ╚═╝     ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚══════╝╚═╝╚══════╝   ╚═╝   
+
+#?   ██╗ ██╗     ██╗    ██╗       ██╗       ███████╗
+#?  ████████╗    ██║    ██║       ██║       ██╔════╝
+#?  ╚██╔═██╔╝    ██║ █╗ ██║    ████████╗    ███████╗
+#?  ████████╗    ██║███╗██║    ██╔═██╔═╝    ╚════██║
+#?  ╚██╔═██╔╝    ╚███╔███╔╝    ██████║      ███████║
+#?   ╚═╝ ╚═╝      ╚══╝╚══╝     ╚═════╝      ╚══════╝
+def winget_search():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Search\' ; winget search {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def winget_install():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget install\' ; winget install {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def winget_uninst():
+    additional_text = insert_input()
+    # Enclose additional_text in double quotes if it contains spaces
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Winget Uninstall\' ; winget uninstall {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def winget_infooo():
+    additional_text = insert_input()
+    # Enclose additional_text in double quotes if it contains spaces
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Show\' ; winget show {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def wget_inst_fzf():
+    command = ' $host.UI.RawUI.WindowTitle = "wget🔽" ; winget search --exact "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget install $_.split()[0] }'
+    try:
+        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def wget_unin_fzf():
+    command = ' $host.UI.RawUI.WindowTitle = "wget❌" ; winget list "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget uninstall $_.split()[0] }'
+    try:
+        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+def scoop_search():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'$host.UI.RawUI.WindowTitle = "Scoop-Search" ; pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Search\' ; scoop search {additional_text}"' #! tf how it works??????????????????
+    try:
+        subprocess.Popen([ "start", "powershell", "-NoExit", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_install():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Install\' ; scoop install {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_uninstall():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Scoop UnInstall\' ; scoop uninstall {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_info():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Info\' ; scoop info {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_install_fzf():
+    # Path to the Python script generating the package list
+    python_script = r"C:\ms1\scripts\python\scoop_list.py"
+
+    # Run the Python script to generate the package list
+    try:
+        subprocess.run(['python', python_script], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+        return
+    # Path to the text file containing package list
+    package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
+    # Command to read from the text file and pipe it to fzf
+    command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
+    try:
+        subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_uninstall_fzf():
+    command = '$host.UI.RawUI.WindowTitle = "scoop❌" ; scoop list "" | fzf --multi --preview \'scoop info {1}\' | ForEach-Object { scoop uninstall $_.split()[0] }'
+    try:
+        subprocess.Popen(['start' , 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+#*  ███████╗███████╗███╗   ███╗██████╗ ███████╗ ██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
+#*  ██╔════╝██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝     ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
+#*  █████╗  █████╗  ██╔████╔██║██████╔╝█████╗  ██║  ███╗    █████╗  ██████╔╝███████║██╔████╔██║█████╗
+#*  ██╔══╝  ██╔══╝  ██║╚██╔╝██║██╔═══╝ ██╔══╝  ██║   ██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
+#*  ██║     ██║     ██║ ╚═╝ ██║██║     ███████╗╚██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
+#*  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+
+def open_ffmpeg_trimm():
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\trim.ps1"])
+
+def open_ffmpeg_convt():
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\convert.ps1"])
+
+def open_ffmpeg_dimns():
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
+
+def open_ffmpeg_imgdm():
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
+
+def open_ffmpeg_merge():
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
+
+#*  ███████╗██╗███╗   ██╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
+#*  ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
+#*  █████╗  ██║██╔██╗ ██║██║  ██║    █████╗  ██████╔╝███████║██╔████╔██║█████╗
+#*  ██╔══╝  ██║██║╚██╗██║██║  ██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
+#*  ██║     ██║██║ ╚████║██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
+#*  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+
+def find_file():
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_file.ps1"])
+
+def find_patt():
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_pattern.ps1"])
+
+def find_size():
+    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
+
+def fzf_c():
+    command = 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'
+    try:
+        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+def fzf_d():
+    command = 'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; fzf --preview=\'bat {}\'"'
+    try:
+        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+def ack_c():
+    additional_text = input("Enter additional text: ")
+    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {additional_text}"'
+    try:
+        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+def ack_d():
+    additional_text = input("Enter additional text: ")
+    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd D: ; ack {additional_text}"'
+    try:
+        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+def ack_c():
+    additional_text = insert_input()
+    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+def ack_d():
+    additional_text = insert_input()
+    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+
+
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
 MAIN_FRAME.pack_propagate(False)
@@ -701,91 +906,6 @@ BT_NCDU_C.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", c
 BT_NCDU_D.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", d_size)
 
 MAIN_FRAME.pack(expand=True)
-
-
-#*  ███████╗███████╗███╗   ███╗██████╗ ███████╗ ██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#*  ██╔════╝██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝     ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#*  █████╗  █████╗  ██╔████╔██║██████╔╝█████╗  ██║  ███╗    █████╗  ██████╔╝███████║██╔████╔██║█████╗
-#*  ██╔══╝  ██╔══╝  ██║╚██╔╝██║██╔═══╝ ██╔══╝  ██║   ██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
-#*  ██║     ██║     ██║ ╚═╝ ██║██║     ███████╗╚██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#*  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
-def open_ffmpeg_trimm():
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\trim.ps1"])
-
-def open_ffmpeg_convt():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\convert.ps1"])
-
-def open_ffmpeg_dimns():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
-
-def open_ffmpeg_imgdm():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
-
-def open_ffmpeg_merge():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
-
-#*  ███████╗██╗███╗   ██╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#*  ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#*  █████╗  ██║██╔██╗ ██║██║  ██║    █████╗  ██████╔╝███████║██╔████╔██║█████╗
-#*  ██╔══╝  ██║██║╚██╗██║██║  ██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
-#*  ██║     ██║██║ ╚████║██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#*  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
-def find_file():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_file.ps1"])
-
-def find_patt():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_pattern.ps1"])
-
-def find_size():
-    subprocess.run(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
-
-def fzf_c():
-    command = 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'
-    try:
-        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def fzf_d():
-    command = 'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; fzf --preview=\'bat {}\'"'
-    try:
-        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def ack_c():
-    additional_text = input("Enter additional text: ")
-    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {additional_text}"'
-    try:
-        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def ack_d():
-    additional_text = input("Enter additional text: ")
-    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd D: ; ack {additional_text}"'
-    try:
-        subprocess.run(["powershell", "-Command", command], shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def ack_c():
-    additional_text = insert_input()
-    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def ack_d():
-    additional_text = insert_input()
-    command = f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
 
 #*  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #*  ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -983,124 +1103,6 @@ BT_CUSTOM_CMD.pack(side="left", pady=0)
 #?  ████████╗    ██║███╗██║    ██╔═██╔═╝    ╚════██║
 #?  ╚██╔═██╔╝    ╚███╔███╔╝    ██████║      ███████║
 #?   ╚═╝ ╚═╝      ╚══╝╚══╝     ╚═════╝      ╚══════╝
-
-# winget / scoop text based info/show search install etc
-
-def winget_search():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Search\' ; winget search {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def winget_install():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget install\' ; winget install {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def winget_uninst():
-    additional_text = insert_input()
-    # Enclose additional_text in double quotes if it contains spaces
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Winget Uninstall\' ; winget uninstall {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def winget_infooo():
-    additional_text = insert_input()
-    # Enclose additional_text in double quotes if it contains spaces
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Show\' ; winget show {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def wget_inst_fzf():
-    command = ' $host.UI.RawUI.WindowTitle = "wget🔽" ; winget search --exact "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget install $_.split()[0] }'
-    try:
-        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def wget_unin_fzf():
-    command = ' $host.UI.RawUI.WindowTitle = "wget❌" ; winget list "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget uninstall $_.split()[0] }'
-    try:
-        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-
-
-def scoop_search():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'$host.UI.RawUI.WindowTitle = "Scoop-Search" ; pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Search\' ; scoop search {additional_text}"' #! tf how it works??????????????????
-    try:
-        subprocess.Popen([ "start", "powershell", "-NoExit", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def scoop_install():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Install\' ; scoop install {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def scoop_uninstall():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Scoop UnInstall\' ; scoop uninstall {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def scoop_info():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Info\' ; scoop info {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def scoop_install_fzf():
-    # Path to the Python script generating the package list
-    python_script = r"C:\ms1\scripts\python\scoop_list.py"
-
-    # Run the Python script to generate the package list
-    try:
-        subprocess.run(['python', python_script], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        return
-    # Path to the text file containing package list
-    package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
-    # Command to read from the text file and pipe it to fzf
-    command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
-    try:
-        subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def scoop_uninstall_fzf():
-    command = '$host.UI.RawUI.WindowTitle = "scoop❌" ; scoop list "" | fzf --multi --preview \'scoop info {1}\' | ForEach-Object { scoop uninstall $_.split()[0] }'
-    try:
-        subprocess.Popen(['start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
 
 
 def create_button(
