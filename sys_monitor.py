@@ -200,7 +200,7 @@ def check_git_status(git_path, status_label):
     if "nothing to commit, working tree clean" in git_status.stdout:
         status_label.config(fg="#00ff21", text="✔️")
     else:
-        status_label.config(fg="#fe1616", text="♻️")
+        status_label.config(fg="#fe1616", text="❌")
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
         print("Invalid path")
