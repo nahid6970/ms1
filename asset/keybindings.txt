@@ -3,8 +3,11 @@
 | PWSH    | Ctrl+Space        | Auto Completion Scoop/Winget                            |
 | PWSH    | Ctrl+Space        | Scoop-Completion                                        |
 | PWSH    | F2                | Suggestions                                             |
+
+
+
 | VSCODE  | ALT+L ALT+O       | Live Server                                             |
-| VSCODE  | alt+shift+;       | Align Multi Coulmns by Separator                        |
+	| VSCODE  | alt+shift+;       | Align Multi Coulmns by Separator                        |
 | VSCODE  | ALT+SHIFT+A       | Comment                                                 |
 | VSCODE  | ALT+SHIFT+M1      | For Coulmns Select First Point & Alt+Shift & Last Point |
 | VSCODE  | ALT+SHIFT+R       | Align by RegEx                                          |
