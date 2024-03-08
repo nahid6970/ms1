@@ -51,8 +51,8 @@
  ╚███╔███╔╝██║██║ ╚████║██████╔╝╚██████╔╝╚███╔███╔╝███████║      ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗
   ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚══════╝      ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝
 | Windows Terminal Keybinding | Objective                             |
-| Alt+Shift+Plus              | Split Screen (Vertically)             |
-| Ctrl+Shift+W                | Split-Screen (Close)                  |
+	| Alt+Shift+equal              | Split Screen (Vertically)             |
+	| Ctrl+Shift+W                | Split-Screen (Close)                  |
 | Alt+Shift+Minus             | Split-Screen (Horizontally)           |
 | Alt+Shift+Arrow             | Split-Screen (Increase/Decrease Size) |
 | Ctrl+Shift+M                | Toogle Mark Mode                      |
