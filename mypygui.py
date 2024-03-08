@@ -1176,7 +1176,7 @@ button_properties = [
 ("msconfig"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,220,"w" ,lambda: subprocess.Popen(["msconfig.exe"],shell=True)),
 ("Netplwiz"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,250,"w" ,lambda: subprocess.Popen(["netplwiz.exe"],shell=True)),
 ("Power Plan"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,280,"w" ,lambda: subprocess.Popen(["powercfg.cpl"],shell=True)),
-("SFC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,310,"w" ,lambda: open_complex("sfc",'"/scannow"')),
+("SFC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,310,"w" ,lambda: subprocess.Popen(["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"],shell=True)),
 ("Sniping Tool"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,340,"w" ,lambda: subprocess.Popen("SnippingTool.exe")),
 ("Systeminfo"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,370,"w" ,lambda: subprocess.Popen("systeminfo")),
 ("UAC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,400,"w" ,lambda: subprocess.Popen("UserAccountControlSettings.exe")),
