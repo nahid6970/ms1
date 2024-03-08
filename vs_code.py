@@ -28,11 +28,12 @@ button_frame.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
 # Button properties: (text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, sticky, padx_button, pady_button, padx_pack, pady_pack, command, window_title)
 button_properties = [
-    ("VS Code"        ,button_frame,"#21a3f1","#1D2027",1,10,"flat",("JetBrainsMono NF",11,"bold"),0,0,1,1,"ew",0,0,(1,1),(0,0),None)                                     ,
-    ("Line Join"      ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","alt+j"))             ,
-    ("Brackets Select",button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+alt+right"))    ,
-    ("Brackets Remove",button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),3,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+alt+Backspace")),
-    ("Brackets GoTo"  ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),4,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+shift+backslash")),
+    ("VS Code"           ,button_frame,"#21a3f1","#1D2027",1,10,"flat",("JetBrainsMono NF",11,"bold"),0,0,1,1,"ew",0,0,(1,1),(0,0),None),
+    ("Line Join"         ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","alt+j"               )),
+    ("Brackets Select"   ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+alt+right"      )),
+    ("Brackets Remove"   ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),3,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+alt+Backspace"  )),
+    ("Brackets GoTo"     ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),4,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+shift+backslash")),
+    ("Expand Selection"  ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),4,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","shift+alt+right"     )),
 ]
 
 # Create buttons
