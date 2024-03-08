@@ -61,6 +61,7 @@ button_properties = [
     ("Table Format Properly"                ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),16 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut  ("Visual Studio Code","CTRL+T+T"            )),
     ("Bookmark Line"                        ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),17 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut  ("Visual Studio Code","ctrl+b+ctrl+b"       )),
     ("Bookmark list all"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),18 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut  ("Visual Studio Code","ctrl+b+ctrl+l"       )),
+    ("Keyboard-Shortcut"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),19 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut  ("Visual Studio Code","ctrl+k+Numpad1"       )),
 ]
 
 # Create buttons
