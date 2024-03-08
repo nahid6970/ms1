@@ -28,9 +28,9 @@
 
 	- ctrl+shift+d = select similar words upward
 	- alt+j = join lines
-- ctrl+b ctrl+b bookmark line
-- ctrl+b ctrl+l list all bookmark lines
-- ctrl+k ctrl+s keyboard shortcuts
+	- ctrl+b ctrl+b bookmark line
+	- ctrl+b ctrl+l list all bookmark lines
+	- ctrl+k ctrl+s keyboard shortcuts
 - ctrl+f ctrl+a fold all
 - ctrl+f ctrl+u unfold all
 - **org related keybinding
