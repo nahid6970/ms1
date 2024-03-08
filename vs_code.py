@@ -96,11 +96,16 @@ button_properties=[
 ("DeleteLine"                   ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"ctrl+shift+k"        )),
 ("NewWindow"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"ctrl+n"              )),
 
-("RemoveFromSelection",Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k("VisualStudioCode",["ctrl+h","alt+l"])),
 
-("Terminal-Close",Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),25,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k(["Powershell","CommandPrompt"],"Ctrl+Shift+W")),
-("Terminal-Split-V",Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),26,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k(["Powershell","CommandPrompt"],"Alt+Shift+equal")),
-("Terminal-Split-H",Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),27,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k(["Powershell","Command"],"Alt+Shift+underscore")),
+
+("RemoveFromSelection",Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k("VisualStudioCode"  ,["ctrl+h"       ,"alt+l"]              )),
+
+
+
+
+("Terminal-Close"     ,Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),25,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"       ,"CommandPrompt"],"Ctrl+Shift+W"        )),
+("Terminal-Split-V"   ,Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),26,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"       ,"CommandPrompt"],"Alt+Shift+equal"     )),
+("Terminal-Split-H"   ,Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),27,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"       ,"Command"]      ,"Alt+Shift+underscore")),
 ]
 
 # Create buttons
