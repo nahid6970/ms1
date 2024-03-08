@@ -38,8 +38,8 @@ button_properties = [
     ("Comment Selection"                    ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),7,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ALT+SHIFT+A"         )),
     ("Sort Lines Ascending"                 ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),8,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ALT+SHIFT+S"         )),
     ("Split Same Document"                  ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),9,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","CTRL+backslash"      )),
-    ("Add Selection To Next Find Match"     ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),9,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","CTRL+D"              )),
-    ("Add Selection To Previous Find Match" ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),9,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","CTRL+shift+d"      ))  ,
+    ("Add Selection To Next Find Match"     ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),10,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","CTRL+D"              )),
+    ("Add Selection To Previous Find Match" ,button_frame,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),11,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","CTRL+shift+d"      ))  ,
 ]
 
 # Create buttons
