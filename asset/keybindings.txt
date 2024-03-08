@@ -36,10 +36,10 @@
 - **emmet
 	- alt+m minimap toogle
 
-- editor.action.deleteLines
+	- editor.action.deleteLines
 	- editor.action.removeDuplicateLines
-- editor.action.sortLinesAscending
-- editor.action.toggleMinimap
+	- editor.action.sortLinesAscending
+	- editor.action.toggleMinimap
 - workbench.action.newGroupX (Right/left/up/below) --splits into empty window
 - workbench.action.splitEditorX (Right/left/up/below) --split and mirror current window
 - workbench.action.duplicateActiveEditorGroupX (Right/left/up/below) --duplicates all tabs
