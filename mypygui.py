@@ -1170,7 +1170,7 @@ button_properties = [
 ("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,40 ,"w" ,lambda: subprocess.Popen(["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True)),
 ("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,70 ,"w" ,lambda: subprocess.Popen(["powershell","Invoke-RestMethod christitus.com/win | Invoke-Expression"],shell=True)),
 ("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,100,"w" ,lambda: subprocess.Popen(["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True)),
-("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,130,"w" ,lambda: subprocess.Popen(["powershell", "Start-Process", "-FilePath","DISM","-ArgumentList",'"/Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs", ";" , "pause"],shell=True)),
+("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,130,"w" ,lambda: subprocess.Popen(["powershell","-NoExit", "Start-Process","-FilePath","DISM","-ArgumentList",'"/Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True)),
 ("DxDiag"                  ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,160,"w" ,lambda: subprocess.Popen ("dxdiag")),
 ("Flush DNS"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,190,"w" ,lambda: open_complex("cmd",'"/k ipconfig /flushdns"')),
 ("msconfig"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,220,"w" ,lambda: subprocess.Popen(["msconfig.exe"],shell=True)),
