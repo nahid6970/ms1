@@ -23,12 +23,17 @@ def send_shortcut(window_title, shortcut):
 root = tk.Tk()
 root.title("Shortcut Buttons")
 root.attributes('-topmost', True)
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+x = screen_width//2 - 1800//2
+y = screen_height//2 + 150
+root.geometry(f"1800x300+{x}+{y}")
 
 # Create a frame for the buttons
 Main_Window = tk.Frame(root, bg="#1d2027")
 Main_Window.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
 
-BT_FOLDER = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Comment_Window, root), )
+Comment_Window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Comment_Window, root), )
 
 Comment_Window = tk.Frame(bg="#1D2027")
 Comment_Window.pack_propagate(True)
@@ -41,7 +46,7 @@ button_properties = [
     ("Brackets Remove"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),3  ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+alt+Backspace"   )),
     ("Brackets GoTo"                        ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),4  ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+shift+backslash" )),
     ("Expand Selection quota/brackets"      ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),5  ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","shift+alt+right"      )),
-    ("Align Multi Coulmns by Separator"     ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),6  ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","alt+shift+;"          )),
+    ("Align Multi Coulmns by Separator"     ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),6  ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","alt+shift+semicolon"          )),
     
     ("Comment"                              ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),7  ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: switch_to_frame(Comment_Window    ,Main_Window))            ,
     ("Comment Selection"                    ,Comment_Window,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),8  ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ALT+SHIFT+A"          )),
@@ -56,7 +61,7 @@ button_properties = [
     ("Table Format Properly"                ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),16 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","CTRL+T+T"             )),
     ("Bookmark Line"                        ,Main_Window   ,"#FFFFFF","#1D2027",1,20,"flat",("JetBrainsMono NF",11,"bold"),17 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_shortcut("Visual Studio Code","ctrl+b+ctrl+b"        )),
 ]
-    
+
 # Create buttons
 for button_props in button_properties:
     create_button(*button_props)
