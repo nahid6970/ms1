@@ -15,14 +15,14 @@ def create_button(text, frame, bg_color, fg_color, height, width, relief, font, 
     return button
 
 
-# def send_shortcut(window_title, shortcut):
+# def send_k(window_title, shortcut):
 #     # Find the window with the given title
 #     app_window = gw.getWindowsWithTitle(window_title)[0]
 #     app_window.activate()  # Activate the window
 #     # Simulate the given shortcut
 #     keyboard.send(shortcut)
 
-def send_shortcut(window_titles, shortcut):
+def send_k(window_titles, shortcut):
     for title in window_titles:
         try:
             app_window = gw.getWindowsWithTitle(title)[0]
@@ -33,7 +33,7 @@ def send_shortcut(window_titles, shortcut):
             pass  # If window title not found, try the next one
 
 
-def send_multiple_shortcuts(window_title, shortcuts):
+def send_m_k(window_title, shortcuts):
     app_window = gw.getWindowsWithTitle(window_title)[0]
     app_window.activate()  # Activate the window
     # Loop through the list of shortcuts and send them one by one
@@ -64,43 +64,43 @@ Comment_Window.pack_propagate(True)
 # Button properties: (text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, sticky, padx_button, pady_button, padx_pack, pady_pack, command, window_title)
 button_properties=[
 ("VSCode"                          ,Main_Window   ,"#21a3f1","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),0 ,0,1,1,"ew",0,0,(1,1),(0,0),None),
-("BracketsSelect"                  ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+alt+right"         )),
-("BracketsRemove"                  ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),3 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+alt+Backspace"     )),
-("BracketsGoTo"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),4 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+shift+backslash"   )),
-("ExpandSelectionquota/brackets"   ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),5 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","shift+alt+right"        )),
-("AlignMultiCoulmnsbySeparator"    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),6 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","alt+shift+semicolon"    )),
+("BracketsSelect"                  ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+alt+right"         )),
+("BracketsRemove"                  ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),3 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+alt+Backspace"     )),
+("BracketsGoTo"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),4 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+shift+backslash"   )),
+("ExpandSelectionquota/brackets"   ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),5 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","shift+alt+right"        )),
+("AlignMultiCoulmnsbySeparator"    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),6 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","alt+shift+semicolon"    )),
 
 ("Comment"                         ,Main_Window   ,"#eac353","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),7 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:switch_to_frame         (Comment_Window      ,Main_Window              )),
-("CommentSelection"                ,Comment_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),8 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ALT+SHIFT+A"            )),
-("Comment"                         ,Comment_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),9 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+k+c"               )),
-("UnComment"                       ,Comment_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),10,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+k+u"               )),
+("CommentSelection"                ,Comment_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),8 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ALT+SHIFT+A"            )),
+("Comment"                         ,Comment_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),9 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+k+c"               )),
+("UnComment"                       ,Comment_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),10,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+k+u"               )),
 
-("LineJoin"                        ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","alt+j"                  )),
-("SortLinesAscending"              ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),11,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ALT+SHIFT+S"            )),
+("LineJoin"                        ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","alt+j"                  )),
+("SortLinesAscending"              ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),11,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ALT+SHIFT+S"            )),
 
-("SplitSameDocument"               ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),12,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","CTRL+backslash"         )),
+("SplitSameDocument"               ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),12,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","CTRL+backslash"         )),
 
-("Select Next"                     ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),13,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+d"                 )),
-("Select Previous"                 ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),14,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+shift+d"           )),
+("Select Next"                     ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),13,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+d"                 )),
+("Select Previous"                 ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),14,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+shift+d"           )),
 
-("TableFormatProperly"             ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),16,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","CTRL+T+T"               )),
-("TableFormatProperly2"            ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),16,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","CTRL+q+f"               )),
+("TableFormatProperly"             ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),16,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","CTRL+T+T"               )),
+("TableFormatProperly2"            ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),16,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","CTRL+q+f"               )),
 
-("ChangeAllOccurrences"            ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),15,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","CTRL+F2"                )),
-("BookmarkLine"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),17,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+b+ctrl+b"          )),
-("Bookmarklistall"                 ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),18,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+b+ctrl+l"          )),
-("Keyboard-Shortcut"               ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),19,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","CTRL+K+CTRL+S"          )),
-("Minimap"                         ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),20,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ALT+m"                  )),
-("RemoveDupLines"                  ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),21,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+r+d"               )),
+("ChangeAllOccurrences"            ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),15,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","CTRL+F2"                )),
+("BookmarkLine"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),17,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+b+ctrl+b"          )),
+("Bookmarklistall"                 ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),18,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+b+ctrl+l"          )),
+("Keyboard-Shortcut"               ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),19,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","CTRL+K+CTRL+S"          )),
+("Minimap"                         ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),20,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ALT+m"                  )),
+("RemoveDupLines"                  ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),21,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+r+d"               )),
 
-("Remove From Selection"           ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_multiple_shortcuts("Visual Studio Code",["ctrl+h","alt+l"]       )),
-("Delete Line"                     ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+d+l"               )),
-("New Window"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+n"                 )),
-
-
+("Remove From Selection"           ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k                ("Visual Studio Code",["ctrl+h","alt+l"]       )),
+("Delete Line"                     ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+d+l"               )),
+("New Window"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+n"                 )),
 
 
-("Terminal-Mark"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),25,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           (["Powershell", "Command Prompt"],"Alt+Shift+equal")),
+
+
+("Terminal-Mark"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),25,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k           (["Powershell", "Command Prompt"],"Alt+Shift+equal")),
 ]
 
 # Create buttons
