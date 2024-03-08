@@ -35,7 +35,7 @@
 - ctrl+f ctrl+u unfold all
 - **org related keybinding
 - **emmet
-- alt+m minimap toogle
+	- alt+m minimap toogle
 - ctrl+right ctrl+right split copy to right
 - editor.action.deleteLines
 - editor.action.joinLines
