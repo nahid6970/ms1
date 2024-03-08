@@ -60,8 +60,10 @@ button_properties=[
 ("Select Next"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),13,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","ctrl+d"              )),
 ("Select Previous"                ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),14,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","ctrl+shift+d"        )),
 
-("ChangeAllOccurrences"           ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),15,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","CTRL+F2"             )),
 ("TableFormatProperly"            ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),16,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","CTRL+T+T"            )),
+("TableFormatProperly2"            ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),16,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","CTRL+q+f"            )),
+
+("ChangeAllOccurrences"           ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),15,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","CTRL+F2"             )),
 ("BookmarkLine"                   ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),17,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","ctrl+b+ctrl+b"       )),
 ("Bookmarklistall"                ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),18,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","ctrl+b+ctrl+l"       )),
 ("Keyboard-Shortcut"              ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),19,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","CTRL+K+CTRL+S"       )),
