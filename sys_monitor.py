@@ -27,7 +27,7 @@ def do_drag(event):
         ROOT.geometry("+%s+%s" % (x, y))
 
 def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#00FF00")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
 
