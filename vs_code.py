@@ -94,7 +94,7 @@ button_properties=[
 ("RemoveDupLines"                  ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),21,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+r+d"               )),
 
 ("Remove From Selection"           ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k                ("Visual Studio Code",["ctrl+h","alt+l"]       )),
-("Delete Line"                     ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+d+l"               )),
+("Delete Line"                     ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+shift+k"               )),
 ("New Window"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k                  ("Visual Studio Code","ctrl+n"                 )),
 
 ("Terminal-Close"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),25,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k           (["Powershell", "Command Prompt"],"Ctrl+Shift+W")),
