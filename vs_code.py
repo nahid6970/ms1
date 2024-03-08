@@ -25,15 +25,15 @@ root.title("Shortcut Buttons")
 root.attributes('-topmost', True)
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
-x = screen_width//2 - 1800//2
-y = screen_height//2 + 150
-root.geometry(f"1800x300+{x}+{y}")
+x = screen_width-500
+y = screen_height//2-800//2
+root.geometry(f"500x800+{x}+{y}")
 
 # Create a frame for the buttons
 Main_Window = tk.Frame(root, bg="#1d2027")
-Main_Window.pack(side="top", anchor="center", pady=(20,0), padx=(0,0))
+Main_Window.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 
-Comment_Window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Comment_Window, root), )
+Comment_Window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Comment_Window, root))
 
 Comment_Window = tk.Frame(bg="#1D2027")
 Comment_Window.pack_propagate(True)
