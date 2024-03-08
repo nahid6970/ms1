@@ -14,7 +14,7 @@
 	| VSCODE  | ALT+SHIFT+RIGHT   | Select All Text Between Quates                          |
 	| VSCODE  | ALT+SHIFT+S       | Sort Lines Ascending                                    |
 | VSCODE  | ALT+SHIFT+UP/DOWN | Copy The Same Line                                      |
-| VSCODE  | CTRL+\            | Split Same Document                                     |
+	| VSCODE  | CTRL+\            | Split Same Document                                     |
 | VSCODE  | CTRL+ALT+UP/DOWN  | Add Cursor Above/Below                                  |
 | VSCODE  | CTRL+F2           | Select All Similar Words Simultaneously                 |
 | VSCODE  | CTRL+K CTRL+C     | Comment                                                 |
