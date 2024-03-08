@@ -111,18 +111,6 @@ def long_running_function():
 # Call the long-running function
 long_running_function()
 
-def open_script(path):
-    subprocess.Popen(["powershell", "start", path])
-
-def open_nostart(path):
-    subprocess.Popen(["powershell", path])
-
-
-
-def open_folder(path):
-    subprocess.Popen(["explorer", path])
-
-
 set_console_title("🔥")
 # Create main window
 ROOT = tk.Tk()
@@ -566,19 +554,19 @@ BOX_2 = tk.Frame(FRAME_FOLDER, bg="#992134")
 BOX_2.pack(side="top", pady=(80,0), padx=(0,0))
 
 button_properties = [
-    ("All Apps"      , BOX_1, lambda: open_folder("shell:AppsFolder")                                                                     , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 0 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("AppData"       , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData")                                                            , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 1 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("Git Projects"  , BOX_1, lambda: open_folder("C:\\Users\\nahid\\OneDrive\\Git")                                                      , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 2 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("Packages"      , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData\\Local\\Packages")                                           , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 3 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("ProgramData"   , BOX_1, lambda: open_folder("C:\\ProgramData")                                                                      , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 4 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("Scoop"         , BOX_1, lambda: open_folder("C:\\Users\\nahid\\scoop")                                                              , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 5 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("Software"      , BOX_1, lambda: open_folder("D:\\software")                                                                         , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 6 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("Song"          , BOX_1, lambda: open_folder("D:\\song")                                                                             , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 7 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("WindowsApp"    , BOX_1, lambda: open_folder("C:\\Program Files\\WindowsApps")                                                       , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 8 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
-    ("Startup System", BOX_1, lambda: open_folder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup")                   , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 9 , 1, 1, 1, "nsew", 0, 0, (0, 1), (3, 0)),
-    ("Startup User"  , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"), "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 9 , 2, 1, 1, "nsew", 0, 0, (1, 0), (3, 0)),
-    ("Temp-AppDate"  , BOX_1, lambda: open_folder("C:\\Users\\nahid\\AppData\\Local\\Temp")                                               , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 10, 1, 1, 1, "nsew", 0, 0, (0, 1), (3, 0)),
-    ("Temp-Windows"  , BOX_1, lambda: open_folder("C:\\Windows\\Temp")                                                                    , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 10, 2, 1, 1, "nsew", 0, 0, (1, 0), (3, 0)),
+    ("All Apps"      , BOX_1, lambda: subprocess.Popen(["explorer","shell:AppsFolder"], shell=True)                                                                     , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 0 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("AppData"       , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData"], shell=True)                                                            , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 1 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Git Projects"  , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\OneDrive\\Git"], shell=True)                                                      , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 2 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Packages"      , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Local\\Packages"], shell=True)                                           , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 3 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("ProgramData"   , BOX_1, lambda: subprocess.Popen(["explorer","C:\\ProgramData"], shell=True)                                                                      , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 4 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Scoop"         , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\scoop"], shell=True)                                                              , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 5 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Software"      , BOX_1, lambda: subprocess.Popen(["explorer","D:\\software"], shell=True)                                                                         , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 6 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Song"          , BOX_1, lambda: subprocess.Popen(["explorer","D:\\song"], shell=True)                                                                             , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 7 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("WindowsApp"    , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Program Files\\WindowsApps"], shell=True)                                                       , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 8 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0)),
+    ("Startup System", BOX_1, lambda: subprocess.Popen(["explorer","C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"], shell=True)                   , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 9 , 1, 1, 1, "nsew", 0, 0, (0, 1), (3, 0)),
+    ("Startup User"  , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"], shell=True), "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 9 , 2, 1, 1, "nsew", 0, 0, (1, 0), (3, 0)),
+    ("Temp-AppDate"  , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Local\\Temp"], shell=True)                                               , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 10, 1, 1, 1, "nsew", 0, 0, (0, 1), (3, 0)),
+    ("Temp-Windows"  , BOX_1, lambda: subprocess.Popen(["explorer","C:\\Windows\\Temp"], shell=True)                                                                    , "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 10, 2, 1, 1, "nsew", 0, 0, (1, 0), (3, 0)),
 ]
 
 for button_props in button_properties:
