@@ -72,6 +72,7 @@ button_properties=[
 
 ("Remove From Selection"          ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","ctrl+h"              )),
 ("Remove From Selection2"         ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","alt+l"               )),
+("Delete Line"         ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut  ("Visual Studio Code","ctrl+d+l"               )),
 
 ]
 

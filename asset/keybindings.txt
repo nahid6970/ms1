@@ -32,14 +32,12 @@
 	- ctrl+b ctrl+b bookmark line
 	- ctrl+b ctrl+l list all bookmark lines
 	- ctrl+k ctrl+s keyboard shortcuts
-- ctrl+f ctrl+a fold all
-- ctrl+f ctrl+u unfold all
 - **org related keybinding
 - **emmet
 	- alt+m minimap toogle
 
 - editor.action.deleteLines
-- editor.action.removeDuplicateLines
+	- editor.action.removeDuplicateLines
 - editor.action.sortLinesAscending
 - editor.action.toggleMinimap
 - workbench.action.newGroupX (Right/left/up/below) --splits into empty window
