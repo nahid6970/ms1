@@ -91,14 +91,12 @@ button_properties=[
 ("Bookmarklistall"              ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),18,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"ctrl+b+ctrl+l"       )),
 ("Keyboard-Shortcut"            ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),19,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"CTRL+K+CTRL+S"       )),
 ("Minimap"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),20,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"ALT+m"               )),
-("RemoveDupLines"               ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),21,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"ctrl+r+d"            )),
+("RemoveDupLines"               ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),21,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k         ("Visual Studio Code"     ,["ctrl+k" ,"alt+d"]        )),
 
 ("DeleteLine"                   ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"ctrl+shift+k"        )),
 ("NewWindow"                    ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"     ,"ctrl+n"              )),
 
-
-
-("RemoveFromSelection",Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k("VisualStudioCode"  ,["ctrl+h"       ,"alt+l"]              )),
+("RemoveFromSelection",Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k("Visual Studio Code"  ,["ctrl+h","alt+l"])),
 
 
 
