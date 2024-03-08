@@ -34,10 +34,10 @@ def create_custom_border(parent):
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
-set_console_title("🔥")
+set_console_title("sysmonitor")
 # Create main window
 ROOT = tk.Tk()
-ROOT.title("Python GUI")
+ROOT.title("Monitor-System")
 # ROOT.attributes('-topmost', True)  # Set always on top
 # ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
