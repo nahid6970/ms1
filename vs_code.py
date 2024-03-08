@@ -14,12 +14,24 @@ def create_button(text, frame, bg_color, fg_color, height, width, relief, font, 
     button.window_title = window_title  # Store the window title with the button
     return button
 
-def send_shortcut(window_title, shortcut):
-    # Find the window with the given title
-    app_window = gw.getWindowsWithTitle(window_title)[0]
-    app_window.activate()  # Activate the window
-    # Simulate the given shortcut
-    keyboard.send(shortcut)
+
+# def send_shortcut(window_title, shortcut):
+#     # Find the window with the given title
+#     app_window = gw.getWindowsWithTitle(window_title)[0]
+#     app_window.activate()  # Activate the window
+#     # Simulate the given shortcut
+#     keyboard.send(shortcut)
+
+def send_shortcut(window_titles, shortcut):
+    for title in window_titles:
+        try:
+            app_window = gw.getWindowsWithTitle(title)[0]
+            app_window.activate()  # Activate the window
+            keyboard.send(shortcut)
+            return  # Exit the loop if shortcut sent successfully
+        except IndexError:
+            pass  # If window title not found, try the next one
+
 
 def send_multiple_shortcuts(window_title, shortcuts):
     app_window = gw.getWindowsWithTitle(window_title)[0]
@@ -84,6 +96,11 @@ button_properties=[
 ("Remove From Selection"           ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda: send_multiple_shortcuts("Visual Studio Code",["ctrl+h","alt+l"]       )),
 ("Delete Line"                     ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+d+l"               )),
 ("New Window"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           ("Visual Studio Code","ctrl+n"                 )),
+
+
+
+
+("Terminal-Mark"                      ,Main_Window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),25,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_shortcut           (["Powershell", "Command Prompt"],"Alt+Shift+equal")),
 ]
 
 # Create buttons
