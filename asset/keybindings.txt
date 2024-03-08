@@ -39,7 +39,6 @@
 	- alt+m minimap toogle
 
 - editor.action.deleteLines
-- editor.action.joinLines
 - editor.action.removeDuplicateLines
 - editor.action.sortLinesAscending
 - editor.action.toggleMinimap
