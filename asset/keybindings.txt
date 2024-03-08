@@ -17,17 +17,17 @@
 	| VSCODE  | CTRL+\            | Split Same Document                                     |
 | VSCODE  | CTRL+ALT+UP/DOWN  | Add Cursor Above/Below                                  |
 	| VSCODE  | CTRL+F2           | Select All Similar Words Simultaneously                 |
-| VSCODE  | CTRL+K CTRL+C     | Comment                                                 |
+	| VSCODE  | CTRL+K CTRL+C     | Comment                                                 |
 | VSCODE  | CTRL+SHIFT+~      | Terminal.New                                            |
 | VSCODE  | CTRL+SHIFT+5      | Terminal.Split                                          |
 | VSCODE  | CTRL+SHIFT+V      | Preview                                                 |
-| VSCODE  | CTRL+T CTRL+T     | Table Format Properly                                   |
+	| VSCODE  | CTRL+T CTRL+T     | Table Format Properly                                   |
 | VSCODE  | ctrl+alt+shift+n  | enable neovim                                           |
 | VSCODE  | ctrl+alt+shift+m  | disable neovim                                          |
 | VSCODE  | ctrl+w            | close tab                                               |
 
-- ctrl+shift+d = select similar words upward
-- alt+j = join lines
+	- ctrl+shift+d = select similar words upward
+	- alt+j = join lines
 - ctrl+b ctrl+b bookmark line
 - ctrl+b ctrl+l list all bookmark lines
 - ctrl+k ctrl+s keyboard shortcuts
