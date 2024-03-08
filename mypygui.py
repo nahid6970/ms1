@@ -117,8 +117,7 @@ def open_script(path):
 def open_nostart(path):
     subprocess.Popen(["powershell", path])
 
-def open_complex(path1, path2):
-    subprocess.Popen(["powershell", "Start-Process", "-FilePath", path1  , "-ArgumentList", path2, "-Verb", "RunAs"])
+
 
 def open_folder(path):
     subprocess.Popen(["explorer", path])
@@ -1163,9 +1162,12 @@ def create_button(text, bg_color, fg_color, height, width, relief, font, padx_bu
 BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=720)
 BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
+def open_complex(path1, path2):
+    subprocess.Popen(["powershell", "Start-Process", "-FilePath", path1  , "-ArgumentList", path2, "-Verb", "RunAs"])
+
 button_properties = [
 ("Advanced Adapter"        ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,10 ,"w" ,lambda: subprocess.Popen("control ncpa.cpl")),
-("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,40 ,"w" ,lambda: open_complex("chkdsk",'"/f /r"')),
+("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,40 ,"w" ,lambda: subprocess.Popen(["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True)),
 ("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,70 ,"w" ,lambda: subprocess.Popen(["powershell","Invoke-RestMethod christitus.com/win | Invoke-Expression"],shell=True)),
 ("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,100,"w" ,lambda: open_complex("cleanmgr","None")),
 ("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,130,"w" ,lambda: open_complex("DISM",'"/Online /Cleanup-Image /RestoreHealth"')),
