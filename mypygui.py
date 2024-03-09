@@ -142,9 +142,9 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 705
+x = screen_width - 745
 y = screen_height//2 - 800//2
-ROOT.geometry(f"705x800+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"745x800+{x}+{y}") #! overall size of the window
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -184,24 +184,24 @@ def toggle_window_size(size):
     global y_coordinate
 
     if size == '▼':
-        ROOT.geometry('705x30')
+        ROOT.geometry('745x30')
         ROOT.configure(bg='red')
         LB_L.config(text='=', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_M.config(text='=', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'medium'
-        x_coordinate = screen_width//2 - 705//2
+        x_coordinate = screen_width//2 - 745//2
         window_height = 30
         y_coordinate = 0
         if ROOT.attributes('-topmost'):
              toggle_checking()
 
     elif size == '■':
-        ROOT.geometry('705x800')
+        ROOT.geometry('745x800')
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='=', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_M.config(text='=', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'large'
-        x_coordinate = screen_width//2 - 705//2
+        x_coordinate = screen_width//2 - 745//2
         y_coordinate = 0
 
         if checking:
@@ -445,11 +445,11 @@ def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, pad
     return label
 
 label_properties = [
-{"text": "CPU"    ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1  ,"rowspan": 1,"columnspan": 1},
-{"text": "GPU"    ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 2  ,"rowspan": 1,"columnspan": 1},
-{"text": "RAM"    ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 3  ,"rowspan": 1,"columnspan": 1},
-{"text": "Disk_C" ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (4 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 4  ,"rowspan": 1,"columnspan": 1},
-{"text": "Disk_D" ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (2 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 5  ,"rowspan": 1,"columnspan": 1},
+{"text": "CPU"    ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1  ,"rowspan": 1,"columnspan": 1},
+{"text": "GPU"    ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 2  ,"rowspan": 1,"columnspan": 1},
+{"text": "RAM"    ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 3  ,"rowspan": 1,"columnspan": 1},
+{"text": "Disk_C" ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (4 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 4  ,"rowspan": 1,"columnspan": 1},
+{"text": "Disk_D" ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (2 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 5  ,"rowspan": 1,"columnspan": 1},
 {"text": "^"      ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 6  ,"rowspan": 1,"columnspan": 1},
 {"text": "v"      ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 7  ,"rowspan": 1,"columnspan": 1},
 {"text": "Git"    ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},
