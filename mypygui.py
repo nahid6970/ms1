@@ -374,25 +374,26 @@ def create_label( text, parent, bg_color, fg_color, width, height, relief, font,
 
 label_properties = [
 ("CPU"   ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,1,1,1),
-("GPU"   ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",2,1,1,1),
-("RAM"   ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,2,1,1),
-("Disk_C",BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,3,1,1),
-("Disk_D",BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",2,3,1,1),
-("^"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),(3 ,0),(0,0),"w",0,"#FFFFFF",1,4,1,1),
-("v"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),(3 ,0),(0,0),"w",0,"#FFFFFF",2,4,1,1),
+("GPU"   ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,2,1,1),
+("RAM"   ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,3,1,1),
+("Disk_C",BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,4,1,1),
+("Disk_D",BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,5,1,1),
+("^"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),(3 ,0),(0,0),"w",0,"#FFFFFF",1,6,1,1),
+("v"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),(3 ,0),(0,0),"w",0,"#FFFFFF",1,7,1,1),
 
-("X"     ,BOX_ROW_ROOT,"#1d2027","#ff0000","0","0","flat",("JetBrainsMonoNF",12,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",3,1,2,1),
-("M"     ,BOX_ROW_ROOT,"#1d2027","#26b2f3","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",3,2,1,1),
-("v"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",3,3,1,1),
-("<"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",3,4,1,1),
-("P"     ,BOX_ROW_ROOT,"#000000","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",3,5,1,1),
-("+"     ,BOX_ROW_ROOT,"#000000","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(10,0),(0,0),"w",0,"#FFFFFF",3,6,2,1),
-("Git"   ,BOX_ROW_ROOT,"#1d2027","#009fff","0","0","flat",("JetBrainsMonoNF",8 ,"bold"),(10,0),(0,0),"w",0,"#FFFFFF",3,7,2,1),
-("m"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",3,8,1,1),
-("m"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",3,9,1,1),
+
+("Git"   ,BOX_ROW_ROOT,"#1d2027","#009fff","0","0","flat",("JetBrainsMonoNF",8 ,"bold"),(10,0),(0,0),"w",0,"#FFFFFF",1,14,2,1),
+("m"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,15,1,1),
+("m"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,16,1,1),
+("+"     ,BOX_ROW_ROOT,"#000000","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(10,0),(0,0),"w",0,"#FFFFFF",1,13,2,1),
+("P"     ,BOX_ROW_ROOT,"#000000","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,12,1,1),
+("<"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,11,1,1),
+("v"     ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,10,1,1),
+("M"     ,BOX_ROW_ROOT,"#1d2027","#26b2f3","0","0","flat",("JetBrainsMonoNF",10,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,9,1,1),
+("X"     ,BOX_ROW_ROOT,"#1d2027","#ff0000","0","0","flat",("JetBrainsMonoNF",12,"bold"),(0 ,0),(0,0),"w",0,"#FFFFFF",1,8,2,1),
 ]
 labels = [create_label(*prop) for prop in label_properties]
-LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, LB_XXX,LB_M,LB_L,LB_S,BT_TOPMOST, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
+LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2,LB_1,BT_TOPMOST,LB_S,LB_L,LB_M,LB_XXX = labels
 
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
