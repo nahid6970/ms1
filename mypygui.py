@@ -200,9 +200,9 @@ def toggle_window_size(size):
         LB_L.config(text='▼', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("agency", 10, "bold"))
         LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'medium'
-        x_coordinate = 0
+        x_coordinate = screen_width//2 - 500//2
         window_height = 30  # Assuming the window height is 38 pixels
-        y_coordinate = screen_height - window_height
+        y_coordinate = 0
         if ROOT.attributes('-topmost'):
              toggle_checking()
 
