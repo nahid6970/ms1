@@ -182,21 +182,10 @@ def toggle_window_size(size):
     global window_state
     global x_coordinate  # Make these variables accessible within the function
     global y_coordinate
-    if size == '◀':
-        ROOT.geometry('112x30')
-        ROOT.configure(bg='red')
-        LB_S.config(text='=', bg="#1d2027", fg="#ebc254", height=1, width=0, font=("Webdings", 10, "bold"))
-        LB_L.config(text='=', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
-        LB_M.config(text='=', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
-        window_state = 'small'
-        x_coordinate = 0
-        window_height = 30  # Assuming the window height is 38 pixels
-        y_coordinate = screen_height - window_height
 
-    elif size == '▼':
+    if size == '▼':
         ROOT.geometry('600x30')
         ROOT.configure(bg='red')
-        LB_S.config(text='=', bg="#1d2027", fg="#ebc254", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_L.config(text='=', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_M.config(text='=', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'medium'
@@ -209,7 +198,6 @@ def toggle_window_size(size):
     elif size == '■':
         ROOT.geometry('600x800')
         ROOT.configure(bg='#1d2027')
-        LB_S.config(text='=', bg="#1d2027", fg="#ebc254", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_L.config(text='=', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_M.config(text='=', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'large'
@@ -398,8 +386,8 @@ label_properties = [
     {"text": "m"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},
     {"text": "K"     ,"parent": BOX_ROW_ROOT,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 11 ,"rowspan": 2,"columnspan": 1},
     {"text": "1"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 12 ,"rowspan": 2,"columnspan": 1},
-    {"text": "ë"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1}, #! PIN
-    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ebc254","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1}, #! LB_S
+    {"text": "P"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0),"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1}, #! Pin
+    {"text": "C"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1}, #! Clear
     {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1}, #! LB_L
     {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 16 ,"rowspan": 1,"columnspan": 1}, #! LB_M
     {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1}, #! LB_X
@@ -407,14 +395,14 @@ label_properties = [
 
 labels = [create_label(**prop) for prop in label_properties]
 
-LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST, LB_S, LB_L, LB_M, LB_XXX = labels
+LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST,CLEAR, LB_L, LB_M, LB_XXX = labels
 
 
 LB_XXX.bind    ("<Button-1>", close_window)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('■'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('▼'))
-LB_S.bind      ("<Button-1>", lambda event: toggle_window_size('◀'))
 BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
+CLEAR.bind("<Button-1>", lambda event: clear_screen())
 LB_1.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
 LB_K.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
 bkup.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1"],shell=True))
