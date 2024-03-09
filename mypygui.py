@@ -142,9 +142,9 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 600
+x = screen_width - 675
 y = screen_height//2 - 800//2
-ROOT.geometry(f"600x800+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"675x800+{x}+{y}") #! overall size of the window
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -184,24 +184,24 @@ def toggle_window_size(size):
     global y_coordinate
 
     if size == '▼':
-        ROOT.geometry('600x30')
+        ROOT.geometry('675x30')
         ROOT.configure(bg='red')
         LB_L.config(text='=', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_M.config(text='=', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'medium'
-        x_coordinate = screen_width//2 - 600//2
+        x_coordinate = screen_width//2 - 675//2
         window_height = 30
         y_coordinate = 0
         if ROOT.attributes('-topmost'):
              toggle_checking()
 
     elif size == '■':
-        ROOT.geometry('600x800')
+        ROOT.geometry('675x800')
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='=', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
         LB_M.config(text='=', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'large'
-        x_coordinate = screen_width//2 - 600//2
+        x_coordinate = screen_width//2 - 675//2
         y_coordinate = 0
 
         if checking:
@@ -362,11 +362,79 @@ def clear_screen():
         print(f"Error clearing screen: {e}")
 
 
-
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027")
 BOX_ROW_ROOT.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
 
-import tkinter as tk
+
+
+def get_cpu_core_usage():
+    # Get CPU usage for each core
+    cpu_usage_per_core = psutil.cpu_percent(interval=None, percpu=True)
+    return cpu_usage_per_core
+def update_cpu_core_bars():
+    # Get CPU usage for each core
+    cpu_core_usage = get_cpu_core_usage()
+    # Update the bars for each CPU core
+    for i, usage in enumerate(cpu_core_usage):
+        core_bar = cpu_core_bars[i]
+        # Clear the previous bar
+        core_bar.delete("all")
+        # Calculate the height of the bar based on usage percentage
+        bar_height = int((usage / 100) * BAR_HEIGHT)
+        # Determine the color based on usage percentage
+        bar_color = determine_color(usage)
+        # Draw the bar with the determined color
+        core_bar.create_rectangle(0, BAR_HEIGHT - bar_height, BAR_WIDTH, BAR_HEIGHT, fill=bar_color)
+    # Schedule the next update
+    ROOT.after(1000, update_cpu_core_bars)
+def determine_color(usage):
+    if usage >= 90:
+        return "#8B0000"  # Dark red for usage >= 90%
+    elif usage >= 80:
+        return "#f12c2f"  # Red for usage >= 80%
+    elif usage >= 50:
+        return "#ff9282"  # Light red for usage >= 50%
+    else:
+        return "#14bcff"  # Default color
+# Constants for bar appearance
+BAR_WIDTH = 8
+BAR_HEIGHT = 25
+# Create a frame to hold the CPU core usage bars and border
+cpu_core_frame = tk.Frame(ROOT, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
+cpu_core_frame.pack(side="right", anchor="nw", padx=0, pady=1)
+# Create canvas widgets for CPU core bars
+cpu_core_bars = []
+for i in range(psutil.cpu_count()):
+    frame = tk.Frame(cpu_core_frame, bg="#1d2027")
+    frame.pack(side="left", padx=(0, 0), pady=0)
+    core_bar = tk.Canvas(frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
+    core_bar.pack(side="top")
+    cpu_core_bars.append(core_bar)
+update_cpu_core_bars()
+
+def get_system_uptime():
+    uptime_seconds = psutil.boot_time()
+    current_time = datetime.now().timestamp()
+    uptime = current_time - uptime_seconds
+    hours, remainder = divmod(uptime, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return int(hours), int(minutes), int(seconds)
+
+def format_uptime():
+    hours, minutes, seconds = get_system_uptime()
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+def update_uptime_label():
+    uptime_str = format_uptime()
+    uptime_label.config(text=f"{uptime_str}")
+    uptime_label.after(1000, update_uptime_label)  # Update every second
+    # Update uptime label periodically
+
+BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW2_ROOT.pack(side="right", anchor="nw", pady=(2,2),padx=(2,2))
+
+uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
+uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
 
 def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
     label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
