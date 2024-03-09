@@ -346,7 +346,6 @@ def update_status():
         # Update the status every second
         time.sleep(1)
 
-
 #! Clear Button
 def clear_screen():
     try:
