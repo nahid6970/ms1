@@ -397,17 +397,17 @@ label_properties = [
 ("v"         ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(3 ,0)  ,(0,0),"w",1,7 ,1,1),
 
 ("Git"       ,BOX_ROW_ROOT,"#1d2027","#009fff","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(10,0)  ,(0,0),"w",1,8 ,1,1),
-("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("Webdings",10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,9 ,1,1),
-("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("Webdings",10,"bold"),0,"#FFFFFF",(0 ,10) ,(0,0),"w",1,10,1,1),
+("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,9 ,1,1),
+("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,10) ,(0,0),"w",1,10,1,1),
 
 ("K"         ,BOX_ROW_ROOT,"#FFFFFF","#1d2027","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,11,2,1),
 ("1"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,12,2,1),
-("P"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,10) ,(0,0),"w",1,13,1,1),
+("ë"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,10) ,(0,0),"w",1,13,1,1),#!Pin
 
-("="         ,BOX_ROW_ROOT,"#1d2027","#ebc254","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,14,1,1),#S
-("="         ,BOX_ROW_ROOT,"#1d2027","#00FF00","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,15,1,1),#L
-("="         ,BOX_ROW_ROOT,"#1d2027","#26b2f3","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,16,1,1),#M
-("="         ,BOX_ROW_ROOT,"#1d2027","#ff0000","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,2)  ,(0,0),"w",1,17,1,1),#X
+("="         ,BOX_ROW_ROOT,"#1d2027","#ebc254","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,14,1,1),#!S
+("="         ,BOX_ROW_ROOT,"#1d2027","#00FF00","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,15,1,1),#!L
+("="         ,BOX_ROW_ROOT,"#1d2027","#26b2f3","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0)  ,(0,0),"w",1,16,1,1),#!M
+("="         ,BOX_ROW_ROOT,"#1d2027","#ff0000","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,2)  ,(0,0),"w",1,17,1,1),#!X
 ]
 labels = [create_label(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1,BT_TOPMOST,LB_S,LB_L,LB_M,LB_XXX = labels
