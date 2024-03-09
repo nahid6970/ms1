@@ -365,7 +365,7 @@ def clear_screen():
 # !???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027")
-BOX_ROW_ROOT.pack(side="right", anchor="ne", pady=(2,2),padx=(3,1))
+BOX_ROW_ROOT.pack(side="right", anchor="ne", pady=(4,2),padx=(3,1))
 
 def create_label( text, parent, bg_color, fg_color, width, height, relief, font,   ht, htc, padx, pady,anchor,row, column, rowspan, columnspan ):
     label = tk.Label( parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc )
@@ -376,8 +376,10 @@ label_properties = [
 ("CPU"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,1 ,1,1),
 ("GPU"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,2 ,1,1),
 ("RAM"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,3 ,1,1),
-("Disk_C"  ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,4 ,1,1),
-("Disk_D"  ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,5 ,1,1),
+
+("Disk_C"  ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,2) ,(0,0),"w",1,4 ,1,1),
+("Disk_D"  ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(2 ,0) ,(0,0),"w",1,5 ,1,1),
+
 ("^"       ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(3 ,0) ,(0,0),"w",1,6 ,1,1),
 ("v"       ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(3 ,0) ,(0,0),"w",1,7 ,1,1),
 
