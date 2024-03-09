@@ -333,7 +333,7 @@ def check_git_status(git_path, status_label):
     os.chdir(git_path)
     git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
     if "nothing to commit, working tree clean" in git_status.stdout:
-        status_label.config(fg="#00ff21", text="✅")
+        status_label.config(fg="#00ff21", text="✔️")
     else:
         status_label.config(fg="#fe1616", text="⚠️")
 def show_git_changes(git_path):
@@ -404,8 +404,8 @@ label_properties = [
 (BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF" ,10,"bold"),1,1,1,"📌"),
 (BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,(10,0),(0,0),"w",0,"#FFFFFF",("agency"   ,10,"bold"),1,7 ,2,"+"),
 (BOX_ROW_ROOT,"#1d2027","#009fff","2","1","flat",0,0,(10,0),(0,0),"w",0,"#FFFFFF",("ink free" ,8 ,"bold"),1,5 ,2,"🔵"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("agency"   ,10,"bold"),1,6 ,1,"m"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("agency"   ,10,"bold"),2,6 ,1,"m"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free"   ,10,"bold"),1,6 ,1,"m"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free"   ,10,"bold"),2,6 ,1,"m"),
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX,LB_M,LB_L,LB_S,BT_TOPMOST, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
