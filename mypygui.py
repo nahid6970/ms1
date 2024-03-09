@@ -397,15 +397,15 @@ def create_label1(parent, bg_color, fg_color, width, height, relief, padx_label,
     return label
 
 label_properties = [
-(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free"   ,12,"bold"),1,8 ,2,"X"),
-(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free"  ,10,"bold"),1,1,1,"■"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free"   ,10,"bold"),1,1,1,"▼"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free" ,10,"bold"),1,1,1,"◀"),
-(BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free" ,10,"bold"),1,1,1,"📌"),
-(BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,(10,0),(0,0),"w",0,"#FFFFFF",("ink free"   ,10,"bold"),1,7 ,2,"+"),
-(BOX_ROW_ROOT,"#1d2027","#009fff","2","1","flat",0,0,(10,0),(0,0),"w",0,"#FFFFFF",("ink free" ,8 ,"bold"),1,5 ,2,"🔵"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free"   ,10,"bold"),1,6 ,1,"m"),
-(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("ink free"   ,10,"bold"),2,6 ,1,"m"),
+(BOX_ROW_ROOT,"#1d2027","#ff0000","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF"   ,12,"bold"),1,8 ,2,"X"),
+(BOX_ROW_ROOT,"#1d2027","#26b2f3","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF"  ,10,"bold"),1,1,1,"■"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF"   ,10,"bold"),1,1,1,"▼"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF" ,10,"bold"),1,1,1,"◀"),
+(BOX_ROW_ROOT,"#000000","#FFFFFF","2","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF" ,10,"bold"),1,1,1,"📌"),
+(BOX_ROW_ROOT,"#000000","#FFFFFF","1","1","flat",0,0,(10,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF"   ,10,"bold"),1,7 ,2,"+"),
+(BOX_ROW_ROOT,"#1d2027","#009fff","2","1","flat",0,0,(10,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF" ,8 ,"bold"),1,5 ,2,"🔵"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","4","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF"   ,10,"bold"),1,6 ,1,"m"),
+(BOX_ROW_ROOT,"#1d2027","#FFFFFF","4","1","flat",0,0,(0 ,0),(0,0),"w",0,"#FFFFFF",("JetBrainsMono NF"   ,10,"bold"),2,6 ,1,"m"),
 ]
 labels = [create_label1(*prop) for prop in label_properties]
 LB_XXX,LB_M,LB_L,LB_S,BT_TOPMOST, LB_1, bkup, STATUS_MS1, STATUS_MS2 = labels
