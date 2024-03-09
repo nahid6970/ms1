@@ -373,19 +373,19 @@ def create_label( text, parent, bg_color, fg_color, width, height, relief, font,
     return label
 
 label_properties = [
-("CPU"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,1 ,1,1),
-("GPU"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,2 ,1,1),
-("RAM"     ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,3 ,1,1),
+("CPU"       ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,1 ,1,1),
+("GPU"       ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,2 ,1,1),
+("RAM"       ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,3 ,1,1),
 
-("Disk_C"  ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,2) ,(0,0),"w",1,4 ,1,1),
-("Disk_D"  ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(2 ,0) ,(0,0),"w",1,5 ,1,1),
+("Disk_C"    ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,2) ,(0,0),"w",1,4 ,1,1),
+("Disk_D"    ,BOX_ROW_ROOT,"#1d2027","#ffffff","4","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(2 ,0) ,(0,0),"w",1,5 ,1,1),
 
-("^"       ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(3 ,0) ,(0,0),"w",1,6 ,1,1),
-("v"       ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(3 ,0) ,(0,0),"w",1,7 ,1,1),
+("^"         ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(3 ,0) ,(0,0),"w",1,6 ,1,1),
+("v"         ,BOX_ROW_ROOT,"#1d2027","#ffffff","5","1","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(3 ,0) ,(0,0),"w",1,7 ,1,1),
 
-("Git"     ,BOX_ROW_ROOT,"#1d2027","#009fff","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(10,0) ,(0,0),"w",1,8 ,1,1),
-("m"       ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,9 ,1,1),
-("m"       ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,10),(0,0),"w",1,10,1,1),
+("Git"       ,BOX_ROW_ROOT,"#1d2027","#009fff","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(10,0) ,(0,0),"w",1,8 ,1,1),
+("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,9 ,1,1),
+("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,10),(0,0),"w",1,10,1,1),
 
 ("K"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,11,2,1),
 ("B1"        ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,12,2,1),
