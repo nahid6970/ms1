@@ -185,9 +185,9 @@ def toggle_window_size(size):
     if size == '◀':
         ROOT.geometry('112x30')
         ROOT.configure(bg='red')
-        LB_S.config(text='◀', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
+        LB_S.config(text='n', bg="#1d2027", fg="#ebc254", height=1, width=0, font=("Webdings", 10, "bold"))
+        LB_L.config(text='n', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
+        LB_M.config(text='n', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'small'
         x_coordinate = 0
         window_height = 30  # Assuming the window height is 38 pixels
@@ -196,9 +196,9 @@ def toggle_window_size(size):
     elif size == '▼':
         ROOT.geometry('600x30')
         ROOT.configure(bg='red')
-        LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
+        LB_S.config(text='n', bg="#1d2027", fg="#ebc254", height=1, width=0, font=("Webdings", 10, "bold"))
+        LB_L.config(text='n', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
+        LB_M.config(text='n', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'medium'
         x_coordinate = screen_width//2 - 600//2
         window_height = 30
@@ -209,9 +209,9 @@ def toggle_window_size(size):
     elif size == '■':
         ROOT.geometry('600x800')
         ROOT.configure(bg='#1d2027')
-        LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
-        LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
-        LB_M.config(text='■', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("calibri", 10, "bold"))
+        LB_S.config(text='n', bg="#1d2027", fg="#ebc254", height=1, width=0, font=("Webdings", 10, "bold"))
+        LB_L.config(text='n', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Webdings", 10, "bold"))
+        LB_M.config(text='n', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Webdings", 10, "bold"))
         window_state = 'large'
         x_coordinate = screen_width//2 - 600//2
         y_coordinate = 0
@@ -403,10 +403,10 @@ label_properties = [
 ("K"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,11,2,1),
 ("B1"        ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,12,2,1),
 ("P"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,13,1,1),
-("S"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,14,1,1),
-("L"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,15,1,1),
-("M"         ,BOX_ROW_ROOT,"#1d2027","#26b2f3","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,16,1,1),
-("X"         ,BOX_ROW_ROOT,"#1d2027","#ff0000","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,2) ,(0,0),"w",1,17,1,1),
+("n"         ,BOX_ROW_ROOT,"#1d2027","#ebc254","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,14,1,1),#S
+("n"         ,BOX_ROW_ROOT,"#1d2027","#00FF00","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,15,1,1),#L
+("n"         ,BOX_ROW_ROOT,"#1d2027","#26b2f3","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,16,1,1),#M
+("n"         ,BOX_ROW_ROOT,"#1d2027","#ff0000","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,2) ,(0,0),"w",1,17,1,1),#X
 ]
 labels = [create_label(*prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1,BT_TOPMOST,LB_S,LB_L,LB_M,LB_XXX = labels
