@@ -400,7 +400,11 @@ def determine_color(usage):
 BAR_WIDTH = 8
 BAR_HEIGHT = 25
 # Create a frame to hold the CPU core usage bars and border
-cpu_core_frame = tk.Frame(ROOT, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
+
+BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW2_ROOT.pack(side="right", anchor="ne", pady=(1,2),padx=(3,1))
+
+cpu_core_frame = tk.Frame(BOX_ROW2_ROOT, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
 cpu_core_frame.pack(side="right", anchor="nw", padx=0, pady=1)
 # Create canvas widgets for CPU core bars
 cpu_core_bars = []
@@ -412,6 +416,9 @@ for i in range(psutil.cpu_count()):
     cpu_core_bars.append(core_bar)
 update_cpu_core_bars()
 
+
+
+
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
     current_time = datetime.now().timestamp()
@@ -419,22 +426,18 @@ def get_system_uptime():
     hours, remainder = divmod(uptime, 3600)
     minutes, seconds = divmod(remainder, 60)
     return int(hours), int(minutes), int(seconds)
-
 def format_uptime():
     hours, minutes, seconds = get_system_uptime()
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-
 def update_uptime_label():
     uptime_str = format_uptime()
     uptime_label.config(text=f"{uptime_str}")
     uptime_label.after(1000, update_uptime_label)  # Update every second
     # Update uptime label periodically
-
-BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
-BOX_ROW2_ROOT.pack(side="right", anchor="nw", pady=(2,2),padx=(2,2))
-
-uptime_label = tk.Label(BOX_ROW2_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="2", relief="flat", highlightthickness=4, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
-uptime_label.pack(side="left", anchor='ne', padx=(0,0), pady=(0,0)) ; update_uptime_label()
+BOX_ROW3_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW3_ROOT.pack(side="right", anchor="nw", pady=(5,2),padx=(2,2))
+uptime_label = tk.Label(BOX_ROW3_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="1", relief="flat", highlightthickness=0, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
+uptime_label.pack(side="left", anchor='nw', padx=(0,0), pady=(0,0)) ; update_uptime_label()
 
 def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
     label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
