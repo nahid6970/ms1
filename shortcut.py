@@ -116,6 +116,11 @@ button_properties=[
 ("Series"        ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),28,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+f+i+s")),
 ("Fit Row"       ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),29,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+o+a"))  ,
 ("Fit Column"    ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),30,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+o+i"))  ,
+
+
+#! chrome
+#! ctrl+shift+b
+
 ]
 
 # Create buttons
