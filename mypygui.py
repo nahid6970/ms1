@@ -400,9 +400,10 @@ label_properties = [
 ("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,9 ,1,1),
 ("m"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,10),(0,0),"w",1,10,1,1),
 
-("K"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,11,2,1),
-("B1"        ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,12,2,1),
-("P"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,13,1,1),
+("K"         ,BOX_ROW_ROOT,"#FFFFFF","#1d2027","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,11,2,1),
+("1"        ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,12,2,1),
+("P"         ,BOX_ROW_ROOT,"#1d2027","#FFFFFF","0","0","flat",("JetBrainsMonoNF",10,"bold"),0,"#FFFFFF",(0 ,10) ,(0,0),"w",1,13,1,1),
+
 ("n"         ,BOX_ROW_ROOT,"#1d2027","#ebc254","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,14,1,1),#S
 ("n"         ,BOX_ROW_ROOT,"#1d2027","#00FF00","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,15,1,1),#L
 ("n"         ,BOX_ROW_ROOT,"#1d2027","#26b2f3","0","0","flat",("Webdings"       ,10,"bold"),0,"#FFFFFF",(0 ,0) ,(0,0),"w",1,16,1,1),#M
