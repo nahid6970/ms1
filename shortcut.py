@@ -56,10 +56,16 @@ root.geometry(f"500x800+{x}+{y}")
 Main_Window = tk.Frame(root, bg="#1d2027")
 Main_Window.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 
+
 Comment_Window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Comment_Window, root))
 
 Comment_Window = tk.Frame(bg="#1D2027")
 Comment_Window.pack_propagate(True)
+
+Excel = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Excel, root))
+
+Excel = tk.Frame(bg="#1D2027")
+Excel.pack_propagate(True)
 
 # Button properties: (text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, sticky, padx_button, pady_button, padx_pack, pady_pack, command, window_title)
 button_properties=[
@@ -104,6 +110,12 @@ button_properties=[
 ("Terminal-Close"     ,Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),25,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"       ,"CommandPrompt"],"Ctrl+Shift+W"        )),
 ("Terminal-Split-V"   ,Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),26,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"       ,"CommandPrompt"],"Alt+Shift+equal"     )),
 ("Terminal-Split-H"   ,Main_Window,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),27,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"       ,"Command"]      ,"Alt+Shift+underscore")),
+
+
+("Excel"         ,Main_Window,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),27,0,1,1,"ew",0,0,(1,1),(0,0),lambda:switch_to_frame(Excel         ,Main_Window))  ,
+("Series"        ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),28,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+f+i+s")),
+("Fit Row"       ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),29,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+o+a"))  ,
+("Fit Column"    ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),30,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+o+i"))  ,
 ]
 
 # Create buttons
