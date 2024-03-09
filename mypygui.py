@@ -142,9 +142,9 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 520
-y = screen_height//2 - 855//2
-ROOT.geometry(f"520x800+{x}+{y}") #! overall size of the window
+x = screen_width - 600
+y = screen_height//2 - 800//2
+ROOT.geometry(f"600x800+{x}+{y}") #! overall size of the window
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -194,27 +194,27 @@ def toggle_window_size(size):
         y_coordinate = screen_height - window_height
 
     elif size == '▼':
-        ROOT.geometry('520x30')
+        ROOT.geometry('600x30')
         ROOT.configure(bg='red')
         LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
         LB_L.config(text='▼', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("agency", 10, "bold"))
         LB_M.config(text='■', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'medium'
-        x_coordinate = screen_width//2 - 500//2
-        window_height = 30  # Assuming the window height is 38 pixels
+        x_coordinate = screen_width//2 - 600//2
+        window_height = 30
         y_coordinate = 0
         if ROOT.attributes('-topmost'):
              toggle_checking()
 
     elif size == '■':
-        ROOT.geometry('520x800')
+        ROOT.geometry('600x800')
         ROOT.configure(bg='#1d2027')
         LB_S.config(text='◀', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("ink free", 10, "bold"))
         LB_L.config(text='▼', bg="#1d2027", fg="#FFFFFF", height=1, width=2, font=("agency", 10, "bold"))
         LB_M.config(text='■', bg="#1d2027", fg="#26b2f3", height=1, width=2, font=("calibri", 10, "bold"))
         window_state = 'large'
-        x_coordinate = screen_width - 520
-        y_coordinate = screen_height//2 - 855//2
+        x_coordinate = screen_width//2 - 600//2
+        y_coordinate = 0
 
         if checking:
             toggle_checking()
