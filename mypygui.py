@@ -382,34 +382,34 @@ BOX_ROW_ROOT.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
 
 import tkinter as tk
 
-def create_label(text, parent, bg_color, fg_color, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
-    label = tk.Label(parent, text=text, bg=bg_color, fg=fg_color, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
+def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
+    label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
     label.grid(row=row, column=column, padx=padx, pady=pady, sticky=anchor, rowspan=rowspan, columnspan=columnspan)
     return label
 
 label_properties = [
-    {"text": "CPU"   ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1  ,"rowspan": 1,"columnspan": 1},
-    {"text": "GPU"   ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 2  ,"rowspan": 1,"columnspan": 1},
-    {"text": "RAM"   ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 3  ,"rowspan": 1,"columnspan": 1},
+    {"text": "CPU"   ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1  ,"rowspan": 1,"columnspan": 1},
+    {"text": "GPU"   ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 2  ,"rowspan": 1,"columnspan": 1},
+    {"text": "RAM"   ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 3  ,"rowspan": 1,"columnspan": 1},
 
-    {"text": "Disk_C","parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 4  ,"rowspan": 1,"columnspan": 1},
-    {"text": "Disk_D","parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (2 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 5  ,"rowspan": 1,"columnspan": 1},
+    {"text": "Disk_C","parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 4  ,"rowspan": 1,"columnspan": 1},
+    {"text": "Disk_D","parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "4","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (2 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 5  ,"rowspan": 1,"columnspan": 1},
 
-    {"text": "^"     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ffffff","width": "5","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 6  ,"rowspan": 1,"columnspan": 1},
-    {"text": "v"     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ffffff","width": "5","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 7  ,"rowspan": 1,"columnspan": 1},
+    {"text": "^"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 6  ,"rowspan": 1,"columnspan": 1},
+    {"text": "v"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "1","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 7  ,"rowspan": 1,"columnspan": 1},
 
-    {"text": "Git"   ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},
-    {"text": "m"     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 9  ,"rowspan": 1,"columnspan": 1},
-    {"text": "m"     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},
+    {"text": "Git"   ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},
+    {"text": "m"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 9  ,"rowspan": 1,"columnspan": 1},
+    {"text": "m"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},
 
-    {"text": "K"     ,"parent": BOX_ROW_ROOT,"bg_color": "#FFFFFF","fg_color": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 11 ,"rowspan": 2,"columnspan": 1},
-    {"text": "1"     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 12 ,"rowspan": 2,"columnspan": 1},
-    {"text": "ë"     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1},
+    {"text": "K"     ,"parent": BOX_ROW_ROOT,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 11 ,"rowspan": 2,"columnspan": 1},
+    {"text": "1"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMonoNF",10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 12 ,"rowspan": 2,"columnspan": 1},
+    {"text": "ë"     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1},
 
-    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ebc254","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1},
-    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1},
-    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 16 ,"rowspan": 1,"columnspan": 1},
-    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg_color": "#1d2027","fg_color": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1}
+    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ebc254","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1},
+    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1},
+    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 16 ,"rowspan": 1,"columnspan": 1},
+    {"text": "="     ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"       ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1}
 ]
 
 labels = [create_label(**prop) for prop in label_properties]
