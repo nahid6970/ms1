@@ -78,25 +78,44 @@
 ; return
 
 ; ;!alt4 🎯 Launch My PYGui
+; #x::
+; IfWinExist, ahk_exe python.exe
+; {
+;     ; If Python is running, find its process ID (PID)
+;     WinGet, pid, PID, ahk_exe python.exe
+;     ; If PID is found, check if it's one of the allowed scripts
+;     if (pid) {
+;         ; Get the full path of the process
+;         Process, Exist, %pid%
+;         fullPath := ErrorLevel
+;         ; Check if the process path matches the excluded scripts
+;         if !(InStr(fullPath, "C:\ms1\mypygui.py"))
+;             Process, Close, %pid%
+;     }
+; }
+; ; Run My PYGui script
+; Run, "C:\ms1\mypygui.py"
+; return
+
+
+; ;!alt4 🎯 Launch My PYGui
+; Initialize a flag to keep track of whether the script has been launched
+Launched := false
+
+; Define a hotkey (Win + X) to launch the script
 #x::
-IfWinExist, ahk_exe python.exe
-{
-    ; If Python is running, find its process ID (PID)
-    WinGet, pid, PID, ahk_exe python.exe
-    ; If PID is found, check if it's one of the allowed scripts
-    if (pid) {
-        ; Get the full path of the process
-        Process, Exist, %pid%
-        fullPath := ErrorLevel
-        ; Check if the process path matches the excluded scripts
-        if !(InStr(fullPath, "C:\ms1\mypygui.py"))
-            Process, Close, %pid%
+; Check if the script has already been launched
+if (!Launched) {
+    ; Check if Python is running
+    IfWinNotExist, ahk_exe python.exe
+    {
+        ; Run the Python script
+        Run, "C:\ms1\mypygui.py"
+        ; Set the flag to indicate that the script has been launched
+        Launched := true
     }
 }
-; Run My PYGui script
-Run, "C:\ms1\mypygui.py"
 return
-
 
 
 ; ;!alt1 ; 🎯 Launch My PWSHGui
