@@ -322,9 +322,9 @@ def check_git_status(git_path, queue):
     os.chdir(git_path)
     git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
     if "nothing to commit, working tree clean" in git_status.stdout:
-        queue.put((git_path, "þ", "#00ff21"))
+        queue.put((git_path, "ü", "#00ff21"))
     else:
-        queue.put((git_path, "ý", "#fe1616"))
+        queue.put((git_path, "ü", "#fe1616"))
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
         print("Invalid path")
