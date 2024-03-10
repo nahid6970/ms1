@@ -1010,7 +1010,7 @@ def show_options(options):
     screen_width = top.winfo_screenwidth()
     screen_height = top.winfo_screenheight()
     x = (screen_width - 300) // 2
-    y = (screen_height - 100) // 2
+    y = 800
     top.geometry(f"300x100+{x}+{y}")
 
     frame = tk.Frame(top, bg="#1d2027")
