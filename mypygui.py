@@ -186,22 +186,24 @@ def toggle_checking():
 checking = False
 
 #! Resize Window
+import keyboard
+
+# Function to toggle window size
 def toggle_window_size(size):
     global window_state
-    global x  # Make these variables accessible within the function
+    global x
     global y
 
     if size == 'line':
         ROOT.geometry('745x30')
-        x = screen_width//2 - 745//2
+        x = screen_width // 2 - 745 // 2
         y = 0
         ROOT.configure(bg='red')
         LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
         LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
-
     elif size == 'max':
         ROOT.geometry('745x800')
-        x = screen_width//2 - 745//2
+        x = screen_width // 2 - 745 // 2
         y = 0
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
@@ -210,14 +212,21 @@ def toggle_window_size(size):
     ROOT.focus_force()
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
-def on_key_press(event):
-    if event.keysym == 'Down':
-        toggle_window_size('line')
-    elif event.keysym == 'Up':
+
+# Function to handle Windows + X key combination
+def on_windows_x_pressed():
+    global window_size_state
+    if window_size_state == 'line':
         toggle_window_size('max')
-# Bind arrow key events to toggle window size
-ROOT.bind("<Down>", on_key_press)
-ROOT.bind("<Up>", on_key_press)
+        window_size_state = 'max'
+    else:
+        toggle_window_size('line')
+        window_size_state = 'line'
+        
+# Initial window size state
+window_size_state = 'line'
+# Bind Windows + X to toggle between 'line' and 'max' sizesx
+keyboard.add_hotkey('win+x', on_windows_x_pressed)
 
 
 
