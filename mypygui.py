@@ -188,7 +188,7 @@ def toggle_window_size(size):
     if size == '▼':
         ROOT.geometry('745x30')
         ROOT.configure(bg='red')
-        LB_L.config(text='y', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings", 10, "bold"))
+        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
         LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
         window_state = 'medium'
         x_coordinate = screen_width//2 - 745//2
@@ -200,7 +200,7 @@ def toggle_window_size(size):
     elif size == '■':
         ROOT.geometry('745x800')
         ROOT.configure(bg='#1d2027')
-        LB_L.config(text='y', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings", 10, "bold"))
+        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
         LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
         window_state = 'large'
         x_coordinate = screen_width//2 - 745//2
@@ -457,7 +457,7 @@ label_properties = [
 {"text": "1"       ,"parent": BOX_ROW_ROOT,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF" ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 12 ,"rowspan": 1,"columnspan": 1},#! #1
 {"text": "P"       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF" ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1},#! Pin
 {"text": "C"       ,"parent": BOX_ROW_ROOT,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF" ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1},#! Clear
-{"text": "y"       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("wingdings"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1},#! LB_L
+{"text": "T"       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("wingdings 3"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (3,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1},#! LB_L
 {"text": "o"       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("wingdings"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 16 ,"rowspan": 1,"columnspan": 1},#! LB_M
 {"text": "="       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1},#! LB_X alternative wingdings x
 ]
