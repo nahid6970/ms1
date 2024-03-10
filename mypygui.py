@@ -194,8 +194,8 @@ def toggle_window_size(size):
         x_coordinate = screen_width//2 - 745//2
         window_height = 30
         y_coordinate = 0
-        if ROOT.attributes('-topmost'):
-             toggle_checking()
+        # if ROOT.attributes('-topmost'):
+        #      toggle_checking()
 
     elif size == '■':
         ROOT.geometry('745x800')
@@ -205,9 +205,8 @@ def toggle_window_size(size):
         window_state = 'large'
         x_coordinate = screen_width//2 - 745//2
         y_coordinate = 0
-
-        if checking:
-            toggle_checking()
+        # if checking:
+        #     toggle_checking()
     ROOT.focus_force()
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x_coordinate}+{y_coordinate}')
