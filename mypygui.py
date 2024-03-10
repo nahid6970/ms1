@@ -325,7 +325,6 @@ def check_git_status(git_path, queue):
         queue.put((git_path, "a", "#00ff21"))
     else:
         queue.put((git_path, "a", "#fe1616"))
-        
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
         print("Invalid path")
@@ -337,7 +336,6 @@ def update_status():
         check_git_status("C:\\ms1", queue)
         check_git_status("C:\\ms2", queue)
         time.sleep(1)
-
 def update_gui():
     while True:
         try:
@@ -349,6 +347,7 @@ def update_gui():
         except:
             pass
         time.sleep(0.1)  # Adjust sleep time as needed
+
 #! Clear Button
 def clear_screen():
     try:
@@ -363,10 +362,9 @@ def clear_screen():
     except Exception as e:
         print(f"Error clearing screen: {e}")
 
-
+#!? Main ROOT BOX
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027")
 BOX_ROW_ROOT.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
-
 
 
 def get_cpu_core_usage():
@@ -417,8 +415,6 @@ for i in range(psutil.cpu_count()):
     core_bar.pack(side="top")
     cpu_core_bars.append(core_bar)
 update_cpu_core_bars()
-
-
 
 
 def get_system_uptime():
@@ -501,13 +497,6 @@ check_window_topmost()
 #?  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #?  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-
-#!   ██╗ ██╗     ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗    ██╗     ██╗███████╗████████╗
-#!  ████████╗    ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║    ██║     ██║██╔════╝╚══██╔══╝
-#!  ╚██╔═██╔╝    █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║    ██║     ██║███████╗   ██║   
-#!  ████████╗    ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║    ██║     ██║╚════██║   ██║   
-#!  ╚██╔═██╔╝    ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║    ███████╗██║███████║   ██║   
-#!   ╚═╝ ╚═╝     ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚══════╝╚═╝╚══════╝   ╚═╝   
 
 #?   ██╗ ██╗     ██╗    ██╗       ██╗       ███████╗
 #?  ████████╗    ██║    ██║       ██║       ██╔════╝
