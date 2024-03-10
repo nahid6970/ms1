@@ -459,7 +459,7 @@ label_properties = [
 {"text": "C"       ,"parent": BOX_ROW_ROOT,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF" ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1},#! Clear
 {"text": "y"       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("wingdings"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1},#! LB_L
 {"text": "o"       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("wingdings"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 16 ,"rowspan": 1,"columnspan": 1},#! LB_M
-{"text": "="       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1},#! LB_X
+{"text": "="       ,"parent": BOX_ROW_ROOT,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"         ,10,"bold"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1},#! LB_X alternative wingdings x
 ]
 
 labels = [create_label(**prop) for prop in label_properties]
