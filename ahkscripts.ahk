@@ -149,6 +149,20 @@ return
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #v:: ; Win + V
 Run, C:\ms1\scripts\valorant\valo.ahk
 return
