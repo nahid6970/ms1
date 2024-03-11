@@ -1416,11 +1416,11 @@ restart = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\ico
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
 # force_shutdown_bt = tk.Button(BOX_1, text="Shutdown [F]", command=force_shutdown, height=1, width=15, bg="#ff0000", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 # force_restart_bt  = tk.Button(BOX_1, text="Restart [F]",  command=force_restart,  height=1, width=15, bg="#ff6600", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-force_shutdown_bt = tk.Button(BOX_1, image=shutdown,compound=tk.TOP, text="", command=force_shutdown, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-force_restart_bt  = tk.Button(BOX_1, image=restart, compound=tk.TOP, text="", command=force_restart,  height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
+force_shutdown_bt = tk.Button(BOX_1, image=shutdown,compound=tk.TOP, text="", command=force_shutdown, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=4, anchor="center", font=("calibri", 14, "bold"))
+force_restart_bt  = tk.Button(BOX_1, image=restart, compound=tk.TOP, text="", command=force_restart,  height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=4, anchor="center", font=("calibri", 14, "bold"))
 
-force_shutdown_bt.pack(pady=0, side="left", anchor="w", padx=(0,0))
-force_restart_bt.pack (pady=0, side="left", anchor="w", padx=(0,0))
+force_shutdown_bt.pack(pady=0, side="left", anchor="center", padx=(0,0))
+force_restart_bt.pack (pady=0, side="left", anchor="center", padx=(0,0))
 
 #! Backup & Update
 def open_backup(event=None):
@@ -1438,7 +1438,7 @@ BACKUP_BT = tk.Button(
                     text="",
                     command=open_backup,
                     image=backup_image,
-                    compound=tk.RIGHT,
+                    compound=tk.TOP,
                     bg="#1d2027",
                     fg="#000000",
                     height=50,
@@ -1457,7 +1457,7 @@ UPDATE_BT = tk.Button(
                     text="",
                     command=open_update,
                     image=update_image,
-                    compound=tk.RIGHT,
+                    compound=tk.TOP,
                     bg="#1d2027",
                     fg="#ffffff",
                     font=("JetBrainsMono NF", 13, "bold"),
