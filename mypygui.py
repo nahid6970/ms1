@@ -1410,17 +1410,10 @@ def force_restart():
     if confirmed:
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
-shutdown = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
-restart = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
+shutdown_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
+restart_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
 
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
-# force_shutdown_bt = tk.Button(BOX_1, text="Shutdown [F]", command=force_shutdown, height=1, width=15, bg="#ff0000", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-# force_restart_bt  = tk.Button(BOX_1, text="Restart [F]",  command=force_restart,  height=1, width=15, bg="#ff6600", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-force_shutdown_bt = tk.Button(BOX_1, image=shutdown,compound=tk.TOP, text="", command=force_shutdown, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=4, anchor="center", font=("calibri", 14, "bold"))
-force_restart_bt  = tk.Button(BOX_1, image=restart, compound=tk.TOP, text="", command=force_restart,  height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=4, anchor="center", font=("calibri", 14, "bold"))
-
-force_shutdown_bt.pack(pady=0, side="left", anchor="center", padx=(0,0))
-force_restart_bt.pack (pady=0, side="left", anchor="center", padx=(0,0))
 
 #! Backup & Update
 def open_backup(event=None):
@@ -1431,46 +1424,22 @@ def open_update(event=None):
 update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
 backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
-BOX_ROW_MAIN.pack(pady=(5,0))
-BACKUP_BT = tk.Button(
-                    BOX_ROW_MAIN,
-                    text="",
-                    command=open_backup,
-                    image=backup_image,
-                    compound=tk.TOP,
-                    bg="#1d2027",
-                    fg="#000000",
-                    height=50,
-                    width=50,
-                    font=("JetBrainsMono NF", 13, "bold"),
-                    bd=0,
-                    relief="flat",
-                    highlightthickness=4,
-                    activebackground="#000000",
-                    activeforeground="#FFFFFF"
-                    )
-BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
 
-UPDATE_BT = tk.Button(
-                    BOX_ROW_MAIN,
-                    text="",
-                    command=open_update,
-                    image=update_image,
-                    compound=tk.TOP,
-                    bg="#1d2027",
-                    fg="#ffffff",
-                    font=("JetBrainsMono NF", 13, "bold"),
-                    height=50,
-                    width=50,
-                    bd=0,
-                    relief="flat",
-                    highlightthickness=4,
-                    activebackground="#000000",
-                    activeforeground="#FFFFFF"
-                    )
-UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
+def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF"):
+    button = tk.Button(parent, text=text, image=image, compound=compound, command=command, height=height, width=width, bg=bg, fg=fg, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground)
+    button.grid(sticky="w", padx=(0,0), pady=0)
+    return button
 
+# Button Properties
+button_properties = [
+{"parent": BOX_1,"image": shutdown_window    ,"compound": tk.TOP,"text": "","command": force_shutdown},
+{"parent": BOX_1,"image": restart_window     ,"compound": tk.TOP,"text": "","command": force_restart} ,
+{"parent": BOX_1,"image": backup_image,"compound": tk.TOP,"text": "","command": open_backup}   ,
+{"parent": BOX_1,"image": update_image,"compound": tk.TOP,"text": "","command": open_update}   ,
+]
+
+# Create Buttons
+buttons = [create_button(**prop) for prop in button_properties]
 
 
 
