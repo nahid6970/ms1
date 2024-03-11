@@ -162,8 +162,12 @@ ROOT.geometry(f"735x30+{x}+{y}") #! overall size of the window
 #?  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 #! Close Window
-def close_window(event=None):
-    ROOT.destroy()
+
+import sys
+
+def close_window():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
 
 #! Pin/Unpin
 def check_window_topmost():
