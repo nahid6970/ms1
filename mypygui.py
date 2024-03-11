@@ -1401,6 +1401,9 @@ run_button.grid(row=0, column=2, rowspan=2, padx=5, pady=10, sticky="nsew") #! n
 #! ██║  ██║███████╗███████║   ██║   ██║  ██║██║  ██║   ██║       ██████║      ███████║██║  ██║╚██████╔╝   ██║   ██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
 #! ╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝       ╚═════╝      ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
 
+BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
+BOX_1.pack(pady=(5,0))
+
 def force_shutdown():
     confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
     if confirmed:
@@ -1410,17 +1413,13 @@ def force_restart():
     if confirmed:
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
-shutdown_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
-restart_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
-
-BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
-
-#! Backup & Update
 def open_backup(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
 def open_update(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
 
+shutdown_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
+restart_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
 update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
 backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
 
@@ -1432,10 +1431,10 @@ def create_button(parent, text="", image=None, compound=None, command=None, heig
 
 # Button Properties
 button_properties = [
-    {"parent": BOX_1,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1, "rowspan":1, "columnspan":1},
-    {"parent": BOX_1,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2, "rowspan":1, "columnspan":1},
-    {"parent": BOX_1,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3, "rowspan":1, "columnspan":1},
-    {"parent": BOX_1,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4, "rowspan":1, "columnspan":1},
+{"parent": BOX_1,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1, "rowspan":1, "columnspan":1},
+{"parent": BOX_1,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2, "rowspan":1, "columnspan":1},
+{"parent": BOX_1,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3, "rowspan":1, "columnspan":1},
+{"parent": BOX_1,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4, "rowspan":1, "columnspan":1},
 ]
 
 # Create Buttons
