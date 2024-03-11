@@ -53,6 +53,7 @@ import threading
 import time
 import tkinter as tk
 import keyboard
+import sys
 
 
 def calculate_time_to_appear(start_time):
@@ -162,12 +163,12 @@ ROOT.geometry(f"735x30+{x}+{y}") #! overall size of the window
 #?  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 #! Close Window
+def close_window(event=None):
+    ROOT.destroy()
 
-import sys
-
-def close_window():
-    python = sys.executable
-    os.execl(python, python, *sys.argv)
+def restart(event=None):
+    ROOT.destroy()
+    subprocess.Popen([sys.executable] + sys.argv)
 
 #! Pin/Unpin
 def check_window_topmost():
