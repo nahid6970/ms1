@@ -52,6 +52,7 @@ import subprocess
 import threading
 import time
 import tkinter as tk
+import keyboard
 
 
 def calculate_time_to_appear(start_time):
@@ -186,7 +187,6 @@ def toggle_checking():
 checking = False
 
 #! Resize Window
-import keyboard
 
 # Function to toggle window size
 def toggle_window_size(size):
@@ -213,7 +213,6 @@ def toggle_window_size(size):
     ROOT.update_idletasks()
     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
 
-# Function to handle Windows + X key combination
 def on_windows_x_pressed():
     global window_size_state
     if window_size_state == 'line':
@@ -227,8 +226,6 @@ def on_windows_x_pressed():
 window_size_state = 'line'
 # Bind Windows + X to toggle between 'line' and 'max' sizesx
 keyboard.add_hotkey('win+x', on_windows_x_pressed)
-
-
 
 
 #! CPU / RAM / DRIVES / NET SPEED
