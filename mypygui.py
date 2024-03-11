@@ -1216,11 +1216,11 @@ button_properties = [
 ("Pattern" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11,"bold"),1 ,2,1 ,1 ,"ew" ,0 ,0,(1,1),(0,0),lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_pattern.ps1"],shell=True)),
 ("Size"    ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11,"bold"),1 ,3,1 ,1 ,"ew" ,0 ,0,(1,1),(0,0),lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_size.ps1"]   ,shell=True)),
 
-("FZF-->C:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,1 ,4,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda:subprocess.Popen(["powershell", "-Command", 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'], shell=True)),
-("FZF-->D:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,1 ,5,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda:subprocess.Popen(["powershell", "-Command", 'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; fzf --preview=\'bat {}\'"'], shell=True) ),
+("FZF-->C:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,2 ,1,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda:subprocess.Popen(["powershell", "-Command", 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'], shell=True)),
+("FZF-->D:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,2 ,2,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda:subprocess.Popen(["powershell", "-Command", 'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; fzf --preview=\'bat {}\'"'], shell=True) ),
 
-("ACK-->C:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,2 ,1,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda: subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {insert_input()}"'], shell=True)),
-("ACK-->D:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,2 ,2,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda: subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {insert_input()}"'], shell=True)),
+("ACK-->C:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,3 ,1,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda: subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {insert_input()}"'], shell=True)),
+("ACK-->D:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,3 ,2,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda: subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {insert_input()}"'], shell=True)),
 
 ]
 
