@@ -642,56 +642,6 @@ LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 
 update_time()
 
-#! Backup & Update
-def open_backup(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
-def open_update(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
-
-update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
-backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
-
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
-BOX_ROW_MAIN.pack(pady=(5,0))
-BACKUP_BT = tk.Button(
-                    BOX_ROW_MAIN,
-                    text="",
-                    command=open_backup,
-                    image=backup_image,
-                    compound=tk.RIGHT,
-                    bg="#1d2027",
-                    fg="#000000",
-                    height=50,
-                    width=50,
-                    font=("JetBrainsMono NF", 13, "bold"),
-                    bd=0,
-                    relief="flat",
-                    highlightthickness=4,
-                    activebackground="#000000",
-                    activeforeground="#FFFFFF"
-                    )
-BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
-
-UPDATE_BT = tk.Button(
-                    BOX_ROW_MAIN,
-                    text="",
-                    command=open_update,
-                    image=update_image,
-                    compound=tk.RIGHT,
-                    bg="#1d2027",
-                    fg="#ffffff",
-                    font=("JetBrainsMono NF", 13, "bold"),
-                    height=50,
-                    width=50,
-                    bd=0,
-                    relief="flat",
-                    highlightthickness=4,
-                    activebackground="#000000",
-                    activeforeground="#FFFFFF"
-                    )
-UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
-
-
 
 #! Drive size analyze using rclone
 def c_size(event=None):
@@ -1469,8 +1419,58 @@ BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
 force_shutdown_bt = tk.Button(BOX_1, image=shutdown,compound=tk.TOP, text="", command=force_shutdown, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 force_restart_bt  = tk.Button(BOX_1, image=restart, compound=tk.TOP, text="", command=force_restart,  height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 
-force_shutdown_bt.pack(pady=0, side="left", anchor="w", padx=(0,30))
-force_restart_bt.pack (pady=0, side="left", anchor="w", padx=(30,0))
+force_shutdown_bt.pack(pady=0, side="left", anchor="w", padx=(0,0))
+force_restart_bt.pack (pady=0, side="left", anchor="w", padx=(0,0))
+
+#! Backup & Update
+def open_backup(event=None):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+def open_update(event=None):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+
+update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
+backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
+
+BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#000000")
+BOX_ROW_MAIN.pack(pady=(5,0))
+BACKUP_BT = tk.Button(
+                    BOX_ROW_MAIN,
+                    text="",
+                    command=open_backup,
+                    image=backup_image,
+                    compound=tk.RIGHT,
+                    bg="#1d2027",
+                    fg="#000000",
+                    height=50,
+                    width=50,
+                    font=("JetBrainsMono NF", 13, "bold"),
+                    bd=0,
+                    relief="flat",
+                    highlightthickness=4,
+                    activebackground="#000000",
+                    activeforeground="#FFFFFF"
+                    )
+BACKUP_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
+
+UPDATE_BT = tk.Button(
+                    BOX_ROW_MAIN,
+                    text="",
+                    command=open_update,
+                    image=update_image,
+                    compound=tk.RIGHT,
+                    bg="#1d2027",
+                    fg="#ffffff",
+                    font=("JetBrainsMono NF", 13, "bold"),
+                    height=50,
+                    width=50,
+                    bd=0,
+                    relief="flat",
+                    highlightthickness=4,
+                    activebackground="#000000",
+                    activeforeground="#FFFFFF"
+                    )
+UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0)
+
 
 
 
