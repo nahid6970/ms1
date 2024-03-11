@@ -1425,17 +1425,17 @@ update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup
 backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
 
 
-def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF"):
+def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF", row=0, column=0, rowspan=1, columnspan=1):
     button = tk.Button(parent, text=text, image=image, compound=compound, command=command, height=height, width=width, bg=bg, fg=fg, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground)
-    button.grid(sticky="w", padx=(0,0), pady=0)
+    button.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan, sticky="w", padx=(0,0), pady=0)
     return button
 
 # Button Properties
 button_properties = [
-{"parent": BOX_1,"image": shutdown_window    ,"compound": tk.TOP,"text": "","command": force_shutdown},
-{"parent": BOX_1,"image": restart_window     ,"compound": tk.TOP,"text": "","command": force_restart} ,
-{"parent": BOX_1,"image": backup_image,"compound": tk.TOP,"text": "","command": open_backup}   ,
-{"parent": BOX_1,"image": update_image,"compound": tk.TOP,"text": "","command": open_update}   ,
+    {"parent": BOX_1, "image": shutdown_window, "compound": tk.TOP, "text": "", "command": force_shutdown, "row": 1, "column": 1},
+    {"parent": BOX_1, "image": restart_window, "compound": tk.TOP, "text": "", "command": force_restart, "row": 1, "column": 2},
+    {"parent": BOX_1, "image": backup_image, "compound": tk.TOP, "text": "", "command": open_backup, "row": 1, "column": 3},
+    {"parent": BOX_1, "image": update_image, "compound": tk.TOP, "text": "", "command": open_update, "row": 1, "column": 4}
 ]
 
 # Create Buttons
