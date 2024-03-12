@@ -643,17 +643,7 @@ LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
 update_time()
 
 
-#! Drive size analyze using rclone
-def c_size(event=None):
-    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
-def d_size(event=None):
-    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
 
-BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="black") ; BOX_ROW_MAIN.pack(pady=0)
-BT_NCDU_C = tk.Label(BOX_ROW_MAIN, bg="#57a9f4", fg="#000000", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#57a9f4", padx=3, font=("JetBrainsMono NF", 14, "bold"), text="C:\\ Drive" )
-BT_NCDU_D = tk.Label(BOX_ROW_MAIN, bg="#57a9f4", fg="#000000", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#57a9f4", padx=3, font=("JetBrainsMono NF", 14, "bold"), text="D:\\ Drive" )
-BT_NCDU_C.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", c_size)
-BT_NCDU_D.pack(side="left", padx=(0,0), pady=0) ; BT_NCDU_C.bind("<Button-1>", d_size)
 
 MAIN_FRAME.pack(expand=True)
 
@@ -1418,10 +1408,18 @@ def open_backup(event=None):
 def open_update(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
 
+def c_size(event=None):
+    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
+
+def d_size(event=None):
+    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
+
 shutdown_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
 restart_window = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
 update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
 backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
+rclone_c = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_c.png"))
+rclone_d = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_d.png"))
 
 
 def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF", row=0, column=0, rowspan=1, columnspan=1):
@@ -1435,22 +1433,12 @@ button_properties = [
 {"parent": BOX_1,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2, "rowspan":1, "columnspan":1},
 {"parent": BOX_1,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3, "rowspan":1, "columnspan":1},
 {"parent": BOX_1,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4, "rowspan":1, "columnspan":1},
+{"parent": BOX_1,"image": rclone_c   ,"compound": tk.TOP,"text": "","command": c_size   ,"row": 1,"column": 5, "rowspan":1, "columnspan":1},
+{"parent": BOX_1,"image": rclone_d   ,"compound": tk.TOP,"text": "","command": d_size   ,"row": 1,"column": 6, "rowspan":1, "columnspan":1},
 ]
 
 # Create Buttons
 buttons = [create_button(**prop) for prop in button_properties]
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
