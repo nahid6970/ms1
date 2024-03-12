@@ -43,17 +43,18 @@ from pyadl import ADLManager
 from time import strftime
 from tkinter import Canvas, Scrollbar
 from tkinter import messagebox
+from tkinter import simpledialog
 from tkinter import ttk
 import ctypes
+import keyboard
 import os
 import psutil
 import pyautogui
 import subprocess
+import sys
 import threading
 import time
 import tkinter as tk
-import keyboard
-import sys
 
 
 def calculate_time_to_appear(start_time):
@@ -163,8 +164,15 @@ ROOT.geometry(f"753x30+{x}+{y}") #! overall size of the window
 #?  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 #! Close Window
+# def close_window(event=None):
+#     ROOT.destroy()
+
 def close_window(event=None):
-    ROOT.destroy()
+    password = simpledialog.askstring("Password", "Enter the password to close the window:")
+    if password == "182358":  # Replace "your_password_here" with your actual password
+        ROOT.destroy()
+    else:
+        print("Incorrect password. Window not closed.")
 
 def restart(event=None):
     ROOT.destroy()
