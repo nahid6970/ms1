@@ -495,7 +495,7 @@ BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
 CLEAR.bind("<Button-1>", lambda event: clear_screen())
 LB_1.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
 LB_K.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
-bkup.bind      ("<Button-1>", lambda event: subprocess.Popen(["Start", "powershell",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'Sync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
+bkup.bind      ("<Button-1>", lambda event: subprocess.Popen(["Start", "powershell",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
 
