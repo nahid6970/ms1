@@ -169,7 +169,7 @@ ROOT.geometry(f"753x30+{x}+{y}") #! overall size of the window
 
 def close_window(event=None):
     password = simpledialog.askstring("Password", "Enter the password to close the window:")
-    if password == "182358":  # Replace "your_password_here" with your actual password
+    if password == "":  # Replace "your_password_here" with your actual password
         ROOT.destroy()
     else:
         print("Incorrect password. Window not closed.")
