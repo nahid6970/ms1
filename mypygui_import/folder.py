@@ -124,13 +124,13 @@ MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
 
+
+
+#! Folder
 def create_button(text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack, command):
     button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
     button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
     return button
-
-
-
 
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#282c34")
 BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
@@ -154,9 +154,6 @@ for button_props in button_properties:
     create_button(*button_props)
 
 
-
-
-
-
+#! Ending
 MAIN_FRAME.pack()
 ROOT.mainloop()
