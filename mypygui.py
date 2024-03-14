@@ -488,11 +488,11 @@ LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, 
 
 
 LB_XXX.bind    ("<Button-1>", close_window)
-LB_R.bind    ("<Button-1>", restart)
+LB_R.bind      ("<Button-1>", restart)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('max'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('line'))
 BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
-CLEAR.bind("<Button-1>", lambda event: clear_screen())
+CLEAR.bind     ("<Button-1>", lambda event: clear_screen())
 LB_1.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
 LB_K.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
 bkup.bind      ("<Button-1>", lambda event: subprocess.Popen(["Start", "powershell",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
