@@ -81,23 +81,15 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width//2 - 753//2
-# y = screen_height//2 - 800//2
-y = 0
-ROOT.geometry(f"500x500+{x}+{y}") #! overall size of the window
+x = screen_width - 400
+y = screen_height//2 - 600//2
+ROOT.geometry(f"400x600+{x}+{y}") #! overall size of the window
 
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=600) #!
+MAIN_FRAME.pack_propagate(False)
+MAIN_FRAME.pack(pady=1)  # Add some padding at the top
+MAIN_FRAME.pack(expand=True)
 
-# x = screen_width//2 - 753//2
-# y = 0
-# ROOT.geometry(f"+{x}+{y}")
-
-
-#?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#?  ██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#?  ██████╔╝██║   ██║██║   ██║   ██║       █████╗  ██████╔╝███████║██╔████╔██║█████╗
-#?  ██╔══██╗██║   ██║██║   ██║   ██║       ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
-#?  ██║  ██║╚██████╔╝╚██████╔╝   ██║       ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#?  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 #! Close Window
 def close_window(event=None):
@@ -119,10 +111,7 @@ labels = [create_label(**prop) for prop in label_properties]
 LB_XXX, = labels
 LB_XXX.bind("<Button-1>", close_window)
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #!
-MAIN_FRAME.pack_propagate(False)
-MAIN_FRAME.pack(pady=1)  # Add some padding at the top
-MAIN_FRAME.pack(expand=True)
+
 
 
 
@@ -133,7 +122,7 @@ def create_button(text, frame, bg_color, fg_color, height, width, relief, font, 
     return button
 
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#282c34")
-BOX_1.pack(side="top", pady=(80,0), padx=(0,0))
+BOX_1.pack(side="top", pady=(30,0), padx=(0,0))
 
 button_properties = [
 ("All Apps"      , BOX_1, "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 0 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0), lambda: subprocess.Popen(["explorer","shell:AppsFolder"], shell=True)                                                                     ),
