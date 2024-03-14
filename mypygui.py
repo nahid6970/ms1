@@ -560,8 +560,8 @@ image=icon_image,
 compound=tk.RIGHT,
 bg="#e7d86a",
 fg="#1D2027",
-height=40,
-width=300,
+
+
 font=("JetBrainsMono NF", 13, "bold"),
 anchor="center",
 bd=0,
