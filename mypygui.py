@@ -1322,28 +1322,8 @@ FR_PYTHON_TOOL.pack_propagate(False)
 BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
-BOX_PYTHON_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027")
-BOX_PYTHON_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
-
-def font_style():
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\font_style.py"],  shell=True)
-def Keybinding():
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\Keybinding.py"],  shell=True)
-def dictionary():
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\python\\dictionary.py"],  shell=True)
-def regedit_run(event=None):
-    subprocess.Popen(["powershell", "-Command", "Start-Process", "-FilePath", "python", "-ArgumentList", "C:\\ms1\\scripts\\python\\regedit.py", "-Verb", "RunAs"], shell=True)
-
-BT_font =        tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=font_style, text="Font Style")
-BT_KeyBindings = tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=Keybinding, text="KeyBindngs")
-BT_Dictionary =  tk.Button(BOX_PYTHON_1, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=dictionary, text="Dictionary")
-LB_REGEDIT = tk.Label (BOX_PYTHON_1,  bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), text="Registry Editor-Run")
-
-BT_font       .pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-BT_KeyBindings.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-BT_Dictionary .pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-LB_REGEDIT.pack(side="top", anchor='center', padx=(0,0), pady=(0,0)) ; LB_REGEDIT.bind("<Button-1>", regedit_run)
-
+BOX_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027")
+BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
 
 def load_scripts(folder_path):
     script_files = []
@@ -1371,23 +1351,23 @@ folders = [
 "C:\\ms1\\scripts\\autohotkey",
 "C:\\ms1\\scripts\\python"
 ]
-BOX_PYTHON_2 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027") ; BOX_PYTHON_2.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
+
 # Dropdown for folders
-folder_var = tk.StringVar(BOX_PYTHON_2)
+folder_var = tk.StringVar(BOX_1)
 folder_var.set("Select a folder")
-folder_dropdown = tk.OptionMenu(BOX_PYTHON_2, folder_var, *folders, command=folder_selected)
+folder_dropdown = tk.OptionMenu(BOX_1, folder_var, *folders, command=folder_selected)
 
 folder_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 10))
 folder_dropdown.config(indicatoron=False)
 
 # Dropdown for scripts
-script_var = tk.StringVar(BOX_PYTHON_2)
+script_var = tk.StringVar(BOX_1)
 script_var.set("Select a script")
-script_dropdown = tk.OptionMenu(BOX_PYTHON_2, script_var, "Select a script")
+script_dropdown = tk.OptionMenu(BOX_1, script_var, "Select a script")
 script_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 10))
 script_dropdown.config(indicatoron=False)
 
-run_button = tk.Button(BOX_PYTHON_2, text="Run", command=run_script, bg="#41abff", font=("JetBrainsMono NF", 12))
+run_button = tk.Button(BOX_1, text="Run", command=run_script, bg="#41abff", font=("JetBrainsMono NF", 12))
 
 folder_dropdown.grid(row=0, column=1, rowspan=1, padx=5, pady=10)
 script_dropdown.grid(row=1, column=1, rowspan=1, padx=5, pady=10)
