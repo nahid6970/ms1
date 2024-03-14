@@ -1298,7 +1298,7 @@ for button_props in button_properties:
 
 BT_PYTHON_MAIN_FRAME = tk.Button(
                                 MAIN_FRAME,
-                                text="Python Tools",
+                                text="Script List",
                                 command=lambda: switch_to_frame(FR_PYTHON_TOOL, MAIN_FRAME),
                                 bg="#366c9c",
                                 fg="#f6d24a",
