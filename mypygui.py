@@ -729,7 +729,7 @@ BT_PROCESS = tk.Button(
 MAIN_FRAME,
 text="Process & PKG & FFMPEG & FIND",
 command=lambda: switch_to_frame(FR_PROCESS, MAIN_FRAME),
-bg="#cc2400",
+bg="#009fff",
 fg="#FFFFFF",
 height=2,
 width=30,
