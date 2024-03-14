@@ -518,117 +518,6 @@ check_window_topmost()
 #?  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #?  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-
-#?   ██╗ ██╗     ██╗    ██╗       ██╗       ███████╗
-#?  ████████╗    ██║    ██║       ██║       ██╔════╝
-#?  ╚██╔═██╔╝    ██║ █╗ ██║    ████████╗    ███████╗
-#?  ████████╗    ██║███╗██║    ██╔═██╔═╝    ╚════██║
-#?  ╚██╔═██╔╝    ╚███╔███╔╝    ██████║      ███████║
-#?   ╚═╝ ╚═╝      ╚══╝╚══╝     ╚═════╝      ╚══════╝
-def winget_search():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Search\' ; winget search {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def winget_install():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget install\' ; winget install {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def winget_uninst():
-    additional_text = insert_input()
-    # Enclose additional_text in double quotes if it contains spaces
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Winget Uninstall\' ; winget uninstall {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def winget_infooo():
-    additional_text = insert_input()
-    # Enclose additional_text in double quotes if it contains spaces
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Show\' ; winget show {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def wget_inst_fzf():
-    command = ' $host.UI.RawUI.WindowTitle = "wget🔽" ; winget search --exact "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget install $_.split()[0] }'
-    try:
-        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def wget_unin_fzf():
-    command = ' $host.UI.RawUI.WindowTitle = "wget❌" ; winget list "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget uninstall $_.split()[0] }'
-    try:
-        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def scoop_search():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'$host.UI.RawUI.WindowTitle = "Scoop-Search" ; pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Search\' ; scoop search {additional_text}"' #! tf how it works??????????????????
-    try:
-        subprocess.Popen([ "start", "powershell", "-NoExit", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_install():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Install\' ; scoop install {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_uninstall():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Scoop UnInstall\' ; scoop uninstall {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_info():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Info\' ; scoop info {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_install_fzf():
-    # Path to the Python script generating the package list
-    python_script = r"C:\ms1\scripts\python\scoop_list.py"
-
-    # Run the Python script to generate the package list
-    try:
-        subprocess.run(['python', python_script], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        return
-    # Path to the text file containing package list
-    package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
-    # Command to read from the text file and pipe it to fzf
-    command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
-    try:
-        subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_uninstall_fzf():
-    command = '$host.UI.RawUI.WindowTitle = "scoop❌" ; scoop list "" | fzf --multi --preview \'scoop info {1}\' | ForEach-Object { scoop uninstall $_.split()[0] }'
-    try:
-        subprocess.Popen(['start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
 MAIN_FRAME.pack_propagate(False)
@@ -837,6 +726,110 @@ def create_button(
     button = tk.Button(input_frame, text=text, command=command, width=width, fg=fg_color, bg=bg_color, font=font)
     button.grid(row=row_button, column=column_button, padx=padx_button, pady=pady_button, sticky=sticky, columnspan=columnspan)
     return button
+
+def winget_search():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Search\' ; winget search {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def winget_install():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget install\' ; winget install {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def winget_uninst():
+    additional_text = insert_input()
+    # Enclose additional_text in double quotes if it contains spaces
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Winget Uninstall\' ; winget uninstall {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def winget_infooo():
+    additional_text = insert_input()
+    # Enclose additional_text in double quotes if it contains spaces
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Show\' ; winget show {additional_text}"'
+    try:
+        subprocess.Popen(command)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def wget_inst_fzf():
+    command = ' $host.UI.RawUI.WindowTitle = "wget🔽" ; winget search --exact "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget install $_.split()[0] }'
+    try:
+        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def wget_unin_fzf():
+    command = ' $host.UI.RawUI.WindowTitle = "wget❌" ; winget list "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget uninstall $_.split()[0] }'
+    try:
+        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+
+def scoop_search():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'$host.UI.RawUI.WindowTitle = "Scoop-Search" ; pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Search\' ; scoop search {additional_text}"' #! tf how it works??????????????????
+    try:
+        subprocess.Popen([ "start", "powershell", "-NoExit", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_install():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Install\' ; scoop install {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_uninstall():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Scoop UnInstall\' ; scoop uninstall {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_info():
+    additional_text = insert_input()
+    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
+    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Info\' ; scoop info {additional_text}"'
+    try:
+        subprocess.Popen(["powershell", "-Command", command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_install_fzf():
+    # Path to the Python script generating the package list
+    python_script = r"C:\ms1\scripts\python\scoop_list.py"
+
+    # Run the Python script to generate the package list
+    try:
+        subprocess.run(['python', python_script], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+        return
+    # Path to the text file containing package list
+    package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
+    # Command to read from the text file and pipe it to fzf
+    command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
+    try:
+        subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+def scoop_uninstall_fzf():
+    command = '$host.UI.RawUI.WindowTitle = "scoop❌" ; scoop list "" | fzf --multi --preview \'scoop info {1}\' | ForEach-Object { scoop uninstall $_.split()[0] }'
+    try:
+        subprocess.Popen(['start' , 'pwsh', '-Command', command], shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
 
 input_frame = tk.Frame(FR_PROCESS, bg="#1D2027")
 input_frame.pack(pady=10)
