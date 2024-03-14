@@ -497,10 +497,8 @@ STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
 
 queue = Queue()
-
 status_thread = threading.Thread(target=update_status, daemon=True)
 gui_thread = threading.Thread(target=update_gui, daemon=True)
-
 status_thread.start()
 gui_thread.start()
 
