@@ -1,45 +1,6 @@
-import importlib
 import subprocess
-from datetime import datetime
-from PIL import Image, ImageTk
-from pyadl import ADLManager
-from time import strftime
-from tkinter import Canvas, Scrollbar
-from tkinter import messagebox
-from tkinter import simpledialog
-from tkinter import ttk
-import ctypes
-import keyboard
-import os
-import psutil
-import pyautogui
 import subprocess
-import sys
-import threading
-import time
 import tkinter as tk
-
-
-def calculate_time_to_appear(start_time):
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Time taken to appear: {elapsed_time:.2f} seconds")
-
-start_time = time.time()
-
-# Print ASCII art in the console
-print(r"""
-
-$$\   $$\           $$\       $$\       $$\ $$\   $$\  $$$$$$\
-$$$\  $$ |          $$ |      \__|      $$ |$$$\  $$ |$$  __$$\
-$$$$\ $$ | $$$$$$\  $$$$$$$\  $$\  $$$$$$$ |$$$$\ $$ |$$ /  $$ |
-$$ $$\$$ | \____$$\ $$  __$$\ $$ |$$  __$$ |$$ $$\$$ |$$$$$$$$ |
-$$ \$$$$ | $$$$$$$ |$$ |  $$ |$$ |$$ /  $$ |$$ \$$$$ |$$  __$$ |
-$$ |\$$$ |$$  __$$ |$$ |  $$ |$$ |$$ |  $$ |$$ |\$$$ |$$ |  $$ |
-$$ | \$$ |\$$$$$$$ |$$ |  $$ |$$ |\$$$$$$$ |$$ | \$$ |$$ |  $$ |
-\__|  \__| \_______|\__|  \__|\__| \_______|\__|  \__|\__|  \__|
-
-""")
 
 # Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
