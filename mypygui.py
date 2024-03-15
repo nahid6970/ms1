@@ -566,7 +566,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_FOLDER.pack(padx=(0, 0), pady=(0, 0))
+BT_FOLDER.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 AppList = tk.Button(
@@ -586,7 +586,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-AppList.pack(padx=(0, 0), pady=(0, 0))
+AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 #!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗       ██╗       ██████╗ ██╗  ██╗ ██████╗
