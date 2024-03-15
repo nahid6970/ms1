@@ -42,11 +42,11 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 400
+x = screen_width - 500
 y = screen_height//2 - 600//2
-ROOT.geometry(f"400x600+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"500x600+{x}+{y}") #! overall size of the window
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=600) #!
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=600) #!
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
