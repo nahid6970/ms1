@@ -590,6 +590,28 @@ cursor="hand2",
 )
 AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
 
+icon_appstore = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
+AppList = tk.Button(
+MAIN_FRAME,
+text="AppStore",
+command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\app_store.py"],shell=True),
+image=icon_appstore,
+compound=tk.LEFT,
+bg="#e7d86a",
+fg="#1D2027",
+height="0",
+width="0",
+font=("JetBrainsMono NF", 13, "bold"),
+anchor="center",
+bd=0,
+highlightthickness=4,
+relief="flat",
+activebackground="#000000",
+activeforeground="#f6d24a",
+cursor="hand2",
+)
+AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
+
 
 #!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗       ██╗       ██████╗ ██╗  ██╗ ██████╗
 #!  ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝       ██║       ██╔══██╗██║ ██╔╝██╔════╝
@@ -691,155 +713,7 @@ BT_CUSTOM_CMD.pack(side="left", pady=0)
 #?   ╚═╝ ╚═╝      ╚══╝╚══╝     ╚═════╝      ╚══════╝
 
 
-def create_button(
-        text,
-        command,
-        bg_color,
-        fg_color,
-        height,
-        width,
-        relief,
-        font,
-        padx_button,
-        padx_pack,
-        pady_button,
-        pady_pack,
-        row_button,
-        column_button,
-        columnspan,
-        sticky,
-        ):
-    button = tk.Button(input_frame, text=text, command=command, width=width, fg=fg_color, bg=bg_color, font=font)
-    button.grid(row=row_button, column=column_button, padx=padx_button, pady=pady_button, sticky=sticky, columnspan=columnspan)
-    return button
 
-def winget_search():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Search\' ; winget search {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def winget_install():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget install\' ; winget install {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def winget_uninst():
-    additional_text = insert_input()
-    # Enclose additional_text in double quotes if it contains spaces
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Winget Uninstall\' ; winget uninstall {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def winget_infooo():
-    additional_text = insert_input()
-    # Enclose additional_text in double quotes if it contains spaces
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Winget Show\' ; winget show {additional_text}"'
-    try:
-        subprocess.Popen(command)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def wget_inst_fzf():
-    command = ' $host.UI.RawUI.WindowTitle = "wget🔽" ; winget search --exact "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget install $_.split()[0] }'
-    try:
-        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def wget_unin_fzf():
-    command = ' $host.UI.RawUI.WindowTitle = "wget❌" ; winget list "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget uninstall $_.split()[0] }'
-    try:
-        subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def scoop_search():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'$host.UI.RawUI.WindowTitle = "Scoop-Search" ; pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Search\' ; scoop search {additional_text}"' #! tf how it works??????????????????
-    try:
-        subprocess.Popen([ "start", "powershell", "-NoExit", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_install():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Install\' ; scoop install {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_uninstall():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground red \'- Scoop UnInstall\' ; scoop uninstall {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_info():
-    additional_text = insert_input()
-    additional_text = f'"{additional_text}"' if " " in additional_text else additional_text
-    command = f'pwsh -Command "cd ; write-host  -foreground blue \'- Scoop Info\' ; scoop info {additional_text}"'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_install_fzf():
-    # Path to the Python script generating the package list
-    python_script = r"C:\ms1\scripts\python\scoop_list.py"
-
-    # Run the Python script to generate the package list
-    try:
-        subprocess.run(['python', python_script], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        return
-    # Path to the text file containing package list
-    package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
-    # Command to read from the text file and pipe it to fzf
-    command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
-    try:
-        subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-def scoop_uninstall_fzf():
-    command = '$host.UI.RawUI.WindowTitle = "scoop❌" ; scoop list "" | fzf --multi --preview \'scoop info {1}\' | ForEach-Object { scoop uninstall $_.split()[0] }'
-    try:
-        subprocess.Popen(['start' , 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-input_frame = tk.Frame(FR_PROCESS, bg="#1D2027")
-input_frame.pack(pady=10)
-
-winget_scoop_button_properties = [
-("Winget"    , None               , "#76c2ff", "#000000", 1, 12, "flat", ("JetBrainsMono NF", 12), 5, 5, 0, 5,       1, 1,2 ,"ew"),
-("Search"    , winget_search      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 1,1 ,""  ),
-("Info"      , winget_infooo      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 2, 1,""  ),
-("Install"   , winget_install     , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 1,1 ,""  ),
-("Uninstall" , winget_uninst      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 2, 1,""  ),
-("Install"   , wget_inst_fzf      , "#1D2027", "#00FF00", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 1, 1,""  ),
-("Uninstall" , wget_unin_fzf      , "#1D2027", "#FF0000", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 2, 1,""  ),
-
-("Scoop"     , None               , "#95cd95", "#000000", 1, 12, "flat", ("JetBrainsMono NF", 12), 5, 5, 0, 5,       1, 3, 2,"ew"),
-("Search"    , scoop_search       , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 3, 1,""  ),
-("Info"      , scoop_info         , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 4, 1,""  ),
-("Install"   , scoop_install      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 3, 1,""  ),
-("Uninstall" , scoop_uninstall    , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 4, 1,""  ),
-("Install"   , scoop_install_fzf  , "#1D2027", "#00FF00", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 3, 1,""  ),
-("Uninstall" , scoop_uninstall_fzf, "#1D2027", "#FF0000", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 4, 1,""  )
-]
-
-for button_props in winget_scoop_button_properties:
-    create_button(*button_props)
 
 
 #?    █████╗ ██████╗ ██████╗ ███████╗
