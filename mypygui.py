@@ -568,7 +568,7 @@ cursor="hand2",
 )
 BT_FOLDER.pack(side="top", padx=(0, 0), pady=(0, 0))
 
-#! applist
+#! App List
 icon_applist = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
 MAIN_FRAME,
@@ -592,7 +592,7 @@ cursor="hand2",
 AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 
 
-#! appstore
+#! App Store
 icon_appstore = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
 MAIN_FRAME,
@@ -615,7 +615,7 @@ cursor="hand2",
 )
 AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 
-
+#! FFmpeg
 BT_FFMPEG = tk.Button(
 MAIN_FRAME,
 text="FFmpeg",
