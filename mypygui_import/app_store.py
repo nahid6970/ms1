@@ -43,10 +43,10 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = screen_width - 500
-y = screen_height//2 - 600//2
-ROOT.geometry(f"500x600+{x}+{y}") #! overall size of the window
+y = screen_height//2 - 250//2
+ROOT.geometry(f"500x250+{x}+{y}") #! overall size of the window
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=600) #!
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=250) #!
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
@@ -84,7 +84,7 @@ LB_XXX.bind("<Button-1>", close_window)
 
 
 BOX_WIDGET_APPID = tk.Frame(MAIN_FRAME, bg="#14bcff")
-BOX_WIDGET_APPID.pack(pady=(80,0))
+BOX_WIDGET_APPID.pack(pady=(30,0))
 
 WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#FFFFFF", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
 WIDGET_APPID.pack(padx=2, pady=2)
