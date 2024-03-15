@@ -545,7 +545,7 @@ MAIN_FRAME.pack(expand=True)
 #*  ██╔══╝  ██║   ██║██║     ██║  ██║██╔══╝  ██╔══██╗    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
 #*  ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*  ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
+#! Folder
 icon_folder = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 BT_FOLDER = tk.Button(
 MAIN_FRAME,
@@ -568,6 +568,7 @@ cursor="hand2",
 )
 BT_FOLDER.pack(side="top", padx=(0, 0), pady=(0, 0))
 
+#! applist
 icon_applist = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
 MAIN_FRAME,
@@ -590,6 +591,8 @@ cursor="hand2",
 )
 AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 
+
+#! appstore
 icon_appstore = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
 MAIN_FRAME,
@@ -611,6 +614,30 @@ activeforeground="#f6d24a",
 cursor="hand2",
 )
 AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
+
+
+BT_FFMPEG = tk.Button(
+MAIN_FRAME,
+text="FFmpeg",
+command=lambda: switch_to_frame(FR_FFmpeg, MAIN_FRAME),
+bg="#009fff",
+fg="#FFFFFF",
+height=2,
+width=30,
+font=("JetBrainsMono NF", 13, "bold"),
+anchor="w",
+bd=0,
+highlightthickness=4,
+relief="flat",
+activebackground="#000000",
+activeforeground="#f6d24a",
+cursor="hand2",
+)
+BT_FFMPEG.pack(padx=(0, 0), pady=(0, 0))
+
+FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
+FR_FFmpeg.pack_propagate(True)
+
 
 
 #!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗       ██╗       ██████╗ ██╗  ██╗ ██████╗
