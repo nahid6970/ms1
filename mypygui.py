@@ -569,6 +569,26 @@ cursor="hand2",
 BT_FOLDER.pack(padx=(0, 0), pady=(0, 0))
 
 
+AppList = tk.Button(
+MAIN_FRAME,
+text="AppList",
+command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\applist.py"],shell=True),
+bg="#e7d86a",
+fg="#1D2027",
+height="0",
+width="0",
+font=("JetBrainsMono NF", 13, "bold"),
+anchor="center",
+bd=0,
+highlightthickness=4,
+relief="flat",
+activebackground="#000000",
+activeforeground="#f6d24a",
+cursor="hand2",
+)
+AppList.pack(padx=(0, 0), pady=(0, 0))
+
+
 #!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗       ██╗       ██████╗ ██╗  ██╗ ██████╗
 #!  ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝       ██║       ██╔══██╗██║ ██╔╝██╔════╝
 #!  ██████╔╝██████╔╝██║   ██║██║     █████╗  ███████╗███████╗    ████████╗    ██████╔╝█████╔╝ ██║  ███╗
