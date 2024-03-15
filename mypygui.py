@@ -546,12 +546,12 @@ MAIN_FRAME.pack(expand=True)
 #*  ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*  ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-icon_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
+icon_folder = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 BT_FOLDER = tk.Button(
 MAIN_FRAME,
 text="Folder",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\folder.py", "-WindowStyle", "Hidden"],shell=True),
-image=icon_image,
+image=icon_folder,
 compound=tk.LEFT,
 bg="#e7d86a",
 fg="#1D2027",
@@ -568,11 +568,13 @@ cursor="hand2",
 )
 BT_FOLDER.pack(side="left", padx=(0, 0), pady=(0, 0))
 
-
+icon_applist = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
 MAIN_FRAME,
 text="AppList",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\applist.py"],shell=True),
+image=icon_applist,
+compound=tk.LEFT,
 bg="#e7d86a",
 fg="#1D2027",
 height="0",
