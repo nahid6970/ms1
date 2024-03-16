@@ -514,7 +514,7 @@ check_window_topmost()
 #!  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 # Create main frame
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=800, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 
@@ -539,6 +539,23 @@ update_time()
 
 MAIN_FRAME.pack(expand=True)
 
+
+
+
+
+
+
+BOX_1_2nd = tk.Frame(MAIN_FRAME, bg="#1d2027")
+BOX_1_2nd.pack(pady=(5,0))
+
+
+
+
+
+
+
+
+
 #?  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
 #?  █████╗  ██║   ██║██║     ██║  ██║█████╗  ██████╔╝    █████╗  ██████╔╝███████║██╔████╔██║█████╗
@@ -548,7 +565,7 @@ MAIN_FRAME.pack(expand=True)
 #! Folder
 icon_folder = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 BT_FOLDER = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="Folder",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\folder.py", "-WindowStyle", "Hidden"],shell=True),
 image=icon_folder,
@@ -566,7 +583,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_FOLDER.pack(side="top", padx=(0, 0), pady=(0, 0))
+BT_FOLDER.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 #?   █████╗ ██████╗ ██████╗     ██╗     ██╗███████╗████████╗
@@ -578,7 +595,7 @@ BT_FOLDER.pack(side="top", padx=(0, 0), pady=(0, 0))
 
 icon_applist = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="AppList",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\applist.py"],shell=True),
 image=icon_applist,
@@ -596,7 +613,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
+AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 #?   █████╗ ██████╗ ██████╗     ███████╗████████╗ ██████╗ ██████╗ ███████╗
@@ -608,7 +625,7 @@ AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 
 icon_appstore = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="AppStore",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\app_store.py"],shell=True),
 image=icon_appstore,
@@ -626,7 +643,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
+AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 #!  ███████╗███████╗███╗   ███╗██████╗ ███████╗ ██████╗ 
 #!  ██╔════╝██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝ 
@@ -636,7 +653,7 @@ AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 #!  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝ 
 
 BT_FFMPEG = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="FFmpeg",
 command=lambda: switch_to_frame(FR_FFmpeg, MAIN_FRAME),
 bg="#009fff",
@@ -652,7 +669,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_FFMPEG.pack(side="top", padx=(0, 0), pady=(0, 0))
+BT_FFMPEG.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
 FR_FFmpeg.pack_propagate(True)
@@ -685,7 +702,7 @@ for button_props in button_properties:
 #!  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ 
 
 BT_Find = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="Find",
 command=lambda: switch_to_frame(FR_Find, MAIN_FRAME),
 bg="#009fff",
@@ -701,7 +718,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_Find.pack(side="top", padx=(0, 0), pady=(0, 0))
+BT_Find.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
 FR_Find.pack_propagate(True)
@@ -740,7 +757,7 @@ for button_props in button_properties:
 #! Process
 icon_process = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="Process",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\process.py"],shell=True),
 image=icon_process,
@@ -758,7 +775,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
+AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 #*  ████████╗ ██████╗  ██████╗ ██╗     ███████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -770,7 +787,7 @@ AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 #! Tools
 icon_tools = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 bt_Tools = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="Tools",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py"],shell=True),
 image=icon_tools,
@@ -788,7 +805,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-bt_Tools.pack(side="top", padx=(0, 0), pady=(0, 0))
+bt_Tools.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 #?  ███████╗ ██████╗██████╗ ██╗██████╗ ████████╗    ██╗     ██╗███████╗████████╗
@@ -801,7 +818,7 @@ bt_Tools.pack(side="top", padx=(0, 0), pady=(0, 0))
 #! Script List
 icon_ScriptList = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 bt_Tools = tk.Button(
-MAIN_FRAME,
+BOX_1_2nd,
 text="Script List",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py"],shell=True),
 image=icon_ScriptList,
@@ -819,7 +836,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-bt_Tools.pack(side="top", padx=(0, 0), pady=(0, 0))
+bt_Tools.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 
@@ -830,8 +847,8 @@ bt_Tools.pack(side="top", padx=(0, 0), pady=(0, 0))
 #! ██║  ██║███████╗███████║   ██║   ██║  ██║██║  ██║   ██║       ██████║      ███████║██║  ██║╚██████╔╝   ██║   ██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
 #! ╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝       ╚═════╝      ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
 
-BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-BOX_1.pack(pady=(5,0))
+BOX_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
+BOX_2.pack(pady=(5,0))
 
 def force_shutdown():
     confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
@@ -860,7 +877,6 @@ backup_image    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\back
 rclone_c        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_c.png"))
 rclone_d        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_d.png"))
 
-
 def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF", row=0, column=0, rowspan=1, columnspan=1):
     button = tk.Button(parent, text=text, image=image, compound=compound, command=command, height=height, width=width, bg=bg, fg=fg, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground)
     button.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan, sticky="w", padx=(0,0), pady=0)
@@ -868,15 +884,14 @@ def create_button(parent, text="", image=None, compound=None, command=None, heig
 
 # Button Properties
 button_properties = [
-{"parent": BOX_1,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1,"rowspan":1,"columnspan":1},
-{"parent": BOX_1,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2,"rowspan":1,"columnspan":1},
-{"parent": BOX_1,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3,"rowspan":1,"columnspan":1},
-{"parent": BOX_1,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4,"rowspan":1,"columnspan":1},
-{"parent": BOX_1,"image": rclone_c       ,"compound": tk.TOP,"text": "","command": c_size        ,"row": 1,"column": 5,"rowspan":1,"columnspan":1},
-{"parent": BOX_1,"image": rclone_d       ,"compound": tk.TOP,"text": "","command": d_size        ,"row": 1,"column": 6,"rowspan":1,"columnspan":1},
+{"parent": BOX_2,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1,"rowspan":1,"columnspan":1},
+{"parent": BOX_2,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2,"rowspan":1,"columnspan":1},
+{"parent": BOX_2,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3,"rowspan":1,"columnspan":1},
+{"parent": BOX_2,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4,"rowspan":1,"columnspan":1},
+{"parent": BOX_2,"image": rclone_c       ,"compound": tk.TOP,"text": "","command": c_size        ,"row": 1,"column": 5,"rowspan":1,"columnspan":1},
+{"parent": BOX_2,"image": rclone_d       ,"compound": tk.TOP,"text": "","command": d_size        ,"row": 1,"column": 6,"rowspan":1,"columnspan":1},
 ]
 
-# Create Buttons
 buttons = [create_button(**prop) for prop in button_properties]
 
 
