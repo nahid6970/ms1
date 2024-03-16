@@ -881,7 +881,6 @@ def create_button(parent, text="", image=None, compound=None, command=None, heig
     button.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan, sticky="w", padx=(0,0), pady=0)
     return button
 
-# Button Properties
 button_properties = [
 {"parent": BOX_2,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1,"rowspan":1,"columnspan":1},
 {"parent": BOX_2,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2,"rowspan":1,"columnspan":1},
@@ -890,7 +889,6 @@ button_properties = [
 {"parent": BOX_2,"image": rclone_c       ,"compound": tk.TOP,"text": "","command": c_size        ,"row": 1,"column": 5,"rowspan":1,"columnspan":1},
 {"parent": BOX_2,"image": rclone_d       ,"compound": tk.TOP,"text": "","command": d_size        ,"row": 1,"column": 6,"rowspan":1,"columnspan":1},
 ]
-
 buttons = [create_button(**prop) for prop in button_properties]
 
 
