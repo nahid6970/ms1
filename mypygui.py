@@ -641,8 +641,8 @@ text="FFmpeg",
 command=lambda: switch_to_frame(FR_FFmpeg, MAIN_FRAME),
 bg="#009fff",
 fg="#FFFFFF",
-height=2,
-width=30,
+height="0",
+width="0",
 font=("JetBrainsMono NF", 13, "bold"),
 anchor="w",
 bd=0,
@@ -690,8 +690,8 @@ text="Find",
 command=lambda: switch_to_frame(FR_Find, MAIN_FRAME),
 bg="#009fff",
 fg="#FFFFFF",
-height=2,
-width=30,
+height="0",
+width="0",
 font=("JetBrainsMono NF", 13, "bold"),
 anchor="w",
 bd=0,
@@ -767,17 +767,20 @@ AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 #*     ██║   ██║   ██║██║   ██║██║     ╚════██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
 #*     ██║   ╚██████╔╝╚██████╔╝███████╗███████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #*     ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
-BT_TOOLS = tk.Button(
+#! Tools
+icon_tools = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
+bt_Tools = tk.Button(
 MAIN_FRAME,
-text="TOOLS",
-command=lambda: switch_to_frame(FRAME_TOOLS, MAIN_FRAME),
-bg="#454545",
-fg="#FFFFFF",
-height=2,
-width=30,
+text="Tools",
+command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py"],shell=True),
+image=icon_tools,
+compound=tk.LEFT,
+bg="#e7d86a",
+fg="#1D2027",
+height="0",
+width="0",
 font=("JetBrainsMono NF", 13, "bold"),
-anchor="w",
+anchor="center",
 bd=0,
 highlightthickness=4,
 relief="flat",
@@ -785,43 +788,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_TOOLS.pack(padx=(0, 0), pady=(0, 0))
-
-FRAME_TOOLS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
-FRAME_TOOLS.pack_propagate(True)
-
-BT_BACK = tk.Button(FRAME_TOOLS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FRAME_TOOLS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
-
-def create_button(text, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, anchor_button, command):
-    button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command, anchor=anchor_button)
-    button.place(x=x_button, y=y_button)
-    return button
-
-BOX_1 = tk.Frame(FRAME_TOOLS, bg="#1d2027",width=520, height=720)
-BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
-
-button_properties = [
-("Advanced Adapter"        ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,10 ,"w" ,lambda: subprocess.Popen ("control ncpa.cpl")),
-("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,40 ,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True)),
-("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,70 ,"w" ,lambda: subprocess.Popen (["powershell","Invoke-RestMethod christitus.com/win | Invoke-Expression"],shell=True)),
-("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,100,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True)),
-("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,130,"w" ,lambda: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True)),
-("DxDiag"                  ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,160,"w" ,lambda: subprocess.Popen ("dxdiag")),
-("Flush DNS"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,190,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"],shell=True                     )),
-("msconfig"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,220,"w" ,lambda: subprocess.Popen (["msconfig.exe"],shell=True)),
-("Netplwiz"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,250,"w" ,lambda: subprocess.Popen (["netplwiz.exe"],shell=True)),
-("Power Plan"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,280,"w" ,lambda: subprocess.Popen (["powercfg.cpl"],shell=True)),
-("SFC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,310,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"],shell=True)),
-("Sniping Tool"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,340,"w" ,lambda: subprocess.Popen ("SnippingTool.exe")),
-("Systeminfo"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,370,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "cmd","-ArgumentList",'"/k systeminfo"'],shell=True)),
-("UAC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,400,"w" ,lambda: subprocess.Popen ("UserAccountControlSettings.exe")),
-("Turn on Windows Features","#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,430,"w" ,lambda: subprocess.Popen (["optionalfeatures"],shell=True)),
-("Winsock Reset"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,460,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"],shell=True)),
-("Character Map"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,100,490,"w" ,lambda: subprocess.Popen ("charmap")),
-]
-for button_props in button_properties:
-    create_button(*button_props)
+bt_Tools.pack(side="top", padx=(0, 0), pady=(0, 0))
 
 
 #?  ███████╗ ██████╗██████╗ ██╗██████╗ ████████╗    ██╗     ██╗███████╗████████╗
