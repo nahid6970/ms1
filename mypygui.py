@@ -739,61 +739,7 @@ BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN
 BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
 
 
-def insert_input():
-    additional_text = WIDGET_APPID.get()
-    return additional_text
 
-def get_process():
-    additional_text = insert_input()
-    if not additional_text:  # Check if input is empty
-        return  # Do nothing if input is empty
-    command = f'Get-Process | Where-Object {{ $_.Name -like "*{additional_text}*" }} | Format-Table -Property ProcessName, Id -AutoSize'
-    try:
-        subprocess.run(["start","powershell", "-NoExit", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def kil_process():
-    additional_text = insert_input()
-    command = f'Stop-Process -Name {additional_text}'
-    try:
-        output = subprocess.run(["powershell", "-Command", command], stderr=subprocess.PIPE, shell=True, text=True)
-        if "Cannot find a process with the name" in output.stderr:
-            print(f"\033[91mError: Process {additional_text} not found.\033[0m")
-        else:
-            print(f"\033[94mProcess {additional_text} killed successfully.\033[0m")
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-def custom_command():
-    additional_text = insert_input()
-    if not additional_text:  # Check if input is empty
-        return  # Do nothing if input is empty
-    profile_path = r'C:\Users\nahid\OneDrive\backup\Microsoft.PowerShell_profile.ps1'
-    command = f'powershell -ExecutionPolicy Bypass -NoProfile -Command "& {{ . {profile_path}; {additional_text} }}"'
-    try:
-        # Execute the custom PowerShell command and capture the output
-        subprocess.run(command, stderr=subprocess.STDOUT, shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-
-BOX_WIDGET_APPID = tk.Frame(FR_PROCESS, bg="#14bcff")
-BOX_WIDGET_APPID.pack(pady=(80,0))
-
-WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#FFFFFF", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
-WIDGET_APPID.pack(padx=2, pady=2)
-
-BOX_ROW_APPID2 = tk.Frame(FR_PROCESS, bg="black")
-BOX_ROW_APPID2.pack(pady=2)
-
-BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#00ff21", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍")
-BT_GET_ID.pack(side="left", pady=0)
-
-BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌")
-BT_KIL_ID.pack(side="left", pady=0)
-
-BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#41abff", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="🏃")
-BT_CUSTOM_CMD.pack(side="left", pady=0)
 
 #?    █████╗ ██████╗ ██████╗ ███████╗
 #?   ██╔══██╗██╔══██╗██╔══██╗██╔════╝
