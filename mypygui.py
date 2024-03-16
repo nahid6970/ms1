@@ -506,12 +506,12 @@ update_info_labels()
 check_window_topmost()
 
 
-#?  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#?  ████╗ ████║██╔══██╗██║████╗  ██║    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#?  ██╔████╔██║███████║██║██╔██╗ ██║    █████╗  ██████╔╝███████║██╔████╔██║█████╗
-#?  ██║╚██╔╝██║██╔══██║██║██║╚██╗██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
-#?  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#?  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+#!  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
+#!  ████╗ ████║██╔══██╗██║████╗  ██║    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
+#!  ██╔████╔██║███████║██║██╔██╗ ██║    █████╗  ██████╔╝███████║██╔████╔██║█████╗
+#!  ██║╚██╔╝██║██╔══██║██║██║╚██╗██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
+#!  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
+#!  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
@@ -652,7 +652,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_FFMPEG.pack(padx=(0, 0), pady=(0, 0))
+BT_FFMPEG.pack(side="top", padx=(0, 0), pady=(0, 0))
 
 FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
 FR_FFmpeg.pack_propagate(True)
@@ -701,7 +701,7 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_Find.pack(padx=(0, 0), pady=(0, 0))
+BT_Find.pack(side="top", padx=(0, 0), pady=(0, 0))
 
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
 FR_Find.pack_propagate(True)
@@ -798,81 +798,28 @@ bt_Tools.pack(side="top", padx=(0, 0), pady=(0, 0))
 #?  ███████║╚██████╗██║  ██║██║██║        ██║       ███████╗██║███████║   ██║   
 #?  ╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝       ╚══════╝╚═╝╚══════╝   ╚═╝   
 
-BT_Script_list = tk.Button(
-                                MAIN_FRAME,
-                                text="Script List",
-                                command=lambda: switch_to_frame(FR_PYTHON_TOOL, MAIN_FRAME),
-                                bg="#00a600",
-                                fg="#000000",
-                                height=2,
-                                width=30,
-                                font=("JetBrainsMono NF", 13, "bold"),
-                                anchor="w",
-                                bd=0,
-                                highlightthickness=4,
-                                relief="flat",
-                                activebackground="#000000",
-                                activeforeground="#f6d24a",
-                                cursor="hand2",
-                                )
-BT_Script_list.pack(padx=(0, 0), pady=(0, 0))
-
-FR_PYTHON_TOOL = tk.Frame(BORDER_FRAME, bg="#1d2027", width=520, height=800)
-FR_PYTHON_TOOL.pack_propagate(False)
-
-BT_BACK = tk.Button(FR_PYTHON_TOOL, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PYTHON_TOOL), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
-
-BOX_1 = tk.Frame(FR_PYTHON_TOOL, bg="#1d2027")
-BOX_1.pack(side="top", anchor="center", pady=(80,0), padx=(0,0))
-
-def load_scripts(folder_path):
-    script_files = []
-    for root, dirs, files in os.walk(folder_path):
-        for file in files:
-            if file.endswith(('.ahk', '.ps1', '.py')):
-                script_files.append(os.path.join(root, file))
-    return script_files
-
-def folder_selected(event):
-    selected_folder = folder_var.get()
-    script_files = load_scripts(selected_folder)
-    script_var.set("Select a script")
-    script_dropdown['menu'].delete(0, 'end') # Clear previous items
-    for script_file in script_files:
-        script_dropdown['menu'].add_command(label=os.path.basename(script_file), command=tk._setit(script_var, os.path.abspath(script_file)))
-
-def run_script():
-    selected_script = script_var.get()
-    if selected_script:
-        subprocess.Popen(selected_script, shell=True)
-
-# Folders
-folders = [
-"C:\\ms1\\scripts\\autohotkey",
-"C:\\ms1\\scripts\\python"
-]
-
-# Dropdown for folders
-folder_var = tk.StringVar(BOX_1)
-folder_var.set("Select a folder")
-folder_dropdown = tk.OptionMenu(BOX_1, folder_var, *folders, command=folder_selected)
-
-folder_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 10))
-folder_dropdown.config(indicatoron=False)
-
-# Dropdown for scripts
-script_var = tk.StringVar(BOX_1)
-script_var.set("Select a script")
-script_dropdown = tk.OptionMenu(BOX_1, script_var, "Select a script")
-script_dropdown.configure(width=30, background="#ddf581", foreground="black", font=("JetBrainsMono NF", 10))
-script_dropdown.config(indicatoron=False)
-
-run_button = tk.Button(BOX_1, text="Run", command=run_script, bg="#41abff", font=("JetBrainsMono NF", 12))
-
-folder_dropdown.grid(row=0, column=1, rowspan=1, padx=5, pady=10)
-script_dropdown.grid(row=1, column=1, rowspan=1, padx=5, pady=10)
-run_button.grid(row=0, column=2, rowspan=2, padx=5, pady=10, sticky="nsew") #! nwse means full filling up down left right spaces so if ns means fullfill up and down portion
+#! Script List
+icon_ScriptList = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
+bt_Tools = tk.Button(
+MAIN_FRAME,
+text="Script List",
+command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py"],shell=True),
+image=icon_ScriptList,
+compound=tk.LEFT,
+bg="#e7d86a",
+fg="#1D2027",
+height="0",
+width="0",
+font=("JetBrainsMono NF", 13, "bold"),
+anchor="center",
+bd=0,
+highlightthickness=4,
+relief="flat",
+activebackground="#000000",
+activeforeground="#f6d24a",
+cursor="hand2",
+)
+bt_Tools.pack(side="top", padx=(0, 0), pady=(0, 0))
 
 
 
