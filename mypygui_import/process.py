@@ -113,7 +113,7 @@ def custom_command():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-BOX_WIDGET_APPID = tk.Frame(MAIN_FRAME, bg="#FF0000")
+BOX_WIDGET_APPID = tk.Frame(MAIN_FRAME, bg="#14bcff")
 BOX_WIDGET_APPID.pack(pady=(30,0))
 
 WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#14bcff", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
@@ -122,7 +122,7 @@ WIDGET_APPID.pack(padx=2, pady=2)
 BOX_ROW_APPID2 = tk.Frame(MAIN_FRAME, bg="black")
 BOX_ROW_APPID2.pack(pady=2)
 
-BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#00ff21", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍")
+BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#00ff21", fg="#000000", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍")
 BT_GET_ID.pack(side="top", pady=0)
 
 BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌")
