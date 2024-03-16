@@ -789,7 +789,7 @@ icon_tools = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\
 bt_Tools = tk.Button(
 BOX_1_2nd,
 text="Tools",
-command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py"],shell=True),
+command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"],shell=True),
 image=icon_tools,
 compound=tk.LEFT,
 bg="#e7d86a",
@@ -820,7 +820,7 @@ icon_ScriptList = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\bac
 bt_Tools = tk.Button(
 BOX_1_2nd,
 text="Script List",
-command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\script_list.py"],shell=True),
+command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"],shell=True),
 image=icon_ScriptList,
 compound=tk.LEFT,
 bg="#e7d86a",
