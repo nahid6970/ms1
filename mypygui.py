@@ -216,7 +216,7 @@ def toggle_window_size(size):
         LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
         LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
     elif size == 'max':
-        ROOT.geometry('800x800')
+        ROOT.geometry('800x230')
         x = screen_width // 2 - 800 // 2
         y = 0
         ROOT.configure(bg='#1d2027')
