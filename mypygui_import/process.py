@@ -43,10 +43,10 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = screen_width - 400
-y = screen_height//2 - 600//2
-ROOT.geometry(f"400x600+{x}+{y}") #! overall size of the window
+y = screen_height//2 - 200//2
+ROOT.geometry(f"400x200+{x}+{y}") #! overall size of the window
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=600) #!
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=200) #!
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
@@ -71,8 +71,6 @@ label_properties = [
 labels = [create_label(**prop) for prop in label_properties]
 LB_XXX, = labels
 LB_XXX.bind("<Button-1>", close_window)
-
-
 
 
 
@@ -115,23 +113,23 @@ def custom_command():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
-BOX_WIDGET_APPID = tk.Frame(MAIN_FRAME, bg="#14bcff")
-BOX_WIDGET_APPID.pack(pady=(80,0))
+BOX_WIDGET_APPID = tk.Frame(MAIN_FRAME, bg="#FF0000")
+BOX_WIDGET_APPID.pack(pady=(30,0))
 
-WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#FFFFFF", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
+WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#14bcff", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
 WIDGET_APPID.pack(padx=2, pady=2)
 
 BOX_ROW_APPID2 = tk.Frame(MAIN_FRAME, bg="black")
 BOX_ROW_APPID2.pack(pady=2)
 
 BT_GET_ID = tk.Button(BOX_ROW_APPID2, bg="#00ff21", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=get_process, text="🔍")
-BT_GET_ID.pack(side="left", pady=0)
+BT_GET_ID.pack(side="top", pady=0)
 
 BT_KIL_ID = tk.Button(BOX_ROW_APPID2, bg="#ff4f00", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=kil_process, text="❌")
-BT_KIL_ID.pack(side="left", pady=0)
+BT_KIL_ID.pack(side="top", pady=0)
 
 BT_CUSTOM_CMD = tk.Button(BOX_ROW_APPID2, bg="#41abff", fg="#fcffef", height=1, width=15, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=custom_command, text="🏃")
-BT_CUSTOM_CMD.pack(side="left", pady=0)
+BT_CUSTOM_CMD.pack(side="top", pady=0)
 
 #! Ending
 MAIN_FRAME.pack()

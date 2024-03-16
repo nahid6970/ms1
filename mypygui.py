@@ -704,25 +704,27 @@ for button_props in button_properties:
     create_button(*button_props)
 
 
-#!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗       ██╗       ██████╗ ██╗  ██╗ ██████╗
-#!  ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝       ██║       ██╔══██╗██║ ██╔╝██╔════╝
-#!  ██████╔╝██████╔╝██║   ██║██║     █████╗  ███████╗███████╗    ████████╗    ██████╔╝█████╔╝ ██║  ███╗
-#!  ██╔═══╝ ██╔══██╗██║   ██║██║     ██╔══╝  ╚════██║╚════██║    ██╔═██╔═╝    ██╔═══╝ ██╔═██╗ ██║   ██║
-#!  ██║     ██║  ██║╚██████╔╝╚██████╗███████╗███████║███████║    ██████║      ██║     ██║  ██╗╚██████╔╝
-#!  ╚═╝     ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝╚══════╝╚══════╝    ╚═════╝      ╚═╝     ╚═╝  ╚═╝ ╚═════╝
+#!  ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗
+#!  ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝
+#!  ██████╔╝██████╔╝██║   ██║██║     █████╗  ███████╗███████╗
+#!  ██╔═══╝ ██╔══██╗██║   ██║██║     ██╔══╝  ╚════██║╚════██║
+#!  ██║     ██║  ██║╚██████╔╝╚██████╗███████╗███████║███████║
+#!  ╚═╝     ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝╚══════╝╚══════╝
 
-#! FRAME Function
-
-BT_PROCESS = tk.Button(
+#! Process
+icon_process = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
+AppList = tk.Button(
 MAIN_FRAME,
-text="Process & PKG & FFMPEG & FIND",
-command=lambda: switch_to_frame(FR_PROCESS, MAIN_FRAME),
-bg="#009fff",
-fg="#FFFFFF",
-height=2,
-width=30,
+text="Process",
+command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\process.py"],shell=True),
+image=icon_process,
+compound=tk.LEFT,
+bg="#e7d86a",
+fg="#1D2027",
+height="0",
+width="0",
 font=("JetBrainsMono NF", 13, "bold"),
-anchor="w",
+anchor="center",
 bd=0,
 highlightthickness=4,
 relief="flat",
@@ -730,48 +732,8 @@ activebackground="#000000",
 activeforeground="#f6d24a",
 cursor="hand2",
 )
-BT_PROCESS.pack(padx=(0, 0), pady=(0, 0))
+AppList.pack(side="top", padx=(0, 0), pady=(0, 0))
 
-FR_PROCESS = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
-FR_PROCESS.pack_propagate(True)
-
-BT_BACK = tk.Button(FR_PROCESS, text="◀", command=lambda: switch_to_frame(MAIN_FRAME, FR_PROCESS), bg="#FFFFFF", fg="#000", height=1, width=5, relief="flat", padx=0, font=("calibri", 10, "bold"))
-BT_BACK.pack(side="bottom", anchor="center", padx=(0,5), pady=(0,30))
-
-
-
-
-#?    █████╗ ██████╗ ██████╗ ███████╗
-#?   ██╔══██╗██╔══██╗██╔══██╗██╔════╝
-#?   ███████║██████╔╝██████╔╝███████╗
-#?   ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║
-#?   ██║  ██║██║     ██║     ███████║
-#?   ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝
-
-# Install Autoruns using winget and check first
-def check_autoruns_installed():
-    autoruns_installed = os.path.exists(r'C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\autoruns.exe')
-    return autoruns_installed
-
-def install_autoruns():
-    try:
-        subprocess.run(["winget", "install", "autoruns"], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error installing Autoruns: {e}")
-
-def launch_autoruns():
-    if not check_autoruns_installed():
-        install_autoruns()
-    autoruns_path = r'autoruns'
-    # Launch Autoruns in admin mode
-    command = f'Start-Process "{autoruns_path}" -Verb RunAs'
-    try:
-        subprocess.Popen(["powershell", "-Command", command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error launching Autoruns: {e}")
-
-BT_AUTORUNS = tk.Button(FR_PROCESS, text="AutoRuns", command=launch_autoruns, height=1, width=20, bg="#FFFFFF", fg="#000000", highlightthickness=5, font=("JetBrainsMono NF", 12, "bold"))
-BT_AUTORUNS.pack(pady=(10, 0))
 
 #*  ████████╗ ██████╗  ██████╗ ██╗     ███████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #*  ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
