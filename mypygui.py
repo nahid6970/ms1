@@ -516,7 +516,10 @@ check_window_topmost()
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=800, height=800) #! this is to adjust the border for main frame #make it bigger so no problem with  # smaller will cause smaller border  # have to do it for every frame
 MAIN_FRAME.pack_propagate(False)
-MAIN_FRAME.pack(pady=1)  # Add some padding at the top
+MAIN_FRAME.pack(pady=1, expand=True)  # Add some padding at the top
+
+
+
 
 #! Time & Date
 def update_time():
@@ -537,9 +540,6 @@ update_time()
 
 
 
-MAIN_FRAME.pack(expand=True)
-
-
 
 
 
@@ -547,14 +547,6 @@ MAIN_FRAME.pack(expand=True)
 
 BOX_1_2nd = tk.Frame(MAIN_FRAME, bg="#1d2027")
 BOX_1_2nd.pack(pady=(5,0))
-
-
-
-
-
-
-
-
 
 #?  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #?  ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
@@ -906,7 +898,7 @@ buttons = [create_button(**prop) for prop in button_properties]
 
 
 # Start with main frame visible
-MAIN_FRAME.pack()
+
 
 # Use threading to continuously update system information
 # thread = threading.Thread(target=continuous_monitor, daemon=True)
