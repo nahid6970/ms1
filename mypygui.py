@@ -807,7 +807,7 @@ bt_Tools.pack(side="left", padx=(0, 0), pady=(0, 0))
 icon_ScriptList = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 bt_Tools = tk.Button(
 BOX_1_2nd,
-text="Script List",
+text="Script",
 command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"],shell=True),
 image=icon_ScriptList,
 compound=tk.LEFT,
