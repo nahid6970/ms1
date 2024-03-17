@@ -853,7 +853,6 @@ def open_update(event=None):
 
 def c_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
-
 def d_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
 
