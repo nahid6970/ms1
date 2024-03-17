@@ -640,10 +640,13 @@ AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
 #!  ██║     ██║     ██║ ╚═╝ ██║██║     ███████╗╚██████╔╝
 #!  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝ 
 
+icon_ffmpeg = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 BT_FFMPEG = tk.Button(
 BOX_1_2nd,
 text="FFmpeg",
 command=lambda: switch_to_frame(FR_FFmpeg, MAIN_FRAME),
+image=icon_ffmpeg,
+compound=tk.LEFT,
 bg="#009fff",
 fg="#FFFFFF",
 height="0",
@@ -689,10 +692,13 @@ for button_props in button_properties:
 #!  ██║     ██║██║ ╚████║██████╔╝
 #!  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ 
 
+icon_find = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 BT_Find = tk.Button(
 BOX_1_2nd,
 text="Find",
 command=lambda: switch_to_frame(FR_Find, MAIN_FRAME),
+image=icon_find,
+compound=tk.LEFT,
 bg="#009fff",
 fg="#FFFFFF",
 height="0",
