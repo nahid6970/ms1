@@ -45,15 +45,10 @@ F2::
     Send, {j up}
 
   return
-
 #IfWinActive
 
 #Persistent
-
-; Remap Left Shift to L
 #IfWinActive, ahk_exe C:\Riot Games\VALORANT\live\VALORANT.exe ahk_exe C:\Riot Games\VALORANT\live\ShooterGame\Binaries\Win64\VALORANT-Win64-Shipping.exe
 LShift::L
-
-; Remap Left Ctrl to I
 LCtrl::i
-
+#IfWinActive
