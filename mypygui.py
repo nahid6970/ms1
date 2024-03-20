@@ -544,64 +544,21 @@ def update_time():
 BOX_1_2nd = tk.Frame(MAIN_FRAME, bg="#1d2027")
 BOX_1_2nd.pack(pady=(30,0))
 
-#?  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#?  ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#?  █████╗  ██║   ██║██║     ██║  ██║█████╗  ██████╔╝    █████╗  ██████╔╝███████║██╔████╔██║█████╗
-#?  ██╔══╝  ██║   ██║██║     ██║  ██║██╔══╝  ██╔══██╗    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
-#?  ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#?  ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-#! Folder
 icon_folder = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-BT_FOLDER = tk.Button(
-BOX_1_2nd,
-text="Folder",
-command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\folder.py", "-WindowStyle", "Hidden"],shell=True),
-image=icon_folder,
-compound=tk.LEFT,
-bg="#e7d86a",
-fg="#1D2027",
-height="0",
-width="0",
-font=("JetBrainsMono NF", 13, "bold"),
-anchor="center",
-bd=0,
-highlightthickness=4,
-relief="flat",
-activebackground="#000000",
-activeforeground="#f6d24a",
-cursor="hand2",
-)
-BT_FOLDER.pack(side="left", padx=(0, 0), pady=(0, 0))
-
-
-#?   █████╗ ██████╗ ██████╗     ██╗     ██╗███████╗████████╗
-#?  ██╔══██╗██╔══██╗██╔══██╗    ██║     ██║██╔════╝╚══██╔══╝
-#?  ███████║██████╔╝██████╔╝    ██║     ██║███████╗   ██║   
-#?  ██╔══██║██╔═══╝ ██╔═══╝     ██║     ██║╚════██║   ██║   
-#?  ██║  ██║██║     ██║         ███████╗██║███████║   ██║   
-#?  ╚═╝  ╚═╝╚═╝     ╚═╝         ╚══════╝╚═╝╚══════╝   ╚═╝   
-
 icon_applist = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-AppList = tk.Button(
-BOX_1_2nd,
-text="AppList",
-command=lambda: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\applist.py"],shell=True),
-image=icon_applist,
-compound=tk.LEFT,
-bg="#e7d86a",
-fg="#1D2027",
-height="0",
-width="0",
-font=("JetBrainsMono NF", 13, "bold"),
-anchor="center",
-bd=0,
-highlightthickness=4,
-relief="flat",
-activebackground="#000000",
-activeforeground="#f6d24a",
-cursor="hand2",
-)
-AppList.pack(side="left", padx=(0, 0), pady=(0, 0))
+
+def create_button_advanced(parent, text="", image=None, command=None, compound=None, height=0, width=0, bg="#e7d86a", fg="#1D2027", font=("JetBrainsMono NF", 13, "bold"), anchor="center", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#f6d24a", cursor="hand2", side="left", padx=(0,0), pady=(0,0)):
+    button = tk.Button(parent, text=text, image=image, command=command, compound=compound, height=height, width=width, bg=bg, fg=fg, font=font, anchor=anchor, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground, cursor=cursor)
+    button.pack(side=side, padx=padx, pady=pady)
+    return button
+
+# Creating buttons with advanced properties
+button_properties_advanced =[
+{"parent": BOX_1_2nd,"text": "Folder"   ,"image": icon_folder    ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\folder.py"  ,"-WindowStyle","Hidden"],shell=True)},
+{"parent": BOX_1_2nd,"text": "AppList"  ,"image": icon_applist   ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\applist.py"],shell=True)},
+]
+
+advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
 
 
 #?   █████╗ ██████╗ ██████╗     ███████╗████████╗ ██████╗ ██████╗ ███████╗
