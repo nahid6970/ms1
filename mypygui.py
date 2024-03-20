@@ -560,14 +560,6 @@ button_properties_advanced =[
 
 advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
 
-
-#?   █████╗ ██████╗ ██████╗     ███████╗████████╗ ██████╗ ██████╗ ███████╗
-#?  ██╔══██╗██╔══██╗██╔══██╗    ██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔════╝
-#?  ███████║██████╔╝██████╔╝    ███████╗   ██║   ██║   ██║██████╔╝█████╗  
-#?  ██╔══██║██╔═══╝ ██╔═══╝     ╚════██║   ██║   ██║   ██║██╔══██╗██╔══╝  
-#?  ██║  ██║██║     ██║         ███████║   ██║   ╚██████╔╝██║  ██║███████╗
-#?  ╚═╝  ╚═╝╚═╝     ╚═╝         ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝
-
 icon_appstore = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 AppList = tk.Button(
 BOX_1_2nd,
