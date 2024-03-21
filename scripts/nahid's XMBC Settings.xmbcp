@@ -398,7 +398,7 @@
 			<RevertLayer1 layer1="false" layer2="false" layer3="false" layer4="false" layer5="false" layer6="false" layer7="false" layer8="false" layer9="false" layer10="false" />
 			<DisableNextPrev layer1="false" layer2="false" layer3="false" layer4="false" layer5="false" layer6="false" layer7="false" layer8="false" layer9="false" layer10="false" />
 			<Disable layer1="false" layer2="false" layer3="false" layer4="false" layer5="false" layer6="false" layer7="false" layer8="false" layer9="false" layer10="false" />
-			<Left action="28" keys="j" keyaction="0" keyrepeat="0" active="true" blockmouse="false" blockmouseactive="false" randomisedelay="false" app="" desc="">
+			<Left action="28" keys="j" keyaction="0" keyrepeat="0" active="false" blockmouse="false" blockmouseactive="false" randomisedelay="false" app="" desc="">
 				<mts Lock="0" Sticky="false" StickyBlock="false" Block="true" InvV="false" InvH="false" SensitivityX="5" SensitivityY="5" NoMovementAction="6" keys="" keyaction="0" keyrepeat="0" active="true" blockmouse="true" blockmouseactive="false" randomisedelay="false" app="" />
 			</Left>
 			<Right action="40" keys="" keyaction="2" keyrepeat="34" active="true" blockmouse="true" blockmouseactive="false" randomisedelay="false" app="" desc="">
@@ -425,7 +425,7 @@
 			<WheelDown action="40" keys="" keyaction="2" keyrepeat="34" active="true" blockmouse="true" blockmouseactive="false" randomisedelay="false" app="" desc="">
 				<mts Lock="0" Sticky="false" StickyBlock="false" Block="true" InvV="false" InvH="false" SensitivityX="5" SensitivityY="5" NoMovementAction="6" keys="" keyaction="0" keyrepeat="0" active="true" blockmouse="true" blockmouseactive="false" randomisedelay="false" app="" />
 			</WheelDown>
-			<Left_Layer1 action="28" keys="k" keyaction="5" keyrepeat="0" active="true" blockmouse="false" blockmouseactive="false" randomisedelay="false" app="" desc="">
+			<Left_Layer1 action="28" keys="k" keyaction="5" keyrepeat="50" active="false" blockmouse="false" blockmouseactive="false" randomisedelay="false" app="" desc="">
 				<mts Lock="0" Sticky="false" StickyBlock="false" Block="true" InvV="false" InvH="false" SensitivityX="5" SensitivityY="5" NoMovementAction="6" keys="" keyaction="0" keyrepeat="0" active="true" blockmouse="true" blockmouseactive="false" randomisedelay="false" app="" />
 			</Left_Layer1>
 			<Right_Layer1 action="40" keys="" keyaction="2" keyrepeat="34" active="true" blockmouse="true" blockmouseactive="false" randomisedelay="false" app="" desc="">
