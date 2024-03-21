@@ -168,9 +168,10 @@ def show_options(options):
 # Define applications and their information
 applications = [
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
-{"name": "Bulk Crap Uninstaller","scoop_name": "bulk-crap-uninstaller","scoop_path": r'xx',"winget_name": "BCUninstaller","winget_path": r"C:\Program Files\BCUninstaller\BCUninstaller.exe"} ,
+{"name": "X-Mouse Button Control","scoop_name": "xmousebuttoncontrol","scoop_path": r'xx',"winget_name": "Highresolution.X-MouseButtonControl","winget_path": r"C:\Program Files\Highresolution Enterprises\X-Mouse Button Control\XMouseButtonControl.exe"} ,
 # {"name": "MiniConda","scoop_name": "miniconda3","scoop_path": r'xx',"winget_name": "Anaconda.Miniconda3","winget_path": r"xx"} ,
 # {"name": "AnaConda","scoop_name": "anaconda3","scoop_path": r'xx',"winget_name": "Anaconda.Anaconda3","winget_path": r"xx"} ,
+{"name": "Bulk Crap Uninstaller","scoop_name": "bulk-crap-uninstaller","scoop_path": r'xx',"winget_name": "BCUninstaller","winget_path": r"C:\Program Files\BCUninstaller\BCUninstaller.exe"} ,
 {"name": "Ack [Find]"               ,"scoop_name": "ack"                               ,"scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                                      ,"winget_name": ""                                       ,"winget_path": r""                                                                                                                                                      } ,
 {"name": "Adb"                      ,"scoop_name": "adb"                               ,"scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe'                       ,"winget_name": ""                                       ,"winget_path": r""                                                                                                                                                      } ,
 {"name": "Alacritty [Terminal]"     ,"scoop_name": "alacritty"                         ,"scoop_path": r'C:\Users\nahid\scoop\apps\alacritty\current\alacritty.exe'                          ,"winget_name": "Alacritty.Alacritty"                    ,"winget_path": r'C:\Program Files\Alacritty\alacritty.exe'                                                                                                                } ,
