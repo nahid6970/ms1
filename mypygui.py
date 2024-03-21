@@ -518,22 +518,6 @@ check_window_topmost()
 #!  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #!  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-#! Time & Date
-# def update_time():
-#     current_time = strftime('%I:%M:%S')  # Format time in 12-hour format # %p is for am/pm
-#     LB_TIME['text'] = current_time
-#     current_date = datetime.now().strftime('%d %b %Y')  # Format date as '03 May 2023'
-#     LB_DATE['text'] = current_date
-#     ROOT.after(1000, update_time)  # Update time every 1000 milliseconds (1 second)
-
-# BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="#1493df")
-# BOX_ROW_MAIN.pack(side="top", anchor="center", pady=(30,0),padx=(0,0), fill="x")
-# LB_TIME = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 18, 'bold'), text="" )
-# LB_DATE = tk.Label (BOX_ROW_MAIN, bg="#1493df", fg="#000000", width="13", height="1", relief="flat", highlightthickness=4, highlightbackground="#1493df", anchor="center", padx=0, pady=0, font=('JetBrainsMono NF', 14, 'bold'), text="" )
-# LB_TIME.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
-# LB_DATE.pack(side="top", anchor='center', padx=(0,0), pady=(0,0))
-# update_time()
-
 BOX_1_2nd = tk.Frame(MAIN_FRAME, bg="#1d2027")
 BOX_1_2nd.pack(pady=(30,0))
 
