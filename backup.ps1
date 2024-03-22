@@ -103,6 +103,7 @@ function bazarr {
 function rssguard {
     $rssguard_src = @( "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" , "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" )
     $rssguard_dst = "C:\Users\nahid\OneDrive\backup\rssguard"
+    Create_DirectoryIfNotExists -Path $rssguard_dst
     $rssguard_src | ForEach-Object { Copy-Item -Path $_ -Destination $rssguard_dst -Recurse -Force }
 }
 
