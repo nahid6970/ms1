@@ -1,4 +1,4 @@
-﻿menu(where=sel.count>0 type='' mode="multiple" title='Script List' image=\uE218)
+﻿menu(where=sel.count>0 type='file|dir|drive|namespace|back' mode="multiple" title='Script List' image=\uE218)
 {
 item(title='Restart File Explorer' image=\uE218 cmd-powershell="Stop-Process -Name explorer -Force; Start-Process explorer")
 
