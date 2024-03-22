@@ -36,6 +36,12 @@ Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 
 function Create_DirectoryIfNotExists { param( [string]$Path ) if (-not (Test-Path $Path -PathType Container)) { New-Item -ItemType Directory -Force -Path $Path } }
 
+function nilesoft_shell {
+    $nilesoftshell_src = @( "C:\Program Files\Nilesoft Shell\shell.nss" , "C:\Program Files\Nilesoft Shell\imports" )
+    $nilesoftshell_dst = "C:\ms1\asset\nilesoft_shell"
+    $nilesoftshell_src | ForEach-Object { Copy-Item -Path $_ -Destination $nilesoftshell_dst -Recurse -Force }
+}
+
 function Command_History {
     $history_src = "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
     $history_dst = "C:\Users\nahid\OneDrive\backup\"
@@ -140,6 +146,7 @@ sonarr
 pwsh_profile
 rclone_config
 terminal
+nilesoft_shell
 
 Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
@@ -149,10 +156,10 @@ Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
 
 # Git-Run
-    C:\ms1\scripts\Github\ms1u.ps1
-Write-Host "Git ms1u Update ✅" -ForegroundColor $FGC
-    C:\ms1\scripts\Github\ms2u.ps1
-Write-Host "Git ms2u Update ✅" -ForegroundColor $FGC
+#     C:\ms1\scripts\Github\ms1u.ps1
+# Write-Host "Git ms1u Update ✅" -ForegroundColor $FGC
+#     C:\ms1\scripts\Github\ms2u.ps1
+# Write-Host "Git ms2u Update ✅" -ForegroundColor $FGC
 
 
 
