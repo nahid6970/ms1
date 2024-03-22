@@ -39,6 +39,7 @@ function Create_DirectoryIfNotExists { param( [string]$Path ) if (-not (Test-Pat
 function nilesoft_shell {
     $nilesoftshell_src = @( "C:\Program Files\Nilesoft Shell\shell.nss" , "C:\Program Files\Nilesoft Shell\imports" )
     $nilesoftshell_dst = "C:\ms1\asset\nilesoft_shell"
+    Create_DirectoryIfNotExists -Path $nilesoftshell_dst
     $nilesoftshell_src | ForEach-Object { Copy-Item -Path $_ -Destination $nilesoftshell_dst -Recurse -Force }
 }
 
