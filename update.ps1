@@ -36,7 +36,8 @@ Write-Host "Scoop Cleanedup ☑️"
 #winget source reset --force #in admin mode if faced issues
 #winget source update # run as adim
 #winget source update --name winget
-winget upgrade --all --include-unknown
+# winget upgrade --all --include-unknown
+winget upgrade --all
 winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
 Write-Host "Winget Upgraded ☑️"
 
