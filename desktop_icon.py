@@ -78,8 +78,8 @@ LB_XXX.bind("<Button-1>", close_window)
 
 
 #! Desktop
-BOX_1_2nd = tk.Frame(MAIN_FRAME, bg="#1d2027")
-BOX_1_2nd.pack(pady=(30,0))
+column_1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
+column_1.pack(pady=(30,0))
 
 icon_folder     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 icon_applist    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
@@ -97,12 +97,9 @@ def create_button_advanced(parent, text="", image=None, command=None, compound=N
 
 # Creating buttons with advanced properties
 button_properties_advanced =[
-{"parent": BOX_1_2nd,"text": "Folder"    ,"image": icon_folder     ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\folder.py","-WindowStyle","Hidden"],shell=True)},
-{"parent": BOX_1_2nd,"text": "AppList"   ,"image": icon_applist    ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#3498db","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\applist.py"],shell=True)},
-{"parent": BOX_1_2nd,"text": "AppStore"  ,"image": icon_appstore   ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#426f7e","fg": "#FFFFFF","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\app_store.py"],shell=True)},
-{"parent": BOX_1_2nd,"text": "Process"   ,"image": icon_process    ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#cc2400","fg": "#ffffff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\process.py"],shell=True)},
-{"parent": BOX_1_2nd,"text": "Tools"     ,"image": icon_tools      ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#454545","fg": "#FFFFFF","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\tools.py","-WindowStyle","Hidden"],shell=True)},
-{"parent": BOX_1_2nd,"text": "Script"    ,"image": icon_ScriptList ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#366c9c","fg": "#f6d24a","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\script_list.py","-WindowStyle","Hidden"],shell=True)},
+{"parent": column_1,"text": "This PC"    ,"image": icon_folder     ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer"], shell=True)},
+{"parent": column_1,"text": "User"    ,"image": icon_folder     ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer","C:\\Users\\nahid"], shell=True)},
+
 ]
 advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
 
