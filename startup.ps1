@@ -32,7 +32,7 @@ function rssguard              {Start-Process "C:\Users\nahid\scoop\apps\rssguar
 # aria2c_rpc
 # free_download_manager
 # rssowl
-# bazarr
+bazarr
 capture2text
 # flaresolver
 powertoys
