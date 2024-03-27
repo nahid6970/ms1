@@ -27,7 +27,7 @@ def create_custom_border(parent):
 # Create main window
 ROOT = tk.Tk()
 ROOT.title("Folder")
-ROOT.attributes('-topmost', True)  # Set always on top
+# ROOT.attributes('-topmost', True)  # Set always on top
 # ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)  # Remove default borders
@@ -44,10 +44,10 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = screen_width - 400
-y = screen_height//2 - 600//2
-ROOT.geometry(f"400x600+{x}+{y}") #! overall size of the window
+y = screen_height//2 - 980//2
+ROOT.geometry(f"400x980+{x}+{y}") #! overall size of the window
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=600) #!
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=980) #!
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
@@ -79,9 +79,9 @@ LB_XXX.bind("<Button-1>", close_window)
 
 #! Desktop
 column_1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-column_1.pack(pady=(30,0))
+column_1.pack(pady=(30,0), side="left")
 
-icon_folder     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
+icon_folder     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-50x50.png"))
 icon_applist    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 icon_appstore   =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 icon_ffmpeg     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
@@ -97,8 +97,14 @@ def create_button_advanced(parent, text="", image=None, command=None, compound=N
 
 # Creating buttons with advanced properties
 button_properties_advanced =[
-{"parent": column_1,"text": "User"       ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"C:\\Users\\nahid"],shell=True)},
-{"parent": column_1,"text": "This PC"    ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer"],shell=True)}       ,
+{"parent": column_1,"text": "User"             ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"C:\\Users\\nahid"],shell=True)},
+{"parent": column_1,"text": "This PC"          ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer"],shell=True)},
+{"parent": column_1,"text": "Recycle Bin"      ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"/root,::{645FF040-5081-101B-9F08-00AA002F954E}"],shell=True)},
+{"parent": column_1,"text": "Control Panel"    ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["control"] ,shell=True)},
+{"parent": column_1,"text": "Startup"          ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"],shell=True)},
+{"parent": column_1,"text": "WindowsApp"          ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"C:\\Program Files\\WindowsApps"],shell=True)},
+{"parent": column_1,"text": "Packages"          ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData\\Local\\Packages"],shell=True)},
+{"parent": column_1,"text": "AppData"          ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData"],shell=True)},
 
 ]
 advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
