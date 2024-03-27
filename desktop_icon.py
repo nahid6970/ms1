@@ -97,8 +97,8 @@ def create_button_advanced(parent, text="", image=None, command=None, compound=N
 
 # Creating buttons with advanced properties
 button_properties_advanced =[
-{"parent": column_1,"text": "This PC"    ,"image": icon_folder     ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer"], shell=True)},
-{"parent": column_1,"text": "User"    ,"image": icon_folder     ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer","C:\\Users\\nahid"], shell=True)},
+{"parent": column_1,"text": "User"       ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer" ,"C:\\Users\\nahid"],shell=True)},
+{"parent": column_1,"text": "This PC"    ,"image": icon_folder     ,"compound": tk.TOP,"height": 0,"width": 0,"bg": "#1D2027","fg": "#fff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["explorer"],shell=True)}       ,
 
 ]
 advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
