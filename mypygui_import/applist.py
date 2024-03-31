@@ -169,7 +169,7 @@ def show_options(options):
 applications = [
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
 {"name": "ExplorerPatcher","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "ExplorerPatcher","winget_path": r"xx"} ,
-{"name": "GlazeWM","scoop_name": "glazewm","scoop_path": r'xx',"winget_name": "GlazeWM","winget_path": r"xx"} ,
+{"name": "GlazeWM","scoop_name": "glazewm","scoop_path": r'C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe',"winget_name": "GlazeWM","winget_path": r"xx"} ,
 {"name": "X-Mouse Button Control","scoop_name": "xmousebuttoncontrol","scoop_path": r'xx',"winget_name": "Highresolution.X-MouseButtonControl","winget_path": r"C:\Program Files\Highresolution Enterprises\X-Mouse Button Control\XMouseButtonControl.exe"} ,
 # {"name": "MiniConda","scoop_name": "miniconda3","scoop_path": r'xx',"winget_name": "Anaconda.Miniconda3","winget_path": r"xx"} ,
 # {"name": "AnaConda","scoop_name": "anaconda3","scoop_path": r'xx',"winget_name": "Anaconda.Anaconda3","winget_path": r"xx"} ,
