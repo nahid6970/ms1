@@ -97,6 +97,9 @@ window_rules:
   # Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
   - command: "set floating"
     match_class_name: "#32770"
+    match_class_name: "PowerShellClass"  # Replace "PowerShellClass" with the actual class name of PowerShell window
+    match_class_name: "ConsoleWindowClass"  # Replace "ConsoleWindowClass" with the actual class name of CMD window
+
 
   # Do not manage picture-in-picture windows for browsers. Note that the default is for
   # English; change `match_title` to the window's title if you use another language.

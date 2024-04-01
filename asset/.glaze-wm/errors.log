@@ -1,0 +1,11 @@
+4/1/2024 3:20:07 AM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. (Line: 101, Col: 3, Idx: 2857) - (Line: 101, Col: 3, Idx: 2857): While parsing a block collection, did not find expected '-' indicator.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.DeserializeUserConfig(String userConfigPath) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 109
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 49
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"97c7a9f7-8f2f-4aed-89dc-a52b4b2c94f6","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
