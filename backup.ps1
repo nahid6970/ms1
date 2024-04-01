@@ -36,6 +36,14 @@ Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 
 function Create_DirectoryIfNotExists { param( [string]$Path ) if (-not (Test-Path $Path -PathType Container)) { New-Item -ItemType Directory -Force -Path $Path } }
 
+
+function glazewm {
+    $glazewm_src = @( "C:\Users\nahid\.glaze-wm\" )
+    $glazewm_dst = "C:\ms1\asset\glazewm"
+    Create_DirectoryIfNotExists -Path $glazewm_dst
+    $glazewm_src | ForEach-Object { Copy-Item -Path $_ -Destination $glazewm_dst -Recurse -Force }
+}
+
 function nilesoft_shell {
     $nilesoftshell_src = @( "C:\Program Files\Nilesoft Shell\shell.nss" , "C:\Program Files\Nilesoft Shell\imports" )
     $nilesoftshell_dst = "C:\ms1\asset\nilesoft_shell"
@@ -149,6 +157,7 @@ pwsh_profile
 rclone_config
 terminal
 nilesoft_shell
+glazewm
 
 Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
