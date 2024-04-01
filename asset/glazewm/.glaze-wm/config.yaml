@@ -99,6 +99,7 @@ window_rules:
     match_class_name: "#32770"
     match_class_name: "PowerShellClass"  # Replace "PowerShellClass" with the actual class name of PowerShell window
     match_class_name: "ConsoleWindowClass"  # Replace "ConsoleWindowClass" with the actual class name of CMD window
+    match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"  # Replace "WindowsTerminalClass" with the actual class name of Windows Terminal window
 
 
   #! Do not manage picture-in-picture windows for browsers. Note that the default is for
