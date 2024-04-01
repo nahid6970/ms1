@@ -92,12 +92,11 @@ window_rules:
   # Task Manager requires admin privileges to manage and should be ignored unless running
   # the WM as admin.
   - command: "ignore"
-    match_process_name: "/Taskmgr|ScreenClippingHost|powershell|pwsh|cmd/"
+    match_process_name: "/Taskmgr|ScreenClippingHost/"
 
   #! Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
   - command: "set floating"
-    match_class_name: "#32770"
-    match_class_name: "Qt5152QWindowIcon"
+    match_class_name: "/#32770|ConsoleWindowClass|Qt5152QWindowIcon|CASCADIA_HOSTING_WINDOW_CLASS/"
 
   #! Do not manage picture-in-picture windows for browsers. Note that the default is for
   # English; change `match_title` to the window's title if you use another language.
