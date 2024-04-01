@@ -50,32 +50,59 @@ bar:
   font_family: "Segoe UI"
   font_size: "13px"
   padding: "4px 6px"
-  offset_x: "0"
-  offset_y: "0"
-  border_radius: "0"
+  offset_x: 0
+  offset_y: 0
+  border_radius: 0
+
   components_left:
     - type: "workspaces"
       focused_workspace_background: "#ffffff33"
       displayed_workspace_background: "#00000033"
       default_workspace_background: "transparent"
+
   components_center:
     - type: "window title"
+
   components_right:
+    - type: "cpu" #!cpu
+      label: "CPU: {percent_usage}%"
+      refresh_interval_ms: 1000
+      padding: "5px 5px"
+      background: "#3c8aff"
+      foreground: "#000"
+      font_family: "Comic Sans MS"
+      font_size: "13px"
+      font_weight: 950
+
+
+    - type: "gpu" #!gpu
+      label: "GPU: {percent_usage}%"
+      refresh_interval_ms: 1000
+      padding: "5px 5px"
+      background: "#00f200"
+      foreground: "#000"
+      font_family: "Comic Sans MS"
+      font_size: "13px"
+      font_weight: 950
+
+
+
+
     # - type: "system tray"
-    - type: "tiling direction"
+    - type: "tiling direction" #!tiling dir
       label_horizontal: "⮂"
       label_vertical: "⮁"
       background: "#ffffff33"
       margin: "0 4px"
       padding: "0 8px"
-    - type: "binding mode"
+    - type: "binding mode" #!binding mode
       background: "#ffffff33"
       margin: "0 4px 0 0"
       padding: "0 8px"
-    - type: "clock"
+    - type: "clock" #!clock
       # Documentation on formatting date/time string:
       # https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
-      time_formatting: "hh:mm tt  ddd MMM d"
+      time_formatting: "hh:mm:ss tt  ddd MMM d"
 
 workspaces:
   - name: "1"
