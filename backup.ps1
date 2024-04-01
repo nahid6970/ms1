@@ -94,7 +94,7 @@ function prowlarr {
 }
 
 function bazarr {
-    $bazarr_src = @( "C:\ProgramData\Bazarr\db\" , "C:\ProgramData\Bazarr\config\" )
+    $bazarr_src = @( "C:\ProgramData\Bazarr\data\db" , "C:\ProgramData\Bazarr\data\config" )
     $bazarr_dst = "D:\software\@MustApp\@ARR\bazarr_backup\"
     Create_DirectoryIfNotExists -Path $bazarr_dst
     $bazarr_src | ForEach-Object { Copy-Item -Path $_ -Destination $bazarr_dst -Recurse -Force }

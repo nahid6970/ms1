@@ -51,4 +51,4 @@ ahkscripts
 radarr_monitor
 sonarr_monitor
 sync
-mypygui
+# mypygui
