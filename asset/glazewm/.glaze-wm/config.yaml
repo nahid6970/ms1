@@ -108,9 +108,8 @@ window_rules:
   - command: "resize borders 0px -7px -7px -7px"
     match_process_name: "steam"
 
-  - command: "resize width -20%"
+  - command: "set width 520px"
     match_process_name: "rssguard"
-
 
 
 binding_modes:
