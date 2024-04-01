@@ -9,3 +9,123 @@ GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user confi
 Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
 State dump: {"id":"97c7a9f7-8f2f-4aed-89dc-a52b4b2c94f6","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
 
+4/1/2024 3:20:58 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. (Line: 114, Col: 1, Idx: 3550) - (Line: 114, Col: 2, Idx: 3551): While parsing a block mapping, did not find expected key.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.DeserializeUserConfig(String userConfigPath) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 109
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 49
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"74254d2e-7b3b-43f8-b540-173cd714cca1","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
+4/1/2024 3:22:34 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Invalid resize amount 150.
+   at GlazeWM.Domain.Windows.ResizeParsingService.ParseResizePercentage(Container containerToResize, ResizeDimension dimensionToResize, String resizeAmount) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\ResizeParsingService.cs:line 35
+   at GlazeWM.Domain.Windows.CommandHandlers.SetWindowSizeHandler.CalculateResizeAmount(SetWindowSizeCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\SetWindowSizeHandler.cs:line 46
+   at GlazeWM.Domain.Windows.CommandHandlers.SetWindowSizeHandler.Handle(SetWindowSizeCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\SetWindowSizeHandler.cs:line 19
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at CallSite.Target(Closure, CallSite, Bus, Object)
+   at System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid2[T0,T1](CallSite site, T0 arg0, T1 arg1)
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.RunWithSubjectContainerHandler.Handle(RunWithSubjectContainerCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\RunWithSubjectContainerHandler.cs:line 53
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Windows.CommandHandlers.ManageWindowHandler.Handle(ManageWindowCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\ManageWindowHandler.cs:line 72
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Windows.EventHandlers.WindowShownHandler.Handle(WindowShownEvent event) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\EventHandlers\WindowShownHandler.cs:line 46
+   at GlazeWM.Infrastructure.Bussing.Bus.Emit[T](T event) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 87
+   at GlazeWM.Infrastructure.Bussing.Bus.<>c__DisplayClass8_0`1.<EmitAsync>b__0() in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 101
+Command history: HandleFatalExceptionCommand, SetWindowSizeCommand, RunWithSubjectContainerCommand, SetFocusedDescendantCommand, ResizeContainerCommand, AttachContainerCommand, ManageWindowCommand, SetActiveWindowBorderCommand, SetFocusedDescendantCommand, SetActiveWindowBorderCommand, SetFocusedDescendantCommand, SetActiveWindowBorderCommand, SetFocusedDescendantCommand, SyncNativeFocusCommand, RedrawContainersCommand 
+State dump: {"id":"239c2dbd-58cd-47e3-8763-f14cdc8b27bb","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[{"device_name":"\\\\.\\DISPLAY1","id":"aad64d35-c347-4304-aee5-623e089709a3","x":0,"y":0,"width":1920,"height":1032,"type":"monitor","focus_index":0,"children":[{"tiling_direction":"horizontal","size_percentage":1,"name":"1","id":"c54d6efa-f40a-4121-a7ee-aba1ec83e69a","x":1,"y":32,"width":1918,"height":999,"type":"workspace","focus_index":0,"children":[{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":131236,"previous_state":"tiling","id":"073e5cc3-03cb-4663-8f2a-12dc306325ef","x":0,"y":0,"width":0,"height":0,"type":"window","focus_index":3,"children":[]},{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":67484,"previous_state":"tiling","id":"20267514-7743-4116-b227-b69c65a0324d","x":0,"y":0,"width":0,"height":0,"type":"window","focus_index":4,"children":[]},{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":131338,"size_percentage":0.33333333333333337,"id":"7100fa87-4b4d-4cae-96a9-f0027a3e998b","x":1,"y":32,"width":638,"height":999,"type":"window","focus_index":2,"children":[]},{"floating_placement":{"left":1,"top":32,"right":1919,"bottom":1031,"x":1,"y":32,"width":1918,"height":999},"border_delta":{"left":0,"top":0,"right":0,"bottom":0},"handle":262646,"size_percentage":0.33333333333333337,"id":"17c3c4aa-a2ff-42da-8422-4e4bbab884e6","x":640,"y":32,"width":638,"height":999,"type":"window","focus_index":1,"children":[]},{"floating_placement":{"left":953,"top":32,"right":1925,"bottom":1038,"x":953,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":66862,"size_percentage":0.3333333333333333,"id":"1a165cd2-3ec7-4a20-8c04-1e0991d7183a","x":1279,"y":32,"width":638,"height":999,"type":"window","focus_index":0,"children":[]}]}]}]}
+
+4/1/2024 3:23:07 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Invalid resize amount 150.
+   at GlazeWM.Domain.Windows.ResizeParsingService.ParseResizePercentage(Container containerToResize, ResizeDimension dimensionToResize, String resizeAmount) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\ResizeParsingService.cs:line 35
+   at GlazeWM.Domain.Windows.CommandHandlers.SetWindowSizeHandler.CalculateResizeAmount(SetWindowSizeCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\SetWindowSizeHandler.cs:line 46
+   at GlazeWM.Domain.Windows.CommandHandlers.SetWindowSizeHandler.Handle(SetWindowSizeCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\SetWindowSizeHandler.cs:line 19
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at CallSite.Target(Closure, CallSite, Bus, Object)
+   at System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid2[T0,T1](CallSite site, T0 arg0, T1 arg1)
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.RunWithSubjectContainerHandler.Handle(RunWithSubjectContainerCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\RunWithSubjectContainerHandler.cs:line 53
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Windows.CommandHandlers.ManageWindowHandler.Handle(ManageWindowCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\ManageWindowHandler.cs:line 72
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Windows.EventHandlers.WindowShownHandler.Handle(WindowShownEvent event) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\EventHandlers\WindowShownHandler.cs:line 46
+   at GlazeWM.Infrastructure.Bussing.Bus.Emit[T](T event) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 79
+   at GlazeWM.Infrastructure.Bussing.Bus.<>c__DisplayClass8_0`1.<EmitAsync>b__0() in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 95
+Command history: HandleFatalExceptionCommand, SetWindowSizeCommand, RunWithSubjectContainerCommand, SetFocusedDescendantCommand, ResizeContainerCommand, AttachContainerCommand, ManageWindowCommand, SyncNativeFocusCommand, RedrawContainersCommand, SetFocusedDescendantCommand, RunWithSubjectContainerCommand, SetFocusedDescendantCommand, AttachContainerCommand, ManageWindowCommand, RunWithSubjectContainerCommand 
+State dump: {"id":"3642c00f-d045-4ab5-b532-9abc7150aabe","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[{"device_name":"\\\\.\\DISPLAY1","id":"96e91231-89da-4c48-8132-11c207c5d1c8","x":0,"y":0,"width":1920,"height":1032,"type":"monitor","focus_index":0,"children":[{"tiling_direction":"horizontal","size_percentage":1,"name":"1","id":"f338e454-cc48-4039-a9f0-8118b51d84da","x":1,"y":32,"width":1918,"height":999,"type":"workspace","focus_index":0,"children":[{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":131236,"previous_state":"tiling","id":"f7a92c73-4cfe-47c7-93ea-acd54d5f83af","x":0,"y":0,"width":0,"height":0,"type":"window","focus_index":2,"children":[]},{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":67484,"previous_state":"tiling","id":"fac34fc8-737a-43d5-9b15-08c5a887a790","x":0,"y":0,"width":0,"height":0,"type":"window","focus_index":3,"children":[]},{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":131338,"size_percentage":0.33333333333333337,"id":"a253d5c7-62b6-4a59-bd5d-639471e4bd54","x":1,"y":32,"width":638,"height":999,"type":"window","focus_index":4,"children":[]},{"floating_placement":{"left":960,"top":32,"right":1918,"bottom":1031,"x":960,"y":32,"width":958,"height":999},"border_delta":{"left":0,"top":0,"right":0,"bottom":0},"handle":262646,"size_percentage":0.33333333333333337,"id":"5497c73e-b4fa-41a0-81c7-0becf69d5119","x":640,"y":32,"width":638,"height":999,"type":"window","focus_index":1,"children":[]},{"floating_placement":{"left":953,"top":32,"right":1925,"bottom":1038,"x":953,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":66862,"size_percentage":0.3333333333333333,"id":"6f1998aa-2566-4f79-9d56-3e276ee0dbca","x":1279,"y":32,"width":638,"height":999,"type":"window","focus_index":0,"children":[]}]}]}]}
+
+4/1/2024 3:23:41 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Invalid resize amount 150.
+   at GlazeWM.Domain.Windows.ResizeParsingService.ParseResizePercentage(Container containerToResize, ResizeDimension dimensionToResize, String resizeAmount) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\ResizeParsingService.cs:line 35
+   at GlazeWM.Domain.Windows.CommandHandlers.SetWindowSizeHandler.CalculateResizeAmount(SetWindowSizeCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\SetWindowSizeHandler.cs:line 46
+   at GlazeWM.Domain.Windows.CommandHandlers.SetWindowSizeHandler.Handle(SetWindowSizeCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\SetWindowSizeHandler.cs:line 19
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at CallSite.Target(Closure, CallSite, Bus, Object)
+   at System.Dynamic.UpdateDelegates.UpdateAndExecuteVoid2[T0,T1](CallSite site, T0 arg0, T1 arg1)
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.RunWithSubjectContainerHandler.Handle(RunWithSubjectContainerCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\RunWithSubjectContainerHandler.cs:line 53
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Windows.CommandHandlers.ManageWindowHandler.Handle(ManageWindowCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\CommandHandlers\ManageWindowHandler.cs:line 72
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Windows.EventHandlers.WindowShownHandler.Handle(WindowShownEvent event) in D:\a\glazewm\glazewm\GlazeWM.Domain\Windows\EventHandlers\WindowShownHandler.cs:line 46
+   at GlazeWM.Infrastructure.Bussing.Bus.Emit[T](T event) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 79
+   at GlazeWM.Infrastructure.Bussing.Bus.<>c__DisplayClass8_0`1.<EmitAsync>b__0() in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 95
+Command history: HandleFatalExceptionCommand, SetWindowSizeCommand, RunWithSubjectContainerCommand, SetFocusedDescendantCommand, ResizeContainerCommand, AttachContainerCommand, ManageWindowCommand, SyncNativeFocusCommand, RedrawContainersCommand, SetFocusedDescendantCommand, RunWithSubjectContainerCommand, SetFocusedDescendantCommand, AttachContainerCommand, ManageWindowCommand, RunWithSubjectContainerCommand 
+State dump: {"id":"25f5431e-cb3b-4310-9e81-c3d910623017","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[{"device_name":"\\\\.\\DISPLAY1","id":"aa9f1376-90eb-43cc-965a-006376d8a7d3","x":0,"y":0,"width":1920,"height":1032,"type":"monitor","focus_index":0,"children":[{"tiling_direction":"horizontal","size_percentage":1,"name":"1","id":"f1b1c6e9-ee8c-4588-bf31-400a612f781b","x":1,"y":32,"width":1918,"height":999,"type":"workspace","focus_index":0,"children":[{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":131236,"previous_state":"tiling","id":"7bc0c141-d31b-4f5f-8819-0907c6f2c89d","x":0,"y":0,"width":0,"height":0,"type":"window","focus_index":1,"children":[]},{"floating_placement":{"left":953,"top":32,"right":1925,"bottom":1038,"x":953,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":66862,"size_percentage":0.3333333333333333,"id":"849ed477-118b-4c65-87c1-3d28664546d0","x":1,"y":32,"width":638,"height":999,"type":"window","focus_index":0,"children":[]},{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":67484,"previous_state":"tiling","id":"c1510770-66e6-40e2-839c-1d5f47049e10","x":0,"y":0,"width":0,"height":0,"type":"window","focus_index":2,"children":[]},{"floating_placement":{"left":-6,"top":32,"right":966,"bottom":1038,"x":-6,"y":32,"width":972,"height":1006},"border_delta":{"left":7,"top":0,"right":7,"bottom":7},"handle":131338,"size_percentage":0.33333333333333337,"id":"480be093-cc2c-4427-aee8-4e02300c076e","x":640,"y":32,"width":638,"height":999,"type":"window","focus_index":3,"children":[]},{"floating_placement":{"left":960,"top":32,"right":1918,"bottom":1031,"x":960,"y":32,"width":958,"height":999},"border_delta":{"left":0,"top":0,"right":0,"bottom":0},"handle":262646,"size_percentage":0.33333333333333337,"id":"e7e8aa7f-5560-406c-b5d6-33c540d0ac16","x":1279,"y":32,"width":638,"height":999,"type":"window","focus_index":4,"children":[]}]}]}]}
+
+4/1/2024 3:24:13 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. (Line: 114, Col: 1, Idx: 3550) - (Line: 114, Col: 2, Idx: 3551): While parsing a block mapping, did not find expected key.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.DeserializeUserConfig(String userConfigPath) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 109
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 49
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"0e889078-6790-4dfd-9ef9-f655e4a59f95","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
+4/1/2024 3:24:40 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. Invalid command 'resize 150px'.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.ValidateDeserializedConfig(UserConfig deserializedConfig) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 209
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 58
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"a0d5c6f2-555b-4b45-ac4e-6e2c432963ed","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
+4/1/2024 3:25:01 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. Invalid command 'resize 150px 10px 50px 11px'.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.ValidateDeserializedConfig(UserConfig deserializedConfig) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 209
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 58
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"5bc7a49e-8ba2-4459-b7f5-44f13373f43e","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
+4/1/2024 3:27:39 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. Invalid command 'resize window -150px'.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.ValidateDeserializedConfig(UserConfig deserializedConfig) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 209
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 58
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"d7e38d6b-27c8-4542-8933-5f74d1fa584f","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
+4/1/2024 3:27:50 PM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. Invalid command 'resize frame -150px'.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.ValidateDeserializedConfig(UserConfig deserializedConfig) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 209
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 58
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"9029ea96-1d55-4650-811e-5526928ca4f8","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
