@@ -97,9 +97,10 @@ window_rules:
   #! Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
   - command: "set floating"
     match_class_name: "#32770"
-    match_class_name: "PowerShellClass"  # Replace "PowerShellClass" with the actual class name of PowerShell window
-    match_class_name: "ConsoleWindowClass"  # Replace "ConsoleWindowClass" with the actual class name of CMD window
-    match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"  # Replace "WindowsTerminalClass" with the actual class name of Windows Terminal window
+    match_class_name: "PowerShellClass"
+    match_class_name: "ConsoleWindowClass"
+    match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"
+    match_class_name: "Qt5152QWindowIcon"
 
 
   #! Do not manage picture-in-picture windows for browsers. Note that the default is for
