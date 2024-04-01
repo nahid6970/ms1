@@ -130,25 +130,25 @@ binding_modes:
         bindings: ["Escape", "Enter"]
 
 keybindings:
-  # Shift focus in a given direction.
-  - command: "focus left"
-    bindings: ["Alt+H", "Alt+Left"]
-  - command: "focus right"
-    bindings: ["Alt+L", "Alt+Right"]
-  - command: "focus up"
-    bindings: ["Alt+K", "Alt+Up"]
-  - command: "focus down"
-    bindings: ["Alt+J", "Alt+Down"]
+  #! Shift focus in a given direction.
+  # - command: "focus left"
+  #   bindings: ["Alt+H", "Alt+Left"]
+  # - command: "focus right"
+  #   bindings: ["Alt+L", "Alt+Right"]
+  # - command: "focus up"
+  #   bindings: ["Alt+K", "Alt+Up"]
+  # - command: "focus down"
+  #   bindings: ["Alt+J", "Alt+Down"]
 
-  # Move focused window in a given direction.
-  - command: "move left"
-    bindings: ["Alt+Shift+H", "Alt+Shift+Left"]
-  - command: "move right"
-    bindings: ["Alt+Shift+L", "Alt+Shift+Right"]
-  - command: "move up"
-    bindings: ["Alt+Shift+K", "Alt+Shift+Up"]
-  - command: "move down"
-    bindings: ["Alt+Shift+J", "Alt+Shift+Down"]
+  #! Move focused window in a given direction.
+  # - command: "move left"
+  #   bindings: ["Alt+Shift+H", "Alt+Shift+Left"]
+  # - command: "move right"
+  #   bindings: ["Alt+Shift+L", "Alt+Shift+Right"]
+  # - command: "move up"
+  #   bindings: ["Alt+Shift+K", "Alt+Shift+Up"]
+  # - command: "move down"
+  #   bindings: ["Alt+Shift+J", "Alt+Shift+Down"]
 
   # Resize focused window by a percentage or pixel amount.
   - command: "resize width -2%"
@@ -185,15 +185,15 @@ keybindings:
   - command: "set minimized"
     binding: "Alt+M"
 
-  # Close focused window.
+  #! Close focused window.
   - command: "close"
     binding: "Alt+Shift+Q"
 
-  # Kill GlazeWM process safely.
+  #! Kill GlazeWM process safely.
   - command: "exit wm"
     binding: "Alt+Shift+E"
 
-  # Re-evaluate configuration file.
+  #! Re-evaluate configuration file.
   - command: "reload config"
     binding: "Alt+Shift+R"
 
