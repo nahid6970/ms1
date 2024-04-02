@@ -112,22 +112,25 @@ workspaces:
   - name: "9"
 
 window_rules:
-  # Task Manager requires admin privileges to manage and should be ignored unless running
-  # the WM as admin.
-  - command: "ignore"
-    match_process_name: "/SnippingTool|python/"
-  - command: "ignore"
-    match_title: "/WhatsApp|Task Manager/"
 
   #! Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
   - command: "set floating"
-    match_class_name: "/#32770|ConsoleWindowClass|Qt5152QWindowIcon|CASCADIA_HOSTING_WINDOW_CLASS/"
+    match_class_name: "/#32770|ConsoleWindowClass|CASCADIA_HOSTING_WINDOW_CLASS/"
 
   #! Do not manage picture-in-picture windows for browsers. Note that the default is for
   # English; change `match_title` to the window's title if you use another language.
+  # Task Manager requires admin privileges to manage and should be ignored unless running
+  # the WM as admin.
   - command: "ignore"
-    match_title: "[Pp]icture.in.[Pp]icture"
+    match_process_name: "/SnippingTool|python|qbittorrent/"
+  - command: "ignore"
+    match_title: "/WhatsApp|Task Manager/"
+  - command: "ignore"
+    match_class_name: "Qt5152QWindowIcon"
+    
+  - command: "ignore"
     match_class_name: "Chrome_WidgetWin_1|MozillaDialogClass"
+    match_title: "[Pp]icture.in.[Pp]icture"
 
   #! Some applications (eg. Steam) have borders that extend past the normal border size.
   - command: "resize borders 0px -7px -7px -7px"
