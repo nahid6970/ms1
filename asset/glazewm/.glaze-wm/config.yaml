@@ -102,7 +102,9 @@ bar:
 
 workspaces:
   - name: "1"
+    display_name: "Main"
   - name: "2"
+    display_name: "Show/Movie"
   - name: "3"
   - name: "4"
   - name: "5"
@@ -137,7 +139,9 @@ window_rules:
     match_process_name: "steam"
 
   - command: "set width 520px"
-    match_process_name: "rssguard"
+    match_process_name: "/rssguard/"
+  - command: "set width 520px"
+    match_title: "/Microsoft Store/"
 
 
 binding_modes:
