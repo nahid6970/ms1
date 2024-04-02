@@ -106,6 +106,7 @@ workspaces:
   - name: "2"
     display_name: "Show/Movie"
   - name: "3"
+    display_name: "Games"
   - name: "4"
   - name: "5"
   - name: "6"
@@ -144,11 +145,17 @@ window_rules:
   - command: "resize borders 0px -7px -7px -7px"
     match_process_name: "steam"
 
+  # - command: "resize borders 0px 0px 0px -500px"    #? top right bottom left
   - command: "set width 520px"
+    match_process_name: "/rssguard/"
+  - command: "tiling direction vertical"
     match_process_name: "/rssguard/"
   - command: "set width 520px"
     match_title: "/Microsoft Store/"
 
+#!here only this 2 application will be splitted horizontally
+  # - command: "tiling direction vertical"
+  #   match_process_name: "/rssguard|chrome/"
 
 binding_modes:
   - name: "resize"
@@ -197,12 +204,12 @@ keybindings:
   - command: "resize height -2%"
     binding: "Alt+I"
 
-  # As an alternative to the resize keybindings above, resize mode enables resizing via
-  # HJKL or arrow keys. The binding mode is defined above with the name "resize".
+  #! As an alternative to the resize keybindings above, resize mode enables resizing via
+  #! HJKL or arrow keys. The binding mode is defined above with the name "resize".
   - command: "binding mode resize"
     binding: "Alt+R"
 
-  # Change tiling direction. This determines where new tiling windows will be inserted.
+  #! Change tiling direction. This determines where new tiling windows will be inserted.
   - command: "tiling direction toggle"
     binding: "Alt+V"
 
