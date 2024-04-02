@@ -148,6 +148,11 @@ return
 
 
 
+#b:: ; Win + V
+Run, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
+return
+
+
 
 
 
@@ -166,6 +171,8 @@ return
 #v:: ; Win + V
 Run, C:\ms1\scripts\valorant\valo.ahk
 return
+
+
 
 
 
