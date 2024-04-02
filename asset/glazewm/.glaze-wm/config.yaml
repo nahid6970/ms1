@@ -122,7 +122,7 @@ window_rules:
   # Task Manager requires admin privileges to manage and should be ignored unless running
   # the WM as admin.
   - command: "ignore"
-    match_process_name: "/SnippingTool|python|qbittorrent|fdm/"
+    match_process_name: "/SnippingTool|python|qbittorrent|fdm|PotPlayerMini64/"
   - command: "ignore"
     match_title: "/WhatsApp|Task Manager/"
   - command: "ignore"
