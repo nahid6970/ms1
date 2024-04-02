@@ -119,6 +119,12 @@ window_rules:
   - command: "set floating"
     match_class_name: "/#32770|ConsoleWindowClass|CASCADIA_HOSTING_WINDOW_CLASS/"
 
+  # - command: "move to workspace terminal"
+  #   match_process_name: "alacritty"
+
+  # - command: "toggle floating"
+  #   match_process_name: "sioyek"
+
   #! Do not manage picture-in-picture windows for browsers. Note that the default is for
   # English; change `match_title` to the window's title if you use another language.
   # Task Manager requires admin privileges to manage and should be ignored unless running
