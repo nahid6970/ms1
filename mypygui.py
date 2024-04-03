@@ -147,11 +147,51 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width//2 - 815//2
+x = screen_width//2 - 820//2
 # y = screen_height//2 - 800//2
 y = 0
-ROOT.geometry(f"815x30+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"820x30+{x}+{y}") #! overall size of the window
 
+#! Resize Window
+
+# Function to toggle window size
+def toggle_window_size(size):
+    global window_state
+    global x
+    global y
+
+    if size == 'line':
+        ROOT.geometry('820x30')
+        x = screen_width // 2 - 820 // 2
+        y = 0
+        ROOT.configure(bg='red')
+        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
+        LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
+    elif size == 'max':
+        ROOT.geometry('820x140')
+        x = screen_width // 2 - 820 // 2
+        y = 0
+        ROOT.configure(bg='#1d2027')
+        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
+        LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
+
+    ROOT.focus_force()
+    ROOT.update_idletasks()
+    ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
+
+def on_windows_x_pressed():
+    global window_size_state
+    if window_size_state == 'line':
+        toggle_window_size('max')
+        window_size_state = 'max'
+    else:
+        toggle_window_size('line')
+        window_size_state = 'line'
+        
+# Initial window size state
+window_size_state = 'line'
+# Bind Windows + X to toggle between 'line' and 'max' sizesx
+keyboard.add_hotkey('win+x', on_windows_x_pressed)
 
 # x = screen_width//2 - 753//2
 # y = 0
@@ -224,48 +264,6 @@ def toggle_checking():
         BT_TOPMOST.config(bg="#000000")  # Change text color to white
 
 checking = False
-
-#! Resize Window
-
-# Function to toggle window size
-def toggle_window_size(size):
-    global window_state
-    global x
-    global y
-
-    if size == 'line':
-        ROOT.geometry('815x30')
-        x = screen_width // 2 - 815 // 2
-        y = 0
-        ROOT.configure(bg='red')
-        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
-        LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
-    elif size == 'max':
-        ROOT.geometry('815x140')
-        x = screen_width // 2 - 815 // 2
-        y = 0
-        ROOT.configure(bg='#1d2027')
-        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
-        LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
-
-    ROOT.focus_force()
-    ROOT.update_idletasks()
-    ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
-
-def on_windows_x_pressed():
-    global window_size_state
-    if window_size_state == 'line':
-        toggle_window_size('max')
-        window_size_state = 'max'
-    else:
-        toggle_window_size('line')
-        window_size_state = 'line'
-        
-# Initial window size state
-window_size_state = 'line'
-# Bind Windows + X to toggle between 'line' and 'max' sizesx
-keyboard.add_hotkey('win+x', on_windows_x_pressed)
-
 
 #! CPU / RAM / DRIVES / NET SPEED
 def get_cpu_ram_info():
