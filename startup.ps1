@@ -14,6 +14,7 @@ function powertoys             {if (Test-Path "C:\Users\nahid\AppData\Local\Powe
 function prowlarr              {C:\ProgramData\Prowlarr\bin\Prowlarr.exe }
 function radarr                {C:\ProgramData\Radarr\bin\Radarr.exe }
 function arr_monitor           {Start-Process "C:\ms1\arr_monitor.ps1" -WindowStyle Hidden }
+function GlazeWM           {Start-Process "C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe" -WindowStyle Hidden }
 function rssowl                {Start-Process "C:\RSSOwlnix\RSSOwlnix.exe" -WindowStyle Minimized }
 function sonarr                {C:\ProgramData\Sonarr\bin\Sonarr.exe }
 function sync                  {Start-Process "C:\ms1\sync.ps1" }
@@ -24,29 +25,22 @@ function rssguard              {Start-Process "C:\Users\nahid\scoop\apps\rssguar
 <# function FunctionName  {  } #>
 
 
-
-
-
-#  APPS  #
 # aria2c_rpc
+# flaresolver
 # free_download_manager
+# monitor_size
+# mypygui
+# rssguard
 # rssowl
+# syncthing
+# valo_qbit
+ahkscripts
+arr_monitor
 bazarr
 capture2text
-# flaresolver
+GlazeWM
 powertoys
 prowlarr
 radarr
 sonarr
-syncthing
-rssguard
-
-
-
-#  SCRIPT  #
-# monitor_size
-# valo_qbit
-ahkscripts
-arr_monitor
 sync
-# mypygui
