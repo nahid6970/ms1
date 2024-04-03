@@ -13,10 +13,9 @@ function mypygui               {Start-Process "python.exe" -ArgumentList "C:\ms1
 function powertoys             {if (Test-Path "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe") { Start-Process "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe" } elseif (Test-Path "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe") { Start-Process "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe" } else { Write-Warning "PowerToys not found in either expected location." } }
 function prowlarr              {C:\ProgramData\Prowlarr\bin\Prowlarr.exe }
 function radarr                {C:\ProgramData\Radarr\bin\Radarr.exe }
-function radarr_monitor        {Start-Process "C:\ms1\scripts\arr\radarr.ps1" -WindowStyle Hidden }
+function arr_monitor           {Start-Process "C:\ms1\arr_monitor.ps1" -WindowStyle Hidden }
 function rssowl                {Start-Process "C:\RSSOwlnix\RSSOwlnix.exe" -WindowStyle Minimized }
 function sonarr                {C:\ProgramData\Sonarr\bin\Sonarr.exe }
-function sonarr_monitor        {Start-Process "C:\ms1\scripts\arr\sonarr.ps1" -WindowStyle Hidden }
 function sync                  {Start-Process "C:\ms1\sync.ps1" }
 function syncthing             {Start-Process "C:\Users\nahid\scoop\apps\syncthing\current\syncthing.exe" -WindowStyle Hidden }
 function valo_qbit             {Start-Process "C:\ms1\scripts\valorant\valo_qbit.ps1" -WindowStyle Hidden }
@@ -48,7 +47,6 @@ rssguard
 # monitor_size
 # valo_qbit
 ahkscripts
-radarr_monitor
-sonarr_monitor
+arr_monitor
 sync
 # mypygui
