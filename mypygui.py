@@ -55,7 +55,8 @@ import sys
 import threading
 import time
 import tkinter as tk
-
+import win32gui
+import win32process
 
 
 def calculate_time_to_appear(start_time):
@@ -172,6 +173,24 @@ MAIN_FRAME.pack(pady=1, expand=True)  # Add some padding at the top
 #! Close Window
 # def close_window(event=None):
 #     ROOT.destroy()
+
+def get_active_window_info():
+   # Wait for 2 seconds
+   time.sleep(2)
+   # Get the position of the mouse cursor
+   pos = win32gui.GetCursorPos()
+   # Get the handle of the window under the cursor
+   hwnd = win32gui.WindowFromPoint(pos)
+   # Get the active window information
+   class_name = win32gui.GetClassName(hwnd)
+   window_text = win32gui.GetWindowText(hwnd)
+   _, pid = win32process.GetWindowThreadProcessId(hwnd)
+   process_name = psutil.Process(pid).name()
+   # Print the information with colors and separators
+   print(f"\033[91mActive Window Class:\033[0m {class_name}")
+   print(f"\033[92mActive Window Process Name:\033[0m {process_name}")
+   print(f"\033[94mActive Window Title:\033[0m {window_text}")
+   print("...")  # Add dots as a visual separator
 
 def close_window(event=None):
     password = simpledialog.askstring("Password", "Enter the password to close the window:")
@@ -492,7 +511,7 @@ labels = [create_label(**prop) for prop in label_properties]
 LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST, CLEAR, LB_get, LB_R, LB_L, LB_M, LB_XXX = labels
 
 LB_XXX.bind    ("<Button-1>", close_window)
-LB_get.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\get_info.py", "-WindowStyle", "Normal"],shell=True))
+LB_get.bind      ("<Button-1>", lambda event: get_active_window_info())
 LB_R.bind      ("<Button-1>", restart)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('max'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('line'))
