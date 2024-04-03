@@ -147,10 +147,10 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width//2 - 800//2
+x = screen_width//2 - 815//2
 # y = screen_height//2 - 800//2
 y = 0
-ROOT.geometry(f"800x30+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"815x30+{x}+{y}") #! overall size of the window
 
 
 # x = screen_width//2 - 753//2
@@ -234,15 +234,15 @@ def toggle_window_size(size):
     global y
 
     if size == 'line':
-        ROOT.geometry('800x30')
-        x = screen_width // 2 - 800 // 2
+        ROOT.geometry('815x30')
+        x = screen_width // 2 - 815 // 2
         y = 0
         ROOT.configure(bg='red')
         LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
         LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
     elif size == 'max':
-        ROOT.geometry('800x140')
-        x = screen_width // 2 - 800 // 2
+        ROOT.geometry('815x140')
+        x = screen_width // 2 - 815 // 2
         y = 0
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
@@ -365,9 +365,9 @@ def check_git_status(git_path, queue):
     os.chdir(git_path)
     git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
     if "nothing to commit, working tree clean" in git_status.stdout:
-        queue.put((git_path, "ü", "#00ff21"))
+        queue.put((git_path, "✔️", "#00ff21"))
     else:
-        queue.put((git_path, "ü", "#fe1616"))
+        queue.put((git_path, "✔️", "#fe1616"))
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
         print("Invalid path")
@@ -495,8 +495,8 @@ label_properties =[
 {"comment":"#️⃣Upload"     ,"text":"^"     ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF"            ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 6  ,"rowspan": 1,"columnspan": 1},#! Upload
 {"comment":"#️⃣Download"   ,"text":"v"     ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF"            ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 7  ,"rowspan": 1,"columnspan": 1},#! Download
 {"comment":"#️⃣GitSync"    ,"text":"Git"   ,"parent": ROOT1,"bg": "#1d2027","fg": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF"            ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},#! GitSync
-{"comment":"#️⃣GitMs1"     ,"text":"m1"    ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Wingdings"                   ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 9  ,"rowspan": 1,"columnspan": 1},#! GitMs1
-{"comment":"#️⃣GitMs2"     ,"text":"m2"    ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("Wingdings"                   ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},#! GitMs2
+{"comment":"#️⃣GitMs1"     ,"text":"m1"    ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF"                   ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 9  ,"rowspan": 1,"columnspan": 1},#! GitMs1
+{"comment":"#️⃣GitMs2"     ,"text":"m2"    ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF"                   ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},#! GitMs2
 {"comment":"#️⃣Keyboard"   ,"text":"7"     ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("wingdings"                   ,10,"normal"),"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 11 ,"rowspan": 1,"columnspan": 1},#! Keyboard
 {"comment":"#️⃣Bar_1"      ,"text":"1"     ,"parent": ROOT1,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF"            ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 12 ,"rowspan": 1,"columnspan": 1},#! Bar_1
 {"comment":"#️⃣Pin"        ,"text":"Pin"   ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF"            ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1},#! Pin
