@@ -77,16 +77,17 @@ LB_XXX.bind("<Button-1>", close_window)
 
 
 #! Folder
-def create_button(text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack, command):
+def create_button(text, frame, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, padx_pack, pady_pack, command):
     button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
-    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
+    button.pack(padx=padx_pack, pady=pady_pack)
     return button
 
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#282c34")
 BOX_1.pack(side="top", pady=(30,0), padx=(0,0))
 
 button_properties = [
-("mypygui"      , BOX_1, "#ffd86a", "#1D2027", 1, 0, "flat", ("calibri", 14, "bold"), 0 , 1, 1, 2, "ew"  , 0, 0, (0, 0), (0, 0), lambda: subprocess.Popen(["Start", "powershell", "-Command", "& { code C:\\ms1\\mypygui.py }"],shell=True)                                                                     ),
+("mypygui"     ,BOX_1,"#282c34","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\mypygui.py }"]     ,shell=True)                                                                     ),
+("desktop_icon",BOX_1,"#282c34","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\desktop_icon.py }"],shell=True)                                                                     ),
 ]
 for button_props in button_properties:
     create_button(*button_props)
