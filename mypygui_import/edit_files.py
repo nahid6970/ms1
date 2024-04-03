@@ -86,8 +86,12 @@ BOX_1 = tk.Frame(MAIN_FRAME, bg="#282c34")
 BOX_1.pack(side="top", pady=(30,0), padx=(0,0))
 
 button_properties = [
-("mypygui"     ,BOX_1,"#282c34","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\mypygui.py }"]     ,shell=True)                                                                     ),
-("desktop_icon",BOX_1,"#282c34","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\desktop_icon.py }"],shell=True)                                                                     ),
+("mypygui"         ,BOX_1,"#346c9a","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\mypygui.py }"]         ,shell=True)                                                                     ),
+("desktop_icon"    ,BOX_1,"#346c9a","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,5),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\desktop_icon.py }"]    ,shell=True)                                                                     ),
+("ahkscripts.ahk"  ,BOX_1,"#599b59","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,5),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\ahkscripts.ahk }"]     ,shell=True)                                                                     ),
+("backup.ps1"      ,BOX_1,"#499eda","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\backup.ps1 }"]         ,shell=True)                                                                     ),
+("startup.ps1"     ,BOX_1,"#499eda","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\startup.ps1 }"]        ,shell=True)                                                                     ),
+("update.ps1"      ,BOX_1,"#499eda","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\update.ps1 }"]         ,shell=True)                                                                     ),
 ]
 for button_props in button_properties:
     create_button(*button_props)
