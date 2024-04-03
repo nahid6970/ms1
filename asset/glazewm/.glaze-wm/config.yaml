@@ -96,6 +96,12 @@ bar:
       margin: "0 4px 0 0"
       padding: "0 8px"
     - type: "clock" #!clock
+      padding: "5px 5px"
+      background: "#ffffff"
+      foreground: "#000"
+      font_family: "Comic Sans MS"
+      font_size: "13px"
+      font_weight: 950
       # Documentation on formatting date/time string:
       # https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
       time_formatting: "hh:mm:ss tt  ddd MMM d"
@@ -104,7 +110,7 @@ workspaces:
   - name: "1"
     display_name: "Main"
   - name: "2"
-    display_name: "Show/Movie"
+    display_name: "G"
   - name: "3"
     display_name: "Games"
   - name: "4"
@@ -148,10 +154,15 @@ window_rules:
   # - command: "resize borders 0px 0px 0px -500px"    #? top right bottom left
   - command: "set width 520px"
     match_process_name: "/rssguard/"
-  - command: "tiling direction vertical"
-    match_process_name: "/rssguard/"
   - command: "set width 520px"
     match_title: "/Microsoft Store/"
+
+
+  - command: "ignore"
+    match_process_name: "Riot Client"
+
+  - command: "move to workspace 2"
+    match_process_name: "VALORANT-Win64-Shipping"
 
 #!here only this 2 application will be splitted horizontally
   # - command: "tiling direction vertical"
