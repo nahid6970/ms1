@@ -85,15 +85,15 @@ column_1.pack(pady=(0,0), side="left")
 column_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 column_2.pack(pady=(0,0), side="left")
 
-icon_folder     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-50x50.png"))
-icon_thispc     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\this-pc-computer-50x50.png"))
-icon_control     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Control-Panel-icon-50x50.png"))
-icon_sonarr     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\sonarr-50x50.png"))
-icon_radarr     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\radarr-50x50.png"))
-icon_music     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Folder Music-50x50.png"))
+icon_folder       =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-50x50.png"))
+icon_thispc       =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\this-pc-computer-50x50.png"))
+icon_control      =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Control-Panel-icon-50x50.png"))
+icon_sonarr       =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\sonarr-50x50.png"))
+icon_radarr       =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\radarr-50x50.png"))
+icon_music        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Folder Music-50x50.png"))
 icon_download     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\downloadfolder-50x50.png"))
 icon_software     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\pngegg (1)-50x50.png"))
-icon_user     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\user (1)-50x50.png"))
+icon_user         =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\user (1)-50x50.png"))
 
 
 def create_button_advanced(parent, text="", image=None, command=None, compound=None, height=0, width=0, bg="#e7d86a", fg="#1D2027", font=("JetBrainsMono NF", 13, "bold"), anchor="center", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#f6d24a", cursor="hand2", side="left", padx=(0,0), pady=(0,0)):
@@ -114,9 +114,9 @@ button_properties_advanced =[
 {"parent":column_1,"text":"Music"       ,"image":icon_music   ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\song"]                                                                            ,shell=True)}                              ,
 {"parent":column_1,"text":"Software"    ,"image":icon_software,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\software"]                                                                        ,shell=True)}                              ,
 {"parent":column_1,"text":"Downloads"   ,"image":icon_download,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads"]                                                                       ,shell=True)}                              ,
-{"parent":column_1,"text":"ms1"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms1"]                                                                             ,shell=True)}                              ,
-{"parent":column_1,"text":"ms2"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms2"]                                                                             ,shell=True)}                              ,
 
+{"parent":column_2,"text":"ms1"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms1"]                                                                             ,shell=True)}                              ,
+{"parent":column_2,"text":"ms2"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms2"]                                                                             ,shell=True)}                              ,
 {"parent":column_2,"text":"Sonarr"      ,"image":icon_sonarr  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads\\@Sonarr"]                                                              ,shell=True)}                              ,
 {"parent":column_2,"text":"Radarr"      ,"image":icon_radarr  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads\\@Radarr"]                                                              ,shell=True)}                              ,
 
