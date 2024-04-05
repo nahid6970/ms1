@@ -404,8 +404,6 @@ def clear_screen():
         print(f"Error clearing screen: {e}")
 
 #!? Main ROOT BOX
-ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
 
 
 def get_cpu_core_usage():
@@ -441,6 +439,8 @@ def determine_color(usage):
 BAR_WIDTH = 8
 BAR_HEIGHT = 25
 # Create a frame to hold the CPU core usage bars and border
+ROOT1 = tk.Frame(ROOT, bg="#1d2027")
+ROOT1.pack(side="right", anchor="ne", pady=(1,2),padx=(3,1))
 
 BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
 BOX_ROW2_ROOT.pack(side="right", anchor="ne", pady=(1,2),padx=(3,1))
@@ -492,7 +492,7 @@ label_properties =[
 {"comment":"#️⃣Disk_D"     ,"text":"Disk_D"               ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (2 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 5  ,"rowspan": 1,"columnspan": 1},#! Disk_D
 {"comment":"#️⃣Upload"     ,"text":"^"                    ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 6  ,"rowspan": 1,"columnspan": 1},#! Upload
 {"comment":"#️⃣Download"   ,"text":"v"                    ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 7  ,"rowspan": 1,"columnspan": 1},#! Download
-{"comment":"#️⃣GitSync"    ,"text":"Git"                  ,"parent": ROOT1,"bg": "#1d2027","fg": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},#! GitSync
+{"comment":"#️⃣GitSync"    ,"text":"\udb80\udea2"                  ,"parent": ROOT1,"bg": "#1d2027","fg": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",16,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},#! GitSync
 {"comment":"#️⃣GitMs1"     ,"text":"m1"                   ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 9  ,"rowspan": 1,"columnspan": 1},#! GitMs1
 {"comment":"#️⃣GitMs2"     ,"text":"m2"                   ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},#! GitMs2
 {"comment":"#️⃣Keyboard"   ,"text":"\udb80\udf0c"         ,"parent":ROOT1 ,"bg":"#FFFFFF" ,"fg":"#1d2027" ,"width":0   ,"height":"0" ,"relief":"flat" ,"font":("JetBrainsMono NF" ,10,"normal"),"ht":0 ,"htc":"#FFFFFF" ,"padx":(0  ,0) ,"pady":(0 ,0),"anchor":"w" ,"row":1 ,"column":11  ,"rowspan":1 ,"columnspan":1} ,
