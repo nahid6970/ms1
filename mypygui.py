@@ -403,6 +403,8 @@ def clear_screen():
     except Exception as e:
         print(f"Error clearing screen: {e}")
 
+BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW2_ROOT.pack(side="left", anchor="ne", pady=(3,2),padx=(3,1))
 
 def get_cpu_core_usage():
     # Get CPU usage for each core
@@ -433,13 +435,8 @@ def determine_color(usage):
         return "#ff9282"  # Light red for usage >= 50%
     else:
         return "#14bcff"  # Default color
-# Constants for bar appearance
 BAR_WIDTH = 8
 BAR_HEIGHT = 25
-
-BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
-BOX_ROW2_ROOT.pack(side="left", anchor="ne", pady=(1,2),padx=(3,1))
-
 cpu_core_frame = tk.Frame(BOX_ROW2_ROOT, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
 cpu_core_frame.pack(side="right", anchor="nw", padx=0, pady=1)
 # Create canvas widgets for CPU core bars
