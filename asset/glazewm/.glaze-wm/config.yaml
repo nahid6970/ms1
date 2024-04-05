@@ -60,10 +60,23 @@ bar:
       displayed_workspace_background: "#00000033"
       default_workspace_background: "transparent"
 
+
   components_center:
     - type: "window title"
 
   components_right:
+
+    - type: "text"
+      text: "Terminal" 
+      margin: 0 5 # Moves it left on top of the previous component
+      left_click_command: "exec pwsh"
+      right_click_command: "exec cmd"
+
+    - type: "text"
+      text: "Sync" 
+      margin: 0 5 # Moves it left on top of the previous component
+      left_click_command: "exec C://ms1//sync.ps1"
+      
     - type: "cpu" #!cpu
       label: "CPU: {percent_usage}%"
       refresh_interval_ms: 1000
@@ -153,9 +166,9 @@ window_rules:
 
   # - command: "resize borders 0px 0px 0px -500px"    #? top right bottom left
   - command: "set width 520px"
-    match_process_name: "/rssguard/"
+    match_process_name: "rssguard"
   - command: "set width 520px"
-    match_title: "/Microsoft Store/"
+    match_title: "Microsoft Store"
 
 
   - command: "ignore"
