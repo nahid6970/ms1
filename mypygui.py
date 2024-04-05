@@ -471,12 +471,8 @@ def format_uptime():
 def update_uptime_label():
     uptime_str = format_uptime()
     uptime_label.config(text=f"{uptime_str}")
-    uptime_label.after(1000, update_uptime_label)  # Update every second
-    # Update uptime label periodically
-BOX_ROW3_ROOT = tk.Frame(ROOT, bg="#1d2027")
-BOX_ROW3_ROOT.pack(side="right", anchor="nw", pady=(5,2),padx=(2,2))
-uptime_label = tk.Label(BOX_ROW3_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="1", relief="flat", highlightthickness=0, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
-uptime_label.pack(side="left", anchor='nw', padx=(0,0), pady=(0,0)) ; update_uptime_label()
+    uptime_label.after(1000, update_uptime_label)
+
 
 def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan, comment=None):
     label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
@@ -485,31 +481,33 @@ def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, pad
     return label
 
 label_properties =[
-{"comment":"#️⃣CPU"        ,"text":"CPU"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1  ,"rowspan": 1,"columnspan": 1},#! CPU
-{"comment":"#️⃣GPU"        ,"text":"GPU"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 2  ,"rowspan": 1,"columnspan": 1},#! GPU
-{"comment":"#️⃣RAM"        ,"text":"RAM"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 3  ,"rowspan": 1,"columnspan": 1},#! RAM
-{"comment":"#️⃣Disk_C"     ,"text":"Disk_C"      ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (4 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 4  ,"rowspan": 1,"columnspan": 1},#! Disk_C
-{"comment":"#️⃣Disk_D"     ,"text":"Disk_D"      ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (2 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 5  ,"rowspan": 1,"columnspan": 1},#! Disk_D
-{"comment":"#️⃣Upload"     ,"text":"^"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 6  ,"rowspan": 1,"columnspan": 1},#! Upload
-{"comment":"#️⃣Download"   ,"text":"v"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 7  ,"rowspan": 1,"columnspan": 1},#! Download
-{"comment":"#️⃣GitSync"    ,"text":"\udb80\udea2","parent": ROOT1,"bg": "#1d2027","fg": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",16,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},#! GitSync
-{"comment":"#️⃣GitMs1"     ,"text":"m1"          ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 9  ,"rowspan": 1,"columnspan": 1},#! GitMs1
-{"comment":"#️⃣GitMs2"     ,"text":"m2"          ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},#! GitMs2
-{"comment":"#️⃣Keyboard"   ,"text":"\udb80\udf0c","parent":ROOT1 ,"bg": "#FFFFFF","fg":"#1d2027" ,"width": 0  ,"height":"0" ,"relief":"flat" ,"font":("JetBrainsMono NF" ,10,"normal"),"ht":0 ,"htc":"#FFFFFF" ,"padx":(0  ,0) ,"pady":(0 ,0),"anchor":"w" ,"row":1 ,"column":11  ,"rowspan":1 ,"columnspan":1} ,
-{"comment":"#️⃣Bar_1"      ,"text":"1"           ,"parent": ROOT1,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 12 ,"rowspan": 1,"columnspan": 1},#! Bar_1
-{"comment":"#️⃣Pin"        ,"text":"\udb81\udc03","parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1},#! Pin
-{"comment":"#️⃣Clear"      ,"text":"\ueabf"      ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1},#! Clear
-{"comment":"#️⃣Get-Info"   ,"text":"G"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1},#! Close
-{"comment":"#️⃣Reload"     ,"text":"Q"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("wingdings 3"     ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 16 ,"rowspan": 1,"columnspan": 1},#! Reload
-{"comment":"#️⃣Line"       ,"text":"T"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("wingdings 3"     ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (3,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1},#! Line
-{"comment":"#️⃣Maximize"   ,"text":"o"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("wingdings"       ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 18 ,"rowspan": 1,"columnspan": 1},#! Maximize
-{"comment":"#️⃣Close"      ,"text":"r"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"        ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 19 ,"rowspan": 1,"columnspan": 1},#! Close
+{"comment":"#️⃣CPU"        ,"text":"CPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :1   ,"rowspan" :1 ,"columnspan" :1},#! CPU
+{"comment":"#️⃣GPU"        ,"text":"GPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :2   ,"rowspan" :1 ,"columnspan" :1},#! GPU
+{"comment":"#️⃣RAM"        ,"text":"RAM"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :3   ,"rowspan" :1 ,"columnspan" :1},#! RAM
+{"comment":"#️⃣Disk_C"     ,"text":"Disk_C"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(4  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :4   ,"rowspan" :1 ,"columnspan" :1},#! Disk_C
+{"comment":"#️⃣Disk_D"     ,"text":"Disk_D"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(2  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :5   ,"rowspan" :1 ,"columnspan" :1},#! Disk_D
+{"comment":"#️⃣Upload"     ,"text":"^"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :6   ,"rowspan" :1 ,"columnspan" :1},#! Upload
+{"comment":"#️⃣Download"   ,"text":"v"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :7   ,"rowspan" :1 ,"columnspan" :1},#! Download
+{"comment":"#️⃣GitSync"    ,"text":"\udb80\udea2"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#009fff","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",16,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(10 ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :8   ,"rowspan" :1 ,"columnspan" :1},#! GitSync
+{"comment":"#️⃣GitMs1"     ,"text":"m1"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :9   ,"rowspan" :1 ,"columnspan" :1},#! GitMs1
+{"comment":"#️⃣GitMs2"     ,"text":"m2"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :10  ,"rowspan" :1 ,"columnspan" :1},#! GitMs2
+{"comment":"#️⃣Keyboard"   ,"text":"\udb80\udf0c"    ,"parent" :ROOT1 ,"bg" :"#FFFFFF" ,"fg":"#1d2027","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"normal"),"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :11  ,"rowspan" :1 ,"columnspan" :1},
+{"comment":"#️⃣Bar_1"      ,"text":"1"               ,"parent" :ROOT1 ,"bg" :"#FFFFFF" ,"fg":"#1d2027","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :12  ,"rowspan" :1 ,"columnspan" :1},#! Bar_1
+{"comment":"#️⃣Pin"        ,"text":"\udb81\udc03"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :13  ,"rowspan" :1 ,"columnspan" :1},#! Pin
+{"comment":"#️⃣Clear"      ,"text":"\ueabf"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :14  ,"rowspan" :1 ,"columnspan" :1},#! Clear
+{"comment":"#️⃣Get-Info"   ,"text":"G"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :15  ,"rowspan" :1 ,"columnspan" :1},#! Close
+{"comment":"#️⃣Reload"     ,"text":"Q"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :16  ,"rowspan" :1 ,"columnspan" :1},#! Reload
+{"comment":"#️⃣Line"       ,"text":"T"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#00FF00","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(3 ,0),"anchor" :"w" ,"row" :1 ,"column" :17  ,"rowspan" :1 ,"columnspan" :1},#! Line
+{"comment":"#️⃣Maximize"   ,"text":"o"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings"       ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :18  ,"rowspan" :1 ,"columnspan" :1},#! Maximize
+{"comment":"#️⃣Close"      ,"text":"r"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("Webdings"        ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :19  ,"rowspan" :1 ,"columnspan" :1},#! Close
+{"comment":"#️⃣Uptime"     ,"text":"Uptime"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"0","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :20  ,"rowspan" :1 ,"columnspan" :1},# ! Uptime
+
 ]
 labels = [create_label(**prop) for prop in label_properties]
-LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST, CLEAR, LB_get, LB_R, LB_L, LB_M, LB_XXX = labels
+LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST, CLEAR, LB_get, LB_R, LB_L, LB_M, LB_XXX, uptime_label  = labels
 
 LB_XXX.bind    ("<Button-1>", close_window)
-LB_get.bind      ("<Button-1>", lambda event: get_active_window_info())
+LB_get.bind    ("<Button-1>", lambda event: get_active_window_info())
 LB_R.bind      ("<Button-1>", restart)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('max'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('line'))
@@ -527,6 +525,7 @@ gui_thread = threading.Thread(target=update_gui, daemon=True)
 status_thread.start()
 gui_thread.start()
 
+update_uptime_label()
 update_info_labels()
 check_window_topmost()
 
