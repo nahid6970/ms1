@@ -150,7 +150,7 @@ screen_height = ROOT.winfo_screenheight()
 x = screen_width//2 - 820//2
 # y = screen_height//2 - 800//2
 y = 0
-ROOT.geometry(f"820x36+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"820x30+{x}+{y}") #! overall size of the window
 
 #! Resize Window
 
@@ -161,7 +161,7 @@ def toggle_window_size(size):
     global y
 
     if size == 'line':
-        ROOT.geometry('820x36')
+        ROOT.geometry('820x30')
         x = screen_width // 2 - 820 // 2
         y = 0
         ROOT.configure(bg='red')
@@ -403,6 +403,10 @@ def clear_screen():
     except Exception as e:
         print(f"Error clearing screen: {e}")
 
+#!? Main ROOT BOX
+ROOT1 = tk.Frame(ROOT, bg="#1d2027")
+ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
+
 
 def get_cpu_core_usage():
     # Get CPU usage for each core
@@ -436,9 +440,10 @@ def determine_color(usage):
 # Constants for bar appearance
 BAR_WIDTH = 8
 BAR_HEIGHT = 25
+# Create a frame to hold the CPU core usage bars and border
 
 BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
-BOX_ROW2_ROOT.pack(side="left", anchor="ne", pady=(1,2),padx=(3,1))
+BOX_ROW2_ROOT.pack(side="right", anchor="ne", pady=(1,2),padx=(3,1))
 
 cpu_core_frame = tk.Frame(BOX_ROW2_ROOT, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
 cpu_core_frame.pack(side="right", anchor="nw", padx=0, pady=1)
@@ -451,6 +456,7 @@ for i in range(psutil.cpu_count()):
     core_bar.pack(side="top")
     cpu_core_bars.append(core_bar)
 update_cpu_core_bars()
+
 
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
@@ -465,8 +471,12 @@ def format_uptime():
 def update_uptime_label():
     uptime_str = format_uptime()
     uptime_label.config(text=f"{uptime_str}")
-    uptime_label.after(1000, update_uptime_label)
-
+    uptime_label.after(1000, update_uptime_label)  # Update every second
+    # Update uptime label periodically
+BOX_ROW3_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW3_ROOT.pack(side="right", anchor="nw", pady=(5,2),padx=(2,2))
+uptime_label = tk.Label(BOX_ROW3_ROOT, text="uptime: 00:00:00", bg="#1d2027", fg="#FFFFFF", height="1", relief="flat", highlightthickness=0, highlightbackground="#1d2027", padx=0, pady=0, font=('JetBrainsMono NF', 10, 'bold'))
+uptime_label.pack(side="left", anchor='nw', padx=(0,0), pady=(0,0)) ; update_uptime_label()
 
 def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan, comment=None):
     label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
@@ -474,36 +484,32 @@ def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, pad
     label.comment = comment  # Store comment in a property of the label
     return label
 
-ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-ROOT1.pack(side="right", anchor="ne", pady=(1,2),padx=(3,1))
-
 label_properties =[
-{"comment":"#️⃣Uptime"     ,"text":"Uptime"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"0","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :1  ,"rowspan" :1 ,"columnspan" :1},# ! Uptime
-{"comment":"#️⃣CPU"        ,"text":"CPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :2  ,"rowspan" :1 ,"columnspan" :1},#! CPU
-{"comment":"#️⃣GPU"        ,"text":"GPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :3  ,"rowspan" :1 ,"columnspan" :1},#! GPU
-{"comment":"#️⃣RAM"        ,"text":"RAM"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :4  ,"rowspan" :1 ,"columnspan" :1},#! RAM
-{"comment":"#️⃣Disk_C"     ,"text":"Disk_C"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(4  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :5  ,"rowspan" :1 ,"columnspan" :1},#! Disk_C
-{"comment":"#️⃣Disk_D"     ,"text":"Disk_D"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(2  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :6  ,"rowspan" :1 ,"columnspan" :1},#! Disk_D
-{"comment":"#️⃣Upload"     ,"text":"^"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :7  ,"rowspan" :1 ,"columnspan" :1},#! Upload
-{"comment":"#️⃣Download"   ,"text":"v"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :8  ,"rowspan" :1 ,"columnspan" :1},#! Download
-{"comment":"#️⃣GitSync"    ,"text":"\udb80\udea2"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#009fff","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",16,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(10 ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :9  ,"rowspan" :1 ,"columnspan" :1},#! GitSync
-{"comment":"#️⃣GitMs1"     ,"text":"m1"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :10  ,"rowspan" :1 ,"columnspan" :1},#! GitMs1
-{"comment":"#️⃣GitMs2"     ,"text":"m2"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :11  ,"rowspan" :1 ,"columnspan" :1},#! GitMs2
-{"comment":"#️⃣Keyboard"   ,"text":"\udb80\udf0c"    ,"parent" :ROOT1 ,"bg" :"#FFFFFF" ,"fg":"#1d2027","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"normal"),"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :12  ,"rowspan" :1 ,"columnspan" :1},#! keyboard
-{"comment":"#️⃣Bar_1"      ,"text":"1"               ,"parent" :ROOT1 ,"bg" :"#FFFFFF" ,"fg":"#1d2027","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :13  ,"rowspan" :1 ,"columnspan" :1},#! Bar_1
-{"comment":"#️⃣Pin"        ,"text":"\udb81\udc03"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :14  ,"rowspan" :1 ,"columnspan" :1},#! Pin
-{"comment":"#️⃣Clear"      ,"text":"\ueabf"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :15  ,"rowspan" :1 ,"columnspan" :1},#! Clear
-{"comment":"#️⃣Get-Info"   ,"text":"G"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :16  ,"rowspan" :1 ,"columnspan" :1},#! Close
-{"comment":"#️⃣Reload"     ,"text":"Q"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :17  ,"rowspan" :1 ,"columnspan" :1},#! Reload
-{"comment":"#️⃣Line"       ,"text":"T"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#00FF00","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(3 ,0),"anchor" :"w" ,"row" :1 ,"column" :18  ,"rowspan" :1 ,"columnspan" :1},#! Line
-{"comment":"#️⃣Maximize"   ,"text":"o"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings"       ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :19  ,"rowspan" :1 ,"columnspan" :1},#! Maximize
-{"comment":"#️⃣Close"      ,"text":"r"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("Webdings"        ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :20  ,"rowspan" :1 ,"columnspan" :1},#! Close
+{"comment":"#️⃣CPU"        ,"text":"CPU"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1  ,"rowspan": 1,"columnspan": 1},#! CPU
+{"comment":"#️⃣GPU"        ,"text":"GPU"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 2  ,"rowspan": 1,"columnspan": 1},#! GPU
+{"comment":"#️⃣RAM"        ,"text":"RAM"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 3  ,"rowspan": 1,"columnspan": 1},#! RAM
+{"comment":"#️⃣Disk_C"     ,"text":"Disk_C"      ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (4 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 4  ,"rowspan": 1,"columnspan": 1},#! Disk_C
+{"comment":"#️⃣Disk_D"     ,"text":"Disk_D"      ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "5","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (2 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 5  ,"rowspan": 1,"columnspan": 1},#! Disk_D
+{"comment":"#️⃣Upload"     ,"text":"^"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 6  ,"rowspan": 1,"columnspan": 1},#! Upload
+{"comment":"#️⃣Download"   ,"text":"v"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ffffff","width": "7","height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (3 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 7  ,"rowspan": 1,"columnspan": 1},#! Download
+{"comment":"#️⃣GitSync"    ,"text":"Git"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#009fff","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (10,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 8  ,"rowspan": 1,"columnspan": 1},#! GitSync
+{"comment":"#️⃣GitMs1"     ,"text":"m1"          ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 9  ,"rowspan": 1,"columnspan": 1},#! GitMs1
+{"comment":"#️⃣GitMs2"     ,"text":"m2"          ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 10 ,"rowspan": 1,"columnspan": 1},#! GitMs2
+{"comment":"#️⃣Keyboard"   ,"text":"\udb80\udf0c","parent":ROOT1 ,"bg":"#FFFFFF" ,"fg":"#1d2027" ,"width":0   ,"height":"0" ,"relief":"flat" ,"font":("JetBrainsMono NF" ,10,"normal"),"ht":0 ,"htc":"#FFFFFF" ,"padx":(0  ,0) ,"pady":(0 ,0),"anchor":"w" ,"row":1 ,"column":11  ,"rowspan":1 ,"columnspan":1} ,
+{"comment":"#️⃣Bar_1"      ,"text":"1"           ,"parent": ROOT1,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 12 ,"rowspan": 1,"columnspan": 1},#! Bar_1
+{"comment":"#️⃣Pin"        ,"text":"Pin"         ,"parent": ROOT1,"bg": "#1d2027","fg": "#FFFFFF","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 13 ,"rowspan": 1,"columnspan": 1},#! Pin
+{"comment":"#️⃣Clear"      ,"text":"Clear"       ,"parent": ROOT1,"bg": "#FFFFFF","fg": "#1d2027","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,10),"pady": (0,0),"anchor": "w","row": 1,"column": 14 ,"rowspan": 1,"columnspan": 1},#! Clear
+{"comment":"#️⃣Get-Info"   ,"text":"G"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("JetBrainsMono NF",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 15 ,"rowspan": 1,"columnspan": 1},#! Close
+{"comment":"#️⃣Reload"     ,"text":"Q"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("wingdings 3"     ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 16 ,"rowspan": 1,"columnspan": 1},#! Reload
+{"comment":"#️⃣Line"       ,"text":"T"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#00FF00","width": 0  ,"height": "0","relief": "flat","font": ("wingdings 3"     ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (3,0),"anchor": "w","row": 1,"column": 17 ,"rowspan": 1,"columnspan": 1},#! Line
+{"comment":"#️⃣Maximize"   ,"text":"o"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#26b2f3","width": 0  ,"height": "0","relief": "flat","font": ("wingdings"       ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,0) ,"pady": (0,0),"anchor": "w","row": 1,"column": 18 ,"rowspan": 1,"columnspan": 1},#! Maximize
+{"comment":"#️⃣Close"      ,"text":"r"           ,"parent": ROOT1,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings"        ,10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 19 ,"rowspan": 1,"columnspan": 1},#! Close
 ]
 labels = [create_label(**prop) for prop in label_properties]
-uptime_label, LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST, CLEAR, LB_get, LB_R, LB_L, LB_M, LB_XXX   = labels
+LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST, CLEAR, LB_get, LB_R, LB_L, LB_M, LB_XXX = labels
 
 LB_XXX.bind    ("<Button-1>", close_window)
-LB_get.bind    ("<Button-1>", lambda event: get_active_window_info())
+LB_get.bind      ("<Button-1>", lambda event: get_active_window_info())
 LB_R.bind      ("<Button-1>", restart)
 LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('max'))
 LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('line'))
@@ -521,7 +527,6 @@ gui_thread = threading.Thread(target=update_gui, daemon=True)
 status_thread.start()
 gui_thread.start()
 
-update_uptime_label()
 update_info_labels()
 check_window_topmost()
 
@@ -534,7 +539,7 @@ check_window_topmost()
 #!  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 BOX_1_2nd = tk.Frame(MAIN_FRAME, bg="#1d2027")
-BOX_1_2nd.pack(pady=(32,0))
+BOX_1_2nd.pack(pady=(30,0))
 
 icon_folder     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
 icon_applist    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
@@ -581,7 +586,7 @@ def create_button(text, frame, bg_color, fg_color, height, width, relief, font, 
     return button
 
 BOX_1 = tk.Frame(FR_FFmpeg, bg="#1d2027")
-BOX_1.pack(side="top", anchor="center", pady=(35,0), padx=(0,0))
+BOX_1.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
 
 button_properties = [
 ("◀ FFMPEG",BOX_1,"#98c379","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0), lambda: switch_to_frame(MAIN_FRAME, FR_FFmpeg)),
@@ -614,7 +619,7 @@ def create_button(text, frame, bg_color, fg_color, height, width, relief, font, 
     return button
 
 BOX_find = tk.Frame(FR_Find, bg="#1d2027")
-BOX_find.pack(side="top", anchor="center", pady=(35,0), padx=(0,0))
+BOX_find.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
 
 button_properties = [
 ("◀ Find",BOX_find,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"),0 ,1,1,7,"ew" ,0 ,0,(1,1),(0,0),lambda: switch_to_frame(MAIN_FRAME, FR_Find)),
