@@ -44,6 +44,7 @@ focus_borders:
 bar:
   height: "36px"
   position: "top"
+  always_on_top: false
   opacity: 1.0
   background: "#475875"
   foreground: "#ffffff"
@@ -71,31 +72,42 @@ bar:
       margin: 0 5 # Moves it left on top of the previous component
       left_click_command: "exec pwsh"
       right_click_command: "exec cmd"
+      background: "#000"
+      foreground: "#fff"
+      padding: 5 0
+      border_width: "1"
+      border_color: "#fff"
 
     - type: "text"
       text: "Sync" 
       margin: 0 5 # Moves it left on top of the previous component
       left_click_command: "exec C://ms1//sync.ps1"
+      background: "#005900"
+      foreground: "#fff"
+      padding: 5 5
+      border_width: "1"
+      border_color: "#fff"
       
-    - type: "cpu" #!cpu
-      label: "CPU: {percent_usage}%"
-      refresh_interval_ms: 1000
-      padding: "5px 5px"
-      background: "#3c8aff"
-      foreground: "#000"
-      font_family: "Comic Sans MS"
-      font_size: "13px"
-      font_weight: 950
+    # - type: "cpu" #!cpu
+    #   label: "CPU: {percent_usage}%"
+    #   refresh_interval_ms: 1000
+    #   padding: "5px 5px"
+    #   background: "#3c8aff"
+    #   foreground: "#000"
+    #   font_family: "Comic Sans MS"
+    #   font_size: "13px"
+    #   font_weight: 950
 
-    - type: "gpu" #!gpu
-      label: "GPU: {percent_usage}%"
-      refresh_interval_ms: 1000
-      padding: "5px 5px"
-      background: "#00f200"
-      foreground: "#000"
-      font_family: "Comic Sans MS"
-      font_size: "13px"
-      font_weight: 950
+    # - type: "gpu" #!gpu
+    #   label: "GPU: {percent_usage}%"
+    #   refresh_interval_ms: 1000
+    #   padding: "5px 5px"
+    #   background: "#00f200"
+    #   foreground: "#000"
+    #   font_family: "Comic Sans MS"
+    #   font_size: "13px"
+    #   font_weight: 950
+
 
     # - type: "system tray"
     - type: "tiling direction" #!tiling dir

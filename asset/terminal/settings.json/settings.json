@@ -38,7 +38,7 @@
         }
     ],
     "autoHideWindow": false,
-    "centerOnLaunch": false,
+    "centerOnLaunch": true,
     "confirmCloseAllTabs": false,
     "copyFormatting": "none",
     "copyOnSelect": false,
@@ -46,7 +46,7 @@
     "disableAnimations": true,
     "firstWindowPreference": "defaultProfile",
     "initialCols": 90,
-    "initialPosition": "450,168",
+    "initialPosition": ",",
     "launchMode": "default",
     "minimizeToNotificationArea": false,
     "newTabMenu": 
