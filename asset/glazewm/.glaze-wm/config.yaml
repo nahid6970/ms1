@@ -167,6 +167,8 @@ window_rules:
     match_title: "/WhatsApp|Task Manager/"
   - command: "ignore"
     match_class_name: "/Qt5152QWindowIcon/"
+  - command: "ignore"
+    match_class_name: "TWizardForm"
     
   - command: "ignore" #!different from the rest
     match_class_name: "Chrome_WidgetWin_1|MozillaDialogClass"
