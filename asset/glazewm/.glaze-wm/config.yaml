@@ -165,6 +165,7 @@ window_rules:
 
   - command: "ignore"
     match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"
+    
   - command: "ignore"
     match_class_name: "ConsoleWindowClass"
 
@@ -174,7 +175,9 @@ window_rules:
   # Task Manager requires admin privileges to manage and should be ignored unless running
   # the WM as admin.
   - command: "ignore"
-    match_process_name: "/SnippingTool|python|fdm|PotPlayerMini64/"
+    match_process_name: "/SnippingTool|python|PotPlayerMini64/"
+  - command: "ignore"
+    match_process_name: "fdm"
   - command: "ignore"
     match_process_name: "qbittorrent"
   - command: "ignore"
