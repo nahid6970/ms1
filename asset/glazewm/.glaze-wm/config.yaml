@@ -68,6 +68,16 @@ bar:
   components_right:
 
     - type: "text"
+      text: "E" 
+      left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
+      background: "#000"
+      foreground: "#fff"
+      margin: 0 2 # Moves it left on top of the previous component
+      padding: 5 5
+      border_width: "1"
+      border_color: "#fff"
+
+    - type: "text"
       text: "Terminal" 
       left_click_command: "exec pwsh"
       right_click_command: "exec cmd"
