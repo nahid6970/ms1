@@ -10,7 +10,7 @@ general:
   toggle_workspace_on_refocus: true
 
   # Whether to show floating windows as always on top.
-  show_floating_on_top: true
+  show_floating_on_top: false
 
   # Amount to move floating windows by (eg. when using `alt+<hjkl>` on a floating window)
   floating_window_move_amount: "5%"
@@ -161,20 +161,22 @@ window_rules:
 
   #! Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
   - command: "set floating"
-    match_class_name: "/#32770|ConsoleWindowClass|CASCADIA_HOSTING_WINDOW_CLASS/"
+    match_class_name: "#32770"
 
-  # - command: "move to workspace terminal"
-  #   match_process_name: "alacritty"
+  - command: "ignore"
+    match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"
+  - command: "ignore"
+    match_class_name: "ConsoleWindowClass"
 
-  # - command: "toggle floating"
-  #   match_process_name: "sioyek"
 
   #! Do not manage picture-in-picture windows for browsers. Note that the default is for
   # English; change `match_title` to the window's title if you use another language.
   # Task Manager requires admin privileges to manage and should be ignored unless running
   # the WM as admin.
   - command: "ignore"
-    match_process_name: "/SnippingTool|python|qbittorrent|fdm|PotPlayerMini64/"
+    match_process_name: "/SnippingTool|python|fdm|PotPlayerMini64/"
+  - command: "ignore"
+    match_process_name: "qbittorrent"
   - command: "ignore"
     match_title: "/WhatsApp|Task Manager/"
   - command: "ignore"
