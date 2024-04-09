@@ -233,3 +233,44 @@ binding_modes:
       # Press enter/escape to return to default keybindings.
       - command: "binding mode none"
         bindings: ["Escape", "Enter"]
+
+keybindings:
+  #! Shift focus in a given direction.
+  #? - command: "focus left"
+  #?   bindings: ["Alt+H", "Alt+Left"]
+  #? - command: "focus right"
+  #?   bindings: ["Alt+L", "Alt+Right"]
+  #? - command: "focus up"
+  #?   bindings: ["Alt+K", "Alt+Up"]
+  #? - command: "focus down"
+  #?   bindings: ["Alt+J", "Alt+Down"]
+
+  #! Move focused window in a given direction.
+  #? - command: "move left"
+  #?   bindings: ["Alt+Shift+H", "Alt+Shift+Left"]
+  #? - command: "move right"
+  #?   bindings: ["Alt+Shift+L", "Alt+Shift+Right"]
+  #? - command: "move up"
+  #?   bindings: ["Alt+Shift+K", "Alt+Shift+Up"]
+  #? - command: "move down"
+  #?   bindings: ["Alt+Shift+J", "Alt+Shift+Down"]
+
+  # Move focused window to a workspace defined in `workspaces` config.
+  - commands: ["move to workspace 1", "focus workspace 1"]
+    binding: "Alt+Shift+1"
+  - commands: ["move to workspace 2", "focus workspace 2"]
+    binding: "Alt+Shift+2"
+  - commands: ["move to workspace 3", "focus workspace 3"]
+    binding: "Alt+Shift+3"
+  - commands: ["move to workspace 4", "focus workspace 4"]
+    binding: "Alt+Shift+4"
+  - commands: ["move to workspace 5", "focus workspace 5"]
+    binding: "Alt+Shift+5"
+  - commands: ["move to workspace 6", "focus workspace 6"]
+    binding: "Alt+Shift+6"
+  - commands: ["move to workspace 7", "focus workspace 7"]
+    binding: "Alt+Shift+7"
+  - commands: ["move to workspace 8", "focus workspace 8"]
+    binding: "Alt+Shift+8"
+  - commands: ["move to workspace 9", "focus workspace 9"]
+    binding: "Alt+Shift+9"
