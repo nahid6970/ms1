@@ -90,7 +90,7 @@ bar:
 
     - type: "text"
       text: "Sync" 
-      left_click_command: "exec C://ms1//sync.ps1"
+      left_click_command: "exec 'C://ms1//sync.ps1'"
       background: "#005900"
       foreground: "#fff"
       margin: 0 2 # Moves it left on top of the previous component

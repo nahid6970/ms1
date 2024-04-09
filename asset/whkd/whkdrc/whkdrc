@@ -110,7 +110,8 @@ Alt + S  :glazewm command '"move workspace down"'
 #*  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
 
 Alt + return :glazewm command '"exec cmd"'
-Alt + G :   Start-Process 'glazewm.exe' -WindowStyle hidden
+Alt + G      :Start-Process 'glazewm.exe' -WindowStyle hidden
+alt + x      :Start-Process pwsh -Verb RunAs
 
 
 

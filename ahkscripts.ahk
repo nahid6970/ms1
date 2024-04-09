@@ -130,34 +130,8 @@ return
 ; }
 ; return
 
-; ; !alt2 🎯 Launch My PWSHGui
-; 🎯 Launch My PWSHGui
-#!x:: 
-IfWinExist, ahk_exe pwsh.exe
-{
-    ; If pwsh window exists, activate it
-    WinActivate
-}
-else
-{
-    ; If pwsh window does not exist, run the pwsh script
-    Run, pwsh.exe -File "C:\ms1\scripts\mypwshgui.ps1"
-}
-return
 
 
-
-; 🎯 Launch TaskManager
-#z::
-Run, taskmgr
-return
-
-
-
-; 🎯 Launch Pwsh
-!x:: ; alt + x
-Run, %comspec% /c cd %USERPROFILE% && pwsh
-return
 
 ; 🎯 Launch Pwsh in admin mode
 ^!x::
