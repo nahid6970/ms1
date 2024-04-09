@@ -191,7 +191,7 @@ def on_windows_x_pressed():
 # Initial window size state
 window_size_state = 'line'
 # Bind Windows + X to toggle between 'line' and 'max' sizesx
-keyboard.add_hotkey('win+x', on_windows_x_pressed)
+#! keyboard.add_hotkey('win+x', on_windows_x_pressed)
 
 # x = screen_width//2 - 753//2
 # y = 0

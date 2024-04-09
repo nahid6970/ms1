@@ -65,7 +65,7 @@ Alt+9  :glazewm command '"focus workspace 9"'
 
 #? Move focused workspace to a monitor in a given direction.
 Alt + A  :glazewm command '"move workspace left"'
-Alt + F  :glazewm command '"move workspace right"'
+# Alt + F  :glazewm command '"move workspace right"'
 Alt + D  :glazewm command '"move workspace up"'
 Alt + S  :glazewm command '"move workspace down"'
 

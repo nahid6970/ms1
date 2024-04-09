@@ -33,110 +33,37 @@
 
 
 ; ; ;! alt1 🎯 Launch My PYGui
-; #x:: 
-; IfWinExist, ahk_exe python.exe
-; {
-; WinActivate
-; }
-; else
-; {
-; Run, "C:\ms1\mypygui.py"
-; }
-; return
-
-
-
-; ; ;! alt1 🎯 Launch My PYGui
-; #x:: 
-; Run, "C:\ms1\mypygui.py"
-; return
-
-; ; ; ;! alt1 🎯 Launch My PYGui
-; #x::
-; Run, pwsh.exe /c python C:\ms1\mypygui.py
-; return
-
-
-;!alt2 🎯 Launch My PYGui
-; #x::
-; Run, powershell.exe -NoExit -Command "cd ~; python C:\ms1\mypygui.py"
-; return
-
-
-; ;!alt3 🎯 Launch My PYGui
-; #x:: 
-; IfWinExist, ahk_exe python.exe
-; {
-;     ; If Python is running, find its process ID (PID)
-;     WinGet, pid, PID, ahk_exe python.exe
-;     ; If PID is found, terminate the process
-;     if (pid)
-;         Process, Close, %pid%
-; }
-; ; Run My PYGui script
-; Run, "C:\ms1\mypygui.py"
-; return
-
-; ;!alt4 🎯 Launch My PYGui
-; #x::
-; IfWinExist, ahk_exe python.exe
-; {
-;     ; If Python is running, find its process ID (PID)
-;     WinGet, pid, PID, ahk_exe python.exe
-;     ; If PID is found, check if it's one of the allowed scripts
-;     if (pid) {
-;         ; Get the full path of the process
-;         Process, Exist, %pid%
-;         fullPath := ErrorLevel
-;         ; Check if the process path matches the excluded scripts
-;         if !(InStr(fullPath, "C:\ms1\mypygui.py"))
-;             Process, Close, %pid%
-;     }
-; }
-; ; Run My PYGui script
-; Run, "C:\ms1\mypygui.py"
-; return
-
-
-; ;!alt4 🎯 Launch My PYGui
-; Initialize a flag to keep track of whether the script has been launched
-Launched := false
-
-; Define a hotkey (Win + X) to launch the script
-#x::
-; Check if the script has already been launched
-if (!Launched) {
-    ; Check if Python is running
-    IfWinNotExist, ahk_exe python.exe
-    {
-        ; Run the Python script
-        Run, "C:\ms1\mypygui.py"
-        ; Set the flag to indicate that the script has been launched
-        Launched := true
-    }
+#x:: 
+IfWinExist, ahk_exe python.exe
+{
+WinActivate
+}
+else
+{
+Run, "C:\ms1\mypygui.py"
 }
 return
 
 
-; ;!alt1 ; 🎯 Launch My PWSHGui
-; #!x:: 
-; IfWinExist, ahk_exe python.exe
-; {
-; WinActivate
-; }
-; else
-; {
-; Run, "C:\ms1\scripts\mypwshgui.ps1"
+; ;!🎯 Launch My PYGui
+; ; Initialize a flag to keep track of whether the script has been launched
+; Launched := false
+
+; ; Define a hotkey (Win + X) to launch the script
+; #x::
+; ; Check if the script has already been launched
+; if (!Launched) {
+;     ; Check if Python is running
+;     IfWinNotExist, ahk_exe python.exe
+;     {
+;         ; Run the Python script
+;         Run, "C:\ms1\mypygui.py"
+;         ; Set the flag to indicate that the script has been launched
+;         Launched := true
+;     }
 ; }
 ; return
 
-
-
-
-; 🎯 Launch Pwsh in admin mode
-^!x::
-Run, %comspec% /c cd %USERPROFILE% && start "" powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process pwsh -Verb RunAs"
-return
 
 
 ; 🎯 Always on Top

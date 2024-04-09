@@ -172,6 +172,8 @@ window_rules:
   - command: "ignore"
     match_process_name: "PowerToys.Settings"
 
+  - command: "ignore"
+    match_process_name: "PowerToys.Settings"
 
 
   #! Do not manage picture-in-picture windows for browsers. Note that the default is for
