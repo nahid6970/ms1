@@ -167,7 +167,9 @@ def show_options(options):
 
 # Define applications and their information
 applications = [
+{"name": "whkd","scoop_name": "whkd","scoop_path": r'C:\Users\nahid\scoop\apps\whkd\current\whkd.exe',"winget_name": "WingetName","winget_path": r"xx"} ,
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
+{"name": "komorebi","scoop_name": "komorebi","scoop_path": r'C:\Users\nahid\scoop\apps\komorebi\current\komorebi.exe',"winget_name": "WingetName","winget_path": r"xx"} ,
 {"name": "ExplorerPatcher","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "ExplorerPatcher","winget_path": r"xx"} ,
 {"name": "GlazeWM","scoop_name": "glazewm","scoop_path": r'C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe',"winget_name": "GlazeWM","winget_path": r"xx"} ,
 {"name": "X-Mouse Button Control","scoop_name": "xmousebuttoncontrol","scoop_path": r'xx',"winget_name": "Highresolution.X-MouseButtonControl","winget_path": r"C:\Program Files\Highresolution Enterprises\X-Mouse Button Control\XMouseButtonControl.exe"} ,
