@@ -34,27 +34,27 @@ Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 #$nvim_dst     = "C:\ms1\asset\neovim\init.lua"
 
 
-function Create_DirectoryIfNotExists { param( [string]$Path ) if (-not (Test-Path $Path -PathType Container)) { New-Item -ItemType Directory -Force -Path $Path } }
+function create_dir { param( [string]$Path ) if (-not (Test-Path $Path -PathType Container)) { New-Item -ItemType Directory -Force -Path $Path } }
 
 
 function glazewm {
     $glazewm_src = @( "C:\Users\nahid\.glaze-wm\" )
     $glazewm_dst = "C:\ms1\asset\glazewm"
-    Create_DirectoryIfNotExists -Path $glazewm_dst
+    create_dir -Path $glazewm_dst
     $glazewm_src | ForEach-Object { Copy-Item -Path $_ -Destination $glazewm_dst -Recurse -Force }
 }
 
 function nilesoft_shell {
     $nilesoftshell_src = @( "C:\Program Files\Nilesoft Shell\shell.nss" , "C:\Program Files\Nilesoft Shell\imports" )
     $nilesoftshell_dst = "C:\ms1\asset\nilesoft_shell"
-    Create_DirectoryIfNotExists -Path $nilesoftshell_dst
+    create_dir -Path $nilesoftshell_dst
     $nilesoftshell_src | ForEach-Object { Copy-Item -Path $_ -Destination $nilesoftshell_dst -Recurse -Force }
 }
 
 function Command_History {
     $history_src = "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
     $history_dst = "C:\Users\nahid\OneDrive\backup\"
-    Create_DirectoryIfNotExists -Path $history_dst
+    create_dir -Path $history_dst
     Copy-Item -Path $history_src -Destination $history_dst
 }
 
@@ -62,84 +62,84 @@ function Command_History {
 function terminal {
     $terminal_src = "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
     $terminal_dst = "C:\ms1\asset\terminal\settings.json"
-    Create_DirectoryIfNotExists -Path $terminal_dst
+    create_dir -Path $terminal_dst
     Copy-Item -Path $terminal_src -Destination $terminal_dst
 }
 
 function rclone_config {
     $rclone_src    = "C:\Users\nahid\scoop\apps\rclone\current\rclone.conf"
     $rclone_dst    = "C:\Users\nahid\OneDrive\backup\rclone\"
-    Create_DirectoryIfNotExists -Path $rclone_dst
+    create_dir -Path $rclone_dst
     Copy-Item -Path $rclone_src -Destination $rclone_dst
 }
 
 function pwsh_profile  {
     $pwsh_src      = "C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
     $pwsh_dst      = "C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1"
-    # Create_DirectoryIfNotExists -Path $pwsh_dst
+    # create_dir -Path $pwsh_dst
     Copy-Item -Path $pwsh_src -Destination $pwsh_dst
 }
 
 function sonarr {
     $sonar_src = @( "C:\ProgramData\Sonarr\sonarr.db" , "C:\ProgramData\Sonarr\config.xml" )
     $sonar_dst = "D:\software\@MustApp\@ARR\sonar_backup\"
-    Create_DirectoryIfNotExists -Path $sonar_dst
+    create_dir -Path $sonar_dst
     Copy-Item -Path $sonar_src -Destination $sonar_dst
 }
 
 function radarr {
     $radar_src = @( "C:\ProgramData\Radarr\radarr.db" , "C:\ProgramData\Radarr\config.xml" )
     $radar_dst = "D:\software\@MustApp\@ARR\radar_backup\"
-    Create_DirectoryIfNotExists -Path $radar_dst
+    create_dir -Path $radar_dst
     Copy-Item -Path $radar_src -Destination $radar_dst
 }
 
 function prowlarr {
     $prowlar_src = @( "C:\ProgramData\Prowlarr\prowlarr.db" , "C:\ProgramData\Prowlarr\config.xml" )
     $prowlar_dst = "D:\software\@MustApp\@ARR\prowlar_backup\"
-    Create_DirectoryIfNotExists -Path $prowlar_dst
+    create_dir -Path $prowlar_dst
     Copy-Item -Path $prowlar_src -Destination $prowlar_dst
 }
 
 function bazarr {
     $bazarr_src = @( "C:\ProgramData\Bazarr\data\db" , "C:\ProgramData\Bazarr\data\config" )
     $bazarr_dst = "D:\software\@MustApp\@ARR\bazarr_backup\"
-    Create_DirectoryIfNotExists -Path $bazarr_dst
+    create_dir -Path $bazarr_dst
     $bazarr_src | ForEach-Object { Copy-Item -Path $_ -Destination $bazarr_dst -Recurse -Force }
 }
 
 function rssguard {
     $rssguard_src = @( "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" , "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" )
     $rssguard_dst = "C:\Users\nahid\OneDrive\backup\rssguard"
-    Create_DirectoryIfNotExists -Path $rssguard_dst
+    create_dir -Path $rssguard_dst
     $rssguard_src | ForEach-Object { Copy-Item -Path $_ -Destination $rssguard_dst -Recurse -Force }
 }
 
 function espanso {
     $espanso_src = @( "C:\Users\nahid\AppData\Roaming\espanso\config\default.yml" , "C:\Users\nahid\AppData\Roaming\espanso\match\base.yml" )
     $espanso_dst = "C:\Users\nahid\OneDrive\backup\espanso\"
-    Create_DirectoryIfNotExists -Path $espanso_dst
+    create_dir -Path $espanso_dst
     Copy-Item -Path $espanso_src -Destination $espanso_dst -Force
 }
 
 function whisparr {
     $whisparr_src = @( "C:\ProgramData\Whisparr\config.xml" , "C:\ProgramData\Whisparr\whisparr2.db" )
     $whisparr_dst = "D:\software\@MustApp\@ARR\whisparr_backup\"
-    Create_DirectoryIfNotExists -Path $whisparr_dst
+    create_dir -Path $whisparr_dst
     Copy-Item -Path $whisparr_src -Destination $whisparr_dst
 }
 
 function jellyfin {
     $jellyfin_src = @( "C:\ProgramData\Jellyfin\Server\config" , "C:\ProgramData\Jellyfin\Server\data\jellyfin.db" , "C:\ProgramData\Jellyfin\Server\data\library.db" )
     $jellyfin_dst = "D:\software\@MustApp\@ARR\jellyfin_backup\"
-    Create_DirectoryIfNotExists -Path $jellyfin_dst
+    create_dir -Path $jellyfin_dst
     Copy-Item -Path $jellyfin_src -Destination $jellyfin_dst -Force
 }
 
 function filezilla {
     $filezilla_src = @( "C:\ProgramData\filezilla-server\users.xml" , "C:\ProgramData\filezilla-server\allowed_ips.xml" , "C:\ProgramData\filezilla-server\disallowed_ips.xml" , "C:\ProgramData\filezilla-server\groups.xml" , "C:\ProgramData\filezilla-server\settings.xml" )
     $filezilla_dst = "C:\Users\nahid\OneDrive\backup\filezilla_server\"
-    Create_DirectoryIfNotExists -Path $filezilla_dst
+    create_dir -Path $filezilla_dst
     Copy-Item -Path $filezilla_src -Destination $filezilla_dst -Force
 }
 
@@ -162,8 +162,8 @@ glazewm
 Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
 
-
-
+create_dir -Path  C:\ms1\asset\whkd\whkdrc
+Copy-Item -Path "C:\Users\nahid\.config\whkdrc" -Destination "C:\ms1\asset\whkd\whkdrc" -Recurse -Force -Verbose
 
 
 # Git-Run

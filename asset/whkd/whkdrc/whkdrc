@@ -1,0 +1,185 @@
+.shell pwsh
+
+# Reload whkd configuration
+# alt + o                 : taskkill /f /im whkd.exe && start /b whkd # if shell is cmd
+alt + o                 : taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
+alt + shift + o         : taskkill /f /im whkd.exe
+
+
+
+
+#?   ██████╗ ██╗      █████╗ ███████╗███████╗██╗    ██╗███╗   ███╗
+#?  ██╔════╝ ██║     ██╔══██╗╚══███╔╝██╔════╝██║    ██║████╗ ████║
+#?  ██║  ███╗██║     ███████║  ███╔╝ █████╗  ██║ █╗ ██║██╔████╔██║
+#?  ██║   ██║██║     ██╔══██║ ███╔╝  ██╔══╝  ██║███╗██║██║╚██╔╝██║
+#?  ╚██████╔╝███████╗██║  ██║███████╗███████╗╚███╔███╔╝██║ ╚═╝ ██║
+#?   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚══╝╚══╝ ╚═╝     ╚═╝
+
+alt + shift + r         : glazewm command '"reload config"'   #! Re-evaluate configuration file.
+alt + shift + e         : glazewm command '"exit wm"'         #! Kill GlazeWM process safely.
+alt + shift + q         : glazewm command '"close"'           #! Close focused window.
+
+# Resize focused window by a percentage or pixel amount.
+Alt + u : glazewm command '"resize width -2%"'
+Alt + p : glazewm command '"resize width +2%"'
+# Alt + o : glazewm command '"resize width +2%"'
+Alt + i : glazewm command '"resize width -2%"'
+
+#! Change tiling direction. This determines where new tiling windows will be inserted.
+Alt + V : glazewm command '"tiling direction toggle"'
+
+#! As an alternative to the resize keybindings above, resize mode enables resizing via
+#! HJKL or arrow keys. The binding mode is defined above with the name "resize".
+Alt + R : glazewm command '"binding mode resize"'
+
+#! Change focus between floating / tiling windows.
+Alt + Space : glazewm command '"focus mode toggle"'
+
+#! Change the focused window to be floating / tiling.
+Alt + Shift + Space : glazewm command '"toggle floating"'
+
+#! Change the focused window to be maximized / unmaximized.
+# Alt + X : glazewm command '"toggle maximized"' #! used by ahk
+
+#! Minimize focused window.
+Alt + M : glazewm command '"set minimized"'
+
+#! Focus the workspace that last had focus.
+Alt + Y : glazewm command '"focus workspace recent"'
+
+
+#! Focus the next/previous workspace defined in `workspaces` config.
+Alt + T          :glazewm command '"focus workspace next"'
+Alt + Shift + T  :glazewm command '"focus workspace prev"'
+
+#! Change focus to a workspace defined in `workspaces` config.
+Alt+1  :glazewm command '"focus workspace 1"'
+Alt+2  :glazewm command '"focus workspace 2"'
+Alt+3  :glazewm command '"focus workspace 3"'
+Alt+4  :glazewm command '"focus workspace 4"'
+Alt+5  :glazewm command '"focus workspace 5"'
+Alt+6  :glazewm command '"focus workspace 6"'
+Alt+7  :glazewm command '"focus workspace 7"'
+Alt+8  :glazewm command '"focus workspace 8"'
+Alt+9  :glazewm command '"focus workspace 9"'
+
+#! Move focused workspace to a monitor in a given direction.
+Alt+A  :glazewm command '"move workspace left"'
+Alt+F  :glazewm command '"move workspace right"'
+Alt+D  :glazewm command '"move workspace up"'
+Alt+S  :glazewm command '"move workspace down"'
+
+#! Move focused window to a workspace defined in `workspaces` config.
+Alt+Shift+1  :glazewm command '"move to workspace 1", "focus workspace 1"'
+Alt+Shift+2  :glazewm command '"move to workspace 2", "focus workspace 2"'
+Alt+Shift+3  :glazewm command '"move to workspace 3", "focus workspace 3"'
+Alt+Shift+4  :glazewm command '"move to workspace 4", "focus workspace 4"'
+Alt+Shift+5  :glazewm command '"move to workspace 5", "focus workspace 5"'
+Alt+Shift+6  :glazewm command '"move to workspace 6", "focus workspace 6"'
+Alt+Shift+7  :glazewm command '"move to workspace 7", "focus workspace 7"'
+Alt+Shift+8  :glazewm command '"move to workspace 8", "focus workspace 8"'
+Alt+Shift+9  :glazewm command '"move to workspace 9", "focus workspace 9"'
+
+#   #! Shift focus in a given direction.
+#   #? - command: "focus left"
+#   #?   bindings: ["Alt+H", "Alt+Left"]
+#   #? - command: "focus right"
+#   #?   bindings: ["Alt+L", "Alt+Right"]
+#   #? - command: "focus up"
+#   #?   bindings: ["Alt+K", "Alt+Up"]
+#   #? - command: "focus down"
+#   #?   bindings: ["Alt+J", "Alt+Down"]
+
+#   #! Move focused window in a given direction.
+#   #? - command: "move left"
+#   #?   bindings: ["Alt+Shift+H", "Alt+Shift+Left"]
+#   #? - command: "move right"
+#   #?   bindings: ["Alt+Shift+L", "Alt+Shift+Right"]
+#   #? - command: "move up"
+#   #?   bindings: ["Alt+Shift+K", "Alt+Shift+Up"]
+#   #? - command: "move down"
+#   #?   bindings: ["Alt+Shift+J", "Alt+Shift+Down"]
+
+
+
+#*  ██╗      █████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗
+#*  ██║     ██╔══██╗██║   ██║████╗  ██║██╔════╝██║  ██║
+#*  ██║     ███████║██║   ██║██╔██╗ ██║██║     ███████║
+#*  ██║     ██╔══██║██║   ██║██║╚██╗██║██║     ██╔══██║
+#*  ███████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╗██║  ██║
+#*  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
+
+Alt + return :glazewm command '"exec cmd"'
+Alt + G :   Start-Process 'glazewm.exe' -WindowStyle hidden
+
+
+
+
+
+# App shortcuts - these require shell to be pwsh / powershell
+# The apps will be focused if open, or launched if not open
+# alt + f                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
+# alt + b                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
+# alt + shift + o         : komorebic reload-configuration
+
+
+
+
+#!  ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗ ██████╗
+#!  ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║██╔════╝
+#!  █████╔╝ ██║   ██║██╔████╔██║██║   ██║██████╔╝█████╗  ██████╔╝██║██║     
+#!  ██╔═██╗ ██║   ██║██║╚██╔╝██║██║   ██║██╔══██╗██╔══╝  ██╔══██╗██║██║     
+#!  ██║  ██╗╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║███████╗██████╔╝██║╚██████╗
+#!  ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝ ╚═════╝
+
+# Focus windows
+alt + h                 : komorebic focus left
+alt + j                 : komorebic focus down
+alt + k                 : komorebic focus up
+alt + l                 : komorebic focus right
+alt + shift + oem_4     : komorebic cycle-focus previous # oem_4 is [
+alt + shift + oem_6     : komorebic cycle-focus next # oem_6 is ]
+
+# Move windows
+alt + shift + h         : komorebic move left
+alt + shift + j         : komorebic move down
+alt + shift + k         : komorebic move up
+# alt + shift + l         : komorebic move right
+alt + shift + return    : komorebic promote
+
+# Stack windows
+# alt + left              : komorebic stack left
+# alt + down              : komorebic stack down
+# alt + up                : komorebic stack up
+# alt + right             : komorebic stack right
+# alt + oem_1             : komorebic unstack # oem_1 is ;
+# alt + oem_4             : komorebic cycle-stack previous # oem_4 is [
+# alt + oem_6             : komorebic cycle-stack next # oem_6 is ]
+
+# Resize
+alt + oem_plus          : komorebic resize-axis horizontal increase
+alt + oem_minus         : komorebic resize-axis horizontal decrease
+alt + shift + oem_plus  : komorebic resize-axis vertical increase
+alt + shift + oem_minus : komorebic resize-axis vertical decrease
+
+# Manipulate windows
+# alt + t                 : komorebic toggle-float
+alt + shift + f         : komorebic toggle-monocle
+
+# Window manager options
+# alt + shift + r         : komorebic retile
+# alt + p                 : komorebic toggle-pause
+
+# Layouts
+# alt + x                 : komorebic flip-layout horizontal
+# alt + y                 : komorebic flip-layout vertical
+
+# Workspaces
+# alt + 1                 : komorebic focus-workspace 0
+# alt + 2                 : komorebic focus-workspace 1
+# alt + 3                 : komorebic focus-workspace 2
+
+# Move windows across workspaces
+# alt + shift + 1         : komorebic move-to-workspace 0K
+# alt + shift + 2         : komorebic move-to-workspace 1K
+# alt + shift + 3         : komorebic move-to-workspace 2
