@@ -147,36 +147,6 @@ return
 
 
 
-
-#b:: ; Win + V
-Run, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
-return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#v:: ; Win + V
-Run, C:\ms1\scripts\valorant\valo.ahk
-return
-
-
-
-
-
-
 ; 🎯 Launch TaskManager
 #z::
 Run, taskmgr
