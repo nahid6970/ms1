@@ -143,21 +143,21 @@ function filezilla {
     Copy-Item -Path $filezilla_src -Destination $filezilla_dst -Force
 }
 
-# espanso
-# filezilla
-# jellyfin
-# whisparr
-bazarr
+#! espanso
+#! filezilla
+#! jellyfin
+#! whisparr
+# bazarr
+# prowlarr
+# radarr
+# sonarr
 Command_History
-prowlarr
-radarr
-rssguard
-sonarr
+glazewm
+nilesoft_shell
 pwsh_profile
 rclone_config
+rssguard
 terminal
-nilesoft_shell
-glazewm
 
 Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 

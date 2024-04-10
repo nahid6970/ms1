@@ -14,7 +14,8 @@ function powertoys             {if (Test-Path "C:\Users\nahid\AppData\Local\Powe
 function prowlarr              {C:\ProgramData\Prowlarr\bin\Prowlarr.exe }
 function radarr                {C:\ProgramData\Radarr\bin\Radarr.exe }
 function arr_monitor           {Start-Process "C:\ms1\arr_monitor.ps1" -WindowStyle Hidden }
-function GlazeWM           {Start-Process "C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe" -WindowStyle Hidden }
+function GlazeWM               {Start-Process "C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe" -WindowStyle Hidden }
+function whkd                  {Start-Process "C:\Users\nahid\scoop\apps\whkd\current\whkd.exe" -WindowStyle Hidden }
 function rssowl                {Start-Process "C:\RSSOwlnix\RSSOwlnix.exe" -WindowStyle Minimized }
 function sonarr                {C:\ProgramData\Sonarr\bin\Sonarr.exe }
 function sync                  {Start-Process "C:\ms1\sync.ps1" }
@@ -44,3 +45,4 @@ prowlarr
 radarr
 sonarr
 sync
+whkd
