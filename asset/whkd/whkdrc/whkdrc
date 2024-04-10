@@ -12,9 +12,25 @@ alt + shift + o         : taskkill /f /im whkd.exe
 #*  ███████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╗██║  ██║
 #*  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
 
-Alt + return :glazewm command '"exec cmd"'
-Alt + G      :Start-Process 'glazewm.exe' -WindowStyle hidden
 alt + x      :Start-Process pwsh -Verb RunAs
+
+#?   ██████╗ ██╗      █████╗ ███████╗███████╗██╗    ██╗███╗   ███╗
+#?  ██╔════╝ ██║     ██╔══██╗╚══███╔╝██╔════╝██║    ██║████╗ ████║
+#?  ██║  ███╗██║     ███████║  ███╔╝ █████╗  ██║ █╗ ██║██╔████╔██║
+#?  ██║   ██║██║     ██╔══██║ ███╔╝  ██╔══╝  ██║███╗██║██║╚██╔╝██║
+#?  ╚██████╔╝███████╗██║  ██║███████╗███████╗╚███╔███╔╝██║ ╚═╝ ██║
+#?   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚══╝╚══╝ ╚═╝     ╚═╝
+
+ALT+NUMPAD4 : glazewm command '"move left"'
+ALT+NUMPAD6 : glazewm command '"move right"'
+ALT+NUMPAD8 : glazewm command '"move up"'
+ALT+NUMPAD2 : glazewm command '"move down"'
+
+Alt + G          : Start-Process 'glazewm.exe' -WindowStyle hidden #start glazewm
+Alt + Shift + E  : glazewm command '"exit wm"'                     #Kill GlazeWM process safely.
+Alt + Shift + Q  : glazewm command '"close"'                       #Close focused window.
+Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate configuration file.
+
 
 #!  ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗ ██████╗
 #!  ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║██╔════╝

@@ -220,6 +220,8 @@ window_rules:
  
 
 
+
+
 binding_modes:
   - name: "resize"
     keybindings:
@@ -237,16 +239,6 @@ binding_modes:
         bindings: ["Escape", "Enter"]
 
 keybindings:
-  #! Shift focus in a given direction.
-  - command: "move left"
-    bindings: ["Alt+H", "Alt+Left"]
-  - command: "move right"
-    bindings: ["Alt+L", "Alt+Right"]
-  - command: "move up"
-    bindings: ["Alt+K", "Alt+Up"]
-  - command: "move down"
-    bindings: ["Alt+J", "Alt+Down"]
-
   #! Resize focused window by a percentage or pixel amount.
   # - command: "resize width -2%"
   #   binding: "Alt+U"
@@ -281,18 +273,6 @@ keybindings:
   # Minimize focused window.
   - command: "set minimized"
     binding: "Alt+M"
-
-  # Close focused window.
-  - command: "close"
-    binding: "Alt+Shift+Q"
-
-  # Kill GlazeWM process safely.
-  - command: "exit wm"
-    binding: "Alt+Shift+E"
-
-  # Re-evaluate configuration file.
-  - command: "reload config"
-    binding: "Alt+Shift+R"
 
   # Focus the next/previous workspace defined in `workspaces` config.
   - command: "focus workspace next"
