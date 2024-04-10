@@ -182,14 +182,25 @@ window_rules:
   # the WM as admin.
   - command: "ignore"
     match_process_name: "/SnippingTool|python|PotPlayerMini64/"
+
   - command: "ignore"
     match_process_name: "fdm"
+
   - command: "ignore"
     match_process_name: "qbittorrent"
+
   - command: "ignore"
-    match_title: "/WhatsApp|Task Manager/"
+    match_process_name: "RadeonSoftware"
+
   - command: "ignore"
-    match_class_name: "/Qt5152QWindowIcon/"
+    match_title: "WhatsApp"
+
+  - command: "ignore"
+    match_title: "Task Manager"
+
+  - command: "ignore"
+    match_class_name: "Qt5152QWindowIcon"
+
   - command: "ignore"
     match_class_name: "TWizardForm"
     
@@ -204,9 +215,9 @@ window_rules:
   # - command: "resize borders 0px 0px 0px -500px"    #? top right bottom left
   - command: "set width 520px"
     match_process_name: "rssguard"
+    
   - command: "set width 520px"
     match_title: "Microsoft Store"
-
 
   - command: "ignore"
     match_process_name: "Riot Client"
@@ -215,8 +226,8 @@ window_rules:
   #   match_process_name: "VALORANT-Win64-Shipping"
 
 #!here only this 2 application will be splitted horizontally
-  - command: "tiling direction vertical"
-    match_process_name: "rssguard"
+  # - command: "tiling direction vertical"
+  #   match_process_name: "rssguard"
  
 
 
