@@ -2,8 +2,8 @@
 
 # Reload whkd configuration
 # alt + o                 : taskkill /f /im whkd.exe && start /b whkd # if shell is cmd
-alt + o                 : taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
-alt + shift + o         : taskkill /f /im whkd.exe
+ALT + O                 : taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
+ALT + SHIFT + O         : taskkill /f /im whkd.exe
 
 #*  ██╗      █████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗
 #*  ██║     ██╔══██╗██║   ██║████╗  ██║██╔════╝██║  ██║
@@ -12,7 +12,7 @@ alt + shift + o         : taskkill /f /im whkd.exe
 #*  ███████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╗██║  ██║
 #*  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
 
-alt + x      :Start-Process pwsh -Verb RunAs
+ALT + X      :Start-Process pwsh -Verb RunAs
 
 #?   ██████╗ ██╗      █████╗ ███████╗███████╗██╗    ██╗███╗   ███╗
 #?  ██╔════╝ ██║     ██╔══██╗╚══███╔╝██╔════╝██║    ██║████╗ ████║
@@ -21,16 +21,15 @@ alt + x      :Start-Process pwsh -Verb RunAs
 #?  ╚██████╔╝███████╗██║  ██║███████╗███████╗╚███╔███╔╝██║ ╚═╝ ██║
 #?   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚══╝╚══╝ ╚═╝     ╚═╝
 
-ALT+NUMPAD4 : glazewm command '"move left"'
-ALT+NUMPAD6 : glazewm command '"move right"'
-ALT+NUMPAD8 : glazewm command '"move up"'
-ALT+NUMPAD2 : glazewm command '"move down"'
+ALT + NUMPAD4 : glazewm command '"move left"'
+ALT + NUMPAD6 : glazewm command '"move right"'
+ALT + NUMPAD8 : glazewm command '"move up"'
+ALT + NUMPAD2 : glazewm command '"move down"'
 
 Alt + G          : Start-Process 'glazewm.exe' -WindowStyle hidden #start glazewm
 Alt + Shift + E  : glazewm command '"exit wm"'                     #Kill GlazeWM process safely.
 Alt + Shift + Q  : glazewm command '"close"'                       #Close focused window.
 Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate configuration file.
-
 
 #!  ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗ ██████╗
 #!  ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║██╔════╝
@@ -39,60 +38,61 @@ Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate 
 #!  ██║  ██╗╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║███████╗██████╔╝██║╚██████╗
 #!  ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝ ╚═════╝
 
-# App shortcuts - these require shell to be pwsh / powershell
-# The apps will be focused if open, or launched if not open
-# alt + f                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
-# alt + b                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
-# alt + shift + o         : komorebic reload-configuration
+#! App shortcuts - these require shell to be pwsh / powershell
+#! The apps will be focused if open, or launched if not open
+# ALT + F                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
+# ALT + B                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
+# ALT + SHIFT + O         : komorebic reload-configuration
 
-# Focus windows
-alt + h                 : komorebic focus left
-alt + j                 : komorebic focus down
-alt + k                 : komorebic focus up
-alt + l                 : komorebic focus right
-alt + shift + oem_4     : komorebic cycle-focus previous # oem_4 is [
-alt + shift + oem_6     : komorebic cycle-focus next # oem_6 is ]
+#! Focus windows
+# alt + h                 : komorebic focus left
+# alt + j                 : komorebic focus down
+# alt + k                 : komorebic focus up
+# alt + l                 : komorebic focus right
+# alt + shift + oem_4     : komorebic cycle-focus previous # oem_4 is [
+# alt + shift + oem_6     : komorebic cycle-focus next # oem_6 is ]
 
-# Move windows
-alt + shift + h         : komorebic move left
-alt + shift + j         : komorebic move down
-alt + shift + k         : komorebic move up
-# alt + shift + l         : komorebic move right
-alt + shift + return    : komorebic promote
+#! Move windows
+# ALT + SHIFT + H         : komorebic move left
+# ALT + SHIFT + J         : komorebic move down
+# ALT + SHIFT + K         : komorebic move up
+# ALT + SHIFT + L         : komorebic move right
 
-# Stack windows
-# alt + left              : komorebic stack left
-# alt + down              : komorebic stack down
-# alt + up                : komorebic stack up
-# alt + right             : komorebic stack right
+# ALT + SHIFT + return    : komorebic promote
+
+#! Stack windows
+# ALT + LEFT              : komorebic stack left
+# ALT + DOWN              : komorebic stack down
+# ALT + UP                : komorebic stack up
+# ALT + RIGHT             : komorebic stack right
 # alt + oem_1             : komorebic unstack # oem_1 is ;
 # alt + oem_4             : komorebic cycle-stack previous # oem_4 is [
 # alt + oem_6             : komorebic cycle-stack next # oem_6 is ]
 
-# Resize
-alt + oem_plus          : komorebic resize-axis horizontal increase
-alt + oem_minus         : komorebic resize-axis horizontal decrease
-alt + shift + oem_plus  : komorebic resize-axis vertical increase
-alt + shift + oem_minus : komorebic resize-axis vertical decrease
+#! Resize
+# alt + oem_plus          : komorebic resize-axis horizontal increase
+# alt + oem_minus         : komorebic resize-axis horizontal decrease
+# alt + shift + oem_plus  : komorebic resize-axis vertical increase
+# alt + shift + oem_minus : komorebic resize-axis vertical decrease
 
-# Manipulate windows
-# alt + t                 : komorebic toggle-float
-alt + shift + f         : komorebic toggle-monocle
+#! Manipulate windows
+# ALT + T                 : komorebic toggle-float
+# ALT + SHIFT + F         : komorebic toggle-monocle
 
-# Window manager options
-# alt + shift + r         : komorebic retile
-# alt + p                 : komorebic toggle-pause
+#! Window manager options
+# ALT + SHIFT + R         : komorebic retile
+# ALT + P                 : komorebic toggle-pause
 
-# Layouts
+#! Layouts
 # alt + x                 : komorebic flip-layout horizontal
 # alt + y                 : komorebic flip-layout vertical
 
-# Workspaces
-# alt + 1                 : komorebic focus-workspace 0
-# alt + 2                 : komorebic focus-workspace 1
-# alt + 3                 : komorebic focus-workspace 2
+#! Workspaces
+# ALT + 1                 : komorebic focus-workspace 0
+# ALT + 2                 : komorebic focus-workspace 1
+# ALT + 3                 : komorebic focus-workspace 2
 
-# Move windows across workspaces
-# alt + shift + 1         : komorebic move-to-workspace 0K
-# alt + shift + 2         : komorebic move-to-workspace 1K
-# alt + shift + 3         : komorebic move-to-workspace 2
+#! Move windows across workspaces
+# ALT + SHIFT + 1         : komorebic move-to-workspace 0K
+# ALT + SHIFT + 2         : komorebic move-to-workspace 1K
+# ALT + SHIFT + 3         : komorebic move-to-workspace 2
