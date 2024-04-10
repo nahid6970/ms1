@@ -16,7 +16,7 @@ general:
   floating_window_move_amount: "5%"
 
   # Whether to center new floating windows.
-  center_new_floating_windows: false
+  center_new_floating_windows: true
 
   # *Strongly* recommended to set to 'false'. Whether to globally enable/disable
   # window transition animations (on minimize, close, etc). Set to 'unchanged'
@@ -25,131 +25,62 @@ general:
 
 gaps:
   # Gap between adjacent windows.
-  inner_gap: "0px"
+  inner_gap: "20px"
 
   # Gap between windows and the screen edge.
-  outer_gap: "1px"
+  outer_gap: "20px"
 
 # Highlight active/inactive windows with a colored border.
 # ** Exclusive to Windows 11 due to API limitations.
 focus_borders:
   active:
     enabled: true
-    color: "#00f200"
+    color: "#0000ff"
 
   inactive:
     enabled: false
     color: "#ff0000"
 
 bar:
-  height: "36px"
+  height: "30px"
   position: "top"
-  always_on_top: false
   opacity: 1.0
-  background: "#475875"
+  background: "#20242cc4"
   foreground: "#ffffff"
   font_family: "Segoe UI"
   font_size: "13px"
   padding: "4px 6px"
-  offset_x: 0
-  offset_y: 0
-  border_radius: 0
-
+  offset_x: "0"
+  offset_y: "0"
+  border_radius: "0"
   components_left:
     - type: "workspaces"
       focused_workspace_background: "#ffffff33"
       displayed_workspace_background: "#00000033"
       default_workspace_background: "transparent"
-
-
   components_center:
     - type: "window title"
-
   components_right:
-
-    - type: "text"
-      text: "E" 
-      left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
-      background: "#000"
-      foreground: "#fff"
-      margin: 0 2 # Moves it left on top of the previous component
-      padding: 5 5
-      border_width: "1"
-      border_color: "#fff"
-
-    - type: "text"
-      text: "Terminal" 
-      left_click_command: "exec pwsh"
-      right_click_command: "exec cmd"
-      background: "#000"
-      foreground: "#fff"
-      margin: 0 2 # Moves it left on top of the previous component
-      padding: 5 5
-      border_width: "1"
-      border_color: "#fff"
-
-    - type: "text"
-      text: "Sync" 
-      left_click_command: "exec 'C://ms1//sync.ps1'"
-      background: "#005900"
-      foreground: "#fff"
-      margin: 0 2 # Moves it left on top of the previous component
-      padding: 5 5
-      border_width: "1"
-      border_color: "#fff"
-      
-    # - type: "cpu" #!cpu
-    #   label: "CPU: {percent_usage}%"
-    #   refresh_interval_ms: 1000
-    #   padding: "5px 5px"
-    #   background: "#3c8aff"
-    #   foreground: "#000"
-    #   font_family: "Comic Sans MS"
-    #   font_size: "13px"
-    #   font_weight: 950
-
-    # - type: "gpu" #!gpu
-    #   label: "GPU: {percent_usage}%"
-    #   refresh_interval_ms: 1000
-    #   padding: "5px 5px"
-    #   background: "#00f200"
-    #   foreground: "#000"
-    #   font_family: "Comic Sans MS"
-    #   font_size: "13px"
-    #   font_weight: 950
-
-    # - type: "system tray"
-
-    - type: "tiling direction" #!tiling dir
+    - type: "system tray"
+    - type: "tiling direction"
       label_horizontal: "⮂"
       label_vertical: "⮁"
       background: "#ffffff33"
       margin: "0 4px"
       padding: "0 8px"
-
-    - type: "binding mode" #!binding mode
+    - type: "binding mode"
       background: "#ffffff33"
       margin: "0 4px 0 0"
       padding: "0 8px"
-      
-    - type: "clock" #!clock
-      padding: "5px 5px"
-      background: "#ffffff"
-      foreground: "#000"
-      font_family: "Comic Sans MS"
-      font_size: "13px"
-      font_weight: 950
+    - type: "clock"
       # Documentation on formatting date/time string:
       # https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
-      time_formatting: "hh:mm:ss tt  ddd MMM d"
+      time_formatting: "hh:mm tt  ddd MMM d"
 
 workspaces:
   - name: "1"
-    display_name: "Main"
   - name: "2"
-    display_name: "G"
   - name: "3"
-    display_name: "Games"
   - name: "4"
   - name: "5"
   - name: "6"
@@ -158,67 +89,24 @@ workspaces:
   - name: "9"
 
 window_rules:
-
-  #! Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
-  - command: "set floating"
-    match_class_name: "#32770"
-
-  - command: "ignore"
-    match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"
-    
-  - command: "ignore"
-    match_class_name: "ConsoleWindowClass"
-
-  - command: "ignore"
-    match_process_name: "PowerToys.Settings"
-
-  - command: "ignore"
-    match_process_name: "PowerToys.Settings"
-
-
-  #! Do not manage picture-in-picture windows for browsers. Note that the default is for
-  # English; change `match_title` to the window's title if you use another language.
   # Task Manager requires admin privileges to manage and should be ignored unless running
   # the WM as admin.
   - command: "ignore"
-    match_process_name: "/SnippingTool|python|PotPlayerMini64/"
-  - command: "ignore"
-    match_process_name: "fdm"
-  - command: "ignore"
-    match_process_name: "qbittorrent"
-  - command: "ignore"
-    match_title: "/WhatsApp|Task Manager/"
-  - command: "ignore"
-    match_class_name: "/Qt5152QWindowIcon/"
-  - command: "ignore"
-    match_class_name: "TWizardForm"
-    
-  - command: "ignore" #!different from the rest
-    match_class_name: "Chrome_WidgetWin_1|MozillaDialogClass"
-    match_title: "[Pp]icture.in.[Pp]icture"
+    match_process_name: "/Taskmgr|ScreenClippingHost/"
 
-  #! Some applications (eg. Steam) have borders that extend past the normal border size.
+  # Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
+  - command: "set floating"
+    match_class_name: "#32770"
+
+  # Do not manage picture-in-picture windows for browsers. Note that the default is for
+  # English; change `match_title` to the window's title if you use another language.
+  - command: "ignore"
+    match_title: "[Pp]icture.in.[Pp]icture"
+    match_class_name: "Chrome_WidgetWin_1|MozillaDialogClass"
+
+  # Some applications (eg. Steam) have borders that extend past the normal border size.
   - command: "resize borders 0px -7px -7px -7px"
     match_process_name: "steam"
-
-  # - command: "resize borders 0px 0px 0px -500px"    #? top right bottom left
-  - command: "set width 520px"
-    match_process_name: "rssguard"
-  - command: "set width 520px"
-    match_title: "Microsoft Store"
-
-
-  - command: "ignore"
-    match_process_name: "Riot Client"
-
-  # - command: "move to workspace 2"
-  #   match_process_name: "VALORANT-Win64-Shipping"
-
-#!here only this 2 application will be splitted horizontally
-  - command: "tiling direction vertical"
-    match_process_name: "rssguard"
- 
-
 
 binding_modes:
   - name: "resize"
@@ -267,8 +155,7 @@ keybindings:
   - command: "resize height -2%"
     binding: "Alt+I"
 
-
-    # As an alternative to the resize keybindings above, resize mode enables resizing via
+  # As an alternative to the resize keybindings above, resize mode enables resizing via
   # HJKL or arrow keys. The binding mode is defined above with the name "resize".
   - command: "binding mode resize"
     binding: "Alt+R"
@@ -305,13 +192,22 @@ keybindings:
   - command: "reload config"
     binding: "Alt+Shift+R"
 
+  # Launch CMD terminal (alternatively `exec wt` or `exec %ProgramFiles%/Git/git-bash.exe`
+  # to start Windows Terminal and Git Bash respectively.
+  - command: "exec cmd"
+    binding: "Alt+Enter"
+
+  # Focus the workspace that last had focus.
+  - command: "focus workspace recent"
+    binding: "Alt+Y"
+
   # Focus the next/previous workspace defined in `workspaces` config.
   - command: "focus workspace next"
     binding: "Alt+T"
   - command: "focus workspace prev"
     binding: "Alt+Shift+T"
 
-    # Change focus to a workspace defined in `workspaces` config.
+  # Change focus to a workspace defined in `workspaces` config.
   - command: "focus workspace 1"
     binding: "Alt+1"
   - command: "focus workspace 2"
@@ -331,6 +227,16 @@ keybindings:
   - command: "focus workspace 9"
     binding: "Alt+9"
 
+  # Move focused workspace to a monitor in a given direction.
+  - command: "move workspace left"
+    binding: "Alt+A"
+  - command: "move workspace right"
+    binding: "Alt+F"
+  - command: "move workspace up"
+    binding: "Alt+D"
+  - command: "move workspace down"
+    binding: "Alt+S"
+
   # Move focused window to a workspace defined in `workspaces` config.
   - commands: ["move to workspace 1", "focus workspace 1"]
     binding: "Alt+Shift+1"
@@ -349,4 +255,4 @@ keybindings:
   - commands: ["move to workspace 8", "focus workspace 8"]
     binding: "Alt+Shift+8"
   - commands: ["move to workspace 9", "focus workspace 9"]
-    binding: "Alt+Shift+9"
+    bindings: ["Alt+Shift+9"]
