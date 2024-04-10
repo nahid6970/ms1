@@ -33,6 +33,7 @@ function rssguard              {Start-Process "C:\Users\nahid\scoop\apps\rssguar
 # mypygui
 # rssguard
 # rssowl
+# sync
 # syncthing
 # valo_qbit
 ahkscripts
@@ -44,5 +45,4 @@ powertoys
 prowlarr
 radarr
 sonarr
-sync
 whkd
