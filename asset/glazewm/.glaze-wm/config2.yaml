@@ -145,40 +145,40 @@ keybindings:
   - command: "move down"
     bindings: ["Alt+Shift+J", "Alt+Shift+Down"]
 
-  # Resize focused window by a percentage or pixel amount.
-  - command: "resize width -2%"
-    binding: "Alt+U"
-  - command: "resize width +2%"
-    binding: "Alt+P"
-  - command: "resize height +2%"
-    binding: "Alt+O"
-  - command: "resize height -2%"
-    binding: "Alt+I"
+  #! Resize focused window by a percentage or pixel amount.
+  # - command: "resize width -2%"
+  #   binding: "Alt+U"
+  # - command: "resize width +2%"
+  #   binding: "Alt+P"
+  # - command: "resize height +2%"
+  #   binding: "Alt+O"
+  # - command: "resize height -2%"
+  #   binding: "Alt+I"
 
-  # As an alternative to the resize keybindings above, resize mode enables resizing via
-  # HJKL or arrow keys. The binding mode is defined above with the name "resize".
+  #! As an alternative to the resize keybindings above, resize mode enables resizing via
+  #! HJKL or arrow keys. The binding mode is defined above with the name "resize".
   - command: "binding mode resize"
     binding: "Alt+R"
 
-  # Change tiling direction. This determines where new tiling windows will be inserted.
+  #! Change tiling direction. This determines where new tiling windows will be inserted.
   - command: "tiling direction toggle"
     binding: "Alt+V"
 
-  # Change focus between floating / tiling windows.
-  - command: "focus mode toggle"
-    binding: "Alt+Space"
+  #! Change focus between floating / tiling windows.
+  # - command: "focus mode toggle"
+  #   binding: "Alt+Space"
 
-  # Change the focused window to be floating / tiling.
+  #! Change the focused window to be floating / tiling.
   - command: "toggle floating"
     binding: "Alt+Shift+Space"
 
-  # Change the focused window to be maximized / unmaximized.
-  - command: "toggle maximized"
-    binding: "Alt+X"
+  #! Change the focused window to be maximized / unmaximized.
+  # - command: "toggle maximized"
+  #   binding: "Alt+X"
 
-  # Minimize focused window.
-  - command: "set minimized"
-    binding: "Alt+M"
+  #! Minimize focused window.
+  # - command: "set minimized"
+  #   binding: "Alt+M"
 
   # Close focused window.
   - command: "close"
@@ -218,16 +218,8 @@ keybindings:
     binding: "Alt+4"
   - command: "focus workspace 5"
     binding: "Alt+5"
-  - command: "focus workspace 6"
-    binding: "Alt+6"
-  - command: "focus workspace 7"
-    binding: "Alt+7"
-  - command: "focus workspace 8"
-    binding: "Alt+8"
-  - command: "focus workspace 9"
-    binding: "Alt+9"
 
-  # Move focused workspace to a monitor in a given direction.
+  #! Move focused workspace to a monitor in a given direction.
   - command: "move workspace left"
     binding: "Alt+A"
   - command: "move workspace right"
@@ -237,7 +229,7 @@ keybindings:
   - command: "move workspace down"
     binding: "Alt+S"
 
-  # Move focused window to a workspace defined in `workspaces` config.
+  #! Move focused window to a workspace defined in `workspaces` config.
   - commands: ["move to workspace 1", "focus workspace 1"]
     binding: "Alt+Shift+1"
   - commands: ["move to workspace 2", "focus workspace 2"]
