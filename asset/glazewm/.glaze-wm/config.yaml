@@ -262,25 +262,25 @@ keybindings:
   # - command: "focus mode toggle"
   #   binding: "Alt+Space"
 
-  # Change the focused window to be floating / tiling.
-  - command: "toggle floating"
-    binding: "Alt+Shift+Space"
+  #! Change the focused window to be floating / tiling.
+  # - command: "toggle floating"
+  #   binding: "Alt+Shift+Space"
 
   #! Change the focused window to be maximized / unmaximized.
   # - command: "toggle maximized"
   #   binding: "Alt+X"
 
-  # Minimize focused window.
+  #! Minimize focused window.
   - command: "set minimized"
     binding: "Alt+M"
 
-  # Focus the next/previous workspace defined in `workspaces` config.
+  #! Focus the next/previous workspace defined in `workspaces` config.
   - command: "focus workspace next"
     binding: "Alt+T"
   - command: "focus workspace prev"
     binding: "Alt+Shift+T"
 
-    # Change focus to a workspace defined in `workspaces` config.
+  #! Change focus to a workspace defined in `workspaces` config.
   - command: "focus workspace 1"
     binding: "Alt+1"
   - command: "focus workspace 2"
@@ -291,16 +291,8 @@ keybindings:
     binding: "Alt+4"
   - command: "focus workspace 5"
     binding: "Alt+5"
-  - command: "focus workspace 6"
-    binding: "Alt+6"
-  - command: "focus workspace 7"
-    binding: "Alt+7"
-  - command: "focus workspace 8"
-    binding: "Alt+8"
-  - command: "focus workspace 9"
-    binding: "Alt+9"
 
-  # Move focused window to a workspace defined in `workspaces` config.
+  #! Move focused window to a workspace defined in `workspaces` config.
   - commands: ["move to workspace 1", "focus workspace 1"]
     binding: "Alt+Shift+1"
   - commands: ["move to workspace 2", "focus workspace 2"]
@@ -311,11 +303,4 @@ keybindings:
     binding: "Alt+Shift+4"
   - commands: ["move to workspace 5", "focus workspace 5"]
     binding: "Alt+Shift+5"
-  - commands: ["move to workspace 6", "focus workspace 6"]
-    binding: "Alt+Shift+6"
-  - commands: ["move to workspace 7", "focus workspace 7"]
-    binding: "Alt+Shift+7"
-  - commands: ["move to workspace 8", "focus workspace 8"]
-    binding: "Alt+Shift+8"
-  - commands: ["move to workspace 9", "focus workspace 9"]
-    binding: "Alt+Shift+9"
+
