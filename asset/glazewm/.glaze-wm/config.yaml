@@ -147,15 +147,11 @@ workspaces:
   - name: "1"
     display_name: "Main"
   - name: "2"
-    display_name: "G"
+    display_name: "P"
   - name: "3"
-    display_name: "Games"
+    display_name: "G"
   - name: "4"
   - name: "5"
-  - name: "6"
-  - name: "7"
-  - name: "8"
-  - name: "9"
 
 window_rules:
   #! Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
