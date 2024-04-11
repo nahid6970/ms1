@@ -35,3 +35,25 @@ GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user confi
 Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
 State dump: {"id":"f39b7312-31b1-436b-b29e-cfcc01f20b2e","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
 
+4/12/2024 3:46:58 AM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. Invalid command 'focus workspace 2'.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.ValidateDeserializedConfig(UserConfig deserializedConfig) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 209
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 58
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"6c12a9fd-fa4f-4501-b91f-1f33c741c7ba","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+
+4/12/2024 3:47:06 AM
+GlazeWM.Infrastructure.Exceptions.FatalUserException: Failed to parse user config. Invalid command 'focus workspace 2'.
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.ValidateDeserializedConfig(UserConfig deserializedConfig) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 209
+   at GlazeWM.Domain.UserConfigs.CommandHandlers.EvaluateUserConfigHandler.Handle(EvaluateUserConfigCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\UserConfigs\CommandHandlers\EvaluateUserConfigHandler.cs:line 58
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.Domain.Common.CommandHandlers.PopulateInitialStateHandler.Handle(PopulateInitialStateCommand command) in D:\a\glazewm\glazewm\GlazeWM.Domain\Common\CommandHandlers\PopulateInitialStateHandler.cs:line 41
+   at GlazeWM.Infrastructure.Bussing.Bus.Invoke[T](T command) in D:\a\glazewm\glazewm\GlazeWM.Infrastructure\Bussing\Bus.cs:line 41
+   at GlazeWM.App.WindowManager.WmStartup.Run()
+Command history: HandleFatalExceptionCommand, EvaluateUserConfigCommand, PopulateInitialStateCommand 
+State dump: {"id":"b4503119-e4b8-42b3-9bae-f06cfca49e80","x":0,"y":0,"width":0,"height":0,"type":"root","focus_index":0,"children":[]}
+

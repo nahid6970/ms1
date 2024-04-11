@@ -43,10 +43,10 @@ focus_borders:
 
 bar:
   # enabled: false
-  height: "36px"
-  position: "top"
+  height: "30px"
+  position: "bottom"
   always_on_top: false
-  opacity: 1.0
+  opacity: 1
   background: "#475875"
   foreground: "#ffffff"
   font_family: "Segoe UI"
@@ -58,46 +58,50 @@ bar:
 
   components_left:
     - type: "workspaces"
-      focused_workspace_background: "#ffffff33"
-      displayed_workspace_background: "#00000033"
+      focused_workspace_background: "#2E3440 "
+      focused_workspace_foreground: "#D8DEE9"
+      displayed_workspace_background: "#4C566A "
+      displayed_workspace_foreground: "#D8DEE9 "
       default_workspace_background: "transparent"
-
+      font_family: "Comic Sans MS"
+      font_size: "14px"
+      font_weight: 950
 
   components_center:
     - type: "window title"
 
   components_right:
 
-    - type: "text"
-      text: "E" 
-      left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
-      background: "#000"
-      foreground: "#fff"
-      margin: 0 2 # Moves it left on top of the previous component
-      padding: 5 5
-      border_width: "1"
-      border_color: "#fff"
+    # - type: "text"
+    #   text: "E" 
+    #   left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
+    #   background: "#000"
+    #   foreground: "#fff"
+    #   margin: 0 2 # Moves it left on top of the previous component
+    #   padding: 5 5
+    #   border_width: "1"
+    #   border_color: "#fff"
 
-    - type: "text"
-      text: "Terminal" 
-      left_click_command: "exec pwsh"
-      right_click_command: "exec cmd"
-      background: "#000"
-      foreground: "#fff"
-      margin: 0 2 # Moves it left on top of the previous component
-      padding: 5 5
-      border_width: "1"
-      border_color: "#fff"
+    # - type: "text"
+    #   text: "Terminal" 
+    #   left_click_command: "exec pwsh"
+    #   right_click_command: "exec cmd"
+    #   background: "#000"
+    #   foreground: "#fff"
+    #   margin: 0 2 # Moves it left on top of the previous component
+    #   padding: 5 5
+    #   border_width: "1"
+    #   border_color: "#fff"
 
-    - type: "text"
-      text: "Sync" 
-      left_click_command: "exec 'C://ms1//sync.ps1'"
-      background: "#005900"
-      foreground: "#fff"
-      margin: 0 2 # Moves it left on top of the previous component
-      padding: 5 5
-      border_width: "1"
-      border_color: "#fff"
+    # - type: "text"
+    #   text: "Sync" 
+    #   left_click_command: "exec 'C://ms1//sync.ps1'"
+    #   background: "#005900"
+    #   foreground: "#fff"
+    #   margin: 0 2 # Moves it left on top of the previous component
+    #   padding: 5 5
+    #   border_width: "1"
+    #   border_color: "#fff"
       
     # - type: "cpu" #!cpu
     #   label: "CPU: {percent_usage}%"
@@ -133,20 +137,20 @@ bar:
       margin: "0 4px 0 0"
       padding: "0 8px"
       
-    - type: "clock" #!clock
-      padding: "5px 5px"
-      background: "#ffffff"
-      foreground: "#000"
-      font_family: "Comic Sans MS"
-      font_size: "13px"
-      font_weight: 950
-      # Documentation on formatting date/time string:
-      # https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
-      time_formatting: "hh:mm:ss tt  ddd MMM d"
+    # - type: "clock" #!clock
+    #   padding: "5px 5px"
+    #   background: "#ffffff"
+    #   foreground: "#000"
+    #   font_family: "Comic Sans MS"
+    #   font_size: "13px"
+    #   font_weight: 950
+    #   # Documentation on formatting date/time string:
+    #   # https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+    #   time_formatting: "hh:mm:ss tt  ddd MMM d"
 
 workspaces:
   - name: "1"
-    display_name: "Main"
+    display_name: "M"
     keep_alive: true
 
   - name: "2"
