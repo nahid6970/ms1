@@ -52,12 +52,11 @@ widgets:
         on_middle: "exec explorer.exe shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"
         on_right: "next_timezone"
 
-
   cpu:
     type: "yasb.cpu.CpuWidget"
     options:
       label: "\uf4bc {info[histograms][cpu_percent]}"
-      label_alt: "\uf4bc CPU: {info[percent][total]}% | freq: {info[freq][current]:.2f} Mhz"
+      label_alt: "\uf4bc CPU: {info[percent][total]}%"
       update_interval: 500
       histogram_icons:
         - '\u2581' # 0%
