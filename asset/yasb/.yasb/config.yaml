@@ -127,6 +127,26 @@ widgets:
         run_interval: 3600000
         return_format: "json"
 
+  # komorebi_active_layout:
+  #   type: "komorebi.active_layout.ActiveLayoutWidget"
+  #   options:
+  #       hide_if_offline: false
+  #       label: "{icon}"
+  #       layout_icons:
+  #       bsp: "[\\\\]"
+  #       columns: "[||]"
+  #       rows: "[==]"
+  #       vertical_stack: "[V]="
+  #       horizontal_stack: "[H]="
+  #       ultrawide_vertical_stack: "||="
+  #       monocle: "[M]"
+  #       maximised: "[X]"
+  #       floating: "><>"
+  #       paused: "[P]"
+  #       callbacks:
+  #       on_left: 'next_layout'
+  #       on_middle: 'toggle_monocle'
+  #       on_right: 'prev_layout'
 
 
 # Configuration for Yasb (Yet Another Status Bar)
@@ -469,26 +489,7 @@ widgets:
 
 
 
-  # komorebi_active_layout:
-  #   type: "komorebi.active_layout.ActiveLayoutWidget"
-  #   options:
-  #       hide_if_offline: false
-  #       label: "{icon}"
-  #       layout_icons:
-  #       bsp: "[\\\\]"
-  #       columns: "[||]"
-  #       rows: "[==]"
-  #       vertical_stack: "[V]="
-  #       horizontal_stack: "[H]="
-  #       ultrawide_vertical_stack: "||="
-  #       monocle: "[M]"
-  #       maximised: "[X]"
-  #       floating: "><>"
-  #       paused: "[P]"
-  #       callbacks:
-  #       on_left: 'next_layout'
-  #       on_middle: 'toggle_monocle'
-  #       on_right: 'prev_layout'
+
 
   # Some custom widgets
 
