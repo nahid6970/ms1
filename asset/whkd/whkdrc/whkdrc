@@ -1,22 +1,13 @@
-.shell cmd
+.shell pwsh
 
 # Reload whkd configuration
-# ALT + O                 : taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
-# ALT + o                 : taskkill /f /im whkd.exe && start /b whkd # if shell is cmd
-ALT + o                 : taskkill /f /im whkd.exe & start /min whkd.exe # if shell is cmd hidden
-ALT + SHIFT + O         : taskkill /f /im whkd.exe
-
-#*  ██╗      █████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗
-#*  ██║     ██╔══██╗██║   ██║████╗  ██║██╔════╝██║  ██║
-#*  ██║     ███████║██║   ██║██╔██╗ ██║██║     ███████║
-#*  ██║     ██╔══██║██║   ██║██║╚██╗██║██║     ██╔══██║
-#*  ███████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╗██║  ██║
-#*  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
-
-ALT + X      :powershell.exe -Command "Start-Process pwsh -Verb RunAs"
-# ALT + X      :Start-Process pwsh -Verb RunAs
-
-
+# ALT + o         :taskkill /f /im whkd.exe && start /min whkd.exe # if shell is cmd hidden
+# ALT + o         :taskkill /f /im whkd.exe && start /b whkd # if shell is cmd
+ALT + O           :taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
+ALT + SHIFT + O   :taskkill /f /im whkd.exe
+ALT + SHIFT + P   :taskkill /f /im python.exe
+ALT + Y           :Start-Process "python.exe" -ArgumentList "C:\Users\nahid\.yasb\main.py" -WindowStyle Hidden
+ALT + X           :Start-Process pwsh -Verb RunAs
 
 #?   ██████╗ ██╗      █████╗ ███████╗███████╗██╗    ██╗███╗   ███╗
 #?  ██╔════╝ ██║     ██╔══██╗╚══███╔╝██╔════╝██║    ██║████╗ ████║
@@ -33,7 +24,7 @@ ALT + X      :powershell.exe -Command "Start-Process pwsh -Verb RunAs"
 Alt + G          : Start-Process 'glazewm.exe' -WindowStyle hidden #start glazewm
 Alt + Shift + E  : glazewm command '"exit wm"'                     #Kill GlazeWM process safely.
 Alt + Shift + Q  : glazewm command '"close"'                       #Close focused window.
-Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate configuration file.
+# Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate configuration file.
 
 #!  ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗ ██████╗
 #!  ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║██╔════╝
@@ -46,7 +37,9 @@ Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate 
 #! The apps will be focused if open, or launched if not open
 # ALT + F                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
 # ALT + B                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
-# ALT + SHIFT + O         : komorebic reload-configuration
+ALT + K                 :komorebic start
+ALT + SHIFT + K         :komorebic stop
+ALT + SHIFT + R         :komorebic reload-configuration
 
 #! Focus windows
 # alt + h                 : komorebic focus left
@@ -62,7 +55,7 @@ Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate 
 # ALT + SHIFT + K         : komorebic move up
 # ALT + SHIFT + L         : komorebic move right
 
-# ALT + SHIFT + return    : komorebic promote
+ALT + SHIFT + return    : komorebic promote
 
 #! Stack windows
 # ALT + LEFT              : komorebic stack left
@@ -74,10 +67,10 @@ Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate 
 # alt + oem_6             : komorebic cycle-stack next # oem_6 is ]
 
 #! Resize
-# alt + oem_plus          : komorebic resize-axis horizontal increase
-# alt + oem_minus         : komorebic resize-axis horizontal decrease
-# alt + shift + oem_plus  : komorebic resize-axis vertical increase
-# alt + shift + oem_minus : komorebic resize-axis vertical decrease
+alt + oem_plus          : komorebic resize-axis horizontal increase
+alt + oem_minus         : komorebic resize-axis horizontal decrease
+alt + shift + oem_plus  : komorebic resize-axis vertical increase
+alt + shift + oem_minus : komorebic resize-axis vertical decrease
 
 #! Manipulate windows
 # ALT + T                 : komorebic toggle-float
