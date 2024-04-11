@@ -41,18 +41,23 @@
 
 ; ; ;! alt1 🎯 Launch My PYGui
 #x:: 
-IfWinExist, ahk_exe python.exe
-{
-WinActivate
-}
-else
-{
 Run, "C:\ms1\mypygui.py"
-}
 return
 
+; ; ;! alt1 🎯 Launch My PYGui
+; #x:: 
+; IfWinExist, ahk_exe python.exe
+; {
+; WinActivate
+; }
+; else
+; {
+; Run, "C:\ms1\mypygui.py"
+; }
+; return
+
 ; ;!🎯 Launch My PYGui
-; ; Initialize a flag to keep track of whether the script has been launched
+; Initialize a flag to keep track of whether the script has been launched
 ; Launched := false
 
 ; ; Define a hotkey (Win + X) to launch the script

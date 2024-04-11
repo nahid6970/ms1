@@ -9,7 +9,7 @@ Write-Host -ForegroundColor green ' ██████╔╝██║  ██║
 Write-Host -ForegroundColor green ' ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝      '
 
 $FGC = [System.ConsoleColor]::green
-$BGC = [System.ConsoleColor]::blue
+# $BGC = [System.ConsoleColor]::blue
 
 #Installed-Apps-Backup
     # moved to update.ps1 scoop export > C:\ms1\asset\installedApps\list_scoop.txt
@@ -36,6 +36,27 @@ Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 
 function create_dir { param( [string]$Path ) if (-not (Test-Path $Path -PathType Container)) { New-Item -ItemType Directory -Force -Path $Path } }
 
+
+function yasb {
+    $yasb_src = @( "C:\Users\nahid\.yasb" )
+    $yasb_dst = "C:\ms1\asset\yasb"
+    create_dir -Path $yasb_dst
+    $yasb_src | ForEach-Object { Copy-Item -Path $_ -Destination $yasb_dst -Recurse -Force }
+}
+
+function komorebi {
+    $komorebi_src = @( "C:\Users\nahid\komorebi.json" )
+    $komorebi_dst = "C:\ms1\asset\komorebi"
+    create_dir -Path $komorebi_dst
+    $komorebi_src | ForEach-Object { Copy-Item -Path $_ -Destination $komorebi_dst -Recurse -Force }
+}
+
+function whkd {
+    $whkd_src = @( "C:\Users\nahid\.config\whkdrc" )
+    $whkd_dst = "C:\ms1\asset\whkd\whkdrc"
+    create_dir -Path $whkd_dst
+    $whkd_src | ForEach-Object { Copy-Item -Path $_ -Destination $whkd_dst -Recurse -Force }
+}
 
 function glazewm {
     $glazewm_src = @( "C:\Users\nahid\.glaze-wm\" )
@@ -158,12 +179,12 @@ pwsh_profile
 rclone_config
 rssguard
 terminal
+whkd
+komorebi
+yasb
 
 Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
-
-create_dir -Path  C:\ms1\asset\whkd\whkdrc
-Copy-Item -Path "C:\Users\nahid\.config\whkdrc" -Destination "C:\ms1\asset\whkd\whkdrc" -Recurse -Force -Verbose
 
 
 # Git-Run

@@ -28,7 +28,7 @@ gaps:
   inner_gap: "0px"
 
   # Gap between windows and the screen edge.
-  outer_gap: "1px"
+  outer_gap: '1px 1px 1px 1px'
 
 # Highlight active/inactive windows with a colored border.
 # ** Exclusive to Windows 11 due to API limitations.
@@ -42,6 +42,7 @@ focus_borders:
     color: "#ff0000"
 
 bar:
+  # enabled: false
   height: "36px"
   position: "top"
   always_on_top: false
@@ -173,6 +174,9 @@ window_rules:
 
   - command: "ignore"
     match_class_name: "#32770"
+
+  - command: 'ignore'
+    match_process_name: '/Zebar/'
 
   - command: "ignore"
     match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"

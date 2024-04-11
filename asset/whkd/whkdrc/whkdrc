@@ -88,11 +88,11 @@ Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate 
 # alt + y                 : komorebic flip-layout vertical
 
 #! Workspaces
-# ALT + 1                 : komorebic focus-workspace 0
-# ALT + 2                 : komorebic focus-workspace 1
-# ALT + 3                 : komorebic focus-workspace 2
+ALT + 1                 : komorebic focus-workspace 0
+ALT + 2                 : komorebic focus-workspace 1
+ALT + 3                 : komorebic focus-workspace 2
 
 #! Move windows across workspaces
-# ALT + SHIFT + 1         : komorebic move-to-workspace 0K
-# ALT + SHIFT + 2         : komorebic move-to-workspace 1K
-# ALT + SHIFT + 3         : komorebic move-to-workspace 2
+ALT + SHIFT + 1         : komorebic move-to-workspace 0K
+ALT + SHIFT + 2         : komorebic move-to-workspace 1K
+ALT + SHIFT + 3         : komorebic move-to-workspace 2
