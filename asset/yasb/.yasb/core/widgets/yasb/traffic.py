@@ -81,25 +81,34 @@ class TrafficWidget(BaseWidget):
 
         active_label.setText(active_label_formatted)
 
+        # Set background color based on speed
+        upload_speed_float = float(upload_speed.split()[0])  # Extract the speed value as float
+        download_speed_float = float(download_speed.split()[0])  # Extract the speed value as float
+
+        if upload_speed_float < 1 and download_speed_float < 1:
+            active_label.setStyleSheet("background-color: #0daf15")  # Green color for speeds below 1MB/s
+        else:
+            active_label.setStyleSheet("background-color: #51a2ff")  # Blue color for speeds above or equal to 1MB/s
+
+
     def _get_speed(self) -> [str, str]:
         current_io = psutil.net_io_counters()
         upload_diff = current_io.bytes_sent - self.bytes_sent
         download_diff = current_io.bytes_recv - self.bytes_recv
 
-        if upload_diff < 1024:
-            upload_speed = f"{upload_diff} B/s"
-        else:
-            upload_speed = naturalsize(
-                (current_io.bytes_sent - self.bytes_sent) // self.interval,
-            ) + "/s"
+        # Convert bytes to MB
+        upload_speed = upload_diff / (1024 * 1024 * self.interval)
+        download_speed = download_diff / (1024 * 1024 * self.interval)
 
-        if download_diff < 1024:
-            download_speed = f"{download_diff} B/s"
-        else:
-            download_speed = naturalsize(
-                (current_io.bytes_recv - self.bytes_recv) // self.interval,
-            ) + "/s"
+        # Format speeds to two decimal places
+        upload_speed_str = "{:.2f}".format(upload_speed)
+        download_speed_str = "{:.2f}".format(download_speed)
+
+        # Format speeds as strings with 'MB/s' unit
+        upload_speed_formatted = f"{upload_speed_str} MB/s"
+        download_speed_formatted = f"{download_speed_str} MB/s"
 
         self.bytes_sent = current_io.bytes_sent
         self.bytes_recv = current_io.bytes_recv
-        return upload_speed, download_speed
+
+        return upload_speed_formatted, download_speed_formatted
