@@ -69,7 +69,7 @@ widgets:
         - '\u2586' # 60%
         - '\u2587' # 70%
         - '\u2588' # 80%+
-      histogram_num_columns: 10
+      histogram_num_columns: 5
 
   memory:
     type: "yasb.memory.MemoryWidget"
