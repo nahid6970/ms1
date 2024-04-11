@@ -40,6 +40,8 @@ Alt + Shift + Q  : glazewm command '"close"'                       #Close focuse
 ALT + K                 :komorebic start
 ALT + SHIFT + K         :komorebic stop
 ALT + SHIFT + R         :komorebic reload-configuration
+ALT + F5         :komorebic quick-save-resize
+ALT + F6         :komorebic quick-load-resize
 
 #! Focus windows
 # alt + h                 : komorebic focus left
