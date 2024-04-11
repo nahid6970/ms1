@@ -1,8 +1,9 @@
-.shell pwsh
+.shell cmd
 
 # Reload whkd configuration
-# alt + o                 : taskkill /f /im whkd.exe && start /b whkd # if shell is cmd
-ALT + O                 : taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
+# ALT + O                 : taskkill /f /im whkd.exe; Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
+# ALT + o                 : taskkill /f /im whkd.exe && start /b whkd # if shell is cmd
+ALT + o                 : taskkill /f /im whkd.exe & start /min whkd.exe # if shell is cmd hidden
 ALT + SHIFT + O         : taskkill /f /im whkd.exe
 
 #*  ██╗      █████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗
@@ -12,7 +13,10 @@ ALT + SHIFT + O         : taskkill /f /im whkd.exe
 #*  ███████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╗██║  ██║
 #*  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
 
-ALT + X      :Start-Process pwsh -Verb RunAs
+ALT + X      :powershell.exe -Command "Start-Process pwsh -Verb RunAs"
+# ALT + X      :Start-Process pwsh -Verb RunAs
+
+
 
 #?   ██████╗ ██╗      █████╗ ███████╗███████╗██╗    ██╗███╗   ███╗
 #?  ██╔════╝ ██║     ██╔══██╗╚══███╔╝██╔════╝██║    ██║████╗ ████║
@@ -21,10 +25,10 @@ ALT + X      :Start-Process pwsh -Verb RunAs
 #?  ╚██████╔╝███████╗██║  ██║███████╗███████╗╚███╔███╔╝██║ ╚═╝ ██║
 #?   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚══╝╚══╝ ╚═╝     ╚═╝
 
-ALT + NUMPAD4 : glazewm command '"move left"'
-ALT + NUMPAD6 : glazewm command '"move right"'
-ALT + NUMPAD8 : glazewm command '"move up"'
-ALT + NUMPAD2 : glazewm command '"move down"'
+# ALT + NUMPAD4 : glazewm command '"move left"'
+# ALT + NUMPAD6 : glazewm command '"move right"'
+# ALT + NUMPAD8 : glazewm command '"move up"'
+# ALT + NUMPAD2 : glazewm command '"move down"'
 
 Alt + G          : Start-Process 'glazewm.exe' -WindowStyle hidden #start glazewm
 Alt + Shift + E  : glazewm command '"exit wm"'                     #Kill GlazeWM process safely.
