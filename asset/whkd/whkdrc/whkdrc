@@ -67,10 +67,10 @@ ALT + SHIFT + return    : komorebic promote
 # alt + oem_6             : komorebic cycle-stack next # oem_6 is ]
 
 #! Resize
-alt + oem_plus          : komorebic resize-axis horizontal increase
-alt + oem_minus         : komorebic resize-axis horizontal decrease
-alt + shift + oem_plus  : komorebic resize-axis vertical increase
-alt + shift + oem_minus : komorebic resize-axis vertical decrease
+# alt + oem_plus          : komorebic resize-axis horizontal increase
+# alt + oem_minus         : komorebic resize-axis horizontal decrease
+# alt + shift + oem_plus  : komorebic resize-axis vertical increase
+# alt + shift + oem_minus : komorebic resize-axis vertical decrease
 
 #! Manipulate windows
 # ALT + T                 : komorebic toggle-float
@@ -88,6 +88,8 @@ alt + shift + oem_minus : komorebic resize-axis vertical decrease
 ALT + 1                 : komorebic focus-workspace 0
 ALT + 2                 : komorebic focus-workspace 1
 ALT + 3                 : komorebic focus-workspace 2
+ALT + 4                 : komorebic focus-workspace 3
+ALT + 5                 : komorebic focus-workspace 4
 
 #! Move windows across workspaces
 ALT + SHIFT + 1         : komorebic move-to-workspace 0K
