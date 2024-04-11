@@ -3,18 +3,19 @@
   "app_specific_configuration_path": "$Env:USERPROFILE/applications.yaml",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
+
   "default_workspace_padding": 1,
   "default_container_padding": 0,
-  "border_padding": 1,
-  "border_offset": -8,
-  "active_window_border": true,
-  "active_window_border_colours": {
-    "single": "#00f200",
-    "stack": "#00a542",
-    "monocle": "#ff3399"
-  },
- "active_window_border_style":"Square",
 
+  "border_padding": 1,
+  "border_offset": -1,
+  "border_width": 2,
+
+  "active_window_border": true,
+  "active_window_border_style":"Square",
+  "active_window_border_colours": { "single": "#00f200", "stack": "#00a542", "monocle": "#ff3399" },
+
+  "mouse_follows_focus":false,
 
 
 
