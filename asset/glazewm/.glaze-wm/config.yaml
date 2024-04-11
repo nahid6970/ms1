@@ -45,7 +45,7 @@ bar:
   # enabled: false
   height: "30px"
   position: "bottom"
-  always_on_top: false
+  always_on_top: true
   opacity: 1
   background: "#475875"
   foreground: "#ffffff"
@@ -67,20 +67,30 @@ bar:
       font_size: "14px"
       font_weight: 950
 
+    - type: "tiling direction" #!tiling dir
+      label_horizontal: "⮂"
+      label_vertical: "⮁"
+      background: "#ffdb76"
+      foreground: "#000000"
+      margin: "0 4px"
+      padding: "0 8px"
+
+    - type: "text"
+      text: "E" 
+      left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
+      background: "#3c97ff"
+      foreground: "#000000"
+      margin: 0 2 # Moves it left on top of the previous component
+      padding: 5 5
+      border_width: "1"
+      border_color: "#fff"
+      font_weight: 950
+
+
   components_center:
     - type: "window title"
 
   components_right:
-
-    # - type: "text"
-    #   text: "E" 
-    #   left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
-    #   background: "#000"
-    #   foreground: "#fff"
-    #   margin: 0 2 # Moves it left on top of the previous component
-    #   padding: 5 5
-    #   border_width: "1"
-    #   border_color: "#fff"
 
     # - type: "text"
     #   text: "Terminal" 
@@ -124,13 +134,6 @@ bar:
     #   font_weight: 950
 
     # - type: "system tray"
-
-    - type: "tiling direction" #!tiling dir
-      label_horizontal: "⮂"
-      label_vertical: "⮁"
-      background: "#ffffff33"
-      margin: "0 4px"
-      padding: "0 8px"
 
     - type: "binding mode" #!binding mode
       background: "#ffffff33"
