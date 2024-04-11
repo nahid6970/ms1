@@ -22,7 +22,7 @@ ALT + X           :Start-Process pwsh -Verb RunAs
 # ALT + NUMPAD2 : glazewm command '"move down"'
 
 Alt + G          : Start-Process 'glazewm.exe' -WindowStyle hidden #start glazewm
-Alt + Shift + E  : glazewm command '"exit wm"'                     #Kill GlazeWM process safely.
+Alt + Shift + G  : glazewm command '"exit wm"'                     #Kill GlazeWM process safely.
 Alt + Shift + Q  : glazewm command '"close"'                       #Close focused window.
 # Alt + Shift + R  : glazewm command '"reload config"'               #Re-evaluate configuration file.
 
