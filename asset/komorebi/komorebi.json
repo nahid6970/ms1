@@ -51,6 +51,11 @@
       "kind": "Class",
       "id": "Qt643QWindowIcon",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Class",
+      "id": "CASCADIA_HOSTING_WINDOW_CLASS",
+      "matching_strategy": "Equals"
     }
   ]
 }
