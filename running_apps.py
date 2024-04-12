@@ -29,7 +29,7 @@ screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
 x = screen_width - 500
-y = screen_height -75
+y = screen_height -78
 root.geometry(f"500x30+{x}+{y}") #! overall size of the window
 
 root.wm_attributes('-transparentcolor', '#ab23ff')
