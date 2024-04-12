@@ -1,4 +1,4 @@
-$host.UI.RawUI.WindowTitle = "Backup"
+# $host.UI.RawUI.WindowTitle = "Backup"
 Clear-Host
 
 Write-Host -ForegroundColor green ' ██████╗  █████╗  ██████╗██╗  ██╗██╗   ██╗██████╗  '
