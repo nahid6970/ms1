@@ -38,7 +38,7 @@ def update_labels():
             "notepad.exe": is_process_running("notepad.exe"),
             "whkd.exe": is_process_running("whkd.exe"),
             "chrome.exe": is_process_running("chrome.exe"),
-            "Code.exe": is_process_running("Code.exe")
+            "Code.exe": is_process_running("Code.exe"),
         }
         if statuses != last_statuses:
             root.after_idle(update_labels_gui, statuses)
@@ -47,10 +47,12 @@ def update_labels():
 
 # Function to update GUI labels
 def update_labels_gui(statuses):
-    labels = [(notepad_label, "notepad.exe", "Notepad"), 
-              (whkd_label, "whkd.exe", "whkd"), 
-              (chrome_label, "chrome.exe", "Chrome"), 
-              (Code_label, "Code.exe", "Code")]
+    labels = [
+              (notepad_label     ,"notepad.exe","Notepad"),
+              (whkd_label        ,"whkd.exe"   ,"whkd"   ),
+              (chrome_label      ,"chrome.exe" ,"Chrome" ),
+              (Code_label        ,"Code.exe"   ,"Code"   ),
+              ]
 
     for label, process_name, text in labels:
         if statuses[process_name]:
@@ -58,7 +60,6 @@ def update_labels_gui(statuses):
             label.grid()
         else:
             label.grid_remove()
-
 
 # Create labels for each process
 chrome_label  =tk.Label(root,bg="#23a9f2",fg="#000000",font=("JETBRAINSMONO NF",10,"bold"))
