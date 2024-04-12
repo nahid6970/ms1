@@ -206,12 +206,3 @@ Set-Location
 
 # End of script message
 Write-Host -ForegroundColor Blue "Script Ended 🎯🎯🎯 [Q to Exit]"
-
-# Directly exit if 'q' key is pressed
-# while ($true) {
-#     $key = [System.Console]::ReadKey($true).Key
-#     if ($key -eq 'Q') {
-#         Write-Host "Exiting..."
-#         exit
-#     }
-# }
