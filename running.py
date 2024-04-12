@@ -27,14 +27,25 @@ def update_labels():
 
 # Function to update GUI labels
 def update_labels_gui(statuses):
-    notepad_label.config(text="Notepad is running" if statuses["notepad.exe"] else "")
-    whkd_label.config(text="whkd is running" if statuses["whkd.exe"] else "")
-    chrome_label.config(text="Chrome is running" if statuses["chrome.exe"] else "")
-    Code_label.config(text="Code is running" if statuses["Code.exe"] else "")
+    notepad_label.config(text="Notepad" if statuses["notepad.exe"] else "")
+    whkd_label.config(text="whkd" if statuses["whkd.exe"] else "")
+    chrome_label.config(text="Chrome" if statuses["chrome.exe"] else "")
+    Code_label.config(text="Code" if statuses["Code.exe"] else "")
 
 # Create the Tkinter window
 root = tk.Tk()
 root.title("Process Monitor")
+root.configure(bg="#282c34")
+root.overrideredirect(True)  # Remove default borders
+
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+x = screen_width//2 - 820//2
+# y = screen_height//2 - 800//2
+y = 0
+root.geometry(f"820x36+{x}+{y}") #! overall size of the window
+
 
 # Create labels for each process
 notepad_label = tk.Label(root)
