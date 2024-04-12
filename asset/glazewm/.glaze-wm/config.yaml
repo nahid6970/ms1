@@ -10,7 +10,7 @@ general:
   toggle_workspace_on_refocus: true
 
   # Whether to show floating windows as always on top.
-  show_floating_on_top: false
+  show_floating_on_top: true
 
   # Amount to move floating windows by (eg. when using `alt+<hjkl>` on a floating window)
   floating_window_move_amount: "5%"
@@ -56,7 +56,11 @@ bar:
   offset_y: 0
   border_radius: 0
 
-  components_left:
+  # components_left:
+
+  components_center:
+    # - type: "window title"
+
     - type: "workspaces"
       focused_workspace_background: "#FFFFFF "
       focused_workspace_foreground: "#2E3440"
@@ -66,33 +70,32 @@ bar:
       font_family: "Comic Sans MS"
       font_size: "14px"
       font_weight: 950
-
+      margin: 1 1
+      padding: 0 0
+      
     - type: "tiling direction" #!tiling dir
       label_horizontal: "H"
       label_vertical: "V"
-      background: "#ffdb76"
+      background: "#626c80"
       foreground: "#000000"
-      margin: "0 4px"
-      padding: "0 8px"
+      margin: 1 1
+      padding: 0 5
       font_weight: 950
       # label_horizontal: "⮂"
       # label_vertical: "⮁"
-
 
     - type: "text"
       text: "E" 
       left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
       background: "#3c97ff"
       foreground: "#000000"
-      margin: 0 2 # Moves it left on top of the previous component
-      padding: 5 5
-      border_width: "1"
-      border_color: "#fff"
+      margin: 1 1
+      padding: 0 5
+      # border_width: "1"
+      # border_color: "#fff"
+      font_family: "Comic Sans MS"
+      font_size: "14px"
       font_weight: 950
-
-
-  components_center:
-    - type: "window title"
 
   components_right:
 
@@ -192,7 +195,7 @@ window_rules:
   - command: 'ignore'
     match_process_name: 'Notepad'
 
-  - command: "ignore"
+  - command: "set floating"
     match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"
     
   - command: "ignore"

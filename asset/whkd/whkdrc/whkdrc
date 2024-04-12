@@ -10,6 +10,14 @@ ALT + R           :Start-Process "python.exe" -ArgumentList "C:\ms1\running_apps
 ALT + Y           :Start-Process "python.exe" -ArgumentList "C:\Users\nahid\.yasb\main.py" -WindowStyle Hidden
 ALT + X           :Start-Process pwsh -Verb RunAs
 
+# Specify different behaviour depending on the app
+# alt + n [
+#     # ProcessName as shown by `Get-Process`
+#     Firefox       : echo "hello firefox"
+    
+#     # Spaces are fine, no quotes required
+#     Google Chrome : echo "hello chrome"
+# ]
 
 #?   ██████╗ ██╗      █████╗ ███████╗███████╗██╗    ██╗███╗   ███╗
 #?  ██╔════╝ ██║     ██╔══██╗╚══███╔╝██╔════╝██║    ██║████╗ ████║
