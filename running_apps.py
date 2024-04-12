@@ -62,7 +62,7 @@ def update_labels():
     global last_statuses
     while True:
         statuses = {
-            "notepad.exe" :is_process_running    ("notepad.exe" ),
+            "Notepad.exe" :is_process_running    ("Notepad.exe" ),
             "whkd.exe"    :is_process_running    ("whkd.exe"    ),
             "chrome.exe"  :is_process_running    ("chrome.exe"  ),
             "Code.exe"    :is_process_running    ("Code.exe"    ),
@@ -77,7 +77,7 @@ def update_labels():
 
 def update_labels_gui(statuses):
     labels = [
-              (notepad_label        ,"notepad.exe"   ,"Notepad"   ),
+              (notepad_label        ,"Notepad.exe"   ,"Notepad"   ),
               (whkd_label           ,"whkd.exe"      ,"whkd"      ),
               (chrome_label         ,"chrome.exe"    ,"Chrome"    ),
               (Code_label           ,"Code.exe"      ,"Code"      ),
