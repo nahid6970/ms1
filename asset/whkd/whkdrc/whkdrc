@@ -9,6 +9,7 @@ ALT + SHIFT + P   :taskkill /f /im python.exe
 ALT + Y           :Start-Process "python.exe" -ArgumentList "C:\Users\nahid\.yasb\main.py" -WindowStyle Hidden
 ALT + X           :Start-Process pwsh -Verb RunAs
 
+
 #?   ██████╗ ██╗      █████╗ ███████╗███████╗██╗    ██╗███╗   ███╗
 #?  ██╔════╝ ██║     ██╔══██╗╚══███╔╝██╔════╝██║    ██║████╗ ████║
 #?  ██║  ███╗██║     ███████║  ███╔╝ █████╗  ██║ █╗ ██║██╔████╔██║
