@@ -1,15 +1,15 @@
-# $host.UI.RawUI.WindowTitle = "Backup"
-# Clear-Host
+$host.UI.RawUI.WindowTitle = "Backup"
+Clear-Host
 
-# Write-Host -ForegroundColor green ' ██████╗  █████╗  ██████╗██╗  ██╗██╗   ██╗██████╗  '
-# Write-Host -ForegroundColor green ' ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██║   ██║██╔══██╗ '
-# Write-Host -ForegroundColor green ' ██████╔╝███████║██║     █████╔╝ ██║   ██║██████╔╝ '
-# Write-Host -ForegroundColor green ' ██╔══██╗██╔══██║██║     ██╔═██╗ ██║   ██║██╔═══╝  '
-# Write-Host -ForegroundColor green ' ██████╔╝██║  ██║╚██████╗██║  ██╗╚██████╔╝██║      '
-# Write-Host -ForegroundColor green ' ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝      '
+Write-Host -ForegroundColor green ' ██████╗  █████╗  ██████╗██╗  ██╗██╗   ██╗██████╗  '
+Write-Host -ForegroundColor green ' ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██║   ██║██╔══██╗ '
+Write-Host -ForegroundColor green ' ██████╔╝███████║██║     █████╔╝ ██║   ██║██████╔╝ '
+Write-Host -ForegroundColor green ' ██╔══██╗██╔══██║██║     ██╔═██╗ ██║   ██║██╔═══╝  '
+Write-Host -ForegroundColor green ' ██████╔╝██║  ██║╚██████╗██║  ██╗╚██████╔╝██║      '
+Write-Host -ForegroundColor green ' ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝      '
 
-# Green = [System.ConsoleColor]::green
-# # $BGC = [System.ConsoleColor]::blue
+$FGC = [System.ConsoleColor]::green
+# $BGC = [System.ConsoleColor]::blue
 
 #Installed-Apps-Backup
     # moved to update.ps1 scoop export > C:\ms1\asset\installedApps\list_scoop.txt
@@ -21,11 +21,11 @@
     #[-Wait = will wait before anyother command can be executed in the same script]
     #[-NoNewWindow = wont create any new window]
     #[-WindowStyle Hidden/minimized/maximized/normal]
-Write-Host "Appslist Export ✔️" -ForegroundColor Green
+Write-Host "Appslist Export ✔️" -ForegroundColor $FGC
 
 #OrgDoc Convert to html
     pandoc -s C:\ms2\Files\MyOrg.org  -o C:\ms2\OrgDoc.html --toc
-Write-Host "Pandoc Myorg ✔️" -ForegroundColor Green
+Write-Host "Pandoc Myorg ✔️" -ForegroundColor $FGC
 
 #$emacs_src    = @( "C:\Users\nahid\AppData\Roaming\.emacs.d\config.org", "C:\Users\nahid\AppData\Roaming\.emacs.d\init.el", "C:\Users\nahid\AppData\Roaming\.emacs.d\early-init.el" )
 #$nvim_src     = "C:\Users\nahid\AppData\Local\nvim\init.lua"
@@ -189,9 +189,9 @@ Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
 # Git-Run
 #     C:\ms1\scripts\Github\ms1u.ps1
-# Write-Host "Git ms1u Update ✅" -ForegroundColor Green
+# Write-Host "Git ms1u Update ✅" -ForegroundColor $FGC
 #     C:\ms1\scripts\Github\ms2u.ps1
-# Write-Host "Git ms2u Update ✅" -ForegroundColor Green
+# Write-Host "Git ms2u Update ✅" -ForegroundColor $FGC
 
 
 
@@ -208,10 +208,10 @@ Set-Location
 Write-Host -ForegroundColor Blue "Script Ended 🎯🎯🎯 [Q to Exit]"
 
 # Directly exit if 'q' key is pressed
-while ($true) {
-    $key = [System.Console]::ReadKey($true).Key
-    if ($key -eq 'Q') {
-        Write-Host "Exiting..."
-        exit
-    }
-}
+# while ($true) {
+#     $key = [System.Console]::ReadKey($true).Key
+#     if ($key -eq 'Q') {
+#         Write-Host "Exiting..."
+#         exit
+#     }
+# }
