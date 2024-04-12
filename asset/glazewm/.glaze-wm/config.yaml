@@ -47,7 +47,7 @@ bar:
   position: "bottom"
   always_on_top: true
   opacity: 1
-  background: "#475875"
+  background: "#47587580"
   foreground: "#ffffff"
   font_family: "Segoe UI"
   font_size: "13px"
