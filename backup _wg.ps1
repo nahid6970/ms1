@@ -211,7 +211,7 @@ Write-Host -ForegroundColor Blue "Script Ended 🎯🎯🎯 [Q to Exit]"
 # while ($true) {
 #     $key = [System.Console]::ReadKey($true).Key
 #     if ($key -eq 'Q') {
-#         Write-Host "Exiting..."
+#         Write-Host " Exiting... "
 #         exit
 #     }
 # }
