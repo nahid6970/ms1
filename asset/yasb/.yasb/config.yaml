@@ -31,6 +31,7 @@ bars:
 
 
 widgets:
+
   active_window:
     type: "yasb.active_window.ActiveWindowWidget"
     options:
@@ -40,7 +41,6 @@ widgets:
       max_length: 48  # Maximum length of the window title
       max_length_ellipsis: "..."  # Ellipsis when the window title exceeds the maximum length
       monitor_exclusive: false  # Monitor windows on all monitors, not just the current one
-
 
   clock:
     type: "yasb.clock.ClockWidget"
@@ -82,7 +82,7 @@ widgets:
   komorebi_workspaces:
     type: "komorebi.workspaces.WorkspaceWidget"
     options:
-        label_offline: "Komorebi Offline"
+        label_offline: "GlazeWM"
         label_workspace_btn: "{index}"
         label_default_name: "{index}"
         label_zero_index: false
