@@ -45,7 +45,7 @@ bar:
   # enabled: false
   height: "36px"
   position: "bottom"
-  always_on_top: true
+  always_on_top: false
   opacity: 1
   background: "#ff5c2850"
   foreground: "#ffffff"

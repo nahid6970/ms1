@@ -11,6 +11,13 @@ ROOT.configure(bg="#83a598")
 ROOT.overrideredirect(True)  # Remove default borders
 ROOT.attributes('-topmost', True)  # Set always on top
 
+def check_window_topmost():
+    if not ROOT.attributes('-topmost'):
+        ROOT.attributes('-topmost', True)
+    ROOT.after(500, check_window_topmost)
+# Call the function to check window topmost status periodically
+check_window_topmost()
+
 class ActiveWindowInfo(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
