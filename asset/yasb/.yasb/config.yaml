@@ -34,8 +34,8 @@ widgets:
   active_window:
     type: "yasb.active_window.ActiveWindowWidget"
     options:
-      label: "\udb81\udcfe {win[process][name]}"
-      label_alt: "\udb82\ude77 {win[class_name]}   \udb82\ude77 {win[title]}"
+      label: "\udb85\udcfb {win[process][name]}"
+      label_alt: "\udb86\ude07 {win[class_name]}   \udb86\ude07 {win[title]}"
       label_no_window: ""  # No label when there's no active window
       max_length: 48  # Maximum length of the window title
       max_length_ellipsis: "..."  # Ellipsis when the window title exceeds the maximum length
