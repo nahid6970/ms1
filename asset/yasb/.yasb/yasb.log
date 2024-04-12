@@ -1,11 +1,18 @@
-2024-04-12 14:58:15 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-12 14:58:17 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-12 14:58:17 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-12 14:58:17 INFO event_listener.py: Created named pipe yasb-cdfa29c3-f8aa-11ee-9a0a-a85e4555ad30
-2024-04-12 14:58:17 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-cdfa29c3-f8aa-11ee-9a0a-a85e4555ad30
-2024-04-12 14:58:17 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-12 14:58:18 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
+2024-04-12 15:08:20 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-12 15:08:21 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-12 15:08:21 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-12 15:08:21 INFO event_listener.py: Created named pipe yasb-35ebdccb-f8ac-11ee-8a49-a85e4555ad30
+2024-04-12 15:08:21 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-35ebdccb-f8ac-11ee-8a49-a85e4555ad30
+2024-04-12 15:08:21 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-12 15:08:21 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
 
 Location:
     komorebic\src\main.rs:1191:22
 
+2024-04-12 15:09:24 INFO event_listener.py: Komorebi connected to named pipe: yasb-35ebdccb-f8ac-11ee-8a49-a85e4555ad30
+2024-04-12 15:09:34 ERROR event_listener.py: Komorebi has disconnected from the named pipe yasb-35ebdccb-f8ac-11ee-8a49-a85e4555ad30
+Traceback (most recent call last):
+  File "C:\Users\nahid\.yasb\core\utils\komorebi\event_listener.py", line 60, in run
+    buffer, bytes_to_read, result = win32pipe.PeekNamedPipe(self.pipe, 1)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.error: (109, 'PeekNamedPipe', 'The pipe has been ended.')

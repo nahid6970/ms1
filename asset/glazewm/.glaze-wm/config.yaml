@@ -189,6 +189,9 @@ window_rules:
   - command: 'ignore'
     match_process_name: '/Zebar/'
 
+  - command: 'ignore'
+    match_process_name: 'Notepad'
+
   - command: "ignore"
     match_class_name: "CASCADIA_HOSTING_WINDOW_CLASS"
     
