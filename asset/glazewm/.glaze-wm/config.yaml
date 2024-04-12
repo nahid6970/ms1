@@ -286,8 +286,8 @@ keybindings:
 
   #! As an alternative to the resize keybindings above, resize mode enables resizing via
   #! HJKL or arrow keys. The binding mode is defined above with the name "resize".
-  - command: "binding mode resize"
-    binding: "Alt+R"
+  # - command: "binding mode resize"
+  #   binding: "Alt+R"
 
   # Change tiling direction. This determines where new tiling windows will be inserted.
   - command: "tiling direction toggle"
