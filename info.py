@@ -16,7 +16,7 @@ class ActiveWindowInfo(tk.Frame):
         super().__init__(master)
         self.pack()
         self.info_type = 0  # 0 for process name, 1 for title/class name
-        self.label = tk.Label(self, text="", pady=5 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NF", 10), justify="left", wraplength=1000)
+        self.label = tk.Label(self, text="", pady=1 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NF", 10), justify="left", wraplength=1000)
         self.label.pack(pady=(0,0))
         self.label.bind("<Button-1>", self.toggle_info)
         self.label.bind("<Button-3>", self.copy_to_clipboard)
@@ -26,7 +26,7 @@ class ActiveWindowInfo(tk.Frame):
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = 0
-        y = 0
+        y = 8
         master.geometry(f"+{x}+{y}")
 
     def update_info(self):

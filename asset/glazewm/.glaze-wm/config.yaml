@@ -43,7 +43,7 @@ focus_borders:
 
 bar:
   # enabled: false
-  height: "30px"
+  height: "36px"
   position: "top"
   always_on_top: true
   opacity: 1
