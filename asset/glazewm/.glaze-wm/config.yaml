@@ -58,8 +58,8 @@ bar:
 
   components_left:
     - type: "workspaces"
-      focused_workspace_background: "#2E3440 "
-      focused_workspace_foreground: "#D8DEE9"
+      focused_workspace_background: "#FFFFFF "
+      focused_workspace_foreground: "#2E3440"
       displayed_workspace_background: "#4C566A "
       displayed_workspace_foreground: "#D8DEE9 "
       default_workspace_background: "transparent"
@@ -68,12 +68,16 @@ bar:
       font_weight: 950
 
     - type: "tiling direction" #!tiling dir
-      label_horizontal: "⮂"
-      label_vertical: "⮁"
+      label_horizontal: "H"
+      label_vertical: "V"
       background: "#ffdb76"
       foreground: "#000000"
       margin: "0 4px"
       padding: "0 8px"
+      font_weight: 950
+      # label_horizontal: "⮂"
+      # label_vertical: "⮁"
+
 
     - type: "text"
       text: "E" 
