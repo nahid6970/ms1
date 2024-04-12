@@ -204,5 +204,3 @@ Set-Location
 
 
 
-# End of script message
-Write-Host -ForegroundColor Blue "Script Ended 🎯🎯🎯 [Q to Exit]"
