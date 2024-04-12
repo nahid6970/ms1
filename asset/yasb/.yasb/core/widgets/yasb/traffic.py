@@ -105,8 +105,8 @@ class TrafficWidget(BaseWidget):
         download_speed_str = "{:.2f}".format(download_speed)
 
         # Format speeds as strings with 'MB/s' unit
-        upload_speed_formatted = f"{upload_speed_str} MB/s"
-        download_speed_formatted = f"{download_speed_str} MB/s"
+        upload_speed_formatted = f"{upload_speed_str}" # MB/s
+        download_speed_formatted = f"{download_speed_str}" # MB/s
 
         self.bytes_sent = current_io.bytes_sent
         self.bytes_recv = current_io.bytes_recv
