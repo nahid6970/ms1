@@ -27,10 +27,20 @@ bars:
     widgets:
       left:   ["komorebi_workspaces"]
       center: ["active_window"]
-      right:  ["uptime", "traffic", "clock", "explorer_button", "cpu", "memory" ]
+      right:  ["process", "traffic", "clock", "explorer_button", "cpu", "memory" ]
 
 
 widgets:
+
+  process:
+    type: "yasb.process.ProcessWidget"
+    options:
+      label: "Active Processes: "
+      label_alt: "Active Processes: "
+      update_interval: 1000
+      callbacks:
+        on_right: "exec cmd /c Taskmgr"
+
 
   active_window:
     type: "yasb.active_window.ActiveWindowWidget"
