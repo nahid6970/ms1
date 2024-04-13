@@ -17,8 +17,8 @@ class ProcessWorker(QRunnable):
         while True:
             processes_mapping = {
                 #   "Notepad.exe":  {"abbreviation": "&nbsp;N  ","bg_color": "#add8e6","fg_color": "#000080","width": 30},
-                  "python.exe":   {"abbreviation": "&nbsp;P  ","bg_color": "#3772a4","fg_color": "#000000","width": 20},
-                  "Code.exe":     {"abbreviation": "&nbsp;C  ","bg_color": "#23a9f2","fg_color": "#000000","width": 25},
+                #   "python.exe":   {"abbreviation": "&nbsp;P  ","bg_color": "#3772a4","fg_color": "#000000","width": 20},
+                #   "Code.exe":     {"abbreviation": "&nbsp;C  ","bg_color": "#23a9f2","fg_color": "#000000","width": 25},
                   "whkd.exe":     {"abbreviation": "&nbsp;W  ","bg_color": "#FFFFFF","fg_color": "#000000","width": 25},
                   "komorebi.exe": {"abbreviation": "&nbsp;K  ","bg_color": "#9068b0","fg_color": "#000000","width": 25},
                   "glazewm.exe":  {"abbreviation": "&nbsp;GW ","bg_color": "#41bdf8","fg_color": "#000000","width": 25},
@@ -43,7 +43,7 @@ class ProcessWidget(BaseWidget):
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_interval, class_name="traffic-widget")
+        super().__init__(update_interval, class_name="process-widget")
 
         self._label_content = label
         self._label_alt_content = label_alt
@@ -73,6 +73,6 @@ class ProcessWidget(BaseWidget):
                 label_style = f"background-color: {bg_color}; color: {fg_color}; width: {width}px; padding: 2px 5px; border-radius: 3px;"
                 label_html = f"<span style='{label_style}'>{label_text}</span>"
                 labels.append(label_html)
-            self._label.setText("\udb81\udc6e " + " ".join(labels))
+            self._label.setText("<font color='#efff28'>\udb81\udc6e</font> " + " ".join(labels))
         else:
-            self._label.setText("\uebde")
+            self._label.setText("<font color='#efff28'>\uebde</font>")
