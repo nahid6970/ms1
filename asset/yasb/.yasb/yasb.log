@@ -1,22 +1,7 @@
-2024-04-13 10:06:43 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-13 10:06:44 ERROR widget_builder.py: Failed to import widget with type yasb.pdf.traffic.TrafficWidget
-Traceback (most recent call last):
-  File "C:\Users\nahid\.yasb\core\utils\widget_builder.py", line 42, in _build_widget
-    widget_module = import_module(f"core.widgets.{widget_module_str}")
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\nahid\scoop\apps\python\current\Lib\importlib\__init__.py", line 90, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1310, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
-ModuleNotFoundError: No module named 'core.widgets.yasb.pdf'
-2024-04-13 10:06:45 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-13 10:06:45 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-13 10:06:45 INFO event_listener.py: Created named pipe yasb-3e064e84-f94b-11ee-a8ad-a85e4555ad30
-2024-04-13 10:06:45 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-3e064e84-f94b-11ee-a8ad-a85e4555ad30
-2024-04-13 10:06:45 INFO event_listener.py: Komorebi connected to named pipe: yasb-3e064e84-f94b-11ee-a8ad-a85e4555ad30
+2024-04-13 10:08:10 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-13 10:08:12 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-13 10:08:12 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-13 10:08:12 INFO event_listener.py: Created named pipe yasb-71e48c94-f94b-11ee-b3a2-a85e4555ad30
+2024-04-13 10:08:12 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-71e48c94-f94b-11ee-b3a2-a85e4555ad30
+2024-04-13 10:08:12 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-13 10:08:12 INFO event_listener.py: Komorebi connected to named pipe: yasb-71e48c94-f94b-11ee-b3a2-a85e4555ad30

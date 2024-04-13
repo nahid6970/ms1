@@ -89,7 +89,7 @@ widgets:
           on_right: "exec cmd /c Taskmgr"
 
   traffic:
-    type: "yasb.pdf.traffic.TrafficWidget"
+    type: "yasb.traffic.TrafficWidget"
     options:
       label: "\udb80\uddda {download_speed} | \udb81\udd52 {upload_speed}"
       label_alt: "\udb81\udd52 {upload_speed} | \udb80\uddda {download_speed}"
