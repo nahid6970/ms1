@@ -21,7 +21,7 @@ class ProcessWorker(QRunnable):
                   "Code.exe":     {"abbreviation": "&nbsp;C  ","bg_color": "#23a9f2","fg_color": "#000000","width": 25},
                   "whkd.exe":     {"abbreviation": "&nbsp;W  ","bg_color": "#FFFFFF","fg_color": "#000000","width": 25},
                   "komorebi.exe": {"abbreviation": "&nbsp;K  ","bg_color": "#9068b0","fg_color": "#000000","width": 25},
-                  "glazewm.exe":  {"abbreviation": "&nbsp;GW ","bg_color": "#41bdf8","fg_color": "#000000","width": 25}
+                  "glazewm.exe":  {"abbreviation": "&nbsp;GW ","bg_color": "#41bdf8","fg_color": "#000000","width": 25},
             }
             active_processes = [processes_mapping[p] for p in processes_mapping if self._is_process_running(p)]
             self.signals.result.emit(active_processes)
@@ -73,6 +73,6 @@ class ProcessWidget(BaseWidget):
                 label_style = f"background-color: {bg_color}; color: {fg_color}; width: {width}px; padding: 2px 5px; border-radius: 3px;"
                 label_html = f"<span style='{label_style}'>{label_text}</span>"
                 labels.append(label_html)
-            self._label.setText("Active: " + " ".join(labels))
+            self._label.setText("\udb81\udc6e " + " ".join(labels))
         else:
-            self._label.setText("No active processes")
+            self._label.setText("\uebde")
