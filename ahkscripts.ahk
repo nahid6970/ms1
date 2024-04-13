@@ -293,3 +293,4 @@ return
 ; !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
 ; !y::RunWait, python.exe C:\Users\nahid\.yasb\main.py, , Hide
 ; !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
+Pause::Run, komorebic quick-load-resize ; Pause key
