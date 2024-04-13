@@ -153,11 +153,11 @@ background: #4b95e9;
 padding: 5px;
 max-width: 200px;
 }
-.process-widget{
+/* .process-widget{
 background: #044466;
 padding: 5px;
 max-width: 200px;
-}
+} */
 .app-widget{
 background: #4b95e9;
 padding: 5 5 5 5; /* top right bottom left  */

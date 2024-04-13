@@ -1,7 +1,7 @@
 import psutil
 from core.widgets.base import BaseWidget
 from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
-from PyQt6.QtWidgets import QLabel
+from PyQt6.QtWidgets import QLabel, QHBoxLayout
 from PyQt6.QtCore import QTimer, QObject, QRunnable, QThreadPool, pyqtSignal
 import time
 
@@ -16,12 +16,9 @@ class ProcessWorker(QRunnable):
     def run(self):
         while True:
             processes_mapping = {
-                #   "Notepad.exe":  {"abbreviation": "&nbsp;N  ","bg_color": "#add8e6","fg_color": "#000080","width": 30},
-                #   "python.exe":   {"abbreviation": "&nbsp;P  ","bg_color": "#3772a4","fg_color": "#000000","width": 20},
-                #   "Code.exe":     {"abbreviation": "&nbsp;C  ","bg_color": "#23a9f2","fg_color": "#000000","width": 25},
-                  "whkd.exe":     {"abbreviation": "&nbsp;W  ","bg_color": "#FFFFFF","fg_color": "#000000","width": 25},
-                  "komorebi.exe": {"abbreviation": "&nbsp;K  ","bg_color": "#9068b0","fg_color": "#000000","width": 25},
-                  "glazewm.exe":  {"abbreviation": "&nbsp;GW ","bg_color": "#41bdf8","fg_color": "#000000","width": 25},
+                "whkd.exe":     {"abbreviation": "W","bg_color": "#FFFFFF","fg_color": "#000000"},
+                "komorebi.exe": {"abbreviation": "K","bg_color": "#9068b0","fg_color": "#000000"},
+                "glazewm.exe":  {"abbreviation": "GW","bg_color": "#41bdf8","fg_color": "#000000"},
             }
             active_processes = [processes_mapping[p] for p in processes_mapping if self._is_process_running(p)]
             self.signals.result.emit(active_processes)
@@ -48,8 +45,8 @@ class ProcessWidget(BaseWidget):
         self._label_content = label
         self._label_alt_content = label_alt
 
-        self._label = QLabel()
-        self.widget_layout.addWidget(self._label)
+        self.labels_layout = QHBoxLayout()
+        self.widget_layout.addLayout(self.labels_layout)
 
         self.callback_right = callbacks["on_right"]
 
@@ -63,16 +60,27 @@ class ProcessWidget(BaseWidget):
         self.threadpool.start(self.worker)
 
     def update_label(self, active_processes):
+        # Clear existing labels
+        for i in reversed(range(self.labels_layout.count())):
+            widgetToRemove = self.labels_layout.itemAt(i).widget()
+            if widgetToRemove is not None:
+                widgetToRemove.setParent(None)
+
         if active_processes:
-            labels = []
+            symbol_label = QLabel("\udb81\udc6e")
+            symbol_label.setStyleSheet("color: white; font-size: 20px;")
+            self.labels_layout.addWidget(symbol_label)
+
+
             for process in active_processes:
                 label_text = process["abbreviation"]
                 bg_color = process["bg_color"]
                 fg_color = process["fg_color"]
-                width = process["width"]
-                label_style = f"background-color: {bg_color}; color: {fg_color}; width: {width}px; padding: 2px 5px; border-radius: 3px;"
-                label_html = f"<span style='{label_style}'>{label_text}</span>"
-                labels.append(label_html)
-            self._label.setText("<font color='#efff28'>\udb81\udc6e</font> " + " ".join(labels))
+
+                label = QLabel(label_text)
+                label.setStyleSheet(f"background-color: {bg_color}; color: {fg_color}; padding: 2 5; margin: 2 2 2 2; border-radius: 3px;")
+                self.labels_layout.addWidget(label)
         else:
+            self._label = QLabel()
             self._label.setText("<font color='#efff28'>\uebde</font>")
+            self.labels_layout.addWidget(self._label)
