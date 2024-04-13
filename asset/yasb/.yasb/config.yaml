@@ -33,7 +33,7 @@ bars:
 widgets:
 
   AppManager:
-    type: "yasb.app.AppWidget"
+    type: "yasb.widget_app_manager.AppWidget"
     options:
       label: "A"
       label_alt: "A"
