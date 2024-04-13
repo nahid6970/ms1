@@ -16,9 +16,12 @@ class ProcessWorker(QRunnable):
     def run(self):
         while True:
             processes_mapping = {
-                "Notepad.exe": {"abbreviation": "&nbsp;N ", "bg_color": "#add8e6", "fg_color": "#000080", "width": 30},
-                "python.exe": {"abbreviation": "&nbsp;P ", "bg_color": "#0000FF", "fg_color": "#FFFFFF", "width": 20},
-                "Code.exe": {"abbreviation": "&nbsp;C ", "bg_color": "#FF0000", "fg_color": "#008000", "width": 25}
+                #   "Notepad.exe":  {"abbreviation": "&nbsp;N  ","bg_color": "#add8e6","fg_color": "#000080","width": 30},
+                  "python.exe":   {"abbreviation": "&nbsp;P  ","bg_color": "#3772a4","fg_color": "#000000","width": 20},
+                  "Code.exe":     {"abbreviation": "&nbsp;C  ","bg_color": "#23a9f2","fg_color": "#000000","width": 25},
+                  "whkd.exe":     {"abbreviation": "&nbsp;W  ","bg_color": "#FFFFFF","fg_color": "#000000","width": 25},
+                  "komorebi.exe": {"abbreviation": "&nbsp;K  ","bg_color": "#9068b0","fg_color": "#000000","width": 25},
+                  "glazewm.exe":  {"abbreviation": "&nbsp;GW ","bg_color": "#41bdf8","fg_color": "#000000","width": 25}
             }
             active_processes = [processes_mapping[p] for p in processes_mapping if self._is_process_running(p)]
             self.signals.result.emit(active_processes)
