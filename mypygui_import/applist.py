@@ -167,15 +167,16 @@ def show_options(options):
 
 # Define applications and their information
 applications = [
-{"name": "whkd","scoop_name": "whkd","scoop_path": r'C:\Users\nahid\scoop\apps\whkd\current\whkd.exe',"winget_name": "WingetName","winget_path": r"xx"} ,
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
+{"name": "ripgrep [rg]","scoop_name": "ripgrep","scoop_path": r'C:\Users\nahid\scoop\apps\ripgrep\current\rg.exe',"winget_name": "BurntSushi.ripgrep.MSVC","winget_path": r"C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\ripgrep-14.1.0-x86_64-pc-windows-msvc\rg.exe"} ,
+{"name": "whkd","scoop_name": "whkd","scoop_path": r'C:\Users\nahid\scoop\apps\whkd\current\whkd.exe',"winget_name": "WingetName","winget_path": r"xx"} ,
 {"name": "komorebi","scoop_name": "komorebi","scoop_path": r'C:\Users\nahid\scoop\apps\komorebi\current\komorebi.exe',"winget_name": "WingetName","winget_path": r"xx"} ,
 {"name": "ExplorerPatcher","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "ExplorerPatcher","winget_path": r"xx"} ,
 {"name": "GlazeWM","scoop_name": "glazewm","scoop_path": r'C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe',"winget_name": "GlazeWM","winget_path": r"xx"} ,
 {"name": "X-Mouse Button Control","scoop_name": "xmousebuttoncontrol","scoop_path": r'xx',"winget_name": "Highresolution.X-MouseButtonControl","winget_path": r"C:\Program Files\Highresolution Enterprises\X-Mouse Button Control\XMouseButtonControl.exe"} ,
+{"name": "Bulk Crap Uninstaller","scoop_name": "bulk-crap-uninstaller","scoop_path": r'xx',"winget_name": "BCUninstaller","winget_path": r"C:\Program Files\BCUninstaller\BCUninstaller.exe"} ,
 # {"name": "MiniConda","scoop_name": "miniconda3","scoop_path": r'xx',"winget_name": "Anaconda.Miniconda3","winget_path": r"xx"} ,
 # {"name": "AnaConda","scoop_name": "anaconda3","scoop_path": r'xx',"winget_name": "Anaconda.Anaconda3","winget_path": r"xx"} ,
-{"name": "Bulk Crap Uninstaller","scoop_name": "bulk-crap-uninstaller","scoop_path": r'xx',"winget_name": "BCUninstaller","winget_path": r"C:\Program Files\BCUninstaller\BCUninstaller.exe"} ,
 {"name": "Ack [Find]"               ,"scoop_name": "ack"                               ,"scoop_path": r'C:\Users\nahid\scoop\apps\ack\current\ack.bat'                                      ,"winget_name": ""                                       ,"winget_path": r""                                                                                                                                                      } ,
 {"name": "Adb"                      ,"scoop_name": "adb"                               ,"scoop_path": r'C:\Users\nahid\scoop\apps\adb\current\platform-tools\adb.exe'                       ,"winget_name": ""                                       ,"winget_path": r""                                                                                                                                                      } ,
 {"name": "Alacritty [Terminal]"     ,"scoop_name": "alacritty"                         ,"scoop_path": r'C:\Users\nahid\scoop\apps\alacritty\current\alacritty.exe'                          ,"winget_name": "Alacritty.Alacritty"                    ,"winget_path": r'C:\Program Files\Alacritty\alacritty.exe'                                                                                                                } ,
