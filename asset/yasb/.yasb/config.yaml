@@ -42,6 +42,15 @@ widgets:
       max_length_ellipsis: "..."  # Ellipsis when the window title exceeds the maximum length
       monitor_exclusive: false  # Monitor windows on all monitors, not just the current one
 
+  komorebi_workspaces:
+    type: "komorebi.workspaces.WorkspaceWidget"
+    options:
+        label_offline: "GlazeWM"
+        label_workspace_btn: "{index}"
+        label_default_name: "{index}"
+        label_zero_index: false
+        hide_empty_workspaces: false
+
   clock:
     type: "yasb.clock.ClockWidget"
     options:
@@ -79,14 +88,14 @@ widgets:
         callbacks:
           on_right: "exec cmd /c Taskmgr"
 
-  komorebi_workspaces:
-    type: "komorebi.workspaces.WorkspaceWidget"
+  traffic:
+    type: "yasb.pdf.traffic.TrafficWidget"
     options:
-        label_offline: "GlazeWM"
-        label_workspace_btn: "{index}"
-        label_default_name: "{index}"
-        label_zero_index: false
-        hide_empty_workspaces: false
+      label: "\udb80\uddda {download_speed} | \udb81\udd52 {upload_speed}"
+      label_alt: "\udb81\udd52 {upload_speed} | \udb80\uddda {download_speed}"
+      update_interval: 1000 # Update interval should be a multiple of 1000
+      callbacks:
+        on_right: "exec cmd /c Taskmgr"
 
   explorer_button:
     type: "yasb.custom.CustomWidget"
@@ -126,16 +135,6 @@ widgets:
         # run every hour
         run_interval: 3600000
         return_format: "json"
-
-
-  traffic:
-    type: "yasb.traffic.TrafficWidget"
-    options:
-      label: "\udb80\uddda {download_speed} | \udb81\udd52 {upload_speed}"
-      label_alt: "\udb81\udd52 {upload_speed} | \udb80\uddda {download_speed}"
-      update_interval: 1000 # Update interval should be a multiple of 1000
-      callbacks:
-        on_right: "exec cmd /c Taskmgr"
 
   # komorebi_active_layout:
   #   type: "komorebi.active_layout.ActiveLayoutWidget"

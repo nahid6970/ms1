@@ -48,8 +48,8 @@ powertoys
 # radarr
 # sonarr
 
-Glaze_WM
+# Glaze_WM
 whkd
 
-# komorebic start
+komorebic start
 yasb
