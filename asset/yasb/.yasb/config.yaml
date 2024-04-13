@@ -42,21 +42,14 @@ widgets:
         on_left: "launch_applist"
         on_right: "launch_appstore"
 
-
-
-
-
-
-
   process:
-    type: "yasb.process.ProcessWidget"
+    type: "yasb.widget_running_process.ProcessWidget"
     options:
       label: "Active Processes: "
       label_alt: "Active Processes: "
       update_interval: 1000
       callbacks:
         on_right: "exec cmd /c Taskmgr"
-
 
   active_window:
     type: "yasb.active_window.ActiveWindowWidget"
@@ -124,22 +117,13 @@ widgets:
         on_right: "exec cmd /c Taskmgr"
 
   uptime:
-    type: "yasb.uptime.UptimeWidget"
+    type: "yasb.widget_uptime.UptimeWidget"
     options:
       label: "PC Uptime: "
       label_alt: "PC Uptime: "
       update_interval: 1000
       callbacks:
         on_right: "exec cmd /c Taskmgr"
-
-  hello_world:
-    type: "yasb.m.test.HelloWorldWidget"
-    options:
-      update_interval: 1000  # Update interval in milliseconds
-      callbacks:
-        on_left: ""  # Left-click callback (empty for no action)
-        on_right: ""  # Right-click callback (empty for no action)
-        on_middle: ""  # Middle-click callback (empty for no action)
 
   explorer_button:
     type: "yasb.custom.CustomWidget"

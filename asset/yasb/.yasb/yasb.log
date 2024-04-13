@@ -1,68 +1,9 @@
-2024-04-13 21:27:18 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-13 21:27:18 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 0 0 5 [163:1: padding]
-2024-04-13 21:27:18 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:27:20 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-13 21:27:20 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-13 21:27:20 INFO event_listener.py: Created named pipe yasb-51dd740b-f9aa-11ee-980f-a85e4555ad30
-2024-04-13 21:27:20 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-51dd740b-f9aa-11ee-980f-a85e4555ad30
-2024-04-13 21:27:21 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-13 21:27:21 INFO event_listener.py: Komorebi connected to named pipe: yasb-51dd740b-f9aa-11ee-980f-a85e4555ad30
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:05 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:05 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:06 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:07 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:08 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:08 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:08 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
-2024-04-13 21:28:08 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
-2024-04-13 21:28:08 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
+2024-04-13 22:02:01 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-13 22:02:02 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [163:1: padding]
+2024-04-13 22:02:02 ERROR errorhandler.py: Property: Invalid value for "CSS Level 2.1" property: 5 5 5 5 [164:1: margin]
+2024-04-13 22:02:04 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-13 22:02:04 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-13 22:02:04 INFO event_listener.py: Created named pipe yasb-2beac045-f9af-11ee-a3d5-a85e4555ad30
+2024-04-13 22:02:04 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-2beac045-f9af-11ee-a3d5-a85e4555ad30
+2024-04-13 22:02:04 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-13 22:02:05 INFO event_listener.py: Komorebi connected to named pipe: yasb-2beac045-f9af-11ee-a3d5-a85e4555ad30
