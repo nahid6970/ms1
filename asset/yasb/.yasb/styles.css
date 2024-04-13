@@ -8,7 +8,7 @@
 }
 
 .bar {
-  background: rgba(29, 32, 33, 0.3);
+  background: rgba(0, 181, 241, 0.3);
   border: 1px solid #504945;
   padding: 0 5px;
 }
@@ -150,6 +150,11 @@ max-width: 200px;
 .uptime-widget{
 color: #242424;
 background: #4b95e9;
+padding: 5px;
+max-width: 200px;
+}
+.process-widget{
+background: #cf3506;
 padding: 5px;
 max-width: 200px;
 }
