@@ -27,7 +27,7 @@ bars:
     widgets:
       left:   ["komorebi_workspaces"]
       center: ["active_window"]
-      right:  ["process", "traffic", "clock", "explorer_button", "cpu", "memory" ]
+      right:  [ "process", "uptime", "traffic", "clock", "explorer_button", "cpu", "memory" ]
 
 
 widgets:
