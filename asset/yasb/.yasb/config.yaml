@@ -25,12 +25,28 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   ["komorebi_workspaces"]
+      left:   ["komorebi_workspaces", "AppManager"]
       center: ["active_window"]
       right:  [ "process", "uptime", "traffic", "clock", "explorer_button", "cpu", "memory" ]
 
 
 widgets:
+
+  AppManager:
+    type: "yasb.app.AppWidget"
+    options:
+      label: "A"
+      label_alt: "A"
+      update_interval: 0
+      callbacks:
+        on_left: "launch_applist"
+        on_right: "launch_appstore"
+
+
+
+
+
+
 
   process:
     type: "yasb.process.ProcessWidget"
