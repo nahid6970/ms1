@@ -31,15 +31,15 @@ bars:
 
 widgets:
 
-  AppManager:
-    type: "yasb.app_manager.AppWidget"
-    options:
-      label: "A"
-      label_alt: "A"
-      update_interval: 0
-      callbacks:
-        on_left: "launch_applist"
-        on_right: "launch_appstore"
+  # AppManager:
+  #   type: "yasb.app_manager.AppWidget"
+  #   options:
+  #     label: "A"
+  #     label_alt: "A"
+  #     update_interval: 0
+  #     callbacks:
+  #       on_left: "launch_applist"
+  #       on_right: "launch_appstore"
 
   process:
     type: "yasb.process_running.ProcessWidget"
@@ -138,7 +138,7 @@ widgets:
   applist:
     type: "yasb.applist.CustomWidget"
     options:
-      label: "Apps"
+      label: "\uf40e"
       label_alt: "Explorer"
       class_name: "applist-widget"
       exec_options:
