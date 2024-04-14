@@ -194,3 +194,18 @@ font-size: 14px;
   margin: 5px 5px; 
   border-radius: 3px;
 } */
+
+/*! explorer */
+.explorer-widget {
+padding: 2px 6px;
+background: #ffda72;
+border-radius: 5px;
+margin: 4px 5px;
+}
+.explorer-widget:hover {
+background: #b98e18;
+}
+.container-left .explorer-widget * {
+color: #030303;
+font-size: 14px;
+}

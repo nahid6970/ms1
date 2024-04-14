@@ -124,7 +124,7 @@ widgets:
         on_right: "exec cmd /c Taskmgr"
 
   explorer_button:
-    type: "yasb.custom.CustomWidget"
+    type: "yasb.explorer.CustomWidget"
     options:
       label: "\uf07c"
       label_alt: "Explorer"
