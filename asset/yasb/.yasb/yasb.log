@@ -1,17 +1,7 @@
-2024-04-15 00:14:10 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-15 00:14:13 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-15 00:14:13 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-15 00:14:13 INFO event_listener.py: Created named pipe yasb-cc32be4f-fa8a-11ee-ba8b-a85e4555ad30
-2024-04-15 00:14:13 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-cc32be4f-fa8a-11ee-ba8b-a85e4555ad30
-2024-04-15 00:14:13 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-15 00:14:13 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
-
-Location:
-    komorebic\src\main.rs:1191:22
-
-2024-04-15 00:15:58 INFO event_listener.py: Komorebi connected to named pipe: yasb-cc32be4f-fa8a-11ee-ba8b-a85e4555ad30
-2024-04-15 01:39:16 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
-2024-04-15 01:39:30 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
-2024-04-15 01:39:36 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
-2024-04-15 01:39:41 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
-2024-04-15 01:47:34 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
+2024-04-15 02:37:04 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-15 02:37:08 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-15 02:37:08 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-15 02:37:08 INFO event_listener.py: Created named pipe yasb-c3895de0-fa9e-11ee-821f-a85e4555ad30
+2024-04-15 02:37:08 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-c3895de0-fa9e-11ee-821f-a85e4555ad30
+2024-04-15 02:37:08 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-15 02:37:09 INFO event_listener.py: Komorebi connected to named pipe: yasb-c3895de0-fa9e-11ee-821f-a85e4555ad30
