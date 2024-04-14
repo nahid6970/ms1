@@ -57,7 +57,7 @@ y = 0
 
 ROOT.geometry(f"80x36+{x}+{y}") #! overall size of the window
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=800, height=800)
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#01405d", width=800, height=800)
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1, expand=True)
 
