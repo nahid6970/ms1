@@ -27,7 +27,7 @@ bars:
     widgets:
       left:   ["komorebi_workspaces", "applist"]
       center: ["active_window"]
-      right:  [ "process", "uptime", "traffic", "clock", "explorer_button", "cpu", "memory" ]
+      right:  [ "process", "uptime", "traffic_download","traffic_upload", "clock", "explorer_button", "cpu", "memory" ]
 
 widgets:
 
@@ -106,14 +106,30 @@ widgets:
         callbacks:
           on_right: "exec cmd /c Taskmgr"
 
-  traffic:
+  # traffic:
+  #   type: "yasb.traffic.TrafficWidget"
+  #   options:
+  #     label: "\udb80\uddda {download_speed} | \udb81\udd52 {upload_speed}"
+  #     label_alt: "\udb81\udd52 {upload_speed} | \udb80\uddda {download_speed}"
+  #     update_interval: 1000 # Update interval should be a multiple of 1000
+  #     callbacks:
+  #       on_right: "exec cmd /c Taskmgr"
+
+  traffic_download:
     type: "yasb.traffic.TrafficWidget"
     options:
-      label: "\udb80\uddda {download_speed} | \udb81\udd52 {upload_speed}"
-      label_alt: "\udb81\udd52 {upload_speed} | \udb80\uddda {download_speed}"
+      label: ""
       update_interval: 1000 # Update interval should be a multiple of 1000
       callbacks:
-        on_right: "exec cmd /c Taskmgr"
+        on_right: "do_nothing"
+
+  # traffic_upload:
+  #   type: "yasb.traffic.TrafficWidget"
+  #   options:
+  #     label: "\udb81\udd52 {upload_speed}"
+  #     update_interval: 1000 # Update interval should be a multiple of 1000
+  #     callbacks:
+  #       on_right: "do_nothing"
 
   uptime:
     type: "yasb.widget_uptime.UptimeWidget"

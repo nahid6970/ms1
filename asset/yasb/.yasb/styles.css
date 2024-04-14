@@ -142,12 +142,22 @@ color: #242424;
 background: #ffffff;
 padding: 5px;
 }
-.traffic-widget{
+
+/* .traffic-widget{
 color: #242424;
 background: #0daf15;
 padding: 5px;
 max-width: 200px;
+} */
+
+
+.container-right .traffic-widget * {
+font-size: 14px;
+margin: 2px;
+border-radius: 3px;
 }
+
+
 /* .process-widget{
   background: #044466;
   padding: 5px;
