@@ -25,21 +25,11 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   ["komorebi_workspaces", "applist", "explorer_button",]
+      left:   ["komorebi_workspaces", "applist", "explorer_button"]
       center: ["active_window"]
       right:  [ "process", "traffic", "uptime",  "clock", "cpu", "memory" ]
 
 widgets:
-
-  # AppManager:
-  #   type: "yasb.app_manager.AppWidget"
-  #   options:
-  #     label: "A"
-  #     label_alt: "A"
-  #     update_interval: 0
-  #     callbacks:
-  #       on_left: "launch_applist"
-  #       on_right: "launch_appstore"
 
   process:
     type: "yasb.process_running.ProcessWidget"
@@ -545,5 +535,15 @@ widgets:
   #     update_interval: 1000 # Update interval should be a multiple of 1000
   #     callbacks:
   #       on_right: "do_nothing"
-  # Some custom widgets
+
+#! appmanager store/list
+  # AppManager:
+  #   type: "yasb.app_manager.AppWidget"
+  #   options:
+  #     label: "A"
+  #     label_alt: "A"
+  #     update_interval: 0
+  #     callbacks:
+  #       on_left: "launch_applist"
+  #       on_right: "launch_appstore"
 

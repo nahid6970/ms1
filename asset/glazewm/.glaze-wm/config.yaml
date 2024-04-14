@@ -42,7 +42,7 @@ focus_borders:
     color: "#ff0000"
 
 bar:
-  # enabled: false
+  enabled: false
   height: "36px"
   position: "bottom"
   always_on_top: false
