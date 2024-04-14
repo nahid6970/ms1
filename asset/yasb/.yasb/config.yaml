@@ -25,9 +25,9 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   ["komorebi_workspaces", "applist"]
+      left:   ["komorebi_workspaces", "applist", "explorer_button",]
       center: ["active_window"]
-      right:  [ "process", "traffic", "uptime",  "clock", "explorer_button", "cpu", "memory" ]
+      right:  [ "process", "traffic", "uptime",  "clock", "cpu", "memory" ]
 
 widgets:
 
@@ -133,7 +133,7 @@ widgets:
         run_once: true
       callbacks:
         on_left: "exec C:/ms1/mypygui_import/folder.py"
-        on_right: "toggle_label"
+        on_right: "exec explorer.exe"
 
   applist:
     type: "yasb.applist.CustomWidget"
