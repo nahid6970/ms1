@@ -32,7 +32,7 @@ bars:
 widgets:
 
   AppManager:
-    type: "yasb.widget_app_manager.AppWidget"
+    type: "yasb.app_manager.AppWidget"
     options:
       label: "A"
       label_alt: "A"
@@ -42,7 +42,7 @@ widgets:
         on_right: "launch_appstore"
 
   process:
-    type: "yasb.widget_running_process.ProcessWidget"
+    type: "yasb.process_running.ProcessWidget"
     options:
       label: "Active Processes: "
       label_alt: "Active Processes: "
@@ -115,7 +115,7 @@ widgets:
         on_right: "do_nothing"
 
   uptime:
-    type: "yasb.widget_uptime.UptimeWidget"
+    type: "yasb.uptime.UptimeWidget"
     options:
       label: "PC Uptime: "
       label_alt: "PC Uptime: "
