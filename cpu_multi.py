@@ -18,7 +18,7 @@ def do_drag(event):
         ROOT.geometry("+%s+%s" % (x, y))
 
 def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#013f5e")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
 
@@ -61,7 +61,7 @@ MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=800, height=800)
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1, expand=True)
 
-BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#013f5e")
 BOX_ROW2_ROOT.pack(side="top", anchor="center", pady=(3,2),padx=(0,0))
 
 def get_cpu_core_usage():
@@ -87,11 +87,11 @@ def determine_color(usage):
         return "#14bcff"
 BAR_WIDTH = 8
 BAR_HEIGHT = 25
-cpu_core_frame = tk.Frame(BOX_ROW2_ROOT, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
+cpu_core_frame = tk.Frame(BOX_ROW2_ROOT, bg="#013f5e", highlightthickness=1, highlightbackground="#717d99", relief="solid")
 cpu_core_frame.pack(side="right", anchor="nw", padx=0, pady=1)
 cpu_core_bars = []
 for i in range(psutil.cpu_count()):
-    frame = tk.Frame(cpu_core_frame, bg="#1d2027")
+    frame = tk.Frame(cpu_core_frame, bg="#013f5e")
     frame.pack(side="left", padx=(0, 0), pady=0)
     core_bar = tk.Canvas(frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
     core_bar.pack(side="top")
