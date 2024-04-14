@@ -175,17 +175,14 @@ color: #070707;
 /*! applist */
 .applist-widget {
 padding: 2px 6px;
-font-size: 14px;
 background: #4b95e9;
 border-radius: 5px;
 margin: 4px 5px;
-}
-.applist-widget .icon {
-font-size: 13px;
 }
 .applist-widget:hover {
 background: #55c9ff;
 }
 .container-left .applist-widget * {
 color: #030303;
+font-size: 14px;
 }
