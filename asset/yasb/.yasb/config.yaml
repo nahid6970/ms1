@@ -30,6 +30,7 @@ bars:
       right:  [ "process", "uptime", "traffic", "clock", "explorer_button", "cpu", "memory" ]
 
 
+
 widgets:
 
   AppManager:
