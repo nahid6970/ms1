@@ -21,6 +21,7 @@ border-radius: 5px;
 .container-right .widget * {
 color: #242424;
 }
+
 .komorebi-workspaces {
 margin-left: 0;
 }
@@ -163,4 +164,24 @@ background: #4b95e9;
 padding: 5 5 5 5; /* top right bottom left  */
 margin: 5 5 5 5; /* top right bottom left  */
 border-radius: 3px;
+}
+
+
+
+.applist-widget {
+padding: 2px 6px;
+font-size: 14px;
+background: #4b95e9;
+border-radius: 5;
+margin: 4 5 4 5;
+}
+.applist-widget .icon {
+font-size: 13px;
+}
+.applist-widget:hover {
+background: #55c9ff;
+}
+
+.container-left .applist-widget * {
+color: #030303;
 }
