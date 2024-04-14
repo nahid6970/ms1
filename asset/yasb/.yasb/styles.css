@@ -148,24 +148,31 @@ background: #0daf15;
 padding: 5px;
 max-width: 200px;
 }
+/* .process-widget{
+  background: #044466;
+  padding: 5px;
+  max-width: 200px;
+} */
+
+/* .app-widget{
+  background: #4b95e9;
+  padding: 5px 5px;
+  margin: 5px 5px; 
+  border-radius: 3px;
+} */
+
+/*! uptime */
 .uptime-widget{
 color: #242424;
 background: #4b95e9;
 padding: 5px;
 max-width: 200px;
 }
-/* .process-widget{
-background: #044466;
-padding: 5px;
-max-width: 200px;
-} */
-.app-widget{
-background: #4b95e9;
-padding: 5px 5px; /* top right bottom left  */
-margin: 5px 5px; /* top right bottom left  */
-border-radius: 3px;
+.container-right .uptime-widget * {
+color: #070707;
 }
 
+/*! applist */
 .applist-widget {
 padding: 2px 6px;
 font-size: 14px;
@@ -179,7 +186,6 @@ font-size: 13px;
 .applist-widget:hover {
 background: #55c9ff;
 }
-
 .container-left .applist-widget * {
 color: #030303;
 }
