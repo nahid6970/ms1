@@ -69,13 +69,16 @@ class TrafficWidget(BaseWidget):
             bg_color = "#1d2027"
             fg_color = "#FFFFFF"
         elif 0 < speed_float < 0.5:
-            bg_color = "#67D567"
+            bg_color = "#dfffdf"
             fg_color = "#000000"
         elif 0.5 <= speed_float < 1:
-            bg_color = "#32AB32"
+            bg_color = "#67D567"
+            fg_color = "#000000"
+        elif 1 <= speed_float < 5:
+            bg_color = "#4b95e9"
             fg_color = "#000000"
         else:
-            bg_color = "#4b95e9"
+            bg_color = "#ff0000"
             fg_color = "#000000"
 
         label.setStyleSheet(f"background-color: {bg_color}; color: {fg_color};")
