@@ -7,6 +7,7 @@ import ctypes
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 set_console_title("App Store")
+
 # Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
 
@@ -47,11 +48,11 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 500
+x = screen_width - 300
 y = screen_height//2 - 250//2
-ROOT.geometry(f"500x250+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"300x350+{x}+{y}") #! overall size of the window
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=500, height=250) #!
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=300, height=350) #!
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
@@ -100,28 +101,7 @@ def insert_input():
     return additional_text
 
 
-#! App Store
-def create_button(
-        text,
-        command,
-        bg_color,
-        fg_color,
-        height,
-        width,
-        relief,
-        font,
-        padx_button,
-        padx_pack,
-        pady_button,
-        pady_pack,
-        row_button,
-        column_button,
-        columnspan,
-        sticky,
-        ):
-    button = tk.Button(input_frame, text=text, command=command, width=width, fg=fg_color, bg=bg_color, font=font)
-    button.grid(row=row_button, column=column_button, padx=padx_button, pady=pady_button, sticky=sticky, columnspan=columnspan)
-    return button
+
 
 def winget_search():
     additional_text = insert_input()
@@ -227,25 +207,48 @@ def scoop_uninstall_fzf():
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
 
+#! App Store
+def create_button(
+        text,
+        command,
+        bg_color,
+        fg_color,
+        height,
+        width,
+        relief,
+        font,
+        padx_button,
+        padx_pack,
+        pady_button,
+        pady_pack,
+        row_button,
+        column_button,
+        columnspan,
+        sticky,
+        ):
+    button = tk.Button(input_frame, text=text, command=command, width=width, fg=fg_color, bg=bg_color, font=font)
+    button.grid(row=row_button, column=column_button, padx=padx_button, pady=pady_button, sticky=sticky, columnspan=columnspan)
+    return button
+
 input_frame = tk.Frame(MAIN_FRAME, bg="#1D2027")
 input_frame.pack(pady=10)
 
 winget_scoop_button_properties = [
-("Winget"    , None               , "#76c2ff", "#000000", 1, 12, "flat", ("JetBrainsMono NF", 12), 5, 5, 0, 5,       1, 1,2 ,"ew"),
-("Search"    , winget_search      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 1,1 ,""  ),
-("Info"      , winget_infooo      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 2, 1,""  ),
-("Install"   , winget_install     , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 1,1 ,""  ),
-("Uninstall" , winget_uninst      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 2, 1,""  ),
-("Install"   , wget_inst_fzf      , "#1D2027", "#00FF00", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 1, 1,""  ),
-("Uninstall" , wget_unin_fzf      , "#1D2027", "#FF0000", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 2, 1,""  ),
+("Winget"    ,None               ,"#76c2ff","#000000",1,12,"flat",("JetBrainsMono NF",12),5,5,0,5,     1,1,1 ,"ew"),
+("Search"    ,winget_search      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     2,1,1 ,""  ),
+("Info"      ,winget_infooo      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     3,1,1 ,""  ),
+("Install"   ,winget_install     ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     4,1,1 ,""  ),
+("Uninstall" ,winget_uninst      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     5,1,1 ,""  ),
+("Install"   ,wget_inst_fzf      ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,1,1 ,""  ),
+("Uninstall" ,wget_unin_fzf      ,"#1D2027","#FF0000",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     7,1,1 ,""  ),
 
-("Scoop"     , None               , "#95cd95", "#000000", 1, 12, "flat", ("JetBrainsMono NF", 12), 5, 5, 0, 5,       1, 3, 2,"ew"),
-("Search"    , scoop_search       , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 3, 1,""  ),
-("Info"      , scoop_info         , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       2, 4, 1,""  ),
-("Install"   , scoop_install      , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 3, 1,""  ),
-("Uninstall" , scoop_uninstall    , "#1D2027", "#FFFFFF", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       3, 4, 1,""  ),
-("Install"   , scoop_install_fzf  , "#1D2027", "#00FF00", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 3, 1,""  ),
-("Uninstall" , scoop_uninstall_fzf, "#1D2027", "#FF0000", 1, 12, "flat", ("JetBrainsMono NF", 10), 5, 5, 0, 5,       4, 4, 1,""  )
+("Scoop"     ,None               ,"#95cd95","#000000",1,12,"flat",("JetBrainsMono NF",12),5,5,0,5,     1,2,1 ,"ew"),
+("Search"    ,scoop_search       ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     2,2,1 ,""  ),
+("Info"      ,scoop_info         ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     3,2,1 ,""  ),
+("Install"   ,scoop_install      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     4,2,1 ,""  ),
+("Uninstall" ,scoop_uninstall    ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     5,2,1 ,""  ),
+("Install"   ,scoop_install_fzf  ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,2,1 ,""  ),
+("Uninstall" ,scoop_uninstall_fzf,"#1D2027","#FF0000",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     7,2,1 ,""  )
 ]
 
 for button_props in winget_scoop_button_properties:
