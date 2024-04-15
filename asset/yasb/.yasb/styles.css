@@ -185,15 +185,23 @@ max-width: 200px;
   background: #55c9ff;
 }
 .container-left .applist-widget * {
+  color: #030303;
+  font-size: 16px;
+}
+/*! applist  alt*/
+.app-widget{
+  background: #4b95e9;
+  padding: 2px 6px;
+  margin: 4px 3px;
+  border-radius: 5px;
+}
+.app-widget:hover {
+  background: #55c9ff;
+}
+.container-left .app-widget * {
 color: #030303;
 font-size: 16px;
 }
-/* .app-widget{
-  background: #4b95e9;
-  padding: 5px 5px;
-  margin: 5px 5px; 
-  border-radius: 3px;
-} */
 
 /*! explorer */
 .explorer-widget {
@@ -253,17 +261,23 @@ background: #55c9ff;
 color: #2e2323;
 font-size: 16px;
 }
-/*! Mouse Cross Line */
-.mouse_crossline-widget {
+
+/*!  ██████╗  ██████╗ ██╗    ██╗███████╗██████╗     ████████╗ ██████╗ ██╗   ██╗███████╗  */
+/*!  ██╔══██╗██╔═══██╗██║    ██║██╔════╝██╔══██╗    ╚══██╔══╝██╔═══██╗╚██╗ ██╔╝██╔════╝  */
+/*!  ██████╔╝██║   ██║██║ █╗ ██║█████╗  ██████╔╝       ██║   ██║   ██║ ╚████╔╝ ███████╗  */
+/*!  ██╔═══╝ ██║   ██║██║███╗██║██╔══╝  ██╔══██╗       ██║   ██║   ██║  ╚██╔╝  ╚════██║  */
+/*!  ██║     ╚██████╔╝╚███╔███╔╝███████╗██║  ██║       ██║   ╚██████╔╝   ██║   ███████║  */
+/*!  ╚═╝      ╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝       ╚═╝    ╚═════╝    ╚═╝   ╚══════╝  */
+.powertoys-widget {
 padding: 2px 6px;
-background: #b39f9f;
+background: #e25214;
 border-radius: 5px;
 margin: 4px 3px;
 }
-.mouse_crossline-widget:hover {
+.powertoys-widget:hover {
 background: #55c9ff;
 }
-.container-left .mouse_crossline-widget * {
+.container-left .powertoys-widget * {
 color: #04221e;
 font-size: 16px;
 }

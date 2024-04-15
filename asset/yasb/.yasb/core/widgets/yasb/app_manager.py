@@ -20,9 +20,9 @@ class AppWidget(BaseWidget):
         self._label_alt_content = label_alt
 
         self._label = QLabel()
-        self._label.setText("A")
+        self._label.setText(" \uf40e ")
         self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
-        self._label.setStyleSheet("background-color: #4b95e9; color: #000000;")
+        self._label.setStyleSheet("")
         self.widget_layout.addWidget(self._label)
         self.callback_left = callbacks["on_left"]
         self.callback_right = callbacks["on_right"]
