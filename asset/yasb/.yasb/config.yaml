@@ -27,10 +27,9 @@ bars:
     widgets:
       left:   [komorebi_workspaces, applist, explorer_button, color_pallet, position, desktop, mouse_pointer]
       center: ["active_window"]
-      right:  [ "process", "traffic", "uptime",  "clock", "cpu", "memory" ]
+      right:  [ traffic, uptime, clock, cpu, memory ]
 
 widgets:
-
 
   mouse_pointer:
     type: "yasb.mouse_crossline.CustomWidget"
@@ -44,7 +43,7 @@ widgets:
         on_left: "exec cmd /c python C:\\ms1\\python_yasb_shortcut.py powertoys_mouse_crosshair"
         on_right: "do_nothing"
 
-  process:
+  process: #! high cpu usage
     type: "yasb.process_running.ProcessWidget"
     options:
       label: "Active Processes: "
