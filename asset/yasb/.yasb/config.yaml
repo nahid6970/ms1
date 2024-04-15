@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, applist, AppManager, explorer_button, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract]
+      left:   [komorebi_workspaces, applist, AppManager, explorer_button, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract, PowerToys_Screen_Ruler]
       center: ["active_window"]
       right:  [ traffic, uptime, clock, cpu, memory ]
 
@@ -62,7 +62,7 @@ widgets:
       exec_options:
         run_once: true
       callbacks:
-        on_left: "exec cmd /c python C:\\ms1\\python_yasb_shortcut.py powertoys_mouse_crosshair"
+        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_mouse_crosshair"
         on_right: "do_nothing"
 
   PowerToys_Text_Extract:
@@ -74,7 +74,19 @@ widgets:
       exec_options:
         run_once: true
       callbacks:
-        on_left: "exec cmd /c python C:\\ms1\\python_yasb_shortcut.py powertoys_TextExtract"
+        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_TextExtract"
+        on_right: "do_nothing"
+
+  PowerToys_Screen_Ruler:
+    type: "yasb.powertoys_hotkey.CustomWidget"
+    options:
+      label: "\udb84\udf53"
+      label_alt: ""
+      class_name: "powertoys-widget"
+      exec_options:
+        run_once: true
+      callbacks:
+        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_ruler"
         on_right: "do_nothing"
 
   process: #! high cpu usage
