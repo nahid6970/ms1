@@ -17,7 +17,7 @@ class CustomWidget(BaseWidget):
             callbacks: dict,
             class_name: str
     ):
-        super().__init__(exec_options['run_interval'], class_name=f"custom-widget {class_name}")
+        super().__init__(exec_options['run_interval'], class_name=f"desktop-widget {class_name}")
         self._label_max_length = label_max_length
         self._exec_data = None
         self._exec_cmd = exec_options['run_cmd'].split(" ") if exec_options.get('run_cmd', False) else None

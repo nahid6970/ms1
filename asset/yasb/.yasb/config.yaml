@@ -162,11 +162,11 @@ widgets:
         on_right: "do_nothing"
 
   desktop:
-    type: "yasb.custom.CustomWidget"
+    type: "yasb.desktop.CustomWidget"
     options:
       label: "\udb80\uddc4"
       label_alt: ""
-      class_name: "custom-widget"
+      class_name: "desktop-widget"
       exec_options:
         run_once: true
       callbacks:
