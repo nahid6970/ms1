@@ -31,6 +31,9 @@ bars:
 
 widgets:
 
+
+
+
   process:
     type: "yasb.process_running.ProcessWidget"
     options:
@@ -159,7 +162,7 @@ widgets:
         run_once: true
       callbacks:
         on_left: "exec C:\\ms1\\utility\\position_x_y.py"
-        on_right: "do_nothing"
+        on_right: "exec cmd /c python C:\\Users\\nahid\\OneDrive\\Desktop\\asdasdad.py powertoys_mouse_crosshair"
 
   desktop:
     type: "yasb.desktop.CustomWidget"
