@@ -25,7 +25,7 @@ def do_drag(event):
         ROOT.geometry("+%s+%s" % (x, y))
 
 def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#00ff00")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
 
@@ -81,18 +81,10 @@ LB_XXX.bind("<Button-1>", close_window)
 
 
 
-
-
-
-
-
-
-
-
-BOX_WIDGET_APPID = tk.Frame(MAIN_FRAME, bg="#14bcff")
+BOX_WIDGET_APPID = tk.Frame(MAIN_FRAME, bg="#ff0000")
 BOX_WIDGET_APPID.pack(pady=(30,0))
 
-WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=30, fg="#000000", bg="#FFFFFF", font=("calibri", 18, "bold", "italic"), justify="center", relief="flat")
+WIDGET_APPID = tk.Entry(BOX_WIDGET_APPID, width=15, fg="#000000", bg="#FFFFFF", font=("calibri", 14, "bold", "italic"), justify="center", relief="flat")
 WIDGET_APPID.pack(padx=2, pady=2)
 
 
