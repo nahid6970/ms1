@@ -7,8 +7,8 @@ def update_color():
     x, y = pyautogui.position()
     color = pyautogui.screenshot().getpixel((x, y))
     hex_color = '#{:02x}{:02x}{:02x}'.format(*color)
-    color_label.config(text=f"{hex_color}", bg=hex_color)
-    color_label_white.config(text=f"{hex_color}", bg=hex_color)
+    color_label.config(text=f"Color: {hex_color}", bg=hex_color)
+    color_label_white.config(text=f"Color: {hex_color}", bg=hex_color)
     ROOT.after(100, update_color)
 
 def copy_color():
@@ -45,5 +45,6 @@ LB_x.bind("<Button-1>", close_window)
 
 update_color()
 keyboard.add_hotkey("ctrl+space", copy_color)
+print("Hotkey registered")
 
 ROOT.mainloop()
