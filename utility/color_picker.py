@@ -3,6 +3,8 @@ import pyautogui
 import pyperclip
 import keyboard
 
+
+
 def update_color():
     # Get the position of the mouse cursor
     x, y = pyautogui.position()
@@ -17,7 +19,7 @@ def update_color():
     color_label.config(text=f"Color: {hex_color}", bg=hex_color)
     
     # Schedule the update every 100 milliseconds (0.1 second)
-    root.after(100, update_color)
+    ROOT.after(100, update_color)
 
 def copy_color():
     # Get the text of the color label
@@ -30,12 +32,34 @@ def copy_color():
     pyperclip.copy(hex_color)
 
 # Create the main window
-root = tk.Tk()
-root.title("Color Picker")
+ROOT = tk.Tk()
+ROOT.title("Color Picker")
+
+
+
+def close_window(event=None):
+    ROOT.destroy()
+ROOT.attributes('-topmost', True)
+ROOT.configure(bg="#282c34")
+ROOT.overrideredirect(True)
+screen_width = ROOT.winfo_screenwidth()
+screen_height = ROOT.winfo_screenheight()
+x = 242
+y = 7
+ROOT.geometry(f"+{x}+{y}")
+ROOT.configure(bg="#282c34")
+ROOT.overrideredirect(True)
+box1 = tk.Frame(ROOT, bg="#1d2027")
+box1.pack(side="right", anchor="center", pady=(0,0),padx=(0,0))
 
 # Create a label to display the color
-color_label = tk.Label(root, text="Color: ", font=("Arial", 14), padx=10, pady=5)
-color_label.pack()
+color_label = tk.Label(ROOT, text="Color: ", font=("JetBrainsMono NF", 10, "bold"))
+color_label.pack(side="left")
+LB_name = tk.Label(box1, bg="#ff0000", fg="#FFFFFF", font=("JetBrainsMono NF", 10, "bold"), text="X")
+LB_name.pack(side="left")
+LB_name.bind("<Button-1>", close_window)
+
+
 
 # Start updating the color
 update_color()
@@ -44,4 +68,4 @@ update_color()
 keyboard.add_hotkey("ctrl+space", copy_color)
 
 # Run the Tkinter event loop
-root.mainloop()
+ROOT.mainloop()
