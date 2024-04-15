@@ -34,7 +34,8 @@ def display_palettes():
             palette_labels.append(color_label)
 
 def copy_to_clipboard(bg_color, fg_color):
-    pyperclip.copy(f"bg={bg_color} fg={fg_color}")
+    pyperclip.copy(f'{bg_color}')
+    # pyperclip.copy(f"bg={bg_color} fg={fg_color}")
 
 
 # Create the main window
