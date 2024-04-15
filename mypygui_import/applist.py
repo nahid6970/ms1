@@ -4,8 +4,12 @@ import tkinter as tk
 from tkinter import Canvas, Scrollbar
 from tkinter import ttk
 import os
+import ctypes
 
 
+def set_console_title(title):
+    ctypes.windll.kernel32.SetConsoleTitleW(title)
+set_console_title("App List")
 
 # Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}

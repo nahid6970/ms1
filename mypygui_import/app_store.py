@@ -1,7 +1,12 @@
 import subprocess
 import subprocess
 import tkinter as tk
+import ctypes
 
+
+def set_console_title(title):
+    ctypes.windll.kernel32.SetConsoleTitleW(title)
+set_console_title("App Store")
 # Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
 
