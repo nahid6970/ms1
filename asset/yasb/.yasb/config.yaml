@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, applist, explorer_button, color_pallet, position]
+      left:   [komorebi_workspaces, applist, explorer_button, color_pallet, position, desktop]
       center: ["active_window"]
       right:  [ "process", "traffic", "uptime",  "clock", "cpu", "memory" ]
 
@@ -159,6 +159,18 @@ widgets:
         run_once: true
       callbacks:
         on_left: "exec C:\\ms1\\utility\\position_x_y.py"
+        on_right: "do_nothing"
+
+  desktop:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "\udb80\uddc4"
+      label_alt: ""
+      class_name: "custom-widget"
+      exec_options:
+        run_once: true
+      callbacks:
+        on_left: "exec C:\\ms1\\desktop_icon.py"
         on_right: "do_nothing"
 
   ip_info:

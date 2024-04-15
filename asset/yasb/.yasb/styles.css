@@ -239,3 +239,17 @@ background: #55c9ff;
 color: #2e2323;
 font-size: 16px;
 }
+/*! Desktop */
+.desktop-widget {
+padding: 2px 6px;
+background: #fafffb;
+border-radius: 5px;
+margin: 4px 3px;
+}
+.desktop-widget:hover {
+background: #55c9ff;
+}
+.container-left .desktop-widget * {
+color: #2e2323;
+font-size: 16px;
+}

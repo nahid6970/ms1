@@ -1,7 +1,8 @@
-2024-04-15 14:40:02 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-15 14:40:04 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-15 14:40:04 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-15 14:40:04 INFO event_listener.py: Created named pipe yasb-c17d2d35-fb03-11ee-9e7d-a85e4555ad30
-2024-04-15 14:40:04 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-c17d2d35-fb03-11ee-9e7d-a85e4555ad30
-2024-04-15 14:40:04 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-15 14:40:04 INFO event_listener.py: Komorebi connected to named pipe: yasb-c17d2d35-fb03-11ee-9e7d-a85e4555ad30
+2024-04-15 15:50:12 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-15 15:50:15 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-15 15:50:15 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-15 15:50:16 INFO event_listener.py: Created named pipe yasb-8fb78cdc-fb0d-11ee-849a-a85e4555ad30
+2024-04-15 15:50:16 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-8fb78cdc-fb0d-11ee-849a-a85e4555ad30
+2024-04-15 15:50:16 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-15 15:50:16 INFO event_listener.py: Komorebi connected to named pipe: yasb-8fb78cdc-fb0d-11ee-849a-a85e4555ad30
+2024-04-15 15:50:23 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
