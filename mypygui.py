@@ -17,6 +17,9 @@ required_libraries = [
     "threading",
     "time",
     "tkinter",
+    "Image",
+    "lib",
+    "pywin32",
     # "tkinter.messagebox",
     # "tkinter.ttk",
 ]
@@ -28,9 +31,7 @@ def install_missing_libraries():
         except ImportError:
             print(f"Installing {lib}...")
             subprocess.check_call(["pip", "install", lib])
-
-# Call the function to install missing libraries
-install_missing_libraries()
+# install_missing_libraries()
 
 #! Now import the libraries
 # from tkinter import PhotoImage
@@ -49,7 +50,7 @@ import ctypes
 import keyboard
 import os
 import psutil
-# import pyautogui
+import pyautogui
 import subprocess
 import sys
 import threading
@@ -210,10 +211,6 @@ MAIN_FRAME.pack(pady=1, expand=True)  # Add some padding at the top
 #?  ██║  ██║╚██████╔╝╚██████╔╝   ██║       ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #?  ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-#! Close Window
-# def close_window(event=None):
-#     ROOT.destroy()
-
 def get_active_window_info():
    # Wait for 2 seconds
    time.sleep(2)
@@ -231,6 +228,10 @@ def get_active_window_info():
    print(f"\033[92mActive Window Process Name:\033[0m {process_name}")
    print(f"\033[94mActive Window Title:\033[0m {window_text}")
    print("...")  # Add dots as a visual separator
+
+#! Close Window
+# def close_window(event=None):
+#     ROOT.destroy()
 
 def close_window(event=None):
     password = simpledialog.askstring("Password", "Enter the password to close the window:")

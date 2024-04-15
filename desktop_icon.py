@@ -24,18 +24,14 @@ def create_custom_border(parent):
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
 
-# Create main window
 ROOT = tk.Tk()
 ROOT.title("Folder")
-# ROOT.attributes('-topmost', True)  # Set always on top
-# ROOT.geometry("520x800")
+ROOT.attributes('-topmost', True)
 ROOT.configure(bg="#282c34")
-ROOT.overrideredirect(True)  # Remove default borders
+ROOT.overrideredirect(True)
 
-# Create custom border
 BORDER_FRAME = create_custom_border(ROOT)
 
-# Add bindings to make the window movable
 ROOT.bind("<ButtonPress-1>", start_drag)
 ROOT.bind("<ButtonRelease-1>", stop_drag)
 ROOT.bind("<B1-Motion>", do_drag)
@@ -43,14 +39,13 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 400
-# y = screen_height//2 - 980//2
-y = 0
-ROOT.geometry(f"400x1030+{x}+{y}") #! overall size of the window
+x = 0
+y = 39
+ROOT.geometry(f"1920x400+{x}+{y}")
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=980) #!
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920, height=400) #!
 MAIN_FRAME.pack_propagate(False)
-MAIN_FRAME.pack(pady=1)  # Add some padding at the top
+MAIN_FRAME.pack(pady=1) 
 MAIN_FRAME.pack(expand=True)
 
 
@@ -80,10 +75,10 @@ LB_XXX.bind("<Button-1>", close_window)
 
 #! Desktop
 column_1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-column_1.pack(pady=(0,0), side="left")
+column_1.pack(pady=(0,0), side="top")
 
 column_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-column_2.pack(pady=(0,0), side="left")
+column_2.pack(pady=(0,0), side="top")
 
 icon_folder       =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-50x50.png"))
 icon_thispc       =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\this-pc-computer-50x50.png"))
@@ -98,27 +93,27 @@ icon_user         =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\ba
 
 def create_button_advanced(parent, text="", image=None, command=None, compound=None, height=0, width=0, bg="#e7d86a", fg="#1D2027", font=("JetBrainsMono NF", 13, "bold"), anchor="center", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#f6d24a", cursor="hand2", side="left", padx=(0,0), pady=(0,0)):
     button = tk.Button(parent, text=text, image=image, command=command, compound=compound, height=height, width=width, bg=bg, fg=fg, font=font, anchor=anchor, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground, cursor=cursor)
-    button.pack(side="top", padx=padx, pady=pady)
+    button.pack(side="left", padx=padx, pady=pady)
     return button
 
 # Creating buttons with advanced properties
 button_properties_advanced =[
-{"parent":column_1,"text":"User"        ,"image":icon_user  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid"]                                                                    ,shell=True)}                              ,
-{"parent":column_1,"text":"ThisPC"      ,"image":icon_thispc  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer"],shell=True)}                                                                           ,
-{"parent":column_1,"text":"RecycleBin"  ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"/root                                                                                 ,::{645FF040-5081-101B-9F08-00AA002F954E}"],shell=True)},
-{"parent":column_1,"text":"ControlPanel","image":icon_control ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["control"] ,shell=True)}                                                                           ,
-{"parent":column_1,"text":"Startup"     ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\StartMenu\\Programs\\Startup"],shell=True)}                              ,
-{"parent":column_1,"text":"WindowsApp"  ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ProgramFiles\\WindowsApps"]                                                       ,shell=True)}                              ,
-{"parent":column_1,"text":"Packages"    ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData\\Local\\Packages"]                                          ,shell=True)}                              ,
-{"parent":column_1,"text":"AppData"     ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData"]                                                           ,shell=True)}                              ,
-{"parent":column_1,"text":"Music"       ,"image":icon_music   ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\song"]                                                                            ,shell=True)}                              ,
-{"parent":column_1,"text":"Software"    ,"image":icon_software,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\software"]                                                                        ,shell=True)}                              ,
-{"parent":column_1,"text":"Downloads"   ,"image":icon_download,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads"]                                                                       ,shell=True)}                              ,
+{"parent":column_1,"text":"User"        ,"image":icon_user    ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid"]                                                                    ,shell=True)}                              ,
+{"parent":column_1,"text":"ThisPC"      ,"image":icon_thispc  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer"],shell=True)}                                                                           ,
+{"parent":column_1,"text":"RecycleBin"  ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"/root                                                                                 ,::{645FF040-5081-101B-9F08-00AA002F954E}"],shell=True)},
+{"parent":column_1,"text":"ControlPanel","image":icon_control ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["control"] ,shell=True)}                                                                           ,
+{"parent":column_1,"text":"Startup"     ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\StartMenu\\Programs\\Startup"],shell=True)}                              ,
+{"parent":column_1,"text":"WindowsApp"  ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ProgramFiles\\WindowsApps"]                                                       ,shell=True)}                              ,
+{"parent":column_1,"text":"Packages"    ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData\\Local\\Packages"]                                          ,shell=True)}                              ,
+{"parent":column_1,"text":"AppData"     ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\Users\\nahid\\AppData"]                                                           ,shell=True)}                              ,
+{"parent":column_1,"text":"Music"       ,"image":icon_music   ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\song"]                                                                            ,shell=True)}                              ,
+{"parent":column_1,"text":"Software"    ,"image":icon_software,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\software"]                                                                        ,shell=True)}                              ,
+{"parent":column_1,"text":"Downloads"   ,"image":icon_download,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads"]                                                                       ,shell=True)}                              ,
 
-{"parent":column_2,"text":"ms1"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms1"]                                                                             ,shell=True)}                              ,
-{"parent":column_2,"text":"ms2"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms2"]                                                                             ,shell=True)}                              ,
-{"parent":column_2,"text":"Sonarr"      ,"image":icon_sonarr  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads\\@Sonarr"]                                                              ,shell=True)}                              ,
-{"parent":column_2,"text":"Radarr"      ,"image":icon_radarr  ,"compound":tk.TOP,"height":0,"width":0,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads\\@Radarr"]                                                              ,shell=True)}                              ,
+{"parent":column_2,"text":"ms1"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms1"]                                                                             ,shell=True)}                              ,
+{"parent":column_2,"text":"ms2"         ,"image":icon_folder  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"C:\\ms2"]                                                                             ,shell=True)}                              ,
+{"parent":column_2,"text":"Sonarr"      ,"image":icon_sonarr  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads\\@Sonarr"]                                                              ,shell=True)}                              ,
+{"parent":column_2,"text":"Radarr"      ,"image":icon_radarr  ,"compound":tk.TOP,"height":0,"width":100,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["explorer" ,"D:\\Downloads\\@Radarr"]                                                              ,shell=True)}                              ,
 
 ]
 advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
