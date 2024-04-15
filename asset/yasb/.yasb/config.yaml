@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   ["komorebi_workspaces", "applist", "explorer_button", color_pallet]
+      left:   [komorebi_workspaces, applist, explorer_button, color_pallet, position]
       center: ["active_window"]
       right:  [ "process", "traffic", "uptime",  "clock", "cpu", "memory" ]
 
@@ -148,6 +148,18 @@ widgets:
       callbacks:
         on_left: "exec C:\\ms1\\utility\\color_picker.py"
         on_right: "exec C:\\ms1\\utility\\color_pallet_rand_fg_bgFF00.py"
+
+  position:
+    type: "yasb.position.Position_Widget"
+    options:
+      label: "\udb83\ude51"
+      label_alt: "Color-Pallet"
+      class_name: "applist-widget"
+      exec_options:
+        run_once: true
+      callbacks:
+        on_left: "exec C:\\ms1\\utility\\position_x_y.py"
+        on_right: "do_nothing"
 
   ip_info:
     type: "yasb.custom.CustomWidget"
