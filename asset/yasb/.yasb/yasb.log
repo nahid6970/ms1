@@ -1,7 +1,7 @@
-2024-04-15 11:45:00 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-15 11:45:03 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-15 11:45:03 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-15 11:45:03 INFO event_listener.py: Created named pipe yasb-4e8963fa-faeb-11ee-91e2-a85e4555ad30
-2024-04-15 11:45:03 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-4e8963fa-faeb-11ee-91e2-a85e4555ad30
-2024-04-15 11:45:03 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-15 11:45:04 INFO event_listener.py: Komorebi connected to named pipe: yasb-4e8963fa-faeb-11ee-91e2-a85e4555ad30
+2024-04-15 13:25:16 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-15 13:25:19 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-15 13:25:19 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-15 13:25:19 INFO event_listener.py: Created named pipe yasb-5058b3e5-faf9-11ee-b335-a85e4555ad30
+2024-04-15 13:25:19 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-5058b3e5-faf9-11ee-b335-a85e4555ad30
+2024-04-15 13:25:19 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-15 13:25:20 INFO event_listener.py: Komorebi connected to named pipe: yasb-5058b3e5-faf9-11ee-b335-a85e4555ad30
