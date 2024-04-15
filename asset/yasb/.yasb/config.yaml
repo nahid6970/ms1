@@ -25,14 +25,24 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, applist, explorer_button, color_pallet, position, desktop]
+      left:   [komorebi_workspaces, applist, explorer_button, color_pallet, position, desktop, mouse_pointer]
       center: ["active_window"]
       right:  [ "process", "traffic", "uptime",  "clock", "cpu", "memory" ]
 
 widgets:
 
 
-
+  mouse_pointer:
+    type: "yasb.mouse_crossline.CustomWidget"
+    options:
+      label: "\uf245"
+      label_alt: ""
+      class_name: "custom-widget"
+      exec_options:
+        run_once: true
+      callbacks:
+        on_left: "exec cmd /c python C:\\ms1\\python_yasb_shortcut.py powertoys_mouse_crosshair"
+        on_right: "do_nothing"
 
   process:
     type: "yasb.process_running.ProcessWidget"
@@ -162,7 +172,7 @@ widgets:
         run_once: true
       callbacks:
         on_left: "exec C:\\ms1\\utility\\position_x_y.py"
-        on_right: "exec cmd /c python C:\\Users\\nahid\\OneDrive\\Desktop\\asdasdad.py powertoys_mouse_crosshair"
+        on_right: "do_nothing"
 
   desktop:
     type: "yasb.desktop.CustomWidget"

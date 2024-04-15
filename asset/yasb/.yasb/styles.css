@@ -253,3 +253,17 @@ background: #55c9ff;
 color: #2e2323;
 font-size: 16px;
 }
+/*! Mouse Cross Line */
+.mouse_crossline-widget {
+padding: 2px 6px;
+background: #b39f9f;
+border-radius: 5px;
+margin: 4px 3px;
+}
+.mouse_crossline-widget:hover {
+background: #55c9ff;
+}
+.container-left .mouse_crossline-widget * {
+color: #04221e;
+font-size: 16px;
+}
