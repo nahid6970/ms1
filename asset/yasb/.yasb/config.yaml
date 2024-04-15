@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, applist, AppManager, explorer_button, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract, PowerToys_Screen_Ruler]
+      left:   [komorebi_workspaces, applist, AppManager, explorer_button, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract, PowerToys_Screen_Ruler, PowerToys_Color_Picker]
       center: ["active_window"]
       right:  [ traffic, uptime, clock, cpu, memory ]
 
@@ -87,6 +87,18 @@ widgets:
         run_once: true
       callbacks:
         on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_ruler"
+        on_right: "do_nothing"
+
+  PowerToys_Color_Picker:
+    type: "yasb.powertoys_hotkey.CustomWidget"
+    options:
+      label: "\udb80\ude66"
+      label_alt: ""
+      class_name: "powertoys-widget"
+      exec_options:
+        run_once: true
+      callbacks:
+        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_color_picker"
         on_right: "do_nothing"
 
   process: #! high cpu usage

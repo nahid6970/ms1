@@ -12,6 +12,9 @@ def windows_terminal():
 def powertoys_ruler():
     pyautogui.hotkey('win', 'shift', 'm')
 
+def powertoys_color_picker():
+    pyautogui.hotkey('win', 'shift', 'c')
+
 def powertoys_TextExtract():
     pyautogui.hotkey('win', 'shift', 't')
 
@@ -39,6 +42,8 @@ def main(args):
         powertoys_mouse_crosshair()
     elif args.action == 'stop_wsa':
         stop_wsa()
+    elif args.action == 'powertoys_color_picker':
+        powertoys_color_picker()
     else:
         print("Invalid action")
 
