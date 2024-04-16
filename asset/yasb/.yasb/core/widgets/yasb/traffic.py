@@ -2,6 +2,7 @@ import psutil
 from core.widgets.base import BaseWidget
 from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
 from PyQt6.QtWidgets import QLabel, QApplication
+from PyQt6.QtCore import Qt
 import subprocess
 
 class TrafficWidget(BaseWidget):
@@ -80,9 +81,9 @@ class TrafficWidget(BaseWidget):
         # Connect click events to respective functions
         self._download_label.mousePressEvent = self._open_settings
         self._upload_label.mousePressEvent = self._open_task_manager
-        self._notepad_label.mousePressEvent = self._open_notepad
-        self._chrome_label.mousePressEvent = self._open_chrome
-        self._vscode_label.mousePressEvent = self._open_vscode
+        self._notepad_label.mousePressEvent = lambda event: self._on_notepad_click(event, self._notepad_label)
+        self._chrome_label.mousePressEvent = lambda event: self._on_chrome_click(event, self._chrome_label)
+        self._vscode_label.mousePressEvent = lambda event: self._on_vscode_click(event, self._vscode_label)
 
     def _set_label_color(self, label, content):
         # Define colors and stylesheets based on content
@@ -145,17 +146,24 @@ class TrafficWidget(BaseWidget):
         # Open task manager when upload label is clicked
         subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
 
-    def _open_notepad(self, event):
-        # Open Notepad when Notepad label is clicked
-        subprocess.Popen(['notepad.exe'])
+    def _on_notepad_click(self, event, label):
+        # Perform left or right mouse click action for Notepad label
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
 
-    def _open_chrome(self, event):
-        # Open Chrome when Chrome label is clicked
-        subprocess.Popen(['cmd.exe', '/c', 'start', 'chrome.exe'])
+    def _on_chrome_click(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
 
-    def _open_vscode(self, event):
-        # Open VSCode when VSCode label is clicked
-        subprocess.Popen(['cmd.exe', '/c','code'])
+    def _on_vscode_click(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
 
 if __name__ == "__main__":
     app = QApplication([])
