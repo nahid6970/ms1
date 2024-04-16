@@ -1,36 +1,3 @@
-; shift = +
-; alt 	= !
-; ctrl 	= ^
-
-; alt + x = launch pwsh
-; ctrl + alt + h = show/hide files in explore
-; ctrl + alt + m = copy file path
-; ctrl + alt + n = open with vscode
-; ctrl + alt + p = copy path for linux
-; ctrl + alt + x = launch pwsh admin mode
-; ctrl + h = launch pygui
-; ctrl + shift + r = reload autohotkey script
-; win + alt + x = mypwshgui.ps1
-; win + t = always on top
-; win + v = launch valo.ahk
-; win + x = pyscript
-; win + z = taskmanager
-; CTRL+ALT+R = RegEdit  open Run Path
-
-
-; ;now = Current date and time
-; ;vv1 = u guys r so trash garbage get good..
-; ;vv2 = trash garbage stupid noobs..
-; ;vv3 = stupid kids get good.
-
-
-
-
-
-^+p::Pause    ; Pause script with Ctrl+Alt+P
-^+s::Suspend  ; Suspend script with Ctrl+Alt+S
-^+r::Reload   ; Reload script with Ctrl+Alt+R
-
 
 ;!  ███╗   ███╗██╗   ██╗██████╗ ██╗   ██╗ ██████╗ ██╗   ██╗██╗
 ;!  ████╗ ████║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝██╔════╝ ██║   ██║██║
@@ -141,11 +108,8 @@ return
 
 ;! 🎯 open Run Path
 ^!r::
-    ; Open Registry Editor
     Run, regedit.exe
-    ; Wait for Registry Editor to open (adjust the sleep time as needed)
     Sleep, 500
-    ; Copy the registry path to clipboard
     Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 return
 
@@ -282,7 +246,6 @@ return
 ::;sa::SHIFT{+}ALT
 ::;ss::<SPACE>
 
-
 !+k::RunWait, taskkill /f /im komorebi.exe
 !+o::RunWait, taskkill /f /im whkd.exe
 !+p::RunWait, taskkill /f /im python.exe
@@ -291,7 +254,10 @@ return
 !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
 !y::RunWait, python.exe C:\Users\nahid\.yasb\main.py, , Hide
-Pause::Run, komorebic quick-load-resize ; Pause key
-#x:: Run, C:\ms1\mypygui.py
-
 #t:: WinSet, AlwaysOnTop, Toggle, A
+#x:: Run, C:\ms1\mypygui.py
+Pause::Run, komorebic quick-load-resize
+
+^+p::Pause    ; Pause script with Ctrl+Alt+P
+^+s::Suspend  ; Suspend script with Ctrl+Alt+S
+^+r::Reload   ; Reload script with Ctrl+Alt+R
