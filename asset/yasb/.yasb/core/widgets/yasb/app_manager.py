@@ -39,7 +39,7 @@ class AppWidget(BaseWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             os.system("start C:/ms1/mypygui_import/applist.py")
         elif event.button() == Qt.MouseButton.RightButton:
-            os.system("start C:/ms1/mypygui_import/app_store.py")
+            os.system("cmd /c python C:\\ms1\\HotKeys.py powertoys_mouse_crosshair")
 
     def _on_mouse_enter_event(self, event):
         # Change style or perform actions when mouse enters the widget
