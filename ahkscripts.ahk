@@ -287,10 +287,12 @@ return
 ::;ss::<SPACE>
 
 
-; !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
-; !+o::RunWait, taskkill /f /im whkd.exe
-; !+p::RunWait, taskkill /f /im python.exe
-; !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
-; !y::RunWait, python.exe C:\Users\nahid\.yasb\main.py, , Hide
-; !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
+!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
+!+o::RunWait, taskkill /f /im whkd.exe
+!+k::RunWait, taskkill /f /im komorebi.exe
+!k::RunWait, komorebic start
+!+p::RunWait, taskkill /f /im python.exe
+!r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
+!y::RunWait, python.exe C:\Users\nahid\.yasb\main.py, , Hide
+!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
 Pause::Run, komorebic quick-load-resize ; Pause key
