@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QLabel, QApplication
 from PyQt6.QtCore import Qt
 import subprocess
 import os
+import time
 
 class CombinedWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
@@ -58,7 +59,7 @@ class CombinedWidget(BaseWidget):
         # Set text and colors for additional labels
         self._Edit_label.setText("\uf044")
         self._chrome_label.setText("\uf005")
-        self._reload_label.setText("\udb86\ude08")
+        self._reload_label.setText("\uf256")
 
         self._set_label_color(self._Edit_label, "Edit")
         self._set_label_color(self._chrome_label, "Chrome")
@@ -99,9 +100,10 @@ class CombinedWidget(BaseWidget):
 
     def _reload_yasb(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
+            os.system('cmd /c start taskkill /f /im python.exe')
         elif event.button() == Qt.MouseButton.RightButton:
-            subprocess.Popen('taskkill /f /im python.exe && start /MIN cmd /c pythonw C:\\Users\\nahid\\.yasb\\main.py', shell=True)
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
+
 
 
 if __name__ == "__main__":
