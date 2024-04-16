@@ -5,6 +5,7 @@ from tkinter import filedialog
 import subprocess
 import tkinter as tk
 import filecmp
+
 from datetime import datetime
 
 root = tk.Tk()
@@ -58,6 +59,10 @@ restore_button.pack()
 
 
 
+
+yasb_src = "c:/Users/nahid/.yasb/"
+yasb_dst = "c:/ms1/asset/.yasb/"
+
 def compare_directories(dir1, dir2):
     if not os.path.exists(dir1) or not os.path.exists(dir2):
         label.config(text="❌ Similar directories not found")
@@ -77,21 +82,40 @@ def compare_directories(dir1, dir2):
                 for f in subdir.diff_files:
                     label.config(text=label.cget("text") + f"\nDifferent files: {os.path.join(subdir.left, f)} and {os.path.join(subdir.right, f)}")
 
-yasb_src = "c:/Users/nahid/.yasb"
-yasb_dst = "c:/ms1/asset/yasb_test"
-
 label = tk.Label(root, font=("calibri", 14), wraplength=600)
 label.pack()
 
 compare_directories(yasb_src, yasb_dst)
 
+def backup_directory():
+    for dirpath, dirnames, filenames in os.walk(yasb_src):
+        rel_dirpath = os.path.relpath(dirpath, yasb_src)
+        dst_dir = os.path.join(yasb_dst, rel_dirpath)
+        os.makedirs(dst_dir, exist_ok=True)
+        for filename in filenames:
+            src_file = os.path.join(dirpath, filename)
+            dst_file = os.path.join(dst_dir, filename)
+            if not os.path.exists(dst_file):
+                shutil.copy2(src_file, dst_file)
+    label.config(text="✔️ Directory backup completed")
 
-backup_button = tk.Button(root, text="Backup", command=lambda: shutil.copyfile(yasb_src, yasb_dst))
+def restore_directory():
+    for dirpath, dirnames, filenames in os.walk(yasb_dst):
+        rel_dirpath = os.path.relpath(dirpath, yasb_dst)
+        src_dir = os.path.join(yasb_src, rel_dirpath)
+        for filename in filenames:
+            src_file = os.path.join(dirpath, filename)
+            dst_file = os.path.join(src_dir, filename)
+            if not os.path.exists(dst_file):
+                os.makedirs(src_dir, exist_ok=True)
+                shutil.copy2(src_file, dst_file)
+    label.config(text="✔️ Directory restore completed")
+
+backup_button = tk.Button(root, text="Backup", command=backup_directory)
 backup_button.pack()
 
-restore_button = tk.Button(root, text="Restore", command=lambda: shutil.copyfile(yasb_dst, yasb_src))
+restore_button = tk.Button(root, text="Restore", command=restore_directory)
 restore_button.pack()
-
 
 
 
