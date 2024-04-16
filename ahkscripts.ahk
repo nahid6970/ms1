@@ -40,9 +40,7 @@
 ;!  ╚═╝     ╚═╝   ╚═╝   ╚═╝        ╚═╝    ╚═════╝  ╚═════╝ ╚═╝
 
 ; ; ;! alt1 🎯 Launch My PYGui
-#x:: 
-Run, "C:\ms1\mypygui.py"
-return
+
 
 ; ; ;! alt1 🎯 Launch My PYGui
 ; #x:: 
@@ -84,9 +82,7 @@ return
 ;!  ██║  ██║███████╗╚███╔███╔╝██║  ██║   ██║   ███████║       ██║   ╚██████╔╝██║     
 ;!  ╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝       ╚═╝    ╚═════╝ ╚═╝     
 
-#t::
-WinSet, AlwaysOnTop, Toggle, A
-return
+
 
 ;!  ███████╗██╗  ██╗ ██████╗ ██╗    ██╗     ██╗ ██╗  ██╗██╗██████╗ ███████╗
 ;!  ██╔════╝██║  ██║██╔═══██╗██║    ██║    ██╔╝ ██║  ██║██║██╔══██╗██╔════╝
@@ -287,12 +283,15 @@ return
 ::;ss::<SPACE>
 
 
-!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
-!+o::RunWait, taskkill /f /im whkd.exe
 !+k::RunWait, taskkill /f /im komorebi.exe
-!k::RunWait, komorebic start
+!+o::RunWait, taskkill /f /im whkd.exe
 !+p::RunWait, taskkill /f /im python.exe
+!k::RunWait, komorebic start
+!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
 !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
-!y::RunWait, python.exe C:\Users\nahid\.yasb\main.py, , Hide
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
+!y::RunWait, python.exe C:\Users\nahid\.yasb\main.py, , Hide
 Pause::Run, komorebic quick-load-resize ; Pause key
+#x:: Run, C:\ms1\mypygui.py
+
+#t:: WinSet, AlwaysOnTop, Toggle, A
