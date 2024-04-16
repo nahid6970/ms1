@@ -4,6 +4,7 @@ from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
 from PyQt6.QtWidgets import QLabel, QApplication
 from PyQt6.QtCore import Qt
 import subprocess
+import os
 
 class CombinedWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
@@ -28,13 +29,13 @@ class CombinedWidget(BaseWidget):
         self._label_content = label
         self._label_alt_content = label_alt
 
-        self._Edit_File = QLabel()
+        self._Edit_label = QLabel()
         self._chrome_label = QLabel()
-        self._vscode_label = QLabel()
+        self._reload_label = QLabel()
 
-        self.widget_layout.addWidget(self._Edit_File)
+        self.widget_layout.addWidget(self._Edit_label)
         self.widget_layout.addWidget(self._chrome_label)
-        self.widget_layout.addWidget(self._vscode_label)
+        self.widget_layout.addWidget(self._reload_label)
 
         self.register_callback("toggle_label", self._toggle_label)
         self.register_callback("update_label", self._update_label)
@@ -55,17 +56,17 @@ class CombinedWidget(BaseWidget):
         active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
 
         # Set text and colors for additional labels
-        self._Edit_File.setText("\uf044")
+        self._Edit_label.setText("\uf044")
         self._chrome_label.setText("\uf005")
-        self._vscode_label.setText("\udb81\udc53")
+        self._reload_label.setText("\udb86\ude08")
 
-        self._set_label_color(self._Edit_File, "Edit")
+        self._set_label_color(self._Edit_label, "Edit")
         self._set_label_color(self._chrome_label, "Chrome")
-        self._set_label_color(self._vscode_label, "VSCode")
+        self._set_label_color(self._reload_label, "VSCode")
 
-        self._Edit_File.mousePressEvent = lambda event: self._on_Edit_click(event, self._Edit_File)
+        self._Edit_label.mousePressEvent = lambda event: self._on_Edit_click(event, self._Edit_label)
         self._chrome_label.mousePressEvent = lambda event: self._on_chrome_click(event, self._chrome_label)
-        self._vscode_label.mousePressEvent = lambda event: self._on_vscode_click(event, self._vscode_label)
+        self._reload_label.mousePressEvent = lambda event: self._reload_yasb(event, self._reload_label)
 
     def _set_label_color(self, label, content):
         # Define colors and stylesheets based on content
@@ -79,7 +80,7 @@ class CombinedWidget(BaseWidget):
             stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
         elif content == "VSCode":
             bg_color = "#79e173"  # Dark Blue
-            fg_color = "#FFFFFF"  # White
+            fg_color = "#000000"  # White
             stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
 
         label.setStyleSheet(stylesheet)
@@ -96,11 +97,12 @@ class CombinedWidget(BaseWidget):
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
 
-    def _on_vscode_click(self, event, label):
+    def _reload_yasb(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
+            subprocess.Popen('taskkill /f /im python.exe && start /MIN cmd /c pythonw C:\\Users\\nahid\\.yasb\\main.py', shell=True)
+
 
 if __name__ == "__main__":
     app = QApplication([])
