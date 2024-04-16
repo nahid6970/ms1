@@ -20,8 +20,7 @@ class AppWidget(BaseWidget):
         self._label_alt_content = label_alt
 
         self._label = QLabel()
-        self._label.setText("Apps")
-        self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
+        self._label.setText("\udb80\udeaf")
         self._label.setStyleSheet(" font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #4b95e9; color: #000000; margin: 4px 3px; padding: 2px 6px;")
         self.widget_layout.addWidget(self._label)
         self.callback_left = callbacks["on_left"]
