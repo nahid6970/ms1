@@ -1,8 +1,8 @@
 import psutil
 from core.widgets.base import BaseWidget
 from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
-from PyQt6.QtWidgets import QLabel, QApplication
-import subprocess
+from PyQt6.QtWidgets import QLabel
+
 
 class TrafficWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
@@ -62,10 +62,6 @@ class TrafficWidget(BaseWidget):
         self._set_label_color(self._upload_label, upload_speed)
         self._set_label_color(self._download_label, download_speed)
 
-        # Connect click events to respective functions
-        self._download_label.mousePressEvent = self._open_settings
-        self._upload_label.mousePressEvent = self._open_task_manager
-
     def _set_label_color(self, label, speed):
         speed_float = float(speed.split()[0])
 
@@ -104,17 +100,3 @@ class TrafficWidget(BaseWidget):
         self.bytes_recv = current_io.bytes_recv
 
         return download_speed_str, upload_speed_str
-
-    def _open_settings(self, event):
-        # Open settings when download label is clicked
-        subprocess.Popen(['cmd.exe', '/c', 'start', 'ms-settings:'])
-
-    def _open_task_manager(self, event):
-        # Open task manager when upload label is clicked
-        subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-
-if __name__ == "__main__":
-    app = QApplication([])
-    widget = TrafficWidget("Download", "Upload", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
-    widget.show()
-    app.exec()
