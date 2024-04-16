@@ -90,7 +90,8 @@ class CombinedWidget(BaseWidget):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py'])
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'code', 'C:\ms1\mypygui_import\edit_files.py'])
+           subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\mypygui_import\\edit_files.py:89'])
+
 
     def _on_chrome_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
