@@ -4,14 +4,37 @@ import filecmp
 import os
 root = tk.Tk()
 
-def compare_directories(src_dir, dst_dir):
-    if not (os.path.exists(src_dir) and os.path.exists(dst_dir)):
-        return "One or both directories do not exist"
-    dcmp = filecmp.dircmp(src_dir, dst_dir)
-    if len(dcmp.left_only) == 0 and len(dcmp.right_only) == 0 and len(dcmp.diff_files) == 0:
-        return "Directories are identical"
+
+def compare_directories(dir1, dir2):
+    if not os.path.exists(dir1) or not os.path.exists(dir2):
+        label.config(text="❌ Similar directories not found")
     else:
-        return "Directories are different"
+        dcmp = filecmp.dircmp(dir1, dir2)
+        if len(dcmp.left_only) == 0 and len(dcmp.right_only) == 0 and len(dcmp.diff_files) == 0:
+            label.config(text="✔️ Directories are identical")
+        else:
+            label.config(text="❌ Directories are different")
+            
+            # Display differences
+            for subdir in dcmp.subdirs.values():
+                for f in subdir.left_only:
+                    label.config(text=label.cget("text") + f"\nFile only in {dir1}: {os.path.join(subdir.left, f)}")
+                for f in subdir.right_only:
+                    label.config(text=label.cget("text") + f"\nFile only in {dir2}: {os.path.join(subdir.right, f)}")
+                for f in subdir.diff_files:
+                    label.config(text=label.cget("text") + f"\nDifferent files: {os.path.join(subdir.left, f)} and {os.path.join(subdir.right, f)}")
+
+
+def perform_comparison():
+    src = "c:/Users/nahid/.yasb/"
+    dst = "c:/ms1/asset/.yasb/"
+    compare_directories(src, dst)
+
+label = tk.Label(root, font=("calibri", 10), wraplength=600)
+label.pack()
+
+compare_button = tk.Button(root, text="Compare", command=perform_comparison)
+compare_button.pack()
 
 def create_button(text, frame, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, padx_pack, pady_pack, anchor, command):
     button = tk.Button(frame, anchor=anchor, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
@@ -29,8 +52,5 @@ button_properties = [
 
 for button_props in button_properties:
     create_button(*button_props)
-
-label = tk.Label(root, font=("calibri", 14), wraplength=600)
-label.pack()
 
 root.mainloop()
