@@ -88,12 +88,6 @@ def perform_comparison():
 label = tk.Label(root, font=("calibri", 14), wraplength=600)
 label.pack()
 
-backup_button = tk.Button(root, text="Backup", command=None)
-backup_button.pack()
-
-restore_button = tk.Button(root, text="Restore", command=None)
-restore_button.pack()
-
 label = tk.Label(root, font=("calibri", 14), wraplength=600)
 label.pack()
 
@@ -103,22 +97,20 @@ compare_button.pack()
 
 
 
+BOX_ = tk.Frame(root, bg="#1d2027")
+BOX_.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 
+#! Folder
+def create_button(text, frame, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, padx_pack, pady_pack, anchor, command):
+    button = tk.Button(frame, anchor=anchor, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
+    button.pack(padx=padx_pack, pady=pady_pack)
+    return button
 
+button_properties =[
+("Copy File", BOX_, "#1D2027", "#ffffff", 1, 15, "flat", ("calibri", 14, "bold"), 0, 0, (0, 0), (0, 0), "w", lambda: subprocess.Popen(['powershell.exe', 'Copy-Item', '-Path', '"C:\\Users\\nahid\\.config\\whkdrc"', '-Destination', '"C:\\ms1\\asset\\whkd\\whkdrc"', '-Recurse', '-Force', '-Verbose'], shell=True)),
 
-# BOX_ = tk.Frame(root, bg="#1d2027")
-# BOX_.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
-
-# #! Folder
-# def create_button(text, frame, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, padx_pack, pady_pack, anchor, command):
-#     button = tk.Button(frame, anchor=anchor, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
-#     button.pack(padx=padx_pack, pady=pady_pack)
-#     return button
-
-# button_properties =[
-# ("Test",BOX_,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\.yasb"],shell=True)),
-# ]
-# for button_props in button_properties:
-#     create_button(*button_props)
+]
+for button_props in button_properties:
+    create_button(*button_props)
 
 root.mainloop()
