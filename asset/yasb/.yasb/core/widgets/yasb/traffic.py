@@ -1,9 +1,8 @@
 import psutil
 from core.widgets.base import BaseWidget
 from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
-from PyQt6.QtWidgets import QLabel, QApplication
-from PyQt6.QtCore import Qt
-import subprocess
+from PyQt6.QtWidgets import QLabel
+
 
 class TrafficWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
@@ -30,15 +29,9 @@ class TrafficWidget(BaseWidget):
 
         self._upload_label = QLabel()
         self._download_label = QLabel()
-        self._notepad_label = QLabel()
-        self._chrome_label = QLabel()
-        self._vscode_label = QLabel()
 
         self.widget_layout.addWidget(self._upload_label)
         self.widget_layout.addWidget(self._download_label)
-        self.widget_layout.addWidget(self._notepad_label)
-        self.widget_layout.addWidget(self._chrome_label)
-        self.widget_layout.addWidget(self._vscode_label)
 
         self.register_callback("toggle_label", self._toggle_label)
         self.register_callback("update_label", self._update_label)
@@ -69,56 +62,26 @@ class TrafficWidget(BaseWidget):
         self._set_label_color(self._upload_label, upload_speed)
         self._set_label_color(self._download_label, download_speed)
 
-        # Set text and colors for additional labels
-        self._notepad_label.setText("Notepad")
-        self._chrome_label.setText("Chrome")
-        self._vscode_label.setText("VSCode")
+    def _set_label_color(self, label, speed):
+        speed_float = float(speed.split()[0])
 
-        self._set_label_color(self._notepad_label, "Notepad")
-        self._set_label_color(self._chrome_label, "Chrome")
-        self._set_label_color(self._vscode_label, "VSCode")
-
-        # Connect click events to respective functions
-        self._download_label.mousePressEvent = self._open_settings
-        self._upload_label.mousePressEvent = self._open_task_manager
-        self._notepad_label.mousePressEvent = lambda event: self._on_notepad_click(event, self._notepad_label)
-        self._chrome_label.mousePressEvent = lambda event: self._on_chrome_click(event, self._chrome_label)
-        self._vscode_label.mousePressEvent = lambda event: self._on_vscode_click(event, self._vscode_label)
-
-    def _set_label_color(self, label, content):
-        # Define colors and stylesheets based on content
-        if content == "Notepad":
-            bg_color = "#FF5733"  # Orange
-            fg_color = "#000000"  # Black
-            stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
-        elif content == "Chrome":
-            bg_color = "#4285F4"  # Blue
-            fg_color = "#FFFFFF"  # White
-            stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
-        elif content == "VSCode":
-            bg_color = "#007ACC"  # Dark Blue
-            fg_color = "#FFFFFF"  # White
-            stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
+        if speed_float == 0:
+            bg_color = "#1d2027"
+            fg_color = "#FFFFFF"
+        elif 0 < speed_float < 0.5:
+            bg_color = "#dfffdf"
+            fg_color = "#000000"
+        elif 0.5 <= speed_float < 1:
+            bg_color = "#67D567"
+            fg_color = "#000000"
+        elif 1 <= speed_float < 5:
+            bg_color = "#4b95e9"
+            fg_color = "#000000"
         else:
-            speed_float = float(content.split()[0])
-            if speed_float == 0:
-                bg_color = "#1d2027"  # Dark Grey
-                fg_color = "#FFFFFF"  # White
-            elif 0 < speed_float < 0.5:
-                bg_color = "#dfffdf"  # Light Green
-                fg_color = "#000000"  # Black
-            elif 0.5 <= speed_float < 1:
-                bg_color = "#67D567"  # Green
-                fg_color = "#000000"  # Black
-            elif 1 <= speed_float < 5:
-                bg_color = "#4b95e9"  # Blue
-                fg_color = "#000000"  # Black
-            else:
-                bg_color = "#ff0000"  # Red
-                fg_color = "#000000"  # Black
-            stylesheet = f"background-color: {bg_color}; color: {fg_color};"
+            bg_color = "#ff0000"
+            fg_color = "#000000"
 
-        label.setStyleSheet(stylesheet)
+        label.setStyleSheet(f"background-color: {bg_color}; color: {fg_color};")
 
     def _get_speed(self) -> [str, str]:
         current_io = psutil.net_io_counters()
@@ -137,36 +100,3 @@ class TrafficWidget(BaseWidget):
         self.bytes_recv = current_io.bytes_recv
 
         return download_speed_str, upload_speed_str
-
-    def _open_settings(self, event):
-        # Open settings when download label is clicked
-        subprocess.Popen(['cmd.exe', '/c', 'start', 'ms-settings:'])
-
-    def _open_task_manager(self, event):
-        # Open task manager when upload label is clicked
-        subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-
-    def _on_notepad_click(self, event, label):
-        # Perform left or right mouse click action for Notepad label
-        if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-        elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-
-    def _on_chrome_click(self, event, label):
-        if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-        elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-
-    def _on_vscode_click(self, event, label):
-        if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-        elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
-
-if __name__ == "__main__":
-    app = QApplication([])
-    widget = TrafficWidget("Download", "Upload", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
-    widget.show()
-    app.exec()
