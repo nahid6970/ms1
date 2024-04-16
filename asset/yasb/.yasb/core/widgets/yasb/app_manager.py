@@ -20,17 +20,43 @@ class AppWidget(BaseWidget):
         self._label_alt_content = label_alt
 
         self._label = QLabel()
-        self._label.setText(" \uf40e ")
+        self._label.setText("Apps")
         self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
-        self._label.setStyleSheet("")
+        self._label.setStyleSheet(" font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #4b95e9; color: #000000; margin: 4px 3px; padding: 2px 6px;")
         self.widget_layout.addWidget(self._label)
         self.callback_left = callbacks["on_left"]
         self.callback_right = callbacks["on_right"]
 
         self._label.mousePressEvent = self._on_mouse_press_event
 
+        # Connect hover events
+        self._label.enterEvent = self._on_mouse_enter_event
+        self._label.leaveEvent = self._on_mouse_leave_event
+
+        # Flag to track hover state
+        self._is_hovered = False
+
     def _on_mouse_press_event(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             os.system("start C:/ms1/mypygui_import/applist.py")
         elif event.button() == Qt.MouseButton.RightButton:
             os.system("start C:/ms1/mypygui_import/app_store.py")
+
+    def _on_mouse_enter_event(self, event):
+        # Change style or perform actions when mouse enters the widget
+        self._is_hovered = True
+        # Example: Change background color
+        self._label.setStyleSheet("font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #39b9ea; color: #000000; margin: 4px 3px; padding: 2px 6px;")
+
+    def _on_mouse_leave_event(self, event):
+        # Revert style or perform actions when mouse leaves the widget
+        self._is_hovered = False
+        # Example: Revert background color
+        self._label.setStyleSheet(" font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #4b95e9; color: #000000; margin: 4px 3px; padding: 2px 6px;")
+
+# Example usage
+if __name__ == "__main__":
+    app = QApplication([])
+    widget = AppWidget(label="Label", label_alt="Alt Label", update_interval=1000, callbacks={"on_left": "left_action", "on_right": "right_action"})
+    widget.show()
+    app.exec()

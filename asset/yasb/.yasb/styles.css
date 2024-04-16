@@ -176,10 +176,10 @@ max-width: 200px;
 
 /*! applist */
 .applist-widget {
-  padding: 2px 6px;
   background: #4b95e9;
   border-radius: 5px;
   margin: 4px 3px;
+  padding: 2px 6px;
 }
 .applist-widget:hover {
   background: #55c9ff;
@@ -189,7 +189,7 @@ max-width: 200px;
   font-size: 16px;
 }
 /*! applist  alt*/
-.app-widget{
+/* .app-widget{
   background: #4b95e9;
   padding: 2px 6px;
   margin: 4px 3px;
@@ -201,7 +201,7 @@ max-width: 200px;
 .container-left .app-widget * {
 color: #030303;
 font-size: 16px;
-}
+} */
 
 /*! explorer */
 .explorer-widget {

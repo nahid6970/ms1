@@ -854,11 +854,11 @@ function sync { c:\ms1\sync.ps1 }
 function trim { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 }
 Import-Module scoop-completion
 
-function ms1  { Set-Location c:\ms1\ }
-function ms2  { Set-Location c:\ms2\ }
+# function ms1  { Set-Location c:\ms1\ }
+# function ms2  { Set-Location c:\ms2\ }
 
 
-
+Set-Alias trim C:\ms1\scripts\ffmpeg\trim.ps1
 
 
 # Override PSReadLine's history search
