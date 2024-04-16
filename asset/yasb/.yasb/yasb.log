@@ -1,13 +1,7 @@
-2024-04-16 23:46:33 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-16 23:46:35 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-16 23:46:35 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-16 23:46:35 INFO event_listener.py: Created named pipe yasb-44df7da1-fc19-11ee-af36-a85e4555ad30
-2024-04-16 23:46:35 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-44df7da1-fc19-11ee-af36-a85e4555ad30
-2024-04-16 23:46:35 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-16 23:46:35 INFO event_listener.py: Komorebi connected to named pipe: yasb-44df7da1-fc19-11ee-af36-a85e4555ad30
-2024-04-17 01:02:21 ERROR event_listener.py: Komorebi has disconnected from the named pipe yasb-44df7da1-fc19-11ee-af36-a85e4555ad30
-Traceback (most recent call last):
-  File "C:\Users\nahid\.yasb\core\utils\komorebi\event_listener.py", line 60, in run
-    buffer, bytes_to_read, result = win32pipe.PeekNamedPipe(self.pipe, 1)
-                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pywintypes.error: (109, 'PeekNamedPipe', 'The pipe has been ended.')
+2024-04-17 01:49:02 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-17 01:49:07 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-17 01:49:07 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-17 01:49:07 INFO event_listener.py: Created named pipe yasb-62c62624-fc2a-11ee-af74-a85e4555ad30
+2024-04-17 01:49:07 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-62c62624-fc2a-11ee-af74-a85e4555ad30
+2024-04-17 01:49:07 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-17 01:49:07 INFO event_listener.py: Komorebi connected to named pipe: yasb-62c62624-fc2a-11ee-af74-a85e4555ad30

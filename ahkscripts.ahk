@@ -247,6 +247,7 @@ return
 ::;ss::<SPACE>
 
 !+k::RunWait, taskkill /f /im komorebi.exe
+!+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe
 !+o::RunWait, taskkill /f /im whkd.exe
 !+p::RunWait, taskkill /f /im python.exe
 !k::RunWait, komorebic start
