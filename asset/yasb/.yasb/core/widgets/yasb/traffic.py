@@ -161,4 +161,4 @@ if __name__ == "__main__":
     app = QApplication([])
     widget = TrafficWidget("Download", "Upload", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
     widget.show()
-    app.exec
+    app.exec()
