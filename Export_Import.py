@@ -16,52 +16,49 @@ root.configure(bg="#282c34")
 
 
 
-source      ="c:/test/src/hi.txt"
-destination ="c:/test/dst/hi.txt"
+# source      ="c:/test/src/hi.txt"
+# destination ="c:/test/dst/hi.txt"
 
-def compare_files(source, destination):
-    if not os.path.exists(source) or not os.path.exists(destination):
-        label.config(text="❌ Similar files not found")
-    else:
-        if filecmp.cmp(source, destination):
-            label.config(text="✔️ Files are equal")
-        else:
-            label.config(text="❌ Files are different")
+# def compare_files(source, destination):
+#     if not os.path.exists(source) or not os.path.exists(destination):
+#         label.config(text="❌ Similar files not found")
+#     else:
+#         if filecmp.cmp(source, destination):
+#             label.config(text="✔️ Files are equal")
+#         else:
+#             label.config(text="❌ Files are different")
 
-        # Get last modified times of the files
-        source_modified = os.path.getmtime(source)
-        destination_modified = os.path.getmtime(destination)
+#         # Get last modified times of the files
+#         source_modified = os.path.getmtime(source)
+#         destination_modified = os.path.getmtime(destination)
 
-        # Convert last modified times to human-readable format (12-hour format)
-        source_last_modified = datetime.fromtimestamp(source_modified).strftime('%Y-%m-%d %I:%M:%S %p')
-        destination_last_modified = datetime.fromtimestamp(destination_modified).strftime('%Y-%m-%d %I:%M:%S %p')
+#         # Convert last modified times to human-readable format (12-hour format)
+#         source_last_modified = datetime.fromtimestamp(source_modified).strftime('%Y-%m-%d %I:%M:%S %p')
+#         destination_last_modified = datetime.fromtimestamp(destination_modified).strftime('%Y-%m-%d %I:%M:%S %p')
 
-        if source_modified > destination_modified:
-            label.config(text=label.cget("text") + f"\nLast modified: {source_last_modified} ({source})")
-        else:
-            label.config(text=label.cget("text") + f"\nLast modified: {destination_last_modified} ({destination})")
+#         if source_modified > destination_modified:
+#             label.config(text=label.cget("text") + f"\nLast modified: {source_last_modified} ({source})")
+#         else:
+#             label.config(text=label.cget("text") + f"\nLast modified: {destination_last_modified} ({destination})")
 
-source = "c:/test/src/hi.txt"
-destination = "c:/test/dst/hi.txt"
+# source = "c:/test/src/hi.txt"
+# destination = "c:/test/dst/hi.txt"
 
-label = tk.Label(root, font=("calibri", 14), wraplength=300)
-label.pack()
+# label = tk.Label(root, font=("calibri", 14), wraplength=300)
+# label.pack()
 
-compare_files(source, destination)
+# compare_files(source, destination)
 
-backup_button = tk.Button(root, text="Backup", command=lambda: shutil.copyfile(source, destination))
-backup_button.pack()
+# backup_button = tk.Button(root, text="Backup", command=lambda: shutil.copyfile(source, destination))
+# backup_button.pack()
 
-restore_button = tk.Button(root, text="Restore", command=lambda: shutil.copyfile(destination, source))
-restore_button.pack()
-
-
+# restore_button = tk.Button(root, text="Restore", command=lambda: shutil.copyfile(destination, source))
+# restore_button.pack()
 
 
 
 
-yasb_src = "c:/Users/nahid/.yasb/"
-yasb_dst = "c:/ms1/asset/.yasb/"
+
 
 def compare_directories(dir1, dir2):
     if not os.path.exists(dir1) or not os.path.exists(dir2):
@@ -82,44 +79,26 @@ def compare_directories(dir1, dir2):
                 for f in subdir.diff_files:
                     label.config(text=label.cget("text") + f"\nDifferent files: {os.path.join(subdir.left, f)} and {os.path.join(subdir.right, f)}")
 
+
+def perform_comparison():
+    src = "c:/Users/nahid/.yasb/"
+    dst = "c:/ms1/asset/.yasb/"
+    compare_directories(src, dst)
+
 label = tk.Label(root, font=("calibri", 14), wraplength=600)
 label.pack()
 
-compare_directories(yasb_src, yasb_dst)
-
-def backup_directory():
-    for dirpath, dirnames, filenames in os.walk(yasb_src):
-        rel_dirpath = os.path.relpath(dirpath, yasb_src)
-        dst_dir = os.path.join(yasb_dst, rel_dirpath)
-        os.makedirs(dst_dir, exist_ok=True)
-        for filename in filenames:
-            src_file = os.path.join(dirpath, filename)
-            dst_file = os.path.join(dst_dir, filename)
-            if not os.path.exists(dst_file):
-                shutil.copy2(src_file, dst_file)
-    label.config(text="✔️ Directory backup completed")
-
-def restore_directory():
-    for dirpath, dirnames, filenames in os.walk(yasb_dst):
-        rel_dirpath = os.path.relpath(dirpath, yasb_dst)
-        src_dir = os.path.join(yasb_src, rel_dirpath)
-        for filename in filenames:
-            src_file = os.path.join(dirpath, filename)
-            dst_file = os.path.join(src_dir, filename)
-            if not os.path.exists(dst_file):
-                os.makedirs(src_dir, exist_ok=True)
-                shutil.copy2(src_file, dst_file)
-    label.config(text="✔️ Directory restore completed")
-
-backup_button = tk.Button(root, text="Backup", command=backup_directory)
+backup_button = tk.Button(root, text="Backup", command=None)
 backup_button.pack()
 
-restore_button = tk.Button(root, text="Restore", command=restore_directory)
+restore_button = tk.Button(root, text="Restore", command=None)
 restore_button.pack()
 
+label = tk.Label(root, font=("calibri", 14), wraplength=600)
+label.pack()
 
-
-
+compare_button = tk.Button(root, text="Compare", command=perform_comparison)
+compare_button.pack()
 
 
 
