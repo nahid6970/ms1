@@ -148,7 +148,7 @@ padding: 5px;
 
 /*! traffic */
 .traffic-widget{
-/* background: #ffffff; */
+background: #366b50;
 }
 .container-right .traffic-widget * {
 font-size: 14px;
@@ -282,15 +282,21 @@ color: #04221e;
 font-size: 16px;
 }
 
+/*!  ██████╗██████╗ ██╗   ██╗ */
+/*! ██╔════╝██╔══██╗██║   ██║ */
+/*! ██║     ██████╔╝██║   ██║ */
+/*! ██║     ██╔═══╝ ██║   ██║ */
+/*! ╚██████╗██║     ╚██████╔╝ */
+/*!  ╚═════╝╚═╝      ╚═════╝  */
 
-
-/*! traffic */
+/*! Multi CPU */
 .multicpu-widget{
-  background: #ffffff;
-  }
-  .container-right .multicpu-widget * {
-  font-size: 14px;
-  margin: 2px;
-  border-radius: 3px;
-  }
-  
+background: #fdfdfd;
+}
+.container-right .multicpu-widget * {
+font-size: 14px;
+color: #ffffff;
+background: #1800f1;
+margin: 2px;
+border-radius: 3px;
+}
