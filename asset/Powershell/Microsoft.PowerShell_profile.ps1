@@ -926,3 +926,16 @@ function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop sho
 # }
 # Export-ModuleMember -Function PSConsoleHostReadLine
 
+
+
+
+function fzf-filter {
+    param(
+        [string]$Command,
+        [string]$Text
+    )
+
+    $output = Invoke-Expression "$Command" | Out-String
+    $filteredOutput = $output -split "`n" | fzf --query="$Text"
+    Write-Output $filteredOutput
+}
