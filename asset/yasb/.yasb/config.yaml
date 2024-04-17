@@ -25,49 +25,24 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, applist, AppManager, explorer_button, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract, PowerToys_Screen_Ruler, PowerToys_Color_Picker]
-      center: ["active_window"]
-      right:  [ CPU_Multi, traffic, BT, uptime, clock, cpu, memory ]
+      left:   [komorebi_workspaces, applist, AppManager, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract, PowerToys_Screen_Ruler, PowerToys_Color_Picker]
+      center: ["active_window", PowerToys]
+      right:  [ CPU_Multi, traffic, BT, uptime, clock, cpu, memory, Folder]
 
 widgets:
 
   CPU_Multi:
     type: "yasb.cpumulti.MultiCPU_Widget"
-    options:
-      label: ""
-      update_interval: 1000
-      callbacks:
-        on_right: "do_nothing"
 
   BT:
     type: "yasb.Combined_BT.CombinedWidget"
-    options:
-      label: ""
-      update_interval: 1000
-      callbacks:
-        on_right: "do_nothing"
 
-  applist:
-    type: "yasb.applist.CustomWidget"
-    options:
-      label: "\uf40e"
-      label_alt: "Explorer"
-      class_name: "applist-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec powershell C:/ms1/mypygui_import/applist.py"
-        on_right: "exec powershell C:/ms1/mypygui_import/app_store.py"
+  traffic:
+    type: "yasb.traffic.TrafficWidget"
 
-  AppManager:
-    type: "yasb.app_manager.AppWidget"
-    options:
-      label: "\uf40e"
-      label_alt: "A"
-      update_interval: 0
-      callbacks:
-        on_left: "launch_applist"
-        on_right: "launch_appstore"
+  PowerToys:
+    type: "yasb.PowerToys_Multi.PowerToysWidget"
+
 
   PowerToys_Mouse_Pointer:
     type: "yasb.powertoys_hotkey.CustomWidget"
@@ -116,6 +91,30 @@ widgets:
       callbacks:
         on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_color_picker"
         on_right: "do_nothing"
+
+
+  applist:
+    type: "yasb.applist.CustomWidget"
+    options:
+      label: "\uf40e"
+      label_alt: "Explorer"
+      class_name: "applist-widget"
+      exec_options:
+        run_once: true
+      callbacks:
+        on_left: "exec powershell C:/ms1/mypygui_import/applist.py"
+        on_right: "exec powershell C:/ms1/mypygui_import/app_store.py"
+
+  AppManager:
+    type: "yasb.app_manager.AppWidget"
+    options:
+      label: "\uf40e"
+      label_alt: "A"
+      update_interval: 0
+      callbacks:
+        on_left: "launch_applist"
+        on_right: "launch_appstore"
+
 
   process: #! high cpu usage
     type: "yasb.process_running.ProcessWidget"
@@ -182,14 +181,6 @@ widgets:
         callbacks:
           on_right: "exec cmd /c Taskmgr"
 
-  traffic:
-    type: "yasb.traffic.TrafficWidget"
-    options:
-      label: ""
-      update_interval: 1000 # Update interval should be a multiple of 1000
-      callbacks:
-        on_right: "do_nothing"
-
   uptime:
     type: "yasb.uptime.UptimeWidget"
     options:
@@ -199,8 +190,8 @@ widgets:
       callbacks:
         on_right: "exec cmd /c Taskmgr"
 
-  explorer_button:
-    type: "yasb.explorer.CustomWidget"
+  Folder:
+    type: "yasb.folder.CustomWidget"
     options:
       label: "\uf07c"
       label_alt: "Explorer"

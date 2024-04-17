@@ -1,13 +1,11 @@
-2024-04-17 12:46:54 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-17 12:46:56 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-17 12:46:56 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-17 12:46:56 INFO event_listener.py: Created named pipe yasb-482ad6ce-fc86-11ee-a4e6-a85e4555ad30
-2024-04-17 12:46:56 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-482ad6ce-fc86-11ee-a4e6-a85e4555ad30
-2024-04-17 12:46:56 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-17 12:46:56 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
+2024-04-17 13:41:17 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-17 13:41:19 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-17 13:41:19 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-17 13:41:19 INFO event_listener.py: Created named pipe yasb-e0fd253e-fc8d-11ee-a3e1-a85e4555ad30
+2024-04-17 13:41:19 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-e0fd253e-fc8d-11ee-a3e1-a85e4555ad30
+2024-04-17 13:41:19 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-17 13:41:19 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
 
 Location:
     komorebic\src\main.rs:1191:22
 
-2024-04-17 12:47:31 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
-2024-04-17 12:47:38 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.

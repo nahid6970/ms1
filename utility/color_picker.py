@@ -23,7 +23,7 @@ ROOT.attributes('-topmost', True)
 ROOT.overrideredirect(True)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
-x = 242
+x = 500
 y = 7
 ROOT.geometry(f"+{x}+{y}")
 
