@@ -41,8 +41,6 @@ def main():
     elif args.action=='powertoys_TextExtract'    :global_shortcut("win+shift+t"         )
     elif args.action=='capture2text'             :global_shortcut("win+ctrl+alt+shift+q")
 
-
-
     else:
         print("Invalid action")
 
