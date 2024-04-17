@@ -1,4 +1,5 @@
 import os
+import subprocess
 from core.widgets.base import BaseWidget
 from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
 from PyQt6.QtWidgets import QLabel, QApplication
@@ -37,10 +38,10 @@ class Browser(BaseWidget):
 
     def _on_mouse_press_event(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            os.system("start C:/ms1/mypygui_import/applist.py")
+            subprocess.Popen("c:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
         elif event.button() == Qt.MouseButton.RightButton:
-            os.system("cmd /c python C:\\ms1\\HotKeys.py powertoys_mouse_crosshair")
-
+            subprocess.Popen("c:/Program Files/Google/Chrome/Application/chrome.exe")
+            # os.system("cmd /c python C:\\ms1\\HotKeys.py powertoys_mouse_crosshair")
     def _on_mouse_enter_event(self, event):
         # Change style or perform actions when mouse enters the widget
         self._is_hovered = True
