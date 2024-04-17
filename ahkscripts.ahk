@@ -262,3 +262,5 @@ Pause::Run, komorebic quick-load-resize
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
+
+::;;::,=:[]()
