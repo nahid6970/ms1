@@ -24,7 +24,7 @@ def send_m_k(window_title, shortcuts):
         keyboard.send(shortcut)
         time.sleep(0.1)
 
-def send_global_shortcut(shortcut):
+def global_shortcut(shortcut):
     keyboard.send(shortcut, True, True)
 
 def main():
@@ -32,12 +32,12 @@ def main():
     parser.add_argument("action", type=str, help="Action to perform")
     args = parser.parse_args()
 
-    if args.action == 'remove_dup_lines':
-        send_m_k("Visual Studio Code", ["ctrl+k", "alt+d"])
-    elif args.action == 'remove_from_selection':
-        send_m_k("Visual Studio Code", ["ctrl+h", "alt+l"])
-    elif args.action == 'winnnnnnnnnn':
-        send_global_shortcut("win+shift+c")  # Example of a global shortcut
+    if args.action   =='remove_dup_lines      ': send_m_k         ("Visual Studio Code"     ,["ctrl+k","alt+d"])
+    elif args.action =='remove_from_selection ': send_m_k         ("Visual Studio Code"     ,["ctrl+h","alt+l"])
+    elif args.action =='powertoys_color_picker': global_shortcut  ("win+shift+c")
+
+
+
     else:
         print("Invalid action")
 
