@@ -929,7 +929,7 @@ function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop sho
 
 
 
-function fzf-filter {
+function filterfzf {
     param(
         [string]$Command,
         [string]$Text
