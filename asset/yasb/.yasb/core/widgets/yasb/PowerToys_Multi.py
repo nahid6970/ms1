@@ -112,7 +112,7 @@ class PowerToysWidget(BaseWidget):
 
     def _on_button_4_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\HotKeys.py powertoys_color_picker'])
+           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\HotKeys.py winnnnnnnnnn'])
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c',''])
 
