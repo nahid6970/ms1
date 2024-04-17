@@ -27,7 +27,7 @@ bars:
     widgets:
       left:   [komorebi_workspaces, applist, AppManager, color_pallet, position, desktop, PowerToys]
       center: [active_window ]
-      right:  [ CPU_Multi, traffic, BT, uptime, clock, cpu, memory, Folder]
+      right:  [ BT, Folder, CPU_Multi, cpu, memory, traffic, uptime, clock]
 
 widgets:
 
@@ -47,7 +47,7 @@ widgets:
     type: "yasb.applist.CustomWidget"
     options:
       label: "\uf40e"
-      label_alt: "Explorer"
+      label_alt: ""
       class_name: "applist-widget"
       exec_options:
         run_once: true
@@ -88,7 +88,7 @@ widgets:
   komorebi_workspaces:
     type: "komorebi.workspaces.WorkspaceWidget"
     options:
-        label_offline: "GlazeWM"
+        label_offline: "Nahid-NA"
         label_workspace_btn: "{index}"
         label_default_name: "{index}"
         label_zero_index: false
@@ -120,7 +120,7 @@ widgets:
         - '\u2586' # 60%
         - '\u2587' # 70%
         - '\u2588' # 80%+
-      histogram_num_columns: 5
+      histogram_num_columns: 10
 
   memory:
     type: "yasb.memory.MemoryWidget"
