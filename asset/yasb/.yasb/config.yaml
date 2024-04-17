@@ -32,7 +32,7 @@ bars:
 widgets:
 
   CPU_Multi:
-    type: "yasb.cpumulti.TrafficWidget"
+    type: "yasb.cpumulti.MultiCPU_Widget"
     options:
       label: ""
       update_interval: 1000

@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QLabel, QApplication
 from PyQt6.QtCore import Qt
 import subprocess
 
-class TrafficWidget(BaseWidget):
+class MultiCPU_Widget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
 
     def __init__(
@@ -15,7 +15,7 @@ class TrafficWidget(BaseWidget):
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_interval, class_name="traffic-widget")
+        super().__init__(update_interval, class_name="multicpu-widget")
         self.interval = update_interval // 1000
 
         self._show_alt_label = False
@@ -24,7 +24,7 @@ class TrafficWidget(BaseWidget):
 
         self._cpu_core_bars = []
 
-        self.widget_layout.addWidget(QLabel("CPU Usage"))
+        self.widget_layout.addWidget(QLabel("\uf4bc"))
 
         for _ in range(psutil.cpu_count()):
             bar = QLabel()
@@ -66,6 +66,6 @@ class TrafficWidget(BaseWidget):
 
 if __name__ == "__main__":
     app = QApplication([])
-    widget = TrafficWidget("CPU Usage", "CPU Usage", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
+    widget = MultiCPU_Widget("CPU Usage", "CPU Usage", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
     widget.show()
     app.exec()
