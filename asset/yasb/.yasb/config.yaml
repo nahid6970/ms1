@@ -25,8 +25,8 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, applist, AppManager, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract, PowerToys_Screen_Ruler, PowerToys_Color_Picker]
-      center: ["active_window", PowerToys]
+      left:   [komorebi_workspaces, applist, AppManager, color_pallet, position, desktop, PowerToys]
+      center: [active_window ]
       right:  [ CPU_Multi, traffic, BT, uptime, clock, cpu, memory, Folder]
 
 widgets:
@@ -42,56 +42,6 @@ widgets:
 
   PowerToys:
     type: "yasb.PowerToys_Multi.PowerToysWidget"
-
-
-  PowerToys_Mouse_Pointer:
-    type: "yasb.powertoys_hotkey.CustomWidget"
-    options:
-      label: "\uf245"
-      label_alt: ""
-      class_name: "powertoys-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_mouse_crosshair"
-        on_right: "do_nothing"
-
-  PowerToys_Text_Extract:
-    type: "yasb.powertoys_hotkey.CustomWidget"
-    options:
-      label: "\udb80\udd4d"
-      label_alt: ""
-      class_name: "powertoys-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_TextExtract"
-        on_right: "do_nothing"
-
-  PowerToys_Screen_Ruler:
-    type: "yasb.powertoys_hotkey.CustomWidget"
-    options:
-      label: "\udb84\udf53"
-      label_alt: ""
-      class_name: "powertoys-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_ruler"
-        on_right: "do_nothing"
-
-  PowerToys_Color_Picker:
-    type: "yasb.powertoys_hotkey.CustomWidget"
-    options:
-      label: "\udb80\ude66"
-      label_alt: ""
-      class_name: "powertoys-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_color_picker"
-        on_right: "do_nothing"
-
 
   applist:
     type: "yasb.applist.CustomWidget"
@@ -638,4 +588,39 @@ widgets:
   #     callbacks:
   #       on_right: "do_nothing"
 
+  # PowerToys_Text_Extract:
+  #   type: "yasb.powertoys_hotkey.CustomWidget"
+  #   options:
+  #     label: "\udb80\udd4d"
+  #     label_alt: ""
+  #     class_name: "powertoys-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_TextExtract"
+  #       on_right: "do_nothing"
+
+  # PowerToys_Screen_Ruler:
+  #   type: "yasb.powertoys_hotkey.CustomWidget"
+  #   options:
+  #     label: "\udb84\udf53"
+  #     label_alt: ""
+  #     class_name: "powertoys-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_ruler"
+  #       on_right: "do_nothing"
+
+  # PowerToys_Color_Picker:
+  #   type: "yasb.powertoys_hotkey.CustomWidget"
+  #   options:
+  #     label: "\udb80\ude66"
+  #     label_alt: ""
+  #     class_name: "powertoys-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_color_picker"
+  #       on_right: "do_nothing"
 

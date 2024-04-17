@@ -1,10 +1,10 @@
-2024-04-17 14:00:15 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-17 14:00:16 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-17 14:00:16 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-17 14:00:16 INFO event_listener.py: Created named pipe yasb-8713c27a-fc90-11ee-96b1-a85e4555ad30
-2024-04-17 14:00:16 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-8713c27a-fc90-11ee-96b1-a85e4555ad30
-2024-04-17 14:00:16 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
-2024-04-17 14:00:16 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
+2024-04-17 14:06:22 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-17 14:06:23 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-17 14:06:23 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-17 14:06:23 INFO event_listener.py: Created named pipe yasb-61d9eac5-fc91-11ee-91fb-a85e4555ad30
+2024-04-17 14:06:23 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-61d9eac5-fc91-11ee-91fb-a85e4555ad30
+2024-04-17 14:06:23 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-17 14:06:23 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
 
 Location:
     komorebic\src\main.rs:1191:22
