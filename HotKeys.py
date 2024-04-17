@@ -33,11 +33,12 @@ def main():
     parser.add_argument("action", type=str, help="Action to perform")
     args = parser.parse_args()
 
-    if args.action   =='remove_dup_lines'         :send_m_k       ("Visual Studio Code",["ctrl+k","alt+d"])
-    elif args.action =='remove_from_selection'    :send_m_k       ("Visual Studio Code",["ctrl+h","alt+l"])
-    elif args.action =='powertoys_color_picker'   :global_shortcut("win+shift+c")
-    elif args.action =='powertoys_mouse_crosshair':global_shortcut("win+alt+p"  )
-    elif args.action =='powertoys_TextExtract'    :global_shortcut("win+shift+t")
+    if args.action  =='remove_dup_lines'         :send_m_k       ("VisualStudioCode",["ctrl+k","alt+d"])
+    elif args.action=='remove_from_selection'    :send_m_k       ("VisualStudioCode",["ctrl+h","alt+l"])
+    elif args.action=='powertoys_color_picker'   :global_shortcut("win+shift+c"         )
+    elif args.action=='powertoys_mouse_crosshair':global_shortcut("win+alt+p"           )
+    elif args.action=='powertoys_TextExtract'    :global_shortcut("win+shift+t"         )
+    elif args.action=='capture2text'             :global_shortcut("win+ctrl+alt+shift+q")
 
 
 
