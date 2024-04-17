@@ -1,18 +1,11 @@
-2024-04-17 12:02:15 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-17 12:02:16 ERROR widget_builder.py: Failed to import widget with type yasb.cpumulti.TrafficWidget
-Traceback (most recent call last):
-  File "C:\Users\nahid\.yasb\core\utils\widget_builder.py", line 43, in _build_widget
-    widget_cls = getattr(widget_module, widget_class_str)
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: module 'core.widgets.yasb.cpumulti' has no attribute 'TrafficWidget'
-2024-04-17 12:02:23 INFO bar_manager.py: Starting SystemEventListener...
-2024-04-17 12:02:23 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-17 12:02:23 INFO event_listener.py: Created named pipe yasb-0f1dbe18-fc80-11ee-a602-a85e4555ad30
-2024-04-17 12:02:23 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-0f1dbe18-fc80-11ee-a602-a85e4555ad30
-2024-04-17 12:02:23 INFO event_listener.py: Komorebi connected to named pipe: yasb-0f1dbe18-fc80-11ee-a602-a85e4555ad30
-2024-04-17 12:03:06 ERROR event_listener.py: Komorebi has disconnected from the named pipe yasb-0f1dbe18-fc80-11ee-a602-a85e4555ad30
-Traceback (most recent call last):
-  File "C:\Users\nahid\.yasb\core\utils\komorebi\event_listener.py", line 60, in run
-    buffer, bytes_to_read, result = win32pipe.PeekNamedPipe(self.pipe, 1)
-                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pywintypes.error: (109, 'PeekNamedPipe', 'The pipe has been ended.')
+2024-04-17 12:29:52 INFO log.py: Yasb - Yet Another Status Bar
+2024-04-17 12:29:54 INFO bar_manager.py: Starting SystemEventListener...
+2024-04-17 12:29:54 INFO bar_manager.py: Starting KomorebiEventListener...
+2024-04-17 12:29:54 INFO event_listener.py: Created named pipe yasb-e71cfc7f-fc83-11ee-83f6-a85e4555ad30
+2024-04-17 12:29:54 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-e71cfc7f-fc83-11ee-83f6-a85e4555ad30
+2024-04-17 12:29:54 INFO watcher.py: Created file watcher for path C:\Users\nahid\.yasb
+2024-04-17 12:29:54 WARNING event_listener.py: Komorebi failed to subscribe named pipe. Waiting for subscription: Error: No connection could be made because the target machine actively refused it. (os error 10061)
+
+Location:
+    komorebic\src\main.rs:1191:22
+

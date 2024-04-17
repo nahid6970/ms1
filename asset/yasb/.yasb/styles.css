@@ -148,7 +148,7 @@ padding: 5px;
 
 /*! traffic */
 .traffic-widget{
-background: #ffffff;
+/* background: #ffffff; */
 }
 .container-right .traffic-widget * {
 font-size: 14px;
