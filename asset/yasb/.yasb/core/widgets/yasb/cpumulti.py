@@ -28,7 +28,7 @@ class MultiCPU_Widget(BaseWidget):
 
         for _ in range(psutil.cpu_count()):
             bar = QLabel()
-            bar.setStyleSheet("background-color: #1d2027; border: 1px solid black; border-radius: 3px;")
+            bar.setStyleSheet("background-color: #1d2027;  ") #!border: 1px solid black; border-radius: 3px;
             self._cpu_core_bars.append(bar)
             self.widget_layout.addWidget(bar)
 
@@ -51,7 +51,7 @@ class MultiCPU_Widget(BaseWidget):
 
         for bar, usage in zip(self._cpu_core_bars, cpu_usage_per_core):
             bar_height = int((usage / 100) * 25)  # Max bar height is 25 pixels
-            bar.setStyleSheet(f"background-color: {self._determine_color(usage)}; border: 1px solid black; border-radius: 3px;")
+            bar.setStyleSheet(f"background-color: {self._determine_color(usage)}; ") #!border: 1px solid black; border-radius: 3px;
             bar.setFixedHeight(bar_height)
 
     def _determine_color(self, usage):

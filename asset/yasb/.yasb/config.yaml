@@ -25,9 +25,9 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, AppManager, Browser, color_pallet, position, desktop, PowerToys]
+      left:   [komorebi_workspaces, AppManager, Browser, color_pallet, position, desktop, PowerToys] #!
       center: [active_window ]
-      right:  [ BT, Folder, CPU_Multi, cpu, memory, traffic, uptime, clock]
+      right:  [ BT, Folder, CPU_Multi, traffic, uptime, clock] #! MEMORY CPU_Histo
 
 widgets:
 
@@ -104,7 +104,7 @@ widgets:
         on_middle: "exec explorer.exe shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"
         on_right: "next_timezone"
 
-  cpu:
+  CPU_Histo:
     type: "yasb.cpu.CpuWidget"
     options:
       label: "\uf4bc {info[histograms][cpu_percent]}"
@@ -122,7 +122,7 @@ widgets:
         - '\u2588' # 80%+
       histogram_num_columns: 10
 
-  memory:
+  MEMORY:
     type: "yasb.memory.MemoryWidget"
     options:
         label: "\udb86\udc96 {virtual_mem_free}"
