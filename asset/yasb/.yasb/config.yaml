@@ -27,9 +27,17 @@ bars:
     widgets:
       left:   [komorebi_workspaces, applist, AppManager, explorer_button, color_pallet, position, desktop, PowerToys_Mouse_Pointer, PowerToys_Text_Extract, PowerToys_Screen_Ruler, PowerToys_Color_Picker]
       center: ["active_window"]
-      right:  [ traffic, BT, uptime, clock, cpu, memory ]
+      right:  [ CPU_Multi, BT, uptime, clock, cpu, memory ]
 
 widgets:
+
+  CPU_Multi:
+    type: "yasb.cpumulti.TrafficWidget"
+    options:
+      label: ""
+      update_interval: 1000
+      callbacks:
+        on_right: "do_nothing"
 
   BT:
     type: "yasb.Combined_BT.CombinedWidget"

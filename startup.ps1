@@ -38,7 +38,6 @@ function yasb                  {Start-Process "python.exe" -ArgumentList "C:\Use
 # sync
 # syncthing
 # valo_qbit
-ahkscripts
 arr_monitor
 capture2text
 powertoys
@@ -48,8 +47,8 @@ powertoys
 # radarr
 # sonarr
 
-# Glaze_WM
-whkd
-
-komorebic start
+ahkscripts
 yasb
+# Glaze_WM
+# whkd
+# komorebic start
