@@ -114,6 +114,9 @@ button_properties=[
 #! chrome
 #! ctrl+shift+b
 
+import customtkinter
+button = customtkinter.CTkButton(root, text="CTkButton", command=None)
+button.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
 
 # Create buttons
 for button_props in button_properties:
