@@ -141,10 +141,16 @@ margin: 2px;
 
 /*! Clock */
 .clock-widget{
-color: #242424;
-background: #ffffff;
+background: #000000;
 padding: 5px;
 }
+.container-right .clock-widget * {
+font-size: 14px;
+color: #90f122;
+margin: 2px;
+border-radius: 3px;
+}
+  
 
 /*! traffic */
 .traffic-widget{

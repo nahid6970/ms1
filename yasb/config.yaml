@@ -101,7 +101,7 @@ widgets:
   clock:
     type: "yasb.clock.ClockWidget"
     options:
-      label: "{%I:%M:%S %p %Z}"
+      label: "\uf017 {%I:%M:%S %p %Z}"
       label_alt: "{%I:%M:%S %p  %A-%d-%B-%Y}"
       timezones: ["Asia/Dhaka", "Europe/London", "America/New_York"]
       callbacks:

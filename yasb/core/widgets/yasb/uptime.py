@@ -36,7 +36,7 @@ class UptimeWidget(BaseWidget):
         boot_time = psutil.boot_time()
         uptime = datetime.now() - datetime.fromtimestamp(boot_time)
         days, hours, minutes = uptime.days, uptime.seconds // 3600, (uptime.seconds // 60) % 60
-        uptime_str = f"{hours}h{minutes}m"
+        uptime_str = f"\ueb79 {hours}h-{minutes}m"
         # uptime_str = f"{days}d, {hours}h, {minutes}m"
         
         self._label.setText(uptime_str)
