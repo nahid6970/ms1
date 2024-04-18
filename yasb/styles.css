@@ -140,17 +140,15 @@ margin: 2px;
 }
 
 /*! Clock */
-.clock-widget{
-background: #000000;
-padding: 5px;
+
+.clock-widget * {
+  font-size: 14px;
+  background: #070707;
+  color: #90f122;
+  padding: 5px;
+  margin: 2px;
+  border-radius: 3px;
 }
-.container-right .clock-widget * {
-font-size: 14px;
-color: #90f122;
-margin: 2px;
-border-radius: 3px;
-}
-  
 
 /*! traffic */
 .traffic-widget{
