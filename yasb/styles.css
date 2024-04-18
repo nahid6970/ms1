@@ -165,28 +165,27 @@ border-radius: 3px;
 
 /*! uptime */
 .uptime-widget{
-color: #242424;
-background: #4b95e9;
+background: #000000;
 padding: 5px;
 max-width: 200px;
 }
 .container-right .uptime-widget * {
-  color: #070707;
+color: #fffdfd;
 }
 
 /*! AppManager */
 .appmanager-widget {
-  background: #4b95e9;
-  border-radius: 5px;
-  margin: 4px 3px;
-  padding: 2px 6px;
+background: #4b95e9;
+border-radius: 5px;
+margin: 4px 3px;
+padding: 2px 6px;
 }
 .appmanager-widget:hover {
-  background: #55c9ff;
+background: #55c9ff;
 }
 .container-left .appmanager-widget * {
-  color: #030303;
-  font-size: 16px;
+color: #030303;
+font-size: 16px;
 }
 
 
