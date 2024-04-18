@@ -181,7 +181,7 @@ rssguard
 terminal
 whkd
 komorebi
-yasb
+# yasb
 
 Write-Host "Database & configs backedup ☑️." -ForegroundColor Blue
 
