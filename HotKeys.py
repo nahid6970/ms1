@@ -68,17 +68,13 @@ def main():
     elif args.action=='Fit_Row'   :send_k  (["Excel"],"Alt,h,o,a"  )
     elif args.action=='Fit_Column':send_k  (["Excel"],"Alt,h,o,i"  )
  
-
-
-
-
-    elif args.action=='powertoys_color_picker'   :global_shortcut("win+shift+c"         )
-    elif args.action=='powertoys_ruler'          :global_shortcut("win+shift+m"         )
-    elif args.action=='powertoys_mouse_crosshair':global_shortcut("win+alt+p"           )
-    elif args.action=='powertoys_TextExtract'    :global_shortcut("win+shift+t"         )
-    elif args.action=='capture2text':global_shortcut("win+ctrl+alt+shift+q")
-    elif args.action=='x_mouse_enable':global_shortcut("ctrl+alt+F1")
-    elif args.action=='kill_process':subprocess.Popen(["powershell", "start-process", "C:/ms1/utility//kill_process.ps1", "-WindowStyle", "Normal"],shell=True)
+    elif args.action=='powertoys_color_picker'   :global_shortcut ("win+shift+c"         )
+    elif args.action=='powertoys_ruler'          :global_shortcut ("win+shift+m"         )
+    elif args.action=='powertoys_mouse_crosshair':global_shortcut ("win+alt+p"           )
+    elif args.action=='powertoys_TextExtract'    :global_shortcut ("win+shift+t"         )
+    elif args.action=='capture2text'             :global_shortcut ("win+ctrl+alt+shift+q")
+    elif args.action=='x_mouse_enable'           :global_shortcut ("ctrl+alt+F1"         )
+    elif args.action=='kill_process'             :subprocess.Popen(["powershell", "start-process", "C:/ms1/utility//kill_process.ps1", "-WindowStyle", "Normal"],shell=True)
 
     else:
         print("Invalid action")
