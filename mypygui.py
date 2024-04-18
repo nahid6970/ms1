@@ -404,7 +404,7 @@ def clear_screen():
     except Exception as e:
         print(f"Error clearing screen: {e}")
 
-BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
+""" BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
 BOX_ROW2_ROOT.pack(side="left", anchor="ne", pady=(3,2),padx=(3,1))
 
 def get_cpu_core_usage():
@@ -448,7 +448,7 @@ for i in range(psutil.cpu_count()):
     core_bar = tk.Canvas(frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
     core_bar.pack(side="top")
     cpu_core_bars.append(core_bar)
-update_cpu_core_bars()
+update_cpu_core_bars() """
 
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
@@ -473,7 +473,7 @@ def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, pad
     return label
 
 ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-ROOT1.pack(side="right", anchor="ne", pady=(1,2),padx=(3,1))
+ROOT1.pack(side="top", anchor="center", pady=(1,2),padx=(5,1))
 
 label_properties =[
 {"comment":"#️⃣Uptime"     ,"text":"Uptime"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"0","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :1  ,"rowspan" :1 ,"columnspan" :1},# ! Uptime
