@@ -33,6 +33,7 @@ def main():
     parser.add_argument("action", type=str, help="Action to perform")
     args = parser.parse_args()
 
+#! VSCode
     if args.action  =='remove_dup_lines'         :send_m_k       ("VisualStudioCode",["ctrl+k","alt+d"])
     elif args.action=='remove_from_selection'    :send_m_k       ("VisualStudioCode",["ctrl+h","alt+l"])
     elif args.action=='powertoys_color_picker'   :global_shortcut("win+shift+c"         )
