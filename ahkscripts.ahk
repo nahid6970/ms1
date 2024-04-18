@@ -254,7 +254,7 @@ return
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
 !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
-!y::RunWait, python.exe C:\Users\nahid\.yasb\main.py, , Hide
+!y::RunWait, python.exe C:\ms1\yasb\main.py, , Hide
 #t:: WinSet, AlwaysOnTop, Toggle, A
 #x:: Run, C:\ms1\mypygui.py
 Pause::Run, komorebic quick-load-resize
