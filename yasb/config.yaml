@@ -25,9 +25,9 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces,BT, PowerToys, color_pallet, position, desktop, Browser,Folder, AppManager] #!
-      center: [active_window ]
-      right:  [ CPU_Multi, traffic, uptime, clock] #! MEMORY CPU_Histo
+      left:   [komorebi_workspaces,BT, PowerToys, color_pallet, position, desktop, Browser,Folder, AppManager] #! active_window
+      center: [ clock ]
+      right:  [ CPU_Multi, traffic, uptime] #! MEMORY CPU_Histo
 
 widgets:
 
@@ -68,7 +68,6 @@ widgets:
       callbacks:
         on_left: "launch_applist"
         on_right: "launch_appstore"
-
 
   process: #! high cpu usage
     type: "yasb.process_running.ProcessWidget"

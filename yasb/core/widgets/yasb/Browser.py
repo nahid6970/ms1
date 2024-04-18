@@ -22,7 +22,7 @@ class Browser(BaseWidget):
 
         self._label = QLabel()
         self._label.setText("\udb80\udeaf")
-        self._label.setStyleSheet(" font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #d17bf9; color: #FFFFFF; margin: 4px 3px; padding: 2px 6px;")
+        self._label.setStyleSheet(" font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #cc7e10; color: #000000; margin: 4px 3px; padding: 2px 6px;")
         self.widget_layout.addWidget(self._label)
         self.callback_left = callbacks["on_left"]
         self.callback_right = callbacks["on_right"]
@@ -46,13 +46,13 @@ class Browser(BaseWidget):
         # Change style or perform actions when mouse enters the widget
         self._is_hovered = True
         # Example: Change background color
-        self._label.setStyleSheet("font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #538366; color: #000000; margin: 4px 3px; padding: 2px 6px;")
+        self._label.setStyleSheet("font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #538366; color: #fff; margin: 4px 3px; padding: 2px 6px;")
 
     def _on_mouse_leave_event(self, event):
         # Revert style or perform actions when mouse leaves the widget
         self._is_hovered = False
         # Example: Revert background color
-        self._label.setStyleSheet(" font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #2cdf00; color: #FFFFFF; margin: 4px 3px; padding: 2px 6px;")
+        self._label.setStyleSheet(" font-family: 'JETBRAINSMONO NF'; font-size: 16px; background-color: #cc7e10; color: #000000; margin: 4px 3px; padding: 2px 6px;")
 
 # Example usage
 if __name__ == "__main__":
