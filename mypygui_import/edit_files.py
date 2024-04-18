@@ -101,9 +101,9 @@ button_properties = [
 
 ("whkd"            ,BOX_1,"#ffffff","#000000",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,5),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\Users\\nahid\\.config\\whkdrc }"]                              ,shell=True)                                                                     ),
 
-("yasb-config.yaml",BOX_1,"#9068b0","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\Users\\nahid\\.yasb\\config.yaml }"]                           ,shell=True)                                                                     ),
-("yasb-styles.css" ,BOX_1,"#5995af","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\Users\\nahid\\.yasb\\styles.css }"]                            ,shell=True)                                                                     ),
-("yasb-folder"     ,BOX_1,"#ffd359","#000000",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\Users\\nahid\\.yasb }"]                                        ,shell=True)                                                                     ),
+("yasb-config.yaml",BOX_1,"#9068b0","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\yasb\\config.yaml }"]                           ,shell=True)                                                                     ),
+("yasb-styles.css" ,BOX_1,"#5995af","#ffffff",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\yasb\\styles.css }"]                            ,shell=True)                                                                     ),
+("yasb-folder"     ,BOX_1,"#ffd359","#000000",1,47,"flat",("calibri",12,"bold"),0,0,(0,0),(0,0),lambda: subprocess.Popen(["Start","powershell","-Command","& { code C:\\ms1\\yasb\\ }"]                                        ,shell=True)                                                                     ),
 ]
 for button_props in button_properties:
     create_button(*button_props)
