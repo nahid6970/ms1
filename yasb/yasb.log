@@ -4,3 +4,5 @@
 2024-04-19 00:13:03 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-4c65bbb3-fdaf-11ee-8cc4-a85e4555ad30
 2024-04-19 00:13:03 INFO watcher.py: Created file watcher for path C:\ms1\yasb
 2024-04-19 00:13:03 INFO event_listener.py: Komorebi connected to named pipe: yasb-4c65bbb3-fdaf-11ee-8cc4-a85e4555ad30
+2024-04-19 03:14:55 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
+2024-04-19 03:15:00 INFO bar_manager.py: Successfully loaded updated stylesheet and applied to all bars.
