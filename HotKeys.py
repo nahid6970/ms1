@@ -67,7 +67,7 @@ def main():
     elif args.action=='Series'    :send_k  (["Excel"],"Alt,h,f,i,s")
     elif args.action=='Fit_Row'   :send_k  (["Excel"],"Alt,h,o,a"  )
     elif args.action=='Fit_Column':send_k  (["Excel"],"Alt,h,o,i"  )
- 
+ #! Global & launch
     elif args.action=='powertoys_color_picker'   :global_shortcut ("win+shift+c"         )
     elif args.action=='powertoys_ruler'          :global_shortcut ("win+shift+m"         )
     elif args.action=='powertoys_mouse_crosshair':global_shortcut ("win+alt+p"           )
