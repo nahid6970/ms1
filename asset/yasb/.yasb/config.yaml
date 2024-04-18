@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces, AppManager, Browser, color_pallet, position, desktop, PowerToys] #!
+      left:   [komorebi_workspaces, PowerToys, color_pallet, position, desktop, Browser, AppManager] #!
       center: [active_window ]
       right:  [ BT, Folder, CPU_Multi, traffic, uptime, clock] #! MEMORY CPU_Histo
 
@@ -33,6 +33,10 @@ widgets:
 
   CPU_Multi:
     type: "yasb.cpumulti.MultiCPU_Widget"
+    options:
+      callbacks:
+        on_left: "exec pwsh c:/ms1/utility/kill_process.ps1"
+        on_right: "exec powershell C:/ms1/mypygui_import/applist.py"
 
   BT:
     type: "yasb.Combined_BT.CombinedWidget"
