@@ -24,7 +24,7 @@ function sonarr                {C:\ProgramData\Sonarr\bin\Sonarr.exe }
 
 function Glaze_WM              {Start-Process 'glazewm.exe' -WindowStyle hidden }
 function whkd                  {Start-Process "C:\Users\nahid\scoop\apps\whkd\current\whkd.exe" -WindowStyle Hidden }
-function yasb                  {Start-Process "python.exe" -ArgumentList "C:\Users\nahid\.yasb\main.py" -WindowStyle Hidden }
+function yasb                  {Start-Process "python.exe" -ArgumentList "C:\ms1\yasb\main.py" -WindowStyle Hidden }
 
 
 

@@ -110,6 +110,7 @@ icon_sage    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\
 desktop_ok   =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\desktopok220-220-50x50.png"))
 local_send   =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\localsend-50x50.ico"))
 audio_relay   =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\audiorelaya-50x50.png"))
+rss_guard   =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\rssguarddd-50x50.png"))
 
 
 def create_button_advanced(parent, text="", image=None, command=None, compound=None, height=0, width=0, bg="#e7d86a", fg="#1D2027", font=("JetBrainsMono NF", 13, "bold"), anchor="center", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#f6d24a", cursor="hand2", side="top", padx=(0,0), pady=(0,0)):
@@ -141,6 +142,7 @@ button_properties_advanced =[
 {"parent":column_4,"text":"DesktopOK"   ,"image":desktop_ok         ,"compound":tk.TOP  ,"height":0,"width":100  ,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["C:\\Users\\nahid\\OneDrive\\backup\\desktopok\\DesktopOK_x64.exe"] ,shell=True)},
 {"parent":column_4,"text":"Local Send"   ,"image":local_send         ,"compound":tk.TOP  ,"height":0,"width":100  ,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["C:\\Users\\nahid\\scoop\\apps\\localsend\\current\\localsend_app.exe"] ,shell=True)},
 {"parent":column_4,"text":"AudioRelay"   ,"image":audio_relay         ,"compound":tk.TOP  ,"height":0,"width":100  ,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["C:\\Program Files (x86)\\AudioRelay\\AudioRelay.exe"] ,shell=True)},
+{"parent":column_4,"text":"RssGuard"   ,"image":rss_guard         ,"compound":tk.TOP  ,"height":0,"width":100  ,"bg":"#1D2027","fg":"#fff","font":("JetBrainsMonoNF",12,"bold"),"anchor":"center","bd":0,"relief":"flat","highlightthickness":4,"activebackground":"#000000","activeforeground":"#f6d24a","cursor":"hand2","command":lambda:subprocess.Popen(["C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"] ,shell=True)},
 
 
 ]
