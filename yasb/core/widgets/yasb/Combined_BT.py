@@ -7,15 +7,24 @@ import subprocess
 import os
 import time
 
+class HoverLabel(QLabel):
+    def __init__(self, initial_color, hover_color, hover_after_color, parent=None):
+        super().__init__(parent)
+        self.setMouseTracking(True)
+        self.setStyleSheet(initial_color)
+        self.hover_color = hover_color
+        self.hover_after_color = hover_after_color
+
+    def enterEvent(self, event):
+        self.setStyleSheet(self.hover_color)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.setStyleSheet(self.hover_after_color)
+        super().leaveEvent(event)
+
 class CombinedWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
-
-    # initialize io counters
-    io = psutil.net_io_counters()
-    bytes_sent = io.bytes_sent
-    bytes_recv = io.bytes_recv
-    interval = 1  # second(s)
-
     def __init__(
         self,
         label: str,
@@ -30,9 +39,23 @@ class CombinedWidget(BaseWidget):
         self._label_content = label
         self._label_alt_content = label_alt
 
-        self._Edit_label = QLabel()
-        self._chrome_label = QLabel()
-        self._reload_label = QLabel()
+        self._Edit_label = HoverLabel(
+            initial_color="background-color: #282c34; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
+            hover_color="background-color: #ff0000; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
+            hover_after_color="background-color: #00ff00; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;"
+        )
+
+        self._chrome_label = HoverLabel(
+            initial_color="background-color: #000000; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
+            hover_color="background-color: #0000ff; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
+            hover_after_color="background-color: #ff0000; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;"
+        )
+
+        self._reload_label = HoverLabel(
+            initial_color="background-color: #000000; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
+            hover_color="background-color: #0000ff; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
+            hover_after_color="background-color: #ff0000; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;"
+        )
 
         self.widget_layout.addWidget(self._Edit_label)
         self.widget_layout.addWidget(self._chrome_label)
@@ -61,37 +84,16 @@ class CombinedWidget(BaseWidget):
         self._chrome_label.setText("\uf005")
         self._reload_label.setText("\uf256")
 
-        self._set_label_color(self._Edit_label, "Edit")
-        self._set_label_color(self._chrome_label, "Chrome")
-        self._set_label_color(self._reload_label, "VSCode")
-
         self._Edit_label.mousePressEvent = lambda event: self._on_Edit_click(event, self._Edit_label)
         self._chrome_label.mousePressEvent = lambda event: self._on_chrome_click(event, self._chrome_label)
         self._reload_label.mousePressEvent = lambda event: self._reload_yasb(event, self._reload_label)
 
-    def _set_label_color(self, label, content):
-        # Define colors and stylesheets based on content
-        if content == "Edit":
-            bg_color = "#bcd12f"  # Orange
-            fg_color = "#000000"  # Black
-            stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
-        elif content == "Chrome":
-            bg_color = "#4285F4"  # Blue
-            fg_color = "#FFFFFF"  # White
-            stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
-        elif content == "VSCode":
-            bg_color = "#79e173"  # Dark Blue
-            fg_color = "#000000"  # White
-            stylesheet = f"background-color: {bg_color}; color: {fg_color}; border: 1px solid black; border-radius: 5px;"
-
-        label.setStyleSheet(stylesheet)
 
     def _on_Edit_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py'])
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\mypygui_import\\edit_files.py:89'])
-
 
     def _on_chrome_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -105,10 +107,14 @@ class CombinedWidget(BaseWidget):
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
 
-
-
 if __name__ == "__main__":
     app = QApplication([])
     widget = CombinedWidget("Download", "Upload", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
     widget.show()
     app.exec()
+
+
+
+
+
+
