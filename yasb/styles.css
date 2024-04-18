@@ -140,14 +140,22 @@ margin: 2px;
 }
 
 /*! Clock */
-
 .clock-widget * {
-  font-size: 14px;
-  background: #070707;
-  color: #90f122;
-  padding: 5px;
-  margin: 2px;
-  border-radius: 3px;
+font-size: 14px;
+background: #070707;
+color: #90f122;
+padding: 5px;
+margin: 2px;
+border-radius: 5px;
+}
+
+/*! uptime */
+.uptime-widget * {
+color: #86b2f5;
+background: #000000;
+padding: 5px;
+margin: 2px;
+border-radius: 5px;
 }
 
 /*! traffic */
@@ -167,13 +175,7 @@ border-radius: 3px;
   max-width: 200px;
 } */
 
-/*! uptime */
-.uptime-widget * {
-color: #86b2f5;
-background: #000000;
-padding: 5px;
-max-width: 200px;
-}
+
 
 /*! AppManager */
 .appmanager-widget {
