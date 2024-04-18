@@ -19,7 +19,7 @@ function SearchPackages {
     # Load the package list from the file
     $packages = Get-Content $packageListFile
 
-    $selectedPackage = $packages | fzf
+    $selectedPackage = $packages | fzf --preview="winget show {1}" --preview-window="right:20%"
 
     if ($selectedPackage) {
         $packageName = ($selectedPackage -split '\s+')[0]

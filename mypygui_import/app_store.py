@@ -129,12 +129,19 @@ def winget_infooo():
         subprocess.Popen(command)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
+
+
+        
 def wget_inst_fzf():
     command = ' $host.UI.RawUI.WindowTitle = "wget🔽" ; winget search --exact "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget install $_.split()[0] }'
     try:
         subprocess.Popen([ 'start' , 'pwsh', '-Command', command], shell=True)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
+
+
+
+
 def wget_unin_fzf():
     command = ' $host.UI.RawUI.WindowTitle = "wget❌" ; winget list "" | fzf --multi --preview-window=up:60% --preview \'winget show {1}\' | ForEach-Object { winget uninstall $_.split()[0] }'
     try:
