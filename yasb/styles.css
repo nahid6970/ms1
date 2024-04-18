@@ -168,13 +168,11 @@ border-radius: 3px;
 } */
 
 /*! uptime */
-.uptime-widget{
+.uptime-widget * {
+color: #f00000;
 background: #000000;
 padding: 5px;
 max-width: 200px;
-}
-.container-right .uptime-widget * {
-color: #fffdfd;
 }
 
 /*! AppManager */

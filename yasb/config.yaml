@@ -26,8 +26,8 @@ bars:
       right: 0
     widgets:
       left:   [komorebi_workspaces,BT, PowerToys, color_pallet, position, desktop, Browser,Folder, AppManager] #! active_window
-      center: [ clock ]
-      right:  [ CPU_Multi, traffic, uptime] #! MEMORY CPU_Histo
+      center: [ clock, uptime ]
+      right:  [ CPU_Multi, traffic] #! MEMORY CPU_Histo
 
 widgets:
 
