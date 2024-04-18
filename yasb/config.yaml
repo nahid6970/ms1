@@ -178,7 +178,7 @@ widgets:
         run_once: true
       callbacks:
         on_left: "exec C:\\ms1\\utility\\position_x_y.py"
-        on_right: "do_nothing"
+        on_right: "exec code C:\\ms1\\utility\\position_x_y.py"
 
   desktop:
     type: "yasb.desktop.CustomWidget"

@@ -19,8 +19,8 @@ ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
-x = 500
-y = 7
+x = 0
+y = screen_height - 30
 ROOT.geometry(f"+{x}+{y}")
 ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)
