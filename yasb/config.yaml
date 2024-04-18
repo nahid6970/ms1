@@ -36,7 +36,7 @@ widgets:
     options:
       callbacks:
         on_left: "exec python c:/ms1/HotKeys.py kill_process"
-        on_right: "exec powershell C:/ms1/mypygui_import/applist.py"
+        on_right: "exec cmd /c Taskmgr"
 
   BT:
     type: "yasb.Combined_BT.CombinedWidget"
