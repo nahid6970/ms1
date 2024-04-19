@@ -343,7 +343,7 @@ border-radius: 0px;
 /* background: #000000; */
 }
 .container-right .cpu_usage * {
-font-size: px;
+font-size: 14px;
 color: #ffffff;
 background: #ff000d;
 margin: 1px;
@@ -357,7 +357,7 @@ min-width: 60px;
 /* background: #000000; */
 }
 .container-right .gpu_usage * {
-font-size: px;
+font-size: 14px;
 color: #ffffff;
 background: #ff000d;
 margin: 1px;
@@ -371,7 +371,7 @@ min-width: 60px;
 /* background: #000000; */
 }
 .container-right .ram_usage * {
-font-size: px;
+font-size: 14px;
 color: #ffffff;
 background: #ff000d;
 margin: 1px;
@@ -382,4 +382,22 @@ min-width: 60px;
 .container-right .ram_usage {
 margin: 2px;
 border-radius: 10px;
+}
+/*! Disk Usage*/
+.disk_usage{
+    border: 2px solid #1b8af1;
+/* background: #000000; */
+}
+.container-right .disk_usage * {
+font-size: 14px;
+color: #ffffff;
+background: #ff000d;
+margin: 1px;
+border-radius: 0px;
+/* border: 2px solid #f08d0c; */
+/* min-width: 60px; */
+}
+.container-right .disk_usage {
+margin: 2px;
+border-radius: 0px;
 }

@@ -39,6 +39,7 @@ class CombinedWidget(BaseWidget):
         self._label_content = label
         self._label_alt_content = label_alt
 
+#! Step 1
         self._Edit_label = HoverLabel(
             initial_color="background-color: #020163; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
             hover_color="background-color: #ffffff; color: #000000; border: 1px solid black; border-radius: 5px; margin: 4px 3px;",
@@ -57,6 +58,7 @@ class CombinedWidget(BaseWidget):
             hover_after_color="background-color: #08684a; color: #FFFFFF; border: 1px solid black; border-radius: 5px; margin: 4px 3px;"
         )
 
+#! Step 2
         self.widget_layout.addWidget(self._Edit_label)
         self.widget_layout.addWidget(self._info_get)
         self.widget_layout.addWidget(self._reload_label)
@@ -79,16 +81,20 @@ class CombinedWidget(BaseWidget):
         # Update the active label at each timer interval
         active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
 
+
+#! Step 3
         # Set text and colors for additional labels
         self._Edit_label.setText("\uf044")
         self._info_get.setText("\uf129")
         self._reload_label.setText("\uf256")
 
+#! Step 4
         self._Edit_label.mousePressEvent = lambda event: self._on_Edit_click(event, self._Edit_label)
         self._info_get.mousePressEvent = lambda event: self._get_info(event, self._info_get)
         self._reload_label.mousePressEvent = lambda event: self._reload_yasb(event, self._reload_label)
 
 
+#! Step 5
     def _on_Edit_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py'])
