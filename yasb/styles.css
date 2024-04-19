@@ -13,14 +13,11 @@ border: 1px solid #504945;
 padding: 0 5px;
 }
 
-.container-right .widget {
-margin: 2px;
-border-radius: 5px;
-}
 
-.container-right .widget * {
+
+/* .container-right .widget * {
 color: #242424;
-}
+} */
 
 .komorebi-workspaces {
 margin-left: 0;
@@ -301,7 +298,10 @@ border: 2px solid #000000;
 /** ██╔══██╗██║██║   ██║██╔══██║   ██║    */
 /** ██║  ██║██║╚██████╔╝██║  ██║   ██║    */
 /** ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝    */
-
+.container-right .widget {
+margin: 2px;
+border-radius: 3px;
+}
 
 /*! traffic */
 .traffic-widget{
@@ -312,7 +312,6 @@ font-size: 14px;
 margin: 2px;
 border-radius: 3px;
 }
-
 
 /*!  ██████╗██████╗ ██╗   ██╗ */
 /*! ██╔════╝██╔══██╗██║   ██║ */
@@ -333,6 +332,11 @@ background: #ff000d;
 margin: 1px;
 border-radius: 3px;
 }
+.container-right .bar_cpu_gpu {
+margin: 2px;
+border-radius: 0px;
+}
+
 /*! CPU Usage*/
 .cpu_usage{
 background: #000000;
@@ -368,7 +372,7 @@ font-size: px;
 color: #ffffff;
 background: #ff000d;
 margin: 1px;
-border-radius: 3px;
+border-radius: 10px;
 border: 2px solid #f08d0c;
 min-width: 60px;
 }
