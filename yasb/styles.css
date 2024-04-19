@@ -340,7 +340,7 @@ border-radius: 0px;
 
 /*! CPU Usage*/
 .cpu_usage{
-background: #000000;
+/* background: #000000; */
 }
 .container-right .cpu_usage * {
 font-size: px;
@@ -354,7 +354,7 @@ min-width: 60px;
 
 /*! GPU Usage*/
 .gpu_usage{
-background: #000000;
+/* background: #000000; */
 }
 .container-right .gpu_usage * {
 font-size: px;
@@ -368,7 +368,7 @@ min-width: 60px;
 
 /*! RAM Usage*/
 .ram_usage{
-background: #000000;
+/* background: #000000; */
 }
 .container-right .ram_usage * {
 font-size: px;
