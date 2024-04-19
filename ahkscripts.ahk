@@ -252,6 +252,7 @@ return
 !+p::RunWait, taskkill /f /im python.exe
 !k::RunWait, komorebic start
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
+!g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
 !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
 !y::RunWait, python.exe C:\ms1\yasb\main.py, , Hide
