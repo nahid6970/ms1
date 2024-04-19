@@ -1,16 +1,16 @@
 * {
-  /* Bar measurement icons: https://github.com/and3rson/graph-bars-font */
-  /* Icon set: https://fontawesome.com/v5.15/how-to-use/on-the-desktop/setup/getting-started */
-  font-family: 'JETBRAINSMONO NF', 'Bars', 'Font Awesome 5 Free';
-  font-size: 14px;
-  color: #f2e5bc;
-  font-weight: 900;
+/* Bar measurement icons: https://github.com/and3rson/graph-bars-font */
+/* Icon set: https://fontawesome.com/v5.15/how-to-use/on-the-desktop/setup/getting-started */
+font-family: 'JETBRAINSMONO NF', 'Bars', 'Font Awesome 5 Free';
+font-size: 14px;
+color: #f2e5bc;
+font-weight: 900;
 }
 
 .bar {
-  background: rgba(0, 181, 241, 0.3);
-  border: 1px solid #504945;
-  padding: 0 5px;
+background: rgba(0, 181, 241, 0.3);
+border: 1px solid #504945;
+padding: 0 5px;
 }
 
 .container-right .widget {
@@ -27,39 +27,39 @@ margin-left: 0;
 }
 
 .komorebi-active-layout .label {
-  color: #fbf1c7;
-  margin: -4px 2px 2px 8px;
-  font-family: Hack;
-  }
-  
+color: #fbf1c7;
+margin: -4px 2px 2px 8px;
+font-family: Hack;
+}
+
 .ws-btn {
-  padding: 5px;
-  background: rgba(60, 56, 54, 0.4);
-  border: 1px solid rgba(168, 153, 132, 0.4);
-  margin: 2px 1px;
-  font-size: 12px;
-  border-radius: 3px;
+padding: 5px;
+background: rgba(60, 56, 54, 0.4);
+border: 1px solid rgba(168, 153, 132, 0.4);
+margin: 2px 1px;
+font-size: 12px;
+border-radius: 3px;
 }
 
 .ws-btn:hover {
-  color: #fbf1c7;
-  font-weight: bold;
+color: #fbf1c7;
+font-weight: bold;
 }
 
 .ws-btn.populated {
-  border-color: rgba(168, 153, 132, 1.0);
-  color: #ebdbb2;
+border-color: rgba(168, 153, 132, 1.0);
+color: #ebdbb2;
 }
 
 .ws-btn.active {
-  background: rgba(251, 241, 199, 0.85);
-  color: #121212;
+background: rgba(251, 241, 199, 0.85);
+color: #121212;
 }
 
 .custom-widget {
-  padding: 2px 6px;
-  font-size: 14px;
-  background: #bdae93;
+padding: 2px 6px;
+font-size: 14px;
+background: #bdae93;
 }
 .custom-widget .icon {
 font-size: 13px;
@@ -68,17 +68,17 @@ font-size: 13px;
 background: #fbf1c7;
 }
 .custom-widget .icon.icon-left {
-  margin-right: 5px;
+margin-right: 5px;
 }
 .custom-widget .icon.icon-right {
-  margin-left: 5px;
+margin-left: 5px;
 }
 .custom-widget.hostname-widget {
-  background: #83a598;
+background: #83a598;
 }
 
 .custom-widget.terminal-widget {
-  font-size: 14px;
+font-size: 14px;
 }
 
 .cpu-widget .label,
@@ -139,44 +139,19 @@ border-radius: 3px;
 margin: 2px;
 }
 
-/*! Clock */
-.clock-widget * {
-font-size: 14px;
-/* background: #070707; */
-color: #ffffff;
-padding: 5px;
-margin: 2px;
-border-radius: 5px;
-border: 2px solid #000000;
-}
-
-/*! uptime */
-.uptime-widget * {
-color: #86b2f5;
-background: #000000;
-padding: 5px;
-margin: 2px;
-border-radius: 5px;
-}
-
-/*! traffic */
-.traffic-widget{
-background: #366b50;
-}
-.container-right .traffic-widget * {
-font-size: 14px;
-margin: 2px;
-border-radius: 3px;
-}
-
 /*! Running-Process */
 /* .process-widget{
-  background: #044466;
-  padding: 5px;
-  max-width: 200px;
+background: #044466;
+padding: 5px;
+max-width: 200px;
 } */
 
-
+/** ██╗     ███████╗███████╗████████╗ */
+/** ██║     ██╔════╝██╔════╝╚══██╔══╝ */
+/** ██║     █████╗  █████╗     ██║    */
+/** ██║     ██╔══╝  ██╔══╝     ██║    */
+/** ███████╗███████╗██║        ██║    */
+/** ╚══════╝╚══════╝╚═╝        ╚═╝    */
 
 /*! AppManager */
 .appmanager-widget {
@@ -193,7 +168,24 @@ color: #030303;
 font-size: 16px;
 }
 
+/*!   ██████╗ ██████╗ ███╗   ███╗██████╗ ██╗███╗   ██╗███████╗██████╗     ██████╗ ████████╗ */
+/*!  ██╔════╝██╔═══██╗████╗ ████║██╔══██╗██║████╗  ██║██╔════╝██╔══██╗    ██╔══██╗╚══██╔══╝ */
+/*!  ██║     ██║   ██║██╔████╔██║██████╔╝██║██╔██╗ ██║█████╗  ██║  ██║    ██████╔╝   ██║    */
+/*!  ██║     ██║   ██║██║╚██╔╝██║██╔══██╗██║██║╚██╗██║██╔══╝  ██║  ██║    ██╔══██╗   ██║    */
+/*!  ╚██████╗╚██████╔╝██║ ╚═╝ ██║██████╔╝██║██║ ╚████║███████╗██████╔╝    ██████╔╝   ██║    */
+/*!   ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝╚═════╝     ╚═════╝    ╚═╝    */
 
+/* .combined-widget {
+padding: 2px 6px;
+border-radius: 5px;
+}
+.combined-widget:hover {
+background: #55c9ff;
+}
+.container-left .combined-widget * {
+color: #04221e;
+font-size: 16px;
+} */
 /*! Browser */
 
 /*! explorer */
@@ -275,6 +267,53 @@ color: #04221e;
 font-size: 16px;
 }
 
+/** ███╗   ███╗██╗██████╗ ██████╗ ██╗     ███████╗ */
+/** ████╗ ████║██║██╔══██╗██╔══██╗██║     ██╔════╝ */
+/** ██╔████╔██║██║██║  ██║██║  ██║██║     █████╗   */
+/** ██║╚██╔╝██║██║██║  ██║██║  ██║██║     ██╔══╝   */
+/** ██║ ╚═╝ ██║██║██████╔╝██████╔╝███████╗███████╗ */
+/** ╚═╝     ╚═╝╚═╝╚═════╝ ╚═════╝ ╚══════╝╚══════╝ */
+
+/*! Clock */
+.clock-widget * {
+font-size: 14px;
+/* background: #070707; */
+color: #ffffff;
+padding: 5px;
+margin: 2px;
+border-radius: 5px;
+border: 2px solid #000000;
+}
+
+/*! uptime */
+.uptime-widget * {
+color: #86b2f5;
+/* background: #000000; */
+padding: 5px;
+margin: 2px;
+border-radius: 5px;
+border: 2px solid #000000;
+}
+
+/** ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗ */
+/** ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝ */
+/** ██████╔╝██║██║  ███╗███████║   ██║    */
+/** ██╔══██╗██║██║   ██║██╔══██║   ██║    */
+/** ██║  ██║██║╚██████╔╝██║  ██║   ██║    */
+/** ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝    */
+
+
+/*! traffic */
+.traffic-widget{
+background: #366b50;
+}
+.container-right .traffic-widget * {
+font-size: 14px;
+margin: 2px;
+border-radius: 3px;
+}
+
+
 /*!  ██████╗██████╗ ██╗   ██╗ */
 /*! ██╔════╝██╔══██╗██║   ██║ */
 /*! ██║     ██████╔╝██║   ██║ */
@@ -334,24 +373,3 @@ border-radius: 3px;
 border: 2px solid #f08d0c;
 min-width: 60px;
 }
-
-
-
-/*!   ██████╗ ██████╗ ███╗   ███╗██████╗ ██╗███╗   ██╗███████╗██████╗     ██████╗ ████████╗ */
-/*!  ██╔════╝██╔═══██╗████╗ ████║██╔══██╗██║████╗  ██║██╔════╝██╔══██╗    ██╔══██╗╚══██╔══╝ */
-/*!  ██║     ██║   ██║██╔████╔██║██████╔╝██║██╔██╗ ██║█████╗  ██║  ██║    ██████╔╝   ██║    */
-/*!  ██║     ██║   ██║██║╚██╔╝██║██╔══██╗██║██║╚██╗██║██╔══╝  ██║  ██║    ██╔══██╗   ██║    */
-/*!  ╚██████╗╚██████╔╝██║ ╚═╝ ██║██████╔╝██║██║ ╚████║███████╗██████╔╝    ██████╔╝   ██║    */
-/*!   ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝╚═╝  ╚═══╝╚══════╝╚═════╝     ╚═════╝    ╚═╝    */
-
-/* .combined-widget {
-padding: 2px 6px;
-border-radius: 5px;
-}
-.combined-widget:hover {
-background: #55c9ff;
-}
-.container-left .combined-widget * {
-color: #04221e;
-font-size: 16px;
-} */
