@@ -246,6 +246,9 @@ return
 ::;sa::SHIFT{+}ALT
 ::;ss::<SPACE>
 
+
+
+
 !+k::RunWait, taskkill /f /im komorebi.exe
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe
 !+o::RunWait, taskkill /f /im whkd.exe
@@ -259,6 +262,7 @@ return
 #t:: WinSet, AlwaysOnTop, Toggle, A
 #x:: Run, C:\ms1\mypygui.py
 Pause::Run, komorebic quick-load-resize
+!+g::Run, taskkill /f /im glazewm.exe
 
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
