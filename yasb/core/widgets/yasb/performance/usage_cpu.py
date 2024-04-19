@@ -14,7 +14,7 @@ class CustomWidget(BaseWidget):
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_interval, class_name="cpu-widget")
+        super().__init__(update_interval, class_name="cpu_usage")
         self.interval = update_interval // 1000
 
         self._cpu_label = QLabel("CPU: -%")
@@ -36,7 +36,9 @@ class CustomWidget(BaseWidget):
     def _update_label(self):
         # CPU usage
         cpu_usage = psutil.cpu_percent()
-        self._cpu_label.setText(f"CPU: {cpu_usage}%")
+        self._cpu_label.setText(f"{cpu_usage}%")
+        #! self._cpu_label.setText(f"CPU: {cpu_usage}%")
+        self._cpu_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
         self._cpu_label.setStyleSheet(self._determine_color(cpu_usage))
 
     def _determine_color(self, usage):
@@ -53,6 +55,6 @@ class CustomWidget(BaseWidget):
 
 if __name__ == "__main__":
     app = QApplication([])
-    widget = CustomWidget("CPU Usage", "CPU Usage", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
+    widget = CustomWidget("", "", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
     widget.show()
     app.exec()

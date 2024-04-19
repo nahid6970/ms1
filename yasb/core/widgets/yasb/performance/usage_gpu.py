@@ -15,7 +15,7 @@ class CustomWidget(BaseWidget):
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_interval, class_name="multicpu-widget")
+        super().__init__(update_interval, class_name="gpu_usage")
         self.interval = update_interval // 1000
 
         self._show_alt_label = False
@@ -42,7 +42,9 @@ class CustomWidget(BaseWidget):
     def _update_label(self):
         # GPU usage
         gpu_usage = self.get_gpu_usage()
-        self._gpu_label.setText(f"GPU: {gpu_usage}%")
+        self._gpu_label.setText(f"{gpu_usage}%")
+        #! self._gpu_label.setText(f"GPU: {gpu_usage}%")
+        self._gpu_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
         self._gpu_label.setStyleSheet(self._determine_color(gpu_usage))
 
     @staticmethod
@@ -67,6 +69,6 @@ class CustomWidget(BaseWidget):
 
 if __name__ == "__main__":
     app = QApplication([])
-    widget = CustomWidget("CPU Usage", "CPU Usage", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
+    widget = CustomWidget("", "", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
     widget.show()
     app.exec()
