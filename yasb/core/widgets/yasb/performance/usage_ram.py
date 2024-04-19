@@ -46,7 +46,8 @@ class CustomWidget(BaseWidget):
         if usage > 80:
             return "background-color: #f12c2f; color: #FFFFFF"  # Red background, white text
         else:
-            return "background-color: #1d2027; color: #ff934b"  # Black background, orange text
+            return "background-color: #03415f; color: #ff934b"  # Black background, orange text
+            # return "background-color: #1d2027; color: #ff934b"  # Black background, orange text
 
 if __name__ == "__main__":
     app = QApplication([])

@@ -57,9 +57,9 @@ class CustomWidget(BaseWidget):
 
     def _determine_color(self, usage):
         if usage == 0:
-            return "background-color: #1d2027; color: #00ff21"  # Black background, green text
+            return "background-color: #03415f; color: #00ff21"  # Black background, green text
         elif usage < 25:
-            return "background-color: #1d2027; color: #00ff21"  # Black background, green text
+            return "background-color: #03415f; color: #00ff21"  # Black background, green text
         elif 10 <= usage < 50:
             return "background-color: #ff9282; color: #000000"  # Red background, black text
         elif 50 <= usage < 80:
