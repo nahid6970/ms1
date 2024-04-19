@@ -323,7 +323,7 @@ border-radius: 3px;
 
 /*! Bar CPU GPU */
 .bar_cpu_gpu{
-background: #000000;
+/* background: #000000; */
 border: 1px solid #fffefd;
 }
 .container-right .bar_cpu_gpu * {
