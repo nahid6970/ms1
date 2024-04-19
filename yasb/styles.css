@@ -321,6 +321,19 @@ border-radius: 3px;
 border: 2px solid #e22910;
 min-width: 60px;
 }
+/*! RAM Usage*/
+.ram_usage{
+background: #000000;
+}
+.container-right .ram_usage * {
+font-size: px;
+color: #ffffff;
+background: #ff000d;
+margin: 1px;
+border-radius: 3px;
+border: 2px solid #f08d0c;
+min-width: 60px;
+}
 
 
 
