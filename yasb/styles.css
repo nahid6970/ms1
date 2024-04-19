@@ -324,6 +324,7 @@ border-radius: 3px;
 /*! Bar CPU GPU */
 .bar_cpu_gpu{
 background: #000000;
+border: 1px solid #fffefd;
 }
 .container-right .bar_cpu_gpu * {
 font-size: 14px;
@@ -332,7 +333,6 @@ background: #ff000d;
 margin: 1px;
 border-radius: 3px;
 }
-
 /*! CPU Usage*/
 .cpu_usage{
 background: #000000;
@@ -346,7 +346,6 @@ border-radius: 3px;
 border: 2px solid #1b8af1;
 min-width: 60px;
 }
-
 /*! GPU Usage*/
 .gpu_usage{
 background: #000000;
