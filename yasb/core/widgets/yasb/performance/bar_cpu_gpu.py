@@ -3,9 +3,9 @@ from core.widgets.base import BaseWidget
 from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
 from PyQt6.QtWidgets import QLabel, QApplication
 from PyQt6.QtCore import Qt
-import subprocess
+from pyadl import ADLManager
 
-class MultiCPU_Widget(BaseWidget):
+class CustomWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
 
     def __init__(
@@ -23,14 +23,16 @@ class MultiCPU_Widget(BaseWidget):
         self._label_alt_content = label_alt
 
         self._cpu_core_bars = []
-
-        self.widget_layout.addWidget(QLabel("\uf4bc"))
+        self._gpu_bar = QLabel()  # Added for GPU usage
+        self.widget_layout.addWidget(QLabel("\uf4bc"))  # CPU icon
 
         for _ in range(psutil.cpu_count()):
             bar = QLabel()
-            bar.setStyleSheet("background-color: #1d2027;  ") #!border: 1px solid black; border-radius: 3px;
+            bar.setStyleSheet("background-color: #1d2027; ")
             self._cpu_core_bars.append(bar)
             self.widget_layout.addWidget(bar)
+
+        self.widget_layout.addWidget(self._gpu_bar)  # Add GPU bar
 
         self.register_callback("toggle_label", self._toggle_label)
         self.register_callback("update_label", self._update_label)
@@ -47,12 +49,19 @@ class MultiCPU_Widget(BaseWidget):
         self._update_label()
 
     def _update_label(self):
+        # CPU usage
         cpu_usage_per_core = psutil.cpu_percent(interval=None, percpu=True)
 
         for bar, usage in zip(self._cpu_core_bars, cpu_usage_per_core):
             bar_height = int((usage / 100) * 25)  # Max bar height is 25 pixels
-            bar.setStyleSheet(f"background-color: {self._determine_color(usage)}; ") #!border: 1px solid black; border-radius: 3px;
+            bar.setStyleSheet(f"background-color: {self._determine_color(usage)}; ")
             bar.setFixedHeight(bar_height)
+
+        # GPU usage
+        gpu_usage = get_gpu_usage()
+        gpu_bar_height = int((gpu_usage / 100) * 25)
+        self._gpu_bar.setStyleSheet(f"background-color: {self._determine_color(gpu_usage)}; ")
+        self._gpu_bar.setFixedHeight(gpu_bar_height)
 
     def _determine_color(self, usage):
         if usage >= 90:
@@ -64,8 +73,15 @@ class MultiCPU_Widget(BaseWidget):
         else:
             return "#14bcff"
 
+def get_gpu_usage():
+    # Get the first GPU device (you can modify this if you have multiple GPUs)
+    device = ADLManager.getInstance().getDevices()[0]
+    # Get the current GPU usage
+    gpu_usage = device.getCurrentUsage()
+    return gpu_usage
+
 if __name__ == "__main__":
     app = QApplication([])
-    widget = MultiCPU_Widget("CPU Usage", "CPU Usage", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
+    widget = CustomWidget("CPU Usage", "CPU Usage", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
     widget.show()
     app.exec()

@@ -314,3 +314,15 @@ background: #55c9ff;
 color: #04221e;
 font-size: 16px;
 } */
+
+.gpu-usage-widget {
+padding: 2px 6px;
+border-radius: 5px;
+}
+.gpu-usage-widget:hover {
+background: #55c9ff;
+}
+.container-right .gpu-usage-widget * {
+color: #04221e;
+font-size: 16px;
+}
