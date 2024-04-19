@@ -42,7 +42,9 @@ if ( (VGet "env:USE_GITIGNORE" 0) -eq 0) {
 }
 
 $TYPE_FILTER_ARR=VOptGet "env:TYPE_FILTER" "--type"
-$GLOBS=VOptGet "env:GLOBS" "--glob"
+# Exclude files with names like "bar.cpython-312.pyc"
+$GLOBS += "--glob '!*cpython-*.pyc'"
+
 
 # Additional paths to search
 $ADDITIONAL_PATHS = @("C:\ms1\", "C:\ms2\")
