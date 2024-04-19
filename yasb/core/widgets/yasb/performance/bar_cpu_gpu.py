@@ -15,7 +15,7 @@ class CustomWidget(BaseWidget):
         update_interval: int,
         callbacks: dict[str, str],
     ):
-        super().__init__(update_interval, class_name="multicpu-widget")
+        super().__init__(update_interval, class_name="bar_cpu_gpu")
         self.interval = update_interval // 1000
 
         self._show_alt_label = False

@@ -283,10 +283,10 @@ font-size: 16px;
 /*!  ╚═════╝╚═╝      ╚═════╝  */
 
 /*! Multi CPU */
-.multicpu-widget{
+.bar_cpu_gpu{
 background: #000000;
 }
-.container-right .multicpu-widget * {
+.container-right .bar_cpu_gpu * {
 font-size: 14px;
 color: #ffffff;
 background: #ff000d;
