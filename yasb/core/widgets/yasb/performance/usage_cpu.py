@@ -38,7 +38,7 @@ class CustomWidget(BaseWidget):
         cpu_usage = psutil.cpu_percent()
         self._cpu_label.setText(f"{cpu_usage}%")
         #! self._cpu_label.setText(f"CPU: {cpu_usage}%")
-        self._cpu_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
+        self._cpu_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._cpu_label.setStyleSheet(self._determine_color(cpu_usage))
 
     def _determine_color(self, usage):
