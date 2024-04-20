@@ -69,13 +69,13 @@ class TrafficWidget(BaseWidget):
             bg_color = "#1d2027"
             fg_color = "#FFFFFF"
         elif 0 < speed_float < 0.5:
-            bg_color = "#dfffdf"
+            bg_color = "#A8E4A8"
             fg_color = "#000000"
         elif 0.5 <= speed_float < 1:
             bg_color = "#67D567"
             fg_color = "#000000"
         elif 1 <= speed_float < 5:
-            bg_color = "#4b95e9"
+            bg_color = "#32AB32"
             fg_color = "#000000"
         else:
             bg_color = "#ff0000"
