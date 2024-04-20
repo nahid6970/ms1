@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces,BT, PowerToys, color_pallet, position, Browser,Folder, AppManager] #! active_window
+      left:   [komorebi_workspaces,BT, PowerToys, color_pallet, position] #! active_window
       center: [ clock, uptime ]
       right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
 
@@ -63,27 +63,27 @@ widgets:
   PowerToys:
     type: "yasb.PowerToys_Multi.PowerToysWidget"
 
-  AppManager:
-    type: "yasb.AppManager.CustomWidget"
-    options:
-      label: "\uf40e"
-      label_alt: ""
-      class_name: "applist-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec powershell C:/ms1/mypygui_import/app_store.py"
-        on_right: "exec powershell C:/ms1/mypygui_import/applist.py"
+  # AppManager:
+  #   type: "yasb.AppManager.CustomWidget"
+  #   options:
+  #     label: "\uf40e"
+  #     label_alt: ""
+  #     class_name: "applist-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec powershell C:/ms1/mypygui_import/app_store.py"
+  #       on_right: "exec powershell C:/ms1/mypygui_import/applist.py"
 
-  Browser:
-    type: "yasb.Browser.Browser"
-    options:
-      label: "\uf40e"
-      label_alt: "A"
-      update_interval: 0
-      callbacks:
-        on_left: "launch_applist"
-        on_right: "launch_appstore"
+  # Browser:
+  #   type: "yasb.Browser.Browser"
+  #   options:
+  #     label: "\uf40e"
+  #     label_alt: "A"
+  #     update_interval: 0
+  #     callbacks:
+  #       on_left: "launch_applist"
+  #       on_right: "launch_appstore"
 
   process: #! high cpu usage
     type: "yasb.process_running.ProcessWidget"
@@ -141,14 +141,14 @@ widgets:
         - '\u2588' # 80%+
       histogram_num_columns: 10
 
-  MEMORY:
-    type: "yasb.memory.MemoryWidget"
-    options:
-        label: "\udb86\udc96 {virtual_mem_free}"
-        label_alt: "\udb86\udc96 {virtual_mem_percent}%"
-        update_interval: 5000
-        callbacks:
-          on_right: "exec cmd /c Taskmgr"
+  # MEMORY:
+  #   type: "yasb.memory.MemoryWidget"
+  #   options:
+  #       label: "\udb86\udc96 {virtual_mem_free}"
+  #       label_alt: "\udb86\udc96 {virtual_mem_percent}%"
+  #       update_interval: 5000
+  #       callbacks:
+  #         on_right: "exec cmd /c Taskmgr"
 
   uptime:
     type: "yasb.uptime.UptimeWidget"
@@ -159,17 +159,17 @@ widgets:
       callbacks:
         on_right: "exec cmd /c Taskmgr"
 
-  Folder:
-    type: "yasb.folder.CustomWidget"
-    options:
-      label: "\uf07c"
-      label_alt: "Explorer"
-      class_name: "explorer-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec C:/ms1/mypygui_import/folder.py"
-        on_right: "exec explorer.exe"
+  # Folder:
+  #   type: "yasb.folder.CustomWidget"
+  #   options:
+  #     label: "\uf07c"
+  #     label_alt: "Explorer"
+  #     class_name: "explorer-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec C:/ms1/mypygui_import/folder.py"
+  #       on_right: "exec explorer.exe"
 
 
   color_pallet:

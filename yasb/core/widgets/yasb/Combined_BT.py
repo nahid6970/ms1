@@ -41,27 +41,39 @@ class CombinedWidget(BaseWidget):
 
 #! Step 1
         self._Edit_label = HoverLabel(
-            initial_color    ="background-color:#020163; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="background-color:#ffffff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="background-color:#020163; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 16px; background-color:#020163; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 16px; background-color:#ffffff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 16px; background-color:#020163; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
         self._info_get = HoverLabel(
-            initial_color    ="background-color:#eddebe; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="background-color:#5b1033; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="background-color:#eddebe; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 16px; background-color:#eddebe; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 16px; background-color:#5b1033; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 16px; background-color:#eddebe; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
         self._reload_label = HoverLabel(
-            initial_color    ="background-color:#08684a; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="background-color:#1a8357; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="background-color:#08684a; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 16px; background-color:#08684a; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 16px; background-color:#1a8357; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 16px; background-color:#08684a; color:#FFFFFF; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
         self._desktop = HoverLabel(
-            initial_color    ="background-color:#fafffb; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="background-color:#55c9ff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="background-color:#fafffb; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 16px; background-color:#fafffb; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 16px; background-color:#55c9ff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 16px; background-color:#fafffb; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+        )
+
+        self._folder = HoverLabel(
+            initial_color    ="font-size: 16px; background-color:#ffda72; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 16px; background-color:#b98e18; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 16px; background-color:#ffda72; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+        )
+
+        self._appmanager = HoverLabel(
+            initial_color    ="font-size: 16px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 16px; background-color:#55c9ff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 16px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
 #! Step 2
@@ -69,6 +81,8 @@ class CombinedWidget(BaseWidget):
         self.widget_layout.addWidget(self._info_get)
         self.widget_layout.addWidget(self._reload_label)
         self.widget_layout.addWidget(self._desktop)
+        self.widget_layout.addWidget(self._folder)
+        self.widget_layout.addWidget(self._appmanager)
 
         self.register_callback("toggle_label", self._toggle_label)
         self.register_callback("update_label", self._update_label)
@@ -95,12 +109,16 @@ class CombinedWidget(BaseWidget):
         self._info_get.setText("\uf129")
         self._reload_label.setText("\uf256")
         self._desktop.setText("\udb80\uddc4")
+        self._folder.setText("\uf07c")
+        self._appmanager.setText("\uf40e")
 
 #! Step 4
-        self._Edit_label.mousePressEvent = lambda event: self._on_Edit_click(event, self._Edit_label)
-        self._info_get.mousePressEvent = lambda event: self._get_info(event, self._info_get)
-        self._reload_label.mousePressEvent = lambda event: self._reload_yasb(event, self._reload_label)
-        self._desktop.mousePressEvent = lambda event: self._desktop_action(event, self._desktop)
+        self._Edit_label.mousePressEvent   =lambda event:self._on_Edit_click    (event,self._Edit_label  )
+        self._info_get.mousePressEvent     =lambda event:self._get_info         (event,self._info_get    )
+        self._reload_label.mousePressEvent =lambda event:self._reload_yasb      (event,self._reload_label)
+        self._desktop.mousePressEvent      =lambda event:self._desktop_action   (event,self._desktop     )
+        self._folder.mousePressEvent       =lambda event:self._folder_action    (event,self._folder      )
+        self._appmanager.mousePressEvent   =lambda event:self._appmanager_action(event,self._appmanager  )
 
 
 #! Step 5
@@ -127,6 +145,18 @@ class CombinedWidget(BaseWidget):
             os.system('C:\\ms1\\desktop_icon.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen()
+
+    def _folder_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+            os.system('C:\\ms1\\desktop_icon.py')
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen()
+
+    def _appmanager_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           os.system('cmd /c start C:/ms1/mypygui_import/app_store.py')
+        elif event.button() == Qt.MouseButton.RightButton:
+           os.system('cmd /c start C:/ms1/mypygui_import/applist.py')
 
 
 if __name__ == "__main__":
