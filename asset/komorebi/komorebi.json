@@ -24,8 +24,7 @@
       "workspaces": [
         {
           "name": "I",
-          "layout": "BSP"
-        },
+          "layout": "UltrawideVerticalStack"        },
         {
           "name": "II",
           "layout": "VerticalStack"
@@ -36,7 +35,7 @@
         },
         {
           "name": "IV",
-          "layout": "UltrawideVerticalStack"
+          "layout": "BSP"
         },
         {
           "name": "V",
