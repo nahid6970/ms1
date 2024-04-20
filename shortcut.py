@@ -135,8 +135,9 @@ for button_props in button_properties:
 #! ctrl+shift+b
 
 import customtkinter
-button = customtkinter.CTkButton(root, text="CTkButton", command=None)
+button = customtkinter.CTkButton(root, text="CTkButton", command=None, hover_color="#154223", border_width=1, border_color="red",)
 button.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
+
 
 
 # Start the main event loop
