@@ -939,3 +939,8 @@ function filterfzf {
     $filteredOutput = $output -split "`n" | fzf --query="$Text"
     Write-Output $filteredOutput
 }
+
+
+
+
+Invoke-Expression (& { (zoxide init powershell | Out-String) })

@@ -172,6 +172,8 @@ def show_options(options):
 # Define applications and their information
 applications = [
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
+{"name": "Zoxide",
+ "scoop_name": "zoxide","scoop_path": r'C:\Users\nahid\scoop\apps\zoxide\current\zoxide.exe',"winget_name": "WingetName","winget_path": r""} ,
 {"name": "WinToy"                ,"scoop_name": "ScoopName"            ,"scoop_path": r''                                                       ,"winget_name": "wintoy"                             ,"winget_path": r"C:\Program Files\WindowsApps\11413PtruceanBogdan.Wintoys_1.3.0.0_x64__ankwhmsh70gj6\Wintoys.exe"}                                                                   ,
 {"name": "VSCodium"              ,"scoop_name": "vscodium"             ,"scoop_path": r'xx'                                                     ,"winget_name": "VSCodium"                           ,"winget_path": r"C:\Users\nahid\AppData\Local\Programs\VSCodium\VSCodium.exe"}                                                                                                       ,
 {"name": "ripgrep [rg]"          ,"scoop_name": "ripgrep"              ,"scoop_path": r'C:\Users\nahid\scoop\apps\ripgrep\current\rg.exe'       ,"winget_name": "BurntSushi.ripgrep.MSVC"            ,"winget_path": r"C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\ripgrep-14.1.0-x86_64-pc-windows-msvc\rg.exe"} ,
