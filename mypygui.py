@@ -148,10 +148,10 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width//2 - 820//2
+x = screen_width//2 - 1920//2
 # y = screen_height//2 - 800//2
 y = 0
-ROOT.geometry(f"820x36+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"1920x36+{x}+{y}") #! overall size of the window
 
 #! Resize Window
 
@@ -162,15 +162,15 @@ def toggle_window_size(size):
     global y
 
     if size == 'line':
-        ROOT.geometry('820x36')
-        x = screen_width // 2 - 820 // 2
+        ROOT.geometry('1920x36')
+        x = screen_width // 2 - 1920 // 2
         y = 0
         ROOT.configure(bg='red')
         LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
         LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
     elif size == 'max':
-        ROOT.geometry('820x140')
-        x = screen_width // 2 - 820 // 2
+        ROOT.geometry('1920x140')
+        x = screen_width // 2 - 1920 // 2
         y = 0
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
@@ -404,7 +404,7 @@ def clear_screen():
     except Exception as e:
         print(f"Error clearing screen: {e}")
 
-""" BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
+BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
 BOX_ROW2_ROOT.pack(side="left", anchor="ne", pady=(3,2),padx=(3,1))
 
 def get_cpu_core_usage():
@@ -448,7 +448,7 @@ for i in range(psutil.cpu_count()):
     core_bar = tk.Canvas(frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
     core_bar.pack(side="top")
     cpu_core_bars.append(core_bar)
-update_cpu_core_bars() """
+update_cpu_core_bars()
 
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
@@ -660,36 +660,59 @@ def c_size(event=None):
 def d_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
 
-shutdown_window =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
-restart_window  =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
-update_image    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
-backup_image    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
-rclone_c        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_c.png"))
-rclone_d        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_d.png"))
-
-def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF", row=0, column=0, rowspan=1, columnspan=1):
-    button = tk.Button(parent, text=text, image=image, compound=compound, command=command, height=height, width=width, bg=bg, fg=fg, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground)
-    button.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan, sticky="w", padx=(0,0), pady=0)
-    return button
-
-button_properties = [
-{"parent": BOX_2,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1,"rowspan":1,"columnspan":1},
-{"parent": BOX_2,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2,"rowspan":1,"columnspan":1},
-{"parent": BOX_2,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3,"rowspan":1,"columnspan":1},
-{"parent": BOX_2,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4,"rowspan":1,"columnspan":1},
-{"parent": BOX_2,"image": rclone_c       ,"compound": tk.TOP,"text": "","command": c_size        ,"row": 1,"column": 5,"rowspan":1,"columnspan":1},
-{"parent": BOX_2,"image": rclone_d       ,"compound": tk.TOP,"text": "","command": d_size        ,"row": 1,"column": 6,"rowspan":1,"columnspan":1},
-]
-buttons = [create_button(**prop) for prop in button_properties]
+# shutdown_window =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
+# restart_window  =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
+# update_image    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
+# backup_image    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
+# rclone_c        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_c.png"))
+# rclone_d        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_d.png"))
 
 
+# def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF", row=0, column=0, rowspan=1, columnspan=1):
+#     button = tk.Button(parent, text=text, image=image, compound=compound, command=command, height=height, width=width, bg=bg, fg=fg, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground)
+#     button.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan, sticky="w", padx=(0,0), pady=0)
+#     return button
 
+# button_properties = [
+# {"parent": BOX_2,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1,"rowspan":1,"columnspan":1},
+# {"parent": BOX_2,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2,"rowspan":1,"columnspan":1},
+# {"parent": BOX_2,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3,"rowspan":1,"columnspan":1},
+# {"parent": BOX_2,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4,"rowspan":1,"columnspan":1},
+# {"parent": BOX_2,"image": rclone_c       ,"compound": tk.TOP,"text": "","command": c_size        ,"row": 1,"column": 5,"rowspan":1,"columnspan":1},
+# {"parent": BOX_2,"image": rclone_d       ,"compound": tk.TOP,"text": "","command": d_size        ,"row": 1,"column": 6,"rowspan":1,"columnspan":1},
+# ]
+# buttons = [create_button(**prop) for prop in button_properties]
 
 
 
 
 
+class HoverButton(tk.Button):
+    def __init__(self, master=None, **kw):
+        self.default_color = kw.pop('default_color', "#000000")
+        self.hover_color = kw.pop('hover_color', "red")
+        self.default_fg = kw.pop('default_fg', "#FFFFFF")
+        self.hover_fg = kw.pop('hover_fg', "#000000")
+        super().__init__(master, **kw)
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+        self.configure(bg=self.default_color, fg=self.default_fg)
 
+    def on_enter(self, event):
+        self.configure(bg=self.hover_color, fg=self.hover_fg)
+
+    def on_leave(self, event):
+        self.configure(bg=self.default_color, fg=self.default_fg)
+
+def force_shutdown():
+    # Your function logic here
+    pass
+
+BOX_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
+BOX_2.pack(pady=(5,0))
+
+BT_name = HoverButton(BOX_2, bg="#000000", hover_color="red", fg="#FFFFFF", hover_fg="#000000", height=1, width=20, bd=0, highlightthickness=0, font=("jetbrainsmono nf", 14, "bold"), command=force_shutdown, text="\uf011")
+BT_name.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 
 
