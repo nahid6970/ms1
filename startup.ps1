@@ -51,4 +51,4 @@ ahkscripts
 yasb
 # Glaze_WM
 # whkd
-# komorebic start
+komorebic start
