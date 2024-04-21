@@ -35,15 +35,24 @@ class CustomWidget(BaseWidget):
         # Check if the path exists
         path = "d:/test/"
         if os.path.exists(path):
-            status = "\uf023"
-            color = "#4CAF50"  # Green color for accessible path
-        else:
             status = "\uf13e"
-            color = "#f44336"  # Red color for inaccessible path
+            color = "#f44336"
+        else:
+            status = "\uf023"
+            color = "#4CAF50"
 
         self._path_label.setText(f"{status}")
         #! self._path_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
-        self._path_label.setStyleSheet(f"color: {color}; font-size: 16px;")
+        self._path_label.setStyleSheet(f"color: {color}; font-size: 20px;")
+
+        self._path_label.mousePressEvent   =lambda event:self._path_label_action(event,self._path_label  )
+
+
+    def _path_label_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           os.system('"C:\Program Files\My Lockbox\mylbx.exe"')
+        elif event.button() == Qt.MouseButton.RightButton:
+           os.system('')
 
 if __name__ == "__main__":
     app = QApplication([])
