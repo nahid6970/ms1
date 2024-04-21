@@ -33,9 +33,15 @@ def display_palettes():
             color_label.bind("<Button-1>", lambda event, bg=color, fg=text_color: copy_to_clipboard(bg, fg))
             palette_labels.append(color_label)
 
+# def copy_to_clipboard(bg_color, fg_color):
+#     pyperclip.copy(f'{bg_color}')
+#     # pyperclip.copy(f"bg={bg_color} fg={fg_color}")
+
 def copy_to_clipboard(bg_color, fg_color):
-    pyperclip.copy(f'{bg_color}')
-    # pyperclip.copy(f"bg={bg_color} fg={fg_color}")
+    # Remove '#' from the color
+    color_without_hash = bg_color[1:]
+    pyperclip.copy(color_without_hash)
+
 
 
 # Create the main window
