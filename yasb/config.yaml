@@ -25,8 +25,8 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces,BT, PowerToys, color_pallet, position] #! active_window
-      center: [ clock, uptime ]
+      left:   [komorebi_workspaces,BT, PowerToys, color_pallet, position,] #! active_window
+      center: [ clock, uptime, LockBox ]
       right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
 
 widgets:
@@ -37,6 +37,10 @@ widgets:
       callbacks:
         on_left: "exec python c:/ms1/HotKeys.py kill_process"
         on_right: "exec cmd /c Taskmgr"
+
+  LockBox:
+    type: "yasb.LockBox.CustomWidget"
+
 
   Usage_Cpu:
     type: "yasb.performance.usage_cpu.CustomWidget"
