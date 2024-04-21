@@ -293,14 +293,14 @@ scrollbar.pack(side="right", fill="y")
 style = ttk.Style()
 style.theme_use("default")
 # Set the background color of the scrollbar to red
-style.configure("Custom.Vertical.TScrollbar", background="#FF0000", troughcolor="#0000FF")
+style.configure("Custom.Vertical.TScrollbar", background="#FF0000", troughcolor="#25072c")
 # Set the thickness of the outside bar to 10 pixels
 style.map("Custom.Vertical.TScrollbar",
-    background=[("active", "#ce503a")],  # Changed from blue to red
+    background=[("active", "#72a9ec")],  # Changed from blue to red
 )
 # Set the thickness of the inside bar to 25 pixels
 style.map("Custom.Vertical.TScrollbar",
-    troughcolor=[("active", "#0000FF")],  # Changed from blue to red
+    troughcolor=[("active", "#25072c")],  # Changed from blue to red
     width=[("active", 10)]
 )
 canvas.configure(yscrollcommand=scrollbar.set)
