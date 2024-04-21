@@ -281,10 +281,29 @@ def on_mousewheel(event):
 canvas.bind_all("<MouseWheel>", on_mousewheel)
 
 # Create a vertical scrollbar
-scrollbar = ttk.Scrollbar(MAIN_FRAME, orient="vertical", style="Custom.Vertical.TScrollbar", )
-scrollbar.pack(side="right", fill="y")
-canvas.configure(yscrollcommand=scrollbar.set)
+# scrollbar = ttk.Scrollbar(MAIN_FRAME, orient="vertical", style="Custom.Vertical.TScrollbar", )
+# scrollbar.pack(side="right", fill="y")
+# canvas.configure(yscrollcommand=scrollbar.set)
 
+
+
+scrollbar = ttk.Scrollbar(MAIN_FRAME, orient="vertical", style="Custom.Vertical.TScrollbar")
+scrollbar.pack(side="right", fill="y")
+# Configure the style of the scrollbar
+style = ttk.Style()
+style.theme_use("default")
+# Set the background color of the scrollbar to red
+style.configure("Custom.Vertical.TScrollbar", background="#FF0000", troughcolor="#0000FF")
+# Set the thickness of the outside bar to 10 pixels
+style.map("Custom.Vertical.TScrollbar",
+    background=[("active", "#ce503a")],  # Changed from blue to red
+)
+# Set the thickness of the inside bar to 25 pixels
+style.map("Custom.Vertical.TScrollbar",
+    troughcolor=[("active", "#0000FF")],  # Changed from blue to red
+    width=[("active", 10)]
+)
+canvas.configure(yscrollcommand=scrollbar.set)
 
 #! scrollbar End
 
