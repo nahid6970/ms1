@@ -1,3 +1,4 @@
+import subprocess
 from core.widgets.base import BaseWidget
 from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
 from PyQt6.QtWidgets import QLabel, QApplication
@@ -50,7 +51,7 @@ class CustomWidget(BaseWidget):
 
     def _path_label_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           os.system('"C:\Program Files\My Lockbox\mylbx.exe"')
+           subprocess.Popen('cmd /c  "C:\Program Files\My Lockbox\mylbx.exe"')
         elif event.button() == Qt.MouseButton.RightButton:
            os.system('')
 
