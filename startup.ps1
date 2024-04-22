@@ -43,8 +43,8 @@ capture2text
 powertoys
 
 # bazarr
-# prowlarr
-# radarr
+prowlarr
+radarr
 sonarr
 
 ahkscripts
