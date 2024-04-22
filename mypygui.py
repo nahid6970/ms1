@@ -711,16 +711,13 @@ def force_shutdown():
 BOX_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 BOX_2.pack(pady=(5,0))
 
-BT_name = HoverButton(BOX_2, bg="#000000", hover_color="red", fg="#FFFFFF", hover_fg="#000000", height=1, width=20, bd=0, highlightthickness=0, font=("jetbrainsmono nf", 14, "bold"), command=force_shutdown, text="\uf011")
-BT_name.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-
+BT_name = HoverButton(BOX_2, bg="#000000",activebackground="green", hover_color="red", fg="#FFFFFF", hover_fg="#000000", height=0, width=0, relief="solid",  font=("jetbrainsmono nf", 14, "bold"), command=force_shutdown, text="\uf011")
+BT_name.pack(side="top",  padx=(0,0), pady=(0,0))
 
 
 
 
 # Start with main frame visible
-
 
 # Use threading to continuously update system information
 # thread = threading.Thread(target=continuous_monitor, daemon=True)

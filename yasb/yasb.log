@@ -1,6 +1,0 @@
-2024-04-21 20:27:06 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-21 20:27:07 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-21 20:27:07 INFO event_listener.py: Created named pipe yasb-3b9f714f-ffeb-11ee-8719-a85e4555ad30
-2024-04-21 20:27:07 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-3b9f714f-ffeb-11ee-8719-a85e4555ad30
-2024-04-21 20:27:07 INFO watcher.py: Created file watcher for path C:\ms1\yasb
-2024-04-21 20:27:07 INFO event_listener.py: Komorebi connected to named pipe: yasb-3b9f714f-ffeb-11ee-8719-a85e4555ad30
