@@ -1,7 +1,0 @@
-2024-04-22 16:50:12 INFO log.py: Yasb - Yet Another Status Bar
-2024-04-22 16:50:20 INFO bar_manager.py: Starting KomorebiEventListener...
-2024-04-22 16:50:21 INFO event_listener.py: Created named pipe yasb-1d2cbf3e-0096-11ef-9ef4-a85e4555ad30
-2024-04-22 16:50:21 INFO event_listener.py: Waiting for Komorebi to subscribe to named pipe yasb-1d2cbf3e-0096-11ef-9ef4-a85e4555ad30
-2024-04-22 16:50:21 INFO watcher.py: Created file watcher for path C:\ms1\yasb
-2024-04-22 16:50:23 INFO event_listener.py: Komorebi connected to named pipe: yasb-1d2cbf3e-0096-11ef-9ef4-a85e4555ad30
-2024-04-22 16:50:24 ERROR event_listener.py: Failed to retrieve komorebi state before starting event listener: None returned. Retrying in 1 second... Is komorebi online and its binaries added to $PATH?

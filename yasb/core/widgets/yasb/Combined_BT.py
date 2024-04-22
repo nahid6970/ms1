@@ -83,6 +83,12 @@ class CombinedWidget(BaseWidget):
             hover_after_color="font-size: 16px; background-color:#ffffff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
+        self._color_pallet = HoverLabel(
+            initial_color    ="font-size: 16px; background-color:#ffffff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 16px; background-color:#ff0000; color:#ffffff; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 16px; background-color:#ffffff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+        )
+
 #! Step 2
         self.widget_layout.addWidget(self._Edit_label)
         self.widget_layout.addWidget(self._info_get)
@@ -91,6 +97,7 @@ class CombinedWidget(BaseWidget):
         self.widget_layout.addWidget(self._folder)
         self.widget_layout.addWidget(self._appmanager)
         self.widget_layout.addWidget(self._shutdown_restart)
+        self.widget_layout.addWidget(self._color_pallet)
 
         self.register_callback("toggle_label", self._toggle_label)
         self.register_callback("update_label", self._update_label)
@@ -120,6 +127,7 @@ class CombinedWidget(BaseWidget):
         self._folder.setText("\uf07c")
         self._appmanager.setText("\uf40e")
         self._shutdown_restart.setText("\uf011")
+        self._color_pallet.setText("\ue22b")
 
 #! Step 4
         self._Edit_label.mousePressEvent   =lambda event:self._on_Edit_click    (event,self._Edit_label  )
@@ -129,6 +137,7 @@ class CombinedWidget(BaseWidget):
         self._folder.mousePressEvent       =lambda event:self._folder_action    (event,self._folder      )
         self._appmanager.mousePressEvent   =lambda event:self._appmanager_action(event,self._appmanager  )
         self._shutdown_restart.mousePressEvent   =lambda event:self._shutdown_restart_action(event,self._shutdown_restart  )
+        self._color_pallet.mousePressEvent   =lambda event:self._color_pallet_action(event,self._color_pallet  )
 
 
 #! Step 5
@@ -177,6 +186,12 @@ class CombinedWidget(BaseWidget):
             confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to restart?")
             if confirmed:
                 subprocess.Popen(["shutdown", "/r", "/f", "/t", "0"])
+
+    def _color_pallet_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen('cmd /c C:/ms1/utility/color/color_picker.py')
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen('cmd /c C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
 
 if __name__ == "__main__":
     app = QApplication([])
