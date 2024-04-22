@@ -135,7 +135,7 @@ for button_props in button_properties:
 #! ctrl+shift+b
 
 import customtkinter
-button = customtkinter.CTkButton(root, text="\uf011", command=None, hover_color="#154223", border_width=1, border_color="red",font=("JetBrainsMonoNL NFP", 20, "bold"))
+button = customtkinter.CTkButton(root,corner_radius=10,height=300, text="\uf011", command=None, hover_color="#154223",font=("JetBrainsMonoNL NFP", 20, "bold"))
 button.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
 
 
