@@ -146,37 +146,37 @@ class CombinedWidget(BaseWidget):
 
     def _reload_yasb(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            os.system('cmd /c start taskkill /f /im python.exe')
+            subprocess.Popen('cmd /c start taskkill /f /im python.exe')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
 
     def _desktop_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            os.system('C:\\ms1\\desktop_icon.py')
+            subprocess.Popen('C:\\ms1\\desktop_icon.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen()
 
     def _folder_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            os.system('C:\\ms1\\desktop_icon.py')
+            subprocess.Popen('cmd /c C:/ms1/mypygui_import/folder.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen()
 
     def _appmanager_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           os.system('cmd /c start C:/ms1/mypygui_import/app_store.py')
+           subprocess.Popen('cmd /c start C:/ms1/mypygui_import/app_store.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           os.system('cmd /c start C:/ms1/mypygui_import/applist.py')
+           subprocess.Popen('cmd /c start C:/ms1/mypygui_import/applist.py')
 
     def _shutdown_restart_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
             confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
             if confirmed:
-                subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
+                subprocess.Popen(["shutdown", "/s", "/f", "/t", "0"])
         elif event.button() == Qt.MouseButton.RightButton:
             confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to restart?")
             if confirmed:
-                subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
+                subprocess.Popen(["shutdown", "/r", "/f", "/t", "0"])
 
 if __name__ == "__main__":
     app = QApplication([])
