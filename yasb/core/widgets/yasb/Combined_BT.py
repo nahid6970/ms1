@@ -84,9 +84,9 @@ class CombinedWidget(BaseWidget):
         )
 
         self._color_pallet = HoverLabel(
-            initial_color    ="font-size: 16px; background-color:#ffffff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="font-size: 16px; background-color:#ff0000; color:#ffffff; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="font-size: 16px; background-color:#ffffff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 3px;",
+            hover_color      ="font-size: 20px; ; color:#ff00ff; ; ; margin:4px 3px;",
+            hover_after_color="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 3px;"
         )
 
 #! Step 2
