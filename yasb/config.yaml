@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces,BT, PowerToys, position,] #! active_window
+      left:   [komorebi_workspaces,BT, PowerToys,] #! active_window
       center: [ clock, uptime, LockBox ]
       right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
 
@@ -188,17 +188,17 @@ widgets:
   #       on_left: "exec C:\\ms1\\utility\\color\\color_picker.py"
   #       on_right: "exec C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"
 
-  position:
-    type: "yasb.position.Position_Widget"
-    options:
-      label: "\udb83\ude51"
-      label_alt: "Color-Pallet"
-      class_name: "applist-widget"
-      exec_options:
-        run_once: true
-      callbacks:
-        on_left: "exec C:\\ms1\\utility\\position_x_y.py"
-        on_right: "exec code C:\\ms1\\utility\\position_x_y.py"
+  # position:
+  #   type: "yasb.position.Position_Widget"
+  #   options:
+  #     label: "\udb83\ude51"
+  #     label_alt: "Color-Pallet"
+  #     class_name: "applist-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec C:\\ms1\\utility\\position_x_y.py"
+  #       on_right: "exec code C:\\ms1\\utility\\position_x_y.py"
 
   # desktop:
   #   type: "yasb.desktop.CustomWidget"

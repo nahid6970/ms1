@@ -84,9 +84,15 @@ class CombinedWidget(BaseWidget):
         )
 
         self._color_pallet = HoverLabel(
-            initial_color    ="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 3px;",
-            hover_color      ="font-size: 20px; ; color:#ff00ff; ; ; margin:4px 3px;",
-            hover_after_color="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 3px;"
+            initial_color    ="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 0px;",
+            hover_color      ="font-size: 20px; ; color:#ff00ff; ; ; margin:4px 0px;",
+            hover_after_color="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 0px;"
+        )
+
+        self._xy_position = HoverLabel(
+            initial_color    ="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;",
+            hover_color      ="font-size: 20px; ; color:#008394; ; ; margin:4px 0px;",
+            hover_after_color="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;"
         )
 
 #! Step 2
@@ -98,6 +104,7 @@ class CombinedWidget(BaseWidget):
         self.widget_layout.addWidget(self._appmanager)
         self.widget_layout.addWidget(self._shutdown_restart)
         self.widget_layout.addWidget(self._color_pallet)
+        self.widget_layout.addWidget(self._xy_position)
 
         self.register_callback("toggle_label", self._toggle_label)
         self.register_callback("update_label", self._update_label)
@@ -128,16 +135,18 @@ class CombinedWidget(BaseWidget):
         self._appmanager.setText("\uf40e")
         self._shutdown_restart.setText("\uf011")
         self._color_pallet.setText("\ue22b")
+        self._xy_position.setText("\udb83\ude51")
 
 #! Step 4
-        self._Edit_label.mousePressEvent   =lambda event:self._on_Edit_click    (event,self._Edit_label  )
-        self._info_get.mousePressEvent     =lambda event:self._get_info         (event,self._info_get    )
+        self._Edit_label.mousePressEvent=lambda event:self._on_Edit_click    (event,self._Edit_label  )
+        self._info_get.mousePressEvent=lambda event:self._get_info         (event,self._info_get    )
         self._reload_label.mousePressEvent =lambda event:self._reload_yasb      (event,self._reload_label)
-        self._desktop.mousePressEvent      =lambda event:self._desktop_action   (event,self._desktop     )
-        self._folder.mousePressEvent       =lambda event:self._folder_action    (event,self._folder      )
-        self._appmanager.mousePressEvent   =lambda event:self._appmanager_action(event,self._appmanager  )
-        self._shutdown_restart.mousePressEvent   =lambda event:self._shutdown_restart_action(event,self._shutdown_restart  )
-        self._color_pallet.mousePressEvent   =lambda event:self._color_pallet_action(event,self._color_pallet  )
+        self._desktop.mousePressEvent=lambda event:self._desktop_action   (event,self._desktop     )
+        self._folder.mousePressEvent=lambda event:self._folder_action    (event,self._folder      )
+        self._appmanager.mousePressEvent=lambda event:self._appmanager_action(event,self._appmanager  )
+        self._shutdown_restart.mousePressEvent=lambda event:self._shutdown_restart_action(event,self._shutdown_restart  )
+        self._color_pallet.mousePressEvent=lambda event:self._color_pallet_action(event,self._color_pallet  )
+        self._xy_position.mousePressEvent=lambda event:self._xy_position_action(event,self._xy_position  )
 
 
 #! Step 5
@@ -192,6 +201,12 @@ class CombinedWidget(BaseWidget):
            subprocess.Popen('cmd /c C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen('cmd /c C:/ms1/utility/color/color_picker.py')
+
+    def _xy_position_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen('cmd /c C:/ms1/utility/position_x_y.py')
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen('cmd /c code C:/ms1/utility/position_x_y.py')
 
 if __name__ == "__main__":
     app = QApplication([])
