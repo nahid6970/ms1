@@ -189,9 +189,9 @@ class CombinedWidget(BaseWidget):
 
     def _color_pallet_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c C:/ms1/utility/color/color_picker.py')
-        elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen('cmd /c C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen('cmd /c C:/ms1/utility/color/color_picker.py')
 
 if __name__ == "__main__":
     app = QApplication([])
