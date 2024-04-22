@@ -25,23 +25,24 @@ def create_custom_border(parent):
 
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
-        self.default_color = kw.pop('default_color', "#000000")
+        self.bg = kw.pop('bg', "#000000")
         self.h_bg = kw.pop('h_bg', "red")
         self.default_fg = kw.pop('default_fg', "#FFFFFF")
         self.h_fg = kw.pop('h_fg', "#000000")
         super().__init__(master, **kw)
         self.bind("<Enter>", self.on_enter)
         self.bind("<Leave>", self.on_leave)
-        self.configure(bg=self.default_color, fg=self.default_fg)
+        self.configure(bg=self.bg, fg=self.default_fg)
 
     def on_enter(self, event):
         self.configure(bg=self.h_bg, fg=self.h_fg)
 
     def on_leave(self, event):
-        self.configure(bg=self.default_color, fg=self.default_fg)
+        self.configure(bg=self.bg, fg=self.default_fg)
 
 
-
+def close_window(event=None):
+    ROOT.destroy()
 # Create main window
 ROOT = tk.Tk()
 ROOT.title("Folder")
@@ -76,33 +77,14 @@ MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
 
-
-#! Close Window
-def close_window(event=None):
-    ROOT.destroy()
-
-#!? Main ROOT BOX
-ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
-
-def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
-    label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
-    label.grid(row=row, column=column, padx=padx, pady=pady, sticky=anchor, rowspan=rowspan, columnspan=columnspan)
-    return label
-
-label_properties = [
-{"text": "r","parent": ROOT1,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1 ,"rowspan": 1,"columnspan": 1},#! LB_X alternative wingdings x
-]
-labels = [create_label(**prop) for prop in label_properties]
-LB_XXX, = labels
-LB_XXX.bind("<Button-1>", close_window)
-
 #! Folder
 default_font = ("Jetbrainsmono nf", 14, "italic")
 ROOT.option_add("*Font", default_font)
 
 BOX_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 BOX_2.pack(pady=(5,0))
+
+bt =HoverButton(BOX_2,text="\uf52f"               ,bg="#fc0808",activebackground="green",h_bg="red",fg="#FFFFFF",h_fg="#000000",height=0,width=20,relief="solid",font=("jetbrainsmono nf", 10, "normal") ,command=close_window); bt.pack(side="top",padx=(0,0),pady=(0,0))
 
 bt =HoverButton(BOX_2,text="\uf07c .yasb"         ,bg="#000000",activebackground="green",h_bg="red",fg="#FFFFFF",h_fg="#000000",height=0,width=0,relief="solid",command=lambda:subprocess.Popen(["explorer","C:\\ms1\\yasb"                                                                        ],shell=True)); bt.pack(side="top",padx=(0,0),pady=(0,0))
 bt =HoverButton(BOX_2,text="\uf07c .glaze-wm"     ,bg="#000000",activebackground="green",h_bg="red",fg="#FFFFFF",h_fg="#000000",height=0,width=0,relief="solid",command=lambda:subprocess.Popen(["explorer","C:\\Users\\nahid\\.glaze-wm"                                                          ],shell=True)); bt.pack(side="top",padx=(0,0),pady=(0,0))
