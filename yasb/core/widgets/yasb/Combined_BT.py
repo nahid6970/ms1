@@ -120,15 +120,15 @@ class CombinedWidget(BaseWidget):
         )
 
 #! Step 2
-        self.widget_layout.addWidget(self._Edit_label)
-        self.widget_layout.addWidget(self._info_get)
         self.widget_layout.addWidget(self._reload_label)
-        self.widget_layout.addWidget(self._color_pallet)
-        self.widget_layout.addWidget(self._xy_position)
         self.widget_layout.addWidget(self.PowerToys_Mouse_Pointer)
         self.widget_layout.addWidget(self.PowerToys_Text_Extract)
         self.widget_layout.addWidget(self.PowerToys_Screen_Ruler)
         self.widget_layout.addWidget(self.PowerToys_Screen_Color)
+        self.widget_layout.addWidget(self._Edit_label)
+        self.widget_layout.addWidget(self._color_pallet)
+        self.widget_layout.addWidget(self._info_get)
+        self.widget_layout.addWidget(self._xy_position)
         self.widget_layout.addWidget(self._appmanager)
         self.widget_layout.addWidget(self._folder)
         self.widget_layout.addWidget(self._desktop)
@@ -247,6 +247,8 @@ class CombinedWidget(BaseWidget):
     def PowerToys_Mouse_Pointer_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_mouse_crosshair')
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py x_mouse_enable')
 
     def PowerToys_Text_Extract_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
