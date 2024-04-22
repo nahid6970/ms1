@@ -97,42 +97,9 @@ labels = [create_label(**prop) for prop in label_properties]
 LB_XXX, = labels
 LB_XXX.bind("<Button-1>", close_window)
 
-
-
-
-
 #! Folder
-def create_button(text, frame, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, padx_pack, pady_pack, anchor, command):
-    button = tk.Button(frame, anchor=anchor, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
-    button.pack(padx=padx_pack, pady=pady_pack)
-    return button
-
-BOX_1 = tk.Frame(MAIN_FRAME, bg="#282c34")
-BOX_1.pack(side="top", pady=(30,0), padx=(0,0))
-
-button_properties =[
-# ("\uf07c .yasb"          ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\.yasb"]                                                              ,shell=True)),
-# ("\uf07c .glaze-wm"      ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\.glaze-wm"]                                                          ,shell=True)),
-# ("\uf07c All Apps"       ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","shell:AppsFolder"]                                                                     ,shell=True)),
-# ("\uf07c AppData"        ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData"]                                                            ,shell=True)),
-# ("\uf07c Git Projects"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\OneDrive\\Git"]                                                      ,shell=True)),
-# ("\uf07c Packages"       ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Local\\Packages"]                                           ,shell=True)),
-# ("\uf07c ProgramData"    ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\ProgramData"]                                                                      ,shell=True)),
-# ("\uf07c Scoop"          ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\scoop"]                                                              ,shell=True)),
-# ("\uf07c Software"       ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","D:\\software"]                                                                         ,shell=True)),
-# ("\uf07c Song"           ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","D:\\song"]                                                                             ,shell=True)),
-# ("\uf07c WindowsApp"     ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Program Files\\WindowsApps"]                                                       ,shell=True)),
-# ("\uf07c Startup System" ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,1),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"]                   ,shell=True)),
-# ("\uf07c Startup User"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(1,0),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"],shell=True)),
-# ("\uf07c Temp-AppDate"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,1),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Local\\Temp"]                                               ,shell=True)),
-# ("\uf07c Temp-Windows"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(1,0),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\Windows\\Temp"]                                                                    ,shell=True)),
-]
-for button_props in button_properties:
-    create_button(*button_props)
-
 default_font = ("Jetbrainsmono nf", 14, "italic")
 ROOT.option_add("*Font", default_font)
-
 
 BOX_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 BOX_2.pack(pady=(5,0))
@@ -159,3 +126,33 @@ bt =HoverButton(BOX_2,text="\uf07c Temp-Windows"  ,bg="#000000",activebackground
 #! Ending
 MAIN_FRAME.pack()
 ROOT.mainloop()
+
+
+
+# def create_button(text, frame, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, padx_pack, pady_pack, anchor, command):
+#     button = tk.Button(frame, anchor=anchor, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
+#     button.pack(padx=padx_pack, pady=pady_pack)
+#     return button
+
+# BOX_1 = tk.Frame(MAIN_FRAME, bg="#282c34")
+# BOX_1.pack(side="top", pady=(30,0), padx=(0,0))
+
+# button_properties =[
+# ("\uf07c .yasb"          ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\.yasb"]                                                              ,shell=True)),
+# ("\uf07c .glaze-wm"      ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\.glaze-wm"]                                                          ,shell=True)),
+# ("\uf07c All Apps"       ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","shell:AppsFolder"]                                                                     ,shell=True)),
+# ("\uf07c AppData"        ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData"]                                                            ,shell=True)),
+# ("\uf07c Git Projects"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\OneDrive\\Git"]                                                      ,shell=True)),
+# ("\uf07c Packages"       ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Local\\Packages"]                                           ,shell=True)),
+# ("\uf07c ProgramData"    ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\ProgramData"]                                                                      ,shell=True)),
+# ("\uf07c Scoop"          ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\scoop"]                                                              ,shell=True)),
+# ("\uf07c Software"       ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","D:\\software"]                                                                         ,shell=True)),
+# ("\uf07c Song"           ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","D:\\song"]                                                                             ,shell=True)),
+# ("\uf07c WindowsApp"     ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,0),(0,0),"w",lambda: subprocess.Popen(["explorer","C:\\Program Files\\WindowsApps"]                                                       ,shell=True)),
+# ("\uf07c Startup System" ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,1),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"]                   ,shell=True)),
+# ("\uf07c Startup User"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(1,0),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"],shell=True)),
+# ("\uf07c Temp-AppDate"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(0,1),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\Users\\nahid\\AppData\\Local\\Temp"]                                               ,shell=True)),
+# ("\uf07c Temp-Windows"   ,BOX_1,"#1D2027","#ffffff",1,15,"flat",("calibri",14,"bold"),0,0,(1,0),(3,0),"w",lambda: subprocess.Popen(["explorer","C:\\Windows\\Temp"]                                                                    ,shell=True)),
+# ]
+# for button_props in button_properties:
+#     create_button(*button_props)
