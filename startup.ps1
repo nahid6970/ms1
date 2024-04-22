@@ -45,7 +45,7 @@ powertoys
 # bazarr
 # prowlarr
 # radarr
-# sonarr
+sonarr
 
 ahkscripts
 yasb
