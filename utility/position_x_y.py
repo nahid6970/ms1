@@ -24,6 +24,9 @@ def move_window(mouse_x, mouse_y):
 def close_window(event=None):
     ROOT.destroy()
 
+def handle_focus_out(event=None):
+    ROOT.focus_force()
+
 ROOT = tk.Tk()
 ROOT.title("Mouse Position Tracker")
 ROOT.configure(bg="#282c34")
@@ -35,6 +38,8 @@ x = 0
 y = screen_height - 30
 ROOT.geometry(f"+{x}+{y}")
 ROOT.bind("<Escape>", close_window)
+ROOT.bind("<FocusOut>", handle_focus_out)
+
 
 box1 = tk.Frame(ROOT, bg="#1d2027")
 box1.pack(side="right", anchor="center", pady=(0, 0), padx=(0, 0))
