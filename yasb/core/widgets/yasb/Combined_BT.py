@@ -90,6 +90,30 @@ class CombinedWidget(BaseWidget):
         )
 
         self._xy_position = HoverLabel(
+            initial_color    ="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;",
+            hover_color      ="font-size: 20px; ; color:#e75c1c; ; ; margin:4px 0px;",
+            hover_after_color="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;"
+        )
+
+        self.PowerToys_Mouse_Pointer = HoverLabel(
+            initial_color    ="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;",
+            hover_color      ="font-size: 20px; ; color:#008394; ; ; margin:4px 0px;",
+            hover_after_color="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;"
+        )
+
+        self.PowerToys_Text_Extract = HoverLabel(
+            initial_color    ="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;",
+            hover_color      ="font-size: 20px; ; color:#008394; ; ; margin:4px 0px;",
+            hover_after_color="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;"
+        )
+
+        self.PowerToys_Screen_Ruler = HoverLabel(
+            initial_color    ="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;",
+            hover_color      ="font-size: 20px; ; color:#008394; ; ; margin:4px 0px;",
+            hover_after_color="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;"
+        )
+
+        self.PowerToys_Screen_Color = HoverLabel(
             initial_color    ="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;",
             hover_color      ="font-size: 20px; ; color:#008394; ; ; margin:4px 0px;",
             hover_after_color="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;"
@@ -105,6 +129,10 @@ class CombinedWidget(BaseWidget):
         self.widget_layout.addWidget(self._shutdown_restart)
         self.widget_layout.addWidget(self._color_pallet)
         self.widget_layout.addWidget(self._xy_position)
+        self.widget_layout.addWidget(self.PowerToys_Mouse_Pointer)
+        self.widget_layout.addWidget(self.PowerToys_Text_Extract)
+        self.widget_layout.addWidget(self.PowerToys_Screen_Ruler)
+        self.widget_layout.addWidget(self.PowerToys_Screen_Color)
 
         self.register_callback("toggle_label", self._toggle_label)
         self.register_callback("update_label", self._update_label)
@@ -136,17 +164,25 @@ class CombinedWidget(BaseWidget):
         self._shutdown_restart.setText("\uf011")
         self._color_pallet.setText("\ue22b")
         self._xy_position.setText("\udb83\ude51")
+        self.PowerToys_Mouse_Pointer.setText("\uf245")
+        self.PowerToys_Text_Extract.setText("\uf15c")
+        self.PowerToys_Screen_Ruler.setText("\udb84\udf53")
+        self.PowerToys_Screen_Color.setText("\ue275")
 
 #! Step 4
-        self._Edit_label.mousePressEvent=lambda event:self._on_Edit_click    (event,self._Edit_label  )
-        self._info_get.mousePressEvent=lambda event:self._get_info         (event,self._info_get    )
-        self._reload_label.mousePressEvent =lambda event:self._reload_yasb      (event,self._reload_label)
-        self._desktop.mousePressEvent=lambda event:self._desktop_action   (event,self._desktop     )
-        self._folder.mousePressEvent=lambda event:self._folder_action    (event,self._folder      )
-        self._appmanager.mousePressEvent=lambda event:self._appmanager_action(event,self._appmanager  )
-        self._shutdown_restart.mousePressEvent=lambda event:self._shutdown_restart_action(event,self._shutdown_restart  )
-        self._color_pallet.mousePressEvent=lambda event:self._color_pallet_action(event,self._color_pallet  )
-        self._xy_position.mousePressEvent=lambda event:self._xy_position_action(event,self._xy_position  )
+        self._Edit_label.mousePressEvent=lambda event:self._on_Edit_click(event,self._Edit_label)
+        self._info_get.mousePressEvent=lambda event:self._get_info(event,self._info_get)
+        self._reload_label.mousePressEvent =lambda event:self._reload_yasb(event,self._reload_label)
+        self._desktop.mousePressEvent=lambda event:self._desktop_action(event,self._desktop)
+        self._folder.mousePressEvent=lambda event:self._folder_action(event,self._folder)
+        self._appmanager.mousePressEvent=lambda event:self._appmanager_action(event,self._appmanager)
+        self._shutdown_restart.mousePressEvent=lambda event:self._shutdown_restart_action(event,self._shutdown_restart)
+        self._color_pallet.mousePressEvent=lambda event:self._color_pallet_action(event,self._color_pallet)
+        self._xy_position.mousePressEvent=lambda event:self._xy_position_action(event,self._xy_position)
+        self.PowerToys_Mouse_Pointer.mousePressEvent=lambda event:self.PowerToys_Mouse_Pointer_action(event,self.PowerToys_Mouse_Pointer)
+        self.PowerToys_Text_Extract.mousePressEvent=lambda event:self.PowerToys_Text_Extract_action(event,self.PowerToys_Text_Extract)
+        self.PowerToys_Screen_Ruler.mousePressEvent=lambda event:self.PowerToys_Screen_Ruler_action(event,self.PowerToys_Screen_Ruler)
+        self.PowerToys_Screen_Color.mousePressEvent=lambda event:self.PowerToys_Screen_Color_action(event,self.PowerToys_Screen_Color)
 
 
 #! Step 5
@@ -207,6 +243,23 @@ class CombinedWidget(BaseWidget):
            subprocess.Popen('cmd /c C:/ms1/utility/position_x_y.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen('cmd /c code C:/ms1/utility/position_x_y.py')
+
+    def PowerToys_Mouse_Pointer_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_mouse_crosshair')
+
+    def PowerToys_Text_Extract_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_TextExtract')
+
+    def PowerToys_Screen_Ruler_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_ruler')
+
+    def PowerToys_Screen_Color_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_color_picker')
+
 
 if __name__ == "__main__":
     app = QApplication([])

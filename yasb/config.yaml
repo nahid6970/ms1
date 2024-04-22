@@ -25,7 +25,7 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [komorebi_workspaces,BT, PowerToys,] #! active_window
+      left:   [komorebi_workspaces,BT] #! active_window
       center: [ clock, uptime, LockBox ]
       right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
 
@@ -38,6 +38,7 @@ widgets:
         on_left: "exec python c:/ms1/HotKeys.py kill_process"
         on_right: "exec cmd /c Taskmgr"
 
+
   LockBox:
     type: "yasb.LockBox.CustomWidget"
 
@@ -45,58 +46,26 @@ widgets:
   Usage_Cpu:
     type: "yasb.performance.usage_cpu.CustomWidget"
 
+
   Usage_Gpu:
     type: "yasb.performance.usage_gpu.CustomWidget"
 
+
   Usage_Ram:
     type: "yasb.performance.usage_ram.CustomWidget"
+
 
   Usage_Disk:
     type: "yasb.performance.usage_disk.CustomWidget"
 
 
-
-
-
   BT:
     type: "yasb.Combined_BT.CombinedWidget"
+
 
   traffic:
     type: "yasb.traffic.TrafficWidget"
 
-  PowerToys:
-    type: "yasb.PowerToys_Multi.PowerToysWidget"
-
-  # AppManager:
-  #   type: "yasb.AppManager.CustomWidget"
-  #   options:
-  #     label: "\uf40e"
-  #     label_alt: ""
-  #     class_name: "applist-widget"
-  #     exec_options:
-  #       run_once: true
-  #     callbacks:
-  #       on_left: "exec powershell C:/ms1/mypygui_import/app_store.py"
-  #       on_right: "exec powershell C:/ms1/mypygui_import/applist.py"
-
-  # Browser:
-  #   type: "yasb.Browser.Browser"
-  #   options:
-  #     label: "\uf40e"
-  #     label_alt: "A"
-  #     update_interval: 0
-  #     callbacks:
-  #       on_left: "launch_applist"
-  #       on_right: "launch_appstore"
-
-  process: #! high cpu usage
-    type: "yasb.process_running.ProcessWidget"
-    options:
-      label: "Active Processes: "
-      label_alt: "Active Processes: "
-      update_interval: 1000
-      callbacks:
-        on_right: "exec cmd /c Taskmgr"
 
   active_window:
     type: "yasb.active_window.ActiveWindowWidget"
@@ -108,6 +77,7 @@ widgets:
       max_length_ellipsis: "..."  # Ellipsis when the window title exceeds the maximum length
       monitor_exclusive: false  # Monitor windows on all monitors, not just the current one
 
+
   komorebi_workspaces:
     type: "komorebi.workspaces.WorkspaceWidget"
     options:
@@ -116,6 +86,7 @@ widgets:
         label_default_name: "{index}"
         label_zero_index: false
         hide_empty_workspaces: false
+
 
   clock:
     type: "yasb.clock.ClockWidget"
@@ -127,32 +98,6 @@ widgets:
         on_middle: "exec explorer.exe shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"
         on_right: "next_timezone"
 
-  CPU_Histo:
-    type: "yasb.cpu.CpuWidget"
-    options:
-      label: "\uf4bc {info[histograms][cpu_percent]}"
-      label_alt: "\uf4bc CPU: {info[percent][total]}%"
-      update_interval: 500
-      histogram_icons:
-        - '\u2581' # 0%
-        - '\u2581' # 10%
-        - '\u2582' # 20%
-        - '\u2583' # 30%
-        - '\u2584' # 40%
-        - '\u2585' # 50%
-        - '\u2586' # 60%
-        - '\u2587' # 70%
-        - '\u2588' # 80%+
-      histogram_num_columns: 10
-
-  # MEMORY:
-  #   type: "yasb.memory.MemoryWidget"
-  #   options:
-  #       label: "\udb86\udc96 {virtual_mem_free}"
-  #       label_alt: "\udb86\udc96 {virtual_mem_percent}%"
-  #       update_interval: 5000
-  #       callbacks:
-  #         on_right: "exec cmd /c Taskmgr"
 
   uptime:
     type: "yasb.uptime.UptimeWidget"
@@ -163,81 +108,9 @@ widgets:
       callbacks:
         on_right: "exec cmd /c Taskmgr"
 
-  # Folder:
-  #   type: "yasb.folder.CustomWidget"
-  #   options:
-  #     label: "\uf07c"
-  #     label_alt: "Explorer"
-  #     class_name: "explorer-widget"
-  #     exec_options:
-  #       run_once: true
-  #     callbacks:
-  #       on_left: "exec C:/ms1/mypygui_import/folder.py"
-  #       on_right: "exec explorer.exe"
 
 
-  # color_pallet:
-  #   type: "yasb.color_pallet.Color_Pallet_Widget"
-  #   options:
-  #     label: "\ue22b"
-  #     label_alt: "Color-Pallet"
-  #     class_name: "applist-widget"
-  #     exec_options:
-  #       run_once: true
-  #     callbacks:
-  #       on_left: "exec C:\\ms1\\utility\\color\\color_picker.py"
-  #       on_right: "exec C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"
 
-  # position:
-  #   type: "yasb.position.Position_Widget"
-  #   options:
-  #     label: "\udb83\ude51"
-  #     label_alt: "Color-Pallet"
-  #     class_name: "applist-widget"
-  #     exec_options:
-  #       run_once: true
-  #     callbacks:
-  #       on_left: "exec C:\\ms1\\utility\\position_x_y.py"
-  #       on_right: "exec code C:\\ms1\\utility\\position_x_y.py"
-
-  # desktop:
-  #   type: "yasb.desktop.CustomWidget"
-  #   options:
-  #     label: "\udb80\uddc4"
-  #     label_alt: ""
-  #     class_name: "desktop-widget"
-  #     exec_options:
-  #       run_once: true
-  #     callbacks:
-  #       on_left: "exec C:\\ms1\\desktop_icon.py"
-  #       on_right: "do_nothing"
-
-  ip_info:
-    type: "yasb.custom.CustomWidget"
-    options:
-      label: "\udb82\ude5f {data[city]}, {data[region]}"
-      label_alt: "\uf3c5 {data[ip]} [{data[country]}]"
-      class_name: "ip-info-widget"
-      exec_options:
-        run_cmd: "curl.exe https://ipinfo.io"
-        run_interval: 120000                                        # every 5 minutes
-        return_format: "json"
-      callbacks:
-        on_left: "toggle_label"
-        on_middle: "exec cmd /c ncpa.cpl"                           # open network settings
-        on_right: "exec cmd /c start https://ipinfo.io/{data[ip]} " # open ipinfo in browser
-
-  weather:
-    type: "yasb.custom.CustomWidget"
-    options:
-      label: "\uf0c2 {data[main][temp]}\u00b0c"
-      label_alt: "\uf0c2 {data[weather][0][description]}"
-      class_name: "weather-widget"
-      exec_options:
-        run_cmd: "curl.exe api.openweathermap.org/data/2.5/weather?q=Glasgow&units=metric&appid={YOUR_API_KEY_HERE}"
-        # run every hour
-        run_interval: 3600000
-        return_format: "json"
 
 #! Configuration for Yasb (Yet Another Status Bar)
 # Author: @denBot
@@ -647,3 +520,140 @@ widgets:
   #       on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_color_picker"
   #       on_right: "do_nothing"
 
+  # PowerToys:
+  #   type: "yasb.PowerToys_Multi.PowerToysWidget"
+
+  # AppManager:
+  #   type: "yasb.AppManager.CustomWidget"
+  #   options:
+  #     label: "\uf40e"
+  #     label_alt: ""
+  #     class_name: "applist-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec powershell C:/ms1/mypygui_import/app_store.py"
+  #       on_right: "exec powershell C:/ms1/mypygui_import/applist.py"
+
+  # Browser:
+  #   type: "yasb.Browser.Browser"
+  #   options:
+  #     label: "\uf40e"
+  #     label_alt: "A"
+  #     update_interval: 0
+  #     callbacks:
+  #       on_left: "launch_applist"
+  #       on_right: "launch_appstore"
+
+
+    # Folder:
+  #   type: "yasb.folder.CustomWidget"
+  #   options:
+  #     label: "\uf07c"
+  #     label_alt: "Explorer"
+  #     class_name: "explorer-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec C:/ms1/mypygui_import/folder.py"
+  #       on_right: "exec explorer.exe"
+
+
+  # color_pallet:
+  #   type: "yasb.color_pallet.Color_Pallet_Widget"
+  #   options:
+  #     label: "\ue22b"
+  #     label_alt: "Color-Pallet"
+  #     class_name: "applist-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec C:\\ms1\\utility\\color\\color_picker.py"
+  #       on_right: "exec C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"
+
+  # position:
+  #   type: "yasb.position.Position_Widget"
+  #   options:
+  #     label: "\udb83\ude51"
+  #     label_alt: "Color-Pallet"
+  #     class_name: "applist-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec C:\\ms1\\utility\\position_x_y.py"
+  #       on_right: "exec code C:\\ms1\\utility\\position_x_y.py"
+
+  # desktop:
+  #   type: "yasb.desktop.CustomWidget"
+  #   options:
+  #     label: "\udb80\uddc4"
+  #     label_alt: ""
+  #     class_name: "desktop-widget"
+  #     exec_options:
+  #       run_once: true
+  #     callbacks:
+  #       on_left: "exec C:\\ms1\\desktop_icon.py"
+  #       on_right: "do_nothing"
+
+    # CPU_Histo:
+  #   type: "yasb.cpu.CpuWidget"
+  #   options:
+  #     label: "\uf4bc {info[histograms][cpu_percent]}"
+  #     label_alt: "\uf4bc CPU: {info[percent][total]}%"
+  #     update_interval: 500
+  #     histogram_icons:
+  #       - '\u2581' # 0%
+  #       - '\u2581' # 10%
+  #       - '\u2582' # 20%
+  #       - '\u2583' # 30%
+  #       - '\u2584' # 40%
+  #       - '\u2585' # 50%
+  #       - '\u2586' # 60%
+  #       - '\u2587' # 70%
+  #       - '\u2588' # 80%+
+  #     histogram_num_columns: 10
+
+  # MEMORY:
+  #   type: "yasb.memory.MemoryWidget"
+  #   options:
+  #       label: "\udb86\udc96 {virtual_mem_free}"
+  #       label_alt: "\udb86\udc96 {virtual_mem_percent}%"
+  #       update_interval: 5000
+  #       callbacks:
+  #         on_right: "exec cmd /c Taskmgr"
+
+  # ip_info:
+  #   type: "yasb.custom.CustomWidget"
+  #   options:
+  #     label: "\udb82\ude5f {data[city]}, {data[region]}"
+  #     label_alt: "\uf3c5 {data[ip]} [{data[country]}]"
+  #     class_name: "ip-info-widget"
+  #     exec_options:
+  #       run_cmd: "curl.exe https://ipinfo.io"
+  #       run_interval: 120000                                        # every 5 minutes
+  #       return_format: "json"
+  #     callbacks:
+  #       on_left: "toggle_label"
+  #       on_middle: "exec cmd /c ncpa.cpl"                           # open network settings
+  #       on_right: "exec cmd /c start https://ipinfo.io/{data[ip]} " # open ipinfo in browser
+
+  # weather:
+  #   type: "yasb.custom.CustomWidget"
+  #   options:
+  #     label: "\uf0c2 {data[main][temp]}\u00b0c"
+  #     label_alt: "\uf0c2 {data[weather][0][description]}"
+  #     class_name: "weather-widget"
+  #     exec_options:
+  #       run_cmd: "curl.exe api.openweathermap.org/data/2.5/weather?q=Glasgow&units=metric&appid={YOUR_API_KEY_HERE}"
+  #       # run every hour
+  #       run_interval: 3600000
+  #       return_format: "json"
+
+    # process: #! high cpu usage
+  #   type: "yasb.process_running.ProcessWidget"
+  #   options:
+  #     label: "Active Processes: "
+  #     label_alt: "Active Processes: "
+  #     update_interval: 1000
+  #     callbacks:
+  #       on_right: "exec cmd /c Taskmgr"
