@@ -19,7 +19,7 @@ function SearchPackages {
     # Load the package list from the file
     $packages = Get-Content $packageListFile
 
-    $selectedPackage = $packages | fzf --preview="winget show {1}" --preview-window="right:20%"
+    $selectedPackage = $packages | fzf #!--preview="winget show {1}" --preview-window="right:20%"
 
     if ($selectedPackage) {
         $packageName = ($selectedPackage -split '\s+')[0]
@@ -30,8 +30,6 @@ function SearchPackages {
     }
 }
 
-# Function to update the package list by querying winget search
-# Function to update the package list by querying winget search
 function UpdatePackageList {
     $packageListFile = ".\package-list.txt"
     # Query winget search and filter out non-ASCII characters
