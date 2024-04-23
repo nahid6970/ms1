@@ -31,11 +31,17 @@ function SearchPackages {
 }
 
 # Function to update the package list by querying winget search
+# Function to update the package list by querying winget search
 function UpdatePackageList {
     $packageListFile = ".\package-list.txt"
-    winget search "" | Select-String -Pattern '^(?<Name>\S+)\s+(?<Id>\S+)' | Out-File $packageListFile -Encoding utf8
+    # Query winget search and filter out non-ASCII characters
+    $packages = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+    # Replace spaces with hyphens within the first 43 characters
+    $packages = $packages -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
+    $packages | Out-File $packageListFile -Encoding utf8
     Write-Host "Package list updated."
 }
+
 
 # Function to install a selected package
 function InstallPackage {
