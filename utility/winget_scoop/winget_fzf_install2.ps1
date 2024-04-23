@@ -1,6 +1,6 @@
 # Function to search for packages using winget and fzf
 function SearchPackages {
-    $packageListFile = ".\package-list.txt"
+    $packageListFile = ".\package-list2.txt"
 
     # Check if the package list file exists and if it's older than 1 hour
     if (Test-Path $packageListFile) {
@@ -31,10 +31,10 @@ function SearchPackages {
 }
 
 function UpdatePackageList {
-    $packageListFile = ".\package-list.txt"
+    $packageListFile = ".\package-list2.txt"
     # Query winget search and filter out non-ASCII characters
-    $packages = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
-    #!$packages = winget search " " | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+    #!$packages = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+    $packages = winget search " " | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
     # Remove the first five rows
     $packages = $packages | Select-Object -Skip 8
     # Replace spaces with hyphens within the first 43 characters
@@ -45,7 +45,7 @@ function UpdatePackageList {
 
 
 # function UpdatePackageList {
-#     $packageListFile = ".\package-list.txt"
+#     $packageListFile = ".\package-list2.txt"
 
 #     $packages1 = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
 #     $packages1 = $packages1 -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
