@@ -534,6 +534,15 @@ LB_CPU.grid(row=2, column=2, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; 
 LB_GPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_GPU.grid(row=2, column=3, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_GPU.bind("<Button-1>", None)
 
+LB_RAM = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_RAM.grid(row=2, column=4, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_RAM.bind("<Button-1>", None)
+
+LB_DUC = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_DUC.grid(row=2, column=5, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUC.bind("<Button-1>", None)
+
+LB_DUD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_DUD.grid(row=2, column=6, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUD.bind("<Button-1>", None)
+
 LB_DWLOAD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_DWLOAD.grid(row=2, column=8, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DWLOAD.bind("<Button-1>", None)
 
