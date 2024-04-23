@@ -30,14 +30,31 @@ function SearchPackages {
     }
 }
 
+# function UpdatePackageList {
+#     $packageListFile = ".\package-list.txt"
+#     # Query winget search and filter out non-ASCII characters
+#     #!$packages = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+#     $packages = winget search " " | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+#     # Remove the first five rows
+#     $packages = $packages | Select-Object -Skip 7
+#     # Replace spaces with hyphens within the first 43 characters
+#     $packages = $packages -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
+#     $packages | Out-File $packageListFile -Encoding utf8
+#     Write-Host "Package list updated."
+# }
+
+
 function UpdatePackageList {
     $packageListFile = ".\package-list.txt"
-    # Query winget search and filter out non-ASCII characters
-    $packages = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
-    # Remove the first five rows
-    $packages = $packages | Select-Object -Skip 7
-    # Replace spaces with hyphens within the first 43 characters
-    $packages = $packages -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
+
+    $packages1 = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+    $packages1 = $packages1 -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
+
+    $packages2 = winget search " " | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+    $packages2 = $packages2 -replace '^((?:.{1,54})\S*)', { $_.Groups[1].Value -replace '\s', '.' }
+
+    $packages = $packages1 + $packages2
+    $packages = $packages | Select-Object -Skip 5
     $packages | Out-File $packageListFile -Encoding utf8
     Write-Host "Package list updated."
 }
