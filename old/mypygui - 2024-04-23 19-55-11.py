@@ -230,15 +230,15 @@ def get_active_window_info():
    print("...")  # Add dots as a visual separator
 
 #! Close Window
-def close_window(event=None):
-    ROOT.destroy()
-
 # def close_window(event=None):
-#     password = simpledialog.askstring("Password", "Enter the password to close the window:")
-#     if password == "":  # Replace "your_password_here" with your actual password
-#         ROOT.destroy()
-#     else:
-#         print("Incorrect password. Window not closed.")
+#     ROOT.destroy()
+
+def close_window(event=None):
+    password = simpledialog.askstring("Password", "Enter the password to close the window:")
+    if password == "":  # Replace "your_password_here" with your actual password
+        ROOT.destroy()
+    else:
+        print("Incorrect password. Window not closed.")
 
 def restart(event=None):
     ROOT.destroy()
@@ -522,22 +522,6 @@ gui_thread.start()
 update_uptime_label()
 update_info_labels()
 check_window_topmost()
-
-
-
-uptime_label = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-uptime_label.grid(row=2, column=1, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; uptime_label.bind("<Button-1>", None)
-
-LB_CPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_CPU.grid(row=2, column=2, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_CPU.bind("<Button-1>", None)
-
-LB_GPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_GPU.grid(row=2, column=3, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_GPU.bind("<Button-1>", None)
-
-LB_DWLOAD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_DWLOAD.grid(row=2, column=8, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DWLOAD.bind("<Button-1>", None)
-
-
 
 
 #!  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
