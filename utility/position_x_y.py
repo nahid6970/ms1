@@ -10,15 +10,16 @@ def update_position():
         move_window(x, y)
 
 def move_window(mouse_x, mouse_y):
-    window_offset = 10
+    window_offset_x = 10
+    window_offset_y = 20
     screen_width = ROOT.winfo_screenwidth()
     screen_height = ROOT.winfo_screenheight()
     window_width = ROOT.winfo_width()
     window_height = ROOT.winfo_height()
     
     # Calculate the adjusted window position
-    x = min(max(mouse_x, 0), screen_width - window_width)
-    y = min(max(mouse_y + window_offset, 0), screen_height - window_height)
+    x = min(max(mouse_x + window_offset_x, 0), screen_width - window_width)
+    y = min(max(mouse_y + window_offset_y, 0), screen_height - window_height)
     
     ROOT.geometry(f"+{x}+{y}")
 
