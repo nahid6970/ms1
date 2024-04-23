@@ -473,7 +473,7 @@ def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, pad
     return label
 
 ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-ROOT1.pack(side="top", anchor="center", pady=(1,2),padx=(5,1))
+ROOT1.pack(side="right", anchor="ne", pady=(1,2),padx=(5,1))
 
 label_properties =[
 {"comment":"#️⃣Uptime"     ,"text":"Uptime"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"0","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :1  ,"rowspan" :1 ,"columnspan" :1},# ! Uptime
