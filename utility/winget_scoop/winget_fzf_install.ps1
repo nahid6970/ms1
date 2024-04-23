@@ -51,10 +51,10 @@ function UpdatePackageList {
     $packages1 = $packages1 -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
 
     $packages2 = winget search " " | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
-    $packages2 = $packages2 -replace '^((?:.{1,53})\S*)', { $_.Groups[1].Value -replace '\s', '.' }
+    $packages2 = $packages2 -replace '^((?:.{1,53})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
 
     $packages = $packages1 + $packages2
-    $packages = $packages | Select-Object -Skip 5
+    $packages = $packages | Select-Object -Skip 8
     $packages | Out-File $packageListFile -Encoding utf8
     Write-Host "Package list updated."
 }
