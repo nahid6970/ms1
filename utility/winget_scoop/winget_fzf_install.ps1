@@ -36,6 +36,8 @@ function UpdatePackageList {
     $packageListFile = ".\package-list.txt"
     # Query winget search and filter out non-ASCII characters
     $packages = winget search "" | Where-Object { $_ -notmatch '[^\x00-\x7F]' }
+    # Remove the first five rows
+    $packages = $packages | Select-Object -Skip 7
     # Replace spaces with hyphens within the first 43 characters
     $packages = $packages -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
     $packages | Out-File $packageListFile -Encoding utf8
