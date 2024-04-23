@@ -476,42 +476,99 @@ ROOT1 = tk.Frame(ROOT, bg="#1d2027")
 ROOT1.pack(side="right", anchor="ne", pady=(1,2),padx=(5,1))
 
 label_properties =[
-{"comment":"#️⃣Uptime"     ,"text":"Uptime"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"0","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :1  ,"rowspan" :1 ,"columnspan" :1},# ! Uptime
-{"comment":"#️⃣CPU"        ,"text":"CPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :2  ,"rowspan" :1 ,"columnspan" :1},#! CPU
-{"comment":"#️⃣GPU"        ,"text":"GPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :3  ,"rowspan" :1 ,"columnspan" :1},#! GPU
-{"comment":"#️⃣RAM"        ,"text":"RAM"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :4  ,"rowspan" :1 ,"columnspan" :1},#! RAM
-{"comment":"#️⃣Disk_C"     ,"text":"Disk_C"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(4  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :5  ,"rowspan" :1 ,"columnspan" :1},#! Disk_C
-{"comment":"#️⃣Disk_D"     ,"text":"Disk_D"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(2  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :6  ,"rowspan" :1 ,"columnspan" :1},#! Disk_D
-{"comment":"#️⃣Upload"     ,"text":"^"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :7  ,"rowspan" :1 ,"columnspan" :1},#! Upload
-{"comment":"#️⃣Download"   ,"text":"v"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :8  ,"rowspan" :1 ,"columnspan" :1},#! Download
-{"comment":"#️⃣GitSync"    ,"text":"\udb80\udea2"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#009fff","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",16,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(10 ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :9  ,"rowspan" :1 ,"columnspan" :1},#! GitSync
-{"comment":"#️⃣GitMs1"     ,"text":"m1"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :10  ,"rowspan" :1 ,"columnspan" :1},#! GitMs1
-{"comment":"#️⃣GitMs2"     ,"text":"m2"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :11  ,"rowspan" :1 ,"columnspan" :1},#! GitMs2
-{"comment":"#️⃣Keyboard"   ,"text":"\udb80\udf0c"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":2  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",16,"normal"),"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :12  ,"rowspan" :1 ,"columnspan" :1},#! keyboard
-{"comment":"#️⃣Bar_1"      ,"text":"1"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :13  ,"rowspan" :1 ,"columnspan" :1},#! Bar_1
-{"comment":"#️⃣Pin"        ,"text":"\udb81\udc03"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",11,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :14  ,"rowspan" :1 ,"columnspan" :1},#! Pin
-{"comment":"#️⃣Clear"      ,"text":"\ueabf"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",12,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :15  ,"rowspan" :1 ,"columnspan" :1},#! Clear
-{"comment":"#️⃣Get-Info"   ,"text":"G"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :16  ,"rowspan" :1 ,"columnspan" :1},#! Close
-{"comment":"#️⃣Reload"     ,"text":"Q"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :17  ,"rowspan" :1 ,"columnspan" :1},#! Reload
-{"comment":"#️⃣Line"       ,"text":"T"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#00FF00","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(3 ,0),"anchor" :"w" ,"row" :1 ,"column" :18  ,"rowspan" :1 ,"columnspan" :1},#! Line
-{"comment":"#️⃣Maximize"   ,"text":"o"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings"       ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :19  ,"rowspan" :1 ,"columnspan" :1},#! Maximize
-{"comment":"#️⃣Close"      ,"text":"r"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("Webdings"        ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :1 ,"column" :20  ,"rowspan" :1 ,"columnspan" :1},#! Close
+{"comment":"#️⃣Uptime"     ,"text":"Uptime"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"0","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :1  ,"rowspan" :1 ,"columnspan" :1},# ! Uptime
+{"comment":"#️⃣CPU"        ,"text":"CPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :2  ,"rowspan" :1 ,"columnspan" :1},#! CPU
+{"comment":"#️⃣GPU"        ,"text":"GPU"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :3  ,"rowspan" :1 ,"columnspan" :1},#! GPU
+{"comment":"#️⃣RAM"        ,"text":"RAM"             ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :4  ,"rowspan" :1 ,"columnspan" :1},#! RAM
+{"comment":"#️⃣Disk_C"     ,"text":"Disk_C"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(4  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :5  ,"rowspan" :1 ,"columnspan" :1},#! Disk_C
+{"comment":"#️⃣Disk_D"     ,"text":"Disk_D"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"5","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(2  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :6  ,"rowspan" :1 ,"columnspan" :1},#! Disk_D
+{"comment":"#️⃣Upload"     ,"text":"^"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :7  ,"rowspan" :1 ,"columnspan" :1},#! Upload
+{"comment":"#️⃣Download"   ,"text":"v"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ffffff","width":"7","height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(3  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :8  ,"rowspan" :1 ,"columnspan" :1},#! Download
+{"comment":"#️⃣GitSync"    ,"text":"\udb80\udea2"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#009fff","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",16,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(10 ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :9  ,"rowspan" :1 ,"columnspan" :1},#! GitSync
+{"comment":"#️⃣GitMs1"     ,"text":"m1"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :10  ,"rowspan" :1 ,"columnspan" :1},#! GitMs1
+{"comment":"#️⃣GitMs2"     ,"text":"m2"              ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :11  ,"rowspan" :1 ,"columnspan" :1},#! GitMs2
+{"comment":"#️⃣Keyboard"   ,"text":"\udb80\udf0c"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":2  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",16,"normal"),"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :12  ,"rowspan" :1 ,"columnspan" :1},#! keyboard
+{"comment":"#️⃣Bar_1"      ,"text":"1"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :13  ,"rowspan" :1 ,"columnspan" :1},#! Bar_1
+{"comment":"#️⃣Pin"        ,"text":"\udb81\udc03"    ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",11,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :14  ,"rowspan" :1 ,"columnspan" :1},#! Pin
+{"comment":"#️⃣Clear"      ,"text":"\ueabf"          ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#FFFFFF","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",12,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,10),"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :15  ,"rowspan" :1 ,"columnspan" :1},#! Clear
+{"comment":"#️⃣Get-Info"   ,"text":"G"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("JetBrainsMono NF",10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :16  ,"rowspan" :1 ,"columnspan" :1},#! Close
+{"comment":"#️⃣Reload"     ,"text":"Q"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :17  ,"rowspan" :1 ,"columnspan" :1},#! Reload
+{"comment":"#️⃣Line"       ,"text":"T"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#00FF00","width":0  ,"height":"0","relief":"flat","font":("wingdings 3"     ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(3 ,0),"anchor" :"w" ,"row" :2 ,"column" :18  ,"rowspan" :1 ,"columnspan" :1},#! Line
+{"comment":"#️⃣Maximize"   ,"text":"o"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#26b2f3","width":0  ,"height":"0","relief":"flat","font":("wingdings"       ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,0) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :19  ,"rowspan" :1 ,"columnspan" :1},#! Maximize
+{"comment":"#️⃣Close"      ,"text":"r"               ,"parent" :ROOT1 ,"bg" :"#1d2027" ,"fg":"#ff0000","width":0  ,"height":"0","relief":"flat","font":("Webdings"        ,10,"bold")  ,"ht":0 ,"htc" :"#FFFFFF" ,"padx" :(0  ,2) ,"pady" :(0 ,0),"anchor" :"w" ,"row" :2 ,"column" :20  ,"rowspan" :1 ,"columnspan" :1},#! Close
 ]
 labels = [create_label(**prop) for prop in label_properties]
 uptime_label, LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup, STATUS_MS1, STATUS_MS2, LB_K, LB_1, BT_TOPMOST, CLEAR, LB_get, LB_R, LB_L, LB_M, LB_XXX   = labels
 
-LB_XXX.bind    ("<Button-1>", close_window)
-LB_get.bind    ("<Button-1>", lambda event: get_active_window_info())
-LB_R.bind      ("<Button-1>", restart)
-LB_M.bind      ("<Button-1>", lambda event: toggle_window_size('max'))
-LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('line'))
-BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
-CLEAR.bind     ("<Button-1>", lambda event: clear_screen())
-LB_1.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
-LB_K.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
-bkup.bind      ("<Button-1>", lambda event: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'GiTSync' ; C:\\ms1\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
-STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
-STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
+
+
+
+
+
+
+
+
+uptime_label = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+uptime_label.grid(row=1, column=1, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; uptime_label.bind("<Button-1>", None)
+
+LB_CPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_CPU.grid(row=1, column=2, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_CPU.bind("<Button-1>", None)
+
+LB_GPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_GPU.grid(row=1, column=3, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_GPU.bind("<Button-1>", None)
+
+LB_RAM = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_RAM.grid(row=1, column=4, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_RAM.bind("<Button-1>", None)
+
+LB_DUC = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_DUC.grid(row=1, column=5, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUC.bind("<Button-1>", None)
+
+LB_DUD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_DUD.grid(row=1, column=6, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUD.bind("<Button-1>", None)
+
+LB_UPLOAD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_UPLOAD.grid(row=1, column=7, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_UPLOAD.bind("<Button-1>", None)
+
+LB_DWLOAD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_DWLOAD.grid(row=1, column=8, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DWLOAD.bind("<Button-1>", None)
+
+bkup = tk.Label(ROOT1, bg="#000000", fg="#009fff", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 16, "bold"), text="\udb80\udea2")
+bkup.grid(row=1, column=9, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; bkup.bind("<Button-1>", lambda event: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'GiTSync' ; C:\\ms1\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
+
+STATUS_MS1 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+STATUS_MS1.grid(row=1, column=10, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
+
+STATUS_MS2 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+STATUS_MS2.grid(row=1, column=11, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
+
+LB_K = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 16, "bold"), text="\udb80\udf0c")
+LB_K.grid(row=1, column=12, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_K.bind("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
+
+LB_1 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="1")
+LB_1.grid(row=1, column=13, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_1.bind("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
+
+BT_TOPMOST = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\udb81\udc03")
+BT_TOPMOST.grid(row=1, column=14, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
+
+CLEAR = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\ueabf")
+CLEAR.grid(row=1, column=15, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; CLEAR.bind("<Button-1>", lambda event: clear_screen())
+
+LB_get = tk.Label(ROOT1, bg="#000000", fg="#ff0000", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="G")
+LB_get.grid(row=1, column=16, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_get.bind("<Button-1>", lambda event: get_active_window_info())
+
+LB_R = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uf0e2")
+LB_R.grid(row=1, column=17, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_R.bind("<Button-1>", restart)
+
+LB_L = tk.Label(ROOT1, bg="#000000", fg="#00FF00", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\ueab7")
+LB_L.grid(row=1, column=18, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('line'))
+
+LB_M = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uea72")
+LB_M.grid(row=1, column=19, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('max'))
+
+LB_XXX = tk.Label(ROOT1, bg="#000000", fg="#ff0000", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uf00d")
+LB_XXX.grid(row=1, column=20, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+
+
 
 queue = Queue()
 status_thread = threading.Thread(target=update_status, daemon=True)
@@ -522,32 +579,6 @@ gui_thread.start()
 update_uptime_label()
 update_info_labels()
 check_window_topmost()
-
-
-
-uptime_label = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-uptime_label.grid(row=2, column=1, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; uptime_label.bind("<Button-1>", None)
-
-LB_CPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_CPU.grid(row=2, column=2, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_CPU.bind("<Button-1>", None)
-
-LB_GPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_GPU.grid(row=2, column=3, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_GPU.bind("<Button-1>", None)
-
-LB_RAM = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_RAM.grid(row=2, column=4, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_RAM.bind("<Button-1>", None)
-
-LB_DUC = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_DUC.grid(row=2, column=5, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUC.bind("<Button-1>", None)
-
-LB_DUD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_DUD.grid(row=2, column=6, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUD.bind("<Button-1>", None)
-
-LB_DWLOAD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
-LB_DWLOAD.grid(row=2, column=8, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DWLOAD.bind("<Button-1>", None)
-
-
-
 
 #!  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
 #!  ████╗ ████║██╔══██╗██║████╗  ██║    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
