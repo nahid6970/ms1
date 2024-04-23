@@ -511,19 +511,19 @@ uptime_label, LB_CPU, LB_GPU, LB_RAM, LB_DUC, LB_DUD, LB_UPLOAD, LB_DWLOAD, bkup
 uptime_label = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 uptime_label.grid(row=1, column=1, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; uptime_label.bind("<Button-1>", None)
 
-LB_CPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_CPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=5, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_CPU.grid(row=1, column=2, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_CPU.bind("<Button-1>", None)
 
-LB_GPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_GPU = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=5, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_GPU.grid(row=1, column=3, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_GPU.bind("<Button-1>", None)
 
-LB_RAM = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_RAM = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=5, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_RAM.grid(row=1, column=4, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_RAM.bind("<Button-1>", None)
 
-LB_DUC = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_DUC = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=5, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_DUC.grid(row=1, column=5, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUC.bind("<Button-1>", None)
 
-LB_DUD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+LB_DUD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=5, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_DUD.grid(row=1, column=6, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DUD.bind("<Button-1>", None)
 
 LB_UPLOAD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
@@ -532,40 +532,40 @@ LB_UPLOAD.grid(row=1, column=7, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0))
 LB_DWLOAD = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 LB_DWLOAD.grid(row=1, column=8, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_DWLOAD.bind("<Button-1>", None)
 
-bkup = tk.Label(ROOT1, bg="#000000", fg="#009fff", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 16, "bold"), text="\udb80\udea2")
+bkup = tk.Label(ROOT1, bg="#000000", fg="#009fff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 16, "bold"), text="\udb80\udea2")
 bkup.grid(row=1, column=9, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; bkup.bind("<Button-1>", lambda event: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'GiTSync' ; C:\\ms1\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
 
-STATUS_MS1 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+STATUS_MS1 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 STATUS_MS1.grid(row=1, column=10, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
 
-STATUS_MS2 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
+STATUS_MS2 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 10, "bold"), text="")
 STATUS_MS2.grid(row=1, column=11, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
 
-LB_K = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 16, "bold"), text="\udb80\udf0c")
+LB_K = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 16, "bold"), text="\udb80\udf0c")
 LB_K.grid(row=1, column=12, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_K.bind("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
 
-LB_1 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="1")
+LB_1 = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="1")
 LB_1.grid(row=1, column=13, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_1.bind("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
 
-BT_TOPMOST = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\udb81\udc03")
+BT_TOPMOST = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\udb81\udc03")
 BT_TOPMOST.grid(row=1, column=14, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
 
-CLEAR = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\ueabf")
+CLEAR = tk.Label(ROOT1, bg="#000000", fg="#FFFFFF", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\ueabf")
 CLEAR.grid(row=1, column=15, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; CLEAR.bind("<Button-1>", lambda event: clear_screen())
 
-LB_get = tk.Label(ROOT1, bg="#000000", fg="#ff0000", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="G")
+LB_get = tk.Label(ROOT1, bg="#000000", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="G")
 LB_get.grid(row=1, column=16, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_get.bind("<Button-1>", lambda event: get_active_window_info())
 
-LB_R = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uf0e2")
+LB_R = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uf0e2")
 LB_R.grid(row=1, column=17, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_R.bind("<Button-1>", restart)
 
-LB_L = tk.Label(ROOT1, bg="#000000", fg="#00FF00", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\ueab7")
+LB_L = tk.Label(ROOT1, bg="#000000", fg="#00FF00", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\ueab7")
 LB_L.grid(row=1, column=18, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event: toggle_window_size('line'))
 
-LB_M = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uea72")
+LB_M = tk.Label(ROOT1, bg="#000000", fg="#26b2f3", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uea72")
 LB_M.grid(row=1, column=19, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event: toggle_window_size('max'))
 
-LB_XXX = tk.Label(ROOT1, bg="#000000", fg="#ff0000", height=0, width=7, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uf00d")
+LB_XXX = tk.Label(ROOT1, bg="#000000", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NF", 12, "bold"), text="\uf00d")
 LB_XXX.grid(row=1, column=20, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
 
 
