@@ -182,8 +182,8 @@ return
     {
         ClipBoardContent := Clipboard
         ; Replace drive letter and backslashes with WSL path format
-        StringReplace, ClipBoardContent, ClipBoardContent, C:\, c:/, All
-        StringReplace, ClipBoardContent, ClipBoardContent, D:\, d:/, All
+        StringReplace, ClipBoardContent, ClipBoardContent, C:\, C:/, All
+        StringReplace, ClipBoardContent, ClipBoardContent, D:\, D:/, All
         StringReplace, ClipBoardContent, ClipBoardContent, \, /, All
         Clipboard := ClipboardBackup
         Clipboard := ClipBoardContent
