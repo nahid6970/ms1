@@ -38,7 +38,7 @@ function UpdatePackageList {
     # Remove the first five rows
     $packages = $packages | Select-Object -Skip 8
     # Replace spaces with hyphens within the first 43 characters
-    $packages = $packages -replace '^((?:.{1,43})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
+    $packages = $packages -replace '^((?:.{1,53})\S*)', { $_.Groups[1].Value -replace '\s', '-' }
     $packages | Out-File $packageListFile -Encoding utf8
     Write-Host "Package list updated."
 }
