@@ -7,6 +7,8 @@ from PyQt6.QtCore import Qt
 import subprocess
 import os
 import time
+from PyQt6.QtGui import QMouseEvent, QKeyEvent
+
 
 class HoverLabel(QLabel):
     def __init__(self, initial_color, hover_color, hover_after_color, parent=None):
@@ -186,11 +188,30 @@ class CombinedWidget(BaseWidget):
 
 
 #! Step 5
-    def _on_Edit_click(self, event, label):
+    def _on_Edit_click(self, event: QMouseEvent, label: HoverLabel):
+        modifiers = QApplication.keyboardModifiers()
+
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py'])
+            if modifiers == Qt.KeyboardModifier.ControlModifier:
+#! CTRL + Left
+                subprocess.Popen(['cmd.exe', '/c', 'Code C:\ms1\mypygui_import\edit_files.py']) 
+            else:
+#! Left
+                subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py']) 
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\mypygui_import\\edit_files.py:89'])
+            if modifiers == Qt.KeyboardModifier.ControlModifier:
+#! Ctrl+Right
+                self.callback_right()  # Call the right mouse click callback
+            else:
+#! Right
+                subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\mypygui_import\\edit_files.py:89'])
+        elif event.button() == Qt.MouseButton.MiddleButton:
+#! Middle mouse click
+            self.callback_middle()
+
+
+
+
 
     def _get_info(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
