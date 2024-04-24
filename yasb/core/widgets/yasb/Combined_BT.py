@@ -42,6 +42,27 @@ class CombinedWidget(BaseWidget):
         self._label_content = label
         self._label_alt_content = label_alt
 
+
+#! Example
+    #     self._XXX = HoverLabel(
+    #         initial_color    ="font-size: 20px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 0px;",
+    #         hover_color      ="font-size: 20px; background-color:#55c9ff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 0px;",
+    #         hover_after_color="font-size: 20px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 0px;"
+    #     )
+    #     self.widget_layout.addWidget(self._XXX)
+    #     self._XXX.setText("Display")
+    #     self._XXX.mousePressEvent=lambda event:self._XXX_action(event,self._XXX)
+    # def _XXX_action(self, event, label):
+    #     if event.button() == Qt.MouseButton.LeftButton:
+    #        subprocess.Popen('cmd /c start C:/ms1/mypygui_import/app_store.py')
+    #     elif event.button() == Qt.MouseButton.RightButton:
+    #        subprocess.Popen('cmd /c start C:/ms1/mypygui_import/applist.py')
+
+
+
+
+
+
 #! Step 1
         self._Edit_label = HoverLabel(
             initial_color    ="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;",
@@ -121,6 +142,14 @@ class CombinedWidget(BaseWidget):
             hover_after_color="font-size: 20px; ; color:#00ecfd; ; ; margin:4px 0px;"
         )
 
+        self._potplaylist = HoverLabel(
+            initial_color    ="font-size: 20px; color:#91fd2b; margin:4px 0px;",
+            hover_color      ="font-size: 20px; color:#798602; margin:4px 0px;",
+            hover_after_color="font-size: 20px; color:#91fd2b; margin:4px 0px;"
+        )
+
+
+
 #! Step 2
         self.widget_layout.addWidget(self._Tools_label)
         self.widget_layout.addWidget(self.PowerToys_Mouse_Pointer)
@@ -131,6 +160,7 @@ class CombinedWidget(BaseWidget):
         self.widget_layout.addWidget(self._Edit_label)
         self.widget_layout.addWidget(self._color_pallet)
         self.widget_layout.addWidget(self._xy_position)
+        self.widget_layout.addWidget(self._potplaylist)
         self.widget_layout.addWidget(self._appmanager)
         self.widget_layout.addWidget(self._folder)
         self.widget_layout.addWidget(self._desktop)
@@ -170,6 +200,8 @@ class CombinedWidget(BaseWidget):
         self.PowerToys_Text_Extract.setText("\uf15c")
         self.PowerToys_Screen_Ruler.setText("\udb84\udf53")
         self.PowerToys_Screen_Color.setText("\ue275")
+        self._potplaylist.setText("\ueba6")
+
 
 #! Step 4
         self._Edit_label.mousePressEvent=lambda event:self._on_Edit_click(event,self._Edit_label)
@@ -185,6 +217,7 @@ class CombinedWidget(BaseWidget):
         self.PowerToys_Text_Extract.mousePressEvent=lambda event:self.PowerToys_Text_Extract_action(event,self.PowerToys_Text_Extract)
         self.PowerToys_Screen_Ruler.mousePressEvent=lambda event:self.PowerToys_Screen_Ruler_action(event,self.PowerToys_Screen_Ruler)
         self.PowerToys_Screen_Color.mousePressEvent=lambda event:self.PowerToys_Screen_Color_action(event,self.PowerToys_Screen_Color)
+        self._potplaylist.mousePressEvent=lambda event:self._potplaylist_action(event,self._potplaylist)
 
 
 #! Step 5
@@ -293,6 +326,12 @@ class CombinedWidget(BaseWidget):
     def PowerToys_Screen_Color_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_color_picker')
+
+
+    def _potplaylist_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+           subprocess.Popen('cmd /c start C:/ms1/scripts/playlist.py')
+
 
 
 if __name__ == "__main__":
