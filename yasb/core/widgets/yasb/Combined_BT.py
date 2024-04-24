@@ -229,7 +229,7 @@ class CombinedWidget(BaseWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             subprocess.Popen('cmd /c C:/ms1/mypygui_import/folder.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen()
+            subprocess.Popen('cmd /c Code C:/ms1/mypygui_import/folder.py')
 
 
     def _appmanager_action(self, event, label):
