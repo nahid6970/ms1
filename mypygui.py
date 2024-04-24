@@ -166,15 +166,15 @@ def toggle_window_size(size):
         x = screen_width // 2 - 1920 // 2
         y = 0
         ROOT.configure(bg='red')
-        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
-        LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
+        LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
+        LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
     elif size == 'max':
         ROOT.geometry('1920x140')
         x = screen_width // 2 - 1920 // 2
         y = 0
         ROOT.configure(bg='#1d2027')
-        LB_L.config(text='T', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("Wingdings 3", 10, "bold"))
-        LB_M.config(text='o', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("Wingdings", 10, "bold"))
+        LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
+        LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
 
     ROOT.focus_force()
     ROOT.update_idletasks()
@@ -486,10 +486,10 @@ LB_1         =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=0,relief="
 BT_TOPMOST   =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\udb81\udc03")
 CLEAR        =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\ueabf"      )
 LB_get       =tk.Label(ROOT1,bg="#000000",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="G"           )
-LB_R         =tk.Label(ROOT1,bg="#000000",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\uf0e2"      )
-LB_L         =tk.Label(ROOT1,bg="#000000",fg="#00FF00",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\ueab7"      )
-LB_M         =tk.Label(ROOT1,bg="#000000",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\uea72"      )
-LB_XXX       =tk.Label(ROOT1,bg="#000000",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\uf00d"      )
+LB_R         =tk.Label(ROOT1,bg="#000000",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2"      )
+LB_L         =tk.Label(ROOT1,bg="#000000",fg="#00FF00",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\ueab7"      )
+LB_M         =tk.Label(ROOT1,bg="#000000",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",18,"bold"),text="\uea72"      )
+LB_XXX       =tk.Label(ROOT1,bg="#000000",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\uf00d"      )
 
 uptime_label.grid(row=1, column=1, rowspan =1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; uptime_label.bind("<Button-1>", None)
 LB_CPU.grid(row      =1, column=2, rowspan =1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_CPU.bind("<Button-1>", None)
@@ -510,7 +510,7 @@ LB_get.grid(row      =1, column=16, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0
 LB_R.grid(row        =1, column=17, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_R.bind("<Button-1>", restart)
 LB_L.grid(row        =1, column=18, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_L.bind("<Button-1>", lambda event:toggle_window_size('line'))
 LB_M.grid(row        =1, column=19, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_M.bind("<Button-1>", lambda event:toggle_window_size('max'))
-LB_XXX.grid(row      =1, column=20, rowspan=1 ,columnspan=1, padx=(3,0), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+LB_XXX.grid(row      =1, column=20, rowspan=1 ,columnspan=1, padx=(3,10), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
 
 
 

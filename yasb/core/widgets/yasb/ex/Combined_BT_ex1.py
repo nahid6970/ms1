@@ -62,13 +62,11 @@ class CombinedWidget(BaseWidget):
     def _toggle_label(self):
         self._show_alt_label = not self._show_alt_label
         self._update_label()
-
+        
     def _update_label(self):
         # Update the active label at each timer interval
         active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
-
         self._Edit_label.setText("\uf044")
-
         self._Edit_label.mousePressEvent=lambda event:self._on_Edit_click(event,self._Edit_label)
 
     def _on_Edit_click(self, event, label):
