@@ -60,9 +60,6 @@ class CombinedWidget(BaseWidget):
 
 
 
-
-
-
 #! Step 1
         self._Edit_label = HoverLabel(
             initial_color    ="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;",
@@ -331,6 +328,11 @@ class CombinedWidget(BaseWidget):
     def _potplaylist_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c start C:/ms1/scripts/playlist.py')
+
+
+    def _killProcess_action(self, event, label):
+        if event.button() == Qt.MouseButton.LeftButton:
+            subprocess.Popen('cmd /c start pwsh -Command "$processName = (Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String | fzf) -split \'\\s{2,}\' | Select-Object -First 1; if ($processName) { Stop-Process -Name $processName -Force; Write-Host \"Process $processName terminated.\" } else { Write-Host \"No process selected.\" }"')
 
 
 
