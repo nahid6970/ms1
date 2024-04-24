@@ -190,27 +190,18 @@ class CombinedWidget(BaseWidget):
 #! Step 5
     def _on_Edit_click(self, event: QMouseEvent, label: HoverLabel):
         modifiers = QApplication.keyboardModifiers()
-
         if event.button() == Qt.MouseButton.LeftButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-#! CTRL + Left
                 subprocess.Popen(['cmd.exe', '/c', 'Code C:\ms1\mypygui_import\edit_files.py']) 
             else:
-#! Left
                 subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py']) 
         elif event.button() == Qt.MouseButton.RightButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-#! Ctrl+Right
                 self.callback_right()  # Call the right mouse click callback
             else:
-#! Right
                 subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\mypygui_import\\edit_files.py:89'])
         elif event.button() == Qt.MouseButton.MiddleButton:
-#! Middle mouse click
             self.callback_middle()
-
-
-
 
 
     def _get_info(self, event, label):
@@ -219,11 +210,13 @@ class CombinedWidget(BaseWidget):
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c', 'code', 'C:\\ms1\\utility\\info.py'])
 
+
     def _reload_yasb(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
             subprocess.Popen('cmd /c start taskkill /f /im python.exe')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c', 'start', 'taskmgr.exe'])
+
 
     def _desktop_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -231,17 +224,20 @@ class CombinedWidget(BaseWidget):
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen()
 
+
     def _folder_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
             subprocess.Popen('cmd /c C:/ms1/mypygui_import/folder.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen()
 
+
     def _appmanager_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c start C:/ms1/mypygui_import/app_store.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen('cmd /c start C:/ms1/mypygui_import/applist.py')
+
 
     def _shutdown_restart_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -253,11 +249,22 @@ class CombinedWidget(BaseWidget):
             if confirmed:
                 subprocess.Popen(["shutdown", "/r", "/f", "/t", "0"])
 
-    def _color_pallet_action(self, event, label):
+
+    def _color_pallet_action(self, event: QMouseEvent, label: HoverLabel):
+        modifiers = QApplication.keyboardModifiers()
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
+            if modifiers == Qt.KeyboardModifier.ControlModifier:
+                subprocess.Popen('cmd /c Code C:/ms1/utility/color/color_picker.py')
+            else:
+                subprocess.Popen('cmd /c C:/ms1/utility/color/color_picker.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c C:/ms1/utility/color/color_picker.py')
+            if modifiers == Qt.KeyboardModifier.ControlModifier:
+                subprocess.Popen('cmd /c Code C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
+            else:
+                subprocess.Popen('cmd /c C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
+        elif event.button() == Qt.MouseButton.MiddleButton:
+            self.callback_middle()
+
 
     def _xy_position_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -265,19 +272,23 @@ class CombinedWidget(BaseWidget):
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen('cmd /c code C:/ms1/utility/position_x_y.py')
 
+
     def PowerToys_Mouse_Pointer_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_mouse_crosshair')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen('cmd /c python C:/ms1/HotKeys.py x_mouse_enable')
 
+
     def PowerToys_Text_Extract_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_TextExtract')
 
+
     def PowerToys_Screen_Ruler_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_ruler')
+
 
     def PowerToys_Screen_Color_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
