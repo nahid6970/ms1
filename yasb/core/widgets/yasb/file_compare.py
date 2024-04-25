@@ -103,6 +103,7 @@ class CustomWidget(BaseWidget):
         source_dest_pairs = {
             "komorebi": ("C:\\Users\\nahid\\komorebi.json", "C:\\ms1\\asset\\komorebi\\komorebi.json"),
             "glaze-wm": ("C:\\Users\\nahid\\.glaze-wm", "C:\\ms1\\asset\\glazewm\\.glaze-wm"),
+            "glaze-wm": ("C:\\Program Files\\Nilesoft Shell\\imports", "C:\\ms1\\asset\\nilesoft_shell\\imports"),
         }
 
         # Check if all source and destination paths have the same content
