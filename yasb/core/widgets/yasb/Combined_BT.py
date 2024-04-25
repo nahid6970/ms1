@@ -62,9 +62,9 @@ class CombinedWidget(BaseWidget):
 
 #! Step 1
         self._Find_files = HoverLabel(
-            initial_color    ="font-size: 20px; ; color:#14af7b; ; ; margin:4px 0px;",
+            initial_color    ="font-size: 20px; ; color:#bcffe9; ; ; margin:4px 0px;",
             hover_color      ="font-size: 20px; ; color:#000000; ; ; margin:4px 0px;",
-            hover_after_color="font-size: 20px; ; color:#14af7b; ; ; margin:4px 0px;"
+            hover_after_color="font-size: 20px; ; color:#bcffe9; ; ; margin:4px 0px;"
         )
 
         self._info_get = HoverLabel(
