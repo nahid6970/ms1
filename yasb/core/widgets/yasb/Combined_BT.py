@@ -92,9 +92,9 @@ class CombinedWidget(BaseWidget):
         )
 
         self._appmanager = HoverLabel(
-            initial_color    ="font-size: 20px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="font-size: 20px; background-color:#55c9ff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="font-size: 20px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 20px; color:#4b95e9; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 20px; background-color:#55c9ff; color:#000000; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 20px; color:#4b95e9; border-radius:5px; margin:4px 3px;"
         )
 
         self._shutdown_restart = HoverLabel(
