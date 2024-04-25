@@ -148,7 +148,6 @@ class CombinedWidget(BaseWidget):
 
 
 #! Step 2
-        self.widget_layout.addWidget(self._Tools_label)
         self.widget_layout.addWidget(self.PowerToys_Mouse_Pointer)
         self.widget_layout.addWidget(self.PowerToys_Text_Extract)
         self.widget_layout.addWidget(self.PowerToys_Screen_Ruler)
@@ -157,10 +156,11 @@ class CombinedWidget(BaseWidget):
         self.widget_layout.addWidget(self._color_pallet)
         self.widget_layout.addWidget(self._xy_position)
         self.widget_layout.addWidget(self._potplaylist)
+        self.widget_layout.addWidget(self._desktop)
+        self.widget_layout.addWidget(self._Tools_label)
         self.widget_layout.addWidget(self._Find_files)
         self.widget_layout.addWidget(self._appmanager)
         self.widget_layout.addWidget(self._folder)
-        self.widget_layout.addWidget(self._desktop)
         self.widget_layout.addWidget(self._shutdown_restart)
 
         self.register_callback("toggle_label", self._toggle_label)
