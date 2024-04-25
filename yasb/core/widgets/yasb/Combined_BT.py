@@ -92,21 +92,21 @@ class CombinedWidget(BaseWidget):
         )
 
         self._appmanager = HoverLabel(
-            initial_color    ="font-size: 16px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="font-size: 16px; background-color:#55c9ff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="font-size: 16px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 20px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 20px; background-color:#55c9ff; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 20px; background-color:#4b95e9; color:#000000; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
         self._shutdown_restart = HoverLabel(
-            initial_color    ="font-size: 20px; ; color:#f55e06; ; ; margin:4px 0px;",
-            hover_color      ="font-size: 20px; ; color:#fa0606; ; ; margin:4px 0px;",
-            hover_after_color="font-size: 20px; ; color:#f55e06; ; ; margin:4px 0px;"
+            initial_color    ="font-size: 20px; background-color:#ffffff; color:#ff0000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 20px; background-color:#000000; color:#fa0606; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 20px; background-color:#ffffff; color:#ff0000; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
         self._color_pallet = HoverLabel(
-            initial_color    ="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 0px;",
-            hover_color      ="font-size: 20px; ; color:#ff00ff; ; ; margin:4px 0px;",
-            hover_after_color="font-size: 20px; ; color:#ffaefb; ; ; margin:4px 0px;"
+            initial_color    ="font-size: 20px; ; color:#dc6cf8; ; ; margin:4px 0px;",
+            hover_color      ="font-size: 20px; ; color:#721a72; ; ; margin:4px 0px;",
+            hover_after_color="font-size: 20px; ; color:#dc6cf8; ; ; margin:4px 0px;"
         )
 
         self._xy_position = HoverLabel(
