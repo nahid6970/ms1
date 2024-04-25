@@ -61,10 +61,10 @@ class CombinedWidget(BaseWidget):
 
 
 #! Step 1
-        self._Edit_label = HoverLabel(
-            initial_color    ="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;",
+        self._Find_files = HoverLabel(
+            initial_color    ="font-size: 20px; ; color:#14af7b; ; ; margin:4px 0px;",
             hover_color      ="font-size: 20px; ; color:#000000; ; ; margin:4px 0px;",
-            hover_after_color="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;"
+            hover_after_color="font-size: 20px; ; color:#14af7b; ; ; margin:4px 0px;"
         )
 
         self._info_get = HoverLabel(
@@ -154,10 +154,10 @@ class CombinedWidget(BaseWidget):
         self.widget_layout.addWidget(self.PowerToys_Screen_Ruler)
         self.widget_layout.addWidget(self.PowerToys_Screen_Color)
         self.widget_layout.addWidget(self._info_get)
-        self.widget_layout.addWidget(self._Edit_label)
         self.widget_layout.addWidget(self._color_pallet)
         self.widget_layout.addWidget(self._xy_position)
         self.widget_layout.addWidget(self._potplaylist)
+        self.widget_layout.addWidget(self._Find_files)
         self.widget_layout.addWidget(self._appmanager)
         self.widget_layout.addWidget(self._folder)
         self.widget_layout.addWidget(self._desktop)
@@ -184,7 +184,7 @@ class CombinedWidget(BaseWidget):
 
 #! Step 3
         # Set text and colors for additional labels
-        self._Edit_label.setText("\uf005")
+        self._Find_files.setText("\uf002")
         self._info_get.setText("\uf129")
         self._Tools_label.setText("\ue20f")
         self._desktop.setText("\udb80\uddc4")
@@ -201,7 +201,7 @@ class CombinedWidget(BaseWidget):
 
 
 #! Step 4
-        self._Edit_label.mousePressEvent=lambda event:self._on_Edit_click(event,self._Edit_label)
+        self._Find_files.mousePressEvent=lambda event:self._Find_files_action(event,self._Find_files)
         self._info_get.mousePressEvent=lambda event:self._get_info(event,self._info_get)
         self._Tools_label.mousePressEvent =lambda event:self._Tools_yasb(event,self._Tools_label)
         self._desktop.mousePressEvent=lambda event:self._desktop_action(event,self._desktop)
@@ -218,18 +218,18 @@ class CombinedWidget(BaseWidget):
 
 
 #! Step 5
-    def _on_Edit_click(self, event: QMouseEvent, label: HoverLabel):
+    def _Find_files_action(self, event: QMouseEvent, label: HoverLabel):
         modifiers = QApplication.keyboardModifiers()
         if event.button() == Qt.MouseButton.LeftButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen(['cmd.exe', '/c', 'Code C:\ms1\mypygui_import\edit_files.py']) 
+                subprocess.Popen(['cmd.exe', '/c', 'Code C:\\ms1\\utility\\find_files.ps1']) 
             else:
-                subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py']) 
+                subprocess.Popen(['cmd.exe', '/c','start', 'C:\\ms1\\utility\\find_files.ps1']) 
         elif event.button() == Qt.MouseButton.RightButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                self.callback_right()  # Call the right mouse click callback
-            else:
                 subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\mypygui_import\\edit_files.py:89'])
+            else:
+                subprocess.Popen(['cmd.exe', '/c', 'start', 'C:\\ms1\\mypygui_import\\edit_files.py'])
         elif event.button() == Qt.MouseButton.MiddleButton:
             self.callback_middle()
 
