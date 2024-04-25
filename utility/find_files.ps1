@@ -16,7 +16,8 @@ function OpenFileInVSCode {
 # Main function to search directories and files using fzf with file preview
 # Main function to search directories and files using fzf with file preview
 function SearchDirectoriesAndFiles {
-    $selectedDirectory = ($directories | fzf -m)
+    #! $selectedDirectory = ($directories | fzf -m)
+    $selectedDirectory = ($directories)
     if ($selectedDirectory) {
         $files = Get-ChildItem -Path $selectedDirectory -File -Recurse | Where-Object { $_.FullName -notmatch ($ignoreList -join '|') }
         $selectedFile = ($files.FullName | fzf -m --preview "highlight -O ansi -l {}" --preview-window=top:50% )
