@@ -98,9 +98,9 @@ class CombinedWidget(BaseWidget):
         )
 
         self._shutdown_restart = HoverLabel(
-            initial_color    ="font-size: 20px; background-color:#ffffff; color:#ff0000; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_color      ="font-size: 20px; background-color:#000000; color:#fa0606; border:1px solid black; border-radius:5px; margin:4px 3px;",
-            hover_after_color="font-size: 20px; background-color:#ffffff; color:#ff0000; border:1px solid black; border-radius:5px; margin:4px 3px;"
+            initial_color    ="font-size: 20px; background-color:#000000; color:#ff0000; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_color      ="font-size: 20px; background-color:#ffffff; color:#5336d8; border:1px solid black; border-radius:5px; margin:4px 3px;",
+            hover_after_color="font-size: 20px; background-color:#000000; color:#ff0000; border:1px solid black; border-radius:5px; margin:4px 3px;"
         )
 
         self._color_pallet = HoverLabel(

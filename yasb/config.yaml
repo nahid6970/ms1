@@ -25,8 +25,8 @@ bars:
       bottom: 0
       right: 0
     widgets:
-      left:   [BT] #! active_window, komorebi_workspaces
-      center: [ clock, uptime, LockBox, compare ]
+      left:   [BT, compare] #! active_window, komorebi_workspaces
+      center: [ clock, uptime, LockBox ]
       right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
 
 widgets:
