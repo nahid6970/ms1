@@ -35,7 +35,7 @@ widgets:
     type: "yasb.performance.bar_cpu_gpu.CustomWidget"
     options:
       callbacks:
-        on_left: "exec python c:/ms1/HotKeys.py kill_process"
+        on_left: "exec powershell Start C:/ms1/utility/kill_process.ps1"
         on_right: "exec cmd /c Taskmgr"
 
 
