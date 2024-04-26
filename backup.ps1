@@ -171,7 +171,7 @@ function filezilla {
 
 # bazarr
 # prowlarr
-# radarr
+radarr
 sonarr
 
 Command_History
