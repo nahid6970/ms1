@@ -1,69 +1,3 @@
-# from core.widgets.base import BaseWidget
-# from core.validation.widgets.yasb.traffic import VALIDATION_SCHEMA
-# from PyQt6.QtWidgets import QLabel, QApplication
-# from PyQt6.QtCore import Qt
-# import os
-
-# class CustomWidget(BaseWidget):
-#     validation_schema = VALIDATION_SCHEMA
-
-#     def __init__(
-#         self,
-#         label: str,
-#         label_alt: str,
-#         update_interval: int,
-#         callbacks: dict[str, str],
-#     ):
-#         super().__init__(update_interval, class_name="path_status")
-#         self.interval = update_interval // 1000
-
-#         self._status_label = QLabel("")
-#         self.widget_layout.addWidget(self._status_label)  # Add status label
-
-#         self.callbacks = callbacks  # Store callbacks
-
-#         self.callback_left = callbacks["on_left"]
-#         self.callback_right = callbacks["on_right"]
-#         self.callback_middle = callbacks["on_middle"]
-#         self.callback_timer = "update_label"
-
-#         self.register_callback("update_label", self._update_label)  # Register update_label callback
-
-#         self.start_timer()
-
-#     def _update_label(self):
-#         # Source and destination directories
-#         source_dest_pairs = [
-#             ("C:\\ms1\\yasb\\core\\widgets\\yasb\\ex", "C:\\ms1\\yasb\\core\\widgets\\yasb\\ex"),
-#             ("C:\\ms1\\yasb\\core\\widgets\\yasb\\uptime.py", "C:\\ms1\\asset\\komorebi.json")
-#         ]
-
-#         # Check if source and destination directories are the same
-#         statuses = []
-#         for source, dest in source_dest_pairs:
-#             if os.path.abspath(source) == os.path.abspath(dest):
-#                 statuses.append("✅")  # Source and destination are the same
-#             else:
-#                 statuses.append("❌")  # Source and destination are different
-
-#         # Update status label text
-#         self._status_label.setText(f"Status: {', '.join(statuses)}")
-#         self._status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
-#         self._status_label.setStyleSheet("font-size: 16px;")
-
-# if __name__ == "__main__":
-#     app = QApplication([])
-#     widget = CustomWidget("", "", 1000, {"on_left": "", "on_right": "", "on_middle": "", "update_label": ""})
-#     widget.show()
-#     app.exec()
-
-
-
-
-
-
-
-
 import os
 import filecmp
 from core.widgets.base import BaseWidget
@@ -104,6 +38,9 @@ class CustomWidget(BaseWidget):
             "komorebi": ("C:\\Users\\nahid\\komorebi.json", "C:\\ms1\\asset\\komorebi\\komorebi.json"),
             "glaze-wm": ("C:\\Users\\nahid\\.glaze-wm", "C:\\ms1\\asset\\glazewm\\.glaze-wm"),
             "Nilesoft": ("C:\\Program Files\\Nilesoft Shell\\imports", "C:\\ms1\\asset\\nilesoft_shell\\imports"),
+            "whkd": ("C:\\Users\\nahid\\.config\\whkdrc", "C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"),
+            "Command_History": ("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt", "C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt"),
+            "terminal": ("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json", "C:\\ms1\\asset\\terminal\\settings.json"),
         }
 
         # Check if all source and destination paths have the same content
