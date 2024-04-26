@@ -35,30 +35,31 @@ class CustomWidget(BaseWidget):
     def _update_label(self):
         # Source and destination paths (files or directories)
         source_dest_pairs = {
-"komorebi"       :("C:\\Users\\nahid\\komorebi.json"                                                                                ,"C:\\ms1\\asset\\komorebi\\komorebi.json"                    ) ,
-"glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                   ,"C:\\ms1\\asset\\glazewm\\.glaze-wm"                         ) ,
-"Nilesoft"       :("C:\\Program Files\\Nilesoft Shell\\imports"                                                                    ,"C:\\ms1\\asset\\nilesoft_shell\\imports"                    ) ,
-"whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                             ,"C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                       ) ,
-"Command_History":("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt"       ,"C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt") ,
-"terminal"       :("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json","C:\\ms1\\asset\\terminal\\settings.json\\settings.json"     ) ,
-"rclone_config":("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                     ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf")     ,
-"pwsh_profile":("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"),
+"komorebi"       :("C:\\Users\\nahid\\komorebi.json"                                                                                  ,"C:\\ms1\\asset\\komorebi\\komorebi.json"                         ),
+"glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                      ,"C:\\ms1\\asset\\glazewm\\.glaze-wm"                              ),
+"Nilesoft"       :("C:\\Program Files\\Nilesoft Shell\\imports"                                                                       ,"C:\\ms1\\asset\\nilesoft_shell\\imports"                         ),
+"whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                                ,"C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                            ),
+"Command_History":("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt"          ,"C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt"     ),
+"terminal"       :("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"   ,"C:\\ms1\\asset\\terminal\\settings.json\\settings.json"          ),
+"rclone_config"  :("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf"         ),
+"pwsh_profile"   :("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"    ),
 
-"sonarr_db":("C:\\ProgramData\\Sonarr\\sonarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"),
-"sonarr_config":("C:\\ProgramData\\Sonarr\\config.xml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\config.xml"),
+"sonarr_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
+"sonarr_config"  :("C:\\ProgramData\\Sonarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\config.xml"     ),
 
-"radar_db":("C:\\ProgramData\\Radarr\\radarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"),
-"radar_config":("C:\\ProgramData\\Radarr\\config.xml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"),
+"radar_db"       :("C:\\ProgramData\\Radarr\\radarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"      ),
+"radar_config"   :("C:\\ProgramData\\Radarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"     ),
 
-"prowlar_db":("C:\\ProgramData\\Prowlarr\\prowlarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"),
-"prowlar_config":("C:\\ProgramData\\Prowlarr\\config.xml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"),
+"prowlar_db"     :("C:\\ProgramData\\Prowlarr\\prowlarr.db"                                                                           ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"  ),
+"prowlar_config" :("C:\\ProgramData\\Prowlarr\\config.xml"                                                                            ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"   ),
 
-"bazarr_db":("C:\\ProgramData\\Bazarr\\data\\db\\bazarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\bazarr.db"),
-"bazarr_config":("C:\\ProgramData\\Bazarr\\data\\config\\config.yaml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\config.yaml"),
-"name":("src","dst"),
+"bazarr_db"      :("C:\\ProgramData\\Bazarr\\data\\db\\bazarr.db"                                                                     ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\bazarr.db"      ),
+"bazarr_config"  :("C:\\ProgramData\\Bazarr\\data\\config\\config.yaml"                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\config.yaml"    ),
 
+"rssguard_db"    :("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database"                                                ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\database"          ),
+"rssguard_config":("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"),
 
-
+# "name":("src","dst"),
         }
 
         # Check if all source and destination paths have the same content
