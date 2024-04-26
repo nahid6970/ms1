@@ -52,6 +52,9 @@ class CustomWidget(BaseWidget):
 
 "prowlar_db":("C:\\ProgramData\\Prowlarr\\prowlarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"),
 "prowlar_config":("C:\\ProgramData\\Prowlarr\\config.xml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"),
+
+"bazarr_db":("C:\\ProgramData\\Bazarr\\data\\db\\bazarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\bazarr.db"),
+"bazarr_config":("C:\\ProgramData\\Bazarr\\data\\config\\config.yaml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\config.yaml"),
 "name":("src","dst"),
 
 

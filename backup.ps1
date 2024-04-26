@@ -123,8 +123,8 @@ function prowlarr {
 }
 
 function bazarr {
-    $bazarr_src = @( "C:\ProgramData\Bazarr\data\db" , "C:\ProgramData\Bazarr\data\config" )
-    $bazarr_dst = "D:\software\@MustApp\@ARR\bazarr_backup\"
+    $bazarr_src = @( "C:\ProgramData\Bazarr\data\db\bazarr.db" , "C:\ProgramData\Bazarr\data\config\config.yaml" )
+    $bazarr_dst = "C:\Users\nahid\OneDrive\backup\arr\bazarr"
     create_dir -Path $bazarr_dst
     $bazarr_src | ForEach-Object { Copy-Item -Path $_ -Destination $bazarr_dst -Recurse -Force }
 }
@@ -169,7 +169,7 @@ function filezilla {
 #! jellyfin
 #! whisparr
 
-# bazarr
+bazarr
 prowlarr
 radarr
 sonarr
