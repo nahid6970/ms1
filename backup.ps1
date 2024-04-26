@@ -117,7 +117,7 @@ function radarr {
 
 function prowlarr {
     $prowlar_src = @( "C:\ProgramData\Prowlarr\prowlarr.db" , "C:\ProgramData\Prowlarr\config.xml" )
-    $prowlar_dst = "D:\software\@MustApp\@ARR\prowlar_backup\"
+    $prowlar_dst = "C:\Users\nahid\OneDrive\backup\arr\prowlarr"
     create_dir -Path $prowlar_dst
     Copy-Item -Path $prowlar_src -Destination $prowlar_dst
 }
@@ -170,7 +170,7 @@ function filezilla {
 #! whisparr
 
 # bazarr
-# prowlarr
+prowlarr
 radarr
 sonarr
 

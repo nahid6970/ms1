@@ -49,6 +49,9 @@ class CustomWidget(BaseWidget):
 
 "radar_db":("C:\\ProgramData\\Radarr\\radarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"),
 "radar_config":("C:\\ProgramData\\Radarr\\config.xml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"),
+
+"prowlar_db":("C:\\ProgramData\\Prowlarr\\prowlarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"),
+"prowlar_config":("C:\\ProgramData\\Prowlarr\\config.xml","C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"),
 "name":("src","dst"),
 
 
