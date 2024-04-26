@@ -35,12 +35,16 @@ class CustomWidget(BaseWidget):
     def _update_label(self):
         # Source and destination paths (files or directories)
         source_dest_pairs = {
-            "komorebi": ("C:\\Users\\nahid\\komorebi.json", "C:\\ms1\\asset\\komorebi\\komorebi.json"),
-            "glaze-wm": ("C:\\Users\\nahid\\.glaze-wm", "C:\\ms1\\asset\\glazewm\\.glaze-wm"),
-            "Nilesoft": ("C:\\Program Files\\Nilesoft Shell\\imports", "C:\\ms1\\asset\\nilesoft_shell\\imports"),
-            "whkd": ("C:\\Users\\nahid\\.config\\whkdrc", "C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"),
-            "Command_History": ("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt", "C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt"),
-            "terminal": ("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json", "C:\\ms1\\asset\\terminal\\settings.json"),
+            "komorebi"       :("C:\\Users\\nahid\\komorebi.json"                                                                                ,"C:\\ms1\\asset\\komorebi\\komorebi.json"                    ) ,
+            "glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                   ,"C:\\ms1\\asset\\glazewm\\.glaze-wm"                         ) ,
+            "Nilesoft"       :("C:\\Program Files\\Nilesoft Shell\\imports"                                                                    ,"C:\\ms1\\asset\\nilesoft_shell\\imports"                    ) ,
+            "whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                             ,"C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                       ) ,
+            "Command_History":("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt"       ,"C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt") ,
+            "terminal"       :("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json","C:\\ms1\\asset\\terminal\\settings.json\\settings.json"     ) ,
+            "rclone_config":("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                     ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf")     ,
+            "pwsh_profile":("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"),
+            "sonarr_db":("C:\\ProgramData\\Sonarr\\sonarr.db","C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"),
+            "name":("src","dst"),
         }
 
         # Check if all source and destination paths have the same content

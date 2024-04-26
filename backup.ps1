@@ -103,7 +103,7 @@ function pwsh_profile  {
 
 function sonarr {
     $sonar_src = @( "C:\ProgramData\Sonarr\sonarr.db" , "C:\ProgramData\Sonarr\config.xml" )
-    $sonar_dst = "D:\software\@MustApp\@ARR\sonar_backup\"
+    $sonar_dst = "C:\Users\nahid\OneDrive\backup\arr\sonarr\"
     create_dir -Path $sonar_dst
     Copy-Item -Path $sonar_src -Destination $sonar_dst
 }
@@ -168,10 +168,12 @@ function filezilla {
 #! filezilla
 #! jellyfin
 #! whisparr
+
 # bazarr
 # prowlarr
 # radarr
-# sonarr
+sonarr
+
 Command_History
 glazewm
 nilesoft_shell
