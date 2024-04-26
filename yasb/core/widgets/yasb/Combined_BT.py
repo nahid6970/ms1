@@ -328,7 +328,8 @@ class CombinedWidget(BaseWidget):
     def _potplaylist_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
            subprocess.Popen('cmd /c start C:/ms1/scripts/playlist.py')
-
+        elif event.button() == Qt.MouseButton.RightButton:
+           subprocess.Popen('cmd /c start Code C:/ms1/scripts/playlist.py')
 
     def _killProcess_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
