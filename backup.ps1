@@ -110,7 +110,7 @@ function sonarr {
 
 function radarr {
     $radar_src = @( "C:\ProgramData\Radarr\radarr.db" , "C:\ProgramData\Radarr\config.xml" )
-    $radar_dst = "D:\software\@MustApp\@ARR\radar_backup\"
+    $radar_dst = "C:\Users\nahid\OneDrive\backup\arr\radarr"
     create_dir -Path $radar_dst
     Copy-Item -Path $radar_src -Destination $radar_dst
 }
