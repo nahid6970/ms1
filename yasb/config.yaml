@@ -30,7 +30,7 @@ bars:
       right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
 
   bottom-bar:
-    enabled: false
+    enabled: True
     screens: ['*']
     class_name: "bottom-bar"
     alignment:
