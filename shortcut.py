@@ -28,63 +28,10 @@ Main_Window.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 
 
 
-# Button properties: (text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, sticky, padx_button, pady_button, padx_pack, pady_pack, command, window_title)
-button_properties=[
-("VSCode"                       ,Main_Window   ,"#21a3f1","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),0 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:switch_to_frame(vscode_window         ,Main_Window)),
-#! ("AlignMultiCoulmnsbySeparator" ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"alt+shift+semicolon" )),
-#! ("BookmarkLine"                 ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+b+ctrl+b"       )),
-#! ("Bookmarklistall"              ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),3,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+b+ctrl+l"       )),
-#! ("BracketsGoTo"                 ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),4,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+backslash")),
-#! ("BracketsRemove"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),5,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+Backspace"  )),
-#! ("BracketsSelect"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),6,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+right"      )),
-#! ("ChangeAllOccurrences"         ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),7,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+F2"             )),
-#! ("Comment"                      ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),8,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+k+c"            )),
-#! ("CommentSelection"             ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),9,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ALT+SHIFT+A"         )),
-#! ("DeleteLine"                   ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),10,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+k"        )),
-#? ("ExpandSelectionquota/brackets",vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),11,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"shift+alt+right"     )),
-#! ("Keyboard-Shortcut"            ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),12,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+K+CTRL+S"       )),
-#! ("LineJoin"                     ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),13,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"alt+j"               )),
-#! ("Minimap"                      ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),14,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ALT+m"               )),
-#! ("NewWindow"                    ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),15,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+n"              )),
-
-
-#! ("RemoveDupLines"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),16,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k         ("Visual Studio Code"     ,["ctrl+k","alt+d"])),
-#! ("RemoveFromSelection"          ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),17,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_m_k("Visual Studio Code"              ,["ctrl+h","alt+l"])),
-
-
-#! ("SelectNext"                   ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),18,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+d"              )),
-#! ("SelectPrevious"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),19,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+d"        )),
-#! ("SortLinesAscending"           ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),20,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ALT+SHIFT+S"         )),
-#! ("SplitSameDocument"            ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),21,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+backslash"      )),
-#! ("TableFormatProperly"          ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),22,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+T+T"            )),
-#! ("TableFormatProperly2"         ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),23,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+q+f"            )),
-#! ("UnComment"                    ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),24,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+k+u"            )),
-
-
 # ("Terminal"           ,Main_Window   ,"#000000","#ffffff",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:switch_to_frame(terminal         ,Main_Window))   ,
 # ("Terminal-Close"     ,terminal      ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),0,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"           ,"CommandPrompt"],"Ctrl+Shift+W"        )),
 # ("Terminal-Split-V"   ,terminal      ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"           ,"CommandPrompt"],"Alt+Shift+equal"     )),
 # ("Terminal-Split-H"   ,terminal      ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell","Command"]      ,"Alt+Shift+underscore")),
-
-
-# ("Excel"         ,Main_Window,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda:switch_to_frame(Excel         ,Main_Window))  ,
-# ("Series"        ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),0,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+f+i+s")),
-# ("Fit Row"       ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+o+a"))  ,
-# ("Fit Column"    ,Excel      ,"#1b8655","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Excel"]            ,"Alt+h+o+i"))  ,
-
-]
-
-
-# # Button properties: (text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, sticky, padx_button, pady_button, padx_pack, pady_pack, command, window_title)
-# button_properties=[
-#     ("VSCode", Main_Window, "#21a3f1", "#1D2027", 1, 0, "flat", ("JetBrainsMonoNF", 11, "bold"), 0, 0, 1, 1, "ew", 0, 0, (1, 1), (0, 0), lambda: switch_to_frame(vscode_window, Main_Window)),
-#     ("RemoveDupLines", vscode_window, "#FFFFFF", "#1D2027", 1, 0, "flat", ("JetBrainsMonoNF", 11, "bold"), 16, 0, 1, 1, "ew", 0, 0, (1, 1), (0, 0),lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Series"])),
-# ]
-
-
-# # Create buttons
-# for button_props in button_properties:
-#     create_button(*button_props)
 
 
 #! chrome
@@ -95,9 +42,9 @@ vscode_window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(
 vscode_window = tk.Frame(bg="#1D2027")
 vscode_window.pack_propagate(True)
 
-Excel = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Excel, root))
-Excel = tk.Frame(bg="#1D2027")
-Excel.pack_propagate(True)
+Excel_window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Excel_window, root))
+Excel_window = tk.Frame(bg="#1D2027")
+Excel_window.pack_propagate(True)
 
 terminal = tk.Button( root, text="Folder", command=lambda: switch_to_frame(terminal, root))
 terminal = tk.Frame(bg="#1D2027")
@@ -121,7 +68,7 @@ class HoverButton(tk.Button):
         self.configure(bg=self.bg, fg=self.default_fg)
 
 
-VSCode = HoverButton(Main_Window, bg="#23a8f2", fg="#000000", h_bg="green", h_fg="white", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , Main_Window), text="\udb81\ude10")
+VSCode = HoverButton(Main_Window, bg="#23a8f2", fg="#000000", h_bg="#FFFFFF", h_fg="#000000", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , Main_Window), text="\udb81\ude10")
 VSCode.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 AlignMultiCoulmnsbySeparator = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py AlignMultiCoulmnsbySeparator"]), text="\uf037")
@@ -196,6 +143,21 @@ TableFormatProperly2.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 UnComment = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py UnComment"]), text="\udb85\udde1")
 UnComment.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
+
+
+
+
+Excel = HoverButton(Main_Window, bg="#21a366", fg="#000000", h_bg="#FFFFFF", h_fg="#000000", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(Excel_window , Main_Window), text="\udb84\udf8f")
+Excel.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+Series = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Series"]), text="\udb81\udc8b")
+Series.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+Fit_Row = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Row"]), text="\udb82\udc37")
+Fit_Row.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+Fit_Column = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Column"]), text="\udb82\udc35")
+Fit_Column.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 
 
