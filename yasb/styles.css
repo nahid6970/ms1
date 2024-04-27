@@ -412,12 +412,9 @@ padding: 2px 5px;
 .container-right .path_status * {
 font-size: 14px;
 color: #ffffff;
-background: #ff000d;
-margin: 1px;
-border-radius: 3px;
+background: #ff0000;
 }
 .container-left .path_status {
-margin: 2px;
-border-radius: 0px;
-color: #35f054;
+margin: 0px;
+border-radius: 10px;
 }
