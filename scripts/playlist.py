@@ -7,7 +7,7 @@ def add_media_to_potplayer(directory):
     # Walk through the directory and its subdirectories
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if file.endswith(('.mp3', '.mp4', '.avi',"mkv")):  # Check for audio and video files
+            if file.endswith(('.mp3', '.mp4', '.avi',"mkv", '.webm')):  # Check for audio and video files
                 media_files.append(os.path.join(root, file))
 
     # Shuffle the list of media files randomly
