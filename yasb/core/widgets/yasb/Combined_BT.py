@@ -250,9 +250,9 @@ class CombinedWidget(BaseWidget):
 
     def _desktop_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            subprocess.Popen('cmd /c C:\\ms1\\desktop_icon.py')
+            subprocess.Popen('cmd /c C:\\ms1\\utility\\desktop_icon.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen()
+            subprocess.Popen('cmd /c Code C:\\ms1\\utility\\desktop_icon.py')
 
 
     def _folder_action(self, event, label):
