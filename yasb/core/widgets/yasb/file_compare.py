@@ -45,13 +45,13 @@ class CustomWidget(BaseWidget):
 "rclone_config"  :("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf"         ),
 "pwsh_profile"   :("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"    ),
 
-"sr_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
+"SR_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
 "sr_cf"  :("C:\\ProgramData\\Sonarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\config.xml"     ),
 
 "rr_db"       :("C:\\ProgramData\\Radarr\\radarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"      ),
 "rr_cf"   :("C:\\ProgramData\\Radarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"     ),
 
-"pr_db"     :("C:\\ProgramData\\Prowlarr\\prowlarr.db"                                                                           ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"  ),
+"Pr_db"     :("C:\\ProgramData\\Prowlarr\\prowlarr.db"                                                                           ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"  ),
 "pr_cf" :("C:\\ProgramData\\Prowlarr\\config.xml"                                                                            ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"   ),
 
 "br_db"      :("C:\\ProgramData\\Bazarr\\data\\db\\bazarr.db"                                                                     ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\bazarr.db"      ),
@@ -94,6 +94,7 @@ class CustomWidget(BaseWidget):
         self._status_label.setText(f"{name}")
         self._status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
         self._status_label.setStyleSheet("font-size: 12px;")
+
 
 if __name__ == "__main__":
     app = QApplication([])
