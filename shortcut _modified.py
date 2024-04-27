@@ -72,7 +72,7 @@ terminal.pack_propagate(True)
 # Button properties: (text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, sticky, padx_button, pady_button, padx_pack, pady_pack, command, window_title)
 button_properties=[
     ("VSCode", Main_Window, "#21a3f1", "#1D2027", 1, 0, "flat", ("JetBrainsMonoNF", 11, "bold"), 0, 0, 1, 1, "ew", 0, 0, (1, 1), (0, 0), lambda: switch_to_frame(vscode_window, Main_Window)),
-    ("RemoveDupLines", vscode_window, "#FFFFFF", "#1D2027", 1, 0, "flat", ("JetBrainsMonoNF", 11, "bold"), 16, 0, 1, 1, "ew", 0, 0, (1, 1), (0, 0),lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py kill_process"])),
+    ("RemoveDupLines", vscode_window, "#FFFFFF", "#1D2027", 1, 0, "flat", ("JetBrainsMonoNF", 11, "bold"), 16, 0, 1, 1, "ew", 0, 0, (1, 1), (0, 0),lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py RemoveFromSelection"])),
 ]
 
 #! chrome

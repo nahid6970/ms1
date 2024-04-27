@@ -34,10 +34,9 @@ def main():
     args = parser.parse_args()
 
 #! VSCode
-    if args.action  =='remove_dup_lines'             :send_m_k  ("VisualStudioCode",["ctrl+k","alt+d"])
-    elif args.action=='remove_from_selection'        :send_m_k  ("VisualStudioCode",["ctrl+h","alt+l"])
-    elif args.action=='RemoveDupLines'               :send_m_k  ("VisualStudioCode",["ctrl+k","alt+d"])
-    elif args.action=='RemoveFromSelection'          :send_m_k  ("VisualStudioCode",["ctrl+h","alt+l"])
+    if args.action  =='remove_dup_lines'             :send_m_k  ("Visual Studio Code",["ctrl+k","alt+d"])
+    elif args.action=='RemoveDupLines'               :send_m_k  ("Visual Studio Code",["ctrl+k","alt+d"])
+    elif args.action=='RemoveFromSelection'          :send_m_k  ("Visual Studio Code",["ctrl+h","alt+l"])
     elif args.action=='AlignMultiCoulmnsbySeparator' :send_k    ("VisualStudioCode","alt+shift+semicolon" )
     elif args.action=='BookmarkLine'                 :send_k    ("VisualStudioCode","ctrl+b+ctrl+l"       )
     elif args.action=='BracketsGoTo'                 :send_k    ("VisualStudioCode","ctrl+shift+backslash")
