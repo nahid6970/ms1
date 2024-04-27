@@ -45,20 +45,20 @@ class CustomWidget(BaseWidget):
 "rclone_config"  :("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf"         ),
 "pwsh_profile"   :("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"    ),
 
-"SR_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
-"sr_cf"  :("C:\\ProgramData\\Sonarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\config.xml"     ),
+"Sr_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
+"Sr_cf"  :("C:\\ProgramData\\Sonarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\config.xml"     ),
 
-"rr_db"       :("C:\\ProgramData\\Radarr\\radarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"      ),
-"rr_cf"   :("C:\\ProgramData\\Radarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"     ),
+"Rr_db"       :("C:\\ProgramData\\Radarr\\radarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"      ),
+"Rr_cf"   :("C:\\ProgramData\\Radarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"     ),
 
 "Pr_db"     :("C:\\ProgramData\\Prowlarr\\prowlarr.db"                                                                           ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"  ),
-"pr_cf" :("C:\\ProgramData\\Prowlarr\\config.xml"                                                                            ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"   ),
+"Pr_cf" :("C:\\ProgramData\\Prowlarr\\config.xml"                                                                            ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"   ),
 
 "br_db"      :("C:\\ProgramData\\Bazarr\\data\\db\\bazarr.db"                                                                     ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\bazarr.db"      ),
 "br_cf"  :("C:\\ProgramData\\Bazarr\\data\\config\\config.yaml"                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\config.yaml"    ),
 
-"rssgd_db"    :("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database"                                                ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\database"          ),
-"rssgd_cf":("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"),
+"Rss_db"    :("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database"                                                ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\database"          ),
+"Rss_cf":("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"),
 
         }
 
