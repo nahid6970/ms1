@@ -36,7 +36,7 @@ x = 0
 y = screen_height//2-800//2
 root.geometry(f"30x800+{x}+{y}")
 
-default_font = ("Jetbrainsmono nf", 14, "bold")
+default_font = ("Jetbrainsmono nfp", 14, "bold")
 root.option_add("*Font", default_font)
 
 Main_Window = tk.Frame(root, bg="#1d2027")
@@ -52,13 +52,13 @@ button_properties=[
 #! ("Bookmarklistall"              ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),3,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+b+ctrl+l"       )),
 #! ("BracketsGoTo"                 ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),4,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+backslash")),
 #! ("BracketsRemove"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),5,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+Backspace"  )),
-# ("BracketsSelect"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),6,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+right"      )),
-# ("ChangeAllOccurrences"         ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),7,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+F2"             )),
-# ("Comment"                      ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),8,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+k+c"            )),
-# ("CommentSelection"             ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),9,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ALT+SHIFT+A"         )),
-# ("DeleteLine"                   ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),10,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+k"        )),
-# ("ExpandSelectionquota/brackets",vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),11,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"shift+alt+right"     )),
-# ("Keyboard-Shortcut"            ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),12,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+K+CTRL+S"       )),
+#! ("BracketsSelect"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),6,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+right"      )),
+#! ("ChangeAllOccurrences"         ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),7,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+F2"             )),
+#! ("Comment"                      ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),8,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+k+c"            )),
+#! ("CommentSelection"             ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),9,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ALT+SHIFT+A"         )),
+#! ("DeleteLine"                   ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),10,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+k"        )),
+#? ("ExpandSelectionquota/brackets",vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),11,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"shift+alt+right"     )),
+#! ("Keyboard-Shortcut"            ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),12,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+K+CTRL+S"       )),
 # ("LineJoin"                     ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),13,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"alt+j"               )),
 # ("Minimap"                      ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),14,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ALT+m"               )),
 # ("NewWindow"                    ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),15,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+n"              )),
@@ -139,5 +139,32 @@ BracketsGoTo.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 BracketsRemove = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BracketsRemove"]), text="\uebe6")
 BracketsRemove.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
-# Start the main event loop
+BracketsSelect = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BracketsSelect"]), text="\uf2f5")
+BracketsSelect.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+ChangeAllOccurrences = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py ChangeAllOccurrences"]), text="\udb81\udc86")
+ChangeAllOccurrences.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+Comment = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Comment"]), text="\uf27b")
+Comment.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+CommentSelection = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py CommentSelection"]), text="\udb80\udd84")
+CommentSelection.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+DeleteLine = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py DeleteLine"]), text="\udb80\uddb4")
+DeleteLine.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+#! ?? ExpandSelectionquota_brackets = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py ExpandSelectionquota_brackets"]), text="")
+#! ?? ExpandSelectionquota_brackets.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+Keyboard_Shortcut = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Keyboard_Shortcut"]), text="\uf11c")
+Keyboard_Shortcut.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+
+
+
+
+
+
+
 root.mainloop()
