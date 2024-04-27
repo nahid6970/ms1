@@ -93,7 +93,7 @@ class CustomWidget(BaseWidget):
         # Update status label text
         self._status_label.setText(f"{name}")
         self._status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
-        self._status_label.setStyleSheet("font-size: 12px; color: #ffffff; background: #000000;")
+        self._status_label.setStyleSheet("font-size: 12px;")
 
 if __name__ == "__main__":
     app = QApplication([])
