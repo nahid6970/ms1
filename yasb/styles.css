@@ -405,8 +405,9 @@ border-radius: 0px;
 
 /*! file check */
 .path_status{
-background: #000000;
+background: #024363;
 border: 1px solid #fffefd;
+padding: 2px 5px;
 }
 .container-right .path_status * {
 font-size: 14px;
@@ -418,4 +419,5 @@ border-radius: 3px;
 .container-left .path_status {
 margin: 2px;
 border-radius: 0px;
+color: #35f054;
 }
