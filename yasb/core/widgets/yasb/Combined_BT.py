@@ -331,6 +331,7 @@ class CombinedWidget(BaseWidget):
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen('cmd /c start Code C:/ms1/scripts/playlist.py')
 
+
     def _killProcess_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
             subprocess.Popen('cmd /c start pwsh -Command "$processName = (Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String | fzf) -split \'\\s{2,}\' | Select-Object -First 1; if ($processName) { Stop-Process -Name $processName -Force; Write-Host \"Process $processName terminated.\" } else { Write-Host \"No process selected.\" }"')
@@ -339,12 +340,6 @@ class CombinedWidget(BaseWidget):
 
 if __name__ == "__main__":
     app = QApplication([])
-    widget = CombinedWidget("Download", "Upload", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
+    widget = CombinedWidget("", "", 1000, {"on_left": "", "on_right": "", "on_middle": ""})
     widget.show()
     app.exec()
-
-
-
-
-
-
