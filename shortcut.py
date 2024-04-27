@@ -8,6 +8,23 @@ def switch_to_frame(frame_to_show, frame_to_hide):
     frame_to_hide.pack_forget()
     frame_to_show.pack()
 
+class HoverButton(tk.Button):
+    def __init__(self, master=None, **kw):
+        self.bg = kw.pop('bg', "#000000")
+        self.h_bg = kw.pop('h_bg', "red")
+        self.default_fg = kw.pop('default_fg', "#FFFFFF")
+        self.h_fg = kw.pop('h_fg', "#000000")
+        super().__init__(master, **kw)
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+        self.configure(bg=self.bg, fg=self.default_fg)
+
+    def on_enter(self, event):
+        self.configure(bg=self.h_bg, fg=self.h_fg)
+
+    def on_leave(self, event):
+        self.configure(bg=self.bg, fg=self.default_fg)
+
 root = tk.Tk()
 root.title("Shortcut Buttons")
 root.attributes('-topmost', True)
@@ -19,6 +36,9 @@ x = 0
 y = screen_height//2-800//2
 root.geometry(f"30x800+{x}+{y}")
 
+default_font = ("Jetbrainsmono nf", 14, "bold")
+root.option_add("*Font", default_font)
+
 Main_Window = tk.Frame(root, bg="#1d2027")
 Main_Window.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 
@@ -27,11 +47,11 @@ Main_Window.pack(side="top", anchor="center", pady=(0,0), padx=(0,0))
 # Button properties: (text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button, sticky, padx_button, pady_button, padx_pack, pady_pack, command, window_title)
 button_properties=[
 ("VSCode"                       ,Main_Window   ,"#21a3f1","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),0 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:switch_to_frame(vscode_window         ,Main_Window)),
-# ("AlignMultiCoulmnsbySeparator" ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"alt+shift+semicolon" )),
-# ("BookmarkLine"                 ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+b+ctrl+b"       )),
-# ("Bookmarklistall"              ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),3,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+b+ctrl+l"       )),
-# ("BracketsGoTo"                 ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),4,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+backslash")),
-# ("BracketsRemove"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),5,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+Backspace"  )),
+#! ("AlignMultiCoulmnsbySeparator" ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"alt+shift+semicolon" )),
+#! ("BookmarkLine"                 ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+b+ctrl+b"       )),
+#! ("Bookmarklistall"              ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),3,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+b+ctrl+l"       )),
+#! ("BracketsGoTo"                 ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),4,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+shift+backslash")),
+#! ("BracketsRemove"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),5,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+Backspace"  )),
 # ("BracketsSelect"               ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),6,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+alt+right"      )),
 # ("ChangeAllOccurrences"         ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),7,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"CTRL+F2"             )),
 # ("Comment"                      ,vscode_window   ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),8,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k         ("VisualStudioCode"         ,"ctrl+k+c"            )),
@@ -87,26 +107,6 @@ button_properties=[
 #! ctrl+shift+b
 
 
-class HoverButton(tk.Button):
-    def __init__(self, master=None, **kw):
-        self.bg = kw.pop('bg', "#000000")
-        self.h_bg = kw.pop('h_bg', "red")
-        self.default_fg = kw.pop('default_fg', "#FFFFFF")
-        self.h_fg = kw.pop('h_fg', "#000000")
-        super().__init__(master, **kw)
-        self.bind("<Enter>", self.on_enter)
-        self.bind("<Leave>", self.on_leave)
-        self.configure(bg=self.bg, fg=self.default_fg)
-
-    def on_enter(self, event):
-        self.configure(bg=self.h_bg, fg=self.h_fg)
-
-    def on_leave(self, event):
-        self.configure(bg=self.bg, fg=self.default_fg)
-
-default_font = ("Jetbrainsmono nf", 14, "italic")
-root.option_add("*Font", default_font)
-
 vscode_window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(vscode_window, root))
 vscode_window = tk.Frame(bg="#1D2027")
 vscode_window.pack_propagate(True)
@@ -124,9 +124,20 @@ terminal.pack_propagate(True)
 VSCode = HoverButton(Main_Window, bg="#000000", fg="#FFFFFF", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , Main_Window), text="\udb81\ude10")
 VSCode.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
-AlignMultiCoulmnsbySeparator = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, font=("calibri", 14, "bold"), command=None, text="AA")
+AlignMultiCoulmnsbySeparator = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py AlignMultiCoulmnsbySeparator"]), text="\uf037")
 AlignMultiCoulmnsbySeparator.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
+BookmarkLine = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BookmarkLine"]), text="⭐")
+BookmarkLine.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+Bookmarklistall = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Bookmarklistall"]), text="?⭐")
+Bookmarklistall.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+BracketsGoTo = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BracketsGoTo"]), text="\uebe5")
+BracketsGoTo.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
+BracketsRemove = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BracketsRemove"]), text="\uebe6")
+BracketsRemove.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 # Start the main event loop
 root.mainloop()
