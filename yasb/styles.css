@@ -405,19 +405,15 @@ border-radius: 0px;
 
 /*! file check */
 .path_status{
-background: #024363;
-/* border: 1px solid #fffefd; */
-padding: 2px 5px;
 }
 .path_status * {
 font-size: 14px;
 color: #ffffff;
 background: #024363;
-
+padding: 2px 5px;
+border-radius: 10px;
+border-left:2px solid rgb(255, 255, 255);
+border-right:2px solid rgb(255, 255, 255);
 }
 .container-left .path_status {
-margin: 0px;
-border-radius: 10px;
-border-left:2px solid red;
-border-right:2px solid red;
 }
