@@ -83,7 +83,7 @@ class CustomWidget(BaseWidget):
         # Set the emoji and name accordingly
         if is_all_same:
             emoji = "✅"
-            name = "All paths have identical content"
+            name = "✅"
         else:
             emoji = "❌"
             names_per_row = 4
@@ -93,7 +93,7 @@ class CustomWidget(BaseWidget):
         # Update status label text
         self._status_label.setText(f"{name}")
         self._status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Align text to center
-        self._status_label.setStyleSheet("font-size: 12px;")
+        self._status_label.setStyleSheet("font-size: 12px; color: #ffffff; background: #000000;")
 
 if __name__ == "__main__":
     app = QApplication([])
