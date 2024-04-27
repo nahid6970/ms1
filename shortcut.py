@@ -8,22 +8,6 @@ def switch_to_frame(frame_to_show, frame_to_hide):
     frame_to_hide.pack_forget()
     frame_to_show.pack()
 
-class HoverButton(tk.Button):
-    def __init__(self, master=None, **kw):
-        self.bg = kw.pop('bg', "#000000")
-        self.h_bg = kw.pop('h_bg', "red")
-        self.default_fg = kw.pop('default_fg', "#FFFFFF")
-        self.h_fg = kw.pop('h_fg', "#000000")
-        super().__init__(master, **kw)
-        self.bind("<Enter>", self.on_enter)
-        self.bind("<Leave>", self.on_leave)
-        self.configure(bg=self.bg, fg=self.default_fg)
-
-    def on_enter(self, event):
-        self.configure(bg=self.h_bg, fg=self.h_fg)
-
-    def on_leave(self, event):
-        self.configure(bg=self.bg, fg=self.default_fg)
 
 root = tk.Tk()
 root.title("Shortcut Buttons")
@@ -119,9 +103,25 @@ terminal = tk.Button( root, text="Folder", command=lambda: switch_to_frame(termi
 terminal = tk.Frame(bg="#1D2027")
 terminal.pack_propagate(True)
 
+class HoverButton(tk.Button):
+    def __init__(self, master=None, **kw):
+        self.bg = kw.pop('bg', "#000000")
+        self.h_bg = kw.pop('h_bg', "red")
+        self.default_fg = kw.pop('fg', "#FFFFFF")
+        self.h_fg = kw.pop('h_fg', "#000000")
+        super().__init__(master, **kw)
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+        self.configure(bg=self.bg, fg=self.default_fg)
+
+    def on_enter(self, event):
+        self.configure(bg=self.h_bg, fg=self.h_fg)
+
+    def on_leave(self, event):
+        self.configure(bg=self.bg, fg=self.default_fg)
 
 
-VSCode = HoverButton(Main_Window, bg="#000000", fg="#FFFFFF", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , Main_Window), text="\udb81\ude10")
+VSCode = HoverButton(Main_Window, bg="#23a8f2", fg="#000000", h_bg="green", h_fg="white", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , Main_Window), text="\udb81\ude10")
 VSCode.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 AlignMultiCoulmnsbySeparator = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py AlignMultiCoulmnsbySeparator"]), text="\uf037")
