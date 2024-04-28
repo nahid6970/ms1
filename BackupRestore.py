@@ -1,9 +1,7 @@
 import os
 import shutil
 import tkinter as tk
-from tkinter import filedialog
 import filecmp
-from datetime import datetime
 
 def compare_files(source, destination, label):
     if not os.path.exists(source) or not os.path.exists(destination):
@@ -56,15 +54,15 @@ root.title("Backup & Restore")
 rclone_src="C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"
 rclone_dst="C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
 
-backup_button = tk.Button(root, text="Rclone Backup", command=lambda:shutil.copyfile(rclone_src, rclone_dst))
-backup_button.grid(row=1, column=0)
+rclone_backup = tk.Button(root, text="Rclone Backup", command=lambda:shutil.copyfile(rclone_src, rclone_dst))
+rclone_backup.grid(row=1, column=0)
 
 label = tk.Label(root, font=("calibri", 14), wraplength=300)
 label.grid(row=1, column=1)
 compare_files(rclone_src, rclone_dst, label)
 
-restore_button = tk.Button(root, text="Rclone Restore", command=lambda:shutil.copyfile(rclone_dst, rclone_src))
-restore_button.grid(row=1, column=2)
+rclone_restore = tk.Button(root, text="Rclone Restore", command=lambda:shutil.copyfile(rclone_dst, rclone_src))
+rclone_restore.grid(row=1, column=2)
 
 
 
