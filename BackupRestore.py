@@ -11,6 +11,71 @@ def compare_files(source, destination, label):
             label.config(text="✔️")
         else:
             label.config(text="❌")
+    # Schedule the next comparison after 1 second
+    label.after(1000, lambda: compare_files(source, destination, label))
+
+def compare_folders(source, destination, label):
+    if not os.path.exists(source) or not os.path.exists(destination):
+        label.config(text="❓")
+    else:
+        dir_cmp = filecmp.dircmp(source, destination)
+        if dir_cmp.left_only or dir_cmp.right_only or dir_cmp.diff_files:
+            label.config(text="❌")
+        else:
+            label.config(text="✔️")
+    # Schedule the next comparison after 1 second
+    label.after(1000, lambda: compare_folders(source, destination, label))
+
+root = tk.Tk()
+root.title("Backup & Restore")
+
+# Files
+rclone_src = "C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"
+rclone_dst = "C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
+
+rclone_backup = tk.Button(root, text="Rclone Backup", command=lambda: shutil.copyfile(rclone_src, rclone_dst))
+rclone_restore = tk.Button(root, text="Rclone Restore", command=lambda: shutil.copyfile(rclone_dst, rclone_src))
+label_file = tk.Label(root, font=("calibri", 14), wraplength=300)
+compare_files(rclone_src, rclone_dst, label_file)
+
+rclone_backup.grid(row=1, column=0)
+rclone_restore.grid(row=1, column=1)
+label_file.grid(row=1, column=2)
+
+# Folders
+glazewm_src = "C:/Users/nahid/.glaze-wm"
+glazewm_dst = "C:/ms1/asset/glazewm/.glaze-wm"
+
+glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.copytree(glazewm_src, glazewm_dst))
+glazewm_restore = tk.Button(root, text="glazewm_ Restore", command=lambda: shutil.copytree(glazewm_dst, glazewm_src))
+label_folder = tk.Label(root, font=("calibri", 14), wraplength=300)
+compare_folders(glazewm_src, glazewm_dst, label_folder)
+
+glazewm_backup.grid(row=2, column=0)
+glazewm_restore.grid(row=2, column=1)
+label_folder.grid(row=2, column=2)
+
+root.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # def compare_files(source, destination, label):
 #     if not os.path.exists(source) or not os.path.exists(destination):
 #         label.config(text="❌ Similar files not found")
@@ -32,48 +97,3 @@ def compare_files(source, destination, label):
         #     label.config(text=label.cget("text") + f"\nLast modified: {source_last_modified} ({source})")
         # else:
         #     label.config(text=label.cget("text") + f"\nLast modified: {destination_last_modified} ({destination})")
-
-
-def compare_folders(source, destination, label):
-    dir_cmp = filecmp.dircmp(source, destination)
-    if dir_cmp.left_only or dir_cmp.right_only or dir_cmp.diff_files:
-        label.config(text="❌ Folders are different")
-    else:
-        label.config(text="✔️ Folders are equal")
-
-
-root = tk.Tk()
-root.title("Backup & Restore")
-
-
-
-
-
-#! Files
-
-rclone_src="C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"
-rclone_dst="C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
-
-rclone_backup = tk.Button(root, text="Rclone Backup", command=lambda:shutil.copyfile(rclone_src, rclone_dst))
-rclone_backup.grid(row=1, column=0)
-
-label = tk.Label(root, font=("calibri", 14), wraplength=300)
-label.grid(row=1, column=1)
-compare_files(rclone_src, rclone_dst, label)
-
-rclone_restore = tk.Button(root, text="Rclone Restore", command=lambda:shutil.copyfile(rclone_dst, rclone_src))
-rclone_restore.grid(row=1, column=2)
-
-
-
-
-#! Folders
-
-
-
-
-
-
-
-
-root.mainloop()
