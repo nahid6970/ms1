@@ -35,8 +35,7 @@ rclone_dst = "C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
 
 rclone_backup = tk.Button(root, text="Rclone Backup", command=lambda: shutil.copyfile(rclone_src, rclone_dst))
 rclone_restore = tk.Button(root, text="Rclone Restore", command=lambda: shutil.copyfile(rclone_dst, rclone_src))
-label_file = tk.Label(root, font=("calibri", 14), wraplength=300)
-compare_files(rclone_src, rclone_dst, label_file)
+label_file = tk.Label(root, font=("calibri", 14), wraplength=300) ; compare_files(rclone_src, rclone_dst, label_file)
 
 rclone_backup.grid(row=1, column=0)
 rclone_restore.grid(row=1, column=1)
@@ -48,8 +47,7 @@ glazewm_dst = "C:/ms1/asset/glazewm/.glaze-wm"
 
 glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.copytree(glazewm_src, glazewm_dst))
 glazewm_restore = tk.Button(root, text="glazewm_ Restore", command=lambda: shutil.copytree(glazewm_dst, glazewm_src))
-label_folder = tk.Label(root, font=("calibri", 14), wraplength=300)
-compare_folders(glazewm_src, glazewm_dst, label_folder)
+label_folder = tk.Label(root, font=("calibri", 14), wraplength=300) ; compare_folders(glazewm_src, glazewm_dst, label_folder)
 
 glazewm_backup.grid(row=2, column=0)
 glazewm_restore.grid(row=2, column=1)
