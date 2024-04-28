@@ -80,9 +80,9 @@ class CombinedWidget(BaseWidget):
         )
 
         self._desktop = HoverLabel(
-            initial_color    ="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;",
+            initial_color    ="font-size: 20px; ; color:#ff922b; ; ; margin:4px 0px;",
             hover_color      ="font-size: 20px; ; color:#000000; ; ; margin:4px 0px;",
-            hover_after_color="font-size: 20px; ; color:#ffffff; ; ; margin:4px 0px;"
+            hover_after_color="font-size: 20px; ; color:#ff922b; ; ; margin:4px 0px;"
         )
 
         self._folder = HoverLabel(
@@ -187,7 +187,7 @@ class CombinedWidget(BaseWidget):
         self._Find_files.setText("\uf002")
         self._info_get.setText("\uf129")
         self._Tools_label.setText("\ue20f")
-        self._desktop.setText("\udb80\uddc4")
+        self._desktop.setText("\uf498")
         self._folder.setText("\uf07c")
         self._appmanager.setText("\uf40e")
         self._shutdown_restart.setText("\uf011")
