@@ -455,14 +455,14 @@ def update_uptime_label():
     uptime_label.after(1000, update_uptime_label)
 
 
-ROOT1 = tk.Frame(ROOT, bg="#1d2027", width=640)
-ROOT1.grid(row=1, column=1, pady=(1,2),padx=(5,1))
+ROOT1 = tk.Frame(ROOT, bg="#54f00c", width=640)
+ROOT1.pack(side="left", pady=(1,2),padx=(5,1),  anchor="w", fill="x")
 
-ROOT2 = tk.Frame(ROOT, bg="#1d2027", width=640)
-ROOT2.grid(row=1, column=2, pady=(1,2),padx=(5,1))
+ROOT2 = tk.Frame(ROOT, bg="#0e52f0", width=640)
+ROOT2.pack(side="left", pady=(1,2),padx=(0,0), expand=True, anchor="center", fill="x")
 
-ROOT3 = tk.Frame(ROOT, bg="#1d2027", width=640)
-ROOT3.grid(row=1, column=3, pady=(1,2),padx=(5,1))
+ROOT3 = tk.Frame(ROOT, bg="#ca4b10", width=640)
+ROOT3.pack(side="right", pady=(1,2),padx=(5,1), anchor="e", fill="x")
 
 uptime_label   =tk.Label(ROOT2,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
 cpu_core_frame =tk.Frame(ROOT3,bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
