@@ -38,15 +38,16 @@ def install_missing_libraries():
 # import shutil
 # import tksvg
 # import win32gui
+# from tkinter import Canvas, Scrollbar
 from datetime import datetime
 from PIL import Image, ImageTk
 from pyadl import ADLManager
 from time import strftime
-# from tkinter import Canvas, Scrollbar
 from tkinter import messagebox
 from tkinter import simpledialog
 from tkinter import ttk
 import ctypes
+import customtkinter
 import keyboard
 import os
 import psutil
@@ -58,7 +59,6 @@ import time
 import tkinter as tk
 import win32gui
 import win32process
-
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -455,19 +455,17 @@ def update_uptime_label():
     uptime_label.after(1000, update_uptime_label)
 
 
-
-
-
-ROOT1 = tk.Frame(ROOT, bg="#1d2027")
+ROOT1 = tk.Frame(ROOT, bg="#1d2027", width=640)
 ROOT1.grid(row=1, column=1, pady=(1,2),padx=(5,1))
-ROOT2 = tk.Frame(ROOT, bg="#1d2027")
+
+ROOT2 = tk.Frame(ROOT, bg="#1d2027", width=640)
 ROOT2.grid(row=1, column=2, pady=(1,2),padx=(5,1))
-ROOT3 = tk.Frame(ROOT, bg="#1d2027")
+
+ROOT3 = tk.Frame(ROOT, bg="#1d2027", width=640)
 ROOT3.grid(row=1, column=3, pady=(1,2),padx=(5,1))
 
-
-uptime_label   =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-cpu_core_frame =tk.Frame(ROOT3, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
+uptime_label   =tk.Label(ROOT2,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+cpu_core_frame =tk.Frame(ROOT3,bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
 LB_CPU         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
 LB_GPU         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
 LB_RAM         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
@@ -475,16 +473,16 @@ LB_DUC         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief
 LB_DUD         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
 LB_UPLOAD      =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
 LB_DWLOAD      =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
-bkup           =tk.Label(ROOT3,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\udb80\udea2")
-STATUS_MS1     =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
-STATUS_MS2     =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
-LB_K           =tk.Label(ROOT3,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\udb80\udf0c")
-LB_1           =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           )
-BT_TOPMOST     =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03")
-CLEAR          =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\ueabf"      )
-LB_get         =tk.Label(ROOT3,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="G"           )
+bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\udb80\udea2")
+STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
+STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            )
+LB_K           =tk.Label(ROOT1,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\udb80\udf0c")
+LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           )
+BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03")
+CLEAR          =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\ueabf"      )
+LB_get         =tk.Label(ROOT1,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="G"           )
 LB_R           =tk.Label(ROOT3,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2"      )
-LB_L           =tk.Label(ROOT3,bg="#1d2027",fg="#00FF00",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\ueab7"      )
+LB_L           =tk.Label(ROOT3,bg="#1d2027",fg="#00FF00",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf106"      )
 LB_M           =tk.Label(ROOT3,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",18,"bold"),text="\uea72"      )
 LB_XXX         =tk.Label(ROOT3,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf00d"      )
 
@@ -498,17 +496,17 @@ LB_DUD.grid        (row=1, column=7, rowspan =1 ,columnspan=1, padx=(3,0), pady=
 LB_UPLOAD.grid     (row=1, column=8, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_UPLOAD.bind("<Button-1>", None)
 LB_DWLOAD.grid     (row=1, column=9, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_DWLOAD.bind("<Button-1>", None)
 bkup.grid          (row=1, column=10,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; bkup.bind("<Button-1>", start_backup)
-STATUS_MS1.grid    (row=1, column=11,rowspan=1  ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS1.bind("<Button-1>", lambda event:show_git_changes("C:\\ms1"))
-STATUS_MS2.grid    (row=1, column=12, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS2.bind("<Button-1>", lambda event:show_git_changes("C:\\ms2"))
-LB_K.grid          (row=1, column=13, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_K.bind("<Button-1>", start_shortcut)
-LB_1.grid          (row=1, column=14, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_1.bind("<Button-1>", start_bar_1)
-BT_TOPMOST.grid    (row=1, column=15, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; BT_TOPMOST.bind("<Button-1>", lambda event:toggle_checking())
-CLEAR.grid         (row=1, column=16, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; CLEAR.bind("<Button-1>", lambda event:clear_screen())
-LB_get.grid        (row=1, column=17, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_get.bind("<Button-1>", lambda event:get_active_window_info())
-LB_R.grid          (row=1, column=18, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_R.bind("<Button-1>", restart)
-LB_L.grid          (row=1, column=19, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_L.bind("<Button-1>", lambda event:toggle_window_size('line'))
-LB_M.grid          (row=1, column=20, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_M.bind("<Button-1>", lambda event:toggle_window_size('max'))
-LB_XXX.grid        (row=1, column=21, rowspan=1 ,columnspan=1, padx=(3,10), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
+STATUS_MS1.grid    (row=1, column=11,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS1.bind("<Button-1>", lambda event:show_git_changes("C:\\ms1"))
+STATUS_MS2.grid    (row=1, column=12,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS2.bind("<Button-1>", lambda event:show_git_changes("C:\\ms2"))
+LB_K.grid          (row=1, column=13,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_K.bind("<Button-1>", start_shortcut)
+LB_1.grid          (row=1, column=14,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_1.bind("<Button-1>", start_bar_1)
+BT_TOPMOST.grid    (row=1, column=15,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; BT_TOPMOST.bind("<Button-1>", lambda event:toggle_checking())
+CLEAR.grid         (row=1, column=16,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; CLEAR.bind("<Button-1>", lambda event:clear_screen())
+LB_get.grid        (row=1, column=17,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_get.bind("<Button-1>", lambda event:get_active_window_info())
+LB_R.grid          (row=1, column=18,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_R.bind("<Button-1>", restart)
+LB_L.grid          (row=1, column=19,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_L.bind("<Button-1>", lambda event:toggle_window_size('line'))
+LB_M.grid          (row=1, column=20,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_M.bind("<Button-1>", lambda event:toggle_window_size('max'))
+LB_XXX.grid        (row=1, column=21,rowspan =1 ,columnspan=1, padx=(3,10), pady=(0,0)) ; LB_XXX.bind("<Button-1>", close_window)
 
 
 cpu_core_bars = []
