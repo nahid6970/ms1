@@ -47,7 +47,7 @@ from tkinter import messagebox
 from tkinter import simpledialog
 from tkinter import ttk
 import ctypes
-import customtkinter
+from customtkinter import *
 import keyboard
 import os
 import psutil
@@ -449,7 +449,7 @@ def format_uptime():
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 def update_uptime_label():
     uptime_str = format_uptime()
-    uptime_label.config(text=f"{uptime_str}")
+    uptime_label.configure(text=f"{uptime_str}")
     uptime_label.after(1000, update_uptime_label)
 
 
@@ -460,7 +460,7 @@ ROOT2 = tk.Frame(ROOT, bg="#1d2027")
 ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 
-uptime_label   =tk.Label(ROOT1,bg="#2089eb",fg="#0a0a0a",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF" ,10,"bold"),text=""            ); uptime_label.pack  (side="left",padx=(0,0),pady=(0,0)); uptime_label.bind("<Button-1>",None          )
+uptime_label   =CTkButton(ROOT1, corner_radius=25,height=10,  text_color="#ffffff",fg_color="#44547a", hover_color="#ffffff", border_color="#cfe608", border_width=1, font=("JetBrainsMono NFP" ,12,"bold"),text=""            ); uptime_label.pack  (side="left",padx=(0,0),pady=(0,0)); uptime_label.bind("<Button-1>",None          )
 LB_K           =tk.Label(ROOT1,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\udb80\udf0c"); LB_K.pack          (side="left",padx=(3,0),pady=(0,0)); LB_K.bind        ("<Button-1>",start_shortcut)
 LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           ); LB_1.pack          (side="left",padx=(3,0),pady=(0,0)); LB_1.bind        ("<Button-1>",start_bar_1   )
 BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03"); BT_TOPMOST.pack    (side="left",padx=(3,0),pady=(0,0)); BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking       ())
