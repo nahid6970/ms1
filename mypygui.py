@@ -501,7 +501,7 @@ bkup.grid          (row=1, column=10,rowspan =1 ,columnspan=1, padx=(3,0), pady=
 STATUS_MS1.grid    (row=1, column=11,rowspan=1  ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS1.bind("<Button-1>", lambda event:show_git_changes("C:\\ms1"))
 STATUS_MS2.grid    (row=1, column=12, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS2.bind("<Button-1>", lambda event:show_git_changes("C:\\ms2"))
 LB_K.grid          (row=1, column=13, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_K.bind("<Button-1>", lambda event:subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
-LB_1.grid          (row=1, column=14, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_1.bind("<Button-1>", lambda event:subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
+LB_1.grid          (row=1, column=14, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_1.bind("<Button-1>", start_bar_1)
 BT_TOPMOST.grid    (row=1, column=15, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; BT_TOPMOST.bind("<Button-1>", lambda event:toggle_checking())
 CLEAR.grid         (row=1, column=16, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; CLEAR.bind("<Button-1>", lambda event:clear_screen())
 LB_get.grid        (row=1, column=17, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_get.bind("<Button-1>", lambda event:get_active_window_info())
