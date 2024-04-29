@@ -151,7 +151,7 @@ screen_height = ROOT.winfo_screenheight()
 x = screen_width//2 - 1920//2
 # y = screen_height//2 - 800//2
 y = screen_height-47-37
-ROOT.geometry(f"1920x36+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"1920x39+{x}+{y}") #! overall size of the window
 
 #! Resize Window
 
@@ -162,7 +162,7 @@ def toggle_window_size(size):
     global y
 
     if size == 'line':
-        ROOT.geometry('1920x36')
+        ROOT.geometry('1920x39')
         x = screen_width // 2 - 1920 // 2
         y = screen_height-47-37
         ROOT.configure(bg='red')
@@ -404,9 +404,6 @@ def clear_screen():
     except Exception as e:
         print(f"Error clearing screen: {e}")
 
-BOX_ROW2_ROOT = tk.Frame(ROOT, bg="#1d2027")
-BOX_ROW2_ROOT.pack(side="left", anchor="ne", pady=(3,2),padx=(3,1))
-
 def get_cpu_core_usage():
     # Get CPU usage for each core
     cpu_usage_per_core = psutil.cpu_percent(interval=None, percpu=True)
@@ -462,33 +459,37 @@ def update_uptime_label():
 
 
 ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-ROOT1.pack(side="right", anchor="ne", pady=(1,2),padx=(5,1))
+ROOT1.grid(row=1, column=1, pady=(1,2),padx=(5,1))
+ROOT2 = tk.Frame(ROOT, bg="#1d2027")
+ROOT2.grid(row=1, column=2, pady=(1,2),padx=(5,1))
+ROOT3 = tk.Frame(ROOT, bg="#1d2027")
+ROOT3.grid(row=1, column=3, pady=(1,2),padx=(5,1))
 
 
-uptime_label   =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-cpu_core_frame =tk.Frame(ROOT1, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
-LB_CPU         =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-LB_GPU         =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-LB_RAM         =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-LB_DUC         =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-LB_DUD         =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-LB_UPLOAD      =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-LB_DWLOAD      =tk.Label(ROOT1,bg="#000000",fg="#FFFFFF",height=0,width=7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\udb80\udea2")
-STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
-LB_K           =tk.Label(ROOT1,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\udb80\udf0c")
-LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="1"           )
-BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\udb81\udc03")
-CLEAR          =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\ueabf"      )
-LB_get         =tk.Label(ROOT1,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="G"           )
-LB_R           =tk.Label(ROOT1,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2"      )
-LB_L           =tk.Label(ROOT1,bg="#1d2027",fg="#00FF00",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\ueab7"      )
-LB_M           =tk.Label(ROOT1,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",18,"bold"),text="\uea72"      )
-LB_XXX         =tk.Label(ROOT1,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\uf00d"      )
+uptime_label   =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+cpu_core_frame =tk.Frame(ROOT3, bg="#1d2027", highlightthickness=1, highlightbackground="#717d99", relief="solid")
+LB_CPU         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+LB_GPU         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+LB_RAM         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+LB_DUC         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+LB_DUD         =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=5,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+LB_UPLOAD      =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+LB_DWLOAD      =tk.Label(ROOT3,bg="#000000",fg="#FFFFFF",height=0,width=7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+bkup           =tk.Label(ROOT3,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\udb80\udea2")
+STATUS_MS1     =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+STATUS_MS2     =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",10,"bold"),text=""            )
+LB_K           =tk.Label(ROOT3,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\udb80\udf0c")
+LB_1           =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="1"           )
+BT_TOPMOST     =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\udb81\udc03")
+CLEAR          =tk.Label(ROOT3,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="\ueabf"      )
+LB_get         =tk.Label(ROOT3,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",12,"bold"),text="G"           )
+LB_R           =tk.Label(ROOT3,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2"      )
+LB_L           =tk.Label(ROOT3,bg="#1d2027",fg="#00FF00",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\ueab7"      )
+LB_M           =tk.Label(ROOT3,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",18,"bold"),text="\uea72"      )
+LB_XXX         =tk.Label(ROOT3,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NF",16,"bold"),text="\uf00d"      )
 
-uptime_label.grid  (row=1, column=1, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; uptime_label.bind("<Button-1>", None)
-cpu_core_frame.grid(row=1, column=2) ; cpu_core_frame.bind("<Button-1>", lambda event:subprocess.Popen(["powershell", "start-process","Set-Location", "C:\\ms1\\utility\\kill_process.ps1", "-WindowStyle", "Normal"],shell=True))
+uptime_label.grid  (row=1, column=1, rowspan =1 ,columnspan=1, padx=(0,0), pady= (0,0)) ; uptime_label.bind("<Button-1>", None)
+cpu_core_frame.grid(row=1, column=2)
 LB_CPU.grid        (row=1, column=3, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_CPU.bind("<Button-1>", None)
 LB_GPU.grid        (row=1, column=4, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_GPU.bind("<Button-1>", None)
 LB_RAM.grid        (row=1, column=5, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_RAM.bind("<Button-1>", None)
@@ -496,8 +497,8 @@ LB_DUC.grid        (row=1, column=6, rowspan =1 ,columnspan=1, padx=(3,0), pady=
 LB_DUD.grid        (row=1, column=7, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_DUD.bind("<Button-1>", None)
 LB_UPLOAD.grid     (row=1, column=8, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_UPLOAD.bind("<Button-1>", None)
 LB_DWLOAD.grid     (row=1, column=9, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_DWLOAD.bind("<Button-1>", None)
-bkup.grid          (row=1, column=10, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; bkup.bind("<Button-1>", lambda event:subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
-STATUS_MS1.grid    (row=1, column=11, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS1.bind("<Button-1>", lambda event:show_git_changes("C:\\ms1"))
+bkup.grid          (row=1, column=10,rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; bkup.bind("<Button-1>", lambda event:subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
+STATUS_MS1.grid    (row=1, column=11,rowspan=1  ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS1.bind("<Button-1>", lambda event:show_git_changes("C:\\ms1"))
 STATUS_MS2.grid    (row=1, column=12, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; STATUS_MS2.bind("<Button-1>", lambda event:show_git_changes("C:\\ms2"))
 LB_K.grid          (row=1, column=13, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_K.bind("<Button-1>", lambda event:subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
 LB_1.grid          (row=1, column=14, rowspan=1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_1.bind("<Button-1>", lambda event:subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
