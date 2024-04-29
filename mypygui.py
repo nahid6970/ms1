@@ -489,7 +489,7 @@ LB_M           =tk.Label(ROOT3,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief
 LB_XXX         =tk.Label(ROOT3,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf00d"      )
 
 uptime_label.grid  (row=1, column=1, rowspan =1 ,columnspan=1, padx=(0,0), pady= (0,0)) ; uptime_label.bind("<Button-1>", None)
-cpu_core_frame.grid(row=1, column=2)
+cpu_core_frame.grid(row=1, column=2, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0))
 LB_CPU.grid        (row=1, column=3, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_CPU.bind("<Button-1>", None)
 LB_GPU.grid        (row=1, column=4, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_GPU.bind("<Button-1>", None)
 LB_RAM.grid        (row=1, column=5, rowspan =1 ,columnspan=1, padx=(3,0), pady= (0,0)) ; LB_RAM.bind("<Button-1>", None)
