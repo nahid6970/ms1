@@ -20,5 +20,7 @@ import win32gui
 import win32process
 
 
+# def start_bar_1(event):
+#     subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\python\\bar_1.py"], shell=True)
 def start_bar_1(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
