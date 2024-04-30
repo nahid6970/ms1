@@ -201,7 +201,7 @@ window_size_state = 'line'
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920, height=800)
 MAIN_FRAME.pack_propagate(False)
-MAIN_FRAME.pack(pady=1, expand=True)  # Add some padding at the top
+MAIN_FRAME.pack(pady=1, expand=True)  #! Add some padding at the top
 
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -465,11 +465,7 @@ ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
 ROOT2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
-FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-FR_FFmpeg.pack_propagate(True)
 
-FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-FR_Find.pack_propagate(True)
 
 #! Left Side
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=25, width=100,height=20,  text_color="#ffffff",fg_color="#44547a", font=("JetBrainsMono NFP" ,16,"bold"))
@@ -531,7 +527,10 @@ STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="fla
 STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
 
-FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
+FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+FR_FFmpeg.pack_propagate(True)
+FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME))
+FFMPEG_bt.pack(side="left")
 back_button      =tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG"     ,width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME    ,FR_FFmpeg)); back_button.pack(side="left" )
 Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"              ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left",padx=(0,0))
 Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"           ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left",padx=(0,0))
@@ -539,7 +538,10 @@ Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"         ,width=0,fg="#FFF
 Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension"    ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left",padx=(0,0))
 Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"             ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left",padx=(0,0))
 
-Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME)) ; Find_bt.pack(side="left")
+FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+FR_Find.pack_propagate(True)
+Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME))
+Find_bt.pack(side="left")
 back_button=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find)); back_button.pack(side="left" ,padx=(0,0))
 File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file        ); File_bt.pack                       (side="left" ,padx=(0,0))
 Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern     ); Pattern_bt.pack                    (side="left" ,padx=(0,0))
