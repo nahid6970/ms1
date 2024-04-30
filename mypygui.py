@@ -496,23 +496,15 @@ Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFF
 
 
 Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME)) ; Find_bt.pack(side="left")
-back_button=tk.Button(FR_Find,text="◀ Find", bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME, FR_Find)) 
-File_bt   =tk.Button(FR_Find,text="File"   ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_find_file   )
-Pattern_bt=tk.Button(FR_Find,text="Pattern",width=0,fg="#FFFFFF",bg="#1D2027",command=start_find_pattern)
-Size_bt   =tk.Button(FR_Find,text="Size"   ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_find_size   )
-FZFC_bt   =tk.Button(FR_Find,text="FZF-C"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_fzf_c       )
-FZFD_bt   =tk.Button(FR_Find,text="FZF-D"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_fzf_d       )
-ackc_bt   =tk.Button(FR_Find,text="ACK-C"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_ack_c       )
-ackd_bt   =tk.Button(FR_Find,text="ACK-D"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_ack_d       )
-back_button.pack(side="left" ,padx=(0,0))
-File_bt.pack    (side="left" ,padx=(0,0))
-Pattern_bt.pack (side="left" ,padx=(0,0))
-Pattern_bt.pack (side="left" ,padx=(0,0))
-Size_bt.pack    (side="left" ,padx=(0,0))
-FZFC_bt.pack    (side="left" ,padx=(0,0))
-FZFD_bt.pack    (side="left" ,padx=(0,0))
-ackc_bt.pack    (side="left" ,padx=(0,0))
-ackd_bt.pack    (side="left" ,padx=(0,0))
+back_button=tk.Button(FR_Find,text="◀ Find",bg   ="#98c379",fg="#1D2027",command=lambda:switch_to_frame(MAIN_FRAME,FR_Find)); back_button.pack(side="left" ,padx=(0,0))
+File_bt    =tk.Button(FR_Find,text="File"   ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_find_file        ); File_bt.pack     (side="left" ,padx=(0,0))
+Pattern_bt =tk.Button(FR_Find,text="Pattern",width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_find_pattern     ); Pattern_bt.pack  (side="left" ,padx=(0,0))
+Size_bt    =tk.Button(FR_Find,text="Size"   ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_find_size        ); Size_bt.pack     (side="left" ,padx=(0,0))
+FZFC_bt    =tk.Button(FR_Find,text="FZF-C"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_fzf_c            ); FZFC_bt.pack     (side="left" ,padx=(0,0))
+FZFD_bt    =tk.Button(FR_Find,text="FZF-D"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_fzf_d            ); FZFD_bt.pack     (side="left" ,padx=(0,0))
+ackc_bt    =tk.Button(FR_Find,text="ACK-C"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_ack_c            ); ackc_bt.pack     (side="left" ,padx=(0,0))
+ackd_bt    =tk.Button(FR_Find,text="ACK-D"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_ack_d            ); ackd_bt.pack     (side="left" ,padx=(0,0))
+
 
 
 
