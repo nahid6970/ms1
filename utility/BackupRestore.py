@@ -2,7 +2,11 @@ import os
 import shutil
 import tkinter as tk
 import filecmp
+
+import sys
+sys.path.append('C:/ms1/')
 from functionlist import *
+
 
 def compare_files(source, destination, label):
     if not os.path.exists(source) or not os.path.exists(destination):

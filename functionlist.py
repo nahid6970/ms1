@@ -115,9 +115,9 @@ def start_merge():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
 def Backup_Restore(event):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\BackupRestore.py"])
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\utility\\BackupRestore.py"])
 def editBackup_Restore(event):
-    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\BackupRestore.py"])
+    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
 
 
 
