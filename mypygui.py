@@ -504,30 +504,10 @@ LB_1=tk.Label(ROOT1, text="\udb83\udca0",bg="#1d2027",fg="#2af083",height=0,widt
 LB_1.pack(side="left",padx=(3,0),pady=(0,0))
 LB_1.bind("<Button-1>",start_bar_1)
 
-ShutReboot=tk.Label(ROOT1, text="\uf011",bg="#1d2027",fg="#ff3f3f",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
-ShutReboot.bind("<Button-1>",force_shutdown)
-ShutReboot.bind("<Button-3>",force_restart)
-
 Update_bt=tk.Label(ROOT1, text="\uf01b",bg="#1d2027",fg="#16a2ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 Update_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Update_bt.bind("<Button-1>",open_update)
 Update_bt.bind("<Control-Button-1>",edit_update)
-
-
-
-
-
-
-
-
-
-# {"parent": BOX_2,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4,"rowspan":1,"columnspan":1},
-# {"parent": BOX_2,"image": rclone_c       ,"compound": tk.TOP,"text": "","command": c_size        ,"row": 1,"column": 5,"rowspan":1,"columnspan":1},
-# {"parent": BOX_2,"image": rclone_d       ,"compound": tk.TOP,"text": "","command": d_size        ,"row": 1,"column": 6,"rowspan":1,"columnspan":1},
-
-
-
 
 BT_TOPMOST=tk.Label(ROOT1,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 BT_TOPMOST.pack(side="left",padx=(3,0),pady=(0,0))
@@ -585,9 +565,12 @@ ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2
 
 
 
-
-
 #! Right Side
+ShutReboot=tk.Label(ROOT2, text="\uf011",bg="#1d2027",fg="#ff3f3f",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
+ShutReboot.bind("<Button-1>",force_shutdown)
+ShutReboot.bind("<Button-3>",force_restart)
+
 LB_DWLOAD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DWLOAD.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_DWLOAD.bind("<Button-1>",None)
