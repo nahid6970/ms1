@@ -56,3 +56,9 @@ def start_find_size():
 
 def start_tools(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
+
+def start_applist(event):
+    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+
+def start_appstore(event):
+    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\app_store.py"], shell=True)

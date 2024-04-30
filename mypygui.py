@@ -477,21 +477,31 @@ uptime_label=CTkLabel(ROOT1, text="", corner_radius=25, width=100,height=20,  te
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0)); uptime_label.bind("<Button-1>",None)
 
 LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-LB_K.pack(side="left",padx=(3,0),pady=(1,0)); LB_K.bind("<Button-1>",start_shortcut)
+LB_K.pack(side="left",padx=(10,0),pady=(1,0)); LB_K.bind("<Button-1>",start_shortcut)
 
 Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
-Tools_bt.pack(side="left",padx=(3,0),pady=(1,0)); Tools_bt.bind("<Button-1>", start_tools)
+Tools_bt.pack(side="left",padx=(10,0),pady=(1,0)); Tools_bt.bind("<Button-1>", start_tools)
 
+AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0)); AppManagement_bt.bind("<Button-1>", start_appstore) ; AppManagement_bt.bind("<Button-3>", start_applist)
 
+LB_1=tk.Label(ROOT1, text="\udb83\udca0",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+LB_1.pack(side="left",padx=(3,0),pady=(0,0)); LB_1.bind("<Button-1>",start_bar_1)
 
+BT_TOPMOST=tk.Label(ROOT1,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+BT_TOPMOST.pack(side="left",padx=(3,0),pady=(0,0)); BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking())
 
-LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           ); LB_1.pack          (side="left",padx=(3,0),pady=(0,0)); LB_1.bind        ("<Button-1>",start_bar_1   )
-BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03"); BT_TOPMOST.pack    (side="left",padx=(3,0),pady=(0,0)); BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking       ())
-CLEAR          =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\ueabf"      ); CLEAR.pack         (side="left",padx=(3,0),pady=(0,0)); CLEAR.bind       ("<Button-1>",lambda event:clear_screen          ())
-LB_get         =tk.Label(ROOT1,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="G"           ); LB_get.pack        (side="left",padx=(3,0),pady=(0,0)); LB_get.bind      ("<Button-1>",lambda event:get_active_window_info())
-bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\ue621 \udb80\udea2"); bkup.pack          (side="left",padx=(3,0),pady=(0,0)); bkup.bind ("<Button-1>",start_backup  )
-STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS1.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS1.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms1"))
-STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS2.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
+CLEAR=tk.Label(ROOT1, text="\ueabf",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+CLEAR.pack(side="left",padx=(3,0),pady=(0,0)); CLEAR.bind("<Button-1>",lambda event:clear_screen())
+
+LB_get=tk.Label(ROOT1, text="G",bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+LB_get.pack(side="left",padx=(3,0),pady=(0,0)); LB_get.bind("<Button-1>",lambda event:get_active_window_info())
+
+bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+bkup.pack(side="left",padx=(3,0),pady=(0,0)); bkup.bind ("<Button-1>",start_backup)
+
+STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""); STATUS_MS1.pack(side="left",padx=(3,0),pady=(0,0)); STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes      ("C:\\ms1"))
+STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""); STATUS_MS2.pack(side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
 
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
 back_button      =tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG"     ,width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME    ,FR_FFmpeg)); back_button.pack(side="left" )
@@ -602,8 +612,6 @@ def create_button_advanced(parent, text="", image=None, command=None, compound=N
 # Creating buttons with advanced properties
 button_properties_advanced =[
 {"parent": BOX_1_2nd,"text": "Folder"    ,"image": icon_folder     ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#e7d86a","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\folder.py","-WindowStyle","Hidden"],shell=True)},
-{"parent": BOX_1_2nd,"text": "AppList"   ,"image": icon_applist    ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#3498db","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\applist.py"],shell=True)},
-{"parent": BOX_1_2nd,"text": "AppStore"  ,"image": icon_appstore   ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#426f7e","fg": "#FFFFFF","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\app_store.py"],shell=True)},
 {"parent": BOX_1_2nd,"text": "Process"   ,"image": icon_process    ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#cc2400","fg": "#ffffff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\process.py"],shell=True)},
 {"parent": BOX_1_2nd,"text": "Script"    ,"image": icon_ScriptList ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#366c9c","fg": "#f6d24a","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\script_list.py","-WindowStyle","Hidden"],shell=True)},
 ]
