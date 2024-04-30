@@ -479,6 +479,12 @@ uptime_label.pack(side="left",padx=(0,0),pady=(1,0)); uptime_label.bind("<Button
 LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 LB_K.pack(side="left",padx=(3,0),pady=(1,0)); LB_K.bind("<Button-1>",start_shortcut)
 
+Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+Tools_bt.pack(side="left",padx=(3,0),pady=(1,0)); Tools_bt.bind("<Button-1>", start_tools)
+
+
+
+
 LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           ); LB_1.pack          (side="left",padx=(3,0),pady=(0,0)); LB_1.bind        ("<Button-1>",start_bar_1   )
 BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03"); BT_TOPMOST.pack    (side="left",padx=(3,0),pady=(0,0)); BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking       ())
 CLEAR          =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\ueabf"      ); CLEAR.pack         (side="left",padx=(3,0),pady=(0,0)); CLEAR.bind       ("<Button-1>",lambda event:clear_screen          ())
@@ -488,12 +494,12 @@ STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief
 STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS2.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
 
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
-back_button=tk.Button(FR_FFmpeg,text="◀ FFMPEG", width=0,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME, FR_FFmpeg)) ; back_button.pack( side="left" )
-Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left", padx=(0,0) )
-Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left", padx=(0,0) )
-Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left", padx=(0,0) )
-Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension", width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left", padx=(0,0) )
-Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left", padx=(0,0) )
+back_button      =tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG"     ,width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME    ,FR_FFmpeg)); back_button.pack(side="left" )
+Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"              ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left",padx=(0,0))
+Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"           ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left",padx=(0,0))
+Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left",padx=(0,0))
+Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension"    ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left",padx=(0,0))
+Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"             ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left",padx=(0,0))
 
 
 Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME)) ; Find_bt.pack(side="left")
@@ -599,7 +605,6 @@ button_properties_advanced =[
 {"parent": BOX_1_2nd,"text": "AppList"   ,"image": icon_applist    ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#3498db","fg": "#1D2027","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\applist.py"],shell=True)},
 {"parent": BOX_1_2nd,"text": "AppStore"  ,"image": icon_appstore   ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#426f7e","fg": "#FFFFFF","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\app_store.py"],shell=True)},
 {"parent": BOX_1_2nd,"text": "Process"   ,"image": icon_process    ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#cc2400","fg": "#ffffff","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\process.py"],shell=True)},
-{"parent": BOX_1_2nd,"text": "Tools"     ,"image": icon_tools      ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#454545","fg": "#FFFFFF","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\tools.py","-WindowStyle","Hidden"],shell=True)},
 {"parent": BOX_1_2nd,"text": "Script"    ,"image": icon_ScriptList ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#366c9c","fg": "#f6d24a","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\script_list.py","-WindowStyle","Hidden"],shell=True)},
 ]
 advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]

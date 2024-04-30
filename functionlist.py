@@ -53,3 +53,6 @@ def start_find_pattern():
 
 def start_find_size():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
+
+def start_tools(event):
+    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
