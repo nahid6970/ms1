@@ -103,6 +103,24 @@ def c_size(event=None):
 def d_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
 
+def start_trim():
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\trim.ps1"])
+def start_convert():
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\convert.ps1"])
+def start_dimension():
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])
+def start_imgdimension():
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"])
+def start_merge():
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
+
+def Backup_Restore(event):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\BackupRestore.py"])
+def editBackup_Restore(event):
+    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\BackupRestore.py"])
+
+
+
 
 #! Path List
 rclone_src = "C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"

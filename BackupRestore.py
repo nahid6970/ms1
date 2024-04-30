@@ -35,8 +35,6 @@ root.option_add("*Font", default_font)
 
 #! Files
 
-
-
 rclone_backup = tk.Button(root, text="Rclone Backup", command=lambda: shutil.copyfile(rclone_src, rclone_dst))
 rclone_restore = tk.Button(root, text="Rclone Restore", command=lambda: shutil.copyfile(rclone_dst, rclone_src))
 label_file = tk.Label(root, wraplength=300) ; compare_files(rclone_src, rclone_dst, label_file)
@@ -45,7 +43,8 @@ rclone_backup.grid(row=1, column=0)
 rclone_restore.grid(row=1, column=1)
 label_file.grid(row=1, column=2)
 
-# Folders
+
+#! Folders
 
 glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.copytree(glazewm_src, glazewm_dst))
 glazewm_restore = tk.Button(root, text="glazewm_ Restore", command=lambda: shutil.copytree(glazewm_dst, glazewm_src))
