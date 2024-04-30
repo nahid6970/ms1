@@ -455,7 +455,8 @@ def update_uptime_label():
 
 
 
-
+default_font = ("Jetbrainsmono nfp", 10)
+ROOT.option_add("*Font", default_font)
 
 
 #! ALL Boxes
@@ -478,32 +479,32 @@ uptime_label.pack(side="left",padx=(0,0),pady=(1,0)); uptime_label.bind("<Button
 LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 LB_K.pack(side="left",padx=(3,0),pady=(1,0)); LB_K.bind("<Button-1>",start_shortcut)
 
-LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           ); LB_1.pack          (side="left",padx=(3,0),pady=(0,0)); LB_1.bind        ("<Button-1>",start_bar_1   )
-BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03"); BT_TOPMOST.pack    (side="left",padx=(3,0),pady=(0,0)); BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking       ())
-CLEAR          =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\ueabf"      ); CLEAR.pack         (side="left",padx=(3,0),pady=(0,0)); CLEAR.bind       ("<Button-1>",lambda event:clear_screen          ())
-LB_get         =tk.Label(ROOT1,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="G"           ); LB_get.pack        (side="left",padx=(3,0),pady=(0,0)); LB_get.bind      ("<Button-1>",lambda event:get_active_window_info())
-bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\ue621 \udb80\udea2"); bkup.pack          (side="left",padx=(3,0),pady=(0,0)); bkup.bind ("<Button-1>",start_backup  )
-STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS1.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS1.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms1"))
-STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS2.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
+LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           ); LB_1.pack          (side="left",padx=(3,0),pady=(0,0)); LB_1.bind        ("<Button-1>",start_bar_1   )
+BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03"); BT_TOPMOST.pack    (side="left",padx=(3,0),pady=(0,0)); BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking       ())
+CLEAR          =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\ueabf"      ); CLEAR.pack         (side="left",padx=(3,0),pady=(0,0)); CLEAR.bind       ("<Button-1>",lambda event:clear_screen          ())
+LB_get         =tk.Label(ROOT1,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="G"           ); LB_get.pack        (side="left",padx=(3,0),pady=(0,0)); LB_get.bind      ("<Button-1>",lambda event:get_active_window_info())
+bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\ue621 \udb80\udea2"); bkup.pack          (side="left",padx=(3,0),pady=(0,0)); bkup.bind ("<Button-1>",start_backup  )
+STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS1.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS1.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms1"))
+STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS2.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
 
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
-back_button=tk.Button(FR_FFmpeg,text="◀ FFMPEG", width=0,bg="#98c379", fg="#1D2027", font=("JetBrainsMono NFP",12,"bold"),command=lambda:switch_to_frame(MAIN_FRAME, FR_FFmpeg)) ; back_button.pack( side="left" )
-Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left", padx=(0,0) )
-Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left", padx=(0,0) )
-Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left", padx=(0,0) )
-Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension", width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left", padx=(0,0) )
-Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left", padx=(0,0) )
+back_button=tk.Button(FR_FFmpeg,text="◀ FFMPEG", width=0,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME, FR_FFmpeg)) ; back_button.pack( side="left" )
+Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left", padx=(0,0) )
+Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left", padx=(0,0) )
+Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left", padx=(0,0) )
+Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension", width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left", padx=(0,0) )
+Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left", padx=(0,0) )
 
 
 Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME)) ; Find_bt.pack(side="left")
-back_button=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:switch_to_frame(MAIN_FRAME,FR_Find)); back_button.pack(side="left" ,padx=(0,0))
-File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_find_file        ); File_bt.pack                       (side="left" ,padx=(0,0))
-Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_find_pattern     ); Pattern_bt.pack                    (side="left" ,padx=(0,0))
-Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_find_size        ); Size_bt.pack                       (side="left" ,padx=(0,0))
-FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_fzf_c            ); FZFC_bt.pack                       (side="left" ,padx=(0,0))
-FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_fzf_d            ); FZFD_bt.pack                       (side="left" ,padx=(0,0))
-ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_ack_c            ); ackc_bt.pack                       (side="left" ,padx=(0,0))
-ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_ack_d            ); ackd_bt.pack                       (side="left" ,padx=(0,0))
+back_button=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find)); back_button.pack(side="left" ,padx=(0,0))
+File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file        ); File_bt.pack                       (side="left" ,padx=(0,0))
+Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern     ); Pattern_bt.pack                    (side="left" ,padx=(0,0))
+Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size        ); Size_bt.pack                       (side="left" ,padx=(0,0))
+FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c            ); FZFC_bt.pack                       (side="left" ,padx=(0,0))
+FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d            ); FZFD_bt.pack                       (side="left" ,padx=(0,0))
+ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c            ); ackc_bt.pack                       (side="left" ,padx=(0,0))
+ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d            ); ackd_bt.pack                       (side="left" ,padx=(0,0))
 
 
 
