@@ -109,6 +109,23 @@ def create_custom_border(parent):
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
+class HoverButton(tk.Button):
+    def __init__(self, master=None, **kw):
+        self.default_color = kw.pop('default_color', "#000000")
+        self.hover_color = kw.pop('hover_color', "red")
+        self.default_fg = kw.pop('default_fg', "#FFFFFF")
+        self.hover_fg = kw.pop('hover_fg', "#000000")
+        super().__init__(master, **kw)
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+        self.configure(bg=self.default_color, fg=self.default_fg)
+
+    def on_enter(self, event):
+        self.configure(bg=self.hover_color, fg=self.hover_fg)
+
+    def on_leave(self, event):
+        self.configure(bg=self.default_color, fg=self.default_fg)
+
 # wait this time to start the gui
 def long_running_function():
     time.sleep(0)
@@ -640,34 +657,6 @@ update_uptime_label()
 update_info_labels()
 check_window_topmost()
 
-#!  ███╗   ███╗ █████╗ ██╗███╗   ██╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#!  ████╗ ████║██╔══██╗██║████╗  ██║    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#!  ██╔████╔██║███████║██║██╔██╗ ██║    █████╗  ██████╔╝███████║██╔████╔██║█████╗
-#!  ██║╚██╔╝██║██╔══██║██║██║╚██╗██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝
-#!  ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#!  ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
-BOX_1_2nd = tk.Frame(MAIN_FRAME, bg="#1d2027")
-BOX_1_2nd.pack(pady=(32,0))
-
-icon_folder     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-icon_applist    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-icon_appstore   =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-icon_ffmpeg     =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-icon_find       =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-icon_process    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-icon_tools      =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-icon_ScriptList =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"))
-
-def create_button_advanced(parent, text="", image=None, command=None, compound=None, height=0, width=0, bg="#e7d86a", fg="#1D2027", font=("JetBrainsMono NF", 13, "bold"), anchor="center", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#f6d24a", cursor="hand2", side="left", padx=(0,0), pady=(0,0)):
-    button = tk.Button(parent, text=text, image=image, command=command, compound=compound, height=height, width=width, bg=bg, fg=fg, font=font, anchor=anchor, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground, cursor=cursor)
-    button.pack(side=side, padx=padx, pady=pady)
-    return button
-
-# Creating buttons with advanced properties
-button_properties_advanced =[
-]
-advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
 
 
 
@@ -676,36 +665,6 @@ advanced_buttons = [create_button_advanced(**prop) for prop in button_properties
 
 
 
-
-
-
-
-class HoverButton(tk.Button):
-    def __init__(self, master=None, **kw):
-        self.default_color = kw.pop('default_color', "#000000")
-        self.hover_color = kw.pop('hover_color', "red")
-        self.default_fg = kw.pop('default_fg', "#FFFFFF")
-        self.hover_fg = kw.pop('hover_fg', "#000000")
-        super().__init__(master, **kw)
-        self.bind("<Enter>", self.on_enter)
-        self.bind("<Leave>", self.on_leave)
-        self.configure(bg=self.default_color, fg=self.default_fg)
-
-    def on_enter(self, event):
-        self.configure(bg=self.hover_color, fg=self.hover_fg)
-
-    def on_leave(self, event):
-        self.configure(bg=self.default_color, fg=self.default_fg)
-
-def force_shutdown():
-    # Your function logic here
-    pass
-
-BOX_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-BOX_2.pack(pady=(5,0))
-
-BT_name = HoverButton(BOX_2, bg="#000000",activebackground="green", hover_color="red", fg="#FFFFFF", hover_fg="#000000", height=0, width=0, relief="solid",  font=("jetbrainsmono nf", 14, "bold"), command=force_shutdown, text="\uf011")
-BT_name.pack(side="top",  padx=(0,0), pady=(0,0))
 
 
 
