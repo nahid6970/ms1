@@ -77,3 +77,23 @@ def start_script_list(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
 def edit_script_list(event):
     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
+
+
+def force_shutdown():
+    confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
+    if confirmed:
+        subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
+def force_restart():
+    confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to restart?")
+    if confirmed:
+        subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
+
+def open_backup(event=None):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+def open_update(event=None):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+
+def c_size(event=None):
+    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
+def d_size(event=None):
+    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])

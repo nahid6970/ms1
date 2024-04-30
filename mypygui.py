@@ -531,25 +531,27 @@ FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_FFmpeg.pack_propagate(True)
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME))
 FFMPEG_bt.pack(side="left")
-back_button      =tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG"     ,width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME    ,FR_FFmpeg)); back_button.pack(side="left" )
-Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"              ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left",padx=(0,0))
-Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"           ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left",padx=(0,0))
-Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left",padx=(0,0))
-Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension"    ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left",padx=(0,0))
-Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"             ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left",padx=(0,0))
+back_ffmpeg      =tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG"     ,width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
+back_ffmpeg.pack(side="left" )
+Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left",padx=(0,0))
+Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left",padx=(0,0))
+Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left",padx=(0,0))
+Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left",padx=(0,0))
+Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left",padx=(0,0))
 
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_Find.pack_propagate(True)
 Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME))
 Find_bt.pack(side="left")
-back_button=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find)); back_button.pack(side="left" ,padx=(0,0))
-File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file        ); File_bt.pack                       (side="left" ,padx=(0,0))
-Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern     ); Pattern_bt.pack                    (side="left" ,padx=(0,0))
-Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size        ); Size_bt.pack                       (side="left" ,padx=(0,0))
-FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c            ); FZFC_bt.pack                       (side="left" ,padx=(0,0))
-FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d            ); FZFD_bt.pack                       (side="left" ,padx=(0,0))
-ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c            ); ackc_bt.pack                       (side="left" ,padx=(0,0))
-ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d            ); ackd_bt.pack                       (side="left" ,padx=(0,0))
+back_find=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
+back_find.pack(side="left" ,padx=(0,0))
+File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
+Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
+Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))
+FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c       ); FZFC_bt.pack   (side="left" ,padx=(0,0))
+FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d       ); FZFD_bt.pack   (side="left" ,padx=(0,0))
+ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c       ); ackc_bt.pack   (side="left" ,padx=(0,0))
+ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0))
 
 
 
@@ -657,57 +659,9 @@ advanced_buttons = [create_button_advanced(**prop) for prop in button_properties
 
 
 
-#! ██████╗ ███████╗███████╗████████╗ █████╗ ██████╗ ████████╗       ██╗       ███████╗██╗  ██╗██╗   ██╗████████╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
-#! ██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝       ██║       ██╔════╝██║  ██║██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗██║    ██║████╗  ██║
-#! ██████╔╝█████╗  ███████╗   ██║   ███████║██████╔╝   ██║       ████████╗    ███████╗███████║██║   ██║   ██║   ██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
-#! ██╔══██╗██╔══╝  ╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██╔═██╔═╝    ╚════██║██╔══██║██║   ██║   ██║   ██║  ██║██║   ██║██║███╗██║██║╚██╗██║
-#! ██║  ██║███████╗███████║   ██║   ██║  ██║██║  ██║   ██║       ██████║      ███████║██║  ██║╚██████╔╝   ██║   ██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
-#! ╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝       ╚═════╝      ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
-
-BOX_2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
-BOX_2.pack(pady=(5,0))
-
-def force_shutdown():
-    confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
-    if confirmed:
-        subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
-def force_restart():
-    confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to restart?")
-    if confirmed:
-        subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
-
-def open_backup(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
-def open_update(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
-
-def c_size(event=None):
-    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
-def d_size(event=None):
-    subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
-
-# shutdown_window =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
-# restart_window  =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
-# update_image    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
-# backup_image    =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))
-# rclone_c        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_c.png"))
-# rclone_d        =ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\rclone_d.png"))
 
 
-# def create_button(parent, text="", image=None, compound=None, command=None, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, relief="flat", highlightthickness=4, activebackground="#000000", activeforeground="#FFFFFF", row=0, column=0, rowspan=1, columnspan=1):
-#     button = tk.Button(parent, text=text, image=image, compound=compound, command=command, height=height, width=width, bg=bg, fg=fg, bd=bd, relief=relief, highlightthickness=highlightthickness, activebackground=activebackground, activeforeground=activeforeground)
-#     button.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan, sticky="w", padx=(0,0), pady=0)
-#     return button
 
-# button_properties = [
-# {"parent": BOX_2,"image": shutdown_window,"compound": tk.TOP,"text": "","command": force_shutdown,"row": 1,"column": 1,"rowspan":1,"columnspan":1},
-# {"parent": BOX_2,"image": restart_window ,"compound": tk.TOP,"text": "","command": force_restart ,"row": 1,"column": 2,"rowspan":1,"columnspan":1},
-# {"parent": BOX_2,"image": backup_image   ,"compound": tk.TOP,"text": "","command": open_backup   ,"row": 1,"column": 3,"rowspan":1,"columnspan":1},
-# {"parent": BOX_2,"image": update_image   ,"compound": tk.TOP,"text": "","command": open_update   ,"row": 1,"column": 4,"rowspan":1,"columnspan":1},
-# {"parent": BOX_2,"image": rclone_c       ,"compound": tk.TOP,"text": "","command": c_size        ,"row": 1,"column": 5,"rowspan":1,"columnspan":1},
-# {"parent": BOX_2,"image": rclone_d       ,"compound": tk.TOP,"text": "","command": d_size        ,"row": 1,"column": 6,"rowspan":1,"columnspan":1},
-# ]
-# buttons = [create_button(**prop) for prop in button_properties]
 
 
 
