@@ -524,8 +524,12 @@ bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=
 bkup.pack(side="left",padx=(3,0),pady=(0,0))
 bkup.bind ("<Button-1>",start_backup)
 
-STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""); STATUS_MS1.pack(side="left",padx=(3,0),pady=(0,0)); STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes      ("C:\\ms1"))
-STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""); STATUS_MS2.pack(side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
+STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+STATUS_MS1.pack(side="left",padx=(3,0),pady=(0,0))
+STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes("C:\\ms1"))
+STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+STATUS_MS2.pack(side="left",padx=(3,0),pady=(0,0))
+STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
 
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
 back_button      =tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG"     ,width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME    ,FR_FFmpeg)); back_button.pack(side="left" )
