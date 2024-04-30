@@ -90,8 +90,13 @@ def force_restart():
 
 def open_backup(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+def edit_backup(event=None):
+    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\backup.ps1"], shell=True)
+
 def open_update(event=None):
     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+def edit_update(event=None):
+    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\update.ps1"],  shell=True)
 
 def c_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
