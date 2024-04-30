@@ -102,3 +102,11 @@ def c_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
 def d_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu d:\\' "])
+
+
+#! Path List
+rclone_src = "C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"
+rclone_dst = "C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
+
+glazewm_src = "C:/Users/nahid/.glaze-wm"
+glazewm_dst = "C:/ms1/asset/glazewm/.glaze-wm"

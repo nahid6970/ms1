@@ -2,6 +2,7 @@ import os
 import shutil
 import tkinter as tk
 import filecmp
+from functionlist import *
 
 def compare_files(source, destination, label):
     if not os.path.exists(source) or not os.path.exists(destination):
@@ -32,9 +33,9 @@ root.title("Backup & Restore")
 default_font = ("Jetbrainsmono nfp", 14, "italic")
 root.option_add("*Font", default_font)
 
-# Files
-rclone_src = "C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"
-rclone_dst = "C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
+#! Files
+
+
 
 rclone_backup = tk.Button(root, text="Rclone Backup", command=lambda: shutil.copyfile(rclone_src, rclone_dst))
 rclone_restore = tk.Button(root, text="Rclone Restore", command=lambda: shutil.copyfile(rclone_dst, rclone_src))
@@ -45,8 +46,6 @@ rclone_restore.grid(row=1, column=1)
 label_file.grid(row=1, column=2)
 
 # Folders
-glazewm_src = "C:/Users/nahid/.glaze-wm"
-glazewm_dst = "C:/ms1/asset/glazewm/.glaze-wm"
 
 glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.copytree(glazewm_src, glazewm_dst))
 glazewm_restore = tk.Button(root, text="glazewm_ Restore", command=lambda: shutil.copytree(glazewm_dst, glazewm_src))
