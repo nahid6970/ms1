@@ -59,6 +59,7 @@ import time
 import tkinter as tk
 import win32gui
 import win32process
+import ttkbootstrap
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -492,10 +493,6 @@ Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFF
 
 
 
-
-
-
-
 #! Right Side
 LB_DWLOAD      =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =7,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_DWLOAD.pack     (side="left",padx=(3,0 ),pady=(0,0)); LB_DWLOAD.bind("<Button-1>",None        )
 LB_UPLOAD      =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =7,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_UPLOAD.pack     (side="left",padx=(3,0 ),pady=(0,0)); LB_UPLOAD.bind("<Button-1>",None        )
@@ -503,15 +500,32 @@ LB_UPLOAD      =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height 
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
-LB_CPU         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =5,relief="flat",highlightthickness=1     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_CPU.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_CPU.bind   ("<Button-1>",None        )
-LB_GPU         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =5,relief="flat",highlightthickness=1     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_GPU.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_GPU.bind   ("<Button-1>",None        )
-LB_RAM         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =5,relief="flat",highlightthickness=1     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_RAM.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_RAM.bind   ("<Button-1>",None        )
-LB_DUC         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =8,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_DUC.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_DUC.bind   ("<Button-1>",None        )
-LB_DUD         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =8,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_DUD.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_DUD.bind   ("<Button-1>",None        )
-LB_R           =tk.Label(ROOT2,bg="#1d2027",fg                ="#26b2f3",height             =0        ,width =0,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2"      ); LB_R.pack          (side="left",padx=(3,0 ),pady=(0,0)); LB_R.bind     ("<Button-1>",restart     )
-LB_L           =tk.Label(ROOT2,bg="#1d2027",fg                ="#00FF00",height             =0        ,width =0,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",16,"bold"),text="\uf106"      ); LB_L.pack          (side="left",padx=(3,0 ),pady=(0,0)); LB_L.bind     ("<Button-1>",lambda event:toggle_window_size('line'))
-LB_M           =tk.Label(ROOT2,bg="#1d2027",fg                ="#26b2f3",height             =0        ,width =0,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",18,"bold"),text="\uea72"      ); LB_M.pack          (side="left",padx=(3,0 ),pady=(0,0)); LB_M.bind     ("<Button-1>",lambda event:toggle_window_size('max' ))
-LB_XXX         =tk.Label(ROOT2,bg="#1d2027",fg                ="#ff0000",height             =0        ,width =0,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",16,"bold"),text="\uf00d"      ); LB_XXX.pack        (side="left",padx=(3,10),pady=(0,0)); LB_XXX.bind   ("<Button-1>",close_window)
+LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_CPU.bind   ("<Button-1>",None)
+
+LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_GPU.bind("<Button-1>",None)
+
+LB_RAM=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_RAM.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_RAM.bind("<Button-1>",None)
+
+LB_DUC=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =8,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_DUC.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_DUC.bind("<Button-1>",None)
+
+LB_DUD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =8,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_DUD.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_DUD.bind("<Button-1>",None)
+
+LB_R=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2")
+LB_R.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_R.bind("<Button-1>",restart)
+
+LB_L=tk.Label(ROOT2,bg="#1d2027",fg="#00FF00",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf106")
+LB_L.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_L.bind("<Button-1>",lambda event:toggle_window_size('line'))
+
+LB_M=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"),text="\uea72")
+LB_M.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_M.bind("<Button-1>",lambda event:toggle_window_size('max'))
+
+LB_XXX=tk.Label(ROOT2,bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf00d")
+LB_XXX.pack(side="left",padx=(3,10),pady=(0,0)); LB_XXX.bind("<Button-1>",close_window)
 
 
 
