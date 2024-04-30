@@ -525,10 +525,10 @@ bkup.pack(side="left",padx=(3,0),pady=(0,0))
 bkup.bind ("<Button-1>",start_backup)
 
 STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-STATUS_MS1.pack(side="left",padx=(3,0),pady=(0,0))
+STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes("C:\\ms1"))
 STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-STATUS_MS2.pack(side="left",padx=(3,0),pady=(0,0))
+STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
 
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
