@@ -199,7 +199,7 @@ window_size_state = 'line'
 # ROOT.geometry(f"+{x}+{y}")
 
 # Create main frame
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=800, height=800)
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920, height=800)
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1, expand=True)  # Add some padding at the top
 
@@ -436,7 +436,6 @@ def determine_color(usage):
 BAR_WIDTH = 8
 BAR_HEIGHT = 25
 
-
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
     current_time = datetime.now().timestamp()
@@ -453,26 +452,57 @@ def update_uptime_label():
     uptime_label.after(1000, update_uptime_label)
 
 
-ROOT1 = tk.Frame(ROOT, bg="#1d2027")
+
+
+
+
+
+#! ALL Boxes
+ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
 
-ROOT2 = tk.Frame(ROOT, bg="#1d2027")
+ROOT2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
+FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
+FR_FFmpeg.pack_propagate(True)
 
-uptime_label   =CTkButton(ROOT1, corner_radius=25,height=10,  text_color="#ffffff",fg_color="#44547a", hover_color="#ffffff", border_color="#cfe608", border_width=1, font=("JetBrainsMono NFP" ,12,"bold"),text=""            ); uptime_label.pack  (side="left",padx=(0,0),pady=(0,0)); uptime_label.bind("<Button-1>",None          )
-LB_K           =tk.Label(ROOT1,bg="#1d2027",fg="#26b2f3",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\udb80\udf0c"); LB_K.pack          (side="left",padx=(3,0),pady=(0,0)); LB_K.bind        ("<Button-1>",start_shortcut)
+#! Left Side
+uptime_label=CTkLabel(ROOT1, text="", corner_radius=25, width=100,height=20,  text_color="#ffffff",fg_color="#44547a", font=("JetBrainsMono NFP" ,16,"bold"))
+uptime_label.pack(side="left",padx=(0,0),pady=(1,0)); uptime_label.bind("<Button-1>",None)
+
+LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
+LB_K.pack(side="left",padx=(3,0),pady=(1,0)); LB_K.bind("<Button-1>",start_shortcut)
+
 LB_1           =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="1"           ); LB_1.pack          (side="left",padx=(3,0),pady=(0,0)); LB_1.bind        ("<Button-1>",start_bar_1   )
 BT_TOPMOST     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\udb81\udc03"); BT_TOPMOST.pack    (side="left",padx=(3,0),pady=(0,0)); BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking       ())
 CLEAR          =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="\ueabf"      ); CLEAR.pack         (side="left",padx=(3,0),pady=(0,0)); CLEAR.bind       ("<Button-1>",lambda event:clear_screen          ())
 LB_get         =tk.Label(ROOT1,bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",12,"bold"),text="G"           ); LB_get.pack        (side="left",padx=(3,0),pady=(0,0)); LB_get.bind      ("<Button-1>",lambda event:get_active_window_info())
-bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\ue621 \udb80\udea2"); bkup.pack          (side="left",padx=(3,0),pady=(0,0)); bkup.bind        ("<Button-1>",start_backup  )
+bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",16,"bold"),text="\ue621 \udb80\udea2"); bkup.pack          (side="left",padx=(3,0),pady=(0,0)); bkup.bind ("<Button-1>",start_backup  )
 STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS1.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS1.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms1"))
 STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS2.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
 
+FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack()
+back_button=tk.Button(FR_FFmpeg,text="◀ FFMPEG", bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME, FR_FFmpeg)) ; back_button.pack( side="left" )
+Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left", padx=(0,0) )
+Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left", padx=(0,0) )
+Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left", padx=(0,0) )
+Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension", width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left", padx=(0,0) )
+Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left", padx=(0,0) )
+
+
+
+
+
+
+
+#! Right Side
 LB_DWLOAD      =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =7,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_DWLOAD.pack     (side="left",padx=(3,0 ),pady=(0,0)); LB_DWLOAD.bind("<Button-1>",None        )
 LB_UPLOAD      =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =7,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_UPLOAD.pack     (side="left",padx=(3,0 ),pady=(0,0)); LB_UPLOAD.bind("<Button-1>",None        )
-cpu_core_frame =tk.Frame(ROOT2,bg="#1d2027",highlightthickness=1        ,highlightbackground="#717d99",relief="solid"); cpu_core_frame.pack(side="left",padx               =(3       ,0),pady=(0      ,0))
+
+cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
+cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
+
 LB_CPU         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =5,relief="flat",highlightthickness=1     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_CPU.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_CPU.bind   ("<Button-1>",None        )
 LB_GPU         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =5,relief="flat",highlightthickness=1     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_GPU.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_GPU.bind   ("<Button-1>",None        )
 LB_RAM         =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =5,relief="flat",highlightthickness=1     ,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_RAM.pack        (side="left",padx=(3,0 ),pady=(0,0)); LB_RAM.bind   ("<Button-1>",None        )
@@ -488,9 +518,9 @@ LB_XXX         =tk.Label(ROOT2,bg="#1d2027",fg                ="#ff0000",height 
 
 cpu_core_bars = []
 for i in range(psutil.cpu_count()):
-    frame = tk.Frame(cpu_core_frame, bg="#1d2027")
+    frame = CTkFrame(cpu_core_frame, bg_color="#1d2027")
     frame.pack(side="left", padx=(0, 0), pady=0)
-    core_bar = tk.Canvas(frame, bg="#1d2027", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
+    core_bar = CTkCanvas(frame, bg="#53565c", width=BAR_WIDTH, height=BAR_HEIGHT, highlightthickness=0)
     core_bar.pack(side="top")
     cpu_core_bars.append(core_bar)
 update_cpu_core_bars()
@@ -551,27 +581,9 @@ advanced_buttons = [create_button_advanced(**prop) for prop in button_properties
 #?  ██║     ██║     ██║ ╚═╝ ██║██║     ███████╗╚██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
 #?  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
-FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
-FR_FFmpeg.pack_propagate(True)
 
-def create_button(text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack, command):
-    button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
-    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
-    return button
 
-BOX_1 = tk.Frame(FR_FFmpeg, bg="#1d2027")
-BOX_1.pack(side="top", anchor="center", pady=(35,0), padx=(0,0))
 
-button_properties = [
-("◀ FFMPEG",BOX_1,"#98c379","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"), 0 ,1,1,5,"ew" , 0,0, (1,1),(0,0), lambda: switch_to_frame(MAIN_FRAME, FR_FFmpeg)),
-("Trim"           ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,1,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"]     )),
-("Convert"        ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,2,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"]  )),
-("Dimension"      ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,3,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])),
-("Imagedimension" ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,4,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"]   )),
-("Merge"          ,BOX_1,"#FFFFFF" ,"#1D2027",1 ,0 ,"flat" ,("JetBrainsMono NF",11 ,"bold"   ),1 ,5,1,1,"ew" ,0,0,(1,1),(0,0),lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"]    )),
-]
-for button_props in button_properties:
-    create_button(*button_props)
 
 
 
