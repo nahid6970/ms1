@@ -465,8 +465,11 @@ ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
 ROOT2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
-FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
+FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_FFmpeg.pack_propagate(True)
+
+FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+FR_Find.pack_propagate(True)
 
 #! Left Side
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=25, width=100,height=20,  text_color="#ffffff",fg_color="#44547a", font=("JetBrainsMono NFP" ,16,"bold"))
@@ -483,13 +486,40 @@ bkup           =tk.Label(ROOT1,bg="#1d2027",fg="#009fff",height=0,width=0,relief
 STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS1.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS1.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms1"))
 STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS2.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
 
-FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack()
+FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
 back_button=tk.Button(FR_FFmpeg,text="◀ FFMPEG", bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME, FR_FFmpeg)) ; back_button.pack( side="left" )
 Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left", padx=(0,0) )
 Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left", padx=(0,0) )
 Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left", padx=(0,0) )
 Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension", width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left", padx=(0,0) )
 Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left", padx=(0,0) )
+
+
+Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME)) ; Find_bt.pack(side="left")
+back_button=tk.Button(FR_Find,text="◀ Find", bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME, FR_Find)) 
+File_bt   =tk.Button(FR_Find,text="File"   ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_find_file   )
+Pattern_bt=tk.Button(FR_Find,text="Pattern",width=0,fg="#FFFFFF",bg="#1D2027",command=start_find_pattern)
+Size_bt   =tk.Button(FR_Find,text="Size"   ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_find_size   )
+FZFC_bt   =tk.Button(FR_Find,text="FZF-C"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_fzf_c       )
+FZFD_bt   =tk.Button(FR_Find,text="FZF-D"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_fzf_d       )
+ackc_bt   =tk.Button(FR_Find,text="ACK-C"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_ack_c       )
+ackd_bt   =tk.Button(FR_Find,text="ACK-D"  ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_ack_d       )
+back_button.pack(side="left" ,padx=(0,0))
+File_bt.pack    (side="left" ,padx=(0,0))
+Pattern_bt.pack (side="left" ,padx=(0,0))
+Pattern_bt.pack (side="left" ,padx=(0,0))
+Size_bt.pack    (side="left" ,padx=(0,0))
+FZFC_bt.pack    (side="left" ,padx=(0,0))
+FZFD_bt.pack    (side="left" ,padx=(0,0))
+ackc_bt.pack    (side="left" ,padx=(0,0))
+ackd_bt.pack    (side="left" ,padx=(0,0))
+
+
+
+
+
+
+
 
 
 
@@ -591,15 +621,6 @@ advanced_buttons = [create_button_advanced(**prop) for prop in button_properties
 
 
 
-#?  ███████╗███████╗███╗   ███╗██████╗ ███████╗ ██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#?  ██╔════╝██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝     ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#?  █████╗  █████╗  ██╔████╔██║██████╔╝█████╗  ██║  ███╗    █████╗  ██████╔╝███████║██╔████╔██║█████╗  
-#?  ██╔══╝  ██╔══╝  ██║╚██╔╝██║██╔═══╝ ██╔══╝  ██║   ██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝  
-#?  ██║     ██║     ██║ ╚═╝ ██║██║     ███████╗╚██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#?  ╚═╝     ╚═╝     ╚═╝     ╚═╝╚═╝     ╚══════╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
-
-
 
 
 
@@ -612,32 +633,6 @@ advanced_buttons = [create_button_advanced(**prop) for prop in button_properties
 #?  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 
 
-
-FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800)
-FR_Find.pack_propagate(True)
-
-def create_button(text, frame, bg_color, fg_color, height, width, relief, font, row_button, column_button, rowspan_button, columnspan_button,sticky, padx_button, pady_button, padx_pack, pady_pack, command):
-    button = tk.Button(frame, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command)
-    button.grid(row=row_button, column=column_button, rowspan=rowspan_button, columnspan=columnspan_button, padx=padx_pack, pady=pady_pack, sticky=sticky)
-    return button
-
-BOX_find = tk.Frame(FR_Find, bg="#1d2027")
-BOX_find.pack(side="top", anchor="center", pady=(35,0), padx=(0,0))
-
-button_properties = [
-("◀ Find",BOX_find,"#79828b","#1D2027",1,0,"flat",("JetBrainsMono NF",11,"bold"),0 ,1,1,7,"ew" ,0 ,0,(1,1),(0,0),lambda: switch_to_frame(MAIN_FRAME, FR_Find)),
-("File"    ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11,"bold"),1 ,1,1 ,1 ,"ew" ,0 ,0,(1,1),(0,0),lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_file.ps1"]   ,shell=True)),
-("Pattern" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11,"bold"),1 ,2,1 ,1 ,"ew" ,0 ,0,(1,1),(0,0),lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_pattern.ps1"],shell=True)),
-("Size"    ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11,"bold"),1 ,3,1 ,1 ,"ew" ,0 ,0,(1,1),(0,0),lambda: subprocess.Popen(["start" ,"C:\\ms1\\scripts\\find\\find_size.ps1"]   ,shell=True)),
-
-("FZF-->C:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,1 ,4,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda:subprocess.Popen(["powershell", "-Command", 'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; fzf --preview=\'highlight -O ansi -l {}\'"'], shell=True)),
-("FZF-->D:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,1 ,5,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda:subprocess.Popen(["powershell", "-Command", 'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; fzf --preview=\'bat {}\'"'], shell=True) ),
-
-("ACK-->C:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,1 ,6,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda: subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {insert_input()}"'], shell=True)),
-("ACK-->D:\\" ,BOX_find ,"#FFFFFF","#1D2027",1 ,0 ,"flat",("JetBrainsMono NF",11 ,"bold") ,1 ,7,1,1,"ew" ,0 ,0,(1,1),(0 ,0),lambda: subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {insert_input()}"'], shell=True)),
-]
-for button_props in button_properties:
-    create_button(*button_props)
 
 
 
