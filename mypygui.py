@@ -494,8 +494,11 @@ Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFF
 
 
 #! Right Side
-LB_DWLOAD      =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =7,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_DWLOAD.pack     (side="left",padx=(3,0 ),pady=(0,0)); LB_DWLOAD.bind("<Button-1>",None        )
-LB_UPLOAD      =tk.Label(ROOT2,bg="#000000",fg                ="#FFFFFF",height             =0        ,width =7,relief="flat",highlightthickness=0     ,highlightbackground="#ffffff",anchor ="w"     ,font=("JetBrainsMono NFP",10,"bold"),text=""            ); LB_UPLOAD.pack     (side="left",padx=(3,0 ),pady=(0,0)); LB_UPLOAD.bind("<Button-1>",None        )
+LB_DWLOAD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_DWLOAD.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_DWLOAD.bind("<Button-1>",None)
+
+LB_UPLOAD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_UPLOAD.pack(side="left",padx=(3,0 ),pady=(0,0)); LB_UPLOAD.bind("<Button-1>",None)
 
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
