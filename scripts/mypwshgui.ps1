@@ -206,7 +206,7 @@ $Rclone_bt       = req ` -content "[R]clone"          ` -styles @($ff10, $b, $fg
 $StartStop_bt    = req ` -content "[S]top [R]estart"  ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $StartStop_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Startupapps_bt  = req ` -content "[S]tartup Apps"    ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $StartupApps_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 $Tools_bt        = req ` -content "[T]ools"           ` -styles @($ff10, $b, $fg00, $bg01, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Tools_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
-$Update_bt       = req ` -content "[U]pdate"          ` -styles @($ff10, $b, $fg01, $bg03, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\ms1\scripts\update.ps1`"" }
+$Update_bt       = req ` -content "[U]pdate"          ` -styles @($ff10, $b, $fg01, $bg03, $fz16, $w250, $h040) ` -onClick { Start-Process -FilePath "pwsh" -ArgumentList "-NoExit -File `"C:\ms1\utility\kill_process.ps1`"" }
 $Valorant_bt     = req ` -content "[V]alorant"        ` -styles @($ff10, $b, $fg01, $bg05, $fz16, $w250, $h040) ` -onClick { $Prev_Content = $Main_Panel.Content ; $Main_Panel.Content = $Valorant_Panel ; $Main_Panel.Width = 400 ; $Main_Panel.Height = 700 ; $BackToMain_bt.Tag = $Prev_Content }
 
 $Main_Panel.Content.Children.Add($backup_bt)
