@@ -566,7 +566,7 @@ ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2
 
 
 #! Right Side
-ShutReboot=tk.Label(ROOT2, text="\uf011",bg="#1d2027",fg="#ff3f3f",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+ShutReboot=tk.Label(ROOT2, text="\uf011",bg="#1d2027",fg="#ff3f3f",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",15,"bold"))
 ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
 ShutReboot.bind("<Button-3>",force_restart)
