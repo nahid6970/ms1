@@ -487,23 +487,23 @@ STATUS_MS1     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief
 STATUS_MS2     =tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text=""            ); STATUS_MS2.pack    (side="left",padx=(3,0),pady=(0,0)); STATUS_MS2.bind  ("<Button-1>",lambda event:show_git_changes      ("C:\\ms2"))
 
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME)) ; FFMPEG_bt.pack(side="left")
-back_button=tk.Button(FR_FFmpeg,text="◀ FFMPEG", bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME, FR_FFmpeg)) ; back_button.pack( side="left" )
-Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left", padx=(0,0) )
-Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left", padx=(0,0) )
-Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left", padx=(0,0) )
-Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension", width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left", padx=(0,0) )
-Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFFF",bg="#1D2027", command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left", padx=(0,0) )
+back_button=tk.Button(FR_FFmpeg,text="◀ FFMPEG", width=0,bg="#98c379", fg="#1D2027", font=("JetBrainsMono NFP",12,"bold"),command=lambda:switch_to_frame(MAIN_FRAME, FR_FFmpeg)) ; back_button.pack( side="left" )
+Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\trim.ps1"     ])); Trim_bt.pack          (side="left", padx=(0,0) )
+Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\convert.ps1"  ])); Convert_bt.pack       (side="left", padx=(0,0) )
+Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\dimension.ps1"])); Dimension_bt.pack     (side="left", padx=(0,0) )
+Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension", width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"   ])); Imagedimension_bt.pack(side="left", padx=(0,0) )
+Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         , width=0, fg="#FFFFFF",bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:subprocess.Popen(["powershell" ,"start","C:\\ms1\\scripts\\ffmpeg\\merge.ps1"    ])); Merge_bt.pack         (side="left", padx=(0,0) )
 
 
 Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME)) ; Find_bt.pack(side="left")
-back_button=tk.Button(FR_Find,text="◀ Find",bg   ="#98c379",fg="#1D2027",command=lambda:switch_to_frame(MAIN_FRAME,FR_Find)); back_button.pack(side="left" ,padx=(0,0))
-File_bt    =tk.Button(FR_Find,text="File"   ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_find_file        ); File_bt.pack     (side="left" ,padx=(0,0))
-Pattern_bt =tk.Button(FR_Find,text="Pattern",width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_find_pattern     ); Pattern_bt.pack  (side="left" ,padx=(0,0))
-Size_bt    =tk.Button(FR_Find,text="Size"   ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_find_size        ); Size_bt.pack     (side="left" ,padx=(0,0))
-FZFC_bt    =tk.Button(FR_Find,text="FZF-C"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_fzf_c            ); FZFC_bt.pack     (side="left" ,padx=(0,0))
-FZFD_bt    =tk.Button(FR_Find,text="FZF-D"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_fzf_d            ); FZFD_bt.pack     (side="left" ,padx=(0,0))
-ackc_bt    =tk.Button(FR_Find,text="ACK-C"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_ack_c            ); ackc_bt.pack     (side="left" ,padx=(0,0))
-ackd_bt    =tk.Button(FR_Find,text="ACK-D"  ,width=0        ,fg="#FFFFFF",bg     ="#1D2027",command=start_ack_d            ); ackd_bt.pack     (side="left" ,padx=(0,0))
+back_button=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=lambda:switch_to_frame(MAIN_FRAME,FR_Find)); back_button.pack(side="left" ,padx=(0,0))
+File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_find_file        ); File_bt.pack                       (side="left" ,padx=(0,0))
+Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_find_pattern     ); Pattern_bt.pack                    (side="left" ,padx=(0,0))
+Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_find_size        ); Size_bt.pack                       (side="left" ,padx=(0,0))
+FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_fzf_c            ); FZFC_bt.pack                       (side="left" ,padx=(0,0))
+FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_fzf_d            ); FZFD_bt.pack                       (side="left" ,padx=(0,0))
+ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_ack_c            ); ackc_bt.pack                       (side="left" ,padx=(0,0))
+ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", font=("JetBrainsMono NFP",12,"bold"), command=start_ack_d            ); ackd_bt.pack                       (side="left" ,padx=(0,0))
 
 
 
@@ -602,20 +602,6 @@ button_properties_advanced =[
 {"parent": BOX_1_2nd,"text": "Script"    ,"image": icon_ScriptList ,"compound": tk.LEFT,"height": 0,"width": 0,"bg": "#366c9c","fg": "#f6d24a","font": ("JetBrainsMono NF",13,"bold"),"anchor": "center","bd": 0,"relief": "flat","highlightthickness": 4,"activebackground": "#000000","activeforeground": "#f6d24a","cursor": "hand2" ,"command": lambda: subprocess.Popen(["powershell","start-process","C:\\ms1\\mypygui_import\\script_list.py","-WindowStyle","Hidden"],shell=True)},
 ]
 advanced_buttons = [create_button_advanced(**prop) for prop in button_properties_advanced]
-
-
-
-
-
-
-
-#?  ███████╗██╗███╗   ██╗██████╗     ███████╗██████╗  █████╗ ███╗   ███╗███████╗
-#?  ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝
-#?  █████╗  ██║██╔██╗ ██║██║  ██║    █████╗  ██████╔╝███████║██╔████╔██║█████╗  
-#?  ██╔══╝  ██║██║╚██╗██║██║  ██║    ██╔══╝  ██╔══██╗██╔══██║██║╚██╔╝██║██╔══╝  
-#?  ██║     ██║██║ ╚████║██████╔╝    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗
-#?  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-
 
 
 
