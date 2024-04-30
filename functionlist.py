@@ -62,3 +62,18 @@ def start_applist(event):
 
 def start_appstore(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+
+def start_folder(event):
+    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\folder.py", "-WindowStyle", "Hidden"], shell=True)
+def Edit_folder(event):
+    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\folder.py", "-WindowStyle", "Hidden"], shell=True)
+
+def start_process(event):
+    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\process.py"], shell=True)
+def Edit_process(event):
+    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\process.py"], shell=True)
+
+def start_script_list(event):
+    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
+def edit_script_list(event):
+    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
