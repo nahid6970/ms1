@@ -119,6 +119,8 @@ def Backup_Restore(event):
 def editBackup_Restore(event):
     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
 
+def launch_LockBox(event):
+    subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
 
 
 
