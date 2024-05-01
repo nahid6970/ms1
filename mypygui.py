@@ -531,7 +531,7 @@ ScriptList_bt.bind("<Button-1>", start_script_list)
 ScriptList_bt.bind("<Control-Button-1>", edit_script_list)
 
 LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-LockBox_lb.pack(side="left", padx=(3, 10), pady=(0, 0))
+LockBox_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
 LockBox_lb.bind("<Button-1>",launch_LockBox)
 
 
