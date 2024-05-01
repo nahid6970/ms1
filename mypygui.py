@@ -532,8 +532,8 @@ def compare_path_file():
         names_per_row = 4
         formatted_names = [", ".join(names[i:i + names_per_row]) for i in range(0, len(names), names_per_row)]
         name = "\n".join(formatted_names)
-    status_label_path.config(text=f"{name}")
-    status_label_path.after(1000, compare_path_file)
+    Changes_Monitor_lb.config(text=f"{name}")
+    Changes_Monitor_lb.after(1000, compare_path_file)
 
 
 
@@ -678,8 +678,8 @@ back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_3
 
 
-status_label_path = tk.Label(ROOT1, text="", bg="#1d2027", fg="#FFFFFF")
-status_label_path.pack(side="left",padx=(3,0),pady=(0,0))
+Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#FFFFFF")
+Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
 
 
 #! Right Side
