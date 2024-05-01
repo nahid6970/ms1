@@ -3,6 +3,8 @@ import tkinter as tk
 import keyboard
 import pygetwindow as gw
 import time
+from idlelib.tooltip import Hovertip
+
 
 def switch_to_frame(frame_to_show, frame_to_hide):
     frame_to_hide.pack_forget()
@@ -50,22 +52,75 @@ terminal = tk.Button( root, text="Folder", command=lambda: switch_to_frame(termi
 terminal = tk.Frame(bg="#1D2027")
 terminal.pack_propagate(True)
 
+class ToolTip:
+    def __init__(self, widget, text, delay, font_size=10):
+        self.widget = widget
+        self.text = text
+        self.delay = delay
+        self.font_size = font_size
+        self.tooltip = None
+        self.enter_id = None
+        self.leave_id = None
+        self.widget.bind("<Enter>", self.on_enter_widget)
+        self.widget.bind("<Leave>", self.on_leave_widget)
+
+    def on_enter_widget(self, event):
+        self.widget.on_enter(event)
+        self.on_enter(event)
+
+    def on_leave_widget(self, event):
+        self.widget.on_leave(event)
+        self.on_leave(event)
+
+    def on_enter(self, event):
+        if self.enter_id is None:
+            self.enter_id = self.widget.after(self.delay, self.show_tooltip)
+
+    def on_leave(self, event):
+        if self.enter_id:
+            self.widget.after_cancel(self.enter_id)
+            self.enter_id = None
+        self.hide_tooltip()
+
+    def show_tooltip(self):
+        if self.tooltip is None:
+            x, y, _, _ = self.widget.bbox("insert")
+            x += self.widget.winfo_rootx() + 25
+            y += self.widget.winfo_rooty() + 25
+            self.tooltip = tk.Toplevel(self.widget)
+            self.tooltip.wm_overrideredirect(True)
+            self.tooltip.wm_geometry(f"+{x}+{y}")
+            label = tk.Label(self.tooltip, text=self.text, background="yellow", relief="solid", borderwidth=1, font=("jetbrainsmono nfp", self.font_size))
+            label.pack(ipadx=1)
+
+    def hide_tooltip(self):
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
         self.bg = kw.pop('bg', "#000000")
         self.h_bg = kw.pop('h_bg', "red")
-        self.default_fg = kw.pop('fg', "#FFFFFF")
+        self.fg = kw.pop('fg', "#FFFFFF")
         self.h_fg = kw.pop('h_fg', "#000000")
+        self.tooltip_text = kw.pop('tooltip_text', None)
+        self.tooltip_delay = kw.pop('tooltip_delay', 500)  # Default delay
+        self.tooltip_font_size = kw.pop('tooltip_font_size', 10)  # Default font size
         super().__init__(master, **kw)
         self.bind("<Enter>", self.on_enter)
         self.bind("<Leave>", self.on_leave)
-        self.configure(bg=self.bg, fg=self.default_fg)
+        self.configure(bg=self.bg, fg=self.fg)
+
+        if self.tooltip_text:
+            ToolTip(self, self.tooltip_text, delay=self.tooltip_delay, font_size=self.tooltip_font_size)
 
     def on_enter(self, event):
         self.configure(bg=self.h_bg, fg=self.h_fg)
 
     def on_leave(self, event):
-        self.configure(bg=self.bg, fg=self.default_fg)
+        self.configure(bg=self.bg, fg=self.fg)
+
 
 
 VSCode = HoverButton(Main_Window, bg="#23a8f2", fg="#000000", h_bg="#FFFFFF", h_fg="#000000", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , Main_Window), text="\udb81\ude10")
@@ -156,8 +211,11 @@ Series.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 Fit_Row = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Row"]), text="\udb82\udc37")
 Fit_Row.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
-Fit_Column = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Column"]), text="\udb82\udc35")
+Fit_Column = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0,
+                         tooltip_text="This l is a hover button",tooltip_delay=100,tooltip_font_size=20, 
+                         command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Column"]), text="\udb82\udc35")
 Fit_Column.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+
 
 
 
