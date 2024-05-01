@@ -553,11 +553,6 @@ BackupRestore_bt.pack(side="left",padx=(3,0),pady=(0,0))
 BackupRestore_bt.bind("<Button-1>",Backup_Restore)
 BackupRestore_bt.bind("<Control-Button-1>",editBackup_Restore)
 
-Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
-Search_bt.bind("<Button-1>",fzf_search)
-Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
-
 BT_TOPMOST=tk.Label(ROOT1,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 BT_TOPMOST.pack(side="left",padx=(3,0),pady=(0,0))
 BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking())

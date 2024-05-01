@@ -119,6 +119,11 @@ def Backup_Restore(event):
 def editBackup_Restore(event):
     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
 
+def fzf_search(event):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\utility\\find_files.ps1"])
+def edit_fzfSearch(event):
+    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\find_files.ps1"])
+
 def launch_LockBox(event):
     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
 
