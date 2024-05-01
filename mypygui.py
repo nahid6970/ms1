@@ -678,7 +678,7 @@ back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_3
 
 
-Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#FFFFFF")
+Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
 
 
