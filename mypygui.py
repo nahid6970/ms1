@@ -608,9 +608,6 @@ Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Search_bt.bind("<Button-1>",fzf_search)
 Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
 
-status_label_path = tk.Label(ROOT1, text="", bg="#1d2027", fg="#FFFFFF")
-status_label_path.pack(side="left",padx=(3,0),pady=(0,0))
-
 BT_TOPMOST=tk.Label(ROOT1,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 BT_TOPMOST.pack(side="left",padx=(3,0),pady=(0,0))
 BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking())
@@ -634,41 +631,44 @@ STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="fla
 STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
 
-FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-FR_FFmpeg.pack_propagate(True)
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME))
 FFMPEG_bt.pack(side="left")
-back_ffmpeg=tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG",width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
+FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+FR_FFmpeg.pack_propagate(True)
+BoxForFFmpeg = tk.Frame(FR_FFmpeg, bg="#1d2027")
+BoxForFFmpeg.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
+back_ffmpeg=tk.Button(BoxForFFmpeg,text="\ueb6f FFMPEG",width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
 back_ffmpeg.pack(side="left" )
 def ffmpeg(FR_FFmpeg):
-    Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
-    Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
-    Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
-    Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027",command=start_imgdimension); Imagedimension_bt.pack(side="left",padx=(0,0))
-    Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
+    Trim_bt          =tk.Button(BoxForFFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
+    Convert_bt       =tk.Button(BoxForFFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
+    Dimension_bt     =tk.Button(BoxForFFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
+    Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027",command=start_imgdimension); Imagedimension_bt.pack(side="left",padx=(0,0))
+    Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
 ffmpeg(FR_FFmpeg)
 
+Find_bt = CTkButton(ROOT1, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME))
+Find_bt.pack(side="left")
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_Find.pack_propagate(True)
-Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME))
-Find_bt.pack(side="left")
-back_find=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
+BoxForFind = tk.Frame(FR_Find, bg="#1d2027")
+BoxForFind.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
+back_find=tk.Button(BoxForFind,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
 back_find.pack(side="left" ,padx=(0,0))
 def find(FR_Find):
-    File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
-    Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
-    Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))
-    FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c       ); FZFC_bt.pack   (side="left" ,padx=(0,0))
-    FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d       ); FZFD_bt.pack   (side="left" ,padx=(0,0))
-    ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c       ); ackc_bt.pack   (side="left" ,padx=(0,0))
-    ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0))
+    File_bt    =tk.Button(BoxForFind,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
+    Pattern_bt =tk.Button(BoxForFind,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
+    Size_bt    =tk.Button(BoxForFind,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))
+    FZFC_bt    =tk.Button(BoxForFind,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c       ); FZFC_bt.pack   (side="left" ,padx=(0,0))
+    FZFD_bt    =tk.Button(BoxForFind,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d       ); FZFD_bt.pack   (side="left" ,padx=(0,0))
+    ackc_bt    =tk.Button(BoxForFind,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c       ); ackc_bt.pack   (side="left" ,padx=(0,0))
+    ackd_bt    =tk.Button(BoxForFind,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0))
 find(FR_Find)
-
 
 #! Worspace_1
 WorkSpace_1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 WorkSpace_1.pack_propagate(True)
-Enter_WS1 = CTkButton(MAIN_FRAME, text="1",width=0,fg_color="#ffffff", text_color="#000000", hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME))
+Enter_WS1 = CTkButton(ROOT1, text="1",width=0,fg_color="#ffffff", text_color="#000000", hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME))
 Enter_WS1.pack(side="left", padx=(2,2))
 BoxForWS_1 = tk.Frame(WorkSpace_1, bg="#1D2027")
 BoxForWS_1.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
@@ -676,6 +676,11 @@ back_WS1=tk.Button(BoxForWS_1,text="\uf100",width=0 ,bg="#98c379", fg="#1D2027",
 back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_2
 #! Worspace_3
+
+
+status_label_path = tk.Label(ROOT1, text="", bg="#1d2027", fg="#FFFFFF")
+status_label_path.pack(side="left",padx=(3,0),pady=(0,0))
+
 
 #! Right Side
 ShutReboot=tk.Label(ROOT2, text="\uf011",bg="#1d2027",fg="#ff3f3f",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",15,"bold"))
