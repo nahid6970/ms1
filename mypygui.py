@@ -59,6 +59,8 @@ import time
 import tkinter as tk
 import win32gui
 import win32process
+import filecmp
+
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -130,6 +132,7 @@ class HoverButton(tk.Button):
 def long_running_function():
     time.sleep(0)
     print("Function completed!")
+
 
 # Call the long-running function
 long_running_function()
@@ -480,6 +483,66 @@ def Lockbox_update_label(LockBox_lb):
     LockBox_lb.config(text=status, fg=color, font=("JetBrainsMono NFP", 16, "bold"))
     LockBox_lb.after(1000, lambda: Lockbox_update_label(LockBox_lb))
 
+def compare_path_file():
+    # Source and destination paths (files or directories)
+    source_dest_pairs = {
+"komorebi"       :("C:\\Users\\nahid\\komorebi.json"                                                                                  ,"C:\\ms1\\asset\\komorebi\\komorebi.json"                         ),
+"glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                      ,"C:\\ms1\\asset\\glazewm\\.glaze-wm"                              ),
+"Nilesoft"       :("C:\\Program Files\\Nilesoft Shell\\imports"                                                                       ,"C:\\ms1\\asset\\nilesoft_shell\\imports"                         ),
+"whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                                ,"C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                            ),
+"pwshH":("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt"          ,"C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt"     ),
+"terminal"       :("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"   ,"C:\\ms1\\asset\\terminal\\settings.json\\settings.json"          ),
+"rclone_config"  :("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf"         ),
+"pwsh_profile"   :("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"    ),
+
+"Sr_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
+"Sr_cf"  :("C:\\ProgramData\\Sonarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\config.xml"     ),
+
+"Rr_db"       :("C:\\ProgramData\\Radarr\\radarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"      ),
+"Rr_cf"   :("C:\\ProgramData\\Radarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"     ),
+
+"Pr_db"     :("C:\\ProgramData\\Prowlarr\\prowlarr.db"                                                                           ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"  ),
+"Pr_cf" :("C:\\ProgramData\\Prowlarr\\config.xml"                                                                            ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"   ),
+
+"br_db"      :("C:\\ProgramData\\Bazarr\\data\\db\\bazarr.db"                                                                     ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\bazarr.db"      ),
+"br_cf"  :("C:\\ProgramData\\Bazarr\\data\\config\\config.yaml"                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\config.yaml"    ),
+
+"Rss_db"    :("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database"                                                ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\database"          ),
+"Rss_cf":("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"),
+
+    }
+
+    # Check if all source and destination paths have the same content
+    is_all_same = True
+    names = []
+    for name, (source, dest) in source_dest_pairs.items():
+        if os.path.isdir(source) and os.path.isdir(dest):
+            dcmp = filecmp.dircmp(source, dest)
+            if dcmp.diff_files or dcmp.left_only or dcmp.right_only:
+                is_all_same = False
+                names.append(name)
+        elif os.path.isfile(source) and os.path.isfile(dest):
+            if not filecmp.cmp(source, dest):
+                is_all_same = False
+                names.append(name)
+        else:
+            # Handle the case where source or destination file/directory is missing
+            is_all_same = False
+            names.append(name)
+
+    # Set the emoji and name accordingly
+    if is_all_same:
+        emoji = "✅"
+        name = "✅"
+    else:
+        emoji = "❌"
+        names_per_row = 4
+        formatted_names = [", ".join(names[i:i + names_per_row]) for i in range(0, len(names), names_per_row)]
+        name = "\n".join(formatted_names)
+
+    # Update status label text
+    status_label_path.config(text=f"{name}")
+
 
 
 
@@ -557,6 +620,9 @@ Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width
 Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Search_bt.bind("<Button-1>",fzf_search)
 Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
+
+status_label_path = tk.Label(ROOT1, text="", bg="#1d2027", fg="#FFFFFF")
+status_label_path.pack(side="left",padx=(3,0),pady=(0,0))
 
 BT_TOPMOST=tk.Label(ROOT1,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 BT_TOPMOST.pack(side="left",padx=(3,0),pady=(0,0))
@@ -704,8 +770,7 @@ update_uptime_label()
 update_info_labels()
 check_window_topmost()
 Lockbox_update_label(LockBox_lb)
-
-
+compare_path_file()
 
 
 
