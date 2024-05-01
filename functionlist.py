@@ -133,3 +133,36 @@ pwshH_dst = "C:/Users/nahid/OneDrive/backup/ConsoleHost_history.txt"
 
 terminal_src = "C:/Users/nahid/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
 terminal_dst = "C:/ms1/asset/terminal/settings.json/settings.json"
+
+pwsh_profile_src = "C:/Users/nahid/OneDrive/Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
+pwsh_profile_dst = "C:/ms1/asset/Powershell/Microsoft.PowerShell_profile.ps1"
+
+Sr_db_src = "C:/ProgramData/Sonarr/sonarr.db"
+Sr_db_dst = "C:/Users/nahid/OneDrive/backup/arr/sonarr/sonarr.db"
+
+Sr_cf_src = "C:/ProgramData/Sonarr/config.xml"
+Sr_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/sonarr/config.xml"
+
+Rr_db_src = "C:/ProgramData/Radarr/radarr.db"
+Rr_db_dst = "C:/Users/nahid/OneDrive/backup/arr/radarr/radarr.db"
+
+Rr_cf_src = "C:/ProgramData/Radarr/config.xml"
+Rr_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/radarr/config.xml"
+
+Pr_db_src = "C:/ProgramData/Prowlarr/prowlarr.db"
+Pr_db_dst = "C:/Users/nahid/OneDrive/backup/arr/prowlarr/prowlarr.db"
+
+Pr_cf_src = "C:/ProgramData/Prowlarr/config.xml"
+Pr_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/prowlarr/config.xml"
+
+br_db_src = "C:/ProgramData/Bazarr/data/db/bazarr.db"
+br_db_dst = "C:/Users/nahid/OneDrive/backup/arr/bazarr/bazarr.db"
+
+br_cf_src = "C:/ProgramData/Bazarr/data/config/config.yaml"
+br_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/bazarr/config.yaml"
+
+Rss_db_src = "C:/Users/nahid/scoop/apps/rssguard/current/data4/database"
+Rss_db_dst = "C:/Users/nahid/OneDrive/backup/rssguard/database"
+
+Rss_cf_src = "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"
+Rss_cf_dst = "C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"

@@ -488,29 +488,26 @@ def Lockbox_update_label(LockBox_lb):
 
 def compare_path_file():
     source_dest_pairs = {
-"komorebi"       :(komorebi_src, komorebi_dst),
-"glaze-wm"       :(glazewm_src, glazewm_dst),
-"Nilesoft"       :(Nilesoft_src, Nilesoft_dst),
-"whkd"           :(whkd_src, whkd_dst),
-"pwshH"          :(pwshH_src, pwshH_dst),
-"terminal"       :(terminal_src,terminal_dst),
-"rclone_config"  :(rclone_src , rclone_dst),
-"pwsh_profile"   :("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"    ),
+"komorebi"       :(komorebi_src    ,komorebi_dst    ),
+"glaze-wm"       :(glazewm_src     ,glazewm_dst     ),
+"Nilesoft"       :(Nilesoft_src    ,Nilesoft_dst    ),
+"whkd"           :(whkd_src        ,whkd_dst        ),
+"pwshH"          :(pwshH_src       ,pwshH_dst       ),
+"terminal"       :(terminal_src    ,terminal_dst    ),
+"rclone_config"  :(rclone_src      ,rclone_dst      ),
+"pwsh_profile"   :(pwsh_profile_src,pwsh_profile_dst),
 
-"Sr_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
-"Sr_cf"  :("C:\\ProgramData\\Sonarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\config.xml"     ),
+"Sr_db"          :(Sr_db_src       ,Sr_db_dst       ),
+"Sr_cf"          :(Sr_cf_src       ,Sr_cf_dst       ),
+"Rr_db"          :(Rr_db_src       ,Rr_db_dst       ),
+"Rr_cf"          :(Rr_cf_src       ,Rr_cf_dst       ),
+"Pr_db"          :(Pr_db_src       ,Pr_db_dst       ),
+"Pr_cf"          :(Pr_cf_src       ,Pr_cf_dst       ),
+"br_db"          :(br_db_src       ,br_db_dst       ),
+"br_cf"          :(br_cf_src       ,br_cf_dst       ),
 
-"Rr_db"       :("C:\\ProgramData\\Radarr\\radarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\radarr.db"      ),
-"Rr_cf"   :("C:\\ProgramData\\Radarr\\config.xml"                                                                              ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\radarr\\config.xml"     ),
-
-"Pr_db"     :("C:\\ProgramData\\Prowlarr\\prowlarr.db"                                                                           ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\prowlarr.db"  ),
-"Pr_cf" :("C:\\ProgramData\\Prowlarr\\config.xml"                                                                            ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\prowlarr\\config.xml"   ),
-
-"br_db"      :("C:\\ProgramData\\Bazarr\\data\\db\\bazarr.db"                                                                     ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\bazarr.db"      ),
-"br_cf"  :("C:\\ProgramData\\Bazarr\\data\\config\\config.yaml"                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\bazarr\\config.yaml"    ),
-
-"Rss_db"    :("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database"                                                ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\database"          ),
-"Rss_cf":("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"),
+"Rss_db"         :(Rss_db_src      ,Rss_db_dst      ),
+"Rss_cf"         :(Rss_cf_src      ,Rss_cf_dst      ),
     }
     is_all_same = True
     names = []
