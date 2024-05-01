@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QGridLayout, QWid
 from PyQt6.QtCore import QTimer, Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 import psutil
+from pyadl import ADLManager
 from functionlist import *
 
 
@@ -101,14 +102,6 @@ frame1_layout.addWidget(button2, 0, 1)  # Button 2 at row 0, column 1
 frame1_layout.addWidget(button3, 0, 3, 1, 2)  # Button 3 spans from row 1, column 0 to row 1, column 1
 frame1.setLayout(frame1_layout)
 
-
-# Connect button signals to functions
-def open_backup():
-    print("Open backup")
-
-def edit_backup():
-    print("Edit backup")
-
 close_win.left_clicked.connect(close_window)
 close_win.right_clicked.connect(launch_LockBox)
 close_win.ctrl_left_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
@@ -153,12 +146,9 @@ frame2.setLayout(frame2_layout)
 frame3 = QFrame()
 frame3.setStyleSheet("background-color: #a0997a;")
 frame3_layout = QVBoxLayout()
-frame3_layout
-# Add CPU label to second frame layout
+
 _cpu_label = QLabel("CPU: -%")
 frame3_layout.addWidget(_cpu_label)
-
-# Update CPU label text and style using QTimer
 def update_cpu_label():
     cpu_usage = psutil.cpu_percent()
     _cpu_label.setText(f"CPU: {cpu_usage}%")
@@ -184,8 +174,6 @@ timer = QTimer()
 timer.timeout.connect(update_cpu_label)
 timer.start(1000)
 frame3.setLayout(frame3_layout)
-
-
 
 
 
