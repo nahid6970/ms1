@@ -484,6 +484,7 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 
 
+
 #! Left Side
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=25, width=100,height=20,  text_color="#ffffff",fg_color="#44547a", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
@@ -565,11 +566,13 @@ FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_fra
 FFMPEG_bt.pack(side="left")
 back_ffmpeg=tk.Button(FR_FFmpeg,text="\ueb6f FFMPEG",width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
 back_ffmpeg.pack(side="left" )
-Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
-Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
-Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
-Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027",command=start_imgdimension); Imagedimension_bt.pack(side="left",padx=(0,0))
-Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
+def ffmpeg(FR_FFmpeg):
+    Trim_bt          =tk.Button(FR_FFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
+    Convert_bt       =tk.Button(FR_FFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
+    Dimension_bt     =tk.Button(FR_FFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
+    Imagedimension_bt=tk.Button(FR_FFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027",command=start_imgdimension); Imagedimension_bt.pack(side="left",padx=(0,0))
+    Merge_bt         =tk.Button(FR_FFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
+ffmpeg(FR_FFmpeg)
 
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_Find.pack_propagate(True)
@@ -577,15 +580,28 @@ Find_bt = CTkButton(MAIN_FRAME, text="Find",width=0, command=lambda:switch_to_fr
 Find_bt.pack(side="left")
 back_find=tk.Button(FR_Find,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
 back_find.pack(side="left" ,padx=(0,0))
-File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
-Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
-Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))
-FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c       ); FZFC_bt.pack   (side="left" ,padx=(0,0))
-FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d       ); FZFD_bt.pack   (side="left" ,padx=(0,0))
-ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c       ); ackc_bt.pack   (side="left" ,padx=(0,0))
-ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0))
+def find(FR_Find):
+    File_bt    =tk.Button(FR_Find,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
+    Pattern_bt =tk.Button(FR_Find,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
+    Size_bt    =tk.Button(FR_Find,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))
+    FZFC_bt    =tk.Button(FR_Find,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c       ); FZFC_bt.pack   (side="left" ,padx=(0,0))
+    FZFD_bt    =tk.Button(FR_Find,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d       ); FZFD_bt.pack   (side="left" ,padx=(0,0))
+    ackc_bt    =tk.Button(FR_Find,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c       ); ackc_bt.pack   (side="left" ,padx=(0,0))
+    ackd_bt    =tk.Button(FR_Find,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0))
+find(FR_Find)
 
 
+#! Worspace_1
+WorkSpace_1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+WorkSpace_1.pack_propagate(True)
+Enter_WS1 = CTkButton(MAIN_FRAME, text="1",width=0,fg_color="#ffffff", text_color="#000000", hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME))
+Enter_WS1.pack(side="left", padx=(2,2))
+BoxForWS_1 = tk.Frame(WorkSpace_1, bg="#1D2027")
+BoxForWS_1.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+back_WS1=tk.Button(BoxForWS_1,text="\uf100",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
+back_WS1.pack(side="left" ,padx=(0,0))
+#! Worspace_2
+#! Worspace_3
 
 #! Right Side
 ShutReboot=tk.Label(ROOT2, text="\uf011",bg="#1d2027",fg="#ff3f3f",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",15,"bold"))
@@ -639,6 +655,11 @@ LB_M.bind("<Button-1>",lambda event:toggle_window_size('max'))
 LB_XXX=tk.Label(ROOT2,bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf00d")
 LB_XXX.pack(side="left",padx=(3,10),pady=(0,0))
 LB_XXX.bind("<Button-1>",close_window)
+
+
+#! Slider Left
+#! Slider Right
+
 
 
 
