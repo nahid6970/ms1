@@ -165,6 +165,9 @@ ROOT.bind("<ButtonPress-1>", start_drag)
 ROOT.bind("<ButtonRelease-1>", stop_drag)
 ROOT.bind("<B1-Motion>", do_drag)
 
+default_font = ("Jetbrainsmono nfp", 10)
+ROOT.option_add("*Font", default_font)
+
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
@@ -484,7 +487,6 @@ def Lockbox_update_label(LockBox_lb):
     LockBox_lb.after(1000, lambda: Lockbox_update_label(LockBox_lb))
 
 def compare_path_file():
-    # Source and destination paths (files or directories)
     source_dest_pairs = {
 "komorebi"       :("C:\\Users\\nahid\\komorebi.json"                                                                                  ,"C:\\ms1\\asset\\komorebi\\komorebi.json"                         ),
 "glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                      ,"C:\\ms1\\asset\\glazewm\\.glaze-wm"                              ),
@@ -492,7 +494,7 @@ def compare_path_file():
 "whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                                ,"C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                            ),
 "pwshH":("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt"          ,"C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt"     ),
 "terminal"       :("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"   ,"C:\\ms1\\asset\\terminal\\settings.json\\settings.json"          ),
-"rclone_config"  :("C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.conf"                                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rclone\\rclone.conf"         ),
+"rclone_config"  :(rclone_src , rclone_dst),
 "pwsh_profile"   :("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"    ),
 
 "Sr_db"      :("C:\\ProgramData\\Sonarr\\sonarr.db"                                                                               ,"C:\\Users\\nahid\\OneDrive\\backup\\arr\\sonarr\\sonarr.db"      ),
@@ -509,10 +511,7 @@ def compare_path_file():
 
 "Rss_db"    :("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database"                                                ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\database"          ),
 "Rss_cf":("C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"                                      ,"C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"),
-
     }
-
-    # Check if all source and destination paths have the same content
     is_all_same = True
     names = []
     for name, (source, dest) in source_dest_pairs.items():
@@ -526,11 +525,8 @@ def compare_path_file():
                 is_all_same = False
                 names.append(name)
         else:
-            # Handle the case where source or destination file/directory is missing
             is_all_same = False
             names.append(name)
-
-    # Set the emoji and name accordingly
     if is_all_same:
         emoji = "✅"
         name = "✅"
@@ -539,15 +535,9 @@ def compare_path_file():
         names_per_row = 4
         formatted_names = [", ".join(names[i:i + names_per_row]) for i in range(0, len(names), names_per_row)]
         name = "\n".join(formatted_names)
-
-    # Update status label text
     status_label_path.config(text=f"{name}")
 
 
-
-
-default_font = ("Jetbrainsmono nfp", 10)
-ROOT.option_add("*Font", default_font)
 
 
 #! ALL Boxes
@@ -556,7 +546,6 @@ ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
 
 ROOT2 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
-
 
 
 
