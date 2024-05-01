@@ -488,12 +488,12 @@ def Lockbox_update_label(LockBox_lb):
 
 def compare_path_file():
     source_dest_pairs = {
-"komorebi"       :("C:\\Users\\nahid\\komorebi.json"                                                                                  ,"C:\\ms1\\asset\\komorebi\\komorebi.json"                         ),
-"glaze-wm"       :("C:\\Users\\nahid\\.glaze-wm"                                                                                      ,"C:\\ms1\\asset\\glazewm\\.glaze-wm"                              ),
-"Nilesoft"       :("C:\\Program Files\\Nilesoft Shell\\imports"                                                                       ,"C:\\ms1\\asset\\nilesoft_shell\\imports"                         ),
-"whkd"           :("C:\\Users\\nahid\\.config\\whkdrc"                                                                                ,"C:\\ms1\\asset\\whkd\\whkdrc\\whkdrc"                            ),
-"pwshH":("C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt"          ,"C:\\Users\\nahid\\OneDrive\\backup\\ConsoleHost_history.txt"     ),
-"terminal"       :("C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"   ,"C:\\ms1\\asset\\terminal\\settings.json\\settings.json"          ),
+"komorebi"       :(komorebi_src, komorebi_dst),
+"glaze-wm"       :(glazewm_src, glazewm_dst),
+"Nilesoft"       :(Nilesoft_src, Nilesoft_dst),
+"whkd"           :(whkd_src, whkd_dst),
+"pwshH"          :(pwshH_src, pwshH_dst),
+"terminal"       :(terminal_src,terminal_dst),
 "rclone_config"  :(rclone_src , rclone_dst),
 "pwsh_profile"   :("C:\\Users\\nahid\\OneDrive\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"                              ,"C:\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1"    ),
 
@@ -536,6 +536,7 @@ def compare_path_file():
         formatted_names = [", ".join(names[i:i + names_per_row]) for i in range(0, len(names), names_per_row)]
         name = "\n".join(formatted_names)
     status_label_path.config(text=f"{name}")
+    status_label_path.after(1000, compare_path_file)
 
 
 

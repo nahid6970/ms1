@@ -118,3 +118,18 @@ rclone_dst = "C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
 
 glazewm_src = "C:/Users/nahid/.glaze-wm"
 glazewm_dst = "C:/ms1/asset/glazewm/.glaze-wm"
+
+komorebi_src = "C:/Users/nahid/komorebi.json"
+komorebi_dst = "C:/ms1/asset/komorebi/komorebi.json"
+
+Nilesoft_src = "C:/Program Files/Nilesoft Shell/imports"
+Nilesoft_dst = "C:/ms1/asset/nilesoft_shell/imports"
+
+whkd_src = "C:/Users/nahid/.config/whkdrc"
+whkd_dst = "C:/ms1/asset/whkd/whkdrc/whkdrc"
+
+pwshH_src = "C:/Users/nahid/AppData/Roaming/Microsoft/Windows/PowerShell/PSReadLine/ConsoleHost_history.txt"
+pwshH_dst = "C:/Users/nahid/OneDrive/backup/ConsoleHost_history.txt"
+
+terminal_src = "C:/Users/nahid/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
+terminal_dst = "C:/ms1/asset/terminal/settings.json/settings.json"
