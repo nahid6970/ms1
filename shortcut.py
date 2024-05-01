@@ -211,9 +211,9 @@ Series.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 Fit_Row = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Row"]), text="\udb82\udc37")
 Fit_Row.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
-Fit_Column = HoverButton(Excel_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0,
-                         tooltip_text="This l is a hover button",tooltip_delay=100,tooltip_font_size=20, 
-                         command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Column"]), text="\udb82\udc35")
+Fit_Column = HoverButton(Excel_window, text="\udb82\udc35", bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0,
+                         tooltip_text="Adjust Column",tooltip_delay=100,tooltip_font_size=12, 
+                         command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Column"]))
 Fit_Column.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 
