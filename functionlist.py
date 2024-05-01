@@ -1,23 +1,6 @@
-from datetime import datetime
-from PIL import Image, ImageTk
-from pyadl import ADLManager
-from time import strftime
-# from tkinter import Canvas, Scrollbar
 from tkinter import messagebox
-from tkinter import simpledialog
-from tkinter import ttk
-import ctypes
-import keyboard
-import os
-import psutil
-import pyautogui
 import subprocess
-import sys
-import threading
-import time
-import tkinter as tk
-import win32gui
-import win32process
+
 
 
 # def start_bar_1(event):
@@ -124,7 +107,7 @@ def fzf_search(event):
 def edit_fzfSearch(event):
     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\find_files.ps1"])
 
-def launch_LockBox(event):
+def launch_LockBox(event=None):
     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
 
 
