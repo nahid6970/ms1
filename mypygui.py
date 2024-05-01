@@ -469,6 +469,18 @@ def update_uptime_label():
     uptime_label.after(1000, update_uptime_label)
 
 
+def Lockbox_update_label(LockBox_lb):
+    path = "d:/tt/"
+    if os.path.exists(path):
+        status = "\uf13e"
+        color = "#f44336"
+    else:
+        status = "\uf023"
+        color = "#4CAF50"
+    LockBox_lb.config(text=status, fg=color, font=("JetBrainsMono NFP", 16, "bold"))
+    LockBox_lb.after(1000, lambda: Lockbox_update_label(LockBox_lb))
+
+
 
 
 default_font = ("Jetbrainsmono nfp", 10)
@@ -517,6 +529,13 @@ ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a
 ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
 ScriptList_bt.bind("<Button-1>", start_script_list)
 ScriptList_bt.bind("<Control-Button-1>", edit_script_list)
+
+LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+LockBox_lb.pack(side="left", padx=(3, 10), pady=(0, 0))
+LockBox_lb.bind("<Button-1>",)
+
+
+
 
 LB_1=tk.Label(ROOT1, text="\udb83\udca0",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_1.pack(side="left",padx=(3,0),pady=(0,0))
@@ -682,7 +701,7 @@ gui_thread.start()
 update_uptime_label()
 update_info_labels()
 check_window_topmost()
-
+Lockbox_update_label(LockBox_lb)
 
 
 
