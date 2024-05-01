@@ -546,6 +546,11 @@ Update_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Update_bt.bind("<Button-1>",open_update)
 Update_bt.bind("<Control-Button-1>",edit_update)
 
+Backup_bt=tk.Label(ROOT1, text="\uf01b",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+Backup_bt.pack(side="left",padx=(3,0),pady=(0,0))
+Backup_bt.bind("<Button-1>",open_backup)
+Backup_bt.bind("<Control-Button-1>",edit_backup)
+
 BackupRestore_bt=tk.Label(ROOT1, text="\udb84\udc38",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 BackupRestore_bt.pack(side="left",padx=(3,0),pady=(0,0))
 BackupRestore_bt.bind("<Button-1>",Backup_Restore)
@@ -563,12 +568,7 @@ LB_get=tk.Label(ROOT1, text="G",bg="#1d2027",fg="#ff0000",height=0,width=0,relie
 LB_get.pack(side="left",padx=(3,0),pady=(0,0))
 LB_get.bind("<Button-1>",lambda event:get_active_window_info())
 
-Backup_bt=tk.Label(ROOT1, text="\ue621 \uf093",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-Backup_bt.pack(side="left",padx=(3,0),pady=(0,0))
-Backup_bt.bind("<Button-1>",open_backup)
-Backup_bt.bind("<Control-Button-1>",edit_backup)
-
-bkup=tk.Label(ROOT1,text="\udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 bkup.pack(side="left",padx=(3,0),pady=(0,0))
 bkup.bind ("<Button-1>",start_backup)
 
