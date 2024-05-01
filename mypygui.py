@@ -598,7 +598,7 @@ Enter_WS1 = CTkButton(MAIN_FRAME, text="1",width=0,fg_color="#ffffff", text_colo
 Enter_WS1.pack(side="left", padx=(2,2))
 BoxForWS_1 = tk.Frame(WorkSpace_1, bg="#1D2027")
 BoxForWS_1.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
-back_WS1=tk.Button(BoxForWS_1,text="\uf100",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
+back_WS1=tk.Button(BoxForWS_1,text="\uf100",width=0 ,bg="#98c379", fg="#1D2027", font=("Jetbrainsmono nfp",12), command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
 back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_2
 #! Worspace_3
