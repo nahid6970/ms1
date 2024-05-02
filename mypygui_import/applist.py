@@ -7,8 +7,10 @@ import os
 import ctypes
 
 
-import sys
-sys.path.append('C:/ms1/')
+# import sys
+# sys.path.append('C:/ms1/')
+# from functionlist import *
+
 from functionlist import *
 
 
