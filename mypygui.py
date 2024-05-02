@@ -282,12 +282,12 @@ def toggle_checking():
     if checking:
         if ROOT.attributes('-topmost'):  # Only start checking if already topmost
             check_window_topmost()  # Start checking if toggled on and already topmost
-        BT_TOPMOST.config(fg="#000000")  # Change text color to green
-        BT_TOPMOST.config(bg="#FFFFFF")  # Change text color to green
+        Topmost_lb.config(fg="#000000")  # Change text color to green
+        Topmost_lb.config(bg="#FFFFFF")  # Change text color to green
     else:
         ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
-        BT_TOPMOST.config(fg="#FFFFFF")  # Change text color to white
-        BT_TOPMOST.config(bg="#000000")  # Change text color to white
+        Topmost_lb.config(fg="#FFFFFF")  # Change text color to white
+        Topmost_lb.config(bg="#000000")  # Change text color to white
 
 checking = False
 
@@ -584,10 +584,6 @@ ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
 ScriptList_bt.bind("<Button-1>", start_script_list)
 ScriptList_bt.bind("<Control-Button-1>", edit_script_list)
 
-LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-LockBox_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
-LockBox_lb.bind("<Button-1>",launch_LockBox)
-
 LB_1=tk.Label(ROOT1, text="\udb83\udca0",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_1.pack(side="left",padx=(3,0),pady=(0,0))
 LB_1.bind("<Button-1>",start_bar_1)
@@ -612,10 +608,6 @@ Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width
 Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Search_bt.bind("<Button-1>",fzf_search)
 Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
-
-BT_TOPMOST=tk.Label(ROOT1,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
-BT_TOPMOST.pack(side="left",padx=(3,0),pady=(0,0))
-BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking())
 
 LB_get=tk.Label(ROOT1, text="G",bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 LB_get.pack(side="left",padx=(3,0),pady=(0,0))
@@ -678,6 +670,9 @@ back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_2
 #! Worspace_3
 
+LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+LockBox_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
+LockBox_lb.bind("<Button-1>",launch_LockBox)
 
 Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
@@ -719,6 +714,10 @@ LB_DUC.bind("<Button-1>",None)
 LB_DUD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =8,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUD.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_DUD.bind("<Button-1>",None)
+
+Topmost_lb=tk.Label(ROOT2,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+Topmost_lb.pack(side="left",padx=(3,0),pady=(0,0))
+Topmost_lb.bind  ("<Button-1>",lambda event:toggle_checking())
 
 CLEAR=tk.Label(ROOT2, text="\ueabf",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
