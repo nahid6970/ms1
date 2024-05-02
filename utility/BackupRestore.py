@@ -50,7 +50,8 @@ label_file.grid(row=1, column=2)
 
 #! Folders
 
-glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.rmtree(glazewm_dst) or shutil.copytree(glazewm_src, glazewm_dst))
+# glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.rmtree(glazewm_dst) or shutil.copytree(glazewm_src, glazewm_dst))
+glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: (shutil.rmtree(glazewm_dst) if os.path.exists(glazewm_src) else None) or shutil.copytree(glazewm_src, glazewm_dst))
 glazewm_restore = tk.Button(root, text="glazewm_ Restore", command=lambda: shutil.copytree(glazewm_dst, glazewm_src))
 label_folder = tk.Label(root, wraplength=300) ; compare_folders(glazewm_src, glazewm_dst, label_folder)
 
