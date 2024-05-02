@@ -11,7 +11,7 @@
   "border_offset": -1,
   "border_width": 2,
 
-  "active_window_border": true,
+  "active_window_border": false,
   "active_window_border_style":"Square",
   "active_window_border_colours": { "single": "#00f200", "stack": "#00a542", "monocle": "#ff3399" },
 
