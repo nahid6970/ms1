@@ -44,9 +44,13 @@ def start_tools(event):
 
 def start_applist(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+def edit_applist(event):
+    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\applist.py"], shell=True)
 
 def start_appstore(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+def edit_appstore(event):
+    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
 
 def start_folder(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\folder.py", "-WindowStyle", "Hidden"], shell=True)
@@ -170,3 +174,38 @@ Rss_db_dst = "C:/Users/nahid/OneDrive/backup/rssguard/database"
 
 Rss_cf_src = "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"
 Rss_cf_dst = "C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"
+
+
+
+
+#! App Path
+Zoxide_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe"
+
+ripgrep_winget_path = "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-14.1.0-x86_64-pc-windows-msvc\\rg.exe"
+ripgrep_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\ripgrep\\current\\rg.exe"
+
+WinToy_winget_path = "C:\\Program Files\\WindowsApps\\11413PtruceanBogdan.Wintoys_1.3.0.0_x64__ankwhmsh70gj6\\Wintoys.exe"
+
+VSCodium_winget_path = "C:\\Users\\nahid\\AppData\\Local\\Programs\\VSCodium\\VSCodium.exe"
+
+whkd_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe"
+
+komorebi_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\komorebi\\current\\komorebi.exe"
+
+GlazeWM_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\glazewm\\current\\GlazeWM.exe"
+
+X_mousebutton_winget_path = "C:\\Program Files\\Highresolution Enterprises\\X-Mouse Button Control\\XMouseButtonControl.exe"
+
+BulkUninstall_winget_path = "C:\\Program Files\\BCUninstaller\\BCUninstaller.exe"
+
+Ack_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\ack\\current\\ack.bat"
+
+Adb_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\adb\\current\\platform-tools\\adb.exe"
+
+Alacritty_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\alacritty\\current\\alacritty.exe"
+Alacritty_winget_path = "C:\\Program Files\\Alacritty\\alacritty.exe"
+
+Aria2_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\aria2\\current\\aria2c.exe"
+Aria2_winget_path = "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links\\aria2c.exe"
+
+AudioRelay_winget_path = "C:\\Program Files (x86)\\AudioRelay\\AudioRelay.exe"
