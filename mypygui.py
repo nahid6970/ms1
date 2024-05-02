@@ -617,10 +617,6 @@ BT_TOPMOST=tk.Label(ROOT1,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0
 BT_TOPMOST.pack(side="left",padx=(3,0),pady=(0,0))
 BT_TOPMOST.bind  ("<Button-1>",lambda event:toggle_checking())
 
-CLEAR=tk.Label(ROOT1, text="\ueabf",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
-CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
-CLEAR.bind("<Button-1>",lambda event:clear_screen())
-
 LB_get=tk.Label(ROOT1, text="G",bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 LB_get.pack(side="left",padx=(3,0),pady=(0,0))
 LB_get.bind("<Button-1>",lambda event:get_active_window_info())
@@ -723,6 +719,10 @@ LB_DUC.bind("<Button-1>",None)
 LB_DUD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =8,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUD.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_DUD.bind("<Button-1>",None)
+
+CLEAR=tk.Label(ROOT2, text="\ueabf",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
+CLEAR.bind("<Button-1>",lambda event:clear_screen())
 
 LB_R=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2")
 LB_R.pack(side="left",padx=(3,0 ),pady=(0,0))
