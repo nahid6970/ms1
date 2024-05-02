@@ -6,12 +6,12 @@ from tkinter import ttk
 import os
 import ctypes
 
+from functionlist import *
 
 # import sys
 # sys.path.append('C:/ms1/')
 # from functionlist import *
 
-from functionlist import *
 
 
 def set_console_title(title):
