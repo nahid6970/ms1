@@ -371,8 +371,8 @@ def update_info_labels():
     # Change background and foreground color based on usage thresholds
     LB_RAM.config(bg='#f12c2f' if ram_usage > 80 else '#1d2027', fg='#FFFFFF' if ram_usage > 80 else '#ff934b')
     LB_CPU.config(bg='#f12c2f' if cpu_usage > 80 else '#1d2027', fg='#FFFFFF' if cpu_usage > 80 else '#14bcff')
-    LB_DUC.config(bg='#f12c2f' if disk_c_usage > 90 else '#464b57', fg='#FFFFFF' if disk_c_usage > 90 else '#fff')
-    LB_DUD.config(bg='#f12c2f' if disk_d_usage > 90 else '#464b57', fg='#FFFFFF' if disk_d_usage > 90 else '#fff')
+    LB_DUC.config(bg='#f12c2f' if disk_c_usage > 90 else '#044568', fg='#FFFFFF' if disk_c_usage > 90 else '#fff')
+    LB_DUD.config(bg='#f12c2f' if disk_d_usage > 90 else '#044568', fg='#FFFFFF' if disk_d_usage > 90 else '#fff')
 
     ROOT.after(1000, update_info_labels)
 # Initialize static variables for network speed calculation
@@ -707,11 +707,11 @@ LB_RAM=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",
 LB_RAM.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_RAM.bind("<Button-1>",None)
 
-LB_DUC=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =8,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_DUC=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUC.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_DUC.bind("<Button-1>",None)
 
-LB_DUD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =8,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_DUD=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_DUD.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_DUD.bind("<Button-1>",None)
 
