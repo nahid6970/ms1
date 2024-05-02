@@ -270,3 +270,32 @@ Aria2_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\aria2\\current\\aria2c.exe"
 Aria2_winget_path = "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links\\aria2c.exe"
 
 AudioRelay_winget_path = "C:\\Program Files (x86)\\AudioRelay\\AudioRelay.exe"
+
+AutoHotkeyv1_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\autohotkey1.1\\current\\AutoHotkeyU64.exe"
+AutoHotkeyv1_winget_path = "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps\\AutoHotkeyU64.exe"
+
+AutoHotkeyv2_winget_path = "C:\\Users\\nahid\\AppData\\Local\\Programs\\AutoHotkey\\v2\\AutoHotkey64.exe"
+
+Autoruns_winget_path="C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\\autoruns.exe"
+
+BareGrep_scoop_path="C:\\Users\\nahid\\scoop\\apps\\baregrep\\current\\baregrep.exe"
+
+Bat_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\bat\\current\\bat.exe"
+
+Bazarr_winget_path = "C:\\Bazarr\\bazarr.py"
+
+Bitwarden_winget_path="C:\\Users\\nahid\\AppData\\Local\\Programs\\Bitwarden\\Bitwarden.exe"
+
+btop_scoop_path="C:\\Users\\nahid\\scoop\\apps\\btop\\current\\btop.exe"
+
+Capture2Text_scoop_path="C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"
+
+CheatEngine_scoop_path ="C:\\Users\\nahid\\scoop\\apps\\cheat-engine\\current\\Cheat Engine.exe"
+
+clink_scoop_path="C:\\Users\\nahid\\scoop\\apps\\clink\\current\\clink_x64.exe"
+
+Cmder_scoop_path="C:\\Users\\nahid\\scoop\\apps\\cmder\\current\\Cmder.exe"
+
+CPUZ_scoop_path="C:\\Users\\nahid\\scoop\\apps\\cpu-z\\current\\cpuz_x64.exe"
+
+CrystalDiskInfo_scoop_path="C:\\Users\\nahid\\scoop\\apps\\crystaldiskinfo\\current\\DiskInfo64.exe"
