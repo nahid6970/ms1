@@ -565,7 +565,7 @@ AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
 AppManagement_bt.bind("<Button-1>", start_appstore)
 AppManagement_bt.bind("<Button-3>", start_applist)
 
-Folder_bt=CTkLabel(ROOT1, text="\ueaf7", bg_color="#1d2027",text_color="#ffd900", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+Folder_bt=CTkLabel(ROOT1, text="\ueaf7", font=("JetBrainsMono NFP",18,"bold"), anchor="w", bg_color="#1d2027",text_color="#ffd900")
 Folder_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Folder_bt.bind("<Button-1>", start_folder)
 Folder_bt.bind("<Control-Button-1>", Edit_folder)
