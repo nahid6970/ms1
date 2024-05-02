@@ -332,7 +332,7 @@ def update_info_labels():
     # Set background color based on GPU usage
     if gpu_usage == "0":
         LB_GPU.config(bg="#1d2027" , fg="#00ff21")
-    elif float(gpu_usage) < 25:
+    elif float(gpu_usage) < 50:
         LB_GPU.config(bg="#1d2027" , fg="#00ff21")
     elif 10 <= float(gpu_usage) < 50:
         LB_GPU.config(bg="#ff9282" , fg="#000000")
@@ -695,15 +695,15 @@ Upload_lb.bind("<Button-1>",None)
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
-LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_CPU.bind("<Button-1>",kill_proces)
 
-LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#e22910",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_GPU.bind("<Button-1>",None)
 
-LB_RAM=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#ffffff",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_RAM=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#f08d0c",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_RAM.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_RAM.bind("<Button-1>",None)
 
