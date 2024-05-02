@@ -679,12 +679,12 @@ Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
 
 
 #! Right Side
-ShutReboot=tk.Label(ROOT2, text="\uf011",bg="#1d2027",fg="#ff3f3f",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",15,"bold"))
+ShutReboot=CTkButton(ROOT2, text="\uf011",fg_color="#1d2027",text_color="#ff3f3f", hover_color="#770c0c",border_color="#FF0000", border_width=1,corner_radius=5,height=20,width=50, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
 ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
 ShutReboot.bind("<Button-3>",force_restart)
 
-Download_lb=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+Download_lb=tk.Label(ROOT2,bg="#000000",fg="#080505",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Download_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
 Download_lb.bind("<Button-1>",None)
 
