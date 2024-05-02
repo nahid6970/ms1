@@ -326,8 +326,8 @@ def update_info_labels():
     LB_GPU.config(text=f'{gpu_usage}%')
     LB_DUC['text'] = f'\uf0a0 {disk_c_usage}%'
     LB_DUD['text'] = f'\uf0a0 {disk_d_usage}%'
-    LB_UPLOAD['text'] = f' ▲ {upload_speed} '
-    LB_DWLOAD['text'] = f' ▼ {download_speed} '
+    Upload_lb['text'] = f' ▲ {upload_speed} '
+    Download_lb['text'] = f' ▼ {download_speed} '
 
     # Set background color based on GPU usage
     if gpu_usage == "0":
@@ -343,26 +343,26 @@ def update_info_labels():
 
     # Set background color based on upload speed
     if upload_speed == "0":
-        LB_UPLOAD.config(bg='#1d2027', fg="#FFFFFF")
+        Upload_lb.config(bg='#1d2027', fg="#FFFFFF")
     elif float(upload_speed) < 0.1:  # Less than 100 KB
-        LB_UPLOAD.config(bg='#1d2027', fg="#FFFFFF")
+        Upload_lb.config(bg='#1d2027', fg="#FFFFFF")
     elif 0.1 <= float(upload_speed) < 0.5:  # 100 KB to 499 KB
-        LB_UPLOAD.config(bg='#A8E4A8', fg="#000000")
+        Upload_lb.config(bg='#A8E4A8', fg="#000000")
     elif 0.5 <= float(upload_speed) < 1:  # 500 KB to 1 MB
-        LB_UPLOAD.config(bg='#67D567', fg='#000000')  # Normal green
+        Upload_lb.config(bg='#67D567', fg='#000000')  # Normal green
     else:
-        LB_UPLOAD.config(bg='#32AB32', fg='#000000')  # Dark green
+        Upload_lb.config(bg='#32AB32', fg='#000000')  # Dark green
     # Set background color based on download speed
     if download_speed == "0":
-        LB_DWLOAD.config(bg='#1d2027' , fg="#FFFFFF")
+        Download_lb.config(bg='#1d2027' , fg="#FFFFFF")
     elif float(download_speed) < 0.1:  # Less than 100 KB
-        LB_DWLOAD.config(bg='#1d2027', fg="#FFFFFF")
+        Download_lb.config(bg='#1d2027', fg="#FFFFFF")
     elif 0.1 <= float(download_speed) < 0.5:  # 100 KB to 499 KB
-        LB_DWLOAD.config(bg='#A8E4A8', fg="#000000")
+        Download_lb.config(bg='#A8E4A8', fg="#000000")
     elif 0.5 <= float(download_speed) < 1:  # 500 KB to 1 MB
-        LB_DWLOAD.config(bg='#67D567', fg='#000000')  # Normal green
+        Download_lb.config(bg='#67D567', fg='#000000')  # Normal green
     else:
-        LB_DWLOAD.config(bg='#32AB32', fg='#000000')  # Dark green
+        Download_lb.config(bg='#32AB32', fg='#000000')  # Dark green
 
     #        # Write speed information to a text file
     # with open("d:\\netspeed_download_upload.log", "a") as logfile:
@@ -689,13 +689,13 @@ ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
 ShutReboot.bind("<Button-3>",force_restart)
 
-LB_DWLOAD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-LB_DWLOAD.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_DWLOAD.bind("<Button-1>",None)
+Download_lb=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+Download_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
+Download_lb.bind("<Button-1>",None)
 
-LB_UPLOAD=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-LB_UPLOAD.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_UPLOAD.bind("<Button-1>",None)
+Upload_lb=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+Upload_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
+Upload_lb.bind("<Button-1>",None)
 
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
