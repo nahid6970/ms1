@@ -173,7 +173,7 @@ screen_height = ROOT.winfo_screenheight()
 
 x = screen_width//2 - 1920//2
 # y = screen_height//2 - 800//2
-y = screen_height-47-37
+y = screen_height-47-40
 ROOT.geometry(f"1920x39+{x}+{y}") #! overall size of the window
 
 #! Resize Window
