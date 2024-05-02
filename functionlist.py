@@ -112,6 +112,8 @@ def edit_fzfSearch(event):
 def launch_LockBox(event=None):
     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
 
+def kill_proces(event):
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\utility\\kill_process.ps1"])
 
 
 #! Path List
