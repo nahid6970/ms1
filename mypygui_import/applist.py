@@ -180,6 +180,7 @@ def show_options(options):
 # Define applications and their information
 applications = [
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
+{"name": "Workspace Utilities","scoop_name": "workspaceutilities","scoop_path": r'C:\\Users\\nahid\\scoop\\apps\\workspaceutilities\\current\\WorkspaceUtilities.exe',"winget_name": "WingetName","winget_path": r""} ,
 # {"name": "MiniConda","scoop_name": "miniconda3","scoop_path": r'xx',"winget_name": "Anaconda.Miniconda3","winget_path": r"xx"},
 # {"name": "AnaConda","scoop_name": "anaconda3","scoop_path": r'xx',"winget_name": "Anaconda.Anaconda3","winget_path": r"xx"},
 {"name":"Zoxide"                ,"scoop_name"          :"zoxide"               ,"scoop_path":Zoxide_scoop_path   ,"winget_name":"WingetName"                         ,"winget_path":r""}                      ,

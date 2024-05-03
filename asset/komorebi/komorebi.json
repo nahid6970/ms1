@@ -61,6 +61,11 @@
       "kind": "Exe",
       "id": "GlassWire.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "fdm.exe",
+      "matching_strategy": "Equals"
     }
   ]
 }
