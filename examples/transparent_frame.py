@@ -33,7 +33,7 @@ label.pack(ipadx=1, ipady=1, padx=1)
 label.bind("<Button-1>", lambda event: open_directory())
 
 # Create a label for text
-text_label = Label(transparent_label, text="D Drive", font=("Helvetica", 12), bg='#ab23ff', fg="#fff")
+text_label = Label(transparent_label, text="D Drive", font=("Helvetica", 12), bg='#ab23ff', fg="#ff0101")
 text_label.pack(pady=(0, 10))  # Adjust the padding as needed
 
 win.mainloop()
