@@ -470,7 +470,7 @@ def get_system_uptime():
     return int(hours), int(minutes), int(seconds)
 def format_uptime():
     hours, minutes, seconds = get_system_uptime()
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    return f"\udb81\udf8c {hours:02d}:{minutes:02d}:{seconds:02d}"
 def update_uptime_label():
     uptime_str = format_uptime()
     uptime_label.configure(text=f"{uptime_str}")
@@ -550,7 +550,7 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 
 #! Left Side
-uptime_label=CTkLabel(ROOT1, text="", corner_radius=25, width=100,height=20,  text_color="#ffffff",fg_color="#44547a", font=("JetBrainsMono NFP" ,16,"bold"))
+uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#000000",fg_color="#FFFFFF", font=("JetBrainsMono NFP" ,12,"bold"))
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
 uptime_label.bind("<Button-1>",None)
 
