@@ -44,7 +44,7 @@ from datetime import datetime
 from PIL import Image, ImageTk
 from pyadl import ADLManager
 from time import strftime
-from tkinter import messagebox
+from tkinter import Label, messagebox
 from tkinter import simpledialog
 from tkinter import ttk
 import ctypes
@@ -227,6 +227,12 @@ window_size_state = 'line'
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920, height=800)
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1, expand=True)  #! Add some padding at the top
+
+# Adding transparent background property
+ROOT.wm_attributes('-transparentcolor', '#000001')
+
+
+
 
 
 #?  ██████╗  ██████╗  ██████╗ ████████╗    ███████╗██████╗  █████╗ ███╗   ███╗███████╗
@@ -550,7 +556,7 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 
 #! Left Side
-uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#000000",fg_color="#FFFFFF", font=("JetBrainsMono NFP" ,12,"bold"))
+uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#000000",fg_color="#ffffff", font=("JetBrainsMono NFP" ,12,"bold"))
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
 uptime_label.bind("<Button-1>",None)
 
