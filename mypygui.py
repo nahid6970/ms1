@@ -771,7 +771,7 @@ gui_thread.start()
 
 update_uptime_label()
 update_info_labels()
-check_window_topmost()
+# check_window_topmost()
 Lockbox_update_label(LockBox_lb)
 compare_path_file()
 
