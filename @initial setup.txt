@@ -9,7 +9,7 @@ zoxide
 
 *** use wine aero to get access of C:\Users\nahid\AppData\Local\Packages\
 
-run mypygui using powershell or pwsh not cmd
+run mypygui using powershell or pwsh not cmd for file path not found error
 
 mklink
 New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force #[pwsh]
