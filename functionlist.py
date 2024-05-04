@@ -236,8 +236,8 @@ Rss_db_dst = "C:/Users/nahid/OneDrive/backup/rssguard/database"
 Rss_cf_src = "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"
 Rss_cf_dst = "C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"
 
-
-
+terminal_src = "C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
+terminal_dst = "C:\\ms1\\asset\\terminal\\settings.json"
 
 #! App Path
 Zoxide_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe"

@@ -48,6 +48,15 @@ rclone_restore.grid(row=1, column=1)
 label_file.grid(row=1, column=2)
 
 
+terminal_backup = tk.Button(root, text="terminal Backup", command=lambda: shutil.copyfile(terminal_src, terminal_dst))
+terminal_restore = tk.Button(root, text="terminal Restore", command=lambda: shutil.copyfile(terminal_dst, terminal_src))
+label_file = tk.Label(root, wraplength=300) ; compare_files(terminal_src, terminal_dst, label_file)
+
+terminal_backup.grid(row=2, column=0)
+terminal_restore.grid(row=2, column=1)
+label_file.grid(row=2, column=2)
+
+
 #! Folders
 
 #! glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.rmtree(glazewm_dst) or shutil.copytree(glazewm_src, glazewm_dst))
@@ -55,9 +64,9 @@ glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: (shutil
 glazewm_restore = tk.Button(root, text="glazewm_ Restore", command=lambda: shutil.copytree(glazewm_dst, glazewm_src))
 label_folder = tk.Label(root, wraplength=300) ; compare_folders(glazewm_src, glazewm_dst, label_folder)
 
-glazewm_backup.grid(row=2, column=0)
-glazewm_restore.grid(row=2, column=1)
-label_folder.grid(row=2, column=2)
+glazewm_backup.grid(row=3, column=0)
+glazewm_restore.grid(row=3, column=1)
+label_folder.grid(row=3, column=2)
 
 root.mainloop()
 
