@@ -124,18 +124,39 @@ komorebi_backup.grid(row=6, column=0)
 komorebi_restore.grid(row=6, column=1)
 label_file.grid(row=6, column=2)
 
+#!  ██████  ██████  ███    ███ ███    ███  █████  ███    ██ ██████      ██   ██ ██ ███████ ████████  ██████  ██████  ██    ██
+#! ██      ██    ██ ████  ████ ████  ████ ██   ██ ████   ██ ██   ██     ██   ██ ██ ██         ██    ██    ██ ██   ██  ██  ██
+#! ██      ██    ██ ██ ████ ██ ██ ████ ██ ███████ ██ ██  ██ ██   ██     ███████ ██ ███████    ██    ██    ██ ██████    ████
+#! ██      ██    ██ ██  ██  ██ ██  ██  ██ ██   ██ ██  ██ ██ ██   ██     ██   ██ ██      ██    ██    ██    ██ ██   ██    ██
+#!  ██████  ██████  ██      ██ ██      ██ ██   ██ ██   ████ ██████      ██   ██ ██ ███████    ██     ██████  ██   ██    ██
+
+pwshH_backup = tk.Button(root, text="pwshH Backup", command=lambda: shutil.copyfile(pwshH_src, pwshH_dst))
+pwshH_restore = tk.Button(root, text="pwshH Restore", command=lambda: shutil.copyfile(pwshH_dst, pwshH_src))
+label_file = tk.Label(root, wraplength=300) ; compare_files(pwshH_src, pwshH_dst, label_file)
+
+pwshH_backup.grid(row=7, column=0)
+pwshH_restore.grid(row=7, column=1)
+label_file.grid(row=7, column=2)
 
 
 
 
+"""
+███████╗ ██████╗ ███╗   ██╗ █████╗ ██████╗ ██████╗
+██╔════╝██╔═══██╗████╗  ██║██╔══██╗██╔══██╗██╔══██╗
+███████╗██║   ██║██╔██╗ ██║███████║██████╔╝██████╔╝
+╚════██║██║   ██║██║╚██╗██║██╔══██║██╔══██╗██╔══██╗
+███████║╚██████╔╝██║ ╚████║██║  ██║██║  ██║██║  ██║
+╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+"""
 
+Sr_db_backup = tk.Button(root, text="Sr_db Backup", command=lambda: shutil.copyfile(Sr_db_src, Sr_db_dst))
+Sr_db_restore = tk.Button(root, text="Sr_db Restore", command=lambda: shutil.copyfile(Sr_db_dst, Sr_db_src))
+label_file = tk.Label(root, wraplength=300) ; compare_files(Sr_db_src, Sr_db_dst, label_file)
 
-
-
-
-
-
-
+Sr_db_backup.grid(row=8, column=0)
+Sr_db_restore.grid(row=8, column=1)
+label_file.grid(row=8, column=2)
 
 
 
@@ -145,44 +166,3 @@ label_file.grid(row=6, column=2)
 
 
 root.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def compare_files(source, destination, label):
-#     if not os.path.exists(source) or not os.path.exists(destination):
-#         label.config(text="❌ Similar files not found")
-#     else:
-#         if filecmp.cmp(source, destination):
-#             label.config(text="✔️ Files are equal")
-#         else:
-#             label.config(text="❌ Files are different")
-
-        # # Get last modified times of the files
-        # source_modified = os.path.getmtime(source)
-        # destination_modified = os.path.getmtime(destination)
-
-        # # Convert last modified times to human-readable format (12-hour format)
-        # source_last_modified = datetime.fromtimestamp(source_modified).strftime('%Y-%m-%d %I:%M:%S %p')
-        # destination_last_modified = datetime.fromtimestamp(destination_modified).strftime('%Y-%m-%d %I:%M:%S %p')
-
-        # if source_modified > destination_modified:
-        #     label.config(text=label.cget("text") + f"\nLast modified: {source_last_modified} ({source})")
-        # else:
-        #     label.config(text=label.cget("text") + f"\nLast modified: {destination_last_modified} ({destination})")
