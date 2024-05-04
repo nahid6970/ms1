@@ -158,6 +158,22 @@ Sr_db_backup.grid(row=8, column=0)
 Sr_db_restore.grid(row=8, column=1)
 label_file.grid(row=8, column=2)
 
+Rr_db_backup = tk.Button(root, text="Rr_db Backup", command=lambda: shutil.copyfile(Rr_db_src, Rr_db_dst))
+Rr_db_restore = tk.Button(root, text="Rr_db Restore", command=lambda: shutil.copyfile(Rr_db_dst, Rr_db_src))
+label_file = tk.Label(root, wraplength=300) ; compare_files(Rr_db_src, Rr_db_dst, label_file)
+
+Rr_db_backup.grid(row=9, column=0)
+Rr_db_restore.grid(row=9, column=1)
+label_file.grid(row=9, column=2)
+
+Pr_db_backup = tk.Button(root, text="Pr_db Backup", command=lambda: shutil.copyfile(Pr_db_src, Pr_db_dst))
+Pr_db_restore = tk.Button(root, text="Pr_db Restore", command=lambda: shutil.copyfile(Pr_db_dst, Pr_db_src))
+label_file = tk.Label(root, wraplength=300) ; compare_files(Pr_db_src, Pr_db_dst, label_file)
+
+Pr_db_backup.grid(row=10, column=0)
+Pr_db_restore.grid(row=10, column=1)
+label_file.grid(row=10, column=2)
+
 
 
 
