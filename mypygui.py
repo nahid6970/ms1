@@ -622,7 +622,7 @@ LB_get.bind("<Button-1>",lambda event:get_active_window_info())
 
 bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 bkup.pack(side="left",padx=(3,0),pady=(0,0))
-bkup.bind ("<Button-1>",start_backup)
+bkup.bind ("<Button-1>",git_backup)
 
 STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))

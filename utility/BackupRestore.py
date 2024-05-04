@@ -49,14 +49,16 @@ label_file.grid(row=1, column=2)
 
 
 terminal_backup = tk.Button(root, text="terminal Backup", command=lambda: shutil.copyfile(terminal_src, terminal_dst))
-terminal_backup_location = tk.Button(root, text="src_dir", command=lambda: subprocess.Popen(["explorer", os.path.dirname(terminal_src)], shell=True))
+terminal_src_location = tk.Button(root, text="src_dir", command=lambda: subprocess.Popen(["explorer", os.path.dirname(terminal_src)], shell=True))
 terminal_restore = tk.Button(root, text="terminal Restore", command=lambda: shutil.copyfile(terminal_dst, terminal_src))
+terminal_dst_location = tk.Button(root, text="src_dir", command=lambda: subprocess.Popen(["explorer", os.path.dirname(terminal_dst)], shell=True))
 label_file = tk.Label(root, wraplength=300) ; compare_files(terminal_src, terminal_dst, label_file)
 
 terminal_backup.grid(row=2, column=0)
-terminal_backup_location.grid(row=2, column=1)
+terminal_src_location.grid(row=2, column=1)
 terminal_restore.grid(row=2, column=2)
-label_file.grid(row=2, column=3)
+terminal_dst_location.grid(row=2, column=3)
+label_file.grid(row=2, column=4)
 
 
 #! Folders
