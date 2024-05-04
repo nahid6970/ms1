@@ -1,6 +1,5 @@
 #? https://pypi.org/project/pretty-errors/
 
-#! Now import the libraries
 from customtkinter import *
 from datetime import datetime
 from functionlist import *
@@ -17,7 +16,6 @@ import keyboard
 import os
 import psutil
 import pyautogui
-import subprocess
 import subprocess
 import sys
 import threading
@@ -48,7 +46,7 @@ $$ | \$$ |\$$$$$$$ |$$ |  $$ |$$ |\$$$$$$$ |$$ | \$$ |$$ |  $$ |
 
 """)
 
-# Vaiables to track the position of the mouse when clicking​⁡
+#! Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
 
 def start_drag(event):
@@ -126,9 +124,9 @@ ROOT.overrideredirect(True)  # Remove default borders
 BORDER_FRAME = create_custom_border(ROOT)
 
 # Add bindings to make the window movable
-ROOT.bind("<ButtonPress-1>", start_drag)
-ROOT.bind("<ButtonRelease-1>", stop_drag)
-ROOT.bind("<B1-Motion>", do_drag)
+# ROOT.bind("<ButtonPress-1>", start_drag)
+# ROOT.bind("<ButtonRelease-1>", stop_drag)
+# ROOT.bind("<B1-Motion>", do_drag)
 
 default_font = ("Jetbrainsmono nfp", 10)
 ROOT.option_add("*Font", default_font)
@@ -160,7 +158,7 @@ def toggle_window_size(size):
     elif size == 'max':
         ROOT.geometry('1920x140')
         x = screen_width // 2 - 1920 // 2
-        y = 993
+        y = 892
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
