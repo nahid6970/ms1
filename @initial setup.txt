@@ -1,9 +1,11 @@
-Update all packages first from ms store
+* Update all packages first from ms store
 
+* install first for error management
+powershell
 scoop-search
 scoop-completion (reset bucket or rm for error)
 Set-PsFzfOption (comment out)
-zoxide 
+zoxide
 
 mklink
 New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force #[pwsh]
