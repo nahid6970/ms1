@@ -862,8 +862,8 @@ Set-Alias trim C:\ms1\scripts\ffmpeg\trim.ps1
 
 
 # Override PSReadLine's history search
-Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' `
-                -PSReadlineChordReverseHistory 'Ctrl+r'
+#Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' `
+#                -PSReadlineChordReverseHistory 'Ctrl+r'
 
 
 

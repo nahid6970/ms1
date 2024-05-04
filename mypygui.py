@@ -20,6 +20,7 @@ required_libraries = [
     "tkinter",
     "Image",
     "lib",
+    "Pillow ",
     "pywin32",
     # "tkinter.messagebox",
     # "tkinter.ttk",

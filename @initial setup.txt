@@ -1,0 +1,14 @@
+Update all packages first from ms store
+
+scoop-search
+scoop-completion (reset bucket or rm for error)
+Set-PsFzfOption (comment out)
+zoxide 
+
+mklink
+New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
+
+
+pip required packages
+pip install pillow importlib pyadl customtkinter keyboard psutil pyautogui pywin32
