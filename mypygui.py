@@ -139,7 +139,7 @@ screen_height = ROOT.winfo_screenheight()
 x = screen_width//2 - 1920//2
 # y = screen_height//2 - 800//2
 # y = screen_height-47-40
-y = 0
+y = 993
 ROOT.geometry(f"1920x39+{x}+{y}") #! overall size of the window
 
 #! Resize Window
@@ -153,14 +153,14 @@ def toggle_window_size(size):
     if size == 'line':
         ROOT.geometry('1920x39')
         x = screen_width // 2 - 1920 // 2
-        y = 0
+        y = 993
         ROOT.configure(bg='red')
         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
     elif size == 'max':
         ROOT.geometry('1920x140')
         x = screen_width // 2 - 1920 // 2
-        y = 0
+        y = 993
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
