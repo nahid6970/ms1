@@ -53,4 +53,5 @@ yasb
 # whkd
 komorebic start
 
-start "C:\Users\nahid\scoop\apps\workspaceutilities\current\WorkspaceUtilities.exe"
+Start-Process "C:\Users\nahid\scoop\apps\workspaceutilities\current\WorkspaceUtilities.exe"
+Start-Process "C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"
