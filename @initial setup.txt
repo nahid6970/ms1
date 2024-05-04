@@ -20,10 +20,10 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\
 ** Command_history
 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Target "C:\Users\nahid\OneDrive\backup\ConsoleHost_history.txt" -Force #[pwsh]
 
-** Sonarr
+** Sonarr first let all update
 New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Sonarr\sonarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\sonarr\sonarr.db" -Force #[pwsh]
 
-** Radarr
+** Radarr first let all update
 New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Radarr\radarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\radarr\radarr.db" -Force #[pwsh]
 
 ** Prowlarr
