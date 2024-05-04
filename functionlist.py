@@ -301,3 +301,16 @@ Cmder_scoop_path="C:\\Users\\nahid\\scoop\\apps\\cmder\\current\\Cmder.exe"
 CPUZ_scoop_path="C:\\Users\\nahid\\scoop\\apps\\cpu-z\\current\\cpuz_x64.exe"
 
 CrystalDiskInfo_scoop_path="C:\\Users\\nahid\\scoop\\apps\\crystaldiskinfo\\current\\DiskInfo64.exe"
+
+notepadplusplus_winget_path="C:\\Program Files\\Notepad++\\notepad++.exe"
+
+Ditto_scoop_path = r'C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe'
+DotNet8_wp = r"C:\Program Files\dotnet\dotnet.exe"
+eza_sp=r'C:\Users\nahid\scoop\apps\eza\current\eza.exe'
+FFmpegBatch_sp=r'C:\Users\nahid\scoop\apps\ffmpeg-batch\current\FFBatch.exe'
+ffmpeg_sp=r'C:\Users\nahid\scoop\apps\ffmpeg\current\bin\ffmpeg.exe'
+FileConverter_wp=r"C:\Program Files\File Converter\FileConverter.exe"
+filezillaServer_sp=r'C:\Users\nahid\scoop\apps\filezilla-server\current\filezilla-server.exe'
+flaresolverr_sp=r'C:\Users\nahid\scoop\apps\flaresolverr\current\flaresolverr.exe'
+FreeDownloadManager_wp=r"C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe"
+fzf_sp=r'C:\Users\nahid\scoop\apps\fzf\current\fzf.exe'
