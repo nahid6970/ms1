@@ -37,7 +37,12 @@ root.title("Backup & Restore")
 default_font = ("Jetbrainsmono nfp", 14, "italic")
 root.option_add("*Font", default_font)
 
-#! Files
+
+#! ██████   ██████ ██       ██████  ███    ██ ███████
+#! ██   ██ ██      ██      ██    ██ ████   ██ ██
+#! ██████  ██      ██      ██    ██ ██ ██  ██ █████
+#! ██   ██ ██      ██      ██    ██ ██  ██ ██ ██
+#! ██   ██  ██████ ███████  ██████  ██   ████ ███████
 
 rclone_backup = tk.Button(root, text="Rclone Backup", command=lambda: shutil.copyfile(rclone_src, rclone_dst))
 rclone_restore = tk.Button(root, text="Rclone Restore", command=lambda: shutil.copyfile(rclone_dst, rclone_src))
@@ -47,6 +52,11 @@ rclone_backup.grid(row=1, column=0)
 rclone_restore.grid(row=1, column=1)
 label_file.grid(row=1, column=2)
 
+#! ████████ ███████ ██████  ███    ███ ██ ███    ██  █████  ██
+#!    ██    ██      ██   ██ ████  ████ ██ ████   ██ ██   ██ ██
+#!    ██    █████   ██████  ██ ████ ██ ██ ██ ██  ██ ███████ ██
+#!    ██    ██      ██   ██ ██  ██  ██ ██ ██  ██ ██ ██   ██ ██
+#!    ██    ███████ ██   ██ ██      ██ ██ ██   ████ ██   ██ ███████
 
 terminal_backup = tk.Button(root, text="terminal Backup", command=lambda: shutil.copyfile(terminal_src, terminal_dst))
 terminal_src_location = tk.Button(root, text="src_dir", command=lambda: subprocess.Popen(["explorer", os.path.dirname(terminal_src)], shell=True))
@@ -60,8 +70,11 @@ terminal_restore.grid(row=2, column=2)
 terminal_dst_location.grid(row=2, column=3)
 label_file.grid(row=2, column=4)
 
-
-#! Folders
+#!  ██████  ██       █████  ███████ ███████ ██     ██ ███    ███
+#! ██       ██      ██   ██    ███  ██      ██     ██ ████  ████
+#! ██   ███ ██      ███████   ███   █████   ██  █  ██ ██ ████ ██
+#! ██    ██ ██      ██   ██  ███    ██      ██ ███ ██ ██  ██  ██
+#!  ██████  ███████ ██   ██ ███████ ███████  ███ ███  ██      ██
 
 #! glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: shutil.rmtree(glazewm_dst) or shutil.copytree(glazewm_src, glazewm_dst))
 glazewm_backup = tk.Button(root, text="glazewm_ Backup", command=lambda: (shutil.rmtree(glazewm_dst) if os.path.exists(glazewm_src) else None) or shutil.copytree(glazewm_src, glazewm_dst))
@@ -71,6 +84,60 @@ label_folder = tk.Label(root, wraplength=300) ; compare_folders(glazewm_src, gla
 glazewm_backup.grid(row=3, column=0)
 glazewm_restore.grid(row=3, column=1)
 label_folder.grid(row=3, column=2)
+
+#! ██████╗ ███████╗███████╗
+#! ██╔══██╗██╔════╝██╔════╝
+#! ██████╔╝███████╗███████╗
+#! ██╔══██╗╚════██║╚════██║
+#! ██║  ██║███████║███████║
+#! ╚═╝  ╚═╝╚══════╝╚══════╝
+
+Rss_db_backup = tk.Button(root, text="Rss_db_ Backup", command=lambda: (shutil.rmtree(Rss_db_dst) if os.path.exists(Rss_db_src) else None) or shutil.copytree(Rss_db_src, Rss_db_dst))
+Rss_db_restore = tk.Button(root, text="Rss_db_ Restore", command=lambda: (shutil.rmtree(Rss_db_src) if os.path.exists(Rss_db_dst) else None) or shutil.copytree(Rss_db_dst, Rss_db_src))
+label_folder = tk.Label(root, wraplength=300) ; compare_folders(Rss_db_src, Rss_db_dst, label_folder)
+
+Rss_db_backup.grid(row=4, column=0)
+Rss_db_restore.grid(row=4, column=1)
+label_folder.grid(row=4, column=2)
+
+Rss_cf_backup = tk.Button(root, text="Rss_cf Backup", command=lambda: shutil.copyfile(Rss_cf_src, Rss_cf_dst))
+Rss_cf_restore = tk.Button(root, text="Rss_cf Restore", command=lambda: shutil.copyfile(Rss_cf_dst, Rss_cf_src))
+label_file = tk.Label(root, wraplength=300) ; compare_files(Rss_cf_src, Rss_cf_dst, label_file)
+
+Rss_cf_backup.grid(row=5, column=0)
+Rss_cf_restore.grid(row=5, column=1)
+label_file.grid(row=5, column=2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 root.mainloop()
 
