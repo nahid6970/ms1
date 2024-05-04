@@ -7,6 +7,8 @@ scoop-completion (reset bucket or rm for error)
 Set-PsFzfOption (comment out)
 zoxide
 
+*** use wine aero to get access of C:\Users\nahid\AppData\Local\Packages\
+
 run mypygui using powershell or pwsh not cmd
 
 mklink
