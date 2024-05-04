@@ -52,3 +52,5 @@ yasb
 # Glaze_WM
 # whkd
 komorebic start
+
+start "C:\Users\nahid\scoop\apps\workspaceutilities\current\WorkspaceUtilities.exe"
