@@ -109,15 +109,20 @@ Rss_cf_restore.grid(row=5, column=1)
 label_file.grid(row=5, column=2)
 
 
+#! ██   ██  ██████  ███    ███  ██████  ██████  ███████ ██████  ██
+#! ██  ██  ██    ██ ████  ████ ██    ██ ██   ██ ██      ██   ██ ██
+#! █████   ██    ██ ██ ████ ██ ██    ██ ██████  █████   ██████  ██
+#! ██  ██  ██    ██ ██  ██  ██ ██    ██ ██   ██ ██      ██   ██ ██
+#! ██   ██  ██████  ██      ██  ██████  ██   ██ ███████ ██████  ██
 
 
+komorebi_backup = tk.Button(root, text="komorebi Backup", command=lambda: shutil.copyfile(komorebi_src, komorebi_dst))
+komorebi_restore = tk.Button(root, text="komorebi Restore", command=lambda: shutil.copyfile(komorebi_dst, komorebi_src))
+label_file = tk.Label(root, wraplength=300) ; compare_files(komorebi_src, komorebi_dst, label_file)
 
-
-
-
-
-
-
+komorebi_backup.grid(row=6, column=0)
+komorebi_restore.grid(row=6, column=1)
+label_file.grid(row=6, column=2)
 
 
 
