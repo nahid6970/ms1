@@ -606,7 +606,7 @@ Backup_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Backup_bt.bind("<Button-1>",open_backup)
 Backup_bt.bind("<Control-Button-1>",edit_backup)
 
-BackupRestore_bt=tk.Label(ROOT1, text="\udb84\udc38",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+BackupRestore_bt=tk.Label(ROOT1, text="\udb84\udc38",bg="#1d2027",fg="#3bc7ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 BackupRestore_bt.pack(side="left",padx=(3,0),pady=(0,0))
 BackupRestore_bt.bind("<Button-1>",Backup_Restore)
 BackupRestore_bt.bind("<Control-Button-1>",editBackup_Restore)
