@@ -260,7 +260,7 @@ return
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
 !y::RunWait, python.exe C:\ms1\yasb\main.py, , Hide
 #t:: WinSet, AlwaysOnTop, Toggle, A
-#x:: Run, C:\ms1\mypygui.py
+#x:: Run, C:\ms1\mypygui.py , ,Hide
 Pause::Run, komorebic quick-load-resize
 !+g::Run, taskkill /f /im glazewm.exe
 
