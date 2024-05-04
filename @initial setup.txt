@@ -11,9 +11,21 @@ zoxide
 
 run mypygui using powershell or pwsh not cmd for file path not found error
 
-mklink
+*** mklink
 New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force #[pwsh]
+
+** functionlist
 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
+
+** Command_history
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Target "C:\Users\nahid\OneDrive\backup\ConsoleHost_history.txt" -Force #[pwsh]
+
+** Sonarr
+New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Sonarr\sonarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\sonarr\sonarr.db" -Force #[pwsh]
+
+** Prowlarr
+New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Prowlarr\prowlarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\prowlarr\prowlarr.db" -Force #[pwsh]
+
 
 
 pip required packages
