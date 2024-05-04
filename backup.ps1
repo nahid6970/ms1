@@ -82,7 +82,7 @@ function Command_History {
 
 function terminal {
     $terminal_src = "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-    $terminal_dst = "C:\ms1\asset\terminal\settings.json"
+    $terminal_dst = "C:\ms1\asset\terminal\"
     create_dir -Path $terminal_dst
     Copy-Item -Path $terminal_src -Destination $terminal_dst
 }

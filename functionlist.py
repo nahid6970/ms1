@@ -202,8 +202,8 @@ whkd_dst = "C:/ms1/asset/whkd/whkdrc/whkdrc"
 pwshH_src = "C:/Users/nahid/AppData/Roaming/Microsoft/Windows/PowerShell/PSReadLine/ConsoleHost_history.txt"
 pwshH_dst = "C:/Users/nahid/OneDrive/backup/ConsoleHost_history.txt"
 
-terminal_src = "C:/Users/nahid/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
-terminal_dst = "C:/ms1/asset/terminal/settings.json/settings.json"
+terminal_src = "C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
+terminal_dst = "C:\\ms1\\asset\\terminal\\settings.json"
 
 pwsh_profile_src = "C:/Users/nahid/OneDrive/Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
 pwsh_profile_dst = "C:/ms1/asset/Powershell/Microsoft.PowerShell_profile.ps1"
