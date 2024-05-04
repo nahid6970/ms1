@@ -351,3 +351,22 @@ Rufus_wp=r"C:\Users\nahid\AppData\Local\Microsoft\WinGet\Links\rufus.exe"
 
 scoopCompletion_sp=r'C:\Users\nahid\scoop\apps\scoop-completion\current\scoop-completion.psm1'
 scoopSearch_sp=r'C:\Users\nahid\scoop\apps\scoop-search\current\scoop-search.exe'
+
+scrcpy_sp=r'C:\Users\nahid\scoop\apps\scrcpy\current\scrcpy.exe'
+scrcpyplus_wp=r"C:\Users\nahid\AppData\Local\Programs\scrcpy-plus\scrcpy+.exe"
+Sonarr_wp=r"C:\ProgramData\Sonarr\bin\Sonarr.exe"
+steam_wp=r"C:\Program Files (x86)\Steam\steam.exe"
+Syncthing_sp=r'C:\Users\nahid\scoop\apps\syncthing\current\syncthing.exe'
+tldr_sp=r'C:\Users\nahid\scoop\apps\tldr\current\tldr.exe'
+VCredistAIO_sp=r'C:\Users\nahid\scoop\apps\vcredist-aio\current\VisualCppRedist_AIO_x86_x64.exe'
+VirtualBox_sp=r'C:\Users\nahid\scoop\apps\virtualbox-with-extension-pack-np\current\VirtualBox.exe'
+vscode_wp=r"C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe"
+whatsapp_wp=r"C:\Program Files\WindowsApps\5319275A.WhatsAppDesktop_2.2407.10.0_x64__cv1g1gvanyjgm\WhatsApp.exe"
+WinaeroTweaker_sp=r'C:\Users\nahid\scoop\apps\winaero-tweaker\current\WinaeroTweaker.exe'
+windirstat_sp=r'C:\Users\nahid\scoop\apps\windirstat\current\windirstat.exe'
+winget_sp=r'C:\Users\nahid\scoop\apps\winget\current\winget.exe'
+WPUninstall_wp=r"C:\Program Files (x86)\Wise\Wise Program Uninstaller\WiseProgramUninstaller.exe"
+WizTree_sp=r'C:\Users\nahid\scoop\apps\wiztree\current\WizTree64.exe'
+wsapacman_sp=r'C:\Users\nahid\scoop\apps\wsa-pacman\current\WSA-pacman.exe'
+ytdlp_sp=r'C:\Users\nahid\scoop\apps\yt-dlp\current\yt-dlp.exe'
+WSUtilities_sp=r'C:\\Users\\nahid\\scoop\\apps\\workspaceutilities\\current\\WorkspaceUtilities.exe'
