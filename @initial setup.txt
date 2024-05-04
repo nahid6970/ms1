@@ -23,6 +23,9 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Roaming\Microsoft\
 ** Sonarr
 New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Sonarr\sonarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\sonarr\sonarr.db" -Force #[pwsh]
 
+** Radarr
+New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Radarr\radarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\radarr\radarr.db" -Force #[pwsh]
+
 ** Prowlarr
 New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Prowlarr\prowlarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\prowlarr\prowlarr.db" -Force #[pwsh]
 
