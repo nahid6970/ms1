@@ -1,47 +1,9 @@
-import importlib
-import subprocess
-
-from functionlist import *
-
 #? https://pypi.org/project/pretty-errors/
 
-required_libraries = [
-    "ctypes",
-    "datetime",
-    "os",
-    "PIL",
-    "psutil",
-    "pyadl",
-    "pyautogui",
-    "shutil",
-    "subprocess",
-    "threading",
-    "time",
-    "tkinter",
-    "Image",
-    "lib",
-    "Pillow ",
-    "pywin32",
-    # "tkinter.messagebox",
-    # "tkinter.ttk",
-]
-
-def install_missing_libraries():
-    for lib in required_libraries:
-        try:
-            importlib.import_module(lib)
-        except ImportError:
-            print(f"Installing {lib}...")
-            subprocess.check_call(["pip", "install", lib])
-# install_missing_libraries()
-
 #! Now import the libraries
-# from tkinter import PhotoImage
-# import shutil
-# import tksvg
-# import win32gui
-# from tkinter import Canvas, Scrollbar
+from customtkinter import *
 from datetime import datetime
+from functionlist import *
 from PIL import Image, ImageTk
 from pyadl import ADLManager
 from time import strftime
@@ -49,11 +11,13 @@ from tkinter import Label, messagebox
 from tkinter import simpledialog
 from tkinter import ttk
 import ctypes
-from customtkinter import *
+import filecmp
+import importlib
 import keyboard
 import os
 import psutil
 import pyautogui
+import subprocess
 import subprocess
 import sys
 import threading
@@ -61,7 +25,6 @@ import time
 import tkinter as tk
 import win32gui
 import win32process
-import filecmp
 
 
 def calculate_time_to_appear(start_time):
@@ -190,14 +153,14 @@ def toggle_window_size(size):
     if size == 'line':
         ROOT.geometry('1920x39')
         x = screen_width // 2 - 1920 // 2
-        y = screen_height-47-37
+        y = 0
         ROOT.configure(bg='red')
         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
     elif size == 'max':
         ROOT.geometry('1920x140')
         x = screen_width // 2 - 1920 // 2
-        y = screen_height-47-37
+        y = 0
         ROOT.configure(bg='#1d2027')
         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
