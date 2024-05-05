@@ -31,6 +31,8 @@ New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Prowlarr\prowlarr.db" -Tar
 
 ** RssGUard (delete files first of rssguard)
 cmd /c mklink /d C:\Users\nahid\scoop\apps\rssguard\current\data4\database C:\Users\nahid\OneDrive\backup\rssguard\database
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config\config.ini" -Target "C:\Users\nahid\OneDrive\backup\rssguard\config\config.ini" -Force
+
 
 
 pip required packages
