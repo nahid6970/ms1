@@ -81,6 +81,11 @@
       "kind": "Title",
       "id": "Settings",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "PotPlayerMini64.exe",
+      "matching_strategy": "Equals"
     }
   ]
 }
