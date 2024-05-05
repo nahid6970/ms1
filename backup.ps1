@@ -169,19 +169,19 @@ function filezilla {
 #! jellyfin
 #! whisparr
 
-bazarr
-prowlarr
-radarr
-sonarr
+# bazarr
+# prowlarr
+# radarr
+# sonarr
 
-Command_History
-glazewm
-nilesoft_shell
+# Command_History
+# glazewm
+# nilesoft_shell
 pwsh_profile
 rclone_config
-rssguard
+# rssguard
 terminal
-whkd
+# whkd
 komorebi
 # yasb
 
