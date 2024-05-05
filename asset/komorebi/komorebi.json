@@ -71,6 +71,16 @@
       "kind": "Exe",
       "id": "Riot Client.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "PowerToys.Settings.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Settings",
+      "matching_strategy": "Equals"
     }
   ]
 }
