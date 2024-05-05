@@ -4,6 +4,7 @@ import win32process
 import psutil
 import textwrap
 import pyperclip
+import keyboard
 
 ROOT = tk.Tk()
 ROOT.title("Python GUI")
@@ -22,19 +23,30 @@ class ActiveWindowInfo(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.pack()
-        self.info_type = 0  # 0 for process name, 1 for title/class name
-        self.label = tk.Label(self, text="", pady=1 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NF", 12 ,"bold"), justify="left", wraplength=1000)
-        self.label.pack(pady=(0,0))
-        self.label.bind("<Button-1>", self.toggle_info)
-        self.label.bind("<Button-3>", self.copy_to_clipboard)
+        self.label_process = tk.Label(self, text="", pady=0 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
+        self.label_process.grid(row=0, column=0, padx=5, pady=0, sticky='ew')
+        
+        self.label_class = tk.Label(self, text="", pady=0 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
+        self.label_class.grid(row=1, column=0, padx=5, pady=0, sticky='ew')
+        
+        self.label_title = tk.Label(self, text="", pady=0 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
+        self.label_title.grid(row=2, column=0, padx=5, pady=0, sticky='ew')
+        
         self.update_info()
 
         # Center the window on the screen
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
+
         x = 0
-        y = screen_height -30
+        y = 0
         master.geometry(f"+{x}+{y}")
+
+        # Register global hotkeys
+        keyboard.add_hotkey('ctrl+1', lambda: self.copy_to_clipboard(0))
+        keyboard.add_hotkey('ctrl+2', lambda: self.copy_to_clipboard(1))
+        keyboard.add_hotkey('ctrl+3', lambda: self.copy_to_clipboard(2))
+        keyboard.add_hotkey('esc', self.exit_app)
 
     def update_info(self):
         # Get the position of the mouse cursor
@@ -45,31 +57,34 @@ class ActiveWindowInfo(tk.Frame):
 
         # Get the active window information
         _, pid = win32process.GetWindowThreadProcessId(hwnd)
-        if self.info_type == 0:  # Process name
-            try:
-                process_name = psutil.Process(pid).name()
-                self.label.config(text=f"\udb85\udcfb {process_name}")
-            except psutil.NoSuchProcess:
-                self.label.config(text="No active window found")
-        elif self.info_type == 1:  # Title/class name
-            class_name = win32gui.GetClassName(hwnd)
-            window_text = win32gui.GetWindowText(hwnd)
-            # Truncate text if it exceeds 20 characters
-            window_text = textwrap.shorten(window_text, width=100, placeholder="...")
-            class_name = textwrap.shorten(class_name, width=100, placeholder="...")
-            self.label.config(text=f"\udb86\ude07 {window_text}   \udb86\ude07 {class_name}")
+        
+        try:
+            process_name = psutil.Process(pid).name()
+            self.label_process.config(text=f"Process Name: {process_name}")
+        except psutil.NoSuchProcess:
+            self.label_process.config(text="No active window found")
+        
+        class_name = win32gui.GetClassName(hwnd)
+        window_text = win32gui.GetWindowText(hwnd)
+        # Truncate text if it exceeds 20 characters
+        window_text = textwrap.shorten(window_text, width=100, placeholder="...")
+        class_name = textwrap.shorten(class_name, width=100, placeholder="...")
+        self.label_class.config(text=f"Class Name: {class_name}")
+        self.label_title.config(text=f"Window Title: {window_text}")
+
         self.after(250, self.update_info)  # Update every 250 milliseconds
 
-    def toggle_info(self, event=None):
-        self.info_type = (self.info_type + 1) % 2  # Toggle between 0 and 1
-        if self.info_type == 0:
-            self.label.config(text="Active Window Process Name: ")
-        else:
-            self.label.config(text="Active Window Title: \nClass Name: ")
-
-    def copy_to_clipboard(self, event=None):
-        text = self.label.cget("text")
+    def copy_to_clipboard(self, info_type):
+        if info_type == 0:  # Process name
+            text = self.label_process.cget("text").split(": ")[-1]
+        elif info_type == 1:  # Class name
+            text = self.label_class.cget("text").split(": ")[-1]
+        elif info_type == 2:  # Window title
+            text = self.label_title.cget("text").split(": ")[-1]
         pyperclip.copy(text)
+
+    def exit_app(self):
+        ROOT.quit()
 
 if __name__ == "__main__":
     app = ActiveWindowInfo(master=ROOT)
