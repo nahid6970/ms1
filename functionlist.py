@@ -95,10 +95,8 @@ def start_ack_d():
 
 def start_find_file():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\find\\find_file.ps1"])
-
 def start_find_pattern():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\find\\find_file.ps1"])
-
 def start_find_size():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
 
@@ -106,14 +104,14 @@ def start_tools(event):
     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
 
 def start_applist(event):
-    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+    subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\applist.py"], shell=True)
 def edit_applist(event):
-    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+    subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\applist.py"], shell=True)
 
 def start_appstore(event):
-    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+    subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
 def edit_appstore(event):
-    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+    subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
 
 def start_folder(event):
     subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\folder.py"], shell=True)
