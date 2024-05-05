@@ -459,9 +459,9 @@ def Lockbox_update_label(LockBox_lb):
 def compare_path_file():
     source_dest_pairs = {
 "komorebi"       :(komorebi_src    ,komorebi_dst    ),
-"glaze-wm"       :(glazewm_src     ,glazewm_dst     ),
-"Nilesoft"       :(Nilesoft_src    ,Nilesoft_dst    ),
-"whkd"           :(whkd_src        ,whkd_dst        ),
+# "glaze-wm"       :(glazewm_src     ,glazewm_dst     ),
+# "Nilesoft"       :(Nilesoft_src    ,Nilesoft_dst    ),
+# "whkd"           :(whkd_src        ,whkd_dst        ),
 "pwshH"          :(pwshH_src       ,pwshH_dst       ),
 "terminal"       :(terminal_src    ,terminal_dst    ),
 "rclone_config"  :(rclone_src      ,rclone_dst      ),
