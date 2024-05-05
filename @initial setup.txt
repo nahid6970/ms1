@@ -29,6 +29,8 @@ New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Radarr\radarr.db" -Target 
 ** Prowlarr
 New-Item -ItemType SymbolicLink -Path "C:\ProgramData\Prowlarr\prowlarr.db" -Target "C:\Users\nahid\OneDrive\backup\arr\prowlarr\prowlarr.db" -Force #[pwsh]
 
+** RssGUard (delete files first of rssguard)
+cmd /c mklink /d C:\Users\nahid\scoop\apps\rssguard\current\data4\database C:\Users\nahid\OneDrive\backup\rssguard\database
 
 
 pip required packages
