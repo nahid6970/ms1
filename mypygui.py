@@ -530,7 +530,7 @@ Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#26b2f3",
 Tools_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Tools_bt.bind("<Button-1>", start_tools)
 
-AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
 AppManagement_bt.bind("<Button-1>", start_appstore)
 AppManagement_bt.bind("<Control-Button-1>", edit_appstore)
