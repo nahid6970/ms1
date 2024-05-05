@@ -66,6 +66,11 @@
       "kind": "Exe",
       "id": "fdm.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Riot Client.exe",
+      "matching_strategy": "Equals"
     }
   ]
 }
