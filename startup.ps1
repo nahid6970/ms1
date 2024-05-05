@@ -33,11 +33,11 @@ function yasb                  {Start-Process "python.exe" -ArgumentList "C:\ms1
 # free_download_manager
 # monitor_size
 # mypygui
-# rssguard
 # rssowl
 # sync
 # syncthing
 # valo_qbit
+rssguard
 arr_monitor
 capture2text
 powertoys
