@@ -86,6 +86,11 @@
       "kind": "Exe",
       "id": "PotPlayerMini64.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "WorkspaceUtilities.exe",
+      "matching_strategy": "Equals"
     }
   ]
 }
