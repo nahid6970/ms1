@@ -33,7 +33,7 @@ class ActiveWindowInfo(tk.Frame):
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = 0
-        y = screen_height -75
+        y = screen_height -30
         master.geometry(f"+{x}+{y}")
 
     def update_info(self):

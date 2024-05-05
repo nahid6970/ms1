@@ -129,6 +129,12 @@ def edit_script_list(event):
     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
 
 
+def get_appinfo(event):
+    subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True)
+def edit_appinfo(event):
+    subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True)
+
+
 def force_shutdown(event):
     confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
     if confirmed:

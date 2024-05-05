@@ -579,7 +579,9 @@ Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
 
 LB_get=tk.Label(ROOT1, text="G",bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 LB_get.pack(side="left",padx=(3,0),pady=(0,0))
-LB_get.bind("<Button-1>",lambda event:get_active_window_info())
+LB_get.bind("<Button-1>",get_appinfo)
+LB_get.bind("<Control-Button-1>",edit_appinfo)
+# LB_get.bind("<Button-1>",lambda event:get_active_window_info())
 
 bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 bkup.pack(side="left",padx=(3,0),pady=(0,0))
