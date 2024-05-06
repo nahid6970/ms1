@@ -14,6 +14,8 @@ winsdk==1.0.0b6
 
 pip install
 BlurWindow Cerberus cssutils humanize psutil PyQt6 pytz pywin32 PyYAML tzlocal watchdog winsdk pylama
+
+
 ttkbootstrap
 
 

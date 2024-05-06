@@ -1,33 +1,60 @@
 watch_stylesheet: true
 watch_config: true
 
+# bars:
+#   yasb-bar:
+#     enabled: true
+#     screens: ['*']
+#     class_name: "yasb-bar"
+#     alignment:
+#       position: "top"
+#       center: false
+#     blur_effect:
+#       enabled: false
+#       acrylic: false
+#       dark: false
+#     window_flags:
+#       always_on_top: true
+#       windows_app_bar: true
+#     dimensions:
+#       width: "100%"
+#       height: 37
+#     padding:
+#       top: 0
+#       left: 0
+#       bottom: 0
+#       right: 0
+#     widgets:
+#       left:   [BT, compare] #! active_window, komorebi_workspaces
+#       center: [ clock, uptime, LockBox ]
+#       right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
 bars:
   yasb-bar:
     enabled: true
     screens: ['*']
     class_name: "yasb-bar"
     alignment:
-      position: "top"
+      position: "bottom"
       center: false
     blur_effect:
       enabled: false
       acrylic: false
       dark: false
     window_flags:
-      always_on_top: true
+      always_on_top: false
       windows_app_bar: true
     dimensions:
       width: "100%"
-      height: 37
+      height: 85
     padding:
       top: 0
       left: 0
       bottom: 0
       right: 0
     widgets:
-      left:   [BT, compare] #! active_window, komorebi_workspaces
-      center: [ clock, uptime, LockBox ]
-      right:  [ traffic, Bar_Cpu_Gpu, Usage_Cpu, Usage_Gpu, Usage_Ram, Usage_Disk ] #! MEMORY CPU_Histo
+      left:   []
+      center: []
+      right:  []
 
 
 widgets:
