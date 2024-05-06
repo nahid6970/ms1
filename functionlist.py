@@ -71,8 +71,8 @@ def start_bar_1(event):
 def edit_bar_1(event):
     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
 
-def start_shortcut(event):
-    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"], shell=True)
+# def start_shortcut(event):
+#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_backup(event):
 #     subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"], shell=True)
@@ -100,18 +100,18 @@ def start_find_pattern():
 def start_find_size():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
 
-def start_tools(event):
-    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
+# def start_tools(event):
+#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
 
-def start_applist(event):
-    subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\applist.py"], shell=True)
-def edit_applist(event):
-    subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+# def start_applist(event):
+#     subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+# def edit_applist(event):
+#     subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\applist.py"], shell=True)
 
-def start_appstore(event):
-    subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
-def edit_appstore(event):
-    subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+# def start_appstore(event):
+#     subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+# def edit_appstore(event):
+#     subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
 
 def start_folder(event):
     subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\folder.py"], shell=True)
