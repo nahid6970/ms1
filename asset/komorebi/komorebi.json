@@ -96,6 +96,11 @@
       "kind": "Exe",
       "id": "VALORANT-Win64-Shipping.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "mylbx.exe",
+      "matching_strategy": "Equals"
     }
   ]
 }
