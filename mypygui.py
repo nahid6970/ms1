@@ -539,18 +539,18 @@ AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /
 
 Folder_bt=CTkLabel(ROOT1, text="\ueaf7", font=("JetBrainsMono NFP",18,"bold"), anchor="w", bg_color="#1d2027",text_color="#ffd900")
 Folder_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Folder_bt.bind("<Button-1>", start_folder)
-Folder_bt.bind("<Control-Button-1>", Edit_folder)
+Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\folder.py"], shell=True))
+Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\folder.py"], shell=True))
 
 Process_bt=CTkLabel(ROOT1, text="\ueba2", bg_color="#1d2027",text_color="#ff1313", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
 Process_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Process_bt.bind("<Button-1>", start_process)
-Process_bt.bind("<Control-Button-1>", Edit_process)
+Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\process.py"], shell=True))
+Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\process.py"], shell=True))
 
 ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a04c", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
 ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
-ScriptList_bt.bind("<Button-1>", start_script_list)
-ScriptList_bt.bind("<Control-Button-1>", edit_script_list)
+ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
+ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
 
 LB_1=tk.Label(ROOT1, text="\udb83\udca0",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_1.pack(side="left",padx=(3,0),pady=(0,0))
