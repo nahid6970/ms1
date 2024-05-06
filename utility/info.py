@@ -60,7 +60,7 @@ class ActiveWindowInfo(tk.Frame):
         
         try:
             process_name = psutil.Process(pid).name()
-            self.label_process.config(text=f"Process Name: {process_name}")
+            self.label_process.config(text=f"Process: {process_name}")
         except psutil.NoSuchProcess:
             self.label_process.config(text="No active window found")
         
@@ -69,8 +69,8 @@ class ActiveWindowInfo(tk.Frame):
         # Truncate text if it exceeds 20 characters
         window_text = textwrap.shorten(window_text, width=100, placeholder="...")
         class_name = textwrap.shorten(class_name, width=100, placeholder="...")
-        self.label_class.config(text=f"Class Name: {class_name}")
-        self.label_title.config(text=f"Window Title: {window_text}")
+        self.label_class.config(text=f"Class: {class_name}")
+        self.label_title.config(text=f"Title: {window_text}")
 
         self.after(250, self.update_info)  # Update every 250 milliseconds
 
