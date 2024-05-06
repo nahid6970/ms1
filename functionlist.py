@@ -129,10 +129,10 @@ def start_find_size():
 #     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
 
 
-def get_appinfo(event):
-    subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True)
-def edit_appinfo(event):
-    subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True)
+# def get_appinfo(event):
+#     subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True)
+# def edit_appinfo(event):
+#     subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True)
 
 
 def force_shutdown(event):
@@ -180,11 +180,11 @@ def fzf_search(event):
 def edit_fzfSearch(event):
     subprocess.Popen(["cmd /c code C:\\ms1\\utility\\find_files.ps1"],shell=True)
 
-def launch_LockBox(event=None):
-    subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
+# def launch_LockBox(event=None):
+#     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
 
-def kill_proces(event):
-    subprocess.Popen(["cmd /c start C:\\ms1\\utility\\kill_process.ps1"], shell=True)
+# def kill_proces(event):
+#     subprocess.Popen(["cmd /c start C:\\ms1\\utility\\kill_process.ps1"], shell=True)
 
 
 #! Path List

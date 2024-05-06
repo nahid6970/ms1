@@ -517,7 +517,13 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 
 
-#! Left Side
+#! ██╗     ███████╗███████╗████████╗
+#! ██║     ██╔════╝██╔════╝╚══██╔══╝
+#! ██║     █████╗  █████╗     ██║
+#! ██║     ██╔══╝  ██╔══╝     ██║
+#! ███████╗███████╗██║        ██║
+#! ╚══════╝╚══════╝╚═╝        ╚═╝
+
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#000000",fg_color="#ffffff", font=("JetBrainsMono NFP" ,12,"bold"))
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
 uptime_label.bind("<Button-1>",None)
@@ -579,8 +585,8 @@ Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
 
 LB_get=tk.Label(ROOT1, text="G",bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 LB_get.pack(side="left",padx=(3,0),pady=(0,0))
-LB_get.bind("<Button-1>",get_appinfo)
-LB_get.bind("<Control-Button-1>",edit_appinfo)
+LB_get.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True))
+LB_get.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True))
 # LB_get.bind("<Button-1>",lambda event:get_active_window_info())
 
 bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
@@ -642,13 +648,18 @@ back_WS1.pack(side="left" ,padx=(0,0))
 
 LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 LockBox_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
-LockBox_lb.bind("<Button-1>",launch_LockBox)
+LockBox_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Program Files\\My Lockbox\\mylbx.exe"], shell=True))
 
 Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
 
+#! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
+#! ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝
+#! ██████╔╝██║██║  ███╗███████║   ██║
+#! ██╔══██╗██║██║   ██║██╔══██║   ██║
+#! ██║  ██║██║╚██████╔╝██║  ██║   ██║
+#! ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 
-#! Right Side
 ShutReboot=CTkButton(ROOT2, text="\uf011",fg_color="#1d2027",text_color="#ff3f3f", hover_color="#770c0c",border_color="#FF0000", border_width=1,corner_radius=5,height=20,width=50, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
 ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
@@ -667,7 +678,7 @@ cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_CPU.bind("<Button-1>",kill_proces)
+LB_CPU.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\utility\\kill_process.ps1"], shell=True))
 
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#e22910",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))

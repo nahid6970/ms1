@@ -91,6 +91,11 @@
       "kind": "Exe",
       "id": "WorkspaceUtilities.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "VALORANT-Win64-Shipping.exe",
+      "matching_strategy": "Equals"
     }
   ]
 }
