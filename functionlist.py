@@ -66,10 +66,10 @@ class HoverButton(tk.Button):
 
 # def start_bar_1(event):
 #     subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\python\\bar_1.py"], shell=True)
-def start_bar_1(event):
-    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
-def edit_bar_1(event):
-    subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
+# def start_bar_1(event):
+#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
+# def edit_bar_1(event):
+#     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_shortcut(event):
 #     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"], shell=True)
@@ -188,62 +188,44 @@ def kill_proces(event):
 
 
 #! Path List
-rclone_src = "C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"
-rclone_dst = "C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
-
-glazewm_src = "C:/Users/nahid/.glaze-wm"
-glazewm_dst = "C:/ms1/asset/glazewm/.glaze-wm"
-
-komorebi_src = "C:/Users/nahid/komorebi.json"
-komorebi_dst = "C:/ms1/asset/komorebi/komorebi.json"
-
-Nilesoft_src = "C:/Program Files/Nilesoft Shell/imports"
-Nilesoft_dst = "C:/ms1/asset/nilesoft_shell/imports"
-
-whkd_src = "C:/Users/nahid/.config/whkdrc"
-whkd_dst = "C:/ms1/asset/whkd/whkdrc/whkdrc"
-
-pwshH_src = "C:/Users/nahid/AppData/Roaming/Microsoft/Windows/PowerShell/PSReadLine/ConsoleHost_history.txt"
-pwshH_dst = "C:/Users/nahid/OneDrive/backup/ConsoleHost_history.txt"
-
-terminal_src = "C:/Users/nahid/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
-terminal_dst = "C:/ms1/asset/terminal/settings.json"
-
-pwsh_profile_src = "C:/Users/nahid/OneDrive/Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
-pwsh_profile_dst = "C:/ms1/asset/Powershell/Microsoft.PowerShell_profile.ps1"
-
-Sr_db_src = "C:/ProgramData/Sonarr/sonarr.db"
-Sr_db_dst = "C:/Users/nahid/OneDrive/backup/arr/sonarr/sonarr.db"
-
-Sr_cf_src = "C:/ProgramData/Sonarr/config.xml"
-Sr_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/sonarr/config.xml"
-
-Rr_db_src = "C:/ProgramData/Radarr/radarr.db"
-Rr_db_dst = "C:/Users/nahid/OneDrive/backup/arr/radarr/radarr.db"
-
-Rr_cf_src = "C:/ProgramData/Radarr/config.xml"
-Rr_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/radarr/config.xml"
-
-Pr_db_src = "C:/ProgramData/Prowlarr/prowlarr.db"
-Pr_db_dst = "C:/Users/nahid/OneDrive/backup/arr/prowlarr/prowlarr.db"
-
-Pr_cf_src = "C:/ProgramData/Prowlarr/config.xml"
-Pr_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/prowlarr/config.xml"
-
-br_db_src = "C:/ProgramData/Bazarr/data/db/bazarr.db"
-br_db_dst = "C:/Users/nahid/OneDrive/backup/arr/bazarr/bazarr.db"
-
-br_cf_src = "C:/ProgramData/Bazarr/data/config/config.yaml"
-br_cf_dst = "C:/Users/nahid/OneDrive/backup/arr/bazarr/config.yaml"
-
-Rss_db_src = "C:/Users/nahid/scoop/apps/rssguard/current/data4/database"
-Rss_db_dst = "C:/Users/nahid/OneDrive/backup/rssguard/database"
-
-Rss_cf_src = "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"
-Rss_cf_dst = "C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"
-
-terminal_src = "C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
-terminal_dst = "C:\\ms1\\asset\\terminal\\settings.json"
+br_cf_dst        ="C:/Users/nahid/OneDrive/backup/arr/bazarr/config.yaml"
+br_cf_src        ="C:/ProgramData/Bazarr/data/config/config.yaml"
+br_db_dst        ="C:/Users/nahid/OneDrive/backup/arr/bazarr/bazarr.db"
+br_db_src        ="C:/ProgramData/Bazarr/data/db/bazarr.db"
+glazewm_dst      ="C:/ms1/asset/glazewm/.glaze-wm"
+glazewm_src      ="C:/Users/nahid/.glaze-wm"
+komorebi_dst     ="C:/ms1/asset/komorebi/komorebi.json"
+komorebi_src     ="C:/Users/nahid/komorebi.json"
+Nilesoft_dst     ="C:/ms1/asset/nilesoft_shell/imports"
+Nilesoft_src     ="C:/Program Files/Nilesoft Shell/imports"
+Pr_cf_dst        ="C:/Users/nahid/OneDrive/backup/arr/prowlarr/config.xml"
+Pr_cf_src        ="C:/ProgramData/Prowlarr/config.xml"
+Pr_db_dst        ="C:/Users/nahid/OneDrive/backup/arr/prowlarr/prowlarr.db"
+Pr_db_src        ="C:/ProgramData/Prowlarr/prowlarr.db"
+pwsh_profile_dst ="C:/ms1/asset/Powershell/Microsoft.PowerShell_profile.ps1"
+pwsh_profile_src ="C:/Users/nahid/OneDrive/Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
+pwshH_dst        ="C:/Users/nahid/OneDrive/backup/ConsoleHost_history.txt"
+pwshH_src        ="C:/Users/nahid/AppData/Roaming/Microsoft/Windows/PowerShell/PSReadLine/ConsoleHost_history.txt"
+rclone_dst       ="C:/Users/nahid/OneDrive/backup/rclone/rclone.conf"
+rclone_src       ="C:/Users/nahid/scoop/apps/rclone/current/rclone.conf"
+Rr_cf_dst        ="C:/Users/nahid/OneDrive/backup/arr/radarr/config.xml"
+Rr_cf_src        ="C:/ProgramData/Radarr/config.xml"
+Rr_db_dst        ="C:/Users/nahid/OneDrive/backup/arr/radarr/radarr.db"
+Rr_db_src        ="C:/ProgramData/Radarr/radarr.db"
+Rss_cf_dst       ="C:\\Users\\nahid\\OneDrive\\backup\\rssguard\\config\\config.ini"
+Rss_cf_src       ="C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config\\config.ini"
+Rss_db_dst       ="C:/Users/nahid/OneDrive/backup/rssguard/database"
+Rss_db_src       ="C:/Users/nahid/scoop/apps/rssguard/current/data4/database"
+Sr_cf_dst        ="C:/Users/nahid/OneDrive/backup/arr/sonarr/config.xml"
+Sr_cf_src        ="C:/ProgramData/Sonarr/config.xml"
+Sr_db_dst        ="C:/Users/nahid/OneDrive/backup/arr/sonarr/sonarr.db"
+Sr_db_src        ="C:/ProgramData/Sonarr/sonarr.db"
+terminal_dst     ="C:/ms1/asset/terminal/settings.json"
+terminal_dst     ="C:\\ms1\\asset\\terminal\\settings.json"
+terminal_src     ="C:/Users/nahid/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
+terminal_src     ="C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json"
+whkd_dst         ="C:/ms1/asset/whkd/whkdrc/whkdrc"
+whkd_src         ="C:/Users/nahid/.config/whkdrc"
 
 #! App Path
 Zoxide_scoop_path = "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe"
