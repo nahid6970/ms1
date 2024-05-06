@@ -1,3 +1,8 @@
+** ! dont doesnt work to change cmd admin password
+net user
+whoami
+net user Administrator 182358
+
 * Update all packages first from ms store
 
 * install first for error management

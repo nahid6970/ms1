@@ -144,15 +144,15 @@ def force_restart(event):
     if confirmed:
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
-def open_backup(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
-def edit_backup(event=None):
-    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\backup.ps1"], shell=True)
+# def open_backup(event=None):
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+# def edit_backup(event=None):
+#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\backup.ps1"], shell=True)
 
-def open_update(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
-def edit_update(event=None):
-    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\update.ps1"],  shell=True)
+# def open_update(event=None):
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+# def edit_update(event=None):
+#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\update.ps1"],  shell=True)
 
 def c_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
@@ -170,10 +170,10 @@ def start_imgdimension():
 def start_merge():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
-def Backup_Restore(event):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\utility\\BackupRestore.py"])
-def editBackup_Restore(event):
-    subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
+# def Backup_Restore(event):
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\utility\\BackupRestore.py"])
+# def editBackup_Restore(event):
+#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
 
 def fzf_search(event):
     subprocess.Popen(["cmd /c start C:\\ms1\\utility\\find_files.ps1"], shell=True)
