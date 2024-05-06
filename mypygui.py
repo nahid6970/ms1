@@ -648,7 +648,7 @@ back_WS1.pack(side="left" ,padx=(0,0))
 
 LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 LockBox_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
-LockBox_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Program Files\\My Lockbox\\mylbx.exe"], shell=True))
+LockBox_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
 
 Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
