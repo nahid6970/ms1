@@ -48,7 +48,7 @@ radarr
 sonarr
 
 ahkscripts
-yasb
+# yasb
 # Glaze_WM
 # whkd
 komorebic start
