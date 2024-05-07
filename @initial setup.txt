@@ -45,3 +45,6 @@ pip install pillow importlib pyadl customtkinter keyboard psutil pyautogui pywin
 
 *** Komorebi
 cant directly restore first need to use 'komorebic quickstart' for init file then restore
+
+** Glasswire
+	block it in both inbound and outbound no need for host config
