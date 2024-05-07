@@ -660,7 +660,7 @@ Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
 #! ██║  ██║██║╚██████╔╝██║  ██║   ██║
 #! ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 
-ShutReboot=CTkButton(ROOT2, text="\uf011",fg_color="#1d2027",text_color="#ff3f3f", hover_color="#770c0c",border_color="#FF0000", border_width=1,corner_radius=5,height=20,width=50, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
+ShutReboot=CTkButton(ROOT2, text="\uf011",fg_color="#ffffff",text_color="#000000", hover_color="#770c0c",border_color="#FF0000", border_width=1,corner_radius=5,height=20,width=50, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
 ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
 ShutReboot.bind("<Button-3>",force_restart)
