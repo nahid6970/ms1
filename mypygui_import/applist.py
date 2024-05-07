@@ -180,6 +180,7 @@ def show_options(options):
 # Define applications and their information
 applications = [
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
+{"name": "DotNet_6","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "Microsoft.DotNet.DesktopRuntime.6","winget_path": dotnet6_wp} ,
 {"name":"Ack [Find]"               ,"scoop_name":"ack"                               ,"scoop_path":Ack_scoop_path            ,"winget_name":""                                       ,"winget_path":r""}                         ,
 {"name":"Adb"                      ,"scoop_name":"adb"                               ,"scoop_path":Adb_scoop_path            ,"winget_name":""                                       ,"winget_path":r""}                         ,
 {"name":"Alacritty [Terminal]"     ,"scoop_name":"alacritty"                         ,"scoop_path":Alacritty_scoop_path      ,"winget_name":"Alacritty.Alacritty"                    ,"winget_path":Alacritty_winget_path}       ,
@@ -201,7 +202,7 @@ applications = [
 {"name":"CPU-Z"                    ,"scoop_name":"cpu-z"                             ,"scoop_path":CPUZ_scoop_path           ,"winget_name":"CPUID.CPU-Z"                            ,"winget_path":r""}                         ,
 {"name":"Crystal DiskInfo"         ,"scoop_name":"crystaldiskinfo"                   ,"scoop_path":CrystalDiskInfo_scoop_path,"winget_name":"CrystalDewWorld.CrystalDiskInfo"        ,"winget_path":r""}                         ,
 {"name":"Ditto"                    ,"scoop_name":"ditto"                             ,"scoop_path":Ditto_scoop_path          ,"winget_name":"Ditto.Ditto"                            ,"winget_path":r""}                         ,
-{"name":"DotNet DesktopRuntime 8"  ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"Microsoft.DotNet.DesktopRuntime.8"      ,"winget_path":DotNet8_wp}                  ,
+{"name":"DotNet_8"  ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"Microsoft.DotNet.DesktopRuntime.8"      ,"winget_path":DotNet8_wp}                  ,
 {"name":"ExplorerPatcher"          ,"scoop_name":"ScoopName"                         ,"scoop_path":r''                       ,"winget_name":"ExplorerPatcher"                        ,"winget_path":r""}                         ,
 {"name":"eza [ls]"                 ,"scoop_name":"eza"                               ,"scoop_path":eza_sp                    ,"winget_name":"eza-community.eza"                      ,"winget_path":r""}                         ,
 {"name":"FFmpeg-Batch"             ,"scoop_name":"ffmpeg-batch"                      ,"scoop_path":FFmpegBatch_sp            ,"winget_name":"eibol.FFmpegBatchAVConverter"           ,"winget_path":r""}                         ,
