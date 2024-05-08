@@ -21,7 +21,7 @@ def add_media_to_potplayer(directory):
         return
 
     # Launch PotPlayer with media files
-    potplayer_path = r"C:\Program Files\PotPlayer\PotPlayerMini64.exe"  # PotPlayer executable path
+    potplayer_path = r"C:\Program Files\DAUM\PotPlayer\PotPlayerMini64.exe"  # PotPlayer executable path
     subprocess.Popen([potplayer_path] + media_files)
 
     # Wait for PotPlayer to launch

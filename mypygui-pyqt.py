@@ -81,9 +81,24 @@ frame1_layout.setContentsMargins(0, 0, 0, 0)  # Set margins to 0
 
 # Add buttons to layout
 close_win = HoverButton("\uf530",
-                      initial_color="font-size: 20px; color:#477566; margin:4px 0px;border-radius: 5px; background-color: aqua;", 
-                      hover_color="font-size: 20px; color:#000000; margin:4px 0px;", 
-                      hover_after_color="font-size: 20px; color:#bcffe9; margin:4px 0px;"
+                        initial_color="""
+                            font-size: 20px;
+                            color: #477566;
+                            margin: 4px 0px;
+                            border-radius: 5px;
+                            max-width: 50px;
+                            background-color: aqua;
+                        """,
+                        hover_color="""
+                            font-size: 20px;
+                            color: #000000;
+                            margin: 4px 0px;
+                        """,
+                        hover_after_color="""
+                            font-size: 20px;
+                            color: #bcffe9;
+                            margin: 4px 0px;
+                        """
                       )
 button2 = HoverButton("Button 2",
                       initial_color="font-size: 20px; color:#ffffff; margin:4px 0px;", 
@@ -103,17 +118,17 @@ frame1_layout.addWidget(button3, 0, 3, 1, 2)  # Button 3 spans from row 1, colum
 frame1.setLayout(frame1_layout)
 
 close_win.left_clicked.connect(close_window)
-close_win.right_clicked.connect(launch_LockBox)
+close_win.right_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
 close_win.ctrl_left_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
-close_win.ctrl_right_clicked.connect(lambda: print("Ctrl + Right Mouse Button clicked on Button 1"))
+close_win.ctrl_right_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
 
-button2.left_clicked.connect(launch_LockBox)
-button2.right_clicked.connect(launch_LockBox)
+button2.left_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
+button2.right_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
 button2.ctrl_left_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 2"))
 button2.ctrl_right_clicked.connect(lambda: print("Ctrl + Right Mouse Button clicked on Button 2"))
 
-button3.left_clicked.connect(launch_LockBox)
-button3.right_clicked.connect(launch_LockBox)
+button3.left_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
+button3.right_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 1"))
 button3.ctrl_left_clicked.connect(lambda: print("Ctrl + Left Mouse Button clicked on Button 3"))
 button3.ctrl_right_clicked.connect(lambda: print("Ctrl + Right Mouse Button clicked on Button 3"))
 
