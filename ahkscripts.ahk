@@ -8,7 +8,6 @@
 
 ; ; ;! alt1 🎯 Launch My PYGui
 
-
 ; ; ;! alt1 🎯 Launch My PYGui
 ; #x:: 
 ; IfWinExist, ahk_exe python.exe
@@ -39,8 +38,6 @@
 ;     }
 ; }
 ; return
-
-
 
 ;!   █████╗ ██╗     ██╗    ██╗ █████╗ ██╗   ██╗███████╗    ████████╗ ██████╗ ██████╗ 
 ;!  ██╔══██╗██║     ██║    ██║██╔══██╗╚██╗ ██╔╝██╔════╝    ╚══██╔══╝██╔═══██╗██╔══██╗
@@ -212,6 +209,52 @@ return
     }
     return
 
+
+
+
+
+
+
+
+
+#Persistent
+SetTimer, ResetKeyPresses, 500 ; Adjust the timing interval as needed (in milliseconds)
+KeyPressCount := 0
+
+~Esc::
+    KeyPressCount++
+    If (KeyPressCount = 1)
+        SetTimer, CheckKeyPresses, -200 ; Set the check timer to fire after 200 milliseconds
+return
+
+CheckKeyPresses:
+    SetTimer, CheckKeyPresses, Off
+    If (KeyPressCount >= 2)
+    {
+        Send, {Alt Down}{F4}{Alt Up} ; Sends Alt+F4 to close the active window
+        KeyPressCount := 0 ; Reset the key press count
+    }
+    else
+        KeyPressCount := 0 ; Reset the key press count if not pressed twice rapidly
+return
+
+ResetKeyPresses:
+    KeyPressCount := 0 ; Reset the key press count after a certain duration
+return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ;!  ██████╗  █████╗ ████████╗███████╗       ██╗       ████████╗██╗███╗   ███╗███████╗
 ;!  ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝       ██║       ╚══██╔══╝██║████╗ ████║██╔════╝
 ;!  ██║  ██║███████║   ██║   █████╗      ████████╗       ██║   ██║██╔████╔██║█████╗  
@@ -245,9 +288,6 @@ return
 ::;csa::CTRL{+}SHIFT{+}ALT
 ::;sa::SHIFT{+}ALT
 ::;ss::<SPACE>
-
-
-
 
 !+k::RunWait, taskkill /f /im komorebi.exe
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe
