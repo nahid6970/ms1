@@ -37,7 +37,7 @@ class StartupManager(tk.Tk):
             frame = tk.Frame(self)
             frame.pack(fill=tk.X)
 
-            label = tk.Label(frame, text=item["name"])
+            label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"))
             label.pack(side=tk.LEFT)
 
             checkbox_var = tk.BooleanVar()
