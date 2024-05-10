@@ -30,6 +30,9 @@ class StartupManager(tk.Tk):
             {"type": "Command","name": "\uf445 syncthing"     ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
             {"type": "Command","name": "\uf445 ValoQbit"      ,"command": "Start-Process 'C:\\ms1\\scripts\\valorant\\valo_qbit.ps1' -WindowStyle Hidden"},
             {"type": "Command","name": "\uf445 Glaze_WM"      ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
+            {"type": "Command","name": "\uf445 whkd"          ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
+            {"type": "Command","name": "\uf445 yasb"          ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
+            {"type": "Command","name": "\uf445 komorebic"     ,"command": "komorebic start"},
             # Add more items in the same format if needed
         ]
 
