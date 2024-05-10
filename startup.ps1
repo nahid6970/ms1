@@ -32,7 +32,7 @@ function yasb                  {Start-Process "python.exe" -ArgumentList "C:\ms1
 # flaresolver
 # free_download_manager
 # monitor_size
-# mypygui
+mypygui
 # rssowl
 # sync
 # syncthing
