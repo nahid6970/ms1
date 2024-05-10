@@ -101,6 +101,11 @@
       "kind": "Exe",
       "id": "mylbx.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "DesktopCoral.exe",
+      "matching_strategy": "Equals"
     }
   ]
 }

@@ -53,5 +53,5 @@ ahkscripts
 # whkd
 komorebic start
 
-Start-Process "C:\Users\nahid\scoop\apps\workspaceutilities\current\WorkspaceUtilities.exe"
+# Start-Process "C:\Users\nahid\scoop\apps\workspaceutilities\current\WorkspaceUtilities.exe"
 Start-Process "C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"
