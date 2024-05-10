@@ -8,7 +8,7 @@ class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Startup Manager")
-        self.geometry("200x500")
+        self.geometry("200x550")
         self.items = [
 
             {"type": "App","name": "\uf444 Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
