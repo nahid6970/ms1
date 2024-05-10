@@ -528,8 +528,13 @@ uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  tex
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
 uptime_label.bind("<Button-1>",None)
 
+ShutReboot=CTkButton(ROOT1, text="\uf011",fg_color="#ffffff",text_color="#000000", hover_color="#770c0c",border_color="#FF0000", border_width=1,corner_radius=5,height=20,width=50, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
+ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
+ShutReboot.bind("<Button-1>",force_shutdown)
+ShutReboot.bind("<Button-3>",force_restart)
+
 LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-LB_K.pack(side="left",padx=(10,0),pady=(1,0))
+LB_K.pack(side="left",padx=(8,0),pady=(1,0))
 LB_K.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.py"], shell=True))
 
 Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
@@ -659,11 +664,6 @@ Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
 #! ██╔══██╗██║██║   ██║██╔══██║   ██║
 #! ██║  ██║██║╚██████╔╝██║  ██║   ██║
 #! ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
-
-ShutReboot=CTkButton(ROOT2, text="\uf011",fg_color="#ffffff",text_color="#000000", hover_color="#770c0c",border_color="#FF0000", border_width=1,corner_radius=5,height=20,width=50, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
-ShutReboot.pack(side="left",padx=(3,0),pady=(0,0))
-ShutReboot.bind("<Button-1>",force_shutdown)
-ShutReboot.bind("<Button-3>",force_restart)
 
 Download_lb=tk.Label(ROOT2,bg="#000000",fg="#080505",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Download_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
