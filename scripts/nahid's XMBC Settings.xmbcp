@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <root>
 	<version major="2" minor="20" revision="5" build="0" />
 	<OfficeMouse Enable="false" />
@@ -23,7 +23,7 @@
 		<Hotkey4 Key="0" Modifier="0" />
 		<Hotkey5 Key="112" Modifier="0" />
 		<Hotkey6 Key="0" Modifier="0" />
-		<Hotkey7 Key="0" Modifier="0" />
+		<Hotkey7 Key="112" Modifier="6" />
 		<Hotkey8 Key="0" Modifier="0" />
 		<Hotkey9 Key="0" Modifier="0" />
 		<Hotkey10 Key="0" Modifier="0" />
@@ -391,6 +391,109 @@
 			</WheelDown>
 		</Layer9>
 	</Default>
+	<DesktopIcons>
+		<NAHID6970-nahid>
+			<Icon Name="Nahid Ahmed" xPos="14" yPos="102" gadget="false" />
+			<Icon Name="This PC" xPos="14" yPos="202" gadget="false" />
+			<Icon Name="Recycle Bin" xPos="14" yPos="302" gadget="false" />
+			<Icon Name="Control Panel" xPos="14" yPos="402" gadget="false" />
+			<Icon Name="Startup" xPos="14" yPos="502" gadget="false" />
+			<Icon Name="WindowsApp" xPos="14" yPos="602" gadget="false" />
+			<Icon Name="Packages" xPos="14" yPos="702" gadget="false" />
+			<Icon Name="AppData" xPos="14" yPos="802" gadget="false" />
+			<Icon Name="Key Remapper" xPos="14" yPos="902" gadget="false" />
+			<Icon Name="Google Chrome" xPos="90" yPos="102" gadget="false" />
+			<Icon Name="Free Download Manager" xPos="90" yPos="202" gadget="false" />
+			<Icon Name="PotPlayer 64 bit" xPos="90" yPos="302" gadget="false" />
+			<Icon Name="WizTree - Shortcut" xPos="90" yPos="402" gadget="false" />
+			<Icon Name="VirusTotal" xPos="90" yPos="502" gadget="false" />
+			<Icon Name="Adobe FormsCentral" xPos="90" yPos="602" gadget="false" />
+			<Icon Name="Inkscape" xPos="90" yPos="702" gadget="false" />
+			<Icon Name="Visual Studio Code" xPos="90" yPos="802" gadget="false" />
+			<Icon Name="Wise Program Uninstaller" xPos="90" yPos="902" gadget="false" />
+			<Icon Name="My Lockbox" xPos="166" yPos="102" gadget="false" />
+			<Icon Name="FileZilla Server Interface" xPos="166" yPos="202" gadget="false" />
+			<Icon Name="GlassWire" xPos="166" yPos="302" gadget="false" />
+			<Icon Name="AudioRelay" xPos="166" yPos="402" gadget="false" />
+			<Icon Name="LocalSend" xPos="166" yPos="502" gadget="false" />
+			<Icon Name="RSS Guard" xPos="166" yPos="602" gadget="false" />
+			<Icon Name="Adobe Acrobat XI Pro" xPos="166" yPos="702" gadget="false" />
+			<Icon Name="WinDirStat - Shortcut" xPos="166" yPos="802" gadget="false" />
+			<Icon Name="DesktopOK" xPos="166" yPos="902" gadget="false" />
+			<Icon Name="Sonarr" xPos="242" yPos="102" gadget="false" />
+			<Icon Name="Radarr" xPos="242" yPos="202" gadget="false" />
+			<Icon Name="Prowlarr" xPos="242" yPos="302" gadget="false" />
+			<Icon Name="Whisparr" xPos="242" yPos="402" gadget="false" />
+			<Icon Name="Jackett" xPos="242" yPos="502" gadget="false" />
+			<Icon Name="syncthing" xPos="242" yPos="602" gadget="false" />
+			<Icon Name="Microsoft Edge" xPos="242" yPos="702" gadget="false" />
+			<Icon Name="Winaero Tweaker" xPos="242" yPos="802" gadget="false" />
+			<Icon Name="ReIcon" xPos="242" yPos="902" gadget="false" />
+			<Icon Name="Steam" xPos="318" yPos="102" gadget="false" />
+			<Icon Name="Cheat Engine.exe - Shortcut" xPos="318" yPos="202" gadget="false" />
+			<Icon Name="ChatGPT" xPos="318" yPos="302" gadget="false" />
+			<Icon Name="Gemini" xPos="318" yPos="402" gadget="false" />
+			<Icon Name="VALORANT" xPos="318" yPos="502" gadget="false" />
+			<Icon Name="Riot Client" xPos="318" yPos="602" gadget="false" />
+			<Icon Name="My Lockbox Control Panel" xPos="318" yPos="702" gadget="false" />
+			<Icon Name="LDPlayer9" xPos="318" yPos="802" gadget="false" />
+			<Icon Name="LDMultiPlayer" xPos="318" yPos="902" gadget="false" />
+			<Icon Name="AdmitCard_RAJUK_PKNYQFAB.pdf" xPos="546" yPos="102" gadget="false" />
+			<Icon Name="AdmitCard_CSCXLTLN.pdf" xPos="546" yPos="202" gadget="false" />
+			<Icon Name="Gmail - IFIC Bank_ Initial Interview for MT.pdf" xPos="622" yPos="102" gadget="false" />
+			<Icon Name="RAJUK_Applicant's_Copy_PKNYQFAB 1 of 2.png" xPos="622" yPos="202" gadget="false" />
+			<Icon Name="Resume of NAHID AHMED.pdf" xPos="622" yPos="302" gadget="false" />
+			<Icon Name="marksheetuttolon" xPos="698" yPos="202" gadget="false" />
+			<Icon Name="BEZA_48YSQJNX.pdf" xPos="698" yPos="502" gadget="false" />
+			<Icon Name="certificate" xPos="774" yPos="202" gadget="false" />
+			<Icon Name="Nahid-Ahmed-goodcv.com-011023.94831.docx" xPos="850" yPos="102" gadget="false" />
+			<Icon Name="New Microsoft Word Document (2).docx" xPos="926" yPos="102" gadget="false" />
+			<Icon Name="nov062023_bscs_97.pdf" xPos="926" yPos="402" gadget="false" />
+			<Icon Name="generate_admit_10180_pdf.php.pdf" xPos="926" yPos="602" gadget="false" />
+			<Icon Name="ms.docx" xPos="926" yPos="702" gadget="false" />
+			<Icon Name="saif" xPos="1002" yPos="102" gadget="false" />
+			<Icon Name="বাসার আবেদন.docx" xPos="1002" yPos="202" gadget="false" />
+			<Icon Name="New Microsoft Word Document.docx" xPos="1002" yPos="302" gadget="false" />
+			<Icon Name="New Text Document.txt" xPos="1002" yPos="402" gadget="false" />
+			<Icon Name="New Microsoft Word Document (3).docx" xPos="1002" yPos="602" gadget="false" />
+			<Icon Name="2312119580005317.pdf" xPos="1002" yPos="702" gadget="false" />
+			<Icon Name="Bangladesh Public Service Commission.pdf" xPos="1002" yPos="802" gadget="false" />
+			<Icon Name="white.jpeg" xPos="1078" yPos="102" gadget="false" />
+			<Icon Name="dulabai jonmo-compressed.pdf" xPos="1078" yPos="202" gadget="false" />
+			<Icon Name="NURUL AMIN SALARY LAST.pdf" xPos="1078" yPos="302" gadget="false" />
+			<Icon Name="FCR JANUARY 2020 TO" xPos="1078" yPos="402" gadget="false" />
+			<Icon Name="Screenshot 2023-12-22 215356.png" xPos="1078" yPos="502" gadget="false" />
+			<Icon Name="10201.pdf" xPos="1078" yPos="602" gadget="false" />
+			<Icon Name="46-bcs.pdf" xPos="1078" yPos="702" gadget="false" />
+			<Icon Name="backup" xPos="1382" yPos="902" gadget="false" />
+			<Icon Name="TeraBox" xPos="1458" yPos="902" gadget="false" />
+			<Icon Name="share" xPos="1534" yPos="302" gadget="false" />
+			<Icon Name="mysong.dpl" xPos="1534" yPos="802" gadget="false" />
+			<Icon Name="OneDrive" xPos="1534" yPos="902" gadget="false" />
+			<Icon Name="ahkscripts.ahk" xPos="1610" yPos="702" gadget="false" />
+			<Icon Name="song.dpl" xPos="1610" yPos="802" gadget="false" />
+			<Icon Name="Sonarr_Changes.log" xPos="1610" yPos="902" gadget="false" />
+			<Icon Name="rotated_button.py" xPos="1686" yPos="102" gadget="false" />
+			<Icon Name="valo_m3" xPos="1686" yPos="702" gadget="false" />
+			<Icon Name="full.ahk - Shortcut" xPos="1686" yPos="802" gadget="false" />
+			<Icon Name="song" xPos="1686" yPos="902" gadget="false" />
+			<Icon Name="android.py" xPos="1762" yPos="102" gadget="false" />
+			<Icon Name="ms1" xPos="1762" yPos="502" gadget="false" />
+			<Icon Name="@Sonarr" xPos="1762" yPos="602" gadget="false" />
+			<Icon Name="mypygui.py" xPos="1762" yPos="702" gadget="false" />
+			<Icon Name="Radarr_Changes.log" xPos="1762" yPos="802" gadget="false" />
+			<Icon Name="software" xPos="1762" yPos="902" gadget="false" />
+			<Icon Name="test.py" xPos="1838" yPos="102" gadget="false" />
+			<Icon Name="test.ps1" xPos="1838" yPos="202" gadget="false" />
+			<Icon Name="d_drive_speed.py" xPos="1838" yPos="302" gadget="false" />
+			<Icon Name="VampireSurvivors" xPos="1838" yPos="402" gadget="false" />
+			<Icon Name="ms2" xPos="1838" yPos="502" gadget="false" />
+			<Icon Name="@Radarr" xPos="1838" yPos="602" gadget="false" />
+			<Icon Name="PWSH-GUI" xPos="1838" yPos="702" gadget="false" />
+			<Icon Name="@deltaX.xlsx" xPos="1838" yPos="802" gadget="false" />
+			<Icon Name="Downloads" xPos="1838" yPos="902" gadget="false" />
+		</NAHID6970-nahid>
+	</DesktopIcons>
 	<Applications>
 		<Application Name="valorant-win64-shipping.exe" Description="VALORANT  " Enabled="true" OverrideSpeed="false" EnhancePointerPrecision="false" ActivateOnHover="false" Speed="10" InvertScrolling="false" InvertHorizontalScrolling="false" ScrollPages="false" ScrollLines="3" ForceSPI="false" ClipMouse="false" AxisLocking="true" ChangeCursor="false" Cursor="" Script="" EnableScript="false" SwapButtons="0" NoParent="false" RegExMatching="false" MatchType="1" WindowArea="false" Top="0" Bottom="0" Left="0" Right="0" IgnoreVScroll="false" IgnoreVScrollTime="200" IgnoreHScroll="false" IgnoreHScrollTime="400" AdvScrollMethod="8" AdvScrollVert="1" AdvScrollHorz="1" DisableScrollUnderCursor="false" DisableMouseOver="false" DisableLayerModifier="false" WindowMask="15">
 			<LayerNames layer1="normal_leftmouse" layer2="rapid fire " layer3="" layer4="" layer5="" layer6="" layer7="" layer8="" layer9="" layer10="" />
@@ -670,107 +773,4 @@
 			</WheelDown_Layer9>
 		</Application>
 	</Applications>
-	<DesktopIcons>
-		<NAHID6970-nahid>
-			<Icon Name="Nahid Ahmed" xPos="14" yPos="102" gadget="false" />
-			<Icon Name="This PC" xPos="14" yPos="202" gadget="false" />
-			<Icon Name="Recycle Bin" xPos="14" yPos="302" gadget="false" />
-			<Icon Name="Control Panel" xPos="14" yPos="402" gadget="false" />
-			<Icon Name="Startup" xPos="14" yPos="502" gadget="false" />
-			<Icon Name="WindowsApp" xPos="14" yPos="602" gadget="false" />
-			<Icon Name="Packages" xPos="14" yPos="702" gadget="false" />
-			<Icon Name="AppData" xPos="14" yPos="802" gadget="false" />
-			<Icon Name="Key Remapper" xPos="14" yPos="902" gadget="false" />
-			<Icon Name="Google Chrome" xPos="90" yPos="102" gadget="false" />
-			<Icon Name="Free Download Manager" xPos="90" yPos="202" gadget="false" />
-			<Icon Name="PotPlayer 64 bit" xPos="90" yPos="302" gadget="false" />
-			<Icon Name="WizTree - Shortcut" xPos="90" yPos="402" gadget="false" />
-			<Icon Name="VirusTotal" xPos="90" yPos="502" gadget="false" />
-			<Icon Name="Adobe FormsCentral" xPos="90" yPos="602" gadget="false" />
-			<Icon Name="Inkscape" xPos="90" yPos="702" gadget="false" />
-			<Icon Name="Visual Studio Code" xPos="90" yPos="802" gadget="false" />
-			<Icon Name="Wise Program Uninstaller" xPos="90" yPos="902" gadget="false" />
-			<Icon Name="My Lockbox" xPos="166" yPos="102" gadget="false" />
-			<Icon Name="FileZilla Server Interface" xPos="166" yPos="202" gadget="false" />
-			<Icon Name="GlassWire" xPos="166" yPos="302" gadget="false" />
-			<Icon Name="AudioRelay" xPos="166" yPos="402" gadget="false" />
-			<Icon Name="LocalSend" xPos="166" yPos="502" gadget="false" />
-			<Icon Name="RSS Guard" xPos="166" yPos="602" gadget="false" />
-			<Icon Name="Adobe Acrobat XI Pro" xPos="166" yPos="702" gadget="false" />
-			<Icon Name="WinDirStat - Shortcut" xPos="166" yPos="802" gadget="false" />
-			<Icon Name="DesktopOK" xPos="166" yPos="902" gadget="false" />
-			<Icon Name="Sonarr" xPos="242" yPos="102" gadget="false" />
-			<Icon Name="Radarr" xPos="242" yPos="202" gadget="false" />
-			<Icon Name="Prowlarr" xPos="242" yPos="302" gadget="false" />
-			<Icon Name="Whisparr" xPos="242" yPos="402" gadget="false" />
-			<Icon Name="Jackett" xPos="242" yPos="502" gadget="false" />
-			<Icon Name="syncthing" xPos="242" yPos="602" gadget="false" />
-			<Icon Name="Microsoft Edge" xPos="242" yPos="702" gadget="false" />
-			<Icon Name="Winaero Tweaker" xPos="242" yPos="802" gadget="false" />
-			<Icon Name="ReIcon" xPos="242" yPos="902" gadget="false" />
-			<Icon Name="Steam" xPos="318" yPos="102" gadget="false" />
-			<Icon Name="Cheat Engine.exe - Shortcut" xPos="318" yPos="202" gadget="false" />
-			<Icon Name="ChatGPT" xPos="318" yPos="302" gadget="false" />
-			<Icon Name="Gemini" xPos="318" yPos="402" gadget="false" />
-			<Icon Name="VALORANT" xPos="318" yPos="502" gadget="false" />
-			<Icon Name="Riot Client" xPos="318" yPos="602" gadget="false" />
-			<Icon Name="My Lockbox Control Panel" xPos="318" yPos="702" gadget="false" />
-			<Icon Name="LDPlayer9" xPos="318" yPos="802" gadget="false" />
-			<Icon Name="LDMultiPlayer" xPos="318" yPos="902" gadget="false" />
-			<Icon Name="AdmitCard_RAJUK_PKNYQFAB.pdf" xPos="546" yPos="102" gadget="false" />
-			<Icon Name="AdmitCard_CSCXLTLN.pdf" xPos="546" yPos="202" gadget="false" />
-			<Icon Name="Gmail - IFIC Bank_ Initial Interview for MT.pdf" xPos="622" yPos="102" gadget="false" />
-			<Icon Name="RAJUK_Applicant's_Copy_PKNYQFAB 1 of 2.png" xPos="622" yPos="202" gadget="false" />
-			<Icon Name="Resume of NAHID AHMED.pdf" xPos="622" yPos="302" gadget="false" />
-			<Icon Name="marksheetuttolon" xPos="698" yPos="202" gadget="false" />
-			<Icon Name="BEZA_48YSQJNX.pdf" xPos="698" yPos="502" gadget="false" />
-			<Icon Name="certificate" xPos="774" yPos="202" gadget="false" />
-			<Icon Name="Nahid-Ahmed-goodcv.com-011023.94831.docx" xPos="850" yPos="102" gadget="false" />
-			<Icon Name="New Microsoft Word Document (2).docx" xPos="926" yPos="102" gadget="false" />
-			<Icon Name="nov062023_bscs_97.pdf" xPos="926" yPos="402" gadget="false" />
-			<Icon Name="generate_admit_10180_pdf.php.pdf" xPos="926" yPos="602" gadget="false" />
-			<Icon Name="ms.docx" xPos="926" yPos="702" gadget="false" />
-			<Icon Name="saif" xPos="1002" yPos="102" gadget="false" />
-			<Icon Name="বাসার আবেদন.docx" xPos="1002" yPos="202" gadget="false" />
-			<Icon Name="New Microsoft Word Document.docx" xPos="1002" yPos="302" gadget="false" />
-			<Icon Name="New Text Document.txt" xPos="1002" yPos="402" gadget="false" />
-			<Icon Name="New Microsoft Word Document (3).docx" xPos="1002" yPos="602" gadget="false" />
-			<Icon Name="2312119580005317.pdf" xPos="1002" yPos="702" gadget="false" />
-			<Icon Name="Bangladesh Public Service Commission.pdf" xPos="1002" yPos="802" gadget="false" />
-			<Icon Name="white.jpeg" xPos="1078" yPos="102" gadget="false" />
-			<Icon Name="dulabai jonmo-compressed.pdf" xPos="1078" yPos="202" gadget="false" />
-			<Icon Name="NURUL AMIN SALARY LAST.pdf" xPos="1078" yPos="302" gadget="false" />
-			<Icon Name="FCR JANUARY 2020 TO" xPos="1078" yPos="402" gadget="false" />
-			<Icon Name="Screenshot 2023-12-22 215356.png" xPos="1078" yPos="502" gadget="false" />
-			<Icon Name="10201.pdf" xPos="1078" yPos="602" gadget="false" />
-			<Icon Name="46-bcs.pdf" xPos="1078" yPos="702" gadget="false" />
-			<Icon Name="backup" xPos="1382" yPos="902" gadget="false" />
-			<Icon Name="TeraBox" xPos="1458" yPos="902" gadget="false" />
-			<Icon Name="share" xPos="1534" yPos="302" gadget="false" />
-			<Icon Name="mysong.dpl" xPos="1534" yPos="802" gadget="false" />
-			<Icon Name="OneDrive" xPos="1534" yPos="902" gadget="false" />
-			<Icon Name="ahkscripts.ahk" xPos="1610" yPos="702" gadget="false" />
-			<Icon Name="song.dpl" xPos="1610" yPos="802" gadget="false" />
-			<Icon Name="Sonarr_Changes.log" xPos="1610" yPos="902" gadget="false" />
-			<Icon Name="rotated_button.py" xPos="1686" yPos="102" gadget="false" />
-			<Icon Name="valo_m3" xPos="1686" yPos="702" gadget="false" />
-			<Icon Name="full.ahk - Shortcut" xPos="1686" yPos="802" gadget="false" />
-			<Icon Name="song" xPos="1686" yPos="902" gadget="false" />
-			<Icon Name="android.py" xPos="1762" yPos="102" gadget="false" />
-			<Icon Name="ms1" xPos="1762" yPos="502" gadget="false" />
-			<Icon Name="@Sonarr" xPos="1762" yPos="602" gadget="false" />
-			<Icon Name="mypygui.py" xPos="1762" yPos="702" gadget="false" />
-			<Icon Name="Radarr_Changes.log" xPos="1762" yPos="802" gadget="false" />
-			<Icon Name="software" xPos="1762" yPos="902" gadget="false" />
-			<Icon Name="test.py" xPos="1838" yPos="102" gadget="false" />
-			<Icon Name="test.ps1" xPos="1838" yPos="202" gadget="false" />
-			<Icon Name="d_drive_speed.py" xPos="1838" yPos="302" gadget="false" />
-			<Icon Name="VampireSurvivors" xPos="1838" yPos="402" gadget="false" />
-			<Icon Name="ms2" xPos="1838" yPos="502" gadget="false" />
-			<Icon Name="@Radarr" xPos="1838" yPos="602" gadget="false" />
-			<Icon Name="PWSH-GUI" xPos="1838" yPos="702" gadget="false" />
-			<Icon Name="@deltaX.xlsx" xPos="1838" yPos="802" gadget="false" />
-			<Icon Name="Downloads" xPos="1838" yPos="902" gadget="false" />
-		</NAHID6970-nahid>
-	</DesktopIcons>
 </root>
