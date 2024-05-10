@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import messagebox
 import os
@@ -10,34 +9,29 @@ class StartupManager(tk.Tk):
         self.title("Startup Manager")
         self.geometry("400x300")
         self.items = [
-
             {"type": "App", "name": "Ditto", "path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"},
             {"type": "App", "name": "Radarr", "path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
             {"type": "App", "name": "DesktopCoral", "path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
-            {"type": "App", "name": "Capture2Text", "path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
 
-
-
-            {"type": "Command", "name": "ahkscript", "command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
-            {"type": "Command", "name": "mypygui", "command": "C:\\ms1\\mypygui.py"},
-            {"type": "Command", "name": "ValoQbit", "command": "C:\\ms1\\scripts\\valorant\\valo_qbit.ps1"},
+            {"type": "Command", "name": "Echo Hello", "command": "echo Hello"},
+            {"type": "Command", "name": "Dir C:\\", "command": "dir C:\\"},
             # Add more items in the same format if needed
         ]
-        self.ps1_file_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', 'startup_commands.ps1')
-        self.create_ps1_file()
+        self.batch_file_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', 'startup_commands.bat')
+        self.create_batch_file()
         self.create_widgets()
 
-    def create_ps1_file(self):
-        if not os.path.exists(self.ps1_file_path):
-            with open(self.ps1_file_path, 'w') as f:
-                f.write('# PowerShell script for startup\n')
+    def create_batch_file(self):
+        if not os.path.exists(self.batch_file_path):
+            with open(self.batch_file_path, 'w') as f:
+                f.write('@echo off\n')
 
     def create_widgets(self):
         for item in self.items:
             frame = tk.Frame(self)
             frame.pack(fill=tk.X)
 
-            label = tk.Label(frame, text=item["name"])
+            label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"))
             label.pack(side=tk.LEFT)
 
             checkbox_var = tk.BooleanVar()
@@ -48,7 +42,7 @@ class StartupManager(tk.Tk):
             if item["type"] == "App":
                 startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', f'{item["name"]}.lnk')
             else:
-                startup_path = self.ps1_file_path
+                startup_path = self.batch_file_path
                 with open(startup_path, 'r') as f:
                     lines = f.readlines()
                     for line in lines:
@@ -73,8 +67,14 @@ class StartupManager(tk.Tk):
                         Target=item["path"]
                     )
                 else:
-                    with open(self.ps1_file_path, 'a') as f:
-                        f.write(f'{item["command"]}\n')
+                    with open(self.batch_file_path, 'r') as f:
+                        lines = f.readlines()
+                    with open(self.batch_file_path, 'a') as f:
+                        for line in lines:
+                            if item["command"] in line:
+                                break
+                        else:
+                            f.write(f'{item["command"]}\n')
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
                 checkbox_var.set(False)
@@ -84,9 +84,9 @@ class StartupManager(tk.Tk):
                 if item["type"] == "App":
                     os.remove(os.path.join(startup_path, f'{item["name"]}.lnk'))
                 else:
-                    with open(self.ps1_file_path, 'r') as f:
+                    with open(self.batch_file_path, 'r') as f:
                         lines = f.readlines()
-                    with open(self.ps1_file_path, 'w') as f:
+                    with open(self.batch_file_path, 'w') as f:
                         for line in lines:
                             if item["command"] in line:
                                 continue
