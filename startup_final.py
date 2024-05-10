@@ -9,8 +9,10 @@ class StartupManager(tk.Tk):
         self.title("Startup Manager")
         self.geometry("400x300")
         self.items = [
-            {"type": "App", "name": "Ditto", "path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
-            {"type": "App", "name": "AnotherApp", "path": "C:\\path\\to\\AnotherApp.exe"},
+            {"type": "App", "name": "Ditto", "path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"},
+            {"type": "App", "name": "Radarr", "path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
+            {"type": "App", "name": "DesktopCoral", "path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
+
             {"type": "Command", "name": "Echo Hello", "command": "echo Hello"},
             {"type": "Command", "name": "Dir C:\\", "command": "dir C:\\"},
             # Add more items in the same format if needed
@@ -29,7 +31,7 @@ class StartupManager(tk.Tk):
             frame = tk.Frame(self)
             frame.pack(fill=tk.X)
 
-            label = tk.Label(frame, text=item["name"])
+            label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"))
             label.pack(side=tk.LEFT)
 
             checkbox_var = tk.BooleanVar()
