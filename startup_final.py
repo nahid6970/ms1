@@ -12,13 +12,13 @@ class StartupManager(tk.Tk):
         self.items = [
 
             {"type": "App","name": "\uf444 Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
-            {"type": "App","name": "\uf444 Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"}        ,
-            {"type": "App","name": "\uf444 DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"}               ,
-            {"type": "App","name": "\uf444 Ditto"       ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"}              ,
+            {"type": "App","name": "\uf444 rssguard","path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
+            {"type": "App","name": "\uf444 DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
+            {"type": "App","name": "\uf444 Ditto"       ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"},
 
-            {"type": "App","name": "\uf4c3 Prowlarr"    ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"}                          ,
-            {"type": "App","name": "\uf4c3 Radarr"      ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"}                              ,
-            {"type": "App","name": "\uf4c3 Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"}                              ,
+            {"type": "App","name": "\uf4c3 Prowlarr"    ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"},
+            {"type": "App","name": "\uf4c3 Radarr"      ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
+            {"type": "App","name": "\uf4c3 Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
 
             {"type": "Command","name": "\uf445 ahkscript"     ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
             {"type": "Command","name": "\uf445 arr_monitor"   ,"command": "Start-Process 'C:\\ms1\\arr_monitor.ps1' -WindowStyle Hidden"},
