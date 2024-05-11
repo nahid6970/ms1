@@ -605,7 +605,7 @@ Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Search_bt.bind("<Button-1>",fzf_search)
 Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
 
-LB_get=tk.Label(ROOT1, text="G",bg="#1d2027",fg="#ff0000",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+LB_get=tk.Label(ROOT1, text="\uf05a",bg="#1d2027",fg="#b9b1f1",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_get.pack(side="left",padx=(3,0),pady=(0,0))
 LB_get.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True))
 LB_get.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True))
