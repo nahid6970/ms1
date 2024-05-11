@@ -51,22 +51,23 @@ class StartupManager(tk.Tk):
             label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"),bg="#fff" )
             label.pack(side=tk.LEFT)
 
-            # Check if the item is already in startup
-            if item["type"] == "App":
-                startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', f'{item["name"]}.lnk')
-                checked = os.path.exists(startup_path)
-            else:
-                startup_path = self.ps1_file_path
-                with open(startup_path, 'r') as f:
-                    lines = f.readlines()
-                    checked = any(item["command"] in line for line in lines)
+            checked = self.is_checked(item)
 
             label = tk.Label(frame, text="\uf205" if checked else "\uf204", font=("jetbrainsmono nfp", 12), fg="blue" if checked else "gray")
             label.pack(side=tk.RIGHT, padx=10)
 
-            label.bind("<Button-1>", lambda event, item=item: self.toggle_startup(item))
+            label.bind("<Button-1>", lambda event, item=item, label=label: self.toggle_startup(item, label))
 
-    def toggle_startup(self, item):
+    def is_checked(self, item):
+        if item["type"] == "App":
+            shortcut_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', f'{item["name"]}.lnk')
+            return os.path.exists(shortcut_path)
+        else:
+            with open(self.ps1_file_path, 'r') as f:
+                lines = f.readlines()
+                return any(item["command"] in line for line in lines)
+
+    def toggle_startup(self, item, label):
         startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
 
         if item["type"] == "App":
@@ -75,11 +76,13 @@ class StartupManager(tk.Tk):
             if checked:
                 try:
                     os.remove(shortcut_path)
+                    label.config(text="\uf204", fg="gray")
                 except Exception as e:
                     messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
             else:
                 try:
                     winshell.CreateShortcut(Path=shortcut_path, Target=item["path"])
+                    label.config(text="\uf205", fg="blue")
                 except Exception as e:
                     messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
         else:
@@ -94,13 +97,7 @@ class StartupManager(tk.Tk):
                         f.write(line)
                 if not checked:
                     f.write(f'{item["command"]}\n')
-
-        self.update_widgets()
-
-    def update_widgets(self):
-        for widget in self.winfo_children():
-            widget.destroy()
-        self.create_widgets()
+            label.config(text="\uf205" if not checked else "\uf204", fg="blue" if not checked else "gray")
 
 if __name__ == "__main__":
     app = StartupManager()
