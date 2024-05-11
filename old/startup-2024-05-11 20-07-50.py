@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import messagebox
 import os
@@ -9,7 +10,9 @@ class StartupManager(tk.Tk):
         self.title("Startup Manager")
         self.geometry("200x550")
         # self.configure(bg="#2c3235")
+
         self.items = [
+
             {"type": "App","name": "\uf444 Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
             {"type": "App","name": "\uf444 rssguard","path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
             {"type": "App","name": "\uf444 DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
@@ -34,6 +37,8 @@ class StartupManager(tk.Tk):
             {"type": "Command","name": "\uf445 komorebic"     ,"command": "komorebic start"},
             # Add more items in the same format if needed
         ]
+
+
         self.ps1_file_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', 'startup_commands.ps1')
         self.create_ps1_file()
         self.create_widgets()
@@ -45,62 +50,77 @@ class StartupManager(tk.Tk):
 
     def create_widgets(self):
         for item in self.items:
-            frame = tk.Frame(self)
+            frame = tk.Frame(self, bg="#fff")
             frame.pack(fill=tk.X)
 
             label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"),bg="#fff" )
+
+            checkbox_var = tk.BooleanVar()
+            checkbox = tk.Checkbutton(frame, variable=checkbox_var, command=lambda item=item, checkbox_var=checkbox_var, label=label: self.toggle_startup(item, checkbox_var, label))
+
+            checkbox.pack(side=tk.LEFT)
             label.pack(side=tk.LEFT)
 
             # Check if the item is already in startup
             if item["type"] == "App":
                 startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', f'{item["name"]}.lnk')
-                checked = os.path.exists(startup_path)
+                checkbox_var.set(os.path.exists(startup_path))
             else:
                 startup_path = self.ps1_file_path
                 with open(startup_path, 'r') as f:
                     lines = f.readlines()
-                    checked = any(item["command"] in line for line in lines)
+                    for line in lines:
+                        if item["command"] in line:
+                            checkbox_var.set(True)
+                            break
+                    else:
+                        checkbox_var.set(False)
 
-            label = tk.Label(frame, text="\uf205" if checked else "\uf204", font=("jetbrainsmono nfp", 12), fg="blue" if checked else "gray")
-            label.pack(side=tk.RIGHT, padx=10)
+            # Set initial label color based on checkbox state
+            self.update_label_color(label, checkbox_var.get())
 
-            label.bind("<Button-1>", lambda event, item=item: self.toggle_startup(item))
-
-    def toggle_startup(self, item):
+    def toggle_startup(self, item, checkbox_var, label):
         startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
 
-        if item["type"] == "App":
-            shortcut_path = os.path.join(startup_path, f'{item["name"]}.lnk')
-            checked = os.path.exists(shortcut_path)
-            if checked:
-                try:
-                    os.remove(shortcut_path)
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
-            else:
-                try:
-                    winshell.CreateShortcut(Path=shortcut_path, Target=item["path"])
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
+        if checkbox_var.get():
+            # Add item to startup
+            try:
+                if item["type"] == "App":
+                    winshell.CreateShortcut(
+                        Path=os.path.join(startup_path, f'{item["name"]}.lnk'),
+                        Target=item["path"]
+                    )
+                else:
+                    with open(self.ps1_file_path, 'a') as f:
+                        f.write(f'{item["command"]}\n')
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
+                checkbox_var.set(False)
         else:
-            checked = False
-            with open(self.ps1_file_path, 'r') as f:
-                lines = f.readlines()
-            with open(self.ps1_file_path, 'w') as f:
-                for line in lines:
-                    if item["command"] in line:
-                        checked = True
-                    else:
-                        f.write(line)
-                if not checked:
-                    f.write(f'{item["command"]}\n')
+            # Remove item from startup
+            try:
+                if item["type"] == "App":
+                    os.remove(os.path.join(startup_path, f'{item["name"]}.lnk'))
+                else:
+                    with open(self.ps1_file_path, 'r') as f:
+                        lines = f.readlines()
+                    with open(self.ps1_file_path, 'w') as f:
+                        for line in lines:
+                            if item["command"] in line:
+                                continue
+                            else:
+                                f.write(line)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
 
-        self.update_widgets()
+        # Update label color based on checkbox state
+        self.update_label_color(label, checkbox_var.get())
 
-    def update_widgets(self):
-        for widget in self.winfo_children():
-            widget.destroy()
-        self.create_widgets()
+    def update_label_color(self, label, checked):
+        if checked:
+            label.config(fg="green")
+        else:
+            label.config(fg="red")
 
 if __name__ == "__main__":
     app = StartupManager()
