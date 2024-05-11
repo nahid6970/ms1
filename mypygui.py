@@ -622,6 +622,7 @@ STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="fla
 STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
 
+#! FFMPEG
 FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1,hover_color="#1dd463", border_color="#000000", fg_color="#bff130", text_color="#000")
 FFMPEG_bt.pack(side="left")
 FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
@@ -638,6 +639,7 @@ def ffmpeg(FR_FFmpeg):
     Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
 ffmpeg(FR_FFmpeg)
 
+#! Find
 Find_bt = CTkButton(ROOT1, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0,hover_color="#1dd463", border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
 Find_bt.pack(side="left")
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
