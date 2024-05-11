@@ -528,7 +528,7 @@ uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  tex
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
 uptime_label.bind("<Button-1>",None)
 
-ShutReboot=CTkButton(ROOT1, text="\uf011",fg_color="#d12e2e",text_color="#ffffff", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
+ShutReboot=CTkButton(ROOT1, text="\uf011",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
 ShutReboot.pack(side="left",padx=(3,3),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
 ShutReboot.bind("<Button-3>",force_restart)
@@ -540,6 +540,11 @@ LB_K.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.
 Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Tools_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
+
+Startup_bt=CTkLabel(ROOT1, text="\uf205", bg_color="#1d2027",text_color="#16d97c", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
+Startup_bt.pack(side="left",padx=(10,0),pady=(1,0))
+Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\startup.py"], shell=True))
+Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\startup.py"], shell=True))
 
 AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
@@ -592,8 +597,8 @@ ColorTool_bt=tk.Label(ROOT1, text="\ue22b",bg="#1d2027",fg="#c588fd",height=0,wi
 ColorTool_bt.pack(side="left",padx=(3,0),pady=(0,0))
 ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_picker.py"], shell=True))
 ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_picker.py"],shell=True))
-ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_pallet.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_pallet.py"],shell=True))
+ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
+ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
 
 Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
