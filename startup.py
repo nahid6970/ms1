@@ -9,6 +9,8 @@ class StartupManager(tk.Tk):
         super().__init__()
         self.title("Startup Manager")
         self.geometry("200x550")
+        # self.configure(bg="#2c3235")
+
         self.items = [
 
             {"type": "App","name": "\uf444 Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
@@ -48,15 +50,16 @@ class StartupManager(tk.Tk):
 
     def create_widgets(self):
         for item in self.items:
-            frame = tk.Frame(self)
+            frame = tk.Frame(self, bg="#fff")
             frame.pack(fill=tk.X)
 
-            label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"))
-            label.pack(side=tk.LEFT)
+            label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"),bg="#fff" )
 
             checkbox_var = tk.BooleanVar()
             checkbox = tk.Checkbutton(frame, variable=checkbox_var, command=lambda item=item, checkbox_var=checkbox_var, label=label: self.toggle_startup(item, checkbox_var, label))
-            checkbox.pack(side=tk.RIGHT)
+
+            checkbox.pack(side=tk.LEFT)
+            label.pack(side=tk.LEFT)
 
             # Check if the item is already in startup
             if item["type"] == "App":
