@@ -7,7 +7,7 @@ class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Startup Manager")
-        self.geometry("200x650")
+        self.geometry("200x550")
         # self.configure(bg="#2c3235")
         self.items = [
             {"type": "App","name": "Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
@@ -44,34 +44,20 @@ class StartupManager(tk.Tk):
                 f.write('# PowerShell script for startup\n')
 
     def create_widgets(self):
-        app_separator = tk.Label(self, text="Apps", font=("Helvetica", 10, "bold"))
-        app_separator.pack(fill=tk.X, pady=5)
-        
         for item in self.items:
-            if item["type"] == "App":
-                self.create_item_widget(item)
-        
-        command_separator = tk.Label(self, text="Commands", font=("Helvetica", 10, "bold"))
-        command_separator.pack(fill=tk.X, pady=5)
+            frame = tk.Frame(self)
+            frame.pack(fill=tk.X)
 
-        for item in self.items:
-            if item["type"] == "Command":
-                self.create_item_widget(item)
+            name_label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"))
+            checked = self.is_checked(item)
+            label = tk.Label(frame, text="\uf205" if checked else "\uf204", font=("jetbrainsmono nfp", 12), fg="blue" if checked else "gray")
+            label.bind("<Button-1>", lambda event, item=item, name_label=name_label, icon_label=label: self.toggle_startup(item, name_label, icon_label))
+            
+            label.pack(side=tk.LEFT, padx=10)
+            name_label.pack(side=tk.LEFT)
 
-    def create_item_widget(self, item):
-        frame = tk.Frame(self)
-        frame.pack(fill=tk.X)
-
-        name_label = tk.Label(frame, text=item["name"], font=("Jetbrainsmono nfp", 12, "bold"))
-        checked = self.is_checked(item)
-        label = tk.Label(frame, text="\uf205" if checked else "\uf204", font=("Jetbrainsmono nfp", 12, "bold"), fg="blue" if checked else "gray")
-        label.bind("<Button-1>", lambda event, item=item, name_label=name_label, label=label: self.toggle_startup(item, name_label, label))
-
-        label.pack(side=tk.LEFT, padx=10)
-        name_label.pack(side=tk.LEFT)
-
-        # Set initial label color based on checked state
-        self.update_label_color(name_label, checked)
+            # Set initial label color based on checked state
+            self.update_label_color(name_label, checked)
 
     def is_checked(self, item):
         if item["type"] == "App":
