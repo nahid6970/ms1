@@ -48,18 +48,15 @@ class StartupManager(tk.Tk):
             frame = tk.Frame(self)
             frame.pack(fill=tk.X)
 
-            name_label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"))
-            name_label.pack(side=tk.LEFT)
+            label = tk.Label(frame, text=item["name"], font=("jetbrainsmono nfp", 12, "bold"),bg="#fff" )
+            label.pack(side=tk.LEFT)
 
             checked = self.is_checked(item)
 
             label = tk.Label(frame, text="\uf205" if checked else "\uf204", font=("jetbrainsmono nfp", 12), fg="blue" if checked else "gray")
             label.pack(side=tk.RIGHT, padx=10)
 
-            label.bind("<Button-1>", lambda event, item=item, name_label=name_label, icon_label=label: self.toggle_startup(item, name_label, icon_label))
-
-            # Set initial label color based on checked state
-            self.update_label_color(name_label, checked)
+            label.bind("<Button-1>", lambda event, item=item, label=label: self.toggle_startup(item, label))
 
     def is_checked(self, item):
         if item["type"] == "App":
@@ -70,7 +67,7 @@ class StartupManager(tk.Tk):
                 lines = f.readlines()
                 return any(item["command"] in line for line in lines)
 
-    def toggle_startup(self, item, name_label, icon_label):
+    def toggle_startup(self, item, label):
         startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
 
         if item["type"] == "App":
@@ -79,15 +76,13 @@ class StartupManager(tk.Tk):
             if checked:
                 try:
                     os.remove(shortcut_path)
-                    name_label.config(fg="red")
-                    icon_label.config(text="\uf204", fg="gray")
+                    label.config(text="\uf204", fg="gray")
                 except Exception as e:
                     messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
             else:
                 try:
                     winshell.CreateShortcut(Path=shortcut_path, Target=item["path"])
-                    name_label.config(fg="green")
-                    icon_label.config(text="\uf205", fg="blue")
+                    label.config(text="\uf205", fg="blue")
                 except Exception as e:
                     messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
         else:
@@ -102,15 +97,7 @@ class StartupManager(tk.Tk):
                         f.write(line)
                 if not checked:
                     f.write(f'{item["command"]}\n')
-
-            name_label.config(fg="green" if not checked else "red")
-            icon_label.config(text="\uf205" if not checked else "\uf204", fg="blue" if not checked else "gray")
-
-    def update_label_color(self, label, checked):
-        if checked:
-            label.config(fg="green")
-        else:
-            label.config(fg="red")
+            label.config(text="\uf205" if not checked else "\uf204", fg="blue" if not checked else "gray")
 
 if __name__ == "__main__":
     app = StartupManager()
