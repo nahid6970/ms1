@@ -622,7 +622,7 @@ STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="fla
 STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
 
-FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME))
+FFMPEG_bt = CTkButton(ROOT1, text="FFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1,hover_color="#1dd463", border_color="#000000", fg_color="#bff130", text_color="#000")
 FFMPEG_bt.pack(side="left")
 FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_FFmpeg.pack_propagate(True)
@@ -638,7 +638,7 @@ def ffmpeg(FR_FFmpeg):
     Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
 ffmpeg(FR_FFmpeg)
 
-Find_bt = CTkButton(ROOT1, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME))
+Find_bt = CTkButton(ROOT1, text="Find",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0,hover_color="#1dd463", border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
 Find_bt.pack(side="left")
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_Find.pack_propagate(True)
@@ -659,8 +659,8 @@ find(FR_Find)
 #! Worspace_1
 WorkSpace_1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 WorkSpace_1.pack_propagate(True)
-Enter_WS1 = CTkButton(ROOT1, text="1",width=0,fg_color="#ffffff", text_color="#000000", hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME))
-Enter_WS1.pack(side="left", padx=(2,2))
+Enter_WS1 = CTkButton(ROOT1, text="P", width=20, hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+Enter_WS1.pack(side="left", padx=(1,1))
 BoxForWS_1 = tk.Frame(WorkSpace_1, bg="#1D2027")
 BoxForWS_1.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
 back_WS1=tk.Button(BoxForWS_1,text="\uf100",width=0 ,bg="#98c379", fg="#1D2027", font=("Jetbrainsmono nfp",12), command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
