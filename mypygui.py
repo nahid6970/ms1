@@ -583,6 +583,11 @@ BackupRestore_bt.pack(side="left",padx=(3,0),pady=(0,0))
 BackupRestore_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\utility\\BackupRestore.py"], shell=True))
 BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\BackupRestore.py"],shell=True))
 
+PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#3bc7ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
+PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\position_x_y.py"], shell=True))
+PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\position_x_y.py"],shell=True))
+
 Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Search_bt.bind("<Button-1>",fzf_search)
