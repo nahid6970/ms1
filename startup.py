@@ -10,28 +10,28 @@ class StartupManager(tk.Tk):
         self.geometry("200x550")
         # self.configure(bg="#2c3235")
         self.items = [
-            {"type": "App","name": "\uf444 Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
-            {"type": "App","name": "\uf444 rssguard","path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
-            {"type": "App","name": "\uf444 DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
-            {"type": "App","name": "\uf444 Ditto"       ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"},
+            {"type": "App","name": "Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
+            {"type": "App","name": "rssguard","path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
+            {"type": "App","name": "DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
+            {"type": "App","name": "Ditto"       ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"},
 
-            {"type": "App","name": "\uf4c3 Prowlarr"    ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"},
-            {"type": "App","name": "\uf4c3 Radarr"      ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
-            {"type": "App","name": "\uf4c3 Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
+            {"type": "App","name": "Prowlarr"    ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"},
+            {"type": "App","name": "Radarr"      ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
+            {"type": "App","name": "Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
 
-            {"type": "Command","name": "\uf445 ahkscript"     ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
-            {"type": "Command","name": "\uf445 arr_monitor"   ,"command": "Start-Process 'C:\\ms1\\arr_monitor.ps1' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 bazarr"        ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 flaresolver"   ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 monitor_size"  ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 mypygui"       ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\mypygui.py' -Verb RunAs -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 sync"          ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"},
-            {"type": "Command","name": "\uf445 syncthing"     ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 ValoQbit"      ,"command": "Start-Process 'C:\\ms1\\scripts\\valorant\\valo_qbit.ps1' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 Glaze_WM"      ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
-            {"type": "Command","name": "\uf445 whkd"          ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 yasb"          ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
-            {"type": "Command","name": "\uf445 komorebic"     ,"command": "komorebic start"},
+            {"type": "Command","name": "ahkscript"     ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
+            {"type": "Command","name": "arr_monitor"   ,"command": "Start-Process 'C:\\ms1\\arr_monitor.ps1' -WindowStyle Hidden"},
+            {"type": "Command","name": "bazarr"        ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
+            {"type": "Command","name": "flaresolver"   ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
+            {"type": "Command","name": "monitor_size"  ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
+            {"type": "Command","name": "mypygui"       ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\mypygui.py' -Verb RunAs -WindowStyle Hidden"},
+            {"type": "Command","name": "sync"          ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"},
+            {"type": "Command","name": "syncthing"     ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
+            {"type": "Command","name": "ValoQbit"      ,"command": "Start-Process 'C:\\ms1\\scripts\\valorant\\valo_qbit.ps1' -WindowStyle Hidden"},
+            {"type": "Command","name": "Glaze_WM"      ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
+            {"type": "Command","name": "whkd"          ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
+            {"type": "Command","name": "yasb"          ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
+            {"type": "Command","name": "komorebic"     ,"command": "komorebic start"},
             # Add more items in the same format if needed
         ]
         self.ps1_file_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', 'startup_commands.ps1')
