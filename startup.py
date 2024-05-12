@@ -15,7 +15,7 @@ class StartupManager(tk.Tk):
             {"type": "App","name": "Ditto"       ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"},
             {"type": "App","name": "Prowlarr"    ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"},
             {"type": "App","name": "Radarr"      ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
-            {"type": "App","name": "rssguard","path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
+            {"type": "App","name": "RssGuard","path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
             {"type": "App","name": "Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
 
             {"type": "Command","name": "ahkscript"     ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
