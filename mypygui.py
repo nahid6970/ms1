@@ -715,25 +715,25 @@ LB_DUD=tk.Label(ROOT2,height=0,width =8,relief="flat",highlightthickness=1,highl
 LB_DUD.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_DUD.bind("<Button-1>",None)
 
-Topmost_lb=tk.Label(ROOT2,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
-Topmost_lb.pack(side="left",padx=(3,0),pady=(0,0))
-Topmost_lb.bind  ("<Button-1>",lambda event:toggle_checking())
+# Topmost_lb=tk.Label(ROOT2,text="\udb81\udc03",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+# Topmost_lb.pack(side="left",padx=(3,0),pady=(0,0))
+# Topmost_lb.bind  ("<Button-1>",lambda event:toggle_checking())
 
-CLEAR=tk.Label(ROOT2, text="\ueabf",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
-CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
-CLEAR.bind("<Button-1>",lambda event:clear_screen())
+# CLEAR=tk.Label(ROOT2, text="\ueabf",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
+# CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
+# CLEAR.bind("<Button-1>",lambda event:clear_screen())
 
 LB_R=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2")
 LB_R.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_R.bind("<Button-1>",restart)
 
-LB_L=tk.Label(ROOT2,bg="#1d2027",fg="#00FF00",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf106")
-LB_L.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_L.bind("<Button-1>",lambda event:toggle_window_size('line'))
+# LB_L=tk.Label(ROOT2,bg="#1d2027",fg="#00FF00",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf106")
+# LB_L.pack(side="left",padx=(3,0 ),pady=(0,0))
+# LB_L.bind("<Button-1>",lambda event:toggle_window_size('line'))
 
-LB_M=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"),text="\uea72")
-LB_M.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_M.bind("<Button-1>",lambda event:toggle_window_size('max'))
+# LB_M=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"),text="\uea72")
+# LB_M.pack(side="left",padx=(3,0 ),pady=(0,0))
+# LB_M.bind("<Button-1>",lambda event:toggle_window_size('max'))
 
 LB_XXX=tk.Label(ROOT2,bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf00d")
 LB_XXX.pack(side="left",padx=(3,10),pady=(0,0))
