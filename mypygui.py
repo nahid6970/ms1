@@ -473,7 +473,7 @@ def compare_path_file():
 # "Rr_cf"          :(Rr_cf_src       ,Rr_cf_dst       ),
 "Pr_db"          :(Pr_db_src       ,Pr_db_dst       ),
 # "Pr_cf"          :(Pr_cf_src       ,Pr_cf_dst       ),
-"br_db"          :(br_db_src       ,br_db_dst       ),
+# "br_db"          :(br_db_src       ,br_db_dst       ),
 # "br_cf"          :(br_cf_src       ,br_cf_dst       ),
 
 "Rss_db"         :(Rss_db_src      ,Rss_db_dst      ),
