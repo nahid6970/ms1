@@ -15,7 +15,7 @@
   "active_window_border_style":"Square",
   "active_window_border_colours": { "single": "#00f200", "stack": "#00a542", "monocle": "#ff3399" },
 
-  "mouse_follows_focus":false,
+  "mouse_follows_focus":true,
 
 
 
