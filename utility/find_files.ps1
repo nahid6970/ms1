@@ -18,17 +18,32 @@ function OpenFileInVSCode {
 }
 
 # Main function to search directories and files using fzf
+# function SearchDirectoriesAndFiles {
+#     $selectedDirectory = ($directories | fzf -m)
+#     #!$selectedDirectory = ($directories)
+#     if ($selectedDirectory) {
+#         $files = Get-ChildItem -Path $selectedDirectory -File -Recurse | Where-Object { $_.FullName -notmatch ($ignoreList -join '|') }
+#         $selectedFile = ($files.FullName | fzf -m --preview "highlight -O ansi -l {}" --preview-window=top:50% )
+#         if ($selectedFile) {
+#             OpenFileInVSCode $selectedFile
+#         }
+#     }
+# }
+
+
+# Main function to search directories and files using fzf
 function SearchDirectoriesAndFiles {
     $selectedDirectory = ($directories | fzf -m)
     #!$selectedDirectory = ($directories)
     if ($selectedDirectory) {
-        $files = Get-ChildItem -Path $selectedDirectory -File -Recurse | Where-Object { $_.FullName -notmatch ($ignoreList -join '|') }
+        $files = Get-ChildItem -Path $selectedDirectory -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch ($ignoreList -join '|') }
         $selectedFile = ($files.FullName | fzf -m --preview "highlight -O ansi -l {}" --preview-window=top:50% )
         if ($selectedFile) {
             OpenFileInVSCode $selectedFile
         }
     }
 }
+
 
 
 # Call the main function
