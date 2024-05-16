@@ -16,7 +16,9 @@ zoxide
 
 run mypygui using powershell or pwsh not cmd for file path not found error
 
-**  grouppolicy for startup powershell
+**  grouppolicy for startup powershell XXX
+    add using reg run  and dont use ahk script to go to that directory just use it to copy regrun path 
+    then open regigry edit and copy path and add startup_command.ps1
 
 *** mklink
 New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force #[pwsh]
