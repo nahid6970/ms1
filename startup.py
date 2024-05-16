@@ -54,9 +54,10 @@ class StartupManager(tk.Tk):
             {"type": "Command","name": "yasb"            ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"}                                                                         ,
             # Add more items in the same format if needed
         ]
-        self.ps1_file_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup', 'startup_commands.ps1')
+        self.ps1_file_path = "C:\\ms1\\startup_commands.ps1"
         self.create_ps1_file()
         self.create_widgets()
+
 
     def create_ps1_file(self):
         if not os.path.exists(self.ps1_file_path):
