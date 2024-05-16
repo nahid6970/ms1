@@ -674,8 +674,8 @@ LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, reli
 LockBox_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
 LockBox_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
 
-Encrypt_lb = tk.Label(ROOT1,text="\udb86\uddc4", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-Encrypt_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
+Encrypt_lb = tk.Label(ROOT1,text="\uf511", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
 Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
 
