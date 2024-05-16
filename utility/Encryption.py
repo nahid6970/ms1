@@ -92,9 +92,9 @@ file_button.grid(row=0, column=2, padx=10, pady=5)
 password_label.grid(row=1, column=0, padx=10, pady=5)
 password_entry.grid(row=1, column=1, padx=10, pady=5)
 
-encrypt_button.grid(row=2, column=0, padx=10, pady=5)
-decrypt_button.grid(row=2, column=1, padx=10, pady=5)
+encrypt_button.grid(row=2, column=1, padx=10, pady=5)
+decrypt_button.grid(row=3, column=1, padx=10, pady=5)
 
-result_label.grid(row=3, columnspan=3, padx=10, pady=5)
+result_label.grid(row=4, columnspan=3, padx=10, pady=5)
 
 root.mainloop()
