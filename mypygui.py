@@ -528,12 +528,7 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#000000",fg_color="#ffffff", font=("JetBrainsMono NFP" ,12,"bold"))
 uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
-uptime_label.bind("<Button-1>",None)
-
-ShutReboot=CTkButton(ROOT1, text="\uf011",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
-ShutReboot.pack(side="left",padx=(3,3),pady=(0,0))
-ShutReboot.bind("<Button-1>",force_shutdown)
-ShutReboot.bind("<Button-3>",force_restart)
+uptime_label.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui.py"], shell=True))
 
 LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 LB_K.pack(side="left",padx=(3,0),pady=(1,0))
@@ -730,8 +725,13 @@ LB_DUD.bind("<Button-1>",None)
 # CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
 # CLEAR.bind("<Button-1>",lambda event:clear_screen())
 
+ShutReboot=CTkButton(ROOT2, text="\uf011",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
+ShutReboot.pack(side="left",padx=(1,1),pady=(0,0))
+ShutReboot.bind("<Button-1>",force_shutdown)
+ShutReboot.bind("<Button-3>",force_restart)
+
 LB_R=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2")
-LB_R.pack(side="left",padx=(3,0 ),pady=(0,0))
+LB_R.pack(side="left",padx=(1,1 ),pady=(0,0))
 LB_R.bind("<Button-1>",restart)
 
 # LB_L=tk.Label(ROOT2,bg="#1d2027",fg="#00FF00",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf106")
@@ -743,7 +743,7 @@ LB_R.bind("<Button-1>",restart)
 # LB_M.bind("<Button-1>",lambda event:toggle_window_size('max'))
 
 LB_XXX=tk.Label(ROOT2,bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf00d")
-LB_XXX.pack(side="left",padx=(3,10),pady=(0,0))
+LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
 LB_XXX.bind("<Button-1>",close_window)
 
 
