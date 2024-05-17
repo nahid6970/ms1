@@ -543,7 +543,7 @@ Startup_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\startup.py"], shell=True))
 Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\startup.py"], shell=True))
 
-AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
+AppManagement_bt=CTkLabel(ROOT1, text="\uf0be", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
 AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\app_store.py"], shell=True))
 AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\app_store.py"], shell=True))
