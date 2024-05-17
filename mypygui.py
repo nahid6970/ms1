@@ -686,6 +686,9 @@ Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
 #! ██║  ██║██║╚██████╔╝██║  ██║   ██║
 #! ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 
+cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
+cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
+
 Download_lb=tk.Label(ROOT2,bg="#000000",fg="#080505",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Download_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
 Download_lb.bind("<Button-1>",None)
@@ -693,9 +696,6 @@ Download_lb.bind("<Button-1>",None)
 Upload_lb=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =7,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 Upload_lb.pack(side="left",padx=(3,0 ),pady=(0,0))
 Upload_lb.bind("<Button-1>",None)
-
-cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
-cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
