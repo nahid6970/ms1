@@ -725,12 +725,12 @@ LB_DUD.bind("<Button-1>",None)
 # CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
 # CLEAR.bind("<Button-1>",lambda event:clear_screen())
 
-ShutReboot=CTkButton(ROOT2, text="\uf011",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",20,"bold"))
+ShutReboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
 ShutReboot.pack(side="left",padx=(1,1),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
 ShutReboot.bind("<Button-3>",force_restart)
 
-LB_R=tk.Label(ROOT2,bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",12,"bold"),text="\uf0e2")
+LB_R=tk.Label(ROOT2 ,text="\uf0e2", bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_R.pack(side="left",padx=(1,1 ),pady=(0,0))
 LB_R.bind("<Button-1>",restart)
 
@@ -742,7 +742,7 @@ LB_R.bind("<Button-1>",restart)
 # LB_M.pack(side="left",padx=(3,0 ),pady=(0,0))
 # LB_M.bind("<Button-1>",lambda event:toggle_window_size('max'))
 
-LB_XXX=tk.Label(ROOT2,bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"),text="\uf00d")
+LB_XXX=tk.Label(ROOT2, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"))
 LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
 LB_XXX.bind("<Button-1>",close_window)
 
