@@ -37,10 +37,10 @@ def on_press(key):
 
 def main():
     window_title = 'LDPlayer'
-    k_image_path = r"C:\Users\nahid\OneDrive\Desktop\k.png"
-    e_image_path = r"C:\Users\nahid\OneDrive\Desktop\Screenshot 2024-05-17 224823.png"
-    space_image_path = r"C:\Users\nahid\OneDrive\Desktop\space.png"
-    continue_image_path = r"C:\Users\nahid\OneDrive\Desktop\continue.png"
+    action_image = r"C:\ms1\SH3\b_action.png"
+    e_image = r"C:\ms1\SH3\b_tournament.png"
+    space_image = r"C:\ms1\SH3\b_space.png"
+    continue_image = r"C:\ms1\SH3\b_continue.png"
 
     print("Press 'q' to stop the script.")
     
@@ -52,7 +52,7 @@ def main():
         while True:
             # Focus on the LDPlayer window
             focus_window(window_title)
-            if find_image(k_image_path):
+            if find_image(action_image):
                 # Randomly choose whether to hold or press 'k'
                 if random.choice([True, False]):
                     pyautogui.keyDown('j')
@@ -60,11 +60,11 @@ def main():
                     pyautogui.keyUp('j')
                 else:
                     pyautogui.press('j')
-            elif find_image(e_image_path):
+            elif find_image(e_image):
                 pyautogui.press('e')
-            elif find_image(space_image_path, confidence=0.8):
+            elif find_image(space_image, confidence=0.8):
                 pyautogui.press(' ')
-            elif find_image(continue_image_path, confidence=0.8):
+            elif find_image(continue_image, confidence=0.8):
                 pyautogui.press('c')
             time.sleep(0.1)  # Adjust the delay as needed
     except KeyboardInterrupt:
