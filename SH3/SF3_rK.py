@@ -60,6 +60,7 @@ def main():
                     pyautogui.keyDown('l')
                     time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
                     pyautogui.keyUp('k')
+                    pyautogui.keyUp('l')
                 else:
                     pyautogui.press('k')
             elif find_image(e_image):
