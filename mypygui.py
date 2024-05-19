@@ -303,11 +303,11 @@ def update_info_labels():
     elif float(gpu_usage) < 50:
         LB_GPU.config(bg="#1d2027" , fg="#00ff21")
     elif 10 <= float(gpu_usage) < 50:
-        LB_GPU.config(bg="#ff9282" , fg="#000000")
+        LB_GPU.config(bg="#00ff21" , fg="#000000")
     elif 50 <= float(gpu_usage) < 80:
-        LB_GPU.config(bg="#ff6b54" , fg="#000000")
+        LB_GPU.config(bg="#00ff21" , fg="#000000")
     else:
-        LB_GPU.config(bg="#ff3010" , fg="#FFFFFF")
+        LB_GPU.config(bg="#00ff21" , fg="#FFFFFF")
 
     # Set background color based on upload speed
     if upload_speed == "0":
@@ -337,8 +337,8 @@ def update_info_labels():
     #     logfile.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - Download: {download_speed}, Upload: {upload_speed}\n")
 
     # Change background and foreground color based on usage thresholds
-    LB_RAM.config(bg='#f12c2f' if ram_usage > 80 else '#1d2027', fg='#FFFFFF' if ram_usage > 80 else '#ff934b')
-    LB_CPU.config(bg='#f12c2f' if cpu_usage > 80 else '#1d2027', fg='#FFFFFF' if cpu_usage > 80 else '#14bcff')
+    LB_RAM.config(bg='#ff934b' if ram_usage > 80 else '#1d2027', fg='#1d2027' if ram_usage > 80 else '#ff934b')
+    LB_CPU.config(bg='#14bcff' if cpu_usage > 80 else '#1d2027', fg='#1d2027' if cpu_usage > 80 else '#14bcff')
     LB_DUC.config(bg='#f12c2f' if disk_c_usage > 90 else '#044568', fg='#FFFFFF' if disk_c_usage > 90 else '#fff')
     LB_DUD.config(bg='#f12c2f' if disk_d_usage > 90 else '#044568', fg='#FFFFFF' if disk_d_usage > 90 else '#fff')
 
