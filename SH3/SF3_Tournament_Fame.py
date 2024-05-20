@@ -41,6 +41,7 @@ def main():
     e_image = r"C:\ms1\SH3\b_tournament.png"
     space_image = r"C:\ms1\SH3\b_space.png"
     continue_image = r"C:\ms1\SH3\b_continue.png"
+    ability_image = r"C:\Users\nahid\OneDrive\Desktop\b_ability.png"
 
     print("Press 'q' to stop the script.")
     
@@ -52,14 +53,31 @@ def main():
         while True:
             # Focus on the LDPlayer window
             focus_window(window_title)
+
+#* Use Hand
             if find_image(action_image):
                 # Randomly choose whether to hold or press 'k'
                 if random.choice([True, False]):
                     pyautogui.keyDown('j')
+                    pyautogui.keyDown('l')
                     time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
                     pyautogui.keyUp('j')
+                    pyautogui.keyUp('l')
                 else:
                     pyautogui.press('j')
+
+#* Use Kick
+            # if find_image(action_image):
+            #     # Randomly choose whether to hold or press 'k'
+            #     if random.choice([True, False]):
+            #         pyautogui.keyDown('k')
+            #         pyautogui.keyDown('l')
+            #         time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
+            #         pyautogui.keyUp('k')
+            #         pyautogui.keyUp('l')
+            #     else:
+            #         pyautogui.press('k')
+
             elif find_image(e_image):
                 pyautogui.press('e')
             elif find_image(space_image, confidence=0.8):
