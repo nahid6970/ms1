@@ -626,7 +626,7 @@ FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_FFmpeg.pack_propagate(True)
 BoxForFFmpeg = tk.Frame(FR_FFmpeg, bg="#1d2027")
 BoxForFFmpeg.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
-back_ffmpeg=tk.Button(BoxForFFmpeg,text="\ueb6f FFMPEG",width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
+back_ffmpeg=tk.Button(BoxForFFmpeg,text="\ueb6fFFMPEG",width=0,bg="#98c379",fg="#1D2027",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
 back_ffmpeg.pack(side="left" )
 def ffmpeg(FR_FFmpeg):
     Trim_bt          =tk.Button(BoxForFFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
@@ -643,7 +643,7 @@ FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_Find.pack_propagate(True)
 BoxForFind = tk.Frame(FR_Find, bg="#1d2027")
 BoxForFind.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
-back_find=tk.Button(BoxForFind,text="\ueb6f Find",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
+back_find=tk.Button(BoxForFind,text="\ueb6fFind",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
 back_find.pack(side="left" ,padx=(0,0))
 def find(FR_Find):
     File_bt    =tk.Button(BoxForFind,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
@@ -655,10 +655,29 @@ def find(FR_Find):
     ackd_bt    =tk.Button(BoxForFind,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0))
 find(FR_Find)
 
+#! Desktop
+Desktop_bt = CTkButton(ROOT1, text="\uf07cDesktop",width=0, command=lambda:switch_to_frame(FR_Desktop , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0,hover_color="#1dd463", border_width=1, border_color="#FFFFFF", fg_color="#0099ff", text_color="#000000")
+Desktop_bt.pack(side="left")
+FR_Desktop = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+FR_Desktop.pack_propagate(True)
+BoxForDesktop = tk.Frame(FR_Desktop, bg="#1d2027")
+BoxForDesktop.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
+back_desktop=tk.Button(BoxForDesktop,text="\ueb6fDesktop",width=0 ,bg="#98c379", fg="#1D2027", command=lambda:switch_to_frame(MAIN_FRAME,FR_Desktop))
+back_desktop.pack(side="left" ,padx=(0,0))
+
+sonarr_img = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\sonarr-20x20.png"))
+radarr_img = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\radarr-20x20.png"))
+def desktop(FR_Desktop):
+    Sonarr_bt=tk.Button(BoxForDesktop, image=sonarr_img, compound=tk.TOP, text="", command=lambda:(subprocess.Popen(["explorer","D:\\Downloads\\@Sonarr"],shell=True)), height=50, width=30, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
+    Sonarr_bt.pack(pady=0, side="left", anchor="w", padx=(0,0))
+    Radarr_bt=tk.Button(BoxForDesktop, image=radarr_img, compound=tk.TOP, text="", command=lambda:(subprocess.Popen(["explorer","D:\\Downloads\\@Radarr"],shell=True)),  height=50, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
+    Radarr_bt.pack (pady=0, side="left", anchor="w", padx=(0,0))
+desktop(FR_Desktop)
+
 #! Worspace_1
 WorkSpace_1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 WorkSpace_1.pack_propagate(True)
-Enter_WS1 = CTkButton(ROOT1, text="\uf07cP", width=20, hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+Enter_WS1 = CTkButton(ROOT1, text="\uf07cP", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
 Enter_WS1.pack(side="left", padx=(1,1))
 BoxForWS_1 = tk.Frame(WorkSpace_1, bg="#1D2027")
 BoxForWS_1.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
@@ -701,7 +720,7 @@ LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_CPU.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\utility\\kill_process.ps1"], shell=True))
 
-LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#e22910",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
+LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#00ff21",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))
 LB_GPU.bind("<Button-1>",None)
 
