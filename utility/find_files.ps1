@@ -1,5 +1,6 @@
 # Directories to search
 $directories = @(
+$HOME
 "C:\",
 "D:\",
 "C:\ms1",
