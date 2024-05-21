@@ -694,16 +694,20 @@ back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_2
 #! Worspace_3
 
-bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
-bkup.pack(side="left",padx=(3,0),pady=(0,0))
-bkup.bind ("<Button-1>",git_backup)
 
+SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
+SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
+bkup=tk.Label(ROOT1,text="\udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+bkup.pack(side="left",padx=(0,0),pady=(0,0))
+bkup.bind ("<Button-1>",git_backup)
 STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes("C:\\ms1"))
 STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
+SEPARATOR=tk.Label(ROOT1,text="]",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
+SEPARATOR.pack(side="left",padx=(0,0),pady=(0,0))
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
 #! ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝
