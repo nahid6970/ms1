@@ -597,6 +597,11 @@ ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c co
 ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
 ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
 
+RoundedCorner_lb = tk.Label(ROOT1, text="\udb81\ude07", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+RoundedCorner_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
+RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
+RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
+
 Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
 Search_bt.bind("<Button-1>",fzf_search)
@@ -616,10 +621,6 @@ Encrypt_lb = tk.Label(ROOT1,text="\uf084", bg="#1d2027", fg="#ff0000", height=0,
 Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
 Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
-
-RoundedCorner_lb = tk.Label(ROOT1, text="\udb81\ude07", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-RoundedCorner_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
 
 Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 Changes_Monitor_lb.pack(side="left",padx=(0,0),pady=(0,0))
