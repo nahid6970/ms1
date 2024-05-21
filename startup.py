@@ -33,7 +33,7 @@ class StartupManager(tk.Tk):
             # {"type": "Command","name": "whkd"          ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
             # {"type": "Command","name": "yasb"          ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
-            {"type": "Command","name": "mypygui"         ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\mypygui.py' -Verb RunAs -WindowStyle Hidden"}                                                                ,
+            {"type": "Command","name": "mypygui"         ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\mypygui.py' -WindowStyle Hidden"}                                                                ,
             {"type": "Command","name": "ahkscript"       ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"}                                                                                                                       ,
             {"type": "Command","name": "komorebic"       ,"command": "komorebic start"}                                                                                                                                               ,
             {"type": "Command","name": "DesktopCoral"    ,"command": 'Start "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"'}                                                                                               ,

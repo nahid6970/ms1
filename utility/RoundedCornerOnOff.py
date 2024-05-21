@@ -34,7 +34,7 @@ def enable_rounded_corners():
 
 # Function to disable rounded corners
 def disable_rounded_corners():
-    run_as_admin([exe_path, '--disable'])
+    run_as_admin([exe_path, '--disable --autostart'])
 
 # Check if the executable is already downloaded, if not download it
 if not os.path.exists(exe_path):
