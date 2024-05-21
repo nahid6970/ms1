@@ -9,6 +9,7 @@ import os
 # Initialize the Tkinter window
 root = tk.Tk()
 root.title("File Encryptor/Decryptor")
+root.configure(bg="#282c34")
 
 # Function to handle file selection
 def select_files():
@@ -42,9 +43,9 @@ def encrypt_files():
                 enc_file.write(cipher.nonce)
                 enc_file.write(ciphertext)
 
-            result_label.config(text=f"File encrypted successfully: {encrypted_file_path}")
+            result_label.config(text=f"File encrypted successfully: {encrypted_file_path}", fg="#41abff")
         except Exception as e:
-            result_label.config(text=f"Error: {str(e)}")
+            result_label.config(text=f"Error: {str(e)}", fg="#ff0000")
 
 # Function to perform decryption
 def decrypt_files():
@@ -67,34 +68,34 @@ def decrypt_files():
             with open(decrypted_file_path, 'wb') as dec_file:
                 dec_file.write(plaintext)
 
-            result_label.config(text=f"File decrypted successfully: {decrypted_file_path}")
+            result_label.config(text=f"File decrypted successfully: {decrypted_file_path}", fg="#41abff")
         except Exception as e:
-            result_label.config(text=f"Error: {str(e)}")
+            result_label.config(text=f"Error: {str(e)}", fg="#ff0000")
 
 # Create GUI elements
-file_label = tk.Label(root, text="Select files:")
-file_entry = tk.Entry(root, width=50)
-file_button = tk.Button(root, text="Browse", command=select_files)
+file_label = tk.Label(root, text="Select files:", bg="#282c34", fg="#ddf581", font=("JetBrainsMono NF", 10))
+file_entry = tk.Entry(root, width=50, font=("JetBrainsMono NF", 10))
+file_button = tk.Button(root, text="Browse", command=select_files, bg="#41abff", fg="#000000", font=("JetBrainsMono NF", 10))
 
-password_label = tk.Label(root, text="Enter password:")
-password_entry = tk.Entry(root, show="*")
+password_label = tk.Label(root, text="Enter password:", bg="#282c34", fg="#ddf581", font=("JetBrainsMono NF", 10))
+password_entry = tk.Entry(root, show="*", font=("JetBrainsMono NF", 10))
 
-encrypt_button = tk.Button(root, text="Encrypt", command=encrypt_files)
-decrypt_button = tk.Button(root, text="Decrypt", command=decrypt_files)
+encrypt_button = tk.Button(root, text="Encrypt", command=encrypt_files, bg="#f73016", fg="#ffffff", font=("JetBrainsMono NF", 10))
+decrypt_button = tk.Button(root, text="Decrypt", command=decrypt_files, bg="#41abff", fg="#000000", font=("JetBrainsMono NF", 10))
 
-result_label = tk.Label(root, text="")
+result_label = tk.Label(root, text="", bg="#282c34", fg="#41abff", font=("JetBrainsMono NF", 10))
 
 # Arrange GUI elements
-file_label.grid(row=0, column=0, padx=10, pady=5)
+file_label.grid(row=0, column=0, padx=10, pady=5, sticky='w')
 file_entry.grid(row=0, column=1, padx=10, pady=5)
 file_button.grid(row=0, column=2, padx=10, pady=5)
 
-password_label.grid(row=1, column=0, padx=10, pady=5)
+password_label.grid(row=1, column=0, padx=10, pady=5, sticky='w')
 password_entry.grid(row=1, column=1, padx=10, pady=5)
 
-encrypt_button.grid(row=2, column=1, padx=10, pady=5)
-decrypt_button.grid(row=3, column=1, padx=10, pady=5)
+encrypt_button.grid(row=2, column=0, padx=10, pady=5, columnspan=3, sticky='ew')
+decrypt_button.grid(row=3, column=0, padx=10, pady=5, columnspan=3, sticky='ew')
 
-result_label.grid(row=4, columnspan=3, padx=10, pady=5)
+result_label.grid(row=4, column=0, padx=10, pady=5, columnspan=3, sticky='w')
 
 root.mainloop()
