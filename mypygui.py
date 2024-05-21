@@ -756,7 +756,7 @@ ShutReboot.pack(side="left",padx=(1,1),pady=(0,0))
 ShutReboot.bind("<Button-1>",force_shutdown)
 ShutReboot.bind("<Button-3>",force_restart)
 
-LB_R=tk.Label(ROOT2 ,text="\uf0e2", bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"))
+LB_R=tk.Label(ROOT2 ,text="\uf2f1", bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_R.pack(side="left",padx=(1,1 ),pady=(0,0))
 LB_R.bind("<Button-1>",restart)
 
