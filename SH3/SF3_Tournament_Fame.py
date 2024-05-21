@@ -55,16 +55,16 @@ def main():
             focus_window(window_title)
 
 #* Hand
-            # if find_image(action_image):
-            #     # Randomly choose whether to hold or press 'k'
-            #     if random.choice([True, False]):
-            #         pyautogui.keyDown('j')
-            #         pyautogui.keyDown('l')
-            #         time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
-            #         pyautogui.keyUp('j')
-            #         pyautogui.keyUp('l')
-            #     else:
-            #         pyautogui.press('j')
+            if find_image(action_image):
+                # Randomly choose whether to hold or press 'k'
+                if random.choice([True, False]):
+                    pyautogui.keyDown('j')
+                    pyautogui.keyDown('l')
+                    time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
+                    pyautogui.keyUp('j')
+                    pyautogui.keyUp('l')
+                else:
+                    pyautogui.press('j')
 
 #* Kick
             # if find_image(action_image):
@@ -79,40 +79,40 @@ def main():
             #         pyautogui.press('k')
 
 #* Hand and Kick Combo
-            if find_image(action_image):
-                # Randomly choose between different combos
-                combo_choice = random.choice(['hand', 'kick', 'hand_kick'])
+            # if find_image(action_image):
+            #     # Randomly choose between different combos
+            #     combo_choice = random.choice(['hand', 'kick', 'hand_kick'])
 
-                if combo_choice == 'hand':
-                    if random.choice([True, False]):
-                        pyautogui.keyDown('j')
-                        pyautogui.keyDown('l')
-                        time.sleep(random.uniform(0.1, 0.5))  # Hold 'j' and 'l' for a random duration
-                        pyautogui.keyUp('j')
-                        pyautogui.keyUp('l')
-                    else:
-                        pyautogui.press('j')
+            #     if combo_choice == 'hand':
+            #         if random.choice([True, False]):
+            #             pyautogui.keyDown('j')
+            #             pyautogui.keyDown('l')
+            #             time.sleep(random.uniform(0.1, 0.5))  # Hold 'j' and 'l' for a random duration
+            #             pyautogui.keyUp('j')
+            #             pyautogui.keyUp('l')
+            #         else:
+            #             pyautogui.press('j')
 
-                elif combo_choice == 'kick':
-                    if random.choice([True, False]):
-                        pyautogui.keyDown('k')
-                        pyautogui.keyDown('l')
-                        time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' and 'l' for a random duration
-                        pyautogui.keyUp('k')
-                        pyautogui.keyUp('l')
-                    else:
-                        pyautogui.press('k')
+            #     elif combo_choice == 'kick':
+            #         if random.choice([True, False]):
+            #             pyautogui.keyDown('k')
+            #             pyautogui.keyDown('l')
+            #             time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' and 'l' for a random duration
+            #             pyautogui.keyUp('k')
+            #             pyautogui.keyUp('l')
+            #         else:
+            #             pyautogui.press('k')
 
-                elif combo_choice == 'hand_kick':
-                    if random.choice([True, False]):
-                        pyautogui.keyDown('j')
-                        pyautogui.keyDown('k')
-                        time.sleep(random.uniform(0.1, 0.5))  # Hold 'j' and 'k' for a random duration
-                        pyautogui.keyUp('j')
-                        pyautogui.keyUp('k')
-                    else:
-                        pyautogui.press('j')
-                        pyautogui.press('k')
+            #     elif combo_choice == 'hand_kick':
+            #         if random.choice([True, False]):
+            #             pyautogui.keyDown('j')
+            #             pyautogui.keyDown('k')
+            #             time.sleep(random.uniform(0.1, 0.5))  # Hold 'j' and 'k' for a random duration
+            #             pyautogui.keyUp('j')
+            #             pyautogui.keyUp('k')
+            #         else:
+            #             pyautogui.press('j')
+            #             pyautogui.press('k')
 
 
 
