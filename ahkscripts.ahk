@@ -249,6 +249,7 @@ return
 ::;ss::<SPACE>
 
 ::;;::,=:[]()
+::;font::font=("Jetbrainsmono nfp", 12, "bold")
 
 ;*   $$$$$$\  $$\                            $$\                           $$\               
 ;*  $$  __$$\ $$ |                           $$ |                          $$ |              

@@ -668,10 +668,12 @@ back_desktop.pack(side="left" ,padx=(0,0))
 sonarr_img = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\sonarr-20x20.png"))
 radarr_img = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\radarr-20x20.png"))
 def desktop(FR_Desktop):
-    Sonarr_bt=tk.Button(BoxForDesktop, image=sonarr_img, compound=tk.TOP, text="", command=lambda:(subprocess.Popen(["explorer","D:\\Downloads\\@Sonarr"],shell=True)), height=50, width=30, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-    Sonarr_bt.pack(pady=0, side="left", anchor="w", padx=(0,0))
-    Radarr_bt=tk.Button(BoxForDesktop, image=radarr_img, compound=tk.TOP, text="", command=lambda:(subprocess.Popen(["explorer","D:\\Downloads\\@Radarr"],shell=True)),  height=50, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-    Radarr_bt.pack (pady=0, side="left", anchor="w", padx=(0,0))
+    Sonarr_bt=tk.Label(BoxForDesktop, image=sonarr_img, compound=tk.TOP, text="", height=30, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
+    Sonarr_bt.bind("<Button-1>",lambda event:(subprocess.Popen(["explorer","D:\\Downloads\\@Sonarr"],shell=True)))
+    Sonarr_bt.pack(pady=(0,2), side="left", anchor="w", padx=(0,0))
+    Radarr_bt=tk.Label(BoxForDesktop, image=radarr_img, compound=tk.TOP, text="", height=50, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
+    Radarr_bt.bind("<Button-1>",lambda event:(subprocess.Popen(["explorer","D:\\Downloads\\@Radarr"],shell=True)))
+    Radarr_bt.pack(pady=(0,2), side="left", anchor="w", padx=(0,0))
 desktop(FR_Desktop)
 
 #! Worspace_1
