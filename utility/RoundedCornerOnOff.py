@@ -45,10 +45,18 @@ root = tk.Tk()
 root.title("Win11 Toggle Rounded Corners")
 root.geometry("300x150")
 
-# Style
+# Configure dark theme
+root.configure(bg='#2e2e2e')
 style = ttk.Style()
-style.configure('TButton', font=('Arial', 12))
-style.configure('TLabel', font=('Arial', 12))
+
+# Set ttk theme to "clam" which is more easily customizable
+style.theme_use('clam')
+
+# Define styles
+style.configure('TFrame', background='#2e2e2e')
+style.configure('TButton', font=('Arial', 12), background='#3e3e3e', foreground='#ffffff', borderwidth=1)
+style.map('TButton', background=[('active', '#575757')])
+style.configure('TLabel', font=('Arial', 12), background='#2e2e2e', foreground='#ffffff')
 
 # Create frame
 frame = ttk.Frame(root)
