@@ -526,15 +526,15 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 #! ███████╗███████╗██║        ██║
 #! ╚══════╝╚══════╝╚═╝        ╚═╝
 
-uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#000000",fg_color="#ffffff", font=("JetBrainsMono NFP" ,12,"bold"))
-uptime_label.pack(side="left",padx=(0,0),pady=(1,0))
+uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
+uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 uptime_label.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui.py"], shell=True))
 
-LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-LB_K.pack(side="left",padx=(3,0),pady=(1,0))
+LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
+LB_K.pack(side="left",padx=(5,0),pady=(1,0))
 LB_K.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.py"], shell=True))
 
-Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#f37826", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Tools_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
 
@@ -693,7 +693,6 @@ back_WS1=tk.Button(BoxForWS_1,text="\uf100",width=0 ,bg="#98c379", fg="#1D2027",
 back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_2
 #! Worspace_3
-
 
 SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
