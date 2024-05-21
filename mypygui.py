@@ -608,16 +608,21 @@ LB_get.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility
 LB_get.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True))
 # LB_get.bind("<Button-1>",lambda event:get_active_window_info())
 
-bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-bkup.pack(side="left",padx=(3,0),pady=(0,0))
-bkup.bind ("<Button-1>",git_backup)
+LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+LockBox_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
+LockBox_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
 
-STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
-STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes("C:\\ms1"))
-STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
-STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
+Encrypt_lb = tk.Label(ROOT1,text="\uf084", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
+Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
+Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
+
+RoundedCorner_lb = tk.Label(ROOT1, text="\udb81\ude07", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+RoundedCorner_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
+RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
+
+Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
+Changes_Monitor_lb.pack(side="left",padx=(0,0),pady=(0,0))
 
 #! FFMPEG
 FFMPEG_bt = CTkButton(ROOT1, text="\uf07cFFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1,hover_color="#1dd463", border_color="#000000", fg_color="#bff130", text_color="#000")
@@ -688,17 +693,16 @@ back_WS1.pack(side="left" ,padx=(0,0))
 #! Worspace_2
 #! Worspace_3
 
-LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-LockBox_lb.pack(side="left", padx=(10, 0), pady=(0, 0))
-LockBox_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
+bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+bkup.pack(side="left",padx=(3,0),pady=(0,0))
+bkup.bind ("<Button-1>",git_backup)
 
-Encrypt_lb = tk.Label(ROOT1,text="\uf511", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
-Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
-
-Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
-Changes_Monitor_lb.pack(side="left",padx=(3,0),pady=(0,0))
+STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
+STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes("C:\\ms1"))
+STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
+STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
 #! ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝
