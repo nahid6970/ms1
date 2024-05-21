@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import subprocess
 import requests
 import os
@@ -42,14 +43,24 @@ if not os.path.exists(exe_path):
 # Create the main window
 root = tk.Tk()
 root.title("Win11 Toggle Rounded Corners")
+root.geometry("300x150")
+
+# Style
+style = ttk.Style()
+style.configure('TButton', font=('Arial', 12))
+style.configure('TLabel', font=('Arial', 12))
+
+# Create frame
+frame = ttk.Frame(root)
+frame.pack(expand=True, fill='both')
 
 # Create enable button
-enable_button = tk.Button(root, text="Enable Rounded Corners", command=enable_rounded_corners)
-enable_button.pack(pady=10)
+enable_button = ttk.Button(frame, text="Enable Rounded Corners", command=enable_rounded_corners)
+enable_button.pack(pady=10, padx=20, fill='x')
 
 # Create disable button
-disable_button = tk.Button(root, text="Disable Rounded Corners", command=disable_rounded_corners)
-disable_button.pack(pady=10)
+disable_button = ttk.Button(frame, text="Disable Rounded Corners", command=disable_rounded_corners)
+disable_button.pack(pady=10, padx=20, fill='x')
 
 # Run the Tkinter event loop
 root.mainloop()
