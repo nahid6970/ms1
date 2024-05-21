@@ -38,6 +38,7 @@ def on_press(key):
 def main():
     window_title = 'LDPlayer'
     action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fightt.png"
+    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\Sakura_fight.png"
     continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\cont.png"
     # e_image = r""
     # space_image = r""
@@ -52,6 +53,7 @@ def main():
     advert3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
     advert4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
     advert5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
+    advert6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
 
     print("Press 'q' to stop the script.")
     
@@ -68,7 +70,7 @@ def main():
                 continue
             
 #* Hand
-            if find_image(action_image):
+            if find_image(action_image) or find_image(action2_image):
                 # Randomly choose whether to hold or press 'k'
                 if random.choice([True, False]):
                     pyautogui.keyDown('j')
@@ -160,6 +162,9 @@ def main():
                 if positionclick:
                     pyautogui.click(positionclick)
                 positionclick = find_image(advert5, confidence=0.8)
+                if positionclick:
+                    pyautogui.click(positionclick)
+                positionclick = find_image(advert6, confidence=0.8)
                 if positionclick:
                     pyautogui.click(positionclick)
 
