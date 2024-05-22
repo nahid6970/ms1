@@ -179,8 +179,41 @@ return
 
 
 
+;;!  $$\   $$\ $$\ $$\ $$\       $$\      $$\ $$\                 $$\
+;;!  $$ | $$  |\__|$$ |$$ |      $$ | $\  $$ |\__|                $$ |
+;;!  $$ |$$  / $$\ $$ |$$ |      $$ |$$$\ $$ |$$\ $$$$$$$\   $$$$$$$ | $$$$$$\  $$\  $$\  $$\
+;;!  $$$$$  /  $$ |$$ |$$ |      $$ $$ $$\$$ |$$ |$$  __$$\ $$  __$$ |$$  __$$\ $$ | $$ | $$ |
+;;!  $$  $$<   $$ |$$ |$$ |      $$$$  _$$$$ |$$ |$$ |  $$ |$$ /  $$ |$$ /  $$ |$$ | $$ | $$ |
+;;!  $$ |\$$\  $$ |$$ |$$ |      $$$  / \$$$ |$$ |$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ | $$ | $$ |
+;;!  $$ | \$$\ $$ |$$ |$$ |      $$  /   \$$ |$$ |$$ |  $$ |\$$$$$$$ |\$$$$$$  |\$$$$$\$$$$  |
+;;!  \__|  \__|\__|\__|\__|      \__/     \__|\__|\__|  \__| \_______| \______/  \_____\____/
 
+; #Persistent
+; SetTimer, ResetKeyPresses, 500 ; Adjust the timing interval as needed (in milliseconds)
+; KeyPressCount := 0
 
+; ~Esc::
+;     KeyPressCount++
+;     If (KeyPressCount = 1)
+;         SetTimer, CheckKeyPresses, -200 ; Set the check timer to fire after 200 milliseconds
+; return
+
+; ~q::
+;     If (GetKeyState("Esc", "P")) ; Check if Esc is held down
+;     {
+;         Send, {Alt Down}{F4}{Alt Up} ; Sends Alt+F4 to close the active window
+;         KeyPressCount := 0 ; Reset the key press count
+;     }
+; return
+
+; CheckKeyPresses:
+;     SetTimer, CheckKeyPresses, Off
+;     KeyPressCount := 0 ; Reset the key press count
+; return
+
+; ResetKeyPresses:
+;     KeyPressCount := 0 ; Reset the key press count after a certain duration
+; return
 
 #Persistent
 SetTimer, ResetKeyPresses, 500 ; Adjust the timing interval as needed (in milliseconds)
@@ -192,15 +225,18 @@ KeyPressCount := 0
         SetTimer, CheckKeyPresses, -200 ; Set the check timer to fire after 200 milliseconds
 return
 
-CheckKeyPresses:
-    SetTimer, CheckKeyPresses, Off
-    If (KeyPressCount >= 2)
+~q::
+    If (GetKeyState("Esc", "P")) ; Check if Esc is held down
     {
-        Send, {Alt Down}{F4}{Alt Up} ; Sends Alt+F4 to close the active window
+        WinGet, ProcessName, ProcessName, A ; Get the process name of the active window
+        Run, %ComSpec% /c taskkill /IM %ProcessName% /F, , Hide ; Kill the process using taskkill
         KeyPressCount := 0 ; Reset the key press count
     }
-    else
-        KeyPressCount := 0 ; Reset the key press count if not pressed twice rapidly
+return
+
+CheckKeyPresses:
+    SetTimer, CheckKeyPresses, Off
+    KeyPressCount := 0 ; Reset the key press count
 return
 
 ResetKeyPresses:
