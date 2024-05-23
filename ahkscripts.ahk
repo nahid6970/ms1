@@ -218,13 +218,11 @@ return
 #Persistent
 SetTimer, ResetKeyPresses, 500 ; Adjust the timing interval as needed (in milliseconds)
 KeyPressCount := 0
-
 ~Esc::
     KeyPressCount++
     If (KeyPressCount = 1)
         SetTimer, CheckKeyPresses, -200 ; Set the check timer to fire after 200 milliseconds
 return
-
 ~q::
     If (GetKeyState("Esc", "P")) ; Check if Esc is held down
     {
@@ -233,12 +231,10 @@ return
         KeyPressCount := 0 ; Reset the key press count
     }
 return
-
 CheckKeyPresses:
     SetTimer, CheckKeyPresses, Off
     KeyPressCount := 0 ; Reset the key press count
 return
-
 ResetKeyPresses:
     KeyPressCount := 0 ; Reset the key press count after a certain duration
 return
