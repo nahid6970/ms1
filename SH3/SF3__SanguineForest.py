@@ -37,8 +37,8 @@ def on_press(key):
 
 def main():
     window_title = 'LDPlayer'
-    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\fight.png"
-    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\Sakura_fight.png"
+    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+    # action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\Sakura_fight.png"
     continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
     # e_image = r""
     # space_image = r""
@@ -71,7 +71,8 @@ def main():
                 continue
             
 #* Hand
-            if find_image(action_image) or find_image(action2_image):
+            # if find_image(action_image) or find_image(action2_image):
+            if find_image(action_image):
                 # Randomly choose whether to hold or press 'k'
                 if random.choice([True, False]):
                     pyautogui.keyDown('j')
