@@ -317,3 +317,6 @@ return
 Pause::Run, komorebic quick-load-resize
 ^e::Run, komorebic toggle-float
 
+
+
+
