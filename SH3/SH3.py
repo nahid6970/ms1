@@ -2,11 +2,16 @@ import time
 import pyautogui
 import pygetwindow as gw
 import random
+import threading
+from tkinter import Tk, Button
+
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
 error_count = 0  # Initialize the error counter
+stop_thread = False  # Flag to stop the thread
+
 
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
@@ -19,6 +24,7 @@ def find_image(image_path, confidence=0.7):
         error_count += 1
         print(f"{error_count} times image not found")
     return None
+
 
 def focus_window(window_title):
     """Set focus to the window with the given title."""
@@ -262,15 +268,49 @@ def SanguineForest():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+
+def start_function1():
+    global stop_thread
+    stop_thread = False
+    threading.Thread(target=TournamentFame).start()
+
+def start_function2():
+    global stop_thread
+    stop_thread = False
+    threading.Thread(target=SanguineForest).start()
+
+def stop_functions():
+    global stop_thread
+    stop_thread = True
+
+
+
+
+# if __name__ == "__main__":
+#     print("Press '1' for TournamentFame")
+#     print("Press '2' for SanguineForest")
+
+#     choice = input().strip()
+
+#     if choice == '1':
+#         TournamentFame()
+#     elif choice == '2':
+#         SanguineForest()
+#     else:
+#         print("Invalid choice. Exiting.")
+
+
 if __name__ == "__main__":
-    print("Press '1' for TournamentFame")
-    print("Press '2' for SanguineForest")
+    root = Tk()
+    root.title("Function Selector")
 
-    choice = input().strip()
+    button1 = Button(root, text="TournamentFame", command=start_function1, bg="#01c1fc", fg="#000000")
+    button1.pack(pady=10, side="left")
 
-    if choice == '1':
-        TournamentFame()
-    elif choice == '2':
-        SanguineForest()
-    else:
-        print("Invalid choice. Exiting.")
+    button2 = Button(root, text="SanguineForest", command=start_function2, bg="#c4f728", fg="#000000")
+    button2.pack(pady=10, side="left")
+
+    button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
+    button3.pack(pady=10,side="left")
+
+    root.mainloop()
