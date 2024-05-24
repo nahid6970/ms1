@@ -158,10 +158,11 @@ def SanguineForest():
         # while True:
         while not stop_thread:
             # Focus on the LDPlayer window
-            if not focus_window(window_title):
-                print(f"Window with title '{window_title}' not found. Retrying...")
-                time.sleep(1)
-                continue
+            # if not focus_window(window_title):
+            focus_window(window_title)
+                # print(f"Window with title '{window_title}' not found. Retrying...")
+                # time.sleep(1)
+                # continue
 
 #* Hand
             # if find_image(action_image):
