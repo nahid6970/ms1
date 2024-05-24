@@ -668,30 +668,43 @@ FR_Desktop = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_Desktop.pack_propagate(True)
 BoxForDesktop = tk.Frame(FR_Desktop, bg="#1d2027")
 BoxForDesktop.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
-back_desktop=tk.Button(BoxForDesktop,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,FR_Desktop))
-back_desktop.pack(side="left" ,padx=(0,0))
+BACK=tk.Button(BoxForDesktop,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,FR_Desktop))
+BACK.pack(side="left" ,padx=(0,0))
 
 sonarr_img = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\sonarr-20x20.png"))
 radarr_img = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\radarr-20x20.png"))
-def desktop(FR_Desktop):
+def Folder(FR_Desktop):
     Sonarr_bt=tk.Label(BoxForDesktop, image=sonarr_img, compound=tk.TOP, text="", height=30, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
     Sonarr_bt.bind("<Button-1>",lambda event:(subprocess.Popen(["explorer","D:\\Downloads\\@Sonarr"],shell=True)))
     Sonarr_bt.pack(pady=(0,2), side="left", anchor="w", padx=(0,0))
     Radarr_bt=tk.Label(BoxForDesktop, image=radarr_img, compound=tk.TOP, text="", height=50, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
     Radarr_bt.bind("<Button-1>",lambda event:(subprocess.Popen(["explorer","D:\\Downloads\\@Radarr"],shell=True)))
     Radarr_bt.pack(pady=(0,2), side="left", anchor="w", padx=(0,0))
-desktop(FR_Desktop)
+Folder(FR_Desktop)
 
 #! Worspace_1
 WorkSpace_1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 WorkSpace_1.pack_propagate(True)
 Enter_WS1 = CTkButton(ROOT1, text="\uf07cP", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
 Enter_WS1.pack(side="left", padx=(1,1))
-BoxForWS_1 = tk.Frame(WorkSpace_1, bg="#1D2027")
-BoxForWS_1.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
-back_WS1=tk.Button(BoxForWS_1,text="\uf100",width=0 ,bg="#98c379", fg="#1D2027", font=("Jetbrainsmono nfp",12), command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
-back_WS1.pack(side="left" ,padx=(0,0))
+BOX = tk.Frame(WorkSpace_1, bg="#1D2027")
+BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
+BACK.pack(side="left" ,padx=(0,0))
+
 #! Worspace_2
+EDIT_SPACE = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+EDIT_SPACE.pack_propagate(True)
+Enter_WS2 = CTkButton(ROOT1, text="\uf07cEdit", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(EDIT_SPACE , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+Enter_WS2.pack(side="left", padx=(1,1))
+BOX = tk.Frame(EDIT_SPACE, bg="#1D2027")
+BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_SPACE))
+BACK.pack(side="left" ,padx=(0,0))
+def Folder(EDIT_SPACE):
+    File_bt=tk.Button(BOX,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
+Folder(EDIT_SPACE)
+
 #! Worspace_3
 
 SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
