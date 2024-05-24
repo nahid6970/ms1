@@ -38,7 +38,7 @@ def on_press(key):
 def main():
     window_title = 'LDPlayer'
     action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    # action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\Sakura_fight.png"
+    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
     # e_image = r""
     # space_image = r""
@@ -71,8 +71,8 @@ def main():
                 continue
             
 #* Hand
-            # if find_image(action_image) or find_image(action2_image):
-            if find_image(action_image):
+            # if find_image(action_image):
+            if find_image(action_image) or find_image(action2_image):
                 # Randomly choose whether to hold or press 'k'
                 if random.choice([True, False]):
                     pyautogui.keyDown('j')
@@ -135,8 +135,8 @@ def main():
 
             elif find_image(continue_image, confidence=0.8):
                 pyautogui.press('c')
-            elif find_image(select_from):
-                pyautogui.press('1')
+            # elif find_image(select_from):
+            #     pyautogui.press('1')
             elif find_image(Four_paths, confidence=0.8):
                 pyautogui.press('f')
             elif find_image(fourth_tournament):
@@ -151,25 +151,25 @@ def main():
                 if positionclick:
                     pyautogui.click(positionclick)
 
-                positionclick = find_image(advert1, confidence=0.8)
+                positionclick = find_image(advert1, confidence=0.9)
                 if positionclick:
                     pyautogui.click(positionclick)
-                positionclick = find_image(advert2, confidence=0.8)
+                positionclick = find_image(advert2, confidence=0.9)
                 if positionclick:
                     pyautogui.click(positionclick)
-                positionclick = find_image(advert3, confidence=0.8)
+                positionclick = find_image(advert3, confidence=0.9)
                 if positionclick:
                     pyautogui.click(positionclick)
-                positionclick = find_image(advert4, confidence=0.8)
+                positionclick = find_image(advert4, confidence=0.9)
                 if positionclick:
                     pyautogui.click(positionclick)
-                positionclick = find_image(advert5, confidence=0.8)
+                positionclick = find_image(advert5, confidence=0.9)
                 if positionclick:
                     pyautogui.click(positionclick)
-                positionclick = find_image(advert6, confidence=0.8)
+                positionclick = find_image(advert6, confidence=0.9)
                 if positionclick:
                     pyautogui.click(positionclick)
-                positionclick = find_image(advert7, confidence=0.8)
+                positionclick = find_image(advert7, confidence=0.9)
                 if positionclick:
                     pyautogui.click(positionclick)
 
