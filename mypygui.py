@@ -528,7 +528,6 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
-uptime_label.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui.py"], shell=True))
 
 LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 LB_K.pack(side="left",padx=(5,0),pady=(1,0))
@@ -692,7 +691,7 @@ BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
 BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
 BACK.pack(side="left" ,padx=(0,0))
 
-#! Worspace_2
+#! EDIT SPACE
 EDIT_SPACE = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 EDIT_SPACE.pack_propagate(True)
 Enter_WS2 = CTkButton(ROOT1, text="\uf07cEdit", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(EDIT_SPACE , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
@@ -702,7 +701,10 @@ BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
 BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_SPACE))
 BACK.pack(side="left" ,padx=(0,0))
 def Folder(EDIT_SPACE):
-    File_bt=tk.Button(BOX,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
+    MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True)))
+    MYPYGUI.pack(side="left" ,padx=(0,0))
+    AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#ffffff", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahkscripts.ahk"],shell=True)))
+    AHKEDIT.pack(side="left" ,padx=(0,0))
 Folder(EDIT_SPACE)
 
 #! Worspace_3
