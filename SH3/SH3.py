@@ -55,7 +55,8 @@ def TournamentFame():
     ability_image = r"C:\Users\nahid\OneDrive\Desktop\b_ability.png"
 
     try:
-        while True:
+        # while True:
+        while not stop_thread:
             # Focus on the LDPlayer window
             focus_window(window_title)
 
@@ -154,7 +155,8 @@ def SanguineForest():
     advert7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
 
     try:
-        while True:
+        # while True:
+        while not stop_thread:
             # Focus on the LDPlayer window
             if not focus_window(window_title):
                 print(f"Window with title '{window_title}' not found. Retrying...")
