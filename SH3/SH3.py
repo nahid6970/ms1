@@ -308,12 +308,11 @@ if __name__ == "__main__":
     root.title("Function Selector")
 
     button1 = Button(root, text="TournamentFame", command=start_function1, bg="#01c1fc", fg="#000000")
-    button1.pack(pady=10, side="left")
-
     button2 = Button(root, text="SanguineForest", command=start_function2, bg="#c4f728", fg="#000000")
-    button2.pack(pady=10, side="left")
-
     button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
-    button3.pack(pady=10,side="left")
+
+    button1.grid(row=1, column=1, columnspan=1)
+    button2.grid(row=1, column=2, columnspan=1)
+    button3.grid(row=2, column=1, columnspan=2, sticky="ew")
 
     root.mainloop()
