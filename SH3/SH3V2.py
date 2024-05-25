@@ -253,6 +253,7 @@ def Raids():
     action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
     Raids = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\Raid_Home.png"
+    level3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
     participate = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
     toraid = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
     fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
@@ -279,6 +280,10 @@ def Raids():
                 press_key(window, 'c')
             else:
                 positionclick = find_image(Raids, confidence=0.8)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(level3, confidence=0.85)
                 if positionclick:
                     click(window, positionclick.left, positionclick.top)
 
@@ -331,13 +336,13 @@ if __name__ == "__main__":
     root = Tk()
     root.title("Function Selector")
 
-    button1 = Button(root, text="TournamentFame", command=start_function1, bg="#01c1fc", fg="#000000")
+    button1 = Button(root, text="TournamentFame", command=start_function1, bg="#bda24a", fg="#000000")
     button1.pack(fill="x")
 
-    button2 = Button(root, text="SanguineForest", command=start_function2, bg="#c4f728", fg="#000000")
+    button2 = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
     button2.pack(fill="x")
 
-    buttonRaids = Button(root, text="Raids", command=start_function3, bg="#c4f728", fg="#000000")
+    buttonRaids = Button(root, text="Raids", command=start_function3, bg="#006173", fg="#ffffff")
     buttonRaids.pack(fill="x")
 
     button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
