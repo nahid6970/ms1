@@ -311,7 +311,7 @@ return
 !+k::RunWait, taskkill /f /im komorebi.exe
 !k::RunWait, komorebic start
 Pause::Run, komorebic quick-load-resize,,Hide
-Esc & e::Run, komorebic toggle-float
+Esc & e::Run, komorebic toggle-float,,Hide
 
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 
