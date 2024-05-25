@@ -295,11 +295,9 @@ return
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
-!+k::RunWait, taskkill /f /im komorebi.exe
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe
 !+o::RunWait, taskkill /f /im whkd.exe
 !+p::RunWait, taskkill /f /im python.exe
-!k::RunWait, komorebic start
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
 !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
@@ -310,7 +308,9 @@ return
 !+g::Run, taskkill /f /im glazewm.exe
 
 
-Pause::Run, komorebic quick-load-resize
+!+k::RunWait, taskkill /f /im komorebi.exe
+!k::RunWait, komorebic start
+Pause::Run, komorebic quick-load-resize,,Hide
 Esc & e::Run, komorebic toggle-float
 
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
