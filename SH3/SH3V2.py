@@ -177,17 +177,17 @@ def SanguineForest():
     window_title = 'LDPlayer'
     action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
     action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
-    continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
-    Four_paths = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterSanguineForest.png"
-    fourth_tournament = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterTournament.png"
-    advertise = r"C:\Users\nahid\OneDrive\backup\shadowfight3\video_click.png"
-    advert1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
-    advert2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
-    advert3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
-    advert4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
-    advert5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
-    advert6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
-    advert7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
+    continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
+    EnterSanguineForest = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterSanguineForest.png"
+    EnterTournament = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterTournament.png"
+    # advertise = r"C:\Users\nahid\OneDrive\backup\shadowfight3\video_click.png"
+    # advert1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
+    # advert2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
+    # advert3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
+    # advert4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
+    # advert5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
+    # advert6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
+    # advert7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
 
     window = focus_window(window_title)
     if not window:
@@ -209,40 +209,43 @@ def SanguineForest():
 
             elif find_image(continue_image, confidence=0.8):
                 press_key(window, 'c')
-            elif find_image(Four_paths, confidence=0.8):
+
+            elif find_image(EnterSanguineForest, confidence=0.8):
                 press_key(window, 'f')
-            elif find_image(fourth_tournament):
+
+            elif find_image(EnterTournament):
                 press_key(window, 'n')
+
             else:
-                positionclick = find_image(Four_paths, confidence=0.8)
+                positionclick = find_image(EnterSanguineForest, confidence=0.8)
                 if positionclick:
                     click(window, positionclick.left, positionclick.top)
 
-                positionclick = find_image(advertise)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advertise)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
 
-                positionclick = find_image(advert1, confidence=0.9)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
-                positionclick = find_image(advert2, confidence=0.9)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
-                positionclick = find_image(advert3, confidence=0.9)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
-                positionclick = find_image(advert4, confidence=0.9)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
-                positionclick = find_image(advert5, confidence=0.9)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
-                positionclick = find_image(advert6, confidence=0.9)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
-                positionclick = find_image(advert7, confidence=0.9)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advert1, confidence=0.9)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advert2, confidence=0.9)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advert3, confidence=0.9)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advert4, confidence=0.9)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advert5, confidence=0.9)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advert6, confidence=0.9)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
+                # positionclick = find_image(advert7, confidence=0.9)
+                # if positionclick:
+                #     click(window, positionclick.left, positionclick.top)
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
