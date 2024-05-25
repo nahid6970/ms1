@@ -3,7 +3,6 @@ Start-Process 'C:\ms1\ahkscripts.ahk'
 komorebic start
 Start-Process 'C:\Users\nahid\OneDrive\backup\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden
 Start-Process 'C:\ms1\scripts\valorant\valo_qbit.ps1' -WindowStyle Hidden
-Start-Process -FilePath 'C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe'
 Start-Process -FilePath 'C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe'
 Start-Process -FilePath 'C:\ProgramData\Prowlarr\bin\Prowlarr.exe'
 Start-Process -FilePath 'C:\ProgramData\Radarr\bin\Radarr.exe'
