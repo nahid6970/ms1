@@ -324,11 +324,12 @@ Pause::Run, komorebic quick-load-resize
 ; Move all windows from the secondary monitor to the primary monitor
 ; Use Win+M to trigger the script
 
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+#NoEnv
+SendMode Input
+SetWorkingDir %A_ScriptDir%
 
-#1::  ; Win + 1 hotkey
+; Win + 1 hotkey to toggle window between primary and secondary monitors
+#1::
 {
     ; Get the handle of the active window
     WinGet, hwnd, ID, A
@@ -336,13 +337,24 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
     ; Get the position and size of the active window
     WinGetPos, x, y, w, h, ahk_id %hwnd%
 
-    ; Get the work area of the primary monitor
+    ; Get the work area of the primary and secondary monitors
     SysGet, MonitorPrimary, MonitorWorkArea, 1
+    SysGet, MonitorSecondary, MonitorWorkArea, 2
 
-    ; Calculate the new position to center the window on the primary monitor
-    newX := MonitorPrimaryLeft + ((MonitorPrimaryRight - MonitorPrimaryLeft - w) / 2)
-    newY := MonitorPrimaryTop + ((MonitorPrimaryBottom - MonitorPrimaryTop - h) / 2)
+    ; Check if the window is on the primary monitor
+    if (x >= MonitorPrimaryLeft and x < MonitorPrimaryRight and y >= MonitorPrimaryTop and y < MonitorPrimaryBottom)
+    {
+        ; Calculate the new position to center the window on the secondary monitor
+        newX := MonitorSecondaryLeft + ((MonitorSecondaryRight - MonitorSecondaryLeft - w) / 2)
+        newY := MonitorSecondaryTop + ((MonitorSecondaryBottom - MonitorSecondaryTop - h) / 2)
+    }
+    else
+    {
+        ; Calculate the new position to center the window on the primary monitor
+        newX := MonitorPrimaryLeft + ((MonitorPrimaryRight - MonitorPrimaryLeft - w) / 2)
+        newY := MonitorPrimaryTop + ((MonitorPrimaryBottom - MonitorPrimaryTop - h) / 2)
+    }
 
-    ; Move the window to the calculated position on the primary monitor
+    ; Move the window to the calculated position
     WinMove, ahk_id %hwnd%, , newX, newY
 }
