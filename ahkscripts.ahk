@@ -313,6 +313,7 @@ return
 Pause::Run, komorebic quick-load-resize
 Esc & e::Run, komorebic toggle-float
 
+^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 
 
 
