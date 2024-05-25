@@ -3,6 +3,7 @@
   "app_specific_configuration_path": "$Env:USERPROFILE/applications.yaml",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
+  "global_work_area_offset": {"left": 0, "right": 0, "top": 0, "bottom": 38},
 
   "default_workspace_padding": 1,
   "default_container_padding": 0,
