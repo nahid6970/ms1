@@ -116,6 +116,26 @@ def focus_window(window_title):
         return window
     return None
 
+def press_key(window, key):
+    """Send a key press to a specific window."""
+    window.activate()
+    pyautogui.press(key)
+
+def key_down(window, key):
+    """Send a key down event to a specific window."""
+    window.activate()
+    pyautogui.keyDown(key)
+
+def key_up(window, key):
+    """Send a key up event to a specific window."""
+    window.activate()
+    pyautogui.keyUp(key)
+
+def click(window, x, y):
+    """Send a mouse click to a specific window."""
+    window.activate()
+    pyautogui.click(x, y)
+
 def TournamentFame():
     window_title = 'LDPlayer'
     action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
@@ -123,26 +143,32 @@ def TournamentFame():
     e_image = r"C:\ms1\SH3\b_tournament.png"
     space_image = r"C:\ms1\SH3\b_space.png"
     continue_image = r"C:\ms1\SH3\b_continue.png"
+    ability_image = r"C:\Users\nahid\OneDrive\Desktop\b_ability.png"
+
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
 
     try:
         while not stop_thread:
             focus_window(window_title)
             if find_image(action_image) or find_image(action2_image):
                 if random.choice([True, False]):
-                    pyautogui.keyDown('j')
-                    pyautogui.keyDown('l')
+                    key_down(window, 'j')
+                    key_down(window, 'l')
                     time.sleep(random.uniform(0.1, 0.5))
-                    pyautogui.keyUp('j')
-                    pyautogui.keyUp('l')
+                    key_up(window, 'j')
+                    key_up(window, 'l')
                 else:
-                    pyautogui.press('j')
+                    press_key(window, 'j')
 
             elif find_image(e_image):
-                pyautogui.press('e')
+                press_key(window, 'e')
             elif find_image(space_image, confidence=0.8):
-                pyautogui.press(' ')
+                press_key(window, ' ')
             elif find_image(continue_image, confidence=0.8):
-                pyautogui.press('c')
+                press_key(window, 'c')
             time.sleep(0.1)  # Adjust the delay as needed
     except KeyboardInterrupt:
         print("Script stopped by user.")
@@ -163,55 +189,60 @@ def SanguineForest():
     advert6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
     advert7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
 
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+
     try:
         while not stop_thread:
             focus_window(window_title)
             if find_image(action_image) or find_image(action2_image):
                 if random.choice([True, False]):
-                    pyautogui.keyDown('j')
-                    pyautogui.keyDown('l')
+                    key_down(window, 'j')
+                    key_down(window, 'l')
                     time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
-                    pyautogui.keyUp('j')
-                    pyautogui.keyUp('l')
+                    key_up(window, 'j')
+                    key_up(window, 'l')
                 else:
-                    pyautogui.press('j')
+                    press_key(window, 'j')
 
             elif find_image(continue_image, confidence=0.8):
-                pyautogui.press('c')
+                press_key(window, 'c')
             elif find_image(Four_paths, confidence=0.8):
-                pyautogui.press('f')
+                press_key(window, 'f')
             elif find_image(fourth_tournament):
-                pyautogui.press('n')
+                press_key(window, 'n')
             else:
                 positionclick = find_image(Four_paths, confidence=0.8)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
 
                 positionclick = find_image(advertise)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
 
                 positionclick = find_image(advert1, confidence=0.9)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
                 positionclick = find_image(advert2, confidence=0.9)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
                 positionclick = find_image(advert3, confidence=0.9)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
                 positionclick = find_image(advert4, confidence=0.9)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
                 positionclick = find_image(advert5, confidence=0.9)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
                 positionclick = find_image(advert6, confidence=0.9)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
                 positionclick = find_image(advert7, confidence=0.9)
                 if positionclick:
-                    pyautogui.click(positionclick)
+                    click(window, positionclick.left, positionclick.top)
 
             time.sleep(0.1)
     except KeyboardInterrupt:
@@ -248,7 +279,6 @@ if __name__ == "__main__":
     button3.grid(row=2, column=1, columnspan=2, sticky="ew")
 
     root.mainloop()
-
 
 
 # if __name__ == "__main__":
