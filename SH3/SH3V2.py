@@ -258,6 +258,8 @@ def Raids():
     toraid = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
     fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
     claimreward = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
+    continuee = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue.png"
+    continuee2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue2.png"
 
     window = focus_window(window_title)
     if not window:
@@ -300,6 +302,14 @@ def Raids():
                     click(window, positionclick.left, positionclick.top)
 
                 positionclick = find_image(claimreward, confidence=.97)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(continuee, confidence=.97)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(continuee2, confidence=.97)
                 if positionclick:
                     click(window, positionclick.left, positionclick.top)
 
