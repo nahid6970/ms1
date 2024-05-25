@@ -243,6 +243,60 @@ def SanguineForest():
                 positionclick = find_image(advert7, confidence=0.9)
                 if positionclick:
                     click(window, positionclick.left, positionclick.top)
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+
+def Raids():
+    window_title = 'LDPlayer'
+    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
+    continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
+    Raids = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\Raid_Home.png"
+    participate = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
+    toraid = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
+    fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
+    claimreward = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
+
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if find_image(action_image) or find_image(action2_image):
+                if random.choice([True, False]):
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
+                    key_up(window, 'j')
+                    key_up(window, 'l')
+                else:
+                    press_key(window, 'j')
+
+            elif find_image(continue_image, confidence=0.8):
+                press_key(window, 'c')
+            else:
+                positionclick = find_image(Raids, confidence=0.8)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(participate, confidence=.97)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(toraid, confidence=.97)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(fight, confidence=.97)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(claimreward, confidence=.97)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
 
             time.sleep(0.1)
     except KeyboardInterrupt:
@@ -262,6 +316,13 @@ def start_function2():
     t.daemon = True  # This makes sure the thread will exit when the main program exits
     t.start()
 
+def start_function3():
+    global stop_thread
+    stop_thread = False
+    t = threading.Thread(target=Raids)
+    t.daemon = True  # This makes sure the thread will exit when the main program exits
+    t.start()
+
 def stop_functions():
     global stop_thread
     stop_thread = True
@@ -271,12 +332,17 @@ if __name__ == "__main__":
     root.title("Function Selector")
 
     button1 = Button(root, text="TournamentFame", command=start_function1, bg="#01c1fc", fg="#000000")
-    button2 = Button(root, text="SanguineForest", command=start_function2, bg="#c4f728", fg="#000000")
-    button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
+    button1.pack(fill="x")
 
-    button1.grid(row=1, column=1, columnspan=1)
-    button2.grid(row=1, column=2, columnspan=1)
-    button3.grid(row=2, column=1, columnspan=2, sticky="ew")
+    button2 = Button(root, text="SanguineForest", command=start_function2, bg="#c4f728", fg="#000000")
+    button2.pack(fill="x")
+
+    buttonRaids = Button(root, text="Raids", command=start_function3, bg="#c4f728", fg="#000000")
+    buttonRaids.pack(fill="x")
+
+    button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
+    button3.pack(fill="x")
+
 
     root.mainloop()
 
