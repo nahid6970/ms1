@@ -119,9 +119,6 @@ def focus_window(window_title):
 
 
 
-action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
-
 """
 ████████  ██████  ██    ██ ██████  ███    ██  █████  ███    ███ ███████ ███    ██ ████████
    ██    ██    ██ ██    ██ ██   ██ ████   ██ ██   ██ ████  ████ ██      ████   ██    ██
@@ -131,6 +128,8 @@ action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
 """
 def TournamentFame():
     window_title = 'LDPlayer'
+    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     # action_image = r"C:\ms1\SH3\b_action.png"
     e_image = r"C:\ms1\SH3\b_tournament.png"
     space_image = r"C:\ms1\SH3\b_space.png"
@@ -220,8 +219,8 @@ def TournamentFame():
 """
 def SanguineForest():
     window_title = 'LDPlayer'
-    # action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    # action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
+    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
 
     Four_paths = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterSanguineForest.png"
