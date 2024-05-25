@@ -105,7 +105,7 @@ def find_image(image_path, confidence=0.7):
             return location
     except Exception:
         error_count += 1
-        print(f"Error finding image occurred {error_count} times")
+        print(f"{error_count} times not found")
     return None
 
 def focus_window(window_title):
@@ -371,30 +371,30 @@ def stop_functions():
 
 
 
-# if __name__ == "__main__":
-#     print("Press '1' for TournamentFame")
-#     print("Press '2' for SanguineForest")
-
-#     choice = input().strip()
-
-#     if choice == '1':
-#         TournamentFame()
-#     elif choice == '2':
-#         SanguineForest()
-#     else:
-#         print("Invalid choice. Exiting.")
-
-
 if __name__ == "__main__":
-    root = Tk()
-    root.title("Function Selector")
+    print("Press '1' for TournamentFame")
+    print("Press '2' for SanguineForest")
 
-    button1 = Button(root, text="TournamentFame", command=start_function1, bg="#01c1fc", fg="#000000")
-    button2 = Button(root, text="SanguineForest", command=start_function2, bg="#c4f728", fg="#000000")
-    button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
+    choice = input().strip()
 
-    button1.grid(row=1, column=1, columnspan=1)
-    button2.grid(row=1, column=2, columnspan=1)
-    button3.grid(row=2, column=1, columnspan=2, sticky="ew")
+    if choice == '1':
+        TournamentFame()
+    elif choice == '2':
+        SanguineForest()
+    else:
+        print("Invalid choice. Exiting.")
 
-    root.mainloop()
+
+# if __name__ == "__main__":
+#     root = Tk()
+#     root.title("Function Selector")
+
+#     button1 = Button(root, text="TournamentFame", command=start_function1, bg="#01c1fc", fg="#000000")
+#     button2 = Button(root, text="SanguineForest", command=start_function2, bg="#c4f728", fg="#000000")
+#     button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
+
+#     button1.grid(row=1, column=1, columnspan=1)
+#     button2.grid(row=1, column=2, columnspan=1)
+#     button3.grid(row=2, column=1, columnspan=2, sticky="ew")
+
+#     root.mainloop()
