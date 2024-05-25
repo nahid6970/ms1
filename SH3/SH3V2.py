@@ -116,6 +116,9 @@ def focus_window(window_title):
         window.activate()
         return window
     return None
+
+
+
 action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
 action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
 

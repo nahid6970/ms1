@@ -316,3 +316,33 @@ Pause::Run, komorebic quick-load-resize
 
 
 
+
+
+
+
+
+; Move all windows from the secondary monitor to the primary monitor
+; Use Win+M to trigger the script
+
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+
+#1::  ; Win + 1 hotkey
+{
+    ; Get the handle of the active window
+    WinGet, hwnd, ID, A
+
+    ; Get the position and size of the active window
+    WinGetPos, x, y, w, h, ahk_id %hwnd%
+
+    ; Get the work area of the primary monitor
+    SysGet, MonitorPrimary, MonitorWorkArea, 1
+
+    ; Calculate the new position to center the window on the primary monitor
+    newX := MonitorPrimaryLeft + ((MonitorPrimaryRight - MonitorPrimaryLeft - w) / 2)
+    newY := MonitorPrimaryTop + ((MonitorPrimaryBottom - MonitorPrimaryTop - h) / 2)
+
+    ; Move the window to the calculated position on the primary monitor
+    WinMove, ahk_id %hwnd%, , newX, newY
+}
