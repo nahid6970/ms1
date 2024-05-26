@@ -348,18 +348,31 @@ def stop_functions():
 if __name__ == "__main__":
     root = Tk()
     root.title("Function Selector")
+    root.overrideredirect(True)
+    # root.attributes('-topmost', True)
+    default_font = ("Jetbrainsmono nfp", 10)
+    root.option_add("*Font", default_font)
+    root.geometry(f"+{75}+{1044}")
+
+    def check_window_topmost():
+        if not root.attributes('-topmost'):
+            root.attributes('-topmost', True)
+        root.after(500, check_window_topmost)
+    # Call the function to check window topmost status periodically
+    check_window_topmost()
+
 
     button1 = Button(root, text="TournamentFame", command=start_function1, bg="#bda24a", fg="#000000")
-    button1.pack(fill="x")
+    button1.pack(side="left")
 
     button2 = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
-    button2.pack(fill="x")
+    button2.pack(side="left")
 
     buttonRaids = Button(root, text="Raids", command=start_function3, bg="#006173", fg="#ffffff")
-    buttonRaids.pack(fill="x")
+    buttonRaids.pack(side="left")
 
     button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
-    button3.pack(fill="x")
+    button3.pack(side="left")
 
 
     root.mainloop()
