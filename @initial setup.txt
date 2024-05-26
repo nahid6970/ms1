@@ -46,6 +46,8 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\curren
 
 pip required packages
 pip install pillow importlib pyadl customtkinter keyboard psutil pyautogui pywin32 winshell PyDictionary cryptography pycryptodomex
+pip install pillow screeninfo
+
 
 *** Komorebi
 cant directly restore first need to use 'komorebic quickstart' for init file then restore
