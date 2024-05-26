@@ -5,7 +5,6 @@ import mss
 from PIL import Image, ImageTk, ImageDraw
 from screeninfo import get_monitors
 import win32api
-import win32gui
 
 drag_data = {"x": 0, "y": 0}
 
@@ -45,7 +44,6 @@ def capture_secondary_monitor():
         }
 
         while True:
-            start_time = time.time()
             sct_img = sct.grab(monitor)
 
             # Convert the image to PIL format
@@ -78,10 +76,11 @@ def capture_secondary_monitor():
             root.update_idletasks()
             root.update()
 
-            # Calculate sleep time to achieve a real-time update rate
-            elapsed_time = time.time() - start_time
-            sleep_time = max(0, 0.05 - elapsed_time)  # Adjust 0.05 for desired update rate (in seconds)
-            time.sleep(sleep_time)
+            # Capture every 100 milliseconds
+            time.sleep(0.1)
+
+def close_window():
+    root.destroy()
 
 # Create the Tkinter window
 root = tk.Tk()
@@ -101,6 +100,11 @@ root.attributes('-topmost', True)
 label = tk.Label(root)
 label.pack()
 
+# Create a close button
+close_button = tk.Button(root, text="X", command=close_window)
+close_button.config(font=("jetbrainsmono nfp", 8), bg="red", fg="white")
+close_button.place(relx=1, x=-2, y=2, anchor="ne")
+
 # Start the screen capture in a separate thread
 thread = threading.Thread(target=capture_secondary_monitor)
 thread.daemon = True
@@ -108,6 +112,8 @@ thread.start()
 
 # Start the Tkinter event loop
 root.mainloop()
+
+
 
 
 
@@ -165,6 +171,7 @@ root.mainloop()
 #         }
 
 #         while True:
+#             start_time = time.time()
 #             sct_img = sct.grab(monitor)
 
 #             # Convert the image to PIL format
@@ -197,8 +204,10 @@ root.mainloop()
 #             root.update_idletasks()
 #             root.update()
 
-#             # Capture every 100 milliseconds
-#             time.sleep(0.1)
+#             # Calculate sleep time to achieve a real-time update rate
+#             elapsed_time = time.time() - start_time
+#             sleep_time = max(0, 0.05 - elapsed_time)  # Adjust 0.05 for desired update rate (in seconds)
+#             time.sleep(sleep_time)
 
 # # Create the Tkinter window
 # root = tk.Tk()
@@ -225,6 +234,18 @@ root.mainloop()
 
 # # Start the Tkinter event loop
 # root.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
