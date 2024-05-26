@@ -50,7 +50,7 @@ def capture_secondary_monitor():
             img = Image.frombytes('RGB', (sct_img.width, sct_img.height), sct_img.rgb)
 
             # Resize the screenshot to fit the display window
-            resized_screenshot = img.resize((int(img.width // 3), int(img.height // 3)))
+            resized_screenshot = img.resize((int(img.width // 3.5), int(img.height // 3.5)))
 
             # Update the image on the Tkinter label
             img_tk = ImageTk.PhotoImage(resized_screenshot)
@@ -67,21 +67,16 @@ def capture_secondary_monitor():
 # Create the Tkinter window
 root = tk.Tk()
 root.title("Secondary Monitor Viewer")
-
 root.overrideredirect(True)
 # root.geometry(f"+{75}+{1044}")
-
-def check_window_topmost():
-    if not root.attributes('-topmost'):
-        root.attributes('-topmost', True)
-    root.after(500, check_window_topmost)
-# Call the function to check window topmost status periodically
-check_window_topmost()
 
 # Add bindings to make the window movable
 root.bind("<ButtonPress-1>", start_drag)
 root.bind("<ButtonRelease-1>", stop_drag)
 root.bind("<B1-Motion>", do_drag)
+
+root.attributes('-topmost', True)
+
 
 # Create a label to display the captured image
 label = tk.Label(root)
