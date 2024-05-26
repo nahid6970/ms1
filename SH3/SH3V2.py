@@ -189,6 +189,9 @@ def SanguineForest():
     # advert6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
     # advert7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
 
+    fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
+
+
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -214,10 +217,14 @@ def SanguineForest():
                 press_key(window, 'f')
 
             elif find_image(EnterTournament):
-                press_key(window, 'n')
+                press_key(window, 'g')
 
             else:
                 positionclick = find_image(EnterSanguineForest, confidence=0.8)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+
+                positionclick = find_image(fight, confidence=.97)
                 if positionclick:
                     click(window, positionclick.left, positionclick.top)
 
