@@ -6,8 +6,10 @@ $valorantProcessName = "VALORANT"
 $qbittorrentProcessName = "qbittorrent"
 $qbittorrentExePath = "C:\Program Files\qBittorrent\qbittorrent.exe"
 
+$fdm_ProcessName = "fdm"
+$fdm_Path = "C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe"
+
 $mobileNetworkName = "Ethernet 2"  # Name of the mobile network interface
-$mobileNetworkMacAddress = "AE-DE-5C-48-14-F8"  # MAC address of the mobile network interface
 
 
 #$rssowlnixProcessName = "RSSOwlnix"
@@ -17,6 +19,7 @@ $mobileNetworkMacAddress = "AE-DE-5C-48-14-F8"  # MAC address of the mobile netw
 while ($true) {
     $valorantRunning = Get-Process -Name $valorantProcessName -ErrorAction SilentlyContinue
     $qbittorrentRunning = Get-Process -Name $qbittorrentProcessName -ErrorAction SilentlyContinue
+    $fdmRunning = Get-Process -Name $fdm_ProcessName -ErrorAction SilentlyContinue
     # $rssowlnixRunning = Get-Process -Name $rssowlnixProcessName -ErrorAction SilentlyContinue
 
     # Check if mobile network is connected
@@ -29,10 +32,10 @@ while ($true) {
             Write-Host "$qbittorrentProcessName process closed." -BackgroundColor Red -ForegroundColor White
         }
 
-        # if ($rssowlnixRunning) {
-        #     Stop-Process -Name $rssowlnixProcessName
-        #     Write-Host "$rssowlnixProcessName process closed." -BackgroundColor Red -ForegroundColor White
-        # }
+        if ($fdmRunning) {
+            Stop-Process -Name $fdm_ProcessName
+            Write-Host "$fdm_ProcessName process closed." -BackgroundColor Red -ForegroundColor White
+        }
     } else {
         if (-not $qbittorrentRunning) {
             Start-Process -FilePath $qbittorrentExePath
