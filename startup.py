@@ -20,10 +20,10 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "flaresolver"         ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"}                                                    ,
 {"type": "Command","name": "Glaze_WM"            ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"}                                                                                                               ,
 {"type": "Command","name": "monitor_size"        ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"}                                       ,
+{"type": "Command","name": "NetworkCondition"    ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"}                                                                                    ,
 {"type": "Command","name": "RoundedCornerDisable","command": "Start-Process 'C:\\Users\\nahid\\OneDrive\\backup\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"}                ,
 {"type": "Command","name": "sync"                ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"}                                                                                                                             ,
 {"type": "Command","name": "syncthing"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"}                                                          ,
-{"type": "Command","name": "ValoQbit"            ,"command": "Start-Process 'C:\\ms1\\scripts\\valorant\\valo_qbit.ps1' -WindowStyle Hidden"}                                                                                 ,
 {"type": "Command","name": "whkd"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"}                                                                    ,
 {"type": "Command","name": "yasb"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"}                                                                         ,
 
