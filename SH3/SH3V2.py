@@ -1,3 +1,5 @@
+import subprocess
+import sys
 import time
 import pyautogui
 import pygetwindow as gw
@@ -7,6 +9,10 @@ from tkinter import Tk, Button
 from ctypes import windll, c_char_p, c_buffer
 from struct import calcsize, pack
 from PIL import Image
+
+def restart(event=None):
+    root.destroy()
+    subprocess.Popen([sys.executable] + sys.argv)
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
@@ -281,10 +287,10 @@ def Raids():
             if find_image(action_image) or find_image(action2_image):
                 if random.choice([True, False]):
                     key_down(window, 'j')
-                    key_down(window, 'l')
                     time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
                     key_up(window, 'j')
-                    key_up(window, 'l')
+                    press_key(window, 'l')
+                    press_key(window, 'x')
                 else:
                     press_key(window, 'j')
 
@@ -369,17 +375,20 @@ if __name__ == "__main__":
     check_window_topmost()
 
 
-    button1 = Button(root, text="TournamentFame", command=start_function1, bg="#bda24a", fg="#000000")
-    button1.pack(side="left")
+    TournamentFame_bt = Button(root, text="Fame", command=start_function1, bg="#bda24a", fg="#000000")
+    TournamentFame_bt.pack(side="left")
 
-    button2 = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
-    button2.pack(side="left")
+    SanguineForest_bt = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
+    SanguineForest_bt.pack(side="left")
 
-    buttonRaids = Button(root, text="Raids", command=start_function3, bg="#006173", fg="#ffffff")
-    buttonRaids.pack(side="left")
+    Raids_bt = Button(root, text="Raids", command=start_function3, bg="#006173", fg="#ffffff")
+    Raids_bt.pack(side="left")
 
-    button3 = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
-    button3.pack(side="left")
+    Stop_bt = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
+    Stop_bt.pack(side="left")
+
+    Restart_bt = Button(root, text="Restart", command=restart, bg="#0e93ff", fg="#FFFFFF")
+    Restart_bt.pack(side="left")
 
 
     root.mainloop()
