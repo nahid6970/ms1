@@ -290,10 +290,10 @@ def Raids():
             if find_image(action_image) or find_image(action2_image):
                 if random.choice([True, False]):
                     key_down(window, 'j')
+                    key_down(window, 'l')
                     time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
                     key_up(window, 'j')
-                    press_key(window, 'l')
-                    press_key(window, 'x')
+                    key_up(window, 'l')
                 else:
                     press_key(window, 'j')
 
