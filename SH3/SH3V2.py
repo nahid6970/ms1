@@ -14,6 +14,9 @@ def restart(event=None):
     root.destroy()
     subprocess.Popen([sys.executable] + sys.argv)
 
+def close_window(event=None):
+    root.destroy()
+
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
@@ -389,6 +392,9 @@ if __name__ == "__main__":
 
     Restart_bt = Button(root, text="Restart", command=restart, bg="#0e93ff", fg="#FFFFFF")
     Restart_bt.pack(side="left")
+
+    Exit_bt = Button(root, text="Exit", command=close_window, bg="#080808", fg="#FFFFFF")
+    Exit_bt.pack(side="left")
 
 
     root.mainloop()

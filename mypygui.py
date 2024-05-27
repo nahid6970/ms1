@@ -621,6 +621,16 @@ Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
 Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
 
+VirtualMonitor_lb = tk.Label(ROOT1,text="2nd", bg="#1d2027", fg="#8ab9ff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+VirtualMonitor_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
+VirtualMonitor_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\2nd_Monitor.py'))
+VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\2nd_Monitor.py'))
+
+ShadowFight3_lb = tk.Label(ROOT1,text="SH3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
+ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\SH3\\SH3V2.py'))
+ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\SH3\\SH3V2.py'))
+
 #! FFMPEG
 FFMPEG_bt = CTkButton(ROOT1, text="\uf07cFFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1,hover_color="#1dd463", border_color="#000000", fg_color="#bff130", text_color="#000")
 FFMPEG_bt.pack(side="left")
