@@ -145,6 +145,14 @@ def click(window, x, y):
     window.activate()
     pyautogui.click(x, y)
 
+"""
+███████  █████  ███    ███ ███████
+██      ██   ██ ████  ████ ██
+█████   ███████ ██ ████ ██ █████
+██      ██   ██ ██  ██  ██ ██
+██      ██   ██ ██      ██ ███████
+"""
+
 def TournamentFame():
     window_title = 'LDPlayer'
     action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
@@ -182,6 +190,14 @@ def TournamentFame():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+
+"""
+███████  █████  ███    ██  ██████  ██    ██ ██ ███    ██ ███████ ███████  ██████  ██████  ███████ ███████ ████████
+██      ██   ██ ████   ██ ██       ██    ██ ██ ████   ██ ██      ██      ██    ██ ██   ██ ██      ██         ██
+███████ ███████ ██ ██  ██ ██   ███ ██    ██ ██ ██ ██  ██ █████   █████   ██    ██ ██████  █████   ███████    ██
+     ██ ██   ██ ██  ██ ██ ██    ██ ██    ██ ██ ██  ██ ██ ██      ██      ██    ██ ██   ██ ██           ██    ██
+███████ ██   ██ ██   ████  ██████   ██████  ██ ██   ████ ███████ ██       ██████  ██   ██ ███████ ███████    ██
+"""
 def SanguineForest():
     window_title = 'LDPlayer'
     action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
@@ -266,6 +282,13 @@ def SanguineForest():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+"""
+██████   █████  ██ ██████  ███████
+██   ██ ██   ██ ██ ██   ██ ██
+██████  ███████ ██ ██   ██ ███████
+██   ██ ██   ██ ██ ██   ██      ██
+██   ██ ██   ██ ██ ██████  ███████
+"""
 def Raids():
     window_title = 'LDPlayer'
     action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
