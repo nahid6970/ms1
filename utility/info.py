@@ -23,13 +23,13 @@ class ActiveWindowInfo(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.pack()
-        self.label_process = tk.Label(self, text="", pady=0 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
+        self.label_process = tk.Label(self, text="", pady=0 ,bg="#3a5beb", fg="#ffffff", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
         self.label_process.grid(row=0, column=0, padx=5, pady=0, sticky='ew')
         
-        self.label_class = tk.Label(self, text="", pady=0 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
+        self.label_class = tk.Label(self, text="", pady=0 ,bg="#00b871", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
         self.label_class.grid(row=1, column=0, padx=5, pady=0, sticky='ew')
         
-        self.label_title = tk.Label(self, text="", pady=0 ,bg="#83a598", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
+        self.label_title = tk.Label(self, text="", pady=0 ,bg="#f0b803", fg="#000000", font=("JETBRAINSMONO NFP", 11 ,"bold"), anchor="w",justify="left", wraplength=1000)
         self.label_title.grid(row=2, column=0, padx=5, pady=0, sticky='ew')
         
         self.update_info()
