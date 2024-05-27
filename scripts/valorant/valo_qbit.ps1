@@ -50,12 +50,12 @@ while ($true) {
         if ($triggerActive) {
             if ($appRunning) {
                 Stop-Process -Name $app.Name
-                Write-Host "$($app.Name) process closed." -BackgroundColor Red -ForegroundColor White
+                Write-Host "$($app.Name) process closed."-ForegroundColor Red
             }
         } else {
             if (-not $appRunning) {
                 Start-Process -FilePath $app.Path -WindowStyle Minimized
-                Write-Host "$($app.Name) started." -BackgroundColor Green -ForegroundColor Black
+                Write-Host "$($app.Name) started." -ForegroundColor Green
             }
         }
     }
