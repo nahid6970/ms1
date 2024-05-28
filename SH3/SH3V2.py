@@ -236,22 +236,21 @@ def SanguineForest():
                 else:
                     press_key(window, 'j')
 
-            elif find_image(continue_image, confidence=0.8):
-                press_key(window, 'c')
-
-            elif find_image(EnterSanguineForest, confidence=0.8):
-                press_key(window, 'f')
-
-            elif find_image(EnterTournament):
-                press_key(window, 'g')
+            elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
+            elif find_image(EnterSanguineForest, confidence=0.8): press_key(window, 'f')
+            elif find_image(EnterTournament): press_key(window, 'g')
 
             else:
-                if positionclick := find_image(EnterSanguineForest, confidence=0.8):
-                    click(window, positionclick.left, positionclick.top)
+                if find_image(EnterSanguineForest, confidence=0.8): click(window, find_image(EnterSanguineForest, confidence=0.8).left, find_image(EnterSanguineForest, confidence=0.8).top)
+                if find_image(fight, confidence=0.8): click(window, find_image(fight, confidence=0.8).left, find_image(fight, confidence=0.8).top)
 
-                if positionclick := find_image(fight, confidence=0.8):
-                    click(window, positionclick.left, positionclick.top)
 
+
+                # if positionclick := find_image(EnterSanguineForest, confidence=0.8):
+                #     click(window, positionclick.left, positionclick.top)
+
+                # if positionclick := find_image(fight, confidence=0.8):
+                #     click(window, positionclick.left, positionclick.top)
 
                 # positionclick = find_image(advertise)
                 # if positionclick:
