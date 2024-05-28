@@ -65,7 +65,7 @@ def capture_secondary_monitor():
                 draw.line((cursor_x - cursor_size, cursor_y, cursor_x + cursor_size, cursor_y), fill=cursor_color, width=5)
 
             # Resize the screenshot to fit the display window
-            resized_screenshot = img.resize((int(img.width // 3.5), int(img.height // 3.5)))
+            resized_screenshot = img.resize((int(img.width // 4), int(img.height // 4)))
 
             # Update the image on the Tkinter label
             img_tk = ImageTk.PhotoImage(resized_screenshot)
