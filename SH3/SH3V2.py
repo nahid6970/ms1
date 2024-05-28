@@ -246,13 +246,12 @@ def SanguineForest():
                 press_key(window, 'g')
 
             else:
-                positionclick = find_image(EnterSanguineForest, confidence=0.8)
-                if positionclick:
+                if positionclick := find_image(EnterSanguineForest, confidence=0.8):
                     click(window, positionclick.left, positionclick.top)
 
-                positionclick = find_image(fight, confidence=0.8)
-                if positionclick:
+                if positionclick := find_image(fight, confidence=0.8):
                     click(window, positionclick.left, positionclick.top)
+
 
                 # positionclick = find_image(advertise)
                 # if positionclick:
