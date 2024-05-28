@@ -108,7 +108,8 @@ def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
     global error_count
     try:
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence)
+        #* location = pyautogui.locateOnScreen(image_path, confidence=confidence)
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             return location
     except Exception:
@@ -205,6 +206,7 @@ def SanguineForest():
     continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
     EnterSanguineForest = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterSanguineForest.png"
     EnterTournament = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterTournament.png"
+    fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\fight.png"
     # advertise = r"C:\Users\nahid\OneDrive\backup\shadowfight3\video_click.png"
     # advert1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
     # advert2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
@@ -214,7 +216,6 @@ def SanguineForest():
     # advert6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
     # advert7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
 
-    fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
 
 
     window = focus_window(window_title)
@@ -249,7 +250,7 @@ def SanguineForest():
                 if positionclick:
                     click(window, positionclick.left, positionclick.top)
 
-                positionclick = find_image(fight, confidence=.97)
+                positionclick = find_image(fight, confidence=0.8)
                 if positionclick:
                     click(window, positionclick.left, positionclick.top)
 
