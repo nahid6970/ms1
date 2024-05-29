@@ -282,6 +282,49 @@ def SanguineForest():
         print("Script stopped by user.")
 
 """
+██████   █████  ███    ██  ██████  ███████ ██████   ██████  ██    ██ ███████ ███████ ██   ██  ██████  ██     ██
+██   ██ ██   ██ ████   ██ ██       ██      ██   ██ ██    ██ ██    ██ ██      ██      ██   ██ ██    ██ ██     ██
+██   ██ ███████ ██ ██  ██ ██   ███ █████   ██████  ██    ██ ██    ██ ███████ ███████ ███████ ██    ██ ██  █  ██
+██   ██ ██   ██ ██  ██ ██ ██    ██ ██      ██   ██ ██    ██ ██    ██      ██      ██ ██   ██ ██    ██ ██ ███ ██
+██████  ██   ██ ██   ████  ██████  ███████ ██   ██  ██████   ██████  ███████ ███████ ██   ██  ██████   ███ ███
+"""
+def DangerousShow():
+    window_title   ='LDPlayer'
+    action_image   =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+    action2_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
+    continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
+    DangerousShow  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\DangerousShow.png"
+    Tournament     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\Tournament.png"
+    fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\fight.png"
+
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if find_image(action_image) or find_image(action2_image):
+                if random.choice([True, False]):
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
+                    key_up(window, 'j')
+                    key_up(window, 'l')
+                else:
+                    press_key(window, 'j')
+
+            elif find_image(DangerousShow, confidence=0.8): press_key(window, 'f')
+            elif find_image(Tournament): press_key(window, 'u')
+            elif find_image(fight, confidence=0.8): press_key(window, 'p')
+            elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
+
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+
+"""
 ██████   █████  ██ ██████  ███████
 ██   ██ ██   ██ ██ ██   ██ ██
 ██████  ███████ ██ ██   ██ ███████
@@ -379,6 +422,13 @@ def start_function3():
     t.daemon = True  # This makes sure the thread will exit when the main program exits
     t.start()
 
+def start_function4():
+    global stop_thread
+    stop_thread = False
+    t = threading.Thread(target=DangerousShow)
+    t.daemon = True  # This makes sure the thread will exit when the main program exits
+    t.start()
+
 def stop_functions():
     global stop_thread
     stop_thread = True
@@ -403,8 +453,11 @@ if __name__ == "__main__":
     TournamentFame_bt = Button(root, text="Fame", command=start_function1, bg="#bda24a", fg="#000000")
     TournamentFame_bt.pack(side="left")
 
-    SanguineForest_bt = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
-    SanguineForest_bt.pack(side="left")
+    # SanguineForest_bt = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
+    # SanguineForest_bt.pack(side="left")
+
+    DangerousShow_bt = Button(root, text="DangerousShow", command=start_function4, bg="#5a0000", fg="#ffffff")
+    DangerousShow_bt.pack(side="left")
 
     Raids_bt = Button(root, text="Raids", command=start_function3, bg="#006173", fg="#ffffff")
     Raids_bt.pack(side="left")
