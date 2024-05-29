@@ -108,8 +108,8 @@ def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
     global error_count
     try:
-        #* location = pyautogui.locateOnScreen(image_path, confidence=confidence)
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence)
+        # location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             return location
     except Exception:
@@ -295,7 +295,7 @@ def DangerousShow():
     continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
     DangerousShow  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\DangerousShow.png"
     Tournament     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\Tournament.png"
-    fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\fight.png"
+
 
     window = focus_window(window_title)
     if not window:
@@ -316,8 +316,7 @@ def DangerousShow():
                     press_key(window, 'j')
 
             elif find_image(DangerousShow, confidence=0.8): press_key(window, 'f')
-            elif find_image(Tournament): press_key(window, 'u')
-            elif find_image(fight, confidence=0.8): press_key(window, 'p')
+            elif find_image(Tournament,confidence=0.8): press_key(window, 'u')
             elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
 
             time.sleep(0.1)
