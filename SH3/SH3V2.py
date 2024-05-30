@@ -326,9 +326,10 @@ def DangerousShow():
         while not stop_thread:
             focus_window(window_title)
             if find_image(action_image) or find_image(action2_image):
-                    press_key(window, 'l')
                     key_down(window, 'j')
-                    time.sleep(2)
+                    key_down(window, 'l')
+                    time.sleep(5)
+                    key_up(window, 'l')
                     key_up(window, 'j')
 
             elif find_image(DangerousShow, confidence=0.8): press_key(window, 'f')
