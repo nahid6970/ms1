@@ -378,40 +378,53 @@ def Raids():
                 else:
                     press_key(window, 'j')
 
-            elif find_image(continue_image, confidence=0.8):
-                press_key(window, 'c')
-            else:
-                positionclick = find_image(Raids, confidence=0.8)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            # elif find_image(continue_image, confidence=0.8):
+            #     press_key(window, 'c')
 
-                positionclick = find_image(level3, confidence=0.85)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
 
-                positionclick = find_image(participate, confidence=.97)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            # else:
+            #     positionclick = find_image(Raids, confidence=0.8)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
 
-                positionclick = find_image(toraid, confidence=.97)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            elif find_image(Raids, confidence=0.8): press_key(window, 'z')
 
-                positionclick = find_image(fight, confidence=.97)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            #     positionclick = find_image(level3, confidence=0.85)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
 
-                positionclick = find_image(claimreward, confidence=.97)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            elif find_image(level3, confidence=0.85): press_key(window, '3')
 
-                positionclick = find_image(continuee, confidence=.97)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            #     positionclick = find_image(participate, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(participate, confidence=0.97): press_key(window, 'c')
 
-                positionclick = find_image(continuee2, confidence=.97)
-                if positionclick:
-                    click(window, positionclick.left, positionclick.top)
+            #     positionclick = find_image(toraid, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(toraid, confidence=0.97): press_key(window, ' ')
+
+            #     positionclick = find_image(fight, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(fight, confidence=0.97): press_key(window, 'c')
+
+            #     positionclick = find_image(claimreward, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
+
+            #     positionclick = find_image(continuee, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(continuee, confidence=0.97): press_key(window, 'c')
+
+            #     positionclick = find_image(continuee2, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(continuee2, confidence=0.97): press_key(window, 'c')
 
             time.sleep(0.1)
     except KeyboardInterrupt:
