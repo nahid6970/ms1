@@ -326,14 +326,10 @@ def DangerousShow():
         while not stop_thread:
             focus_window(window_title)
             if find_image(action_image) or find_image(action2_image):
-                if random.choice([True, False]):
+                    press_key(window, 'l')
                     key_down(window, 'j')
-                    key_down(window, 'l')
-                    time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
+                    time.sleep(2)
                     key_up(window, 'j')
-                    key_up(window, 'l')
-                else:
-                    press_key(window, 'j')
 
             elif find_image(DangerousShow, confidence=0.8): press_key(window, 'f')
             elif find_image(Tournament,confidence=0.8): press_keys_with_delays(window, 'u', 3, 'c', 1)
