@@ -146,6 +146,26 @@ def click(window, x, y):
     window.activate()
     pyautogui.click(x, y)
 
+# def press_keys_with_delay(window, key1, delay, key2):
+#     """Press key1, wait for delay seconds, then press key2."""
+#     press_key(window, key1)
+#     time.sleep(delay)
+#     press_key(window, key2)
+
+def press_keys_with_delays(window, *args):
+    """Press keys with specified delays in between.
+    
+    Usage: press_keys_with_delays(window, 'u', 2, 'p', 3, 'z', 2, 'x')
+    """
+    if len(args) % 2 != 0:
+        raise ValueError("Arguments should be in pairs of (key, delay).")
+    
+    for i in range(0, len(args), 2):
+        key = args[i]
+        delay = args[i+1]
+        press_key(window, key)
+        time.sleep(delay)
+
 """
 ███████  █████  ███    ███ ███████
 ██      ██   ██ ████  ████ ██
@@ -316,7 +336,7 @@ def DangerousShow():
                     press_key(window, 'j')
 
             elif find_image(DangerousShow, confidence=0.8): press_key(window, 'f')
-            elif find_image(Tournament,confidence=0.8): press_key(window, 'u')
+            elif find_image(Tournament,confidence=0.8): press_keys_with_delays(window, 'u', 3, 'c', 1)
             elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
 
             time.sleep(0.1)
