@@ -10,13 +10,6 @@ from ctypes import windll, c_char_p, c_buffer
 from struct import calcsize, pack
 from PIL import Image
 
-def restart(event=None):
-    root.destroy()
-    subprocess.Popen([sys.executable] + sys.argv)
-
-def close_window(event=None):
-    root.destroy()
-
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
@@ -458,9 +451,27 @@ def start_function4():
     t.daemon = True  # This makes sure the thread will exit when the main program exits
     t.start()
 
+
+
 def stop_functions():
     global stop_thread
     stop_thread = True
+
+# def restart(event=None):
+#     root.destroy()
+#     subprocess.Popen([sys.executable] + sys.argv)
+def restart(event=None):
+    stop_functions()
+    root.destroy()
+    subprocess.Popen([sys.executable] + sys.argv)
+
+# def close_window(event=None):
+#     root.destroy()
+def close_window(event=None):
+    stop_functions()
+    root.destroy()
+
+
 
 if __name__ == "__main__":
     root = Tk()
