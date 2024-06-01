@@ -333,7 +333,7 @@ def DangerousShow():
                     key_up(window, 'j')
 
             elif find_image(DangerousShow, confidence=0.8): press_key(window, 'f')
-            elif find_image(Tournament,confidence=0.8): press_keys_with_delays(window, 'u', 3, 'c', 1)
+            elif find_image(Tournament,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
 
             time.sleep(0.1)
