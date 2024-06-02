@@ -1,4 +1,6 @@
-*** ctrl+l --------> clear screen
+* ctrl+l --------> clear screen
+* cfdisk
+* lsblk
 
 * [Step 1] - create partitions
 * cfdisk
@@ -25,3 +27,12 @@
 ** mount boot
 *** mkdir -p /mnt/boot/efi
 *** mount /dev/sda1 /mnt/boot/efi
+** mount swap
+*** swapon /dev/sda2
+
+
+* [Step 4] - change mirrors
+
+
+* [Step 5] - install packages
+*** pacstrap /mnt  base linux linux-firmware sof-firmware base-devel grub efibootmgr nano networkmanager
