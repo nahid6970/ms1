@@ -1,0 +1,8 @@
+*** ctrl+l --------> clear screen
+
+* cfdisk
+*** delete partitations that are not needed
+*** create 3 new partitations
+** 100M -------> boot
+** 4G ---------> swap
+** rest -------> root
