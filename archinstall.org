@@ -36,3 +36,69 @@
 
 * [Step 5] - install packages
 *** pacstrap /mnt  base linux linux-firmware sof-firmware base-devel grub efibootmgr nano networkmanager
+
+* [Step 6] - Generate Filsystem Tab
+*** genfstab /mnt [check filesystem]
+*** genfstab /mnt > /mnt/etc/fstab
+*** cat /mnt/etc/fstab [check filesystem]
+
+* [Step 7] - setup timezoe etc
+*** arch-chroot /mnt
+*** ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime [tab to see country]
+** date [check if its correct]
+*** hwclock --systohc
+
+* [Step 8] - edit using nano
+*** nano /etc/local.gen
+** find en_US.UTF-8 UTF 8 and press del uncomment it
+** ctrl+o --- enter --- ctrl+x
+** locale-gen to check
+*** nano /etc/locale.conf [some programs checks it for language]
+*** LANG=en_US.UTF-8 [type this here inside nano]
+** ctrl+o --- enter --- ctrl+x
+*** nano /etc/vconsole.conf
+*** KEYMAP=us
+
+* [Step 9] - hostname etc
+*** nano /etc/hostname
+*** nahid
+** ctrl+o --- enter --- ctrl+x
+** setup root password
+*** passwd
+** enter my password
+** add user
+*** useradd -m -G wheel -s /bin/bash nahid6970
+*** passwd nahid6970
+
+* [Step 10] - fix root sudo for user
+** check if the problem even exist
+** su nahid6970
+** sudo pacman -Syu
+** if u see a error the error exist
+* fix
+*** exit
+** exit to go back to root and exit from nahid6970
+*** EDITOR=nano visudo
+** uncomment  at the end
+*** %wheel All=(ALL) ALL
+** ctrl+o --- enter --- ctrl+x
+** check if the problem  exist again
+** su nahid6970
+** sudo pacman -Syu
+
+* [Step 11] - enable networkmanager
+*** systemctl enable NetworkManager
+** systemctl enable gdm/lightdm [later]
+
+* [Step 12] - setup boot
+*** grub-install /dev/sda
+*** grub-mkconfig -o /boot/grub/grub.cfg
+*** exit
+*** umount -a
+*** reboot
+
+* [Step 13] - setup graphical environment
+*** sudo pacman -S plasma sddm
+*** sudo pacman -S konsole kate firefox
+*** sudo systemctl enable sddm [enables it at boot]
+*** sudo systemctl enable --now sddm [enables it now]
