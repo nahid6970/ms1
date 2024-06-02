@@ -1,3 +1,11 @@
+* [Step 4] - change mirrors
+** Do it fast or mirror will change to tpo 20
+*** vim /etc/pacman.d/mirrorlist
+** go to bangladesh and click 2dd to delete then exit
+** it will refresh automatically to 20 mirror list
+*** vim /etc/pacman.d/mirrorlist
+** paste using p at the top before other mirror list
+
 * ctrl+l --------> clear screen
 * cfdisk
 * lsblk
@@ -29,10 +37,6 @@
 *** mount /dev/sda1 /mnt/boot/efi
 ** mount swap
 *** swapon /dev/sda2
-
-
-* [Step 4] - change mirrors
-
 
 * [Step 5] - install packages
 *** pacstrap /mnt  base linux linux-firmware sof-firmware base-devel grub efibootmgr nano networkmanager
