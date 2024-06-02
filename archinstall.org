@@ -1,8 +1,27 @@
 *** ctrl+l --------> clear screen
 
+* [Step 1] - create partitions
 * cfdisk
-*** delete partitations that are not needed
-*** create 3 new partitations
-** 100M -------> boot
-** 4G ---------> swap
-** rest -------> root
+** delete partitions that are not needed
+** create 3 new partitions
+*** 100M -------> boot
+*** 4G ---------> swap
+*** rest -------> root
+*** write ------> yes
+
+* [Step 2] - format partitions
+* lsblk [info abt partitions]
+** now format the partitions
+** for root
+*** mkfs.ext4 /dev/sda3 [highest storage for root]
+** for boot
+*** mkfs.fat -F 32 /dev/sda1
+** for swap
+*** mkswap /dev/sda2
+
+* [Step 3] - mount partitions
+** mount root directory
+*** mount /dev/sda3 /mnt
+** mount boot
+*** mkdir -p /mnt/boot/efi
+*** mount /dev/sda1 /mnt/boot/efi
