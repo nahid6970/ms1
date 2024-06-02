@@ -308,6 +308,7 @@ def DangerousShow():
     continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
     DangerousShow  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\DangerousShow.png"
     Tournament     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\Tournament.png"
+    Resume         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
 
     window = focus_window(window_title)
@@ -328,6 +329,7 @@ def DangerousShow():
             elif find_image(DangerousShow, confidence=0.8): press_key(window, 'f')
             elif find_image(Tournament,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
             time.sleep(0.1)
     except KeyboardInterrupt:
