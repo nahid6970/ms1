@@ -5,6 +5,9 @@
 ** it will refresh automatically to 20 mirror list
 *** vim /etc/pacman.d/mirrorlist
 ** paste using p at the top before other mirror list
+## Bangladesh
+Server = https://mirror.xeonbd.com/archlinux/$repo/os/$arch
+
 
 * ctrl+l --------> clear screen
 * cfdisk
@@ -90,7 +93,9 @@
 ** su nahid6970
 ** sudo pacman -Syu
 
+
 * [Step 11] - enable networkmanager
+** go back to root usr by exiting or dont if already root
 *** systemctl enable NetworkManager
 ** systemctl enable gdm/lightdm [later]
 
