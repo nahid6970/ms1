@@ -359,3 +359,4 @@ WSUtilities_sp=r'C:\\Users\\nahid\\scoop\\apps\\workspaceutilities\\current\\Wor
 meld_wp=r'C:\Program Files\Meld\Meld.exe'
 dotnet6_wp=r'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.29\createdump.exe'
 fastfetch_sp=r'C:\Users\nahid\scoop\apps\fastfetch\2.12.0\fastfetch.exe'
+ventoy_sp=r'C:\Users\nahid\scoop\apps\ventoy\current\altexe\Ventoy2Disk_X64.exe'

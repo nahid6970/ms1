@@ -273,6 +273,7 @@ applications = [
 {"name":"yt-dlp"                   ,"scoop_name":"yt-dlp"                            ,"scoop_path":ytdlp_sp                  ,"winget_name":"yt-dlp.yt-dlp"                          ,"winget_path":""}                          ,
 {"name":"Zoxide"                   ,"scoop_name":"zoxide"                            ,"scoop_path":Zoxide_scoop_path         ,"winget_name":"WingetName"                             ,"winget_path":r""}                         ,
 {"name": "FastFetch","scoop_name": "fastfetch","scoop_path":fastfetch_sp,"winget_name": "","winget_path": r""} ,
+{"name": "Ventoy","scoop_name": "ventoy","scoop_path": ventoy_sp,"winget_name": "WingetName","winget_path": r""} ,
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
 
 ]
