@@ -110,28 +110,73 @@ return
 ;*                       $$ |      \$$$$$$  |                                            
 ;*                       \__|       \______/                                             
 
+; ;! 🎯 Copy File Path
+; ^!m::
+; ClipboardBackup := ClipboardAll
+; Clipboard := "" 
+; Send, ^c 
+; ClipWait, 1
+; if ErrorLevel
+; {
+; MsgBox, No valid file path found.
+; }
+; else
+; {
+; ClipBoardContent := Clipboard
+; StringReplace, ClipBoardContent, ClipBoardContent, `n, `t, All
+; Clipboard := ClipboardBackup
+; Clipboard := ClipBoardContent
+; TrayTip, Copy as Path, Copied "%ClipBoardContent%" to clipboard.
+; }
+; return
+
 ;! 🎯 Copy File Path
-^!m::
-ClipboardBackup := ClipboardAll
-Clipboard := "" 
-Send, ^c 
-ClipWait, 1
-if ErrorLevel
-{
-MsgBox, No valid file path found.
+CopyPath_File() {
+    ClipboardBackup := ClipboardAll
+    Clipboard := "" 
+    Send, ^c 
+    ClipWait, 1
+    if ErrorLevel
+    {
+    MsgBox, No valid file path found.
+    }
+    else
+    {
+    ClipBoardContent := Clipboard
+    StringReplace, ClipBoardContent, ClipBoardContent, `n, `t, All
+    Clipboard := ClipboardBackup
+    Clipboard := ClipBoardContent
+    TrayTip, Copy as Path, Copied "%ClipBoardContent%" to clipboard.
+    }
 }
-else
-{
-ClipBoardContent := Clipboard
-StringReplace, ClipBoardContent, ClipBoardContent, `n, `t, All
-Clipboard := ClipboardBackup
-Clipboard := ClipBoardContent
-TrayTip, Copy as Path, Copied "%ClipBoardContent%" to clipboard.
-}
-return
+
+
+; ;! 🎯 Copy WSL Path
+; ^!p::
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No valid file path found.
+;     }
+;     else
+;     {
+;         ClipBoardContent := Clipboard
+;         ; Replace drive letter and backslashes with WSL path format
+;         StringReplace, ClipBoardContent, ClipBoardContent, C:\, C:/, All
+;         StringReplace, ClipBoardContent, ClipBoardContent, D:\, D:/, All
+;         StringReplace, ClipBoardContent, ClipBoardContent, \, /, All
+;         Clipboard := ClipboardBackup
+;         Clipboard := ClipBoardContent
+;         TrayTip, Copy as WSL Path, Copied "%ClipBoardContent%" to clipboard.
+;     }
+;     return
+
 
 ;! 🎯 Copy WSL Path
-^!p::
+CopyPath_wsl() {
     ClipboardBackup := ClipboardAll
     Clipboard := ""
     Send, ^c
@@ -151,7 +196,7 @@ return
         Clipboard := ClipBoardContent
         TrayTip, Copy as WSL Path, Copied "%ClipBoardContent%" to clipboard.
     }
-    return
+}
 
 ; ;! 🎯 Copy Path with '\\' double Backslashes
 ; ^!o::
@@ -355,8 +400,8 @@ Esc & w::Run, komorebic toggle-float,,Hide
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 ~Esc & q::KillForeground()
 ^!o::CopyPath_DoubleSlash()
-
-
+^!p::CopyPath_wsl()
+^!m::CopyPath_File()
 
 
 
