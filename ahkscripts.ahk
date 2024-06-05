@@ -78,7 +78,7 @@ return
                                      
 
 ;! 🎯 Open-File-Using-Vscode
-^!n::
+VScode_OpenWith() {
 Clipboard := ""
 Send, ^c
 ClipWait 1
@@ -95,8 +95,7 @@ Run, "C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe" "%ClipBo
 else
 {
 MsgBox, No valid file path found.
-}
-return
+}}
 
 ;*    $$$$$$\                                      $$$$$$$\            $$\     $$\       
 ;*   $$  __$$\                                     $$  __$$\           $$ |    $$ |      
@@ -402,7 +401,7 @@ Esc & w::Run, komorebic toggle-float,,Hide
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^!m::CopyPath_File()
-
+^!n::VScode_OpenWith()
 
 
 
