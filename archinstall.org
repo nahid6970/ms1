@@ -1,3 +1,21 @@
+shortcut method
+*** vim /etc/pacman.d/mirrorlist copy bangladesh mirror & reload & past to top 20
+cfdisk & create 2 partition 100M & rest 
+mkfs.ext4 /dev/sda3
+mkfs.fat -F 32 /dev/sda2
+no need to mount
+archinstall
+disk config - manual partition - 100M assign as /boot & rest assign as /
+setup rest & install
+
+
+
+
+
+
+
+
+
 * [Step 4] - change mirrors
 ** Do it fast or mirror will change to tpo 20
 *** vim /etc/pacman.d/mirrorlist
