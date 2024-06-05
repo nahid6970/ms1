@@ -204,6 +204,101 @@ def TournamentFame():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+"""
+██████   █████  ██ ██████  ███████
+██   ██ ██   ██ ██ ██   ██ ██
+██████  ███████ ██ ██   ██ ███████
+██   ██ ██   ██ ██ ██   ██      ██
+██   ██ ██   ██ ██ ██████  ███████
+"""
+def Raids():
+    window_title = 'LDPlayer'
+    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
+    continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
+    Raids = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\Raid_Home.png"
+    level3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
+    participate = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
+    toraid = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
+    fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
+    claimreward = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
+    continuee = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue.png"
+    continuee2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue2.png"
+
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            # if find_image(action_image) or find_image(action2_image):
+            #     if random.choice([True, False]):
+            #         key_down(window, 'j')
+            #         key_down(window, 'l')
+            #         time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
+            #         key_up(window, 'j')
+            #         key_up(window, 'l')
+            #     else:
+            #         press_key(window, 'j')
+            if find_image(action_image) or find_image(action2_image):
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    time.sleep(5)
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+
+            # elif find_image(continue_image, confidence=0.8):
+            #     press_key(window, 'c')
+
+            elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
+
+            # else:
+            #     positionclick = find_image(Raids, confidence=0.8)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+
+            elif find_image(Raids, confidence=0.8): press_key(window, 'z')
+
+            #     positionclick = find_image(level3, confidence=0.85)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+
+            elif find_image(level3, confidence=0.85): press_key(window, '3')
+
+            #     positionclick = find_image(participate, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(participate, confidence=0.97): press_key(window, 'c')
+
+            #     positionclick = find_image(toraid, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(toraid, confidence=0.97): press_key(window, ' ')
+
+            #     positionclick = find_image(fight, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(fight, confidence=0.97): press_key(window, 'c')
+
+            #     positionclick = find_image(claimreward, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
+
+            #     positionclick = find_image(continuee, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(continuee, confidence=0.97): press_key(window, 'c')
+
+            #     positionclick = find_image(continuee2, confidence=.97)
+            #     if positionclick:
+            #         click(window, positionclick.left, positionclick.top)
+            elif find_image(continuee2, confidence=0.97): press_key(window, 'c')
+
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
 
 """
 ███████  █████  ███    ██  ██████  ██    ██ ██ ███    ██ ███████ ███████  ██████  ██████  ███████ ███████ ████████
@@ -381,95 +476,7 @@ def WheelofHistory():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
-"""
-██████   █████  ██ ██████  ███████
-██   ██ ██   ██ ██ ██   ██ ██
-██████  ███████ ██ ██   ██ ███████
-██   ██ ██   ██ ██ ██   ██      ██
-██   ██ ██   ██ ██ ██████  ███████
-"""
-def Raids():
-    window_title = 'LDPlayer'
-    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
-    continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
-    Raids = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\Raid_Home.png"
-    level3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
-    participate = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
-    toraid = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
-    fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
-    claimreward = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
-    continuee = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue.png"
-    continuee2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue2.png"
 
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if find_image(action_image) or find_image(action2_image):
-                if random.choice([True, False]):
-                    key_down(window, 'j')
-                    key_down(window, 'l')
-                    time.sleep(random.uniform(0.1, 0.5))  # Hold 'k' for a random duration
-                    key_up(window, 'j')
-                    key_up(window, 'l')
-                else:
-                    press_key(window, 'j')
-
-            # elif find_image(continue_image, confidence=0.8):
-            #     press_key(window, 'c')
-
-            elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
-
-            # else:
-            #     positionclick = find_image(Raids, confidence=0.8)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-
-            elif find_image(Raids, confidence=0.8): press_key(window, 'z')
-
-            #     positionclick = find_image(level3, confidence=0.85)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-
-            elif find_image(level3, confidence=0.85): press_key(window, '3')
-
-            #     positionclick = find_image(participate, confidence=.97)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-            elif find_image(participate, confidence=0.97): press_key(window, 'c')
-
-            #     positionclick = find_image(toraid, confidence=.97)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-            elif find_image(toraid, confidence=0.97): press_key(window, ' ')
-
-            #     positionclick = find_image(fight, confidence=.97)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-            elif find_image(fight, confidence=0.97): press_key(window, 'c')
-
-            #     positionclick = find_image(claimreward, confidence=.97)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-            elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
-
-            #     positionclick = find_image(continuee, confidence=.97)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-            elif find_image(continuee, confidence=0.97): press_key(window, 'c')
-
-            #     positionclick = find_image(continuee2, confidence=.97)
-            #     if positionclick:
-            #         click(window, positionclick.left, positionclick.top)
-            elif find_image(continuee2, confidence=0.97): press_key(window, 'c')
-
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
 
 def start_function1():
     global stop_thread
