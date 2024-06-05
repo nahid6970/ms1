@@ -384,7 +384,7 @@ return
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
 !r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
-!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs"
+!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
 !y::RunWait, python.exe C:\ms1\yasb\main.py, , Hide
 #t:: WinSet, AlwaysOnTop, Toggle, A
 #x:: Run, C:\ms1\mypygui.py , ,Hide
