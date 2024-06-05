@@ -335,6 +335,49 @@ def DangerousShow():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+
+"""
+██╗    ██╗██╗  ██╗███████╗███████╗██╗          ██████╗ ███████╗    ██╗  ██╗██╗███████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
+██║    ██║██║  ██║██╔════╝██╔════╝██║         ██╔═══██╗██╔════╝    ██║  ██║██║██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
+██║ █╗ ██║███████║█████╗  █████╗  ██║         ██║   ██║█████╗      ███████║██║███████╗   ██║   ██║   ██║██████╔╝ ╚████╔╝
+██║███╗██║██╔══██║██╔══╝  ██╔══╝  ██║         ██║   ██║██╔══╝      ██╔══██║██║╚════██║   ██║   ██║   ██║██╔══██╗  ╚██╔╝
+╚███╔███╔╝██║  ██║███████╗███████╗███████╗    ╚██████╔╝██║         ██║  ██║██║███████║   ██║   ╚██████╔╝██║  ██║   ██║
+ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝     ╚═════╝ ╚═╝         ╚═╝  ╚═╝╚═╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+"""
+def WheelofHistory():
+    window_title   ='LDPlayer'
+    action_image   =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+    action2_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
+    continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
+    WeekendEvent  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\WheelofHistory.png"
+    Tournament     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\Tournament.png"
+    Resume         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
+
+
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if find_image(action_image) or find_image(action2_image):
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    time.sleep(5)
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+
+            elif find_image(WeekendEvent, confidence=0.8): press_key(window, 'f')
+            elif find_image(Tournament,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+
 """
 ██████   █████  ██ ██████  ███████
 ██   ██ ██   ██ ██ ██   ██ ██
@@ -453,6 +496,13 @@ def start_function4():
     t.daemon = True  # This makes sure the thread will exit when the main program exits
     t.start()
 
+def start_function5():
+    global stop_thread
+    stop_thread = False
+    t = threading.Thread(target=WheelofHistory)
+    t.daemon = True  # This makes sure the thread will exit when the main program exits
+    t.start()
+
 
 
 def stop_functions():
@@ -498,8 +548,11 @@ if __name__ == "__main__":
     # SanguineForest_bt = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
     # SanguineForest_bt.pack(side="left")
 
-    DangerousShow_bt = Button(root, text="DangerousShow", command=start_function4, bg="#5a0000", fg="#ffffff")
-    DangerousShow_bt.pack(side="left")
+    # DangerousShow_bt = Button(root, text="DangerousShow", command=start_function4, bg="#5a0000", fg="#ffffff")
+    # DangerousShow_bt.pack(side="left")
+
+    WheelofHistory_bt = Button(root, text="Wheel of History", command=start_function5, bg="#5a0000", fg="#ffffff")
+    WheelofHistory_bt.pack(side="left")
 
     Raids_bt = Button(root, text="Raids", command=start_function3, bg="#006173", fg="#ffffff")
     Raids_bt.pack(side="left")
