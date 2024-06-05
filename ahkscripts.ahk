@@ -153,18 +153,36 @@ return
     }
     return
 
-;! 🎯 Copy Path with '\\' double Backslashes
-^!o::
+; ;! 🎯 Copy Path with '\\' double Backslashes
+; ^!o::
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No valid file path found.
+;     }
+;     else
+;     {
+;         ClipBoardContent := Clipboard
+;         StringReplace, ClipBoardContent, ClipBoardContent, \, \\, All
+        
+;         Clipboard := ClipboardBackup
+;         Clipboard := ClipBoardContent
+;         TrayTip, Copy with Doubled Backslashes, Copied "%ClipBoardContent%" to clipboard.
+;     }
+;     return
+
+
+CopyPath_DoubleSlash() {
     ClipboardBackup := ClipboardAll
     Clipboard := ""
     Send, ^c
     ClipWait, 1
-    if ErrorLevel
-    {
+    if ErrorLevel {
         MsgBox, No valid file path found.
-    }
-    else
-    {
+    } else {
         ClipBoardContent := Clipboard
         StringReplace, ClipBoardContent, ClipBoardContent, \, \\, All
         
@@ -172,8 +190,7 @@ return
         Clipboard := ClipBoardContent
         TrayTip, Copy with Doubled Backslashes, Copied "%ClipBoardContent%" to clipboard.
     }
-    return
-
+}
 
 
 
@@ -191,13 +208,11 @@ return
 ; #Persistent
 ; SetTimer, ResetKeyPresses, 500 ; Adjust the timing interval as needed (in milliseconds)
 ; KeyPressCount := 0
-
 ; ~Esc::
 ;     KeyPressCount++
 ;     If (KeyPressCount = 1)
 ;         SetTimer, CheckKeyPresses, -200 ; Set the check timer to fire after 200 milliseconds
 ; return
-
 ; ~q::
 ;     If (GetKeyState("Esc", "P")) ; Check if Esc is held down
 ;     {
@@ -205,7 +220,6 @@ return
 ;         KeyPressCount := 0 ; Reset the key press count
 ;     }
 ; return
-
 ; CheckKeyPresses:
 ;     SetTimer, CheckKeyPresses, Off
 ;     KeyPressCount := 0 ; Reset the key press count
@@ -215,30 +229,54 @@ return
 ;     KeyPressCount := 0 ; Reset the key press count after a certain duration
 ; return
 
-#Persistent
-SetTimer, ResetKeyPresses, 500 ; Adjust the timing interval as needed (in milliseconds)
-KeyPressCount := 0
-~Esc::
-    KeyPressCount++
-    If (KeyPressCount = 1)
-        SetTimer, CheckKeyPresses, -200 ; Set the check timer to fire after 200 milliseconds
-return
-~q::
-    If (GetKeyState("Esc", "P")) ; Check if Esc is held down
-    {
-        WinGet, ProcessName, ProcessName, A ; Get the process name of the active window
-        Run, %ComSpec% /c taskkill /IM %ProcessName% /F, , Hide ; Kill the process using taskkill
-        KeyPressCount := 0 ; Reset the key press count
-    }
-return
-CheckKeyPresses:
-    SetTimer, CheckKeyPresses, Off
-    KeyPressCount := 0 ; Reset the key press count
-return
-ResetKeyPresses:
-    KeyPressCount := 0 ; Reset the key press count after a certain duration
-return
 
+
+; #Persistent
+; SetTimer, ResetKeyPresses, 500 ; Adjust the timing interval as needed (in milliseconds)
+; KeyPressCount := 0
+; ~Esc::
+;     KeyPressCount++
+;     If (KeyPressCount = 1)
+;         SetTimer, CheckKeyPresses, -200 ; Set the check timer to fire after 200 milliseconds
+; return
+; ~q::
+;     If (GetKeyState("Esc", "P")) ; Check if Esc is held down
+;     {
+;         WinGet, ProcessName, ProcessName, A ; Get the process name of the active window
+;         Run, %ComSpec% /c taskkill /IM %ProcessName% /F, , Hide ; Kill the process using taskkill
+;         KeyPressCount := 0 ; Reset the key press count
+;     }
+; return
+; CheckKeyPresses:
+;     SetTimer, CheckKeyPresses, Off
+;     KeyPressCount := 0 ; Reset the key press count
+; return
+; ResetKeyPresses:
+;     KeyPressCount := 0 ; Reset the key press count after a certain duration
+; return
+
+
+; Press Esc+Q to kill the foreground application
+; ; Define the hotkey combination
+; ~Esc & q::KillForeground()
+; ; Function to kill the foreground application
+; KillForeground() {
+;     ; Get the ID of the foreground window
+;     WinGet, hWnd, ID, A
+;     ; Close the window
+;     WinClose, ahk_id %hWnd%
+; }
+
+
+; ~Esc & q::WinClose, % "ahk_id " . WinExist("A")
+
+; Press Esc+Q to kill the foreground application
+
+
+KillForeground() {
+    WinGet, ProcessName, ProcessName, A
+    Run, taskkill /f /im %ProcessName%,, Hide
+}
 
 
 ;*   $$$$$$$\             $$\                      $$$\           $$$$$$$$\ $$\                         
@@ -315,8 +353,8 @@ Esc & w::Run, komorebic toggle-float,,Hide
 
 
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
-
-
+~Esc & q::KillForeground()
+^!o::CopyPath_DoubleSlash()
 
 
 
