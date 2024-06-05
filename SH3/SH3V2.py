@@ -349,8 +349,10 @@ def WheelofHistory():
     action_image   =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
     action2_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
+    continue_image2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
     WeekendEvent  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\WheelofHistory.png"
-    Tournament     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\Tournament.png"
+    Tournament_step1     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney.png"
+    Tournament_step2     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
     Resume         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
 
@@ -370,8 +372,10 @@ def WheelofHistory():
                     key_up(window, 'j')
 
             elif find_image(WeekendEvent, confidence=0.8): press_key(window, 'f')
-            elif find_image(Tournament,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
             elif find_image(continue_image, confidence=0.8): press_key(window, 'c')
+            elif find_image(continue_image2, confidence=0.8): press_key(window, 'c')
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
             time.sleep(0.1)
