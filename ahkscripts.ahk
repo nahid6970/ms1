@@ -1,3 +1,32 @@
+^+p::Pause    ; Pause script with Ctrl+Alt+P
+^+s::Suspend  ; Suspend script with Ctrl+Alt+S
+^+r::Reload   ; Reload script with Ctrl+Alt+R
+
+!+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe
+!+o::RunWait, taskkill /f /im whkd.exe
+!+p::RunWait, taskkill /f /im python.exe
+!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
+!g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
+!r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
+!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
+!y::RunWait, python.exe C:\ms1\yasb\main.py, , Hide
+#t:: WinSet, AlwaysOnTop, Toggle, A
+#x:: Run, C:\ms1\mypygui.py , ,Hide
+!+g::Run, taskkill /f /im glazewm.exe
+
+!+k::RunWait, taskkill /f /im komorebi.exe
+!k::RunWait, komorebic start
+Pause::Run, komorebic quick-load-resize,,Hide
+Esc & w::Run, komorebic toggle-float,,Hide
+
+!1::ChangeMonitorApps()
+^+Esc::Run pwsh -c Taskmgr.exe,,Hide
+~Esc & q::KillForeground()
+^!o::CopyPath_DoubleSlash()
+^!p::CopyPath_wsl()
+^!m::CopyPath_File()
+^!n::VScode_OpenWith()
+
 ;*   $$$$$$\  $$\                                      $$\  $$\   $$\ $$\       $$\           
 ;*  $$  __$$\ $$ |                                    $$  | $$ |  $$ |\__|      $$ |          
 ;*  $$ /  \__|$$$$$$$\   $$$$$$\  $$\  $$\  $$\      $$  /  $$ |  $$ |$$\  $$$$$$$ | $$$$$$\  
@@ -373,58 +402,22 @@ return
 ;*  $$\   $$ |$$ |  $$ |$$ |  $$ |$$ |       $$ |$$\ $$ |      $$ |  $$ |  $$ |$$\  \____$$\ 
 ;*  \$$$$$$  |$$ |  $$ |\$$$$$$  |$$ |       \$$$$  |\$$$$$$$\ \$$$$$$  |  \$$$$  |$$$$$$$  |
 ;*   \______/ \__|  \__| \______/ \__|        \____/  \_______| \______/    \____/ \_______/ 
-^+p::Pause    ; Pause script with Ctrl+Alt+P
-^+s::Suspend  ; Suspend script with Ctrl+Alt+S
-^+r::Reload   ; Reload script with Ctrl+Alt+R
 
-!+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe
-!+o::RunWait, taskkill /f /im whkd.exe
-!+p::RunWait, taskkill /f /im python.exe
-!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
-!g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
-!r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
-!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
-!y::RunWait, python.exe C:\ms1\yasb\main.py, , Hide
-#t:: WinSet, AlwaysOnTop, Toggle, A
-#x:: Run, C:\ms1\mypygui.py , ,Hide
-!+g::Run, taskkill /f /im glazewm.exe
-
-
-!+k::RunWait, taskkill /f /im komorebi.exe
-!k::RunWait, komorebic start
-Pause::Run, komorebic quick-load-resize,,Hide
-Esc & w::Run, komorebic toggle-float,,Hide
-
-
-^+Esc::Run pwsh -c Taskmgr.exe,,Hide
-~Esc & q::KillForeground()
-^!o::CopyPath_DoubleSlash()
-^!p::CopyPath_wsl()
-^!m::CopyPath_File()
-^!n::VScode_OpenWith()
-
-
-
+ChangeMonitorApps() {
 ; Move all windows from the secondary monitor to the primary monitor
 ; Use Win+M to trigger the script
-
 #NoEnv
 SendMode Input
 SetWorkingDir %A_ScriptDir%
-
 ; Win + 1 hotkey to toggle window between primary and secondary monitors
-!1::
 {
     ; Get the handle of the active window
     WinGet, hwnd, ID, A
-
     ; Get the position and size of the active window
     WinGetPos, x, y, w, h, ahk_id %hwnd%
-
     ; Get the work area of the primary and secondary monitors
     SysGet, MonitorPrimary, MonitorWorkArea, 1
     SysGet, MonitorSecondary, MonitorWorkArea, 2
-
     ; Check if the window is on the primary monitor
     if (x >= MonitorPrimaryLeft and x < MonitorPrimaryRight and y >= MonitorPrimaryTop and y < MonitorPrimaryBottom)
     {
@@ -438,10 +431,6 @@ SetWorkingDir %A_ScriptDir%
         newX := MonitorPrimaryLeft + ((MonitorPrimaryRight - MonitorPrimaryLeft - w) / 2)
         newY := MonitorPrimaryTop + ((MonitorPrimaryBottom - MonitorPrimaryTop - h) / 2)
     }
-
     ; Move the window to the calculated position
     WinMove, ahk_id %hwnd%, , newX, newY
-}
-
-
-
+}}
