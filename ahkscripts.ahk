@@ -22,10 +22,13 @@ Esc & w::Run, komorebic toggle-float,,Hide
 !1::ChangeMonitorApps()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 ~Esc & q::KillForeground()
+
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^!m::CopyPath_File()
+
 ^!n::VScode_OpenWith()
+^!h::ToggleHiddenFiles()
 
 ;*   $$$$$$\  $$\                                      $$\  $$\   $$\ $$\       $$\           
 ;*  $$  __$$\ $$ |                                    $$  | $$ |  $$ |\__|      $$ |          
@@ -50,9 +53,35 @@ Esc & w::Run, komorebic toggle-float,,Hide
 ; }
 ; return
 
-;! Initialize a variable to keep track of the toggle state
-toggleState := 0
-^!h::
+; ;! Initialize a variable to keep track of the toggle state
+; toggleState := 0
+; ^!h::
+;     ; Launch Control Panel with the "folders" argument
+;     Run, control.exe folders,, Max
+;     ; Wait for the Control Panel window to open (adjust the sleep time as needed)
+;     Sleep, 500
+;     ; Send keys to navigate to the "View" tab
+;     Send, ^{Tab}
+;     Send, {Tab}
+;     ; Wait for the "View" tab to be selected
+;     Sleep, 500
+;     ; Send keys to navigate to the "Hidden files and folders" options
+;     Loop % (toggleState ? 8 : 7) {
+;         Send, {Down}
+;         Sleep, 1
+;     }
+;     ; Toggle the option
+;     Send, {Space}
+;     ; Close the Control Panel window
+;     Send, {Tab 2}{Enter}
+;     ; Toggle the state for the next time
+;     toggleState := !toggleState
+; return
+
+ToggleHiddenFiles() {
+    ; Initialize a static variable to keep track of the toggle state
+    static toggleState := 0
+
     ; Launch Control Panel with the "folders" argument
     Run, control.exe folders,, Max
     ; Wait for the Control Panel window to open (adjust the sleep time as needed)
@@ -75,7 +104,8 @@ toggleState := 0
 
     ; Toggle the state for the next time
     toggleState := !toggleState
-return
+}
+
 
 ;*   $$$$$$$\                                          $$$$$$$\                      
 ;*   $$  __$$\                                         $$  __$$\                     
