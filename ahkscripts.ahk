@@ -1,34 +1,38 @@
+;;* AHK Related
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
-!+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe
-!+o::RunWait, taskkill /f /im whkd.exe
+;;! Kill Commands
+!+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
+!+o::RunWait, taskkill /f /im whkd.exe,,Hide
 !+p::RunWait, taskkill /f /im python.exe
-!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe, ,Hide
-!g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe
-!r::RunWait, python.exe C:\ms1\running_apps.py, , Hide
-!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
-!y::RunWait, python.exe C:\ms1\yasb\main.py, , Hide
-#t:: WinSet, AlwaysOnTop, Toggle, A
-#x:: Run, C:\ms1\mypygui.py , ,Hide
-!+g::Run, taskkill /f /im glazewm.exe
+!+g::RunWait, taskkill /f /im glazewm.exe,,Hide
+!+k::RunWait, taskkill /f /im komorebi.exe,,Hide
+~Esc & q::KillForeground()
 
-!+k::RunWait, taskkill /f /im komorebi.exe
-!k::RunWait, komorebic start
+;;* Start Apps / Scripts
+#x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
+!y::RunWait, python.exe C:\ms1\yasb\main.py,,Hide                                      ;* yasb
+!r::RunWait, python.exe C:\ms1\running_apps.py,,Hide                                   ;* running apps
+!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
+!g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
+!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
+!k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
+
+;;* Komorebic Commands
 Pause::Run, komorebic quick-load-resize,,Hide
 Esc & w::Run, komorebic toggle-float,,Hide
 
+;;* Others
 !1::ChangeMonitorApps()
-^+Esc::Run pwsh -c Taskmgr.exe,,Hide
-~Esc & q::KillForeground()
-
+#t:: WinSet, AlwaysOnTop, Toggle, A
+^!h::ToggleHiddenFiles()
+^!m::CopyPath_File()
+^!n::VScode_OpenWith()
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
-^!m::CopyPath_File()
-
-^!n::VScode_OpenWith()
-^!h::ToggleHiddenFiles()
+^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 
 ;*   $$$$$$\  $$\                                      $$\  $$\   $$\ $$\       $$\           
 ;*  $$  __$$\ $$ |                                    $$  | $$ |  $$ |\__|      $$ |          
