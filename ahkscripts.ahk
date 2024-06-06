@@ -21,8 +21,10 @@
 !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
 
 ;;* Komorebic Commands
-Pause::Run, komorebic quick-load-resize,,Hide
-Esc & w::Run, komorebic toggle-float,,Hide
+Pause::RunWait, komorebic quick-load-resize,,Hide
+Esc & w::RunWait, komorebic toggle-float,,Hide
+!s::RunWait, komorebic toggle-window-container-behaviour,,Hide
+
 
 ;;* Others
 !1::ChangeMonitorApps()
