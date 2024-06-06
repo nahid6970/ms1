@@ -34,6 +34,33 @@ Esc & w::Run, komorebic toggle-float,,Hide
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 
+;*   $$$$$$\  $$\                  $$\     
+;*  $$  __$$\ $$ |                 $$ |    
+;*  $$ /  \__|$$$$$$$\   $$$$$$\ $$$$$$\   
+;*  $$ |      $$  __$$\  \____$$\\_$$  _|  
+;*  $$ |      $$ |  $$ | $$$$$$$ | $$ |    
+;*  $$ |  $$\ $$ |  $$ |$$  __$$ | $$ |$$\ 
+;*  \$$$$$$  |$$ |  $$ |\$$$$$$$ | \$$$$  |
+;*   \______/ \__|  \__| \_______|  \____/ 
+
+;! Valorant Trash Talk
+::;vv1::u guys r so trash garbage get good..
+::;vv2::trash garbage stupid noobs..
+::;vv3::stupid kids get good.
+
+;! keyboard mod buttons
+::;a::ALT
+::;c::CTRL
+::;s::SHIFT
+::;ca::CTRL{+}ALT
+::;cs::CTRL{+}SHIFT
+::;csa::CTRL{+}SHIFT{+}ALT
+::;sa::SHIFT{+}ALT
+::;ss::<SPACE>
+
+::;;::,=:[]()
+::;font::font=("Jetbrainsmono nfp", 12, "bold")
+
 ;*   $$$$$$\  $$\                                      $$\  $$\   $$\ $$\       $$\           
 ;*  $$  __$$\ $$ |                                    $$  | $$ |  $$ |\__|      $$ |          
 ;*  $$ /  \__|$$$$$$$\   $$$$$$\  $$\  $$\  $$\      $$  /  $$ |  $$ |$$\  $$$$$$$ | $$$$$$\  
@@ -399,34 +426,6 @@ KillForeground() {
 FormatTime, CurrentDateTime,, yyyy-MM-dd HH-mm-ss
 SendInput %CurrentDateTime%
 return
-
-;*   $$$$$$\  $$\                  $$\     
-;*  $$  __$$\ $$ |                 $$ |    
-;*  $$ /  \__|$$$$$$$\   $$$$$$\ $$$$$$\   
-;*  $$ |      $$  __$$\  \____$$\\_$$  _|  
-;*  $$ |      $$ |  $$ | $$$$$$$ | $$ |    
-;*  $$ |  $$\ $$ |  $$ |$$  __$$ | $$ |$$\ 
-;*  \$$$$$$  |$$ |  $$ |\$$$$$$$ | \$$$$  |
-;*   \______/ \__|  \__| \_______|  \____/ 
-
-
-;! Valorant Trash Talk
-::;vv1::u guys r so trash garbage get good..
-::;vv2::trash garbage stupid noobs..
-::;vv3::stupid kids get good.
-
-;! keyboard mod buttons
-::;a::ALT
-::;c::CTRL
-::;s::SHIFT
-::;ca::CTRL{+}ALT
-::;cs::CTRL{+}SHIFT
-::;csa::CTRL{+}SHIFT{+}ALT
-::;sa::SHIFT{+}ALT
-::;ss::<SPACE>
-
-::;;::,=:[]()
-::;font::font=("Jetbrainsmono nfp", 12, "bold")
 
 ;*   $$$$$$\  $$\                            $$\                           $$\               
 ;*  $$  __$$\ $$ |                           $$ |                          $$ |              
