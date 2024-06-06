@@ -11,7 +11,12 @@
   "border_padding": 1,
   "border_offset": -1,
   "border_width": 2,
-
+  "stackbar": {"mode": "OnStack","tabs": {"focused_text":{"r": 0,"g": 255,"b": 164},
+                                          "unfocused_text":{"r": 255,"g": 0,"b": 0},
+                                          "background":{"r": 82,"g": 81,"b": 81}
+                                         },
+                                  "height": 25
+              },
   "active_window_border": false,
   "active_window_border_style":"Square",
   "active_window_border_colours": { "single": "#00f200", "stack": "#00a542", "monocle": "#ff3399" },
