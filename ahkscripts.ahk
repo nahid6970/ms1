@@ -35,6 +35,7 @@ Esc & w::RunWait, komorebic toggle-float,,Hide
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
+#e::Run explorer,,Hide
 
 ;*  ██████╗██╗  ██╗ █████╗ ████████╗
 ;* ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
@@ -261,3 +262,32 @@ SetWorkingDir %A_ScriptDir%
     ; Move the window to the calculated position
     WinMove, ahk_id %hwnd%, , newX, newY
 }}
+
+
+
+
+; Define a variable to track the state of the screen blackout
+blackoutState := 0
+
+; Define a function to toggle the screen blackout
+ToggleScreenBlackout() {
+    global blackoutState  ; Declare the variable as global so it can be accessed inside the function
+
+    if (blackoutState = 0) {
+        ; If the screen is not blacked out, create a black fullscreen window
+        blackoutState := 1
+        ; Get the height of the taskbar
+        SysGet, taskbarHeight, 4, Shell_TrayWnd
+        ; Create the black window to cover the entire screen
+        Gui +LastFound +AlwaysOnTop -Caption +ToolWindow ; Remove caption and border
+        Gui, Color, Black
+        Gui, Show, w%A_ScreenWidth% h%A_ScreenHeight% x0 y0 NoActivate
+    } else {
+        ; If the screen is already blacked out, close the window
+        blackoutState := 0
+        Gui, Destroy
+    }
+}
+
+; Define a hotkey to toggle the screen blackout
+^!b::ToggleScreenBlackout()
