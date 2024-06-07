@@ -35,7 +35,7 @@ Esc & w::RunWait, komorebic toggle-float,,Hide
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
-#e::Run explorer,,Hide
+#e::RunWait pwsh -c explorer.exe,,Hide
 
 ;*  ██████╗██╗  ██╗ █████╗ ████████╗
 ;* ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
