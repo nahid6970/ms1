@@ -290,10 +290,10 @@ def Start_Event():
             elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
-            for ad_image in ads_images:
-                ad_location = find_image(ad_image, confidence=0.8)
-                if ad_location:
-                    click(window, ad_location.left, ad_location.top)
+            # for ad_image in ads_images:
+            #     ad_location = find_image(ad_image, confidence=0.8)
+            #     if ad_location:
+            #         click(window, ad_location.left, ad_location.top)
 
             time.sleep(0.1)
     except KeyboardInterrupt:
