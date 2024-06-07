@@ -159,6 +159,22 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
+
+
+
+
+action1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
+action2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
+
+ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
+ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
+ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
+ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
+ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
+ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
+ads7 = r"C:\Users\nahid\OneDrive\Desktop\image_9.png"
+ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7]
+
 """
 ███████  █████  ███    ███ ███████
 ██      ██   ██ ████  ████ ██
@@ -169,12 +185,9 @@ def press_keys_with_delays(window, *args):
 
 def TournamentFame():
     window_title = 'LDPlayer'
-    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     e_image = r"C:\ms1\SH3\b_tournament.png"
     space_image = r"C:\ms1\SH3\b_space.png"
     continue_image = r"C:\ms1\SH3\b_continue.png"
-    ability_image = r"C:\Users\nahid\OneDrive\Desktop\b_ability.png"
 
     window = focus_window(window_title)
     if not window:
@@ -184,7 +197,7 @@ def TournamentFame():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(action_image) or find_image(action2_image):
+            if find_image(action1) or find_image(action2):
                 if random.choice([True, False]):
                     key_down(window, 'j')
                     key_down(window, 'l')
@@ -212,18 +225,16 @@ def TournamentFame():
 ██   ██ ██   ██ ██ ██████  ███████
 """
 def Raids():
-    window_title = 'LDPlayer'
-    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
-    continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
-    Raids = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\Raid_Home.png"
-    level3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
-    participate = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
-    toraid = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
-    fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
-    claimreward = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
-    continuee = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue.png"
-    continuee2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue2.png"
+    window_title   ='LDPlayer'
+    continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\cont.png"
+    Raids          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\Raid_Home.png"
+    level3         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
+    participate    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
+    toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
+    fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
+    claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
+    continuee      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue.png"
+    continuee2     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue2.png"
 
     window = focus_window(window_title)
     if not window:
@@ -232,7 +243,7 @@ def Raids():
     try:
         while not stop_thread:
             focus_window(window_title)
-            # if find_image(action_image) or find_image(action2_image):
+            # if find_image(action1) or find_image(action2):
             #     if random.choice([True, False]):
             #         key_down(window, 'j')
             #         key_down(window, 'l')
@@ -241,7 +252,7 @@ def Raids():
             #         key_up(window, 'l')
             #     else:
             #         press_key(window, 'j')
-            if find_image(action_image) or find_image(action2_image):
+            if find_image(action1) or find_image(action2):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -309,20 +320,12 @@ def Raids():
 """
 def SanguineForest():
     window_title = 'LDPlayer'
-    action_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    action2_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     continue_image = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
     EnterSanguineForest = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterSanguineForest.png"
     EnterTournament = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\EnterTournament.png"
     fight = r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\fight.png"
     # advertise = r"C:\Users\nahid\OneDrive\backup\shadowfight3\video_click.png"
-    # advert1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
-    # advert2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
-    # advert3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
-    # advert4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
-    # advert5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
-    # advert6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
-    # advert7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
+
 
 
 
@@ -334,7 +337,7 @@ def SanguineForest():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(action_image) or find_image(action2_image):
+            if find_image(action1) or find_image(action2):
                 if random.choice([True, False]):
                     key_down(window, 'j')
                     key_down(window, 'l')
@@ -352,6 +355,13 @@ def SanguineForest():
             # else:
                 # if find_image(EnterSanguineForest, confidence=0.8): click(window, find_image(EnterSanguineForest, confidence=0.8).left, find_image(EnterSanguineForest, confidence=0.8).top)
                 # if find_image(fight, confidence=0.8): click(window, find_image(fight, confidence=0.8).left, find_image(fight, confidence=0.8).top)
+            if find_image(ads1, confidence=0.8): click(window, find_image(ads1, confidence=0.8).left, find_image(ads1, confidence=0.8).top)
+            if find_image(ads2, confidence=0.8): click(window, find_image(ads2, confidence=0.8).left, find_image(ads2, confidence=0.8).top)
+            if find_image(ads3, confidence=0.8): click(window, find_image(ads3, confidence=0.8).left, find_image(ads3, confidence=0.8).top)
+            if find_image(ads4, confidence=0.8): click(window, find_image(ads4, confidence=0.8).left, find_image(ads4, confidence=0.8).top)
+            if find_image(ads5, confidence=0.8): click(window, find_image(ads5, confidence=0.8).left, find_image(ads5, confidence=0.8).top)
+            if find_image(ads6, confidence=0.8): click(window, find_image(ads6, confidence=0.8).left, find_image(ads6, confidence=0.8).top)
+            if find_image(ads7, confidence=0.8): click(window, find_image(ads7, confidence=0.8).left, find_image(ads7, confidence=0.8).top)
 
 
                 # if positionclick := find_image(EnterSanguineForest, confidence=0.8):
@@ -398,8 +408,6 @@ def SanguineForest():
 """
 def DangerousShow():
     window_title   ='LDPlayer'
-    action_image   =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    action2_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
     continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
     DangerousShow  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\DangerousShow.png"
     Tournament     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\DangerousShow\Tournament.png"
@@ -414,7 +422,7 @@ def DangerousShow():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(action_image) or find_image(action2_image):
+            if find_image(action1) or find_image(action2):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -430,36 +438,32 @@ def DangerousShow():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+"""
+███████╗██╗   ██╗███████╗███╗   ██╗████████╗
+██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
+█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║
+██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║
+███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
+╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
+"""
 
-"""
-██╗    ██╗██╗  ██╗███████╗███████╗██╗          ██████╗ ███████╗    ██╗  ██╗██╗███████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
-██║    ██║██║  ██║██╔════╝██╔════╝██║         ██╔═══██╗██╔════╝    ██║  ██║██║██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
-██║ █╗ ██║███████║█████╗  █████╗  ██║         ██║   ██║█████╗      ███████║██║███████╗   ██║   ██║   ██║██████╔╝ ╚████╔╝
-██║███╗██║██╔══██║██╔══╝  ██╔══╝  ██║         ██║   ██║██╔══╝      ██╔══██║██║╚════██║   ██║   ██║   ██║██╔══██╗  ╚██╔╝
-╚███╔███╔╝██║  ██║███████╗███████╗███████╗    ╚██████╔╝██║         ██║  ██║██║███████║   ██║   ╚██████╔╝██║  ██║   ██║
- ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝     ╚═════╝ ╚═╝         ╚═╝  ╚═╝╚═╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
-"""
-def WheelofHistory():
-    window_title   ='LDPlayer'
-    action_image   =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
-    action2_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
-    continue_image =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
-    continue_image2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
-    WeekendEvent  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\WheelofHistory.png"
+def Start_Event():
+    window_title         ='LDPlayer'
+    continue_image       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
+    continue_image2      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
+    WeekendEvent         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\WheelofHistory.png"
     Tournament_step1     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney.png"
     Tournament_step2     =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
-    Resume         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
-
+    Resume               =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(action_image) or find_image(action2_image):
+            if find_image(action1) or find_image(action2):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -471,49 +475,37 @@ def WheelofHistory():
             elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            
+            for ad_image in ads_images:
+                ad_location = find_image(ad_image, confidence=0.8)
+                if ad_location:
+                    click(window, ad_location.left, ad_location.top)
 
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
 
-
-def start_function1():
+def Fame_Function():
     global stop_thread
     stop_thread = False
     t = threading.Thread(target=TournamentFame)
-    t.daemon = True  # This makes sure the thread will exit when the main program exits
+    t.daemon = True
     t.start()
 
-def start_function2():
-    global stop_thread
-    stop_thread = False
-    t = threading.Thread(target=SanguineForest)
-    t.daemon = True  # This makes sure the thread will exit when the main program exits
-    t.start()
-
-def start_function3():
+def Raids_Function():
     global stop_thread
     stop_thread = False
     t = threading.Thread(target=Raids)
-    t.daemon = True  # This makes sure the thread will exit when the main program exits
+    t.daemon = True
     t.start()
 
-def start_function4():
+def event_function():
     global stop_thread
     stop_thread = False
-    t = threading.Thread(target=DangerousShow)
-    t.daemon = True  # This makes sure the thread will exit when the main program exits
+    t = threading.Thread(target=Start_Event)
+    t.daemon = True
     t.start()
-
-def start_function5():
-    global stop_thread
-    stop_thread = False
-    t = threading.Thread(target=WheelofHistory)
-    t.daemon = True  # This makes sure the thread will exit when the main program exits
-    t.start()
-
-
 
 def stop_functions():
     global stop_thread
@@ -522,24 +514,14 @@ def stop_functions():
 def restart(event=None):
     root.destroy()
     subprocess.Popen([sys.executable] + sys.argv)
-# def restart(event=None):
-#     stop_functions()
-#     root.destroy()
-#     subprocess.Popen([sys.executable] + sys.argv)
 
 def close_window(event=None):
     root.destroy()
-# def close_window(event=None):
-#     stop_functions()
-#     root.destroy()
-
-
 
 if __name__ == "__main__":
     root = Tk()
     root.title("Function Selector")
     root.overrideredirect(True)
-    # root.attributes('-topmost', True)
     default_font = ("Jetbrainsmono nfp", 10)
     root.option_add("*Font", default_font)
     root.geometry(f"+{75}+{1044}")
@@ -548,34 +530,20 @@ if __name__ == "__main__":
         if not root.attributes('-topmost'):
             root.attributes('-topmost', True)
         root.after(500, check_window_topmost)
-    # Call the function to check window topmost status periodically
     check_window_topmost()
 
-
-    TournamentFame_bt = Button(root, text="Fame", command=start_function1, bg="#bda24a", fg="#000000")
-    TournamentFame_bt.pack(side="left")
-
-    # SanguineForest_bt = Button(root, text="SanguineForest", command=start_function2, bg="#5a0000", fg="#ffffff")
-    # SanguineForest_bt.pack(side="left")
-
-    # DangerousShow_bt = Button(root, text="DangerousShow", command=start_function4, bg="#5a0000", fg="#ffffff")
-    # DangerousShow_bt.pack(side="left")
-
-    WheelofHistory_bt = Button(root, text="Wheel of History", command=start_function5, bg="#5a0000", fg="#ffffff")
-    WheelofHistory_bt.pack(side="left")
-
-    Raids_bt = Button(root, text="Raids", command=start_function3, bg="#006173", fg="#ffffff")
+    Fame_bt = Button(root, text="Fame", command=Fame_Function, bg="#bda24a", fg="#000000")
+    Fame_bt.pack(side="left")
+    Event_bt = Button(root, text="Event", command=event_function, bg="#5a0000", fg="#ffffff")
+    Event_bt.pack(side="left")
+    Raids_bt = Button(root, text="Raids", command=Raids_Function, bg="#006173", fg="#ffffff")
     Raids_bt.pack(side="left")
-
     Stop_bt = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
     Stop_bt.pack(side="left")
-
     Restart_bt = Button(root, text="Restart", command=restart, bg="#0e93ff", fg="#FFFFFF")
     Restart_bt.pack(side="left")
-
     Exit_bt = Button(root, text="Exit", command=close_window, bg="#080808", fg="#FFFFFF")
     Exit_bt.pack(side="left")
-
 
     root.mainloop()
 
