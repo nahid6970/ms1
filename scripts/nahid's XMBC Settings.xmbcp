@@ -21,9 +21,9 @@
 		<Hotkey2 Key="0" Modifier="0" />
 		<Hotkey3 Key="0" Modifier="0" />
 		<Hotkey4 Key="0" Modifier="0" />
-		<Hotkey5 Key="112" Modifier="0" />
+		<Hotkey5 Key="112" Modifier="6" />
 		<Hotkey6 Key="0" Modifier="0" />
-		<Hotkey7 Key="112" Modifier="6" />
+		<Hotkey7 Key="0" Modifier="0" />
 		<Hotkey8 Key="0" Modifier="0" />
 		<Hotkey9 Key="0" Modifier="0" />
 		<Hotkey10 Key="0" Modifier="0" />
