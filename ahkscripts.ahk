@@ -294,23 +294,22 @@ ToggleScreenBlackout() {
     }}
 
 
-; Define a function to run the appropriate command based on the active window
-RunCommandBasedOnActiveWindow() {
-    ; Get the name of the active window
-    WinGetTitle, activeWindowTitle, A
+; ; Define a function to run the appropriate command based on the active window
+; RunCommandBasedOnActiveWindow() {
+;     ; Get the name of the active window
+;     WinGetTitle, activeWindowTitle, A
 
-    ; Check if the active window is Visual Studio Code
-    if (InStr(activeWindowTitle, "Visual Studio Code")) {
-        Run, cmd /c "rclone config"
-    }
-    ; Check if the active window is Google Chrome
-    else if (InStr(activeWindowTitle, "Google Chrome")) {
-        Run, cmd /c "fzf"
-    }
-}
-
-; Define a hotkey (Alt + 5) to trigger the function
-!5::RunCommandBasedOnActiveWindow()
+;     ; Check if the active window is Visual Studio Code
+;     if (InStr(activeWindowTitle, "Visual Studio Code")) {
+;         Run, cmd /c "rclone config"
+;     }
+;     ; Check if the active window is Google Chrome
+;     else if (InStr(activeWindowTitle, "Google Chrome")) {
+;         Run, cmd /c "fzf"
+;     }
+; }
+; ; Define a hotkey (Alt + 5) to trigger the function
+; !5::RunCommandBasedOnActiveWindow()
 
 
 ; ; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
@@ -320,6 +319,7 @@ RunCommandBasedOnActiveWindow() {
 
 ; ; Define F1 to send F1 normally
 ; F1::Send, {F1}
+
 
 
 ; ; Define a function to check the foreground application and send the appropriate keys
@@ -341,11 +341,12 @@ RunCommandBasedOnActiveWindow() {
 
 
 
-; ; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
-; #If (WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe") && GetKeyState("F1", "P"))
-;     F1::Send, ^!{F1}
+; ; Define hotkey F2 to run 'dir' command when Chrome is active
+; #IfWinActive ahk_exe chrome.exe
+;     F2::Run, cmd /c rclone ncdu d:
 ; #If
-; ; Define a hotkey (F1) to send F1 normally for all other applications
-; #If !WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe")
-;     F1::Send, {F1}
+
+; ; Define hotkey F2 to run 'rclone config' when VSCode is active
+; #IfWinActive ahk_exe Code.exe
+;     F2::Run, cmd /c rclone config
 ; #If
