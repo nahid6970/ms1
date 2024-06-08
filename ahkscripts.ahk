@@ -288,3 +288,20 @@ ToggleScreenBlackout() {
     }}
 
 
+; Define a function to run the appropriate command based on the active window
+RunCommandBasedOnActiveWindow() {
+    ; Get the name of the active window
+    WinGetTitle, activeWindowTitle, A
+
+    ; Check if the active window is Visual Studio Code
+    if (InStr(activeWindowTitle, "Visual Studio Code")) {
+        Run, cmd /c "rclone config"
+    }
+    ; Check if the active window is Google Chrome
+    else if (InStr(activeWindowTitle, "Google Chrome")) {
+        Run, cmd /c "fzf"
+    }
+}
+
+; Define a hotkey (Alt + 5) to trigger the function
+!5::RunCommandBasedOnActiveWindow()
