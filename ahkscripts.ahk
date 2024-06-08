@@ -21,22 +21,22 @@
 !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
 
 ;;* Komorebic Commands
-Pause::RunWait, komorebic quick-load-resize,,Hide
-Esc & w::RunWait, komorebic toggle-float,,Hide
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
+Esc & w::RunWait, komorebic toggle-float,,Hide
+Pause::RunWait, komorebic quick-load-resize,,Hide
 
 
 ;;* Others
 !1::ChangeMonitorApps()
+#e::Run pwsh -c explorer.exe,,Hide
 #t:: WinSet, AlwaysOnTop, Toggle, A
+^!b::ToggleScreenBlackout()
 ^!h::ToggleHiddenFiles()
 ^!m::CopyPath_File()
 ^!n::VScode_OpenWith()
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
-#e::Run pwsh -c explorer.exe,,Hide
-^!b::ToggleScreenBlackout()
 
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
