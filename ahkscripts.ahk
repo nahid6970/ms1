@@ -25,7 +25,6 @@
 Esc & w::RunWait, komorebic toggle-float,,Hide
 Pause::RunWait, komorebic quick-load-resize,,Hide
 
-
 ;;* Others
 !1::ChangeMonitorApps()
 #e::Run pwsh -c explorer.exe,,Hide
@@ -40,8 +39,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
-    F1::Send, ^!{F1}
-#If
+    F1::Send, ^!{F1} #If
 
 
 ;*  ██████╗██╗  ██╗ █████╗ ████████╗
