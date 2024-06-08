@@ -38,6 +38,12 @@ Esc & w::RunWait, komorebic toggle-float,,Hide
 #e::Run pwsh -c explorer.exe,,Hide
 ^!b::ToggleScreenBlackout()
 
+#IfWinActive ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe
+    F1::Send, % (GetKeyState("F1", "P") ? "^!{F1}" : "{F1}")
+#If
+
+
+
 ;*  ██████╗██╗  ██╗ █████╗ ████████╗
 ;* ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
 ;* ██║     ███████║███████║   ██║
@@ -334,12 +340,12 @@ RunCommandBasedOnActiveWindow() {
 ; F1::CheckForegroundAndSendKeys()
 
 
-; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
-#If (WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe") && GetKeyState("F1", "P"))
-    F1::Send, ^!{F1}
-#If
 
-; Define a hotkey (F1) to send F1 normally for all other applications
-#If !WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe")
-    F1::Send, {F1}
-#If
+; ; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
+; #If (WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe") && GetKeyState("F1", "P"))
+;     F1::Send, ^!{F1}
+; #If
+; ; Define a hotkey (F1) to send F1 normally for all other applications
+; #If !WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe")
+;     F1::Send, {F1}
+; #If
