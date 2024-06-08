@@ -305,3 +305,41 @@ RunCommandBasedOnActiveWindow() {
 
 ; Define a hotkey (Alt + 5) to trigger the function
 !5::RunCommandBasedOnActiveWindow()
+
+
+; ; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
+; #IfWinActive ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe
+;     F1::Send, ^!{F1}
+; #IfWinActive
+
+; ; Define F1 to send F1 normally
+; F1::Send, {F1}
+
+
+; ; Define a function to check the foreground application and send the appropriate keys
+; CheckForegroundAndSendKeys() {
+;     ; Get the name of the active window
+;     WinGetTitle, activeWindowTitle, A
+
+;     ; Check if the active window is Valorant
+;     if (InStr(activeWindowTitle, "VALORANT")) {
+;         ; Send Ctrl + Alt + F1
+;         Send, ^!{F1}
+;     } else {
+;         ; Send F1 normally
+;         Send, {F1}
+;     }
+; }
+; ; Define a hotkey (F1) to trigger the function
+; F1::CheckForegroundAndSendKeys()
+
+
+; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
+#If (WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe") && GetKeyState("F1", "P"))
+    F1::Send, ^!{F1}
+#If
+
+; Define a hotkey (F1) to send F1 normally for all other applications
+#If !WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe")
+    F1::Send, {F1}
+#If
