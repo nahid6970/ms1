@@ -189,14 +189,11 @@ def TournamentFame():
         while not stop_thread:
             focus_window(window_title)
             if find_image(action1) or find_image(action2):
-                if random.choice([True, False]):
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(random.uniform(0.1, 0.5))
-                    key_up(window, 'j')
+                    time.sleep(5)
                     key_up(window, 'l')
-                else:
-                    press_key(window, 'j')
+                    key_up(window, 'j')
 
             elif find_image(e_image):
                 press_key(window, 'e')
