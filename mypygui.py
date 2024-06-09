@@ -555,11 +555,6 @@ Folder_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\folder.py"], shell=True))
 Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\folder.py"], shell=True))
 
-Process_bt=CTkLabel(ROOT1, text="\ueba2", bg_color="#1d2027",text_color="#ff1313", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
-Process_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\process.py"], shell=True))
-Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\process.py"], shell=True))
-
 ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a04c", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
 ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
 ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
@@ -597,15 +592,6 @@ ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c co
 ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
 ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
 
-RoundedCorner_lb = tk.Label(ROOT1, text="\udb81\ude07", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-RoundedCorner_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
-RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
-
-Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
-Search_bt.bind("<Button-1>",fzf_search)
-Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
 
 Info_lb=tk.Label(ROOT1, text="\udb80\udefc",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Info_lb.pack(side="left",padx=(3,3),pady=(0,0))
@@ -616,11 +602,6 @@ Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:
 LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 LockBox_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 LockBox_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Program Files\\My Lockbox\\mylbx.exe"'))
-
-Encrypt_lb = tk.Label(ROOT1,text="\uf084", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
-Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
 
 VirtualMonitor_lb = tk.Label(ROOT1,text="2nd", bg="#1d2027", fg="#8ab9ff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 VirtualMonitor_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
@@ -659,6 +640,11 @@ BoxForFind.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
 back_find=tk.Button(BoxForFind,text="\ueb6f",width=0 ,bg="#1D2027", fg="#FFFFFF", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
 back_find.pack(side="left" ,padx=(0,0))
 def find(FR_Find):
+    Search_bt=tk.Label(BoxForFind, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+    Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
+    Search_bt.bind("<Button-1>",fzf_search)
+    Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
+
     File_bt    =tk.Button(BoxForFind,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
     Pattern_bt =tk.Button(BoxForFind,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
     Size_bt    =tk.Button(BoxForFind,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))

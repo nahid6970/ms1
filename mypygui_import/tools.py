@@ -1,7 +1,7 @@
 import subprocess
 import subprocess
 import tkinter as tk
-from customtkinter import CTkButton
+from customtkinter import CTkButton, CTkLabel
 
 # Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
@@ -51,7 +51,7 @@ x = screen_width//2 - 1200//2
 y = screen_height//2 - 800//2
 ROOT.geometry(f"1200x800+{x}+{y}") #! overall size of the window
 
-MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=600) #!
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200, height=800) #!
 MAIN_FRAME.pack_propagate(False)
 MAIN_FRAME.pack(pady=1)  # Add some padding at the top
 MAIN_FRAME.pack(expand=True)
@@ -74,28 +74,36 @@ LB_XXX.bind("<Button-1>",close_window)
 
 
 #! Tools
-WINDOWSTOOLS_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+ROW_1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
+ROW_1.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
+
+WINDOWSTOOLS_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
 WINDOWSTOOLS_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROOT1, text="\uf07cEdit", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
-ENTER_FRAME.pack(side="left", padx=(1,1))
+ENTER_FRAME = CTkButton(ROW_1, text="WindowsTools", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME.pack(side="left",padx=(1,1))
 BOX = tk.Frame(WINDOWSTOOLS_FRAME, bg="#1D2027")
-BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
-BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WINDOWSTOOLS_FRAME))
-BACK.pack(side="left" ,padx=(0,0))
+BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
+
 def Folder(WINDOWSTOOLS_FRAME):
-    MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True)))
-    MYPYGUI.pack(side="left" ,padx=(0,0))
-    AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#ffffff", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahkscripts.ahk"],shell=True)))
-    AHKEDIT.pack(side="left" ,padx=(0,0))
+    AdvancedAdapter=tk.Button(BOX,text="Advanced Adapter",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892", command=lambda: subprocess.Popen ("control ncpa.cpl"))
+    AdvancedAdapter.pack(side="top" ,padx=(0,0))
+
+    CheckDisk=tk.Button(BOX,text="CheckDisk",width=0 ,fg="#ffffff",font=("jetbrainsmono nf",12,"bold"), bg="#204892", command=lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True))
+    CheckDisk.pack(side="top" ,padx=(0,0))
+
+    ChrisTitusWinUtility=tk.Button(BOX,text="Chris Titus Win Utility",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892", command=lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "powershell","-ArgumentList",'C:/ms1/scripts/ctt.ps1' ,"-Verb", "RunAs"],shell=True))
+    ChrisTitusWinUtility.pack(side="top" ,padx=(0,0))
+
+    BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WINDOWSTOOLS_FRAME))
+    BACK.pack(side="top" ,padx=(0,0))
 Folder(WINDOWSTOOLS_FRAME)
 
-BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027",width=520, height=720)
-BOX_1.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
+
 
 button_properties = [
-("Advanced Adapter"        ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,10 ,"w" ,lambda: subprocess.Popen ("control ncpa.cpl")),
-("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,40 ,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True)),
-("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,70 ,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "powershell","-ArgumentList",'C:/ms1/scripts/ctt.ps1' ,"-Verb", "RunAs"],shell=True)),
+# ("Advanced Adapter"        ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,10 ,"w" ,lambda: subprocess.Popen ("control ncpa.cpl")),
+# ("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,40 ,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True)),
+# ("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,70 ,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "powershell","-ArgumentList",'C:/ms1/scripts/ctt.ps1' ,"-Verb", "RunAs"],shell=True)),
 # ("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,70 ,"w" ,lambda: subprocess.Popen (["powershell","Invoke-RestMethod christitus.com/win | Invoke-Expression"],shell=True)),
 ("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,100,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True)),
 ("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,130,"w" ,lambda: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True)),
@@ -112,6 +120,41 @@ button_properties = [
 ("Winsock Reset"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,460,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"],shell=True)),
 ("Character Map"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,490,"w" ,lambda: subprocess.Popen ("charmap")),
 ]
+
+
+
+
+
+
+
+PYTHON_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
+PYTHON_FRAME.pack_propagate(True)
+ENTER_FRAME = CTkButton(ROW_1, text="Python", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(PYTHON_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME.pack(side="left", padx=(1,1))
+BOX = tk.Frame(PYTHON_FRAME, bg="#1D2027")
+BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
+def Folder(PYTHON_FRAME):
+    RoundedCorner_lb = tk.Label(BOX, text="Rounded Corner", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+    RoundedCorner_lb.pack(side="top", padx=(0, 0), pady=(0, 0))
+    RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
+    RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
+
+    Process_bt=CTkLabel(BOX, text="Process", bg_color="#1d2027",text_color="#ff1313", anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+    Process_bt.pack(side="top",padx=(0,0),pady=(0,0))
+    Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\process.py"], shell=True))
+    Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\process.py"], shell=True))
+
+    BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,PYTHON_FRAME))
+    BACK.pack(side="top" ,padx=(0,0))
+Folder(PYTHON_FRAME)
+
+
+
+Encrypt_lb = tk.Label(ROW_1,text="\uf084", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 50, "bold"))
+Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
+Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
+Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
+
 
 
 
