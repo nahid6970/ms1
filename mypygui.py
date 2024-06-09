@@ -700,23 +700,22 @@ BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=la
 BACK.pack(side="left" ,padx=(0,0))
 
 #! EDIT SPACE
-EDIT_SPACE = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-EDIT_SPACE.pack_propagate(True)
-Enter_WS2 = CTkButton(ROOT1, text="\uf07cEdit", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(EDIT_SPACE , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
-Enter_WS2.pack(side="left", padx=(1,1))
-BOX = tk.Frame(EDIT_SPACE, bg="#1D2027")
+EDIT_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+EDIT_FRAME.pack_propagate(True)
+ENTER_FRAME = CTkButton(ROOT1, text="\uf07cEdit", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(EDIT_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME.pack(side="left", padx=(1,1))
+BOX = tk.Frame(EDIT_FRAME, bg="#1D2027")
 BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
-BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_SPACE))
+BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_FRAME))
 BACK.pack(side="left" ,padx=(0,0))
-def Folder(EDIT_SPACE):
+def Folder(EDIT_FRAME):
     MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True)))
     MYPYGUI.pack(side="left" ,padx=(0,0))
     AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#ffffff", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahkscripts.ahk"],shell=True)))
     AHKEDIT.pack(side="left" ,padx=(0,0))
-Folder(EDIT_SPACE)
+Folder(EDIT_FRAME)
 
 #! Worspace_3
-
 SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 bkup=tk.Label(ROOT1,text="\udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
