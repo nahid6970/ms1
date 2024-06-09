@@ -31,7 +31,7 @@ def switch_to_frame(frame_to_show, frame_to_hide):
 # Create main window
 ROOT = tk.Tk()
 ROOT.title("Folder")
-ROOT.attributes('-topmost', True)  # Set always on top
+# ROOT.attributes('-topmost', True)  # Set always on top
 # ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
 ROOT.overrideredirect(True)  # Remove default borders
@@ -86,13 +86,19 @@ BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
 
 def Folder(WINDOWSTOOLS_FRAME):
     AdvancedAdapter=tk.Button(BOX,text="Advanced Adapter",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892", command=lambda: subprocess.Popen ("control ncpa.cpl"))
-    AdvancedAdapter.pack(side="top" ,padx=(0,0))
+    AdvancedAdapter.pack(side="top",anchor="w",padx=(0,0))
 
     CheckDisk=tk.Button(BOX,text="CheckDisk",width=0 ,fg="#ffffff",font=("jetbrainsmono nf",12,"bold"), bg="#204892", command=lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True))
-    CheckDisk.pack(side="top" ,padx=(0,0))
+    CheckDisk.pack(side="top",anchor="w",padx=(0,0))
 
-    ChrisTitusWinUtility=tk.Button(BOX,text="Chris Titus Win Utility",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892", command=lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "powershell","-ArgumentList",'C:/ms1/scripts/ctt.ps1' ,"-Verb", "RunAs"],shell=True))
-    ChrisTitusWinUtility.pack(side="top" ,padx=(0,0))
+    ChrisTitusWinUtility=tk.Button(BOX,text="Chris Titus Win Utility",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#000000", command=lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "powershell","-ArgumentList",'C:/ms1/scripts/ctt.ps1' ,"-Verb", "RunAs"],shell=True))
+    ChrisTitusWinUtility.pack(side="top",anchor="w",padx=(0,0))
+
+    DiskCleanup=tk.Button(BOX,text="Disk Cleanup",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892", command=lambda: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True))
+    DiskCleanup.pack(side="top",anchor="w",padx=(0,0))
+
+    DISM=tk.Button(BOX,text="DISM",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892", command=lambda: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True))
+    DISM.pack(side="top",anchor="w",padx=(0,0))
 
     BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WINDOWSTOOLS_FRAME))
     BACK.pack(side="top" ,padx=(0,0))
@@ -105,8 +111,8 @@ button_properties = [
 # ("CheckDisk"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,40 ,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True)),
 # ("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,70 ,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "powershell","-ArgumentList",'C:/ms1/scripts/ctt.ps1' ,"-Verb", "RunAs"],shell=True)),
 # ("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,70 ,"w" ,lambda: subprocess.Popen (["powershell","Invoke-RestMethod christitus.com/win | Invoke-Expression"],shell=True)),
-("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,100,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True)),
-("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,130,"w" ,lambda: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True)),
+# ("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,100,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True)),
+# ("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,130,"w" ,lambda: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True)),
 ("DxDiag"                  ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,160,"w" ,lambda: subprocess.Popen ("dxdiag")),
 ("Flush DNS"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,190,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"],shell=True                     )),
 ("msconfig"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,220,"w" ,lambda: subprocess.Popen (["msconfig.exe"],shell=True)),
