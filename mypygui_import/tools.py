@@ -79,7 +79,7 @@ ROW_1.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
 
 WINDOWSTOOLS_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
 WINDOWSTOOLS_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROW_1, text="WindowsTools", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME = CTkButton(ROW_1, text="Windows\nTools", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
 ENTER_FRAME.pack(side="left",padx=(1,1))
 BOX = tk.Frame(WINDOWSTOOLS_FRAME, bg="#1D2027")
 BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
@@ -133,7 +133,7 @@ button_properties = [
 
 PYTHON_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
 PYTHON_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROW_1, text="Python", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(PYTHON_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME = CTkButton(ROW_1, text="Python", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(PYTHON_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
 ENTER_FRAME.pack(side="left", padx=(1,1))
 BOX = tk.Frame(PYTHON_FRAME, bg="#1D2027")
 BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
