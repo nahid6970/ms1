@@ -22,7 +22,7 @@
 
 ;;* Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
-Esc & w::RunWait, komorebic toggle-float,,Hide
+~Esc & w::RunWait, komorebic toggle-float,,Hide
 Pause::RunWait, komorebic quick-load-resize,,Hide
 
 ;;* Others
