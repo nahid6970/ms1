@@ -1,6 +1,7 @@
 import subprocess
 import subprocess
 import tkinter as tk
+from customtkinter import CTkButton
 
 # Vaiables to track the position of the mouse when clicking​⁡
 drag_data = {"x": 0, "y": 0}
@@ -22,6 +23,10 @@ def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
+
+def switch_to_frame(frame_to_show, frame_to_hide):
+    frame_to_hide.pack_forget()
+    frame_to_show.pack()
 
 # Create main window
 ROOT = tk.Tk()
@@ -69,10 +74,20 @@ LB_XXX.bind("<Button-1>",close_window)
 
 
 #! Tools
-def create_button(text, bg_color, fg_color, height, width, relief, font, padx_button, pady_button, x_button, y_button, anchor_button, command):
-    button = tk.Button(BOX_1, text=text, bg=bg_color, fg=fg_color, height=height, width=width, relief=relief, font=font, padx=padx_button, pady=pady_button, command=command, anchor=anchor_button)
-    button.place(x=x_button, y=y_button)
-    return button
+WINDOWSTOOLS_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+WINDOWSTOOLS_FRAME.pack_propagate(True)
+ENTER_FRAME = CTkButton(ROOT1, text="\uf07cEdit", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME.pack(side="left", padx=(1,1))
+BOX = tk.Frame(WINDOWSTOOLS_FRAME, bg="#1D2027")
+BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WINDOWSTOOLS_FRAME))
+BACK.pack(side="left" ,padx=(0,0))
+def Folder(WINDOWSTOOLS_FRAME):
+    MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True)))
+    MYPYGUI.pack(side="left" ,padx=(0,0))
+    AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#ffffff", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahkscripts.ahk"],shell=True)))
+    AHKEDIT.pack(side="left" ,padx=(0,0))
+Folder(WINDOWSTOOLS_FRAME)
 
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027",width=520, height=720)
 BOX_1.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
@@ -97,8 +112,6 @@ button_properties = [
 ("Winsock Reset"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,460,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"],shell=True)),
 ("Character Map"           ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,490,"w" ,lambda: subprocess.Popen ("charmap")),
 ]
-for button_props in button_properties:
-    create_button(*button_props)
 
 
 
