@@ -42,9 +42,9 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 400
-y = screen_height//2 - 600//2
-ROOT.geometry(f"400x600+{x}+{y}") #! overall size of the window
+x = screen_width//2 - 1200//2
+y = screen_height//2 - 800//2
+ROOT.geometry(f"1200x800+{x}+{y}") #! overall size of the window
 
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=600) #!
 MAIN_FRAME.pack_propagate(False)
@@ -60,17 +60,9 @@ def close_window(event=None):
 ROOT1 = tk.Frame(ROOT, bg="#1d2027")
 ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
 
-def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
-    label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
-    label.grid(row=row, column=column, padx=padx, pady=pady, sticky=anchor, rowspan=rowspan, columnspan=columnspan)
-    return label
-
-label_properties = [
-{"text": "r","parent": ROOT1,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1 ,"rowspan": 1,"columnspan": 1},#! LB_X alternative wingdings x
-]
-labels = [create_label(**prop) for prop in label_properties]
-LB_XXX, = labels
-LB_XXX.bind("<Button-1>", close_window)
+LB_XXX=tk.Label(ROOT1, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"))
+LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
+LB_XXX.bind("<Button-1>",close_window)
 
 
 

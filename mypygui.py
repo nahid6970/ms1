@@ -533,7 +533,7 @@ LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#d4d654
 LB_K.pack(side="left",padx=(5,0),pady=(1,0))
 LB_K.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.py"], shell=True))
 
-Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#1d2027",text_color="#f37826", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+Tools_bt=CTkLabel(ROOT1, text="\ue20f", bg_color="#a2d5ff",text_color="#000000", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Tools_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
 Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\tools.py"], shell=True))
