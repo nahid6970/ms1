@@ -36,7 +36,7 @@ ROOT.overrideredirect(True)
 ROOT.configure(bg="#282c34")
 
 def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#66fd1f")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
 
@@ -46,9 +46,9 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = 0
-y = screen_height - 308
+y = screen_height - 350
 
-ROOT.geometry(f"40x260+{x}+{y}")  
+ROOT.geometry(f"50x270+{x}+{y}")  
 
 button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
 button_frame.pack(side="top", padx=1, pady=10, fill="both")
@@ -69,14 +69,14 @@ def on_release(label, release_color):
     label.config(bg=release_color)
 
 button_properties = [
-("❌",  close_window             ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
-("📏",  powertoys_ruler          ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
-("🐭",  powertoys_mouse_crosshair,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
-("📝",  powertoys_TextExtract    ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
-("📝",  capture2text             ,"#1d2027", "#db1725", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
-("♾️",  rclone_sync              ,"#1d2027", "#3bda00", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
-("💻",  windows_terminal         ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
-("📵",  stop_wsa                 ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Arial",16), "flat", "#FFFFFF", 0, (0,0), (0,0))
+("\uf2d3",  close_window             ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("\uee11",  powertoys_ruler          ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("\uf245",  powertoys_mouse_crosshair,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("\ueb69",  powertoys_TextExtract    ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("\ueb69",  capture2text             ,"#1d2027", "#db1725", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("\uea77",  rclone_sync              ,"#1d2027", "#3bda00", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("\uea85",  windows_terminal         ,"#1d2027", "#FFFFFF", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0)),
+("\uf17b",  stop_wsa                 ,"#1d2027", "#FF0000", "#1d2027", "#1d2027", "center", "top", 10, 1, ("Jetbrainsmono nfp",16), "flat", "#FFFFFF", 0, (0,0), (0,0))
 ]
 
 labels = []
