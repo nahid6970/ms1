@@ -82,48 +82,50 @@ WINDOWSTOOLS_FRAME.pack_propagate(True)
 ENTER_FRAME = CTkButton(ROW_1, text="Windows\nTools", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
 ENTER_FRAME.pack(side="left",padx=(1,1))
 BOX = tk.Frame(WINDOWSTOOLS_FRAME, bg="#1D2027")
-BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
+BOX.pack(side="top", pady=(30,2), padx=(5,1), anchor="center", fill="x")
+
+BACK = tk.Button(BOX, text="\ueb6f", width=50, bg="#1d2027", fg="#ffffff", command=lambda: switch_to_frame(MAIN_FRAME, WINDOWSTOOLS_FRAME))
+BACK.grid(row=0, column=0, columnspan=3, pady=(0, 10))  # Add BACK button at the top
 
 def Folder(WINDOWSTOOLS_FRAME):
     items = [
-        ("#204892", "#ffffff", "Advanced Adapter",         {"command": "control ncpa.cpl"}),
-        ("#204892", "#ffffff", "CheckDisk",                {"command": ["powershell", "Start-Process", "-FilePath", "chkdsk", "-ArgumentList", '"/f /r"', "-Verb", "RunAs"]}),
-        ("#000000", "#ffffff", "Chris Titus Win Utility",  {"command": ["powershell", "Start-Process", "-FilePath", "powershell", "-ArgumentList", 'C:/ms1/scripts/ctt.ps1', "-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "Disk Cleanup",             {"command": ["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "DISM",                     {"command": ["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "DxDiag",                   {"command": "dxdiag"}),
-        ("#204892", "#ffffff", "Flush DNS",                {"command": ["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "MSconfig",                 {"command": ["msconfig.exe"]}),
-        ("#204892", "#ffffff", "Netplwiz",                 {"command": "netplwiz.exe"}),
-        ("#204892", "#ffffff", "Power Plan",               {"command": "powercfg.cpl"}),
-        ("#204892", "#ffffff", "SFC",                      {"command": ["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "Systeminfo",               {"command": ["powershell", "Start-Process", "cmd","-ArgumentList",'"/k systeminfo"']}),
-        ("#204892", "#ffffff", "UAC",                      {"command": "UserAccountControlSettings.exe"}),
-        ("#204892", "#ffffff", "Turn on Windows Features", {"command": "optionalfeatures"}),
-        ("#204892", "#ffffff", "Winsock Reset",            {"command": ["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "Character Map",            {"command": "charmap"}),
-        ("#204892", "#ffffff", "Desktop Icon",             {"command": "cmd /c rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"}),
+("#204892", "#ffffff", "Advanced Adapter",         {"command": "control ncpa.cpl"}),
+("#204892", "#ffffff", "CheckDisk",                {"command": ["powershell", "Start-Process", "-FilePath", "chkdsk", "-ArgumentList", '"/f /r"', "-Verb", "RunAs"]}),
+("#000000", "#ffffff", "Chris Titus Win Utility",  {"command": ["powershell", "Start-Process", "-FilePath", "powershell", "-ArgumentList", 'C:/ms1/scripts/ctt.ps1', "-Verb", "RunAs"]}),
+("#204892", "#ffffff", "Disk Cleanup",             {"command": ["powershell", "Start-Process", "-FilePath","cleanmgr","-Verb", "RunAs"]}),
+("#204892", "#ffffff", "DISM",                     {"command": ["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"]}),
+("#204892", "#ffffff", "DxDiag",                   {"command": "dxdiag"}),
+("#204892", "#ffffff", "Flush DNS",                {"command": ["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"]}),
+("#204892", "#ffffff", "MSconfig",                 {"command": ["msconfig.exe"]}),
+("#204892", "#ffffff", "Netplwiz",                 {"command": "netplwiz.exe"}),
+("#204892", "#ffffff", "Power Plan",               {"command": "powercfg.cpl"}),
+("#204892", "#ffffff", "SFC",                      {"command": ["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"]}),
+("#204892", "#ffffff", "Systeminfo",               {"command": ["powershell", "Start-Process", "cmd","-ArgumentList",'"/k systeminfo"']}),
+("#204892", "#ffffff", "UAC",                      {"command": "UserAccountControlSettings.exe"}),
+("#204892", "#ffffff", "Turn on Windows Features", {"command": "optionalfeatures"}),
+("#204892", "#ffffff", "Winsock Reset",            {"command": ["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"]}),
+("#204892", "#ffffff", "Character Map",            {"command": "charmap"}),
+("#204892", "#ffffff", "Desktop Icon",             {"command": "cmd /c rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"}),
     ]
-
-    BACK=tk.Button(BOX,text="\ueb6f",width=50 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WINDOWSTOOLS_FRAME))
-    BACK.pack(side="top" ,padx=(0,0))
 
     # Sort the items alphabetically by their text
     items.sort(key=lambda x: x[2])
-
-    for bg_color, fg_color, item_text, command_dict in items:
-        item = tk.Label(BOX, text=item_text, font=("jetbrainsmono nf",12,"bold"), width=0 , fg=fg_color, bg=bg_color)
+    # Number of items per column
+    max_items_per_column = 15
+    # Items Property
+    for index, (bg_color, fg_color, item_text, command_dict) in enumerate(items):
+        row = (index % max_items_per_column) + 1  # Start from row 1 to leave space for the BACK button
+        column = index // max_items_per_column
+        item = tk.Label(BOX, text=item_text, font=("jetbrainsmono nf",12,"bold"), width=0, fg=fg_color, bg=bg_color)
         # Function to handle click effect
         def on_click(event, cmd=command_dict["command"], item=item, bg=bg_color, fg=fg_color):
             item.config(bg="#ffffff", fg="#204892")  # Change colors temporarily
             subprocess.Popen(cmd, shell=True)
-            if bg != "#204892":
-                WINDOWSTOOLS_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))  # Restore original colors after 100ms
-            else:
-                WINDOWSTOOLS_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))
+            WINDOWSTOOLS_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))  # Restore original colors after 100ms
         item.bind("<Button-1>", on_click)
-        item.pack(side="top", anchor="w", padx=(0,0), pady=(0,1))
+        item.grid(row=row, column=column, padx=(0, 10), pady=(0, 2), sticky="w")
 Folder(WINDOWSTOOLS_FRAME)
+
 
 
 
