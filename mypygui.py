@@ -560,7 +560,7 @@ ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
 ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
 ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
 
-LB_1=tk.Label(ROOT1, text="\udb83\udca0",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+LB_1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 LB_1.pack(side="left",padx=(3,0),pady=(0,0))
 LB_1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
 LB_1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
