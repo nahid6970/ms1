@@ -110,17 +110,9 @@ def Folder(WINDOWSTOOLS_FRAME):
 
     for bg_color, fg_color, item_text, command_dict in items:
         item = tk.Label(BOX, text=item_text, font=("jetbrainsmono nf",12,"bold"), width=0 , fg=fg_color, bg=bg_color)
-
-        # Function to handle click effect
-        def on_click(event, cmd=command_dict["command"], item=item, bg=bg_color, fg=fg_color):
-            item.config(bg="#ffffff", fg="#204892")  # Change colors temporarily
-            subprocess.Popen(cmd, shell=True)
-            if bg != "#204892":
-                WINDOWSTOOLS_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))  # Restore original colors after 100ms
-            else:
-                WINDOWSTOOLS_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))
-
-        item.bind("<Button-1>", on_click)
+        # Extracting the command from the dictionary
+        command = command_dict["command"]
+        item.bind("<Button-1>", lambda event, cmd=command: subprocess.Popen(cmd, shell=True))
         item.pack(side="top", anchor="w", padx=(0,0))
 
 Folder(WINDOWSTOOLS_FRAME)

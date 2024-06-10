@@ -34,7 +34,7 @@ ROOT.title("Folder")
 # ROOT.attributes('-topmost', True)  # Set always on top
 # ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
-# ROOT.overrideredirect(True)  # Remove default borders
+ROOT.overrideredirect(True)  # Remove default borders
 
 # Create custom border
 BORDER_FRAME = create_custom_border(ROOT)
@@ -62,12 +62,12 @@ def close_window(event=None):
     ROOT.destroy()
 
 #!? Main ROOT BOX
-# ROOT1 = tk.Frame(ROOT, bg="#1d2027")
-# ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
+ROOT1 = tk.Frame(ROOT, bg="#1d2027")
+ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
 
-# LB_XXX=tk.Label(ROOT1, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"))
-# LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
-# LB_XXX.bind("<Button-1>",close_window)
+LB_XXX=tk.Label(ROOT1, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"))
+LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
+LB_XXX.bind("<Button-1>",close_window)
 
 
 
@@ -85,47 +85,78 @@ BOX = tk.Frame(WINDOWSTOOLS_FRAME, bg="#1D2027")
 BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
 
 def Folder(WINDOWSTOOLS_FRAME):
-    items = [
-        ("#204892", "#ffffff", "Advanced Adapter", {"command": "control ncpa.cpl"}),
-        ("#204892", "#ffffff", "CheckDisk", {"command": ["powershell", "Start-Process", "-FilePath", "chkdsk", "-ArgumentList", '"/f /r"', "-Verb", "RunAs"]}),
-        ("#000000", "#ffffff", "Chris Titus Win Utility", {"command": ["powershell", "Start-Process", "-FilePath", "powershell", "-ArgumentList", 'C:/ms1/scripts/ctt.ps1', "-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "Disk Cleanup", {"command": ["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "DISM", {"command": ["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "DxDiag", {"command": "dxdiag"}),
-        ("#204892", "#ffffff", "Flush DNS", {"command": ["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "MSconfig", {"command": ["msconfig.exe"]}),
-        ("#204892", "#ffffff", "Netplwiz", {"command": "netplwiz.exe"}),
-        ("#204892", "#ffffff", "Power Plan", {"command": "powercfg.cpl"}),
-        ("#204892", "#ffffff", "SFC", {"command": ["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "Systeminfo", {"command": ["powershell", "Start-Process", "cmd","-ArgumentList",'"/k systeminfo"']}),
-        ("#204892", "#ffffff", "UAC", {"command": "UserAccountControlSettings.exe"}),
-        ("#204892", "#ffffff", "Turn on Windows Features", {"command": "optionalfeatures"}),
-        ("#204892", "#ffffff", "Winsock Reset", {"command": ["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"]}),
-        ("#204892", "#ffffff", "Character Map", {"command": "charmap"}),
-        ("#204892", "#ffffff", "Desktop Icon", {"command": "cmd /c rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"}),
-    ]
+    AdvancedAdapter=tk.Label(BOX,text="Advanced Adapter",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892");
+    AdvancedAdapter.bind( "<Button-1>",lambda event: subprocess.Popen ("control ncpa.cpl"))
+    AdvancedAdapter.pack(side="top",anchor="w",padx=(0,0))
 
-    # Sort the items alphabetically by their text
-    items.sort(key=lambda x: x[2])
+    CheckDisk=tk.Label(BOX,text="CheckDisk",width=0 ,fg="#ffffff",font=("jetbrainsmono nf",12,"bold"), bg="#204892")
+    CheckDisk.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "chkdsk","-ArgumentList", '"/f /r"', "-Verb", "RunAs"],shell=True))
+    CheckDisk.pack(side="top",anchor="w",padx=(0,0))
 
-    for bg_color, fg_color, item_text, command_dict in items:
-        item = tk.Label(BOX, text=item_text, font=("jetbrainsmono nf",12,"bold"), width=0 , fg=fg_color, bg=bg_color)
+    ChrisTitusWinUtility=tk.Label(BOX,text="Chris Titus Win Utility",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#000000")
+    ChrisTitusWinUtility.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "powershell","-ArgumentList",'C:/ms1/scripts/ctt.ps1' ,"-Verb", "RunAs"],shell=True))
+    ChrisTitusWinUtility.pack(side="top",anchor="w",padx=(0,0))
 
-        # Function to handle click effect
-        def on_click(event, cmd=command_dict["command"], item=item, bg=bg_color, fg=fg_color):
-            item.config(bg="#ffffff", fg="#204892")  # Change colors temporarily
-            subprocess.Popen(cmd, shell=True)
-            if bg != "#204892":
-                WINDOWSTOOLS_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))  # Restore original colors after 100ms
-            else:
-                WINDOWSTOOLS_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))
+    DiskCleanup=tk.Label(BOX,text="Disk Cleanup",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    DiskCleanup.bind( "<Button-1>", lambda event: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True))
+    DiskCleanup.pack(side="top",anchor="w",padx=(0,0))
 
-        item.bind("<Button-1>", on_click)
-        item.pack(side="top", anchor="w", padx=(0,0))
+    dism=tk.Label(BOX,text="DISM",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    dism.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True))
+    dism.pack(side="top",anchor="w",padx=(0,0))
 
+    DxDiag=tk.Label(BOX,text="DxDiag",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    DxDiag.bind( "<Button-1>",lambda event: subprocess.Popen ("dxdiag"))
+    DxDiag.pack(side="top",anchor="w",padx=(0,0))
+
+    FlushDNS=tk.Label(BOX,text="Flush DNS",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    FlushDNS.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"],shell=True))
+    FlushDNS.pack(side="top",anchor="w",padx=(0,0))
+
+    msconfig=tk.Label(BOX,text="msconfig",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    msconfig.bind( "<Button-1>",lambda event: subprocess.Popen (["msconfig.exe"],shell=True))
+    msconfig.pack(side="top",anchor="w",padx=(0,0))
+
+    Netplwiz=tk.Label(BOX,text="Netplwiz",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    Netplwiz.bind( "<Button-1>",lambda event: subprocess.Popen (["netplwiz.exe"],shell=True))
+    Netplwiz.pack(side="top",anchor="w",padx=(0,0))
+
+    PowerPlan=tk.Label(BOX,text="Power Plan",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    PowerPlan.bind( "<Button-1>",lambda event: subprocess.Popen (["powercfg.cpl"],shell=True))
+    PowerPlan.pack(side="top",anchor="w",padx=(0,0))
+
+    sfc=tk.Label(BOX,text="SFC",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    sfc.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"],shell=True))
+    sfc.pack(side="top",anchor="w",padx=(0,0))
+
+    # SnipingTool=tk.Label(BOX,text="Sniping Tool",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    # SnipingTool.bind( "<Button-1>",lambda event: subprocess.Popen ("SnippingTool.exe"))
+    # SnipingTool.pack(side="top",anchor="w",padx=(0,0))
+
+    Systeminfo=tk.Label(BOX,text="Systeminfo",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    Systeminfo.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "cmd","-ArgumentList",'"/k systeminfo"'],shell=True))
+    Systeminfo.pack(side="top",anchor="w",padx=(0,0))
+
+    uac=tk.Label(BOX,text="UAC",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    uac.bind( "<Button-1>",lambda event: subprocess.Popen ("UserAccountControlSettings.exe"))
+    uac.pack(side="top",anchor="w",padx=(0,0))
+
+    WindowsFeatures=tk.Label(BOX,text="Turn on Windows Features",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    WindowsFeatures.bind( "<Button-1>",lambda event: subprocess.Popen (["optionalfeatures"],shell=True))
+    WindowsFeatures.pack(side="top",anchor="w",padx=(0,0))
+
+    WinsockReset=tk.Label(BOX,text="Winsock Reset",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    WinsockReset.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"],shell=True))
+    WinsockReset.pack(side="top",anchor="w",padx=(0,0))
+
+    CharacterMap=tk.Label(BOX,text="Character Map",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    CharacterMap.bind( "<Button-1>",lambda event: subprocess.Popen ("charmap"))
+    CharacterMap.pack(side="top",anchor="w",padx=(0,0))
+
+    BACK=tk.Label(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff")
+    BACK.bind( "<Button-1>",lambda event:switch_to_frame(MAIN_FRAME,WINDOWSTOOLS_FRAME))
+    BACK.pack(side="top" ,padx=(0,0))
 Folder(WINDOWSTOOLS_FRAME)
-
-
 
 
 
