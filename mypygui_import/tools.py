@@ -116,7 +116,7 @@ def Folder(WINDOWSTOOLS_FRAME):
     for index, (bg_color, fg_color, item_text, command_dict) in enumerate(items):
         row = (index % max_items_per_column) + 1  # Start from row 1 to leave space for the BACK button
         column = index // max_items_per_column
-        item = tk.Label(BOX, text=item_text, font=("jetbrainsmono nf",12,"bold"), width=0, fg=fg_color, bg=bg_color)
+        item = tk.Label(BOX, text=item_text, font=("jetbrainsmono nfp",12,"bold"), width=0, fg=fg_color, bg=bg_color)
         # Function to handle click effect
         def on_click(event, cmd=command_dict["command"], item=item, bg=bg_color, fg=fg_color):
             item.config(bg="#ffffff", fg="#204892")  # Change colors temporarily
