@@ -84,7 +84,7 @@ ENTER_FRAME.pack(side="left",padx=(1,1))
 BOX = tk.Frame(WINDOWSTOOLS_FRAME, bg="#1D2027")
 BOX.pack(side="top", pady=(30,2), padx=(5,1), anchor="center", fill="x")
 
-BACK = tk.Button(BOX, text="\ueb6f", width=50, bg="#1d2027", fg="#ffffff", command=lambda: switch_to_frame(MAIN_FRAME, WINDOWSTOOLS_FRAME))
+BACK = tk.Button(BOX, text="\ueb6f \ueb6f \ueb6f", width=50, bg="#1d2027", fg="#ffffff", command=lambda: switch_to_frame(MAIN_FRAME, WINDOWSTOOLS_FRAME))
 BACK.grid(row=0, column=0, columnspan=3, pady=(0, 10))  # Add BACK button at the top
 
 def Folder(WINDOWSTOOLS_FRAME):
