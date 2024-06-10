@@ -101,9 +101,37 @@ def Folder(WINDOWSTOOLS_FRAME):
     DiskCleanup.bind( "<Button-1>", lambda event: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True))
     DiskCleanup.pack(side="top",anchor="w",padx=(0,0))
 
-    DISM=tk.Label(BOX,text="DISM",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
-    DISM.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True))
-    DISM.pack(side="top",anchor="w",padx=(0,0))
+    dism=tk.Label(BOX,text="DISM",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    dism.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True))
+    dism.pack(side="top",anchor="w",padx=(0,0))
+
+    DxDiag=tk.Label(BOX,text="DxDiag",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    DxDiag.bind( "<Button-1>",lambda event: subprocess.Popen ("dxdiag"))
+    DxDiag.pack(side="top",anchor="w",padx=(0,0))
+
+    FlushDNS=tk.Label(BOX,text="Flush DNS",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    FlushDNS.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"],shell=True))
+    FlushDNS.pack(side="top",anchor="w",padx=(0,0))
+
+    msconfig=tk.Label(BOX,text="msconfig",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    msconfig.bind( "<Button-1>",lambda event: subprocess.Popen (["msconfig.exe"],shell=True))
+    msconfig.pack(side="top",anchor="w",padx=(0,0))
+
+    Netplwiz=tk.Label(BOX,text="Netplwiz",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    Netplwiz.bind( "<Button-1>",lambda event: subprocess.Popen (["netplwiz.exe"],shell=True))
+    Netplwiz.pack(side="top",anchor="w",padx=(0,0))
+
+    PowerPlan=tk.Label(BOX,text="Power Plan",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    PowerPlan.bind( "<Button-1>",lambda event: subprocess.Popen (["powercfg.cpl"],shell=True))
+    PowerPlan.pack(side="top",anchor="w",padx=(0,0))
+
+    sfc=tk.Label(BOX,text="SFC",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    sfc.bind( "<Button-1>",lambda event: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"],shell=True))
+    sfc.pack(side="top",anchor="w",padx=(0,0))
+
+    SnipingTool=tk.Label(BOX,text="Sniping Tool",font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+    SnipingTool.bind( "<Button-1>",lambda event: subprocess.Popen ("SnippingTool.exe"))
+    SnipingTool.pack(side="top",anchor="w",padx=(0,0))
 
     BACK=tk.Label(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff")
     BACK.bind( "<Button-1>",lambda event:switch_to_frame(MAIN_FRAME,WINDOWSTOOLS_FRAME))
@@ -119,12 +147,12 @@ button_properties = [
 # ("Chris Titus Win Utility" ,"#000000","#FFFFFF",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,70 ,"w" ,lambda: subprocess.Popen (["powershell","Invoke-RestMethod christitus.com/win | Invoke-Expression"],shell=True)),
 # ("Disk Cleanup"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,100,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process","-FilePath","cleanmgr","-Verb", "RunAs"],shell=True)),
 # ("DISM"                    ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,130,"w" ,lambda: subprocess.Popen (["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"],shell=True)),
-("DxDiag"                  ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,160,"w" ,lambda: subprocess.Popen ("dxdiag")),
-("Flush DNS"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,190,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"],shell=True                     )),
-("msconfig"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,220,"w" ,lambda: subprocess.Popen (["msconfig.exe"],shell=True)),
-("Netplwiz"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,250,"w" ,lambda: subprocess.Popen (["netplwiz.exe"],shell=True)),
-("Power Plan"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,280,"w" ,lambda: subprocess.Popen (["powercfg.cpl"],shell=True)),
-("SFC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,310,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"],shell=True)),
+# ("DxDiag"                  ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,160,"w" ,lambda: subprocess.Popen ("dxdiag")),
+# ("Flush DNS"               ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,190,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath","cmd","-ArgumentList",'"/k ipconfig /flushdns"', "-Verb", "RunAs"],shell=True                     )),
+# ("msconfig"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,220,"w" ,lambda: subprocess.Popen (["msconfig.exe"],shell=True)),
+# ("Netplwiz"                ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,250,"w" ,lambda: subprocess.Popen (["netplwiz.exe"],shell=True)),
+# ("Power Plan"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,280,"w" ,lambda: subprocess.Popen (["powercfg.cpl"],shell=True)),
+# ("SFC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,310,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k sfc /scannow"', "-Verb", "RunAs"],shell=True)),
 ("Sniping Tool"            ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,340,"w" ,lambda: subprocess.Popen ("SnippingTool.exe")),
 ("Systeminfo"              ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,370,"w" ,lambda: subprocess.Popen (["powershell", "Start-Process", "cmd","-ArgumentList",'"/k systeminfo"'],shell=True)),
 ("UAC"                     ,"#FFFFFF","#1D2027",1,25,"solid",("jetbrainsmono nf",14,"bold"),0,0,60,400,"w" ,lambda: subprocess.Popen ("UserAccountControlSettings.exe")),
