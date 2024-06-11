@@ -19,6 +19,8 @@
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
 !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
+#r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
+
 
 ;;* Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
@@ -36,6 +38,8 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
+
+
 
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
