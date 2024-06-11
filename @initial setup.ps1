@@ -1,3 +1,4 @@
+#* Update Winget Sources
 Write-Host "############################################" -ForegroundColor Blue
 Write-Host "########## Winget Update --Source ##########" -ForegroundColor Blue
 Write-Host "############################################" -ForegroundColor Blue
@@ -42,7 +43,7 @@ Stop-Process -Name "Prowlarr"
 New-Item -ItemType SymbolicLink -Path $ProwlarrFAKE -Target $ProwlarrSRC -Force #[pwsh]
 Start-Process $ProwlarrEXE
 
-
+#* Scoop Setup / Add Bucket / Install Packages
 Write-Host "#################################" -ForegroundColor Green
 Write-Host "########## Scoop Setup ##########" -ForegroundColor Green
 Write-Host "#################################" -ForegroundColor Green
@@ -89,7 +90,7 @@ Install_Scoop
 Add_Buckets
 Install_Packages
 
-
+#* Python Packages Install
 Write-Host "#####################################"
 Write-Host "########## Python Packages ##########"
 Write-Host "#####################################"
@@ -110,8 +111,36 @@ function pip_install {
 }
 pip_install
 
-# ** functionlist mklink
+#* Python Functionlist Mklink
+Write-Host "################################################" 
+Write-Host "########## Python Functionlist MKLINK ##########" 
+Write-Host "################################################" 
 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
+
+#* Jackett Setup
+Write-Host "###################################"
+Write-Host "########## Jackett Setup ##########"
+Write-Host "###################################"
+$jacket_FAKE_DataProtection="C:\ProgramData\Jackett\DataProtection"
+$jacket_FAKE_Indexers="C:\ProgramData\Jackett\Indexers"
+$jacket_FAKE_ServerConfig="C:\ProgramData\Jackett\ServerConfig.json"
+
+$jacket_SRC_DataProtection="C:\Users\nahid\OneDrive\backup\@mklink\jackett\DataProtection"
+$jacket_SRC_Indexers="C:\Users\nahid\OneDrive\backup\@mklink\jackett\Indexers"
+$jacket_SRC_ServerConfig="C:\Users\nahid\OneDrive\backup\@mklink\jackett\ServerConfig.json"
+
+$jacket_EXE="C:\ProgramData\Jackett\JackettTray.exe"
+
+Remove-Item $jacket_FAKE_DataProtection -Verbose -Recurse
+Remove-Item $jacket_FAKE_Indexers       -Verbose -Recurse
+Remove-Item $jacket_FAKE_ServerConfig   -Verbose -Recurse
+
+New-Item -ItemType SymbolicLink -Path $jacket_FAKE_DataProtection -Target $jacket_SRC_DataProtection -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path $jacket_FAKE_Indexers -Target $jacket_SRC_Indexers -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path $jacket_FAKE_ServerConfig -Target $jacket_SRC_ServerConfig -Force #[pwsh]
+
+Start-Process $jacket_EXE
+
 
 
 # ** ! dont doesnt work to change cmd admin password
