@@ -438,17 +438,17 @@ def compare_path_file():
 "rclone_config"  :(rclone_src      ,rclone_dst      ),
 "pwsh_profile"   :(pwsh_profile_src,pwsh_profile_dst),
 
-"Sr_db"          :(Sr_db_src       ,Sr_db_dst       ),
+"SonarrDB"          :(Sr_db_src       ,Sr_db_dst       ),
 # "Sr_cf"          :(Sr_cf_src       ,Sr_cf_dst       ),
-"Rr_db"          :(Rr_db_src       ,Rr_db_dst       ),
+"RadarrDB"          :(Rr_db_src       ,Rr_db_dst       ),
 # "Rr_cf"          :(Rr_cf_src       ,Rr_cf_dst       ),
-"Pr_db"          :(Pr_db_src       ,Pr_db_dst       ),
+"ProwlarrDB"          :(Pr_db_src       ,Pr_db_dst       ),
 # "Pr_cf"          :(Pr_cf_src       ,Pr_cf_dst       ),
 # "br_db"          :(br_db_src       ,br_db_dst       ),
 # "br_cf"          :(br_cf_src       ,br_cf_dst       ),
 
-"Rss_db"         :(Rss_db_src      ,Rss_db_dst      ),
-"Rss_cf"         :(Rss_cf_src      ,Rss_cf_dst      ),
+"RssDB"         :(Rss_db_src      ,Rss_db_dst      ),
+"RssCF"         :(Rss_cf_src      ,Rss_cf_dst      ),
     }
     is_all_same = True
     names = []
