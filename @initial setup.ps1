@@ -118,9 +118,10 @@ Write-Host "################################################"
 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
 
 #* Jackett Setup
-Write-Host "###################################"
-Write-Host "########## Jackett Setup ##########"
-Write-Host "###################################"
+Write-Host "###################################" -ForegroundColor Blue
+Write-Host "########## Jackett Setup ##########" -ForegroundColor Blue
+Write-Host "###################################" -ForegroundColor Blue
+winget install Jackett.Jackett
 $jacket_FAKE_DataProtection="C:\ProgramData\Jackett\DataProtection"
 $jacket_FAKE_Indexers="C:\ProgramData\Jackett\Indexers"
 $jacket_FAKE_ServerConfig="C:\ProgramData\Jackett\ServerConfig.json"
@@ -141,7 +142,11 @@ New-Item -ItemType SymbolicLink -Path $jacket_FAKE_ServerConfig -Target $jacket_
 
 Start-Process $jacket_EXE
 
-
+#* qbittorrent Setup
+Write-Host "#######################################" -ForegroundColor Blue
+Write-Host "########## qBittorrent Setup ##########" -ForegroundColor Blue
+Write-Host "#######################################" -ForegroundColor Blue
+winget install qBittorrent.qBittorrent
 
 # ** ! dont doesnt work to change cmd admin password
 # net user
