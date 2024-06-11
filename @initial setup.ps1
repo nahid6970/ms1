@@ -128,7 +128,7 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\
 # Set-PsFzfOption (comment out)
 # zoxide
 
-# *** use wine aero to get access of C:\Users\nahid\AppData\Local\Packages\
+# *** use wine-aero to get access of C:\Users\nahid\AppData\Local\Packages\
 
 # run mypygui using powershell or pwsh not cmd for file path not found error
 
@@ -139,6 +139,10 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\
 # ** Command_history
 # New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Target "C:\Users\nahid\OneDrive\backup\ConsoleHost_history.txt" -Force #[pwsh]
 
+#* jacket backup settings
+#! https://github.com/Jackett/Jackett/issues/2576
+#* qbittorrent setting
+#* Ditto setting
 
 # ** RssGUard (delete files first of rssguard)
 # cmd /c mklink /d C:\Users\nahid\scoop\apps\rssguard\current\data4\database C:\Users\nahid\OneDrive\backup\rssguard\database
