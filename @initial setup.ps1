@@ -110,7 +110,7 @@ function pip_install {
 }
 pip_install
 
-# ** functionlist
+# ** functionlist mklink
 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
 
 
