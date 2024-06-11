@@ -69,7 +69,8 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ::;ss::<SPACE>
 
 ::;;::,=:[]()
-::;font::font=("Jetbrainsmono nfp", 12, "bold")
+; ::;font::font=("Jetbrainsmono nfp", 12, "bold")
+::;font1::Jetbrainsmono nfp
 
 
 ;* ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗
