@@ -123,12 +123,12 @@ Write-Host "########## Jackett Setup ##########" -ForegroundColor Blue
 Write-Host "###################################" -ForegroundColor Blue
 winget install Jackett.Jackett
 $jacket_FAKE_DataProtection="C:\ProgramData\Jackett\DataProtection"
-$jacket_FAKE_Indexers="C:\ProgramData\Jackett\Indexers"
-$jacket_FAKE_ServerConfig="C:\ProgramData\Jackett\ServerConfig.json"
+$jacket_FAKE_Indexers      ="C:\ProgramData\Jackett\Indexers"
+$jacket_FAKE_ServerConfig  ="C:\ProgramData\Jackett\ServerConfig.json"
 
 $jacket_SRC_DataProtection="C:\Users\nahid\OneDrive\backup\@mklink\jackett\DataProtection"
-$jacket_SRC_Indexers="C:\Users\nahid\OneDrive\backup\@mklink\jackett\Indexers"
-$jacket_SRC_ServerConfig="C:\Users\nahid\OneDrive\backup\@mklink\jackett\ServerConfig.json"
+$jacket_SRC_Indexers      ="C:\Users\nahid\OneDrive\backup\@mklink\jackett\Indexers"
+$jacket_SRC_ServerConfig  ="C:\Users\nahid\OneDrive\backup\@mklink\jackett\ServerConfig.json"
 
 $jacket_EXE="C:\ProgramData\Jackett\JackettTray.exe"
 
@@ -137,8 +137,8 @@ Remove-Item $jacket_FAKE_Indexers       -Verbose -Recurse
 Remove-Item $jacket_FAKE_ServerConfig   -Verbose -Recurse
 
 New-Item -ItemType SymbolicLink -Path $jacket_FAKE_DataProtection -Target $jacket_SRC_DataProtection -Force #[pwsh]
-New-Item -ItemType SymbolicLink -Path $jacket_FAKE_Indexers -Target $jacket_SRC_Indexers -Force #[pwsh]
-New-Item -ItemType SymbolicLink -Path $jacket_FAKE_ServerConfig -Target $jacket_SRC_ServerConfig -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path $jacket_FAKE_Indexers       -Target $jacket_SRC_Indexers       -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path $jacket_FAKE_ServerConfig   -Target $jacket_SRC_ServerConfig   -Force #[pwsh]
 
 Start-Process $jacket_EXE
 
@@ -147,6 +147,27 @@ Write-Host "#######################################" -ForegroundColor Blue
 Write-Host "########## qBittorrent Setup ##########" -ForegroundColor Blue
 Write-Host "#######################################" -ForegroundColor Blue
 winget install qBittorrent.qBittorrent
+
+$qbit_FAKE_Roaming="C:\Users\nahid\AppData\Roaming\qBittorrent"
+$qbit_FAKE_Local  ="C:\Users\nahid\AppData\Local\qBittorrent"
+$qbit_SRC_Roaming ="C:\Users\nahid\OneDrive\backup\@mklink\qbittorrent\qBittorrent_Roaming"
+$qbit_SRC_Local   ="C:\Users\nahid\OneDrive\backup\@mklink\qbittorrent\qBittorrent_Local"
+
+Stop-Process -Name "qbittorrent"
+
+Remove-Item $qbit_FAKE_Local   -Recurse -Force
+Remove-Item $qbit_FAKE_Roaming -Recurse
+
+New-Item -ItemType SymbolicLink -Path $qbit_FAKE_Local   -Target $qbit_SRC_Local   -Force
+New-Item -ItemType SymbolicLink -Path $qbit_FAKE_Roaming -Target $qbit_SRC_Roaming -Force
+
+
+
+
+
+
+
+
 
 # ** ! dont doesnt work to change cmd admin password
 # net user
@@ -173,8 +194,8 @@ winget install qBittorrent.qBittorrent
 # ** Command_history
 # New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Target "C:\Users\nahid\OneDrive\backup\ConsoleHost_history.txt" -Force #[pwsh]
 
-#* jacket backup settings
-#! https://github.com/Jackett/Jackett/issues/2576
+# jacket backup settings
+# https://github.com/Jackett/Jackett/issues/2576
 #* qbittorrent setting
 #* Ditto setting
 
