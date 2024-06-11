@@ -7,7 +7,7 @@ class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Startup Manager")
-        self.geometry("300x650")
+        self.geometry("300x680")
         # self.configure(bg="#2c3235")
         self.items = [
 
