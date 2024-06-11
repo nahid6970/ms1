@@ -38,8 +38,6 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 
-
-
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
     F1::Send, ^+{F1}
