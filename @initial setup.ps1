@@ -66,25 +66,25 @@ function Install_Packages {
     scoop install git
     scoop install python
 
-    scoop install rclone
-    scoop install fzf
-    scoop install winaero-tweaker
-    scoop install scoop-search
-    scoop install scoop-completion
-    scoop install komorebi
-    scoop install ditto
     scoop install ack
-    scoop install ffmpeg
     scoop install adb
     scoop install bat
-    scoop install highlight
-    scoop install yt-dlp
-    scoop install yt-dlp
-    scoop install ventoy
-    scoop install rufus
-    scoop install rssguard
-    scoop install oh-my-posh
     scoop install capture2text
+    scoop install ditto
+    scoop install ffmpeg
+    scoop install fzf
+    scoop install highlight
+    scoop install komorebi
+    scoop install oh-my-posh
+    scoop install rclone
+    scoop install rssguard
+    scoop install rufus
+    scoop install scoop-completion
+    scoop install scoop-search
+    scoop install ventoy
+    scoop install winaero-tweaker
+    scoop install yt-dlp
+
 }
 Install_Scoop
 Add_Buckets
@@ -161,12 +161,20 @@ Remove-Item $qbit_FAKE_Roaming -Recurse
 New-Item -ItemType SymbolicLink -Path $qbit_FAKE_Local   -Target $qbit_SRC_Local   -Force
 New-Item -ItemType SymbolicLink -Path $qbit_FAKE_Roaming -Target $qbit_SRC_Roaming -Force
 
-
-
-
-
-
-
+#* RssGuard Setup
+Write-Host "####################################"
+Write-Host "########## RssGuard Setup ##########"
+Write-Host "####################################"
+$RssGuard_SRC_DB     ="C:\Users\nahid\OneDrive\backup\@mklink\rssguard\database"
+$RssGuard_SRC_Config ="C:\Users\nahid\OneDrive\backup\@mklink\rssguard\config"
+$RssGuard_FAKE_DB    ="C:\Users\nahid\scoop\apps\rssguard\current\data4\database"
+$RssGuard_FAKE_Config="C:\Users\nahid\scoop\apps\rssguard\current\data4\config"
+Stop-Process -Name "rssguard"
+Remove-Item $RssGuard_FAKE_DB     -Recurse
+Remove-Item $RssGuard_FAKE_Config -Recurse
+New-Item -ItemType SymbolicLink -Path $RssGuard_FAKE_Config -Target $RssGuard_SRC_Config -Force
+New-Item -ItemType SymbolicLink -Path $RssGuard_FAKE_DB     -Target $RssGuard_SRC_DB     -Force
+Start-Process "C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"
 
 
 # ** ! dont doesnt work to change cmd admin password
@@ -196,19 +204,8 @@ New-Item -ItemType SymbolicLink -Path $qbit_FAKE_Roaming -Target $qbit_SRC_Roami
 
 # jacket backup settings
 # https://github.com/Jackett/Jackett/issues/2576
-#* qbittorrent setting
+# qbittorrent setting
 #* Ditto setting
-
-# ** RssGUard (delete files first of rssguard)
-# cmd /c mklink /d C:\Users\nahid\scoop\apps\rssguard\current\data4\database C:\Users\nahid\OneDrive\backup\rssguard\database
-# New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config\config.ini" -Target "C:\Users\nahid\OneDrive\backup\rssguard\config\config.ini" -Force
-
-
-
-# pip required packages
-# pip install pillow importlib pyadl customtkinter keyboard psutil pyautogui pywin32 winshell PyDictionary cryptography pycryptodomex
-# pip install pillow screeninfo
-
 
 # *** Komorebi
 # cant directly restore first need to use 'komorebic quickstart' for init file then restore
