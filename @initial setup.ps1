@@ -1,4 +1,3 @@
-
 # ** Sonarr install/setup/mklink first let all update
 Write-Host "############################" -ForegroundColor Blue
 Write-Host "########## Sonarr ##########" -ForegroundColor Blue
@@ -35,6 +34,34 @@ $ProwlarrEXE ="C:\ProgramData\Prowlarr\bin\Prowlarr.exe"
 Stop-Process -Name "Prowlarr"
 New-Item -ItemType SymbolicLink -Path $ProwlarrFAKE -Target $ProwlarrSRC -Force #[pwsh]
 Start-Process $ProwlarrEXE
+
+
+Write-Host "#################################" -ForegroundColor Green
+Write-Host "########## Scoop Setup ##########" -ForegroundColor Green
+Write-Host "#################################" -ForegroundColor Green
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+function Install_Scoop {
+    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+        Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
+    } else {
+        Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
+    }}
+function Add_Buckets {
+    scoop bucket add extras
+    scoop bucket add versions
+    scoop bucket add nonportable
+    scoop config cache_path D:\@install\scoop\cache
+}
+function Install_Packages {
+    scoop install git
+    scoop install python
+    scoop install rclone
+}
+
+Install_Scoop
+Add_Buckets
+Install_Packages
 
 
 
