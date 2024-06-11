@@ -21,7 +21,6 @@
 !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 
-
 ;;* Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
 ~Esc & w::RunWait, komorebic toggle-float,,Hide
