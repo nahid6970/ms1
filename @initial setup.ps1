@@ -1,4 +1,11 @@
-# ** Sonarr install/setup/mklink first let all update
+Write-Host "############################################" -ForegroundColor Blue
+Write-Host "########## Winget Update --Source ##########" -ForegroundColor Blue
+Write-Host "############################################" -ForegroundColor Blue
+winget upgrade --source msstore
+winget upgrade --source winget
+
+
+# ** Sonarr install/setup/mklink --first let all update/not necessary now
 Write-Host "############################" -ForegroundColor Blue
 Write-Host "########## Sonarr ##########" -ForegroundColor Blue
 Write-Host "############################" -ForegroundColor Blue
@@ -11,7 +18,7 @@ Remove-Item $SonarrFAKE
 New-Item -ItemType SymbolicLink -Path $SonarrFAKE -Target $SonarrSRC -Force #[pwsh]
 Start-Process $SonarrEXE
 
-# ** Radarr install/setup/mklink first let all update
+# ** Radarr install/setup/mklink --first let all update/not necessary now
 Write-Host "############################" -ForegroundColor Blue
 Write-Host "########## Radarr ##########" -ForegroundColor Blue
 Write-Host "############################" -ForegroundColor Blue
@@ -23,7 +30,7 @@ Stop-Process -Name "Radarr"
 New-Item -ItemType SymbolicLink -Path $RadarrFAKE -Target $RadarrSRC -Force #[pwsh]
 Start-Process $RadarrEXE
 
-# ** Prowlarr install/setup/mklink
+# ** Prowlarr install/setup/mklink --first let all update/not necessary now
 Write-Host "############################" -ForegroundColor Blue
 Write-Host "######### Prowlarr #########" -ForegroundColor Blue
 Write-Host "############################" -ForegroundColor Blue
@@ -48,6 +55,7 @@ function Install_Scoop {
         Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
     }}
 function Add_Buckets {
+    scoop bucket add main
     scoop bucket add extras
     scoop bucket add versions
     scoop bucket add nonportable
@@ -56,13 +64,54 @@ function Add_Buckets {
 function Install_Packages {
     scoop install git
     scoop install python
-    scoop install rclone
-}
 
+    scoop install rclone
+    scoop install fzf
+    scoop install winaero-tweaker
+    scoop install scoop-search
+    scoop install scoop-completion
+    scoop install komorebi
+    scoop install ditto
+    scoop install ack
+    scoop install ffmpeg
+    scoop install adb
+    scoop install bat
+    scoop install highlight
+    scoop install yt-dlp
+    scoop install yt-dlp
+    scoop install ventoy
+    scoop install rufus
+    scoop install rssguard
+    scoop install oh-my-posh
+    scoop install capture2text
+}
 Install_Scoop
 Add_Buckets
 Install_Packages
 
+
+Write-Host "#####################################"
+Write-Host "########## Python Packages ##########"
+Write-Host "#####################################"
+function pip_install {
+    pip install cryptography
+    pip install customtkinter
+    pip install importlib
+    pip install keyboard
+    pip install pillow
+    pip install psutil
+    pip install pyadl
+    pip install pyautogui
+    pip install pycryptodomex
+    pip install PyDictionary
+    pip install pywin32
+    pip install screeninfo
+    pip install winshell
+}
+pip_install
+
+# ** functionlist
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
 
 
 # ** ! dont doesnt work to change cmd admin password
@@ -86,12 +135,6 @@ Install_Packages
 # **  grouppolicy for startup powershell XXX
 #     add using reg run  and dont use ahk script to go to that directory just use it to copy regrun path 
 #     then open regigry edit and copy path and add startup_command.ps1
-
-# *** mklink
-# New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force #[pwsh]
-
-# ** functionlist
-# New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
 
 # ** Command_history
 # New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Target "C:\Users\nahid\OneDrive\backup\ConsoleHost_history.txt" -Force #[pwsh]
