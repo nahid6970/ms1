@@ -1,4 +1,9 @@
-# ** Sonarr mklink first let all update
+
+# ** Sonarr install/setup/mklink first let all update
+Write-Host "############################" -ForegroundColor Blue
+Write-Host "########## Sonarr ##########" -ForegroundColor Blue
+Write-Host "############################" -ForegroundColor Blue
+Winget install TeamSonarr.Sonarr
 $SonarrFAKE="C:\ProgramData\Sonarr\sonarr.db"
 $SonarrSRC ="C:\Users\nahid\OneDrive\backup\@mklink\sonarr\sonarr.db"
 $SonarrEXE ="C:\ProgramData\Sonarr\bin\Sonarr.exe"
@@ -7,7 +12,11 @@ Remove-Item $SonarrFAKE
 New-Item -ItemType SymbolicLink -Path $SonarrFAKE -Target $SonarrSRC -Force #[pwsh]
 Start-Process $SonarrEXE
 
-# ** Radarr first let all update
+# ** Radarr install/setup/mklink first let all update
+Write-Host "############################" -ForegroundColor Blue
+Write-Host "########## Radarr ##########" -ForegroundColor Blue
+Write-Host "############################" -ForegroundColor Blue
+Winget install TeamRadarr.Radarr
 $RadarrFAKE="C:\ProgramData\Radarr\radarr.db"
 $RadarrSRC ="C:\Users\nahid\OneDrive\backup\@mklink\radarr\radarr.db"
 $RadarrEXE ="C:\ProgramData\Radarr\bin\Radarr.exe"
@@ -15,7 +24,11 @@ Stop-Process -Name "Radarr"
 New-Item -ItemType SymbolicLink -Path $RadarrFAKE -Target $RadarrSRC -Force #[pwsh]
 Start-Process $RadarrEXE
 
-# ** Prowlarr
+# ** Prowlarr install/setup/mklink
+Write-Host "############################" -ForegroundColor Blue
+Write-Host "######### Prowlarr #########" -ForegroundColor Blue
+Write-Host "############################" -ForegroundColor Blue
+Winget install TeamProwlarr.Prowlarr
 $ProwlarrFAKE="C:\ProgramData\Prowlarr\prowlarr.db"
 $ProwlarrSRC ="C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db"
 $ProwlarrEXE ="C:\ProgramData\Prowlarr\bin\Prowlarr.exe"
