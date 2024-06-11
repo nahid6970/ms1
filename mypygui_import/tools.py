@@ -105,7 +105,7 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "Turn on Windows Features",      {"command": "optionalfeatures"}),
 ("#204892", "#ffffff", "Winsock Reset",                 {"command": ["powershell", "Start-Process", "-FilePath", "cmd","-ArgumentList",'"/k netsh winsock reset"' ,"-Verb", "RunAs"]}),
 ("#204892", "#ffffff", "Character Map",                 {"command": "charmap"}),
-("#204892", "#ffffff", "Desktop Icon",                  {"command": "cmd /c rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"}),
+("#204892", "#ffffff", "Desktop Icon",                  {"command": "rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"}),
 ("#204892", "#ffffff", "Text Service & Input Language", {"command": "rundll32 Shell32.dll,Control_RunDLL input.dll,,{C07337D3-DB2C-4D0B-9A93-B722A6C106E2}"}),
     ]
 
