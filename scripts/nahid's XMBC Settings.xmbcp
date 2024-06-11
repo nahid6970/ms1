@@ -16,12 +16,12 @@
 	<MovementToScroll ChangeCursor="true" />
 	<ResetSticky Enabled="false" Key="false" Layer="true" />
 	<GlobalHotkeys Enable="true">
-		<Hotkey0 Key="97" Modifier="2" />
-		<Hotkey1 Key="98" Modifier="2" />
+		<Hotkey0 Key="0" Modifier="0" />
+		<Hotkey1 Key="0" Modifier="0" />
 		<Hotkey2 Key="0" Modifier="0" />
 		<Hotkey3 Key="0" Modifier="0" />
 		<Hotkey4 Key="0" Modifier="0" />
-		<Hotkey5 Key="112" Modifier="6" />
+		<Hotkey5 Key="112" Modifier="3" />
 		<Hotkey6 Key="0" Modifier="0" />
 		<Hotkey7 Key="0" Modifier="0" />
 		<Hotkey8 Key="0" Modifier="0" />

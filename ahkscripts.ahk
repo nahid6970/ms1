@@ -42,7 +42,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
-    F1::Send, ^!{F1}
+    F1::Send, ^+{F1}
 #If
 
 
