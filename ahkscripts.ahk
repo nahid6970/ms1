@@ -90,6 +90,9 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ::;appdata::
     Run, C:\Users\nahid\AppData
     return
+::;user::
+    Run, C:\Users\nahid
+    return
 
 ;* ███████╗██╗  ██╗ ██████╗ ██╗    ██╗        ██╗    ██╗  ██╗██╗██████╗ ███████╗
 ;* ██╔════╝██║  ██║██╔═══██╗██║    ██║       ██╔╝    ██║  ██║██║██╔══██╗██╔════╝
