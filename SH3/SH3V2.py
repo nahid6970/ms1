@@ -262,8 +262,8 @@ def Start_Event():
     window_title    ='LDPlayer'
     cont1           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
     cont2           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
-    WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\WheelofHistory.png"
-    Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney.png"
+    WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\event.png"
+    Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
     Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
     Resume          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
