@@ -176,6 +176,14 @@ New-Item -ItemType SymbolicLink -Path $RssGuard_FAKE_Config -Target $RssGuard_SR
 New-Item -ItemType SymbolicLink -Path $RssGuard_FAKE_DB     -Target $RssGuard_SRC_DB     -Force
 Start-Process "C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"
 
+#* Install Font Jetbrainsmono
+Start-Process powershell "oh-my-posh font install" -Verb Runas -Wait
+
+
+
+
+
+
 
 # ** ! dont doesnt work to change cmd admin password
 # net user
