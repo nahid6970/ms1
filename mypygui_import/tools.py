@@ -108,6 +108,8 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "Desktop Icon",                  {"command": "rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"}),
 ("#204892", "#ffffff", "Text Service & Input Language", {"command": "rundll32 Shell32.dll,Control_RunDLL input.dll,,{C07337D3-DB2C-4D0B-9A93-B722A6C106E2}"}),
 ("#204892", "#ffffff", "System Information",            {"command": "msinfo32"}),
+("#204892", "#ffffff", "Show / Hide Updates",           {"command": "D:\software\@MustApp\wushowhide.diagcab"}),
+("#204892", "#ffffff", "God Mode",                      {"command": "explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"}),
     ]
 
     # Sort the items alphabetically by their text
