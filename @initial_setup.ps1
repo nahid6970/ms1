@@ -14,7 +14,7 @@ Winget install TeamSonarr.Sonarr
 $SonarrFAKE="C:\ProgramData\Sonarr\sonarr.db"
 $SonarrSRC ="C:\Users\nahid\OneDrive\backup\@mklink\sonarr\sonarr.db"
 $SonarrEXE ="C:\ProgramData\Sonarr\bin\Sonarr.exe"
-Stop-Process -Name "Sonarr"
+Start-Process powershell "Stop-Process -Name 'Sonarr'" -Verb Runas -Wait
 Remove-Item $SonarrFAKE
 New-Item -ItemType SymbolicLink -Path $SonarrFAKE -Target $SonarrSRC -Force #[pwsh]
 Start-Process $SonarrEXE
@@ -27,7 +27,8 @@ Winget install TeamRadarr.Radarr
 $RadarrFAKE="C:\ProgramData\Radarr\radarr.db"
 $RadarrSRC ="C:\Users\nahid\OneDrive\backup\@mklink\radarr\radarr.db"
 $RadarrEXE ="C:\ProgramData\Radarr\bin\Radarr.exe"
-Stop-Process -Name "Radarr"
+Start-Process powershell "Stop-Process -Name 'Radarr'" -Verb Runas -Wait
+Remove-Item $RadarrFAKE
 New-Item -ItemType SymbolicLink -Path $RadarrFAKE -Target $RadarrSRC -Force #[pwsh]
 Start-Process $RadarrEXE
 
@@ -39,7 +40,8 @@ Winget install TeamProwlarr.Prowlarr
 $ProwlarrFAKE="C:\ProgramData\Prowlarr\prowlarr.db"
 $ProwlarrSRC ="C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db"
 $ProwlarrEXE ="C:\ProgramData\Prowlarr\bin\Prowlarr.exe"
-Stop-Process -Name "Prowlarr"
+Start-Process powershell "Stop-Process -Name 'Prowlarr'" -Verb Runas -Wait
+Remove-Item $ProwlarrFAKE
 New-Item -ItemType SymbolicLink -Path $ProwlarrFAKE -Target $ProwlarrSRC -Force #[pwsh]
 Start-Process $ProwlarrEXE
 
