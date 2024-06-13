@@ -46,7 +46,7 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = 0
-y = screen_height - 350
+y = screen_height - 360
 
 ROOT.geometry(f"50x270+{x}+{y}")  
 
