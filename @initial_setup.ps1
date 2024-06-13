@@ -199,6 +199,8 @@ Start-Process powershell "oh-my-posh font install" -Verb Runas -Wait
 # Set-PsFzfOption (comment out)
 # zoxide
 
+#* add potplayer registry to open and install
+#* add startup_command registry to open and install
 # *** use wine-aero to get access of C:\Users\nahid\AppData\Local\Packages\
 
 # run mypygui using powershell or pwsh not cmd for file path not found error
