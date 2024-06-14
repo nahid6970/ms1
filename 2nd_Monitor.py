@@ -87,7 +87,7 @@ root = tk.Tk()
 root.title("Secondary Monitor Viewer")
 
 root.overrideredirect(True)
-# root.geometry(f"+{75}+{1044}")
+root.geometry(f"+{1528}+{769}")
 
 # Add bindings to make the window movable
 root.bind("<ButtonPress-1>", start_drag)
@@ -99,6 +99,9 @@ root.attributes('-topmost', True)
 # Create a label to display the captured image
 label = tk.Label(root)
 label.pack()
+
+# root.wm_attributes('-transparentcolor', '#ab23ff')
+
 
 # Create a close button
 close_button = tk.Button(root, text="X", command=close_window)
