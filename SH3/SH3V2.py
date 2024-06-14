@@ -332,28 +332,29 @@ def close_window(event=None):
 if __name__ == "__main__":
     root = Tk()
     root.title("Function Selector")
-    root.overrideredirect(True)
+    # root.overrideredirect(True)
     default_font = ("Jetbrainsmono nfp", 10)
     root.option_add("*Font", default_font)
-    root.geometry(f"+{75}+{1044}")
+    root.geometry("+715+400")
 
-    def check_window_topmost():
-        if not root.attributes('-topmost'):
-            root.attributes('-topmost', True)
-        root.after(500, check_window_topmost)
-    check_window_topmost()
+    # def check_window_topmost():
+    #     if not root.attributes('-topmost'):
+    #         root.attributes('-topmost', True)
+    #     root.after(500, check_window_topmost)
+    # check_window_topmost()
 
-    Fame_bt = Button(root, text="Fame", command=Fame_Function, bg="#bda24a", fg="#000000")
-    Fame_bt.pack(side="left")
-    Event_bt = Button(root, text="Event", command=event_function, bg="#5a0000", fg="#ffffff")
-    Event_bt.pack(side="left")
-    Raids_bt = Button(root, text="Raids", command=Raids_Function, bg="#006173", fg="#ffffff")
-    Raids_bt.pack(side="left")
-    Stop_bt = Button(root, text="Stop", command=stop_functions, bg="#ff0e0e", fg="#FFFFFF")
-    Stop_bt.pack(side="left")
-    Restart_bt = Button(root, text="Restart", command=restart, bg="#0e93ff", fg="#FFFFFF")
-    Restart_bt.pack(side="left")
-    Exit_bt = Button(root, text="Exit", command=close_window, bg="#080808", fg="#FFFFFF")
-    Exit_bt.pack(side="left")
+    Fame_bt   =Button(root,text="Fame"   ,command=Fame_Function , width=15,height=4,bg="#bda24a",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Event_bt  =Button(root,text="Event"  ,command=event_function, width=15,height=4,bg="#5a0000",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Raids_bt  =Button(root,text="Raids"  ,command=Raids_Function, width=15,height=4,bg="#006173",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Stop_bt   =Button(root,text="Stop"   ,command=stop_functions, width=15,height=4,bg="#ff0e0e",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Restart_bt=Button(root,text="Restart",command=restart       , width=15,height=4,bg="#0e93ff",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Exit_bt   =Button(root,text="Exit"   ,command=close_window  , width=15,height=4,bg="#080808",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+
+    Fame_bt.grid   (row=1,column=1, sticky="ew")
+    Event_bt.grid  (row=1,column=2, sticky="ew")
+    Raids_bt.grid  (row=1,column=3, sticky="ew")
+    Stop_bt.grid   (row=2,column=1, sticky="ew")
+    Restart_bt.grid(row=2,column=2, sticky="ew")
+    Exit_bt.grid   (row=2,column=3, sticky="ew")
 
     root.mainloop()
