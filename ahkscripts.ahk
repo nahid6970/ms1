@@ -71,6 +71,18 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ::;font1::Jetbrainsmono nfp
 
 
+; ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗██╗  ██╗
+; ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║
+; █████╗  ██║   ██║██║     ██║  ██║█████╗  ██████╔╝    ██████╔╝███████║   ██║   ███████║
+; ██╔══╝  ██║   ██║██║     ██║  ██║██╔══╝  ██╔══██╗    ██╔═══╝ ██╔══██║   ██║   ██╔══██║
+; ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║    ██║     ██║  ██║   ██║   ██║  ██║
+; ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+
+::;scoop::C:\Users\nahid\scoop\apps
+::;user::C:\Users\nahid
+::;appdata::C:\Users\nahid\AppData
+
+
 ;* ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗
 ;* ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗
 ;* █████╗  ██║   ██║██║     ██║  ██║█████╗  ██████╔╝
@@ -78,21 +90,21 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ;* ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║
 ;* ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝
 
-::;scoop::
-    Run, C:\Users\nahid\scoop
-    return
-::;song::
-    Run, D:\song
-    return
-::;software::
-    Run, D:\software
-    return
-::;appdata::
-    Run, C:\Users\nahid\AppData
-    return
-::;user::
-    Run, C:\Users\nahid
-    return
+; ::;scoop::
+;     Run, C:\Users\nahid\scoop
+;     return
+; ::;song::
+;     Run, D:\song
+;     return
+; ::;software::
+;     Run, D:\software
+;     return
+; ::;appdata::
+;     Run, C:\Users\nahid\AppData
+;     return
+; ::;user::
+;     Run, C:\Users\nahid
+;     return
 
 ;* ███████╗██╗  ██╗ ██████╗ ██╗    ██╗        ██╗    ██╗  ██╗██╗██████╗ ███████╗
 ;* ██╔════╝██║  ██║██╔═══██╗██║    ██║       ██╔╝    ██║  ██║██║██╔══██╗██╔════╝
