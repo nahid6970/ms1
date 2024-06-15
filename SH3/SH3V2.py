@@ -154,6 +154,7 @@ def press_keys_with_delays(window, *args):
         time.sleep(delay)
 
 
+
 action1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
 action2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
 action  = [action1,action2]
@@ -194,7 +195,8 @@ def TournamentFame():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if any(find_image(image) for image in action):
+            #if any(find_image(image) for image in action):
+            if any(find_image(image) for image in valor):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -236,7 +238,8 @@ def Raids():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if any(find_image(image) for image in action):
+            #if any(find_image(image) for image in action):
+            if any(find_image(image) for image in valor):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -280,7 +283,7 @@ def Start_Event():
     try:
         while not stop_thread:
             focus_window(window_title)
-            # if any(find_image(image) for image in action):
+            #if any(find_image(image) for image in action):
             if any(find_image(image) for image in valor):
                     key_down(window, 'j')
                     key_down(window, 'l')
@@ -302,7 +305,6 @@ def Start_Event():
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
-
 
 def Fame_Function():
     global stop_thread
@@ -328,6 +330,73 @@ def event_function():
 def stop_functions():
     global stop_thread
     stop_thread = True
+
+"""
+ ██████╗ ██████╗ ███╗   ███╗███╗   ███╗███████╗███╗   ██╗████████╗    ██╗     ██╗███╗   ██╗███████╗
+██╔════╝██╔═══██╗████╗ ████║████╗ ████║██╔════╝████╗  ██║╚══██╔══╝    ██║     ██║████╗  ██║██╔════╝
+██║     ██║   ██║██╔████╔██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║       ██║     ██║██╔██╗ ██║█████╗
+██║     ██║   ██║██║╚██╔╝██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║       ██║     ██║██║╚██╗██║██╔══╝
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██║ ╚═╝ ██║███████╗██║ ╚████║   ██║       ███████╗██║██║ ╚████║███████╗
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝       ╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
+"""
+script_path = r"C:\ms1\SH3\SH3V2.py"
+
+Event_Action = 286
+Event_Valor = 287
+
+Fame_Action = 198
+Fame_Valor = 199
+
+def read_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+    return lines
+
+def write_file(file_path, lines):
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.writelines(lines)
+
+def toggle_comment(line_number):
+    lines = read_file(script_path)
+    line = lines[line_number - 1]
+    stripped_line = line.lstrip()
+    
+    print(f"Toggling comment on line {line_number}: {line.strip()}")
+    
+    if stripped_line.startswith('#'):
+        lines[line_number - 1] = line.replace('#', '', 1)  # Uncomment the line
+        is_commented = False
+    else:
+        indent = len(line) - len(stripped_line)
+        lines[line_number - 1] = ' ' * indent + '#' + stripped_line  # Comment the line
+        is_commented = True
+    
+    write_file(script_path, lines)
+    
+    print(f"Updated line {line_number}: {lines[line_number - 1].strip()}")
+    
+    return is_commented
+
+def update_button_color(button, is_commented):
+    button.config(bg="gray" if is_commented else "yellow")
+
+def toggle_event_action():
+    is_commented = toggle_comment(Event_Action)
+    update_button_color(Event_action_bt, is_commented)
+
+def toggle_event_valor():
+    is_commented = toggle_comment(Event_Valor)
+    update_button_color(Event_valor_bt, is_commented)
+
+def toggle_fame_action():
+    is_commented = toggle_comment(Fame_Action)
+    update_button_color(Fame_action_bt, is_commented)
+
+def toggle_fame_valor():
+    is_commented = toggle_comment(Fame_Valor)
+    update_button_color(Fame_valor_bt, is_commented)
+
+
 
 # def restart(event=None):
 #     root.destroy()
@@ -363,5 +432,33 @@ if __name__ == "__main__":
     Stop_bt.grid   (row=2,column=1, sticky="ew", columnspan=3)
     # Restart_bt.grid(row=2,column=2, sticky="ew")
     # Exit_bt.grid   (row=2,column=3, sticky="ew")
+
+    #? Event
+    Event_Heading_bt = Button(root,text="Event"                 ,command=None)
+    Event_action_bt = Button(root ,text=f"Action {Event_Action}",command=toggle_event_action)
+    Event_valor_bt = Button(root  ,text=f"Valor {Event_Valor}"  ,command=toggle_event_valor)
+    update_button_color(Event_action_bt, read_file(script_path)[Event_Action - 1].strip().startswith('#'))
+    update_button_color(Event_valor_bt, read_file(script_path)[Event_Valor - 1].strip().startswith('#'))
+    Event_Heading_bt.grid(row=3,column=1,sticky="ew")
+    Event_action_bt.grid( row=3,column=2,sticky="ew")
+    Event_valor_bt.grid(  row=3,column=3,sticky="ew")
+
+    #? Fame
+    Fame_Heading_bt = Button(root,text="Fame"                 ,command=None)
+    Fame_action_bt = Button(root ,text=f"Action {Fame_Action}",command=toggle_fame_action)
+    Fame_valor_bt = Button(root  ,text=f"Valor {Fame_Valor}"  ,command=toggle_fame_valor)
+    update_button_color(Fame_action_bt, read_file(script_path)[Fame_Action - 1].strip().startswith('#'))
+    update_button_color(Fame_valor_bt, read_file(script_path)[Fame_Valor - 1].strip().startswith('#'))
+    Fame_Heading_bt.grid(row=4,column=1,sticky="ew")
+    Fame_action_bt.grid( row=4,column=2,sticky="ew")
+    Fame_valor_bt.grid(  row=4,column=3,sticky="ew")
+
+
+
+
+
+
+
+
 
     root.mainloop()
