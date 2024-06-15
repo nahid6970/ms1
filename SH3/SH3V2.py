@@ -159,10 +159,10 @@ action1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
 action2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
 action  = [action1,action2]
 
-Valor1= r"C:\Users\nahid\OneDrive\backup\shadowfight3\valor\image_12.png"
+
 Valor2= r"C:\Users\nahid\OneDrive\backup\shadowfight3\valor\image_13.png"
 Valor3= r"C:\Users\nahid\OneDrive\backup\shadowfight3\valor\image_14.png"
-valor = [Valor1,Valor2,Valor3]
+valor = [Valor2,Valor3]
 
 ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
 ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
