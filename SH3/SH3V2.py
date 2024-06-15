@@ -173,6 +173,9 @@ ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
 ads7 = r"C:\Users\nahid\OneDrive\Desktop\image_9.png"
 ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7]
 
+cont1           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
+cont2           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
+
 """
 ███████  █████  ███    ███ ███████
 ██      ██   ██ ████  ████ ██
@@ -206,8 +209,7 @@ def TournamentFame():
                 press_key(window, 'e')
             elif find_image(space_image, confidence=0.8):
                 press_key(window, ' ')
-            elif find_image(cont1, confidence=0.8):
-                press_key(window, 'c')
+            elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
             time.sleep(0.1)  # Adjust the delay as needed
     except KeyboardInterrupt:
         print("Script stopped by user.")
