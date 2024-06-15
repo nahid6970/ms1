@@ -156,6 +156,12 @@ def press_keys_with_delays(window, *args):
 
 action1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight.png"
 action2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\fight2.png"
+action  = [action1,action2]
+
+Valor1= r"C:\Users\nahid\OneDrive\backup\shadowfight3\valor\image_12.png"
+Valor2= r"C:\Users\nahid\OneDrive\backup\shadowfight3\valor\image_13.png"
+Valor3= r"C:\Users\nahid\OneDrive\backup\shadowfight3\valor\image_14.png"
+valor = [Valor1,Valor2,Valor3]
 
 ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
 ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
@@ -188,7 +194,7 @@ def TournamentFame():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(action1) or find_image(action2):
+            if any(find_image(image) for image in action):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -230,7 +236,7 @@ def Raids():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(action1) or find_image(action2):
+            if any(find_image(image) for image in action):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -274,7 +280,8 @@ def Start_Event():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(action1) or find_image(action2):
+            # if any(find_image(image) for image in action):
+            if any(find_image(image) for image in valor):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
@@ -322,12 +329,12 @@ def stop_functions():
     global stop_thread
     stop_thread = True
 
-def restart(event=None):
-    root.destroy()
-    subprocess.Popen([sys.executable] + sys.argv)
+# def restart(event=None):
+#     root.destroy()
+#     subprocess.Popen([sys.executable] + sys.argv)
 
-def close_window(event=None):
-    root.destroy()
+# def close_window(event=None):
+#     root.destroy()
 
 if __name__ == "__main__":
     root = Tk()
