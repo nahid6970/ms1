@@ -176,6 +176,41 @@ ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7]
 cont1           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
 cont2           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
 
+
+"""
+███████╗██╗ ██████╗ ██╗  ██╗████████╗
+██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
+█████╗  ██║██║  ███╗███████║   ██║
+██╔══╝  ██║██║   ██║██╔══██║   ██║
+██║     ██║╚██████╔╝██║  ██║   ██║
+╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+"""
+
+def Fight():
+    window_title ='LDPlayer'
+    space_image  =r"C:\ms1\SH3\b_space.png"
+    cont1        =r"C:\ms1\SH3\b_continue.png"
+
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image) for image in actionF):
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    time.sleep(5)
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+            elif find_image(space_image, confidence=0.8):
+                press_key(window, ' ')
+            elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+            time.sleep(0.1)  # Adjust the delay as needed
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
 """
 ███████  █████  ███    ███ ███████
 ██      ██   ██ ████  ████ ██
@@ -305,6 +340,13 @@ def Start_Event():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+def Fight_Function():
+    global stop_thread
+    stop_thread = False
+    t = threading.Thread(target=Fight)
+    t.daemon = True
+    t.start()
+
 def Fame_Function():
     global stop_thread
     stop_thread = False
@@ -343,8 +385,13 @@ if __name__ == "__main__":
     # root.overrideredirect(True)
     default_font = ("Jetbrainsmono nfp", 10)
     root.option_add("*Font", default_font)
-    root.geometry("+715+400")
     root.attributes('-topmost', True)  # Set always on top
+
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    x = screen_width//2-640//2
+    y = screen_height//2-230//2
+    root.geometry(f"+{x}+{y}")
 
     # def check_window_topmost():
     #     if not root.attributes('-topmost'):
@@ -352,6 +399,7 @@ if __name__ == "__main__":
     #     root.after(500, check_window_topmost)
     # check_window_topmost()
 
+    F_bt      =Button(root,text="F"      ,command=Fight_Function, width=15,height=4,bg="#60b5fa",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
     Fame_bt   =Button(root,text="Fame"   ,command=Fame_Function , width=15,height=4,bg="#bda24a",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
     Event_bt  =Button(root,text="Event"  ,command=event_function, width=15,height=4,bg="#5a0000",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
     Raids_bt  =Button(root,text="Raids"  ,command=Raids_Function, width=15,height=4,bg="#006173",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
@@ -359,10 +407,11 @@ if __name__ == "__main__":
     # Restart_bt=Button(root,text="Restart",command=restart       , width=15,height=4,bg="#0e93ff",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
     # Exit_bt   =Button(root,text="Exit"   ,command=close_window  , width=15,height=4,bg="#080808",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
 
-    Fame_bt.grid   (row=1,column=1, sticky="ew")
-    Event_bt.grid  (row=1,column=2, sticky="ew")
-    Raids_bt.grid  (row=1,column=3, sticky="ew")
-    Stop_bt.grid   (row=2,column=1, sticky="ew", columnspan=3)
+    F_bt.grid      (row=1,column=1, sticky="ew")
+    Fame_bt.grid   (row=1,column=2, sticky="ew")
+    Event_bt.grid  (row=1,column=3, sticky="ew")
+    Raids_bt.grid  (row=1,column=4, sticky="ew")
+    Stop_bt.grid   (row=2,column=1, sticky="ew", columnspan=4)
     # Restart_bt.grid(row=2,column=2, sticky="ew")
     # Exit_bt.grid   (row=2,column=3, sticky="ew")
 
