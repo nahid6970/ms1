@@ -330,6 +330,42 @@ def stop_functions():
     global stop_thread
     stop_thread = True
 
+# def restart(event=None):
+#     root.destroy()
+#     subprocess.Popen([sys.executable] + sys.argv)
+
+# def close_window(event=None):
+#     root.destroy()
+
+if __name__ == "__main__":
+    root = Tk()
+    root.title("Function Selector")
+    # root.overrideredirect(True)
+    default_font = ("Jetbrainsmono nfp", 10)
+    root.option_add("*Font", default_font)
+    root.geometry("+715+400")
+    root.attributes('-topmost', True)  # Set always on top
+
+    # def check_window_topmost():
+    #     if not root.attributes('-topmost'):
+    #         root.attributes('-topmost', True)
+    #     root.after(500, check_window_topmost)
+    # check_window_topmost()
+
+    Fame_bt   =Button(root,text="Fame"   ,command=Fame_Function , width=15,height=4,bg="#bda24a",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Event_bt  =Button(root,text="Event"  ,command=event_function, width=15,height=4,bg="#5a0000",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Raids_bt  =Button(root,text="Raids"  ,command=Raids_Function, width=15,height=4,bg="#006173",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Stop_bt   =Button(root,text="Stop"   ,command=stop_functions, width=15,height=4,bg="#ff0e0e",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    # Restart_bt=Button(root,text="Restart",command=restart       , width=15,height=4,bg="#0e93ff",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    # Exit_bt   =Button(root,text="Exit"   ,command=close_window  , width=15,height=4,bg="#080808",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+
+    Fame_bt.grid   (row=1,column=1, sticky="ew")
+    Event_bt.grid  (row=1,column=2, sticky="ew")
+    Raids_bt.grid  (row=1,column=3, sticky="ew")
+    Stop_bt.grid   (row=2,column=1, sticky="ew", columnspan=3)
+    # Restart_bt.grid(row=2,column=2, sticky="ew")
+    # Exit_bt.grid   (row=2,column=3, sticky="ew")
+
 """
  ██████╗ ██████╗ ███╗   ███╗███╗   ███╗███████╗███╗   ██╗████████╗    ██╗     ██╗███╗   ██╗███████╗
 ██╔════╝██╔═══██╗████╗ ████║████╗ ████║██╔════╝████╗  ██║╚══██╔══╝    ██║     ██║████╗  ██║██╔════╝
@@ -338,6 +374,26 @@ def stop_functions():
 ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║ ╚═╝ ██║███████╗██║ ╚████║   ██║       ███████╗██║██║ ╚████║███████╗
  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝       ╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
 """
+    # #? Event
+    # Event_Heading_bt = Button(root,text="Event"                 ,command=None)
+    # Event_action_bt = Button(root ,text=f"Action {Event_Action}",command=toggle_event_action)
+    # Event_valor_bt = Button(root  ,text=f"Valor {Event_Valor}"  ,command=toggle_event_valor)
+    # update_button_color(Event_action_bt, read_file(script_path)[Event_Action - 1].strip().startswith('#'))
+    # update_button_color(Event_valor_bt, read_file(script_path)[Event_Valor - 1].strip().startswith('#'))
+    # Event_Heading_bt.grid(row=3,column=1,sticky="ew")
+    # Event_action_bt.grid( row=3,column=2,sticky="ew")
+    # Event_valor_bt.grid(  row=3,column=3,sticky="ew")
+
+    # #? Fame
+    # Fame_Heading_bt = Button(root,text="Fame"                 ,command=None)
+    # Fame_action_bt = Button(root ,text=f"Action {Fame_Action}",command=toggle_fame_action)
+    # Fame_valor_bt = Button(root  ,text=f"Valor {Fame_Valor}"  ,command=toggle_fame_valor)
+    # update_button_color(Fame_action_bt, read_file(script_path)[Fame_Action - 1].strip().startswith('#'))
+    # update_button_color(Fame_valor_bt, read_file(script_path)[Fame_Valor - 1].strip().startswith('#'))
+    # Fame_Heading_bt.grid(row=4,column=1,sticky="ew")
+    # Fame_action_bt.grid( row=4,column=2,sticky="ew")
+    # Fame_valor_bt.grid(  row=4,column=3,sticky="ew")
+
 # script_path = r"C:\ms1\SH3\SH3V2.py"
 
 # Event_Action = 286
@@ -397,62 +453,77 @@ def stop_functions():
 
 
 
-# def restart(event=None):
-#     root.destroy()
-#     subprocess.Popen([sys.executable] + sys.argv)
-
-# def close_window(event=None):
-#     root.destroy()
-
-if __name__ == "__main__":
-    root = Tk()
-    root.title("Function Selector")
-    # root.overrideredirect(True)
-    default_font = ("Jetbrainsmono nfp", 10)
-    root.option_add("*Font", default_font)
-    root.geometry("+715+400")
-    root.attributes('-topmost', True)  # Set always on top
-
-    # def check_window_topmost():
-    #     if not root.attributes('-topmost'):
-    #         root.attributes('-topmost', True)
-    #     root.after(500, check_window_topmost)
-    # check_window_topmost()
-
-    Fame_bt   =Button(root,text="Fame"   ,command=Fame_Function , width=15,height=4,bg="#bda24a",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Event_bt  =Button(root,text="Event"  ,command=event_function, width=15,height=4,bg="#5a0000",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Raids_bt  =Button(root,text="Raids"  ,command=Raids_Function, width=15,height=4,bg="#006173",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Stop_bt   =Button(root,text="Stop"   ,command=stop_functions, width=15,height=4,bg="#ff0e0e",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    # Restart_bt=Button(root,text="Restart",command=restart       , width=15,height=4,bg="#0e93ff",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    # Exit_bt   =Button(root,text="Exit"   ,command=close_window  , width=15,height=4,bg="#080808",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-
-    Fame_bt.grid   (row=1,column=1, sticky="ew")
-    Event_bt.grid  (row=1,column=2, sticky="ew")
-    Raids_bt.grid  (row=1,column=3, sticky="ew")
-    Stop_bt.grid   (row=2,column=1, sticky="ew", columnspan=3)
-    # Restart_bt.grid(row=2,column=2, sticky="ew")
-    # Exit_bt.grid   (row=2,column=3, sticky="ew")
-
-    # #? Event
-    # Event_Heading_bt = Button(root,text="Event"                 ,command=None)
-    # Event_action_bt = Button(root ,text=f"Action {Event_Action}",command=toggle_event_action)
-    # Event_valor_bt = Button(root  ,text=f"Valor {Event_Valor}"  ,command=toggle_event_valor)
-    # update_button_color(Event_action_bt, read_file(script_path)[Event_Action - 1].strip().startswith('#'))
-    # update_button_color(Event_valor_bt, read_file(script_path)[Event_Valor - 1].strip().startswith('#'))
-    # Event_Heading_bt.grid(row=3,column=1,sticky="ew")
-    # Event_action_bt.grid( row=3,column=2,sticky="ew")
-    # Event_valor_bt.grid(  row=3,column=3,sticky="ew")
-
-    # #? Fame
-    # Fame_Heading_bt = Button(root,text="Fame"                 ,command=None)
-    # Fame_action_bt = Button(root ,text=f"Action {Fame_Action}",command=toggle_fame_action)
-    # Fame_valor_bt = Button(root  ,text=f"Valor {Fame_Valor}"  ,command=toggle_fame_valor)
-    # update_button_color(Fame_action_bt, read_file(script_path)[Fame_Action - 1].strip().startswith('#'))
-    # update_button_color(Fame_valor_bt, read_file(script_path)[Fame_Valor - 1].strip().startswith('#'))
-    # Fame_Heading_bt.grid(row=4,column=1,sticky="ew")
-    # Fame_action_bt.grid( row=4,column=2,sticky="ew")
-    # Fame_valor_bt.grid(  row=4,column=3,sticky="ew")
 
 
+    # script_path = r"C:\ms1\SH3\SH3V2.py"
+    # toggle_lines = {
+    #     "Event": {
+    #         "Action": 286,
+    #         "Valor": 287,
+    #     },
+    #     "Fame": {
+    #         "Action": 198,
+    #         "Valor": 199,
+    #     }
+    # }
 
-    root.mainloop()
+    # def read_file(file_path):
+    #     with open(file_path, 'r', encoding='utf-8') as file:
+    #         lines = file.readlines()
+    #     return lines
+
+    # def write_file(file_path, lines):
+    #     with open(file_path, 'w', encoding='utf-8') as file:
+    #         file.writelines(lines)
+
+    # def toggle_comment(line_number):
+    #     lines = read_file(script_path)
+    #     line = lines[line_number - 1]
+    #     stripped_line = line.lstrip()
+        
+    #     print(f"Toggling comment on line {line_number}: {line.strip()}")
+        
+    #     if stripped_line.startswith('#'):
+    #         lines[line_number - 1] = line.replace('#', '', 1)  # Uncomment the line
+    #         is_commented = False
+    #     else:
+    #         indent = len(line) - len(stripped_line)
+    #         lines[line_number - 1] = ' ' * indent + '#' + stripped_line  # Comment the line
+    #         is_commented = True
+        
+    #     write_file(script_path, lines)
+        
+    #     print(f"Updated line {line_number}: {lines[line_number - 1].strip()}")
+        
+    #     return is_commented
+
+    # def update_button_color(button, is_commented):
+    #     button.config(bg="gray" if is_commented else "yellow")
+
+    # def create_toggle_button(root, label, line_number, row, column):
+    #     def toggle_line():
+    #         is_commented = toggle_comment(line_number)
+    #         update_button_color(button, is_commented)
+
+    #     button = Button(root, text=f"{label} {line_number}", command=toggle_line)
+    #     is_commented = read_file(script_path)[line_number - 1].strip().startswith('#')
+    #     update_button_color(button, is_commented)
+    #     button.grid(row=row, column=column, sticky="ew")
+    #     return button
+
+    # def setup_buttons(root):
+    #     row = 3
+    #     for category, lines in toggle_lines.items():
+    #         heading_button = Button(root, text=category, command=None)
+    #         heading_button.grid(row=row, column=1, sticky="ew")
+
+    #         col = 2
+    #         for label, line_number in lines.items():
+    #             create_toggle_button(root, label, line_number, row, col)
+    #             col += 1
+
+    #         row += 1
+    # setup_buttons(root)
+
+
+root.mainloop()
