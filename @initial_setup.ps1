@@ -6,6 +6,11 @@ winget upgrade --source msstore
 winget upgrade --source winget
 
 
+Write-Host "###############################"
+Write-Host "########## PWSH Core ##########"
+Write-Host "###############################"
+Winget install Microsoft.PowerShell
+
 # ** Sonarr install/setup/mklink --first let all update/not necessary now
 Write-Host "############################" -ForegroundColor Blue
 Write-Host "########## Sonarr ##########" -ForegroundColor Blue
@@ -181,8 +186,24 @@ Start-Process "C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"
 #* Install Font Jetbrainsmono
 Start-Process powershell "oh-my-posh font install" -Verb Runas -Wait
 
+#* Potplayer Register Settings
+# Define the base path where your folders are located
+$basePath = "C:\ms1\asset\potplayer"
+# Get the most recent folder by ordering the folders by their creation time in descending order and selecting the first one
+$latestFolder = Get-ChildItem -Path $basePath | Where-Object { $_.PSIsContainer } | Sort-Object CreationTime -Descending | Select-Object -First 1
+# Construct the path to the .reg file within the latest folder
+$regFilePath = Join-Path -Path $latestFolder.FullName -ChildPath "PotPlayerMini64.reg"
+# Start the process to open the .reg file
+Start-Process $regFilePath -Verbose
 
-
+#* Add startup_command to run folder of Registry Editor
+# Define the registry path and the value details
+$registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+$valueName = "StartUps"
+$valuePath = "C:\ms1\startup_commands.ps1"
+# Add the new string value to the registry
+Start-Process powershell "New-ItemProperty -Path $registryPath -Name $valueName -Value $valuePath -PropertyType String -Force" -Verb Runas -Wait
+Write-Output "Registry entry created: $registryPath\$valueName with value $valuePath"
 
 
 
@@ -201,8 +222,7 @@ Start-Process powershell "oh-my-posh font install" -Verb Runas -Wait
 # Set-PsFzfOption (comment out)
 # zoxide
 
-#* add potplayer registry to open and install
-#* add startup_command registry to open and install
+
 # *** use wine-aero to get access of C:\Users\nahid\AppData\Local\Packages\
 
 # run mypygui using powershell or pwsh not cmd for file path not found error
