@@ -671,3 +671,7 @@ Import-Module -Name Microsoft.WinGet.CommandNotFound
 
 
 # Invoke-Expression (&starship init powershell)
+
+
+
+oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
