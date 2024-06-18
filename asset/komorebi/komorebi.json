@@ -115,6 +115,11 @@
       "kind": "Exe",
       "id": "DesktopCoral.exe",
       "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "LosslessScaling.exe",
+      "matching_strategy": "Equals"
     }
   ]
 
