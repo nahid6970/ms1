@@ -99,12 +99,15 @@ pyautogui.size = lambda: screen_size
 
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
+    global error_count
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence)
+        # location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             return location
-    except Exception as e:
-        print(f"Error finding image: {e}")
+    except Exception:
+        error_count += 1
+        print(f"{error_count} times not found")
     return None
 
 
