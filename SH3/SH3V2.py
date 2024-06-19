@@ -332,14 +332,6 @@ def Start_Event():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
-    finally:
-        # Cleanup actions
-        key_up(window, 'j')  # Ensure 'j' key is released
-        key_up(window, 'l')  # Ensure 'l' key is released
-        # Release any other resources if necessary
-        pyautogui.FAILSAFE = False  # Disable PyAutoGUI fail-safe
-        print("Cleanup completed.")
-
 def Fight_Function():
     global stop_thread
     stop_thread = False
