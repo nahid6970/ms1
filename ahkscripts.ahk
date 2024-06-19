@@ -31,6 +31,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 !e::Run pwsh -c explorer.exe,,Hide
 #t:: WinSet, AlwaysOnTop, Toggle, A
 ^!b::ToggleScreenBlackout()
+^!w::ToggleScreenWhiteout()
 ^!h::ToggleHiddenFiles()
 ^!m::CopyPath_File()
 ^!n::VScode_OpenWith()
@@ -329,6 +330,27 @@ ToggleScreenBlackout() {
     } else {
         ; If the screen is already blacked out, close the window
         blackoutState := 0
+        Gui, Destroy
+    }}
+
+
+; Define a variable to track the state of the screen Whiteout
+whiteoutState := 0
+; Define a function to toggle the screen Whiteout
+ToggleScreenWhiteout() {
+    global whiteoutState  ; Declare the variable as global so it can be accessed inside the function
+    if (whiteoutState = 0) {
+        ; If the screen is not Whiteed out, create a White fullscreen window
+        whiteoutState := 1
+        ; Get the height of the taskbar
+        SysGet, taskbarHeight, 4, Shell_TrayWnd
+        ; Create the White window to cover the entire screen
+        Gui +LastFound +AlwaysOnTop -Caption +ToolWindow ; Remove caption and border
+        Gui, Color, White
+        Gui, Show, w%A_ScreenWidth% h%A_ScreenHeight% x0 y0 NoActivate
+    } else {
+        ; If the screen is already Whiteed out, close the window
+        whiteoutState := 0
         Gui, Destroy
     }}
 
