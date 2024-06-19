@@ -28,7 +28,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 
 ;;* Others
 !1::ChangeMonitorApps()
-#e::Run pwsh -c explorer.exe,,Hide
+!e::Run pwsh -c explorer.exe,,Hide
 #t:: WinSet, AlwaysOnTop, Toggle, A
 ^!b::ToggleScreenBlackout()
 ^!h::ToggleHiddenFiles()
