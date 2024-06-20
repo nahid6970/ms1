@@ -346,13 +346,18 @@ ToggleScreenWhiteout() {
         SysGet, taskbarHeight, 4, Shell_TrayWnd
         ; Create the White window to cover the entire screen
         Gui +LastFound +AlwaysOnTop -Caption +ToolWindow ; Remove caption and border
-        Gui, Color, White
+        
+        ; Convert the RGB color #ffffff to BGR format
+        color := 0xFFFFFF  ; White color in RGB
+        Gui, Color, %color%
+        
         Gui, Show, w%A_ScreenWidth% h%A_ScreenHeight% x0 y0 NoActivate
     } else {
         ; If the screen is already Whiteed out, close the window
         whiteoutState := 0
         Gui, Destroy
-    }}
+    }
+}
 
 
 ; ; Define a function to run the appropriate command based on the active window
