@@ -348,7 +348,7 @@ ToggleScreenWhiteout() {
         Gui +LastFound +AlwaysOnTop -Caption +ToolWindow ; Remove caption and border
         
         ; Convert the RGB color #ffffff to BGR format
-        color := 0xFFFFFF  ; White color in RGB
+        color := 0xf6efb0  ; White color in RGB
         Gui, Color, %color%
         
         Gui, Show, w%A_ScreenWidth% h%A_ScreenHeight% x0 y0 NoActivate
