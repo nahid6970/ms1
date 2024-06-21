@@ -217,14 +217,14 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:
 # whoami
 # net user Administrator 182358
 
-# * Update all packages first from ms store
+#// * Update all packages first from ms store
 
 # * install first for error management
 # powershell
-# scoop-search
-# scoop-completion (reset bucket or rm for error)
-# Set-PsFzfOption (comment out)
-# zoxide
+#// scoop-search
+#// scoop-completion (reset bucket or rm for error)
+#// Set-PsFzfOption (comment out)
+#// zoxide
 
 
 # *** use wine-aero to get access of C:\Users\nahid\AppData\Local\Packages\
@@ -238,13 +238,13 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:
 # ** Command_history
 # New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Target "C:\Users\nahid\OneDrive\backup\ConsoleHost_history.txt" -Force #[pwsh]
 
-# jacket backup settings
-# https://github.com/Jackett/Jackett/issues/2576
-# qbittorrent setting
+#// jacket backup settings
+#// https://github.com/Jackett/Jackett/issues/2576
+#// qbittorrent setting
 #* Ditto setting
 
-# *** Komorebi
-# cant directly restore first need to use 'komorebic quickstart' for init file then restore
+#// *** Komorebi
+#// cant directly restore first need to use 'komorebic quickstart' for init file then restore
 
 # ** inbound and outbound
 # 	glasswire - block it in both inbound and outbound no need for host config
