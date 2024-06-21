@@ -19,7 +19,7 @@
   
   "active_window_border": true,
   "active_window_border_style":"Square",
-  "active_window_border_colours": { "single": "#0089ff", "stack": "#00a542", "monocle": "#ff3399","unfocused":"#ff0000" },
+  "active_window_border_colours": { "single": "#0089ff", "stack": "#00a542", "monocle": "#ff3399","unfocused":"#000000" },
   "border_padding": 1,
   "border_offset": -1,
   "border_width": 2,
@@ -93,7 +93,7 @@
     },
     {
       "kind": "Exe",
-      "id": "PotPlayerMini64.exe",
+      "id": "PotPlayerMini64",
       "matching_strategy": "Equals"
     },
     {
@@ -119,6 +119,11 @@
     {
       "kind": "Exe",
       "id": "LosslessScaling.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "python.exe",
       "matching_strategy": "Equals"
     }
   ]
