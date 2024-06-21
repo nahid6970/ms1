@@ -206,10 +206,9 @@ def Fight():
                     time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
-            elif find_image(space_image, confidence=0.8):
-                press_key(window, ' ')
+            elif find_image(space_image, confidence=0.8): press_key(window, ' ')
             elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-            time.sleep(0.1)  # Adjust the delay as needed
+            time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
 """
@@ -221,9 +220,12 @@ def Fight():
 """
 def TournamentFame():
     window_title ='LDPlayer'
-    e_image      =r"C:\ms1\SH3\b_tournament.png"
-    space_image  =r"C:\ms1\SH3\b_space.png"
-    cont1        =r"C:\ms1\SH3\b_continue.png"
+    e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
+    space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
+    cont1        =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_continue.png"
+    StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
+    WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
+    GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
 
     window = focus_window(window_title)
     if not window:
@@ -240,12 +242,13 @@ def TournamentFame():
                     key_up(window, 'l')
                     key_up(window, 'j')
 
-            elif find_image(e_image):
-                press_key(window, 'e')
-            elif find_image(space_image, confidence=0.8):
-                press_key(window, ' ')
+            elif find_image(StartFame): press_key(window, 'p')
+            elif find_image(WorldIcon): press_key(window, 'o')
+            elif find_image(e_image): press_key(window, 'e')
+            elif find_image(GoBack): press_key(window, 'b')
+            elif find_image(space_image, confidence=0.8): press_key(window, ' ')
             elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-            time.sleep(0.1)  # Adjust the delay as needed
+            time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
