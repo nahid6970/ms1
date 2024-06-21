@@ -174,9 +174,18 @@ ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
 ads7 = r"C:\Users\nahid\OneDrive\Desktop\image_9.png"
 ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7]
 
-cont1           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
-cont2           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
-
+cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
+cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
+cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
+cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
+cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
+contF=[
+        cont1,
+        cont2,
+        cont3,
+        cont4,
+        cont5,
+        ]
 
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
@@ -207,7 +216,7 @@ def Fight():
                     key_up(window, 'l')
                     key_up(window, 'j')
             elif find_image(space_image, confidence=0.8): press_key(window, ' ')
-            elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
@@ -222,7 +231,7 @@ def TournamentFame():
     window_title ='LDPlayer'
     e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
     space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
-    cont1        =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_continue.png"
+
     StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
     WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
     GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
@@ -247,7 +256,7 @@ def TournamentFame():
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack): press_key(window, 'b')
             elif find_image(space_image, confidence=0.8): press_key(window, ' ')
-            elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
@@ -267,8 +276,6 @@ def Raids():
     toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
     fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
     claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
-    cont1          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue.png"
-    cont2          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\continue2.png"
 
     window = focus_window(window_title)
     if not window:
@@ -290,8 +297,7 @@ def Raids():
             elif find_image(toraid, confidence=0.97): press_key(window, ' ')
             elif find_image(fight, confidence=0.97): press_key(window, 'c')
             elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
-            elif find_image(cont1, confidence=0.97): press_key(window, 'c')
-            elif find_image(cont2, confidence=0.97): press_key(window, 'c')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
 
             time.sleep(0.1)
     except KeyboardInterrupt:
@@ -307,8 +313,6 @@ def Raids():
 """
 def Start_Event():
     window_title    ='LDPlayer'
-    cont1           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\SanguineForest\continue.png"
-    cont2           =r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\continueeee.png"
     WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\event.png"
     Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
     Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
@@ -329,7 +333,8 @@ def Start_Event():
                     key_up(window, 'j')
 
             elif find_image(WeekendEvent, confidence=0.8): press_key(window, 'f')
-            elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+            # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
             elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
