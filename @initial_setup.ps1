@@ -205,8 +205,12 @@ $valuePath = "C:\ms1\startup_commands.ps1"
 Start-Process powershell "New-ItemProperty -Path $registryPath -Name $valueName -Value $valuePath -PropertyType String -Force" -Verb Runas -Wait
 Write-Output "Registry entry created: $registryPath\$valueName with value $valuePath"
 
-
-
+Write-Host "####################################"
+Write-Host "########## Komorebi Setup ##########"
+Write-Host "####################################"
+Komorebic quickstart
+Remove-Item "C:\Users\nahid\komorebi.json"
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:\ms1\asset\komorebi\komorebi.json" -Force #[pwsh]
 
 # ** ! dont doesnt work to change cmd admin password
 # net user
