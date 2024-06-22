@@ -660,15 +660,15 @@ find(FR_Find)
 #     Radarr_bt.pack(pady=(0,2), side="left", anchor="w", padx=(0,0))
 # Folder(FR_Desktop)
 
-#! Worspace_1
-WorkSpace_1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-WorkSpace_1.pack_propagate(True)
-Enter_WS1 = CTkButton(ROOT1, text="\uf07cP", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
-Enter_WS1.pack(side="left", padx=(1,1))
-BOX = tk.Frame(WorkSpace_1, bg="#1D2027")
-BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
-BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
-BACK.pack(side="left" ,padx=(0,0))
+# #! Worspace_1
+# WorkSpace_1 = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+# WorkSpace_1.pack_propagate(True)
+# Enter_WS1 = CTkButton(ROOT1, text="\uf07cP", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(WorkSpace_1 , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+# Enter_WS1.pack(side="left", padx=(1,1))
+# BOX = tk.Frame(WorkSpace_1, bg="#1D2027")
+# BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+# BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
+# BACK.pack(side="left" ,padx=(0,0))
 
 #! EDIT SPACE
 EDIT_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
