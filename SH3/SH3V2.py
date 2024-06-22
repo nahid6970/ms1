@@ -378,22 +378,22 @@ def stop_functions():
 if __name__ == "__main__":
     root = Tk()
     root.title("Function Selector")
-    # root.overrideredirect(True)
+    root.overrideredirect(True)
     default_font = ("Jetbrainsmono nfp", 10)
     root.option_add("*Font", default_font)
     root.attributes('-topmost', True)  # Set always on top
 
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    x = screen_width//2-640//2
-    y = screen_height//2-230//2
+    x = screen_width - 115
+    y = screen_height - 280
     root.geometry(f"+{x}+{y}")
 
-    F_bt      =Button(root,text="F"      ,command=Fight_Function, width=15,height=4,bg="#60b5fa",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Fame_bt   =Button(root,text="Fame"   ,command=Fame_Function , width=15,height=4,bg="#bda24a",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Event_bt  =Button(root,text="Event"  ,command=event_function, width=15,height=4,bg="#5a0000",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Raids_bt  =Button(root,text="Raids"  ,command=Raids_Function, width=15,height=4,bg="#006173",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Stop_bt   =Button(root,text="Stop"   ,command=stop_functions, width=15,height=4,bg="#ff0e0e",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    F_bt      =Button(root,text="\udb82\udf65"      ,command=Fight_Function, width=0,height=0,bg="#60b5fa",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Fame_bt   =Button(root,text="\uf41e"   ,command=Fame_Function , width=0,height=0,bg="#bda24a",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Event_bt  =Button(root,text="\uea86"  ,command=event_function, width=0,height=0,bg="#5a0000",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Raids_bt  =Button(root,text="\uef0c"  ,command=Raids_Function, width=0,height=0,bg="#006173",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+    Stop_bt   =Button(root,text="\uf256"   ,command=stop_functions, width=0,height=0,bg="#ff0e0e",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
     # Restart_bt=Button(root,text="Restart",command=restart       , width=15,height=4,bg="#0e93ff",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
     # Exit_bt   =Button(root,text="Exit"   ,command=close_window  , width=15,height=4,bg="#080808",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
 
