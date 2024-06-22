@@ -26,6 +26,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "syncthing"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"}                                                          ,
 {"type": "Command","name": "whkd"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"}                                                                    ,
 {"type": "Command","name": "yasb"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"}                                                                         ,
+{"type": "Command","name": "Scheduled"           ,"command": "Start-Process C:\\ms1\\scheduled.ps1"}                                                                                                                          ,
 
 {"type": "App","name": "Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
 {"type": "App","name": "DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"}               ,
