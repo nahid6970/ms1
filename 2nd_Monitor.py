@@ -5,6 +5,7 @@ import mss
 from PIL import Image, ImageTk, ImageDraw
 from screeninfo import get_monitors
 import win32api
+import keyboard
 
 drag_data = {"x": 0, "y": 0}
 
@@ -65,7 +66,7 @@ def capture_secondary_monitor():
                 draw.line((cursor_x - cursor_size, cursor_y, cursor_x + cursor_size, cursor_y), fill=cursor_color, width=5)
 
             # Resize the screenshot to fit the display window
-            resized_screenshot = img.resize((int(img.width // 5), int(img.height // 5)))
+            resized_screenshot = img.resize((int(img.width // 10), int(img.height // 10)))
 
             # Update the image on the Tkinter label
             img_tk = ImageTk.PhotoImage(resized_screenshot)
@@ -87,7 +88,7 @@ root = tk.Tk()
 root.title("Secondary Monitor Viewer")
 
 root.overrideredirect(True)
-root.geometry(f"+{1528}+{769}")
+root.geometry(f"+{1720}+{876}")
 
 # Add bindings to make the window movable
 root.bind("<ButtonPress-1>", start_drag)
@@ -104,16 +105,17 @@ label.pack()
 
 
 # Create a close button
-close_button = tk.Button(root, text="X", command=close_window)
-close_button.config(font=("jetbrainsmono nfp", 8), bg="red", fg="white")
-close_button.place(relx=1, x=-2, y=2, anchor="ne")
+# close_button = tk.Button(root, text="X", command=close_window)
+# close_button.config(font=("jetbrainsmono nfp", 8), bg="red", fg="white")
+# close_button.place(relx=1, x=-2, y=2, anchor="ne")
 
 # Start the screen capture in a separate thread
 thread = threading.Thread(target=capture_secondary_monitor)
 thread.daemon = True
 thread.start()
 
-# Start the Tkinter event loop
+keyboard.add_hotkey("esc", close_window)
+
 root.mainloop()
 
 
