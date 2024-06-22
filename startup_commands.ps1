@@ -10,3 +10,4 @@ Start-Process -FilePath 'C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe
 Start-Process -FilePath 'C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe'
 Start-Process 'C:\ms1\utility\NetworkCondition.ps1' -WindowStyle Hidden
 cmd /c C:\Users\nahid\OneDrive\backup\usbmmidd_v2\2ndMonitor.bat
+Start-Process C:\ms1\scheduled.ps1
