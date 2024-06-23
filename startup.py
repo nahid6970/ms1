@@ -7,26 +7,26 @@ class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Startup Manager")
-        self.geometry("300x680")
+        # self.geometry("300x680")
         # self.configure(bg="#2c3235")
         self.items = [
 
-{"type": "Command","name": "ahkscript"           ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"}                                                                                                                       ,
-{"type": "Command","name": "mypygui"             ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\mypygui.py' -WindowStyle Hidden"}                                                                            ,
-{"type": "Command","name": "komorebic"           ,"command": "komorebic start"}                                                                                                                                               ,
+{"type": "Command","name": "AHKSCRIPT"           ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"}                                                                                                                       ,
+{"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\mypygui.py' -WindowStyle Hidden"}                                                                            ,
+{"type": "Command","name": "KOMOREBIC"           ,"command": "komorebic start"}                                                                                                                                               ,
 {"type": "Command","name": "2ndMonitor-Virtual"  ,"command": "cmd /c C:\\Users\\nahid\\OneDrive\\backup\\usbmmidd_v2\\2ndMonitor.bat"}                                                                                        ,
 {"type": "Command","name": "arr_monitor"         ,"command": "Start-Process 'C:\\ms1\\arr_monitor.ps1' -WindowStyle Hidden"}                                                                                                  ,
-{"type": "Command","name": "bazarr"              ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
-{"type": "Command","name": "flaresolver"         ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"}                                                    ,
-{"type": "Command","name": "Glaze_WM"            ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"}                                                                                                               ,
-{"type": "Command","name": "monitor_size"        ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"}                                       ,
+{"type": "Command","name": "BAZARR"              ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
+{"type": "Command","name": "FLARESOLVER"         ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"}                                                    ,
+{"type": "Command","name": "GLAZE_WM"            ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"}                                                                                                               ,
+{"type": "Command","name": "MONITOR_SIZE"        ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"}                                       ,
 {"type": "Command","name": "NetworkCondition"    ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"}                                                                                    ,
 {"type": "Command","name": "RoundedCornerDisable","command": "Start-Process 'C:\\Users\\nahid\\OneDrive\\backup\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"}                ,
-{"type": "Command","name": "sync"                ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"}                                                                                                                             ,
-{"type": "Command","name": "syncthing"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"}                                                          ,
-{"type": "Command","name": "whkd"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"}                                                                    ,
-{"type": "Command","name": "yasb"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"}                                                                         ,
-{"type": "Command","name": "Scheduled"           ,"command": "Start-Process C:\\ms1\\scheduled.ps1"}                                                                                                                          ,
+{"type": "Command","name": "SYNC"                ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"}                                                                                                                             ,
+{"type": "Command","name": "SYNCTHING"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"}                                                          ,
+{"type": "Command","name": "WHKD"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"}                                                                    ,
+{"type": "Command","name": "YASB"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"}                                                                         ,
+{"type": "Command","name": "SCHEDULED"           ,"command": "Start-Process C:\\ms1\\scheduled.ps1"}                                                                                                                          ,
 
 {"type": "App","name": "Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
 {"type": "App","name": "DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"}               ,
@@ -81,11 +81,22 @@ class StartupManager(tk.Tk):
         icon_label = tk.Label(frame, text="\uf205" if checked else "\uf204", font=("Jetbrainsmono nfp", 12, "bold"), fg="blue" if checked else "gray")
         icon_label.bind("<Button-1>", lambda event, item=item, name_label=name_label, icon_label=icon_label: self.toggle_startup(item, name_label, icon_label))
 
+        launch_button = tk.Label(frame, text="\ueb2c", font=("Jetbrainsmono nfp", 12, "bold"), fg="green")
+        launch_button.bind("<Button-1>", lambda event, item=item: self.launch_command(item))
+
         icon_label.pack(side=tk.LEFT, padx=10)
         name_label.pack(side=tk.LEFT)
+        launch_button.pack(side=tk.LEFT, padx=10)
 
         # Set initial label color based on checked state
         self.update_label_color(name_label, checked)
+
+    def launch_command(self, item):
+        if item["type"] == "App":
+            os.system(f'start "" "{item["path"]}"')
+        else:
+            os.system(f'PowerShell -Command "{item["command"]}"')
+
 
     def is_checked(self, item):
         with open(self.ps1_file_path, 'r') as f:
@@ -119,7 +130,7 @@ class StartupManager(tk.Tk):
 
     def update_label_color(self, label, checked):
         if checked:
-            label.config(fg="green")
+            label.config(fg="#0365c0")
         else:
             label.config(fg="red")
 

@@ -85,3 +85,92 @@
     └── Madgaon Express (2024) [1080p] [WEBRip] [5.1] [YTS.MX].mp4
 
 4 directories, 4 files
+#########################################
+########## 2024-06-23 12:50:23 ##########
+#########################################
+/
+├── Demon Slayer - Kimetsu no Yaiba
+│   └── Season 5
+│       ├── Demon Slayer - Kimetsu no Yaiba - s05e03 - [58] - Fully Recovered Tanjiro Joins the Hashira Training!! WEBDL-1080p v2 - [VARYG].mkv
+│       ├── Demon Slayer - Kimetsu no Yaiba - s05e04 - [59] - To Bring a Smile to One's Face WEBDL-1080p - [VARYG].mkv
+│       ├── Demon Slayer - Kimetsu no Yaiba - s05e05 - [60] - I Even Ate Demons WEBDL-1080p - [ToonsHub].mkv
+│       └── Demon Slayer - Kimetsu no Yaiba - s05e06 - [61] - The Strongest of the Demon Slayer Corps HDTV-1080p - [Erai-raws].mkv
+├── House of the Dragon
+│   └── Season 2
+│       └── House of the Dragon - S02E01 - A Son for a Son WEBDL-1080p Proper.mkv
+├── Mirzapur
+│   └── Season 2
+│       ├── Mirzapur - S02E01 - Dhenkul WEBRip-720p.mkv
+│       ├── Mirzapur - S02E02 - Khargosh WEBRip-720p.mkv
+│       ├── Mirzapur - S02E03 - Viklaang Quota WEBRip-720p.mkv
+│       ├── Mirzapur - S02E04 - Bhaymukt WEBRip-720p.mkv
+│       ├── Mirzapur - S02E05 - Langda WEBRip-720p.mkv
+│       ├── Mirzapur - S02E06 - Ankush WEBRip-720p.mkv
+│       ├── Mirzapur - S02E07 - Ood Bilaav WEBRip-720p.mkv
+│       ├── Mirzapur - S02E08 - Chauchak WEBRip-720p.mkv
+│       ├── Mirzapur - S02E09 - Butterscotch WEBRip-720p.mkv
+│       └── Mirzapur - S02E10 - King of Mirzapur WEBRip-720p.mkv
+├── Mushoku Tensei - Jobless Reincarnation
+│   └── Season 2
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e14 - [39] - Wedding Reception WEBDL-1080p - [MTBB].mkv
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e15 - [40] - Afar HDTV-1080p - [SubsPlease].mkv
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e16 - [41] - Norn and Aisha WEBDL-1080p - [ToonsHub].mkv
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e17 - [42] - My Older Brother's Feelings WEBDL-1080p - [Global].mkv
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e18 - [43] - Turning Point 3 WEBDL-1080p - [NanDesuKa].mkv
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e19 - [44] - Desert Journey WEBDL-1080p - [ToonsHub].mkv
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e20 - [45] - Into the Labyrinth WEBDL-1080p - [VARYG].mkv
+│       ├── Mushoku Tensei - Jobless Reincarnation - s02e21 - [46] - Magic Circles of the Sixth Stratum WEBDL-1080p - [Global].mkv
+│       └── Mushoku Tensei - Jobless Reincarnation - s02e22 - [47] - Parents WEBDL-1080p - [ToonsHub].mkv
+├── My Hero Academia
+│   ├── Season 1
+│   │   ├── My Hero Academia - s01e01 - [1] - Izuku Midoriya - Origin HDTV-1080p - [SubsPlease].mkv
+│   │   ├── My Hero Academia - s01e02 - [2] - What It Takes to Be a Hero HDTV-1080p - [SubsPlease].mkv
+│   │   ├── My Hero Academia - s01e03 - [3] - Roaring Muscles HDTV-1080p - [SubsPlease].mkv
+│   │   └── My Hero Academia - s01e04 - [4] - Start Line HDTV-1080p - [SubsPlease].mkv
+│   └── Season 7
+│       ├── My Hero Academia - s07e01 - [139] - In the Nick of Time! A Big-Time Maverick From the West HDTV-1080p - [Erai-raws].mkv
+│       ├── My Hero Academia - s07e02 - [140] - TBA WEBDL-1080p - [VARYG].mkv
+│       ├── My Hero Academia - s07e03 - [141] - Villain WEBDL-1080p - [VARYG].mkv
+│       ├── My Hero Academia - s07e04 - [142] - The Story of How We All Became Heroes HDTV-1080p - [SubsPlease].mkv
+│       ├── My Hero Academia - s07e05 - [143] - Let You Down WEBDL-1080p - [ToonsHub].mkv
+│       ├── My Hero Academia - s07e06 - [144] - Division WEBDL-1080p - [ToonsHub].mkv
+│       ├── My Hero Academia - s07e07 - [145] - Inflation WEBDL-1080p - [VARYG].mkv
+│       └── My Hero Academia - s07e08 - [146] - Two Flashfires HDTV-1080p - [SubsPlease].mkv
+├── One Piece
+│   ├── One Piece - s22e09 - [1094] - The Mystery Deepens! Egghead Labophase WEBDL-1080p - [HatSubs].mkv
+│   ├── One Piece - s22e10 - [1095] - The Brain of a Genius - Six Vegapunks! WEBDL-1080p - [HatSubs].mkv
+│   ├── One Piece - s22e11 - [1096] - A Forbidden Piece of History! A Theory Concerning a Kingdom WEBDL-1080p - [HatSubs].mkv
+│   ├── One Piece - s22e12 - [1097] - The Will of Ohara! The Inherited Research WEBDL-1080p - [HatSubs].mkv
+│   ├── One Piece - s22e13 - [1098] - The Eccentric Dream of a Genius! WEBDL-1080p - [HatSubs].mkv
+│   ├── One Piece - s22e14 - [1099] - Preparations for Interception! Rob Lucci Strikes! WEBDL-1080p - [HatSubs].mkv
+│   ├── One Piece - s22e15 - [1100] - Powers on a Different Level! Luffy Vs Lucci! WEBDL-1080p - [HatSubs].mkv
+│   ├── One Piece - s22e16 - [1101] - The Strongest Form of Humanity! The Seraphim's Powers! HDTV-1080p - [SubsPlease].mkv
+│   ├── One Piece - s22e17 - [1102] - Sinister Schemes! The Operation to Escape Egghead HDTV-1080p - [SubsPlease].mkv
+│   ├── One Piece - s22e18 - [1103] - Turn Back My Father! Bonney's Futile Wish! HDTV-1080p - [Erai-raws].mkv
+│   ├── One Piece - s22e19 - [1104] - A Desperate Situation! The Seraphim`s All-out Attack! WEBDL-1080p v2 - [NanDesuKa].mkv
+│   ├── One Piece - s22e20 - [1105] - A Beautiful Act of Treason! The Spy, Stussy HDTV-1080p - [Erai-raws].mkv
+│   ├── One Piece - s22e21 - [1106] - Anomaly Detected! Find Dr. Vegapunk! HDTV-1080p - [Erai-raws].mkv
+│   ├── One Piece - s22e22 - [1107] - A Shudder! The Evil Hand Creeping Up on the Laboratory HDTV-1080p - [SubsPlease].mkv
+│   └── One Piece - s22e23 - [1108] - Unbelievable! Seraphim's Rebellion! HDTV-1080p - [SubsPlease].mkv
+├── The Rookie
+│   └── Season 6
+│       ├── The Rookie - S06E06 - Secrets and Lies WEBRip-1080p.mkv
+│       ├── The Rookie - S06E07 - Crushed WEBDL-1080p.mkv
+│       ├── The Rookie - S06E08 - Punch Card WEBDL-1080p.mkv
+│       ├── The Rookie - S06E09 - The Squeeze HDTV-720p.mkv
+│       └── The Rookie - S06E10 - Escape Plan WEBDL-1080p.mkv
+└── WWE SmackDown
+    └── WWE SmackDown - 2024-06-21 - SmackDown 1296 SDTV.mp4
+
+15 directories, 57 files
+/
+├── Dune (2021)
+│   └── Dune 2021 1080p BluRay H264 AAC.mp4
+├── Dune Part Two (2024)
+│   └── Dune Part Two (2024) [Timothée Chalamet] 1080p BluRay H264 DolbyD 5.1 + nickarad.mp4
+├── Kung Fu Panda 4 (2024)
+│   └── Kung.Fu.Panda.4.2024.BluRay.1080p.x264.mkv
+└── Madgaon Express (2024)
+    └── Madgaon Express (2024) [1080p] [WEBRip] [5.1] [YTS.MX].mp4
+
+4 directories, 4 files
