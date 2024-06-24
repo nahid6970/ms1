@@ -9,7 +9,8 @@
 !+p::RunWait, taskkill /f /im python.exe
 !+g::RunWait, taskkill /f /im glazewm.exe,,Hide
 !+k::RunWait, taskkill /f /im komorebi.exe,,Hide
-~Esc & q::KillForeground()
+; ~Esc & q::KillForeground()
+!q::KillForeground()
 
 ;;* Start Apps / Scripts
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
