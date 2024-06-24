@@ -708,7 +708,7 @@ Sonarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,1))
 
 # radarr_img = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\radarr-20x20.png"))
 # Radarr_bt=tk.Label(ROOT1, image=radarr_img, compound=tk.TOP, text="", height=50, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-Radarr_bt=tk.Label(ROOT1, text="\udb81\udfde", height=0, width=0, bg="#000000", fg="#74abff", bd=0, highlightthickness=0, anchor="center", font=("Jetbrainsmono nfp", 14, "bold"))
+Radarr_bt=tk.Label(ROOT1, text="\udb81\udfde", height=0, width=0, bg="#000000", fg="#74abff", bd=0, highlightthickness=0, anchor="center", font=("Jetbrainsmono nfp", 18, "bold"))
 Radarr_bt.bind("<Button-1>",lambda event:(subprocess.Popen(["explorer","D:\\Downloads\\@Radarr"],shell=True)))
 Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,1))
 
