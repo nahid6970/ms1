@@ -28,13 +28,14 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "WHKD"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"}                                                                    ,
 {"type": "Command","name": "YASB"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"}                                                                         ,
 
-{"type": "App","name": "Capture2Text","path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
-{"type": "App","name": "DesktopCoral","path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"}               ,
-{"type": "App","name": "Ditto"       ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"}              ,
-{"type": "App","name": "Prowlarr"    ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"}                          ,
-{"type": "App","name": "Radarr"      ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"}                              ,
-{"type": "App","name": "RssGuard"    ,"path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"}        ,
-{"type": "App","name": "Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"}                              ,
+{"type": "App","name": "BijoyBayanno"      ,"path": "C:\\Program Files (x86)\\Ananda Computers\\BijoyBayanno\\BijoyBayanno.exe"},
+{"type": "App","name": "Capture2Text"      ,"path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"}   ,
+{"type": "App","name": "DesktopCoral"      ,"path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"}                  ,
+{"type": "App","name": "Ditto"             ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"}                 ,
+{"type": "App","name": "Prowlarr"          ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"}                             ,
+{"type": "App","name": "Radarr"            ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"}                                 ,
+{"type": "App","name": "RssGuard"          ,"path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"}           ,
+{"type": "App","name": "Sonarr"            ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"}                                 ,
 
 # Add more items in the same format if needed
         ]
