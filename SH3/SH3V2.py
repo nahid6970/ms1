@@ -142,12 +142,12 @@ def click(window, x, y):
 
 def press_keys_with_delays(window, *args):
     """Press keys with specified delays in between.
-    
+
     Usage: press_keys_with_delays(window, 'u', 2, 'p', 3, 'z', 2, 'x')
     """
     if len(args) % 2 != 0:
         raise ValueError("Arguments should be in pairs of (key, delay).")
-    
+
     for i in range(0, len(args), 2):
         key = args[i]
         delay = args[i+1]
@@ -315,7 +315,7 @@ def Start_Event():
     window_title    ='LDPlayer'
     WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\event.png"
     Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
-    Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
+    # Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
     Resume          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
     window = focus_window(window_title)
@@ -336,7 +336,7 @@ def Start_Event():
             # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
             elif any(find_image(image) for image in contF): press_key(window, 'c')
             elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-            elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
+            #! elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
             time.sleep(0.1)
