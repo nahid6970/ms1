@@ -3,6 +3,11 @@
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
+;;! Switch between display modes
+#Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal""
+#Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external""
+#Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend""
+
 ;;! Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
 !+o::RunWait, taskkill /f /im whkd.exe,,Hide
@@ -436,3 +441,7 @@ ToggleScreenWhiteout() {
 ; #If !WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe")
 ;     F1::Send, {F1}
 ; #If
+
+
+
+
