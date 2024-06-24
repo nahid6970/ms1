@@ -254,9 +254,17 @@ CopyPath_DoubleSlash() {
 ;;! ██║  ██╗██║███████╗███████╗    ██║     ╚██████╔╝██║  ██║███████╗╚██████╔╝██║  ██║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝
 ;;! ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝
 
+; KillForeground() {
+;     WinGet, ProcessName, ProcessName, A
+;     Run, taskkill /f /im %ProcessName%,, Hide
+; }
+
+
 KillForeground() {
-    WinGet, ProcessName, ProcessName, A
-    Run, taskkill /f /im %ProcessName%,, Hide
+    ; Get the process ID of the foreground window
+    WinGet, ProcessID, PID, A
+    ; Use taskkill command to forcefully terminate the process by ID
+    Run, taskkill /f /pid %ProcessID%,, Hide
 }
 
 ;;* ██████╗  █████╗ ████████╗███████╗       ██╗       ████████╗██╗███╗   ███╗███████╗
