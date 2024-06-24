@@ -529,10 +529,6 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
-LB_K=CTkLabel(ROOT1, text="\udb80\udf0c", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-LB_K.pack(side="left",padx=(5,0),pady=(1,0))
-LB_K.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.py"], shell=True))
-
 Tools_bt=CTkLabel(ROOT1, text="\uef70", bg_color="#a2d5ff",text_color="#000000", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Tools_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
@@ -560,10 +556,14 @@ ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
 ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
 ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
 
-LB_1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-LB_1.pack(side="left",padx=(3,0),pady=(0,0))
-LB_1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
-LB_1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
+ShortcutBar1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+ShortcutBar1.pack(side="left",padx=(3,0),pady=(0,0))
+ShortcutBar1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
+ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
+
+ShortcutBar2=CTkLabel(ROOT1, text="\udb80\udf11", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
+ShortcutBar2.pack(side="left",padx=(5,0),pady=(1,0))
+ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.py"], shell=True))
 
 PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
@@ -576,7 +576,6 @@ ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\u
 ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_picker.py"],shell=True))
 ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
 ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
-
 
 Info_lb=tk.Label(ROOT1, text="\udb80\udefc",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Info_lb.pack(side="left",padx=(3,3),pady=(0,0))
@@ -599,7 +598,7 @@ ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c sta
 ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\SH3\\SH3V2.py'))
 
 #! FFMPEG
-FFMPEG_bt = CTkButton(ROOT1, text="\uf07cFFMPEG",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1,hover_color="#1dd463", border_color="#000000", fg_color="#bff130", text_color="#000")
+FFMPEG_bt = CTkButton(ROOT1, text="\uf07cffmpeg",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
 FFMPEG_bt.pack(side="left")
 FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_FFmpeg.pack_propagate(True)
@@ -616,7 +615,7 @@ def ffmpeg(FR_FFmpeg):
 ffmpeg(FR_FFmpeg)
 
 #! Find
-Find_bt = CTkButton(ROOT1, text="\uf07cFind",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0,hover_color="#1dd463", border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+Find_bt = CTkButton(ROOT1, text="\uf07cfind",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
 Find_bt.pack(side="left")
 FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 FR_Find.pack_propagate(True)
@@ -673,7 +672,7 @@ find(FR_Find)
 #! EDIT SPACE
 EDIT_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
 EDIT_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROOT1, text="\uf07cEdit", width=0, hover_color="#1dd463", command=lambda:switch_to_frame(EDIT_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME = CTkButton(ROOT1, text="\uf07cedit", width=0, command=lambda:switch_to_frame(EDIT_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
 ENTER_FRAME.pack(side="left", padx=(1,1))
 BOX = tk.Frame(EDIT_FRAME, bg="#1D2027")
 BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
