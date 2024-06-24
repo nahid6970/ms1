@@ -266,12 +266,24 @@ CopyPath_DoubleSlash() {
 ; }
 
 
+; KillForeground() {
+;     ; Get the process ID of the foreground window
+;     WinGet, ProcessID, PID, A
+;     ; Use taskkill command to forcefully terminate the process by ID
+;     Run, taskkill /f /pid %ProcessID%,, Hide
+; }
+
 KillForeground() {
-    ; Get the process ID of the foreground window
-    WinGet, ProcessID, PID, A
+    ; Get the window handle of the window under the mouse cursor
+    MouseGetPos, , , WinID
+    
+    ; Get the process ID of the window
+    WinGet, ProcessID, PID, ahk_id %WinID%
+    
     ; Use taskkill command to forcefully terminate the process by ID
     Run, taskkill /f /pid %ProcessID%,, Hide
 }
+
 
 ;;* ██████╗  █████╗ ████████╗███████╗       ██╗       ████████╗██╗███╗   ███╗███████╗
 ;;* ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝       ██║       ╚══██╔══╝██║████╗ ████║██╔════╝
