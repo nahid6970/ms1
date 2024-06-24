@@ -9,5 +9,4 @@ Start-Process -FilePath 'C:\ProgramData\Sonarr\bin\Sonarr.exe'
 Start-Process -FilePath 'C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe'
 Start-Process 'C:\ms1\utility\NetworkCondition.ps1' -WindowStyle Hidden
 cmd /c C:\Users\nahid\OneDrive\backup\usbmmidd_v2\2ndMonitor.bat
-Start-Process -FilePath 'C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe'
 Start-Process C:\ms1\scheduled.ps1
