@@ -254,10 +254,10 @@ def TournamentFame():
                     key_up(window, 'j')
 
             elif find_image(StartFame): press_key(window, 'p')
-            elif find_image(WorldIcon): press_key(window, 'o')
+            elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack): press_key(window, 'b')
-            elif find_image(space_image, confidence=0.8): press_key(window, ' ')
+            elif find_image(space_image, confidence=0.95): press_key(window, ' ')
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif any(find_image(image) for image in contF): press_key(window, 'c')
             time.sleep(0.1)
