@@ -154,8 +154,41 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
+void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
+eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
+thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
+collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
+actionF=[
+        void_compass,
+        eruption,
+        thud,
+        collector,
+        ]
+
+ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
+ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
+ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
+ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
+ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
+ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
+ads7 = r"C:\Users\nahid\OneDrive\Desktop\image_9.png"
+ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7]
+
+cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
+cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
+cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
+cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
+cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
+contF=[
+        cont1,
+        cont2,
+        cont3,
+        cont4,
+        cont5,
+        ]
 
 
+Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -167,18 +200,8 @@ def press_keys_with_delays(window, *args):
 
 def Fight():
     window_title ='LDPlayer'
-    space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
-
-    void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-    eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-    thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-    collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-
-    cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-    cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-    cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-    cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-    cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
+    space_image  =r"C:\ms1\SH3\b_space.png"
+    cont1        =r"C:\ms1\SH3\b_continue.png"
 
     window = focus_window(window_title)
     if not window:
@@ -188,14 +211,14 @@ def Fight():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
+            if any(find_image(image) for image in actionF):
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
             elif find_image(space_image, confidence=0.8): press_key(window, ' ')
-            elif find_image(cont1) or find_image(cont2) or find_image(cont3) or find_image(cont4) or find_image(cont5): press_key(window, 'c')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
@@ -208,25 +231,12 @@ def Fight():
 """
 def TournamentFame():
     window_title ='LDPlayer'
-
-    void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-    eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-    thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-    collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-
     e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
     space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
 
     StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
     WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
     GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
-    Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
-
-    cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-    cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-    cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-    cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-    cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 
     window = focus_window(window_title)
     if not window:
@@ -236,22 +246,20 @@ def TournamentFame():
     try:
         while not stop_thread:
             focus_window(window_title)
-            # if any(find_image(image) for image in actionF):
-            if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
+            if any(find_image(image) for image in actionF):
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
 
-            elif find_image(space_image, confidence=0.8): press_key(window, ' ')
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(StartFame): press_key(window, 'p')
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack): press_key(window, 'b')
-            elif find_image(cont1) or find_image(cont2) or find_image(cont3) or find_image(cont4) or find_image(cont5): press_key(window, 'c')
-
+            elif find_image(space_image, confidence=0.95): press_key(window, ' ')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
@@ -265,26 +273,12 @@ def TournamentFame():
 """
 def Raids():
     window_title   ='LDPlayer'
-
-    void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-    eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-    thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-    collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-
     Raids          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\Raid_Home.png"
     level3         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
     participate    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
     toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
     fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
     claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
-
-    cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-    cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-    cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-    cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-    cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
-
-    Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
     window = focus_window(window_title)
     if not window:
@@ -293,10 +287,10 @@ def Raids():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
+            if any(find_image(image) for image in actionF):
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
 
@@ -306,7 +300,7 @@ def Raids():
             elif find_image(toraid, confidence=0.97): press_key(window, ' ')
             elif find_image(fight, confidence=0.97): press_key(window, 'c')
             elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
-            elif find_image(cont1) or find_image(cont2) or find_image(cont3) or find_image(cont4) or find_image(cont5): press_key(window, 'c')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
 
             time.sleep(0.1)
     except KeyboardInterrupt:
@@ -322,23 +316,10 @@ def Raids():
 """
 def Start_Event():
     window_title    ='LDPlayer'
-
-    void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-    eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-    thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-    collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-
     WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\event.png"
     Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
     # Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
 
-    cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-    cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-    cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-    cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-    cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
-
-    Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
     window = focus_window(window_title)
     if not window:
@@ -347,16 +328,16 @@ def Start_Event():
     try:
         while not stop_thread:
             focus_window(window_title)
-            if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
+            if any(find_image(image) for image in actionF):
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
 
             elif find_image(WeekendEvent, confidence=0.8): press_key(window, 'f')
             # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-            elif find_image(cont1) or find_image(cont2) or find_image(cont3) or find_image(cont4) or find_image(cont5): press_key(window, 'c')
+            elif any(find_image(image) for image in contF): press_key(window, 'c')
             elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             #! elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
