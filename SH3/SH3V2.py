@@ -187,6 +187,8 @@ contF=[
         cont5,
         ]
 
+
+Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -256,6 +258,7 @@ def TournamentFame():
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack): press_key(window, 'b')
             elif find_image(space_image, confidence=0.8): press_key(window, ' ')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif any(find_image(image) for image in contF): press_key(window, 'c')
             time.sleep(0.1)
     except KeyboardInterrupt:
@@ -316,7 +319,7 @@ def Start_Event():
     WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\event.png"
     Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
     # Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
-    Resume          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
+
 
     window = focus_window(window_title)
     if not window:
