@@ -101,8 +101,8 @@ def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
     global error_count
     try:
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence)
-        # location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+        #* location = pyautogui.locateOnScreen(image_path, confidence=confidence)
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             return location
     except Exception:
@@ -155,6 +155,19 @@ def press_keys_with_delays(window, *args):
         time.sleep(delay)
 
 
+void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
+eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
+thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
+collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
+actionF = [void_compass, eruption, thud, collector]
+
+
+cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
+cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
+cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
+cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
+cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
+continueF = [cont1, cont2, cont3, cont4, cont5]
 
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
@@ -191,7 +204,7 @@ def Fight():
             if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
             elif find_image(space_image, confidence=0.8): press_key(window, ' ')
@@ -209,11 +222,6 @@ def Fight():
 def TournamentFame():
     window_title ='LDPlayer'
 
-    void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-    eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-    thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-    collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-
     e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
     space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
     space_image2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
@@ -222,12 +230,6 @@ def TournamentFame():
     WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
     GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
     Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
-
-    cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-    cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-    cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-    cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-    cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 
     window = focus_window(window_title)
     if not window:
@@ -238,20 +240,20 @@ def TournamentFame():
         while not stop_thread:
             focus_window(window_title)
             # if any(find_image(image) for image in actionF):
-            if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
+            if any(find_image(image) for image in actionF):
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
 
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            elif find_image(space_image, confidence=0.8) or find_image(space_image2, confidence=0.8): press_key(window, ' ')
             elif find_image(StartFame): press_key(window, 'p')
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
-            elif find_image(space_image) or find_image(space_image2): press_key(window, ' ')
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-            elif find_image(GoBack): press_key(window, 'b')
-            elif find_image(cont1) or find_image(cont2) or find_image(cont3) or find_image(cont4) or find_image(cont5): press_key(window, 'c')
+            elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
 
             time.sleep(0.1)
     except KeyboardInterrupt:
@@ -297,7 +299,7 @@ def Raids():
             if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
 
@@ -351,7 +353,7 @@ def Start_Event():
             if find_image(void_compass) or find_image(eruption) or find_image(thud) or find_image(collector): 
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(1)
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
 
