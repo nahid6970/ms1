@@ -413,32 +413,54 @@ def stop_functions():
     global stop_thread
     stop_thread = True
 
-if __name__ == "__main__":
-    root = Tk()
-    root.title("Function Selector")
-    root.overrideredirect(True)
-    default_font = ("Jetbrainsmono nfp", 10)
-    root.option_add("*Font", default_font)
-    root.attributes('-topmost', True)  # Set always on top
+import tkinter as tk
 
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    x = screen_width - 115
-    y = screen_height - 280
-    root.geometry(f"+{x}+{y}")
+ROOT = tk.Tk()
+ROOT.title("Utility Buttons")
+ROOT.attributes('-topmost', True) 
+ROOT.overrideredirect(True)
+ROOT.configure(bg="#282c34")
 
-    F_bt      =Button(root,text="\udb82\udf65"      ,command=Fight_Function, width=0,height=0,bg="#60b5fa",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Fame_bt   =Button(root,text="\uf41e"   ,command=Fame_Function , width=0,height=0,bg="#bda24a",fg="#000000", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Event_bt  =Button(root,text="\uea86"  ,command=event_function, width=0,height=0,bg="#5a0000",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Raids_bt  =Button(root,text="\uef0c"  ,command=Raids_Function, width=0,height=0,bg="#006173",fg="#ffffff", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    Stop_bt   =Button(root,text="\uf256"   ,command=stop_functions, width=0,height=0,bg="#ff0e0e",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    # Restart_bt=Button(root,text="Restart",command=restart       , width=15,height=4,bg="#0e93ff",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-    # Exit_bt   =Button(root,text="Exit"   ,command=close_window  , width=15,height=4,bg="#080808",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+def create_custom_border(parent):
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#66fd1f")
+    BORDER_FRAME.place(relwidth=1, relheight=1)
+    return BORDER_FRAME
 
-    F_bt.grid      (row=1,column=1, sticky="ew")
-    Fame_bt.grid   (row=1,column=2, sticky="ew")
-    Event_bt.grid  (row=1,column=3, sticky="ew")
-    Raids_bt.grid  (row=1,column=4, sticky="ew")
-    Stop_bt.grid   (row=2,column=1, sticky="ew", columnspan=4)
+BORDER_FRAME = create_custom_border(ROOT)
 
-root.mainloop()
+screen_width = ROOT.winfo_screenwidth()
+screen_height = ROOT.winfo_screenheight()
+
+
+x = screen_width - 40
+y = screen_height//2 - 190//2
+ROOT.geometry(f"35x190+{x}+{y}")
+
+button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
+button_frame.pack(side="top", padx=1, pady=1, fill="both")
+
+F_bt    =Button(ROOT,text="\udb82\udf65",command=Fight_Function,width=0,height=0,bg="#1d2027",fg="#ffffff",font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Fame_bt =Button(ROOT,text="F"           ,command=Fame_Function ,width=0,height=0,bg="#1d2027",fg="#ffffff",font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Event_bt=Button(ROOT,text="E"           ,command=event_function,width=0,height=0,bg="#1d2027",fg="#ffffff",font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Raids_bt=Button(ROOT,text="R"           ,command=Raids_Function,width=0,height=0,bg="#1d2027",fg="#ffffff",font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Stop_bt =Button(ROOT,text="\uf256"      ,command=stop_functions,width=0,height=0,bg="#1d2027",fg="#FFFFFF",font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+
+F_bt.pack      (side="top")
+Fame_bt.pack   (side="top")
+Event_bt.pack  (side="top")
+Raids_bt.pack  (side="top")
+Stop_bt.pack   (side="top")
+
+ROOT.mainloop()
+
+
+
+
+
+
+
+
+
+
+# Restart_bt=Button(ROOT,text="Restart",command=restart       , width=15,height=4,bg="#1d2027",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+# Exit_bt   =Button(ROOT,text="Exit"   ,command=close_window  , width=15,height=4,bg="#1d2027",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
