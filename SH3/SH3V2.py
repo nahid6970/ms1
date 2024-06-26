@@ -9,6 +9,9 @@ from tkinter import Tk, Button
 from ctypes import windll, c_char_p, c_buffer
 from struct import calcsize, pack
 from PIL import Image
+from PIL import Image, ImageDraw
+import os
+
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
@@ -97,7 +100,6 @@ pyautogui.size = lambda: screen_size
 
 # Rest of the code remains the same
 
-import os
 
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
@@ -164,7 +166,13 @@ void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.p
 eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
 thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
 collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-actionF = [void_compass, eruption, thud, collector]
+#* actionF = [void_compass, eruption, thud, collector]
+actionF = {
+    void_compass: 0.7,
+    eruption: 0.85,
+    thud: 0.7,
+    collector: 0.7
+}
 
 
 cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
@@ -244,8 +252,8 @@ def TournamentFame():
     try:
         while not stop_thread:
             focus_window(window_title)
-            # if any(find_image(image) for image in actionF):
-            if any(find_image(image) for image in actionF):
+            #* if any(find_image(image) for image in actionF):
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
                     key_down(window, 'j')
                     key_down(window, 'l')
                     time.sleep(5)
