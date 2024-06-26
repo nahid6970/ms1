@@ -216,6 +216,7 @@ def TournamentFame():
 
     e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
     space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
+    space_image2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
 
     StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
     WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
@@ -244,11 +245,11 @@ def TournamentFame():
                     key_up(window, 'l')
                     key_up(window, 'j')
 
-            elif find_image(space_image, confidence=0.8): press_key(window, ' ')
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(StartFame): press_key(window, 'p')
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
+            elif find_image(space_image) or find_image(space_image2): press_key(window, ' ')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(GoBack): press_key(window, 'b')
             elif find_image(cont1) or find_image(cont2) or find_image(cont3) or find_image(cont4) or find_image(cont5): press_key(window, 'c')
 
