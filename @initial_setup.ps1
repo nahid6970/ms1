@@ -7,6 +7,7 @@ winget upgrade --source winget
 
 Get-ExecutionPolicy -list
 Set-ExecutionPolicy RemoteSigned
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 Write-Host "###############################"
 Write-Host "########## PWSH Core ##########"

@@ -1,0 +1,14 @@
+* First download ollama from the web
+https://ollama.com/download
+
+* Install Python Packages
+pip install ollama
+
+* Download Models & Run it
+ollama run llama3:8b
+ollama run codegemma:2b
+
+* For Uing it in chrome
+python311 -m pip install open-webui
+open-webui serve
+** (ollama app also needs to be run at the same time)
