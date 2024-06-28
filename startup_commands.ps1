@@ -10,3 +10,4 @@ Start-Process -FilePath 'C:\ProgramData\Prowlarr\bin\Prowlarr.exe'
 Start-Process -FilePath 'C:\ProgramData\Radarr\bin\Radarr.exe'
 Start-Process -FilePath 'C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe'
 Start-Process -FilePath 'C:\ProgramData\Sonarr\bin\Sonarr.exe'
+Start-Process 'python.exe' -ArgumentList 'C:\ms1\mypygui.py' -WindowStyle Hidden
