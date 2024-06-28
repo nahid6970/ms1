@@ -5,6 +5,8 @@ Write-Host "############################################" -ForegroundColor Blue
 winget upgrade --source msstore
 winget upgrade --source winget
 
+Get-ExecutionPolicy -list
+Set-ExecutionPolicy RemoteSigned
 
 Write-Host "###############################"
 Write-Host "########## PWSH Core ##########"
