@@ -5,8 +5,12 @@ https://ollama.com/download
 pip install ollama
 
 * Download Models & Run it
-ollama run llama3:8b
 ollama run codegemma:2b
+ollama run codellama:7b
+ollama run gemma:2b
+ollama run llama3:8b
+ollama run mistral
+ollama run mistral:7b
 
 * For Uing it in chrome
 python311 -m pip install open-webui
