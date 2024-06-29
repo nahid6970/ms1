@@ -38,6 +38,7 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Radarr"            ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
 {"type": "App","name": "RssGuard"          ,"path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
 {"type": "App","name": "Sonarr"            ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
+{"type": "App","name": "Ollama"            ,"path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"},
 
 # Add more items in the same format if needed
         ]
