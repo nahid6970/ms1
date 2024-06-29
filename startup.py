@@ -81,14 +81,15 @@ class StartupManager(tk.Tk):
 
         name_label = tk.Label(frame, text=item["name"], font=("Jetbrainsmono nfp", 12, "bold"))
         checked = self.is_checked(item)
+        
         icon_label = tk.Label(frame, text="\uf205" if checked else "\uf204", font=("Jetbrainsmono nfp", 12, "bold"), fg="blue" if checked else "gray")
         icon_label.bind("<Button-1>", lambda event, item=item, name_label=name_label, icon_label=icon_label: self.toggle_startup(item, name_label, icon_label))
+        icon_label.pack(side=tk.LEFT, padx=0)
 
         launch_button = tk.Label(frame, text="\uf04b", font=("Jetbrainsmono nfp", 12, "bold"), fg="green")
         launch_button.bind("<Button-1>", lambda event, item=item: self.launch_command(item))
-
-        icon_label.pack(side=tk.LEFT, padx=0)
         launch_button.pack(side=tk.LEFT, padx=10)
+
         name_label.pack(side=tk.LEFT)
 
         # Set initial label color based on checked state
