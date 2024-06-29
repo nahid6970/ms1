@@ -161,12 +161,15 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
+#* Home Page of the SH3
+Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 
+#* Action Related Images
 void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
 eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
 thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
 collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-#* actionF = [void_compass, eruption, thud, collector]
+#! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
     eruption: 0.85,
@@ -174,6 +177,7 @@ actionF = {
     collector: 0.7
 }
 
+#* Continue Related Images
 cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
 cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
 cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
@@ -181,12 +185,24 @@ cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 continueF = [cont1, cont2, cont3, cont4, cont5]
 
-Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
-
-#! SPACE
+#* Others
 # space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
 # space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
 SPACE =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
+Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
+
+#* Fame Related Images
+e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
+StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
+WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
+GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
+
+#* Raids Related Images
+level3         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
+participate    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
+toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
+fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
+claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
@@ -196,17 +212,12 @@ SPACE =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
 ██║     ██║╚██████╔╝██║  ██║   ██║
 ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 """
-
 def Fight():
     window_title ='LDPlayer'
-
-
-
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-
     try:
         while not stop_thread:
             focus_window(window_title)
@@ -230,19 +241,10 @@ def Fight():
 """
 def TournamentFame():
     window_title ='LDPlayer'
-
-    e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
-
-    StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
-    WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
-    GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
-    Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
-
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-
     try:
         while not stop_thread:
             focus_window(window_title)
@@ -275,14 +277,6 @@ def TournamentFame():
 """
 def Raids():
     window_title   ='LDPlayer'
-
-    level3         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
-    participate    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
-    toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
-    fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
-    claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
-
-
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
