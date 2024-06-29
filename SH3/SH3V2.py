@@ -182,6 +182,7 @@ cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 continueF = [cont1, cont2, cont3, cont4, cont5]
 
+Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -344,7 +345,7 @@ def Start_Event():
     thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
     collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
 
-    WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\event.png"
+    # WeekendEvent    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\event.png"
     Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
     # Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
 
@@ -370,7 +371,7 @@ def Start_Event():
                     key_up(window, 'l')
                     key_up(window, 'j')
 
-            elif find_image(WeekendEvent, confidence=0.8): press_key(window, 'f')
+            elif find_image(Home, confidence=0.8): press_key(window, 'f')
             # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
             elif find_image(cont1) or find_image(cont2) or find_image(cont3) or find_image(cont4) or find_image(cont5): press_key(window, 'c')
             elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
