@@ -343,10 +343,49 @@ def Start_Event():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
+"""
+██╗      ██████╗ ███████╗███████╗
+██║     ██╔═══██╗██╔════╝██╔════╝
+██║     ██║   ██║███████╗███████╗
+██║     ██║   ██║╚════██║╚════██║
+███████╗╚██████╔╝███████║███████║
+╚══════╝ ╚═════╝ ╚══════╝╚══════╝
+"""
+def TakeL():
+    window_title ='LDPlayer'
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            #* if any(find_image(image) for image in actionF):
+            if any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, 'b', 1, "m", 1)
+
+            # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            elif find_image(SPACE, confidence=0.8) : press_key(window, ' ')
+            elif find_image(StartFame): press_key(window, 'p')
+            elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+            elif find_image(e_image): press_key(window, 'e')
+            elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+
 def Fight_Function():
     global stop_thread
     stop_thread = False
     t = threading.Thread(target=Fight)
+    t.daemon = True
+    t.start()
+
+def Loss_Function():
+    global stop_thread
+    stop_thread = False
+    t = threading.Thread(target=TakeL)
     t.daemon = True
     t.start()
 
@@ -396,7 +435,7 @@ screen_height = ROOT.winfo_screenheight()
 
 x = screen_width - 40
 y = screen_height//2 - 190//2
-ROOT.geometry(f"35x190+{x}+{y}")
+ROOT.geometry(f"35x230+{x}+{y}")
 
 button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
 button_frame.pack(side="top", padx=1, pady=1, fill="both")
@@ -405,12 +444,14 @@ F_bt    =Button(ROOT,text="\ueefd"      ,bg="#6a6a64",fg="#9dff00",width=0,heigh
 Fame_bt =Button(ROOT,text="F"           ,bg="#bda24a",fg="#000000",width=0,height=1,command=Fame_Function ,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
 Event_bt=Button(ROOT,text="E"           ,bg="#ce5129",fg="#ffffff",width=0,height=1,command=event_function,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
 Raids_bt=Button(ROOT,text="R"           ,bg="#5a9bf7",fg="#000000",width=0,height=1,command=Raids_Function,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Loss_bt =Button(ROOT,text="L"           ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=Loss_Function,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
 Stop_bt =Button(ROOT,text="\uf04d"      ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=stop_functions,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
 
 F_bt.pack      (side="top")
 Fame_bt.pack   (side="top")
 Event_bt.pack  (side="top")
 Raids_bt.pack  (side="top")
+Loss_bt.pack   (side="top")
 Stop_bt.pack   (side="top")
 
 ROOT.mainloop()
