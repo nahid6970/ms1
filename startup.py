@@ -34,11 +34,11 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Capture2Text"      ,"path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
 {"type": "App","name": "DesktopCoral"      ,"path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
 {"type": "App","name": "Ditto"             ,"path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"},
+{"type": "App","name": "Ollama"            ,"path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"},
 {"type": "App","name": "Prowlarr"          ,"path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"},
 {"type": "App","name": "Radarr"            ,"path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"},
 {"type": "App","name": "RssGuard"          ,"path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
 {"type": "App","name": "Sonarr"            ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
-{"type": "App","name": "Ollama"            ,"path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"},
 
 # Add more items in the same format if needed
         ]
