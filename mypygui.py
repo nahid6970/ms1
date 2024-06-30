@@ -140,46 +140,42 @@ x = screen_width//2 - 1920//2
 y = 993
 ROOT.geometry(f"1920x39+{x}+{y}") #! overall size of the window
 
-#! Resize Window
 
-# Function to toggle window size
-def toggle_window_size(size):
-    global window_state
-    global x
-    global y
-
-    if size == 'line':
-        ROOT.geometry('1920x39')
-        x = screen_width // 2 - 1920 // 2
-        y = 993
-        ROOT.configure(bg='red')
-        LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
-        LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
-    elif size == 'max':
-        ROOT.geometry('1920x140')
-        x = screen_width // 2 - 1920 // 2
-        y = 892
-        ROOT.configure(bg='#1d2027')
-        LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
-        LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
-
-    ROOT.focus_force()
-    ROOT.update_idletasks()
-    ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
-
-def on_windows_x_pressed():
-    global window_size_state
-    if window_size_state == 'line':
-        toggle_window_size('max')
-        window_size_state = 'max'
-    else:
-        toggle_window_size('line')
-        window_size_state = 'line'
-        
-# Initial window size state
-window_size_state = 'line'
-# Bind Windows + X to toggle between 'line' and 'max' sizesx
-#! keyboard.add_hotkey('win+x', on_windows_x_pressed)
+# #! Resize Window
+# #* Function to toggle window size
+# def toggle_window_size(size):
+#     global window_state
+#     global x
+#     global y
+#     if size == 'line':
+#         ROOT.geometry('1920x39')
+#         x = screen_width // 2 - 1920 // 2
+#         y = 993
+#         ROOT.configure(bg='red')
+#         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
+#         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
+#     elif size == 'max':
+#         ROOT.geometry('1920x140')
+#         x = screen_width // 2 - 1920 // 2
+#         y = 892
+#         ROOT.configure(bg='#1d2027')
+#         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
+#         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
+#     ROOT.focus_force()
+#     ROOT.update_idletasks()
+#     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
+# def on_windows_x_pressed():
+#     global window_size_state
+#     if window_size_state == 'line':
+#         toggle_window_size('max')
+#         window_size_state = 'max'
+#     else:
+#         toggle_window_size('line')
+#         window_size_state = 'line'
+# #* Initial window size state
+# window_size_state = 'line'
+# #* Bind Windows + X to toggle between 'line' and 'max' sizesx
+# #! keyboard.add_hotkey('win+x', on_windows_x_pressed)
 
 # x = screen_width//2 - 753//2
 # y = 0
@@ -244,18 +240,18 @@ def check_window_topmost():
     if checking:  # Only continue checking if the flag is True
         ROOT.after(500, check_window_topmost)
 
-def toggle_checking():
-    global checking
-    checking = not checking
-    if checking:
-        if ROOT.attributes('-topmost'):  # Only start checking if already topmost
-            check_window_topmost()  # Start checking if toggled on and already topmost
-        Topmost_lb.config(fg="#000000")  # Change text color to green
-        Topmost_lb.config(bg="#FFFFFF")  # Change text color to green
-    else:
-        ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
-        Topmost_lb.config(fg="#FFFFFF")  # Change text color to white
-        Topmost_lb.config(bg="#000000")  # Change text color to white
+# def toggle_checking():
+#     global checking
+#     checking = not checking
+#     if checking:
+#         if ROOT.attributes('-topmost'):  # Only start checking if already topmost
+#             check_window_topmost()  # Start checking if toggled on and already topmost
+#         Topmost_lb.config(fg="#000000")  # Change text color to green
+#         Topmost_lb.config(bg="#FFFFFF")  # Change text color to green
+#     else:
+#         ROOT.after_cancel(check_window_topmost)  # Cancel the checking if toggled off
+#         Topmost_lb.config(fg="#FFFFFF")  # Change text color to white
+#         Topmost_lb.config(bg="#000000")  # Change text color to white
 
 checking = False
 
@@ -538,6 +534,7 @@ Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#6488ff
 Startup_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\startup.py"], shell=True))
 Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\startup.py"], shell=True))
+Startup_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\startup_commands.ps1"], shell=True))
 
 AppManagement_bt=CTkLabel(ROOT1, text="\uf0be", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
@@ -681,8 +678,10 @@ BACK.pack(side="left" ,padx=(0,0))
 def Folder(EDIT_FRAME):
     MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True)))
     MYPYGUI.pack(side="left" ,padx=(0,0))
-    AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#ffffff", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahkscripts.ahk"],shell=True)))
+    AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#020202", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahkscripts.ahk"],shell=True)))
     AHKEDIT.pack(side="left" ,padx=(0,0))
+    KOMOREBIC=tk.Button(BOX,text="Komoreb",width=0 ,fg="#080808", bg="#7fc8f3", command=lambda:(subprocess.Popen(["cmd /c Code C:\\Users\\nahid\\komorebi.json"],shell=True)))
+    KOMOREBIC.pack(side="left" ,padx=(0,0))
 Folder(EDIT_FRAME)
 
 #! Worspace_3
