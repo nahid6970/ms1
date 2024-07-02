@@ -284,7 +284,7 @@ def TournamentFame():
                     key_down(window, 'j')
                     key_down(window, 'l')
                     holding_keys = True
-                time.sleep(5)
+                time.sleep(1)
             else:
                 if holding_keys:
                     key_up(window, 'l')
@@ -299,7 +299,7 @@ def TournamentFame():
                 elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
 
-            time.sleep(0.1)
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
     finally:
@@ -356,7 +356,7 @@ def Raids():
                     key_down(window, 'j')
                     key_down(window, 'l')
                     holding_keys = True
-                time.sleep(5)
+                time.sleep(1)
             else:
                 if holding_keys:
                     key_up(window, 'l')
@@ -371,7 +371,7 @@ def Raids():
                 elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
 
-            time.sleep(0.1)
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
