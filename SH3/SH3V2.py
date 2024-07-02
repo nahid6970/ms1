@@ -333,25 +333,21 @@ def Start_Event():
                     key_down(window, 'j')
                     key_down(window, 'l')
                     holding_keys = True
-                time.sleep(5)
+                time.sleep(1)
             else:
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'j')
                     holding_keys = False
 
-                if find_image(Home, confidence=0.8): 
-                    press_key(window, 'f')
+                if find_image(Home, confidence=0.8): press_key(window, 'f')
+                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
                 # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-                elif any(find_image(image) for image in continueF): 
-                    press_key(window, 'c')
-                elif find_image(Tournament_step1, confidence=0.8): 
-                    press_keys_with_delays(window, 'u', 1, 'c', 1)
+                elif any(find_image(image) for image in continueF): press_key(window, 'c')
+                elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
                 #! elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, 'y', 1)
-                elif find_image(Resume, confidence=0.8): 
-                    press_key(window, 'r')
 
-            time.sleep(0.1)
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
     finally:
