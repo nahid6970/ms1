@@ -347,7 +347,7 @@ def Raids():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    holding_keys = False
+    holding_keys = False  # To track if 'j' and 'l' are being held down
     try:
         while not stop_thread:
             focus_window(window_title)
@@ -375,6 +375,7 @@ def Raids():
     except KeyboardInterrupt:
         print("Script stopped by user.")
     finally:
+        # Ensure keys are released if the loop exits
         key_up(window, 'l')
         key_up(window, 'j')
 

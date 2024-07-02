@@ -7,6 +7,8 @@
 !Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
 !Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
 !Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
+^!t::ToggleResetWirkspace()
+
 
 ;;! Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
@@ -29,7 +31,8 @@
 
 ;;* Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
-~Esc & w::RunWait, komorebic toggle-float,,Hide
+; ~Esc & w::RunWait, komorebic toggle-float,,Hide
+!w::RunWait, komorebic toggle-float,,Hide
 Pause::RunWait, komorebic quick-load-resize,,Hide
 
 ;;* Others
@@ -489,3 +492,25 @@ ToggleScreenWhiteout() {
 
 
 
+; Define a variable to track the state of the taskbar
+taskbarVisible := 1  ; 1 for visible, 0 for hidden
+ToggleResetWirkspace() {
+    global taskbarVisible
+    
+    ; Get the handle of the taskbar
+    WinGet, taskbarHandle, ID, ahk_class Shell_TrayWnd
+    
+    if (taskbarVisible) {
+        ; Hide the taskbar
+        WinSet, ExStyle, +0x80, ahk_id %taskbarHandle%  ; WS_EX_TOOLWINDOW
+        WinSet, ExStyle, +0x20, ahk_id %taskbarHandle%  ; WS_EX_TRANSPARENT
+        WinSet, Style, -0x800000, ahk_id %taskbarHandle%  ; WS_DISABLED
+        taskbarVisible := 0
+    } else {
+        ; Unhide the taskbar
+        WinSet, Style, +0x800000, ahk_id %taskbarHandle%  ; WS_DISABLED
+        WinSet, ExStyle, -0x80, ahk_id %taskbarHandle%  ; WS_EX_TOOLWINDOW
+        WinSet, ExStyle, -0x20, ahk_id %taskbarHandle%  ; WS_EX_TRANSPARENT
+        taskbarVisible := 1
+    }
+}
