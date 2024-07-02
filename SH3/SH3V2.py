@@ -322,26 +322,64 @@ def Start_Event():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
+    
+#* new way of doing it
+    holding_keys = False  # To track if 'j' and 'l' are being held down
     try:
         while not stop_thread:
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                if not holding_keys:
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    time.sleep(5)
+                    holding_keys = True
+                time.sleep(5)
+            else:
+                if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'j')
+                    holding_keys = False
 
-            elif find_image(Home, confidence=0.8): press_key(window, 'f')
-            # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-            #! elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+                if find_image(Home, confidence=0.8): 
+                    press_key(window, 'f')
+                # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+                elif any(find_image(image) for image in continueF): 
+                    press_key(window, 'c')
+                elif find_image(Tournament_step1, confidence=0.8): 
+                    press_keys_with_delays(window, 'u', 1, 'c', 1)
+                #! elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, 'y', 1)
+                elif find_image(Resume, confidence=0.8): 
+                    press_key(window, 'r')
 
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
+    finally:
+        # Ensure keys are released if the loop exits
+        key_up(window, 'l')
+        key_up(window, 'j')
+
+
+    # try:
+    #     while not stop_thread:
+    #         focus_window(window_title)
+    #         if any(find_image(image, confidence=actionF[image]) for image in actionF):
+    #                 key_down(window, 'j')
+    #                 key_down(window, 'l')
+    #                 time.sleep(5)
+    #                 key_up(window, 'l')
+    #                 key_up(window, 'j')
+
+    #         elif find_image(Home, confidence=0.8): press_key(window, 'f')
+    #         # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+    #         elif any(find_image(image) for image in continueF): press_key(window, 'c')
+    #         elif find_image(Tournament_step1,confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+    #         #! elif find_image(Tournament_step2,confidence=0.8): press_keys_with_delays(window, 'y', 1)
+    #         elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+
+    #         time.sleep(0.1)
+    # except KeyboardInterrupt:
+    #     print("Script stopped by user.")
 
 """
 ██╗      ██████╗ ███████╗███████╗
