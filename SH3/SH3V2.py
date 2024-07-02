@@ -374,6 +374,9 @@ def Raids():
             time.sleep(1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
 
 """
 ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
