@@ -233,7 +233,7 @@ claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 
 #* Event Related
 Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
-# Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
+Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -420,7 +420,7 @@ def Start_Event():
             # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-            #! elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, 'y', 1)
+            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
