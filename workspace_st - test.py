@@ -1,5 +1,6 @@
 import tkinter as tk
 import ctypes
+from customtkinter import CTkLabel
 import psutil
 from datetime import datetime
 
@@ -16,7 +17,6 @@ class RECT(ctypes.Structure):
 def get_cpu_usage():
     return psutil.cpu_percent(interval=1)
 
-# Function to get system uptime
 def get_system_uptime():
     uptime_seconds = psutil.boot_time()
     current_time = datetime.now().timestamp()
@@ -24,16 +24,12 @@ def get_system_uptime():
     hours, remainder = divmod(uptime, 3600)
     minutes, seconds = divmod(remainder, 60)
     return int(hours), int(minutes), int(seconds)
-
-# Function to format uptime
 def format_uptime():
     hours, minutes, seconds = get_system_uptime()
-    return f"\u25b6 {hours:02d}:{minutes:02d}:{seconds:02d}"  # Unicode symbol for right-pointing triangle bullet
-
-# Function to update the uptime label
+    return f"\udb81\udf8c {hours:02d}:{minutes:02d}:{seconds:02d}"
 def update_uptime_label():
     uptime_str = format_uptime()
-    uptime_label.config(text=uptime_str)
+    uptime_label.configure(text=f"{uptime_str}")
     uptime_label.after(1000, update_uptime_label)
 
 # Function to make the window stay on top and adjust work area
@@ -68,21 +64,20 @@ adjust_work_area()
 # Ensure the window stays on top and update the status bar
 root.after(100, adjust_work_area)
 
-# Create a label to display the CPU usage
+#* Create a label to display the CPU usage
 status_label = tk.Label(root, text="Initializing...", font=("Helvetica", 12), bg="black", fg="white")
 status_label.pack(side="left", padx=(10, 5), pady=(1, 0))
 
-# Create a label to display system uptime
-uptime_label = tk.Label(root, text="", font=("Helvetica", 12), bg="black", fg="white")
-uptime_label.pack(side="right", padx=(5, 10), pady=(1, 0))
+#* Create a label to display system uptime
+uptime_label=CTkLabel(root, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
+uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
-# Function to update both labels
+#! Function to update both labels
 def update_labels():
     cpu_usage = get_cpu_usage()
     status_label.config(text=f"CPU Usage: {cpu_usage}%")
-    uptime_str = format_uptime()
-    uptime_label.config(text=uptime_str)
-    root.after(1000, update_labels)
+    update_uptime_label()  # Update uptime label separately
+    root.after(100, update_labels)
 
 # Update labels initially and start updating them periodically
 update_labels()
