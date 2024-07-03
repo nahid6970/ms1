@@ -11,7 +11,7 @@ from struct import calcsize, pack
 from PIL import Image
 from PIL import Image, ImageDraw
 import os
-
+from tkinter import messagebox
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
@@ -101,21 +101,44 @@ pyautogui.size = lambda: screen_size
 # Rest of the code remains the same
 
 
+# def find_image(image_path, confidence=0.7):
+#     """Find the location of the image on the screen."""
+#     global error_count
+#     try:
+#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#         if location:
+#             image_name = os.path.basename(image_path)
+#             print(f"Found image: {image_name}")
+#             return location
+#     except Exception as e:
+#         error_count += 1
+#         print(f"{error_count} times not found. Error: {e}")
+#     return None
+
+
+error_count = 0
+last_found_time = time.time()
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
-    global error_count
+    global error_count, last_found_time
     try:
-        #* location = pyautogui.locateOnScreen(image_path, confidence=confidence)
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             image_name = os.path.basename(image_path)
             print(f"Found image: {image_name}")
+            last_found_time = time.time()  # Update the last found time
             return location
     except Exception as e:
         error_count += 1
         print(f"{error_count} times not found. Error: {e}")
+    # Check if one minute has passed since the last found time
+    if time.time() - last_found_time > 10:
+        show_message("Error Finding Critical Sys File For 1 Minute")
+        last_found_time = time.time()  # Reset the last found time to avoid repeated messages
     return None
 
+def show_message(message):
+    messagebox.showinfo("Information", message, parent=ROOT)
 
 
 def focus_window(window_title):
