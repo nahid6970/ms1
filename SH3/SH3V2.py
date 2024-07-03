@@ -101,44 +101,44 @@ pyautogui.size = lambda: screen_size
 # Rest of the code remains the same
 
 
-# def find_image(image_path, confidence=0.7):
-#     """Find the location of the image on the screen."""
-#     global error_count
-#     try:
-#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-#         if location:
-#             image_name = os.path.basename(image_path)
-#             print(f"Found image: {image_name}")
-#             return location
-#     except Exception as e:
-#         error_count += 1
-#         print(f"{error_count} times not found. Error: {e}")
-#     return None
-
-
-error_count = 0
-last_found_time = time.time()
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
-    global error_count, last_found_time
+    global error_count
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             image_name = os.path.basename(image_path)
             print(f"Found image: {image_name}")
-            last_found_time = time.time()  # Update the last found time
             return location
     except Exception as e:
         error_count += 1
         print(f"{error_count} times not found. Error: {e}")
-    # Check if one minute has passed since the last found time
-    if time.time() - last_found_time > 60:
-        show_message("Error Finding Critical Sys File For 1 Minute")
-        last_found_time = time.time()  # Reset the last found time to avoid repeated messages
     return None
 
-def show_message(message):
-    messagebox.showinfo("Information", message, parent=ROOT)
+
+# error_count = 0
+# last_found_time = time.time()
+# def find_image(image_path, confidence=0.7):
+#     """Find the location of the image on the screen."""
+#     global error_count, last_found_time
+#     try:
+#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#         if location:
+#             image_name = os.path.basename(image_path)
+#             print(f"Found image: {image_name}")
+#             last_found_time = time.time()  # Update the last found time
+#             return location
+#     except Exception as e:
+#         error_count += 1
+#         print(f"{error_count} times not found. Error: {e}")
+#     # Check if one minute has passed since the last found time
+#     if time.time() - last_found_time > 60:
+#         show_message("Error Finding Critical Sys File For 1 Minute")
+#         last_found_time = time.time()  # Reset the last found time to avoid repeated messages
+#     return None
+
+# def show_message(message):
+#     messagebox.showinfo("Information", message, parent=ROOT)
 
 
 def focus_window(window_title):
@@ -184,6 +184,9 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
+
+window_title='LDPlayer'
+
 #* Home Page of the SH3
 Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 
@@ -227,6 +230,10 @@ toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
 fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
 claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 
+
+#* Event Related
+Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
+# Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -236,7 +243,6 @@ claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 """
 def Fight():
-    window_title ='LDPlayer'
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -273,7 +279,6 @@ def Fight():
 ██      ██   ██ ██      ██ ███████
 """
 def TournamentFame():
-    window_title = 'LDPlayer'
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -317,7 +322,6 @@ def TournamentFame():
 ██   ██ ██   ██ ██ ██████  ███████
 """
 def Raids():
-    window_title = 'LDPlayer'
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -362,49 +366,65 @@ def Raids():
 ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
 """
+# #* new way of doing it / not working ??
+# def Start_Event():
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     holding_keys = False  # To track if 'j' and 'l' are being held down
+#     try:
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+#                 if not holding_keys:
+#                     key_down(window, 'j')
+#                     key_down(window, 'l')
+#                     holding_keys = True
+#                 time.sleep(1)
+#             else:
+#                 if holding_keys:
+#                     key_up(window, 'l')
+#                     key_up(window, 'j')
+#                     holding_keys = False
+#                 elif find_image(Home, confidence=0.8): press_key(window, 'f')
+#                 elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+#                 # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+#                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
+#                 elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+#                 #! elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, 'y', 1)
+#             time.sleep(1)
+#     except KeyboardInterrupt:
+#         print("Script stopped by user.")
+#     finally:
+#         key_up(window, 'l')
+#         key_up(window, 'j')
+
+#* old way / working !!
 def Start_Event():
-    window_title    ='LDPlayer'
-
-    Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
-    # Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\WheelofHistory\entertourney2.png"
-    Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
-
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-
-#* new way of doing it
-    holding_keys = False  # To track if 'j' and 'l' are being held down
     try:
         while not stop_thread:
             focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                if not holding_keys:
+            if any(find_image(image) for image in actionF):
                     key_down(window, 'j')
                     key_down(window, 'l')
-                    holding_keys = True
-                time.sleep(1)
-            else:
-                if holding_keys:
+                    time.sleep(5)
                     key_up(window, 'l')
                     key_up(window, 'j')
-                    holding_keys = False
+            elif find_image(Home, confidence=0.8): press_key(window, 'f')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            #! elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, 'y', 1)
 
-                if find_image(Home, confidence=0.8): press_key(window, 'f')
-                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-                # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-                elif any(find_image(image) for image in continueF): press_key(window, 'c')
-                elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-                #! elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, 'y', 1)
-
-            time.sleep(1)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
-    finally:
-        # Ensure keys are released if the loop exits
-        key_up(window, 'l')
-        key_up(window, 'j')
 """
 ██╗      ██████╗ ███████╗███████╗
 ██║     ██╔═══██╗██╔════╝██╔════╝
@@ -414,7 +434,6 @@ def Start_Event():
 ╚══════╝ ╚═════╝ ╚══════╝╚══════╝
 """
 def TakeL():
-    window_title ='LDPlayer'
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
