@@ -153,7 +153,7 @@ def Folder(PYTHON_SCRIPT_FRAME):
 ("#204892", "#ffffff", "Dictionary",           {"command": "C:\\ms1\\scripts\\python\\dictionary.py"}),
 ("#204892", "#ffffff", "Process",              {"command": "cmd /c start C:\\ms1\\mypygui_import\\process.py"}),
 ("#204892", "#ffffff", "Rock-Paper-Scissor",   {"command": "C:\\ms1\\scripts\\python\\Game_rock_paper_scissor.py"}),
-("#204892", "#ffffff", "Morse-Code",           {"command": "C:\\ms1\\scripts\\python\\morse.py"}),
+("#204892", "#ffffff", "Morse-Code",           {"command": "cmd /c start C:\\ms1\\scripts\\python\\morse.py"}),
     ]
 
     # Sort the items alphabetically by their text
