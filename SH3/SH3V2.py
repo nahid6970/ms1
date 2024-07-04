@@ -356,7 +356,6 @@ def Fight():
 #         key_up(window, 'd')
 
 def TournamentFame():
-    window_title = 'LDPlayer'
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -365,7 +364,6 @@ def TournamentFame():
     try:
         while not stop_thread:
             focus_window(window_title)
-            
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 start_time = time.time()
                 while time.time() - start_time < 10:  # Loop for 5 seconds
@@ -373,22 +371,18 @@ def TournamentFame():
                         key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
-
                     # Press 'j' rapidly
                     press_key(window, 'j')
                     time.sleep(0.001)  # Reduce sleep time for rapid pressing
-
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
                     holding_keys = False
-
             else:
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
                     holding_keys = False
-
                 if find_image(Resume, confidence=0.8): press_key(window, 'r')
                 elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
                 elif find_image(StartFame): press_key(window, 'p')
@@ -396,7 +390,6 @@ def TournamentFame():
                 elif find_image(e_image): press_key(window, 'e')
                 elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
-
             time.sleep(0.05)
     except KeyboardInterrupt:
         print("Script stopped by user.")
@@ -490,30 +483,71 @@ def Raids():
 #         key_up(window, 'l')
 #         key_up(window, 'j')
 
-#* old way / working !!
+# #* old way / working !!
+# def Start_Event():
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     try:
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image) for image in actionF):
+#                     key_down(window, 'j')
+#                     key_down(window, 'l')
+#                     time.sleep(5)
+#                     key_up(window, 'l')
+#                     key_up(window, 'j')
+#             elif find_image(Home, confidence=0.8): press_key(window, 'f')
+#             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+#             # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+#             elif any(find_image(image) for image in continueF): press_key(window, 'c')
+#             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+#             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
+#             time.sleep(0.1)
+#     except KeyboardInterrupt:
+#         print("Script stopped by user.")
+
 def Start_Event():
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
+    holding_keys = False
     try:
         while not stop_thread:
             focus_window(window_title)
-            if any(find_image(image) for image in actionF):
-                    key_down(window, 'j')
-                    key_down(window, 'l')
-                    time.sleep(5)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                start_time = time.time()
+                while time.time() - start_time < 10:  # Loop for 5 seconds
+                    if not holding_keys:
+                        key_down(window, 'd')
+                        key_down(window, 'l')
+                        holding_keys = True
+                    # Press 'j' rapidly
+                    press_key(window, 'j')
+                    time.sleep(0.001)  # Reduce sleep time for rapid pressing
+                if holding_keys:
                     key_up(window, 'l')
-                    key_up(window, 'j')
-            elif find_image(Home, confidence=0.8): press_key(window, 'f')
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-            # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
-            time.sleep(0.1)
+                    key_up(window, 'd')
+                    holding_keys = False
+            else:
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    holding_keys = False
+                elif find_image(Home, confidence=0.8): press_key(window, 'f')
+                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+                # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+                elif any(find_image(image) for image in continueF): press_key(window, 'c')
+                elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+                elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
+            time.sleep(0.05)
     except KeyboardInterrupt:
         print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
 """
 ██╗      ██████╗ ███████╗███████╗
 ██║     ██╔═══██╗██╔════╝██╔════╝
