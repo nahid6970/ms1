@@ -782,13 +782,8 @@ LB_XXX=tk.Label(ROOT2, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =
 LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
 LB_XXX.bind("<Button-1>",close_window)
 
-
 #! Slider Left
 #! Slider Right
-
-
-
-
 
 cpu_core_bars = []
 for i in range(psutil.cpu_count()):
@@ -806,77 +801,10 @@ status_thread.start()
 gui_thread.start()
 
 update_uptime_label()
-
 update_info_labels()
-
 # check_window_topmost()
-
 Lockbox_update_label(LockBox_lb)
-
 compare_path_file()
-
-
-
-
-
-
-
-
-
-
-# Start with main frame visible
-
-# Use threading to continuously update system information
-# thread = threading.Thread(target=continuous_monitor, daemon=True)
-# thread.start()
-
 calculate_time_to_appear(start_time)
 
 ROOT.mainloop()
-
-#? EXAMPLES FOR USING PIC AS BUTTON
-#* Load the PNG image
-# image_path = "C:/Users/nahid/OneDrive/Desktop/aaa.png"
-# photo = tk.PhotoImage(file=image_path)
-
-#* Create the button with the image
-# button = tk.Button(root, image=photo, command=lambda: print("Button clicked"))
-# button.pack()
-
-#* Test
-#! Test
-#? Test
-#// Test
-# todo Test
-
-#! font list
-# 3270 nerd font
-# Agency FB
-# Arial
-# Calibri
-# Candara
-# Cascadia Code PL Nerd Font
-# Comic Sans MS
-# Consolas
-# Courier New
-# DejaVu Sans Mono Nerd Font
-# FiraCode Nerd Font
-# Georgia
-# Hack Nerd Font
-# Helvetica
-# Inconsolata Nerd Font
-# JetBrainsMono Nerd Font
-# JetBrainsMono NF #! (must use it for tkinter)
-# Lucida Console
-# Meslo Nerd Font
-# Mononoki Nerd Font
-# Palatino Linotype
-# Segoe UI
-# Source Code Pro Nerd Font
-# SpaceMono Nerd Font
-# Tahoma
-# terminess Nerd Font
-# Times New Roman
-# Trebuchet MS
-# Verdana
-# Victoria

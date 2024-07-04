@@ -3,21 +3,23 @@
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
-;;! Switch between display modes
+;;* Display Related
 !Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
 !Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
 !Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
 ^!t::ToggleResetWirkspace()
+^!b::ToggleScreenBlackout()
+^!w::ToggleScreenWhiteout()
 
 
-;;! Kill Commands
+;;* Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
 !+o::RunWait, taskkill /f /im whkd.exe,,Hide
 !+p::RunWait, taskkill /f /im python.exe
 !+g::RunWait, taskkill /f /im glazewm.exe,,Hide
 !+k::RunWait, taskkill /f /im komorebi.exe,,Hide
-; ~Esc & q::KillForeground()
 !q::KillForeground()
+; ~Esc & q::KillForeground()
 
 ;;* Start Apps / Scripts
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
@@ -39,8 +41,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 !1::ChangeMonitorApps()
 !e::Run pwsh -c explorer.exe,,Hide
 #t:: WinSet, AlwaysOnTop, Toggle, A
-^!b::ToggleScreenBlackout()
-^!w::ToggleScreenWhiteout()
+
 ^!h::ToggleHiddenFiles()
 ^!m::CopyPath_File()
 ^!n::VScode_OpenWith()
@@ -80,7 +81,37 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 
 ::;;::,=:[]()
 ; ::;font::font=("Jetbrainsmono nfp", 12, "bold")
-::;font1::Jetbrainsmono nfp
+;;* Font list / need real name adjustment
+::;font1::3270 nerd font
+::;font2::Agency FB
+::;font3::Arial
+::;font4::Calibri
+::;font5::Candara
+::;font6::Cascadia Code PL Nerd Font
+::;font7::Comic Sans MS
+::;font8::Consolas
+::;font9::Courier New
+::;font10::DejaVu Sans Mono Nerd Font
+::;font11::FiraCode Nerd Font
+::;font12::Georgia
+::;font13::Georgia
+::;font14::Hack Nerd Font
+::;font15::Helvetica
+::;font16::Inconsolata Nerd Font
+::;font17::Jetbrainsmono nfp
+::;font18::Lucida Console
+::;font19::Meslo Nerd Font
+::;font20::Mononoki Nerd Font
+::;font21::Palatino Linotype
+::;font22::Segoe UI
+::;font23::Source Code Pro Nerd Font
+::;font24::SpaceMono Nerd Font
+::;font25::Tahoma
+::;font26::terminess Nerd Font
+::;font27::Times New Roman
+::;font28::Trebuchet MS
+::;font29::Verdana
+::;font30::Victoria
 
 
 ; ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗██╗  ██╗
