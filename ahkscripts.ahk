@@ -10,7 +10,8 @@
 ^!t::ToggleResetWirkspace()
 ^!b::ToggleScreenBlackout()
 ^!w::ToggleScreenWhiteout()
-
+!1::ChangeMonitorApps()
+#t:: WinSet, AlwaysOnTop, Toggle, A
 
 ;;* Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
@@ -22,14 +23,15 @@
 ; ~Esc & q::KillForeground()
 
 ;;* Start Apps / Scripts
-#x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
-!y::RunWait, python.exe C:\ms1\yasb\main.py,,Hide                                      ;* yasb
-!r::RunWait, python.exe C:\ms1\running_apps.py,,Hide                                   ;* running apps
-!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
+!e::Run pwsh -c explorer.exe,,Hide
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
-!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
 !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
+!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
+!r::RunWait, python.exe C:\ms1\running_apps.py,,Hide                                   ;* running apps
+!x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
+!y::RunWait, python.exe C:\ms1\yasb\main.py,,Hide                                      ;* yasb
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
+#x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
 ;;* Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
@@ -38,10 +40,6 @@
 Pause::RunWait, komorebic quick-load-resize,,Hide
 
 ;;* Others
-!1::ChangeMonitorApps()
-!e::Run pwsh -c explorer.exe,,Hide
-#t:: WinSet, AlwaysOnTop, Toggle, A
-
 ^!h::ToggleHiddenFiles()
 ^!m::CopyPath_File()
 ^!n::VScode_OpenWith()
@@ -55,8 +53,6 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 #If
 
 
-
-
 ;*  ██████╗██╗  ██╗ █████╗ ████████╗
 ;* ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
 ;* ██║     ███████║███████║   ██║
@@ -64,12 +60,12 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ;* ╚██████╗██║  ██║██║  ██║   ██║
 ;*  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
 
-;! Valorant Trash Talk
+;* Valorant Trash Talk
 ::;vv1::u guys r so trash garbage get good..
 ::;vv2::trash garbage stupid noobs..
 ::;vv3::stupid kids get good.
 
-;! keyboard mod buttons
+;* keyboard mod buttons
 ::;a::ALT
 ::;c::CTRL
 ::;s::SHIFT
@@ -80,7 +76,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ::;ss::<SPACE>
 
 ::;;::,=:[]()
-; ::;font::font=("Jetbrainsmono nfp", 12, "bold")
+
 ;;* Font list / need real name adjustment
 ::;font1::3270 nerd font
 ::;font2::Agency FB
@@ -114,12 +110,12 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ::;font30::Victoria
 
 
-; ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗██╗  ██╗
-; ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║
-; █████╗  ██║   ██║██║     ██║  ██║█████╗  ██████╔╝    ██████╔╝███████║   ██║   ███████║
-; ██╔══╝  ██║   ██║██║     ██║  ██║██╔══╝  ██╔══██╗    ██╔═══╝ ██╔══██║   ██║   ██╔══██║
-; ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║    ██║     ██║  ██║   ██║   ██║  ██║
-; ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+;*  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗██╗  ██╗
+;*  ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║
+;*  █████╗  ██║   ██║██║     ██║  ██║█████╗  ██████╔╝    ██████╔╝███████║   ██║   ███████║
+;*  ██╔══╝  ██║   ██║██║     ██║  ██║██╔══╝  ██╔══██╗    ██╔═══╝ ██╔══██║   ██║   ██╔══██║
+;*  ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║    ██║     ██║  ██║   ██║   ██║  ██║
+;*  ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 ::;scoop::C:\Users\nahid\scoop\apps
 ::;user::C:\Users\nahid
