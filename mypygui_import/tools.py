@@ -79,7 +79,7 @@ ROW_1.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
 
 WINDOWSTOOLS_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
 WINDOWSTOOLS_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROW_1, text="Windows\nTools", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+ENTER_FRAME = CTkButton(ROW_1, text="Windows\nTools", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(WINDOWSTOOLS_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#ffffff", text_color="#000")
 ENTER_FRAME.pack(side="left",padx=(1,1))
 BOX = tk.Frame(WINDOWSTOOLS_FRAME, bg="#1D2027")
 BOX.pack(side="top", pady=(30,2), padx=(5,1), anchor="center", fill="x")
@@ -108,7 +108,7 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "Desktop Icon",                  {"command": "rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0"}),
 ("#204892", "#ffffff", "Text Service & Input Language", {"command": "rundll32 Shell32.dll,Control_RunDLL input.dll,,{C07337D3-DB2C-4D0B-9A93-B722A6C106E2}"}),
 ("#204892", "#ffffff", "System Information",            {"command": "msinfo32"}),
-("#204892", "#ffffff", "Show / Hide Updates",           {"command": "D:\software\@MustApp\wushowhide.diagcab"}),
+("#204892", "#ffffff", "Show / Hide Updates",           {"command": "D:\\software\\@MustApp\\wushowhide.diagcab"}),
 ("#204892", "#ffffff", "God Mode",                      {"command": "explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"}),
     ]
 
@@ -136,31 +136,74 @@ Folder(WINDOWSTOOLS_FRAME)
 
 
 
+PYTHON_SCRIPT_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
+PYTHON_SCRIPT_FRAME.pack_propagate(True)
+ENTER_FRAME = CTkButton(ROW_1, text="PYTHON\nSCRIPTS", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(PYTHON_SCRIPT_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#6ca9cd", text_color="#000")
+ENTER_FRAME.pack(side="left",padx=(1,1))
+BOX = tk.Frame(PYTHON_SCRIPT_FRAME, bg="#1D2027")
+BOX.pack(side="top", pady=(30,2), padx=(5,1), anchor="center", fill="x")
+
+BACK = tk.Button(BOX, text="\ueb6f \ueb6f \ueb6f", width=50, bg="#1d2027", fg="#ffffff", command=lambda: switch_to_frame(MAIN_FRAME, PYTHON_SCRIPT_FRAME))
+BACK.grid(row=0, column=0, columnspan=3, pady=(0, 10))  # Add BACK button at the top
+
+def Folder(PYTHON_SCRIPT_FRAME):
+    items = [
+("#204892", "#ffffff", "Rounded Corner",       {"command": "C:\\ms1\\utility\\RoundedCornerOnOff.py"}),
+("#204892", "#ffffff", "Font",                 {"command": "C:\\ms1\\scripts\\python\\font_style.py"}),
+("#204892", "#ffffff", "Dictionary",           {"command": "C:\\ms1\\scripts\\python\\dictionary.py"}),
+("#204892", "#ffffff", "Process",              {"command": "cmd /c start C:\\ms1\\mypygui_import\\process.py"}),
+("#204892", "#ffffff", "Rock-Paper-Scissor",   {"command": "C:\\ms1\\scripts\\python\\Game_rock_paper_scissor.py"}),
+("#204892", "#ffffff", "Morse-Code",           {"command": "C:\\ms1\\scripts\\python\\morse.py"}),
+    ]
+
+    # Sort the items alphabetically by their text
+    items.sort(key=lambda x: x[2])
+    # Number of items per column
+    max_items_per_column = 15
+    # Items Property
+    for index, (bg_color, fg_color, item_text, command_dict) in enumerate(items):
+        row = (index % max_items_per_column) + 1  # Start from row 1 to leave space for the BACK button
+        column = index // max_items_per_column
+        item = tk.Label(BOX, text=item_text, font=("jetbrainsmono nfp",12,"bold"), width=0, fg=fg_color, bg=bg_color)
+        # Function to handle click effect
+        def on_click(event, cmd=command_dict["command"], item=item, bg=bg_color, fg=fg_color):
+            item.config(bg="#ffffff", fg="#204892")  # Change colors temporarily
+            subprocess.Popen(cmd, shell=True)
+            PYTHON_SCRIPT_FRAME.after(100, lambda: item.config(bg=bg, fg=fg))  # Restore original colors after 100ms
+        item.bind("<Button-1>", on_click)
+        item.grid(row=row, column=column, padx=(0, 10), pady=(0, 2), sticky="w")
+Folder(PYTHON_SCRIPT_FRAME)
 
 
 
 
-PYTHON_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
-PYTHON_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROW_1, text="Python", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(PYTHON_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
-ENTER_FRAME.pack(side="left", padx=(1,1))
-BOX = tk.Frame(PYTHON_FRAME, bg="#1D2027")
-BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
-def Folder(PYTHON_FRAME):
-    RoundedCorner_lb = tk.Label(BOX, text="Rounded Corner", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
-    RoundedCorner_lb.pack(side="top", anchor="w", padx=(0, 0), pady=(0, 0))
-    RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
-    RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
 
-    Process_bt=tk.Label(BOX, text="Process", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
-    Process_bt.pack(side="top", anchor="w",padx=(0,0),pady=(0,0))
-    Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\process.py"], shell=True))
-    Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\process.py"], shell=True))
 
-    BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,PYTHON_FRAME))
-    BACK.pack(side="top" ,padx=(0,0))
-Folder(PYTHON_FRAME)
 
+
+
+
+
+# PYTHON_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
+# PYTHON_FRAME.pack_propagate(True)
+# ENTER_FRAME = CTkButton(ROW_1, text="Python", width=100, height=100, hover_color="#1dd463", command=lambda:switch_to_frame(PYTHON_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",18,"bold"), corner_radius=0, border_width=1, border_color="#000000", fg_color="#bff130", text_color="#000")
+# ENTER_FRAME.pack(side="left", padx=(1,1))
+# BOX = tk.Frame(PYTHON_FRAME, bg="#1D2027")
+# BOX.pack(side="top", pady=(30,2),padx=(5,1), anchor="center", fill="x")
+# def Folder(PYTHON_FRAME):
+#     RoundedCorner_lb = tk.Label(BOX, text="Rounded Corner", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+#     RoundedCorner_lb.pack(side="top", anchor="w", padx=(0, 0), pady=(0, 0))
+#     RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
+#     RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
+
+#     Process_bt=tk.Label(BOX, text="Process", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
+#     Process_bt.pack(side="top", anchor="w",padx=(0,0),pady=(0,0))
+#     Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\process.py"], shell=True))
+#     Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\process.py"], shell=True))
+
+#     BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,PYTHON_FRAME))
+#     BACK.pack(side="top" ,padx=(0,0))
+# Folder(PYTHON_FRAME)
 
 
 
