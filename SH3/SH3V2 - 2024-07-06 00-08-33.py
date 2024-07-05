@@ -278,43 +278,84 @@ def Fight():
 ██      ██   ██ ██  ██  ██ ██
 ██      ██   ██ ██      ██ ███████
 """
-def Fame_Heavy():
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    holding_keys = False
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                if not holding_keys:
-                    key_down(window, 'j')
-                    key_down(window, 'l')
-                    holding_keys = True
-                time.sleep(1)
-            else:
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'j')
-                    holding_keys = False
+# def TournamentFame():
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     holding_keys = False
+#     try:
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+#                 if not holding_keys:
+#                     key_down(window, 'j')
+#                     key_down(window, 'l')
+#                     holding_keys = True
+#                 time.sleep(1)
+#             else:
+#                 if holding_keys:
+#                     key_up(window, 'l')
+#                     key_up(window, 'j')
+#                     holding_keys = False
 
-                if find_image(Resume, confidence=0.8): press_key(window, 'r')
-                elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
-                elif find_image(StartFame): press_key(window, 'p')
-                elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-                elif find_image(e_image): press_key(window, 'e')
-                elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-                elif any(find_image(image) for image in continueF): press_key(window, 'c')
+#                 if find_image(Resume, confidence=0.8): press_key(window, 'r')
+#                 elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+#                 elif find_image(StartFame): press_key(window, 'p')
+#                 elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+#                 elif find_image(e_image): press_key(window, 'e')
+#                 elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+#                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
 
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
-    finally:
-        key_up(window, 'l')
-        key_up(window, 'j')
+#             time.sleep(1)
+#     except KeyboardInterrupt:
+#         print("Script stopped by user.")
+#     finally:
+#         key_up(window, 'l')
+#         key_up(window, 'j')
 
-def Fame_Light():
+
+# def TournamentFame():
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     holding_keys = False
+#     try:
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+#                 if not holding_keys:
+#                     key_down(window, 'd')
+#                     key_down(window, 'l')
+#                     holding_keys = True
+
+#                 # Press 'j' rapidly
+#                 press_key(window, 'j')
+#                 time.sleep(0.001)  # Reduce sleep time for rapid pressing
+
+#             else:
+#                 if holding_keys:
+#                     key_up(window, 'l')
+#                     key_up(window, 'd')
+#                     holding_keys = False
+
+#                 if find_image(Resume, confidence=0.8): press_key(window, 'r')
+#                 elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+#                 elif find_image(StartFame): press_key(window, 'p')
+#                 elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+#                 elif find_image(e_image): press_key(window, 'e')
+#                 elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+#                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
+
+#             time.sleep(0.05)
+#     except KeyboardInterrupt:
+#         print("Script stopped by user.")
+#     finally:
+#         key_up(window, 'l')
+#         key_up(window, 'd')
+
+def TournamentFame():
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -552,17 +593,10 @@ def Loss_Function():
     t.daemon = True
     t.start()
 
-def Fame_Function_Light():
+def Fame_Function():
     global stop_thread
     stop_thread = False
-    t = threading.Thread(target=Fame_Light)
-    t.daemon = True
-    t.start()
-
-def Fame_Function_Heavy():
-    global stop_thread
-    stop_thread = False
-    t = threading.Thread(target=Fame_Heavy)
+    t = threading.Thread(target=TournamentFame)
     t.daemon = True
     t.start()
 
@@ -598,31 +632,31 @@ def create_custom_border(parent):
     return BORDER_FRAME
 
 BORDER_FRAME = create_custom_border(ROOT)
+
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 65
+
+x = screen_width - 40
 y = screen_height//2 - 190//2
-# ROOT.geometry(f"35x230+{x}+{y}")
-ROOT.geometry(f"+{x}+{y}")
+ROOT.geometry(f"35x230+{x}+{y}")
 
+button_frame = tk.Frame(ROOT, bg="#1d2027", width=1, height=0)
+button_frame.pack(side="top", padx=1, pady=1, fill="both")
 
+F_bt    =Button(ROOT,text="\ueefd"      ,bg="#6a6a64",fg="#9dff00",width=0,height=1,command=Fight_Function,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Fame_bt =Button(ROOT,text="F"           ,bg="#bda24a",fg="#000000",width=0,height=1,command=Fame_Function ,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Event_bt=Button(ROOT,text="E"           ,bg="#ce5129",fg="#ffffff",width=0,height=1,command=event_function,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Raids_bt=Button(ROOT,text="R"           ,bg="#5a9bf7",fg="#000000",width=0,height=1,command=Raids_Function,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Loss_bt =Button(ROOT,text="L"           ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=Loss_Function,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
+Stop_bt =Button(ROOT,text="\uf04d"      ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=stop_functions,font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
 
-F_bt    =Button(ROOT,text="\ueefd"      ,bg="#6a6a64",fg="#9dff00",width=0,height=1,command=Fight_Function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-FameLight_bt =Button(ROOT,text="FL"           ,bg="#bda24a",fg="#000000",width=0,height=1,command=Fame_Function_Light ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-FameHeavy_bt =Button(ROOT,text="FH"           ,bg="#bda24a",fg="#000000",width=0,height=1,command=Fame_Function_Heavy ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Event_bt=Button(ROOT,text="E"           ,bg="#ce5129",fg="#ffffff",width=0,height=1,command=event_function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Raids_bt=Button(ROOT,text="R"           ,bg="#5a9bf7",fg="#000000",width=0,height=1,command=Raids_Function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Loss_bt =Button(ROOT,text="L"           ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=Loss_Function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Stop_bt =Button(ROOT,text="\uf04d"      ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=stop_functions,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-
-F_bt.grid           (row=1,column=1, padx=(1,1), pady=(3,0))
-FameLight_bt.grid   (row=2,column=1, padx=(1,1))
-FameHeavy_bt.grid   (row=2,column=2, padx=(1,1))
-Event_bt.grid       (row=3,column=1, padx=(1,1))
-Raids_bt.grid       (row=4,column=1, padx=(1,1))
-Loss_bt.grid        (row=5,column=1, padx=(1,1))
-Stop_bt.grid        (row=6,column=1, padx=(1,1), pady=3)
+F_bt.pack      (side="top")
+Fame_bt.pack   (side="top")
+Event_bt.pack  (side="top")
+Raids_bt.pack  (side="top")
+Loss_bt.pack   (side="top")
+Stop_bt.pack   (side="top")
 
 ROOT.mainloop()
 
