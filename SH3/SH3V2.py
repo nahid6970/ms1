@@ -617,12 +617,12 @@ Loss_bt =Button(ROOT,text="L"           ,bg="#1d2027",fg="#fc0000",width=0,heigh
 Stop_bt =Button(ROOT,text="\uf04d"      ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=stop_functions,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
 
 F_bt.grid           (row=1,column=1, padx=(1,1), pady=(3,0))
-FameLight_bt.grid   (row=2,column=1, padx=(1,1))
-FameHeavy_bt.grid   (row=2,column=2, padx=(1,1))
-Event_bt.grid       (row=3,column=1, padx=(1,1))
-Raids_bt.grid       (row=4,column=1, padx=(1,1))
-Loss_bt.grid        (row=5,column=1, padx=(1,1))
-Stop_bt.grid        (row=6,column=1, padx=(1,1), pady=3)
+FameLight_bt.grid   (row=2,column=1, padx=(1,1), pady=(1,1))
+FameHeavy_bt.grid   (row=2,column=2, padx=(1,1), pady=(1,1))
+Event_bt.grid       (row=3,column=1, padx=(1,1), pady=(1,1))
+Raids_bt.grid       (row=4,column=1, padx=(1,1), pady=(1,1))
+Loss_bt.grid        (row=5,column=1, padx=(1,1), pady=(1,1))
+Stop_bt.grid        (row=6,column=1, padx=(1,1), pady=(0,3))
 
 ROOT.mainloop()
 
