@@ -234,6 +234,70 @@ claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 #* Event Related
 Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
 Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
+
+
+def Fight_Heavy():
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    holding_keys = False
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                if not holding_keys:
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    holding_keys = True
+                time.sleep(1)
+            else:
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+                    holding_keys = False
+
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
+
+def Fight_Light():
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    holding_keys = False
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                start_time = time.time()
+                while time.time() - start_time < 10:  # Loop for 5 seconds
+                    if not holding_keys:
+                        key_down(window, 'd')
+                        key_down(window, 'l')
+                        holding_keys = True
+                    # Press 'j' rapidly
+                    press_key(window, 'j')
+                    time.sleep(0.001)  # Reduce sleep time for rapid pressing
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    holding_keys = False
+            else:
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    holding_keys = False
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -313,7 +377,6 @@ def Fight():
 #     finally:
 #         key_up(window, 'l')
 #         key_up(window, 'j')
-
 
 # def TournamentFame():
 #     window = focus_window(window_title)
