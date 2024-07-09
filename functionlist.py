@@ -73,7 +73,7 @@ Ditto_scoop_path           =r'C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe'
 dotnet6_wp                 =r'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.29\createdump.exe'
 DotNet8_wp                 =r"C:\Program Files\dotnet\dotnet.exe"
 eza_sp                     =r'C:\Users\nahid\scoop\apps\eza\current\eza.exe'
-fastfetch_sp               =r'C:\Users\nahid\scoop\apps\fastfetch\2.12.0\fastfetch.exe'
+fastfetch_sp               =r'C:\Users\nahid\scoop\apps\fastfetch\current\fastfetch.exe'
 ffmpeg_sp                  =r'C:\Users\nahid\scoop\apps\ffmpeg\current\bin\ffmpeg.exe'
 FFmpegBatch_sp             =r'C:\Users\nahid\scoop\apps\ffmpeg-batch\current\FFBatch.exe'
 FileConverter_wp           =r"C:\Program Files\File Converter\FileConverter.exe"
@@ -147,8 +147,6 @@ WSUtilities_sp             =r'C:\\Users\\nahid\\scoop\\apps\\workspaceutilities\
 X_mousebutton_winget_path  ="C:\\Program Files\\Highresolution Enterprises\\X-Mouse Button Control\\XMouseButtonControl.exe"
 ytdlp_sp                   =r'C:\Users\nahid\scoop\apps\yt-dlp\current\yt-dlp.exe'
 Zoxide_scoop_path          ="C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe"
-
-
 
 
 

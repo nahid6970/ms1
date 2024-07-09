@@ -1,7 +1,6 @@
 Start-Process 'C:\ms1\ahkscripts.ahk'
 Start-Process  'C:\ms1\mypygui.py' -WindowStyle Hidden
 komorebic start
-cmd /c C:\Users\nahid\OneDrive\backup\usbmmidd_v2\2ndMonitor.bat
 Start-Process 'C:\ms1\utility\NetworkCondition.ps1' -WindowStyle Hidden
 Start-Process 'C:\Users\nahid\OneDrive\backup\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden
 Start-Process C:\ms1\scheduled.ps1
