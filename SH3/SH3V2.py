@@ -601,28 +601,28 @@ BORDER_FRAME = create_custom_border(ROOT)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width - 65
-y = screen_height//2 - 190//2
+x = screen_width - 60
+y = screen_height - 700
 # ROOT.geometry(f"35x230+{x}+{y}")
 ROOT.geometry(f"+{x}+{y}")
 
 
 
-F_bt    =Button(ROOT,text="\ueefd"      ,bg="#6a6a64",fg="#9dff00",width=0,height=1,command=Fight_Function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-FameLight_bt =Button(ROOT,text="FL"           ,bg="#bda24a",fg="#000000",width=0,height=1,command=Fame_Function_Light ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-FameHeavy_bt =Button(ROOT,text="FH"           ,bg="#bda24a",fg="#000000",width=0,height=1,command=Fame_Function_Heavy ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Event_bt=Button(ROOT,text="E"           ,bg="#ce5129",fg="#ffffff",width=0,height=1,command=event_function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Raids_bt=Button(ROOT,text="R"           ,bg="#5a9bf7",fg="#000000",width=0,height=1,command=Raids_Function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Loss_bt =Button(ROOT,text="L"           ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=Loss_Function,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Stop_bt =Button(ROOT,text="\uf04d"      ,bg="#1d2027",fg="#fc0000",width=0,height=1,command=stop_functions,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+F_bt         =Button(ROOT,text="\ueefd" ,bg="#6a6a64",fg="#9dff00",width=5,height=2,command=Fight_Function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+FameLight_bt =Button(ROOT,text="FL"     ,bg="#bda24a",fg="#000000",width=5,height=3,command=Fame_Function_Light ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+FameHeavy_bt =Button(ROOT,text="FH"     ,bg="#bda24a",fg="#000000",width=5,height=2,command=Fame_Function_Heavy ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Event_bt     =Button(ROOT,text="E"      ,bg="#ce5129",fg="#ffffff",width=5,height=2,command=event_function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Raids_bt     =Button(ROOT,text="R"      ,bg="#5a9bf7",fg="#000000",width=5,height=2,command=Raids_Function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Loss_bt      =Button(ROOT,text="L"      ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=Loss_Function       ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Stop_bt      =Button(ROOT,text="\uf04d" ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=stop_functions      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
 
-F_bt.grid           (row=1,column=1, padx=(1,1), pady=(3,0))
+F_bt.grid           (row=1,column=1, padx=(2,2), pady=(3,0))
 FameLight_bt.grid   (row=2,column=1, padx=(1,1), pady=(1,1))
-FameHeavy_bt.grid   (row=2,column=2, padx=(1,1), pady=(1,1))
-Event_bt.grid       (row=3,column=1, padx=(1,1), pady=(1,1))
-Raids_bt.grid       (row=4,column=1, padx=(1,1), pady=(1,1))
-Loss_bt.grid        (row=5,column=1, padx=(1,1), pady=(1,1))
-Stop_bt.grid        (row=6,column=1, padx=(1,1), pady=(0,3))
+FameHeavy_bt.grid   (row=3,column=1, padx=(1,1), pady=(1,1))
+Event_bt.grid       (row=4,column=1, padx=(1,1), pady=(1,1))
+Raids_bt.grid       (row=5,column=1, padx=(1,1), pady=(1,1))
+Loss_bt.grid        (row=6,column=1, padx=(1,1), pady=(1,1))
+Stop_bt.grid        (row=7,column=1, padx=(1,1), pady=(0,3))
 
 ROOT.mainloop()
 
