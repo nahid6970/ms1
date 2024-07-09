@@ -12,6 +12,7 @@ from PIL import Image
 from PIL import Image, ImageDraw
 import os
 from tkinter import messagebox
+import tkinter as tk
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
@@ -408,7 +409,7 @@ def Raids():
 ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
 """
-# #* new way of doing it / not working ??
+# #! new way of doing it / not working ??
 # def Start_Event():
 #     window = focus_window(window_title)
 #     if not window:
@@ -443,31 +444,31 @@ def Raids():
 #         key_up(window, 'j')
 
 # #* old way / working !!
-# def Start_Event():
-#     window = focus_window(window_title)
-#     if not window:
-#         print(f"Window '{window_title}' not found.")
-#         return
-#     try:
-#         while not stop_thread:
-#             focus_window(window_title)
-#             if any(find_image(image) for image in actionF):
-#                     key_down(window, 'j')
-#                     key_down(window, 'l')
-#                     time.sleep(5)
-#                     key_up(window, 'l')
-#                     key_up(window, 'j')
-#             elif find_image(Home, confidence=0.8): press_key(window, 'f')
-#             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-#             # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-#             elif any(find_image(image) for image in continueF): press_key(window, 'c')
-#             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-#             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
-#             time.sleep(0.1)
-#     except KeyboardInterrupt:
-#         print("Script stopped by user.")
+def Start_Event_Heavy():
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image) for image in actionF):
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    time.sleep(5)
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+            elif find_image(Home, confidence=0.8): press_key(window, 'f')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
 
-def Start_Event():
+def Start_Event_Light():
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -478,7 +479,7 @@ def Start_Event():
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 start_time = time.time()
-                while time.time() - start_time < 10:  # Loop for 5 seconds
+                while time.time() - start_time < 5:
                     if not holding_keys:
                         key_down(window, 'd')
                         key_down(window, 'l')
@@ -573,18 +574,26 @@ def Raids_Function():
     t.daemon = True
     t.start()
 
-def event_function():
+def event_function_light():
     global stop_thread
     stop_thread = False
-    t = threading.Thread(target=Start_Event)
+    t = threading.Thread(target=Start_Event_Light)
     t.daemon = True
     t.start()
+
+def event_function_heavy():
+    global stop_thread
+    stop_thread = False
+    t = threading.Thread(target=Start_Event_Heavy)
+    t.daemon = True
+    t.start()
+
 
 def stop_functions():
     global stop_thread
     stop_thread = True
 
-import tkinter as tk
+
 
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
@@ -602,27 +611,29 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
 x = screen_width - 60
-y = screen_height - 700
+y = screen_height - 800
 # ROOT.geometry(f"35x230+{x}+{y}")
 ROOT.geometry(f"+{x}+{y}")
 
 
 
-F_bt         =Button(ROOT,text="\ueefd" ,bg="#6a6a64",fg="#9dff00",width=5,height=2,command=Fight_Function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-FameLight_bt =Button(ROOT,text="FL"     ,bg="#bda24a",fg="#000000",width=5,height=3,command=Fame_Function_Light ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-FameHeavy_bt =Button(ROOT,text="FH"     ,bg="#bda24a",fg="#000000",width=5,height=2,command=Fame_Function_Heavy ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Event_bt     =Button(ROOT,text="E"      ,bg="#ce5129",fg="#ffffff",width=5,height=2,command=event_function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Raids_bt     =Button(ROOT,text="R"      ,bg="#5a9bf7",fg="#000000",width=5,height=2,command=Raids_Function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Loss_bt      =Button(ROOT,text="L"      ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=Loss_Function       ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
-Stop_bt      =Button(ROOT,text="\uf04d" ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=stop_functions      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Fight__BT   =Button(ROOT,text="\ueefd" ,bg="#6a6a64",fg="#9dff00",width=5,height=2,command=Fight_Function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Fame__Light =Button(ROOT,text="FL"     ,bg="#bda24a",fg="#000000",width=5,height=3,command=Fame_Function_Light ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Fame__Heavy =Button(ROOT,text="FH"     ,bg="#bda24a",fg="#000000",width=5,height=2,command=Fame_Function_Heavy ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Event__Light=Button(ROOT,text="EL"     ,bg="#ce5129",fg="#ffffff",width=5,height=2,command=event_function_light,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Event__Heavy=Button(ROOT,text="EH"     ,bg="#ce5129",fg="#ffffff",width=5,height=2,command=event_function_heavy,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Raids_bt    =Button(ROOT,text="R"      ,bg="#5a9bf7",fg="#000000",width=5,height=2,command=Raids_Function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Loss_bt     =Button(ROOT,text="L"      ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=Loss_Function       ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+Stop_bt     =Button(ROOT,text="\uf04d" ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=stop_functions      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
 
-F_bt.grid           (row=1,column=1, padx=(2,2), pady=(3,0))
-FameLight_bt.grid   (row=2,column=1, padx=(1,1), pady=(1,1))
-FameHeavy_bt.grid   (row=3,column=1, padx=(1,1), pady=(1,1))
-Event_bt.grid       (row=4,column=1, padx=(1,1), pady=(1,1))
-Raids_bt.grid       (row=5,column=1, padx=(1,1), pady=(1,1))
-Loss_bt.grid        (row=6,column=1, padx=(1,1), pady=(1,1))
-Stop_bt.grid        (row=7,column=1, padx=(1,1), pady=(0,3))
+Fight__BT.grid     (row=1,column=1, padx=(2,2), pady=(3,0))
+Fame__Light.grid   (row=2,column=1, padx=(1,1), pady=(1,1))
+Fame__Heavy.grid   (row=3,column=1, padx=(1,1), pady=(1,1))
+Event__Light.grid  (row=4,column=1, padx=(1,1), pady=(1,1))
+Event__Heavy.grid  (row=5,column=1, padx=(1,1), pady=(1,1))
+Raids_bt.grid      (row=6,column=1, padx=(1,1), pady=(1,1))
+Loss_bt.grid       (row=7,column=1, padx=(1,1), pady=(1,1))
+Stop_bt.grid       (row=8,column=1, padx=(1,1), pady=(0,3))
 
 ROOT.mainloop()
 
