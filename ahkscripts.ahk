@@ -4,14 +4,18 @@
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
 ;;* Display Related
-!Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
-!Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
-!Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
+; !Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
+; !Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
+; !Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
+!Numpad1::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal",,Hide
+!Numpad2::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external",,Hide
+!Numpad3::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /extend",,Hide
 ^!t::ToggleResetWirkspace()
 ^!b::ToggleScreenBlackout()
 ^!w::ToggleScreenWhiteout()
 !1::ChangeMonitorApps()
 #t:: WinSet, AlwaysOnTop, Toggle, A
+
 
 ;;* Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
