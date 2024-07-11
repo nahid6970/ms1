@@ -196,12 +196,16 @@ void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.p
 eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
 thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
 collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
+bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
+uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
     eruption: 0.85,
     thud: 0.7,
-    collector: 0.7
+    collector: 0.7,
+    uppercut: 0.7,
+    bolt: 0.7
 }
 
 #* Continue Related Images
