@@ -110,6 +110,7 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "System Information",            {"command": "msinfo32"}),
 ("#204892", "#ffffff", "Show / Hide Updates",           {"command": "D:\\software\\@MustApp\\wushowhide.diagcab"}),
 ("#204892", "#ffffff", "God Mode",                      {"command": "explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"}),
+("#204892", "#ffffff", "Performance Options",           {"command": "systempropertiesperformance"}),
     ]
 
     # Sort the items alphabetically by their text
