@@ -205,7 +205,7 @@ actionF = {
     thud: 0.7,
     collector: 0.7,
     uppercut: 0.7,
-    bolt: 0.85
+    # bolt: 1,
 }
 
 #* Continue Related Images
