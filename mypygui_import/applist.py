@@ -274,6 +274,9 @@ applications = [
 {"name":"Zoxide"                   ,"scoop_name":"zoxide"                            ,"scoop_path":Zoxide_scoop_path         ,"winget_name":"WingetName"                             ,"winget_path":r""}                         ,
 {"name": "FastFetch","scoop_name": "fastfetch","scoop_path":fastfetch_sp,"winget_name": "","winget_path": r""} ,
 {"name": "Ventoy","scoop_name": "ventoy","scoop_path": ventoy_sp,"winget_name": "WingetName","winget_path": r""} ,
+{"name": "Ollama","scoop_name": "","scoop_path": r'',"winget_name": "Ollama.Ollama","winget_path": r"xx"} ,
+{"name": "LM Studio","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "LMStudio.LMStudio","winget_path": r"xx"} ,
+{"name": "JellyFin","scoop_name": "","scoop_path": r'',"winget_name": "Jellyfin.Server","winget_path": r"xx"} ,
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
 
 ]
