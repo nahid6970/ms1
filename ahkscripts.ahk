@@ -14,8 +14,8 @@
 ^!b::ToggleScreenBlackout()
 ^!w::ToggleScreenWhiteout()
 !1::ChangeMonitorApps()
+!2::CenterFocusedWindow()
 #t:: WinSet, AlwaysOnTop, Toggle, A
-
 
 ;;* Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
@@ -544,4 +544,26 @@ ToggleResetWirkspace() {
         WinSet, ExStyle, -0x20, ahk_id %taskbarHandle%  ; WS_EX_TRANSPARENT
         taskbarVisible := 1
     }
+}
+
+
+
+
+CenterFocusedWindow() {
+    ; Get the handle of the active (focused) window
+    WinGet, hwnd, ID, A
+    
+    ; Get the position and size of the active window
+    WinGetPos, x, y, w, h, ahk_id %hwnd%
+    
+    ; Get the screen width and height
+    SysGet, ScreenWidth, 78
+    SysGet, ScreenHeight, 79
+    
+    ; Calculate new position to center the window
+    newX := (ScreenWidth - w) / 2
+    newY := (ScreenHeight - h) / 2
+    
+    ; Move the window to the calculated position
+    WinMove, ahk_id %hwnd%, , %newX%, %newY%
 }
