@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import os
+import pyautogui
 
 class StartupManager(tk.Tk):
     def __init__(self):
@@ -14,7 +15,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "NetworkCondition"    ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "RoundedCornerDisable","command": "Start-Process 'C:\\Users\\nahid\\OneDrive\\backup\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"},
 {"type": "Command","name": "SCHEDULED"           ,"command": "Start-Process C:\\ms1\\scheduled.ps1"},
-{"type": "Command","name": "Ollama"              ,"command": "Start-Process open-webui serve"},
+{"type": "Command","name": "Open WebUI"          ,"command": "Start-Process open-webui serve"},
 
 {"type": "Command","name": "arr_monitor"         ,"command": "Start-Process 'C:\\ms1\\arr_monitor.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "BAZARR"              ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
@@ -41,6 +42,18 @@ class StartupManager(tk.Tk):
         self.ps1_file_path = "C:\\ms1\\startup_commands.ps1"
         self.create_ps1_file()
         self.create_widgets()
+
+        self.center_window()
+        self.after(25, self.press_alt_2)  # Delay to ensure the window is focused
+    def center_window(self):
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+    def press_alt_2(self):
+        pyautogui.hotkey('alt', '2')
 
     def create_ps1_file(self):
         if not os.path.exists(self.ps1_file_path):
