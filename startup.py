@@ -1,16 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
 import os
-import winshell
 
 class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Startup Manager")
-        # self.geometry("300x680")
-        # self.configure(bg="#2c3235")
         self.items = [
-
 {"type": "Command","name": "AHKSCRIPT"           ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
 {"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process  'C:\\ms1\\mypygui.py' -WindowStyle Hidden"},
 {"type": "Command","name": "KOMOREBIC"           ,"command": "komorebic start"},
@@ -40,8 +36,6 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "RssGuard"          ,"path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"},
 {"type": "App","name": "Sonarr"            ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
 {"type": "App","name": "Cloudflare WARP"   ,"path": "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"},
-
-# Add more items in the same format if needed
         ]
 
         self.ps1_file_path = "C:\\ms1\\startup_commands.ps1"
@@ -54,32 +48,44 @@ class StartupManager(tk.Tk):
                 f.write('# PowerShell script for startup\n')
 
     def create_widgets(self):
-        # Sort items based on checked status
-        checked_items = []
-        unchecked_items = []
-        for item in self.items:
-            if self.is_checked(item):
-                checked_items.append(item)
-            else:
-                unchecked_items.append(item)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+        self.grid_columnconfigure(3, weight=1)
+        self.grid_columnconfigure(4, weight=1)
 
-        sorted_items = checked_items + unchecked_items
+        checked_commands = [item for item in self.items if item["type"] == "Command" and self.is_checked(item)]
+        unchecked_commands = [item for item in self.items if item["type"] == "Command" and not self.is_checked(item)]
+        checked_apps = [item for item in self.items if item["type"] == "App" and self.is_checked(item)]
+        unchecked_apps = [item for item in self.items if item["type"] == "App" and not self.is_checked(item)]
 
         command_separator = tk.Label(self, text="Commands", font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
-        command_separator.pack(fill=tk.X, pady=5)
-        for item in sorted_items:
-            if item["type"] == "Command":
-                self.create_item_widget(item)
+        command_separator.grid(row=0, column=0, columnspan=5, pady=5, sticky="ew")
+        command_row = 1
+        command_col = 0
+
+        for item in checked_commands + unchecked_commands:
+            self.create_item_widget(item, command_row, command_col)
+            command_col += 1
+            if command_col > 4:
+                command_col = 0
+                command_row += 1
 
         app_separator = tk.Label(self, text="Apps", font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
-        app_separator.pack(fill=tk.X, pady=5)
-        for item in sorted_items:
-            if item["type"] == "App":
-                self.create_item_widget(item)
+        app_separator.grid(row=command_row + 1, column=0, columnspan=5, pady=5, sticky="ew")
+        app_row = command_row + 2
+        app_col = 0
 
-    def create_item_widget(self, item):
+        for item in checked_apps + unchecked_apps:
+            self.create_item_widget(item, app_row, app_col)
+            app_col += 1
+            if app_col > 4:
+                app_col = 0
+                app_row += 1
+
+    def create_item_widget(self, item, row, col):
         frame = tk.Frame(self)
-        frame.pack(fill=tk.X)
+        frame.grid(row=row, column=col, padx=5, pady=5, sticky="w")
 
         name_label = tk.Label(frame, text=item["name"], font=("Jetbrainsmono nfp", 12, "bold"))
         checked = self.is_checked(item)
@@ -88,14 +94,9 @@ class StartupManager(tk.Tk):
         icon_label.bind("<Button-1>", lambda event, item=item, name_label=name_label, icon_label=icon_label: self.toggle_startup(item, name_label, icon_label))
         icon_label.pack(side=tk.LEFT, padx=0)
 
-        # launch_button = tk.Label(frame, text="\uf04b", font=("Jetbrainsmono nfp", 12, "bold"), fg="green")
-        # launch_button.bind("<Button-1>", lambda event, item=item: self.launch_command(item))
-        # launch_button.pack(side=tk.LEFT, padx=10)
-
         name_label.bind("<Button-1>", lambda event, item=item: self.launch_command(item))
         name_label.pack(side=tk.LEFT)
 
-        # Set initial label color based on checked state
         self.update_label_color(name_label, checked)
 
     def launch_command(self, item):
@@ -103,7 +104,6 @@ class StartupManager(tk.Tk):
             os.system(f'start "" "{item["path"]}"')
         else:
             os.system(f'PowerShell -Command "{item["command"]}"')
-
 
     def is_checked(self, item):
         with open(self.ps1_file_path, 'r') as f:
