@@ -1,8 +1,23 @@
+.currentFindMatchInline{
+    background-color: rgba(21, 255, 0, 0.76) !important;
+}
+.findMatchInline{
+    background-color: rgba(169, 226, 164, 0.76) !important;
+}
+
+/* Tabs width */
+.tabs-container .tab .tab-label {
+width: 150px;
+}
+
+
 /* Code comment style */
 .mtk3 {
-    font-family: 'Jetbrainsmono nfp' !important;
-    color: #a08989 !important;
+    font-family: 'FiraCode Nerd Font'!important;
+    color: #06c000 !important;
+    font-style: italic;
 }
+
 
 .line-numbers {
     position: relative !important;
@@ -201,3 +216,6 @@
 .monaco-inputbox input::placeholder {
     color: rgba(255, 255, 255, .3) !important;
 }
+
+/* tab */
+
