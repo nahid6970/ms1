@@ -10,21 +10,19 @@
 width: 150px;
 }
 
-
 /* Code comment style */
 .mtk3 {
-    font-family: 'FiraCode Nerd Font'!important;
+    /* font-family:Jetbrainsmono nfp !important; */
     color: #06c000 !important;
     font-style: italic;
 }
-
 
 .line-numbers {
     position: relative !important;
     width: 35px !important;
     font-size: 16px !important;
     font-family: 'Geist Mono' !important;
-    opacity: .3;
+    opacity: .5;
 }
 
 
