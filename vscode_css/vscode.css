@@ -17,6 +17,10 @@ width: 150px;
     font-style: italic;
 }
 
+.monaco-editor.no-user-select .view-line {
+    color: #ff00ff;
+}
+
 .line-numbers {
     position: relative !important;
     width: 35px !important;
@@ -49,6 +53,10 @@ width: 150px;
     opacity: 1 !important;
     border-top: 1px #727b90 solid;
     border-bottom: 1px #727b90 solid;
+}
+
+.open-editors .monaco-list .monaco-list-row {
+    padding-left: 0px;
 }
 
 /* List item label name */
@@ -102,11 +110,9 @@ width: 150px;
 /* Scroll Bar */
 .slider {
     position: absolute !important;
-    right: 1px !important;
-    width: 1px !important;
     background: #ff6f36 !important;
-    left: auto !important;
 }
+
 
 .codicon-toolbar-more, .codicon-word-wrap {
     display: block !important;
@@ -214,6 +220,3 @@ width: 150px;
 .monaco-inputbox input::placeholder {
     color: rgba(255, 255, 255, .3) !important;
 }
-
-/* tab */
-
