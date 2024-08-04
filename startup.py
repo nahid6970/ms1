@@ -43,18 +43,6 @@ class StartupManager(tk.Tk):
         self.create_ps1_file()
         self.create_widgets()
 
-        self.center_window()
-        self.after(25, self.press_alt_2)  # Delay to ensure the window is focused
-    def center_window(self):
-        self.update_idletasks()
-        width = self.winfo_width()
-        height = self.winfo_height()
-        x = (self.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.winfo_screenheight() // 2) - (height // 2)
-        self.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-    def press_alt_2(self):
-        pyautogui.hotkey('alt', '2')
-
     def create_ps1_file(self):
         if not os.path.exists(self.ps1_file_path):
             with open(self.ps1_file_path, 'w') as f:
@@ -154,6 +142,20 @@ class StartupManager(tk.Tk):
         else:
             label.config(fg="red")
 
+def center_and_press_alt_2(window):
+    def center_window():
+        window.update_idletasks()
+        width = window.winfo_width()
+        height = window.winfo_height()
+        x = (window.winfo_screenwidth() // 2) - (width // 2)
+        y = (window.winfo_screenheight() // 2) - (height // 2)
+        window.geometry(f'{width}x{height}+{x}+{y}')
+    def press_alt_2():
+        pyautogui.hotkey('alt', '2')
+    center_window()
+    window.after(25, press_alt_2)
+
 if __name__ == "__main__":
     app = StartupManager()
+    center_and_press_alt_2(app)
     app.mainloop()
