@@ -13,6 +13,7 @@ apps = {
     "python.exe"         :"\ue73c Python",
     "sonarr.exe"         :"\udb84\udfb4 Sonarr",
     "radarr.exe"         :"\udb81\udfde Radarr",
+    "prowlarr.exe"       :"\uf0c1 Prowlarr",
 }
 
 def update_status():
