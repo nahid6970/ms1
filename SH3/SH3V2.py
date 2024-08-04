@@ -14,6 +14,30 @@ import os
 from tkinter import messagebox
 import tkinter as tk
 
+
+
+
+ROOT = tk.Tk()
+ROOT.title("Utility Buttons")
+ROOT.attributes('-topmost', True) 
+ROOT.overrideredirect(True)
+ROOT.configure(bg="#282c34")
+
+def create_custom_border(parent):
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#66fd1f")
+    BORDER_FRAME.place(relwidth=1, relheight=1)
+    return BORDER_FRAME
+BORDER_FRAME = create_custom_border(ROOT)
+screen_width = ROOT.winfo_screenwidth()
+screen_height = ROOT.winfo_screenheight()
+x = screen_width - 60
+y = screen_height - 800
+# ROOT.geometry(f"35x230+{x}+{y}")
+ROOT.geometry(f"+{x}+{y}")
+
+
+
+
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
@@ -247,11 +271,46 @@ Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
 ██║     ██║╚██████╔╝██║  ██║   ██║
 ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 """
-def Fight():
+# def Fight():
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     holding_keys = False
+#     try:
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+#                 if not holding_keys:
+#                     key_down(window, 'j')
+#                     key_down(window, 'l')
+#                     holding_keys = True
+#                 time.sleep(1)
+#             else:
+#                 if holding_keys:
+#                     key_up(window, 'l')
+#                     key_up(window, 'j')
+#                     holding_keys = False
+#             if find_image(SPACE, confidence=0.8): press_key(window, ' ')
+#             elif any(find_image(image) for image in continueF): press_key(window, 'c')
+
+#             time.sleep(1)
+#     except KeyboardInterrupt:
+#         print("Script stopped by user.")
+#     finally:
+#         key_up(window, 'l')
+#         key_up(window, 'j')
+
+stop_thread = True
+fight_thread = None
+
+def fight():
+    global stop_thread
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
+    
     holding_keys = False
     try:
         while not stop_thread:
@@ -261,14 +320,16 @@ def Fight():
                     key_down(window, 'j')
                     key_down(window, 'l')
                     holding_keys = True
-                time.sleep(1)
             else:
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'j')
                     holding_keys = False
-            if find_image(SPACE, confidence=0.8): press_key(window, ' ')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            
+            if find_image(SPACE, confidence=0.8):
+                press_key(window, ' ')
+            elif any(find_image(image) for image in continueF):
+                press_key(window, 'c')
 
             time.sleep(1)
     except KeyboardInterrupt:
@@ -276,6 +337,24 @@ def Fight():
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
+
+def fight_function():
+    global stop_thread, fight_thread, Fight_BT
+    if fight_thread and fight_thread.is_alive():
+        stop_thread = True
+        fight_thread.join()
+        Fight_BT.config(text="\ueefd", bg="#6a6a64", fg="#9dff00")
+    else:
+        stop_thread = False
+        fight_thread = threading.Thread(target=fight)
+        fight_thread.daemon = True
+        fight_thread.start()
+        Fight_BT.config(text="\uf04d", bg="#1d2027", fg="#fc0000")
+
+
+
+Fight_BT = Button(ROOT, text="\ueefd", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fight_BT.grid(row=1, column=1, padx=(2, 2), pady=(3, 0))
 """
 ███████  █████  ███    ███ ███████
 ██      ██   ██ ████  ████ ██
@@ -543,13 +622,6 @@ def TakeL():
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
-def Fight_Function():
-    global stop_thread
-    stop_thread = False
-    t = threading.Thread(target=Fight)
-    t.daemon = True
-    t.start()
-
 def Loss_Function():
     global stop_thread
     stop_thread = False
@@ -599,29 +671,11 @@ def stop_functions():
 
 
 
-ROOT = tk.Tk()
-ROOT.title("Utility Buttons")
-ROOT.attributes('-topmost', True) 
-ROOT.overrideredirect(True)
-ROOT.configure(bg="#282c34")
-
-def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#66fd1f")
-    BORDER_FRAME.place(relwidth=1, relheight=1)
-    return BORDER_FRAME
-
-BORDER_FRAME = create_custom_border(ROOT)
-screen_width = ROOT.winfo_screenwidth()
-screen_height = ROOT.winfo_screenheight()
-
-x = screen_width - 60
-y = screen_height - 800
-# ROOT.geometry(f"35x230+{x}+{y}")
-ROOT.geometry(f"+{x}+{y}")
 
 
 
-Fight__BT   =Button(ROOT,text="\ueefd" ,bg="#6a6a64",fg="#9dff00",width=5,height=2,command=Fight_Function      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
+
+
 Fame__Light =Button(ROOT,text="FL"     ,bg="#bda24a",fg="#000000",width=5,height=3,command=Fame_Function_Light ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
 Fame__Heavy =Button(ROOT,text="FH"     ,bg="#bda24a",fg="#000000",width=5,height=2,command=Fame_Function_Heavy ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
 Event__Light=Button(ROOT,text="EL"     ,bg="#ce5129",fg="#ffffff",width=5,height=2,command=event_function_light,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
@@ -630,7 +684,6 @@ Raids_bt    =Button(ROOT,text="R"      ,bg="#5a9bf7",fg="#000000",width=5,height
 Loss_bt     =Button(ROOT,text="L"      ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=Loss_Function       ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
 Stop_bt     =Button(ROOT,text="\uf04d" ,bg="#1d2027",fg="#fc0000",width=5,height=2,command=stop_functions      ,font=("Jetbrainsmono nfp",10,"bold") ,relief="flat")
 
-Fight__BT.grid     (row=1,column=1, padx=(2,2), pady=(3,0))
 Fame__Light.grid   (row=2,column=1, padx=(1,1), pady=(1,1))
 Fame__Heavy.grid   (row=3,column=1, padx=(1,1), pady=(1,1))
 Event__Light.grid  (row=4,column=1, padx=(1,1), pady=(1,1))
