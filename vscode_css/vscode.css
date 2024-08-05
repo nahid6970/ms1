@@ -8,6 +8,8 @@
 /* Tabs width */
 .tabs-container .tab .tab-label {
 width: 150px;
+font-weight: bold;
+font-family: Jetbrainsmono nfp;
 }
 
 /* Code comment style */
