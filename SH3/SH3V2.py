@@ -287,7 +287,7 @@ loss_thread = None
 ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 """
 
-def fight():
+def fight_Heavy():
     global stop_thread
     window = focus_window(window_title)
     if not window:
@@ -326,7 +326,7 @@ def fight_function():
         Fight_BT.config(text="\ueefd", bg="#6a6a64", fg="#9dff00")
     else:
         stop_thread = False
-        fight_thread = threading.Thread(target=fight)
+        fight_thread = threading.Thread(target=fight_Heavy)
         fight_thread.daemon = True
         fight_thread.start()
         Fight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
@@ -653,7 +653,7 @@ def Raid_Light():
                     key_up(window, 'l')
                     key_up(window, 'd')
                     holding_keys = False
-                if find_image(Home, confidence=0.8): press_key(window, 'z')
+                elif find_image(Home, confidence=0.8): press_key(window, 'z')
                 elif find_image(level3, confidence=0.85): press_key(window, '3')
                 elif find_image(participate, confidence=0.97): press_key(window, 'c')
                 elif find_image(toraid, confidence=0.97): press_key(window, ' ')
