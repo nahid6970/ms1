@@ -12,16 +12,21 @@ font-weight: bold;
 font-family: Jetbrainsmono nfp;
 }
 
+.monaco-breadcrumbs {
+    font-size: 20px;
+    font-family: Jetbrainsmono nfp;
+    font-style: italic;
+}
+
 /* Code comment style */
 .mtk3 {
-    /* font-family:Jetbrainsmono nfp !important; */
     color: #06c000 !important;
     font-style: italic;
 }
 
-.monaco-editor.no-user-select .view-line {
-    color: #ff00ff;
-}
+/* .mtki {
+    background-color: #ff6f36;
+} */
 
 .line-numbers {
     position: relative !important;
