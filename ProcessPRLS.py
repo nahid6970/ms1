@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import psutil
 import pyautogui
+import threading
 
 # List of predetermined applications and their display names
 apps = {
@@ -17,8 +18,9 @@ apps = {
 }
 
 def update_status():
+    processes = {proc.name().lower() for proc in psutil.process_iter()}
     for app, display_name in apps.items():
-        running = any(proc.name().lower() == app.lower() for proc in psutil.process_iter())
+        running = app in processes
         color = "green" if running else "red"
         label = labels[app]
         label.config(fg=color)
@@ -56,16 +58,17 @@ labels = {}
 row = 0
 col = 0
 for app, display_name in apps.items():
-    label = tk.Label(root, text=display_name, font=("JetBrainsmono nfp", 18,"bold"), width=20, height=5, relief="solid", highlightbackground="blue", highlightcolor="blue", highlightthickness=2, bd=0, padx=5, pady=5)
+    label = tk.Label(root, text=display_name, font=("JetBrainsmono nfp", 18, "bold"), width=20, height=5, relief="solid", highlightbackground="blue", highlightcolor="blue", highlightthickness=2, bd=0, padx=5, pady=5)
     label.grid(row=row, column=col, padx=10, pady=10)
     labels[app] = label
-
 
     col += 1
     if col == 5:  # Move to next row after 5 columns
         row += 1
         col = 0
 
-update_status()
+# Run update_status in a separate thread to avoid blocking the main thread
+threading.Thread(target=update_status).start()
+
 center_and_press_alt_2(root)
 root.mainloop()
