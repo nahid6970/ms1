@@ -275,6 +275,7 @@ event_light_thread = None
 event_heavy_thread = None
 
 raid_heavy_thread = None
+raid_light_thread = None
 
 loss_thread = None
 """
@@ -610,7 +611,7 @@ def raid_function_heavy():
     if raid_heavy_thread and raid_heavy_thread.is_alive():
         stop_thread = True
         raid_heavy_thread.join()
-        Raid_Heavy_BT.config(text="R", bg="#5a9bf7", fg="#000000")
+        Raid_Heavy_BT.config(text="RH", bg="#5a9bf7", fg="#000000")
     else:
         stop_thread = False
         raid_heavy_thread = threading.Thread(target=Raids)
@@ -618,8 +619,69 @@ def raid_function_heavy():
         raid_heavy_thread.start()
         Raid_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Raid_Heavy_BT = Button(ROOT, text="R", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Raid_Heavy_BT = Button(ROOT, text="RH", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+
+
+
+def Raid_Light():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    holding_keys = False
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                start_time = time.time()
+                while time.time() - start_time < 5:
+                    if not holding_keys:
+                        key_down(window, 'd')
+                        key_down(window, 'l')
+                        holding_keys = True
+                    # Press 'j' rapidly
+                    press_key(window, 'j')
+                    time.sleep(0.001)  # Reduce sleep time for rapid pressing
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    holding_keys = False
+            else:
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    holding_keys = False
+                if find_image(Home, confidence=0.8): press_key(window, 'z')
+                elif find_image(level3, confidence=0.85): press_key(window, '3')
+                elif find_image(participate, confidence=0.97): press_key(window, 'c')
+                elif find_image(toraid, confidence=0.97): press_key(window, ' ')
+                elif find_image(fight, confidence=0.97): press_key(window, 'c')
+                elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
+                elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            time.sleep(1)
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
+def raid_function_light():
+    global stop_thread, raid_light_thread, Raid_Light_BT
+    if raid_light_thread and raid_light_thread.is_alive():
+        stop_thread = True
+        raid_light_thread.join()
+        Raid_Light_BT.config(text="RL", bg="#5a9bf7", fg="#000000")
+    else:
+        stop_thread = False
+        raid_light_thread = threading.Thread(target=Raid_Light)
+        raid_light_thread.daemon = True
+        raid_light_thread.start()
+        Raid_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+Raid_Light_BT = Button(ROOT, text="RL", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Raid_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 """
 ██╗      ██████╗ ███████╗███████╗
