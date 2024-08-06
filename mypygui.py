@@ -423,54 +423,52 @@ def Lockbox_update_label(LockBox_lb):
     LockBox_lb.after(1000, lambda: Lockbox_update_label(LockBox_lb))
 
 
-def compare_path_file():
-    source_dest_pairs = {
-"komorebi"       :(komorebi_src    ,komorebi_dst    ),
-# "glaze-wm"       :(glazewm_src     ,glazewm_dst     ),
-# "Nilesoft"       :(Nilesoft_src    ,Nilesoft_dst    ),
-# "whkd"           :(whkd_src        ,whkd_dst        ),
-"pwshH"          :(pwshH_src       ,pwshH_dst       ),
-"terminal"       :(terminal_src    ,terminal_dst    ),
-"rclone_config"  :(rclone_src      ,rclone_dst      ),
-"pwsh_profile"   :(pwsh_profile_src,pwsh_profile_dst),
-
-"ProwlarrDB"        :(ProwlarrDB_src     ,ProwlarrDB_dst     ),
-"RadarrDB"          :(RadarrDB_src       ,RadarrDB_dst       ),
-"SonarrDB"          :(SonarrDB_src       ,SonarrDB_dst       ),
-# "br_cf"          :(br_cf_src       ,br_cf_dst       ),
-# "br_db"          :(br_db_src       ,br_db_dst       ),
-# "Pr_cf"          :(Pr_cf_src       ,Pr_cf_dst       ),
-# "Rr_cf"          :(Rr_cf_src       ,Rr_cf_dst       ),
-# "Sr_cf"          :(Sr_cf_src       ,Sr_cf_dst       ),
-
-"RssDB"         :(Rss_db_src      ,Rss_db_dst      ),
-"RssCF"         :(Rss_cf_src      ,Rss_cf_dst      ),
-    }
-    is_all_same = True
-    names = []
-    for name, (source, dest) in source_dest_pairs.items():
-        if os.path.isdir(source) and os.path.isdir(dest):
-            dcmp = filecmp.dircmp(source, dest)
-            if dcmp.diff_files or dcmp.left_only or dcmp.right_only:
-                is_all_same = False
-                names.append(name)
-        elif os.path.isfile(source) and os.path.isfile(dest):
-            if not filecmp.cmp(source, dest):
-                is_all_same = False
-                names.append(name)
-        else:
-            is_all_same = False
-            names.append(name)
-    if is_all_same:
-        emoji = "✅"
-        name = "✅"
-    else:
-        emoji = "❌"
-        names_per_row = 4
-        formatted_names = [", ".join(names[i:i + names_per_row]) for i in range(0, len(names), names_per_row)]
-        name = "\n".join(formatted_names)
-    Changes_Monitor_lb.config(text=f"{name}")
-    Changes_Monitor_lb.after(1000, compare_path_file)
+# def compare_path_file():
+#     source_dest_pairs = {
+# "komorebi"       :(komorebi_src    ,komorebi_dst    ),
+# # "glaze-wm"       :(glazewm_src     ,glazewm_dst     ),
+# # "Nilesoft"       :(Nilesoft_src    ,Nilesoft_dst    ),
+# # "whkd"           :(whkd_src        ,whkd_dst        ),
+# "pwshH"          :(pwshH_src       ,pwshH_dst       ),
+# "terminal"       :(terminal_src    ,terminal_dst    ),
+# "rclone_config"  :(rclone_src      ,rclone_dst      ),
+# "pwsh_profile"   :(pwsh_profile_src,pwsh_profile_dst),
+# "ProwlarrDB"        :(ProwlarrDB_src     ,ProwlarrDB_dst     ),
+# "RadarrDB"          :(RadarrDB_src       ,RadarrDB_dst       ),
+# "SonarrDB"          :(SonarrDB_src       ,SonarrDB_dst       ),
+# # "br_cf"          :(br_cf_src       ,br_cf_dst       ),
+# # "br_db"          :(br_db_src       ,br_db_dst       ),
+# # "Pr_cf"          :(Pr_cf_src       ,Pr_cf_dst       ),
+# # "Rr_cf"          :(Rr_cf_src       ,Rr_cf_dst       ),
+# # "Sr_cf"          :(Sr_cf_src       ,Sr_cf_dst       ),
+# "RssDB"         :(Rss_db_src      ,Rss_db_dst      ),
+# "RssCF"         :(Rss_cf_src      ,Rss_cf_dst      ),
+#     }
+#     is_all_same = True
+#     names = []
+#     for name, (source, dest) in source_dest_pairs.items():
+#         if os.path.isdir(source) and os.path.isdir(dest):
+#             dcmp = filecmp.dircmp(source, dest)
+#             if dcmp.diff_files or dcmp.left_only or dcmp.right_only:
+#                 is_all_same = False
+#                 names.append(name)
+#         elif os.path.isfile(source) and os.path.isfile(dest):
+#             if not filecmp.cmp(source, dest):
+#                 is_all_same = False
+#                 names.append(name)
+#         else:
+#             is_all_same = False
+#             names.append(name)
+#     if is_all_same:
+#         emoji = "✅"
+#         name = "✅"
+#     else:
+#         emoji = "❌"
+#         names_per_row = 4
+#         formatted_names = [", ".join(names[i:i + names_per_row]) for i in range(0, len(names), names_per_row)]
+#         name = "\n".join(formatted_names)
+#     Changes_Monitor_lb.config(text=f"{name}")
+#     Changes_Monitor_lb.after(1000, compare_path_file)
 
 
 def get_cpu_core_usage():
@@ -716,8 +714,9 @@ Radarr_bt=tk.Label(ROOT1, text="\udb81\udfde", height=0, width=0, bg="#000000", 
 Radarr_bt.bind("<Button-1>",lambda event:(subprocess.Popen(["explorer","D:\\Downloads\\@Radarr"],shell=True)))
 Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,1))
 
-Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
-Changes_Monitor_lb.pack(side="left",padx=(0,0),pady=(0,0))
+# Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
+# Changes_Monitor_lb.pack(side="left",padx=(0,0),pady=(0,0))
+# compare_path_file()
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
 #! ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -809,7 +808,6 @@ update_uptime_label()
 update_info_labels()
 # check_window_topmost()
 Lockbox_update_label(LockBox_lb)
-compare_path_file()
 calculate_time_to_appear(start_time)
 
 ROOT.mainloop()
