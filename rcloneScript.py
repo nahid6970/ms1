@@ -10,25 +10,49 @@ root.title("Rclone GUI")
 command_var = tk.StringVar(value="ls")
 storage_var = tk.StringVar(value="C:/")
 transfer_var = tk.StringVar(value="4")
+include_var = tk.StringVar(value="*.jpg")
+exclude_var = tk.StringVar(value="*.jpg")
 
 # Additional options with display names
 additional_options = [
-    ("Fast-List", "--fast-list", False),
-    ("Check-First", "--check-first", False),
+    ("Fast-List", "--fast-list", True),
+    ("HM", "--human-readable", True),
+
 ]
 
-# Update the state of an option and change the color of the label
-def toggle_option(label, index):
-    current_value = additional_options[index][2]
-    additional_options[index] = (additional_options[index][0], additional_options[index][1], not current_value)
-    update_label_color(label, not current_value)
+# Manage additional items
+extra_items = {
+    "transfer": {"text": "Transfers", "prefix": "--transfers", "var": transfer_var, "state": False},
+    "include": {"text": "Include", "prefix": "--include", "var": include_var, "state": False},
+    "exclude": {"text": "Exclude", "prefix": "--exclude", "var": exclude_var, "state": False}
+}
 
-# Update label color based on state
+def toggle_option(label, key):
+    item = extra_items[key]
+    item["state"] = not item["state"]
+    update_label_color(label, item["state"])
+
 def update_label_color(label, is_selected):
-    if is_selected:
-        label.config(bg="green")
-    else:
-        label.config(bg="red")
+    label.config(bg="green" if is_selected else "red")
+
+def initialize_labels():
+    for idx, (display_text, _, is_selected) in enumerate(additional_options):
+        column = idx // 5
+        row = idx % 5
+        label = tk.Label(arguments_frame, text=display_text, bg="green" if is_selected else "red", width=20)
+        label.grid(row=row, column=column, sticky=tk.W, padx=5, pady=5)
+        label.bind("<Button-1>", lambda e, l=label, i=idx: toggle_option(l, i))
+
+def update_extra_labels():
+    for idx, (key, item) in enumerate(extra_items.items()):
+        row = idx
+        label = tk.Label(options_frame, text=item["text"], bg="green" if item["state"] else "red", width=15)
+        label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
+        label.bind("<Button-1>", lambda e, l=label, k=key: toggle_option(l, k))
+        
+        ttk.Label(options_frame, text="Value:").grid(row=row, column=1, sticky=tk.W)
+        entry = ttk.Entry(options_frame, textvariable=item["var"])
+        entry.grid(row=row, column=2, sticky=tk.W)
 
 # Create command frame
 command_frame = ttk.Frame(root, padding="10")
@@ -50,8 +74,10 @@ ttk.Label(storage_frame, text="Storage:").grid(row=0, column=0, sticky=tk.W)
 storage_radios = [
     ("C:/", "C:/"),
     ("D:/", "D:/"),
-    ("I:/", "I:/"),
-    ("E:/", "E:/")
+    ("cgu:/", "cgu:/"),
+    ("gu:/", "gu:/"),
+    ("g01:/", "g01:/"),
+    ("g02:/", "g02:/")
 ]
 
 for idx, (text, value) in enumerate(storage_radios):
@@ -63,16 +89,14 @@ arguments_frame = ttk.Frame(root, padding="10")
 arguments_frame.grid(row=2, column=0, sticky=tk.W)
 
 # Create labels for additional options
-for idx, (display_text, _, _) in enumerate(additional_options):
-    row = idx // 3
-    column = idx % 3
-    label = tk.Label(arguments_frame, text=display_text, bg="red", width=15)
-    label.grid(row=row, column=column, sticky=tk.W, padx=5, pady=5)
-    label.bind("<Button-1>", lambda e, l=label, i=idx: toggle_option(l, i))
+initialize_labels()
 
-ttk.Label(arguments_frame, text="--transfer=").grid(row=len(additional_options)//3 + 1, column=0, sticky=tk.W)
-transfer_entry = ttk.Entry(arguments_frame, textvariable=transfer_var)
-transfer_entry.grid(row=len(additional_options)//3 + 1, column=1, sticky=tk.W)
+# Create options frame for --transfer, --include, and --exclude
+options_frame = ttk.Frame(root, padding="10")
+options_frame.grid(row=3, column=0, sticky=tk.W)
+
+# Update labels for extra items
+update_extra_labels()
 
 def execute_command():
     command = ["rclone", command_var.get(), storage_var.get()]
@@ -80,8 +104,11 @@ def execute_command():
     for _, actual_text, is_selected in additional_options:
         if is_selected:
             command.append(actual_text)
-
-    command.append(f"--transfer={transfer_var.get()}")
+    
+    # Include/exclude options
+    for key, item in extra_items.items():
+        if item["state"]:
+            command.append(f"{item['prefix']}={item['var'].get()}")
 
     final_command = " ".join(command)
     print("Executing:", final_command)
@@ -91,10 +118,10 @@ def clear_terminal():
     subprocess.run("cls", shell=True)
 
 execute_button = ttk.Button(root, text="Execute", command=execute_command)
-execute_button.grid(row=3, column=0, pady=10, sticky=tk.W)
+execute_button.grid(row=4, column=0, pady=10, sticky=tk.W)
 
 clear_button = ttk.Button(root, text="Clear", command=clear_terminal)
-clear_button.grid(row=3, column=1, pady=10, sticky=tk.W)
+clear_button.grid(row=4, column=1, pady=10, sticky=tk.W)
 
 # Run the main event loop
 root.mainloop()
