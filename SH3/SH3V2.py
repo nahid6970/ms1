@@ -157,7 +157,7 @@ def find_image(image_path, confidence=0.7):
         error_count += 1
         print(f"{error_count} times not found. Error: {e}")
     # Check if one minute has passed since the last found time
-    if time.time() - last_found_time > 15:
+    if time.time() - last_found_time > 60:
         show_message("Error Finding Critical Sys File For 1 Minute")
         last_found_time = time.time()  # Reset the last found time to avoid repeated messages
     return None
