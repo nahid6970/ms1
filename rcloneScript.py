@@ -35,16 +35,17 @@ minsize_var = tk.StringVar(value="100M")
 
 # Additional options with display names
 additional_options = [
-    ("Fast List", "--fast-list", True),
-    ("Readable", "--human-readable", True),
-    ("Acknowledge Abuse", "--drive-acknowledge-abuse", True),
-    ("Log Level", "--log-level ERROR", True),
-    ("Trashed Only", "--drive-trashed-only ", False),
-    ("Shared With Me", "--drive-shared-with-me ", False),
-    ("Skip Dangling Shortcuts", "--drive-skip-dangling-shortcuts ", False),
-    ("Skip Shortcuts", "--drive-skip-shortcuts ", False),
-    ("Date **tree ", "-D ", False),
-    ("Modified Time **tree", "-t ", False),
+    ("Fast List"              ,"--fast-list"                     ,True) ,
+    ("Readable"               ,"--human-readable"                ,True) ,
+    ("Acknowledge Abuse"      ,"--drive-acknowledge-abuse"       ,True) ,
+    ("Log Level"              ,"--log-level ERROR"               ,False),
+    ("Stats Oneline"          ,"--stats-one-line"                ,False),
+    ("Trashed Only"           ,"--drive-trashed-only "           ,False),
+    ("Shared With Me"         ,"--drive-shared-with-me "         ,False),
+    ("Skip Dangling Shortcuts","--drive-skip-dangling-shortcuts ",False),
+    ("Skip Shortcuts"         ,"--drive-skip-shortcuts "         ,False),
+    ("Date **tree "           ,"-D "                             ,False),
+    ("Modified Time **tree"   ,"-t "                             ,False),
 ]
 
 # Manage additional items
@@ -90,15 +91,18 @@ def update_extra_labels():
         entry = ttk.Entry(options_frame, textvariable=item["var"])
         entry.grid(row=row, column=2, sticky=tk.W)
 
-# Create command frame
-command_frame = ttk.Frame(root, padding="10")
+# Create the style for the frame
+style = ttk.Style()
+style.configure("Black.TFrame", background="#282c34")
+
+# Create command frame with the new style
+command_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 command_frame.grid(row=0, column=0, sticky=tk.W)
 
 style = ttk.Style()
-style.configure("Custom.TRadiobutton", font=("Jetbrainsmono nfp", 12, "bold"))
+style.configure("Custom.TRadiobutton", font=("Jetbrainsmono nfp", 12, "bold"), background="#282c34", foreground="white")
 
-
-ttk.Label(command_frame, text="Command:", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
+ttk.Label(command_frame, text="Command:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 ls_radio = ttk.Radiobutton(command_frame, text="ls", variable=command_var, value="ls", style="Custom.TRadiobutton")
 ls_radio.grid(row=0, column=1, sticky=tk.W)
 tree_radio = ttk.Radiobutton(command_frame, text="tree", variable=command_var, value="tree", style="Custom.TRadiobutton")
@@ -111,10 +115,13 @@ mount_radio = ttk.Radiobutton(command_frame, text="mount", variable=command_var,
 mount_radio.grid(row=0, column=5, sticky=tk.W)
 
 # Create storage frame
-storage_frame = ttk.Frame(root, padding="10")
+style = ttk.Style()
+style.configure("Black.TFrame", background="#282c34")
+
+storage_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 storage_frame.grid(row=1, column=0, sticky=tk.W)
 
-ttk.Label(storage_frame, text="Storage:", font=("Jetbrainsmono nfp",12,"bold")).grid(row=0, column=0, sticky=tk.W)
+ttk.Label(storage_frame, text="Storage:",background="#f15812", font=("Jetbrainsmono nfp",12,"bold")).grid(row=0, column=0, sticky=tk.W)
 storage_radios = [
     ("C:/", "C:/"),
     ("D:/", "D:/"),
@@ -146,20 +153,26 @@ for idx, (text, value) in enumerate(storage_radios):
         row = 2
         column = idx - 3
     style = ttk.Style()
-    style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"))
+    style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#efd0b5", )
     radio = ttk.Radiobutton(storage_frame, text=text, variable=storage_var, value=value, style="Custom.TRadiobutton")
     radio.grid(row=row, column=column, sticky=tk.W)
 
 
 # Create arguments frame
-arguments_frame = ttk.Frame(root, padding="10")
+style = ttk.Style()
+style.configure("Black.TFrame", background="#282c34")
+
+arguments_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 arguments_frame.grid(row=2, column=0, sticky=tk.W)
 
 # Create labels for additional options
 initialize_labels()
 
+style = ttk.Style()
+style.configure("Black.TFrame", background="#282c34")
+
 # Create options frame for --transfer, --include, and --exclude
-options_frame = ttk.Frame(root, padding="10")
+options_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 options_frame.grid(row=3, column=0, sticky=tk.W)
 
 # Update labels for extra items
@@ -192,11 +205,6 @@ def execute_command():
 
     thread = threading.Thread(target=run_command)
     thread.start()
-
-
-
-
-
 
 
 def clear_terminal():
