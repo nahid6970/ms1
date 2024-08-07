@@ -27,19 +27,30 @@ storage_var = tk.StringVar(value="C:/")
 transfer_var = tk.StringVar(value="4")
 include_var = tk.StringVar(value="*.jpg")
 exclude_var = tk.StringVar(value="*.jpg")
+maxage_var = tk.StringVar(value="1d")
+minage_var = tk.StringVar(value="1d")
 
 # Additional options with display names
 additional_options = [
     ("--fast-list", "--fast-list", True),
     ("--human-readable", "--human-readable", True),
     ("--drive-acknowledge-abuse", "--drive-acknowledge-abuse", True),
+    ("--drive-trashed-only ", "--drive-trashed-only ", False),
+    ("--drive-shared-with-me ", "--drive-shared-with-me ", False),
+    ("--drive-skip-dangling-shortcuts ", "--drive-skip-dangling-shortcuts ", False),
+    ("--drive-skip-shortcuts ", "--drive-skip-shortcuts ", False),
+    ("-D **tree ", "-D ", False),
+    ("-t **tree", "-t ", False),
 ]
 
 # Manage additional items
 extra_items = {
     "transfer": {"text": "Transfers", "prefix": "--transfers", "var": transfer_var, "state": False},
     "include": {"text": "Include", "prefix": "--include", "var": include_var, "state": False},
-    "exclude": {"text": "Exclude", "prefix": "--exclude", "var": exclude_var, "state": False}
+    "exclude": {"text": "Exclude", "prefix": "--exclude", "var": exclude_var, "state": False},
+    "Max_Age": {"text": "Max Age", "prefix": "--max-age", "var": maxage_var, "state": False},
+    "Min_Age": {"text": "Min Age", "prefix": "--min-age", "var": minage_var, "state": False},
+
 }
 
 def toggle_option(label, idx):
@@ -52,20 +63,20 @@ def update_extra_item(label, key):
     update_label_color(label, item["state"])
 
 def update_label_color(label, is_selected):
-    label.config(bg="#b6fba0" if is_selected else "red")
+    label.config(bg="#b6fba0" if is_selected else "#fa8a93")
 
 def initialize_labels():
     for idx, (display_text, _, is_selected) in enumerate(additional_options):
         column = idx // 5
         row = idx % 5
-        label = tk.Label(arguments_frame, text=display_text, bg="#b6fba0" if is_selected else "red", width=20)
+        label = tk.Label(arguments_frame, text=display_text, bg="#b6fba0" if is_selected else "#fa8a93", width=25, anchor="center")
         label.grid(row=row, column=column, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, i=idx: toggle_option(l, i))
 
 def update_extra_labels():
     for idx, (key, item) in enumerate(extra_items.items()):
         row = idx
-        label = tk.Label(options_frame, text=item["text"], bg="#b6fba0" if item["state"] else "red", width=15)
+        label = tk.Label(options_frame, text=item["text"], bg="#b6fba0" if item["state"] else "#fa8a93", width=15)
         label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, k=key: update_extra_item(l, k))
         
