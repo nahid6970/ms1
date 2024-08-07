@@ -29,6 +29,8 @@ include_var = tk.StringVar(value="*.jpg")
 exclude_var = tk.StringVar(value="*.jpg")
 maxage_var = tk.StringVar(value="1d")
 minage_var = tk.StringVar(value="1d")
+maxsize_var = tk.StringVar(value="100M")
+minsize_var = tk.StringVar(value="100M")
 
 # Additional options with display names
 additional_options = [
@@ -50,6 +52,8 @@ extra_items = {
     "exclude": {"text": "Exclude", "prefix": "--exclude", "var": exclude_var, "state": False},
     "Max_Age": {"text": "Max Age", "prefix": "--max-age", "var": maxage_var, "state": False},
     "Min_Age": {"text": "Min Age", "prefix": "--min-age", "var": minage_var, "state": False},
+    "Max_Size": {"text": "Max Size", "prefix": "--max-size", "var": maxsize_var, "state": False},
+    "Min_Size": {"text": "Min Size", "prefix": "--min-size", "var": minsize_var, "state": False},
 
 }
 
