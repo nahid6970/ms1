@@ -99,7 +99,7 @@ command_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 command_frame.grid(row=0, column=0, sticky=tk.W)
 
 style = ttk.Style()
-style.configure("Custom.TRadiobutton", font=("Jetbrainsmono nfp", 12, "bold"), background="#282c34", foreground="white")
+style.configure("Custom.TRadiobutton", font=("Jetbrainsmono nfp", 12, "bold"), background="#282c34", foreground="#ffffff")
 
 ttk.Label(command_frame, text="Command:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 ls_radio = ttk.Radiobutton(command_frame, text="ls", variable=command_var, value="ls", style="Custom.TRadiobutton")
@@ -126,28 +126,28 @@ ttk.Label(storage_frame, text="Storage:", background="#f15812", font=("JetBrains
 storage_radios = [
     {"text": "C:/"  ,"value": "C:/"  ,"row": 1,"column": 1},
     {"text": "D:/"  ,"value": "D:/"  ,"row": 1,"column": 2},
-    {"text": "cgu:/","value": "cgu:/","row": 1,"column": 3},
-    {"text": "gu:/" ,"value": "gu:/" ,"row": 1,"column": 4},
-    {"text": "g00:/","value": "g00:/","row": 2,"column": 1},
-    {"text": "g01:/","value": "g01:/","row": 2,"column": 2},
-    {"text": "g02:/","value": "g02:/","row": 2,"column": 3},
-    {"text": "g03:/","value": "g03:/","row": 2,"column": 4},
-    {"text": "g04:/","value": "g04:/","row": 3,"column": 1},
-    {"text": "g05:/","value": "g05:/","row": 3,"column": 2},
-    {"text": "g06:/","value": "g06:/","row": 3,"column": 3},
-    {"text": "g07:/","value": "g07:/","row": 3,"column": 4},
-    {"text": "g08:/","value": "g08:/","row": 4,"column": 1},
-    {"text": "g09:/","value": "g09:/","row": 4,"column": 2},
-    {"text": "g10:/","value": "g10:/","row": 4,"column": 3},
-    {"text": "g11:/","value": "g11:/","row": 4,"column": 4},
-    {"text": "g12:/","value": "g12:/","row": 5,"column": 1},
-    {"text": "g13:/","value": "g13:/","row": 5,"column": 2},
-    {"text": "g14:/","value": "g14:/","row": 5,"column": 3},
-    {"text": "g15:/","value": "g15:/","row": 5,"column": 4},
+    {"text": "cgu:/","value": "cgu:/","row": 2,"column": 1},
+    {"text": "gu:/" ,"value": "gu:/" ,"row": 2,"column": 2},
+    {"text": "g00:/","value": "g00:/","row": 2,"column": 3},
+    {"text": "g01:/","value": "g01:/","row": 3,"column": 1},
+    {"text": "g02:/","value": "g02:/","row": 3,"column": 2},
+    {"text": "g03:/","value": "g03:/","row": 3,"column": 3},
+    {"text": "g04:/","value": "g04:/","row": 3,"column": 4},
+    {"text": "g05:/","value": "g05:/","row": 3,"column": 5},
+    {"text": "g06:/","value": "g06:/","row": 4,"column": 1},
+    {"text": "g07:/","value": "g07:/","row": 4,"column": 2},
+    {"text": "g08:/","value": "g08:/","row": 4,"column": 3},
+    {"text": "g09:/","value": "g09:/","row": 4,"column": 4},
+    {"text": "g10:/","value": "g10:/","row": 4,"column": 5},
+    {"text": "g11:/","value": "g11:/","row": 5,"column": 1},
+    {"text": "g12:/","value": "g12:/","row": 5,"column": 2},
+    {"text": "g13:/","value": "g13:/","row": 5,"column": 3},
+    {"text": "g14:/","value": "g14:/","row": 5,"column": 4},
+    {"text": "g15:/","value": "g15:/","row": 5,"column": 5},
 ]
 
 style = ttk.Style()
-style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#efd0b5")
+style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#e6f752")
 
 for item in storage_radios:
     radio = ttk.Radiobutton(storage_frame, text=item["text"], variable=storage_var, value=item["value"], style="Custom.TRadiobutton")
