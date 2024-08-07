@@ -57,7 +57,6 @@ extra_items = {
     "Min_Age": {"text": "Min Age", "prefix": "--min-age", "var": minage_var, "state": False},
     "Max_Size": {"text": "Max Size", "prefix": "--max-size", "var": maxsize_var, "state": False},
     "Min_Size": {"text": "Min Size", "prefix": "--min-size", "var": minsize_var, "state": False},
-
 }
 
 def toggle_option(label, idx):
@@ -121,41 +120,75 @@ style.configure("Black.TFrame", background="#282c34")
 storage_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 storage_frame.grid(row=1, column=0, sticky=tk.W)
 
-ttk.Label(storage_frame, text="Storage:",background="#f15812", font=("Jetbrainsmono nfp",12,"bold")).grid(row=0, column=0, sticky=tk.W)
+
+#! alt1 start
+ttk.Label(storage_frame, text="Storage:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 storage_radios = [
-    ("C:/", "C:/"),
-    ("D:/", "D:/"),
-    ("cgu:/", "cgu:/"),
-    ("gu:/", "gu:/"),
-    ("g00:/", "g00:/"),
-    ("g01:/", "g01:/"),
-    ("g02:/", "g02:/"),
-    ("g03:/", "g03:/"),
-    ("g04:/", "g04:/"),
-    ("g05:/", "g05:/"),
-    ("g06:/", "g06:/"),
-    ("g07:/", "g07:/"),
-    ("g08:/", "g08:/"),
-    ("g09:/", "g09:/"),
-    ("g10:/", "g10:/"),
-    ("g11:/", "g11:/"),
-    ("g12:/", "g12:/"),
-    ("g13:/", "g13:/"),
-    ("g14:/", "g14:/"),
-    ("g15:/", "g15:/"),
+    {"text": "C:/"  ,"value": "C:/"  ,"row": 1,"column": 1},
+    {"text": "D:/"  ,"value": "D:/"  ,"row": 1,"column": 2},
+    {"text": "cgu:/","value": "cgu:/","row": 1,"column": 3},
+    {"text": "gu:/" ,"value": "gu:/" ,"row": 1,"column": 4},
+    {"text": "g00:/","value": "g00:/","row": 2,"column": 1},
+    {"text": "g01:/","value": "g01:/","row": 2,"column": 2},
+    {"text": "g02:/","value": "g02:/","row": 2,"column": 3},
+    {"text": "g03:/","value": "g03:/","row": 2,"column": 4},
+    {"text": "g04:/","value": "g04:/","row": 3,"column": 1},
+    {"text": "g05:/","value": "g05:/","row": 3,"column": 2},
+    {"text": "g06:/","value": "g06:/","row": 3,"column": 3},
+    {"text": "g07:/","value": "g07:/","row": 3,"column": 4},
+    {"text": "g08:/","value": "g08:/","row": 4,"column": 1},
+    {"text": "g09:/","value": "g09:/","row": 4,"column": 2},
+    {"text": "g10:/","value": "g10:/","row": 4,"column": 3},
+    {"text": "g11:/","value": "g11:/","row": 4,"column": 4},
+    {"text": "g12:/","value": "g12:/","row": 5,"column": 1},
+    {"text": "g13:/","value": "g13:/","row": 5,"column": 2},
+    {"text": "g14:/","value": "g14:/","row": 5,"column": 3},
+    {"text": "g15:/","value": "g15:/","row": 5,"column": 4},
 ]
 
-for idx, (text, value) in enumerate(storage_radios):
-    if idx < 4:
-        row = idx // 2
-        column = idx % 2 + 1
-    else:
-        row = 2
-        column = idx - 3
-    style = ttk.Style()
-    style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#efd0b5", )
-    radio = ttk.Radiobutton(storage_frame, text=text, variable=storage_var, value=value, style="Custom.TRadiobutton")
-    radio.grid(row=row, column=column, sticky=tk.W)
+style = ttk.Style()
+style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#efd0b5")
+
+for item in storage_radios:
+    radio = ttk.Radiobutton(storage_frame, text=item["text"], variable=storage_var, value=item["value"], style="Custom.TRadiobutton")
+    radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
+#! alt1 end
+
+# ttk.Label(storage_frame, text="Storage:",background="#f15812", font=("Jetbrainsmono nfp",12,"bold")).grid(row=0, column=0, sticky=tk.W)
+# storage_radios = [
+#     ("C:/", "C:/"),
+#     ("D:/", "D:/"),
+#     ("cgu:/", "cgu:/"),
+#     ("gu:/", "gu:/"),
+#     ("g00:/", "g00:/"),
+#     ("g01:/", "g01:/"),
+#     ("g02:/", "g02:/"),
+#     ("g03:/", "g03:/"),
+#     ("g04:/", "g04:/"),
+#     ("g05:/", "g05:/"),
+#     ("g06:/", "g06:/"),
+#     ("g07:/", "g07:/"),
+#     ("g08:/", "g08:/"),
+#     ("g09:/", "g09:/"),
+#     ("g10:/", "g10:/"),
+#     ("g11:/", "g11:/"),
+#     ("g12:/", "g12:/"),
+#     ("g13:/", "g13:/"),
+#     ("g14:/", "g14:/"),
+#     ("g15:/", "g15:/"),
+# ]
+
+# for idx, (text, value) in enumerate(storage_radios):
+#     if idx < 4:
+#         row = idx // 2
+#         column = idx % 2 + 1
+#     else:
+#         row = 2
+#         column = idx - 3
+#     style = ttk.Style()
+#     style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#efd0b5", )
+#     radio = ttk.Radiobutton(storage_frame, text=text, variable=storage_var, value=value, style="Custom.TRadiobutton")
+#     radio.grid(row=row, column=column, sticky=tk.W)
 
 
 # Create arguments frame
@@ -215,10 +248,6 @@ execute_button.grid(row=4, column=0, pady=10, sticky=tk.W)
 
 clear_button = tk.Button(root, text="Clear", font=("Jetbrainsmono nfp",12,"bold"), command=clear_terminal)
 clear_button.grid(row=4, column=1, pady=10, sticky=tk.W)
-
-
-
-
 
 center_and_press_alt_2(root)
 # Run the main event loop
