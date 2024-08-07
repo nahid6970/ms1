@@ -277,6 +277,7 @@ applications = [
 {"name": "Ollama","scoop_name": "","scoop_path": r'',"winget_name": "Ollama.Ollama","winget_path": r"xx"} ,
 {"name": "LM Studio","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "LMStudio.LMStudio","winget_path": r"xx"} ,
 {"name": "JellyFin","scoop_name": "","scoop_path": r'',"winget_name": "Jellyfin.Server","winget_path": r"xx"} ,
+{"name": "winfsp","scoop_name": "winfsp-np","scoop_path": winfsp_sp,"winget_name": "WingetName","winget_path": r""} ,
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
 
 ]
