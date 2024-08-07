@@ -90,6 +90,15 @@ storage_radios = [
     ("g04:/", "g04:/"),
     ("g05:/", "g05:/"),
     ("g06:/", "g06:/"),
+    ("g07:/", "g07:/"),
+    ("g08:/", "g08:/"),
+    ("g09:/", "g09:/"),
+    ("g10:/", "g10:/"),
+    ("g11:/", "g11:/"),
+    ("g12:/", "g12:/"),
+    ("g13:/", "g13:/"),
+    ("g14:/", "g14:/"),
+    ("g15:/", "g15:/"),
 ]
 
 for idx, (text, value) in enumerate(storage_radios):
@@ -119,6 +128,11 @@ update_extra_labels()
 def execute_command():
     command = ["rclone", command_var.get(), storage_var.get()]
 
+    if command_var.get() == "mount":
+        # For mount command, generate the specific mount argument
+        mount_dir = f"c:/{storage_var.get().strip(':/')}/"
+        command.append(mount_dir)
+    
     for display_text, actual_text, is_selected in additional_options:
         if is_selected:
             command.append(actual_text)
@@ -130,7 +144,7 @@ def execute_command():
 
     final_command = " ".join(command)
     print("Executing:", final_command)
-    subprocess.run(final_command, shell=True)
+    subprocess.Popen(final_command, shell=True)
 
 def clear_terminal():
     subprocess.run("cls", shell=True)
