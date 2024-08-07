@@ -1,3 +1,4 @@
+import threading
 import tkinter as tk
 from tkinter import ttk
 import subprocess
@@ -37,6 +38,7 @@ additional_options = [
     ("Fast List", "--fast-list", True),
     ("Readable", "--human-readable", True),
     ("Acknowledge Abuse", "--drive-acknowledge-abuse", True),
+    ("Log Level", "--log-level ERROR", True),
     ("Trashed Only", "--drive-trashed-only ", False),
     ("Shared With Me", "--drive-shared-with-me ", False),
     ("Skip Dangling Shortcuts", "--drive-skip-dangling-shortcuts ", False),
@@ -182,7 +184,20 @@ def execute_command():
 
     final_command = " ".join(command)
     print("Executing:", final_command)
-    subprocess.Popen(final_command, shell=True)
+
+    def run_command():
+        process = subprocess.Popen(final_command, shell=True)
+        process.wait()
+        print("\033[94mJob Done\033[0m")  # Print "Job Done" in blue
+
+    thread = threading.Thread(target=run_command)
+    thread.start()
+
+
+
+
+
+
 
 def clear_terminal():
     subprocess.run("cls", shell=True)
