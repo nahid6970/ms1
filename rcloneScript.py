@@ -26,7 +26,7 @@ root.title("Rclone + winfsp")
 root.configure(bg="#282c34")
 # Variables
 command_var = tk.StringVar(value="ls")
-storage_var = tk.StringVar(value="C:/")
+storage_var = tk.StringVar(value="")
 transfer_var = tk.StringVar(value="4")
 include_var = tk.StringVar(value="*.jpg")
 exclude_var = tk.StringVar(value="*.jpg")
@@ -47,6 +47,7 @@ additional_options = [
     ("Fast List"              ,"--fast-list"                     ,True) ,
     ("Readable"               ,"--human-readable"                ,True) ,
     ("Acknowledge Abuse"      ,"--drive-acknowledge-abuse"       ,True) ,
+    ("Web Gui **Rcd"          ,"--rc-web-gui"                    ,False) ,
     ("Log Level"              ,"--log-level ERROR"               ,False),
     ("Stats Oneline"          ,"--stats-one-line"                ,False),
     ("Trashed Only"           ,"--drive-trashed-only "           ,False),
@@ -114,6 +115,7 @@ command_radios = [
     {"text": "NcDu" ,"value": "ncdu"} ,
     {"text": "Size" ,"value": "size"} ,
     {"text": "Mount","value": "mount"},
+    {"text": "Rcd","value": "rcd"},
 ]
 # Initialize command radio buttons
 for idx, item in enumerate(command_radios):
@@ -139,8 +141,9 @@ storage_frame.grid(row=1, column=0, sticky=tk.W)
 #! alt1 start
 ttk.Label(storage_frame, text="Storage:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 storage_radios = [
-    {"text": "C:/"  ,"value": "C:/"  ,"row": 1,"column": 1},
-    {"text": "D:/"  ,"value": "D:/"  ,"row": 1,"column": 2},
+    {"text": "N/A"  ,"value": ""     ,"row": 1,"column": 1},
+    {"text": "C:/"  ,"value": "C:/"  ,"row": 1,"column": 2},
+    {"text": "D:/"  ,"value": "D:/"  ,"row": 1,"column": 3},
     {"text": "cgu:/","value": "cgu:/","row": 2,"column": 1},
     {"text": "gu:/" ,"value": "gu:/" ,"row": 2,"column": 2},
     {"text": "g00:/","value": "g00:/","row": 2,"column": 3},
