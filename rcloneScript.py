@@ -65,6 +65,8 @@ tree_radio = ttk.Radiobutton(command_frame, text="tree", variable=command_var, v
 tree_radio.grid(row=0, column=2, sticky=tk.W)
 ncdu_radio = ttk.Radiobutton(command_frame, text="ncdu", variable=command_var, value="ncdu")
 ncdu_radio.grid(row=0, column=3, sticky=tk.W)
+size_radio = ttk.Radiobutton(command_frame, text="size", variable=command_var, value="size")
+size_radio.grid(row=0, column=4, sticky=tk.W)
 
 # Create storage frame
 storage_frame = ttk.Frame(root, padding="10")
