@@ -17,7 +17,6 @@ exclude_var = tk.StringVar(value="*.jpg")
 additional_options = [
     ("Fast-List", "--fast-list", True),
     ("HM", "--human-readable", True),
-
 ]
 
 # Manage additional items
@@ -27,7 +26,11 @@ extra_items = {
     "exclude": {"text": "Exclude", "prefix": "--exclude", "var": exclude_var, "state": False}
 }
 
-def toggle_option(label, key):
+def toggle_option(label, idx):
+    additional_options[idx] = (additional_options[idx][0], additional_options[idx][1], not additional_options[idx][2])
+    update_label_color(label, additional_options[idx][2])
+
+def update_extra_item(label, key):
     item = extra_items[key]
     item["state"] = not item["state"]
     update_label_color(label, item["state"])
@@ -48,7 +51,7 @@ def update_extra_labels():
         row = idx
         label = tk.Label(options_frame, text=item["text"], bg="green" if item["state"] else "red", width=15)
         label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
-        label.bind("<Button-1>", lambda e, l=label, k=key: toggle_option(l, k))
+        label.bind("<Button-1>", lambda e, l=label, k=key: update_extra_item(l, k))
         
         ttk.Label(options_frame, text="Value:").grid(row=row, column=1, sticky=tk.W)
         entry = ttk.Entry(options_frame, textvariable=item["var"])
@@ -67,6 +70,8 @@ ncdu_radio = ttk.Radiobutton(command_frame, text="ncdu", variable=command_var, v
 ncdu_radio.grid(row=0, column=3, sticky=tk.W)
 size_radio = ttk.Radiobutton(command_frame, text="size", variable=command_var, value="size")
 size_radio.grid(row=0, column=4, sticky=tk.W)
+mount_radio = ttk.Radiobutton(command_frame, text="mount", variable=command_var, value="mount")
+mount_radio.grid(row=0, column=5, sticky=tk.W)
 
 # Create storage frame
 storage_frame = ttk.Frame(root, padding="10")
@@ -78,13 +83,24 @@ storage_radios = [
     ("D:/", "D:/"),
     ("cgu:/", "cgu:/"),
     ("gu:/", "gu:/"),
+    ("g00:/", "g00:/"),
     ("g01:/", "g01:/"),
-    ("g02:/", "g02:/")
+    ("g02:/", "g02:/"),
+    ("g03:/", "g03:/"),
+    ("g04:/", "g04:/"),
+    ("g05:/", "g05:/"),
+    ("g06:/", "g06:/"),
 ]
 
 for idx, (text, value) in enumerate(storage_radios):
+    if idx < 4:
+        row = idx // 2
+        column = idx % 2 + 1
+    else:
+        row = 2
+        column = idx - 3
     radio = ttk.Radiobutton(storage_frame, text=text, variable=storage_var, value=value)
-    radio.grid(row=0, column=1+idx, sticky=tk.W)
+    radio.grid(row=row, column=column, sticky=tk.W)
 
 # Create arguments frame
 arguments_frame = ttk.Frame(root, padding="10")
@@ -103,7 +119,7 @@ update_extra_labels()
 def execute_command():
     command = ["rclone", command_var.get(), storage_var.get()]
 
-    for _, actual_text, is_selected in additional_options:
+    for display_text, actual_text, is_selected in additional_options:
         if is_selected:
             command.append(actual_text)
     
