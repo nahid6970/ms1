@@ -1,6 +1,21 @@
 import tkinter as tk
 from tkinter import ttk
 import subprocess
+import pyautogui
+
+
+def center_and_press_alt_2(window):
+    def center_window():
+        window.update_idletasks()
+        width = window.winfo_width()
+        height = window.winfo_height()
+        x = (window.winfo_screenwidth() // 2) - (width // 2)
+        y = (window.winfo_screenheight() // 2) - (height // 2)
+        window.geometry(f'{width}x{height}+{x}+{y}')
+    def press_alt_2():
+        pyautogui.hotkey('alt', '2')
+    center_window()
+    window.after(25, press_alt_2)
 
 # Create the main window
 root = tk.Tk()
@@ -155,5 +170,10 @@ execute_button.grid(row=4, column=0, pady=10, sticky=tk.W)
 clear_button = ttk.Button(root, text="Clear", command=clear_terminal)
 clear_button.grid(row=4, column=1, pady=10, sticky=tk.W)
 
+
+
+
+
+center_and_press_alt_2(root)
 # Run the main event loop
 root.mainloop()
