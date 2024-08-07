@@ -5,6 +5,8 @@ import subprocess
 import pyautogui
 
 
+
+
 def center_and_press_alt_2(window):
     def center_window():
         window.update_idletasks()
@@ -32,6 +34,13 @@ maxage_var = tk.StringVar(value="1d")
 minage_var = tk.StringVar(value="1d")
 maxsize_var = tk.StringVar(value="100M")
 minsize_var = tk.StringVar(value="100M")
+
+style = ttk.Style()
+style.configure("Custom.TRadiobutton", font=("JetBrainsmono nfp", 12, "bold"), foreground="#e6f752", background="#282c34")
+
+style = ttk.Style()
+style.configure("Black.TFrame", background="#282c34")
+
 
 # Additional options with display names
 additional_options = [
@@ -91,32 +100,38 @@ def update_extra_labels():
         entry.grid(row=row, column=2, sticky=tk.W)
 
 # Create the style for the frame
-style = ttk.Style()
-style.configure("Black.TFrame", background="#282c34")
 
 # Create command frame with the new style
 command_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 command_frame.grid(row=0, column=0, sticky=tk.W)
 
-style = ttk.Style()
-style.configure("Custom.TRadiobutton", font=("Jetbrainsmono nfp", 12, "bold"), background="#282c34", foreground="#ffffff")
 
 ttk.Label(command_frame, text="Command:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-ls_radio = ttk.Radiobutton(command_frame, text="ls", variable=command_var, value="ls", style="Custom.TRadiobutton")
-ls_radio.grid(row=0, column=1, sticky=tk.W)
-tree_radio = ttk.Radiobutton(command_frame, text="tree", variable=command_var, value="tree", style="Custom.TRadiobutton")
-tree_radio.grid(row=0, column=2, sticky=tk.W)
-ncdu_radio = ttk.Radiobutton(command_frame, text="ncdu", variable=command_var, value="ncdu", style="Custom.TRadiobutton")
-ncdu_radio.grid(row=0, column=3, sticky=tk.W)
-size_radio = ttk.Radiobutton(command_frame, text="size", variable=command_var, value="size", style="Custom.TRadiobutton")
-size_radio.grid(row=0, column=4, sticky=tk.W)
-mount_radio = ttk.Radiobutton(command_frame, text="mount", variable=command_var, value="mount", style="Custom.TRadiobutton")
-mount_radio.grid(row=0, column=5, sticky=tk.W)
+# Command radios configuration
+command_radios = [
+    {"text": "ls"   ,"value": "ls"}   ,
+    {"text": "Tree" ,"value": "tree"} ,
+    {"text": "NcDu" ,"value": "ncdu"} ,
+    {"text": "Size" ,"value": "size"} ,
+    {"text": "Mount","value": "mount"},
+]
+# Initialize command radio buttons
+for idx, item in enumerate(command_radios):
+    radio = ttk.Radiobutton(command_frame, text=item["text"], variable=command_var, value=item["value"], style="Custom.TRadiobutton")
+    radio.grid(row=0, column=idx+1, sticky=tk.W)
+
+# ls_radio = ttk.Radiobutton(command_frame, text="ls", variable=command_var, value="ls", style="Custom.TRadiobutton")
+# ls_radio.grid(row=0, column=1, sticky=tk.W)
+# tree_radio = ttk.Radiobutton(command_frame, text="tree", variable=command_var, value="tree", style="Custom.TRadiobutton")
+# tree_radio.grid(row=0, column=2, sticky=tk.W)
+# ncdu_radio = ttk.Radiobutton(command_frame, text="ncdu", variable=command_var, value="ncdu", style="Custom.TRadiobutton")
+# ncdu_radio.grid(row=0, column=3, sticky=tk.W)
+# size_radio = ttk.Radiobutton(command_frame, text="size", variable=command_var, value="size", style="Custom.TRadiobutton")
+# size_radio.grid(row=0, column=4, sticky=tk.W)
+# mount_radio = ttk.Radiobutton(command_frame, text="mount", variable=command_var, value="mount", style="Custom.TRadiobutton")
+# mount_radio.grid(row=0, column=5, sticky=tk.W)
 
 # Create storage frame
-style = ttk.Style()
-style.configure("Black.TFrame", background="#282c34")
-
 storage_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 storage_frame.grid(row=1, column=0, sticky=tk.W)
 
@@ -145,9 +160,6 @@ storage_radios = [
     {"text": "g14:/","value": "g14:/","row": 5,"column": 4},
     {"text": "g15:/","value": "g15:/","row": 5,"column": 5},
 ]
-
-style = ttk.Style()
-style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#e6f752")
 
 for item in storage_radios:
     radio = ttk.Radiobutton(storage_frame, text=item["text"], variable=storage_var, value=item["value"], style="Custom.TRadiobutton")
@@ -192,17 +204,11 @@ for item in storage_radios:
 
 
 # Create arguments frame
-style = ttk.Style()
-style.configure("Black.TFrame", background="#282c34")
-
 arguments_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 arguments_frame.grid(row=2, column=0, sticky=tk.W)
 
 # Create labels for additional options
 initialize_labels()
-
-style = ttk.Style()
-style.configure("Black.TFrame", background="#282c34")
 
 # Create options frame for --transfer, --include, and --exclude
 options_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
@@ -213,29 +219,23 @@ update_extra_labels()
 
 def execute_command():
     command = ["rclone", command_var.get(), storage_var.get()]
-
     if command_var.get() == "mount":
         # For mount command, generate the specific mount argument
         mount_dir = f"c:/{storage_var.get().strip(':/')}/"
         command.append(mount_dir)
-    
     for display_text, actual_text, is_selected in additional_options:
         if is_selected:
             command.append(actual_text)
-    
     # Include/exclude options
     for key, item in extra_items.items():
         if item["state"]:
             command.append(f"{item['prefix']}={item['var'].get()}")
-
     final_command = " ".join(command)
     print("Executing:", final_command)
-
     def run_command():
         process = subprocess.Popen(final_command, shell=True)
         process.wait()
         print("\033[94mJob Done\033[0m")  # Print "Job Done" in blue
-
     thread = threading.Thread(target=run_command)
     thread.start()
 
@@ -243,10 +243,13 @@ def execute_command():
 def clear_terminal():
     subprocess.run("cls", shell=True)
 
-execute_button = tk.Button(root, text="Execute", font=("Jetbrainsmono nfp",12,"bold"), command=execute_command)
-execute_button.grid(row=4, column=0, pady=10, sticky=tk.W)
+BottomFrame = ttk.Frame(root, padding="10", style="Black.TFrame")
+BottomFrame.grid(row=4, column=0, sticky=tk.E)
 
-clear_button = tk.Button(root, text="Clear", font=("Jetbrainsmono nfp",12,"bold"), command=clear_terminal)
+execute_button = tk.Button(BottomFrame, text="Execute", font=("Jetbrainsmono nfp",12,"bold"), bg="#4da9ff", fg="#000000", command=execute_command)
+execute_button.grid(row=4, column=0, pady=10, padx=10, sticky=tk.W)
+
+clear_button = tk.Button(BottomFrame, text="Clear", font=("Jetbrainsmono nfp",12,"bold"), bg="#282c34",fg="#ffffff", command=clear_terminal)
 clear_button.grid(row=4, column=1, pady=10, sticky=tk.W)
 
 center_and_press_alt_2(root)
