@@ -4,7 +4,7 @@ import subprocess
 
 # Create the main window
 root = tk.Tk()
-root.title("Rclone GUI")
+root.title("Rclone + winfsp")
 
 # Variables
 command_var = tk.StringVar(value="ls")
