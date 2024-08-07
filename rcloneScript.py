@@ -20,7 +20,7 @@ def center_and_press_alt_2(window):
 # Create the main window
 root = tk.Tk()
 root.title("Rclone + winfsp")
-
+root.configure(bg="#282c34")
 # Variables
 command_var = tk.StringVar(value="ls")
 storage_var = tk.StringVar(value="C:/")
@@ -30,8 +30,9 @@ exclude_var = tk.StringVar(value="*.jpg")
 
 # Additional options with display names
 additional_options = [
-    ("Fast-List", "--fast-list", True),
-    ("HM", "--human-readable", True),
+    ("--fast-list", "--fast-list", True),
+    ("--human-readable", "--human-readable", True),
+    ("--drive-acknowledge-abuse", "--drive-acknowledge-abuse", True),
 ]
 
 # Manage additional items
@@ -51,20 +52,20 @@ def update_extra_item(label, key):
     update_label_color(label, item["state"])
 
 def update_label_color(label, is_selected):
-    label.config(bg="green" if is_selected else "red")
+    label.config(bg="#b6fba0" if is_selected else "red")
 
 def initialize_labels():
     for idx, (display_text, _, is_selected) in enumerate(additional_options):
         column = idx // 5
         row = idx % 5
-        label = tk.Label(arguments_frame, text=display_text, bg="green" if is_selected else "red", width=20)
+        label = tk.Label(arguments_frame, text=display_text, bg="#b6fba0" if is_selected else "red", width=20)
         label.grid(row=row, column=column, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, i=idx: toggle_option(l, i))
 
 def update_extra_labels():
     for idx, (key, item) in enumerate(extra_items.items()):
         row = idx
-        label = tk.Label(options_frame, text=item["text"], bg="green" if item["state"] else "red", width=15)
+        label = tk.Label(options_frame, text=item["text"], bg="#b6fba0" if item["state"] else "red", width=15)
         label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, k=key: update_extra_item(l, k))
         
