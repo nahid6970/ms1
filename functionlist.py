@@ -148,7 +148,7 @@ X_mousebutton_winget_path  ="C:\\Program Files\\Highresolution Enterprises\\X-Mo
 ytdlp_sp                   =r'C:\Users\nahid\scoop\apps\yt-dlp\current\yt-dlp.exe'
 Zoxide_scoop_path          ="C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe"
 winfsp_sp = r'C:\Users\nahid\scoop\apps\winfsp-np\current\setup.msi_'
-
+TigerVncServer_wg = r'C:\Program Files\TightVNC\tvnserver.exe'
 
 
 
