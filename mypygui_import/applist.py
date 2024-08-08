@@ -5,7 +5,6 @@ from tkinter import Canvas, Scrollbar
 from tkinter import ttk
 import os
 import ctypes
-
 from functionlist import *
 
 # import sys
@@ -278,6 +277,7 @@ applications = [
 {"name": "LM Studio","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "LMStudio.LMStudio","winget_path": r"xx"} ,
 {"name": "JellyFin","scoop_name": "","scoop_path": r'',"winget_name": "Jellyfin.Server","winget_path": r"xx"} ,
 {"name": "winfsp","scoop_name": "winfsp-np","scoop_path": winfsp_sp,"winget_name": "WingetName","winget_path": r""} ,
+{"name": "TigerVNC","scoop_name": "ScoopName","scoop_path": r'',"winget_name": "TigerVNCproject.TigerVNC","winget_path": TigerVncServer_wg} ,
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
 
 ]
