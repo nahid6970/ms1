@@ -14,9 +14,6 @@ import os
 from tkinter import messagebox
 import tkinter as tk
 
-
-
-
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
 ROOT.attributes('-topmost', True) 
@@ -27,6 +24,7 @@ def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#66fd1f")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
+
 BORDER_FRAME = create_custom_border(ROOT)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
@@ -34,9 +32,6 @@ x = screen_width - 60
 y = screen_height - 800
 # ROOT.geometry(f"35x230+{x}+{y}")
 ROOT.geometry(f"+{x}+{y}")
-
-
-
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
@@ -143,7 +138,7 @@ pyautogui.size = lambda: screen_size
 
 # error_count = 0  # Make sure to initialize this variable
 # stop_thread = False  # Initialize stop_thread
-def find_image(image_path, confidence=0.7, timeout=15):
+def find_image(image_path, confidence=0.7, timeout=60):
     """Find the location of the image on the screen."""
     global error_count, stop_thread
     start_time = time.time()
