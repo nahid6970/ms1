@@ -50,6 +50,8 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
+^+m:: Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3",,Return
+
 
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
@@ -567,9 +569,3 @@ CenterFocusedWindow() {
     ; Move the window to the calculated position
     WinMove, ahk_id %hwnd%, , %newX%, %newY%
 }
-
-
-
-^+m::
-Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3"
-return
