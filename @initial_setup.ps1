@@ -252,3 +252,16 @@ New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:
 # ** inbound and outbound
 # 	glasswire - block it in both inbound and outbound no need for host config
 # 	ldplayer  - only outbound maybe
+
+
+<#
+██╗  ██╗███████╗██╗     ██████╗ ███████╗██╗   ██╗██╗
+██║  ██║██╔════╝██║     ██╔══██╗██╔════╝██║   ██║██║
+███████║█████╗  ██║     ██████╔╝█████╗  ██║   ██║██║
+██╔══██║██╔══╝  ██║     ██╔═══╝ ██╔══╝  ██║   ██║██║
+██║  ██║███████╗███████╗██║     ██║     ╚██████╔╝███████╗
+╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝
+#>
+
+# pip install --upgrade wheel
+# C:\Users\nahid\scoop\apps\python\current\python.exe -m pip install Module_Name
