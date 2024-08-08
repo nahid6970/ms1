@@ -126,19 +126,43 @@ pyautogui.size = lambda: screen_size
 # Rest of the code remains the same
 
 
-def find_image(image_path, confidence=0.7):
+# def find_image(image_path, confidence=0.7):
+#     """Find the location of the image on the screen."""
+#     global error_count
+#     try:
+#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#         if location:
+#             image_name = os.path.basename(image_path)
+#             print(f"Found image: {image_name}")
+#             return location
+#     except Exception as e:
+#         error_count += 1
+#         print(f"{error_count} times not found. Error: {e}")
+#     return None
+
+
+def find_image(image_path, confidence=0.7, timeout=15):
     """Find the location of the image on the screen."""
     global error_count
-    try:
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-        if location:
-            image_name = os.path.basename(image_path)
-            print(f"Found image: {image_name}")
-            return location
-    except Exception as e:
-        error_count += 1
-        print(f"{error_count} times not found. Error: {e}")
-    return None
+    start_time = time.time()
+    while True:
+        try:
+            location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+            if location:
+                image_name = os.path.basename(image_path)
+                print(f"Found image: {image_name}")
+                return location
+        except Exception as e:
+            error_count += 1
+            print(f"{error_count} times not found. Error: {e}")
+        # Check if timeout has been reached
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= timeout:
+            print("Timeout reached. Clicking shortcut Ctrl+Shift+M.")
+            pyautogui.hotkey('ctrl', 'shift', 'm')
+            return None
+        # Sleep for a short while to avoid excessive CPU usage
+        time.sleep(0.5)
 
 
 

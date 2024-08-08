@@ -567,3 +567,9 @@ CenterFocusedWindow() {
     ; Move the window to the calculated position
     WinMove, ahk_id %hwnd%, , %newX%, %newY%
 }
+
+
+
+^+m::
+Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3"
+return
