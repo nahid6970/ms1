@@ -141,11 +141,17 @@ pyautogui.size = lambda: screen_size
 #     return None
 
 
+# error_count = 0  # Make sure to initialize this variable
+# stop_thread = False  # Initialize stop_thread
 def find_image(image_path, confidence=0.7, timeout=15):
     """Find the location of the image on the screen."""
-    global error_count
+    global error_count, stop_thread
     start_time = time.time()
     while True:
+        # Check if stop_thread is set to True
+        if stop_thread:
+            print("Stopping the function due to stop_thread being set to True.")
+            return None
         try:
             location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
             if location:
@@ -163,7 +169,6 @@ def find_image(image_path, confidence=0.7, timeout=15):
             return None
         # Sleep for a short while to avoid excessive CPU usage
         time.sleep(0.5)
-
 
 
 # last_found_time = time.time()
