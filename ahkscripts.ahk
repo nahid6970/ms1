@@ -69,6 +69,12 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ;* ╚██████╗██║  ██║██║  ██║   ██║
 ;*  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
 
+; Personal Info
+::;address::Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+::;nahidbd::{U+09A8}{U+09BE}{U+09B9}{U+09BF}{U+09A6} {U+0986}{U+09B9}{U+09AE}{U+09C7}{U+09A6}
+::;fatherbd::{U+09A8}{U+09C1}{U+09B0}{U+09C1}{U+09B2} {U+0986}{U+09AE}{U+09BF}{U+09A8}
+::;motherbd::{U+09A8}{U+09BE}{U+099C}{U+09AE}{U+09BE} {U+09AC}{U+09C7}{U+0997}{U+09AE}
+
 ;* Valorant Trash Talk
 ::;vv1::u guys r so trash garbage get good..
 ::;vv2::trash garbage stupid noobs..
@@ -117,7 +123,6 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ::;font28::Trebuchet MS
 ::;font29::Verdana
 ::;font30::Victoria
-
 
 ;*  ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗     ██████╗  █████╗ ████████╗██╗  ██╗
 ;*  ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗    ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║
