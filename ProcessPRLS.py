@@ -34,7 +34,7 @@ def kill_process(app):
     for proc in psutil.process_iter():
         if proc.name().lower() == app.lower():
             proc.kill()
-            messagebox.showinfo("Process Killed", f"{apps[app]} has been killed")
+            # messagebox.showinfo("Process Killed", f"{apps[app]} has been killed")
             break
     update_status()
 
