@@ -1,3 +1,4 @@
+import datetime
 import subprocess
 import sys
 import time
@@ -121,20 +122,38 @@ pyautogui.size = lambda: screen_size
 # Rest of the code remains the same
 
 
+# def find_image(image_path, confidence=0.7):
+#     """Find the location of the image on the screen."""
+#     global error_count
+#     try:
+#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#         if location:
+#             image_name = os.path.basename(image_path)
+#             print(f"Found image: {image_name}")
+#             return location
+#     except Exception as e:
+#         error_count += 1
+#         print(f"{error_count} times not found. Error: {e}")
+#     return None
+
 def find_image(image_path, confidence=0.7):
-    """Find the location of the image on the screen."""
+    """Find the location of the image on the screen and show time in 12-hour format."""
     global error_count
+    
+    def get_current_time():
+        """Return the current time in 12-hour format."""
+        return datetime.datetime.now().strftime("%I:%M:%S %p")
+
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             image_name = os.path.basename(image_path)
-            print(f"Found image: {image_name}")
+            print(f"{get_current_time()} - Found image: {image_name}")
             return location
     except Exception as e:
         error_count += 1
-        print(f"{error_count} times not found. Error: {e}")
+        print(f"{get_current_time()} - {error_count} times not found. Error: {e}")
     return None
-
 
 # # error_count = 0  # Make sure to initialize this variable
 # # stop_thread = False  # Initialize stop_thread
