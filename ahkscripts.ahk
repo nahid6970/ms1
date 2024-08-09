@@ -42,6 +42,9 @@
 ; ~Esc & w::RunWait, komorebic toggle-float,,Hide
 !w::RunWait, komorebic toggle-float,,Hide
 Pause::RunWait, komorebic quick-load-resize,,Hide
+^l:: RunWait, komorebic quick-save-resize,,return
+
+
 
 ;;* Others
 ^!h::ToggleHiddenFiles()
@@ -569,3 +572,5 @@ CenterFocusedWindow() {
     ; Move the window to the calculated position
     WinMove, ahk_id %hwnd%, , %newX%, %newY%
 }
+
+
