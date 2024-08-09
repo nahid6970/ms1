@@ -121,49 +121,49 @@ pyautogui.size = lambda: screen_size
 # Rest of the code remains the same
 
 
-# def find_image(image_path, confidence=0.7):
-#     """Find the location of the image on the screen."""
-#     global error_count
-#     try:
-#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-#         if location:
-#             image_name = os.path.basename(image_path)
-#             print(f"Found image: {image_name}")
-#             return location
-#     except Exception as e:
-#         error_count += 1
-#         print(f"{error_count} times not found. Error: {e}")
-#     return None
-
-
-# error_count = 0  # Make sure to initialize this variable
-# stop_thread = False  # Initialize stop_thread
-def find_image(image_path, confidence=0.7, timeout=60):
+def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
-    global error_count, stop_thread
-    start_time = time.time()
-    while True:
-        # Check if stop_thread is set to True
-        if stop_thread:
-            print("Stopping the function due to stop_thread being set to True.")
-            return None
-        try:
-            location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-            if location:
-                image_name = os.path.basename(image_path)
-                print(f"Found image: {image_name}")
-                return location
-        except Exception as e:
-            error_count += 1
-            print(f"{error_count} times not found. Error: {e}")
-        # Check if timeout has been reached
-        elapsed_time = time.time() - start_time
-        if elapsed_time >= timeout:
-            print("Timeout reached. Clicking shortcut Ctrl+Shift+M.")
-            pyautogui.hotkey('ctrl', 'shift', 'm')
-            return None
-        # Sleep for a short while to avoid excessive CPU usage
-        time.sleep(0.5)
+    global error_count
+    try:
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+        if location:
+            image_name = os.path.basename(image_path)
+            print(f"Found image: {image_name}")
+            return location
+    except Exception as e:
+        error_count += 1
+        print(f"{error_count} times not found. Error: {e}")
+    return None
+
+
+# # error_count = 0  # Make sure to initialize this variable
+# # stop_thread = False  # Initialize stop_thread
+# def find_image(image_path, confidence=0.7, timeout=60):
+#     """Find the location of the image on the screen."""
+#     global error_count, stop_thread
+#     start_time = time.time()
+#     while True:
+#         # Check if stop_thread is set to True
+#         if stop_thread:
+#             print("Stopping the function due to stop_thread being set to True.")
+#             return None
+#         try:
+#             location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#             if location:
+#                 image_name = os.path.basename(image_path)
+#                 print(f"Found image: {image_name}")
+#                 return location
+#         except Exception as e:
+#             error_count += 1
+#             print(f"{error_count} times not found. Error: {e}")
+#         # Check if timeout has been reached
+#         elapsed_time = time.time() - start_time
+#         if elapsed_time >= timeout:
+#             print("Timeout reached. Clicking shortcut Ctrl+Shift+M.")
+#             pyautogui.hotkey('ctrl', 'shift', 'm')
+#             return None
+#         # Sleep for a short while to avoid excessive CPU usage
+#         time.sleep(0.5)
 
 
 # last_found_time = time.time()
@@ -485,6 +485,104 @@ Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
 """
 
+
+# def start_event_heavy():
+#     global stop_thread
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     try:
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image) for image in actionF):
+#                 key_down(window, 'j')
+#                 key_down(window, 'l')
+#                 time.sleep(5)
+#                 key_up(window, 'l')
+#                 key_up(window, 'j')
+#             elif find_image(Home, confidence=0.8): press_key(window, 'f')
+#             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+#             elif any(find_image(image) for image in continueF): press_key(window, 'c')
+#             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+#             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
+#             time.sleep(0.1)
+#     except KeyboardInterrupt: print("Script stopped by user.")
+# def event_function_heavy():
+#     global stop_thread, event_heavy_thread, Event_Heavy_BT
+#     if event_heavy_thread and event_heavy_thread.is_alive():
+#         stop_thread = True
+#         event_heavy_thread.join()
+#         Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
+#     else:
+#         stop_thread = False
+#         event_heavy_thread = threading.Thread(target=start_event_heavy)
+#         event_heavy_thread.daemon = True
+#         event_heavy_thread.start()
+#         Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+# Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+
+# def start_event_heavy():
+#     global stop_thread
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     try:
+#         last_found_time = time.time()  # Initialize the timer
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image) for image in actionF):
+#                 key_down(window, 'j')
+#                 key_down(window, 'l')
+#                 time.sleep(5)
+#                 key_up(window, 'l')
+#                 key_up(window, 'j')
+#                 last_found_time = time.time()  # Reset the timer
+#             elif find_image(Home, confidence=0.8):
+#                 press_key(window, 'f')
+#                 last_found_time = time.time()  # Reset the timer
+#             elif find_image(Resume, confidence=0.8):
+#                 press_key(window, 'r')
+#                 last_found_time = time.time()  # Reset the timer
+#             elif any(find_image(image) for image in continueF):
+#                 press_key(window, 'c')
+#                 last_found_time = time.time()  # Reset the timer
+#             elif find_image(Tournament_step1, confidence=0.8):
+#                 press_keys_with_delays(window, 'u', 1, 'c', 1)
+#                 last_found_time = time.time()  # Reset the timer
+#             elif find_image(Tournament_step2, confidence=0.8):
+#                 press_keys_with_delays(window, '1', 1)
+#                 last_found_time = time.time()  # Reset the timer
+            
+#             # Check if 10 seconds have passed since the last image was found
+#             if time.time() - last_found_time > 60:
+#                 print("No image found for 10 seconds, stopping function.")
+#                 pyautogui.hotkey('ctrl', 'shift', 'm')  # Trigger the shortcut
+#                 break
+
+#             time.sleep(0.1)
+#     except KeyboardInterrupt:
+#         print("Script stopped by user.")
+
+# def event_function_heavy():
+#     global stop_thread, event_heavy_thread, Event_Heavy_BT
+#     if event_heavy_thread and event_heavy_thread.is_alive():
+#         stop_thread = True
+#         event_heavy_thread.join()
+#         Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
+#     else:
+#         stop_thread = False
+#         event_heavy_thread = threading.Thread(target=start_event_heavy)
+#         event_heavy_thread.daemon = True
+#         event_heavy_thread.start()
+#         Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+# Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+
 def start_event_heavy():
     global stop_thread
     window = focus_window(window_title)
@@ -492,27 +590,22 @@ def start_event_heavy():
         print(f"Window '{window_title}' not found.")
         return
     try:
+        last_found_time = time.time()  # Initialize the timer
         while not stop_thread:
             focus_window(window_title)
-            if any(find_image(image) for image in actionF):
-                key_down(window, 'j')
-                key_down(window, 'l')
-                time.sleep(5)
-                key_up(window, 'l')
-                key_up(window, 'j')
-            elif find_image(Home, confidence=0.8):
-                press_key(window, 'f')
-            elif find_image(Resume, confidence=0.8):
-                press_key(window, 'r')
-            elif any(find_image(image) for image in continueF):
-                press_key(window, 'c')
-            elif find_image(Tournament_step1, confidence=0.8):
-                press_keys_with_delays(window, 'u', 1, 'c', 1)
-            elif find_image(Tournament_step2, confidence=0.8):
-                press_keys_with_delays(window, '1', 1)
+            if any(find_image(image) for image in actionF): key_down(window, 'j'); key_down(window, 'l'); time.sleep(5); key_up(window, 'l'); key_up(window, 'j'); last_found_time = time.time()
+            elif find_image(Home, confidence=0.8): press_key(window, 'f'); last_found_time = time.time()
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r'); last_found_time = time.time()
+            elif any(find_image(image) for image in continueF): press_key(window, 'c'); last_found_time = time.time()
+            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1); last_found_time = time.time()
+            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1); last_found_time = time.time()
+            
+            if time.time() - last_found_time > 60: print("No image found for 60 seconds, stopping function."); pyautogui.hotkey('ctrl', 'shift', 'm'); break
+            
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
+
 def event_function_heavy():
     global stop_thread, event_heavy_thread, Event_Heavy_BT
     if event_heavy_thread and event_heavy_thread.is_alive():
@@ -528,6 +621,7 @@ def event_function_heavy():
 
 Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+
 
 
 def Start_Event_Light():
