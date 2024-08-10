@@ -351,13 +351,10 @@ def fight_Heavy():
                     key_up(window, 'l')
                     key_up(window, 'j')
                     holding_keys = False
-            if find_image(SPACE, confidence=0.8):
-                press_key(window, ' ')
-            elif any(find_image(image) for image in continueF):
-                press_key(window, 'c')
+            if find_image(SPACE, confidence=0.8): press_key(window, ' ')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
             time.sleep(1)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
@@ -415,8 +412,7 @@ def fame_heavy():
                 elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
             time.sleep(1)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
@@ -474,8 +470,7 @@ def fame_light():
                 elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
             time.sleep(0.05)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
@@ -505,43 +500,43 @@ Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 """
 
 
-# def start_event_heavy():
-#     global stop_thread
-#     window = focus_window(window_title)
-#     if not window:
-#         print(f"Window '{window_title}' not found.")
-#         return
-#     try:
-#         while not stop_thread:
-#             focus_window(window_title)
-#             if any(find_image(image) for image in actionF):
-#                 key_down(window, 'j')
-#                 key_down(window, 'l')
-#                 time.sleep(5)
-#                 key_up(window, 'l')
-#                 key_up(window, 'j')
-#             elif find_image(Home, confidence=0.8): press_key(window, 'f')
-#             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-#             elif any(find_image(image) for image in continueF): press_key(window, 'c')
-#             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-#             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
-#             time.sleep(0.1)
-#     except KeyboardInterrupt: print("Script stopped by user.")
-# def event_function_heavy():
-#     global stop_thread, event_heavy_thread, Event_Heavy_BT
-#     if event_heavy_thread and event_heavy_thread.is_alive():
-#         stop_thread = True
-#         event_heavy_thread.join()
-#         Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
-#     else:
-#         stop_thread = False
-#         event_heavy_thread = threading.Thread(target=start_event_heavy)
-#         event_heavy_thread.daemon = True
-#         event_heavy_thread.start()
-#         Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+def start_event_heavy():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image) for image in actionF):
+                key_down(window, 'j')
+                key_down(window, 'l')
+                time.sleep(5)
+                key_up(window, 'l')
+                key_up(window, 'j')
+            elif find_image(Home, confidence=0.8): press_key(window, 'f')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
+            time.sleep(0.1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+def event_function_heavy():
+    global stop_thread, event_heavy_thread, Event_Heavy_BT
+    if event_heavy_thread and event_heavy_thread.is_alive():
+        stop_thread = True
+        event_heavy_thread.join()
+        Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
+    else:
+        stop_thread = False
+        event_heavy_thread = threading.Thread(target=start_event_heavy)
+        event_heavy_thread.daemon = True
+        event_heavy_thread.start()
+        Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-# Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-# Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 # def start_event_heavy():
 #     global stop_thread
@@ -602,44 +597,44 @@ Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 # Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 # Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
 
-def start_event_heavy():
-    global stop_thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        last_found_time = time.time()  # Initialize the timer
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image) for image in actionF): key_down(window, 'j'); key_down(window, 'l'); time.sleep(5); key_up(window, 'l'); key_up(window, 'j'); last_found_time = time.time()
-            elif find_image(Home, confidence=0.8): press_key(window, 'f'); last_found_time = time.time()
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r'); last_found_time = time.time()
-            elif any(find_image(image) for image in continueF): press_key(window, 'c'); last_found_time = time.time()
-            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1); last_found_time = time.time()
-            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1); last_found_time = time.time()
+# def start_event_heavy():
+#     global stop_thread
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     try:
+#         last_found_time = time.time()  # Initialize the timer
+#         while not stop_thread:
+#             focus_window(window_title)
+#             if any(find_image(image) for image in actionF): key_down(window, 'j'); key_down(window, 'l'); time.sleep(5); key_up(window, 'l'); key_up(window, 'j'); last_found_time = time.time()
+#             elif find_image(Home, confidence=0.8): press_key(window, 'f'); last_found_time = time.time()
+#             elif find_image(Resume, confidence=0.8): press_key(window, 'r'); last_found_time = time.time()
+#             elif any(find_image(image) for image in continueF): press_key(window, 'c'); last_found_time = time.time()
+#             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1); last_found_time = time.time()
+#             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1); last_found_time = time.time()
             
-            if time.time() - last_found_time > 60: print("No image found for 60 seconds, stopping function."); pyautogui.hotkey('ctrl', 'shift', 'm'); break
+#             if time.time() - last_found_time > 60: print("No image found for 60 seconds, stopping function."); pyautogui.hotkey('ctrl', 'shift', 'm'); break
             
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+#             time.sleep(0.1)
+#     except KeyboardInterrupt:
+#         print("Script stopped by user.")
 
-def event_function_heavy():
-    global stop_thread, event_heavy_thread, Event_Heavy_BT
-    if event_heavy_thread and event_heavy_thread.is_alive():
-        stop_thread = True
-        event_heavy_thread.join()
-        Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
-    else:
-        stop_thread = False
-        event_heavy_thread = threading.Thread(target=start_event_heavy)
-        event_heavy_thread.daemon = True
-        event_heavy_thread.start()
-        Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+# def event_function_heavy():
+#     global stop_thread, event_heavy_thread, Event_Heavy_BT
+#     if event_heavy_thread and event_heavy_thread.is_alive():
+#         stop_thread = True
+#         event_heavy_thread.join()
+#         Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
+#     else:
+#         stop_thread = False
+#         event_heavy_thread = threading.Thread(target=start_event_heavy)
+#         event_heavy_thread.daemon = True
+#         event_heavy_thread.start()
+#         Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+# Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
 
@@ -679,8 +674,7 @@ def Start_Event_Light():
                 elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
                 elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
             time.sleep(0.05)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
@@ -737,8 +731,7 @@ def Raids():
                 elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
             time.sleep(1)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
     finally:
         # Ensure keys are released if the loop exits
         key_up(window, 'l')
@@ -799,8 +792,7 @@ def Raid_Light():
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
             time.sleep(1)
             time.sleep(0.05)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
@@ -849,8 +841,7 @@ def TakeL():
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
 
             time.sleep(0.1)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
 
 def loss_function():
     global stop_thread, loss_thread, Loss_BT
