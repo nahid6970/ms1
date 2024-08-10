@@ -54,7 +54,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 ^+m:: Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3",,Return
-
+^+;::ReplaceDashWSpace()
 
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
@@ -579,3 +579,31 @@ CenterFocusedWindow() {
 }
 
 
+ReplaceDashWSpace() {
+    ; Backup the clipboard
+    ClipboardBackup := ClipboardAll
+    ; Clear the clipboard
+    Clipboard := ""
+    ; Copy the selected text
+    Send, ^c
+    ; Wait for the clipboard to contain the copied text
+    ClipWait, 1
+    if ErrorLevel
+    {
+        MsgBox, No text selected or copying failed.
+    }
+    else
+    {
+        ; Get the clipboard content
+        ClipBoardContent := Clipboard
+        ; Replace all hyphens with spaces
+        StringReplace, ClipBoardContent, ClipBoardContent, -, %A_Space%, All
+        ; Restore the clipboard content with the modified text
+        Clipboard := ClipBoardContent
+        ; Paste the modified text
+        Send, ^v
+    }
+    ; Restore the original clipboard content
+    Clipboard := ClipboardBackup
+    return
+    }
