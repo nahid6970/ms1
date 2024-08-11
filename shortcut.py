@@ -90,10 +90,10 @@ vscode_window.pack_propagate(True)
 VSCode = HoverButton(Main_Window, bg="#23a8f2", fg="#000000", h_bg="#FFFFFF", h_fg="#000000", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , Main_Window), text="\udb81\ude10")
 VSCode.pack(side="left", anchor="center", padx=(0,0), pady=(0,0))
 
-AlignMultiCoulmnsbySeparator = Label(vscode_window, style='Custom.TLabel', text="\uf037")
-AlignMultiCoulmnsbySeparator.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-AlignMultiCoulmnsbySeparator.bind("<Button-1>", lambda event: subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py AlignMultiCoulmnsbySeparator"]))
-apply_hover_effect(AlignMultiCoulmnsbySeparator)
+Align_MultiCoulmns_by_Separator = Label(vscode_window, text="\uf037", style='Custom.TLabel')
+Align_MultiCoulmns_by_Separator.bind("<Button-1>", lambda event: subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py AlignMultiCoulmnsbySeparator"]))
+Align_MultiCoulmns_by_Separator.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+apply_hover_effect(Align_MultiCoulmns_by_Separator)
 
 BookmarkLine = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BookmarkLine"]), text="⭐")
 BookmarkLine.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
@@ -113,10 +113,13 @@ BracketsSelect.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 ChangeAllOccurrences = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py ChangeAllOccurrences"]), text="\udb81\udc86")
 ChangeAllOccurrences.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
-Comment = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Comment"]), text="\uf27b")
+Comment = Label(vscode_window, text="\uf27b", style='Custom.TLabel')
+Comment.bind("<Button-1>",lambda event:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Comment"]))
 Comment.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+apply_hover_effect(Comment)
 
-CommentSelection = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py CommentSelection"]), text="\udb80\udd84")
+
+CommentSelection = HoverButton(vscode_window, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py CommentSelection"]), text="\udb80\udd84")
 CommentSelection.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 DeleteLine = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py DeleteLine"]), text="\udb80\uddb4")
