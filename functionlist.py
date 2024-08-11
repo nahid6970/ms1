@@ -173,34 +173,39 @@ class ToolTip:
         self.leave_id = None
         self.widget.bind("<Enter>", self.on_enter_widget)
         self.widget.bind("<Leave>", self.on_leave_widget)
+
     def on_enter_widget(self, event):
-        self.widget.on_enter(event)
         self.on_enter(event)
+
     def on_leave_widget(self, event):
-        self.widget.on_leave(event)
         self.on_leave(event)
+
     def on_enter(self, event):
         if self.enter_id is None:
             self.enter_id = self.widget.after(self.delay, self.show_tooltip)
+
     def on_leave(self, event):
         if self.enter_id:
             self.widget.after_cancel(self.enter_id)
             self.enter_id = None
         self.hide_tooltip()
+
     def show_tooltip(self):
         if self.tooltip is None:
             x, y, _, _ = self.widget.bbox("insert")
             x += self.widget.winfo_rootx() + 25
-            y += self.widget.winfo_rooty() + 25
+            y += self.widget.winfo_rooty() - 25  # Position above the button
             self.tooltip = tk.Toplevel(self.widget)
             self.tooltip.wm_overrideredirect(True)
             self.tooltip.wm_geometry(f"+{x}+{y}")
-            label = tk.Label(self.tooltip, text=self.text, background="yellow", relief="solid", borderwidth=1, font=("jetbrainsmono nfp", self.font_size))
+            label = tk.Label(self.tooltip, text=self.text, background="yellow", relief="solid", borderwidth=1, font=("JetBrains Mono", self.font_size))
             label.pack(ipadx=1)
+
     def hide_tooltip(self):
         if self.tooltip:
             self.tooltip.destroy()
             self.tooltip = None
+
 
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
