@@ -22,18 +22,10 @@ root.attributes('-topmost', True)
 root.overrideredirect(True)  # Remove default borders
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
-
-x = 0
-y = 0
-root.geometry(f"700x400+{x}+{y}")
+root.geometry(f"700x400")
 
 default_font = ("Jetbrainsmono nfp", 14, "bold")
 root.option_add("*Font", default_font)
-
-
-
-
-
 
 
 def on_enter(event):
@@ -43,7 +35,6 @@ def on_leave(event):
     event.widget.configure(style='Custom.TButton')
 # Create a style object
 style = Style()
-
 # Configure a custom style for TButton
 style.configure('Custom.TButton', 
                 font=('Jetbrainsmono nfp', 12, 'italic'), 
@@ -54,7 +45,6 @@ style.configure('Custom.TButton',
                 padding=(10, 5),
                 width=18,
                 anchor='center')
-
 # Configure a hover style
 style.configure('Hover.TButton', 
                 font=('Jetbrainsmono nfp', 12, 'italic'), 
