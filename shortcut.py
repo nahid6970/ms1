@@ -90,11 +90,6 @@ vscode_window.pack_propagate(True)
 VSCode = HoverButton(main_frame, bg="#23a8f2", fg="#000000", h_bg="#FFFFFF", h_fg="#000000", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , main_frame), text="\udb81\ude10")
 VSCode.pack(padx=(1,1), pady=(1,1))
 
-
-
-
-
-
 # Create buttons
 buttons = [
     ("BookmarkLine"                ,"Bookmark Line")                   ,
@@ -121,102 +116,18 @@ buttons = [
     ("TableFormatProperly2"        ,"Table Format Properly 2")         ,
     ("UnComment"                   ,"UnComment")                       ,
 ]
-
 max_rows = 10
-
 # Create buttons and apply initial styles and bindings
 for i, (command_name, btn_text) in enumerate(buttons):
     # Create each button with the 'Custom.TButton' style initially
     button = Button(vscode_window, text=btn_text, style='Custom.TButton', command=lambda c=command_name: subprocess.Popen(["powershell", f"python c:/ms1/HotKeys.py {c}"]))
     button.grid(row=i % max_rows, column=i // max_rows, padx=(0, 0), pady=(0, 0), sticky="ew")
-    
     # Bind hover events to the button
     button.bind("<Enter>", on_enter)
     button.bind("<Leave>", on_leave)
-    
     # Make rows and columns resizable
     vscode_window.grid_columnconfigure(i // max_rows, weight=1)
     vscode_window.grid_rowconfigure(i % max_rows, weight=1)
-
-
-
-
-# Align_MultiCoulmns_by_Separator = Label(vscode_window, text="\uf037", style='Custom.TLabel')
-# Align_MultiCoulmns_by_Separator.bind("<Button-1>", lambda event: subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py AlignMultiCoulmnsbySeparator"]))
-# Align_MultiCoulmns_by_Separator.pack(side="left", anchor="w", padx=(0,0), pady=(0,0))
-# apply_hover_effect(Align_MultiCoulmns_by_Separator)
-
-# BookmarkLine = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BookmarkLine"]), text="⭐")
-# BookmarkLine.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# Bookmarklistall = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Bookmarklistall"]), text="?⭐")
-# Bookmarklistall.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# BracketsGoTo = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BracketsGoTo"]), text="\uebe5")
-# BracketsGoTo.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# BracketsRemove = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BracketsRemove"]), text="\uebe6")
-# BracketsRemove.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# BracketsSelect = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py BracketsSelect"]), text="\uf2f5")
-# BracketsSelect.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# ChangeAllOccurrences = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py ChangeAllOccurrences"]), text="\udb81\udc86")
-# ChangeAllOccurrences.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# Comment = Label(vscode_window, text="\uf27b", style='Custom.TLabel')
-# Comment.bind("<Button-1>",lambda event:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Comment"]))
-# Comment.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-# apply_hover_effect(Comment)
-
-
-# CommentSelection = HoverButton(vscode_window, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py CommentSelection"]), text="\udb80\udd84")
-# CommentSelection.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# DeleteLine = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py DeleteLine"]), text="\udb80\uddb4")
-# DeleteLine.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-#! ?? ExpandSelectionquota_brackets = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=20, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py ExpandSelectionquota_brackets"]), text="")
-#! ?? ExpandSelectionquota_brackets.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# Keyboard_Shortcut = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Keyboard_Shortcut"]), text="\uf11c")
-# Keyboard_Shortcut.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# LineJoin = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py LineJoin"]), text="\uebb6")
-# LineJoin.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# Minimap = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Minimap"]), text="\uf279")
-# Minimap.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# NewWindow = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py NewWindow"]), text="\uea7f")
-# NewWindow.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# RemoveDupLines = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py remove_dup_lines"]), text="\udb84\ude33")
-# RemoveDupLines.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# RemoveFromSelection = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py RemoveFromSelection"]), text="\ueb3c")
-# RemoveFromSelection.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# SelectNext = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py SelectNext"]), text="\udb82\udfb0")
-# SelectNext.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# SelectPrevious = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py SelectPrevious"]), text="\udb82\udfb2")
-# SelectPrevious.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# SortLinesAscending = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py SortLinesAscending"]), text="\udb81\udcbc")
-# SortLinesAscending.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# SplitSameDocument = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py SplitSameDocument"]), text="\ueb56")
-# SplitSameDocument.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# TableFormatProperly = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py TableFormatProperly"]), text="\uebb7")
-# TableFormatProperly.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# TableFormatProperly2 = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py TableFormatProperly2"]), text="\uebb7")
-# TableFormatProperly2.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-# UnComment = HoverButton(vscode_window, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py UnComment"]), text="\udb85\udde1")
-# UnComment.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
 
 
 
