@@ -569,6 +569,7 @@ ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c co
 ShortcutBar2=CTkLabel(ROOT1, text="\udb80\udf11", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 ShortcutBar2.pack(side="left",padx=(5,0),pady=(1,0))
 ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.py"], shell=True))
+ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\shortcut.py"], shell=True))
 
 PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
