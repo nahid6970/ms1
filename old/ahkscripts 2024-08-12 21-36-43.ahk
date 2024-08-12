@@ -41,13 +41,14 @@
 ; RAlt & E:: Convert_Lowercase()
 ; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser
 ; RAlt & L:: Remove_Duplicate_Lines()
-;; Replace & Text Related
+; Replace & Text Related
+RAlt & -::ReplaceDashWSpace()
 LAlt & F::Show_Action_Chooser() ; Shortcut to open the action chooser GUI
-LAlt & R::Replace_Matching_words_Selection()
-RAlt & -::Replace_Dash_W_Space()
 RAlt & P:: Remove_All_Punctuation()
+LAlt & R::Replace_Matching_words_Selection()
 RAlt & SPACE::Remove_AllSpace_Selection()
 RAlt & U::Convert_Uppercase()
+
 
 ; Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
@@ -422,12 +423,7 @@ SetWorkingDir %A_ScriptDir%
 }}
 
 
-; ██████╗ ██╗      █████╗  ██████╗██╗  ██╗     ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗
-; ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝     ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║
-; ██████╔╝██║     ███████║██║     █████╔╝█████╗███████╗██║     ██████╔╝█████╗  █████╗  ██╔██╗ ██║
-; ██╔══██╗██║     ██╔══██║██║     ██╔═██╗╚════╝╚════██║██║     ██╔══██╗██╔══╝  ██╔══╝  ██║╚██╗██║
-; ██████╔╝███████╗██║  ██║╚██████╗██║  ██╗     ███████║╚██████╗██║  ██║███████╗███████╗██║ ╚████║
-; ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝     ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝
+
 
 ; Define a variable to track the state of the screen blackout
 blackoutState := 0
@@ -449,13 +445,6 @@ Toggle_Screen_Blackout() {
         Gui, Destroy
     }}
 
-
-; ██╗    ██╗██╗  ██╗██╗████████╗███████╗    ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗
-; ██║    ██║██║  ██║██║╚══██╔══╝██╔════╝    ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║
-; ██║ █╗ ██║███████║██║   ██║   █████╗█████╗███████╗██║     ██████╔╝█████╗  █████╗  ██╔██╗ ██║
-; ██║███╗██║██╔══██║██║   ██║   ██╔══╝╚════╝╚════██║██║     ██╔══██╗██╔══╝  ██╔══╝  ██║╚██╗██║
-; ╚███╔███╔╝██║  ██║██║   ██║   ███████╗    ███████║╚██████╗██║  ██║███████╗███████╗██║ ╚████║
-;  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝    ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝
 
 ; Define a variable to track the state of the screen Whiteout
 whiteoutState := 0
@@ -483,12 +472,76 @@ Toggle_Screen_Whiteout() {
 }
 
 
-; ██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗███████╗██████╗  █████╗  ██████╗███████╗    ██████╗ ███████╗███████╗███████╗████████╗
-; ██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝    ██╔══██╗██╔════╝██╔════╝██╔════╝╚══██╔══╝
-; ██║ █╗ ██║██║   ██║██████╔╝█████╔╝ ███████╗██████╔╝███████║██║     █████╗      ██████╔╝█████╗  ███████╗█████╗     ██║
-; ██║███╗██║██║   ██║██╔══██╗██╔═██╗ ╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝      ██╔══██╗██╔══╝  ╚════██║██╔══╝     ██║
-; ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗███████║██║     ██║  ██║╚██████╗███████╗    ██║  ██║███████╗███████║███████╗   ██║
-;  ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝   ╚═╝
+; ; Define a function to run the appropriate command based on the active window
+; RunCommandBasedOnActiveWindow() {
+;     ; Get the name of the active window
+;     WinGetTitle, activeWindowTitle, A
+
+;     ; Check if the active window is Visual Studio Code
+;     if (InStr(activeWindowTitle, "Visual Studio Code")) {
+;         Run, cmd /c "rclone config"
+;     }
+;     ; Check if the active window is Google Chrome
+;     else if (InStr(activeWindowTitle, "Google Chrome")) {
+;         Run, cmd /c "fzf"
+;     }
+; }
+; ; Define a hotkey (Alt + 5) to trigger the function
+; !5::RunCommandBasedOnActiveWindow()
+
+
+; ; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
+; #IfWinActive ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe
+;     F1::Send, ^!{F1}
+; #IfWinActive
+
+; ; Define F1 to send F1 normally
+; F1::Send, {F1}
+
+
+
+; ; Define a function to check the foreground application and send the appropriate keys
+; CheckForegroundAndSendKeys() {
+;     ; Get the name of the active window
+;     WinGetTitle, activeWindowTitle, A
+
+;     ; Check if the active window is Valorant
+;     if (InStr(activeWindowTitle, "VALORANT")) {
+;         ; Send Ctrl + Alt + F1
+;         Send, ^!{F1}
+;     } else {
+;         ; Send F1 normally
+;         Send, {F1}
+;     }
+; }
+; ; Define a hotkey (F1) to trigger the function
+; F1::CheckForegroundAndSendKeys()
+
+
+
+; ; Define hotkey F2 to run 'dir' command when Chrome is active
+; #IfWinActive ahk_exe chrome.exe
+;     F2::Run, cmd /c rclone ncdu d:
+; #If
+
+; ; Define hotkey F2 to run 'rclone config' when VSCode is active
+; #IfWinActive ahk_exe Code.exe
+;     F2::Run, cmd /c rclone config
+; #If
+
+
+
+; ; Define hotkey F1 to send Ctrl+Alt+F1 when Valorant is active
+; #If (WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe") && GetKeyState("F1", "P"))
+;     F1::Send, ^!{F1}
+; #If
+; ; Define a hotkey (F1) to send F1 normally for all other applications
+; #If !WinActive("ahk_class UnrealWindow ahk_exe VALORANT-Win64-Shipping.exe")
+;     F1::Send, {F1}
+; #If
+
+
+
 
 ; Define a variable to track the state of the taskbar
 taskbarVisible := 1  ; 1 for visible, 0 for hidden
@@ -514,12 +567,7 @@ Toggle_Reset_Workspace() {
 }
 
 
-;  ██████╗███████╗███╗   ██╗████████╗███████╗██████╗      █████╗ ██████╗ ██████╗
-; ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██╔════╝██╔══██╗    ██╔══██╗██╔══██╗██╔══██╗
-; ██║     █████╗  ██╔██╗ ██║   ██║   █████╗  ██████╔╝    ███████║██████╔╝██████╔╝
-; ██║     ██╔══╝  ██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗    ██╔══██║██╔═══╝ ██╔═══╝
-; ╚██████╗███████╗██║ ╚████║   ██║   ███████╗██║  ██║    ██║  ██║██║     ██║
-;  ╚═════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝     ╚═╝
+
 
 Center_Focused_Window() {
     ; Get the handle of the active (focused) window
@@ -540,14 +588,8 @@ Center_Focused_Window() {
     WinMove, ahk_id %hwnd%, , %newX%, %newY%
 }
 
-;* ████████╗███████╗██╗  ██╗████████╗    ██████╗ ███████╗██╗      █████╗ ████████╗███████╗██████╗
-;* ╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝    ██╔══██╗██╔════╝██║     ██╔══██╗╚══██╔══╝██╔════╝██╔══██╗
-;*    ██║   █████╗   ╚███╔╝    ██║       ██████╔╝█████╗  ██║     ███████║   ██║   █████╗  ██║  ██║
-;*    ██║   ██╔══╝   ██╔██╗    ██║       ██╔══██╗██╔══╝  ██║     ██╔══██║   ██║   ██╔══╝  ██║  ██║
-;*    ██║   ███████╗██╔╝ ██╗   ██║       ██║  ██║███████╗███████╗██║  ██║   ██║   ███████╗██████╔╝
-;*    ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═════╝
 
-Replace_Dash_W_Space() {
+ReplaceDashWSpace() {
     ; Backup the clipboard
     ClipboardBackup := ClipboardAll
     ; Clear the clipboard
@@ -607,6 +649,7 @@ return
 }
 
 
+
 Replace_Matching_words_Selection(){
     ; Backup the clipboard
     ClipboardBackup := ClipboardAll
@@ -650,6 +693,8 @@ Replace_Matching_words_Selection(){
     return
 }
 
+
+
 ; Remove All Punctuation
 Remove_All_Punctuation(){
     ClipboardBackup := ClipboardAll
@@ -673,6 +718,240 @@ Remove_All_Punctuation(){
     Clipboard := ClipboardBackup
     return
 }
+
+; ; Convert to Uppercase
+; Convert_Uppercase(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Convert to uppercase
+;     StringUpper, ClipBoardContent, ClipBoardContent
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+;     }
+
+
+; ; Convert to Lowercase
+; Convert_Lowercase(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ;* Convert to lowercase
+;     StringLower, ClipBoardContent, ClipBoardContent
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
+
+;; Trim Leading and Trailing Spaces
+; ^+t:: ; Ctrl + Shift + T
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Trim leading and trailing spaces
+;     StringTrimLeft, ClipBoardContent, ClipBoardContent, InStr(ClipBoardContent, A_Space)
+;     StringTrimRight, ClipBoardContent, ClipBoardContent, InStr(ClipBoardContent, A_Space)
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+
+
+; ; Remove Duplicate Lines
+; Remove_Duplicate_Lines(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ;* Remove duplicate lines
+;     Lines := []
+;     Loop, parse, ClipBoardContent, `n, `r
+;     {
+;         if !(Lines[A_LoopField])
+;         {
+;             Lines[A_LoopField] := True
+;             Result .= A_LoopField . "`n"
+;         }
+;     }
+;     ClipBoardContent := Result
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
+
+; ; Replace Multiple Spaces with Single Space
+; ^+m:: ; Ctrl + Shift + M
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.             
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Replace multiple spaces with a single space
+;     StringReplace, ClipBoardContent, ClipBoardContent, %A_Space% %A_Space%, %A_Space%, All
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+
+
+
+
+
+
+
+
+;?  █████╗  ██████╗████████╗██╗ ██████╗ ███╗   ██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
+;? ██╔══██╗██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║    ██╔════╝██║  ██║██╔═══██╗██╔═══██╗██╔════╝██╔════╝██╔══██╗
+;? ███████║██║        ██║   ██║██║   ██║██╔██╗ ██║    ██║     ███████║██║   ██║██║   ██║███████╗█████╗  ██████╔╝
+;? ██╔══██║██║        ██║   ██║██║   ██║██║╚██╗██║    ██║     ██╔══██║██║   ██║██║   ██║╚════██║██╔══╝  ██╔══██╗
+;? ██║  ██║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║    ╚██████╗██║  ██║╚██████╔╝╚██████╔╝███████║███████╗██║  ██║
+;? ╚═╝  ╚═╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝     ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
+
+; ; Central function to choose and execute an action
+; Choose_Action() {
+;     ; Show an input box to choose an action
+;     InputBox, UserChoice, Choose Action, Enter the number of the action:`n1. Convert to Lowercase`n2. Remove Duplicate Lines`n3. Replace Text, , , , , , , , 1
+;     if ErrorLevel  ; User pressed Cancel
+;         return
+;     ; Call the appropriate function based on user choice
+;     if (UserChoice = "1")
+;     {
+;         Convert_Lowercase()
+;     }
+;     else if (UserChoice = "2")
+;     {
+;         Remove_Duplicate_Lines()
+;     }
+;     else if (UserChoice = "3")
+;     {
+;         Replace_Text()
+;     }
+;     else
+;     {
+;         MsgBox, Invalid choice. Please enter 1, 2, or 3.
+;     }
+; }
+
+; ; Convert to Lowercase
+; Convert_Lowercase(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         Clipboard := ClipboardBackup
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Convert to lowercase
+;     StringLower, ClipBoardContent, ClipBoardContent
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
+; ; Remove Duplicate Lines
+; Remove_Duplicate_Lines(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         Clipboard := ClipboardBackup
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Remove duplicate lines
+;     Lines := []
+;     Loop, parse, ClipBoardContent, `n, `r
+;     {
+;         if !(Lines[A_LoopField])
+;         {
+;             Lines[A_LoopField] := True
+;             Result .= A_LoopField . "`n"
+;         }
+;     }
+;     ClipBoardContent := Result
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
+; ; Replace Text
+; Replace_Text(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         Clipboard := ClipboardBackup
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+    
+;     ; Prompt for text to replace and the replacement text
+;     InputBox, TextToReplace, Replace Text, Enter the text to replace:
+;     if ErrorLevel
+;         return
+    
+;     InputBox, ReplacementText, Replace Text, Enter the replacement text:
+;     if ErrorLevel
+;         return
+
+;     ; Replace the text
+;     StringReplace, ClipBoardContent, ClipBoardContent, %TextToReplace%, %ReplacementText%, All
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
 
 
 ;?  ██████╗ ██╗   ██╗██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
