@@ -3,7 +3,7 @@
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
-;;* Display Related
+; Display Related
 ; !Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
 ; !Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
 ; !Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
@@ -17,7 +17,7 @@
 !2::CenterFocusedWindow()
 #t:: WinSet, AlwaysOnTop, Toggle, A
 
-;;* Kill Commands
+; Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
 !+o::RunWait, taskkill /f /im whkd.exe,,Hide
 !+p::RunWait, taskkill /f /im python.exe
@@ -26,7 +26,7 @@
 !q::KillForeground()
 ; ~Esc & q::KillForeground()
 
-;;* Start Apps / Scripts
+; Start Apps / Scripts
 !e::Run pwsh -c explorer.exe,,Hide
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
 !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
@@ -37,16 +37,14 @@
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
-;;* Komorebic Commands
+; Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
 ; ~Esc & w::RunWait, komorebic toggle-float,,Hide
 !w::RunWait, komorebic toggle-float,,Hide
 Pause::RunWait, komorebic quick-load-resize,,Hide
 ^l:: RunWait, komorebic quick-save-resize,,return
 
-
-
-;;* Others
+; Others
 ^!h::ToggleHiddenFiles()
 ^!m::CopyPath_File()
 ^!n::VScode_OpenWith()
@@ -54,7 +52,10 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 ^+m:: Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3",,Return
+
+; Replace
 ^+;::ReplaceDashWSpace()
+^+'::Remove_AllSpace_Selection()
 
 ;;* F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
@@ -607,3 +608,33 @@ ReplaceDashWSpace() {
     Clipboard := ClipboardBackup
     return
     }
+
+
+Remove_AllSpace_Selection(){
+; Backup the clipboard
+ClipboardBackup := ClipboardAll
+; Clear the clipboard
+Clipboard := ""
+; Copy the selected text
+Send, ^c
+; Wait for the clipboard to contain the copied text
+ClipWait, 1
+if ErrorLevel
+{
+MsgBox, No text selected or copying failed.
+}
+else
+{
+; Get the clipboard content
+ClipBoardContent := Clipboard
+; Replace all spaces with nothing
+StringReplace, ClipBoardContent, ClipBoardContent, %A_Space%, , All
+; Restore the clipboard content with the modified text
+Clipboard := ClipBoardContent
+; Paste the modified text
+Send, ^v
+}
+; Restore the original clipboard content
+Clipboard := ClipboardBackup
+return
+}
