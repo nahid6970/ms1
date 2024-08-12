@@ -768,27 +768,29 @@ return
 
 
 
-; !h:: ; Define the shortcut Ctrl+H
-; Gui, New, +Resize ; Create a new GUI window with resize capability
-; Gui, Font, s14 Bold, Jetbrainsmono nfp ; Set font size 14, bold, Arial for the first column
-; Gui, Add, Text, x10 y10 w200 h30, Column 1 ; Label for the first column
-; Gui, Add, Button, x10 y50 w100 h30 , Button 1
-; Gui, Add, Button, x10 y90 w100 h30 , Button 2
-; Gui, Add, Button, x10 y130 w100 h30 , Button 3
-; Gui, Add, Button, x10 y170 w100 h30 , Button 4
-; Gui, Add, Button, x10 y210 w100 h30 , Button 5
+!h:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Button, x10 y00 w300 h50 , Font Related`nAlt+F
+Gui, Add, Button, x10 y50 w300 h50 , Button 1
+Gui, Add, Button, x10 y100 w300 h50 , Button 2
+Gui, Add, Button, x10 y150 w300 h50 , Button 3
+Gui, Add, Button, x10 y200 w300 h50 , Button 4
+Gui, Add, Button, x10 y250 w300 h50 , Button 5
 
-; Gui, Add, Text, x120 y10 w200 h30, Column 2 ; Label for the second column
-; Gui, Add, Button, x120 y50 w100 h30 , Button 6
-; Gui, Add, Button, x120 y90 w100 h30 , Button 7
-; Gui, Add, Button, x120 y130 w100 h30 , Button 8
-; Gui, Add, Button, x120 y170 w100 h30 , Button 9
+Gui, Font, s12 Italic Bold, Jetbrainsmono nfp
+Gui, Add, Button, x310 y00 w300 h50 , Button 6
+Gui, Add, Button, x310 y50 w300 h50 , Button 6
+Gui, Add, Button, x310 y100 w300 h50 , Button 7
+Gui, Add, Button, x310 y150 w300 h50 , Button 8
+Gui, Add, Button, x310 y200 w300 h50 , Button 9
+Gui, Add, Button, x310 y250 w300 h50 , Button 9
 
-; Gui, Show, w250 h260, Two Column GUI ; Show the GUI with a width and height
-; return
-; GuiClose:
-; Gui, Hide ; Hide the GUI instead of exiting the script
-; return
+Gui, Show, w620 h500, Two Column GUI ; Show the GUI with a width and height
+return
+GuiClose:
+Gui, Hide ; Hide the GUI instead of exiting the script
+return
 
 
 
@@ -820,27 +822,27 @@ return
 
 
 
-!h:: ; Define the shortcut Ctrl+H
-Gui, New, +Resize ; Create a new GUI window with resize capability
+; !h:: ; Define the shortcut Ctrl+H
+; Gui, New, +Resize ; Create a new GUI window with resize capability
 
-; First column
-Gui, Font, s14 Bold, Arial ; Set font size 14, bold, Arial for the first column
-Gui, Add, Text, x10 y10 w120 h40 +Center, Button`n1
-Gui, Add, Text, x10 y60 w120 h40 +Center, Button 2
-Gui, Add, Text, x10 y110 w120 h40 +Center, Button 3
-Gui, Add, Text, x10 y160 w120 h40 +Center, Button 4
-Gui, Add, Text, x10 y210 w120 h40 +Center, Button 5
+; ; First column
+; Gui, Font, s12 Bold, Jetbrainsmono nfp
+; Gui, Add, Text, x10 y10 w300 h40 +Center,  ShowActionChooser`nALT+F
+; Gui, Add, Text, x10 y60 w300 h40 +Center, Button 2
+; Gui, Add, Text, x10 y110 w300 h40 +Center, Button 3
+; Gui, Add, Text, x10 y160 w300 h40 +Center, Button 4
+; Gui, Add, Text, x10 y210 w300 h40 +Center, Button 5
 
-; Second column
-Gui, Font, s16 Italic, Times New Roman ; Set font size 16, italic, Times New Roman for the second column
-Gui, Add, Text, x150 y10 w120 h40 +Center, Button A
-Gui, Add, Text, x150 y60 w120 h40 +Center, Button B
-Gui, Add, Text, x150 y110 w120 h40 +Center, Button C
-Gui, Add, Text, x150 y160 w120 h40 +Center, Button D
+; ; Second column
+; Gui, Font, s12 Italic, Times New Roman
+; Gui, Add, Text, x310 y10 w300 h40 +Center, Button A
+; Gui, Add, Text, x310 y60 w300 h40 +Center, Button B
+; Gui, Add, Text, x310 y110 w300 h40 +Center, Button C
+; Gui, Add, Text, x310 y160 w300 h40 +Center, Button D
 
-Gui, Show, w300 h300, Two Column GUI ; Show the GUI with a width and height
-return
+; Gui, Show, w600 h300, Two Column GUI ; Show the GUI with a width and height
+; return
 
-GuiClose:
-Gui, Hide ; Hide the GUI instead of exiting the script
-return
+; GuiClose:
+; Gui, Hide ; Hide the GUI instead of exiting the script
+; return
