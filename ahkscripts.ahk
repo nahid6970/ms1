@@ -719,25 +719,25 @@ Remove_All_Punctuation(){
     return
 }
 
-; Convert to Uppercase
-Convert_Uppercase(){
-    ClipboardBackup := ClipboardAll
-    Clipboard := ""
-    Send, ^c
-    ClipWait, 1
-    if ErrorLevel
-    {
-        MsgBox, No text selected or copying failed.
-        return
-    }
-    ClipBoardContent := Clipboard
-    ; Convert to uppercase
-    StringUpper, ClipBoardContent, ClipBoardContent
-    Clipboard := ClipBoardContent
-    Send, ^v
-    Clipboard := ClipboardBackup
-    return
-    }
+; ; Convert to Uppercase
+; Convert_Uppercase(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Convert to uppercase
+;     StringUpper, ClipBoardContent, ClipBoardContent
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+;     }
 
 
 ; ; Convert to Lowercase
@@ -959,8 +959,9 @@ Convert_Uppercase(){
 ; Shortcut to open the action chooser GUI
 ; Show the action chooser GUI
 Show_Action_Chooser() {
-    Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Convert to Lowercase
-    Gui, Add, Button, x20 y60 w150 h30 gRemove_Duplicate_Lines, Remove Duplicate Lines
+    Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Lowercase
+    Gui, Add, Button, x20 y60 w150 h30 gConvert_Uppercase, UpperCase
+    Gui, Add, Button, x20 y100 w150 h30 gRemove_Duplicate_Lines, Remove Duplicate Lines
     Gui, Show, w200 h160, Action Chooser
     return
 }
@@ -985,6 +986,26 @@ Convert_Lowercase() {
     Clipboard := ClipboardBackup
     return
 }
+
+Convert_Uppercase(){
+    Gui, Destroy
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+    if ErrorLevel
+    {
+        MsgBox, No text selected or copying failed.
+        return
+    }
+    ClipBoardContent := Clipboard
+    ; Convert to uppercase
+    StringUpper, ClipBoardContent, ClipBoardContent
+    Clipboard := ClipBoardContent
+    Send, ^v
+    Clipboard := ClipboardBackup
+    return
+    }
 
 ; Remove Duplicate Lines
 Remove_Duplicate_Lines() {
