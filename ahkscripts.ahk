@@ -37,12 +37,14 @@
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
-; Replace
+; Replace & Text Related
+^+,:: Remove_All_Punctuation()
 ^+;::ReplaceDashWSpace()
 ^+'::Remove_AllSpace_Selection()
+^+d:: Remove_Duplicate_Lines()
+^+l:: Convert_Lowercase()
 ^+u::Convert_Uppercase()
 ^+y::Replace_Matching_words_Selection()
-^+d:: Remove_Duplicate_Lines()
 
 ; Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
@@ -690,7 +692,8 @@ Replace_Matching_words_Selection(){
 
 
 ; Remove All Punctuation
-^+,:: ; Ctrl + Shift + P
+
+Remove_All_Punctuation(){
     ClipboardBackup := ClipboardAll
     Clipboard := ""
     Send, ^c
@@ -701,16 +704,17 @@ Replace_Matching_words_Selection(){
         return
     }
     ClipBoardContent := Clipboard
-    ; Remove punctuation
+    ;* Remove punctuation
     StringReplace, ClipBoardContent, ClipBoardContent, `.,,`, All
     StringReplace, ClipBoardContent, ClipBoardContent, `;,`, All
     StringReplace, ClipBoardContent, ClipBoardContent, `:,`, All
     StringReplace, ClipBoardContent, ClipBoardContent, ``,`, All
-    ; Add more punctuation characters as needed
+    ;* Add more punctuation characters as needed
     Clipboard := ClipBoardContent
     Send, ^v
     Clipboard := ClipboardBackup
     return
+}
 
 ; Convert to Uppercase
 Convert_Uppercase(){
@@ -732,8 +736,9 @@ Convert_Uppercase(){
     return
     }
 
+
 ; Convert to Lowercase
-^+l:: ; Ctrl + Shift + L
+Convert_Lowercase(){
     ClipboardBackup := ClipboardAll
     Clipboard := ""
     Send, ^c
@@ -744,14 +749,16 @@ Convert_Uppercase(){
         return
     }
     ClipBoardContent := Clipboard
-    ; Convert to lowercase
+    ;* Convert to lowercase
     StringLower, ClipBoardContent, ClipBoardContent
     Clipboard := ClipBoardContent
     Send, ^v
     Clipboard := ClipboardBackup
     return
+}
 
-; Trim Leading and Trailing Spaces
+
+;; Trim Leading and Trailing Spaces
 ; ^+t:: ; Ctrl + Shift + T
 ;     ClipboardBackup := ClipboardAll
 ;     Clipboard := ""
