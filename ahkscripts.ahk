@@ -38,14 +38,17 @@
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
+; RAlt & E:: Convert_Lowercase()
+; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser
+; RAlt & L:: Remove_Duplicate_Lines()
 ; Replace & Text Related
-^+,:: Remove_All_Punctuation()
-^+;::ReplaceDashWSpace()
-^+'::Remove_AllSpace_Selection()
-^+d:: Remove_Duplicate_Lines()
-^+l:: Convert_Lowercase()
-^+u::Convert_Uppercase()
-^+y::Replace_Matching_words_Selection()
+RAlt & -::ReplaceDashWSpace()
+RAlt & L::Show_Action_Chooser() ; Shortcut to open the action chooser GUI
+RAlt & P:: Remove_All_Punctuation()
+RAlt & R::Replace_Matching_words_Selection()
+RAlt & SPACE::Remove_AllSpace_Selection()
+RAlt & U::Convert_Uppercase()
+
 
 ; Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
@@ -693,7 +696,6 @@ Replace_Matching_words_Selection(){
 
 
 ; Remove All Punctuation
-
 Remove_All_Punctuation(){
     ClipboardBackup := ClipboardAll
     Clipboard := ""
@@ -738,25 +740,25 @@ Convert_Uppercase(){
     }
 
 
-; Convert to Lowercase
-Convert_Lowercase(){
-    ClipboardBackup := ClipboardAll
-    Clipboard := ""
-    Send, ^c
-    ClipWait, 1
-    if ErrorLevel
-    {
-        MsgBox, No text selected or copying failed.
-        return
-    }
-    ClipBoardContent := Clipboard
-    ;* Convert to lowercase
-    StringLower, ClipBoardContent, ClipBoardContent
-    Clipboard := ClipBoardContent
-    Send, ^v
-    Clipboard := ClipboardBackup
-    return
-}
+; ; Convert to Lowercase
+; Convert_Lowercase(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ;* Convert to lowercase
+;     StringLower, ClipBoardContent, ClipBoardContent
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
 
 
 ;; Trim Leading and Trailing Spaces
@@ -780,34 +782,34 @@ Convert_Lowercase(){
 ;     return
 
 
-; Remove Duplicate Lines
-Remove_Duplicate_Lines(){
-    ClipboardBackup := ClipboardAll
-    Clipboard := ""
-    Send, ^c
-    ClipWait, 1
-    if ErrorLevel
-    {
-        MsgBox, No text selected or copying failed.
-        return
-    }
-    ClipBoardContent := Clipboard
-    ;* Remove duplicate lines
-    Lines := []
-    Loop, parse, ClipBoardContent, `n, `r
-    {
-        if !(Lines[A_LoopField])
-        {
-            Lines[A_LoopField] := True
-            Result .= A_LoopField . "`n"
-        }
-    }
-    ClipBoardContent := Result
-    Clipboard := ClipBoardContent
-    Send, ^v
-    Clipboard := ClipboardBackup
-    return
-}
+; ; Remove Duplicate Lines
+; Remove_Duplicate_Lines(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ;* Remove duplicate lines
+;     Lines := []
+;     Loop, parse, ClipBoardContent, `n, `r
+;     {
+;         if !(Lines[A_LoopField])
+;         {
+;             Lines[A_LoopField] := True
+;             Result .= A_LoopField . "`n"
+;         }
+;     }
+;     ClipBoardContent := Result
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
 
 
 ; ; Replace Multiple Spaces with Single Space
@@ -828,3 +830,193 @@ Remove_Duplicate_Lines(){
 ;     Send, ^v
 ;     Clipboard := ClipboardBackup
 ;     return
+
+
+
+
+
+
+
+
+;?  █████╗  ██████╗████████╗██╗ ██████╗ ███╗   ██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
+;? ██╔══██╗██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║    ██╔════╝██║  ██║██╔═══██╗██╔═══██╗██╔════╝██╔════╝██╔══██╗
+;? ███████║██║        ██║   ██║██║   ██║██╔██╗ ██║    ██║     ███████║██║   ██║██║   ██║███████╗█████╗  ██████╔╝
+;? ██╔══██║██║        ██║   ██║██║   ██║██║╚██╗██║    ██║     ██╔══██║██║   ██║██║   ██║╚════██║██╔══╝  ██╔══██╗
+;? ██║  ██║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║    ╚██████╗██║  ██║╚██████╔╝╚██████╔╝███████║███████╗██║  ██║
+;? ╚═╝  ╚═╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝     ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
+
+; ; Central function to choose and execute an action
+; Choose_Action() {
+;     ; Show an input box to choose an action
+;     InputBox, UserChoice, Choose Action, Enter the number of the action:`n1. Convert to Lowercase`n2. Remove Duplicate Lines`n3. Replace Text, , , , , , , , 1
+;     if ErrorLevel  ; User pressed Cancel
+;         return
+;     ; Call the appropriate function based on user choice
+;     if (UserChoice = "1")
+;     {
+;         Convert_Lowercase()
+;     }
+;     else if (UserChoice = "2")
+;     {
+;         Remove_Duplicate_Lines()
+;     }
+;     else if (UserChoice = "3")
+;     {
+;         Replace_Text()
+;     }
+;     else
+;     {
+;         MsgBox, Invalid choice. Please enter 1, 2, or 3.
+;     }
+; }
+
+; ; Convert to Lowercase
+; Convert_Lowercase(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         Clipboard := ClipboardBackup
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Convert to lowercase
+;     StringLower, ClipBoardContent, ClipBoardContent
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
+; ; Remove Duplicate Lines
+; Remove_Duplicate_Lines(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         Clipboard := ClipboardBackup
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Remove duplicate lines
+;     Lines := []
+;     Loop, parse, ClipBoardContent, `n, `r
+;     {
+;         if !(Lines[A_LoopField])
+;         {
+;             Lines[A_LoopField] := True
+;             Result .= A_LoopField . "`n"
+;         }
+;     }
+;     ClipBoardContent := Result
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
+; ; Replace Text
+; Replace_Text(){
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         Clipboard := ClipboardBackup
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+    
+;     ; Prompt for text to replace and the replacement text
+;     InputBox, TextToReplace, Replace Text, Enter the text to replace:
+;     if ErrorLevel
+;         return
+    
+;     InputBox, ReplacementText, Replace Text, Enter the replacement text:
+;     if ErrorLevel
+;         return
+
+;     ; Replace the text
+;     StringReplace, ClipBoardContent, ClipBoardContent, %TextToReplace%, %ReplacementText%, All
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+; }
+
+
+
+
+
+; Shortcut to open the action chooser GUI
+; Show the action chooser GUI
+Show_Action_Chooser() {
+    Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Convert to Lowercase
+    Gui, Add, Button, x20 y60 w150 h30 gRemove_Duplicate_Lines, Remove Duplicate Lines
+    Gui, Show, w200 h160, Action Chooser
+    return
+}
+
+; Convert to Lowercase
+Convert_Lowercase() {
+    Gui, Destroy
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+    if ErrorLevel {
+        MsgBox, No text selected or copying failed.
+        Clipboard := ClipboardBackup
+        return
+    }
+    ClipBoardContent := Clipboard
+    ; Convert to lowercase
+    StringLower, ClipBoardContent, ClipBoardContent
+    Clipboard := ClipBoardContent
+    Send, ^v
+    Clipboard := ClipboardBackup
+    return
+}
+
+; Remove Duplicate Lines
+Remove_Duplicate_Lines() {
+    Gui, Destroy
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+    if ErrorLevel {
+        MsgBox, No text selected or copying failed.
+        Clipboard := ClipboardBackup
+        return
+    }
+    ClipBoardContent := Clipboard
+    ; Remove duplicate lines
+    Lines := []
+    Loop, parse, ClipBoardContent, `n, `r
+    {
+        if !(Lines[A_LoopField]) {
+            Lines[A_LoopField] := True
+            Result .= A_LoopField . "`n"
+        }
+    }
+    ClipBoardContent := Result
+    Clipboard := ClipBoardContent
+    Send, ^v
+    Clipboard := ClipboardBackup
+    return
+}
+
+; Cancel the replace action and close the GUI
+Cancel() {
+    Gui, Destroy
+    return
+}
