@@ -771,20 +771,22 @@ return
 !h:: ; Define the shortcut Ctrl+H
 Gui, New, +Resize ; Create a new GUI window with resize capability
 Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Button, x10 y00 w300 h50 , Font Related`nAlt+F
-Gui, Add, Button, x10 y50 w300 h50 , Button 1
-Gui, Add, Button, x10 y100 w300 h50 , Button 2
-Gui, Add, Button, x10 y150 w300 h50 , Button 3
-Gui, Add, Button, x10 y200 w300 h50 , Button 4
-Gui, Add, Button, x10 y250 w300 h50 , Button 5
+Gui, Add, Button, x010 y000 w300 h50 , Font Related`nAlt+F
+Gui, Add, Button, x010 y050 w300 h50 , Black Screen`nCtrl+Alt+B
+Gui, Add, Button, x010 y100 w300 h50 , White Screen`nCtrl+Alt+W
+Gui, Add, Button, x010 y150 w300 h50 , Reset Workspace`nCtrl+Alt+T
+Gui, Add, Button, x010 y200 w300 h50 , Always On Top`nWin+T
+Gui, Add, Button, x010 y250 w300 h50 , Send to 2nd Monitor`nWin+S
+Gui, Add, Button, x010 y300 w300 h50 , Center Focused Apps`nWin+C
 
+Gui, Font, s25, Segoe MDL2 Assets ; Set font size to 24 and use the Segoe MDL2 Assets font
+Gui, Add, Text, x310 y000 w300 h80 +Center cBlue, VSCode
 Gui, Font, s12 Italic Bold, Jetbrainsmono nfp
-Gui, Add, Button, x310 y00 w300 h50 , Button 6
-Gui, Add, Button, x310 y50 w300 h50 , Button 6
-Gui, Add, Button, x310 y100 w300 h50 , Button 7
-Gui, Add, Button, x310 y150 w300 h50 , Button 8
-Gui, Add, Button, x310 y200 w300 h50 , Button 9
-Gui, Add, Button, x310 y250 w300 h50 , Button 9
+Gui, Add, Button, x310 y050 w300 h50 +Center cBlue, Split Right`nCtrl+\
+Gui, Add, Button, x310 y100 w300 h50 +Center cBlue, Button 7
+Gui, Add, Button, x310 y150 w300 h50 +Center cBlue, Button 8
+Gui, Add, Button, x310 y200 w300 h50 +Center cBlue, Button 9
+Gui, Add, Button, x310 y250 w300 h50 +Center cBlue, Button 9
 
 Gui, Show, w620 h500, Two Column GUI ; Show the GUI with a width and height
 return
