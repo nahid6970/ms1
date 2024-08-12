@@ -15,148 +15,119 @@ def switch_to_frame(frame_to_show, frame_to_hide):
     frame_to_hide.pack_forget()
     frame_to_show.pack()
 
-
 root = tk.Tk()
-root.title("Shortcut Buttons")
+root.title("Shortcut Labels")
 root.attributes('-topmost', True)
 root.overrideredirect(True)  # Remove default borders
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
-root.geometry(f"700x400")
+root.geometry(f"800x500")
 
 default_font = ("Jetbrainsmono nfp", 14, "bold")
 root.option_add("*Font", default_font)
 
-
 def on_enter(event):
-    event.widget.configure(style='Hover.TButton')
+    event.widget.configure(style='Hover.TLabel')
 
 def on_leave(event):
-    event.widget.configure(style='Custom.TButton')
+    event.widget.configure(style='Custom.TLabel')
+
+def on_mouse_wheel(event):
+    # Scroll vertically based on the wheel movement
+    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+main_frame = tk.Frame(root, bg="#1d2027")
+main_frame.pack(fill='both', expand=True)
+
+# Create the container frame for the canvas and scrollbar
+container_frame = tk.Frame(root)
+container_frame.pack(fill='both', expand=True)
+# Create a canvas widget
+canvas = tk.Canvas(container_frame)
+canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+# Create a vertical scrollbar linked to the canvas
+scrollbar = tk.Scrollbar(container_frame, orient="vertical", command=canvas.yview)
+scrollbar.pack(side=tk.RIGHT, fill='y')
+# Create a frame to hold the labels and place it on the canvas
+vscode_window = tk.Frame(canvas, bg="#1D2027")
+vscode_window.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+# Create an anchor frame to be placed on the canvas
+canvas.create_window((0, 0), window=vscode_window, anchor="nw")
+# Configure the scrollbar to control the canvas
+canvas.configure(yscrollcommand=scrollbar.set)
+root.bind_all("<MouseWheel>", on_mouse_wheel)
+
 # Create a style object
-style = Style()
-# Configure a custom style for TButton
-style.configure('Custom.TButton', 
+style = ttk.Style()
+# Configure a custom style for TLabel
+style.configure('Custom.TLabel', 
                 font=('Jetbrainsmono nfp', 12, 'italic'), 
                 background='lightgrey', 
                 foreground='darkblue', 
                 borderwidth=2, 
                 relief='solid',
                 padding=(10, 5),
-                width=18,
+                width=20,
                 anchor='center')
 # Configure a hover style
-style.configure('Hover.TButton', 
+style.configure('Hover.TLabel', 
                 font=('Jetbrainsmono nfp', 12, 'italic'), 
-                background='red', 
-                foreground='red', 
+                background='Black', 
+                foreground='Green', 
                 borderwidth=2, 
                 relief='solid',
                 padding=(10, 5),
-                width=18,
+                width=20,
                 anchor='center')
 
-
-# ("Terminal"           ,Main_Window   ,"#000000","#ffffff",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1 ,0,1,1,"ew",0,0,(1,1),(0,0),lambda:switch_to_frame(terminal         ,Main_Window))   ,
-# ("Terminal-Close"     ,terminal      ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),0,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"           ,"CommandPrompt"],"Ctrl+Shift+W"        )),
-# ("Terminal-Split-V"   ,terminal      ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),1,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell"           ,"CommandPrompt"],"Alt+Shift+equal"     )),
-# ("Terminal-Split-H"   ,terminal      ,"#FFFFFF","#1D2027",1,0,"flat",("JetBrainsMonoNF",11,"bold"),2,0,1,1,"ew",0,0,(1,1),(0,0),lambda:send_k  (["Powershell","Command"]      ,"Alt+Shift+underscore")),
-
-
-#! chrome
-#! ctrl+shift+b
-
-
-
-
-main_frame = tk.Frame(root, bg="#1d2027")
-main_frame.pack(fill='both', expand=True)
-# Main_Window.pack(side="top", anchor="w", pady=(0,0), padx=(0,0))
-
-
-vscode_window = tk.Button( root, text="Folder", command=lambda: switch_to_frame(vscode_window, root))
-vscode_window = tk.Frame(bg="#1D2027")
-vscode_window.pack_propagate(True)
-VSCode = HoverButton(main_frame, bg="#23a8f2", fg="#000000", h_bg="#FFFFFF", h_fg="#000000", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(vscode_window , main_frame), text="\udb81\ude10")
-VSCode.pack(padx=(1,1), pady=(1,1))
-
-# Create buttons
-buttons = [
-    ("BookmarkLine"                ,"Bookmark Line")                   ,
-    ("Bookmarklistall"             ,"? Bookmark list All")             ,
-    ("BracketsGoTo"                ,"Brackets GoTo")                   ,
-    ("BracketsRemove"              ,"Brackets Remove")                 ,
-    ("BracketsSelect"              ,"Brackets Select")                 ,
-    ("AlignMultiCoulmnsbySeparator","Align Multi Coulmns by Separator"),
-    ("ChangeAllOccurrences"        ,"Change All Occurrences")          ,
-    ("Comment"                     ,"Comment")                         ,
-    ("CommentSelection"            ,"Comment Selection")               ,
-    ("DeleteLine"                  ,"Delete Line")                     ,
-    ("Keyboard_Shortcut"           ,"VSCODE Keyboard Shortcut")        ,
-    ("LineJoin"                    ,"Line Join")                       ,
-    ("Minimap"                     ,"Minimap")                         ,
-    ("NewWindow"                   ,"New Window")                      ,
-    ("remove_dup_lines"            ,"Remove Dup Lines")                ,
-    ("RemoveFromSelection"         ,"Remove From Selection")           ,
-    ("SelectNext"                  ,"Select Next")                     ,
-    ("SelectPrevious"              ,"Select Previous")                 ,
-    ("SortLinesAscending"          ,"Sort Lines Ascending")            ,
-    ("SplitSameDocument"           ,"Split Same Document")             ,
-    ("TableFormatProperly"         ,"Table Format Properly")           ,
-    ("TableFormatProperly2"        ,"Table Format Properly 2")         ,
-    ("UnComment"                   ,"UnComment")                       ,
+# Create labels with different styles
+labels = [
+    ("BookmarkLine"                ,"Bookmark Line",'Custom.TLabel')                   ,
+    ("Bookmarklistall"             ,"? Bookmark list All",'Custom.TLabel')             ,
+    ("BracketsGoTo"                ,"Brackets GoTo",'Custom.TLabel')                   ,
+    ("BracketsRemove"              ,"Brackets Remove",'Custom.TLabel')                 ,
+    ("BracketsSelect"              ,"Brackets Select",'Custom.TLabel')                 ,
+    ("AlignMultiCoulmnsbySeparator","Align Multi Coulmns by Separator",'Custom.TLabel'),
+    ("ChangeAllOccurrences"        ,"Change All Occurrences",'Custom.TLabel')          ,
+    ("Comment"                     ,"Comment",'Custom.TLabel')                         ,
+    ("CommentSelection"            ,"Comment Selection",'Custom.TLabel')               ,
+    ("DeleteLine"                  ,"Delete Line",'Custom.TLabel')                     ,
+    ("Keyboard_Shortcut"           ,"VSCODE Keyboard Shortcut",'Custom.TLabel')        ,
+    ("LineJoin"                    ,"Line Join",'Custom.TLabel')                       ,
+    ("Minimap"                     ,"Minimap",'Custom.TLabel')                         ,
+    ("NewWindow"                   ,"New Window",'Custom.TLabel')                      ,
+    ("remove_dup_lines"            ,"Remove Dup Lines",'Custom.TLabel')                ,
+    ("RemoveFromSelection"         ,"Remove From Selection",'Custom.TLabel')           ,
+    ("SelectNext"                  ,"Select Next",'Custom.TLabel')                     ,
+    ("SelectPrevious"              ,"Select Previous",'Custom.TLabel')                 ,
+    ("SortLinesAscending"          ,"Sort Lines Ascending",'Custom.TLabel')            ,
+    ("SplitSameDocument"           ,"Split Same Document",'Custom.TLabel')             ,
+    ("TableFormatProperly"         ,"Table Format Properly",'Custom.TLabel')           ,
+    ("TableFormatProperly2"        ,"Table Format Properly 2",'Custom.TLabel')         ,
+    ("UnComment"                   ,"UnComment",'Custom.TLabel')                       ,
 ]
-max_rows = 10
-# Create buttons and apply initial styles and bindings
-for i, (command_name, btn_text) in enumerate(buttons):
-    # Create each button with the 'Custom.TButton' style initially
-    button = Button(vscode_window, text=btn_text, style='Custom.TButton', command=lambda c=command_name: subprocess.Popen(["powershell", f"python c:/ms1/HotKeys.py {c}"]))
-    button.grid(row=i % max_rows, column=i // max_rows, padx=(0, 0), pady=(0, 0), sticky="ew")
-    # Bind hover events to the button
-    button.bind("<Enter>", on_enter)
-    button.bind("<Leave>", on_leave)
-    # Make rows and columns resizable
-    vscode_window.grid_columnconfigure(i // max_rows, weight=1)
-    vscode_window.grid_rowconfigure(i % max_rows, weight=1)
 
+# Number of columns per row
+max_columns = 4
 
+for i, (command_name, lbl_text, style_name) in enumerate(labels):
+    row = i // max_columns
+    column = i % max_columns
+    label = ttk.Label(vscode_window, text=lbl_text, style=style_name, cursor='hand2')
+    label.grid(row=row, column=column, padx=(0, 0), pady=(0, 0), sticky="ew")
+    label.bind("<Enter>", on_enter)
+    label.bind("<Leave>", on_leave)
+    label.bind("<Button-1>", lambda e, c=command_name: subprocess.Popen(["powershell", f"python c:/ms1/HotKeys.py {c}"]))
 
-Excel_frame = tk.Button( root, text="Folder", command=lambda: switch_to_frame(Excel_frame, root))
-Excel_frame = tk.Frame(bg="#1D2027")
-Excel_frame.pack_propagate(True)
-Excel = HoverButton(main_frame, bg="#21a366", fg="#000000", h_bg="#FFFFFF", h_fg="#000000", height=1, width=10, bd=0, highlightthickness=0, command=lambda:switch_to_frame(Excel_frame , main_frame), text="\udb84\udf8f")
-Excel.pack(padx=(1,1), pady=(1,1))
+    # Configure row and column weights
+    vscode_window.grid_columnconfigure(column, weight=1)
+    vscode_window.grid_rowconfigure(row, weight=1)
 
-Series = HoverButton(Excel_frame, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Series"]), text="\udb81\udc8b")
-Series.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+# Pack the canvas and scrollbar into the container frame
+canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+scrollbar.pack(side=tk.RIGHT, fill='y')
 
-Fit_Row = HoverButton(Excel_frame, bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0, command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Row"]), text="\udb82\udc37")
-Fit_Row.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
+# Pack the container frame into the root window
+container_frame.pack(fill='both', expand=True)
 
-Fit_Column = HoverButton(Excel_frame, text="\udb82\udc35", bg="#000000", fg="#FFFFFF", height=1, width=0, bd=0, highlightthickness=0,
-                         tooltip_text="Adjust Column",tooltip_delay=100,tooltip_font_size=12,
-                         command=lambda:subprocess.Popen(["powershell", "python c:/ms1/HotKeys.py Fit_Column"]))
-Fit_Column.pack(side="top", anchor="center", padx=(0,0), pady=(0,0))
-
-
-terminal = tk.Button( root, text="Folder", command=lambda: switch_to_frame(terminal, root))
-terminal = tk.Frame(bg="#1D2027")
-terminal.pack_propagate(True)
-
-
-
-def center_and_press_alt_2(window):
-    def center_window():
-        window.update_idletasks()
-        width = window.winfo_width()
-        height = window.winfo_height()
-        x = (window.winfo_screenwidth() // 2) - (width // 2)
-        y = (window.winfo_screenheight() // 2) - (height // 2)
-        window.geometry(f'{width}x{height}+{x}+{y}')
-    def press_alt_2():
-        pyautogui.hotkey('alt', '2')
-    center_window()
-    window.after(25, press_alt_2)
-
-center_and_press_alt_2(root)
 root.mainloop()
