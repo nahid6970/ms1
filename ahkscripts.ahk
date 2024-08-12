@@ -37,6 +37,11 @@
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
+; Replace
+^+;::ReplaceDashWSpace()
+^+'::Remove_AllSpace_Selection()
+^+y::Replace_Matching_words_Selection()
+
 ; Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
 ; ~Esc & w::RunWait, komorebic toggle-float,,Hide
@@ -53,11 +58,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
 ^+m:: Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3",,Return
 
-; Replace
-^+;::ReplaceDashWSpace()
-^+'::Remove_AllSpace_Selection()
-
-;;* F1 for valorant
+; F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
     F1::Send, ^+{F1}
 #If
@@ -637,4 +638,49 @@ Send, ^v
 ; Restore the original clipboard content
 Clipboard := ClipboardBackup
 return
+}
+
+
+
+Replace_Matching_words_Selection(){
+    ; Backup the clipboard
+    ClipboardBackup := ClipboardAll
+    ; Clear the clipboard
+    Clipboard := ""
+    ; Copy the selected text
+    Send, ^c
+    ; Wait for the clipboard to contain the copied text
+    ClipWait, 1
+    if ErrorLevel
+    {
+        MsgBox, No text selected or copying failed.
+        return
+    }
+    ; Get the clipboard content
+    ClipBoardContent := Clipboard
+    ; Prompt user for the word to replace
+    InputBox, OldWord, Replace Word, Enter the word to replace:
+    if (ErrorLevel)
+    {
+        ; User canceled the input box
+        Clipboard := ClipboardBackup
+        return
+    }
+    ; Prompt user for the replacement word
+    InputBox, NewWord, Replace Word, Enter the new word:
+    if (ErrorLevel)
+    {
+        ; User canceled the input box
+        Clipboard := ClipboardBackup
+        return
+    }
+    ; Replace all occurrences of the old word with the new word
+    StringReplace, ClipBoardContent, ClipBoardContent, %OldWord%, %NewWord%, All
+    ; Restore the clipboard content with the modified text
+    Clipboard := ClipBoardContent
+    ; Paste the modified text
+    Send, ^v
+    ; Restore the original clipboard content
+    Clipboard := ClipboardBackup
+    return
 }
