@@ -781,7 +781,7 @@ Gui, Add, Button, x010 y300 w300 h50 , Center Focused Apps`nWin+C
 
 Gui, Font, s25, Segoe MDL2 Assets ; Set font size to 24 and use the Segoe MDL2 Assets font
 Gui, Add, Text, x310 y000 w300 h80 +Center cBlue, VSCode
-Gui, Font, s12 Italic Bold, Jetbrainsmono nfp
+Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
 Gui, Add, Button, x310 y050 w300 h50 +Center cBlue, Split Right`nCtrl+\
 Gui, Add, Button, x310 y100 w300 h50 +Center cBlue gTerminal, cp Terminal Run File`nCtrl+Alt+Shift+Enter
 Gui, Add, Button, x310 y150 w300 h50 +Center cBlue, Button 8
