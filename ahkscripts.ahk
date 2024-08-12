@@ -40,7 +40,9 @@
 ; Replace
 ^+;::ReplaceDashWSpace()
 ^+'::Remove_AllSpace_Selection()
+^+u::Convert_Uppercase()
 ^+y::Replace_Matching_words_Selection()
+^+d:: Remove_Duplicate_Lines()
 
 ; Komorebic Commands
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
@@ -56,7 +58,7 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ^!o::CopyPath_DoubleSlash()
 ^!p::CopyPath_wsl()
 ^+Esc::Run pwsh -c Taskmgr.exe,,Hide
-^+m:: Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3",,Return
+; ^+m:: Run, "C:\Program Files\Windows Media Player\wmplayer.exe" "D:\song\wwe\ww.mp3",,Return
 
 ; F1 for valorant
 #IfWinActive ahk_exe VALORANT-Win64-Shipping.exe
@@ -684,3 +686,137 @@ Replace_Matching_words_Selection(){
     Clipboard := ClipboardBackup
     return
 }
+
+
+
+; Remove All Punctuation
+^+,:: ; Ctrl + Shift + P
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+    if ErrorLevel
+    {
+        MsgBox, No text selected or copying failed.
+        return
+    }
+    ClipBoardContent := Clipboard
+    ; Remove punctuation
+    StringReplace, ClipBoardContent, ClipBoardContent, `.,,`, All
+    StringReplace, ClipBoardContent, ClipBoardContent, `;,`, All
+    StringReplace, ClipBoardContent, ClipBoardContent, `:,`, All
+    StringReplace, ClipBoardContent, ClipBoardContent, ``,`, All
+    ; Add more punctuation characters as needed
+    Clipboard := ClipBoardContent
+    Send, ^v
+    Clipboard := ClipboardBackup
+    return
+
+; Convert to Uppercase
+Convert_Uppercase(){
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+    if ErrorLevel
+    {
+        MsgBox, No text selected or copying failed.
+        return
+    }
+    ClipBoardContent := Clipboard
+    ; Convert to uppercase
+    StringUpper, ClipBoardContent, ClipBoardContent
+    Clipboard := ClipBoardContent
+    Send, ^v
+    Clipboard := ClipboardBackup
+    return
+    }
+
+; Convert to Lowercase
+^+l:: ; Ctrl + Shift + L
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+    if ErrorLevel
+    {
+        MsgBox, No text selected or copying failed.
+        return
+    }
+    ClipBoardContent := Clipboard
+    ; Convert to lowercase
+    StringLower, ClipBoardContent, ClipBoardContent
+    Clipboard := ClipBoardContent
+    Send, ^v
+    Clipboard := ClipboardBackup
+    return
+
+; Trim Leading and Trailing Spaces
+; ^+t:: ; Ctrl + Shift + T
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Trim leading and trailing spaces
+;     StringTrimLeft, ClipBoardContent, ClipBoardContent, InStr(ClipBoardContent, A_Space)
+;     StringTrimRight, ClipBoardContent, ClipBoardContent, InStr(ClipBoardContent, A_Space)
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
+
+
+; Remove Duplicate Lines
+Remove_Duplicate_Lines(){
+    ClipboardBackup := ClipboardAll
+    Clipboard := ""
+    Send, ^c
+    ClipWait, 1
+    if ErrorLevel
+    {
+        MsgBox, No text selected or copying failed.
+        return
+    }
+    ClipBoardContent := Clipboard
+    ;* Remove duplicate lines
+    Lines := []
+    Loop, parse, ClipBoardContent, `n, `r
+    {
+        if !(Lines[A_LoopField])
+        {
+            Lines[A_LoopField] := True
+            Result .= A_LoopField . "`n"
+        }
+    }
+    ClipBoardContent := Result
+    Clipboard := ClipBoardContent
+    Send, ^v
+    Clipboard := ClipboardBackup
+    return
+}
+
+
+; ; Replace Multiple Spaces with Single Space
+; ^+m:: ; Ctrl + Shift + M
+;     ClipboardBackup := ClipboardAll
+;     Clipboard := ""
+;     Send, ^c
+;     ClipWait, 1
+;     if ErrorLevel
+;     {
+;         MsgBox, No text selected or copying failed.             
+;         return
+;     }
+;     ClipBoardContent := Clipboard
+;     ; Replace multiple spaces with a single space
+;     StringReplace, ClipBoardContent, ClipBoardContent, %A_Space% %A_Space%, %A_Space%, All
+;     Clipboard := ClipBoardContent
+;     Send, ^v
+;     Clipboard := ClipboardBackup
+;     return
