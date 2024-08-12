@@ -11,10 +11,10 @@
 !Numpad2::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external",,Hide
 !Numpad3::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /extend",,Hide
 ^!t::Toggle_Reset_Workspace()
-^!b::ToggleScreenBlackout()
-^!w::ToggleScreenWhiteout()
-!1::ChangeMonitorApps()
-!2::CenterFocusedWindow()
+^!b::Toggle_Screen_Blackout()
+^!w::Toggle_Screen_Whiteout()
+!1::Change_Monitor_Apps()
+!2::Center_Focused_Window()
 #t:: WinSet, AlwaysOnTop, Toggle, A
 
 ; Kill Commands
@@ -386,7 +386,7 @@ return
 ;;* ███████╗██║ ╚████║██████╔╝    ██║ ╚═╝ ██║╚██████╔╝██║ ╚████║██║   ██║   ╚██████╔╝██║  ██║
 ;;* ╚══════╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
 
-ChangeMonitorApps() {
+Change_Monitor_Apps() {
 ; Move all windows from the secondary monitor to the primary monitor
 ; Use Win+M to trigger the script
 #NoEnv
@@ -424,7 +424,7 @@ SetWorkingDir %A_ScriptDir%
 ; Define a variable to track the state of the screen blackout
 blackoutState := 0
 ; Define a function to toggle the screen blackout
-ToggleScreenBlackout() {
+Toggle_Screen_Blackout() {
     global blackoutState  ; Declare the variable as global so it can be accessed inside the function
     if (blackoutState = 0) {
         ; If the screen is not blacked out, create a black fullscreen window
@@ -445,7 +445,7 @@ ToggleScreenBlackout() {
 ; Define a variable to track the state of the screen Whiteout
 whiteoutState := 0
 ; Define a function to toggle the screen Whiteout
-ToggleScreenWhiteout() {
+Toggle_Screen_Whiteout() {
     global whiteoutState  ; Declare the variable as global so it can be accessed inside the function
     if (whiteoutState = 0) {
         ; If the screen is not Whiteed out, create a White fullscreen window
@@ -565,7 +565,7 @@ Toggle_Reset_Workspace() {
 
 
 
-CenterFocusedWindow() {
+Center_Focused_Window() {
     ; Get the handle of the active (focused) window
     WinGet, hwnd, ID, A
     
