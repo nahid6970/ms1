@@ -43,9 +43,9 @@
 ; RAlt & L:: Remove_Duplicate_Lines()
 ; Replace & Text Related
 RAlt & -::ReplaceDashWSpace()
-RAlt & L::Show_Action_Chooser() ; Shortcut to open the action chooser GUI
+LAlt & F::Show_Action_Chooser() ; Shortcut to open the action chooser GUI
 RAlt & P:: Remove_All_Punctuation()
-RAlt & R::Replace_Matching_words_Selection()
+LAlt & R::Replace_Matching_words_Selection()
 RAlt & SPACE::Remove_AllSpace_Selection()
 RAlt & U::Convert_Uppercase()
 
@@ -954,11 +954,17 @@ Remove_All_Punctuation(){
 
 
 
-
+;?  ██████╗ ██╗   ██╗██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
+;? ██╔════╝ ██║   ██║██║    ██╔════╝██║  ██║██╔═══██╗██╔═══██╗██╔════╝██╔════╝██╔══██╗
+;? ██║  ███╗██║   ██║██║    ██║     ███████║██║   ██║██║   ██║███████╗█████╗  ██████╔╝
+;? ██║   ██║██║   ██║██║    ██║     ██╔══██║██║   ██║██║   ██║╚════██║██╔══╝  ██╔══██╗
+;? ╚██████╔╝╚██████╔╝██║    ╚██████╗██║  ██║╚██████╔╝╚██████╔╝███████║███████╗██║  ██║
+;?  ╚═════╝  ╚═════╝ ╚═╝     ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
 
 ; Shortcut to open the action chooser GUI
 ; Show the action chooser GUI
 Show_Action_Chooser() {
+    Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
     Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Lowercase
     Gui, Add, Button, x20 y60 w150 h30 gConvert_Uppercase, UpperCase
     Gui, Add, Button, x20 y100 w150 h30 gRemove_Duplicate_Lines, Remove Duplicate Lines
