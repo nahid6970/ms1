@@ -576,15 +576,15 @@ Replace_Dash_W_Space() {
     return
     }
 
-
+; Remove Spaces from Selection
 Remove_AllSpace_Selection(){
-; Backup the clipboard
+;* Backup the clipboard
 ClipboardBackup := ClipboardAll
-; Clear the clipboard
+;* Clear the clipboard
 Clipboard := ""
-; Copy the selected text
+;* Copy the selected text
 Send, ^c
-; Wait for the clipboard to contain the copied text
+;* Wait for the clipboard to contain the copied text
 ClipWait, 1
 if ErrorLevel
 {
@@ -592,60 +592,57 @@ MsgBox, No text selected or copying failed.
 }
 else
 {
-; Get the clipboard content
+;* Get the clipboard content
 ClipBoardContent := Clipboard
-; Replace all spaces with nothing
+;* Replace all spaces with nothing
 StringReplace, ClipBoardContent, ClipBoardContent, %A_Space%, , All
-; Restore the clipboard content with the modified text
+;* Restore the clipboard content with the modified text
 Clipboard := ClipBoardContent
-; Paste the modified text
+;* Paste the modified text
 Send, ^v
 }
-; Restore the original clipboard content
+;* Restore the original clipboard content
 Clipboard := ClipboardBackup
 return
 }
 
-
+; Replace Text from Selection
 Replace_Matching_words_Selection(){
-    ; Backup the clipboard
     ClipboardBackup := ClipboardAll
-    ; Clear the clipboard
     Clipboard := ""
-    ; Copy the selected text
     Send, ^c
-    ; Wait for the clipboard to contain the copied text
+    ;* Wait for the clipboard to contain the copied text
     ClipWait, 1
     if ErrorLevel
     {
         MsgBox, No text selected or copying failed.
         return
     }
-    ; Get the clipboard content
+    ;* Get the clipboard content
     ClipBoardContent := Clipboard
-    ; Prompt user for the word to replace
+    ;* Prompt user for the word to replace
     InputBox, OldWord, Replace Word, Enter the word to replace:
     if (ErrorLevel)
     {
-        ; User canceled the input box
+        ;* User canceled the input box
         Clipboard := ClipboardBackup
         return
     }
-    ; Prompt user for the replacement word
+    ;* Prompt user for the replacement word
     InputBox, NewWord, Replace Word, Enter the new word:
     if (ErrorLevel)
     {
-        ; User canceled the input box
+        ;* User canceled the input box
         Clipboard := ClipboardBackup
         return
     }
-    ; Replace all occurrences of the old word with the new word
+    ;* Replace all occurrences of the old word with the new word
     StringReplace, ClipBoardContent, ClipBoardContent, %OldWord%, %NewWord%, All
-    ; Restore the clipboard content with the modified text
+    ;* Restore the clipboard content with the modified text
     Clipboard := ClipBoardContent
-    ; Paste the modified text
+    ;* Paste the modified text
     Send, ^v
-    ; Restore the original clipboard content
+    ;* Restore the original clipboard content
     Clipboard := ClipboardBackup
     return
 }
@@ -674,25 +671,6 @@ Remove_All_Punctuation(){
     return
 }
 
-
-;?  ██████╗ ██╗   ██╗██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
-;? ██╔════╝ ██║   ██║██║    ██╔════╝██║  ██║██╔═══██╗██╔═══██╗██╔════╝██╔════╝██╔══██╗
-;? ██║  ███╗██║   ██║██║    ██║     ███████║██║   ██║██║   ██║███████╗█████╗  ██████╔╝
-;? ██║   ██║██║   ██║██║    ██║     ██╔══██║██║   ██║██║   ██║╚════██║██╔══╝  ██╔══██╗
-;? ╚██████╔╝╚██████╔╝██║    ╚██████╗██║  ██║╚██████╔╝╚██████╔╝███████║███████╗██║  ██║
-;?  ╚═════╝  ╚═════╝ ╚═╝     ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
-
-; Shortcut to open the action chooser GUI
-; Show the action chooser GUI
-Show_Action_Chooser() {
-    Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
-    Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Lowercase
-    Gui, Add, Button, x20 y60 w150 h30 gConvert_Uppercase, UpperCase
-    Gui, Add, Button, x20 y100 w150 h30 gRemove_Duplicate_Lines, Remove Duplicate Lines
-    Gui, Show, w200 h160, Action Chooser
-    return
-}
-
 ; Convert to Lowercase
 Convert_Lowercase() {
     Gui, Destroy
@@ -706,7 +684,7 @@ Convert_Lowercase() {
         return
     }
     ClipBoardContent := Clipboard
-    ; Convert to lowercase
+    ;* Convert to lowercase
     StringLower, ClipBoardContent, ClipBoardContent
     Clipboard := ClipBoardContent
     Send, ^v
@@ -714,6 +692,7 @@ Convert_Lowercase() {
     return
 }
 
+; Convert Text to Uppercase
 Convert_Uppercase(){
     Gui, Destroy
     ClipboardBackup := ClipboardAll
@@ -726,7 +705,7 @@ Convert_Uppercase(){
         return
     }
     ClipBoardContent := Clipboard
-    ; Convert to uppercase
+    ;* Convert to uppercase
     StringUpper, ClipBoardContent, ClipBoardContent
     Clipboard := ClipBoardContent
     Send, ^v
@@ -747,7 +726,7 @@ Remove_Duplicate_Lines() {
         return
     }
     ClipBoardContent := Clipboard
-    ; Remove duplicate lines
+    ;* Remove duplicate lines
     Lines := []
     Loop, parse, ClipBoardContent, `n, `r
     {
@@ -760,6 +739,24 @@ Remove_Duplicate_Lines() {
     Clipboard := ClipBoardContent
     Send, ^v
     Clipboard := ClipboardBackup
+    return
+}
+
+;?  ██████╗ ██╗   ██╗██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
+;? ██╔════╝ ██║   ██║██║    ██╔════╝██║  ██║██╔═══██╗██╔═══██╗██╔════╝██╔════╝██╔══██╗
+;? ██║  ███╗██║   ██║██║    ██║     ███████║██║   ██║██║   ██║███████╗█████╗  ██████╔╝
+;? ██║   ██║██║   ██║██║    ██║     ██╔══██║██║   ██║██║   ██║╚════██║██╔══╝  ██╔══██╗
+;? ╚██████╔╝╚██████╔╝██║    ╚██████╗██║  ██║╚██████╔╝╚██████╔╝███████║███████╗██║  ██║
+;?  ╚═════╝  ╚═════╝ ╚═╝     ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
+
+; Shortcut to open the action chooser GUI
+; Show the action chooser GUI
+Show_Action_Chooser() {
+    Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
+    Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Lowercase
+    Gui, Add, Button, x20 y60 w150 h30 gConvert_Uppercase, UpperCase
+    Gui, Add, Button, x20 y100 w150 h30 gRemove_Duplicate_Lines, Remove Duplicate Lines
+    Gui, Show, w200 h160, Action Chooser
     return
 }
 
