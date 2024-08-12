@@ -783,7 +783,7 @@ Gui, Font, s25, Segoe MDL2 Assets ; Set font size to 24 and use the Segoe MDL2 A
 Gui, Add, Text, x310 y000 w300 h80 +Center cBlue, VSCode
 Gui, Font, s12 Italic Bold, Jetbrainsmono nfp
 Gui, Add, Button, x310 y050 w300 h50 +Center cBlue, Split Right`nCtrl+\
-Gui, Add, Button, x310 y100 w300 h50 +Center cBlue, Button 7
+Gui, Add, Button, x310 y100 w300 h50 +Center cBlue gTerminal, cp Terminal Run File`nCtrl+Alt+Shift+Enter
 Gui, Add, Button, x310 y150 w300 h50 +Center cBlue, Button 8
 Gui, Add, Button, x310 y200 w300 h50 +Center cBlue, Button 9
 Gui, Add, Button, x310 y250 w300 h50 +Center cBlue, Button 9
@@ -794,6 +794,10 @@ GuiClose:
 Gui, Hide ; Hide the GUI instead of exiting the script
 return
 
+Terminal:
+    Clipboard := "workbench.action.terminal.runActiveFile"
+    MsgBox, Copied `workbench.action.terminal.runActiveFile` to clipboard
+return
 
 
 ; !h:: ; Define the shortcut Ctrl+H
