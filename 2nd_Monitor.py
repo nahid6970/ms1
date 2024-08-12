@@ -88,7 +88,7 @@ root = tk.Tk()
 root.title("Secondary Monitor Viewer")
 
 root.overrideredirect(True)
-root.geometry(f"+{1720}+{876}")
+root.geometry(f"+{0}+{876}")
 
 # Add bindings to make the window movable
 root.bind("<ButtonPress-1>", start_drag)

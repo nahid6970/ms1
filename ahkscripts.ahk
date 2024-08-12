@@ -7,15 +7,16 @@
 ; !Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
 ; !Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
 ; !Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
-!Numpad1::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal",,Hide
-!Numpad2::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external",,Hide
-!Numpad3::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /extend",,Hide
-^!t::Toggle_Reset_Workspace()
-^!b::Toggle_Screen_Blackout()
-^!w::Toggle_Screen_Whiteout()
-!1::Change_Monitor_Apps()
-!2::Center_Focused_Window()
+#Numpad1::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal",,Hide
+#Numpad2::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external",,Hide
+#Numpad3::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /extend",,Hide
+#2:: Run, cmd /c C:\Users\nahid\OneDrive\backup\usbmmidd_v2\2ndMonitor.bat,,Hide
+#c::Center_Focused_Window()
+#s::Send_to_2nd_Monitor()
 #t:: WinSet, AlwaysOnTop, Toggle, A
+^!b::Toggle_Screen_Blackout()
+^!t::Toggle_Reset_Workspace()
+^!w::Toggle_Screen_Whiteout()
 
 ; Kill Commands
 !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
@@ -386,7 +387,7 @@ return
 ;;* ███████╗██║ ╚████║██████╔╝    ██║ ╚═╝ ██║╚██████╔╝██║ ╚████║██║   ██║   ╚██████╔╝██║  ██║
 ;;* ╚══════╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
 
-Change_Monitor_Apps() {
+Send_to_2nd_Monitor() {
 ; Move all windows from the secondary monitor to the primary monitor
 ; Use Win+M to trigger the script
 #NoEnv
