@@ -10,7 +10,7 @@
 !Numpad1::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal",,Hide
 !Numpad2::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external",,Hide
 !Numpad3::Run, %ComSpec% /c "C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /extend",,Hide
-^!t::ToggleResetWirkspace()
+^!t::Toggle_Reset_Workspace()
 ^!b::ToggleScreenBlackout()
 ^!w::ToggleScreenWhiteout()
 !1::ChangeMonitorApps()
@@ -541,7 +541,7 @@ ToggleScreenWhiteout() {
 
 ; Define a variable to track the state of the taskbar
 taskbarVisible := 1  ; 1 for visible, 0 for hidden
-ToggleResetWirkspace() {
+Toggle_Reset_Workspace() {
     global taskbarVisible
     
     ; Get the handle of the taskbar
