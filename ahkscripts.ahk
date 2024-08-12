@@ -759,9 +759,88 @@ Show_Action_Chooser() {
     Gui, Show, w200 h160, Action Chooser
     return
 }
-
-; Cancel the replace action and close the GUI
-Cancel() {
-    Gui, Destroy
-    return
+{
+Gui, Destroy
+return
 }
+
+
+
+
+
+; !h:: ; Define the shortcut Ctrl+H
+; Gui, New, +Resize ; Create a new GUI window with resize capability
+; Gui, Font, s14 Bold, Jetbrainsmono nfp ; Set font size 14, bold, Arial for the first column
+; Gui, Add, Text, x10 y10 w200 h30, Column 1 ; Label for the first column
+; Gui, Add, Button, x10 y50 w100 h30 , Button 1
+; Gui, Add, Button, x10 y90 w100 h30 , Button 2
+; Gui, Add, Button, x10 y130 w100 h30 , Button 3
+; Gui, Add, Button, x10 y170 w100 h30 , Button 4
+; Gui, Add, Button, x10 y210 w100 h30 , Button 5
+
+; Gui, Add, Text, x120 y10 w200 h30, Column 2 ; Label for the second column
+; Gui, Add, Button, x120 y50 w100 h30 , Button 6
+; Gui, Add, Button, x120 y90 w100 h30 , Button 7
+; Gui, Add, Button, x120 y130 w100 h30 , Button 8
+; Gui, Add, Button, x120 y170 w100 h30 , Button 9
+
+; Gui, Show, w250 h260, Two Column GUI ; Show the GUI with a width and height
+; return
+; GuiClose:
+; Gui, Hide ; Hide the GUI instead of exiting the script
+; return
+
+
+
+; !h:: ; Define the shortcut Ctrl+H
+; Gui, New, +Resize ; Create a new GUI window with resize capability
+
+; ; Use Font command to set a specific font size and style for all text controls
+; Gui, Font, s10 Bold, Jetbrainsmono nfp ; Set font size to 12, make it bold, and use Arial
+
+; ; Add text controls to the GUI
+; Gui, Add, Text, x10 y10 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y60 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y110 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y160 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y210 w120 h40 +Center, Button
+
+; Gui, Add, Text, x150 y10 w120 h40 +Center, Button
+; Gui, Add, Text, x150 y60 w120 h40 +Center, Button
+; Gui, Add, Text, x150 y110 w120 h40 +Center, Button
+; Gui, Add, Text, x150 y160 w120 h40 +Center, Button
+
+; Gui, Show, w300 h300, Two Column GUI ; Show the GUI with a width and height
+; return
+
+; GuiClose:
+; Gui, Hide ; Hide the GUI instead of exiting the script
+; return
+
+
+
+
+!h:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+
+; First column
+Gui, Font, s14 Bold, Arial ; Set font size 14, bold, Arial for the first column
+Gui, Add, Text, x10 y10 w120 h40 +Center, Button`n1
+Gui, Add, Text, x10 y60 w120 h40 +Center, Button 2
+Gui, Add, Text, x10 y110 w120 h40 +Center, Button 3
+Gui, Add, Text, x10 y160 w120 h40 +Center, Button 4
+Gui, Add, Text, x10 y210 w120 h40 +Center, Button 5
+
+; Second column
+Gui, Font, s16 Italic, Times New Roman ; Set font size 16, italic, Times New Roman for the second column
+Gui, Add, Text, x150 y10 w120 h40 +Center, Button A
+Gui, Add, Text, x150 y60 w120 h40 +Center, Button B
+Gui, Add, Text, x150 y110 w120 h40 +Center, Button C
+Gui, Add, Text, x150 y160 w120 h40 +Center, Button D
+
+Gui, Show, w300 h300, Two Column GUI ; Show the GUI with a width and height
+return
+
+GuiClose:
+Gui, Hide ; Hide the GUI instead of exiting the script
+return
