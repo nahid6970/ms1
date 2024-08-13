@@ -38,13 +38,13 @@
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
-; RAlt & E:: Convert_Lowercase()
 ; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser
-; RAlt & L:: Remove_Duplicate_Lines()
 ;; Replace & Text Related
 LAlt & F::Font_Tools() ; Shortcut to open the action chooser GUI
 LAlt & R::Replace_Matching_words_Selection()
 RAlt & -::Replace_Dash_W_Space()
+RAlt & E:: Convert_Lowercase()
+RAlt & L:: Remove_Duplicate_Lines()
 RAlt & P:: Remove_All_Punctuation()
 RAlt & SPACE::Remove_AllSpace_Selection()
 RAlt & U::Convert_Uppercase()
@@ -754,10 +754,11 @@ Remove_Duplicate_Lines() {
 ; Show the action chooser GUI
 Font_Tools() {
     Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
-    Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Lowercase
-    Gui, Add, Button, x20 y60 w150 h30 gConvert_Uppercase, UpperCase
-    Gui, Add, Button, x20 y100 w150 h30 gRemove_Duplicate_Lines, Remove Duplicate Lines
-    Gui, Show, w200 h160, Action Chooser
+    Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+    Gui, Add, Button, x10 y020 w290 h30 gConvert_Lowercase, Lowercase [Ralt+E]
+    Gui, Add, Button, x10 y060 w290 h30 gConvert_Uppercase, UpperCase [Ralt+U]
+    Gui, Add, Button, x10 y100 w290 h30 gRemove_Duplicate_Lines, rm Dup Lines [Ralt+L]
+    Gui, Show, w310 h160, Action Chooser
     return
 }
 {
