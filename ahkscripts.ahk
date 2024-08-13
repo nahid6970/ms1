@@ -19,10 +19,10 @@
 ^!w::Toggle_Screen_Whiteout()
 
 ; Kill Commands
-!+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
+; !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
 !+o::RunWait, taskkill /f /im whkd.exe,,Hide
 !+p::RunWait, taskkill /f /im python.exe
-!+g::RunWait, taskkill /f /im glazewm.exe,,Hide
+; !+g::RunWait, taskkill /f /im glazewm.exe,,Hide
 !+k::RunWait, taskkill /f /im komorebi.exe,,Hide
 !q::KillForeground()
 ; ~Esc & q::KillForeground()
@@ -30,7 +30,7 @@
 ; Start Apps / Scripts
 !e::Run pwsh -c explorer.exe,,Hide
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
-!k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
+; !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
 !r::RunWait, python.exe C:\ms1\running_apps.py,,Hide                                   ;* running apps
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
@@ -42,7 +42,7 @@
 ; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser
 ; RAlt & L:: Remove_Duplicate_Lines()
 ;; Replace & Text Related
-LAlt & F::Show_Action_Chooser() ; Shortcut to open the action chooser GUI
+LAlt & F::Font_Tools() ; Shortcut to open the action chooser GUI
 LAlt & R::Replace_Matching_words_Selection()
 RAlt & -::Replace_Dash_W_Space()
 RAlt & P:: Remove_All_Punctuation()
@@ -751,7 +751,7 @@ Remove_Duplicate_Lines() {
 
 ; Shortcut to open the action chooser GUI
 ; Show the action chooser GUI
-Show_Action_Chooser() {
+Font_Tools() {
     Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
     Gui, Add, Button, x20 y20 w150 h30 gConvert_Lowercase, Lowercase
     Gui, Add, Button, x20 y60 w150 h30 gConvert_Uppercase, UpperCase
@@ -783,7 +783,7 @@ Gui, Font, s25, Segoe MDL2 Assets ; Set font size to 24 and use the Segoe MDL2 A
 Gui, Add, Text, x310 y000 w300 h80 +Center cBlue, VSCode
 Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
 Gui, Add, Button, x310 y050 w300 h50 +Center cBlue, Split Right`nCtrl+\
-Gui, Add, Button, x310 y100 w300 h50 +Center cBlue gTerminal, cp Terminal Run File`nCtrl+Alt+Shift+Enter
+Gui, Add, Button, x310 y100 w300 h50 +Center cBlue gTerminal_Run_File, cp Terminal Run File`nCtrl+Alt+Shift+Enter
 Gui, Add, Button, x310 y150 w300 h50 +Center cBlue, Button 8
 Gui, Add, Button, x310 y200 w300 h50 +Center cBlue, Button 9
 Gui, Add, Button, x310 y250 w300 h50 +Center cBlue, Button 9
@@ -794,10 +794,63 @@ GuiClose:
 Gui, Hide ; Hide the GUI instead of exiting the script
 return
 
-Terminal:
+Terminal_Run_File:
     Clipboard := "workbench.action.terminal.runActiveFile"
     MsgBox, Copied `workbench.action.terminal.runActiveFile` to clipboard
 return
+
+; ██╗  ██╗██╗██╗     ██╗            ██╗       ███████╗████████╗ █████╗ ██████╗ ████████╗     ██████╗ ██╗   ██╗██╗
+; ██║ ██╔╝██║██║     ██║            ██║       ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝ ██║   ██║██║
+; █████╔╝ ██║██║     ██║         ████████╗    ███████╗   ██║   ███████║██████╔╝   ██║       ██║  ███╗██║   ██║██║
+; ██╔═██╗ ██║██║     ██║         ██╔═██╔═╝    ╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██║   ██║██║   ██║██║
+; ██║  ██╗██║███████╗███████╗    ██████║      ███████║   ██║   ██║  ██║██║  ██║   ██║       ╚██████╔╝╚██████╔╝██║
+; ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝    ╚═════╝      ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═════╝  ╚═════╝ ╚═╝
+
+!k:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start Apps
+Gui, Add, Text, x310 y000 w300 h80 +Center cRed, Kill Apps
+; start apps
+Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
+; Gui, Add, Button, x010 y050 w300 h50 g__startups, Name
+; Gui, Add, Button, x010 y100 w300 h50 g__startups, Name
+; Gui, Add, Button, x010 y150 w300 h50 g__startups, Name
+; Gui, Add, Button, x010 y200 w300 h50 g__startups, Name
+; Gui, Add, Button, x010 y250 w300 h50 g__startups, Name
+; Gui, Add, Button, x010 y300 w300 h50 g__startups, Name
+; kill apps
+Gui,Add,Button,x310 y050 w300 h50 gKill_Python    ,Python
+Gui,Add,Button,x310 y100 w300 h50 gKill_Komorebi  ,Komorebi
+Gui,Add,Button,x310 y150 w300 h50 gKill_PWSH      ,PWSH
+Gui,Add,Button,x310 y200 w300 h50 gKill_Powershell,Powershell
+Gui,Add,Button,x310 y250 w300 h50 gKill_CMD       ,cmd
+
+Gui, Show, w620 h500, Two Column GUI
+return
+Gui, Hide
+return
+
+Kill_Python:
+Run, taskkill /f /im python.exe,,Hide
+return
+
+Kill_Komorebi:
+Run, taskkill /f /im komorebi.exe,,Hide
+return
+
+Kill_PWSH:
+Run, taskkill /f /im pwsh.exe,,Hide
+return
+
+Kill_Powershell:
+Run, taskkill /f /im powershell.exe,,Hide
+return
+
+Kill_CMD:
+Run, taskkill /f /im cmd.exe,,Hide
+return
+
 
 
 ; !h:: ; Define the shortcut Ctrl+H
