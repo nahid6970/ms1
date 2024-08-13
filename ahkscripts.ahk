@@ -53,8 +53,9 @@ RAlt & U::Convert_Uppercase()
 !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
 ; ~Esc & w::RunWait, komorebic toggle-float,,Hide
 !w::RunWait, komorebic toggle-float,,Hide
+Pause & S:: RunWait, komorebic quick-save-resize,,Hide
 Pause::RunWait, komorebic quick-load-resize,,Hide
-^l:: RunWait, komorebic quick-save-resize,,return
+
 
 ; Others
 ^!h::ToggleHiddenFiles()
@@ -922,3 +923,11 @@ return
 ; GuiClose:
 ; Gui, Hide ; Hide the GUI instead of exiting the script
 ; return
+
+
+#=:: ; [Win]+[=]
+    WinGet, window, ID, A
+    InputBox, width, Resize, Width:, , 140, 130
+    InputBox, height, Resize, Height:, , 140, 130
+    WinMove, ahk_id %window%, , , , width, height
+    return
