@@ -28,13 +28,13 @@
 ; ~Esc & q::KillForeground()
 
 ; Start Apps / Scripts
-!e::Run pwsh -c explorer.exe,,Hide
-!g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
+!e::Run, pwsh -c explorer.exe,,Hide
+; !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
 ; !k::RunWait, komorebic start,,Hide                                                     ;* Komorebi
-!o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
+; !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
 !r::RunWait, python.exe C:\ms1\running_apps.py,,Hide                                   ;* running apps
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin
-!y::RunWait, python.exe C:\ms1\yasb\main.py,,Hide                                      ;* yasb
+; !y::RunWait, python.exe C:\ms1\yasb\main.py,,Hide                                      ;* yasb
 #r::RunWait, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 #x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
 
@@ -809,46 +809,63 @@ return
 !k:: ; Define the shortcut Ctrl+H
 Gui, New, +Resize ; Create a new GUI window with resize capability
 Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start Apps
-Gui, Add, Text, x310 y000 w300 h80 +Center cRed, Kill Apps
+Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
+Gui, Add, Text, x310 y000 w300 h80 +Center cRed, Kill
 ; start apps
-Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
-; Gui, Add, Button, x010 y050 w300 h50 g__startups, Name
-; Gui, Add, Button, x010 y100 w300 h50 g__startups, Name
-; Gui, Add, Button, x010 y150 w300 h50 g__startups, Name
-; Gui, Add, Button, x010 y200 w300 h50 g__startups, Name
-; Gui, Add, Button, x010 y250 w300 h50 g__startups, Name
-; Gui, Add, Button, x010 y300 w300 h50 g__startups, Name
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+Gui, Add, Button, x010 y050 w300 h50 gstart_Explorer          ,Explorer
+Gui, Add, Button, x010 y100 w300 h50 gstart_Komorebic         ,Komorebic
+Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonitor
+Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
+Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
+Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
 ; kill apps
-Gui,Add,Button,x310 y050 w300 h50 gKill_Python    ,Python
-Gui,Add,Button,x310 y100 w300 h50 gKill_Komorebi  ,Komorebi
-Gui,Add,Button,x310 y150 w300 h50 gKill_PWSH      ,PWSH
-Gui,Add,Button,x310 y200 w300 h50 gKill_Powershell,Powershell
-Gui,Add,Button,x310 y250 w300 h50 gKill_CMD       ,cmd
+Gui, Add, Button, x310 y050 w300 h50 gKill_Python    ,Python
+Gui, Add, Button, x310 y100 w300 h50 gKill_Komorebi  ,Komorebi
+Gui, Add, Button, x310 y150 w300 h50 gKill_PWSH      ,PWSH
+Gui, Add, Button, x310 y200 w300 h50 gKill_Powershell,Powershell
+Gui, Add, Button, x310 y250 w300 h50 gKill_CMD       ,cmd
 
-Gui, Show, w620 h500, Two Column GUI
+Gui, Show, w620 h500, Apps (Start/Kill)
 return
 Gui, Hide
 return
 
+; kill related functions
 Kill_Python:
 Run, taskkill /f /im python.exe,,Hide
 return
-
 Kill_Komorebi:
 Run, taskkill /f /im komorebi.exe,,Hide
 return
-
 Kill_PWSH:
 Run, taskkill /f /im pwsh.exe,,Hide
 return
-
 Kill_Powershell:
 Run, taskkill /f /im powershell.exe,,Hide
 return
-
 Kill_CMD:
 Run, taskkill /f /im cmd.exe,,Hide
+return
+
+; start related functions
+start_Explorer:
+Run, pwsh -c explorer.exe,,Hide
+return
+start_Komorebic:
+Run, komorebic start,,Hide
+return
+start_RunningAppsMonitor:
+Run, python.exe C:\ms1\running_apps.py,,Hide
+return
+start_cmd_asAdmin:
+Run, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
+return
+start_Run:
+Run, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
+return
+start_mypygui:
+Run, C:\ms1\mypygui.py ,,Hide 
 return
 
 
