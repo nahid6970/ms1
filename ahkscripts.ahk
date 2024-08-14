@@ -877,7 +877,7 @@ return
 ; ██████╔╝██║╚██████╔╝    ╚██████╔╝╚██████╔╝██║
 ; ╚═════╝ ╚═╝ ╚═════╝      ╚═════╝  ╚═════╝ ╚═╝
 
-!i:: ; Define the shortcut Ctrl+H
+!b:: ; Define the shortcut Ctrl+H
 Gui, New, +Resize ; Create a new GUI window with resize capability
 Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
 ; Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
