@@ -870,6 +870,44 @@ start_mypygui:
 Run, C:\ms1\mypygui.py ,,Hide 
 return
 
+; ██████╗ ██╗ ██████╗      ██████╗ ██╗   ██╗██╗
+; ██╔══██╗██║██╔═══██╗    ██╔════╝ ██║   ██║██║
+; ██████╔╝██║██║   ██║    ██║  ███╗██║   ██║██║
+; ██╔══██╗██║██║   ██║    ██║   ██║██║   ██║██║
+; ██████╔╝██║╚██████╔╝    ╚██████╔╝╚██████╔╝██║
+; ╚═════╝ ╚═╝ ╚═════╝      ╚═════╝  ╚═════╝ ╚═╝
+
+!i:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
+Gui, Add, Text, x310 y000 w300 h80 +Center cRed, Kill
+; start apps
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+Gui, Add, Button, x010 y050 w300 h50 gname_bd_nahid          ,Nahid [BD]
+Gui, Add, Button, x010 y100 w300 h50 gstart_Komorebic         ,Komorebic
+Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonitor
+Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
+Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
+Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
+; kill apps
+Gui, Add, Button, x310 y050 w300 h50 gKill_Python    ,Python
+Gui, Add, Button, x310 y100 w300 h50 gKill_Komorebi  ,Komorebi
+Gui, Add, Button, x310 y150 w300 h50 gKill_PWSH      ,PWSH
+Gui, Add, Button, x310 y200 w300 h50 gKill_Powershell,Powershell
+Gui, Add, Button, x310 y250 w300 h50 gKill_CMD       ,cmd
+
+Gui, Show, w620 h500, Apps (Start/Kill)
+return
+Gui, Hide
+return
+
+name_bd_nahid:
+    Gui, Destroy
+    Send, {U+09A8}{U+09BE}{U+09B9}{U+09BF}{U+09A6} {U+0986}{U+09B9}{U+09AE}{U+09C7}{U+09A6}
+return
+
+
 
 
 ; !h:: ; Define the shortcut Ctrl+H
