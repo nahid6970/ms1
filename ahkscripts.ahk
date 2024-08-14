@@ -879,25 +879,28 @@ return
 
 !i:: ; Define the shortcut Ctrl+H
 Gui, New, +Resize ; Create a new GUI window with resize capability
-Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
-Gui, Add, Text, x310 y000 w300 h80 +Center cRed, Kill
-; start apps
+Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
+; Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+; column
+; Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
+; Gui, Add, Text, x310 y000 w300 h80 +Center cRed, Kill
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-Gui, Add, Button, x010 y050 w300 h50 gname_bd_nahid          ,Nahid [BD]
-Gui, Add, Button, x010 y100 w300 h50 gstart_Komorebic         ,Komorebic
-Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonitor
-Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
-Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
-Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
-; kill apps
-Gui, Add, Button, x310 y050 w300 h50 gKill_Python    ,Python
-Gui, Add, Button, x310 y100 w300 h50 gKill_Komorebi  ,Komorebi
-Gui, Add, Button, x310 y150 w300 h50 gKill_PWSH      ,PWSH
-Gui, Add, Button, x310 y200 w300 h50 gKill_Powershell,Powershell
-Gui, Add, Button, x310 y250 w300 h50 gKill_CMD       ,cmd
 
-Gui, Show, w620 h500, Apps (Start/Kill)
+Gui,Add,Button,x000 y000 w200 h50               ,Nahid Ahmed
+Gui,Add,Button,x200 y000 w100 h50 gname_en_nahid,[EN]
+Gui,Add,Button,x300 y000 w100 h50 gname_bd_nahid,[BD]
+
+Gui,Add,Button,x000 y050 w200 h50               ,Father
+Gui,Add,Button,x200 y050 w100 h50 gname_en_father,[EN]
+Gui,Add,Button,x300 y050 w100 h50 gname_bd_father,[BD]
+
+Gui,Add,Button,x000 y100 w200 h50               ,Mother
+Gui,Add,Button,x200 y100 w100 h50 gname_en_mother,[EN]
+Gui,Add,Button,x300 y100 w100 h50 gname_bd_mother,[BD]
+
+Gui,Add,Button,x000 y150 w400 h50 gPermanentAddress,Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+
+Gui, Show, w400 h500, BIO
 return
 Gui, Hide
 return
@@ -906,8 +909,30 @@ name_bd_nahid:
     Gui, Destroy
     Send, {U+09A8}{U+09BE}{U+09B9}{U+09BF}{U+09A6} {U+0986}{U+09B9}{U+09AE}{U+09C7}{U+09A6}
 return
-
-
+name_en_nahid:
+    Gui, Destroy
+    Send, Nahid Ahmed
+return
+name_bd_father:
+    Gui, Destroy
+    Send, {U+09A8}{U+09C1}{U+09B0}{U+09C1}{U+09B2} {U+0986}{U+09AE}{U+09BF}{U+09A8}
+return
+name_en_father:
+    Gui, Destroy
+    Send, Nurul Amin
+return
+name_bd_mother:
+    Gui, Destroy
+    Send, {U+09A8}{U+09BE}{U+099C}{U+09AE}{U+09BE} {U+09AC}{U+09C7}{U+0997}{U+09AE}
+return
+name_en_mother:
+    Gui, Destroy
+    Send, Nazma Begum
+return
+PermanentAddress:
+    Gui, Destroy
+    Send, Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+return
 
 
 ; !h:: ; Define the shortcut Ctrl+H
