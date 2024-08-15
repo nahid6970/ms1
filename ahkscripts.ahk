@@ -1011,7 +1011,7 @@ ChordSequence := ""
 TimerActive := False
 
 ; First keypress in the chord sequence
-^f::  ; Ctrl + F
+^q::  ; Ctrl + F
     if (GetKeyState("Ctrl", "P")) {
         ChordSequence := "Ctrl+F"
         TimerActive := True
@@ -1019,38 +1019,35 @@ TimerActive := False
     }
     return
 
-; Second keypress in the chord sequence for Explorer
+; Handle second keypress in the chord sequence
 ^e::  ; Ctrl + E
-    if (ChordSequence = "Ctrl+F" && GetKeyState("Ctrl", "P")) {
-        ChordSequence := ""  ; Clear the sequence after successful match
-        TimerActive := False
-        Send, ^e  ; Ensure Ctrl is still held down and send Ctrl + E
-        Run, explorer.exe  ; Launch Windows Explorer
-    }
-    return
-
-; Second keypress in the chord sequence for Terminal
 ^d::  ; Ctrl + D
+^n::  ; Ctrl + N
     if (ChordSequence = "Ctrl+F" && GetKeyState("Ctrl", "P")) {
         ChordSequence := ""  ; Clear the sequence after successful match
         TimerActive := False
-        Send, ^d  ; Ensure Ctrl is still held down and send Ctrl + D
-        Run, wt.exe  ; Launch Windows Terminal (adjust path if needed)
+        if (A_ThisHotkey = "^e") {
+            Send, ^e  ; Send Ctrl + E
+            Run, explorer.exe  ; Launch Windows Explorer
+        } else if (A_ThisHotkey = "^d") {
+            Send, ^d  ; Send Ctrl + D
+            Run, wt.exe  ; Launch Windows Terminal (adjust path if needed)
+        } else if (A_ThisHotkey = "^n") {
+            Send, ^n  ; Send Ctrl + N
+            Run, cmd.exe /c rclone config  ; Execute the rclone config command
+        }
     }
     return
 
 ; Timer expiration handler for timeout
 CheckChordTimeout:
     if (ChordSequence = "Ctrl+F" && TimerActive) {
-        ; Perform the task related to Ctrl+F if Ctrl+E or Ctrl+D is not pressed within 500ms
-        Send, ^f  ; Ensure Ctrl is still held down and send Ctrl + F
-        ; Here you can replace MsgBox with any other action related to Ctrl+F
-        MsgBox, Ctrl+E or Ctrl+D was not pressed in time. Task related to Ctrl+F executed.
+        Send, ^f  ; Send Ctrl + F
+        ; MsgBox, Ctrl+E, Ctrl+D, or Ctrl+N was not pressed in time. Task related to Ctrl+F executed.
     }
     ChordSequence := ""  ; Reset the sequence after handling timeout
     TimerActive := False
     return
 
-; Ensure Ctrl is released if script is terminated or reset
-^Esc::  ; Ctrl + Esc to exit the script
-    ExitApp
+; Exit the script
+^Esc::ExitApp
