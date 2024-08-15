@@ -1,0 +1,4 @@
+# python
+always run pip install as administrative so some error may be solved
+pip install --upgrade pip setuptools wheel
+C:\Users\nahid\scoop\apps\python\current\python.exe -m pip install Module_Name
