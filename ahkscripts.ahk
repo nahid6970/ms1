@@ -995,6 +995,10 @@ return
 
 
 
+
+
+
+
 ; Define the keypress chord sequences
 ChordSequence := ""
 TimerActive := False
@@ -1042,12 +1046,11 @@ TimerActive := False
     }
     return
 
-; Timer expiration handler for timeout
+; Timer expirfation handler for timeout
 CheckChordTimeout:
     if (ChordSequence = "Ctrl+F" && TimerActive) {
-        ; Perform the task related to Ctrl+F if Ctrl+E or Ctrl+D is not pressed within 500ms
-        ; You can define what to do here if needed
-        MsgBox, Ctrl+E or Ctrl+D was not pressed in time. Task related to Ctrl+F executed.
+        ; Send Ctrl+F if Ctrl+E or Ctrl+D is not pressed within 500ms
+        Send, ^f
     }
     ChordSequence := ""  ; Reset the sequence after handling timeout
     TimerActive := False
