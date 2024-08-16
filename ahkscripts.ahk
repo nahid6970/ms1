@@ -41,7 +41,7 @@
 ; RAlt & L:: Choose_Action() ; Shortcut to open the action chooser
 ;; Replace & Text Related
 LAlt & F::Font_Tools() ; Shortcut to open the action chooser GUI
-LAlt & R::Replace_Matching_words_Selection()
+RAlt & R::Replace_Matching_words_Selection()
 RAlt & -::Replace_Dash_W_Space()
 RAlt & E:: Convert_Lowercase()
 RAlt & L:: Remove_Duplicate_Lines()
@@ -50,7 +50,7 @@ RAlt & SPACE::Remove_AllSpace_Selection()
 RAlt & U::Convert_Uppercase()
 
 ; Komorebic Commands
-!s::RunWait, komorebic toggle-window-container-behaviour,,Hide
+; !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
 ; ~Esc & w::RunWait, komorebic toggle-float,,Hide
 !w::RunWait, komorebic toggle-float,,Hide
 Pause & S:: RunWait, komorebic quick-save-resize,,Hide
@@ -758,15 +758,14 @@ Font_Tools() {
     Gui, Add, Button, x10 y020 w290 h30 gConvert_Lowercase, Lowercase [Ralt+E]
     Gui, Add, Button, x10 y060 w290 h30 gConvert_Uppercase, UpperCase [Ralt+U]
     Gui, Add, Button, x10 y100 w290 h30 gRemove_Duplicate_Lines, rm Dup Lines [Ralt+L]
-    Gui, Show, w310 h160, Action Chooser
+    Gui, Add, Button, x10 y140 w290 h50 , Replace Matching Text [RAlt+R]
+    Gui, Show, w310 h200, Action Chooser
     return
 }
 {
 Gui, Destroy
 return
 }
-
-
 
 
 
@@ -801,18 +800,40 @@ Terminal_Run_File:
     MsgBox, Copied `workbench.action.terminal.runActiveFile` to clipboard
 return
 
-; ██╗  ██╗██╗██╗     ██╗            ██╗       ███████╗████████╗ █████╗ ██████╗ ████████╗     ██████╗ ██╗   ██╗██╗
-; ██║ ██╔╝██║██║     ██║            ██║       ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝ ██║   ██║██║
-; █████╔╝ ██║██║     ██║         ████████╗    ███████╗   ██║   ███████║██████╔╝   ██║       ██║  ███╗██║   ██║██║
-; ██╔═██╗ ██║██║     ██║         ██╔═██╔═╝    ╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██║   ██║██║   ██║██║
-; ██║  ██╗██║███████╗███████╗    ██████║      ███████║   ██║   ██║  ██║██║  ██║   ██║       ╚██████╔╝╚██████╔╝██║
-; ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝    ╚═════╝      ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═════╝  ╚═════╝ ╚═╝
+;! ██╗  ██╗██╗██╗     ██╗         ██████╗ ██╗   ██╗██╗
+;! ██║ ██╔╝██║██║     ██║        ██╔════╝ ██║   ██║██║
+;! █████╔╝ ██║██║     ██║        ██║  ███╗██║   ██║██║
+;! ██╔═██╗ ██║██║     ██║        ██║   ██║██║   ██║██║
+;! ██║  ██╗██║███████╗███████╗   ╚██████╔╝╚██████╔╝██║
+;! ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝
 
 !k:: ; Define the shortcut Ctrl+H
 Gui, New, +Resize ; Create a new GUI window with resize capability
 Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Text, x10 y000 w300 h80 +Center cRed, Kill
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+; kill apps
+Gui, Add, Button, x10 y050 w300 h50 gKill_Python    ,Python
+Gui, Add, Button, x10 y100 w300 h50 gKill_Komorebi  ,Komorebi
+Gui, Add, Button, x10 y150 w300 h50 gKill_PWSH      ,PWSH
+Gui, Add, Button, x10 y200 w300 h50 gKill_Powershell,Powershell
+Gui, Add, Button, x10 y250 w300 h50 gKill_CMD       ,cmd
+
+Gui, Show, w320 h500, Apps (Start/Kill)
+return
+Gui, Hide
+return
+; ███████╗████████╗ █████╗ ██████╗ ████████╗     ██████╗ ██╗   ██╗██╗
+; ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝ ██║   ██║██║
+; ███████╗   ██║   ███████║██████╔╝   ██║       ██║  ███╗██║   ██║██║
+; ╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██║   ██║██║   ██║██║
+; ███████║   ██║   ██║  ██║██║  ██║   ██║       ╚██████╔╝╚██████╔╝██║
+; ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═════╝  ╚═════╝ ╚═╝
+
+!s:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
 Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
-Gui, Add, Text, x310 y000 w300 h80 +Center cRed, Kill
 ; start apps
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
 Gui, Add, Button, x010 y050 w300 h50 gstart_Explorer          ,Explorer
@@ -821,14 +842,8 @@ Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonito
 Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
 Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
 Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
-; kill apps
-Gui, Add, Button, x310 y050 w300 h50 gKill_Python    ,Python
-Gui, Add, Button, x310 y100 w300 h50 gKill_Komorebi  ,Komorebi
-Gui, Add, Button, x310 y150 w300 h50 gKill_PWSH      ,PWSH
-Gui, Add, Button, x310 y200 w300 h50 gKill_Powershell,Powershell
-Gui, Add, Button, x310 y250 w300 h50 gKill_CMD       ,cmd
 
-Gui, Show, w620 h500, Apps (Start/Kill)
+Gui, Show, w320 h500, Apps (Start/Kill)
 return
 Gui, Hide
 return
