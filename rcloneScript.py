@@ -238,7 +238,7 @@ def execute_command():
     def run_command():
         process = subprocess.Popen(final_command, shell=True)
         process.wait()
-        print("\033[94mJob Done\033[0m")  # Print "Job Done" in blue
+        print("\033[92mTask Completed\033[0m")
     thread = threading.Thread(target=run_command)
     thread.start()
 
