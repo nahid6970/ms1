@@ -1,5 +1,28 @@
-# Prompt for download location
-$download_location = Read-Host "Enter the download location (e.g., D:\):"
+# Load necessary assemblies
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+# Function to show a folder browser dialog and return the selected path
+function Get-DownloadLocation {
+    $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+    $folderBrowser.Description = "Select the download location"
+    $folderBrowser.ShowNewFolderButton = $true
+
+    if ($folderBrowser.ShowDialog() -eq "OK") {
+        return $folderBrowser.SelectedPath
+    } else {
+        Write-Output "No folder selected. Exiting script."
+        exit
+    }
+}
+
+# Get download location from the folder browser dialog
+$download_location = Get-DownloadLocation
+
+# Display the full path selected
+Write-Output "Selected download location: $download_location"
+
+# Verify if the path exists
 if (-not (Test-Path $download_location)) {
     Write-Output "The specified download location does not exist. Exiting script."
     exit
@@ -28,7 +51,7 @@ function Set-Format {
 function Check-Format {
     Write-Host "Output will be: " 
     Write-Host (& yt-dlp.exe $format $URL --get-format)
-    Read-Host "Ok? (Enter Y/N)"
+    Write-Host "Press Enter to confirm, or Ctrl+C to cancel."
 }
 
 # For choices that require manually selecting formats using format codes (Choices 4 & 5)
@@ -68,7 +91,7 @@ Write-Output ""
 & yt-dlp.exe --list-formats $URL
 
 # While loop until the user is satisfied with the output and confirms using the Check-Format function
-while ($confirm -ne "y") {
+do {
     Write-Output ""
     Write-Output "---------------------------------------------------------------------------"
     Write-Output "Options:"
@@ -84,8 +107,10 @@ while ($confirm -ne "y") {
     if (($choice -eq 4) -or ($choice -eq 5)) { $format = Custom-Formats }
     if ($choice -eq 6) {Update-Program}
     $format = Set-Format
-    $confirm = Check-Format
-}
+    Check-Format
+    $confirm = Read-Host "Press Enter to confirm or type 'n' to reselect format"
+
+} while ($confirm -ne "")
 
 # Final Run
 Write-Output ""
