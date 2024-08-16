@@ -992,3 +992,67 @@ return
     InputBox, height, Resize, Height:, , 140, 130
     WinMove, ahk_id %window%, , , , width, height
     return
+
+
+
+; Define the keypress chord sequences
+ChordSequence := ""
+TimerActive := False
+
+; First keypress in the chord sequence
+^f::  ; Ctrl + F
+    ChordSequence := "Ctrl+F"
+    TimerActive := True
+    SetTimer, CheckChordTimeout, -500  ; Timer to reset the chord sequence if not completed in 500ms
+    return
+
+; Second keypress in the chord sequence for Explorer
+^e::  ; Ctrl + E
+    if (ChordSequence = "Ctrl+F" && GetKeyState("Ctrl", "P")) {
+        ChordSequence := ""  ; Clear the sequence after successful match
+        TimerActive := False
+        ; Launch Windows Explorer
+        Run, explorer.exe
+    }
+    return
+
+; Second keypress in the chord sequence for Terminal
+^d::  ; Ctrl + D
+    if (ChordSequence = "Ctrl+F" && GetKeyState("Ctrl", "P")) {
+        ChordSequence := ""  ; Clear the sequence after successful match
+        TimerActive := False
+        ; Launch Windows Terminal
+        Run, wt.exe  ; Adjust path if needed
+    }
+    return
+
+; Regular Ctrl + D functionality
+^d up::  ; Ctrl + D released
+    if !(ChordSequence = "Ctrl+F") {
+        ; Perform normal Ctrl + D action here
+        Send, ^d
+    }
+    return
+
+; Regular Ctrl + E functionality
+^e up::  ; Ctrl + E released
+    if !(ChordSequence = "Ctrl+F") {
+        ; Perform normal Ctrl + E action here
+        Send, ^e
+    }
+    return
+
+; Timer expiration handler for timeout
+CheckChordTimeout:
+    if (ChordSequence = "Ctrl+F" && TimerActive) {
+        ; Perform the task related to Ctrl+F if Ctrl+E or Ctrl+D is not pressed within 500ms
+        ; You can define what to do here if needed
+        MsgBox, Ctrl+E or Ctrl+D was not pressed in time. Task related to Ctrl+F executed.
+    }
+    ChordSequence := ""  ; Reset the sequence after handling timeout
+    TimerActive := False
+    return
+
+; Ensure Ctrl is released if script is terminated or reset
+^Esc::  ; Ctrl + Esc to exit the script
+    ExitApp
