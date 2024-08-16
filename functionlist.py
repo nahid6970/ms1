@@ -303,11 +303,13 @@ def start_find_size():
 def force_shutdown(event):
     confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
     if confirmed:
-        subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
+        # subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
+        subprocess.run(["shutdown", "/s", "/t", "0"])
 def force_restart(event):
     confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to restart?")
     if confirmed:
-        subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
+        # subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
+        subprocess.run(["shutdown", "/r", "/t", "0"])
 
 # def open_backup(event=None):
 #     subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
