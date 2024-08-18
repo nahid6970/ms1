@@ -453,11 +453,13 @@ def start_event_heavy():
         while not stop_thread:
             focus_window(window_title)
             if any(find_image(image) for image in actionF):
+                key_down(window, 'i')
                 key_down(window, 'j')
                 key_down(window, 'l')
                 time.sleep(5)
                 key_up(window, 'l')
                 key_up(window, 'j')
+                key_up(window, 'i')
             elif find_image(Home, confidence=0.8): press_key(window, 'f')
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
