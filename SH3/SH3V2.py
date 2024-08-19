@@ -272,7 +272,9 @@ Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
 
 #* Threads
 stop_thread = True
+
 fight_thread = None
+fightLight_thread = None
 
 fame_heavy_thread = None
 fame_light_thread = None
@@ -327,7 +329,7 @@ def fight_function():
     if fight_thread and fight_thread.is_alive():
         stop_thread = True
         fight_thread.join()
-        Fight_BT.config(text="\ueefd", bg="#6a6a64", fg="#9dff00")
+        Fight_BT.config(text="\ueefd H", bg="#6a6a64", fg="#9dff00")
     else:
         stop_thread = False
         fight_thread = threading.Thread(target=fight_Heavy)
@@ -335,8 +337,66 @@ def fight_function():
         fight_thread.start()
         Fight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Fight_BT = Button(ROOT, text="\ueefd", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fight_BT = Button(ROOT, text="\ueefd H", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fight_BT.pack(padx=(2, 2), pady=(3, 0))
+
+
+
+def fight_Light():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    holding_keys = False
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                start_time = time.time()
+                while time.time() - start_time < 10:  # Loop for 10 seconds
+                    if not holding_keys:
+                        key_down(window, 'i')
+                        key_down(window, 'd')
+                        key_down(window, 'l')
+                        holding_keys = True
+                    # Press 'j' rapidly
+                    press_key(window, 'j')
+                    time.sleep(0.001)  # Reduce sleep time for rapid pressing
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    key_up(window, 'i')
+                    holding_keys = False
+            else:
+                if holding_keys:
+                    key_up(window, 'i')
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    holding_keys = False
+            if find_image(SPACE, confidence=0.8): press_key(window, ' ')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            time.sleep(1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
+        key_up(window, 'i')
+def fightLight_function():
+    global stop_thread, fightLight_thread, Fightlight_BT
+    if fightLight_thread and fightLight_thread.is_alive():
+        stop_thread = True
+        fightLight_thread.join()
+        Fightlight_BT.config(text="\ueefd L", bg="#6a6a64", fg="#9dff00")
+    else:
+        stop_thread = False
+        fightLight_thread = threading.Thread(target=fight_Light)
+        fightLight_thread.daemon = True
+        fightLight_thread.start()
+        Fightlight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+Fightlight_BT = Button(ROOT, text="\ueefd L", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fightLight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fightlight_BT.pack(padx=(2, 2), pady=(3, 0))
 
 
 """
@@ -420,8 +480,6 @@ def daily_mission_function():
 
 DD_MM_BT = Button(ROOT, text="\udb81\udf87", bg="#dcd3ff", fg="#000000", width=5, height=3, command=daily_mission_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 DD_MM_BT.pack(padx=(1, 1), pady=(1, 1))
-
-
 
 """
 ███████╗ █████╗ ███╗   ███╗███████╗
