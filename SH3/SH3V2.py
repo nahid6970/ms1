@@ -213,13 +213,12 @@ uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
-    eruption: 0.55,
+    eruption: 0.85,
     thud: 0.7,
     collector: 0.7,
-    uppercut: 0.55,
+    uppercut: 0.7,
     # bolt: 1,
 }
-
 
 ironchad_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_left.png"
 ironchad_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_right.png"
@@ -227,15 +226,15 @@ ironchad_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_right
 hunter_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_left.png"
 hunter_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_right.png"
 
-actionF1 = {
-    ironchad_lft: 0.75,
-    hunter_lft: 0.75,
-}
-actionF2 = {
-    ironchad_rht: 0.75,
-    hunter_rht: 0.75,
+# actionF1 = {
+#     ironchad_lft: 0.75,
+#     hunter_lft: 0.65,
+# }
+# actionF2 = {
+#     ironchad_rht: 0.75,
+#     hunter_rht: 0.65,
 
-}
+# }
 
 # Continue Related Images
 cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
@@ -407,46 +406,25 @@ def fame_light():
     try:
         while not stop_thread:
             focus_window(window_title)
-            
-            #* Check for actionF1 images (normal images)
-            if any(find_image(image, confidence=actionF1[image]) for image in actionF1):
-                actionF_type = "actionF1"
-            #* Check for actionF2 images (mirrored images)
-            elif any(find_image(image, confidence=actionF2[image]) for image in actionF2):
-                actionF_type = "actionF2"
-            else:
-                actionF_type = None
-                
-            if actionF_type:
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 start_time = time.time()
-                while time.time() - start_time < 5:  # Loop for 10 seconds
+                while time.time() - start_time < 10:  # Loop for 10 seconds
                     if not holding_keys:
-                        if actionF_type == "actionF1":
-                            key_down(window, 'd')
-                        elif actionF_type == "actionF2":
-                            key_down(window, 'a')
+                        key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
                     # Press 'j' rapidly
                     press_key(window, 'j')
                     time.sleep(0.001)  # Reduce sleep time for rapid pressing
-                # Release the keys after 10 seconds
                 if holding_keys:
-                    if actionF_type == "actionF1":
-                        key_up(window, 'd')
-                    elif actionF_type == "actionF2":
-                        key_up(window, 'a')
                     key_up(window, 'l')
+                    key_up(window, 'd')
                     holding_keys = False
             else:
-                # Reset keys if neither image is found
                 if holding_keys:
-                    key_up(window, 'd')
-                    key_up(window, 'a')
                     key_up(window, 'l')
+                    key_up(window, 'd')
                     holding_keys = False
-
-                # Handle other key presses for other images
                 if find_image(Resume, confidence=0.8): press_key(window, 'r')
                 elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
                 elif find_image(StartFame): press_key(window, 'p')
@@ -454,17 +432,11 @@ def fame_light():
                 elif find_image(e_image): press_key(window, 'e')
                 elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
                 elif any(find_image(image) for image in continueF): press_key(window, 'c')
-
             time.sleep(0.05)
-    except KeyboardInterrupt: 
-        print("Script stopped by user.")
+    except KeyboardInterrupt: print("Script stopped by user.")
     finally:
-        # Make sure to release all keys on exit
         key_up(window, 'l')
         key_up(window, 'j')
-        key_up(window, 'd')
-        key_up(window, 'a')
-
 def fame_function_light():
     global stop_thread, fame_light_thread, Fame_Light_BT
     if fame_light_thread and fame_light_thread.is_alive():
@@ -477,6 +449,7 @@ def fame_function_light():
         fame_light_thread.daemon = True
         fame_light_thread.start()
         Fame_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
 Fame_Light_BT = Button(ROOT, text="FL", bg="#bda24a", fg="#000000", width=5, height=3, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
