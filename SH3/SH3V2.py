@@ -264,6 +264,8 @@ fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.p
 claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 
 
+DailyMission=r"C:\Users\nahid\OneDrive\backup\shadowfight3\DailyMission.png"
+
 # Event Related
 Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
 Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
@@ -282,6 +284,7 @@ raid_heavy_thread = None
 raid_light_thread = None
 
 loss_thread = None
+DairyMairy_thread=None
 """
 ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -334,6 +337,91 @@ def fight_function():
 
 Fight_BT = Button(ROOT, text="\ueefd", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fight_BT.pack(padx=(2, 2), pady=(3, 0))
+
+
+"""
+██████╗  █████╗ ██╗██╗  ██╗   ██╗    ███╗   ███╗██╗███████╗███████╗██╗ ██████╗ ███╗   ██╗
+██╔══██╗██╔══██╗██║██║  ╚██╗ ██╔╝    ████╗ ████║██║██╔════╝██╔════╝██║██╔═══██╗████╗  ██║
+██║  ██║███████║██║██║   ╚████╔╝     ██╔████╔██║██║███████╗███████╗██║██║   ██║██╔██╗ ██║
+██║  ██║██╔══██║██║██║    ╚██╔╝      ██║╚██╔╝██║██║╚════██║╚════██║██║██║   ██║██║╚██╗██║
+██████╔╝██║  ██║██║███████╗██║       ██║ ╚═╝ ██║██║███████║███████║██║╚██████╔╝██║ ╚████║
+╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝╚═╝       ╚═╝     ╚═╝╚═╝╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+"""
+
+def daily_mission():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    holding_keys = False
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                start_time = time.time()
+                while time.time() - start_time < 10:  # Loop for 10 seconds
+                    if not holding_keys:
+                        key_down(window, 'i')
+                        key_down(window, 'd')
+                        key_down(window, 'l')
+                        holding_keys = True
+                    # Press 'j' rapidly
+                    press_key(window, 'j')
+                    time.sleep(0.001)  # Reduce sleep time for rapid pressing
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    key_up(window, 'i')
+                    holding_keys = False
+            else:
+                if holding_keys:
+                    key_up(window, 'i')
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    holding_keys = False
+
+                # Check for claim reward image and click 'c'
+                positionclick = find_image(DailyMission, confidence=0.75)
+                if positionclick:
+                    click(window, positionclick.left, positionclick.top)
+                    time.sleep(0.1)  # Small delay to ensure the click is registered
+                    press_key(window, 'c')
+
+                if find_image(Resume, confidence=0.8):
+                    press_key(window, 'r')
+                elif find_image(SPACE, confidence=0.8):
+                    press_key(window, ' ')
+                elif find_image(StartFame):
+                    press_key(window, 'p')
+                elif any(find_image(image) for image in continueF):
+                    press_key(window, 'c')
+
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'i')
+        key_up(window, 'd')
+
+def daily_mission_function():
+    global stop_thread, DairyMairy_thread, DD_MM_BT
+    if DairyMairy_thread and DairyMairy_thread.is_alive():
+        stop_thread = True
+        DairyMairy_thread.join()
+        DD_MM_BT.config(text="\udb81\udf87", bg="#dcd3ff", fg="#000000")
+    else:
+        stop_thread = False
+        DairyMairy_thread = threading.Thread(target=daily_mission)
+        DairyMairy_thread.daemon = True
+        DairyMairy_thread.start()
+        DD_MM_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+DD_MM_BT = Button(ROOT, text="\udb81\udf87", bg="#dcd3ff", fg="#000000", width=5, height=3, command=daily_mission_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+DD_MM_BT.pack(padx=(1, 1), pady=(1, 1))
+
+
 
 """
 ███████╗ █████╗ ███╗   ███╗███████╗
