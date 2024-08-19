@@ -356,6 +356,7 @@ def fame_heavy():
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 if not holding_keys:
+                    key_down(window, 'i')
                     key_down(window, 'j')
                     key_down(window, 'l')
                     holding_keys = True
@@ -364,6 +365,7 @@ def fame_heavy():
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'j')
+                    key_up(window, 'i')
                     holding_keys = False
                 if find_image(Resume, confidence=0.8): press_key(window, 'r')
                 elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
@@ -375,6 +377,7 @@ def fame_heavy():
             time.sleep(1)
     except KeyboardInterrupt: print("Script stopped by user.")
     finally:
+        key_up(window, 'i')
         key_up(window, 'l')
         key_up(window, 'j')
 def fame_function_heavy():
@@ -401,7 +404,6 @@ def fame_light():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    
     holding_keys = False
     try:
         while not stop_thread:
@@ -410,6 +412,7 @@ def fame_light():
                 start_time = time.time()
                 while time.time() - start_time < 10:  # Loop for 10 seconds
                     if not holding_keys:
+                        key_down(window, 'i')
                         key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
@@ -419,9 +422,11 @@ def fame_light():
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
+                    key_up(window, 'i')
                     holding_keys = False
             else:
                 if holding_keys:
+                    key_up(window, 'i')
                     key_up(window, 'l')
                     key_up(window, 'd')
                     holding_keys = False
@@ -516,6 +521,7 @@ def Start_Event_Light():
                 start_time = time.time()
                 while time.time() - start_time < 5:
                     if not holding_keys:
+                        key_down(window, 'i')
                         key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
@@ -525,11 +531,13 @@ def Start_Event_Light():
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
+                    key_up(window, 'i')
                     holding_keys = False
             else:
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
+                    key_up(window, 'i')
                     holding_keys = False
                 elif find_image(Home, confidence=0.8): press_key(window, 'f')
                 elif find_image(Resume, confidence=0.8): press_key(window, 'r')
