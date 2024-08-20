@@ -1119,3 +1119,18 @@ return
 ; ; Ensure Ctrl is released if script is terminated or reset
 ; ^Esc::  ; Ctrl + Esc to exit the script
 ;     ExitApp
+
+
+
+FileSelectFolder, SelectedFolder, A_Desktop,, Select Folder to copy
+
+FileSelectFolder, SelectedDestination, A_Desktop,, Select Destination
+
+SplitPath, SelectedFolder,,,, SelectedFolderName
+
+RunWait, %ComSpec% /c robocopy "%SelectedFolder%" "%SelectedDestination%\%SelectedFolderName%" /e,, Hide
+
+ExitApp
+
+
+
