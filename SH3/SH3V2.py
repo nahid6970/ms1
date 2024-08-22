@@ -322,7 +322,46 @@ loss_thread = None
 ## ██║     ██║██║   ██║██╔══██║   ██║       ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
 ## ███████╗██║╚██████╔╝██║  ██║   ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
 ## ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+#! actionF light attack
+def actionF_handler(window):
+    holding_keys = False
+    actionf_duration = 5  #* Initial duration for holding the keys (in seconds)
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                start_time = time.time()
+                while time.time() - start_time < actionf_duration:
+                    if not holding_keys:
+                        #* key_down(window, 'i')
+                        key_down(window, 'd')
+                        key_down(window, 'l')
+                        holding_keys = True
+                    #* Check at the 3-second mark if the actionF image is still present
+                    if time.time() - start_time >= 3:
+                        if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                            print("ActionF image found again. Extending time.")
+                            #* Extend the duration by resetting start_time and adding 5 more seconds
+                            start_time = time.time()
+                            actionf_duration = 5
+                    #* Press 'j' rapidly
+                    press_key(window, 'j')
+                    time.sleep(0.001)  # Rapid pressing
+                #* Release keys if holding
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    #* key_up(window, 'i')
+                    holding_keys = False
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("ActionF thread stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
+        #* key_up(window, 'i')
 
+# light attack for fight
 def fight_Light():
     global stop_thread
     window = focus_window(window_title)
@@ -429,44 +468,6 @@ Fame_Light_BT = Button(ROOT, text="FL", bg="#bda24a", fg="#000000", width=5, hei
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 # light attack for event
-def actionF_handler(window):
-    holding_keys = False
-    actionf_duration = 5  #* Initial duration for holding the keys (in seconds)
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                start_time = time.time()
-                while time.time() - start_time < actionf_duration:
-                    if not holding_keys:
-                        #* key_down(window, 'i')
-                        key_down(window, 'd')
-                        key_down(window, 'l')
-                        holding_keys = True
-                    #* Check at the 3-second mark if the actionF image is still present
-                    if time.time() - start_time >= 3:
-                        if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                            print("ActionF image found again. Extending time.")
-                            #* Extend the duration by resetting start_time and adding 5 more seconds
-                            start_time = time.time()
-                            actionf_duration = 5
-                    #* Press 'j' rapidly
-                    press_key(window, 'j')
-                    time.sleep(0.001)  # Rapid pressing
-                #* Release keys if holding
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'd')
-                    #* key_up(window, 'i')
-                    holding_keys = False
-            time.sleep(0.05)
-    except KeyboardInterrupt:
-        print("ActionF thread stopped by user.")
-    finally:
-        key_up(window, 'l')
-        key_up(window, 'j')
-        #* key_up(window, 'i')
-
 def event_items_handler(window):
     try:
         while not stop_thread:
