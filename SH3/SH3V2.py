@@ -134,23 +134,54 @@ pyautogui.size = lambda: screen_size
 #         print(f"{error_count} times not found. Error: {e}")
 #     return None
 
+# def find_image(image_path, confidence=0.7):
+#     """Find the location of the image on the screen and show time in 12-hour format."""
+#     global error_count
+    
+#     def get_current_time():
+#         """Return the current time in 12-hour format."""
+#         return datetime.datetime.now().strftime("%I:%M:%S %p")
+
+#     try:
+#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#         if location:
+#             image_name = os.path.basename(image_path)
+#             print(f"{get_current_time()} - Found image: {image_name}")
+#             return location
+#     except Exception as e:
+#         error_count += 1
+#         print(f"{get_current_time()} - {error_count} times not found. Error: {e}")
+#     return None
+
+
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen and show time in 12-hour format."""
     global error_count
-    
+    output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
+
     def get_current_time():
         """Return the current time in 12-hour format."""
         return datetime.datetime.now().strftime("%I:%M:%S %p")
+
+    def log_output(message):
+        """Save output message to file."""
+        with open(output_file, 'a') as file:
+            file.write(f"{get_current_time()} - {message}\n")
 
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             image_name = os.path.basename(image_path)
-            print(f"{get_current_time()} - Found image: {image_name}")
+            message = f"Found image: {image_name}"
+            print(f"{get_current_time()} - {message}")
+            log_output(message)
             return location
     except Exception as e:
         error_count += 1
-        print(f"{get_current_time()} - {error_count} times not found. Error: {e}")
+        error_message = f"{error_count} times not found. Error: {e}"
+        print(f"{get_current_time()} - {error_message}")
+        log_output(error_message)
+    
     return None
 
 
@@ -287,14 +318,14 @@ raid_light_thread = None
 
 loss_thread = None
 
-"""
-██╗     ██╗ ██████╗ ██╗  ██╗████████╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
-██║     ██║██╔════╝ ██║  ██║╚══██╔══╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-██║     ██║██║  ███╗███████║   ██║       ███████║   ██║      ██║   ███████║██║     █████╔╝
-██║     ██║██║   ██║██╔══██║   ██║       ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
-███████╗██║╚██████╔╝██║  ██║   ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
-╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-"""
+
+## ██╗     ██╗ ██████╗ ██╗  ██╗████████╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
+## ██║     ██║██╔════╝ ██║  ██║╚══██╔══╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+## ██║     ██║██║  ███╗███████║   ██║       ███████║   ██║      ██║   ███████║██║     █████╔╝
+## ██║     ██║██║   ██║██╔══██║   ██║       ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
+## ███████╗██║╚██████╔╝██║  ██║   ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
+## ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+
 def fight_Light():
     global stop_thread
     window = focus_window(window_title)
@@ -557,14 +588,14 @@ def raid_function_light():
 Raid_Light_BT = Button(ROOT, text="RL", bg="#5a9bf7", fg="#000000", width=5, height=2, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
-"""
-██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
-██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-███████║█████╗  ███████║██║   ██║ ╚████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
-██╔══██║██╔══╝  ██╔══██║╚██╗ ██╔╝  ╚██╔╝      ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
-██║  ██║███████╗██║  ██║ ╚████╔╝    ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
-╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝     ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-"""
+
+#? ██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
+#? ██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+#? ███████║█████╗  ███████║██║   ██║ ╚████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
+#? ██╔══██║██╔══╝  ██╔══██║╚██╗ ██╔╝  ╚██╔╝      ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
+#? ██║  ██║███████╗██║  ██║ ╚████╔╝    ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
+#? ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝     ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+
 # heavy attack for fight
 def fight_Heavy():
     global stop_thread
@@ -791,7 +822,7 @@ def loss_function():
     if loss_thread and loss_thread.is_alive():
         stop_thread = True
         loss_thread.join()
-        Loss_BT.config(text="L", bg="#443e3e", fg="#fc0000")
+        Loss_BT.config(text="L", bg="#443e3e", fg="#fff")
     else:
         stop_thread = False
         loss_thread = threading.Thread(target=TakeL)
@@ -799,7 +830,7 @@ def loss_function():
         loss_thread.start()
         Loss_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Loss_BT = Button(ROOT, text="L", bg="#443e3e", fg="#fc0000", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Loss_BT.pack(padx=(1, 1), pady=(1, 1))
+Loss_BT = Button(ROOT, text="L", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Loss_BT.pack(padx=(1, 1), pady=(10, 1))
 
 ROOT.mainloop()
