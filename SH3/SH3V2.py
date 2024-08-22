@@ -663,7 +663,7 @@ def actionF_handler(window):
                 start_time = time.time()
                 while time.time() - start_time < actionf_duration:
                     if not holding_keys:
-                        key_down(window, 'i')
+                        # key_down(window, 'i')
                         key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
@@ -681,7 +681,7 @@ def actionF_handler(window):
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
-                    key_up(window, 'i')
+                    # key_up(window, 'i')
                     holding_keys = False
             time.sleep(0.05)
     except KeyboardInterrupt:
@@ -689,7 +689,7 @@ def actionF_handler(window):
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
-        key_up(window, 'i')
+        # key_up(window, 'i')
 
 def other_items_handler(window):
     try:
@@ -740,7 +740,6 @@ def event_function_light():
         event_light_thread.daemon = True
         event_light_thread.start()
         Event_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-
 
 Event_Light_BT = Button(ROOT, text="EL", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
