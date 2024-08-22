@@ -1122,15 +1122,3 @@ return
 
 
 
-FileSelectFolder, SelectedFolder, A_Desktop,, Select Folder to copy
-
-FileSelectFolder, SelectedDestination, A_Desktop,, Select Destination
-
-SplitPath, SelectedFolder,,,, SelectedFolderName
-
-RunWait, %ComSpec% /c robocopy "%SelectedFolder%" "%SelectedDestination%\%SelectedFolderName%" /e,, Hide
-
-ExitApp
-
-
-
