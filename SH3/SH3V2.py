@@ -162,12 +162,10 @@ def find_image(image_path, confidence=0.7):
     def get_current_time():
         """Return the current time in 12-hour format."""
         return datetime.datetime.now().strftime("%I:%M:%S %p")
-
     def log_output(message):
         """Save output message to file."""
         with open(output_file, 'a') as file:
             file.write(f"{get_current_time()} - {message}\n")
-
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
@@ -181,7 +179,6 @@ def find_image(image_path, confidence=0.7):
         error_message = f"{error_count} times not found. Error: {e}"
         print(f"{get_current_time()} - {error_message}")
         log_output(error_message)
-    
     return None
 
 
@@ -383,50 +380,38 @@ Fightlight_BT = Button(ROOT, text="\ueefd L", bg="#6a6a64", fg="#9dff00", width=
 Fightlight_BT.pack(padx=(2, 2), pady=(3, 0))
 
 # light attack for fame
-def fame_light():
+def fame_items_handler(window):
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if find_image(Resume, confidence=0.8): press_key(window, 'r')
+            elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+            elif find_image(StartFame): press_key(window, 'p')
+            elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+            elif find_image(e_image): press_key(window, 'e')
+            elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            time.sleep(0.05)
+    except KeyboardInterrupt: print("Script stopped by user.")
+
+def fame_Light():
     global stop_thread
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    holding_keys = False
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                start_time = time.time()
-                while time.time() - start_time < 10:  # Loop for 10 seconds
-                    if not holding_keys:
-                        key_down(window, 'i')
-                        key_down(window, 'd')
-                        key_down(window, 'l')
-                        holding_keys = True
-                    # Press 'j' rapidly
-                    press_key(window, 'j')
-                    time.sleep(0.001)  # Reduce sleep time for rapid pressing
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'd')
-                    key_up(window, 'i')
-                    holding_keys = False
-            else:
-                if holding_keys:
-                    key_up(window, 'i')
-                    key_up(window, 'l')
-                    key_up(window, 'd')
-                    holding_keys = False
-                if find_image(Resume, confidence=0.8): press_key(window, 'r')
-                elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
-                elif find_image(StartFame): press_key(window, 'p')
-                elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-                elif find_image(e_image): press_key(window, 'e')
-                elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-                elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            time.sleep(0.05)
-    except KeyboardInterrupt: print("Script stopped by user.")
-    finally:
-        key_up(window, 'l')
-        key_up(window, 'j')
+    # Start the actionF handler in a separate thread
+    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
+    actionF_thread.daemon = True
+    actionF_thread.start()
+    # Start the other items handler in a separate thread
+    other_items_thread = threading.Thread(target=fame_items_handler, args=(window,))
+    other_items_thread.daemon = True
+    other_items_thread.start()
+    # Join the threads to ensure they stop when the main thread stops
+    actionF_thread.join()
+    other_items_thread.join()
+
 def fame_function_light():
     global stop_thread, fame_light_thread, Fame_Light_BT
     if fame_light_thread and fame_light_thread.is_alive():
@@ -435,7 +420,7 @@ def fame_function_light():
         Fame_Light_BT.config(text="FL", bg="#bda24a", fg="#000000")
     else:
         stop_thread = False
-        fame_light_thread = threading.Thread(target=fame_light)
+        fame_light_thread = threading.Thread(target=fame_Light)
         fame_light_thread.daemon = True
         fame_light_thread.start()
         Fame_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
@@ -482,7 +467,7 @@ def actionF_handler(window):
         key_up(window, 'j')
         #* key_up(window, 'i')
 
-def other_items_handler(window):
+def event_items_handler(window):
     try:
         while not stop_thread:
             focus_window(window_title)
@@ -506,7 +491,7 @@ def Start_Event_Light():
     actionF_thread.daemon = True
     actionF_thread.start()
     # Start the other items handler in a separate thread
-    other_items_thread = threading.Thread(target=other_items_handler, args=(window,))
+    other_items_thread = threading.Thread(target=event_items_handler, args=(window,))
     other_items_thread.daemon = True
     other_items_thread.start()
     # Join the threads to ensure they stop when the main thread stops
