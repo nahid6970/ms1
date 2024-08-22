@@ -409,7 +409,7 @@ def fame_function_light():
         fame_light_thread.start()
         Fame_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Fame_Light_BT = Button(ROOT, text="FL", bg="#bda24a", fg="#000000", width=5, height=3, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fame_Light_BT = Button(ROOT, text="FL", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 # light attack for event
@@ -495,7 +495,7 @@ def event_function_light():
         event_light_thread.start()
         Event_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Event_Light_BT = Button(ROOT, text="EL", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Event_Light_BT = Button(ROOT, text="EL", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
@@ -554,9 +554,8 @@ def raid_function_light():
         raid_light_thread.start()
         Raid_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Raid_Light_BT = Button(ROOT, text="RL", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Raid_Light_BT = Button(ROOT, text="RL", bg="#5a9bf7", fg="#000000", width=5, height=2, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Light_BT.pack(padx=(1, 1), pady=(1, 1))
-
 
 """
 ██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
@@ -573,7 +572,6 @@ def fight_Heavy():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    
     holding_keys = False
     try:
         while not stop_thread:
@@ -609,7 +607,7 @@ def fight_function():
         Fight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
 Fight_BT = Button(ROOT, text="\ueefd H", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Fight_BT.pack(padx=(2, 2), pady=(3, 0))
+Fight_BT.pack(padx=(2, 2), pady=(10, 0))
 
 # heavy attack for fame
 def fame_heavy():
@@ -703,7 +701,7 @@ def event_function_heavy():
         event_heavy_thread.start()
         Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 # heavy attack for raid
@@ -754,7 +752,7 @@ def raid_function_heavy():
         raid_heavy_thread.start()
         Raid_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Raid_Heavy_BT = Button(ROOT, text="RH", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Raid_Heavy_BT = Button(ROOT, text="RH", bg="#5a9bf7", fg="#000000", width=5, height=2, command=raid_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 """
@@ -793,7 +791,7 @@ def loss_function():
     if loss_thread and loss_thread.is_alive():
         stop_thread = True
         loss_thread.join()
-        Loss_BT.config(text="L", bg="#0c0c0c", fg="#fc0000")
+        Loss_BT.config(text="L", bg="#443e3e", fg="#fc0000")
     else:
         stop_thread = False
         loss_thread = threading.Thread(target=TakeL)
@@ -801,28 +799,7 @@ def loss_function():
         loss_thread.start()
         Loss_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-Loss_BT = Button(ROOT, text="L", bg="#0c0c0c", fg="#fc0000", width=5, height=3, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Loss_BT = Button(ROOT, text="L", bg="#443e3e", fg="#fc0000", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Loss_BT.pack(padx=(1, 1), pady=(1, 1))
 
-
-
-
-
-
-
-
-
-
 ROOT.mainloop()
-
-
-
-
-
-
-
-
-
-
-# Restart_bt=Button(ROOT,text="Restart",command=restart       , width=15,height=4,bg="#1d2027",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
-# Exit_bt   =Button(ROOT,text="Exit"   ,command=close_window  , width=15,height=4,bg="#1d2027",fg="#FFFFFF", font=("Jetbrainsmono nfp",12,"bold") ,relief="flat")
