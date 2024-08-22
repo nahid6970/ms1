@@ -653,49 +653,81 @@ Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, he
 Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
+def actionF_handler(window):
+    holding_keys = False
+    actionf_duration = 5  # Initial duration for holding the keys (in seconds)
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                start_time = time.time()
+                while time.time() - start_time < actionf_duration:
+                    if not holding_keys:
+                        key_down(window, 'i')
+                        key_down(window, 'd')
+                        key_down(window, 'l')
+                        holding_keys = True
+                    # Check at the 3-second mark if the actionF image is still present
+                    if time.time() - start_time >= 3:
+                        if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                            print("ActionF image found again. Extending time.")
+                            # Extend the duration by resetting start_time and adding 5 more seconds
+                            start_time = time.time()
+                            actionf_duration = 5
+                    # Press 'j' rapidly
+                    press_key(window, 'j')
+                    time.sleep(0.001)  # Rapid pressing
+                # Release keys if holding
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'd')
+                    key_up(window, 'i')
+                    holding_keys = False
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("ActionF thread stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
+        key_up(window, 'i')
+
+def other_items_handler(window):
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            # Handle the other image searches and actions
+            if find_image(Home, confidence=0.8):
+                press_key(window, 'f')
+            elif find_image(Resume, confidence=0.8):
+                press_key(window, 'r')
+            elif any(find_image(image) for image in continueF):
+                press_key(window, 'c')
+            elif find_image(Tournament_step1, confidence=0.8):
+                press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(Tournament_step2, confidence=0.8):
+                press_keys_with_delays(window, '1', 1)
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("Other items thread stopped by user.")
+
 def Start_Event_Light():
     global stop_thread
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    holding_keys = False
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                start_time = time.time()
-                while time.time() - start_time < 5:
-                    if not holding_keys:
-                        key_down(window, 'i')
-                        key_down(window, 'd')
-                        key_down(window, 'l')
-                        holding_keys = True
-                    # Press 'j' rapidly
-                    press_key(window, 'j')
-                    time.sleep(0.001)  # Reduce sleep time for rapid pressing
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'd')
-                    key_up(window, 'i')
-                    holding_keys = False
-            else:
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'd')
-                    key_up(window, 'i')
-                    holding_keys = False
-                elif find_image(Home, confidence=0.8): press_key(window, 'f')
-                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-                # elif find_image(cont1, confidence=0.8) or find_image(cont2, confidence=0.8): press_key(window, 'c')
-                elif any(find_image(image) for image in continueF): press_key(window, 'c')
-                elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-                elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
-            time.sleep(0.05)
-    except KeyboardInterrupt: print("Script stopped by user.")
-    finally:
-        key_up(window, 'l')
-        key_up(window, 'j')
+    # Start the actionF handler in a separate thread
+    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
+    actionF_thread.daemon = True
+    actionF_thread.start()
+    # Start the other items handler in a separate thread
+    other_items_thread = threading.Thread(target=other_items_handler, args=(window,))
+    other_items_thread.daemon = True
+    other_items_thread.start()
+    # Join the threads to ensure they stop when the main thread stops
+    actionF_thread.join()
+    other_items_thread.join()
+
 def event_function_light():
     global stop_thread, event_light_thread, Event_Light_BT
     if event_light_thread and event_light_thread.is_alive():
@@ -708,6 +740,7 @@ def event_function_light():
         event_light_thread.daemon = True
         event_light_thread.start()
         Event_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
 
 Event_Light_BT = Button(ROOT, text="EL", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
