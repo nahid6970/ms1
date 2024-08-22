@@ -286,62 +286,15 @@ raid_heavy_thread = None
 raid_light_thread = None
 
 loss_thread = None
-DairyMairy_thread=None
+
 """
-███████╗██╗ ██████╗ ██╗  ██╗████████╗
-██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
-█████╗  ██║██║  ███╗███████║   ██║
-██╔══╝  ██║██║   ██║██╔══██║   ██║
-██║     ██║╚██████╔╝██║  ██║   ██║
-╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+██╗     ██╗ ██████╗ ██╗  ██╗████████╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
+██║     ██║██╔════╝ ██║  ██║╚══██╔══╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+██║     ██║██║  ███╗███████║   ██║       ███████║   ██║      ██║   ███████║██║     █████╔╝
+██║     ██║██║   ██║██╔══██║   ██║       ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
+███████╗██║╚██████╔╝██║  ██║   ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
+╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 """
-
-def fight_Heavy():
-    global stop_thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    
-    holding_keys = False
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                if not holding_keys:
-                    key_down(window, 'j')
-                    key_down(window, 'l')
-                    holding_keys = True
-            else:
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'j')
-                    holding_keys = False
-            if find_image(SPACE, confidence=0.8): press_key(window, ' ')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            time.sleep(1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-    finally:
-        key_up(window, 'l')
-        key_up(window, 'j')
-def fight_function():
-    global stop_thread, fight_thread, Fight_BT
-    if fight_thread and fight_thread.is_alive():
-        stop_thread = True
-        fight_thread.join()
-        Fight_BT.config(text="\ueefd H", bg="#6a6a64", fg="#9dff00")
-    else:
-        stop_thread = False
-        fight_thread = threading.Thread(target=fight_Heavy)
-        fight_thread.daemon = True
-        fight_thread.start()
-        Fight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-
-Fight_BT = Button(ROOT, text="\ueefd H", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Fight_BT.pack(padx=(2, 2), pady=(3, 0))
-
-
-
 def fight_Light():
     global stop_thread
     window = focus_window(window_title)
@@ -398,69 +351,7 @@ def fightLight_function():
 Fightlight_BT = Button(ROOT, text="\ueefd L", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fightLight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fightlight_BT.pack(padx=(2, 2), pady=(3, 0))
 
-"""
-███████╗ █████╗ ███╗   ███╗███████╗
-██╔════╝██╔══██╗████╗ ████║██╔════╝
-█████╗  ███████║██╔████╔██║█████╗
-██╔══╝  ██╔══██║██║╚██╔╝██║██╔══╝
-██║     ██║  ██║██║ ╚═╝ ██║███████╗
-╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-"""
-def fame_heavy():
-    global stop_thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    
-    holding_keys = False
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                if not holding_keys:
-                    key_down(window, 'i')
-                    key_down(window, 'j')
-                    key_down(window, 'l')
-                    holding_keys = True
-                time.sleep(1)
-            else:
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'j')
-                    key_up(window, 'i')
-                    holding_keys = False
-                if find_image(Resume, confidence=0.8): press_key(window, 'r')
-                elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
-                elif find_image(StartFame): press_key(window, 'p')
-                elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-                elif find_image(e_image): press_key(window, 'e')
-                elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-                elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            time.sleep(1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-    finally:
-        key_up(window, 'i')
-        key_up(window, 'l')
-        key_up(window, 'j')
-def fame_function_heavy():
-    global stop_thread, fame_heavy_thread, Fame_Heavy_BT
-    if fame_heavy_thread and fame_heavy_thread.is_alive():
-        stop_thread = True
-        fame_heavy_thread.join()
-        Fame_Heavy_BT.config(text="FH", bg="#bda24a", fg="#000000")
-    else:
-        stop_thread = False
-        fame_heavy_thread = threading.Thread(target=fame_heavy)
-        fame_heavy_thread.daemon = True
-        fame_heavy_thread.start()
-        Fame_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-
-Fame_Heavy_BT = Button(ROOT, text="FH", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Fame_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
-
-
-
+# light attack for fame
 def fame_light():
     global stop_thread
     window = focus_window(window_title)
@@ -521,58 +412,10 @@ def fame_function_light():
 Fame_Light_BT = Button(ROOT, text="FL", bg="#bda24a", fg="#000000", width=5, height=3, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
-"""
-███████╗██╗   ██╗███████╗███╗   ██╗████████╗
-██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
-█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║
-██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║
-███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
-╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
-"""
-def start_event_heavy():
-    global stop_thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image) for image in actionF):
-                key_down(window, 'i')
-                key_down(window, 'j')
-                key_down(window, 'l')
-                time.sleep(5)
-                key_up(window, 'l')
-                key_up(window, 'j')
-                key_up(window, 'i')
-            elif find_image(Home, confidence=0.8): press_key(window, 'f')
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
-            time.sleep(0.1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-def event_function_heavy():
-    global stop_thread, event_heavy_thread, Event_Heavy_BT
-    if event_heavy_thread and event_heavy_thread.is_alive():
-        stop_thread = True
-        event_heavy_thread.join()
-        Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
-    else:
-        stop_thread = False
-        event_heavy_thread = threading.Thread(target=start_event_heavy)
-        event_heavy_thread.daemon = True
-        event_heavy_thread.start()
-        Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-
-Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
-
-
+# light attack for event
 def actionF_handler(window):
     holding_keys = False
-    actionf_duration = 5  # Initial duration for holding the keys (in seconds)
+    actionf_duration = 5  #* Initial duration for holding the keys (in seconds)
     try:
         while not stop_thread:
             focus_window(window_title)
@@ -580,25 +423,25 @@ def actionF_handler(window):
                 start_time = time.time()
                 while time.time() - start_time < actionf_duration:
                     if not holding_keys:
-                        # key_down(window, 'i')
+                        #* key_down(window, 'i')
                         key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
-                    # Check at the 3-second mark if the actionF image is still present
+                    #* Check at the 3-second mark if the actionF image is still present
                     if time.time() - start_time >= 3:
                         if any(find_image(image, confidence=actionF[image]) for image in actionF):
                             print("ActionF image found again. Extending time.")
-                            # Extend the duration by resetting start_time and adding 5 more seconds
+                            #* Extend the duration by resetting start_time and adding 5 more seconds
                             start_time = time.time()
                             actionf_duration = 5
-                    # Press 'j' rapidly
+                    #* Press 'j' rapidly
                     press_key(window, 'j')
                     time.sleep(0.001)  # Rapid pressing
-                # Release keys if holding
+                #* Release keys if holding
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
-                    # key_up(window, 'i')
+                    #* key_up(window, 'i')
                     holding_keys = False
             time.sleep(0.05)
     except KeyboardInterrupt:
@@ -606,13 +449,13 @@ def actionF_handler(window):
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
-        # key_up(window, 'i')
+        #* key_up(window, 'i')
 
 def other_items_handler(window):
     try:
         while not stop_thread:
             focus_window(window_title)
-            # Handle the other image searches and actions
+            #* Handle the other image searches and actions
             if find_image(Home, confidence=0.8): press_key(window, 'f')
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
@@ -654,65 +497,6 @@ def event_function_light():
 
 Event_Light_BT = Button(ROOT, text="EL", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
-
-"""
-██████╗  █████╗ ██╗██████╗ ███████╗
-██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
-██████╔╝███████║██║██║  ██║███████╗
-██╔══██╗██╔══██║██║██║  ██║╚════██║
-██║  ██║██║  ██║██║██████╔╝███████║
-╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═════╝ ╚══════╝
-"""
-def Raids():
-    global stop_thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    holding_keys = False  # To track if 'j' and 'l' are being held down
-    try:
-        while not stop_thread:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                if not holding_keys:
-                    key_down(window, 'j')
-                    key_down(window, 'l')
-                    holding_keys = True
-                time.sleep(1)
-            else:
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'j')
-                    holding_keys = False
-                if find_image(Home, confidence=0.8): press_key(window, 'z')
-                elif find_image(level3, confidence=0.85): press_key(window, '3')
-                elif find_image(participate, confidence=0.97): press_key(window, 'c')
-                elif find_image(toraid, confidence=0.97): press_key(window, ' ')
-                elif find_image(fight, confidence=0.97): press_key(window, 'c')
-                elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
-                elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            time.sleep(1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-    finally:
-        # Ensure keys are released if the loop exits
-        key_up(window, 'l')
-        key_up(window, 'j')
-def raid_function_heavy():
-    global stop_thread, raid_heavy_thread, Raid_Heavy_BT
-    if raid_heavy_thread and raid_heavy_thread.is_alive():
-        stop_thread = True
-        raid_heavy_thread.join()
-        Raid_Heavy_BT.config(text="RH", bg="#5a9bf7", fg="#000000")
-    else:
-        stop_thread = False
-        raid_heavy_thread = threading.Thread(target=Raids)
-        raid_heavy_thread.daemon = True
-        raid_heavy_thread.start()
-        Raid_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-
-Raid_Heavy_BT = Button(ROOT, text="RH", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Raid_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
-
 
 
 def Raid_Light():
@@ -772,6 +556,206 @@ def raid_function_light():
 
 Raid_Light_BT = Button(ROOT, text="RL", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+
+
+"""
+██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
+██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+███████║█████╗  ███████║██║   ██║ ╚████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
+██╔══██║██╔══╝  ██╔══██║╚██╗ ██╔╝  ╚██╔╝      ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
+██║  ██║███████╗██║  ██║ ╚████╔╝    ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝     ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+"""
+# heavy attack for fight
+def fight_Heavy():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    
+    holding_keys = False
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                if not holding_keys:
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    holding_keys = True
+            else:
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+                    holding_keys = False
+            if find_image(SPACE, confidence=0.8): press_key(window, ' ')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            time.sleep(1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+    finally:
+        key_up(window, 'l')
+        key_up(window, 'j')
+def fight_function():
+    global stop_thread, fight_thread, Fight_BT
+    if fight_thread and fight_thread.is_alive():
+        stop_thread = True
+        fight_thread.join()
+        Fight_BT.config(text="\ueefd H", bg="#6a6a64", fg="#9dff00")
+    else:
+        stop_thread = False
+        fight_thread = threading.Thread(target=fight_Heavy)
+        fight_thread.daemon = True
+        fight_thread.start()
+        Fight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+Fight_BT = Button(ROOT, text="\ueefd H", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fight_BT.pack(padx=(2, 2), pady=(3, 0))
+
+# heavy attack for fame
+def fame_heavy():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    
+    holding_keys = False
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                if not holding_keys:
+                    key_down(window, 'i')
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    holding_keys = True
+                time.sleep(1)
+            else:
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+                    key_up(window, 'i')
+                    holding_keys = False
+                if find_image(Resume, confidence=0.8): press_key(window, 'r')
+                elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+                elif find_image(StartFame): press_key(window, 'p')
+                elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+                elif find_image(e_image): press_key(window, 'e')
+                elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+                elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            time.sleep(1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+    finally:
+        key_up(window, 'i')
+        key_up(window, 'l')
+        key_up(window, 'j')
+def fame_function_heavy():
+    global stop_thread, fame_heavy_thread, Fame_Heavy_BT
+    if fame_heavy_thread and fame_heavy_thread.is_alive():
+        stop_thread = True
+        fame_heavy_thread.join()
+        Fame_Heavy_BT.config(text="FH", bg="#bda24a", fg="#000000")
+    else:
+        stop_thread = False
+        fame_heavy_thread = threading.Thread(target=fame_heavy)
+        fame_heavy_thread.daemon = True
+        fame_heavy_thread.start()
+        Fame_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+Fame_Heavy_BT = Button(ROOT, text="FH", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fame_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+
+# heavy attack for event
+def start_event_heavy():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image) for image in actionF):
+                key_down(window, 'i')
+                key_down(window, 'j')
+                key_down(window, 'l')
+                time.sleep(5)
+                key_up(window, 'l')
+                key_up(window, 'j')
+                key_up(window, 'i')
+            elif find_image(Home, confidence=0.8): press_key(window, 'f')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
+            time.sleep(0.1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+def event_function_heavy():
+    global stop_thread, event_heavy_thread, Event_Heavy_BT
+    if event_heavy_thread and event_heavy_thread.is_alive():
+        stop_thread = True
+        event_heavy_thread.join()
+        Event_Heavy_BT.config(text="EH", bg="#ce5129", fg="#000000")
+    else:
+        stop_thread = False
+        event_heavy_thread = threading.Thread(target=start_event_heavy)
+        event_heavy_thread.daemon = True
+        event_heavy_thread.start()
+        Event_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+Event_Heavy_BT = Button(ROOT, text="EH", bg="#ce5129", fg="#000000", width=5, height=3, command=event_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Event_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
+
+# heavy attack for raid
+def Raids():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    holding_keys = False  # To track if 'j' and 'l' are being held down
+    try:
+        while not stop_thread:
+            focus_window(window_title)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                if not holding_keys:
+                    key_down(window, 'j')
+                    key_down(window, 'l')
+                    holding_keys = True
+                time.sleep(1)
+            else:
+                if holding_keys:
+                    key_up(window, 'l')
+                    key_up(window, 'j')
+                    holding_keys = False
+                if find_image(Home, confidence=0.8): press_key(window, 'z')
+                elif find_image(level3, confidence=0.85): press_key(window, '3')
+                elif find_image(participate, confidence=0.97): press_key(window, 'c')
+                elif find_image(toraid, confidence=0.97): press_key(window, ' ')
+                elif find_image(fight, confidence=0.97): press_key(window, 'c')
+                elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
+                elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            time.sleep(1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+    finally:
+        # Ensure keys are released if the loop exits
+        key_up(window, 'l')
+        key_up(window, 'j')
+def raid_function_heavy():
+    global stop_thread, raid_heavy_thread, Raid_Heavy_BT
+    if raid_heavy_thread and raid_heavy_thread.is_alive():
+        stop_thread = True
+        raid_heavy_thread.join()
+        Raid_Heavy_BT.config(text="RH", bg="#5a9bf7", fg="#000000")
+    else:
+        stop_thread = False
+        raid_heavy_thread = threading.Thread(target=Raids)
+        raid_heavy_thread.daemon = True
+        raid_heavy_thread.start()
+        Raid_Heavy_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+Raid_Heavy_BT = Button(ROOT, text="RH", bg="#5a9bf7", fg="#000000", width=5, height=3, command=raid_function_heavy, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Raid_Heavy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 """
 ██╗      ██████╗ ███████╗███████╗
