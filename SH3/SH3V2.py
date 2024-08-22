@@ -613,19 +613,13 @@ def other_items_handler(window):
         while not stop_thread:
             focus_window(window_title)
             # Handle the other image searches and actions
-            if find_image(Home, confidence=0.8):
-                press_key(window, 'f')
-            elif find_image(Resume, confidence=0.8):
-                press_key(window, 'r')
-            elif any(find_image(image) for image in continueF):
-                press_key(window, 'c')
-            elif find_image(Tournament_step1, confidence=0.8):
-                press_keys_with_delays(window, 'u', 1, 'c', 1)
-            elif find_image(Tournament_step2, confidence=0.8):
-                press_keys_with_delays(window, '1', 1)
+            if find_image(Home, confidence=0.8): press_key(window, 'f')
+            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
             time.sleep(0.05)
-    except KeyboardInterrupt:
-        print("Other items thread stopped by user.")
+    except KeyboardInterrupt: print("Other items thread stopped by user.")
 
 def Start_Event_Light():
     global stop_thread
