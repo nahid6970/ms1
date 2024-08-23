@@ -337,7 +337,7 @@ def actionF_handler(window):
                 start_time = time.time()
                 while time.time() - start_time < actionf_duration:
                     if not holding_keys:
-                        # key_down(window, 'i')
+                        key_down(window, 'i')
                         key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
@@ -349,13 +349,13 @@ def actionF_handler(window):
                             start_time = time.time()
                             actionf_duration = 5
                     # Press 'j' rapidly
-                    press_key(window, 'j')
-                    time.sleep(0.001)  # Rapid pressing
+                    press_key(window, ';')
+                    time.sleep(0.1)  # Rapid pressing
                 # Release keys if holding
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
-                    # key_up(window, 'i')
+                    key_up(window, 'i')
                     holding_keys = False
                 # Unpause the other items handler after actionF is done
                 pause_other_items = False
@@ -363,8 +363,8 @@ def actionF_handler(window):
     except KeyboardInterrupt: print("ActionF thread stopped by user.")
     finally:
         key_up(window, 'l')
-        key_up(window, 'j')
-        # key_up(window, 'i')
+        key_up(window, ';')
+        key_up(window, 'i')
         pause_other_items = False
 
 
