@@ -405,7 +405,7 @@ def fame_items_handler(window):
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            time.sleep(0.05)
+            time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
     global stop_thread
@@ -416,11 +416,11 @@ def fame_Light():
     actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
     actionF_thread.daemon = True
     actionF_thread.start()
-    other_items_thread = threading.Thread(target=fame_items_handler, args=(window,))
-    other_items_thread.daemon = True
-    other_items_thread.start()
+    fame_items_thread = threading.Thread(target=fame_items_handler, args=(window,))
+    fame_items_thread.daemon = True
+    fame_items_thread.start()
     actionF_thread.join()
-    other_items_thread.join()
+    fame_items_thread.join()
 def fame_function_light():
     global stop_thread, fame_light_thread, Fame_Light_BT
     if fame_light_thread and fame_light_thread.is_alive():
@@ -501,11 +501,11 @@ def Raid_Light():
     actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
     actionF_thread.daemon = True
     actionF_thread.start()
-    raid_items_handler = threading.Thread(target=event_items_handler, args=(window,))
-    raid_items_handler.daemon = True
-    raid_items_handler.start()
+    raid_items_thread = threading.Thread(target=raid_items_handler, args=(window,))
+    raid_items_thread.daemon = True
+    raid_items_thread.start()
     actionF_thread.join()
-    raid_items_handler.join()
+    raid_items_thread.join()
 def raid_function_light():
     global stop_thread, raid_light_thread, Raid_Light_BT
     if raid_light_thread and raid_light_thread.is_alive():
