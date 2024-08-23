@@ -323,39 +323,51 @@ loss_thread = None
 #! ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗    ███████║   ██║      ██║   ███████╗███████╗
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 # light attack
+pause_other_items = False
 def actionF_handler(window):
+    global pause_other_items
     holding_keys = False
-    actionf_duration = 5
+    actionf_duration = 5  # Initial duration for holding the keys (in seconds)
     try:
         while not stop_thread:
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                # Pause the other items handler
+                pause_other_items = True
                 start_time = time.time()
                 while time.time() - start_time < actionf_duration:
                     if not holding_keys:
-                        #* key_down(window, 'i')
+                        # key_down(window, 'i')
                         key_down(window, 'd')
                         key_down(window, 'l')
                         holding_keys = True
+                    # Check at the 3-second mark if the actionF image is still present
                     if time.time() - start_time >= 3:
                         if any(find_image(image, confidence=actionF[image]) for image in actionF):
                             print("ActionF image found again. Extending time.")
+                            # Extend the duration by resetting start_time and adding 5 more seconds
                             start_time = time.time()
                             actionf_duration = 5
+                    # Press 'j' rapidly
                     press_key(window, 'j')
-                    time.sleep(0.001)
+                    time.sleep(0.001)  # Rapid pressing
+
+                # Release keys if holding
                 if holding_keys:
                     key_up(window, 'l')
                     key_up(window, 'd')
-                    #* key_up(window, 'i')
+                    # key_up(window, 'i')
                     holding_keys = False
+                # Unpause the other items handler after actionF is done
+                pause_other_items = False
             time.sleep(0.05)
-    except KeyboardInterrupt:
-        print("ActionF thread stopped by user.")
+    except KeyboardInterrupt: print("ActionF thread stopped by user.")
     finally:
         key_up(window, 'l')
         key_up(window, 'j')
-        #* key_up(window, 'i')
+        # key_up(window, 'i')
+        pause_other_items = False
+
 
 ## ██╗     ██╗ ██████╗ ██╗  ██╗████████╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
 ## ██║     ██║██╔════╝ ██║  ██║╚══██╔══╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
@@ -397,7 +409,11 @@ Fightlight_BT.pack(padx=(2, 2), pady=(3, 0))
 def fame_items_handler(window):
     try:
         while not stop_thread:
-            focus_window(window_title)
+            # Check if we need to pause this handler
+            if pause_other_items:
+                print("Paused other items handler for 5 seconds.")
+                while pause_other_items:
+                    time.sleep(0.1)  # Wait until actionF is done
             if find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
             elif find_image(StartFame): press_key(window, 'p')
