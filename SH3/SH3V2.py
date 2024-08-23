@@ -351,7 +351,6 @@ def actionF_handler(window):
                     # Press 'j' rapidly
                     press_key(window, 'j')
                     time.sleep(0.001)  # Rapid pressing
-
                 # Release keys if holding
                 if holding_keys:
                     key_up(window, 'l')
