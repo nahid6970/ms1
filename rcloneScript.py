@@ -144,24 +144,34 @@ storage_radios = [
     {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
     {"text": "C:/"  ,"value": "C:/"  ,"row": 0,"column": 2},
     {"text": "D:/"  ,"value": "D:/"  ,"row": 0,"column": 3},
+
     {"text": "cgu:/","value": "cgu:/","row": 1,"column": 1},
     {"text": "gu:/" ,"value": "gu:/" ,"row": 1,"column": 2},
     {"text": "g00:/","value": "g00:/","row": 1,"column": 3},
+
     {"text": "g01:/","value": "g01:/","row": 2,"column": 1},
     {"text": "g02:/","value": "g02:/","row": 2,"column": 2},
     {"text": "g03:/","value": "g03:/","row": 2,"column": 3},
     {"text": "g04:/","value": "g04:/","row": 2,"column": 4},
     {"text": "g05:/","value": "g05:/","row": 2,"column": 5},
+
     {"text": "g06:/","value": "g06:/","row": 3,"column": 1},
     {"text": "g07:/","value": "g07:/","row": 3,"column": 2},
     {"text": "g08:/","value": "g08:/","row": 3,"column": 3},
     {"text": "g09:/","value": "g09:/","row": 3,"column": 4},
     {"text": "g10:/","value": "g10:/","row": 3,"column": 5},
+
     {"text": "g11:/","value": "g11:/","row": 4,"column": 1},
     {"text": "g12:/","value": "g12:/","row": 4,"column": 2},
     {"text": "g13:/","value": "g13:/","row": 4,"column": 3},
     {"text": "g14:/","value": "g14:/","row": 4,"column": 4},
     {"text": "g15:/","value": "g15:/","row": 4,"column": 5},
+
+    {"text": "o0:/", "value": "o0:/", "row": 5,"column": 1},
+    {"text": "ouk:/","value": "ouk:/","row": 5,"column": 2},
+
+    {"text": "m0:/","value": "m0:/","row": 6,"column": 1},
+    {"text": "m1:/","value": "m1:/","row": 6,"column": 2},
 ]
 
 for item in storage_radios:
