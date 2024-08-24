@@ -248,11 +248,11 @@ actionF = {
     # bolt: 1,
 }
 
-ironchad_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_left.png"
-ironchad_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_right.png"
+# ironchad_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_left.png"
+# ironchad_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_right.png"
 
-hunter_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_left.png"
-hunter_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_right.png"
+# hunter_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_left.png"
+# hunter_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_right.png"
 
 # actionF1 = {
 #     ironchad_lft: 0.75,
@@ -750,7 +750,7 @@ def TakeL():
         while not stop_thread:
             focus_window(window_title)
             #* if any(find_image(image) for image in actionF):
-            if any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, 'b', 1, "m", 1)
+            if any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
 
             # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(SPACE, confidence=0.8) : press_key(window, ' ')
