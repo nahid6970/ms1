@@ -105,9 +105,9 @@ label.pack()
 
 
 # Create a close button
-close_button = tk.Button(root, text="X", command=close_window)
-close_button.config(font=("jetbrainsmono nfp", 8), bg="red", fg="white")
-close_button.place(relx=1, x=-2, y=2, anchor="ne")
+# close_button = tk.Button(root, text="X", command=close_window)
+# close_button.config(font=("jetbrainsmono nfp", 8), bg="red", fg="white")
+# close_button.place(relx=1, x=-2, y=2, anchor="ne")
 
 # Start the screen capture in a separate thread
 thread = threading.Thread(target=capture_secondary_monitor)
