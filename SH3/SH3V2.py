@@ -404,7 +404,6 @@ ACTIONNNNNNNNNNNN.pack(padx=(1, 1), pady=(1, 1))
 ## ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 
 
-
 # light attack for fame
 def fame_items_handler(window):
     try:
@@ -429,13 +428,9 @@ def fame_Light():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
-    actionF_thread.daemon = True
-    actionF_thread.start()
     fame_items_thread = threading.Thread(target=fame_items_handler, args=(window,))
     fame_items_thread.daemon = True
     fame_items_thread.start()
-    actionF_thread.join()
     fame_items_thread.join()
 def fame_function_light():
     global stop_thread, fame_light_thread, Fame_Light_BT
