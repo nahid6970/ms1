@@ -323,7 +323,10 @@ loss_thread = None
 #! ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗    ███████║   ██║      ██║   ███████╗███████╗
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 # light attack
+
+Action_Light_Thread = None
 pause_other_items = False
+
 def actionF_handler(window):
     global pause_other_items
     holding_keys = False
@@ -367,6 +370,31 @@ def actionF_handler(window):
         key_up(window, 'i')
         pause_other_items = False
 
+def Action__Light__FF():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
+    actionF_thread.daemon = True
+    actionF_thread.start()
+    actionF_thread.join()
+
+def action_adjust():
+    global stop_thread, Action_Light_Thread, ACTIONNNNNNNNNNNN
+    if Action_Light_Thread and Action_Light_Thread.is_alive():
+        stop_thread = True
+        Action_Light_Thread.join()
+        ACTIONNNNNNNNNNNN.config(text="AC", bg="#bda24a", fg="#000000")
+    else:
+        stop_thread = False
+        Action_Light_Thread = threading.Thread(target=Action__Light__FF)
+        Action_Light_Thread.daemon = True
+        Action_Light_Thread.start()
+        ACTIONNNNNNNNNNNN.config(text="Stop", bg="#1d2027", fg="#fc0000")
+ACTIONNNNNNNNNNNN = Button(ROOT, text="AC", bg="#bda24a", fg="#000000", width=5, height=2, command=action_adjust, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTIONNNNNNNNNNNN.pack(padx=(1, 1), pady=(1, 1))
 
 ## ██╗     ██╗ ██████╗ ██╗  ██╗████████╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
 ## ██║     ██║██╔════╝ ██║  ██║╚══██╔══╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
@@ -375,34 +403,7 @@ def actionF_handler(window):
 ## ███████╗██║╚██████╔╝██║  ██║   ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
 ## ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 
-# light attack for fight
-def fight_Light():
-    global stop_thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    # Start the actionF handler in a separate thread
-    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
-    actionF_thread.daemon = True
-    actionF_thread.start()
-    actionF_thread.join()
 
-def fightLight_function():
-    global stop_thread, fightLight_thread, Fightlight_BT
-    if fightLight_thread and fightLight_thread.is_alive():
-        stop_thread = True
-        fightLight_thread.join()
-        Fightlight_BT.config(text="\ueefd L", bg="#6a6a64", fg="#9dff00")
-    else:
-        stop_thread = False
-        fightLight_thread = threading.Thread(target=fight_Light)
-        fightLight_thread.daemon = True
-        fightLight_thread.start()
-        Fightlight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-
-Fightlight_BT = Button(ROOT, text="\ueefd L", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fightLight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Fightlight_BT.pack(padx=(2, 2), pady=(3, 0))
 
 # light attack for fame
 def fame_items_handler(window):
@@ -450,6 +451,39 @@ def fame_function_light():
         Fame_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 Fame_Light_BT = Button(ROOT, text="FL", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+
+
+
+
+
+# light attack for fight
+def fight_Light():
+    global stop_thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    # Start the actionF handler in a separate thread
+    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
+    actionF_thread.daemon = True
+    actionF_thread.start()
+    actionF_thread.join()
+
+def fightLight_function():
+    global stop_thread, fightLight_thread, Fightlight_BT
+    if fightLight_thread and fightLight_thread.is_alive():
+        stop_thread = True
+        fightLight_thread.join()
+        Fightlight_BT.config(text="\ueefd L", bg="#6a6a64", fg="#9dff00")
+    else:
+        stop_thread = False
+        fightLight_thread = threading.Thread(target=fight_Light)
+        fightLight_thread.daemon = True
+        fightLight_thread.start()
+        Fightlight_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+Fightlight_BT = Button(ROOT, text="\ueefd L", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fightLight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fightlight_BT.pack(padx=(2, 2), pady=(3, 0))
 
 # light attack for event
 def event_items_handler(window):
