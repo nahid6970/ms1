@@ -315,17 +315,17 @@ raid_light_thread = None
 
 loss_thread = None
 
-
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
 #! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝
 #! ███████║   ██║      ██║   ███████║██║     █████╔╝     ███████╗   ██║    ╚████╔╝ ██║     █████╗
 #! ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗     ╚════██║   ██║     ╚██╔╝  ██║     ██╔══╝
 #! ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗    ███████║   ██║      ██║   ███████╗███████╗
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
+
 # light attack
 Action_Light_Thread = None
 pause_other_items = False
-def actionF_handler(window):
+def actionF_L(window):
     global pause_other_items
     holding_keys = False
     actionf_duration = 5  # Initial duration for holding the keys (in seconds)
@@ -373,7 +373,7 @@ def Action__Light__FF():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
+    actionF_thread = threading.Thread(target=actionF_L, args=(window,))
     actionF_thread.daemon = True
     actionF_thread.start()
     actionF_thread.join()
@@ -394,9 +394,9 @@ ACTION_1.pack(padx=(1, 1), pady=(1, 1))
 
 
 
-Action_Light_Thread = None
+Action_Light_Thread_i = None
 pause_other_items = False
-def actionF_handler(window):
+def actionF_L_i(window):
     global pause_other_items
     holding_keys = False
     actionf_duration = 5  # Initial duration for holding the keys (in seconds)
@@ -438,27 +438,27 @@ def actionF_handler(window):
         key_up(window, ';')
         key_up(window, 'i')
         pause_other_items = False
-def Action__Light__FF():
+def Action__Light__Fi():
     global stop_thread
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    actionF_thread = threading.Thread(target=actionF_handler, args=(window,))
+    actionF_thread = threading.Thread(target=actionF_L_i, args=(window,))
     actionF_thread.daemon = True
     actionF_thread.start()
     actionF_thread.join()
 def action_adjust():
-    global stop_thread, Action_Light_Thread, ACTION_2
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
+    global stop_thread, Action_Light_Thread_i, ACTION_2
+    if Action_Light_Thread_i and Action_Light_Thread_i.is_alive():
         stop_thread = True
-        Action_Light_Thread.join()
+        Action_Light_Thread_i.join()
         ACTION_2.config(text="AL-i", bg="#6a6a64", fg="#9dff00")
     else:
         stop_thread = False
-        Action_Light_Thread = threading.Thread(target=Action__Light__FF)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
+        Action_Light_Thread_i = threading.Thread(target=Action__Light__Fi)
+        Action_Light_Thread_i.daemon = True
+        Action_Light_Thread_i.start()
         ACTION_2.config(text="Stop", bg="#1d2027", fg="#fc0000")
 ACTION_2 = Button(ROOT, text="AL-i", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_2.pack(padx=(1, 1), pady=(1, 1))
@@ -530,14 +530,12 @@ def fight_function():
 ACTION_3 = Button(ROOT, text="AH", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_3.pack(padx=(2, 2), pady=(0, 10))
 
-
-## ██╗     ██╗ ██████╗ ██╗  ██╗████████╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
-## ██║     ██║██╔════╝ ██║  ██║╚══██╔══╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-## ██║     ██║██║  ███╗███████║   ██║       ███████║   ██║      ██║   ███████║██║     █████╔╝
-## ██║     ██║██║   ██║██╔══██║   ██║       ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
-## ███████╗██║╚██████╔╝██║  ██║   ██║       ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
-## ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-
+# ███╗   ███╗ ██████╗ ██████╗ ███████╗
+# ████╗ ████║██╔═══██╗██╔══██╗██╔════╝
+# ██╔████╔██║██║   ██║██║  ██║█████╗
+# ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝
+# ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗
+# ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
 
 # Fame Fame Fame Fame
 def fame_items_handler(window):
