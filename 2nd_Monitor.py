@@ -35,7 +35,7 @@ def get_secondary_monitor_bbox():
             return monitor.x, monitor.y, monitor.width, monitor.height
     return None
 
-def capture_secondary_monitor():
+def capture_secondary_monitor(stop_event):
     bbox = get_secondary_monitor_bbox()
     if not bbox:
         print("Secondary monitor not found.")
@@ -49,7 +49,7 @@ def capture_secondary_monitor():
             "height": bbox[3]
         }
 
-        while True:
+        while not stop_event.is_set():
             sct_img = sct.grab(monitor)
 
             # Convert the image to PIL format
@@ -85,7 +85,28 @@ def capture_secondary_monitor():
             # Capture every 100 milliseconds
             time.sleep(0.1)
 
+def monitor_secondary_display(stop_event):
+    current_status = False
+
+    while not stop_event.is_set():
+        secondary_bbox = get_secondary_monitor_bbox()
+        if secondary_bbox:
+            if not current_status:
+                print("Secondary monitor detected. Starting capture.")
+                stop_event.clear()  # Make sure the stop event is cleared before starting
+                capture_thread = threading.Thread(target=capture_secondary_monitor, args=(stop_event,))
+                capture_thread.start()
+                current_status = True
+        else:
+            if current_status:
+                print("Secondary monitor disconnected. Stopping capture.")
+                stop_event.set()  # Stop the current capture
+                current_status = False
+
+        time.sleep(2)  # Check every 2 seconds
+
 def close_window():
+    stop_event.set()  # Stop all threads before closing the window
     root.destroy()
 
 # Create the Tkinter window
@@ -114,11 +135,12 @@ root.attributes('-topmost', True)
 label = tk.Label(root)
 label.pack()
 
-# Start the screen capture in a separate thread
-thread = threading.Thread(target=capture_secondary_monitor)
-thread.daemon = True
-thread.start()
+# Create an event to stop the threads when needed
+stop_event = threading.Event()
 
-# keyboard.add_hotkey("esc", close_window)
+# Start monitoring for the secondary monitor in a separate thread
+monitor_thread = threading.Thread(target=monitor_secondary_display, args=(stop_event,))
+monitor_thread.daemon = True
+monitor_thread.start()
 
 root.mainloop()
