@@ -299,7 +299,7 @@ Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.
 Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
 
 #* Threads
-stop_thread = True
+
 
 fight_thread = None
 fightLight_thread = None
@@ -323,6 +323,7 @@ loss_thread = None
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 
 # light attack
+stop_thread_action1 = True
 Action_Light_Thread = None
 pause_other_items = False
 def actionF_L(window):
@@ -330,7 +331,7 @@ def actionF_L(window):
     holding_keys = False
     actionf_duration = 5  # Initial duration for holding the keys (in seconds)
     try:
-        while not stop_thread:
+        while not stop_thread_action1:
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 # Pause the other items handler
@@ -368,7 +369,7 @@ def actionF_L(window):
         # key_up(window, 'i')
         pause_other_items = False
 def Action__Light__FF():
-    global stop_thread
+    global stop_thread_action1
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -378,13 +379,13 @@ def Action__Light__FF():
     actionF_thread.start()
     actionF_thread.join()
 def action_adjust():
-    global stop_thread, Action_Light_Thread, ACTION_1
+    global stop_thread_action1, Action_Light_Thread, ACTION_1
     if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread = True
+        stop_thread_action1 = True
         Action_Light_Thread.join()
         ACTION_1.config(text="AL", bg="#6a6a64", fg="#9dff00")
     else:
-        stop_thread = False
+        stop_thread_action1 = False
         Action_Light_Thread = threading.Thread(target=Action__Light__FF)
         Action_Light_Thread.daemon = True
         Action_Light_Thread.start()
@@ -394,6 +395,7 @@ ACTION_1.pack(padx=(1, 1), pady=(1, 1))
 
 
 
+stop_thread_action2 = True
 Action_Light_Thread_i = None
 pause_other_items = False
 def actionF_L_i(window):
@@ -401,7 +403,7 @@ def actionF_L_i(window):
     holding_keys = False
     actionf_duration = 5  # Initial duration for holding the keys (in seconds)
     try:
-        while not stop_thread:
+        while not stop_thread_action2:
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 # Pause the other items handler
@@ -439,7 +441,7 @@ def actionF_L_i(window):
         key_up(window, 'i')
         pause_other_items = False
 def Action__Light__Fi():
-    global stop_thread
+    global stop_thread_action2
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -449,13 +451,13 @@ def Action__Light__Fi():
     actionF_thread.start()
     actionF_thread.join()
 def action_adjust():
-    global stop_thread, Action_Light_Thread_i, ACTION_2
+    global stop_thread_action2, Action_Light_Thread_i, ACTION_2
     if Action_Light_Thread_i and Action_Light_Thread_i.is_alive():
-        stop_thread = True
+        stop_thread_action2 = True
         Action_Light_Thread_i.join()
         ACTION_2.config(text="AL-i", bg="#6a6a64", fg="#9dff00")
     else:
-        stop_thread = False
+        stop_thread_action2 = False
         Action_Light_Thread_i = threading.Thread(target=Action__Light__Fi)
         Action_Light_Thread_i.daemon = True
         Action_Light_Thread_i.start()
@@ -466,6 +468,7 @@ ACTION_2.pack(padx=(1, 1), pady=(1, 1))
 
 
 # heavy attack for fight
+stop_thread_action3 = True
 fight_thread = None
 pause_other_items = False
 def fight_heavy_handler(window):
@@ -473,7 +476,7 @@ def fight_heavy_handler(window):
     holding_keys = False
     fight_duration = 5  # Initial duration for holding the keys (in seconds)
     try:
-        while not stop_thread:
+        while not stop_thread_action3:
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 # Pause the other items handler
@@ -506,7 +509,7 @@ def fight_heavy_handler(window):
         key_up(window, 'j')
         pause_other_items = False
 def fight_Heavy():
-    global stop_thread
+    global stop_thread_action3
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -516,13 +519,13 @@ def fight_Heavy():
     fight_thread.start()
     fight_thread.join()
 def fight_function():
-    global stop_thread, fight_thread, ACTION_3
+    global stop_thread_action3, fight_thread, ACTION_3
     if fight_thread and fight_thread.is_alive():
-        stop_thread = True
+        stop_thread_action3 = True
         fight_thread.join()
         ACTION_3.config(text="AH", bg="#6a6a64", fg="#9dff00")
     else:
-        stop_thread = False
+        stop_thread_action3 = False
         fight_thread = threading.Thread(target=fight_Heavy)
         fight_thread.daemon = True
         fight_thread.start()
@@ -538,9 +541,10 @@ ACTION_3.pack(padx=(2, 2), pady=(0, 10))
 # ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
 
 # Fame Fame Fame Fame
+stop_thread_fame = True
 def fame_items_handler(window):
     try:
-        while not stop_thread:
+        while not stop_thread_fame:
             # Check if we need to pause this handler
             if pause_other_items:
                 print("Paused other items handler for 5 seconds.")
@@ -556,7 +560,7 @@ def fame_items_handler(window):
             time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
-    global stop_thread
+    global stop_thread_fame
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -566,13 +570,13 @@ def fame_Light():
     fame_items_thread.start()
     fame_items_thread.join()
 def fame_function_light():
-    global stop_thread, fame_light_thread, Fame_Light_BT
+    global stop_thread_fame, fame_light_thread, Fame_Light_BT
     if fame_light_thread and fame_light_thread.is_alive():
-        stop_thread = True
+        stop_thread_fame = True
         fame_light_thread.join()
         Fame_Light_BT.config(text="FL", bg="#bda24a", fg="#000000")
     else:
-        stop_thread = False
+        stop_thread_fame = False
         fame_light_thread = threading.Thread(target=fame_Light)
         fame_light_thread.daemon = True
         fame_light_thread.start()
@@ -582,9 +586,10 @@ Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
 # Event Event Event Event
+stop_thread_event = True
 def event_items_handler(window):
     try:
-        while not stop_thread:
+        while not stop_thread_event:
             focus_window(window_title)
             #* Handle the other image searches and actions
             if find_image(Home, confidence=0.8): press_key(window, 'f')
@@ -595,7 +600,7 @@ def event_items_handler(window):
             time.sleep(0.05)
     except KeyboardInterrupt: print("Other items thread stopped by user.")
 def Start_Event_Light():
-    global stop_thread
+    global stop_thread_event
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -606,13 +611,13 @@ def Start_Event_Light():
     other_items_thread.join()
 
 def event_function_light():
-    global stop_thread, event_light_thread, Event_Light_BT
+    global stop_thread_event, event_light_thread, Event_Light_BT
     if event_light_thread and event_light_thread.is_alive():
-        stop_thread = True
+        stop_thread_event = True
         event_light_thread.join()
         Event_Light_BT.config(text="EL", bg="#ce5129", fg="#000000")
     else:
-        stop_thread = False
+        stop_thread_event = False
         event_light_thread = threading.Thread(target=Start_Event_Light)
         event_light_thread.daemon = True
         event_light_thread.start()
@@ -621,9 +626,10 @@ Event_Light_BT = Button(ROOT, text="EL", bg="#ce5129", fg="#000000", width=5, he
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 # Raid Raid Raid Raid
+stop_thread_raid = True
 def raid_items_handler(window):
     try:
-        while not stop_thread:
+        while not stop_thread_raid:
             focus_window(window_title)
             if find_image(Home, confidence=0.8): press_key(window, 'z')
             elif find_image(level3, confidence=0.85): press_key(window, '3')
@@ -635,7 +641,7 @@ def raid_items_handler(window):
             time.sleep(0.05)
     except KeyboardInterrupt: print("Script stopped by user.")
 def Raid_Light():
-    global stop_thread
+    global stop_thread_raid
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -645,13 +651,13 @@ def Raid_Light():
     raid_items_thread.start()
     raid_items_thread.join()
 def raid_function_light():
-    global stop_thread, raid_light_thread, Raid_Light_BT
+    global stop_thread_raid, raid_light_thread, Raid_Light_BT
     if raid_light_thread and raid_light_thread.is_alive():
-        stop_thread = True
+        stop_thread_raid = True
         raid_light_thread.join()
         Raid_Light_BT.config(text="RL", bg="#5a9bf7", fg="#000000")
     else:
-        stop_thread = False
+        stop_thread_raid = False
         raid_light_thread = threading.Thread(target=Raid_Light)
         raid_light_thread.daemon = True
         raid_light_thread.start()
@@ -667,18 +673,18 @@ Raid_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 ███████╗╚██████╔╝███████║███████║
 ╚══════╝ ╚═════╝ ╚══════╝╚══════╝
 """
+stop_thread_loss = True
 def TakeL():
-    global stop_thread
+    global stop_thread_loss
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
     try:
-        while not stop_thread:
+        while not stop_thread_loss:
             focus_window(window_title)
             #* if any(find_image(image) for image in actionF):
             if any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
-
             # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(SPACE, confidence=0.8) : press_key(window, ' ')
             elif find_image(StartFame): press_key(window, 'p')
@@ -686,18 +692,17 @@ def TakeL():
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
-
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
 
 def loss_function():
-    global stop_thread, loss_thread, Loss_BT
+    global stop_thread_loss, loss_thread, Loss_BT
     if loss_thread and loss_thread.is_alive():
-        stop_thread = True
+        stop_thread_loss = True
         loss_thread.join()
         Loss_BT.config(text="L", bg="#443e3e", fg="#fff")
     else:
-        stop_thread = False
+        stop_thread_loss = False
         loss_thread = threading.Thread(target=TakeL)
         loss_thread.daemon = True
         loss_thread.start()
