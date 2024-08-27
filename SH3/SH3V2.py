@@ -531,7 +531,7 @@ def fight_function():
         fight_thread.start()
         ACTION_3.config(text="Stop", bg="#1d2027", fg="#fc0000")
 ACTION_3 = Button(ROOT, text="AH", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_3.pack(padx=(2, 2), pady=(0, 10))
+ACTION_3.pack(padx=(1,1), pady=(1,1))
 
 # ███╗   ███╗ ██████╗ ██████╗ ███████╗
 # ████╗ ████║██╔═══██╗██╔══██╗██╔════╝
@@ -574,14 +574,14 @@ def fame_function_light():
     if fame_light_thread and fame_light_thread.is_alive():
         stop_thread_fame = True
         fame_light_thread.join()
-        Fame_Light_BT.config(text="FL", bg="#bda24a", fg="#000000")
+        Fame_Light_BT.config(text="Fame", bg="#bda24a", fg="#000000")
     else:
         stop_thread_fame = False
         fame_light_thread = threading.Thread(target=fame_Light)
         fame_light_thread.daemon = True
         fame_light_thread.start()
-        Fame_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-Fame_Light_BT = Button(ROOT, text="FL", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+        Fame_Light_BT.config(text="Fame", bg="#1d2027", fg="#fc0000")
+Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
@@ -615,14 +615,14 @@ def event_function_light():
     if event_light_thread and event_light_thread.is_alive():
         stop_thread_event = True
         event_light_thread.join()
-        Event_Light_BT.config(text="EL", bg="#ce5129", fg="#000000")
+        Event_Light_BT.config(text="Event", bg="#ce5129", fg="#000000")
     else:
         stop_thread_event = False
         event_light_thread = threading.Thread(target=Start_Event_Light)
         event_light_thread.daemon = True
         event_light_thread.start()
-        Event_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-Event_Light_BT = Button(ROOT, text="EL", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+        Event_Light_BT.config(text="Event", bg="#1d2027", fg="#fc0000")
+Event_Light_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 # Raid Raid Raid Raid
@@ -655,14 +655,14 @@ def raid_function_light():
     if raid_light_thread and raid_light_thread.is_alive():
         stop_thread_raid = True
         raid_light_thread.join()
-        Raid_Light_BT.config(text="RL", bg="#5a9bf7", fg="#000000")
+        Raid_Light_BT.config(text="Raid", bg="#5a9bf7", fg="#000000")
     else:
         stop_thread_raid = False
         raid_light_thread = threading.Thread(target=Raid_Light)
         raid_light_thread.daemon = True
         raid_light_thread.start()
-        Raid_Light_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-Raid_Light_BT = Button(ROOT, text="RL", bg="#5a9bf7", fg="#000000", width=5, height=2, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+        Raid_Light_BT.config(text="Raid", bg="#1d2027", fg="#fc0000")
+Raid_Light_BT = Button(ROOT, text="Raid", bg="#5a9bf7", fg="#000000", width=5, height=2, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 """
@@ -700,15 +700,15 @@ def loss_function():
     if loss_thread and loss_thread.is_alive():
         stop_thread_loss = True
         loss_thread.join()
-        Loss_BT.config(text="L", bg="#443e3e", fg="#fff")
+        Loss_BT.config(text="Loss", bg="#443e3e", fg="#fff")
     else:
         stop_thread_loss = False
         loss_thread = threading.Thread(target=TakeL)
         loss_thread.daemon = True
         loss_thread.start()
-        Loss_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+        Loss_BT.config(text="Loss", bg="#1d2027", fg="#fc0000")
 
-Loss_BT = Button(ROOT, text="L", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Loss_BT.pack(padx=(1, 1), pady=(10, 1))
+Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Loss_BT.pack(padx=(1, 1), pady=(1, 1))
 
 ROOT.mainloop()
