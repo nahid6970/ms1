@@ -848,6 +848,7 @@ return
 
 !k:: ; Define the shortcut Ctrl+H
 Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, +AlwaysOnTop
 Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
 Gui, Add, Text, x10 y000 w300 h80 +Center cRed, Kill
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
@@ -871,6 +872,7 @@ return
 
 !s:: ; Define the shortcut Ctrl+H
 Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, +AlwaysOnTop
 Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
 Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
 ; start apps
