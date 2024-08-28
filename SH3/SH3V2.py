@@ -322,7 +322,7 @@ loss_thread = None
 #! ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗    ███████║   ██║      ██║   ███████╗███████╗
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 
-# light attack
+# light attack1
 stop_thread_action1 = True
 Action_Light_Thread = None
 pause_other_items = False
@@ -394,7 +394,7 @@ ACTION_1 = Button(ROOT, text="AL", bg="#6a6a64", fg="#9dff00", width=5, height=2
 ACTION_1.pack(padx=(1, 1), pady=(1, 1))
 
 
-
+# light attack2
 stop_thread_action2 = True
 Action_Light_Thread_i = None
 pause_other_items = False
