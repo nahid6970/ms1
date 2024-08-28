@@ -343,7 +343,7 @@ def actionF_L(window):
                 holding_keys = True
                 while time.time() - start_time < actionf_duration:
                     # Press 'j' rapidly while holding 'd', 'i', and 'l'
-                    press_key(window, 'j')
+                    press_key(window, ';')
                     time.sleep(0.1)  # Rapid pressing interval
                     # Check if 3 seconds have passed to extend the duration if the image is still found
                     if time.time() - start_time >= 3:
@@ -366,7 +366,7 @@ def actionF_L(window):
             key_up(window, 'd')
             key_up(window, 'l')
             # key_up(window, 'i')
-        key_up(window, 'j')
+        key_up(window, ';')
         pause_other_items = False
 def Action__Light__FF():
     global stop_thread_action1

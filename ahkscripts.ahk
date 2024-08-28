@@ -1123,4 +1123,12 @@ return
 ;     ExitApp
 
 
-
+#IfWinActive ahk_exe dnplayer.exe
+    F12::
+        Send, {d down} ; Hold down the 'd' key
+        Send, j        ; Press 'j' once
+        Send, j        ; Press 'j' again
+        Sleep, 100     ; Small delay (optional)
+        Send, {d up}   ; Release the 'd' key
+    return
+#If
