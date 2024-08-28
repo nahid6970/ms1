@@ -711,4 +711,12 @@ def loss_function():
 Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Loss_BT.pack(padx=(1, 1), pady=(1, 1))
 
+
+def restart(event=None):
+    ROOT.destroy()
+    subprocess.Popen([sys.executable] + sys.argv)
+
+Destroy_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Destroy_BT.pack(padx=(1, 1), pady=(1, 1))
+
 ROOT.mainloop()
