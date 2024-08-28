@@ -328,45 +328,45 @@ Action_Light_Thread = None
 pause_other_items = False
 def actionF_L(window):
     global pause_other_items
-    holding_keys = False
     actionf_duration = 5  # Initial duration for holding the keys (in seconds)
+    holding_keys = False
     try:
         while not stop_thread_action1:
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                # Pause the other items handler
                 pause_other_items = True
                 start_time = time.time()
+                # Hold 'd', 'i', and 'l' immediately
+                key_down(window, 'd')
+                key_down(window, 'l')
+                # key_down(window, 'i')
+                holding_keys = True
                 while time.time() - start_time < actionf_duration:
-                    if not holding_keys:
-                        # key_down(window, 'i')
-                        key_down(window, 'd')
-                        key_down(window, 'l')
-                        holding_keys = True
-                    # Check at the 3-second mark if the actionF image is still present
+                    # Press 'j' rapidly while holding 'd', 'i', and 'l'
+                    press_key(window, 'j')
+                    time.sleep(0.1)  # Rapid pressing interval
+                    # Check if 3 seconds have passed to extend the duration if the image is still found
                     if time.time() - start_time >= 3:
                         if any(find_image(image, confidence=actionF[image]) for image in actionF):
                             print("ActionF image found again. Extending time.")
-                            # Extend the duration by resetting start_time and adding 5 more seconds
-                            start_time = time.time()
-                            actionf_duration = 5
-                    # Press 'j' rapidly
-                    press_key(window, ';')
-                    time.sleep(0.1)  # Rapid pressing
-                # Release keys if holding
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'd')
-                    # key_up(window, 'i')
-                    holding_keys = False
-                # Unpause the other items handler after actionF is done
+                            start_time = time.time()  # Reset start time
+                            actionf_duration = 5  # Extend the duration by 5 more seconds
+                # Release all held keys when the loop finishes
+                key_up(window, 'd')
+                key_up(window, 'l')
+                # key_up(window, 'i')
+                holding_keys = False
                 pause_other_items = False
-            time.sleep(0.05)
-    except KeyboardInterrupt: print("ActionF thread stopped by user.")
+            time.sleep(0.05)  # Short delay to prevent high CPU usage
+    except KeyboardInterrupt:
+        print("ActionF thread stopped by user.")
     finally:
-        key_up(window, 'l')
-        key_up(window, ';')
-        # key_up(window, 'i')
+        # Ensure all keys are released in case of an exception
+        if holding_keys:
+            key_up(window, 'd')
+            key_up(window, 'l')
+            # key_up(window, 'i')
+        key_up(window, 'j')
         pause_other_items = False
 def Action__Light__FF():
     global stop_thread_action1
@@ -400,46 +400,47 @@ Action_Light_Thread_i = None
 pause_other_items = False
 def actionF_L_i(window):
     global pause_other_items
-    holding_keys = False
     actionf_duration = 5  # Initial duration for holding the keys (in seconds)
+    holding_keys = False
     try:
-        while not stop_thread_action2:
+        while not stop_thread_action1:
             focus_window(window_title)
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                # Pause the other items handler
                 pause_other_items = True
                 start_time = time.time()
+                # Hold 'd', 'i', and 'l' immediately
+                key_down(window, 'd')
+                key_down(window, 'l')
+                key_down(window, 'i')
+                holding_keys = True
                 while time.time() - start_time < actionf_duration:
-                    if not holding_keys:
-                        key_down(window, 'i')
-                        key_down(window, 'd')
-                        key_down(window, 'l')
-                        holding_keys = True
-                    # Check at the 3-second mark if the actionF image is still present
+                    # Press 'j' rapidly while holding 'd', 'i', and 'l'
+                    press_key(window, 'j')
+                    time.sleep(0.1)  # Rapid pressing interval
+                    # Check if 3 seconds have passed to extend the duration if the image is still found
                     if time.time() - start_time >= 3:
                         if any(find_image(image, confidence=actionF[image]) for image in actionF):
                             print("ActionF image found again. Extending time.")
-                            # Extend the duration by resetting start_time and adding 5 more seconds
-                            start_time = time.time()
-                            actionf_duration = 5
-                    # Press 'j' rapidly
-                    press_key(window, ';')
-                    time.sleep(0.1)  # Rapid pressing
-                # Release keys if holding
-                if holding_keys:
-                    key_up(window, 'l')
-                    key_up(window, 'd')
-                    key_up(window, 'i')
-                    holding_keys = False
-                # Unpause the other items handler after actionF is done
+                            start_time = time.time()  # Reset start time
+                            actionf_duration = 5  # Extend the duration by 5 more seconds
+                # Release all held keys when the loop finishes
+                key_up(window, 'd')
+                key_up(window, 'l')
+                key_up(window, 'i')
+                holding_keys = False
                 pause_other_items = False
-            time.sleep(0.05)
-    except KeyboardInterrupt: print("ActionF thread stopped by user.")
+            time.sleep(0.05)  # Short delay to prevent high CPU usage
+    except KeyboardInterrupt:
+        print("ActionF thread stopped by user.")
     finally:
-        key_up(window, 'l')
-        key_up(window, ';')
-        key_up(window, 'i')
+        # Ensure all keys are released in case of an exception
+        if holding_keys:
+            key_up(window, 'd')
+            key_up(window, 'l')
+            key_up(window, 'i')
+        key_up(window, 'j')
         pause_other_items = False
+
 def Action__Light__Fi():
     global stop_thread_action2
     window = focus_window(window_title)
