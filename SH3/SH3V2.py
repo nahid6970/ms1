@@ -323,51 +323,62 @@ loss_thread = None
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 
 # light attack1
+import time
+
 stop_thread_action1 = True
 Action_Light_Thread = None
 pause_other_items = False
+
 def actionF_L(window):
     global pause_other_items
-    actionf_duration = 5  # Initial duration for holding the keys (in seconds)
     holding_keys = False
+    
     try:
         while not stop_thread_action1:
             focus_window(window_title)
+            
+            # Check if any actionF image is found
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 pause_other_items = True
-                start_time = time.time()
-                # Hold 'd', 'i', and 'l' immediately
-                key_down(window, 'd')
-                key_down(window, 'l')
-                # key_down(window, 'i')
                 holding_keys = True
-                while time.time() - start_time < actionf_duration:
-                    # Press 'j' rapidly while holding 'd', 'i', and 'l'
-                    press_key(window, ';')
-                    time.sleep(0.1)  # Rapid pressing interval
-                    # Check if 3 seconds have passed to extend the duration if the image is still found
-                    if time.time() - start_time >= 3:
-                        if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                            print("ActionF image found again. Extending time.")
-                            start_time = time.time()  # Reset start time
-                            actionf_duration = 5  # Extend the duration by 5 more seconds
+                
+                # Hold 'l' immediately
+                key_down(window, 'l')
+                
+                # Start time for periodic image checks
+                start_time = time.time()
+                
+                while holding_keys and not stop_thread_action1:
+                    # Continuously press 'F12'
+                    press_key(window, 'F12')
+                    
+                    # Check for actionF images every 5 seconds
+                    if time.time() - start_time >= 5:
+                        start_time = time.time()  # Reset start time
+                        # Perform the image search again
+                        if not any(find_image(image, confidence=actionF[image]) for image in actionF):
+                            print("ActionF image not found. Stopping action.")
+                            break
+                    
+                    time.sleep(0.01)  # Small delay to ensure continuous pressing
+
                 # Release all held keys when the loop finishes
-                key_up(window, 'd')
                 key_up(window, 'l')
-                # key_up(window, 'i')
+                key_up(window, 'F12')
                 holding_keys = False
                 pause_other_items = False
+
             time.sleep(0.05)  # Short delay to prevent high CPU usage
+
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
     finally:
         # Ensure all keys are released in case of an exception
         if holding_keys:
-            key_up(window, 'd')
             key_up(window, 'l')
-            # key_up(window, 'i')
-        key_up(window, ';')
+        key_up(window, 'F12')
         pause_other_items = False
+
 def Action__Light__FF():
     global stop_thread_action1
     window = focus_window(window_title)
