@@ -1,0 +1,51 @@
+{
+    "window.openFoldersInNewWindow": "on",
+    "security.workspace.trust.untrustedFiles": "open",
+    "security.workspace.trust.banner": "never",
+    "security.workspace.trust.emptyWindow": false,
+    "security.workspace.trust.enabled": false,
+    "editor.minimap.enabled": false,
+    "workbench.startupEditor": "none",
+    "workbench.editor.enablePreview": false,
+    "workbench.sideBar.location": "right",
+    "workbench.colorTheme": "GitHub Dark",
+    "workbench.iconTheme": "material-icon-theme",
+
+    // // Silence the Noise
+    // "breadcrumbs.enabled": false,
+    // "scm.diffDecorations": "none",
+    // "editor.hover.delay": 1500,
+    // "editor.hover.enabled": true,
+    // "editor.matchBrackets": "never",
+    // "workbench.tips.enabled": false,
+    // "editor.colorDecorators": false,
+    // "git.decorations.enabled": false,
+    // "editor.lightbulb.enabled": "off",
+    // "editor.selectionHighlight": false,
+    // "editor.overviewRulerBorder": false,
+    // "editor.renderLineHighlight": "none",
+    // "editor.occurrencesHighlight": "off",
+    // "problems.decorations.enabled": false,
+    // "editor.renderControlCharacters": false,
+    // "editor.hideCursorInOverviewRuler": true,
+    // "editor.gotoLocation.multipleReferences": "goto",
+    // "editor.gotoLocation.multipleDefinitions": "goto",
+    // "editor.gotoLocation.multipleDeclarations": "goto",
+    // "workbench.editor.enablePreviewFromQuickOpen": false,
+    // "editor.gotoLocation.multipleImplementations": "goto",
+    // "editor.gotoLocation.multipleTypeDefinitions": "goto",
+
+
+"vscode_custom_css.imports": [
+    "file:///C:/ms1/vscode_css/vscode.css",
+    "file:///C:/ms1/vscode_css/vscode.js",
+],
+"color-highlight.markRuler": false,
+"window.commandCenter": false,
+"editor.scrollbar.horizontalScrollbarSize": 5,
+"editor.scrollbar.verticalScrollbarSize": 5,
+"editor.scrollbar.horizontal": "visible",
+"editor.scrollbar.vertical": "visible",
+"workbench.activityBar.location": "hidden"
+
+}

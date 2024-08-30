@@ -78,6 +78,8 @@ Pause::RunWait, komorebic quick-load-resize,,Hide
 ;* ██║     ██╔══██║██╔══██║   ██║
 ;* ╚██████╗██║  ██║██║  ██║   ██║
 ;*  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
+; command shortcuts info
+::;mklink::New-Item -ItemType SymbolicLink -Path FakeFile -Target RealFile -Force
 
 ; Personal Info
 ::;address::Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
