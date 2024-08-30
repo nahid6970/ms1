@@ -328,30 +328,23 @@ import time
 stop_thread_action1 = True
 Action_Light_Thread = None
 pause_other_items = False
-
 def actionF_L(window):
     global pause_other_items
     holding_keys = False
-    
     try:
         while not stop_thread_action1:
             focus_window(window_title)
-            
             # Check if any actionF image is found
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 pause_other_items = True
                 holding_keys = True
-                
                 # Hold 'l' immediately
                 key_down(window, 'l')
-                
                 # Start time for periodic image checks
                 start_time = time.time()
-                
                 while holding_keys and not stop_thread_action1:
                     # Continuously press 'F12'
-                    press_key(window, 'F12')
-                    
+                    press_key(window, 'F13')
                     # Check for actionF images every 5 seconds
                     if time.time() - start_time >= 5:
                         start_time = time.time()  # Reset start time
@@ -359,24 +352,20 @@ def actionF_L(window):
                         if not any(find_image(image, confidence=actionF[image]) for image in actionF):
                             print("ActionF image not found. Stopping action.")
                             break
-                    
                     time.sleep(0.01)  # Small delay to ensure continuous pressing
-
                 # Release all held keys when the loop finishes
                 key_up(window, 'l')
-                key_up(window, 'F12')
+                key_up(window, 'F13')
                 holding_keys = False
                 pause_other_items = False
-
             time.sleep(0.05)  # Short delay to prevent high CPU usage
-
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
     finally:
         # Ensure all keys are released in case of an exception
         if holding_keys:
             key_up(window, 'l')
-        key_up(window, 'F12')
+        key_up(window, 'F13')
         pause_other_items = False
 
 def Action__Light__FF():
