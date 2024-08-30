@@ -1122,9 +1122,14 @@ return
 ; ^Esc::  ; Ctrl + Esc to exit the script
 ;     ExitApp
 
-
+;*  ███████╗███████╗██████╗
+;*  ██╔════╝██╔════╝╚════██╗
+;*  ███████╗█████╗   █████╔╝
+;*  ╚════██║██╔══╝   ╚═══██╗
+;*  ███████║██║     ██████╔╝
+;*  ╚══════╝╚═╝     ╚═════╝
 #IfWinActive ahk_exe dnplayer.exe
-    F12::
+    F13::
         Send, {d down} ; Hold down the 'd' key
         Send, j        ; Press 'j' once
         Send, j        ; Press 'j' again
