@@ -1,0 +1,30 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "shift+alt+s",
+        "command": "-PowerShell.ShowAdditionalCommands",
+        "when": "editorTextFocus && editorLangId == 'powershell'"
+    },
+    {
+        "key": "shift+alt+s",
+        "command": "editor.action.sortLinesAscending"
+    },
+    {
+        "key": "ctrl+shift+alt+enter",
+        "command": "-jupyter.runAndDebugCell",
+        "when": "isWorkspaceTrusted && jupyter.ispythonnotebook && !notebookKernel && notebookCellType == 'code' || isWorkspaceTrusted && jupyter.ispythonnotebook && notebookCellType == 'code' && notebookKernel =~ /^ms-toolsai.jupyter\\// && resource not in 'jupyter.notebookeditor.debugDocuments'"
+    },
+    {
+        "key": "alt+j",
+        "command": "editor.action.joinLines"
+    },
+    {
+        "key": "ctrl+shift+alt+enter",
+        "command": "workbench.action.terminal.runActiveFile"
+    },
+    {
+        "key": "f1",
+        "command": "-document.open",
+        "when": "editorLangId == 'ahk'"
+    }
+]

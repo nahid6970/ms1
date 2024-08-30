@@ -215,6 +215,10 @@ Komorebic quickstart
 Remove-Item "C:\Users\nahid\komorebi.json"
 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\komorebi.json" -Target "C:\ms1\asset\komorebi\komorebi.json" -Force #[pwsh]
 
+# VSCode
+New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\mklink\vscode\keybindings.json -Force
+New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\mklink\vscode\settings.json -Force
+
 # ** ! dont doesnt work to change cmd admin password
 # net user
 # whoami
