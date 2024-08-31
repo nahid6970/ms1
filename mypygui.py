@@ -721,7 +721,7 @@ def delete_git_lock_files():
         except Exception as e:
             print(f"Error deleting {file}: {e}")
 
-DelGitIgnore=tk.Label(ROOT1,text="DD",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+DelGitIgnore=tk.Label(ROOT1,text="\udb82\udde7",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
 DelGitIgnore.pack(side="left",padx=(0,0),pady=(0,0))
 DelGitIgnore.bind ("<Button-1>",delete_git_lock_files())
 
