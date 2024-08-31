@@ -705,6 +705,26 @@ STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes("C:\\ms1"))
 STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
+
+def delete_git_lock_files():
+    files_to_delete = [
+        r'C:\ms1\.git\index.lock',
+        r'C:\ms2\.git\index.lock'
+    ]
+    for file in files_to_delete:
+        try:
+            if os.path.exists(file):
+                os.remove(file)
+                print(f"Deleted: {file}")
+            else:
+                print(f"File not found: {file}")
+        except Exception as e:
+            print(f"Error deleting {file}: {e}")
+
+DelGitIgnore=tk.Label(ROOT1,text="DD",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+DelGitIgnore.pack(side="left",padx=(0,0),pady=(0,0))
+DelGitIgnore.bind ("<Button-1>",delete_git_lock_files())
+
 SEPARATOR=tk.Label(ROOT1,text="]",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(0,0),pady=(0,0))
 

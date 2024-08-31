@@ -1139,3 +1139,38 @@ return
         Send, {d up}   ; Release the 'd' key
     return
 #If
+
+
+; Define the hotstring ;killfav
+::;killme::
+{
+    ; Kill python.exe
+    Run, taskkill /F /IM python.exe, , Hide
+    ; Kill ldplayer.exe
+    Run, taskkill /F /IM dnplayer.exe, , Hide
+    ; Close all Chrome tabs (kills chrome.exe process)
+    Run, taskkill /F /IM chrome.exe, , Hide
+    ; Return to stop execution
+    return
+}
+
+
+^!a:: ; Ctrl + Alt + A
+{
+    ; Get the window under the mouse
+    MouseGetPos, , , winID
+    
+    ; Get the process path
+    WinGet, processPath, ProcessPath, ahk_id %winID%
+    
+    ; Run the process as administrator
+    if (processPath != "")
+    {
+        Run, %processPath%,, RunAs
+    }
+    else
+    {
+        MsgBox, Unable to retrieve the process path.
+    }
+}
+return
