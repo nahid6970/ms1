@@ -151,3 +151,26 @@ Remember that modifying the server configuration requires administrative privile
 
 termux openssh setup
 https://www.learntermux.tech/2020/10/Termux-SSH-Use-Termux-Windows.html
+
+
+run terminal as admin
+-initial setup
+ssh-keygen -t rsa -b 4096
+--This creates a private key (id_rsa) and a public key (id_rsa.pub) in the C:\Users\<YourUsername>\.ssh folder.
+ssh-keygen -A
+
+in android
+ssh username@windows_ip_address [ssh nahid@192.168.0.101]
+here password is myhotmail password which is 18---Cd0
+
+Edit the sshd_config file:
+Open the sshd_config file in a text editor. You can use Notepad or any other text editor of your choice.
+makefile
+Copy code
+C:\ProgramData\ssh\sshd_config
+Change the default shell:
+Look for the line that starts with Subsystem and add the following lines below it to specify the default shell:
+mathematica
+Copy code
+Subsystem       powershell C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -sshs -NoLogo -NoProfile
+Save the changes to the sshd_config file.
