@@ -174,3 +174,11 @@ mathematica
 Copy code
 Subsystem       powershell C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -sshs -NoLogo -NoProfile
 Save the changes to the sshd_config file.
+
+How to Fix SSH Client_loop: send disconnect: Broken pipe Error
+go to c:/programdate/ssh/sshd_config
+We will set the two values as follows:
+ClientAliveInterval	300
+ClientAliveCountMax	3
+after that restart is needed
+restart-Service sshd
