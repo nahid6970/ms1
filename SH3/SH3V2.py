@@ -134,53 +134,43 @@ pyautogui.size = lambda: screen_size
 #         print(f"{error_count} times not found. Error: {e}")
 #     return None
 
+
 # def find_image(image_path, confidence=0.7):
 #     """Find the location of the image on the screen and show time in 12-hour format."""
 #     global error_count
-    
+#     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
+
 #     def get_current_time():
 #         """Return the current time in 12-hour format."""
 #         return datetime.datetime.now().strftime("%I:%M:%S %p")
-
+#     def log_output(message):
+#         """Save output message to file."""
+#         with open(output_file, 'a') as file:
+#             file.write(f"{get_current_time()} - {message}\n")
 #     try:
 #         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
 #         if location:
 #             image_name = os.path.basename(image_path)
-#             print(f"{get_current_time()} - Found image: {image_name}")
+#             message = f"Found image: {image_name}"
+#             print(f"{get_current_time()} - {message}")
+#             log_output(message)
 #             return location
 #     except Exception as e:
 #         error_count += 1
-#         print(f"{get_current_time()} - {error_count} times not found. Error: {e}")
+#         error_message = f"{error_count} times not found. Error: {e}"
+#         print(f"{get_current_time()} - {error_message}")
+#         log_output(error_message)
 #     return None
 
-
 def find_image(image_path, confidence=0.7):
-    """Find the location of the image on the screen and show time in 12-hour format."""
-    global error_count
-    output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
-
-    def get_current_time():
-        """Return the current time in 12-hour format."""
-        return datetime.datetime.now().strftime("%I:%M:%S %p")
-    def log_output(message):
-        """Save output message to file."""
-        with open(output_file, 'a') as file:
-            file.write(f"{get_current_time()} - {message}\n")
+    """Find the location of the image on the screen without any output."""
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
-            image_name = os.path.basename(image_path)
-            message = f"Found image: {image_name}"
-            print(f"{get_current_time()} - {message}")
-            log_output(message)
             return location
-    except Exception as e:
-        error_count += 1
-        error_message = f"{error_count} times not found. Error: {e}"
-        print(f"{get_current_time()} - {error_message}")
-        log_output(error_message)
+    except Exception:
+        pass  # Silently handle any exception
     return None
-
 
 def focus_window(window_title):
     """Set focus to the window with the given title."""
@@ -346,7 +336,7 @@ def actionF_L(window):
                     # Continuously press 'F12'
                     press_key(window, 'F13')
                     # Check for actionF images every 5 seconds
-                    if time.time() - start_time >= 5:
+                    if time.time() - start_time >= 10:
                         start_time = time.time()  # Reset start time
                         # Perform the image search again
                         if not any(find_image(image, confidence=actionF[image]) for image in actionF):
