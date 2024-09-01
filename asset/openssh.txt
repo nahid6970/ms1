@@ -182,3 +182,6 @@ ClientAliveInterval	300
 ClientAliveCountMax	3
 after that restart is needed
 restart-Service sshd
+
+use xposed edge to input password 
+or can use a local user without password
