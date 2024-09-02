@@ -652,12 +652,14 @@ Stop-Process -Name "dnplayer"
 Stop-Process -Name "chrome"
 }
 
+# PsExec.exe this will only work through remote not in real terminal
 function dark {
-C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external
+    cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external"
 }
 function light {
-C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal
+    cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal"
 }
+
 
 function shutdown {
     cmd /c "shutdown /s /f /t 0"
