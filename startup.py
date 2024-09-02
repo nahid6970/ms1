@@ -15,6 +15,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "1st Monitor" ,"command": "cmd /c C:\\Users\\nahid\\OneDrive\\backup\DisplaySwitch.exe /internal"},
 {"type": "Command","name": "NetworkCondition"    ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "RoundedCornerDisable","command": "Start-Process 'C:\\Users\\nahid\\OneDrive\\backup\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"},
+{"type": "Command","name": "SSHD"                ,"command": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
 {"type": "Command","name": "SCHEDULED"           ,"command": "Start-Process C:\\ms1\\scheduled.ps1"},
 {"type": "Command","name": "Open WebUI"          ,"command": "Start-Process open-webui serve"},
 
