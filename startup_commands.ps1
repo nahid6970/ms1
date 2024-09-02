@@ -10,4 +10,6 @@ Start-Process -FilePath 'C:\ProgramData\Prowlarr\bin\Prowlarr.exe'
 Start-Process -FilePath 'C:\ProgramData\Radarr\bin\Radarr.exe'
 Start-Process -FilePath 'C:\ProgramData\Sonarr\bin\Sonarr.exe'
 Start-Process -FilePath 'C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe'
+cmd /c C:\Users\nahid\OneDrive\backup\usbmmidd_v2\2ndMonitor.bat
+cmd /c C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal
 Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden
