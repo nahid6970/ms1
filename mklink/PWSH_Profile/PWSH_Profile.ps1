@@ -659,6 +659,13 @@ function light {
 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal
 }
 
+function shutdown {
+shutdown /s /f /t 0
+}
+function reboot {
+shutdown /r /f /t 0
+}
+
 function Prompt {
     $currentLocation = Get-Location
     Write-Host ("->" + $currentLocation + " ⚡") -ForegroundColor Yellow -BackgroundColor Blue -NoNewline
