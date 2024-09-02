@@ -660,11 +660,13 @@ C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal
 }
 
 function shutdown {
-shutdown /s /f /t 0
+    cmd /c "shutdown /s /f /t 0"
 }
+
 function reboot {
-shutdown /r /f /t 0
+    cmd /c "shutdown /r /f /t 0"
 }
+
 
 function Prompt {
     $currentLocation = Get-Location
