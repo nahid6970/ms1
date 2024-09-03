@@ -228,6 +228,7 @@ thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
 collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
 bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
 uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
+Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
@@ -235,6 +236,7 @@ actionF = {
     thud: 0.7,
     collector: 0.7,
     uppercut: 0.7,
+    Peg_Top: 0.7,
     # bolt: 1,
 }
 
@@ -401,6 +403,7 @@ def actionF_L_i(window):
                 # Hold 'l' immediately
                 key_down(window, 'l')
                 key_down(window, 'i')
+                key_down(window, 'x')
                 # Start time for periodic image checks
                 start_time = time.time()
                 while holding_keys and not stop_thread_action2:
@@ -417,6 +420,7 @@ def actionF_L_i(window):
                 # Release all held keys when the loop finishes
                 key_up(window, 'l')
                 key_up(window, 'i')
+                key_up(window, 'x')
                 key_up(window, 'F13')
                 holding_keys = False
                 pause_other_items = False
@@ -428,6 +432,7 @@ def actionF_L_i(window):
         if holding_keys:
             key_up(window, 'l')
             key_up(window, 'i')
+            key_up(window, 'x')
         key_up(window, 'F13')
         pause_other_items = False
 
