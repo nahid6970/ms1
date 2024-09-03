@@ -1133,10 +1133,12 @@ return
 #IfWinActive ahk_exe dnplayer.exe
     F13::
         Send, {d down} ; Hold down the 'd' key
+        Send, {x down} ; Hold down the 'd' key
         Send, j        ; Press 'j' once
         Send, j        ; Press 'j' again
         Sleep, 100     ; Small delay (optional)
         Send, {d up}   ; Release the 'd' key
+        Send, {x up}   ; Release the 'd' key
     return
 #If
 
