@@ -236,7 +236,7 @@ actionF = {
     thud: 0.7,
     collector: 0.7,
     uppercut: 0.7,
-    Peg_Top: 0.7,
+    Peg_Top: 0.85,
     # bolt: 1,
 }
 
