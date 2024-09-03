@@ -403,7 +403,6 @@ def actionF_L_i(window):
                 # Hold 'l' immediately
                 key_down(window, 'l')
                 key_down(window, 'i')
-                key_down(window, 'x')
                 # Start time for periodic image checks
                 start_time = time.time()
                 while holding_keys and not stop_thread_action2:
@@ -420,7 +419,6 @@ def actionF_L_i(window):
                 # Release all held keys when the loop finishes
                 key_up(window, 'l')
                 key_up(window, 'i')
-                key_up(window, 'x')
                 key_up(window, 'F13')
                 holding_keys = False
                 pause_other_items = False
@@ -432,7 +430,6 @@ def actionF_L_i(window):
         if holding_keys:
             key_up(window, 'l')
             key_up(window, 'i')
-            key_up(window, 'x')
         key_up(window, 'F13')
         pause_other_items = False
 
