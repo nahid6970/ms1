@@ -662,11 +662,11 @@ function light {
 }
 
 
-function shutdown {
+function sd {
     cmd /c "shutdown /s /f /t 0"
 }
 
-function reboot {
+function rb {
     cmd /c "shutdown /r /f /t 0"
 }
 
