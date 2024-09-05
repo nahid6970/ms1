@@ -1184,14 +1184,25 @@ return
 ; #IfWinActive ahk_exe dnplayer.exe
 ;     F13::
 ;         Send, {x down}
-;         Send, {i down}
 ;         Send, {l down}
+;         Send, {i down}
 ;         Send, {d down}
 ;         Send, j
 ;         Send, j
 ;         Send, {d up}
-;         Send, {l up}
 ;         Send, {i up}
+;         Send, {l up}
 ;         Send, {x up}
+;     return
+; #If
+
+; #IfWinActive ahk_exe dnplayer.exe
+;     F13::
+;         Send, {i down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Send, {i up}
 ;     return
 ; #If
