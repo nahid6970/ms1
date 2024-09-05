@@ -645,6 +645,7 @@ Set-PSReadLineKeyHandler -Chord 'Alt+x' `
 #* Environmental Variable
 $env:PATH += ";c:\ms1"
 $env:PATH += ";c:\ms1\scripts"
+$env:PATH += ";C:\ms1\utility"
 
 function killme  {
 Stop-Process -Name "python"

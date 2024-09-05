@@ -1124,38 +1124,6 @@ return
 ; ^Esc::  ; Ctrl + Esc to exit the script
 ;     ExitApp
 
-;*  ███████╗███████╗██████╗
-;*  ██╔════╝██╔════╝╚════██╗
-;*  ███████╗█████╗   █████╔╝
-;*  ╚════██║██╔══╝   ╚═══██╗
-;*  ███████║██║     ██████╔╝
-;*  ╚══════╝╚═╝     ╚═════╝
-#IfWinActive ahk_exe dnplayer.exe
-    F13::
-        Send, {d down}
-        Send, {x down}
-        Send, j
-        Send, j
-        Sleep, 100
-        Send, {d up}
-        Send, {x up}
-    return
-#If
-
-#IfWinActive ahk_exe dnplayer.exe
-    F14::
-        Send, {l down} ; Hold down the 'd' key
-        Send, {d down} ; Hold down the 'd' key
-        Send, {x down} ; Hold down the 'd' key
-        Send, j        ; Press 'j' once
-        Send, j        ; Press 'j' again
-        Sleep, 100     ; Small delay (optional)
-        Send, {l up}   ; Release the 'd' key
-        Send, {d up}   ; Release the 'd' key
-        Send, {x up}   ; Release the 'd' key
-    return
-#If
-
 
 ; Define the hotstring ;killfav
 ::;killme::
@@ -1190,3 +1158,40 @@ return
     }
 }
 return
+
+
+
+;*  ███████╗███████╗██████╗
+;*  ██╔════╝██╔════╝╚════██╗
+;*  ███████╗█████╗   █████╔╝
+;*  ╚════██║██╔══╝   ╚═══██╗
+;*  ███████║██║     ██████╔╝
+;*  ╚══════╝╚═╝     ╚═════╝
+; Light-Attack1
+#IfWinActive ahk_exe dnplayer.exe
+    F13::
+        Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        ; Sleep, 100
+        Send, {d up}
+        Send, {x up}
+    return
+#If
+
+; PSS
+; #IfWinActive ahk_exe dnplayer.exe
+;     F13::
+;         Send, {x down}
+;         Send, {i down}
+;         Send, {l down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Send, {l up}
+;         Send, {i up}
+;         Send, {x up}
+;     return
+; #If

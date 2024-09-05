@@ -24,7 +24,6 @@ import tkinter as tk
 import win32gui
 import win32process
 
-
 def calculate_time_to_appear(start_time):
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -764,8 +763,8 @@ Upload_lb.bind("<Button-1>",None)
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_CPU.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\utility\\kill_process.ps1"], shell=True))
-LB_CPU.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\kill_process.ps1"], shell=True))
+LB_CPU.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\utility\\killpro.ps1"], shell=True))
+LB_CPU.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\killpro.ps1"], shell=True))
 
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#00ff21",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))
