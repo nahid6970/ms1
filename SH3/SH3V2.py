@@ -315,8 +315,6 @@ loss_thread = None
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 
 # light attack1
-import time
-
 stop_thread_action1 = True
 Action_Light_Thread = None
 pause_other_items = False
@@ -338,7 +336,7 @@ def actionF_L(window):
                     # Continuously press 'F12'
                     press_key(window, 'F13')
                     # Check for actionF images every 5 seconds
-                    if time.time() - start_time >= 10:
+                    if time.time() - start_time >= 5:
                         start_time = time.time()  # Reset start time
                         # Perform the image search again
                         if not any(find_image(image, confidence=actionF[image]) for image in actionF):
