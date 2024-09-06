@@ -1170,13 +1170,80 @@ return
 ; Light-Attack1
 #IfWinActive ahk_exe dnplayer.exe
     F13::
-        Send, {x down}
+        ; Send, {x down}
         Send, {d down}
         Send, j
         Send, j
-        ; Sleep, 100
         Send, {d up}
-        Send, {x up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x up}
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x down}
+        Send, {d down}
+        Send, j
+        Send, j
+        Send, {d up}
+        Sleep, 100
+        ; Send, {x up}
     return
 #If
 
