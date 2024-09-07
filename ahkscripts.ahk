@@ -938,7 +938,7 @@ Pause::
 Gui, New, +Resize
 Gui, +AlwaysOnTop
 Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
+Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Komorebi
 ; start apps
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
 Gui, Add, Button, x010 y050 w300 h50 gkomorebic_save ,Komorebic Save
