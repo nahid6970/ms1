@@ -1168,84 +1168,127 @@ return
 ;*  ███████║██║     ██████╔╝
 ;*  ╚══════╝╚═╝     ╚═════╝
 ; Light-Attack1
+; #IfWinActive ahk_exe dnplayer.exe
+;     F13::
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x up}
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x down}
+;         Send, {d down}
+;         Send, j
+;         Send, j
+;         Send, {d up}
+;         Sleep, 100
+;         ; Send, {x up}
+;     return
+; #If
+
+
+
+;! continue untile f14 pressed
+; #IfWinActive ahk_exe dnplayer.exe
+;     F13::
+;         Toggle := !Toggle  ; Toggle the loop on/off
+;         while (Toggle)  ; Loop while Toggle is true
+;         {
+;             Send, {d down}
+;             Send, j
+;             Send, j
+;             Send, {d up}
+;             Sleep, 100  ; Adjust the delay as needed
+;             if (!Toggle)  ; Break the loop if Toggle is turned off
+;                 break
+;         }
+;     return
+
+;     F14::
+;         Toggle := false  ; Stop the loop when F14 is pressed
+;     return
+; #If
+
+
+
+;; only send the shortcut to dnplayer
 #IfWinActive ahk_exe dnplayer.exe
     F13::
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x up}
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x down}
-        Send, {d down}
-        Send, j
-        Send, j
-        Send, {d up}
-        Sleep, 100
-        ; Send, {x up}
+        StartTime := A_TickCount  ; Record the current time
+        while (A_TickCount - StartTime < 3000)  ; Run for 3000 milliseconds (3 seconds)
+        {
+            Send, {d down}
+            Send, j
+            Send, j
+            Send, {d up}
+            Sleep, 100  ; Adjust the delay as needed between iterations
+        }
     return
 #If
+
+
+
 
 ; PSS
 ; #IfWinActive ahk_exe dnplayer.exe
