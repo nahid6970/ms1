@@ -53,8 +53,8 @@ RAlt & U::Convert_Uppercase()
 ; !s::RunWait, komorebic toggle-window-container-behaviour,,Hide
 ; ~Esc & w::RunWait, komorebic toggle-float,,Hide
 !w::RunWait, komorebic toggle-float,,Hide
-Pause & S:: RunWait, komorebic quick-save-resize,,Hide
-Pause::RunWait, komorebic quick-load-resize,,Hide
+; Pause & S:: RunWait, komorebic quick-save-resize,,Hide
+; Pause::RunWait, komorebic quick-load-resize,,Hide
 
 
 ; Others
@@ -927,6 +927,36 @@ return
 start_mypygui:
 Run, C:\ms1\mypygui.py ,,Hide 
 return
+
+; ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗
+; ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║
+; █████╔╝ ██║   ██║██╔████╔██║██║   ██║██████╔╝█████╗  ██████╔╝██║
+; ██╔═██╗ ██║   ██║██║╚██╔╝██║██║   ██║██╔══██╗██╔══╝  ██╔══██╗██║
+; ██║  ██╗╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║███████╗██████╔╝██║
+; ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝
+Pause::
+Gui, New, +Resize
+Gui, +AlwaysOnTop
+Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
+; start apps
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+Gui, Add, Button, x010 y050 w300 h50 gkomorebic_save ,Komorebic Save
+Gui, Add, Button, x010 y100 w300 h50 gkomorebic_load ,Komorebic Load
+
+Gui, Show, w320 h200, Komorebi
+return
+Gui, Hide
+return
+
+komorebic_save:
+RunWait, komorebic quick-save-resize,,Hide
+return
+komorebic_load:
+RunWait, komorebic quick-load-resize,,Hide
+return
+
+
 
 ; ██████╗ ██╗ ██████╗      ██████╗ ██╗   ██╗██╗
 ; ██╔══██╗██║██╔═══██╗    ██╔════╝ ██║   ██║██║
