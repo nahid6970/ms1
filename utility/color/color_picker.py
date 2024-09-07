@@ -58,7 +58,7 @@ thread = threading.Thread(target=update_color, daemon=True)
 thread.start()
 
 # Bind events
-keyboard.add_hotkey("ctrl+space", copy_color)
+keyboard.add_hotkey("ctrl+c", copy_color)
 keyboard.add_hotkey("esc", close_window)
 print("Hotkeys registered")
 
