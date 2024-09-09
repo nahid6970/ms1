@@ -53,5 +53,5 @@ fn main() {
         "Status Bar",
         options,
         Box::new(|_cc| Ok(Box::new(MyApp::new()))),
-    );
+    ).unwrap();
 }

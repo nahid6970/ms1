@@ -3,12 +3,14 @@ use eframe::{egui, App};
 fn main() {
     let app = MyComplexApp::default();
     let native_options = eframe::NativeOptions::default();
+    
     eframe::run_native(
         "Complex GUI Example",
         native_options,
         Box::new(|_cc| Ok(Box::new(app))),
-    );
+    ).expect("Failed to run the application");
 }
+
 
 #[derive(Default)]
 struct MyComplexApp {
