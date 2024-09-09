@@ -222,6 +222,26 @@ New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\s
 # Powershell Profiles
 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\mklink\PWSH_Profile\PWSH_Profile.ps1 -Force
 
+# Rust Initial Setup
+# install rustup from scoop or default and choose 3 without any additional items / vscode and proceed with 1
+rustup toolchain install stable-gnu
+rustup default stable-gnu
+or/////////
+rustup toolchain install stable-x86_64-pc-windows-gnu
+rustup default stable-x86_64-pc-windows-gnu
+scoop install mingw #it will install gcc
+scoop install cmake
+gcc --version # chek if gcc is installed
+#//https://www.gnu.org/software/binutils/
+# for any new project use
+cargo new Path_to_a_new_folder
+cargo clean # to clean rubbish
+cargo run # to build
+or///////
+cargo Build
+# if these doesnt work the use visual studio + install cmake
+
+
 # ** ! dont doesnt work to change cmd admin password
 # net user
 # whoami
