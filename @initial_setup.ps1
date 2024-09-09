@@ -240,6 +240,16 @@ cargo run # to build
 or///////
 cargo Build
 # if these doesnt work the use visual studio + install cmake
+# Run it as Administrator, then make sure you download all three things listed below in the
+# screenshot, versions don't matter, just try get latest ones.
+# Installation details
+# MSBuild Tools
+# • Individual components
+# ☑️MSVC v142 - VS 2019 C++ x64/x86 build tool...
+# ☑️C++ CMake tools for Windows
+# ☑️Windows 10 SDK (10.0.20348.0)
+or////////////
+Desktop development with C++
 
 
 # ** ! dont doesnt work to change cmd admin password
