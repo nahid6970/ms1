@@ -8,7 +8,7 @@ fn main() {
         "Complex GUI Example",
         native_options,
         Box::new(|_cc| Ok(Box::new(app))),
-    );
+    ).unwrap();
 }
 
 #[derive(Default)]

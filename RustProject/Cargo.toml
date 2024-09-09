@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "test_run",
+    "pc_usage",
+    "button_2"
+]
+
+resolver = "2"
