@@ -678,6 +678,10 @@ function Prompt {
     return " "
 }
 
+function build {
+    cargo build --target-dir C:\Builds
+}
+
 #* Override PSReadLine's history search
 #Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' `
 #                -PSReadlineChordReverseHistory 'Ctrl+r'
