@@ -41,8 +41,8 @@ winget upgrade --all
 winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
 Write-Host "Winget Upgraded ☑️"
 
-Start-Process powershell -ArgumentList "choco upgrade all -y" -Verb RunAs 
-Write-Host "Choco Upgraded ☑️"
+# Start-Process powershell -ArgumentList "choco upgrade all -y" -Verb RunAs 
+# Write-Host "Choco Upgraded ☑️"
 
 Set-Location
 
