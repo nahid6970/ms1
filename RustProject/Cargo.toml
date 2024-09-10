@@ -3,6 +3,6 @@ members = [
     "test_run",
     "pc_usage",
     "button_2"
-, "example"]
+]
 
 resolver = "2"
