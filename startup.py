@@ -2,13 +2,13 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 import winshell
+import pyautogui
 
 class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Startup Manager")
         self.items = [
-{"type": "App","name": "AHKSCRIPT"           ,"path": "C:\\ms1\\ahkscripts.ahk"},
 {"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process  'C:\\ms1\\mypygui.py' -WindowStyle Hidden"},
 {"type": "Command","name": "KOMOREBIC"           ,"command": "komorebic start"},
 {"type": "Command","name": "2ndMonitor-Virtual"  ,"command": "cmd /c C:\\Users\\nahid\\OneDrive\\backup\\usbmmidd_v2\\2ndMonitor.bat"},
@@ -29,6 +29,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "WHKD"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
 {"type": "Command","name": "YASB"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
+{"type": "App","name": "AHKSCRIPT"         ,"path": "C:\\ms1\\ahkscripts.ahk"},
 {"type": "App","name": "BijoyBayanno"      ,"path": "C:\\Program Files (x86)\\Ananda Computers\\BijoyBayanno\\BijoyBayanno.exe"},
 {"type": "App","name": "Capture2Text"      ,"path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"},
 {"type": "App","name": "DesktopCoral"      ,"path": "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"},
@@ -163,10 +164,7 @@ def center_and_press_alt_2(window):
         x = (window.winfo_screenwidth() // 2) - (width // 2)
         y = (window.winfo_screenheight() // 2) - (height // 2)
         window.geometry(f'{width}x{height}+{x}+{y}')
-    def press_alt_2():
-        pyautogui.hotkey('alt', '2')
     center_window()
-    window.after(25, press_alt_2)
 
 if __name__ == "__main__":
     app = StartupManager()
