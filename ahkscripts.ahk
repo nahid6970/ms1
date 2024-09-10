@@ -211,7 +211,7 @@ ToggleHiddenFiles() {
 ;;* ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 
 ;! 🎯 open Run Path
-^!r::
+::;run::
     Run, regedit.exe
     Sleep, 500
     Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
