@@ -1,14 +1,14 @@
+import os
 import tkinter as tk
 from tkinter import messagebox
-import os
-import pyautogui
+import winshell
 
 class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Startup Manager")
         self.items = [
-{"type": "Command","name": "AHKSCRIPT"           ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
+{"type": "App","name": "AHKSCRIPT"           ,"path": "C:\\ms1\\ahkscripts.ahk"},
 {"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process  'C:\\ms1\\mypygui.py' -WindowStyle Hidden"},
 {"type": "Command","name": "KOMOREBIC"           ,"command": "komorebic start"},
 {"type": "Command","name": "2ndMonitor-Virtual"  ,"command": "cmd /c C:\\Users\\nahid\\OneDrive\\backup\\usbmmidd_v2\\2ndMonitor.bat"},
@@ -40,15 +40,7 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Sonarr"            ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
 {"type": "App","name": "Cloudflare WARP"   ,"path": "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"},
         ]
-
-        self.ps1_file_path = "C:\\ms1\\startup_commands.ps1"
-        self.create_ps1_file()
         self.create_widgets()
-
-    def create_ps1_file(self):
-        if not os.path.exists(self.ps1_file_path):
-            with open(self.ps1_file_path, 'w') as f:
-                f.write('# PowerShell script for startup\n')
 
     def create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
@@ -109,34 +101,53 @@ class StartupManager(tk.Tk):
             os.system(f'PowerShell -Command "{item["command"]}"')
 
     def is_checked(self, item):
-        with open(self.ps1_file_path, 'r') as f:
-            lines = f.readlines()
-            if item["type"] == "App":
-                return any(f"Start-Process -FilePath '{item['path']}'" in line for line in lines)
-            else:
-                return any(item["command"] in line for line in lines)
+        startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
+        if item["type"] == "App":
+            shortcut_path = os.path.join(startup_path, f'{item["name"]}.lnk')
+            return os.path.exists(shortcut_path)
+        else:
+            ps1_path = os.path.join(startup_path, f'{item["name"]}.ps1')
+            return os.path.exists(ps1_path)
+
 
     def toggle_startup(self, item, name_label, icon_label):
-        checked = self.is_checked(item)
-        with open(self.ps1_file_path, 'r') as f:
-            lines = f.readlines()
+        startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
 
-        with open(self.ps1_file_path, 'w') as f:
-            for line in lines:
-                if item["type"] == "App" and f"Start-Process -FilePath '{item['path']}'" in line:
-                    checked = True
-                elif item["type"] == "Command" and item["command"] in line:
-                    checked = True
-                else:
-                    f.write(line)
-            if not checked:
-                if item["type"] == "App":
-                    f.write(f"Start-Process -FilePath '{item['path']}'\n")
-                else:
-                    f.write(f"{item['command']}\n")
-
-        self.update_label_color(name_label, not checked)
-        icon_label.config(text="\uf205" if not checked else "\uf204", fg="blue" if not checked else "gray")
+        if item["type"] == "App":
+            shortcut_path = os.path.join(startup_path, f'{item["name"]}.lnk')
+            checked = os.path.exists(shortcut_path)
+            if checked:
+                try:
+                    os.remove(shortcut_path)
+                    name_label.config(fg="red")
+                    icon_label.config(text="\uf204", fg="gray")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
+            else:
+                try:
+                    winshell.CreateShortcut(Path=shortcut_path, Target=item["path"])
+                    name_label.config(fg="green")
+                    icon_label.config(text="\uf205", fg="blue")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
+        else:
+            ps1_path = os.path.join(startup_path, f'{item["name"]}.ps1')
+            checked = os.path.exists(ps1_path)
+            if checked:
+                try:
+                    os.remove(ps1_path)
+                    name_label.config(fg="red")
+                    icon_label.config(text="\uf204", fg="gray")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
+            else:
+                try:
+                    with open(ps1_path, 'w') as f:
+                        f.write(f'{item["command"]}\n')
+                    name_label.config(fg="green")
+                    icon_label.config(text="\uf205", fg="blue")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
 
     def update_label_color(self, label, checked):
         if checked:
