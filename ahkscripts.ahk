@@ -212,7 +212,7 @@ ToggleHiddenFiles() {
 
 ;! 🎯 open Run Path
 ::;run::
-    Run, regedit.exe
+    Run, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Administrative Tools\Registry Editor.lnk
     Sleep, 500
     Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 return
