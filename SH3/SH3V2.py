@@ -535,6 +535,24 @@ ACTION_3.pack(padx=(1,1), pady=(1,1))
 # ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
 
 # Fame Fame Fame Fame
+# stop_thread_fame = True
+# def fame_items_handler(window):
+#     try:
+#         while not stop_thread_fame:
+#             # Check if we need to pause this handler
+#             if pause_other_items:
+#                 print("Paused other items handler for 5 seconds.")
+#                 while pause_other_items:
+#                     time.sleep(0.1)  # Wait until actionF is done
+#             if find_image(Resume, confidence=0.8): press_key(window, 'r')
+#             elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+#             elif find_image(StartFame): press_key(window, 'p')
+#             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+#             elif find_image(e_image): press_key(window, 'e')
+#             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+#             elif any(find_image(image) for image in continueF): press_key(window, 'c')
+#             time.sleep(2)
+#     except KeyboardInterrupt: print("Script stopped by user.")
 stop_thread_fame = True
 def fame_items_handler(window):
     try:
@@ -550,7 +568,8 @@ def fame_items_handler(window):
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            if any(find_image(image) for image in actionF): press_key(window, 'F13')
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'F9',0 , 'C',0)
             time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
