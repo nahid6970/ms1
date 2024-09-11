@@ -1279,47 +1279,76 @@ return
 
 
 
-; ;! continue untile f14 pressed
+;! continue untile f14 pressed // not sure if runs multiple instance??
 ; #IfWinActive ahk_exe dnplayer.exe
 ;     F13::
 ;         Toggle := !Toggle  ; Toggle the loop on/off
 ;         while (Toggle)  ; Loop while Toggle is true
 ;         {
+;             if !WinActive("ahk_exe dnplayer.exe")  ; Check if dnplayer.exe is still active
+;             {
+;                 Toggle := false
+;                 break
+;             }
 ;             Send, {d down}
 ;             Send, j
 ;             Send, j
 ;             Send, {d up}
 ;             Sleep, 100  ; Adjust the delay as needed
-;             if (!Toggle)  ; Break the loop if Toggle is turned off
-;                 break
 ;         }
 ;     return
 
-;     F14::
-;         Toggle := false  ; Stop the loop when F14 is pressed
+;     F9::
+;         Toggle := false  ; Stop the loop when F9 is pressed
 ;     return
 ; #If
 
-
-
-;; only send the shortcut to dnplayer
+;! continue untile f14 pressed
 #IfWinActive ahk_exe dnplayer.exe
     F13::
-        StartTime := A_TickCount  ; Record the current time
-        while (A_TickCount - StartTime < 3000)  ; Run for 3000 milliseconds (3 seconds)
+        if (Toggle)  ; If the loop is already running, do nothing
+            return
+        Toggle := true  ; Start the loop
+        while (Toggle)  ; Loop while Toggle is true
         {
-            Send, {l down}
-            Send, {x down}
+            if !WinActive("ahk_exe dnplayer.exe")  ; Check if dnplayer.exe is still active
+            {
+                Toggle := false
+                break
+            }
             Send, {d down}
             Send, j
             Send, j
             Send, {d up}
-            Send, {x up}
-            Send, {l up}
-            Sleep, 100  ; Adjust the delay as needed between iterations
+            Sleep, 200  ; Adjust the delay as needed
         }
     return
+
+    F9::
+        Toggle := false  ; Stop the loop when F9 is pressed
+    return
 #If
+
+
+
+; ;; only send the shortcut to dnplayer
+; #IfWinActive ahk_exe dnplayer.exe
+;     F13::
+;         StartTime := A_TickCount  ; Record the current time
+;         while (A_TickCount - StartTime < 5000)  ; Run for 3000 milliseconds (3 seconds)
+;         {
+;             ; Send, {l down}
+;             Send, {x down}
+;             Send, {d down}
+;             Send, j
+;             Send, j
+;             Send, {d up}
+;             Send, {x up}
+;             ; Send, {l up}
+;             Sleep, 100  ; Adjust the delay as needed between iterations
+;         }
+;     return
+; #If
 
 
 
