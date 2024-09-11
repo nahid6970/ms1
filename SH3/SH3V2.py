@@ -574,7 +574,7 @@ def fame_items_handler(window):
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
     global stop_thread_fame
-    window = focus_window(window_title)
+    window = focus_window(window_title)  # Assuming you have a focus_window function
     if not window:
         print(f"Window '{window_title}' not found.")
         return
@@ -582,20 +582,32 @@ def fame_Light():
     fame_items_thread.daemon = True
     fame_items_thread.start()
     fame_items_thread.join()
+
+# Fame function handler
 def fame_function_light():
     global stop_thread_fame, fame_light_thread, Fame_Light_BT
+    window = focus_window(window_title)  # Get the target window (if not already focused)
+
     if fame_light_thread and fame_light_thread.is_alive():
-        stop_thread_fame = True
-        fame_light_thread.join()
+        stop_thread_fame = True  # Stop the thread
+        fame_light_thread.join()  # Wait for the thread to stop
         Fame_Light_BT.config(text="Fame", bg="#bda24a", fg="#000000")
+
+        # Call press_key to send F9 to the window after stopping the thread
+        if window:
+            press_key(window, 'f9')  # Press F9 in the window
     else:
-        stop_thread_fame = False
+        stop_thread_fame = False  # Start a new thread
         fame_light_thread = threading.Thread(target=fame_Light)
         fame_light_thread.daemon = True
         fame_light_thread.start()
         Fame_Light_BT.config(text="Fame", bg="#1d2027", fg="#fc0000")
-Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+
+# Fame button
+Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, 
+                       command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+
 
 
 # Event Event Event Event
