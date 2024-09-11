@@ -1279,7 +1279,7 @@ return
 
 
 
-;! continue untile f14 pressed
+; ;! continue untile f14 pressed
 ; #IfWinActive ahk_exe dnplayer.exe
 ;     F13::
 ;         Toggle := !Toggle  ; Toggle the loop on/off
@@ -1308,10 +1308,14 @@ return
         StartTime := A_TickCount  ; Record the current time
         while (A_TickCount - StartTime < 3000)  ; Run for 3000 milliseconds (3 seconds)
         {
+            Send, {l down}
+            Send, {x down}
             Send, {d down}
             Send, j
             Send, j
             Send, {d up}
+            Send, {x up}
+            Send, {l up}
             Sleep, 100  ; Adjust the delay as needed between iterations
         }
     return
