@@ -1320,7 +1320,13 @@ return
             Send, j
             Send, j
             Send, {d up}
-            Sleep, 200  ; Adjust the delay as needed
+            ; Send, x
+            ; Send, x
+            ; Send, x
+            ; Send, x
+            ; Send, x
+            ; Send, i
+            Sleep, 100  ; Adjust the delay as needed
         }
     return
 
