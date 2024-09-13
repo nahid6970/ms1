@@ -329,12 +329,12 @@ def actionF_L(window):
                 pause_other_items = True
                 holding_keys = True
                 # Hold 'l' immediately
-                key_down(window, 'd')
+                # key_down(window, 'd')
                 # Start time for periodic image checks
                 start_time = time.time()
                 while holding_keys and not stop_thread_action1:
                     # Continuously press 'F12'
-                    press_key(window, 'j')
+                    press_key(window, 'F13')
                     # Check for actionF images every 5 seconds
                     if time.time() - start_time >= 5:
                         start_time = time.time()  # Reset start time
@@ -344,8 +344,8 @@ def actionF_L(window):
                             break
                     time.sleep(0.01)  # Small delay to ensure continuous pressing
                 # Release all held keys when the loop finishes
-                key_up(window, 'd')
-                key_up(window, 'j')
+                # key_up(window, 'd')
+                key_up(window, 'F13')
                 holding_keys = False
                 pause_other_items = False
             time.sleep(0.05)  # Short delay to prevent high CPU usage
@@ -354,8 +354,8 @@ def actionF_L(window):
     finally:
         # Ensure all keys are released in case of an exception
         if holding_keys:
-            key_up(window, 'd')
-            key_up(window, 'j')
+            # key_up(window, 'd')
+            key_up(window, 'F13')
         pause_other_items = False
 
 def Action__Light__FF():
@@ -368,19 +368,23 @@ def Action__Light__FF():
     actionF_thread.daemon = True
     actionF_thread.start()
     actionF_thread.join()
-def action_adjust():
+def action_adjust_1():
     global stop_thread_action1, Action_Light_Thread, ACTION_1
+    window = focus_window(window_title)
     if Action_Light_Thread and Action_Light_Thread.is_alive():
         stop_thread_action1 = True
         Action_Light_Thread.join()
         ACTION_1.config(text="AL", bg="#6a6a64", fg="#9dff00")
+        # Call press_key to send F9 to the window after stopping the thread
+        if window:
+            press_key(window, 'f9')  # Press F9 in the window
     else:
         stop_thread_action1 = False
         Action_Light_Thread = threading.Thread(target=Action__Light__FF)
         Action_Light_Thread.daemon = True
         Action_Light_Thread.start()
         ACTION_1.config(text="Stop", bg="#1d2027", fg="#fc0000")
-ACTION_1 = Button(ROOT, text="AL", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_1 = Button(ROOT, text="AL", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_1.pack(padx=(1, 1), pady=(1, 1))
 
 
@@ -444,7 +448,7 @@ def Action__Light__Fi():
     actionF_thread.daemon = True
     actionF_thread.start()
     actionF_thread.join()
-def action_adjust():
+def action_adjust_2():
     global stop_thread_action2, Action_Light_Thread_i, ACTION_2
     if Action_Light_Thread_i and Action_Light_Thread_i.is_alive():
         stop_thread_action2 = True
@@ -456,7 +460,7 @@ def action_adjust():
         Action_Light_Thread_i.daemon = True
         Action_Light_Thread_i.start()
         ACTION_2.config(text="Stop", bg="#1d2027", fg="#fc0000")
-ACTION_2 = Button(ROOT, text="AL-i", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_2 = Button(ROOT, text="AL-i", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust_2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_2.pack(padx=(1, 1), pady=(1, 1))
 
 
@@ -533,26 +537,7 @@ ACTION_3.pack(padx=(1,1), pady=(1,1))
 # ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝
 # ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗
 # ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
-
 # Fame Fame Fame Fame
-# stop_thread_fame = True
-# def fame_items_handler(window):
-#     try:
-#         while not stop_thread_fame:
-#             # Check if we need to pause this handler
-#             if pause_other_items:
-#                 print("Paused other items handler for 5 seconds.")
-#                 while pause_other_items:
-#                     time.sleep(0.1)  # Wait until actionF is done
-#             if find_image(Resume, confidence=0.8): press_key(window, 'r')
-#             elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
-#             elif find_image(StartFame): press_key(window, 'p')
-#             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-#             elif find_image(e_image): press_key(window, 'e')
-#             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-#             elif any(find_image(image) for image in continueF): press_key(window, 'c')
-#             time.sleep(2)
-#     except KeyboardInterrupt: print("Script stopped by user.")
 stop_thread_fame = True
 def fame_items_handler(window):
     try:
@@ -568,13 +553,12 @@ def fame_items_handler(window):
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-            if any(find_image(image) for image in actionF): press_key(window, 'F13')
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'F9',0 , 'C',0)
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'F9',0, 'c',0)
             time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
     global stop_thread_fame
-    window = focus_window(window_title)  # Assuming you have a focus_window function
+    window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
@@ -582,30 +566,19 @@ def fame_Light():
     fame_items_thread.daemon = True
     fame_items_thread.start()
     fame_items_thread.join()
-
-# Fame function handler
 def fame_function_light():
     global stop_thread_fame, fame_light_thread, Fame_Light_BT
-    window = focus_window(window_title)  # Get the target window (if not already focused)
-
     if fame_light_thread and fame_light_thread.is_alive():
-        stop_thread_fame = True  # Stop the thread
-        fame_light_thread.join()  # Wait for the thread to stop
+        stop_thread_fame = True
+        fame_light_thread.join()
         Fame_Light_BT.config(text="Fame", bg="#bda24a", fg="#000000")
-
-        # Call press_key to send F9 to the window after stopping the thread
-        if window:
-            press_key(window, 'f9')  # Press F9 in the window
     else:
-        stop_thread_fame = False  # Start a new thread
+        stop_thread_fame = False
         fame_light_thread = threading.Thread(target=fame_Light)
         fame_light_thread.daemon = True
         fame_light_thread.start()
         Fame_Light_BT.config(text="Fame", bg="#1d2027", fg="#fc0000")
-
-# Fame button
-Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, 
-                       command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
@@ -619,7 +592,7 @@ def event_items_handler(window):
             #* Handle the other image searches and actions
             if find_image(Home, confidence=0.8): press_key(window, 'f')
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'F9',0, 'c',0)
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
             time.sleep(0.05)

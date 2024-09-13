@@ -1316,16 +1316,12 @@ return
                 Toggle := false
                 break
             }
+            Send, {x down}
             Send, {d down}
             Send, j
             Send, j
             Send, {d up}
-            ; Send, x
-            ; Send, x
-            ; Send, x
-            ; Send, x
-            ; Send, x
-            ; Send, i
+            Send, {x up}
             Sleep, 100  ; Adjust the delay as needed
         }
     return
