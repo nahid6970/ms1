@@ -1303,33 +1303,33 @@ return
 ;     return
 ; #If
 
-;! continue untile f14 pressed
-#IfWinActive ahk_exe dnplayer.exe
-    F13::
-        if (Toggle)  ; If the loop is already running, do nothing
-            return
-        Toggle := true  ; Start the loop
-        while (Toggle)  ; Loop while Toggle is true
-        {
-            if !WinActive("ahk_exe dnplayer.exe")  ; Check if dnplayer.exe is still active
-            {
-                Toggle := false
-                break
-            }
-            Send, {x down}
-            Send, {d down}
-            Send, j
-            Send, j
-            Send, {d up}
-            Send, {x up}
-            Sleep, 100  ; Adjust the delay as needed
-        }
-    return
+; ;! continue untile f14 pressed
+; #IfWinActive ahk_exe dnplayer.exe
+;     F13::
+;         if (Toggle)  ; If the loop is already running, do nothing
+;             return
+;         Toggle := true  ; Start the loop
+;         while (Toggle)  ; Loop while Toggle is true
+;         {
+;             if !WinActive("ahk_exe dnplayer.exe")  ; Check if dnplayer.exe is still active
+;             {
+;                 Toggle := false
+;                 break
+;             }
+;             Send, {x down}
+;             Send, {d down}
+;             Send, j
+;             Send, j
+;             Send, {d up}
+;             Send, {x up}
+;             Sleep, 100  ; Adjust the delay as needed
+;         }
+;     return
 
-    F9::
-        Toggle := false  ; Stop the loop when F9 is pressed
-    return
-#If
+;     F9::
+;         Toggle := false  ; Stop the loop when F9 is pressed
+;     return
+; #If
 
 
 
@@ -1354,12 +1354,36 @@ return
 
 
 
+;; Only send the shortcut to dnplayer
+#IfWinActive ahk_exe dnplayer.exe
+    F13::
+        StartTime := A_TickCount  ; Record the current time
+        while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
+        {
+            if !WinActive("ahk_exe dnplayer.exe")  ; Ensure dnplayer.exe is active
+            {
+                break  ; Stop if dnplayer.exe is no longer active
+            }
+            
+            Send, {x down}
+            Send, {d down}
+            Send, j
+            Send, j
+            Send, {d up}
+            Send, {x up}
+            
+            Sleep, 100  ; Adjust the delay as needed between iterations
+        }
+    return
+#If
+
+
 
 ; PSS
 ; #IfWinActive ahk_exe dnplayer.exe
 ;     F13::
-;         Send, {x down}
-;         Send, {l down}
+;         Send, {x down}j
+;         Send, {l down}j
 ;         Send, {i down}
 ;         Send, {d down}
 ;         Send, j
