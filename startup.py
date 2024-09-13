@@ -154,17 +154,15 @@ class StartupManager(tk.Tk):
         else:
             label.config(fg="red")
 
-def center_and_press_alt_2(window):
-    def center_window():
+def Center_Window(window):
         window.update_idletasks()
         width = window.winfo_width()
         height = window.winfo_height()
         x = (window.winfo_screenwidth() // 2) - (width // 2)
         y = (window.winfo_screenheight() // 2) - (height // 2)
         window.geometry(f'{width}x{height}+{x}+{y}')
-    center_window()
 
 if __name__ == "__main__":
     app = StartupManager()
-    center_and_press_alt_2(app)
+    Center_Window(app)
     app.mainloop()
