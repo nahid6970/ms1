@@ -370,14 +370,11 @@ def Action__Light__FF():
     actionF_thread.join()
 def action_adjust_1():
     global stop_thread_action1, Action_Light_Thread, ACTION_1
-    window = focus_window(window_title)
+    # window = focus_window(window_title)
     if Action_Light_Thread and Action_Light_Thread.is_alive():
         stop_thread_action1 = True
         Action_Light_Thread.join()
         ACTION_1.config(text="AL", bg="#6a6a64", fg="#9dff00")
-        # Call press_key to send F9 to the window after stopping the thread
-        if window:
-            press_key(window, 'f9')  # Press F9 in the window
     else:
         stop_thread_action1 = False
         Action_Light_Thread = threading.Thread(target=Action__Light__FF)
@@ -553,7 +550,7 @@ def fame_items_handler(window):
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'F9',0, 'c',0)
+            elif any(find_image(image) for image in continueF): press_key(window, 'c')
             time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
@@ -592,7 +589,7 @@ def event_items_handler(window):
             #* Handle the other image searches and actions
             if find_image(Home, confidence=0.8): press_key(window, 'f')
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'F9',0, 'c',0)
+            elif any(find_image(image) for image in continueF): press_key(window,'c')
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
             time.sleep(0.05)

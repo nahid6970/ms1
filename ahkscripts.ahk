@@ -15,6 +15,7 @@
 !1::Send_to_2nd_Monitor()
 #t:: WinSet, AlwaysOnTop, Toggle, A
 ^!b::Toggle_Screen_Blackout()
+^!d::Toggle_Screen_Dim()()
 ^!t::Toggle_Reset_Workspace()
 ^!w::Toggle_Screen_Whiteout()
 
@@ -491,6 +492,36 @@ Toggle_Screen_Blackout() {
         Gui, Destroy
     }}
 
+; ██████╗ ██╗███╗   ███╗      ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗
+; ██╔══██╗██║████╗ ████║      ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║
+; ██║  ██║██║██╔████╔██║█████╗███████╗██║     ██████╔╝█████╗  █████╗  ██╔██╗ ██║
+; ██║  ██║██║██║╚██╔╝██║╚════╝╚════██║██║     ██╔══██╗██╔══╝  ██╔══╝  ██║╚██╗██║
+; ██████╔╝██║██║ ╚═╝ ██║      ███████║╚██████╗██║  ██║███████╗███████╗██║ ╚████║
+; ╚═════╝ ╚═╝╚═╝     ╚═╝      ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝
+
+; Define a variable to track the state of the screen dimming
+dimState := 0
+; Define a function to toggle screen dimming
+Toggle_Screen_Dim() {
+    global dimState  ; Declare the variable as global so it can be accessed inside the function
+    if (dimState = 0) {
+        ; If the screen is not dimmed, create a semi-transparent black fullscreen window
+        dimState := 1
+        ; Create the dim window to cover the entire screen
+        Gui +LastFound +AlwaysOnTop -Caption +ToolWindow -MinimizeBox -MaximizeBox ; Remove caption, border, and buttons
+        Gui, Color, Black
+        ; Set the window's transparency (255 is fully opaque, 0 is fully transparent)
+        Gui, Add, Text, w%A_ScreenWidth% h%A_ScreenHeight% BackgroundBlack
+        WinSet, Transparent, 128 ;! Adjust transparency (0-255)
+        Gui, Show, w%A_ScreenWidth% h%A_ScreenHeight% x0 y0 NoActivate
+        ; Allow mouse clicks and keyboard input to pass through
+        WinSet, ExStyle, +0x20 ; WS_EX_TRANSPARENT
+    } else {
+        ; If the screen is already dimmed, close the window
+        dimState := 0
+        Gui, Destroy
+    }
+}
 
 ; ██╗    ██╗██╗  ██╗██╗████████╗███████╗    ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗
 ; ██║    ██║██║  ██║██║╚══██╔══╝██╔════╝    ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║
