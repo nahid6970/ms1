@@ -324,34 +324,28 @@ def actionF_L(window):
     try:
         while not stop_thread_action1:
             focus_window(window_title)
-            # Check if any actionF image is found
+            # Check for the actionF image every 3 seconds
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
                 pause_other_items = True
                 holding_keys = True
-                # Start time for periodic image checks
-                start_time = time.time()
-                while holding_keys and not stop_thread_action1:
-
+                # Perform actions for 5 seconds
+                action_start_time = time.time()
+                while time.time() - action_start_time < 5 and not stop_thread_action1:
                     key_down(window, 'd')
                     key_down(window, 'x')
                     press_key(window, 'j')
                     press_key(window, 'j')
                     key_up(window, 'x')
                     key_up(window, 'd')
-                    # Check for actionF images every 5 seconds
-                    if time.time() - start_time >= 5:
-                        start_time = time.time()  # Reset start time
-                        # Perform the image search again
-                        if not any(find_image(image, confidence=actionF[image]) for image in actionF):
-                            print("ActionF image not found. Stopping action.")
-                            break
                     time.sleep(0.01)  # Small delay to ensure continuous pressing
-                # Release all held keys when the loop finishes
+                # After 5 seconds of action, stop holding keys
                 holding_keys = False
                 pause_other_items = False
-            time.sleep(0.05)  # Short delay to prevent high CPU usage
+            # Wait 3 seconds before the next image check
+            time.sleep(3)
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
+
 
 def Action__Light__FF():
     global stop_thread_action1
