@@ -322,29 +322,38 @@ def actionF_L(window):
     global pause_other_items
     holding_keys = False
     try:
+        image_check_interval = 3  # Check for image every 3 seconds
+        action_duration = 5  # Perform actions for 5 seconds
+        last_image_check = time.time()  # Track the last time the image was checked
         while not stop_thread_action1:
             focus_window(window_title)
-            # Check for the actionF image every 3 seconds
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                pause_other_items = True
-                holding_keys = True
-                # Perform actions for 5 seconds
-                action_start_time = time.time()
-                while time.time() - action_start_time < 5 and not stop_thread_action1:
-                    key_down(window, 'd')
-                    key_down(window, 'x')
-                    press_key(window, 'j')
-                    press_key(window, 'j')
-                    key_up(window, 'x')
-                    key_up(window, 'd')
-                    time.sleep(0.01)  # Small delay to ensure continuous pressing
-                # After 5 seconds of action, stop holding keys
-                holding_keys = False
-                pause_other_items = False
-            # Wait 3 seconds before the next image check
-            time.sleep(3)
+            # If the last image check was more than 3 seconds ago, perform image search
+            if time.time() - last_image_check >= image_check_interval:
+                last_image_check = time.time()  # Reset the image check timer
+                if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                    pause_other_items = True
+                    holding_keys = True
+                    print("ActionF image found. Performing action for 5 seconds.")
+                    # Perform actions for 5 seconds
+                    action_start_time = time.time()
+                    while time.time() - action_start_time < action_duration and not stop_thread_action1:
+                        key_down(window, 'd')
+                        key_down(window, 'x')
+                        press_key(window, 'j')
+                        press_key(window, 'j')
+                        key_up(window, 'x')
+                        key_up(window, 'd')
+                        # Very short delay to allow continuous key pressing without missing
+                        time.sleep(0.01)
+                    holding_keys = False
+                    pause_other_items = False
+                else:
+                    print("ActionF image not found.")
+            # Small delay to prevent the CPU from overloading while waiting for the next image check
+            time.sleep(0.01)
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
+
 
 
 def Action__Light__FF():
