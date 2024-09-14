@@ -354,8 +354,6 @@ def actionF_L(window):
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
 
-
-
 def Action__Light__FF():
     global stop_thread_action1
     window = focus_window(window_title)
