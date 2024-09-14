@@ -181,24 +181,26 @@ def scoop_info():
         subprocess.Popen(["powershell", "-Command", command], shell=True)
     except subprocess.CalledProcessError as e:
         print(f"Error executing command: {e}")
-def scoop_install_fzf():
-    # Path to the Python script generating the package list
-    python_script = r"C:\ms1\scripts\python\scoop_list.py"
 
-    # Run the Python script to generate the package list
-    try:
-        subprocess.run(['python', python_script], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        return
-    # Path to the text file containing package list
-    package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
-    # Command to read from the text file and pipe it to fzf
-    command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf -i --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
-    try:
-        subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
+# def scoop_install_fzf():
+#     # Path to the Python script generating the package list
+#     python_script = r"C:\ms1\scripts\python\scoop_list.py"
+
+#     # Run the Python script to generate the package list
+#     try:
+#         subprocess.run(['python', python_script], check=True)
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+#         return
+#     # Path to the text file containing package list
+#     package_list_file = r"C:\Users\nahid\OneDrive\backup\installed_apps\python_scoop_list_fzf.txt"
+#     # Command to read from the text file and pipe it to fzf
+#     command = f'$host.UI.RawUI.WindowTitle = "scoop🔽" ; type {package_list_file} | fzf -i --multi --preview "scoop info {{1}}" | ForEach-Object {{scoop install $_.split()[0]}}'
+#     try:
+#         subprocess.Popen(['start', 'pwsh', '-Command', command], shell=True)
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error executing command: {e}")
+
 def scoop_uninstall_fzf():
     command = '$host.UI.RawUI.WindowTitle = "scoop❌" ; scoop list "" | fzf --multi --preview \'scoop info {1}\' | ForEach-Object { scoop uninstall $_.split()[0] }'
     try:
@@ -248,7 +250,7 @@ winget_scoop_button_properties = [
 ("Info"      ,scoop_info         ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     3,2,1 ,""  ),
 ("Install"   ,scoop_install      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     4,2,1 ,""  ),
 ("Uninstall" ,scoop_uninstall    ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     5,2,1 ,""  ),
-("Install"   ,scoop_install_fzf  ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,2,1 ,""  ),
+("Install"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'scoop_fzf_install' ; Set-Location ; C:\\ms1\\utility\\winget_scoop\\scoop_fzf_install.ps1 ; cd ~}"],shell=True)  ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,2,1 ,""  ),
 ("Uninstall" ,scoop_uninstall_fzf,"#1D2027","#FF0000",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     7,2,1 ,""  )
 ]
 
