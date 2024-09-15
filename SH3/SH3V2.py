@@ -315,13 +315,53 @@ loss_thread = None
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 
 # light attack1
-stop_thread_action1 = True
+# Global flag for stopping the threads
 Action_Light_Thread = None
+stop_thread_action1 = False
 pause_other_items = False
-def actionF_L(window):
-    global pause_other_items
+image_found = False
+action_timer = None
+# Image searching function (running in one thread)
+def search_image():
+    global image_found
+    while not stop_thread_action1:
+        if any(find_image(image, confidence=actionF[image]) for image in actionF):
+            image_found = True
+            print("Image found, resetting action timer.")
+        else:
+            image_found = False
+            print("Image not found.")
+        time.sleep(0.05)  # Search for the image every 3 seconds
+# Action function for key presses (running in another thread)
+def perform_action(window):
+    global pause_other_items, action_timer
     holding_keys = False
+    while not stop_thread_action1:
+        if image_found:
+            pause_other_items = True
+            holding_keys = True
+            action_timer = time.time()  # Reset the 5-second timer when image is found
+            while holding_keys and not stop_thread_action1:
+                # Continuously press keys until 5 seconds expire
+                if time.time() - action_timer >= 5:
+                    print("5 seconds of action completed. Stopping.")
+                    holding_keys = False
+                    break
+                # Perform the key presses
+                key_down(window, 'd')  # Hold 'd'
+                press_key(window, 'j')  # Press 'j'
+                press_key(window, 'j')  # Press 'j' again
+                key_up(window, 'd')    # Release 'd'
+                time.sleep(0.1)  # Small delay between iterations
+            # Release keys after the action is completed
+            key_up(window, 'd')
+            pause_other_items = False
+        else:
+            time.sleep(0.05)  # Prevent high CPU usage when idle
+# Main function to run both threads
+def actionF_L(window):
     try:
+<<<<<<< HEAD
         image_check_interval = 3  # Check for image every 3 seconds
         action_duration = 5  # Perform actions for 5 seconds
         last_image_check = time.time()  # Track the last time the image was checked
@@ -351,6 +391,17 @@ def actionF_L(window):
                     print("ActionF image not found.")
             # Small delay to prevent the CPU from overloading while waiting for the next image check
             time.sleep(0.01)
+=======
+        # Start the image search thread
+        image_search_thread = threading.Thread(target=search_image)
+        image_search_thread.start()
+        # Start the action thread
+        action_thread = threading.Thread(target=perform_action, args=(window,))
+        action_thread.start()
+        # Wait for both threads to finish if stop is triggered
+        image_search_thread.join()
+        action_thread.join()
+>>>>>>> 258ed15 (ActionF)
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
 
