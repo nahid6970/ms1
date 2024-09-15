@@ -361,37 +361,6 @@ def perform_action(window):
 # Main function to run both threads
 def actionF_L(window):
     try:
-<<<<<<< HEAD
-        image_check_interval = 3  # Check for image every 3 seconds
-        action_duration = 5  # Perform actions for 5 seconds
-        last_image_check = time.time()  # Track the last time the image was checked
-        while not stop_thread_action1:
-            focus_window(window_title)
-            # If the last image check was more than 3 seconds ago, perform image search
-            if time.time() - last_image_check >= image_check_interval:
-                last_image_check = time.time()  # Reset the image check timer
-                if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                    pause_other_items = True
-                    holding_keys = True
-                    print("ActionF image found. Performing action for 5 seconds.")
-                    # Perform actions for 5 seconds
-                    action_start_time = time.time()
-                    while time.time() - action_start_time < action_duration and not stop_thread_action1:
-                        key_down(window, 'd')
-                        key_down(window, 'x')
-                        press_key(window, 'j')
-                        press_key(window, 'j')
-                        key_up(window, 'x')
-                        key_up(window, 'd')
-                        # Very short delay to allow continuous key pressing without missing
-                        time.sleep(0.01)
-                    holding_keys = False
-                    pause_other_items = False
-                else:
-                    print("ActionF image not found.")
-            # Small delay to prevent the CPU from overloading while waiting for the next image check
-            time.sleep(0.01)
-=======
         # Start the image search thread
         image_search_thread = threading.Thread(target=search_image)
         image_search_thread.start()
@@ -401,7 +370,6 @@ def actionF_L(window):
         # Wait for both threads to finish if stop is triggered
         image_search_thread.join()
         action_thread.join()
->>>>>>> 258ed15 (ActionF)
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
 
@@ -430,6 +398,7 @@ def action_adjust_1():
         ACTION_1.config(text="Stop", bg="#1d2027", fg="#fc0000")
 ACTION_1 = Button(ROOT, text="AL", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_1.pack(padx=(1, 1), pady=(1, 1))
+
 
 
 # light attack2
