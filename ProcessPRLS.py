@@ -38,18 +38,13 @@ def kill_process(app):
             break
     update_status()
 
-def center_and_press_alt_2(window):
-    def center_window():
+def Center_Window(window):
         window.update_idletasks()
         width = window.winfo_width()
         height = window.winfo_height()
         x = (window.winfo_screenwidth() // 2) - (width // 2)
         y = (window.winfo_screenheight() // 2) - (height // 2)
         window.geometry(f'{width}x{height}+{x}+{y}')
-    def press_alt_2():
-        pyautogui.hotkey('alt', '2')
-    center_window()
-    window.after(25, press_alt_2)
 
 root = tk.Tk()
 root.title("Process Manager")
@@ -70,5 +65,5 @@ for app, display_name in apps.items():
 # Run update_status in a separate thread to avoid blocking the main thread
 threading.Thread(target=update_status).start()
 
-center_and_press_alt_2(root)
+Center_Window(root)
 root.mainloop()
