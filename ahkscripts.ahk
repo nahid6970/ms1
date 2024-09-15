@@ -1435,3 +1435,80 @@ return
 ;         Send, {i up}
 ;     return
 ; #If
+
+
+; #Persistent
+; SetTitleMatchMode, 2  ; This will match any window title containing the specified text.
+
+; ; Hook into the Win+E key combination for opening File Explorer
+; #e::
+;     ; Check if an Explorer window already exists
+;     IfWinExist, ahk_class CabinetWClass
+;     {
+;         ; Activate the existing window and send the hotkey to open a new tab
+;         WinActivate
+;         Send, ^t  ; This sends Ctrl + T to open a new tab
+;     }
+;     else
+;     {
+;         ; If no window exists, open File Explorer normally
+;         Run, explorer.exe
+;     }
+;     return
+
+
+#Persistent
+SetTitleMatchMode, 2  ; Match windows containing the specified text
+DetectHiddenWindows, On
+
+; Hotkey to merge all Explorer windows into one
+#e::  ; Ctrl + Shift + M
+    ; Array to store all File Explorer window handles and paths
+    explorerWindows := []
+    
+    ; Find all open File Explorer windows
+    WinGet, id, List, ahk_class CabinetWClass
+    if (id = 0)
+    {
+        MsgBox, No File Explorer windows are open.
+        return
+    }
+
+    ; Loop through all the found windows
+    Loop, %id%
+    {
+        this_id := id%A_Index% ; Get the window ID
+        WinActivate, ahk_id %this_id%  ; Activate the window
+        ; Send Alt + D to focus on the address bar, then Ctrl + C to copy the path
+        Send, !d
+        Sleep, 100
+        Send, ^c
+        ClipWait, 1  ; Wait for the clipboard to contain data
+        explorerWindows.Push(Clipboard)  ; Add the path to the array
+    }
+
+    ; Activate the first Explorer window and open the remaining ones in new tabs
+    WinActivate, ahk_id %id1%
+    Sleep, 100
+    Loop, % explorerWindows.MaxIndex()
+    {
+        path := explorerWindows[A_Index]
+        if (A_Index = 1)
+            continue  ; Skip the first one since it's already in the main window
+        Send, ^t  ; Open new tab
+        Sleep, 200
+        Send, ^l  ; Focus on the address bar
+        Sleep, 200
+        Send, %path%{Enter}  ; Paste the path and press Enter
+        Sleep, 500  ; Wait for the new tab to load
+    }
+
+    ; Close all the extra windows
+    Loop, %id%
+    {
+        if (A_Index = 1)
+            continue  ; Skip the first window
+        this_id := id%A_Index%
+        WinClose, ahk_id %this_id%
+    }
+    return
