@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import messagebox
-import winshell
+import winreg
 import pyautogui
 
 class StartupManager(tk.Tk):
@@ -100,53 +100,36 @@ class StartupManager(tk.Tk):
             os.system(f'PowerShell -Command "{item["command"]}"')
 
     def is_checked(self, item):
-        startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
-        if item["type"] == "App":
-            shortcut_path = os.path.join(startup_path, f'{item["name"]}.lnk')
-            return os.path.exists(shortcut_path)
-        else:
-            ps1_path = os.path.join(startup_path, f'{item["name"]}.ps1')
-            return os.path.exists(ps1_path)
-
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
+                try:
+                    winreg.QueryValueEx(reg_key, item["name"])
+                    return True
+                except FileNotFoundError:
+                    return False
+        except WindowsError:
+            return False
 
     def toggle_startup(self, item, name_label, icon_label):
-        startup_path = os.path.join(os.getenv('APPDATA'), 'Microsoft\\Windows\\Start Menu\\Programs\\Startup')
-
-        if item["type"] == "App":
-            shortcut_path = os.path.join(startup_path, f'{item["name"]}.lnk')
-            checked = os.path.exists(shortcut_path)
-            if checked:
-                try:
-                    os.remove(shortcut_path)
+        reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+        try:
+            if self.is_checked(item):
+                # Remove from startup
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
+                    winreg.DeleteValue(reg_key, item["name"])
                     name_label.config(fg="red")
                     icon_label.config(text="\uf204", fg="gray")
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
             else:
-                try:
-                    winshell.CreateShortcut(Path=shortcut_path, Target=item["path"])
+                # Add to startup
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
+                    if item["type"] == "App":
+                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
+                    else:
+                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'powershell -Command "{item["command"]}"')
                     name_label.config(fg="green")
                     icon_label.config(text="\uf205", fg="blue")
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
-        else:
-            ps1_path = os.path.join(startup_path, f'{item["name"]}.ps1')
-            checked = os.path.exists(ps1_path)
-            if checked:
-                try:
-                    os.remove(ps1_path)
-                    name_label.config(fg="red")
-                    icon_label.config(text="\uf204", fg="gray")
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to remove {item['name']} from startup: {e}")
-            else:
-                try:
-                    with open(ps1_path, 'w') as f:
-                        f.write(f'{item["command"]}\n')
-                    name_label.config(fg="green")
-                    icon_label.config(text="\uf205", fg="blue")
-                except Exception as e:
-                    messagebox.showerror("Error", f"Failed to add {item['name']} to startup: {e}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to modify {item['name']} in startup: {e}")
 
     def update_label_color(self, label, checked):
         if checked:
@@ -155,12 +138,12 @@ class StartupManager(tk.Tk):
             label.config(fg="red")
 
 def Center_Window(window):
-        window.update_idletasks()
-        width = window.winfo_width()
-        height = window.winfo_height()
-        x = (window.winfo_screenwidth() // 2) - (width // 2)
-        y = (window.winfo_screenheight() // 2) - (height // 2)
-        window.geometry(f'{width}x{height}+{x}+{y}')
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
+    x = (window.winfo_screenwidth() // 2) - (width // 2)
+    y = (window.winfo_screenheight() // 2) - (height // 2)
+    window.geometry(f'{width}x{height}+{x}+{y}')
 
 if __name__ == "__main__":
     app = StartupManager()

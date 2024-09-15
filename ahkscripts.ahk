@@ -215,7 +215,8 @@ ToggleHiddenFiles() {
 ::;run::
     Run, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Administrative Tools\Registry Editor.lnk
     Sleep, 500
-    Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+    ; Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+    Clipboard := "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
 return
 
 ;;* ██╗   ██╗███████╗ ██████╗ ██████╗ ██████╗ ███████╗
