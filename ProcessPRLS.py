@@ -1,7 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox
+# from tkinter import messagebox
 import psutil
-import pyautogui
+# import pyautogui
 import threading
 
 # List of predetermined applications and their display names
@@ -24,7 +24,7 @@ def update_status():
         color = "green" if running else "red"
         label = labels[app]
         label.config(fg=color)
-        
+
         if running:
             label.bind("<Button-1>", lambda e, app=app: kill_process(app))
         else:
