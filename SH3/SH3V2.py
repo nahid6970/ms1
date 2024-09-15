@@ -348,16 +348,16 @@ def perform_action(window):
                     holding_keys = False
                     break
                 # Perform the key presses
-                key_down(window, 'x')
+                # key_down(window, 'x')
                 key_down(window, 'd')
                 press_key(window, 'j')
                 press_key(window, 'j')
                 key_up(window, 'd')
-                key_up(window, 'x')
+                # key_up(window, 'x')
                 time.sleep(0.1)  # Small delay between iterations
             # Release keys after the action is completed
             key_up(window, 'd')
-            key_up(window, 'x')
+            # key_up(window, 'x')
             pause_other_items = False
         else:
             time.sleep(0.05)  # Prevent high CPU usage when idle
