@@ -718,6 +718,26 @@ def Folder(FUNCTION_FRAME):
     TOY_RULER=tk.Button(BOX,text="\uee11",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_ruler)
     TOY_RULER.pack(side="left" ,padx=(0,0))
 
+    def powertoys_mousecrosshair():
+        keyboard.press_and_release('win+alt+p')
+    TOY_MCROSSHAIR=tk.Button(BOX,text="\uf245",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_mousecrosshair)
+    TOY_MCROSSHAIR.pack(side="left" ,padx=(0,0))
+
+    def powertoys_TextExtract():
+        keyboard.press_and_release('win+shift+t')
+    TOY_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_TextExtract)
+    TOY_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
+
+    def capture2text():
+        is_running = any(proc.name() == "Capture2Text.exe" for proc in psutil.process_iter())
+        if not is_running:
+            subprocess.Popen(r"C:\Users\nahid\scoop\apps\Capture2Text\current\Capture2Text.exe")
+            time.sleep(2)  # Wait 2 seconds if the app had to be started
+        else:
+            time.sleep(1)  # Wait 1 second if the app is already running
+        keyboard.press_and_release('win+ctrl+alt+shift+q')
+    CAPTURE2_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#db1725", bg="#204892", command=capture2text)
+    CAPTURE2_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
 
 
 Folder(FUNCTION_FRAME)
