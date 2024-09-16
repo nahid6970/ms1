@@ -702,43 +702,42 @@ BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
 BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,FUNCTION_FRAME))
 BACK.pack(side="left" ,padx=(0,0))
 def Folder(FUNCTION_FRAME):
-    # Function to simulate key press
-    def send_f13():
-        keyboard.send('f13')
-    F13=tk.Button(BOX,text="F13",width=0 ,fg="#ffffff", bg="#204892", command=send_f13)
-    F13.pack(side="left" ,padx=(0,0))
+        # Function to simulate key press
+        def send_f13():
+            keyboard.send('f13')
+        F13=tk.Button(BOX,text="F13",width=0 ,fg="#ffffff", bg="#204892", command=send_f13)
+        F13.pack(side="left" ,padx=(0,0))
 
-    def send_f15():
-        keyboard.send('f15')
-    F15=tk.Button(BOX,text="F15",width=0 ,fg="#ffffff", bg="#204892", command=send_f15)
-    F15.pack(side="left" ,padx=(0,0))
+        def send_f15():
+            keyboard.send('f15')
+        F15=tk.Button(BOX,text="F15",width=0 ,fg="#ffffff", bg="#204892", command=send_f15)
+        F15.pack(side="left" ,padx=(0,0))
 
-    def powertoys_ruler():
-        keyboard.press_and_release('win+shift+m')
-    TOY_RULER=tk.Button(BOX,text="\uee11",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_ruler)
-    TOY_RULER.pack(side="left" ,padx=(0,0))
+        def powertoys_ruler():
+            keyboard.press_and_release('win+shift+m')
+        TOY_RULER=tk.Button(BOX,text="\uee11",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_ruler)
+        TOY_RULER.pack(side="left" ,padx=(0,0))
 
-    def powertoys_mousecrosshair():
-        keyboard.press_and_release('win+alt+p')
-    TOY_MCROSSHAIR=tk.Button(BOX,text="\uf245",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_mousecrosshair)
-    TOY_MCROSSHAIR.pack(side="left" ,padx=(0,0))
+        def powertoys_mousecrosshair():
+            keyboard.press_and_release('win+alt+p')
+        TOY_MCROSSHAIR=tk.Button(BOX,text="\uf245",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_mousecrosshair)
+        TOY_MCROSSHAIR.pack(side="left" ,padx=(0,0))
 
-    def powertoys_TextExtract():
-        keyboard.press_and_release('win+shift+t')
-    TOY_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_TextExtract)
-    TOY_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
+        def powertoys_TextExtract():
+            keyboard.press_and_release('win+shift+t')
+        TOY_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_TextExtract)
+        TOY_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
 
-    def capture2text():
-        is_running = any(proc.name() == "Capture2Text.exe" for proc in psutil.process_iter())
-        if not is_running:
-            subprocess.Popen(r"C:\Users\nahid\scoop\apps\Capture2Text\current\Capture2Text.exe")
-            time.sleep(2)  # Wait 2 seconds if the app had to be started
-        else:
-            time.sleep(1)  # Wait 1 second if the app is already running
-        keyboard.press_and_release('win+ctrl+alt+shift+q')
-    CAPTURE2_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#db1725", bg="#204892", command=capture2text)
-    CAPTURE2_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
-
+        def capture2text():
+            is_running = any(proc.name() == "Capture2Text.exe" for proc in psutil.process_iter())
+            if not is_running:
+                subprocess.Popen(r"C:\Users\nahid\scoop\apps\Capture2Text\current\Capture2Text.exe")
+                time.sleep(2)  # Wait 2 seconds if the app had to be started
+            else:
+                time.sleep(1)  # Wait 1 second if the app is already running
+            keyboard.press_and_release('win+ctrl+alt+shift+q')
+        CAPTURE2_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#db1725", bg="#204892", command=capture2text)
+        CAPTURE2_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
 
 Folder(FUNCTION_FRAME)
 
