@@ -692,6 +692,36 @@ def Folder(EDIT_FRAME):
     KOMOREBIC.pack(side="left" ,padx=(0,0))
 Folder(EDIT_FRAME)
 
+#! Function SPACE
+FUNCTION_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+FUNCTION_FRAME.pack_propagate(True)
+ENTER_FRAME = CTkButton(ROOT1, text="\uf07cF", width=0, command=lambda:switch_to_frame(FUNCTION_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
+ENTER_FRAME.pack(side="left", padx=(1,1))
+BOX = tk.Frame(FUNCTION_FRAME, bg="#1D2027")
+BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,FUNCTION_FRAME))
+BACK.pack(side="left" ,padx=(0,0))
+def Folder(FUNCTION_FRAME):
+    # Function to simulate key press
+    def send_f13():
+        keyboard.send('f13')
+    F13=tk.Button(BOX,text="F13",width=0 ,fg="#ffffff", bg="#204892", command=send_f13)
+    F13.pack(side="left" ,padx=(0,0))
+
+    def send_f15():
+        keyboard.send('f15')
+    F15=tk.Button(BOX,text="F15",width=0 ,fg="#ffffff", bg="#204892", command=send_f15)
+    F15.pack(side="left" ,padx=(0,0))
+
+    def powertoys_ruler():
+        keyboard.press_and_release('win+shift+m')
+    TOY_RULER=tk.Button(BOX,text="\uee11",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_ruler)
+    TOY_RULER.pack(side="left" ,padx=(0,0))
+
+
+
+Folder(FUNCTION_FRAME)
+
 #! Worspace_3
 SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
