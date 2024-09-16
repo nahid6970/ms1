@@ -1460,12 +1460,10 @@ return
 #Persistent
 SetTitleMatchMode, 2  ; Match windows containing the specified text
 DetectHiddenWindows, On
-
 ; Hotkey to merge all Explorer windows into one
 #e::  ; Ctrl + Shift + M
     ; Array to store all File Explorer window handles and paths
     explorerWindows := []
-    
     ; Find all open File Explorer windows
     WinGet, id, List, ahk_class CabinetWClass
     if (id = 0)
@@ -1473,7 +1471,6 @@ DetectHiddenWindows, On
         MsgBox, No File Explorer windows are open.
         return
     }
-
     ; Loop through all the found windows
     Loop, %id%
     {
@@ -1486,7 +1483,6 @@ DetectHiddenWindows, On
         ClipWait, 1  ; Wait for the clipboard to contain data
         explorerWindows.Push(Clipboard)  ; Add the path to the array
     }
-
     ; Activate the first Explorer window and open the remaining ones in new tabs
     WinActivate, ahk_id %id1%
     Sleep, 100
@@ -1502,7 +1498,6 @@ DetectHiddenWindows, On
         Send, %path%{Enter}  ; Paste the path and press Enter
         Sleep, 500  ; Wait for the new tab to load
     }
-
     ; Close all the extra windows
     Loop, %id%
     {
