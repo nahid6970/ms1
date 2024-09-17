@@ -278,6 +278,7 @@ applications = [
 {"name": "JellyFin" ,"scoop_name": ""         ,"scoop_path": r''        ,"winget_name": "Jellyfin.Server"         ,"winget_path": r"xx"}             ,
 {"name": "winfsp"   ,"scoop_name": "winfsp-np","scoop_path": winfsp_sp  ,"winget_name": "WingetName"              ,"winget_path": r""}               ,
 {"name": "TigerVNC" ,"scoop_name": "ScoopName","scoop_path": r''        ,"winget_name": "TigerVNCproject.TigerVNC","winget_path": TigerVncServer_wg} ,
+{"name": "MinGW","scoop_name": "mingw-msvcrt","scoop_path": mingw_msvcrt,"winget_name": "WingetName","winget_path": r""} ,
 # {"name": "AppName","scoop_name": "ScoopName","scoop_path": r'xx',"winget_name": "WingetName","winget_path": r"xx"} ,
 
 ]

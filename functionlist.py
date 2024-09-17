@@ -149,7 +149,7 @@ ytdlp_sp                   =r'C:\Users\nahid\scoop\apps\yt-dlp\current\yt-dlp.ex
 Zoxide_scoop_path          ="C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe"
 winfsp_sp = r'C:\Users\nahid\scoop\apps\winfsp-np\current\setup.msi_'
 TigerVncServer_wg = r'C:\Program Files\TightVNC\tvnserver.exe'
-
+mingw_msvcrt =r"C:\Users\nahid\scoop\apps\mingw-msvcrt\current\bin\mingw32-make.exe"
 
 
 
