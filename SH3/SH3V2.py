@@ -7,12 +7,12 @@ import pygetwindow as gw
 import random
 import threading
 from tkinter import Tk, Button
-from ctypes import windll, c_char_p, c_buffer
-from struct import calcsize, pack
-from PIL import Image
-from PIL import Image, ImageDraw
+# from ctypes import windll, c_char_p, c_buffer
+# from struct import calcsize, pack
+# from PIL import Image
+# from PIL import Image, ImageDraw
 import os
-from tkinter import messagebox
+# from tkinter import messagebox
 import tkinter as tk
 
 ROOT = tk.Tk()
@@ -31,145 +31,38 @@ screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 x = screen_width - 60
 y = screen_height - 800
-# ROOT.geometry(f"35x230+{x}+{y}")
 ROOT.geometry(f"+{x}+{y}")
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
-# Global variables
+
 error_count = 0  # Initialize the error counter
-# stop_thread = False  # Flag to stop the thread
-screen_size = (10000, 10000)  # optimistic until we know better
-
-def grab_screen(region=None):
-    """Grabs a screenshot that supports multiple monitors."""
-    global screen_size
-    gdi32 = windll.gdi32
-    # Win32 functions
-    CreateDC = gdi32.CreateDCA
-    CreateCompatibleDC = gdi32.CreateCompatibleDC
-    GetDeviceCaps = gdi32.GetDeviceCaps
-    CreateCompatibleBitmap = gdi32.CreateCompatibleBitmap
-    BitBlt = gdi32.BitBlt
-    SelectObject = gdi32.SelectObject
-    GetDIBits = gdi32.GetDIBits
-    DeleteDC = gdi32.DeleteDC
-    DeleteObject = gdi32.DeleteObject
-    # Win32 constants
-    NULL = 0
-    HORZRES = 8
-    VERTRES = 10
-    SRCCOPY = 13369376
-    HGDI_ERROR = 4294967295
-    ERROR_INVALID_PARAMETER = 87
-    SM_XVIRTUALSCREEN = 76
-    SM_YVIRTUALSCREEN = 77
-    SM_CXVIRTUALSCREEN = 78
-    SM_CYVIRTUALSCREEN = 79
-
-    bitmap = None
-    try:
-        screen = CreateDC(c_char_p(b'DISPLAY'), NULL, NULL, NULL)
-        screen_copy = CreateCompatibleDC(screen)
-
-        if region:
-            left, top, width, height = region
-        else:
-            left = windll.user32.GetSystemMetrics(SM_XVIRTUALSCREEN)
-            top = windll.user32.GetSystemMetrics(SM_YVIRTUALSCREEN)
-            width = windll.user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
-            height = windll.user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
-
-        bitmap = CreateCompatibleBitmap(screen, width, height)
-        if bitmap == NULL:
-            print('grab_screen: Error calling CreateCompatibleBitmap. Returned NULL')
-            return
-
-        hobj = SelectObject(screen_copy, bitmap)
-        if hobj == NULL or hobj == HGDI_ERROR:
-            print(f'grab_screen: Error calling SelectObject. Returned {hobj}.')
-            return
-
-        if BitBlt(screen_copy, 0, 0, width, height, screen, left, top, SRCCOPY) == NULL:
-            print('grab_screen: Error calling BitBlt. Returned NULL.')
-            return
-
-        bitmap_header = pack('LHHHH', calcsize('LHHHH'), width, height, 1, 24)
-        bitmap_buffer = c_buffer(bitmap_header)
-        bitmap_bits = c_buffer(b' ' * (height * ((width * 3 + 3) & -4)))
-        got_bits = GetDIBits(screen_copy, bitmap, 0, height, bitmap_bits, bitmap_buffer, 0)
-        if got_bits == NULL or got_bits == ERROR_INVALID_PARAMETER:
-            print(f'grab_screen: Error calling GetDIBits. Returned {got_bits}.')
-            return
-
-        image = Image.frombuffer('RGB', (width, height), bitmap_bits, 'raw', 'BGR', (width * 3 + 3) & -4, -1)
-        if not region:
-            screen_size = image.size
-        return image
-    finally:
-        if bitmap is not None:
-            if bitmap:
-                DeleteObject(bitmap)
-            DeleteDC(screen_copy)
-            DeleteDC(screen)
-
-# Override pyautogui's screenshot functions with our custom function
-pyautogui.screenshot = grab_screen
-pyautogui.pyscreeze.screenshot = grab_screen
-pyautogui.size = lambda: screen_size
-
-
-# def find_image(image_path, confidence=0.7):
-#     """Find the location of the image on the screen."""
-#     global error_count
-#     try:
-#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-#         if location:
-#             image_name = os.path.basename(image_path)
-#             print(f"Found image: {image_name}")
-#             return location
-#     except Exception as e:
-#         error_count += 1
-#         print(f"{error_count} times not found. Error: {e}")
-#     return None
-
-
-# def find_image(image_path, confidence=0.7):
-#     """Find the location of the image on the screen and show time in 12-hour format."""
-#     global error_count
-#     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
-
-#     def get_current_time():
-#         """Return the current time in 12-hour format."""
-#         return datetime.datetime.now().strftime("%I:%M:%S %p")
-#     def log_output(message):
-#         """Save output message to file."""
-#         with open(output_file, 'a') as file:
-#             file.write(f"{get_current_time()} - {message}\n")
-#     try:
-#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-#         if location:
-#             image_name = os.path.basename(image_path)
-#             message = f"Found image: {image_name}"
-#             print(f"{get_current_time()} - {message}")
-#             log_output(message)
-#             return location
-#     except Exception as e:
-#         error_count += 1
-#         error_message = f"{error_count} times not found. Error: {e}"
-#         print(f"{get_current_time()} - {error_message}")
-#         log_output(error_message)
-#     return None
-
 def find_image(image_path, confidence=0.7):
-    """Find the location of the image on the screen without any output."""
+    """Find the location of the image on the screen and show time in 12-hour format."""
+    global error_count
+    output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
+
+    def get_current_time():
+        """Return the current time in 12-hour format."""
+        return datetime.datetime.now().strftime("%I:%M:%S %p")
+    def log_output(message):
+        """Save output message to file."""
+        with open(output_file, 'a') as file:
+            file.write(f"{get_current_time()} - {message}\n")
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
+            image_name = os.path.basename(image_path)
+            message = f"Found image: {image_name}"
+            print(f"{get_current_time()} - {message}")
+            log_output(message)
             return location
-    except Exception:
-        pass  # Silently handle any exception
+    except Exception as e:
+        error_count += 1
+        error_message = f"{error_count} times not found. Error: {e}"
+        print(f"{get_current_time()} - {error_message}")
+        log_output(error_message)
     return None
 
 def focus_window(window_title):
@@ -239,22 +132,6 @@ actionF = {
     Peg_Top: 0.85,
     # bolt: 1,
 }
-
-# ironchad_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_left.png"
-# ironchad_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\ironchad_right.png"
-
-# hunter_lft=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_left.png"
-# hunter_rht=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\Sets\hunter_right.png"
-
-# actionF1 = {
-#     ironchad_lft: 0.75,
-#     hunter_lft: 0.65,
-# }
-# actionF2 = {
-#     ironchad_rht: 0.75,
-#     hunter_rht: 0.65,
-
-# }
 
 # Continue Related Images
 cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
@@ -401,7 +278,6 @@ def action_adjust_1():
         ACTION_1.config(text="Stop", bg="#1d2027", fg="#fc0000")
 ACTION_1 = Button(ROOT, text="AL", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_1.pack(padx=(1, 1), pady=(1, 1))
-
 
 
 # light attack2
