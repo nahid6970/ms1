@@ -62,17 +62,7 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-# x = screen_width - 200
-# y = screen_height//2 - 700//2
-
-# mouse_x = ROOT.winfo_pointerx()
-# mouse_y = ROOT.winfo_pointery()
-# window_offset = 10
-# x = mouse_x
-# y = mouse_y + window_offset
-x= screen_width - 200
-y=screen_height//2 - 700//2
-ROOT.geometry(f"200x700+{x}+{y}") #! overall size of the window
+ROOT.geometry(f"700x700") #! overall size of the window
 
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=400, height=700) #!
 MAIN_FRAME.pack_propagate(False)
