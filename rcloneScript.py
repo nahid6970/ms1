@@ -111,11 +111,11 @@ ttk.Label(command_frame, text="Command:", background="#f15812", font=("Jetbrains
 # Command radios configuration
 command_radios = [
     {"text": "ls"   ,"value": "ls"}   ,
-    {"text": "Tree" ,"value": "tree"} ,
-    {"text": "NcDu" ,"value": "ncdu"} ,
-    {"text": "Size" ,"value": "size"} ,
-    {"text": "Mount","value": "mount"},
-    {"text": "Rcd","value": "rcd"},
+    {"text": "tree" ,"value": "tree"} ,
+    {"text": "ncdu" ,"value": "ncdu"} ,
+    {"text": "size" ,"value": "size"} ,
+    {"text": "mount","value": "mount"},
+    {"text": "rcd","value": "rcd"},
 ]
 # Initialize command radio buttons
 for idx, item in enumerate(command_radios):
