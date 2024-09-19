@@ -19,26 +19,6 @@
 ^!t::Toggle_Reset_Workspace()
 ^!w::Toggle_Screen_Whiteout()
 
-; Action for F13 key
-F13::
-MsgBox, You pressed F13!
-return
-
-F14::
-MsgBox, You pressed F14!
-return
-; Action for F14 key
-F15::
-MsgBox, You pressed F15!
-return
-F16::
-MsgBox, You pressed F16!
-return
-F17::
-MsgBox, You pressed F17!
-return
-
-
 ; Kill Commands
 ; !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
 !+o::RunWait, taskkill /f /im whkd.exe,,Hide
@@ -1527,3 +1507,28 @@ DetectHiddenWindows, On
         WinClose, ahk_id %this_id%
     }
     return
+
+
+
+
+
+
+
+
+    ; Action for F13 key
+; F13::
+; MsgBox, You pressed F13!
+; return
+; F14::
+; MsgBox, You pressed F14!
+; return
+; ; Action for F14 key
+; F15::
+; MsgBox, You pressed F15!
+; return
+; F16::
+; MsgBox, You pressed F16!
+; return
+; F17::
+; MsgBox, You pressed F17!
+; return
