@@ -168,8 +168,6 @@ Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.
 Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
 
 #* Threads
-
-
 fight_thread = None
 fightLight_thread = None
 
@@ -183,6 +181,9 @@ raid_heavy_thread = None
 raid_light_thread = None
 
 loss_thread = None
+
+AHKVERSION = Button(ROOT, text="Py", bg="#607af0", fg="#ecf1ec", width=5, height=2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+AHKVERSION.pack(padx=(1, 1), pady=(1, 1))
 
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
 #! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝

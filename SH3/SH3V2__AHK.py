@@ -184,6 +184,9 @@ raid_light_thread = None
 
 loss_thread = None
 
+AHKVERSION = Button(ROOT, text="AHK", bg="#60a060", fg="#ffffff", width=5, height=2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+AHKVERSION.pack(padx=(1, 1), pady=(1, 1))
+
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
 #! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝
 #! ███████║   ██║      ██║   ███████║██║     █████╔╝     ███████╗   ██║    ╚████╔╝ ██║     █████╗
