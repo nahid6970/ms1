@@ -190,3 +190,41 @@ run this command as admin to change from cmd to powershell
 New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
 or for powershell default one
 New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
+
+
+
+
+
+
+Connect PC to Android
+
+passwd #change user password
+install openssh
+sshd #to enable it or add it to .zshrc
+whoami # to see the user name
+u0_a827@192.168.0.102 -p 8022
+
+
+Setup Antroid/Termux .zshrc/.bashrc
+	pkg install mpv
+	nano ~/.zshrc
+	alias hellomusic='echo "hellomusic" && mpv /storage/emulated/0/song/wwe/ww.mp3'
+	hellomusic
+
+
+Setup For PasswordLess
+$$From PC
+	ssh-keygen
+	cat ~/.ssh/id_rsa.pub #Copy this code
+	ssh u0_a827@192.168.0.102 -p 8022
+$$From PC with ssh to termux/android
+	mkdir -p ~/.ssh
+	nano ~/.ssh/authorized_keys #here paste the code and ctrl+o & ctrl+x
+	chmod 700 ~/.ssh
+	chmod 600 ~/.ssh/authorized_keys
+Now its passwordless
+
+
+
+
+
