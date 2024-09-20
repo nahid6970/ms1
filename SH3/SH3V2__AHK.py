@@ -184,8 +184,15 @@ raid_light_thread = None
 
 loss_thread = None
 
-AHKVERSION = Button(ROOT, text="AHK", bg="#60a060", fg="#ffffff", width=5, height=2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-AHKVERSION.pack(padx=(1, 1), pady=(1, 1))
+def close_window(event=None):
+    # Close the current window
+    ROOT.destroy()
+    # Start the specified script
+    script_path = r"C:\ms1\SH3\SH3V2.py"
+    subprocess.Popen([sys.executable, script_path])
+
+AHK_VERSION = Button(ROOT, text="AHK",command=close_window, bg="#60a060", fg="#000000", width=5, height=2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+AHK_VERSION.pack(padx=(1, 1), pady=(1, 1))
 
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
 #! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝
