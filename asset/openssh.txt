@@ -209,10 +209,10 @@ Setup Antroid/Termux .zshrc/.bashrc
 	pkg install mpv
 	nano ~/.zshrc
 	alias hellomusic='echo "hellomusic" && mpv /storage/emulated/0/song/wwe/ww.mp3'
-	hellomusic
+	add sshd in nano ~/.zshrc
+	
 
-
-Setup For PasswordLess
+Setup For PasswordLess [PC-->Android]
 $$From PC
 	ssh-keygen
 	cat ~/.ssh/id_rsa.pub #Copy this code
@@ -224,7 +224,10 @@ $$From PC with ssh to termux/android
 	chmod 600 ~/.ssh/authorized_keys
 Now its passwordless
 
-
-
-
-
+Setup For PasswordLess [Android-->PC] / also I can use ssh and use pc for setup don't need to use android
+	ssh-keygen
+	cat /data/data/com.termux/files/home/.ssh/id_ed25519.pub
+	mkdir -p ~/.ssh
+	nano ~/.ssh/authorized_keys
+	restart-Service sshd #admin
+not working??
