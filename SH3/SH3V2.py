@@ -36,7 +36,7 @@ ROOT.geometry(f"+{x}+{y}")
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
-
+# find_image
 error_count = 0  # Initialize the error counter
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen and show time in 12-hour format."""
@@ -65,6 +65,7 @@ def find_image(image_path, confidence=0.7):
         log_output(error_message)
     return None
 
+# focus_window
 def focus_window(window_title):
     """Set focus to the window with the given title."""
     windows = gw.getWindowsWithTitle(window_title)
@@ -74,26 +75,31 @@ def focus_window(window_title):
         return window
     return None
 
+# press_key
 def press_key(window, key):
     """Send a key press to a specific window."""
     window.activate()
     pyautogui.press(key)
 
+# key_down
 def key_down(window, key):
     """Send a key down event to a specific window."""
     window.activate()
     pyautogui.keyDown(key)
 
+# key_up
 def key_up(window, key):
     """Send a key up event to a specific window."""
     window.activate()
     pyautogui.keyUp(key)
 
+# click
 def click(window, x, y):
     """Send a mouse click to a specific window."""
     window.activate()
     pyautogui.click(x, y)
 
+# press_keys_with_delays
 def press_keys_with_delays(window, *args):
     """Press keys with specified delays in between.
 
@@ -108,7 +114,7 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
-
+# window title
 window_title='LDPlayer'
 
 # Home Page of the SH3
