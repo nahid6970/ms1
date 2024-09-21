@@ -11,3 +11,4 @@ Start-Sleep -Seconds 5  # Adjust as needed
 # Note: This will type in the active PowerShell window
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.SendKeys]::SendWait("hellomusic{ENTER}")
+# [System.Windows.Forms.SendKeys]::SendWait("playwwe{ENTER}")
