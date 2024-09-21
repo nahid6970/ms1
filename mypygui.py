@@ -347,25 +347,29 @@ from queue import Queue
 
 def check_git_status(git_path, queue):
     if not os.path.exists(git_path):
-        queue.put((git_path, "Invalid path"))
+        queue.put((git_path, "Invalid path", "#000000"))  # Use default color for invalid path
         return
     os.chdir(git_path)
     git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
     if "nothing to commit, working tree clean" in git_status.stdout:
         queue.put((git_path, "✅", "#00ff21"))
     else:
-        queue.put((git_path, "✅", "#fe1616"))
+        queue.put((git_path, "❌", "#fe1616"))
+
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
         print("Invalid path")
         return
     os.chdir(git_path)
     subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status"])
+
 def update_status():
     while True:
         check_git_status("C:\\ms1", queue)
         check_git_status("C:\\ms2", queue)
+        check_git_status("C:\\ms3", queue)
         time.sleep(1)
+
 def update_gui():
     while True:
         try:
@@ -374,9 +378,12 @@ def update_gui():
                 STATUS_MS1.config(text=text, fg=color)
             elif git_path == "C:\\ms2":
                 STATUS_MS2.config(text=text, fg=color)
+            elif git_path == "C:\\ms3":
+                STATUS_MS3.config(text=text, fg=color)
         except:
             pass
         time.sleep(0.1)  # Adjust sleep time as needed
+
 
 #! Clear Button
 def clear_screen():
@@ -756,6 +763,9 @@ STATUS_MS1.bind("<Button-1>",lambda event:show_git_changes("C:\\ms1"))
 STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS2.bind("<Button-1>",lambda event:show_git_changes("C:\\ms2"))
+STATUS_MS3=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
+STATUS_MS3.pack(side="left",padx=(0,0),pady=(0,0))
+STATUS_MS3.bind("<Button-1>",lambda event:show_git_changes("C:\\ms3"))
 
 def delete_git_lock_files():
     files_to_delete = [
