@@ -771,6 +771,7 @@ def delete_git_lock_files():
     files_to_delete = [
         r'C:\ms1\.git\index.lock',
         r'C:\ms2\.git\index.lock'
+        r'C:\ms3\.git\index.lock'
     ]
     for file in files_to_delete:
         try:
