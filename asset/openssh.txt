@@ -210,7 +210,7 @@ Setup Antroid/Termux .zshrc/.bashrc
 	nano ~/.zshrc
 	alias hellomusic='echo "hellomusic" && mpv /storage/emulated/0/song/wwe/ww.mp3'
 	add sshd in nano ~/.zshrc
-	
+
 
 Setup For PasswordLess [PC-->Android]
 $$From PC
