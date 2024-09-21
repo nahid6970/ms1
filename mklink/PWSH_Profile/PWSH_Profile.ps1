@@ -671,6 +671,11 @@ function rb {
     cmd /c "shutdown /r /f /t 0"
 }
 
+function gitpush {
+git add .
+git commit -m "XX"
+git push
+}
 
 function Prompt {
     $currentLocation = Get-Location
