@@ -19,6 +19,13 @@
 ^!t::Toggle_Reset_Workspace()
 ^!w::Toggle_Screen_Whiteout()
 
+
+
+^m:: Run, pwsh C:\ms1\ssh_to_termux.ps1,,Return
+
+
+
+
 ; Kill Commands
 ; !+v::RunWait, taskkill /f /im VALORANT-Win64-Shipping.exe,,Hide
 !+o::RunWait, taskkill /f /im whkd.exe,,Hide
@@ -1532,3 +1539,6 @@ DetectHiddenWindows, On
 ; F17::
 ; MsgBox, You pressed F17!
 ; return
+
+
+
