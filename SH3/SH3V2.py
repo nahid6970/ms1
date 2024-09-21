@@ -37,39 +37,10 @@ ROOT.geometry(f"+{x}+{y}")
 pyautogui.FAILSAFE = False
 
 # find_image
-# error_count = 0  # Initialize the error counter
-# def find_image(image_path, confidence=0.7):
-#     """Find the location of the image on the screen and show time in 12-hour format."""
-#     global error_count
-#     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
-#     def get_current_time():
-#         """Return the current time in 12-hour format."""
-#         return datetime.datetime.now().strftime("%I:%M:%S %p")
-#     def log_output(message):
-#         """Save output message to file."""
-#         with open(output_file, 'a') as file:
-#             file.write(f"{get_current_time()} - {message}\n")
-#     try:
-#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-#         if location:
-#             image_name = os.path.basename(image_path)
-#             message = f"Found image: {image_name}"
-#             print(f"{get_current_time()} - {message}")
-#             log_output(message)
-#             return location
-#     except Exception as e:
-#         error_count += 1
-#         error_message = f"{error_count} times not found. Error: {e}"
-#         print(f"{get_current_time()} - {error_message}")
-#         log_output(error_message)
-#     return None
-
-
 error_count = 0  # Initialize the error counter
-command_executed = False  # Flag to check if the command has been executed
-def find_image(image_path, confidence=0.7, timeout=120):
+def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen and show time in 12-hour format."""
-    global error_count, command_executed
+    global error_count
     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
     def get_current_time():
         """Return the current time in 12-hour format."""
@@ -78,35 +49,64 @@ def find_image(image_path, confidence=0.7, timeout=120):
         """Save output message to file."""
         with open(output_file, 'a') as file:
             file.write(f"{get_current_time()} - {message}\n")
-    start_time = time.time()  # Record the start time
-    while True:
-        try:
-            location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-            if location:
-                image_name = os.path.basename(image_path)
-                message = f"Found image: {image_name}"
-                print(f"{get_current_time()} - {message}")
-                log_output(message)
-                return location
-        except Exception as e:
-            error_count += 1
-            error_message = f"{error_count} times not found. Error: {e}"
-            print(f"{get_current_time()} - {error_message}")
-            log_output(error_message)
-        # Check if the timeout has been reached and the command has not been executed
-        elapsed_time = time.time() - start_time
-        if elapsed_time > timeout and not command_executed:
-            try:
-                # Run the PowerShell script
-                subprocess.Popen(["powershell.exe", r"C:\ms1\ssh_to_termux.ps1"])
-                command_executed = True  # Set the flag to True to prevent multiple executions
-                log_output("Executed the command C:\\ms1\\ssh_to_termux.ps1 due to timeout.")
-            except Exception as e:
-                log_output(f"Failed to execute command. Error: {e}")
-        # Break the loop after timeout to stop trying to find the image
-        if elapsed_time > timeout:
-            break
+    try:
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+        if location:
+            image_name = os.path.basename(image_path)
+            message = f"Found image: {image_name}"
+            print(f"{get_current_time()} - {message}")
+            log_output(message)
+            return location
+    except Exception as e:
+        error_count += 1
+        error_message = f"{error_count} times not found. Error: {e}"
+        print(f"{get_current_time()} - {error_message}")
+        log_output(error_message)
     return None
+
+
+# error_count = 0  # Initialize the error counter
+# command_executed = False  # Flag to check if the command has been executed
+# def find_image(image_path, confidence=0.7, timeout=120):
+#     """Find the location of the image on the screen and show time in 12-hour format."""
+#     global error_count, command_executed
+#     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
+#     def get_current_time():
+#         """Return the current time in 12-hour format."""
+#         return datetime.datetime.now().strftime("%I:%M:%S %p")
+#     def log_output(message):
+#         """Save output message to file."""
+#         with open(output_file, 'a') as file:
+#             file.write(f"{get_current_time()} - {message}\n")
+#     start_time = time.time()  # Record the start time
+#     while True:
+#         try:
+#             location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#             if location:
+#                 image_name = os.path.basename(image_path)
+#                 message = f"Found image: {image_name}"
+#                 print(f"{get_current_time()} - {message}")
+#                 log_output(message)
+#                 return location
+#         except Exception as e:
+#             error_count += 1
+#             error_message = f"{error_count} times not found. Error: {e}"
+#             print(f"{get_current_time()} - {error_message}")
+#             log_output(error_message)
+#         # Check if the timeout has been reached and the command has not been executed
+#         elapsed_time = time.time() - start_time
+#         if elapsed_time > timeout and not command_executed:
+#             try:
+#                 # Run the PowerShell script
+#                 subprocess.Popen(["powershell.exe", r"C:\ms1\ssh_to_termux.ps1"])
+#                 command_executed = True  # Set the flag to True to prevent multiple executions
+#                 log_output("Executed the command C:\\ms1\\ssh_to_termux.ps1 due to timeout.")
+#             except Exception as e:
+#                 log_output(f"Failed to execute command. Error: {e}")
+#         # Break the loop after timeout to stop trying to find the image
+#         if elapsed_time > timeout:
+#             break
+#     return None
 
 
 # focus_window
