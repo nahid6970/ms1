@@ -377,9 +377,7 @@ def perform_action2(window):
                 key_down(window, 'd')
                 press_key(window, 'j')
                 press_key(window, 'j')
-                press_key(window, 'j')
-                press_key(window, 'j')
-                press_key(window, 'l')
+                # press_key(window, 'l')
                 key_up(window, 'd')
                 key_up(window, 'i')
                 # key_up(window, 'l')
@@ -388,6 +386,7 @@ def perform_action2(window):
             # Release keys after the action is completed
             key_up(window, 'd')
             key_up(window, 'x')
+            key_up(window, 'i')
             pause_other_items = False
         else:
             time.sleep(0.05)  # Prevent high CPU usage when idle
