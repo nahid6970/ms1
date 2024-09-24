@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Sharing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .shared-text {
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap; /* Preserve line breaks */
+            word-wrap: break-word; /* Enable line breaks for long words */
+            word-break: break-all;  /* Ensure long unbroken strings wrap properly */
+        }
+        .copy-btn {
+            margin-top: 10px;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .copy-btn:hover {
+            background-color: #0056b3;
+        }
+        .copy-btn.success {
+            background-color: #28a745;
+        }
+    </style>
+    <script>
+        // Function to copy the shared text to the clipboard
+        function copyText() {
+            // Create a temporary textarea element to store the text
+            var textarea = document.createElement('textarea');
+            textarea.value = document.getElementById('shared-text').innerText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            // Change the button text and color to indicate success
+            var copyBtn = document.getElementById('copy-btn');
+            copyBtn.innerText = '✔ Success';
+            copyBtn.classList.add('success');
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Share Text Locally</h1>
+
+    <form method="POST">
+        <textarea name="text" rows="5" placeholder="Paste your text here..."></textarea><br><br>
+        <button type="submit">Share</button>
+    </form>
+
+    {% if shared_text %}
+    <h2>Shared Text:</h2>
+    <div id="shared-text" class="shared-text">{{ shared_text }}</div>
+    <button id="copy-btn" class="copy-btn" onclick="copyText()">Copy</button>
+    {% endif %}
+
+</body>
+</html>
