@@ -118,6 +118,7 @@ function pip_install {
     pip install pywin32
     pip install screeninfo
     pip install winshell
+    pip install Flask
 }
 pip_install
 
