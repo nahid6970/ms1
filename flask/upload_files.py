@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template_string, request, redirect, url_for, send_from_directory, flash
+from flask import Flask, request, send_from_directory, redirect, url_for, flash, render_template_string
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -12,14 +12,14 @@ if not os.path.exists(SHARE_FOLDER):
 
 app.config['SHARE_FOLDER'] = SHARE_FOLDER
 
-# HTML template for file upload and listing
-HTML_TEMPLATE = '''
+# HTML template within the Python file (instead of an external index.html)
+html_template = '''
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Sharing</title>
+    <title>File Sharing with Progress</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,6 +68,17 @@ HTML_TEMPLATE = '''
         .clean-button:hover {
             background-color: #C70039;
         }
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 20px;
+            width: 0;
+            background-color: #4CAF50;
+        }
         .flash {
             color: green;
             font-weight: bold;
@@ -77,35 +88,63 @@ HTML_TEMPLATE = '''
 </head>
 <body>
 
-    <h1>File Sharing Service</h1>
+    <h1>File Sharing with Progress</h1>
 
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="files" multiple required><br><br>
+    <form id="upload-form">
+        <input type="file" id="file-input" name="files" multiple required><br><br>
         <button type="submit">Upload</button>
     </form>
 
-    <form method="POST" action="{{ url_for('clean') }}">
+    <div class="progress-bar">
+        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+    </div>
+    <span id="progress-percentage"></span>
+
+    <form method="POST" action="/clean">
         <button type="submit" class="clean-button">Clean Directory</button>
     </form>
 
-    {% if files %}
-    <h2>Shared Files:</h2>
     <div class="file-list">
         {% for file in files %}
-        <div class="file-item">
-            <a class="download-link" href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a>
-        </div>
+            <div class="file-item">
+                <a class="download-link" href="/uploads/{{ file }}">{{ file }}</a>
+            </div>
         {% endfor %}
     </div>
-    {% endif %}
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash">
-          {{ messages[0] }}
-        </div>
-      {% endif %}
-    {% endwith %}
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var formData = new FormData();
+            var files = document.getElementById("file-input").files;
+
+            for (var i = 0; i < files.length; i++) {
+                formData.append("files", files[i]);
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/", true);
+
+            xhr.upload.onprogress = function(event) {
+                if (event.lengthComputable) {
+                    var percentComplete = (event.loaded / event.total) * 100;
+                    document.getElementById("progress-bar-fill").style.width = percentComplete + "%";
+                    document.getElementById("progress-percentage").innerText = Math.round(percentComplete) + "%";
+                }
+            };
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    window.location.reload(); // Refresh to update the file list after upload
+                } else {
+                    alert("Error uploading file!");
+                }
+            };
+
+            xhr.send(formData);
+        });
+    </script>
 
 </body>
 </html>
@@ -132,11 +171,11 @@ def index():
                 else:
                     flash(f"File '{filename}' already exists.")
 
-            return redirect(url_for('index'))
+            return '', 200  # Return a success response to the client
 
     # List all files in the sharepoint directory
     files = os.listdir(app.config['SHARE_FOLDER'])
-    return render_template_string(HTML_TEMPLATE, files=files)
+    return render_template_string(html_template, files=files)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
