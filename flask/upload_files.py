@@ -19,7 +19,7 @@ html_template = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Sharing with Progress</title>
+    <title>File Sharing with Circular Progress</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,6 +37,11 @@ html_template = '''
             padding: 10px;
             font-size: 16px;
         }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
         button {
             padding: 10px 15px;
             font-size: 16px;
@@ -48,6 +53,28 @@ html_template = '''
         }
         button:hover {
             background-color: #45a049;
+        }
+        .clean-button {
+            background-color: #FF5733; /* Red color for clean button */
+        }
+        .clean-button:hover {
+            background-color: #C70039;
+        }
+        .circular-progress {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(#4CAF50 0%, #ccc 0%);
+        }
+        .progress-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
         }
         .file-list {
             margin-top: 20px;
@@ -62,23 +89,6 @@ html_template = '''
         .download-link:hover {
             text-decoration: underline;
         }
-        .clean-button {
-            background-color: #FF5733; /* Red color for clean button */
-        }
-        .clean-button:hover {
-            background-color: #C70039;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #f3f3f3;
-            border: 1px solid #ccc;
-            margin-top: 10px;
-        }
-        .progress-bar-fill {
-            height: 20px;
-            width: 0;
-            background-color: #4CAF50;
-        }
         .flash {
             color: green;
             font-weight: bold;
@@ -88,21 +98,25 @@ html_template = '''
 </head>
 <body>
 
-    <h1>File Sharing with Progress</h1>
+    <h1>File Sharing with Circular Progress</h1>
 
     <form id="upload-form">
         <input type="file" id="file-input" name="files" multiple required><br><br>
-        <button type="submit">Upload</button>
+
+        <div class="button-container">
+            <button type="submit">Upload</button>
+        </div>
     </form>
 
-    <div class="progress-bar">
-        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+    <form id="clean-form" method="POST" action="/clean">
+        <div class="button-container">
+            <button type="submit" class="clean-button">Clean Directory</button>
+        </div>
+    </form>
+
+    <div class="circular-progress" id="circular-progress">
+        <div class="progress-percentage" id="progress-percentage">0%</div>
     </div>
-    <span id="progress-percentage"></span>
-
-    <form method="POST" action="/clean">
-        <button type="submit" class="clean-button">Clean Directory</button>
-    </form>
 
     <div class="file-list">
         {% for file in files %}
@@ -129,8 +143,12 @@ html_template = '''
             xhr.upload.onprogress = function(event) {
                 if (event.lengthComputable) {
                     var percentComplete = (event.loaded / event.total) * 100;
-                    document.getElementById("progress-bar-fill").style.width = percentComplete + "%";
-                    document.getElementById("progress-percentage").innerText = Math.round(percentComplete) + "%";
+                    var progressCircle = document.getElementById("circular-progress");
+                    var progressText = document.getElementById("progress-percentage");
+
+                    // Update circular progress
+                    progressCircle.style.background = 'conic-gradient(#4CAF50 ' + percentComplete + '%, #ccc ' + percentComplete + '%)';
+                    progressText.innerText = Math.round(percentComplete) + "%";
                 }
             };
 
