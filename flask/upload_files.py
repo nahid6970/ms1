@@ -80,7 +80,7 @@ HTML_TEMPLATE = '''
     <h1>File Sharing Service</h1>
 
     <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" required><br><br>
+        <input type="file" name="files" multiple required><br><br>
         <button type="submit">Upload</button>
     </form>
 
@@ -114,22 +114,23 @@ HTML_TEMPLATE = '''
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        if 'file' in request.files:
-            file = request.files['file']
-            if file.filename == '':
-                flash("No file selected.")
-                return redirect(request.url)
+        if 'files' in request.files:
+            files = request.files.getlist('files')
+            for file in files:
+                if file.filename == '':
+                    flash("No file selected.")
+                    continue
 
-            # Secure the filename and define the file path
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['SHARE_FOLDER'], filename)
+                # Secure the filename and define the file path
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['SHARE_FOLDER'], filename)
 
-            # Save file only if it doesn't already exist
-            if not os.path.exists(file_path):
-                file.save(file_path)
-                flash(f"File '{filename}' uploaded successfully.")
-            else:
-                flash("File already exists.")
+                # Save file only if it doesn't already exist
+                if not os.path.exists(file_path):
+                    file.save(file_path)
+                    flash(f"File '{filename}' uploaded successfully.")
+                else:
+                    flash(f"File '{filename}' already exists.")
 
             return redirect(url_for('index'))
 
