@@ -14,28 +14,63 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Lazy.nvim setup with plugins
 require("lazy").setup({
-  -- Required dependencies
-  {'nvim-lua/plenary.nvim'}, -- Required by Telescope
-
-  -- Telescope plugin for fuzzy finding and more
+  {'EdenEast/nightfox.nvim' },
+  {'L3MON4D3/LuaSnip'},
+  {'MunifTanjim/nui.nvim'},
+  {'NvChad/nvim-colorizer.lua'},
+  {'ThePrimeagen/harpoon'},
+  {'VonHeikemen/lsp-zero.nvim', branch = 'v2.x'},
+  {'crusj/bookmarks.nvim', keys = {{ "<tab><tab>", mode = { "n" } }}, branch = 'main', config = function() 
+      require("bookmarks").setup() 
+      require("telescope").load_extension("bookmarks") 
+    end
+  },
+  {'folke/neodev.nvim'},
+  {'folke/tokyonight.nvim'},
+  {'folke/trouble.nvim'},
+  {'folke/which-key.nvim', event = "VeryLazy", init = function() 
+      vim.o.timeout = true 
+      vim.o.timeoutlen = 300 
+    end, opts = {}
+  },
+  {'hrsh7th/cmp-nvim-lsp'},
+  {'hrsh7th/nvim-cmp'},
+  {'kdheepak/lazygit.nvim'},
+  {'kylechui/nvim-surround', version = "*", event = "VeryLazy", config = function() 
+      require("nvim-surround").setup({ }) 
+    end
+  },
+  {'mg979/vim-visual-multi', branch = 'master'},
+  {'neovim/nvim-lspconfig'},
+  {'nvim-lua/plenary.nvim'},
+  {'nvim-lualine/lualine.nvim'},
+  {'nvim-neo-tree/neo-tree.nvim', branch = "v3.x"},
   {'nvim-telescope/telescope.nvim', tag = '0.1.3', config = function()
-    require('telescope').setup{
-      defaults = {
-        mappings = {
-          i = { ["<C-h>"] = "which_key" } -- Example for Telescope key mappings
+      require('telescope').setup{
+        defaults = {
+          mappings = {
+            i = { ["<C-h>"] = "which_key" } -- Example for Telescope key mappings
+          },
         },
-      },
-    }
-  end},
-
-  -- which-key plugin for shortcut hints
-  {'folke/which-key.nvim', config = function()
-    vim.o.timeout = true
-    vim.o.timeoutlen = 300
-    require("which-key").setup {}
-  end},
+      }
+    end
+  },
+  {'nvim-tree/nvim-web-devicons'},
+  {'nvim-treesitter/nvim-treesitter', build = ":TSUpdate"},
+  {'nvim-treesitter/playground'},
+  {'rafamadriz/friendly-snippets'},
+  {'roobert/surround-ui.nvim', config = function() 
+      require("surround-ui").setup({ root_key = "S" }) 
+    end
+  },
+  {'saadparwaiz1/cmp_luasnip'},
+  {'startup-nvim/startup.nvim', config = function() require("startup").setup() end}, -- Intro
+  {'sunjon/shade.nvim'},
+  {'williamboman/mason-lspconfig.nvim'},
+  {'williamboman/mason.nvim'},
+  {'yorik1984/lualine-theme.nvim'},
+  {'akinsho/bufferline.nvim', version = "*"},
 })
-
 -- Set space as the leader key
 vim.g.mapleader = " "
 
@@ -43,16 +78,14 @@ vim.g.mapleader = " "
 local wk = require("which-key")
 
 wk.register({
-  ["<leader>"] = {
-    f = {
-      name = "File", -- Group name displayed in the popup
-      f = { "<cmd>Telescope find_files<cr>", "Find Files" },
-      g = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
+  [""] = {
+    f = { name = "File",
+        f = { "<cmd>Telescope find_files<cr>", "Find Files" },
+        g = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
     },
-    b = {
-      name = "Buffer",
-      l = { "<cmd>ls<cr>", "List Buffers" },
-      d = { "<cmd>bd<cr>", "Delete Buffer" }
+    b = { name = "Buffer",
+        l = { "<cmd>ls<cr>", "List Buffers" },
+        d = { "<cmd>bd<cr>", "Delete Buffer" }
     },
     q = { "<cmd>q<cr>", "Quit" },
     w = { "<cmd>w<cr>", "Write" },
