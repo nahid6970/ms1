@@ -4,21 +4,22 @@ function Show-Menu {
     Write-Host "======================" -ForegroundColor Cyan
     Write-Host "    Menu Options      " -ForegroundColor Cyan
     Write-Host "======================" -ForegroundColor Cyan
-    Write-Host "1. Install Packages" -ForegroundColor Green
-    Write-Host "2. Set up Neovim" -ForegroundColor Green
-    Write-Host "3. Git Push Repo" -ForegroundColor Green
-    Write-Host "4. Exit" -ForegroundColor Green  # New exit option
+    Write-Host "1. Install Packages"    -ForegroundColor Green
+    Write-Host "2. Git Pull"            -ForegroundColor Green
+    Write-Host "3. Mklink"              -ForegroundColor Green
+    Write-Host "4. Exit"                -ForegroundColor Green
 }
 
 # Function to display the Git Push sub-menu
-function Show-GitMenu {
+function Git_Pull {
     Clear-Host
     Write-Host "=========================" -ForegroundColor Cyan
-    Write-Host "    Git Push Sub-Menu     " -ForegroundColor Cyan
+    Write-Host "         Git Pull        " -ForegroundColor Cyan
     Write-Host "=========================" -ForegroundColor Cyan
-    Write-Host "1. Push to Origin" -ForegroundColor Green
-    Write-Host "2. Push to Upstream" -ForegroundColor Green
-    Write-Host "3. Go Back to Main Menu" -ForegroundColor Green
+    Write-Host "1. ms1"                    -ForegroundColor Green
+    Write-Host "2. ms2"                    -ForegroundColor Green
+    Write-Host "3. ms3"                    -ForegroundColor Green
+    Write-Host "4. Go Back"                -ForegroundColor Green
 }
 
 # Function to install packages (dummy function for example)
@@ -55,16 +56,12 @@ while ($true) {
     $choice = Read-Host "Enter Choice"  # Updated to [1-4]
 
     switch ($choice) {
-        1 {
-            Install-Packages
-        }
+        1 { Install-Packages }
+        2 { Setup-Neovim }
         2 {
-            Setup-Neovim
-        }
-        3 {
             $returnToMain = $false
             while (-not $returnToMain) {
-                Show-GitMenu
+                Git_Pull
                 $gitChoice = Read-Host "Enter Choice"
 
                 switch ($gitChoice) {
