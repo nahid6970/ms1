@@ -1,3 +1,9 @@
+#? ██████╗ ██╗███████╗██████╗ ██╗      █████╗ ██╗   ██╗    ███╗   ███╗███████╗███╗   ██╗██╗   ██╗
+#? ██╔══██╗██║██╔════╝██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝    ████╗ ████║██╔════╝████╗  ██║██║   ██║
+#? ██║  ██║██║███████╗██████╔╝██║     ███████║ ╚████╔╝     ██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
+#? ██║  ██║██║╚════██║██╔═══╝ ██║     ██╔══██║  ╚██╔╝      ██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
+#? ██████╔╝██║███████║██║     ███████╗██║  ██║   ██║       ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
+#? ╚═════╝ ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
 # Function to display the main menu
 function Main_Menu {
     # Clear-Host
@@ -22,41 +28,73 @@ function Git_Pull_Menu {
     Write-Host "4. Go Back"                -ForegroundColor Green
 }
 
+#* ██████╗  █████╗  ██████╗██╗  ██╗ █████╗  ██████╗ ███████╗███████╗
+#* ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔════╝ ██╔════╝██╔════╝
+#* ██████╔╝███████║██║     █████╔╝ ███████║██║  ███╗█████╗  █████╗
+#* ██╔═══╝ ██╔══██║██║     ██╔═██╗ ██╔══██║██║   ██║██╔══╝  ██╔══╝
+#* ██║     ██║  ██║╚██████╗██║  ██╗██║  ██║╚██████╔╝███████╗███████╗
+#* ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
 # Function to install packages (dummy function for example)
-function Install-Packages {
+function Install_Packages {
     Write-Host "Installing packages..." -ForegroundColor Yellow
     Start-Sleep -Seconds 2
     Write-Host "Packages installed successfully!" -ForegroundColor Green
 }
 
+#* ███╗   ███╗██╗  ██╗██╗     ██╗███╗   ██╗██╗  ██╗
+#* ████╗ ████║██║ ██╔╝██║     ██║████╗  ██║██║ ██╔╝
+#* ██╔████╔██║█████╔╝ ██║     ██║██╔██╗ ██║█████╔╝
+#* ██║╚██╔╝██║██╔═██╗ ██║     ██║██║╚██╗██║██╔═██╗
+#* ██║ ╚═╝ ██║██║  ██╗███████╗██║██║ ╚████║██║  ██╗
+#* ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝
 # Function to set up Neovim (dummy function for example)
-function Setup-Neovim {
-    Write-Host "Setting up Neovim..." -ForegroundColor Yellow
+function mklink {
+    Write-Host "Setting up Neovim..."    -ForegroundColor Yellow
     Start-Sleep -Seconds 2
     Write-Host "Neovim setup completed!" -ForegroundColor Green
 }
 
+#*  ██████╗ ██╗████████╗
+#* ██╔════╝ ██║╚══██╔══╝
+#* ██║  ███╗██║   ██║
+#* ██║   ██║██║   ██║
+#* ╚██████╔╝██║   ██║
+#*  ╚═════╝ ╚═╝   ╚═╝
 # Function to push to origin (dummy function for example)
-function Push-Origin {
-    Write-Host "Pushing to origin..." -ForegroundColor Yellow
-    Start-Sleep -Seconds 2
-    Write-Host "Pushed to origin successfully!" -ForegroundColor Green
+function git_pull_ms1 {
+    Write-Host "Git Pull ms1..."      -ForegroundColor Yellow
+    Set-Location C:\
+    Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
 # Function to push to upstream (dummy function for example)
-function Push-Upstream {
-    Write-Host "Pushing to upstream..." -ForegroundColor Yellow
-    Start-Sleep -Seconds 2
-    Write-Host "Pushed to upstream successfully!" -ForegroundColor Green
+function git_pull_ms2 {
+    Write-Host "Git Pull ms2..." -ForegroundColor Yellow
+    Set-Location C:\
+    Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
+# Function to push to upstream (dummy function for example)
+function git_pull_ms3 {
+    Write-Host "Git Pull ms3..."      -ForegroundColor Yellow
+    Set-Location C:\
+    Write-Host "Pulled successfully!" -ForegroundColor Green
+}
+
+
+#?  ██████╗██╗  ██╗ ██████╗ ██╗ ██████╗███████╗███████╗
+#? ██╔════╝██║  ██║██╔═══██╗██║██╔════╝██╔════╝██╔════╝
+#? ██║     ███████║██║   ██║██║██║     █████╗  ███████╗
+#? ██║     ██╔══██║██║   ██║██║██║     ██╔══╝  ╚════██║
+#? ╚██████╗██║  ██║╚██████╔╝██║╚██████╗███████╗███████║
+#?  ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝ ╚═════╝╚══════╝╚══════╝
 # Main script loop
 while ($true) {
     Main_Menu
     $choice = Read-Host "Enter Choice"  # Updated to [1-4]
 
     switch ($choice) {
-        1 { Install-Packages }
+        1 { Install_Packages }
         2 {
             $returnToMain = $false
             while (-not $returnToMain) {
@@ -64,22 +102,15 @@ while ($true) {
                 $gitChoice = Read-Host "Enter Choice"
                 
                 switch ($gitChoice) {
-                    1 {
-                        Push-Origin
-                    }
-                    2 {
-                        Push-Upstream
-                    }
-                    3 {
-                        $returnToMain = $true
-                    }
-                    default {
-                        Write-Host "Invalid option. Please try again." -ForegroundColor Red
-                    }
+                    1 { git_pull_ms1 }
+                    2 { git_pull_ms2 }
+                    3 { git_pull_ms3 }
+                    4 { $returnToMain = $true }
+                    default { Write-Host "Invalid option. Please try again." -ForegroundColor Red }
                 }
             }
         }
-        3 { Setup-Neovim }
+        3 { mklink }
         4 {
             echo 4
         }
