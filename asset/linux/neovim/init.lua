@@ -1,4 +1,5 @@
 --⚡Help⚡-------------------------------------------------------------------------⚡Help⚡--
+-- some time it fails coz of github speed and then delete those repo downloaded folder if already exist error shows and retry
 --Remove-Item C:\Users\nahid\AppData\Local\nvim-data\swap\  #delete swap regularly for errors
 --helping
 --folks/whichkey causing to hide intro
