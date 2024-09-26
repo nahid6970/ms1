@@ -1,12 +1,13 @@
 # Function to display the main menu
 function Show-Menu {
-    Clear-Host
+    # Clear-Host
     Write-Host "======================" -ForegroundColor Cyan
     Write-Host "    Menu Options      " -ForegroundColor Cyan
     Write-Host "======================" -ForegroundColor Cyan
     Write-Host "1. Install Packages" -ForegroundColor Green
     Write-Host "2. Set up Neovim" -ForegroundColor Green
     Write-Host "3. Git Push Repo" -ForegroundColor Green
+    Write-Host "4. Exit" -ForegroundColor Green  # New exit option
 }
 
 # Function to display the Git Push sub-menu
@@ -51,7 +52,7 @@ function Push-Upstream {
 # Main script loop
 while ($true) {
     Show-Menu
-    $choice = Read-Host "Please enter your choice [1-3]"
+    $choice = Read-Host "Enter Choice"  # Updated to [1-4]
 
     switch ($choice) {
         1 {
@@ -64,7 +65,7 @@ while ($true) {
             $returnToMain = $false
             while (-not $returnToMain) {
                 Show-GitMenu
-                $gitChoice = Read-Host "Please select a Git option [1-3]"
+                $gitChoice = Read-Host "Enter Choice"
 
                 switch ($gitChoice) {
                     1 {
@@ -81,6 +82,9 @@ while ($true) {
                     }
                 }
             }
+        }
+        4 {
+            echo 4
         }
         default {
             Write-Host "Invalid option. Please try again." -ForegroundColor Red
