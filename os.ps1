@@ -1,5 +1,5 @@
 # Function to display the main menu
-function Show-Menu {
+function Main_Menu {
     # Clear-Host
     Write-Host "======================" -ForegroundColor Cyan
     Write-Host "    Menu Options      " -ForegroundColor Cyan
@@ -11,7 +11,7 @@ function Show-Menu {
 }
 
 # Function to display the Git Push sub-menu
-function Git_Pull {
+function Git_Pull_Menu {
     Clear-Host
     Write-Host "=========================" -ForegroundColor Cyan
     Write-Host "         Git Pull        " -ForegroundColor Cyan
@@ -52,18 +52,17 @@ function Push-Upstream {
 
 # Main script loop
 while ($true) {
-    Show-Menu
+    Main_Menu
     $choice = Read-Host "Enter Choice"  # Updated to [1-4]
 
     switch ($choice) {
         1 { Install-Packages }
-        2 { Setup-Neovim }
         2 {
             $returnToMain = $false
             while (-not $returnToMain) {
-                Git_Pull
+                Git_Pull_Menu
                 $gitChoice = Read-Host "Enter Choice"
-
+                
                 switch ($gitChoice) {
                     1 {
                         Push-Origin
@@ -80,6 +79,7 @@ while ($true) {
                 }
             }
         }
+        3 { Setup-Neovim }
         4 {
             echo 4
         }
