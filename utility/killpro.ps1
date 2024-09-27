@@ -1,28 +1,23 @@
-# Use old PowerShell and prevent loading the profile
-$psCommand = {
-    $processes = Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String
-    $selectedProcesses = $processes | fzf -m
+# Get a list of running processes with CPU usage and select one or more using fzf
+$processes = Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String
+$selectedProcesses = $processes | fzf -m
 
-    # Extract the process names from the selected strings
-    $processNames = $selectedProcesses -split '\r?\n' | ForEach-Object {
-        $_ -split '\s{2,}' | Select-Object -First 1
-    }
-
-    # If user selects one or more processes, kill them
-    if ($processNames) {
-        foreach ($processName in $processNames) {
-            if ($processName) {
-                Stop-Process -Name $processName -Force
-                Write-Host "Process $processName terminated."
-            }
-        }
-    } else {
-        Write-Host "No processes selected."
-    }
+# Extract the process names from the selected strings
+$processNames = $selectedProcesses -split '\r?\n' | ForEach-Object {
+    $_ -split '\s{2,}' | Select-Object -First 1
 }
 
-# Invoke the old PowerShell without loading the profile
-Start-Process "powershell.exe" -ArgumentList "-NoProfile", "-Command", $psCommand
+# If user selects one or more processes, kill them
+if ($processNames) {
+    foreach ($processName in $processNames) {
+        if ($processName) {
+            Stop-Process -Name $processName -Force
+            Write-Host "Process $processName terminated."
+        }
+    }
+} else {
+    Write-Host "No processes selected."
+}
 
 
 
@@ -32,28 +27,35 @@ Start-Process "powershell.exe" -ArgumentList "-NoProfile", "-Command", $psComman
 
 
 
+# # Use old PowerShell and prevent loading the profile
+# $psCommand = {
+#     $processes = Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String
+#     $selectedProcesses = $processes | fzf -m
 
-
-# # Get a list of running processes with CPU usage and select one or more using fzf
-# $processes = Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String
-# $selectedProcesses = $processes | fzf -m
-
-# # Extract the process names from the selected strings
-# $processNames = $selectedProcesses -split '\r?\n' | ForEach-Object {
-#     $_ -split '\s{2,}' | Select-Object -First 1
-# }
-
-# # If user selects one or more processes, kill them
-# if ($processNames) {
-#     foreach ($processName in $processNames) {
-#         if ($processName) {
-#             Stop-Process -Name $processName -Force
-#             Write-Host "Process $processName terminated."
-#         }
+#     # Extract the process names from the selected strings
+#     $processNames = $selectedProcesses -split '\r?\n' | ForEach-Object {
+#         $_ -split '\s{2,}' | Select-Object -First 1
 #     }
-# } else {
-#     Write-Host "No processes selected."
+
+#     # If user selects one or more processes, kill them
+#     if ($processNames) {
+#         foreach ($processName in $processNames) {
+#             if ($processName) {
+#                 Stop-Process -Name $processName -Force
+#                 Write-Host "Process $processName terminated."
+#             }
+#         }
+#     } else {
+#         Write-Host "No processes selected."
+#     }
 # }
+
+# # Invoke the old PowerShell without loading the profile
+# Start-Process "powershell.exe" -ArgumentList "-NoProfile", "-Command", $psCommand
+
+
+
+
 
 
 
