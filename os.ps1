@@ -34,13 +34,11 @@ function mklink_menu {
     Write-Host "=========================" -ForegroundColor Cyan
     Write-Host "          mklink         " -ForegroundColor Cyan
     Write-Host "=========================" -ForegroundColor Cyan
-    Write-Host "1. xx"                    -ForegroundColor Green
-    Write-Host "2. xx"                    -ForegroundColor Green
-    Write-Host "3. xx"                    -ForegroundColor Green
+    Write-Host "1. xx"                     -ForegroundColor Green
+    Write-Host "2. xx"                     -ForegroundColor Green
+    Write-Host "3. xx"                     -ForegroundColor Green
     Write-Host "4. Go Back"                -ForegroundColor Green
 }
-
-
 
 #!  ██╗ ██╗
 #! ████████╗
@@ -64,8 +62,34 @@ function Run_NewWindow {
 #* ██║     ██║  ██║╚██████╗██║  ██╗██║  ██║╚██████╔╝███████╗███████╗
 #* ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
 # Function to install packages (dummy function for example)
-function Install_Packages {
-    Write-Host "Installing packages..." -ForegroundColor Yellow
+function Install_Packages_scoop {
+    Write-Host "Installing Scoop packages..." -ForegroundColor Yellow
+    scoop install git
+    scoop install python
+
+    scoop install ack
+    scoop install adb
+    scoop install bat
+    scoop install capture2text
+    scoop install ditto
+    scoop install ffmpeg
+    scoop install fzf
+    scoop install highlight
+    scoop install komorebi
+    scoop install oh-my-posh
+    scoop install rclone
+    scoop install rssguard
+    scoop install rufus
+    scoop install scoop-completion
+    scoop install scoop-search
+    scoop install ventoy
+    scoop install winaero-tweaker
+    scoop install yt-dlp
+    Write-Host "Packages installed successfully!" -ForegroundColor Green
+}
+
+function Install_Packages_winget {
+    Write-Host "Installing Winget packages..." -ForegroundColor Yellow
     Start-Sleep -Seconds 2
     Write-Host "Packages installed successfully!" -ForegroundColor Green
 }
@@ -131,7 +155,7 @@ while ($true) {
 
     switch ($choice) {
         1 {
-            Run_NewWindow 'Install_Packages' 
+            Run_NewWindow 'Install_Packages_scoop ; Install_Packages_winget' 
             }
         2 {
             $returnToMain = $false
