@@ -1,3 +1,9 @@
+# ███╗   ██╗███████╗██╗    ██╗    ████████╗ █████╗ ██████╗
+# ████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔══██╗██╔══██╗
+# ██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   ███████║██████╔╝
+# ██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══██║██╔══██╗
+# ██║ ╚████║███████╗╚███╔███╔╝       ██║   ██║  ██║██████╔╝
+# ╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚═╝  ╚═╝╚═════╝
 # Directories to search
 $directories = @(
     # $HOME
@@ -21,14 +27,6 @@ function OpenFileInVSCode {
     Start-Process "code" $filePath
 }
 
-# Function to launch or run the selected file
-function LaunchFile {
-    param (
-        [string]$filePath
-    )
-    Invoke-Item $filePath
-}
-
 # Main function to search directories and files using fzf
 function SearchDirectoriesAndFiles {
     $selectedDirectory = ($directories)
@@ -39,28 +37,9 @@ function SearchDirectoriesAndFiles {
         ForEach-Object {
             $_.FullName # Print the file path to console
         } | fzf -m --preview "highlight -O ansi -l {}" --preview-window=top:30% | ForEach-Object {
-            LaunchFile $_
+            OpenFileInVSCode $_
         }
     }
 }
-
 # Call the main function
 SearchDirectoriesAndFiles
-
-
-
-
-
-
-# Main function to search directories and files using fzf
-# function SearchDirectoriesAndFiles {
-#     $selectedDirectory = ($directories | fzf -m)
-#     #!$selectedDirectory = ($directories)
-#     if ($selectedDirectory) {
-#         $files = Get-ChildItem -Path $selectedDirectory -File -Recurse | Where-Object { $_.FullName -notmatch ($ignoreList -join '|') }
-#         $selectedFile = ($files.FullName | fzf -m --preview "highlight -O ansi -l {}" --preview-window=top:50% )
-#         if ($selectedFile) {
-#             OpenFileInVSCode $selectedFile
-#         }
-#     }
-# }
