@@ -352,13 +352,12 @@ def start_merge():
 #     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
 
 def fzf_search(event):
-    subprocess.Popen(["cmd /c start C:\\ms1\\utility\\find_files.ps1"], shell=True)
+    subprocess.Popen(["cmd /c start C:\\ms1\\ff.ps1"], shell=True)
 def edit_fzfSearch(event):
-    subprocess.Popen(["cmd /c code C:\\ms1\\utility\\find_files.ps1"],shell=True)
+    subprocess.Popen(["cmd /c code C:\\ms1\\ff.ps1"],shell=True)
 
 # def launch_LockBox(event=None):
 #     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')
 
 # def kill_proces(event):
 #     subprocess.Popen(["cmd /c start C:\\ms1\\utility\\kill_process.ps1"], shell=True)
-
