@@ -9,11 +9,11 @@ $Host.UI.RawUI.WindowTitle = $title
 # Define a function to search for files and directories
 function Search-FilesAndDirectories {
     # Prompt the user to enter a search pattern
-    Write-Host "Enter a search pattern to match against filenames" -ForegroundColor Green
+    Write-Host "Pattern to match" -ForegroundColor Green
     $searchPattern = Read-Host
 
     # Prompt the user to enter the drive to search
-    Write-Host "Enter the drive to search" -ForegroundColor Green
+    Write-Host "Drive" -ForegroundColor Green
     $drive = Read-Host
 
     # Get all files and directories in the specified drive and filter by matching names or full paths

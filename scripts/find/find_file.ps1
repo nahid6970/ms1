@@ -9,10 +9,10 @@ $Host.UI.RawUI.WindowTitle = $title
 # Define a function to search for files and directories
 function Search-FilesAndDirectories {
 # Prompt the user to enter a filename or directory name to search for
-Write-Host "Enter a filename or directory name to search for" -ForegroundColor Green
+Write-Host "File Name" -ForegroundColor Green
 $searchTerm = Read-Host
 # Prompt the user to enter the drive to search
-Write-Host "Enter the drive to search" -ForegroundColor Green
+Write-Host "Drive" -ForegroundColor Green
 $drive = Read-Host
 # Get all files and directories in the specified drive and filter by matching names or full paths
 Get-ChildItem -Path $drive -Recurse | Where-Object {$_.Name -like "*$searchTerm*" -or $_.FullName -like "*$searchTerm*"} | Sort-Object -Property FullName | Get-Unique -AsString | Select-Object FullName, @{Name="SizeMB";Expression={$_.Length / 1MB}} | ForEach-Object {
