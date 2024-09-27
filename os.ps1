@@ -94,6 +94,25 @@ function Install_Packages_winget {
     Write-Host "Packages installed successfully!" -ForegroundColor Green
 }
 
+function Install_Packages_pip {
+    Write-Host "Installing pip packages..." -ForegroundColor Yellow
+    pip install cryptography
+    pip install customtkinter
+    pip install importlib
+    pip install keyboard
+    pip install pillow
+    pip install psutil
+    pip install pyadl
+    pip install pyautogui
+    pip install pycryptodomex
+    pip install PyDictionary
+    pip install pywin32
+    pip install screeninfo
+    pip install winshell
+    pip install Flask
+    Write-Host "Packages installed successfully!" -ForegroundColor Green
+}
+
 #* ███╗   ███╗██╗  ██╗██╗     ██╗███╗   ██╗██╗  ██╗
 #* ████╗ ████║██║ ██╔╝██║     ██║████╗  ██║██║ ██╔╝
 #* ██╔████╔██║█████╔╝ ██║     ██║██╔██╗ ██║█████╔╝
@@ -187,7 +206,7 @@ while ($true) {
         }
 
         4 {
-            RNewWindow -FunctionName "echo 4"
+            Run_NewWindow "Install_Packages_pip"
         }
         default {
             Write-Host "Invalid option. Please try again." -ForegroundColor Red
