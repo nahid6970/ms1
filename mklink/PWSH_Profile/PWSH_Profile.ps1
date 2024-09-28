@@ -654,8 +654,8 @@ Stop-Process -Name "dnplayer"
 Stop-Process -Name "chrome"
 }
 
-function yay { cmd /c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
-function nay { cmd /c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
+function yay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
+function nay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
 
 # PsExec.exe this will only work through remote not in real terminal
 function dark { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external" }
