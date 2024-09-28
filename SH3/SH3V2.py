@@ -158,6 +158,54 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
+import win32gui
+
+
+def get_window_rect(hwnd):
+    """Get the window's position and size."""
+    rect = win32gui.GetWindowRect(hwnd)
+    return rect  # Returns (left, top, right, bottom)
+
+# press_buttons_with_delays
+def press_screen_with_delays(window, *args):
+    """Press buttons at specified x, y locations with delays, relative to the window's position.
+
+    Usage: press_buttons_with_delays(window, (100, 200, 2), (150, 250, 3), (300, 400, 2))
+    """
+    if len(args) == 0:
+        raise ValueError("At least one (x, y, delay) tuple is required.")
+
+    # Activate the window
+    window.activate()
+
+    # Get the window handle (HWND) using the window title
+    hwnd = win32gui.FindWindow(None, window.title)
+
+    if not hwnd:
+        raise ValueError("Could not find window with the specified title.")
+
+    # Get the window's position (top-left corner)
+    window_rect = get_window_rect(hwnd)
+    window_x, window_y = window_rect[0], window_rect[1]
+
+    for i in range(len(args)):
+        if len(args[i]) != 3:
+            raise ValueError("Each argument should be a tuple (x, y, delay).")
+
+        x, y, delay = args[i]
+
+        # Adjust x, y coordinates to be relative to the window's position
+        adjusted_x = window_x + x
+        adjusted_y = window_y + y
+
+        # Click at the given coordinates relative to the window
+        pyautogui.click(adjusted_x, adjusted_y)
+
+        # Wait for the specified delay before the next action
+        time.sleep(delay)
+
+
+
 # window title
 window_title='LDPlayer'
 
@@ -557,7 +605,8 @@ def event_items_handler(window):
         while not stop_thread_event:
             focus_window(window_title)
             #* Handle the other image searches and actions
-            if find_image(Home, confidence=0.8): press_key(window, 'f')
+            # if find_image(Home, confidence=0.8): press_key(window, 'f')
+            if find_image(Home, confidence=0.8): press_screen_with_delays(window, (1265, 351, 2))
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif any(find_image(image) for image in continueF): press_key(window,'c')
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
