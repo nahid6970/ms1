@@ -22,6 +22,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "SCHEDULED"           ,"command": "Start-Process C:\\ms1\\scheduled.ps1"},
 {"type": "Command","name": "Share Text"          ,"command": "Start-Process 'C:\\ms1\\flask\\share_text\\share_text.py' -WindowStyle Hidden"},
 {"type": "Command","name": "Share File"          ,"command": "Start-Process 'C:\\ms1\\flask\\upload_files.py' -WindowStyle Hidden"},
+{"type": "Command","name": "Share Drive"         ,"command": "Start-Process 'C:\\ms1\\flask\\Browse_PC_Files\\Browse_PC_Files.py' -WindowStyle Hidden"},
 {"type": "Command","name": "SSHD"                ,"command": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
 {"type": "Command","name": "SYNC"                ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"},
 {"type": "Command","name": "SYNCTHING"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
