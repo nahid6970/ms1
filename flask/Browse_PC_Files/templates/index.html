@@ -174,13 +174,14 @@
             </ul>
         </div>
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <div>
             <h3>Files:</h3>
             <ul class="file-list">
                 {% for file in files %}
                     <li class="file-item">
                         <div>
-                            <span class="dot">•</span> <!-- Dot before the file name -->
+                            <i class="fas fa-file" style="margin-right: 8px; color: #fbfffd;"></i> <!-- File icon -->
                             <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
                         </div>
                         <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn">Download</a>
