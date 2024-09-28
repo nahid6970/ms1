@@ -240,9 +240,9 @@ winget_scoop_button_properties = [
 ("Info"      ,winget_infooo      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     3,1,1 ,""  ),
 ("Install"   ,winget_install     ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     4,1,1 ,""  ),
 ("Uninstall" ,winget_uninst      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     5,1,1 ,""  ),
-("Install"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'Winget_fzf_install' ; Set-Location ; C:\\ms1\\utility\\winget_scoop\\winget_fzf_install.ps1 ; cd ~}"],shell=True)     ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,1,1 ,""  ),
-("Install2"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'Winget_fzf_install2' ; Set-Location ; C:\\ms1\\utility\\winget_scoop\\winget_fzf_install2.ps1 ; cd ~}"],shell=True)     ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     7,1,1 ,""  ),
-("Uninstall"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'Winget_fzf_Uninstall' ; Set-Location ; C:\\ms1\\utility\\winget_scoop\\winget_fzf_uninstall.ps1 ; cd ~}"],shell=True)     ,"#1D2027","#FF0000",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     8,1,1 ,""  ),
+("Install"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'Winget_fzf_install' ; Set-Location ; C:\\ms1\\scripts\\winget_scoop\\wget_install.ps1 ; cd ~}"],shell=True)     ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,1,1 ,""  ),
+("Install2"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'Winget_fzf_install2' ; Set-Location ; C:\\ms1\\scripts\\winget_scoop\\wget_install2.ps1 ; cd ~}"],shell=True)     ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     7,1,1 ,""  ),
+("Uninstall"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'Winget_fzf_Uninstall' ; Set-Location ; C:\\ms1\\scripts\\winget_scoop\\winget_uninstall.ps1 ; cd ~}"],shell=True)     ,"#1D2027","#FF0000",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     8,1,1 ,""  ),
 # ("Uninstall" ,wget_unin_fzf      ,"#1D2027","#FF0000",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     8,1,1 ,""  ),
 
 ("Scoop"     ,None               ,"#95cd95","#000000",1,12,"flat",("JetBrainsMono NF",12),5,5,0,5,     1,2,1 ,"ew"),
