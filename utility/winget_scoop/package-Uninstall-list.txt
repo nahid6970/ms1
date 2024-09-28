@@ -1,0 +1,52 @@
+Name----------------------------------  Id                                       Version          Available     Source
+-----------------------------------------------------------------------------------------------------------------------
+My-Lockbox-4.2.2----------------------  ARP\Machine\X64\My Lockbox_is1           4.2.2                          
+Notepad++-(64-bit-x64)----------------  Notepad++.Notepad++                      8.7                            winget
+Microsoft-OneDrive--------------------  Microsoft.OneDrive                       24.171.0825.0002               winget
+Microsoft-OneNote---en-us-------------  XPFFZHVGQWWLHB                           16.0.17830.20138               msstore
+PotPlayer-64-bit----------------------  Daum.PotPlayer                           240618                         winget
+Riot-Vanguard-------------------------  ARP\Machine\X64\Riot Vanguard            Unknown                        
+AnythingLLM-1.6.7---------------------  MintplexLabs.AnythingLLM                 1.6.7                          winget
+simplewall----------------------------  Henry++.simplewall                       3.8.4                          winget
+nu------------------------------------  Nushell.Nushell                          0.98.0                         winget
+nu------------------------------------  Nushell.Nushell                          0.97.1                         winget
+Cloudflare-WARP-----------------------  Cloudflare.Warp                          24.8.458.0                     winget
+TightVNC------------------------------  GlavSoft.TightVNC                        2.8.85.0                       winget
+Google-Chrome-------------------------  Google.Chrome                            129.0.6668.71                  winget
+File-Converter------------------------  AdrienAllard.FileConverter               2.0.2                          winget
+PowerShell-7-x64----------------------  Microsoft.PowerShell                     7.4.5.0                        winget
+AMD-Chipset-Software------------------  ARP\Machine\X86\AMD_Chipset_IODrivers    5.05.16.529                    
+LDPlayer------------------------------  ARP\Machine\X86\LDPlayer9                9.0.69                         
+Microsoft-Edge------------------------  Microsoft.Edge                           129.0.2792.65                  winget
+Microsoft-Edge-Update-----------------  ARP\Machine\X86\Microsoft Edge Update    1.3.195.19                     
+Microsoft-Edge-WebView2-Runtime-------  Microsoft.EdgeWebView2Runtime            129.0.2792.65                  winget
+Npcap---------------------------------  Insecure.Npcap                           1.79                           winget
+Steam---------------------------------  Valve.Steam                              2.10.91.91                     winget
+Wise-Program-Uninstaller-3.1.1--------  WiseCleaner.WiseProgramUninstaller       3.1.1                          winget
+X-Mouse-Button-Control-2.20.5---------  Highresolution.X-MouseButtonControl      2.20.5                         winget
+qBittorrent---------------------------  qBittorrent.qBittorrent                  4.6.7                          winget
+Prowlarr-version-1.24.3---------------  TeamProwlarr.Prowlarr                    1.24.3                         winget
+Sonarr--------------------------------  TeamSonarr.Sonarr                        4.0.6.1805                     winget
+Radarr-version-5.11.0-----------------  TeamRadarr.Radarr                        5.11.0                         winget
+Windows-Assessment-and-Deployment-Kit-  Microsoft.WindowsADK                     10.1.26100.1                   winget
+Chrome-Remote-Desktop-Host------------  Google.ChromeRemoteDesktopHost           129.0.6668.14    130.0.6723.14 winget
+Jackett-------------------------------  Jackett.Jackett                          0.22.681                       winget
+WinFsp-2023---------------------------  WinFsp.WinFsp                            2.0.23075                      winget
+RipGrep-MSVC--------------------------  BurntSushi.ripgrep.MSVC                  14.1.1                         winget
+LM-Studio-----------------------------  ElementLabs.LMStudio                     0.3.2                          winget
+Autoruns------------------------------  Microsoft.Sysinternals.Autoruns          14.10                          winget
+VALORANT------------------------------  ARP\User\X64\Riot Game valorant.live     Unknown                        
+Rustup:-the-Rust-toolchain-installer--  Rustlang.Rustup                          1.27.1                         winget
+aria2---------------------------------  aria2.aria2                              1.37.0                         winget
+PowerToys-(Preview)-x64---------------  Microsoft.PowerToys                      0.84.1                         winget
+Free-Download-Manager-----------------  SoftDeluxe.FreeDownloadManager           6.24.2.5857                    winget
+Ollama-version-0.3.12-----------------  Ollama.Ollama                            0.3.12                         winget
+Microsoft-Visual-Studio-Code-(User)---  Microsoft.VisualStudioCode               1.93.1                         winget
+WhatsApp------------------------------  9NKSQGP7F2NH                             2.2438.5.0                     msstore
+AutoHotkey-powered-by-weatherlights.com 9NQ8Q8J78637                             1.1137.101.0                   msstore
+App-Installer-------------------------  Microsoft.AppInstaller                   1.23.1911.0                    winget
+Microsoft.UI.Xaml.2.7-----------------  Microsoft.UI.Xaml.2.7                    7.2409.9001.0                  winget
+Microsoft.UI.Xaml.2.7-----------------  Microsoft.UI.Xaml.2.7                    7.2409.9001.0                  winget
+Microsoft.UI.Xaml.2.8-----------------  Microsoft.UI.Xaml.2.8                    8.2310.30001.0                 winget
+Microsoft.UI.Xaml.2.8-----------------  Microsoft.UI.Xaml.2.8                    8.2310.30001.0                 winget
+Windows-Terminal----------------------  Microsoft.WindowsTerminal                1.21.2361.0                    winget
