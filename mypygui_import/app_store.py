@@ -250,7 +250,7 @@ winget_scoop_button_properties = [
 ("Info"      ,scoop_info         ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     3,2,1 ,""  ),
 ("Install"   ,scoop_install      ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     4,2,1 ,""  ),
 ("Uninstall" ,scoop_uninstall    ,"#1D2027","#FFFFFF",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     5,2,1 ,""  ),
-("Install"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'scoop_fzf_install' ; Set-Location ; C:\\ms1\\utility\\winget_scoop\\scoop_fzf_install.ps1 ; cd ~}"],shell=True)  ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,2,1 ,""  ),
+("Install"   ,lambda: subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'scoop_fzf_install' ; Set-Location ; C:\\ms1\\scripts\\winget_scoop\\scoop_install.ps1 ; cd ~}"],shell=True)  ,"#1D2027","#00FF00",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     6,2,1 ,""  ),
 ("Uninstall" ,scoop_uninstall_fzf,"#1D2027","#FF0000",1,12,"flat",("JetBrainsMono NF",10),5,5,0,5,     7,2,1 ,""  )
 ]
 
