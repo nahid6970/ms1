@@ -654,22 +654,14 @@ Stop-Process -Name "dnplayer"
 Stop-Process -Name "chrome"
 }
 
+function yay { cmd /c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
+function nay { cmd /c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
+
 # PsExec.exe this will only work through remote not in real terminal
-function dark {
-    cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external"
-}
-function light {
-    cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal"
-}
-
-
-function sd {
-    cmd /c "shutdown /s /f /t 0"
-}
-
-function rb {
-    cmd /c "shutdown /r /f /t 0"
-}
+function dark { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external" }
+function light { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal" }
+function sd { cmd /c "shutdown /s /f /t 0" }
+function rb { cmd /c "shutdown /r /f /t 0" }
 
 function gitpush {
 git add .
@@ -677,11 +669,11 @@ git commit -m "XX"
 git push
 }
 
-function Prompt {
-    $currentLocation = Get-Location
-    Write-Host ("->" + $currentLocation + " ⚡") -ForegroundColor Yellow -BackgroundColor Blue -NoNewline
-    return " "
-}
+# function Prompt {
+#     $currentLocation = Get-Location
+#     Write-Host ("->" + $currentLocation + " ⚡") -ForegroundColor Yellow -BackgroundColor Blue -NoNewline
+#     return " "
+# }
 
 function build {
     cargo build --target-dir C:\Builds
