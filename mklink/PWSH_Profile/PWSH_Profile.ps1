@@ -657,6 +657,13 @@ Stop-Process -Name "chrome"
 function yay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
 function nay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
 
+function yayw1 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install.ps1" }
+function yayw2 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function nayw { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function yaywn1 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_n_install.ps1" }
+function yaywn2 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_n_install2.ps1" }
+
+
 # PsExec.exe this will only work through remote not in real terminal
 function dark { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external" }
 function light { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal" }
