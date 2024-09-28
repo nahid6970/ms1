@@ -3,7 +3,7 @@ $firstLimit = 32
 $secondLimit = 67
 
 function SearchPackages {
-    $packageListFile = ".\package-list.txt"
+    $packageListFile = ".\package-listn.txt"
     # Check if the package list file exists and if it's older than 12 hours
     if (Test-Path $packageListFile) {
         $fileLastWriteTime = (Get-Item $packageListFile).LastWriteTime
@@ -33,7 +33,7 @@ function SearchPackages {
 }
 
 function UpdatePackageList {
-    $packageListFile = ".\package-list.txt"
+    $packageListFile = ".\package-listn.txt"
     # Delete the package list file if it exists
     if (Test-Path $packageListFile) {
         Remove-Item $packageListFile -Force
