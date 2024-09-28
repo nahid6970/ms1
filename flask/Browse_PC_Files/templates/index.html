@@ -65,6 +65,11 @@
             justify-content: space-between;
             align-items: center;
         }
+        .file-name {
+            flex-grow: 1; /* Allow file name to take available space */
+            word-break: break-all; /* Break long words without spaces */
+            overflow-wrap: break-word; /* Support long words breaking */
+        }
         .download-btn {
             padding: 5px 10px;
             background-color: green;
@@ -72,6 +77,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-left: 10px;
         }
         .download-btn:hover {
             background-color: #45a049;
@@ -113,11 +119,11 @@
         }
         .dot {
             margin-right: 8px;
-            color: #6bc0f8; /* Same color as the file text */
+            color: #6bc0f8;
         }
         .folder-icon {
             margin-right: 8px;
-            color: yellow; /* Same color as folder text */
+            color: yellow;
         }
         /* Media query for mobile screens */
         @media screen and (max-width: 768px) {
@@ -139,8 +145,8 @@
             text-align: center; /* Centers the text horizontally */
             background-color: #4CAF50; /* Cool green background color */
             color: white; /* White text color for contrast */
-            padding: 20px; /* Padding for spacing inside the element */
-            border-radius: 20px; /* Rounded corners */
+            padding: 2px; /* Padding for spacing inside the element */
+            border-radius: 10px; /* Rounded corners */
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
             width: 50%; /* Width of the h1 container */
             margin: 20px auto; /* Centers the container horizontally */
@@ -167,21 +173,20 @@
             <ul class="directory-list">
                 {% for directory in directories %}
                     <li>
-                        <span class="folder-icon">&#128193;</span> <!-- Folder icon (Unicode) -->
+                        <span class="folder-icon">&#128193;</span>
                         <a href="/?dir_path={{ current_dir }}/{{ directory }}&drive={{ current_drive }}">{{ directory }}</a>
                     </li>
                 {% endfor %}
             </ul>
         </div>
 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <div>
             <h3>Files:</h3>
             <ul class="file-list">
                 {% for file in files %}
                     <li class="file-item">
-                        <div>
-                            <i class="fas fa-file" style="margin-right: 8px; color: #fbfffd;"></i> <!-- File icon -->
+                        <div class="file-name">
+                            <span class="">📃</span>
                             <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
                         </div>
                         <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn">Download</a>
