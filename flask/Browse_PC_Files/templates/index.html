@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC File Browser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .container div {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .container div:last-child {
+            margin-right: 0;
+        }
+        .directory-list, .file-list {
+            margin-top: 20px;
+            padding: 0;
+        }
+        .directory-list li, .file-list li {
+            list-style-type: none;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 12px; /* Rounded corners for both folders and files */
+        }
+
+        .directory-list a {
+            text-decoration: none;
+            color: #e3e300;
+            font-weight: bold;
+        }
+        .directory-list li {
+            background-color: #3f3d36; /* Soft yellow background for folders */
+        }
+        .directory-list a:hover {
+            text-decoration: underline;
+        }
+        .file-list a {
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .file-list li {
+            background-color: #267db8; /* Soft blue background for files */
+        }
+        .file-list a:hover {
+            text-decoration: underline;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .download-btn {
+            padding: 5px 10px;
+            background-color: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        select, input[type="submit"] {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .flash {
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .back-btn {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #FF5733;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background-color: #e64b2c;
+        }
+        .dot {
+            margin-right: 8px;
+            color: #6bc0f8; /* Same color as the file text */
+        }
+        .folder-icon {
+            margin-right: 8px;
+            color: yellow; /* Same color as folder text */
+        }
+        /* Media query for mobile screens */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Browse Files on Your PC</h1>
+
+    <style>
+        h1 {
+            text-align: center; /* Centers the text horizontally */
+            background-color: #4CAF50; /* Cool green background color */
+            color: white; /* White text color for contrast */
+            padding: 20px; /* Padding for spacing inside the element */
+            border-radius: 20px; /* Rounded corners */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+            width: 50%; /* Width of the h1 container */
+            margin: 20px auto; /* Centers the container horizontally */
+            font-family: Arial, sans-serif; /* Clean font style */
+        }
+    </style>
+
+    <form method="GET" action="/">
+        <label for="drive-select">Choose a Drive:</label>
+        <select id="drive-select" name="drive">
+            <option value="C:/" {% if current_drive == 'C:/' %}selected{% endif %}>C Drive</option>
+            <option value="D:/" {% if current_drive == 'D:/' %}selected{% endif %}>D Drive</option>
+        </select>
+        <button type="submit">Browse</button>
+    </form>
+
+    <h2>Current Directory: {{ current_dir }}</h2>
+
+    <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn">Back</a>
+
+    <div class="container">
+        <div>
+            <h3>Directories:</h3>
+            <ul class="directory-list">
+                {% for directory in directories %}
+                    <li>
+                        <span class="folder-icon">&#128193;</span> <!-- Folder icon (Unicode) -->
+                        <a href="/?dir_path={{ current_dir }}/{{ directory }}&drive={{ current_drive }}">{{ directory }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div>
+            <h3>Files:</h3>
+            <ul class="file-list">
+                {% for file in files %}
+                    <li class="file-item">
+                        <div>
+                            <span class="dot">•</span> <!-- Dot before the file name -->
+                            <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
+                        </div>
+                        <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn">Download</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash">{{ messages[0] }}</div>
+        {% endif %}
+    {% endwith %}
+
+</body>
+</html>
