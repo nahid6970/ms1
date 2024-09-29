@@ -177,6 +177,7 @@ function port_5002 {
 function git_pull_ms1 {
     Write-Host "Git Pull ms1..."      -ForegroundColor Yellow
     Set-Location C:\
+
     Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
@@ -191,6 +192,7 @@ function git_pull_ms2 {
 function git_pull_ms3 {
     Write-Host "Git Pull ms3..."      -ForegroundColor Yellow
     Set-Location C:\
+    git clone https://github.com/nahid6970/ms3
     Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
@@ -223,9 +225,9 @@ while ($true) {
                 Git_Pull_Menu
                 $pickChoice = Read-Host "Enter Choice"
                 switch ($pickChoice) {
-                    1 { git_pull_ms1 }
-                    2 { git_pull_ms2 }
-                    3 { git_pull_ms3 }
+                    1 { Run_NewWindow git_pull_ms1 }
+                    2 { Run_NewWindow git_pull_ms2 }
+                    3 { Run_NewWindow git_pull_ms3 }
                     4 { $returnToMain = $true }
                     default { Write-Host "Invalid option. Please try again." -ForegroundColor Red }
                 }
