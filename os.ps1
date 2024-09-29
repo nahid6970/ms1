@@ -26,7 +26,7 @@ function Git_Pull_Menu {
     Write-Host "1. ms1"                    -ForegroundColor Green
     Write-Host "2. ms2"                    -ForegroundColor Green
     Write-Host "3. ms3"                    -ForegroundColor Green
-    Write-Host "4. Go Back"                -ForegroundColor Green
+    Write-Host "X. Go Back"                -ForegroundColor White
 }
 
 # Function to display the mklink sub-menu
@@ -38,7 +38,7 @@ function mklink_menu {
     Write-Host "1. xx"                     -ForegroundColor Green
     Write-Host "2. xx"                     -ForegroundColor Green
     Write-Host "3. xx"                     -ForegroundColor Green
-    Write-Host "4. Go Back"                -ForegroundColor Green
+    Write-Host "X. Go Back"                -ForegroundColor White
 }
 
 # Function to display the Port sub-menu
@@ -50,7 +50,7 @@ function port_menu {
     Write-Host "1. Port 5000"              -ForegroundColor Green
     Write-Host "2. Port 5001"              -ForegroundColor Green
     Write-Host "3. Port 5002"              -ForegroundColor Green
-    Write-Host "4. Go Back"                -ForegroundColor Green
+    Write-Host "X. Go Back"                -ForegroundColor White
 }
 
 #!  ██╗ ██╗
@@ -378,7 +378,7 @@ while ($true) {
                     1 { Run_NewWindow git_pull_ms1 }
                     2 { Run_NewWindow git_pull_ms2 }
                     3 { Run_NewWindow git_pull_ms3 }
-                    4 { $returnToMain = $true }
+                    x { $returnToMain = $true }
                     default { Write-Host "Invalid option. Please try again." -ForegroundColor Red }
                 }
             }
@@ -392,7 +392,7 @@ while ($true) {
                     1 { git_pull_ms1 }
                     2 { git_pull_ms2 }
                     3 { git_pull_ms3 }
-                    4 { $returnToMain = $true }
+                    x { $returnToMain = $true }
                     default { Write-Host "Invalid option. Please try again." -ForegroundColor Red }
                 }
             }
@@ -410,7 +410,7 @@ while ($true) {
                     1 { Run_NewWindow port_5000 }
                     2 { Run_NewWindow port_5001 }
                     3 { Run_NewWindow port_5002 }
-                    4 { $returnToMain = $true }
+                    x { $returnToMain = $true }
                     default { Write-Host "Invalid option. Please try again." -ForegroundColor Red }
                 }
             }
