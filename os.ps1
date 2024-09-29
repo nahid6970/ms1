@@ -14,6 +14,7 @@ function Main_Menu {
     Write-Host "2. Git Pull"            -ForegroundColor Green
     Write-Host "3. Mklink"              -ForegroundColor Green
     Write-Host "4. pip packages"        -ForegroundColor Green
+    Write-Host "5. Port Register"        -ForegroundColor Green
 }
 
 # Function to display the Git Push sub-menu
@@ -28,7 +29,7 @@ function Git_Pull_Menu {
     Write-Host "4. Go Back"                -ForegroundColor Green
 }
 
-# Function to display the Git Push sub-menu
+# Function to display the mklink sub-menu
 function mklink_menu {
     Clear-Host
     Write-Host "=========================" -ForegroundColor Cyan
@@ -37,6 +38,18 @@ function mklink_menu {
     Write-Host "1. xx"                     -ForegroundColor Green
     Write-Host "2. xx"                     -ForegroundColor Green
     Write-Host "3. xx"                     -ForegroundColor Green
+    Write-Host "4. Go Back"                -ForegroundColor Green
+}
+
+# Function to display the Port sub-menu
+function port_menu {
+    Clear-Host
+    Write-Host "=========================" -ForegroundColor Cyan
+    Write-Host "           Port          " -ForegroundColor Cyan
+    Write-Host "=========================" -ForegroundColor Cyan
+    Write-Host "1. Port 5000"              -ForegroundColor Green
+    Write-Host "2. Port 5001"              -ForegroundColor Green
+    Write-Host "3. Port 5002"              -ForegroundColor Green
     Write-Host "4. Go Back"                -ForegroundColor Green
 }
 
@@ -135,6 +148,24 @@ function mklink {
 #* ██║     ╚██████╔╝██║  ██║   ██║
 #* ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 
+# Function to set up Neovim (dummy function for example)
+function port_5000 {
+    Write-Host "Setting up Neovim..."    -ForegroundColor Yellow
+    sudo New-NetFirewallRule -DisplayName "Allow_Port_5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+    Write-Host "Neovim setup completed!" -ForegroundColor Green
+}
+
+function port_5001 {
+    Write-Host "Setting up Neovim..."    -ForegroundColor Yellow
+    sudo New-NetFirewallRule -DisplayName "Allow_Port_5001" -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
+    Write-Host "Neovim setup completed!" -ForegroundColor Green
+}
+
+function port_5002 {
+    Write-Host "Setting up Neovim..."    -ForegroundColor Yellow
+    sudo New-NetFirewallRule -DisplayName "Allow_Port_5002" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+    Write-Host "Neovim setup completed!" -ForegroundColor Green
+}
 
 #*  ██████╗ ██╗████████╗
 #* ██╔════╝ ██║╚══██╔══╝
@@ -163,7 +194,7 @@ function git_pull_ms3 {
     Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
-"@ ; Start-Process powershell -ArgumentList "-NoExit", "-Command", "& { $functions; & $FunctionName }" }
+"@ ; Start-Process PWSH -ArgumentList "-NoExit", "-Command", "& { $functions; & $FunctionName }" }
 #!  ██╗ ██╗
 #! ████████╗
 #! ╚██╔═██╔╝
@@ -214,9 +245,23 @@ while ($true) {
                 }
             }
         }
-
+        
         4 {
             Run_NewWindow "Install_Packages_pip"
+        }
+        5 {
+            $returnToMain = $false
+            while (-not $returnToMain) {
+                port_menu
+                $pickChoice = Read-Host "Enter Choice"
+                switch ($pickChoice) {
+                    1 { Run_NewWindow port_5000 }
+                    2 { Run_NewWindow port_5001 }
+                    3 { Run_NewWindow port_5002 }
+                    4 { $returnToMain = $true }
+                    default { Write-Host "Invalid option. Please try again." -ForegroundColor Red }
+                }
+            }
         }
         default {
             Write-Host "Invalid option. Please try again." -ForegroundColor Red
