@@ -1533,5 +1533,35 @@ DetectHiddenWindows, On
 ; MsgBox, You pressed F17!
 ; return
 
+!g::
+{
+    ; Save the selected text to clipboard
+    Send, ^c
+    ClipWait  ; Wait until the clipboard contains data
 
+    ; Get the clipboard contents and split it by commas
+    selectedText := Clipboard
+    items := StrSplit(selectedText, ",")
 
+    ; Trim whitespace and build a list to sort
+    sortedText := ""
+    Loop, % items.MaxIndex()
+    {
+        items[A_Index] := Trim(items[A_Index])
+        sortedText .= items[A_Index] "`n"  ; Add each item to a new line
+    }
+
+    ; Sort the list alphabetically
+    Sort, sortedText
+
+    ; Remove newlines and join the sorted items back into a comma-separated string
+    StringReplace, sortedText, sortedText, `n, `, , All
+
+    ; Remove trailing comma, if any
+    StringTrimRight, sortedText, sortedText, 2
+
+    ; Replace the selected text with the sorted result
+    Clipboard := sortedText
+    Send, ^v  ; Paste the sorted text
+    return
+}
