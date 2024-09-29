@@ -177,7 +177,7 @@ function port_5002 {
 function git_pull_ms1 {
     Write-Host "Git Pull ms1..."      -ForegroundColor Yellow
     Set-Location C:\
-
+    git clone https://github.com/nahid6970/ms1
     Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
@@ -185,6 +185,7 @@ function git_pull_ms1 {
 function git_pull_ms2 {
     Write-Host "Git Pull ms2..." -ForegroundColor Yellow
     Set-Location C:\
+    git clone https://github.com/nahid6970/ms2
     Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
@@ -196,7 +197,7 @@ function git_pull_ms3 {
     Write-Host "Pulled successfully!" -ForegroundColor Green
 }
 
-"@ ; Start-Process PWSH -ArgumentList "-NoExit", "-Command", "& { $functions; & $FunctionName }" }
+"@ ; Start-Process powershell -ArgumentList "-NoExit", "-Command", "& { $functions; & $FunctionName }" }
 #!  ██╗ ██╗
 #! ████████╗
 #! ╚██╔═██╔╝
