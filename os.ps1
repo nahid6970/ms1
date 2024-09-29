@@ -82,6 +82,7 @@ function Install_Packages_scoop {
     scoop install rufus
     scoop install scoop-completion
     scoop install scoop-search
+    scoop install sudo
     scoop install ventoy
     scoop install winaero-tweaker
     scoop install yt-dlp
@@ -125,6 +126,15 @@ function mklink {
     Start-Sleep -Seconds 2
     Write-Host "Neovim setup completed!" -ForegroundColor Green
 }
+
+
+#* ██████╗  ██████╗ ██████╗ ████████╗
+#* ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
+#* ██████╔╝██║   ██║██████╔╝   ██║
+#* ██╔═══╝ ██║   ██║██╔══██╗   ██║
+#* ██║     ╚██████╔╝██║  ██║   ██║
+#* ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+
 
 #*  ██████╗ ██╗████████╗
 #* ██╔════╝ ██║╚══██╔══╝
