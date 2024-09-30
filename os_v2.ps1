@@ -59,7 +59,7 @@ function New_Window {
 # Main Menu and Submenu in a side-by-side view
 function Show-MainMenu {
     $window = New-Object System.Windows.Window
-    $window.Title = "Main Menu with Submenu"
+    $window.Title = "OS_v2"
     $window.Width = 600
     $window.Height = 300
     $window.Background = [System.Windows.Media.Brushes]::DarkSlateGray
@@ -101,6 +101,7 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Packages Management")
     $mainMenuListBox.Items.Add("Git Setup")
     $mainMenuListBox.Items.Add("Neovim Setup")
+    $mainMenuListBox.Items.Add("Port")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -141,6 +142,11 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Push to Origin")
                 $submenuListBox.Items.Add("Push to Upstream")
             }
+            "Port" {
+                $submenuListBox.Items.Add("5000")
+                $submenuListBox.Items.Add("5001")
+                $submenuListBox.Items.Add("5002")
+            }
         }
     })
 
@@ -164,6 +170,15 @@ function Show-MainMenu {
             }
             "Push to Upstream" {
                 New_Window -Command "Write-Host 'Repo pushed to upstream!'"
+            }
+            "5000" {
+                New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any'
+            }
+            "5001" {
+                New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5001" -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any'
+            }
+            "5002" {
+                New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5002" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any'
             }
         }
     })
