@@ -5,7 +5,7 @@ from tkinter import Canvas, Scrollbar
 from tkinter import ttk
 import os
 import ctypes
-from functionlist import *
+from Path_Var import *
 
 # import sys
 # sys.path.append('C:/ms1/')
