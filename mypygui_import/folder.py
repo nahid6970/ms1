@@ -35,10 +35,18 @@ def switch_to_frame(frame_to_show, frame_to_hide):
 # Create main window
 ROOT = tk.Tk()
 ROOT.title("Folder")
-# ROOT.attributes('-topmost', True)  # Set always on top
+ROOT.attributes('-topmost', True)  # Set always on top
 # ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
-# ROOT.overrideredirect(True)  # Remove default borders
+ROOT.geometry(f"700x700")
+ROOT.overrideredirect(True)  # Remove default borders
+def Center_Window(window):
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
+    x = (window.winfo_screenwidth() // 2) - (width // 2)
+    y = (window.winfo_screenheight() // 2) - (height // 2)
+    window.geometry(f'{width}x{height}+{x}+{y}')
 
 # Create custom border
 BORDER_FRAME = create_custom_border(ROOT)
@@ -51,9 +59,6 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-x = screen_width//2 - 1200//2
-y = screen_height//2 - 800//2
-ROOT.geometry(f"1200x800+{x}+{y}") #! overall size of the window
 
 
 
@@ -65,14 +70,9 @@ def close_window(event=None):
 # ROOT1 = tk.Frame(ROOT, bg="#1d2027")
 # ROOT1.pack(side="right", anchor="ne", pady=(3,2),padx=(3,1))
 
-# LB_XXX=tk.Label(ROOT1, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"))
-# LB_XXX.pack(side="left",padx=(1,10),pady=(0,0))
-# LB_XXX.bind("<Button-1>",close_window)
-
-
-
-
-
+LB_XXX=tk.Label(ROOT, text="\uf2d3", bg="#1d2027",fg="#ff0000",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",18,"bold"))
+LB_XXX.pack(side="top",padx=(0,5),pady=(1,0), anchor="e")
+LB_XXX.bind("<Button-1>",close_window)
 
 WINDOWSTOOLS_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1200 , height=800)
 WINDOWSTOOLS_FRAME.pack_propagate(True)
@@ -96,13 +96,11 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "\uf07c Temp-AppDate",   {"command": "explorer C:\\Users\\nahid\\AppData\\Local\\Temp"}),
 ("#204892", "#ffffff", "\uf07c Temp-Windows",   {"command": "explorer C:\\Windows\\Temp"}),
 ("#204892", "#ffffff", "\uf07c WindowsApp",     {"command": "explorer C:\\Program Files\\WindowsApps"}),
-# ("#204892", "#ffffff", "\uf07c .glaze-wm",              {"command": "explorer C:\\Users\\nahid\\.glaze-wm"}),
-# ("#204892", "#ffffff", "\uf07c ",              {"command": ""}),
-# ("#204892", "#ffffff", "\uf07c Git-Projects",              {"command": "explorer C:\\Users\\nahid\\OneDrive\\Git"}),
+# ("#204892", "#ffffff", "\uf07c .glaze-wm",      {"command": "explorer C:\\Users\\nahid\\.glaze-wm"}),
+# ("#204892", "#ffffff", "\uf07c ",               {"command": ""}),
+# ("#204892", "#ffffff", "\uf07c Git-Projects",   {"command": "explorer C:\\Users\\nahid\\OneDrive\\Git"}),
 
     ]
-
-
 
     # Sort the items alphabetically by their text
     items.sort(key=lambda x: x[2])
@@ -122,6 +120,6 @@ def Folder(WINDOWSTOOLS_FRAME):
         item.grid(row=row, column=column, padx=(0, 10), pady=(0, 2), sticky="w")
 Folder(WINDOWSTOOLS_FRAME)
 
-#! Ending
 WINDOWSTOOLS_FRAME.pack()
+Center_Window(ROOT)
 ROOT.mainloop()
