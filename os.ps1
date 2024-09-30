@@ -289,7 +289,6 @@ function mklink {
     Write-Host "Neovim setup completed!" -ForegroundColor Green
 }
 
-
 #* ██████╗  ██████╗ ██████╗ ████████╗
 #* ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
 #* ██████╔╝██║   ██║██████╔╝   ██║
