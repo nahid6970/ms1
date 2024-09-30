@@ -94,8 +94,8 @@ function Show-MainMenu {
 
     # ListBox for main menu options
     $mainMenuListBox = New-Object System.Windows.Controls.ListBox
-    $mainMenuListBox.Background = [System.Windows.Media.Brushes]::Teal
-    $mainMenuListBox.Foreground = [System.Windows.Media.Brushes]::White
+    $mainMenuListBox.Background = [System.Windows.Media.Brushes]::White
+    $mainMenuListBox.Foreground = [System.Windows.Media.Brushes]::Black
     $mainMenuListBox.FontSize = 14
     $mainMenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
     #* ███████╗██╗██████╗ ███████╗████████╗
@@ -126,7 +126,7 @@ function Show-MainMenu {
     $submenuPanel.Children.Add($submenuTitle)
 
     $submenuListBox = New-Object System.Windows.Controls.ListBox
-    $submenuListBox.Background = [System.Windows.Media.Brushes]::LightSlateGray
+    $submenuListBox.Background = [System.Windows.Media.Brushes]::Black
     $submenuListBox.Foreground = [System.Windows.Media.Brushes]::White
     $submenuListBox.FontSize = 14
     $submenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
