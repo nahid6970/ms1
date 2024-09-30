@@ -97,9 +97,10 @@ function Show-MainMenu {
     $mainMenuListBox.Background = [System.Windows.Media.Brushes]::Teal
     $mainMenuListBox.Foreground = [System.Windows.Media.Brushes]::White
     $mainMenuListBox.FontSize = 14
+    $mainMenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
     $mainMenuListBox.Items.Add("Packages Management")
-    $mainMenuListBox.Items.Add("Neovim Setup")
     $mainMenuListBox.Items.Add("Git Setup")
+    $mainMenuListBox.Items.Add("Neovim Setup")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -120,6 +121,7 @@ function Show-MainMenu {
     $submenuListBox.Background = [System.Windows.Media.Brushes]::LightSlateGray
     $submenuListBox.Foreground = [System.Windows.Media.Brushes]::White
     $submenuListBox.FontSize = 14
+    $submenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
     $submenuPanel.Children.Add($submenuListBox)
 
     # Event handler to populate submenu based on main menu selection
