@@ -59,9 +59,6 @@ ROOT.bind("<B1-Motion>", do_drag)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 
-
-
-
 #! Close Window
 def close_window(event=None):
     ROOT.destroy()
