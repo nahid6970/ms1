@@ -102,6 +102,7 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Git Setup")
     $mainMenuListBox.Items.Add("Neovim Setup")
     $mainMenuListBox.Items.Add("Port")
+    $mainMenuListBox.Items.Add("mklink")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -147,6 +148,9 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("5001")
                 $submenuListBox.Items.Add("5002")
             }
+            "mklink" {
+                $submenuListBox.Items.Add("Path_Var")
+            }
         }
     })
 
@@ -179,6 +183,9 @@ function Show-MainMenu {
             }
             "5002" {
                 New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5002" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any'
+            }
+            "Path_Var" {
+                New_Window -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
             }
         }
     })
