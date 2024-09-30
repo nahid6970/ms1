@@ -62,6 +62,11 @@
       "matching_strategy": "Equals"
     },
     {
+      "kind": "Exe",
+      "id": "qbittorrent.exe",
+      "matching_strategy": "Equals"
+    },
+    {
       "kind": "Class",
       "id": "CASCADIA_HOSTING_WINDOW_CLASS",
       "matching_strategy": "Equals"
