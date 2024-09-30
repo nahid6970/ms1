@@ -49,7 +49,7 @@ function Show-NewWindow {
 }
 
 # Function to run a command in a new PowerShell window
-function Run-CommandInNewWindow {
+function New_Window {
     param (
         [string]$Command
     )
@@ -97,9 +97,9 @@ function Show-MainMenu {
     $mainMenuListBox.Background = [System.Windows.Media.Brushes]::Teal
     $mainMenuListBox.Foreground = [System.Windows.Media.Brushes]::White
     $mainMenuListBox.FontSize = 14
-    $mainMenuListBox.Items.Add("Option 1 - Packages")
-    $mainMenuListBox.Items.Add("Option 2 - Neovim")
-    $mainMenuListBox.Items.Add("Option 3 - Git")
+    $mainMenuListBox.Items.Add("Packages Management")
+    $mainMenuListBox.Items.Add("Neovim Setup")
+    $mainMenuListBox.Items.Add("Git Setup")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -127,15 +127,15 @@ function Show-MainMenu {
         $submenuListBox.Items.Clear()
 
         switch ($mainMenuListBox.SelectedItem) {
-            "Option 1 - Packages" {
+            "Packages Management" {
                 $submenuListBox.Items.Add("Install Packages")
                 $submenuListBox.Items.Add("Update Packages")
             }
-            "Option 2 - Neovim" {
+            "Neovim Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
                 $submenuListBox.Items.Add("Configure Neovim Plugins")
             }
-            "Option 3 - Git" {
+            "Git Setup" {
                 $submenuListBox.Items.Add("Push to Origin")
                 $submenuListBox.Items.Add("Push to Upstream")
             }
@@ -146,22 +146,22 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             "Install Packages" {
-                Run-CommandInNewWindow -Command "Write-Host 'Packages installed successfully!'"
+                New_Window -Command "Write-Host 'Packages installed successfully!'"
             }
             "Update Packages" {
-                Run-CommandInNewWindow -Command "Write-Host 'Packages updated successfully!'"
+                New_Window -Command "Write-Host 'Packages updated successfully!'"
             }
             "Set up Neovim" {
-                Run-CommandInNewWindow -Command "Write-Host 'Neovim setup completed!'"
+                New_Window -Command "Write-Host 'Neovim setup completed!'"
             }
             "Configure Neovim Plugins" {
-                Run-CommandInNewWindow -Command "Write-Host 'Neovim plugins configured!'"
+                New_Window -Command "Write-Host 'Neovim plugins configured!'"
             }
             "Push to Origin" {
-                Run-CommandInNewWindow -Command "Write-Host 'Repo pushed to origin!'"
+                New_Window -Command "Write-Host 'Repo pushed to origin!'"
             }
             "Push to Upstream" {
-                Run-CommandInNewWindow -Command "Write-Host 'Repo pushed to upstream!'"
+                New_Window -Command "Write-Host 'Repo pushed to upstream!'"
             }
         }
     })
