@@ -98,6 +98,12 @@ function Show-MainMenu {
     $mainMenuListBox.Foreground = [System.Windows.Media.Brushes]::White
     $mainMenuListBox.FontSize = 14
     $mainMenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
+    #* ███████╗██╗██████╗ ███████╗████████╗
+    #* ██╔════╝██║██╔══██╗██╔════╝╚══██╔══╝
+    #* █████╗  ██║██████╔╝███████╗   ██║
+    #* ██╔══╝  ██║██╔══██╗╚════██║   ██║
+    #* ██║     ██║██║  ██║███████║   ██║
+    #* ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝
     $mainMenuListBox.Items.Add("Packages Management")
     $mainMenuListBox.Items.Add("Git Setup")
     $mainMenuListBox.Items.Add("Neovim Setup")
