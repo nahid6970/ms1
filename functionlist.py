@@ -150,7 +150,7 @@ Zoxide_scoop_path          ="C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zox
 winfsp_sp = r'C:\Users\nahid\scoop\apps\winfsp-np\current\setup.msi_'
 TigerVncServer_wg = r'C:\Program Files\TightVNC\tvnserver.exe'
 mingw_msvcrt =r"C:\Users\nahid\scoop\apps\mingw-msvcrt\current\bin\mingw32-make.exe"
-
+sudo_sp=r'C:\Users\nahid\scoop\apps\sudo\current\sudo.ps1'
 
 
 
