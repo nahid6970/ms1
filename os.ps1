@@ -146,8 +146,10 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Configure Neovim Plugins")
             }
             "Git Setup" {
-                $submenuListBox.Items.Add("Push to Origin")
-                $submenuListBox.Items.Add("Push to Upstream")
+                $submenuListBox.Items.Add("clone ms1")
+                $submenuListBox.Items.Add("clone ms2")
+                $submenuListBox.Items.Add("clone ms3")
+
             }
             "Port" {
                 $submenuListBox.Items.Add("5000")
@@ -175,11 +177,14 @@ function Show-MainMenu {
             "Configure Neovim Plugins" {
                 New_Window -Command "Write-Host 'Neovim plugins configured!'"
             }
-            "Push to Origin" {
-                New_Window -Command "Write-Host 'Repo pushed to origin!'"
+            "clone ms1" {
+                New_Window -Command "Write-Host Cloning ms1 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms1 ; Write-Host Cloned ms1 successfully! -ForegroundColor Green"
             }
-            "Push to Upstream" {
-                New_Window -Command "Write-Host 'Repo pushed to upstream!'"
+            "clone ms2" {
+                New_Window -Command "Write-Host Cloning ms2 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms2 ; Write-Host Cloned ms2 successfully! -ForegroundColor Green"
+            }
+            "clone ms3" {
+                New_Window -Command "Write-Host Cloning ms3 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms3 ; Write-Host Cloned ms3 successfully! -ForegroundColor Green"
             }
             "5000" {
                 New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any'
