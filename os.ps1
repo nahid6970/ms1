@@ -277,7 +277,7 @@ function Show-MainMenu {
                     Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\sonarr\sonarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
-                                        "
+                                         "
             }
             "Radarr" {
                 New_Window_pwsh -Command "
@@ -286,7 +286,7 @@ function Show-MainMenu {
                     Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\radarr\radarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
-                                        "
+                                         "
             }
             "Prowlarr" {
                 New_Window_pwsh -Command "
@@ -295,7 +295,7 @@ function Show-MainMenu {
                     Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
-                                        "
+                                         "
             }
         }
     })
