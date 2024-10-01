@@ -203,8 +203,11 @@ function Show-MainMenu {
                                      scoop update *
                                      scoop export > C:\Users\nahid\OneDrive\backup\installed_apps\list_scoop.txt
                                      Write-Host 'scoop updated ☑️'
-
-
+                                     scoop cleanup *
+                                     Write-Host 'Scoop Cleanedup ☑️'
+                                     winget upgrade --all
+                                     winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+                                     Write-Host 'Winget Upgraded ☑️'
                                      Write-Host 'Packages updated successfully' -ForegroundColor Green"
             }
             "Set up Neovim" {
