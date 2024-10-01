@@ -281,7 +281,7 @@ function Show-MainMenu {
             }
             "Radarr" {
                 New_Window_pwsh -Command "
-                    Winget install TeamRadarr.Radarr -Verbose
+                    Winget install TeamRadarr.Radarr
                     sudo Stop-Process -Name 'Radarr' -Verbose
                     Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\radarr\radarr.db -Force -Verbose
@@ -290,7 +290,7 @@ function Show-MainMenu {
             }
             "Prowlarr" {
                 New_Window_pwsh -Command "
-                    Winget install TeamProwlarr.Prowlarr -Verbose
+                    Winget install TeamProwlarr.Prowlarr
                     sudo Stop-Process -Name 'Prowlarr' -Verbose
                     Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db -Force -Verbose
