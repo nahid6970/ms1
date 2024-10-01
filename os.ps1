@@ -53,7 +53,7 @@ function New_Window_powershell {
     param (
         [string]$Command
     )
-    Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", $Command
 }
 
 function New_Window_pwsh {
@@ -62,7 +62,6 @@ function New_Window_pwsh {
     )
     Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
-
 
 # Main Menu and Submenu in a side-by-side view
 function Show-MainMenu {
