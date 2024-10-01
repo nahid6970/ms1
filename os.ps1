@@ -138,6 +138,8 @@ function Show-MainMenu {
 
         switch ($mainMenuListBox.SelectedItem) {
             "Packages Management" {
+                $submenuListBox.Items.Add("Setup Scoop")
+                $submenuListBox.Items.Add("Update Winget")
                 $submenuListBox.Items.Add("Install Packages")
                 $submenuListBox.Items.Add("Update Packages")
             }
@@ -167,6 +169,11 @@ function Show-MainMenu {
         switch ($submenuListBox.SelectedItem) {
             "Install Packages" {
                 New_Window -Command "Write-Host 'Packages installed successfully!'"
+            }
+            "Update Winget" {
+                New_Window -Command "winget upgrade --source msstore ; 
+                                     winget upgrade --source winget;
+                                     Write-Host 'winget Source updated successfully!' -ForegroundColor Green"
             }
             "Update Packages" {
                 New_Window -Command "Write-Host 'Packages updated successfully!'"
