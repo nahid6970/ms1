@@ -6,7 +6,7 @@
     <title>PC File Browser</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: JetBrainsMono NFP, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
@@ -35,7 +35,7 @@
             display: flex;
             align-items: center;
             padding: 10px;
-            border-radius: 12px; /* Rounded corners for both folders and files */
+            border-radius: 12px;
         }
 
         .directory-list a {
@@ -44,7 +44,7 @@
             font-weight: bold;
         }
         .directory-list li {
-            background-color: #3f3d36; /* Soft yellow background for folders */
+            background-color: #3f3d36;
         }
         .directory-list a:hover {
             text-decoration: underline;
@@ -55,7 +55,7 @@
             font-weight: bold;
         }
         .file-list li {
-            background-color: #267db8; /* Soft blue background for files */
+            background-color: #267db8;
         }
         .file-list a:hover {
             text-decoration: underline;
@@ -66,9 +66,9 @@
             align-items: center;
         }
         .file-name {
-            flex-grow: 1; /* Allow file name to take available space */
-            word-break: break-all; /* Break long words without spaces */
-            overflow-wrap: break-word; /* Support long words breaking */
+            flex-grow: 1;
+            word-break: break-all;
+            overflow-wrap: break-word;
         }
         .download-btn {
             padding: 5px 10px;
@@ -82,7 +82,7 @@
         .download-btn:hover {
             background-color: #45a049;
         }
-        button {
+        /* button {
             padding: 10px 15px;
             font-size: 16px;
             background-color: #4CAF50;
@@ -90,32 +90,43 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-        }
+            margin: 10px;
+        } */
         button:hover {
             background-color: #45a049;
         }
-        select, input[type="submit"] {
-            padding: 10px;
-            font-size: 16px;
-            margin: 5px 0;
+        .drive-back-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* Aligns items to the left */
+            margin-bottom: 20px;
         }
-        .flash {
-            color: green;
-            font-weight: bold;
-            margin-top: 20px;
+        .drive-buttons {
+            display: flex;
+            align-items: center;
         }
-        .back-btn {
-            margin-top: 10px;
-            margin-bottom: 10px;
-            display: inline-block;
+        .drive-buttons form {
+            margin-right: 10px;
+        }
+        /* .back-btn {
             padding: 10px 15px;
             background-color: #FF5733;
             color: white;
             border-radius: 5px;
             text-decoration: none;
-        }
+            margin-left: 10px;
+        } */
         .back-btn:hover {
             background-color: #e64b2c;
+        }
+        .current-path {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .flash {
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
         }
         .dot {
             margin-right: 8px;
@@ -133,39 +144,31 @@
             .container {
                 flex-direction: column;
             }
+            .drive-back-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Browse PC Files</h1>
+    <!-- <h1>Browse PC Files</h1> -->
 
-    <style>
-        h1 {
-            text-align: center; /* Centers the text horizontally */
-            background-color: #4CAF50; /* Cool green background color */
-            color: white; /* White text color for contrast */
-            padding: 2px; /* Padding for spacing inside the element */
-            border-radius: 10px; /* Rounded corners */
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
-            width: 50%; /* Width of the h1 container */
-            margin: 20px auto; /* Centers the container horizontally */
-            font-family: Arial, sans-serif; /* Clean font style */
-        }
-    </style>
+    <div class="drive-back-container">
+        <div class="drive-buttons">
+            <form method="GET" action="/">
+                <button type="submit" name="drive" value="C:/">C Drive</button>
+            </form>
+            <form method="GET" action="/">
+                <button type="submit" name="drive" value="D:/">D Drive</button>
+            </form>
+            <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn">Back</a>
+        </div>
+    </div>
 
-    <form method="GET" action="/">
-        <label for="drive-select">Choose a Drive:</label>
-        <select id="drive-select" name="drive">
-            <option value="C:/" {% if current_drive == 'C:/' %}selected{% endif %}>C Drive</option>
-            <option value="D:/" {% if current_drive == 'D:/' %}selected{% endif %}>D Drive</option>
-        </select>
-        <button type="submit">Browse</button>
-    </form>
-
-    <h2>Current Directory: {{ current_dir }}</h2>
-
-    <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn">Back</a>
+    <!-- Path on a new row -->
+    <div class="current-path">{{ current_dir }}</div>
 
     <div class="container">
         <div>
