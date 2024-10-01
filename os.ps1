@@ -53,7 +53,7 @@ function New_Window {
     param (
         [string]$Command
     )
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", $Command
+    Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
 
 # Main Menu and Submenu in a side-by-side view
@@ -141,7 +141,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Setup Scoop")
                 $submenuListBox.Items.Add("Update Winget")
                 $submenuListBox.Items.Add("Install Packages")
-                $submenuListBox.Items.Add("Update Packages")
+                $submenuListBox.Items.Add("Update Packages ")
             }
             "Neovim Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
@@ -168,15 +168,44 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             "Install Packages" {
-                New_Window -Command "Write-Host 'Packages installed successfully!'"
+                New_Window -Command "scoop install git
+                                     scoop install python
+
+                                     scoop install ack
+                                     scoop install adb
+                                     scoop install bat
+                                     scoop install capture2text
+                                     scoop install ditto
+                                     scoop install ffmpeg
+                                     scoop install fzf
+                                     scoop install highlight
+                                     scoop install komorebi
+                                     scoop install oh-my-posh
+                                     scoop install rclone
+                                     scoop install rssguard
+                                     scoop install rufus
+                                     scoop install scoop-completion
+                                     scoop install scoop-search
+                                     scoop install ventoy
+                                     scoop install winaero-tweaker
+                                     scoop install yt-dlp
+                                     Write-Host 'Packages installed successfully' --ForegroundColor Green"
             }
             "Update Winget" {
                 New_Window -Command "winget upgrade --source msstore ; 
                                      winget upgrade --source winget;
                                      Write-Host 'winget Source updated successfully!' -ForegroundColor Green"
             }
-            "Update Packages" {
-                New_Window -Command "Write-Host 'Packages updated successfully!'"
+            "Update Packages " {
+                New_Window -Command "scoop status
+                                     scoop update
+                                     Write-Host 'Scoop Status & Bucked Updated ☑️'
+                                     scoop update *
+                                     scoop export > C:\Users\nahid\OneDrive\backup\installed_apps\list_scoop.txt
+                                     Write-Host 'scoop updated ☑️'
+
+
+                                     Write-Host 'Packages updated successfully' -ForegroundColor Green"
             }
             "Set up Neovim" {
                 New_Window -Command "Write-Host 'Neovim setup completed!'"

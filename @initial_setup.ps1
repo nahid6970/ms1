@@ -94,7 +94,6 @@ function Install_Packages {
     scoop install ventoy
     scoop install winaero-tweaker
     scoop install yt-dlp
-
 }
 Install_Scoop
 Add_Buckets
