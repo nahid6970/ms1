@@ -175,6 +175,9 @@ function Show-MainMenu {
             }
             "mklink" {
                 $submenuListBox.Items.Add("Path_Var")
+                $submenuListBox.Items.Add("Sonarr")
+                $submenuListBox.Items.Add("Radarr")
+                $submenuListBox.Items.Add("Prowlarr")
             }
         }
     })
@@ -261,6 +264,15 @@ function Show-MainMenu {
             }
             "Path_Var" {
                 New_Window_pwsh -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
+            }
+            "Sonarr" {
+                New_Window_pwsh -Command "
+                    Winget install TeamSonarr.Sonarr
+                    sudo Stop-Process -Name 'Sonarr' -Verbose
+                    Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
+                    New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\sonarr\sonarr.db -Force -Verbose
+                    Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
+                                        "
             }
         }
     })
