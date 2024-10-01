@@ -192,6 +192,7 @@ function Show-MainMenu {
     # Event handler for double-click on submenu to open pop-up window or run command
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
+            # package
             "Install Packages" {
                 New_Window_pwsh -Command "scoop install git
                                      scoop install python
@@ -238,12 +239,14 @@ function Show-MainMenu {
             "Install PWSH" {
                 New_Window_powershell -Command "winget install Microsoft.PowerShell"
             }
+            # neovim
             "Set up Neovim" {
                 New_Window_pwsh -Command "Write-Host 'Neovim setup completed!'"
             }
             "Configure Neovim Plugins" {
                 New_Window_pwsh -Command "Write-Host 'Neovim plugins configured!'"
             }
+            # git
             "clone ms1" {
                 New_Window_pwsh -Command "Write-Host Cloning ms1 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms1 ; Write-Host Cloned ms1 successfully! -ForegroundColor Green"
             }
@@ -253,6 +256,7 @@ function Show-MainMenu {
             "clone ms3" {
                 New_Window_pwsh -Command "Write-Host Cloning ms3 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms3 ; Write-Host Cloned ms3 successfully! -ForegroundColor Green"
             }
+            # port
             "5000" {
                 New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any'
             }
@@ -262,6 +266,7 @@ function Show-MainMenu {
             "5002" {
                 New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5002" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any'
             }
+            # mklink
             "Path_Var" {
                 New_Window_pwsh -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
             }
@@ -272,6 +277,24 @@ function Show-MainMenu {
                     Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\sonarr\sonarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
+                                        "
+            }
+            "Radarr" {
+                New_Window_pwsh -Command "
+                    Winget install TeamRadarr.Radarr -Verbose
+                    sudo Stop-Process -Name 'Radarr' -Verbose
+                    Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
+                    New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\radarr\radarr.db -Force -Verbose
+                    Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
+                                        "
+            }
+            "Prowlarr" {
+                New_Window_pwsh -Command "
+                    Winget install TeamProwlarr.Prowlarr -Verbose
+                    sudo Stop-Process -Name 'Prowlarr' -Verbose
+                    Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
+                    New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db -Force -Verbose
+                    Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
                                         "
             }
         }
