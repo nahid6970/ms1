@@ -49,12 +49,20 @@ function Show-NewWindow {
 }
 
 # Function to run a command in a new PowerShell window
-function New_Window {
+function New_Window_powershell {
     param (
         [string]$Command
     )
     Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
+
+function New_Window_pwsh {
+    param (
+        [string]$Command
+    )
+    Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
+}
+
 
 # Main Menu and Submenu in a side-by-side view
 function Show-MainMenu {
@@ -138,6 +146,7 @@ function Show-MainMenu {
 
         switch ($mainMenuListBox.SelectedItem) {
             "Packages Management" {
+                $submenuListBox.Items.Add("Install PWSH")
                 $submenuListBox.Items.Add("Setup Scoop")
                 $submenuListBox.Items.Add("Update Winget")
                 $submenuListBox.Items.Add("Install Packages")
@@ -168,7 +177,7 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             "Install Packages" {
-                New_Window -Command "scoop install git
+                New_Window_pwsh -Command "scoop install git
                                      scoop install python
 
                                      scoop install ack
@@ -192,12 +201,12 @@ function Show-MainMenu {
                                      Write-Host 'Packages installed successfully' --ForegroundColor Green"
             }
             "Update Winget" {
-                New_Window -Command "winget upgrade --source msstore ; 
+                New_Window_pwsh -Command "winget upgrade --source msstore ; 
                                      winget upgrade --source winget;
                                      Write-Host 'winget Source updated successfully!' -ForegroundColor Green"
             }
             "Update Packages " {
-                New_Window -Command "scoop status
+                New_Window_pwsh -Command "scoop status
                                      scoop update
                                      Write-Host 'Scoop Status & Bucked Updated ☑️'
                                      scoop update *
@@ -210,32 +219,35 @@ function Show-MainMenu {
                                      Write-Host 'Winget Upgraded ☑️'
                                      Write-Host 'Packages updated successfully' -ForegroundColor Green"
             }
+            "Install PWSH" {
+                New_Window_powershell -Command "winget install Microsoft.PowerShell"
+            }
             "Set up Neovim" {
-                New_Window -Command "Write-Host 'Neovim setup completed!'"
+                New_Window_pwsh -Command "Write-Host 'Neovim setup completed!'"
             }
             "Configure Neovim Plugins" {
-                New_Window -Command "Write-Host 'Neovim plugins configured!'"
+                New_Window_pwsh -Command "Write-Host 'Neovim plugins configured!'"
             }
             "clone ms1" {
-                New_Window -Command "Write-Host Cloning ms1 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms1 ; Write-Host Cloned ms1 successfully! -ForegroundColor Green"
+                New_Window_pwsh -Command "Write-Host Cloning ms1 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms1 ; Write-Host Cloned ms1 successfully! -ForegroundColor Green"
             }
             "clone ms2" {
-                New_Window -Command "Write-Host Cloning ms2 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms2 ; Write-Host Cloned ms2 successfully! -ForegroundColor Green"
+                New_Window_pwsh -Command "Write-Host Cloning ms2 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms2 ; Write-Host Cloned ms2 successfully! -ForegroundColor Green"
             }
             "clone ms3" {
-                New_Window -Command "Write-Host Cloning ms3 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms3 ; Write-Host Cloned ms3 successfully! -ForegroundColor Green"
+                New_Window_pwsh -Command "Write-Host Cloning ms3 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms3 ; Write-Host Cloned ms3 successfully! -ForegroundColor Green"
             }
             "5000" {
-                New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any'
+                New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any'
             }
             "5001" {
-                New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5001" -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any'
+                New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5001" -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any'
             }
             "5002" {
-                New_Window -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5002" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any'
+                New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5002" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any'
             }
             "Path_Var" {
-                New_Window -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
+                New_Window_pwsh -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
             }
         }
     })
