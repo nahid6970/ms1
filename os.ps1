@@ -178,6 +178,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Sonarr")
                 $submenuListBox.Items.Add("Radarr")
                 $submenuListBox.Items.Add("Prowlarr")
+                $submenuListBox.Items.Add("Komorebi")
             }
         }
     })
@@ -350,6 +351,13 @@ function Show-MainMenu {
                     Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
+                                         "
+            }
+            "Komorebi" {
+                New_Window_pwsh -Command "
+                    Komorebic quickstart
+                    Remove-Item 'C:\Users\nahid\komorebi.json'
+                    New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\mklink\komorebi\komorebi.json' -Force #[pwsh]
                                          "
             }
         }
