@@ -911,14 +911,17 @@ Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
 Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
 ; start apps
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-Gui, Add, Button, x010 y050 w300 h50 gstart_Explorer          ,Explorer
-Gui, Add, Button, x010 y100 w300 h50 gstart_Komorebic         ,Komorebic
+Gui, Add, Button, x010 y050 w150 h50                          ,Komorebic
+Gui, Add, Button, x160 y050 w150 h50 gstart_Komorebic         ,Start
+
+
+Gui, Add, Button, x010 y100 w300 h50 gstart_Explorer          ,Explorer
 Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonitor
 Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
 Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
 Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
 
-Gui, Show, w320 h500, Apps (Start/Kill)
+Gui, Show, w600 h500, Apps (Start/Kill)
 return
 Gui, Hide
 return
@@ -960,12 +963,12 @@ start_mypygui:
 Run, C:\ms1\mypygui.py ,,Hide 
 return
 
-; ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗
-; ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║
-; █████╔╝ ██║   ██║██╔████╔██║██║   ██║██████╔╝█████╗  ██████╔╝██║
-; ██╔═██╗ ██║   ██║██║╚██╔╝██║██║   ██║██╔══██╗██╔══╝  ██╔══██╗██║
-; ██║  ██╗╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║███████╗██████╔╝██║
-; ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝
+;* ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗
+;* ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║
+;* █████╔╝ ██║   ██║██╔████╔██║██║   ██║██████╔╝█████╗  ██████╔╝██║
+;* ██╔═██╗ ██║   ██║██║╚██╔╝██║██║   ██║██╔══██╗██╔══╝  ██╔══██╗██║
+;* ██║  ██╗╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║███████╗██████╔╝██║
+;* ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝
 Pause::
 Gui, New, +Resize
 Gui, +AlwaysOnTop
@@ -987,6 +990,7 @@ return
 komorebic_load:
 RunWait, komorebic quick-load-resize,,Hide
 return
+
 
 
 
@@ -1106,85 +1110,7 @@ return
 ; return
 
 
-#=:: ; [Win]+[=]
-    WinGet, window, ID, A
-    InputBox, width, Resize, Width:, , 140, 130
-    InputBox, height, Resize, Height:, , 140, 130
-    WinMove, ahk_id %window%, , , , width, height
-    return
 
-
-
-
-
-
-
-;  ██████╗██╗  ██╗ ██████╗ ██████╗ ██████╗
-; ██╔════╝██║  ██║██╔═══██╗██╔══██╗██╔══██╗
-; ██║     ███████║██║   ██║██████╔╝██║  ██║
-; ██║     ██╔══██║██║   ██║██╔══██╗██║  ██║
-; ╚██████╗██║  ██║╚██████╔╝██║  ██║██████╔╝
-;  ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝
-
-; ChordSequence := ""
-; TimerActive := False
-
-; ; First keypress in the chord sequence
-; ^f::  ; Ctrl + F
-;     ChordSequence := "Ctrl+F"
-;     TimerActive := True
-;     SetTimer, CheckChordTimeout, -500  ; Timer to reset the chord sequence if not completed in 500ms
-;     return
-
-; ; Second keypress in the chord sequence for Explorer
-; ^e::  ; Ctrl + E
-;     if (ChordSequence = "Ctrl+F" && GetKeyState("Ctrl", "P")) {
-;         ChordSequence := ""  ; Clear the sequence after successful match
-;         TimerActive := False
-;         ; Launch Windows Explorer
-;         Run, explorer.exe
-;     }
-;     return
-
-; ; Second keypress in the chord sequence for Terminal
-; ^d::  ; Ctrl + D
-;     if (ChordSequence = "Ctrl+F" && GetKeyState("Ctrl", "P")) {
-;         ChordSequence := ""  ; Clear the sequence after successful match
-;         TimerActive := False
-;         ; Launch Windows Terminal
-;         Run, wt.exe  ; Adjust path if needed
-;     }
-;     return
-
-; ; Regular Ctrl + D functionality
-; ^d up::  ; Ctrl + D released
-;     if !(ChordSequence = "Ctrl+F") {
-;         ; Perform normal Ctrl + D action here
-;         Send, ^d
-;     }
-;     return
-
-; ; Regular Ctrl + E functionality
-; ^e up::  ; Ctrl + E released
-;     if !(ChordSequence = "Ctrl+F") {
-;         ; Perform normal Ctrl + E action here
-;         Send, ^e
-;     }
-;     return
-
-; ; Timer expirfation handler for timeout
-; CheckChordTimeout:
-;     if (ChordSequence = "Ctrl+F" && TimerActive) {
-;         ; Send Ctrl+F if Ctrl+E or Ctrl+D is not pressed within 500ms
-;         Send, ^f
-;     }
-;     ChordSequence := ""  ; Reset the sequence after handling timeout
-;     TimerActive := False
-;     return
-
-; ; Ensure Ctrl is released if script is terminated or reset
-; ^Esc::  ; Ctrl + Esc to exit the script
-;     ExitApp
 
 
 ; Define the hotstring ;killfav
