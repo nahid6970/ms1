@@ -1221,171 +1221,12 @@ return
 }
 return
 
-
-
 ;*  ███████╗███████╗██████╗
 ;*  ██╔════╝██╔════╝╚════██╗
 ;*  ███████╗█████╗   █████╔╝
 ;*  ╚════██║██╔══╝   ╚═══██╗
 ;*  ███████║██║     ██████╔╝
 ;*  ╚══════╝╚═╝     ╚═════╝
-; Light-Attack1
-; #IfWinActive ahk_exe dnplayer.exe
-;     F13::
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x up}
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Sleep, 100
-;         ; Send, {x up}
-;     return
-; #If
-
-
-
-;! continue untile f14 pressed // not sure if runs multiple instance??
-; #IfWinActive ahk_exe dnplayer.exe
-;     F13::
-;         Toggle := !Toggle  ; Toggle the loop on/off
-;         while (Toggle)  ; Loop while Toggle is true
-;         {
-;             if !WinActive("ahk_exe dnplayer.exe")  ; Check if dnplayer.exe is still active
-;             {
-;                 Toggle := false
-;                 break
-;             }
-;             Send, {d down}
-;             Send, j
-;             Send, j
-;             Send, {d up}
-;             Sleep, 100  ; Adjust the delay as needed
-;         }
-;     return
-
-;     F9::
-;         Toggle := false  ; Stop the loop when F9 is pressed
-;     return
-; #If
-
-; ;! continue untile f14 pressed
-; #IfWinActive ahk_exe dnplayer.exe
-;     F13::
-;         if (Toggle)  ; If the loop is already running, do nothing
-;             return
-;         Toggle := true  ; Start the loop
-;         while (Toggle)  ; Loop while Toggle is true
-;         {
-;             if !WinActive("ahk_exe dnplayer.exe")  ; Check if dnplayer.exe is still active
-;             {
-;                 Toggle := false
-;                 break
-;             }
-;             Send, {x down}
-;             Send, {d down}
-;             Send, j
-;             Send, j
-;             Send, {d up}
-;             Send, {x up}
-;             Sleep, 100  ; Adjust the delay as needed
-;         }
-;     return
-
-;     F9::
-;         Toggle := false  ; Stop the loop when F9 is pressed
-;     return
-; #If
-
-
-
-; ;; only send the shortcut to dnplayer
-; #IfWinActive ahk_exe dnplayer.exe
-;     F13::
-;         StartTime := A_TickCount  ; Record the current time
-;         while (A_TickCount - StartTime < 5000)  ; Run for 3000 milliseconds (3 seconds)
-;         {
-;             ; Send, {l down}
-;             Send, {x down}
-;             Send, {d down}
-;             Send, j
-;             Send, j
-;             Send, {d up}
-;             Send, {x up}
-;             ; Send, {l up}
-;             Sleep, 100  ; Adjust the delay as needed between iterations
-;         }
-;     return
-; #If
-
-
-
 ;; Only send the shortcut to dnplayer
 #IfWinActive ahk_exe dnplayer.exe
     F13::
@@ -1407,56 +1248,12 @@ return
     return
 #If
 
-
-
-; PSS
-; #IfWinActive ahk_exe dnplayer.exe
-;     F13::
-;         Send, {x down}j
-;         Send, {l down}j
-;         Send, {i down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Send, {i up}
-;         Send, {l up}
-;         Send, {x up}
-;     return
-; #If
-
-; #IfWinActive ahk_exe dnplayer.exe
-;     F13::
-;         Send, {i down}
-;         Send, {d down}
-;         Send, j
-;         Send, j
-;         Send, {d up}
-;         Send, {i up}
-;     return
-; #If
-
-
-; #Persistent
-; SetTitleMatchMode, 2  ; This will match any window title containing the specified text.
-
-; ; Hook into the Win+E key combination for opening File Explorer
-; #e::
-;     ; Check if an Explorer window already exists
-;     IfWinExist, ahk_class CabinetWClass
-;     {
-;         ; Activate the existing window and send the hotkey to open a new tab
-;         WinActivate
-;         Send, ^t  ; This sends Ctrl + T to open a new tab
-;     }
-;     else
-;     {
-;         ; If no window exists, open File Explorer normally
-;         Run, explorer.exe
-;     }
-;     return
-
-
+;* ███████╗██╗  ██╗██████╗ ██╗      ██████╗ ██████╗ ███████╗██████╗
+;* ██╔════╝╚██╗██╔╝██╔══██╗██║     ██╔═══██╗██╔══██╗██╔════╝██╔══██╗
+;* █████╗   ╚███╔╝ ██████╔╝██║     ██║   ██║██████╔╝█████╗  ██████╔╝
+;* ██╔══╝   ██╔██╗ ██╔═══╝ ██║     ██║   ██║██╔══██╗██╔══╝  ██╔══██╗
+;* ███████╗██╔╝ ██╗██║     ███████╗╚██████╔╝██║  ██║███████╗██║  ██║
+;* ╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
 #Persistent
 SetTitleMatchMode, 2  ; Match windows containing the specified text
 DetectHiddenWindows, On
@@ -1507,28 +1304,3 @@ DetectHiddenWindows, On
         WinClose, ahk_id %this_id%
     }
     return
-
-
-
-
-
-
-
-
-    ; Action for F13 key
-; F13::
-; MsgBox, You pressed F13!
-; return
-; F14::
-; MsgBox, You pressed F14!
-; return
-; ; Action for F14 key
-; F15::
-; MsgBox, You pressed F15!
-; return
-; F16::
-; MsgBox, You pressed F16!
-; return
-; F17::
-; MsgBox, You pressed F17!
-; return
