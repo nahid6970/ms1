@@ -216,7 +216,7 @@ def actionF_L(window):
                 pause_other_items = True
                 holding_keys = True
                 # Hold 'l' immediately
-                key_down(window, 'l')
+                # key_down(window, 'l')
                 # Start time for periodic image checks
                 start_time = time.time()
                 while holding_keys and not stop_thread_action1:
@@ -231,7 +231,7 @@ def actionF_L(window):
                             break
                     time.sleep(0.01)  # Small delay to ensure continuous pressing
                 # Release all held keys when the loop finishes
-                key_up(window, 'l')
+                # key_up(window, 'l')
                 key_up(window, 'F13')
                 holding_keys = False
                 pause_other_items = False
@@ -241,8 +241,8 @@ def actionF_L(window):
     finally:
         # Ensure all keys are released in case of an exception
         if holding_keys:
-            key_up(window, 'l')
-        key_up(window, 'F13')
+            # key_up(window, 'l')
+            key_up(window, 'F13')
         pause_other_items = False
 
 def Action__Light__FF():
