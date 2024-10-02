@@ -282,13 +282,28 @@ function Show-MainMenu {
             }
             # git
             "clone ms1" {
-                New_Window_pwsh -Command "Write-Host Cloning ms1 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms1 ; Write-Host Cloned ms1 successfully! -ForegroundColor Green"
+                New_Window_pwsh -Command "
+                Write-Host Cloning ms1 to c:\
+                cd c:\
+                git clone https://github.com/nahid6970/ms1
+                Write-Host Cloned ms1 successfully! -ForegroundColor Green
+                                         "
             }
             "clone ms2" {
-                New_Window_pwsh -Command "Write-Host Cloning ms2 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms2 ; Write-Host Cloned ms2 successfully! -ForegroundColor Green"
+                New_Window_pwsh -Command "
+                    Write-Host Cloning ms2 to c:\ 
+                    cd c:\
+                    git clone https://github.com/nahid6970/ms2
+                    Write-Host Cloned ms2 successfully! -ForegroundColor Green
+                                         "
             }
             "clone ms3" {
-                New_Window_pwsh -Command "Write-Host Cloning ms3 to c:\ ; cd c:\ ; git clone https://github.com/nahid6970/ms3 ; Write-Host Cloned ms3 successfully! -ForegroundColor Green"
+                New_Window_pwsh -Command "
+                Write-Host Cloning ms3 to c:\
+                cd c:\
+                git clone https://github.com/nahid6970/ms3
+                Write-Host Cloned ms3 successfully! -ForegroundColor Green
+                                         "
             }
             # port
             "5000" {
