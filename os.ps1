@@ -307,13 +307,19 @@ function Show-MainMenu {
             }
             # port
             "5000" {
-                New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any'
+                New_Window_pwsh -Command "
+                    sudo New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+                                         "
             }
             "5001" {
-                New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5001" -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any'
+                New_Window_pwsh -Command "
+                sudo New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
+                                         "
             }
             "5002" {
-                New_Window_pwsh -Command 'sudo New-NetFirewallRule -DisplayName "Allow_Port_5002" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any'
+                New_Window_pwsh -Command "
+                    sudo New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                                         "
             }
             # mklink
             "Path_Var" {
