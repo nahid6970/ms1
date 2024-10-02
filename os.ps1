@@ -145,7 +145,6 @@ function Show-MainMenu {
     #* ╚════██║██║   ██║██╔══██╗██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
     #* ███████║╚██████╔╝██████╔╝██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
     #* ╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
-
     # Event handler to populate submenu based on main menu selection
     $mainMenuListBox.Add_SelectionChanged({
         $submenuListBox.Items.Clear()
@@ -153,10 +152,11 @@ function Show-MainMenu {
         switch ($mainMenuListBox.SelectedItem) {
             "Packages Management" {
                 $submenuListBox.Items.Add("Install PWSH")
-                $submenuListBox.Items.Add("Setup Scoop")
                 $submenuListBox.Items.Add("Update Winget")
-                $submenuListBox.Items.Add("Install Packages")
+                $submenuListBox.Items.Add("Setup Scoop")
+                $submenuListBox.Items.Add("Install Scoop Packages")
                 $submenuListBox.Items.Add("Update Packages ")
+                $submenuListBox.Items.Add("Pip Packages")
             }
             "Neovim Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
@@ -193,29 +193,63 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             # package
-            "Install Packages" {
-                New_Window_pwsh -Command "scoop install git
-                                     scoop install python
+            "Setup Scoop" {
+                New_Window_pwsh -Command "
+                    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+                        Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
+                    } else {
+                        Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
+                    }
+                    scoop bucket add main
+                    scoop bucket add extras
+                    scoop bucket add versions
+                    scoop bucket add nonportable
+                    scoop config cache_path D:\@install\scoop\cache
+                                         "
+            }
+            "Install Scoop Packages" {
+                New_Window_pwsh -Command "
+                    scoop install git
+                    scoop install python
 
-                                     scoop install ack
-                                     scoop install adb
-                                     scoop install bat
-                                     scoop install capture2text
-                                     scoop install ditto
-                                     scoop install ffmpeg
-                                     scoop install fzf
-                                     scoop install highlight
-                                     scoop install komorebi
-                                     scoop install oh-my-posh
-                                     scoop install rclone
-                                     scoop install rssguard
-                                     scoop install rufus
-                                     scoop install scoop-completion
-                                     scoop install scoop-search
-                                     scoop install ventoy
-                                     scoop install winaero-tweaker
-                                     scoop install yt-dlp
-                                     Write-Host 'Packages installed successfully' --ForegroundColor Green"
+                    scoop install ack
+                    scoop install adb
+                    scoop install bat
+                    scoop install capture2text
+                    scoop install ditto
+                    scoop install ffmpeg
+                    scoop install fzf
+                    scoop install highlight
+                    scoop install komorebi
+                    scoop install oh-my-posh
+                    scoop install rclone
+                    scoop install rssguard
+                    scoop install rufus
+                    scoop install scoop-completion
+                    scoop install scoop-search
+                    scoop install ventoy
+                    scoop install winaero-tweaker
+                    scoop install yt-dlp
+                    Write-Host 'Packages installed successfully' --ForegroundColor Green
+                                        "
+            }
+            "Pip Packages" {
+                New_Window_pwsh -Command "
+                    pip install cryptography
+                    pip install customtkinter
+                    pip install importlib
+                    pip install keyboard
+                    pip install pillow
+                    pip install psutil
+                    pip install pyadl
+                    pip install pyautogui
+                    pip install pycryptodomex
+                    pip install PyDictionary
+                    pip install pywin32
+                    pip install screeninfo
+                    pip install winshell
+                    pip install Flask
+                                         "
             }
             "Update Winget" {
                 New_Window_pwsh -Command "winget upgrade --source msstore ; 
