@@ -382,3 +382,97 @@ GetLockingProcess(path) {
     
     return output
 }
+
+
+
+
+
+
+
+
+
+; !h:: ; Define the shortcut Ctrl+H
+; Gui, New, +Resize ; Create a new GUI window with resize capability
+
+; ; Use Font command to set a specific font size and style for all text controls
+; Gui, Font, s10 Bold, Jetbrainsmono nfp ; Set font size to 12, make it bold, and use Arial
+
+; ; Add text controls to the GUI
+; Gui, Add, Text, x10 y10 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y60 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y110 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y160 w120 h40 +Center, Button
+; Gui, Add, Text, x10 y210 w120 h40 +Center, Button
+
+; Gui, Add, Text, x150 y10 w120 h40 +Center, Button
+; Gui, Add, Text, x150 y60 w120 h40 +Center, Button
+; Gui, Add, Text, x150 y110 w120 h40 +Center, Button
+; Gui, Add, Text, x150 y160 w120 h40 +Center, Button
+
+; Gui, Show, w300 h300, Two Column GUI ; Show the GUI with a width and height
+; return
+
+; GuiClose:
+; Gui, Hide ; Hide the GUI instead of exiting the script
+; return
+
+
+
+
+; !h:: ; Define the shortcut Ctrl+H
+; Gui, New, +Resize ; Create a new GUI window with resize capability
+
+; ; First column
+; Gui, Font, s12 Bold, Jetbrainsmono nfp
+; Gui, Add, Text, x10 y10 w300 h40 +Center,  ShowActionChooser`nALT+F
+; Gui, Add, Text, x10 y60 w300 h40 +Center, Button 2
+; Gui, Add, Text, x10 y110 w300 h40 +Center, Button 3
+; Gui, Add, Text, x10 y160 w300 h40 +Center, Button 4
+; Gui, Add, Text, x10 y210 w300 h40 +Center, Button 5
+
+; ; Second column
+; Gui, Font, s12 Italic, Times New Roman
+; Gui, Add, Text, x310 y10 w300 h40 +Center, Button A
+; Gui, Add, Text, x310 y60 w300 h40 +Center, Button B
+; Gui, Add, Text, x310 y110 w300 h40 +Center, Button C
+; Gui, Add, Text, x310 y160 w300 h40 +Center, Button D
+
+; Gui, Show, w600 h300, Two Column GUI ; Show the GUI with a width and height
+; return
+
+; GuiClose:
+; Gui, Hide ; Hide the GUI instead of exiting the script
+; return
+
+
+
+
+
+
+
+
+
+
+
+
+
+;* ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗
+;* ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║
+;* █████╔╝ ██║   ██║██╔████╔██║██║   ██║██████╔╝█████╗  ██████╔╝██║
+;* ██╔═██╗ ██║   ██║██║╚██╔╝██║██║   ██║██╔══██╗██╔══╝  ██╔══██╗██║
+;* ██║  ██╗╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║███████╗██████╔╝██║
+;* ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝
+; Pause::
+; Gui, New, +Resize
+; Gui, +AlwaysOnTop
+; Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+; Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Komorebi
+; ; start apps
+; Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+; Gui, Add, Button, x010 y050 w300 h50 gkomorebic_save ,Komorebic Save
+; Gui, Add, Button, x010 y100 w300 h50 gkomorebic_load ,Komorebic Load
+
+; Gui, Show, w320 h200, Komorebi
+; return
+; Gui, Hide
+; return

@@ -816,303 +816,15 @@ Remove_Duplicate_Lines() {
     return
 }
 
-;?  ██████╗ ██╗   ██╗██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
-;? ██╔════╝ ██║   ██║██║    ██╔════╝██║  ██║██╔═══██╗██╔═══██╗██╔════╝██╔════╝██╔══██╗
-;? ██║  ███╗██║   ██║██║    ██║     ███████║██║   ██║██║   ██║███████╗█████╗  ██████╔╝
-;? ██║   ██║██║   ██║██║    ██║     ██╔══██║██║   ██║██║   ██║╚════██║██╔══╝  ██╔══██╗
-;? ╚██████╔╝╚██████╔╝██║    ╚██████╗██║  ██║╚██████╔╝╚██████╔╝███████║███████╗██║  ██║
-;?  ╚═════╝  ╚═════╝ ╚═╝     ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
-
-; Shortcut to open the action chooser GUI
-; Show the action chooser GUI
-Font_Tools() {
-    Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
-    Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-    Gui, Add, Button, x10 y020 w290 h30 gConvert_Lowercase, Lowercase [Ralt+E]
-    Gui, Add, Button, x10 y060 w290 h30 gConvert_Uppercase, UpperCase [Ralt+U]
-    Gui, Add, Button, x10 y100 w290 h30 gRemove_Duplicate_Lines, rm Dup Lines [Ralt+L]
-    Gui, Add, Button, x10 y140 w290 h50 , Replace Matching Text [RAlt+R]
-    Gui, Show, w310 h200, Action Chooser
-    return
-}
-{
-Gui, Destroy
-return
-}
 
 
 
-!h:: ; Define the shortcut Ctrl+H
-Gui, New, +Resize ; Create a new GUI window with resize capability
-Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Button, x010 y000 w300 h50 , Font Related`nAlt+F
-Gui, Add, Button, x010 y050 w300 h50 , Black Screen`nCtrl+Alt+B
-Gui, Add, Button, x010 y100 w300 h50 , White Screen`nCtrl+Alt+W
-Gui, Add, Button, x010 y150 w300 h50 , Reset Workspace`nCtrl+Alt+T
-Gui, Add, Button, x010 y200 w300 h50 , Always On Top`nWin+T
-Gui, Add, Button, x010 y250 w300 h50 , Send to 2nd Monitor`nWin+S
-Gui, Add, Button, x010 y300 w300 h50 , Center Focused Apps`nWin+C
-
-Gui, Font, s25, Segoe MDL2 Assets ; Set font size to 24 and use the Segoe MDL2 Assets font
-Gui, Add, Text, x310 y000 w300 h80 +Center cBlue, VSCode
-Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Button, x310 y050 w300 h50 +Center cBlue, Split Right`nCtrl+\
-Gui, Add, Button, x310 y100 w300 h50 +Center cBlue gTerminal_Run_File, cp Terminal Run File`nCtrl+Alt+Shift+Enter
-Gui, Add, Button, x310 y150 w300 h50 +Center cBlue, Button 8
-Gui, Add, Button, x310 y200 w300 h50 +Center cBlue, Button 9
-Gui, Add, Button, x310 y250 w300 h50 +Center cBlue, Button 9
-
-Gui, Show, w620 h500, Two Column GUI ; Show the GUI with a width and height
-return
-GuiClose:
-Gui, Hide ; Hide the GUI instead of exiting the script
-return
-
-Terminal_Run_File:
-    Clipboard := "workbench.action.terminal.runActiveFile"
-    MsgBox, Copied `workbench.action.terminal.runActiveFile` to clipboard
-return
-
-;! ██╗  ██╗██╗██╗     ██╗         ██████╗ ██╗   ██╗██╗
-;! ██║ ██╔╝██║██║     ██║        ██╔════╝ ██║   ██║██║
-;! █████╔╝ ██║██║     ██║        ██║  ███╗██║   ██║██║
-;! ██╔═██╗ ██║██║     ██║        ██║   ██║██║   ██║██║
-;! ██║  ██╗██║███████╗███████╗   ╚██████╔╝╚██████╔╝██║
-;! ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝
-
-!k:: ; Define the shortcut Ctrl+H
-Gui, New, +Resize ; Create a new GUI window with resize capability
-Gui, +AlwaysOnTop
-Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x10 y000 w300 h80 +Center cRed, Kill
-Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-; kill apps
-Gui, Add, Button, x10 y050 w300 h50 gKill_Python    ,Python
-Gui, Add, Button, x10 y100 w300 h50 gKill_Komorebi  ,Komorebi
-Gui, Add, Button, x10 y150 w300 h50 gKill_PWSH      ,PWSH
-Gui, Add, Button, x10 y200 w300 h50 gKill_Powershell,Powershell
-Gui, Add, Button, x10 y250 w300 h50 gKill_CMD       ,cmd
-
-Gui, Show, w320 h500, Apps (Start/Kill)
-return
-Gui, Hide
-return
-; ███████╗████████╗ █████╗ ██████╗ ████████╗     ██████╗ ██╗   ██╗██╗
-; ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝ ██║   ██║██║
-; ███████╗   ██║   ███████║██████╔╝   ██║       ██║  ███╗██║   ██║██║
-; ╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██║   ██║██║   ██║██║
-; ███████║   ██║   ██║  ██║██║  ██║   ██║       ╚██████╔╝╚██████╔╝██║
-; ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═════╝  ╚═════╝ ╚═╝
-
-!s:: ; Define the shortcut Ctrl+H
-Gui, New, +Resize ; Create a new GUI window with resize capability
-Gui, +AlwaysOnTop
-Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
-; start apps
-Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-Gui, Add, Button, x010 y050 w150 h50                          ,Komorebic
-Gui, Add, Button, x160 y050 w150 h50 gstart_Komorebic         ,Start
-
-
-Gui, Add, Button, x010 y100 w300 h50 gstart_Explorer          ,Explorer
-Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonitor
-Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
-Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
-Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
-
-Gui, Show, w600 h500, Apps (Start/Kill)
-return
-Gui, Hide
-return
-
-; kill related functions
-Kill_Python:
-Run, taskkill /f /im python.exe,,Hide
-return
-Kill_Komorebi:
-Run, taskkill /f /im komorebi.exe,,Hide
-return
-Kill_PWSH:
-Run, taskkill /f /im pwsh.exe,,Hide
-return
-Kill_Powershell:
-Run, taskkill /f /im powershell.exe,,Hide
-return
-Kill_CMD:
-Run, taskkill /f /im cmd.exe,,Hide
-return
-
-; start related functions
-start_Explorer:
-Run, pwsh -c explorer.exe,,Hide
-return
-start_Komorebic:
-Run, komorebic start,,Hide
-return
-start_RunningAppsMonitor:
-Run, python.exe C:\ms1\running_apps.py,,Hide
-return
-start_cmd_asAdmin:
-Run, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
-return
-start_Run:
-Run, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
-return
-start_mypygui:
-Run, C:\ms1\mypygui.py ,,Hide 
-return
-
-;* ██╗  ██╗ ██████╗ ███╗   ███╗ ██████╗ ██████╗ ███████╗██████╗ ██╗
-;* ██║ ██╔╝██╔═══██╗████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔══██╗██║
-;* █████╔╝ ██║   ██║██╔████╔██║██║   ██║██████╔╝█████╗  ██████╔╝██║
-;* ██╔═██╗ ██║   ██║██║╚██╔╝██║██║   ██║██╔══██╗██╔══╝  ██╔══██╗██║
-;* ██║  ██╗╚██████╔╝██║ ╚═╝ ██║╚██████╔╝██║  ██║███████╗██████╔╝██║
-;* ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝
-Pause::
-Gui, New, +Resize
-Gui, +AlwaysOnTop
-Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Komorebi
-; start apps
-Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-Gui, Add, Button, x010 y050 w300 h50 gkomorebic_save ,Komorebic Save
-Gui, Add, Button, x010 y100 w300 h50 gkomorebic_load ,Komorebic Load
-
-Gui, Show, w320 h200, Komorebi
-return
-Gui, Hide
-return
-
-komorebic_save:
-RunWait, komorebic quick-save-resize,,Hide
-return
-komorebic_load:
-RunWait, komorebic quick-load-resize,,Hide
-return
-
-
-
-
-; ██████╗ ██╗ ██████╗      ██████╗ ██╗   ██╗██╗
-; ██╔══██╗██║██╔═══██╗    ██╔════╝ ██║   ██║██║
-; ██████╔╝██║██║   ██║    ██║  ███╗██║   ██║██║
-; ██╔══██╗██║██║   ██║    ██║   ██║██║   ██║██║
-; ██████╔╝██║╚██████╔╝    ╚██████╔╝╚██████╔╝██║
-; ╚═════╝ ╚═╝ ╚═════╝      ╚═════╝  ╚═════╝ ╚═╝
-
-!b::
-Gui, New, +Resize
-Gui, +AlwaysOnTop
-
-Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-
-Gui,Add,Button,x000 y000 w200 h50               ,Nahid Ahmed
-Gui,Add,Button,x200 y000 w100 h50 gname_en_nahid,[EN]
-Gui,Add,Button,x300 y000 w100 h50 gname_bd_nahid,[BD]
-
-Gui,Add,Button,x000 y050 w200 h50               ,Father
-Gui,Add,Button,x200 y050 w100 h50 gname_en_father,[EN]
-Gui,Add,Button,x300 y050 w100 h50 gname_bd_father,[BD]
-
-Gui,Add,Button,x000 y100 w200 h50               ,Mother
-Gui,Add,Button,x200 y100 w100 h50 gname_en_mother,[EN]
-Gui,Add,Button,x300 y100 w100 h50 gname_bd_mother,[BD]
-
-Gui,Add,Button,x000 y150 w400 h50 gPermanentAddress,Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
-
-Gui, Show, w400 h500, BIO
-return
-Gui, Hide
-return
-
-name_bd_nahid:
-    Gui, Destroy
-    Send, {U+09A8}{U+09BE}{U+09B9}{U+09BF}{U+09A6} {U+0986}{U+09B9}{U+09AE}{U+09C7}{U+09A6}
-return
-name_en_nahid:
-    Gui, Destroy
-    Send, Nahid Ahmed
-return
-name_bd_father:
-    Gui, Destroy
-    Send, {U+09A8}{U+09C1}{U+09B0}{U+09C1}{U+09B2} {U+0986}{U+09AE}{U+09BF}{U+09A8}
-return
-name_en_father:
-    Gui, Destroy
-    Send, Nurul Amin
-return
-name_bd_mother:
-    Gui, Destroy
-    Send, {U+09A8}{U+09BE}{U+099C}{U+09AE}{U+09BE} {U+09AC}{U+09C7}{U+0997}{U+09AE}
-return
-name_en_mother:
-    Gui, Destroy
-    Send, Nazma Begum
-return
-PermanentAddress:
-    Gui, Destroy
-    Send, Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
-return
-
-
-; !h:: ; Define the shortcut Ctrl+H
-; Gui, New, +Resize ; Create a new GUI window with resize capability
-
-; ; Use Font command to set a specific font size and style for all text controls
-; Gui, Font, s10 Bold, Jetbrainsmono nfp ; Set font size to 12, make it bold, and use Arial
-
-; ; Add text controls to the GUI
-; Gui, Add, Text, x10 y10 w120 h40 +Center, Button
-; Gui, Add, Text, x10 y60 w120 h40 +Center, Button
-; Gui, Add, Text, x10 y110 w120 h40 +Center, Button
-; Gui, Add, Text, x10 y160 w120 h40 +Center, Button
-; Gui, Add, Text, x10 y210 w120 h40 +Center, Button
-
-; Gui, Add, Text, x150 y10 w120 h40 +Center, Button
-; Gui, Add, Text, x150 y60 w120 h40 +Center, Button
-; Gui, Add, Text, x150 y110 w120 h40 +Center, Button
-; Gui, Add, Text, x150 y160 w120 h40 +Center, Button
-
-; Gui, Show, w300 h300, Two Column GUI ; Show the GUI with a width and height
-; return
-
-; GuiClose:
-; Gui, Hide ; Hide the GUI instead of exiting the script
-; return
-
-
-
-
-; !h:: ; Define the shortcut Ctrl+H
-; Gui, New, +Resize ; Create a new GUI window with resize capability
-
-; ; First column
-; Gui, Font, s12 Bold, Jetbrainsmono nfp
-; Gui, Add, Text, x10 y10 w300 h40 +Center,  ShowActionChooser`nALT+F
-; Gui, Add, Text, x10 y60 w300 h40 +Center, Button 2
-; Gui, Add, Text, x10 y110 w300 h40 +Center, Button 3
-; Gui, Add, Text, x10 y160 w300 h40 +Center, Button 4
-; Gui, Add, Text, x10 y210 w300 h40 +Center, Button 5
-
-; ; Second column
-; Gui, Font, s12 Italic, Times New Roman
-; Gui, Add, Text, x310 y10 w300 h40 +Center, Button A
-; Gui, Add, Text, x310 y60 w300 h40 +Center, Button B
-; Gui, Add, Text, x310 y110 w300 h40 +Center, Button C
-; Gui, Add, Text, x310 y160 w300 h40 +Center, Button D
-
-; Gui, Show, w600 h300, Two Column GUI ; Show the GUI with a width and height
-; return
-
-; GuiClose:
-; Gui, Hide ; Hide the GUI instead of exiting the script
-; return
-
-
-
-
-
+;  ██████╗ ████████╗██╗  ██╗███████╗██████╗ ███████╗
+; ██╔═══██╗╚══██╔══╝██║  ██║██╔════╝██╔══██╗██╔════╝
+; ██║   ██║   ██║   ███████║█████╗  ██████╔╝███████╗
+; ██║   ██║   ██║   ██╔══██║██╔══╝  ██╔══██╗╚════██║
+; ╚██████╔╝   ██║   ██║  ██║███████╗██║  ██║███████║
+;  ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝
 ; Define the hotstring ;killfav
 ::;killme::
 {
@@ -1272,18 +984,239 @@ DetectHiddenWindows, On
     return
 }
 
+;?  ██████╗ ██╗   ██╗██╗     ██████╗██╗  ██╗ ██████╗  ██████╗ ███████╗███████╗██████╗
+;? ██╔════╝ ██║   ██║██║    ██╔════╝██║  ██║██╔═══██╗██╔═══██╗██╔════╝██╔════╝██╔══██╗
+;? ██║  ███╗██║   ██║██║    ██║     ███████║██║   ██║██║   ██║███████╗█████╗  ██████╔╝
+;? ██║   ██║██║   ██║██║    ██║     ██╔══██║██║   ██║██║   ██║╚════██║██╔══╝  ██╔══██╗
+;? ╚██████╔╝╚██████╔╝██║    ╚██████╗██║  ██║╚██████╔╝╚██████╔╝███████║███████╗██║  ██║
+;?  ╚═════╝  ╚═════╝ ╚═╝     ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
 
+; Shortcut to open the action chooser GUI
+; Show the action chooser GUI
+Font_Tools() {
+    Gui, +AlwaysOnTop ; Ensure the GUI window is always on top
+    Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+    Gui, Add, Button, x10 y020 w290 h30 gConvert_Lowercase, Lowercase [Ralt+E]
+    Gui, Add, Button, x10 y060 w290 h30 gConvert_Uppercase, UpperCase [Ralt+U]
+    Gui, Add, Button, x10 y100 w290 h30 gRemove_Duplicate_Lines, rm Dup Lines [Ralt+L]
+    Gui, Add, Button, x10 y140 w290 h50 , Replace Matching Text [RAlt+R]
+    Gui, Show, w310 h200, Action Chooser
+    return
+}
+{
+Gui, Destroy
+return
+}
+
+
+
+!h:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Button, x010 y000 w300 h50 , Font Related`nAlt+F
+Gui, Add, Button, x010 y050 w300 h50 , Black Screen`nCtrl+Alt+B
+Gui, Add, Button, x010 y100 w300 h50 , White Screen`nCtrl+Alt+W
+Gui, Add, Button, x010 y150 w300 h50 , Reset Workspace`nCtrl+Alt+T
+Gui, Add, Button, x010 y200 w300 h50 , Always On Top`nWin+T
+Gui, Add, Button, x010 y250 w300 h50 , Send to 2nd Monitor`nWin+S
+Gui, Add, Button, x010 y300 w300 h50 , Center Focused Apps`nWin+C
+
+Gui, Font, s25, Segoe MDL2 Assets ; Set font size to 24 and use the Segoe MDL2 Assets font
+Gui, Add, Text, x310 y000 w300 h80 +Center cBlue, VSCode
+Gui, Font, s12 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Button, x310 y050 w300 h50 +Center cBlue, Split Right`nCtrl+\
+Gui, Add, Button, x310 y100 w300 h50 +Center cBlue gTerminal_Run_File, cp Terminal Run File`nCtrl+Alt+Shift+Enter
+Gui, Add, Button, x310 y150 w300 h50 +Center cBlue, Button 8
+Gui, Add, Button, x310 y200 w300 h50 +Center cBlue, Button 9
+Gui, Add, Button, x310 y250 w300 h50 +Center cBlue, Button 9
+
+Gui, Show, w620 h500, Two Column GUI ; Show the GUI with a width and height
+return
+GuiClose:
+Gui, Hide ; Hide the GUI instead of exiting the script
+return
+
+Terminal_Run_File:
+    Clipboard := "workbench.action.terminal.runActiveFile"
+    MsgBox, Copied `workbench.action.terminal.runActiveFile` to clipboard
+return
+
+;! ██╗  ██╗██╗██╗     ██╗         ██████╗ ██╗   ██╗██╗
+;! ██║ ██╔╝██║██║     ██║        ██╔════╝ ██║   ██║██║
+;! █████╔╝ ██║██║     ██║        ██║  ███╗██║   ██║██║
+;! ██╔═██╗ ██║██║     ██║        ██║   ██║██║   ██║██║
+;! ██║  ██╗██║███████╗███████╗   ╚██████╔╝╚██████╔╝██║
+;! ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝
+
+!k:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, +AlwaysOnTop
+Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Text, x10 y000 w300 h80 +Center cRed, Kill
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+; kill apps
+Gui, Add, Button, x10 y050 w300 h50 gKill_Python    ,Python
+Gui, Add, Button, x10 y100 w300 h50 gKill_Komorebi  ,Komorebi
+Gui, Add, Button, x10 y150 w300 h50 gKill_PWSH      ,PWSH
+Gui, Add, Button, x10 y200 w300 h50 gKill_Powershell,Powershell
+Gui, Add, Button, x10 y250 w300 h50 gKill_CMD       ,cmd
+
+Gui, Show, w320 h500, Apps (Start/Kill)
+return
+Gui, Hide
+return
+
+;* ███████╗████████╗ █████╗ ██████╗ ████████╗     ██████╗ ██╗   ██╗██╗
+;* ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝ ██║   ██║██║
+;* ███████╗   ██║   ███████║██████╔╝   ██║       ██║  ███╗██║   ██║██║
+;* ╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██║   ██║██║   ██║██║
+;* ███████║   ██║   ██║  ██║██║  ██║   ██║       ╚██████╔╝╚██████╔╝██║
+;* ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═════╝  ╚═════╝ ╚═╝
+
+!s:: ; Define the shortcut Ctrl+H
+Gui, New, +Resize ; Create a new GUI window with resize capability
+Gui, +AlwaysOnTop
+Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
+Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
+; start apps
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+Gui, Add, Button, x010 y050 w150 h50                          ,Komorebic
+Gui, Add, Button, x160 y050 w150 h50 gstart_Komorebic         ,Start
+
+
+Gui, Add, Button, x010 y100 w300 h50 gstart_Explorer          ,Explorer
+Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonitor
+Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
+Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
+Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
+
+Gui, Show, w600 h500, Apps (Start/Kill)
+return
+Gui, Hide
+return
+
+; kill related functions
+Kill_Python:
+Run, taskkill /f /im python.exe,,Hide
+return
+Kill_Komorebi:
+Run, taskkill /f /im komorebi.exe,,Hide
+return
+Kill_PWSH:
+Run, taskkill /f /im pwsh.exe,,Hide
+return
+Kill_Powershell:
+Run, taskkill /f /im powershell.exe,,Hide
+return
+Kill_CMD:
+Run, taskkill /f /im cmd.exe,,Hide
+return
+
+; start related functions
+start_Explorer:
+Run, pwsh -c explorer.exe,,Hide
+return
+start_Komorebic:
+Run, komorebic start,,Hide
+return
+start_RunningAppsMonitor:
+Run, python.exe C:\ms1\running_apps.py,,Hide
+return
+start_cmd_asAdmin:
+Run, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
+return
+start_Run:
+Run, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
+return
+start_mypygui:
+Run, C:\ms1\mypygui.py ,,Hide 
+return
+
+;* ██████╗ ██╗ ██████╗      ██████╗ ██╗   ██╗██╗
+;* ██╔══██╗██║██╔═══██╗    ██╔════╝ ██║   ██║██║
+;* ██████╔╝██║██║   ██║    ██║  ███╗██║   ██║██║
+;* ██╔══██╗██║██║   ██║    ██║   ██║██║   ██║██║
+;* ██████╔╝██║╚██████╔╝    ╚██████╔╝╚██████╔╝██║
+;* ╚═════╝ ╚═╝ ╚═════╝      ╚═════╝  ╚═════╝ ╚═╝
+
+mybio:
+Gui, Destroy
+Gui, New, +Resize
+Gui, +AlwaysOnTop
+
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
+
+Gui,Add,Button,x000 y000 w200 h50               ,Nahid Ahmed
+Gui,Add,Button,x200 y000 w100 h50 gname_en_nahid,[EN]
+Gui,Add,Button,x300 y000 w100 h50 gname_bd_nahid,[BD]
+
+Gui,Add,Button,x000 y050 w200 h50               ,Father
+Gui,Add,Button,x200 y050 w100 h50 gname_en_father,[EN]
+Gui,Add,Button,x300 y050 w100 h50 gname_bd_father,[BD]
+
+Gui,Add,Button,x000 y100 w200 h50               ,Mother
+Gui,Add,Button,x200 y100 w100 h50 gname_en_mother,[EN]
+Gui,Add,Button,x300 y100 w100 h50 gname_bd_mother,[BD]
+
+Gui,Add,Button,x000 y150 w400 h50 gPermanentAddress,Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+
+Gui, Show, w400 h500, BIO
+return
+Gui, Hide
+return
+
+name_bd_nahid:
+    Gui, Destroy
+    Send, {U+09A8}{U+09BE}{U+09B9}{U+09BF}{U+09A6} {U+0986}{U+09B9}{U+09AE}{U+09C7}{U+09A6}
+return
+name_en_nahid:
+    Gui, Destroy
+    Send, Nahid Ahmed
+return
+name_bd_father:
+    Gui, Destroy
+    Send, {U+09A8}{U+09C1}{U+09B0}{U+09C1}{U+09B2} {U+0986}{U+09AE}{U+09BF}{U+09A8}
+return
+name_en_father:
+    Gui, Destroy
+    Send, Nurul Amin
+return
+name_bd_mother:
+    Gui, Destroy
+    Send, {U+09A8}{U+09BE}{U+099C}{U+09AE}{U+09BE} {U+09AC}{U+09C7}{U+0997}{U+09AE}
+return
+name_en_mother:
+    Gui, Destroy
+    Send, Nazma Begum
+return
+PermanentAddress:
+    Gui, Destroy
+    Send, Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+return
+
+;* ██╗   ██╗██╗  ████████╗██╗███╗   ███╗ █████╗ ████████╗███████╗     ██████╗ ██╗   ██╗██╗
+;* ██║   ██║██║  ╚══██╔══╝██║████╗ ████║██╔══██╗╚══██╔══╝██╔════╝    ██╔════╝ ██║   ██║██║
+;* ██║   ██║██║     ██║   ██║██╔████╔██║███████║   ██║   █████╗      ██║  ███╗██║   ██║██║
+;* ██║   ██║██║     ██║   ██║██║╚██╔╝██║██╔══██║   ██║   ██╔══╝      ██║   ██║██║   ██║██║
+;* ╚██████╔╝███████╗██║   ██║██║ ╚═╝ ██║██║  ██║   ██║   ███████╗    ╚██████╔╝╚██████╔╝██║
+;*  ╚═════╝ ╚══════╝╚═╝   ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝     ╚═════╝  ╚═════╝ ╚═╝
 
 #Include C:\ms1\scripts\AHK_BT\V1_4\Class_ImageButton.ahk
 !u::
 Gui, Margin, 20, 20
 Gui, Font, s11 normal, Segoe UI
 
+Gui, Add, Button, xm ym h30 gmybio, Bio
+Gui, Add, Button, x+5 yp h30 gkomorebic_save ,Komorebic Save
+Gui, Add, Button, x+5 yp h30 gkomorebic_load ,Komorebic Load
 
-
-Gui, Add, Button, xm ym w500 h24, #################################
-
-Gui, Add, Button, xm y+5 w250 h30, Python
+Gui, Add, Button, xm y+5 w250 h30, Komorebic
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63, % "Start"
+IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
+			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
+			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
+ImageButton.Create(hBtn63, IBBtnStyles*)
 Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61, % "Kill"
 IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
 			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 2]      ; hover
@@ -1291,14 +1224,14 @@ IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
 			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
 ImageButton.Create(hBtn61, IBBtnStyles*)
 
-Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63, % "Start"
-IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
-			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
-			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
-			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
-ImageButton.Create(hBtn63, IBBtnStyles*)
-
 
 Gui, Show,, Image Buttons
 return
 
+
+komorebic_save:
+RunWait, komorebic quick-save-resize,,Hide
+return
+komorebic_load:
+RunWait, komorebic quick-load-resize,,Hide
+return
