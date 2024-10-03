@@ -155,6 +155,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Install PWSH")
                 $submenuListBox.Items.Add("Update Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
+                $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
                 $submenuListBox.Items.Add("Update Packages ")
                 $submenuListBox.Items.Add("Pip Packages")
@@ -233,6 +234,11 @@ function Show-MainMenu {
                     scoop install winaero-tweaker
                     scoop install yt-dlp
                     Write-Host 'Packages installed successfully' --ForegroundColor Green
+                                        "
+            }
+            "Install Winget Packages" {
+                New_Window_pwsh -Command "
+                    winget install 9NQ8Q8J78637
                                         "
             }
             "Pip Packages" {
