@@ -254,9 +254,11 @@ function Show-MainMenu {
                                          "
             }
             "Update Winget" {
-                New_Window_pwsh -Command "winget upgrade --source msstore ; 
-                                     winget upgrade --source winget;
-                                     Write-Host 'winget Source updated successfully!' -ForegroundColor Green"
+                New_Window_pwsh -Command "
+                    winget upgrade --source msstore
+                    winget upgrade --source winget
+                    Write-Host 'winget Source updated successfully!' -ForegroundColor Green
+                                        "
             }
             "Update Packages " {
                 New_Window_pwsh -Command "scoop status
