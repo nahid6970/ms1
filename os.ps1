@@ -162,9 +162,8 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("pip Packages")
                 $submenuListBox.Items.Add("Font Setup")
             }
-            "Neovim Setup" {
+            "Application Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
-                $submenuListBox.Items.Add("Configure Neovim Plugins")
             }
             "Git Setup" {
                 $submenuListBox.Items.Add("clone ms1")
@@ -300,10 +299,12 @@ function Show-MainMenu {
             }
             # neovim
             "Set up Neovim" {
-                New_Window_pwsh -Command "Write-Host 'Neovim setup completed!'"
-            }
-            "Configure Neovim Plugins" {
-                New_Window_pwsh -Command "Write-Host 'Neovim plugins configured!'"
+                New_Window_pwsh -Command "
+                Write-Host 'Setting up Neovim...'
+                #sudo rm data folder  and init folder
+                scoop install neovim
+                #mklink
+                "
             }
             # git
             "clone ms1" {
