@@ -319,3 +319,66 @@
     InputBox, height, Resize, Height:, , 140, 130
     WinMove, ahk_id %window%, , , , width, height
     return
+
+
+
+
+
+
+#Persistent
+#SingleInstance Force
+
+; Assign Shift + Del to delete folder after killing the locking process
++Del::
+    ; Get the selected folder or file
+    selectedPath := GetSelectedPath()
+    
+    if (selectedPath) {
+        ; Check which process is using the folder/file
+        processList := GetLockingProcess(selectedPath)
+        
+        if (processList) {
+            ; Kill all processes locking the folder
+            Loop, Parse, processList, `n
+            {
+                Process, Close, %A_LoopField%
+            }
+        }
+        
+        ; After killing the process, delete the folder
+        FileRemoveDir, %selectedPath%, 1 ; 1 means to delete non-empty folder
+    } else {
+        MsgBox, No folder or file is selected!
+    }
+return
+
+; Function to get selected file or folder path
+GetSelectedPath() {
+    ; This retrieves the currently selected file or folder in File Explorer
+    filePath := ""
+    ClipSaved := ClipboardAll
+    Clipboard := ""
+    
+    Send, ^c
+    ClipWait, 1
+    
+    filePath := Clipboard
+    Clipboard := ClipSaved
+    
+    return filePath
+}
+
+; Function to get the list of processes locking a file/folder
+GetLockingProcess(path) {
+    ; Uses PowerShell to get the process locking the file/folder
+    cmd := "Get-Process | Where-Object { $_.Modules -match '" path "' } | ForEach-Object { $_.Name }"
+    
+    runCmd := ComObjCreate("WScript.Shell").Exec("powershell.exe -Command " cmd)
+    
+    output := ""
+    while !runCmd.StdOut.AtEndOfStream {
+        output := runCmd.StdOut.ReadAll()
+    }
+    
+    return output
+}
