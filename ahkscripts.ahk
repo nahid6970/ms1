@@ -1095,23 +1095,6 @@ return
 Gui, Hide
 return
 
-; kill related functions
-Kill_Python:
-Run, taskkill /f /im python.exe,,Hide
-return
-Kill_Komorebi:
-Run, taskkill /f /im komorebi.exe,,Hide
-return
-Kill_PWSH:
-Run, taskkill /f /im pwsh.exe,,Hide
-return
-Kill_Powershell:
-Run, taskkill /f /im powershell.exe,,Hide
-return
-Kill_CMD:
-Run, taskkill /f /im cmd.exe,,Hide
-return
-
 ; start related functions
 start_Explorer:
 Run, pwsh -c explorer.exe,,Hide
@@ -1204,26 +1187,26 @@ return
 #Include C:\ms1\scripts\AHK_BT\V1_4\Class_ImageButton.ahk
 !u::
 Gui, Margin, 20, 20
-Gui, Font, s11 normal, Segoe UI
+; Gui, Font, s11 normal, Segoe UI
+Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
 
 Gui, Add, Button, xm ym h30 gmybio, Bio
 Gui, Add, Button, x+5 yp h30 gkomorebic_save ,Komorebic Save
 Gui, Add, Button, x+5 yp h30 gkomorebic_load ,Komorebic Load
 
 Gui, Add, Button, xm y+5 w250 h30, Komorebic
-Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63, % "Start"
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63 gStart_Komorebi, % "Start"
 IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
 			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
 			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
 			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
 ImageButton.Create(hBtn63, IBBtnStyles*)
-Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61, % "Kill"
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61 gKill_Komorebi, % "Kill"
 IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
 			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 2]      ; hover
 			   , [0, 0x80D43F3A, , , 0, , 0x80D43F3A, 2]      ; pressed
 			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
 ImageButton.Create(hBtn61, IBBtnStyles*)
-
 
 Gui, Show,, Image Buttons
 return
@@ -1234,4 +1217,26 @@ RunWait, komorebic quick-save-resize,,Hide
 return
 komorebic_load:
 RunWait, komorebic quick-load-resize,,Hide
+return
+Kill_Komorebi:
+Run, taskkill /f /im komorebi.exe,,Hide
+return
+Start_Komorebi:
+Run, komorebi.exe,,Hide
+return
+
+
+; kill related functions
+Kill_Python:
+Run, taskkill /f /im python.exe,,Hide
+return
+
+Kill_PWSH:
+Run, taskkill /f /im pwsh.exe,,Hide
+return
+Kill_Powershell:
+Run, taskkill /f /im powershell.exe,,Hide
+return
+Kill_CMD:
+Run, taskkill /f /im cmd.exe,,Hide
 return
