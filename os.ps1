@@ -117,7 +117,6 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Neovim Setup")
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
-    $mainMenuListBox.Items.Add("Echo")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -182,11 +181,6 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Radarr")
                 $submenuListBox.Items.Add("Prowlarr")
                 $submenuListBox.Items.Add("Komorebi")
-            }
-            "Echo" {
-                $submenuListBox.Items.Add("SSH [PC-->Android]")
-                $submenuListBox.Items.Add("SSH [Android-->PC]")
-
             }
         }
     })
