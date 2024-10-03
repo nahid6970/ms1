@@ -613,6 +613,11 @@ ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cm
 ShadowFight3_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\SH3\\SH3V2__AHK.py'))
 ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\SH3\\SH3V2__AHK.py'))
 
+OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#54a9f0", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
+OS_LB.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\os.ps1'))
+OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\os.ps1'))
+
 
 #! FFMPEG
 FFMPEG_bt = CTkButton(ROOT1, text="\uf07cffmpeg",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
