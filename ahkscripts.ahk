@@ -1230,3 +1230,44 @@ DetectHiddenWindows, On
         WinClose, ahk_id %this_id%
     }
     return
+
+
+
++Del::
+{
+    ; Prompt for the folder path
+    InputBox, folderPath, Folder Deletion, Enter the path of the folder to delete:
+    if (folderPath = "")
+        return  ; Exit if no folder is provided
+    ; Check if the folder exists
+    if !FileExist(folderPath)
+    {
+        MsgBox, Folder does not exist!
+        return
+    }
+    ; Path to handle64.exe
+    handlePath := "C:\Users\nahid\OneDrive\backup\Handle\handle64.exe"
+    ; Run handle64.exe to find the processes using the folder
+    RunWait, %handlePath% "%folderPath%" /accepteula > "%A_Temp%\handle_output.txt"
+    ; Read the output of handle.exe
+    FileRead, handleOutput, %A_Temp%\handle_output.txt
+    ; Kill the processes that are using the folder
+    Loop, Parse, handleOutput, `n
+    {
+        if (RegExMatch(A_LoopField, "PID: (\d+)", process))
+        {
+            ; Extract the process ID
+            pid := process1
+            ; Kill the process
+            RunWait, TaskKill /F /PID %pid%
+        }
+    }
+    ; Attempt to delete the folder after killing processes
+    FileRemoveDir, %folderPath%, 1
+    if !ErrorLevel
+        MsgBox, Folder deleted successfully!
+    else
+        MsgBox, Failed to delete the folder. It may still be in use by other processes.
+    
+    return
+}
