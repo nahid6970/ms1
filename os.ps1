@@ -385,19 +385,6 @@ function Show-MainMenu {
                     New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\mklink\komorebi\komorebi.json' -Force #[pwsh]
                                          "
             }
-            # echo
-            "SSH [PC-->Android]" {
-                New_Window_pwsh -Command "
-                    # 'Hello, World!'
-                    'plink -ssh -P 8022 -pw XXX u0_a827@192.168.0.102 #give double quota to XXX later' 
-                                         "
-            }
-            "SSH [Android-->PC]" {
-                New_Window_pwsh -Command "
-                    # 'Hello, World!'
-                    'sshpass -p xxx ssh nahid@192.168.0.101'
-                                         "
-            }
         }
     })
 
