@@ -111,7 +111,8 @@ function Show-MainMenu {
     #* ██╔══╝  ██║██╔══██╗╚════██║   ██║
     #* ██║     ██║██║  ██║███████║   ██║
     #* ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝
-    $mainMenuListBox.Items.Add("Packages Management")
+    $mainMenuListBox.Items.Add("Initial Setup")
+    $mainMenuListBox.Items.Add("Application Setup")
     $mainMenuListBox.Items.Add("Git Setup")
     $mainMenuListBox.Items.Add("Neovim Setup")
     $mainMenuListBox.Items.Add("Port")
@@ -150,7 +151,7 @@ function Show-MainMenu {
         $submenuListBox.Items.Clear()
 
         switch ($mainMenuListBox.SelectedItem) {
-            "Packages Management" {
+            "Initial Setup" {
                 $submenuListBox.Items.Add("Install PWSH")
                 $submenuListBox.Items.Add("Update Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
