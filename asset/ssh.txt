@@ -239,3 +239,4 @@ sshpass -p "xxx" ssh nahid@192.168.0.101
 
 [PC-->Android]
 plink -ssh -P 8022 -pw "xxx" u0_a827@192.168.0.102
+kitty.exe -ssh u0_a827@192.168.0.102 -P 8022

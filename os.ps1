@@ -239,6 +239,7 @@ function Show-MainMenu {
                     scoop install winaero-tweaker
                     scoop install yt-dlp
                     scoop install putty
+                    scoop install kitty
                     Write-Host 'Packages installed successfully' --ForegroundColor Green
                                         "
             }
