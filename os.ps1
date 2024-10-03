@@ -114,7 +114,6 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Initial Setup")
     $mainMenuListBox.Items.Add("Application Setup")
     $mainMenuListBox.Items.Add("Git Setup")
-    $mainMenuListBox.Items.Add("Neovim Setup")
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
     $mainMenuPanel.Children.Add($mainMenuListBox)
@@ -157,9 +156,9 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Must Packages")
                 $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
-                $submenuListBox.Items.Add("Update Packages ")
-                $submenuListBox.Items.Add("pip Packages")
                 $submenuListBox.Items.Add("Font Setup")
+                $submenuListBox.Items.Add("pip Packages")
+                $submenuListBox.Items.Add("Update Packages ")
             }
             "Application Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
