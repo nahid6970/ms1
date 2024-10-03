@@ -152,8 +152,7 @@ function Show-MainMenu {
 
         switch ($mainMenuListBox.SelectedItem) {
             "Initial Setup" {
-                $submenuListBox.Items.Add("Install PWSH")
-                $submenuListBox.Items.Add("Update Winget")
+                $submenuListBox.Items.Add("Setup Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
                 $submenuListBox.Items.Add("Must Packages")
                 $submenuListBox.Items.Add("Install Winget Packages")
@@ -213,7 +212,8 @@ function Show-MainMenu {
                                          "
             }
             "Must Packages" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
+                    winget install Microsoft.PowerShell
                     scoop install git
                     scoop install python
                                         "
@@ -264,7 +264,7 @@ function Show-MainMenu {
                     pip install Flask
                                          "
             }
-            "Update Winget" {
+            "Setup Winget" {
                 New_Window_pwsh -Command "
                     winget upgrade --source msstore
                     winget upgrade --source winget
@@ -284,9 +284,6 @@ function Show-MainMenu {
                                      winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
                                      Write-Host 'Winget Upgraded ☑️'
                                      Write-Host 'Packages updated successfully' -ForegroundColor Green"
-            }
-            "Install PWSH" {
-                New_Window_powershell -Command "winget install Microsoft.PowerShell"
             }
             "Font Setup" {
                 New_Window_powershell -Command "
