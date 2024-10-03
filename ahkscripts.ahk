@@ -1208,6 +1208,20 @@ IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
 			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
 ImageButton.Create(hBtn63, IBBtnStyles*)
 
+Gui, Add, Button, xm y+5 w250 h30, Powershell
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61 gKill_PWSH, % "PWSH 7"
+IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
+			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 2]      ; hover
+			   , [0, 0x80D43F3A, , , 0, , 0x80D43F3A, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
+ImageButton.Create(hBtn61, IBBtnStyles*)
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61 gKill_Powershell, % "PWSH 1"
+IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
+			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 2]      ; hover
+			   , [0, 0x80D43F3A, , , 0, , 0x80D43F3A, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
+ImageButton.Create(hBtn61, IBBtnStyles*)
+
 Gui, Add, Button, xm y+5 w250 h30, Python
 Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61 gKill_Python, % "Kill"
 IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
