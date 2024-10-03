@@ -155,10 +155,12 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Install PWSH")
                 $submenuListBox.Items.Add("Update Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
+                $submenuListBox.Items.Add("Must Packages")
                 $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
                 $submenuListBox.Items.Add("Update Packages ")
-                $submenuListBox.Items.Add("Pip Packages")
+                $submenuListBox.Items.Add("pip Packages")
+                $submenuListBox.Items.Add("Font Setup")
             }
             "Neovim Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
@@ -210,11 +212,14 @@ function Show-MainMenu {
                     scoop config cache_path D:\@install\scoop\cache
                                          "
             }
-            "Install Scoop Packages" {
+            "Must Packages" {
                 New_Window_pwsh -Command "
                     scoop install git
                     scoop install python
-
+                                        "
+            }
+            "Install Scoop Packages" {
+                New_Window_pwsh -Command "
                     scoop install ack
                     scoop install adb
                     scoop install bat
@@ -282,6 +287,11 @@ function Show-MainMenu {
             }
             "Install PWSH" {
                 New_Window_powershell -Command "winget install Microsoft.PowerShell"
+            }
+            "Font Setup" {
+                New_Window_powershell -Command "
+                    sudo oh-my-posh font install
+                                               "
             }
             # neovim
             "Set up Neovim" {
