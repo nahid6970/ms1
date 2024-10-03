@@ -223,6 +223,8 @@ function Show-MainMenu {
             }
             "Install Scoop Packages" {
                 New_Window_pwsh -Command "
+                    # scoop install scoop-completion
+                    # scoop install scoop-search
                     scoop install ack
                     scoop install adb
                     scoop install bat
@@ -233,8 +235,6 @@ function Show-MainMenu {
                     scoop install rclone
                     scoop install rssguard
                     scoop install rufus
-                    scoop install scoop-completion
-                    scoop install scoop-search
                     scoop install ventoy
                     scoop install winaero-tweaker
                     scoop install yt-dlp
