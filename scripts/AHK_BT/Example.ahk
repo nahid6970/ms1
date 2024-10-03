@@ -8,12 +8,14 @@ SetBatchLines, -1
 ; #Include UseGDIP.ahk
 
 
+
+
 Gui, Margin, 20, 20
 Gui, Font, s11 normal, Segoe UI
 
 ; ---------------------------------------------------------------------------------------
 
-Gui, Add, Button, xm ym w80 h24 hWndhBtn11, % "Critical"
+Gui, Add, Button, xm ym w80 h24 hWndhBtn11 gstart_Explorer, % "Critical"
 IBBtnStyles := [ [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 1]      ; normal
 			   , [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 1]      ; hover
 			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 1]      ; pressed
@@ -251,3 +253,6 @@ return
 GuiClose:
 GuiEscape:
 ExitApp
+
+start_Explorer:
+Run, pwsh -c explorer.exe,,Hide
