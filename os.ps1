@@ -216,6 +216,9 @@ function Show-MainMenu {
                     winget install Microsoft.PowerShell
                     scoop install git
                     scoop install python
+                    scoop install oh-my-posh
+                    scoop install fzf
+                    scoop install komorebi
                                         "
             }
             "Install Scoop Packages" {
@@ -226,10 +229,7 @@ function Show-MainMenu {
                     scoop install capture2text
                     scoop install ditto
                     scoop install ffmpeg
-                    scoop install fzf
                     scoop install highlight
-                    scoop install komorebi
-                    scoop install oh-my-posh
                     scoop install rclone
                     scoop install rssguard
                     scoop install rufus

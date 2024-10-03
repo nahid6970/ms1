@@ -691,7 +691,7 @@ function build {
 #                -PSReadlineChordReverseHistory 'Ctrl+r'
 
 #* Import List
-Import-Module scoop-completion
+# Import-Module scoop-completion
 Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 # Import-Module -Name C:\ms1\asset\Powershell\pwsh_AutinHistory.ps1
 # Import-Module -Name C:\ms1\asset\Powershell\pwsh_Polyfill.ps1
