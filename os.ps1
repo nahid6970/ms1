@@ -117,6 +117,7 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Neovim Setup")
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
+    $mainMenuListBox.Items.Add("Echo")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -183,6 +184,10 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Prowlarr")
                 $submenuListBox.Items.Add("Komorebi")
             }
+            "Echo" {
+                $submenuListBox.Items.Add("SSH")
+
+            }
         }
     })
 
@@ -238,6 +243,7 @@ function Show-MainMenu {
                     scoop install ventoy
                     scoop install winaero-tweaker
                     scoop install yt-dlp
+                    scoop install putty
                     Write-Host 'Packages installed successfully' --ForegroundColor Green
                                         "
             }
@@ -374,6 +380,11 @@ function Show-MainMenu {
                     Komorebic quickstart
                     Remove-Item 'C:\Users\nahid\komorebi.json'
                     New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\mklink\komorebi\komorebi.json' -Force #[pwsh]
+                                         "
+            }
+            # echo
+            "SSH" {
+                New_Window_pwsh -Command "
                                          "
             }
         }
