@@ -1195,18 +1195,38 @@ Gui, Add, Button, x+5 yp h30 gkomorebic_save ,Komorebic Save
 Gui, Add, Button, x+5 yp h30 gkomorebic_load ,Komorebic Load
 
 Gui, Add, Button, xm y+5 w250 h30, Komorebic
-Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63 gStart_Komorebi, % "Start"
-IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
-			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
-			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
-			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
-ImageButton.Create(hBtn63, IBBtnStyles*)
 Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61 gKill_Komorebi, % "Kill"
 IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
 			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 2]      ; hover
 			   , [0, 0x80D43F3A, , , 0, , 0x80D43F3A, 2]      ; pressed
 			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
 ImageButton.Create(hBtn61, IBBtnStyles*)
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63 gStart_Komorebi, % "Start"
+IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
+			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
+			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
+ImageButton.Create(hBtn63, IBBtnStyles*)
+
+Gui, Add, Button, xm y+5 w250 h30, Python
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61 gKill_Python, % "Kill"
+IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
+			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 2]      ; hover
+			   , [0, 0x80D43F3A, , , 0, , 0x80D43F3A, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
+ImageButton.Create(hBtn61, IBBtnStyles*)
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63 gStart_Python_mypygui_showT, % "mypygui-S"
+IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
+			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
+			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
+ImageButton.Create(hBtn63, IBBtnStyles*)
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63 gStart_Python_mypygui_hideT, % "mypygui-H"
+IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
+			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
+			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
+ImageButton.Create(hBtn63, IBBtnStyles*)
 
 Gui, Show,, Image Buttons
 return
@@ -1225,11 +1245,21 @@ Start_Komorebi:
 Run, komorebi.exe,,Hide
 return
 
-
-; kill related functions
 Kill_Python:
 Run, taskkill /f /im python.exe,,Hide
 return
+Start_Python_mypygui_hideT:
+Run, C:\ms1\mypygui.py,,Hide
+return
+Start_Python_mypygui_showT:
+    Run, cmd /k python "C:\ms1\mypygui.py", , UseErrorLevel
+    if (ErrorLevel)
+    {
+        MsgBox, Script failed to execute. Error code: %ErrorLevel%
+    }
+return
+
+
 
 Kill_PWSH:
 Run, taskkill /f /im pwsh.exe,,Hide
