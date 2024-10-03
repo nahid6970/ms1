@@ -221,6 +221,7 @@ function Show-MainMenu {
                 New_Window_powershell -Command "
                     winget install Microsoft.PowerShell
                     scoop install git
+                    scoop install sudo
                     scoop install python
                     scoop install oh-my-posh
                     scoop install fzf
