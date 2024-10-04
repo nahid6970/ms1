@@ -63,6 +63,11 @@
     },
     {
       "kind": "Exe",
+      "id": "Cloudflare WARP.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
       "id": "qbittorrent.exe",
       "matching_strategy": "Equals"
     },
