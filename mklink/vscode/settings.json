@@ -42,7 +42,7 @@
 ],
 "color-highlight.markRuler": false,
 "window.commandCenter": false,
-"editor.scrollbar.horizontalScrollbarSize": 5,
+"editor.scrollbar.horizontalScrollbarSize": 10,
 "editor.scrollbar.verticalScrollbarSize": 5,
 "editor.scrollbar.horizontal": "visible",
 "editor.scrollbar.vertical": "visible",
