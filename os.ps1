@@ -268,7 +268,7 @@ function Show-MainMenu {
                                          "
             }
             "Setup Winget" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                     winget upgrade --source msstore
                     winget upgrade --source winget
                     Write-Host 'winget Source updated successfully!' -ForegroundColor Green
