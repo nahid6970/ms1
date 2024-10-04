@@ -298,6 +298,7 @@ function Show-MainMenu {
                 scoop install neovim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
                 "
             }
 
