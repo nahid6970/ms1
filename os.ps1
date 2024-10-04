@@ -295,11 +295,12 @@ function Show-MainMenu {
             "Set up Neovim" {
                 New_Window_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
-                #sudo rm data folder  and init folder
                 scoop install neovim
-                #mklink
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
                 "
             }
+
             # git
             "clone ms1" {
                 New_Window_pwsh -Command "
