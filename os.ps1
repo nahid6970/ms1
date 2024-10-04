@@ -180,6 +180,8 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Radarr")
                 $submenuListBox.Items.Add("Prowlarr")
                 $submenuListBox.Items.Add("Komorebi")
+                $submenuListBox.Items.Add("VSCode")
+                $submenuListBox.Items.Add("PowerShell Profile")
             }
         }
     })
@@ -379,6 +381,17 @@ function Show-MainMenu {
                     Komorebic quickstart
                     Remove-Item 'C:\Users\nahid\komorebi.json'
                     New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\mklink\komorebi\komorebi.json' -Force #[pwsh]
+                                         "
+            }
+            "VSCode" {
+                New_Window_pwsh -Command "
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\mklink\vscode\keybindings.json -Force
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\mklink\vscode\settings.json -Force
+                                         "
+            }
+            "PowerShell Profile" {
+                New_Window_pwsh -Command "
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\mklink\PWSH_Profile\PWSH_Profile.ps1 -Force
                                          "
             }
         }
