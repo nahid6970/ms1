@@ -218,6 +218,7 @@ function Show-MainMenu {
                     } else {
                         Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
                     }
+                    scoop install git
                     scoop bucket add main
                     scoop bucket add extras
                     scoop bucket add versions
@@ -228,7 +229,6 @@ function Show-MainMenu {
             "Must Packages" {
                 New_Window_powershell -Command "
                     winget install Microsoft.PowerShell
-                    scoop install git
                     scoop install sudo
                     scoop install python
                     scoop install oh-my-posh
