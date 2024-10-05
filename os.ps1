@@ -159,6 +159,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("Setup Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
+                $submenuListBox.Items.Add("Setup Scoop_Test_Win10")
                 $submenuListBox.Items.Add("Must Packages")
                 $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
@@ -224,6 +225,23 @@ function Show-MainMenu {
                     scoop bucket add versions
                     scoop bucket add nonportable
                     scoop config cache_path D:\@install\scoop\cache
+                                         "
+            }
+            "Setup Scoop_Test_Win10" {
+                New_Window_powershell -Command "
+                    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+                        Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
+                    } else {
+                        Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
+                    }
+                    scoop install git
+                    scoop install winget
+                    scoop install pwsh
+                    scoop bucket add main
+                    scoop bucket add extras
+                    scoop bucket add versions
+                    scoop bucket add nonportable
+                    scoop config cache_path C:\scoopFiles\cache
                                          "
             }
             "Must Packages" {
