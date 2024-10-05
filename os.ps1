@@ -156,6 +156,7 @@ function Show-MainMenu {
 
         switch ($mainMenuListBox.SelectedItem) {
             "Initial Setup" {
+                $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("Setup Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
@@ -204,6 +205,11 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             # package
+            "ChrisTitus WinUtility" {
+                New_Window_powershell -Command "
+                    iwr -useb https://christitus.com/win | iex
+                                         "
+            }
             "Policies" {
                 New_Window_powershell -Command "
                 Set-ExecutionPolicy RemoteSigned
