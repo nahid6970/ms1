@@ -198,7 +198,7 @@ function Show-MainMenu {
         switch ($submenuListBox.SelectedItem) {
             # package
             "Setup Scoop" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                     if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
                         Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
                     } else {
@@ -223,7 +223,7 @@ function Show-MainMenu {
                                         "
             }
             "Install Scoop Packages" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                     # scoop install scoop-completion
                     # scoop install scoop-search
                     scoop install ack
