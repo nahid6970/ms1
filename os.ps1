@@ -208,8 +208,7 @@ function Show-MainMenu {
                 Set-ExecutionPolicy RemoteSigned
                 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-                Install-Module -Name Microsoft.WinGet.Client -A
-
+                Install-Module -Name Microsoft.WinGet.Client -Force -AllowClobber
                                          "
             }
             "Setup Scoop" {
