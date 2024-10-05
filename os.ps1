@@ -1,3 +1,8 @@
+# Before u Start
+# 'UNblock with right click context menu'
+# 'Open store and update AppManager'
+# 'run powrshell as admin'
+
 Add-Type -AssemblyName PresentationFramework
 
 # Function to create a new styled pop-up window
@@ -200,10 +205,6 @@ function Show-MainMenu {
             # package
             "Policies" {
                 New_Window_powershell -Command "
-                'UNblock with right click context menu'
-                'Open store and update AppManager'
-                'run powrshell as admin'
-
                 Set-ExecutionPolicy RemoteSigned
                 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
