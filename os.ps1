@@ -151,6 +151,7 @@ function Show-MainMenu {
 
         switch ($mainMenuListBox.SelectedItem) {
             "Initial Setup" {
+                $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("Setup Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
                 $submenuListBox.Items.Add("Must Packages")
@@ -197,6 +198,17 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             # package
+            "Policies" {
+                New_Window_powershell -Command "
+                'UNblock with right click context menu'
+                'run powrshell as admin'
+
+                Set-ExecutionPolicy RemoteSigned
+                Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+                Install-Module -Name Microsoft.WinGet.Client -A
+
+                                         "
+            }
             "Setup Scoop" {
                 New_Window_powershell -Command "
                     if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
