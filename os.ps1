@@ -259,12 +259,12 @@ function Show-MainMenu {
                                         "
             }
             "Install Winget Packages" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                     winget install 9NQ8Q8J78637
                                         "
             }
             "Pip Packages" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                     pip install cryptography
                     pip install customtkinter
                     pip install importlib
