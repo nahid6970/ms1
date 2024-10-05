@@ -255,7 +255,7 @@ Desktop development with C++
 # ** ! dont doesnt work to change cmd admin password
 # net user
 # whoami
-# net user Administrator 182358
+# net user Administrator 'password'
 
 #// * Update all packages first from ms store
 

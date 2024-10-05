@@ -46,7 +46,6 @@
 "editor.scrollbar.verticalScrollbarSize": 5,
 "editor.scrollbar.horizontal": "visible",
 "editor.scrollbar.vertical": "visible",
-"workbench.activityBar.location": "hidden",
 "git.openRepositoryInParentFolders": "always"
 
 }
