@@ -234,14 +234,16 @@ function Show-MainMenu {
                     } else {
                         Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
                     }
+                    scoop config cache_path C:\scoopFiles\cache
                     scoop install git
-                    scoop install winget
-                    scoop install pwsh
+
                     scoop bucket add main
                     scoop bucket add extras
                     scoop bucket add versions
                     scoop bucket add nonportable
-                    scoop config cache_path C:\scoopFiles\cache
+
+                    scoop install winget
+                    winget install pwsh
                                          "
             }
             "Must Packages" {
