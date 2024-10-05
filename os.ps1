@@ -243,7 +243,7 @@ function Show-MainMenu {
                     scoop bucket add nonportable
 
                     scoop install winget
-                    winget install pwsh
+                    scoop install pwsh
                                          "
             }
             "Must Packages" {
