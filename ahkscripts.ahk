@@ -210,7 +210,6 @@ ToggleHiddenFiles() {
 ;;* ██╔══██╗██╔══╝  ██║   ██║██╔══██╗██║   ██║██║╚██╗██║
 ;;* ██║  ██║███████╗╚██████╔╝██║  ██║╚██████╔╝██║ ╚████║
 ;;* ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
-
 ;! 🎯 open Run Path
 ::;run::
     Run, C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Administrative Tools\Registry Editor.lnk
@@ -218,6 +217,11 @@ ToggleHiddenFiles() {
     ; Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
     Clipboard := "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
 return
+; ::;run::
+;     Send, "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
+;     ; Clipboard := "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+;     ; Clipboard := "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run"
+; return
 
 ;;* ██╗   ██╗███████╗ ██████╗ ██████╗ ██████╗ ███████╗
 ;;* ██║   ██║██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝

@@ -94,6 +94,7 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "\uf07c Temp-AppDate",   {"command": "explorer C:\\Users\\nahid\\AppData\\Local\\Temp"}),
 ("#204892", "#ffffff", "\uf07c Temp-Windows",   {"command": "explorer C:\\Windows\\Temp"}),
 ("#204892", "#ffffff", "\uf07c WindowsApp",     {"command": "explorer C:\\Program Files\\WindowsApps"}),
+("#204892", "#ffffff", "\uf07c Send To",        {"command": "explorer C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\SendTo"}),
 # ("#204892", "#ffffff", "\uf07c .glaze-wm",      {"command": "explorer C:\\Users\\nahid\\.glaze-wm"}),
 # ("#204892", "#ffffff", "\uf07c ",               {"command": ""}),
 # ("#204892", "#ffffff", "\uf07c Git-Projects",   {"command": "explorer C:\\Users\\nahid\\OneDrive\\Git"}),
