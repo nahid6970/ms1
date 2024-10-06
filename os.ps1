@@ -301,14 +301,15 @@ function Show-MainMenu {
                     scoop install ditto
                     scoop install ffmpeg
                     scoop install highlight
+                    scoop install kitty
+                    scoop install neovim
+                    scoop install putty
                     scoop install rclone
                     scoop install rssguard
                     scoop install rufus
                     scoop install ventoy
                     scoop install winaero-tweaker
                     scoop install yt-dlp
-                    scoop install putty
-                    scoop install kitty
                     Write-Host 'Packages installed successfully' --ForegroundColor Green
                                         "
             }
@@ -365,7 +366,6 @@ function Show-MainMenu {
             "Set up Neovim" {
                 New_Window_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
-                # scoop install neovim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
                 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
@@ -374,7 +374,6 @@ function Show-MainMenu {
             "Set up Neovim2" {
                 New_Window_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
-                # scoop install neovim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
                 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init2.lua -Force
