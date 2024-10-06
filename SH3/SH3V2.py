@@ -705,7 +705,10 @@ def TakeL():
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
+
+            # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
 
