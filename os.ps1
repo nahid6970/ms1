@@ -193,6 +193,7 @@ function Show-MainMenu {
             }
             "Application Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
+                $submenuListBox.Items.Add("Set up Neovim2")
             }
             "Git Setup" {
                 $submenuListBox.Items.Add("clone ms1")
@@ -364,10 +365,19 @@ function Show-MainMenu {
             "Set up Neovim" {
                 New_Window_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
-                scoop install neovim
+                # scoop install neovim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
                 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
+                "
+            }
+            "Set up Neovim2" {
+                New_Window_pwsh -Command "
+                Write-Host 'Setting up Neovim...'
+                # scoop install neovim
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init2.lua -Force
                 "
             }
 
