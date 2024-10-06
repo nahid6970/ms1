@@ -182,9 +182,9 @@ function Show-MainMenu {
             "Initial Setup" {
                 $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("Policies")
-                $submenuListBox.Items.Add("Setup Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
                 $submenuListBox.Items.Add("Must Packages")
+                $submenuListBox.Items.Add("Setup Winget")
                 $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
                 $submenuListBox.Items.Add("Font Setup")
@@ -248,33 +248,37 @@ function Show-MainMenu {
                     } else {
                         Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
                     }
-                    scoop install git
-                    scoop bucket add main
-                    scoop bucket add extras
-                    scoop bucket add versions
-                    scoop bucket add nonportable
+                    'Change cache Path'
                     scoop config cache_path D:\@install\scoop\cache
-                                         "
-            }
-            "Setup Scoop_Test_Win10" {
-                New_Window_powershell -Command "
-                    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-                        Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
-                    } else {
-                        Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
-                    }
-                    scoop config cache_path C:\scoopFiles\cache
+
                     scoop install git
 
+                    'Add Buckets'
+                    scoop bucket add nonportable
                     scoop bucket add main
                     scoop bucket add extras
                     scoop bucket add versions
-                    scoop bucket add nonportable
-
-                    scoop install winget
-                    scoop install pwsh
                                          "
             }
+            # "Setup Scoop_Test_Win10" {
+            #     New_Window_powershell -Command "
+            #         if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+            #             Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
+            #         } else {
+            #             Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
+            #         }
+            #         scoop config cache_path C:\scoopFiles\cache
+            #         scoop install git
+
+            #         scoop bucket add main
+            #         scoop bucket add extras
+            #         scoop bucket add versions
+            #         scoop bucket add nonportable
+
+            #         scoop install winget
+            #         scoop install pwsh
+            #                              "
+            # }
             "Must Packages" {
                 New_Window_powershell -Command "
                     winget install Microsoft.PowerShell
@@ -309,7 +313,7 @@ function Show-MainMenu {
             }
             "Install Winget Packages" {
                 New_Window_powershell -Command "
-                    winget install 9NQ8Q8J78637
+                    winget install 9NQ8Q8J78637 # ahk (probably)
                                         "
             }
             "Pip Packages" {
