@@ -3,11 +3,27 @@
 # 'Open store and update AppManager'
 # 'run powrshell as admin'
 
+# # Check if the script is running with administrator privileges
+# if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+#     # Relaunch the script with admin rights
+#     $scriptPath = $MyInvocation.MyCommand.Definition
+#     Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+#     exit
+# }
+
 # Check if the script is running with administrator privileges
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    # Relaunch the script with admin rights
-    $scriptPath = $MyInvocation.MyCommand.Definition
-    Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+    # Check for PowerShell Core (pwsh) availability
+    $pwshPath = Get-Command pwsh -ErrorAction SilentlyContinue
+    if ($pwshPath) {
+        # PowerShell Core (pwsh) is available, relaunch with it
+        $scriptPath = $MyInvocation.MyCommand.Definition
+        Start-Process pwsh -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+    } else {
+        # PowerShell Core is not available, fallback to old PowerShell
+        $scriptPath = $MyInvocation.MyCommand.Definition
+        Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+    }
     exit
 }
 
@@ -168,7 +184,6 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("Setup Winget")
                 $submenuListBox.Items.Add("Setup Scoop")
-                $submenuListBox.Items.Add("Setup Scoop_Test_Win10")
                 $submenuListBox.Items.Add("Must Packages")
                 $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
