@@ -14,7 +14,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Lazy.nvim setup with plugins
 require("lazy").setup({
-  {'EdenEast/nightfox.nvim' },
+  -- {'EdenEast/nightfox.nvim' },
   {'L3MON4D3/LuaSnip'},
   {'MunifTanjim/nui.nvim'},
   {'NvChad/nvim-colorizer.lua'},
@@ -26,7 +26,7 @@ require("lazy").setup({
     end
   },
   {'folke/neodev.nvim'},
-  {'folke/tokyonight.nvim'},
+  -- {'folke/tokyonight.nvim'},
   {'folke/trouble.nvim'},
   {'folke/which-key.nvim', event = "VeryLazy", init = function() 
       vim.o.timeout = true 
@@ -76,18 +76,53 @@ vim.g.mapleader = " "
 
 -- Key mappings using which-key
 local wk = require("which-key")
+wk.add({
+  { "<leader>f", group = "file" }, -- group
+  { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find File", mode = "n" },
+  { "<leader>fb", function() print("hello") end, desc = "Foobar" },
+  { "<leader>fn", desc = "New File" },
+  { "<leader>f1", hidden = true }, -- hide this keymap
+  { "<leader>fe", function() vim.cmd("Ex") end, desc = "Explorer" }, -- hide this keymap
+  { "<leader>fn", function() vim.cmd("Neotree") end, desc = "NeoTree Explorer" }, -- hide this keymap
 
-wk.register({
-  [""] = {
-    f = { name = "File",
-        f = { "<cmd>Telescope find_files<cr>", "Find Files" },
-        g = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
-    },
-    b = { name = "Buffer",
-        l = { "<cmd>ls<cr>", "List Buffers" },
-        d = { "<cmd>bd<cr>", "Delete Buffer" }
-    },
-    q = { "<cmd>q<cr>", "Quit" },
-    w = { "<cmd>w<cr>", "Write" },
-  },
-}, { prefix = "<leader>" })
+
+
+  { "<leader>w", proxy = "<c-w>", group = "windows" }, -- proxy to window mappings
+  { "<leader>b", group = "buffers", expand = function() return require("which-key.extras").expand.buf() end },
+  {
+    -- Nested mappings are allowed and can be added in any order
+    -- Most attributes can be inherited or overridden on any level
+    -- There's no limit to the depth of nesting
+    mode = { "n", "v" }, -- NORMAL and VISUAL mode
+    { "<leader>q", "<cmd>q!<cr>", desc = "Quit!" }, -- no need to specify mode since it's inherited
+    { "<leader>w", "<cmd>w<cr>", desc = "Write" },
+  }
+})
+
+
+--Help key suggestion--
+vim.cmd([[
+  function! FunctionalKeys()
+    echohl Function
+    echom "! = +Filter throug external progrem-->sent to a command and replace with output"
+    echom "' = +Mark"
+    echom "* = Highlight Similar Words"
+    echom "<Ctrl-v> = Visual Block mode"
+    echom "Double quotation = +registers"
+    echom "V = +Visual Line mode"
+    echom "[] = Go to Matched Items i.e (),{},[]"
+    echom "c = +Change(Delete+Insert-Mode)"
+    echom "d = +Delete"
+    echom "g = +Character-Modification"
+    echom "ggvG = ->Go to to first line -> insert selectmode/visualselect -> Go to Last line / Select whole Doc"
+    echom "o = Isert Blank Line + Insert Mode"
+    echom "v = +Visual-Mode / Select-Mode"
+    echom "xGvyG:sort = Sort lines from x to y [x & y is variable]"
+    echom "y = +Yank(Copy)"
+    echom "z = +Fold ❤️  "
+    echom "v to select mode then doublequota & + & y to copy to sysclipboard"
+    echom "% on ()/{}/[]= Rotate cursor between matching () {} [] brackets"
+    echohl None
+  endfunction
+]])
+vim.keymap.set("n", "<leader><leader>", ":call FunctionalKeys()<CR>", { noremap = true, silent = true })
