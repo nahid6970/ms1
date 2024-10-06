@@ -3,6 +3,14 @@
 # 'Open store and update AppManager'
 # 'run powrshell as admin'
 
+# Check if the script is running with administrator privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    # Relaunch the script with admin rights
+    $scriptPath = $MyInvocation.MyCommand.Definition
+    Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+    exit
+}
+
 Add-Type -AssemblyName PresentationFramework
 
 # Function to create a new styled pop-up window
