@@ -156,7 +156,8 @@ vim.g.wrap = "soft"
 ----------⚡--LSP-Config-Files--⚡----------
 require("mason").setup()
 require("mason-lspconfig").setup({
-  ensure_installed = { "lua_ls" ,"html", "cssmodules_ls","custom_elements_ls","powershell_es" }
+  -- ensure_installed = { "lua_ls" ,"html", "cssmodules_ls","custom_elements_ls","powershell_es" }
+  ensure_installed = { "lua_ls" ,"powershell_es" }
 })
 
 local lspconfig = require('lspconfig')
