@@ -238,68 +238,80 @@ require("bookmarks.list").load{
 
 ----------⚡--Which-Key⌨️ --⚡----------
 local wk = require("which-key")
-wk.register(mappings, opts)
-wk.register({
-["*"] = { mark.add_file, "Add to Harpoon" },
-["<Tab>"] = { ui.toggle_quick_menu, "Toggle Quick Menu" },
-["/"] = { name = "Comments",
-	l = { [[i-- <Esc>]], "Insert Comment" },
-	h = { [[i<!--  --> <Esc>]], "HTML Comment" },
-	},
-b = { name = "Bookmark",
-	t = { function() vim.cmd('Telescope bookmarks') end, "Telescope Bookmarks" },
-	b = { name = "Buffers",
-		l = { function() vim.cmd("ls") end, "Buffer List" },
-		a = { function() vim.cmd("e %") end, "Add Current File to Buffer List" },
-		n = { function() vim.cmd("bnext") end, "Next Buffer" },
-		p = { function() vim.cmd("bprevious") end, "Previous Buffer" },
-		d = { function() vim.cmd("bufdo bd") end, "Delete All Buffers" },
-	    }
-    },
-c = { name = "Command",
-	f = { vim.lsp.buf.format, "Format Whole Documnet" }, --also works holding leader+f
-	s = { function() local start_line = vim.fn.input("Start Line: ") local end_line = vim.fn.input("End Line: ") vim.cmd(start_line .. "," .. end_line .. "sort") end, "Sort Lines Within Range" },
-	},
-d = { name = "Delete",
-	c = { [["_d]], "Delete from Cursor (Including Selection)" },
-	s = { function() vim.fn.system('rmdir /s /q C:\\Users\\nahid\\AppData\\Local\\nvim-data\\swap') end, "Delete Swap Files" }},
-f = { name = "File",
-	a = { function() vim.cmd("edit C:/") end, "Explorer to C" },
-	b = { function() vim.cmd("edit D:/") end, "Explorer to D" },
-	c = { function() vim.cmd("cd D:/") end, "CD to C:/ (for grep search)" },
-	d = { function() vim.cmd("cd D:/") end, "CD to D:/ (for grep search)" },
-	e = { function() vim.cmd("Ex") end, "Explorer" },
-	n = { function() vim.cmd("Neotree") end, "NeoTree Explorer" }},
-i = { name = "Info",
-	i = { function() vim.cmd("intro") end, "Intro" },
-	c = { function() vim.cmd("Cheatsheet") end, "CheatSheet" },
-	h = { function() vim.cmd("help") end, "Help" },
-	t = { function() vim.cmd("Tutor") end, "Tutor" },
-	v = { function() vim.cmd("help nvim") end, "Help Nvim" }},
-m = { name = "Copy, Move, Mklink",
-	i = { function() vim.fn.system('robocopy C:\\Users\\nahid\\AppData\\Local\\nvim D:\\git\\ms1\\asset\\neovim init.lua /IS') end, "Replace init.lua in D:\\git\\ms1\\asset\\neovim" }},
-q = { name = "Quit",
-	q = { function() vim.cmd("q") end, "Quit" },
-	w = { function() vim.cmd("wq") end, "Save & Quit" }},
-r = { name = "Replace",
-	a = { [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], "Search and Replace" }},
-s = { name = "Search",
-	h = { ':lua require"telescope.builtin".find_files({ hidden = true })<CR>', "Hidden Files" },
-	f = { require('telescope.builtin').find_files, "Search Files" },
-	g = { require('telescope.builtin').live_grep, "Search by Grep" },
-	i = { require('telescope.builtin').help_tags, "Search Help" },
-	s = {function()builtin.grep_string({search = vim.fn.input("Grep > ") }) end, "Search String" },
-	w = { require('telescope.builtin').grep_string, "Search current Word" }},
-t = { name = "Split",
-	h = { ":split<CR>", "Horizontal Split" }, -- Horizontal split
-	v = { ":vsplit<CR>", "Vertical Split" },},  -- Vertical split
-X = { name = "LSP Functions",
-	K = { vim.lsp.buf.hover, "Show Hover Info" },
-	gD = { vim.lsp.buf.declaration, "Go to Declaration" } --error
-},
+wk.add({
 
-}, { prefix = "<leader>" })
+  -- Quit
+  { "<leader>q", group = "Quit" },
+  { "<leader>qq", "<cmd>q!<cr>", desc = "Quit!" },
+  { "<leader>qw", "<cmd>wq<cr>", desc = "Save & Quit" },
 
+  -- Grouping for "file" actions
+  { "<leader>f", group = "File" }, 
+  { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find File" },
+  { "<leader>fb", function() print("hello") end, desc = "Foobar" },
+  { "<leader>fe", function() vim.cmd("Ex") end, desc = "Explorer" },
+  { "<leader>fn", function() vim.cmd("Neotree") end, desc = "NeoTree Explorer" },
+
+  -- Proxy to window mappings
+  { "<leader>w", proxy = "<c-w>", group = "Windows" },
+
+  -- Group for "buffers"
+  { "<leader>b", group = "Buffers", expand = function() return require("which-key.extras").expand.buf() end },
+
+  -- Comments (Nested mappings)
+  {
+    mode = { "n", "v" },
+    { "<leader>/", group = "Comments" },
+    { "<leader>/l", [[i-- <Esc>]], desc = "Insert Comment" },
+    { "<leader>/h", [[i<!--  --> <Esc>]], desc = "HTML Comment" },
+  },
+
+  -- Bookmark
+  { "<leader>b", group = "Bookmark" },
+  { "<leader>bt", function() vim.cmd('Telescope bookmarks') end, desc = "Telescope Bookmarks" },
+  
+  -- Buffer-related actions
+  { "<leader>bb", group = "Buffers" },
+  { "<leader>bb/l", function() vim.cmd("ls") end, desc = "Buffer List" },
+  { "<leader>bb/a", function() vim.cmd("e %") end, desc = "Add Current File to Buffer List" },
+  { "<leader>bb/n", function() vim.cmd("bnext") end, desc = "Next Buffer" },
+  { "<leader>bb/p", function() vim.cmd("bprevious") end, desc = "Previous Buffer" },
+  { "<leader>bb/d", function() vim.cmd("bufdo bd") end, desc = "Delete All Buffers" },
+
+  -- Commands
+  { "<leader>c", group = "Command" },
+  { "<leader>cf", vim.lsp.buf.format, desc = "Format Whole Document" },
+  { "<leader>cs", function()
+      local start_line = vim.fn.input("Start Line: ")
+      local end_line = vim.fn.input("End Line: ")
+      vim.cmd(start_line .. "," .. end_line .. "sort")
+    end, desc = "Sort Lines Within Range" },
+
+  -- Delete
+  { "<leader>d", group = "Delete" },
+  { "<leader>dc", [["_d]], desc = "Delete from Cursor (Including Selection)" },
+  { "<leader>ds", function() vim.fn.system('rmdir /s /q C:\\Users\\nahid\\AppData\\Local\\nvim-data\\swap') end, desc = "Delete Swap Files" },
+
+  -- Search
+  { "<leader>s", group = "Search" },
+  { "<leader>sh", ':lua require"telescope.builtin".find_files({ hidden = true })<CR>', desc = "Search Hidden Files" },
+  { "<leader>sf", require('telescope.builtin').find_files, desc = "Search Files" },
+  { "<leader>sg", require('telescope.builtin').live_grep, desc = "Search by Grep" },
+  { "<leader>si", require('telescope.builtin').help_tags, desc = "Search Help" },
+  { "<leader>ss", function() builtin.grep_string({search = vim.fn.input("Grep > ") }) end, desc = "Search String" },
+  { "<leader>sw", require('telescope.builtin').grep_string, desc = "Search Current Word" },
+
+  -- Split
+  { "<leader>t", group = "Split" },
+  { "<leader>th", ":split<CR>", desc = "Horizontal Split" },
+  { "<leader>tv", ":vsplit<CR>", desc = "Vertical Split" },
+
+  -- LSP Functions
+  { "<leader>X", group = "LSP Functions" },
+  { "<leader>XK", vim.lsp.buf.hover, desc = "Show Hover Info" },
+  { "<leader>XgD", vim.lsp.buf.declaration, desc = "Go to Declaration" },
+
+})
 
 
 
