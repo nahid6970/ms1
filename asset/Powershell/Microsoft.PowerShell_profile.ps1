@@ -619,37 +619,71 @@ Set-PSReadLineKeyHandler -Chord 'Alt+x' `
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert($unicode)
 }
 
-#* Scoop and Chocolatey Auto Complete
-Invoke-Expression (&scoop-search --hook)
-# Import the Chocolatey Profile that contains the necessary code to enable
-# tab-completions to function for `choco`.
-# Be aware that if you are missing these lines from your profile, tab completion
-# for `choco` will not function.
-# See https://ch0.co/tab-completion for details.
-$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-if (Test-Path($ChocolateyProfile)) {
-  Import-Module "$ChocolateyProfile"
-}
+# #* Scoop and Chocolatey Auto Complete
+# Invoke-Expression (&scoop-search --hook)
+# # Import the Chocolatey Profile that contains the necessary code to enable
+# # tab-completions to function for `choco`.
+# # Be aware that if you are missing these lines from your profile, tab completion
+# # for `choco` will not function.
+# # See https://ch0.co/tab-completion for details.
+# $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+# if (Test-Path($ChocolateyProfile)) {
+#   Import-Module "$ChocolateyProfile"
+# }
 
-#* Winget AutoComplete
-Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
-    param($wordToComplete, $commandAst, $cursorPosition)
-        [Console]::InputEncoding = [Console]::OutputEncoding = $OutputEncoding = [System.Text.Utf8Encoding]::new()
-        $Local:word = $wordToComplete.Replace('"', '""')
-        $Local:ast = $commandAst.ToString().Replace('"', '""')
-        winget complete --word="$Local:word" --commandline "$Local:ast" --position $cursorPosition | ForEach-Object {
-            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-        }
-}
+# #* Winget AutoComplete
+# Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
+#     param($wordToComplete, $commandAst, $cursorPosition)
+#         [Console]::InputEncoding = [Console]::OutputEncoding = $OutputEncoding = [System.Text.Utf8Encoding]::new()
+#         $Local:word = $wordToComplete.Replace('"', '""')
+#         $Local:ast = $commandAst.ToString().Replace('"', '""')
+#         winget complete --word="$Local:word" --commandline "$Local:ast" --position $cursorPosition | ForEach-Object {
+#             [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+#         }
+# }
 
 #* Environmental Variable
 $env:PATH += ";c:\ms1"
 $env:PATH += ";c:\ms1\scripts"
+$env:PATH += ";C:\ms1\utility"
+# $env:PATH += ";D:\binutils-gdb\ld"
 
-function Prompt {
-    $currentLocation = Get-Location
-    Write-Host ("->" + $currentLocation + " ⚡") -ForegroundColor Yellow -BackgroundColor Blue -NoNewline
-    return " "
+function killme  {
+Stop-Process -Name "python"
+Stop-Process -Name "dnplayer"
+Stop-Process -Name "chrome"
+}
+
+function yay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
+function nay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
+
+function yayw1 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install.ps1" }
+function yayw2 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function nayw { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function yaywn1 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_n_install.ps1" }
+function yaywn2 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_n_install2.ps1" }
+
+
+# PsExec.exe this will only work through remote not in real terminal
+function dark { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /external" }
+function light { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h -i 1 C:\Users\nahid\OneDrive\backup\DisplaySwitch.exe /internal" }
+function sd { cmd /c "shutdown /s /f /t 0" }
+function rb { cmd /c "shutdown /r /f /t 0" }
+
+function gitpush {
+git add .
+git commit -m "XX"
+git push
+}
+
+# function Prompt {
+#     $currentLocation = Get-Location
+#     Write-Host ("->" + $currentLocation + " ⚡") -ForegroundColor Yellow -BackgroundColor Blue -NoNewline
+#     return " "
+# }
+
+function build {
+    cargo build --target-dir C:\Builds
 }
 
 #* Override PSReadLine's history search
@@ -657,7 +691,7 @@ function Prompt {
 #                -PSReadlineChordReverseHistory 'Ctrl+r'
 
 #* Import List
-Import-Module scoop-completion
+# Import-Module scoop-completion
 Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 # Import-Module -Name C:\ms1\asset\Powershell\pwsh_AutinHistory.ps1
 # Import-Module -Name C:\ms1\asset\Powershell\pwsh_Polyfill.ps1
@@ -666,12 +700,9 @@ Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
 
-Import-Module -Name Microsoft.WinGet.CommandNotFound
+# Import-Module -Name Microsoft.WinGet.CommandNotFound
 #f45873b3-b655-43a6-b217-97c00aa0db58
 
-
 # Invoke-Expression (&starship init powershell)
-
-
 
 oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression

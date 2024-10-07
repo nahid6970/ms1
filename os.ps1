@@ -456,18 +456,18 @@ function Show-MainMenu {
                 New_Window_pwsh -Command "
                     Komorebic quickstart
                     Remove-Item 'C:\Users\nahid\komorebi.json'
-                    New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\mklink\komorebi\komorebi.json' -Force #[pwsh]
+                    New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
                                          "
             }
             "VSCode" {
                 New_Window_pwsh -Command "
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\mklink\vscode\keybindings.json -Force
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\mklink\vscode\settings.json -Force
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\asset\vscode\keybindings.json -Force
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\asset\vscode\settings.json -Force
                                          "
             }
             "PowerShell Profile" {
                 New_Window_pwsh -Command "
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\mklink\PWSH_Profile\PWSH_Profile.ps1 -Force
+                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
                                          "
             }
         }
