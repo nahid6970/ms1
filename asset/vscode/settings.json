@@ -37,8 +37,8 @@
 
 
 "vscode_custom_css.imports": [
-    "file:///C:/ms1/mklink/vscode/vscode_css/vscode.css",
-    "file:///C:/ms1/mklink/vscode/vscode_css/vscode.js"
+    "file:///C:/ms1/asset/vscode/vscode_css/vscode.css",
+    "file:///C:/ms1/asset/vscode/vscode_css/vscode.js"
 ],
 "color-highlight.markRuler": false,
 "window.commandCenter": false,
