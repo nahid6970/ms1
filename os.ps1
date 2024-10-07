@@ -214,6 +214,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Komorebi")
                 $submenuListBox.Items.Add("VSCode")
                 $submenuListBox.Items.Add("PowerShell Profile")
+                $submenuListBox.Items.Add("PotPlayer Register")
             }
         }
     })
@@ -468,6 +469,11 @@ function Show-MainMenu {
             "PowerShell Profile" {
                 New_Window_pwsh -Command "
                     New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
+                                         "
+            }
+            "PotPlayer Register" {
+                New_Window_pwsh -Command "
+                    Start-Process 'C:\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
                                          "
             }
         }
