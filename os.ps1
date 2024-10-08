@@ -320,7 +320,7 @@ function Show-MainMenu {
                                         "
             }
             "Pip Packages" {
-                New_Window_powershell -Command "
+                New_Window_pwsh -Command "
                     # pip install cryptography
                     # pip install customtkinter
                     # pip install importlib
@@ -335,7 +335,7 @@ function Show-MainMenu {
                     # pip install screeninfo
                     # pip install winshell
                     # pip install Flask
-                    C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
+                    sudo C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
                                          "
             }
             "Setup Winget" {
