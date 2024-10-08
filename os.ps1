@@ -285,7 +285,7 @@ function Show-MainMenu {
                 New_Window_powershell -Command "
                     winget install Microsoft.PowerShell
                     scoop install sudo
-                    scoop install python
+                    scoop install python312
                     scoop install oh-my-posh
                     scoop install fzf
                     scoop install komorebi
@@ -321,20 +321,21 @@ function Show-MainMenu {
             }
             "Pip Packages" {
                 New_Window_powershell -Command "
-                    pip install cryptography
-                    pip install customtkinter
-                    pip install importlib
-                    pip install keyboard
-                    pip install pillow
-                    pip install psutil
-                    pip install pyadl
-                    pip install pyautogui
-                    pip install pycryptodomex
-                    pip install PyDictionary
-                    pip install pywin32
-                    pip install screeninfo
-                    pip install winshell
-                    pip install Flask
+                    # pip install cryptography
+                    # pip install customtkinter
+                    # pip install importlib
+                    # pip install keyboard
+                    # pip install pillow
+                    # pip install psutil
+                    # pip install pyadl
+                    # pip install pyautogui
+                    # pip install pycryptodomex
+                    # pip install PyDictionary
+                    # pip install pywin32
+                    # pip install screeninfo
+                    # pip install winshell
+                    # pip install Flask
+                    C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
                                          "
             }
             "Setup Winget" {
