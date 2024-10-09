@@ -1,7 +1,3 @@
-
-
-
-
 import subprocess
 import subprocess
 import tkinter as tk
@@ -97,7 +93,7 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "\uf07c Send To",        {"command": "explorer C:\\Users\\nahid\\AppData\\Roaming\\Microsoft\\Windows\\SendTo"}),
 ("#204892", "#ffffff", "\uf07c Host",           {"command": "explorer C:\\Windows\\System32\\drivers\\etc"}),
 ("#204892", "#ffffff", "\uf07c PowerToys New+", {"command": "explorer C:\\Users\\nahid\\AppData\\Local\\Microsoft\\PowerToys\\NewPlus\\Templates"}),
-("#d63a13", "#ffffff", "\uf07c Registry Run",   {"command": 'sudo  C:\\Users\\nahid\\OneDrive\\backup\\sysinternals\\regjump.exe HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run'})
+("#d63a13", "#ffffff", "\uf07c Registry Run",   {"command": 'sudo  C:\\Users\\nahid\\OneDrive\\backup\\sysinternals\\regjump.exe HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run'})
 
 # ("#204892", "#ffffff", "\uf07c .glaze-wm",      {"command": "explorer C:\\Users\\nahid\\.glaze-wm"}),
 # ("#204892", "#ffffff", "\uf07c ",               {"command": ""}),
