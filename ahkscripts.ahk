@@ -949,8 +949,47 @@ DetectHiddenWindows, On
     }
     return
 
+;* ██████╗ ██╗   ██╗███╗   ██╗    ██╗███╗   ██╗    ████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗
+;* ██╔══██╗██║   ██║████╗  ██║    ██║████╗  ██║    ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔══██╗██║
+;* ██████╔╝██║   ██║██╔██╗ ██║    ██║██╔██╗ ██║       ██║   █████╗  ██████╔╝██╔████╔██║██║██╔██╗ ██║███████║██║
+;* ██╔══██╗██║   ██║██║╚██╗██║    ██║██║╚██╗██║       ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║██║╚██╗██║██╔══██║██║
+;* ██║  ██║╚██████╔╝██║ ╚████║    ██║██║ ╚████║       ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗
+;* ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚═╝╚═╝  ╚═══╝       ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝
+; AutoHotkey script to run Python, PowerShell, or batch files with specific commands
+^!+Enter::
+    ; Save the current clipboard content (the path of the script)
+    ClipSaved := ClipboardAll
+    Clipboard := ""               ; Clear clipboard
+    ; Send Ctrl+C to copy the selected file path
+    Send, ^c
+    ClipWait, 1                   ; Wait until clipboard has content
+    if (Clipboard != "") {
+        ; Get the selected file path from the clipboard
+        FilePath := Clipboard
+        Ext := SubStr(FilePath, InStr(FilePath, ".", 0, 0) + 1)
+        ; Check the extension and prepend the appropriate command
+        if (Ext = "py") {
+            Run, cmd /k python "%FilePath%", , , PID
+        } else if (Ext = "ps1") {
+            Run, cmd /k powershell -ExecutionPolicy Bypass -File "%FilePath%", , , PID
+        } else if (Ext = "bat") {
+            Run, cmd /k "%FilePath%", , , PID
+        } else {
+            MsgBox, Unsupported file type: %Ext%
+        }
+    } else {
+        MsgBox, No file path selected or copied.
+    }
+    ; Restore original clipboard content
+    Clipboard := ClipSaved
+    return
 
-
+;* ███████╗ ██████╗ ██████╗  ██████╗███████╗    ██████╗ ███████╗██╗     ███████╗████████╗███████╗
+;* ██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔════╝    ██╔══██╗██╔════╝██║     ██╔════╝╚══██╔══╝██╔════╝
+;* █████╗  ██║   ██║██████╔╝██║     █████╗      ██║  ██║█████╗  ██║     █████╗     ██║   █████╗
+;* ██╔══╝  ██║   ██║██╔══██╗██║     ██╔══╝      ██║  ██║██╔══╝  ██║     ██╔══╝     ██║   ██╔══╝
+;* ██║     ╚██████╔╝██║  ██║╚██████╗███████╗    ██████╔╝███████╗███████╗███████╗   ██║   ███████╗
+;* ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═════╝ ╚══════╝╚══════╝╚══════╝   ╚═╝   ╚══════╝
 +Del::
 {
     ; Prompt for the folder path

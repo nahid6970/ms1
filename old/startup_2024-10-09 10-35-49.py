@@ -128,7 +128,7 @@ class StartupManager(tk.Tk):
                     if item["type"] == "App":
                         winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
                     else:
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'powershell -WindowStyle Hidden -Command "{item["command"]}"')
+                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'powershell -Command "{item["command"]}"')
                     name_label.config(fg="green")
                     icon_label.config(text="\uf205", fg="blue")
         except Exception as e:
