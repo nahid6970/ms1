@@ -83,13 +83,13 @@ require("lazy").setup({
 {'rafamadriz/friendly-snippets'},
 {'roobert/surround-ui.nvim', config = function() require("surround-ui").setup({ root_key = "S" }) end, },
 {'saadparwaiz1/cmp_luasnip'},
-{'startup-nvim/startup.nvim', config = function() require"startup".setup() end },  --intro https://github.com/startup-nvim/startup.nvim
+-- {'startup-nvim/startup.nvim', config = function() require"startup".setup() end },  --intro https://github.com/startup-nvim/startup.nvim
 {'sunjon/shade.nvim'},
 {'williamboman/mason-lspconfig.nvim'},
 {'williamboman/mason.nvim'},
 {'yorik1984/lualine-theme.nvim'},
 {'akinsho/bufferline.nvim', version = "*"},
-
+{ 'nvimdev/dashboard-nvim', event = 'VimEnter', config = function() require('dashboard').setup { } end, dependencies = { {'nvim-tree/nvim-web-devicons'}} },
 
  {
   'sudormrfbin/cheatsheet.nvim',
