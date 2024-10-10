@@ -425,7 +425,7 @@ function Show-MainMenu {
             }
             # mklink
             "Path_Var" {
-                New_Window_pwsh -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
+                New_Window_pwsh -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python312\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
             }
             "Sonarr" {
                 New_Window_pwsh -Command "
