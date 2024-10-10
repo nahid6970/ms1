@@ -990,7 +990,7 @@ DetectHiddenWindows, On
 ;* ██╔══╝  ██║   ██║██╔══██╗██║     ██╔══╝      ██║  ██║██╔══╝  ██║     ██╔══╝     ██║   ██╔══╝
 ;* ██║     ╚██████╔╝██║  ██║╚██████╗███████╗    ██████╔╝███████╗███████╗███████╗   ██║   ███████╗
 ;* ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═════╝ ╚══════╝╚══════╝╚══════╝   ╚═╝   ╚══════╝
-+Del::
+RAlt & Del::
 {
     ; Prompt for the folder path
     InputBox, folderPath, Folder Deletion, Enter the path of the folder to delete:
