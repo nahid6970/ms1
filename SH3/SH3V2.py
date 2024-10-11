@@ -239,6 +239,12 @@ cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 continueF = [cont1, cont2, cont3, cont4, cont5]
 
+# notifyF Related Images
+currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
+connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
+connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
+notifyF = [currencyERR, connectionERR,connectionERR2]
+
 # Others
 #* space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
 #* space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
@@ -573,6 +579,11 @@ def fame_items_handler(window):
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
 
+            elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png', confidence=0.8):
+                subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                time.sleep(60)
+
+
             time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
@@ -614,18 +625,23 @@ def event_items_handler(window):
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 4)
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
 
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             # elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
 
             elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
 
+            # # Check if the no_currency image is found
+            # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png', confidence=0.8):
+            #     # Run the whatsapp.py script
+            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     # Wait for 1 minute
+            #     time.sleep(60)
+
             # Check if the no_currency image is found
-            elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png', confidence=0.8):
-                # Run the whatsapp.py script
+            elif any(find_image(image) for image in notifyF):
                 subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-                # Wait for 1 minute
                 time.sleep(60)
 
             time.sleep(0.05)
