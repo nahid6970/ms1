@@ -579,7 +579,10 @@ def fame_items_handler(window):
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
 
-            elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png', confidence=0.8):
+            # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png', confidence=0.8):
+            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     time.sleep(60)
+            elif any(find_image(image) for image in notifyF):
                 subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
                 time.sleep(60)
 
