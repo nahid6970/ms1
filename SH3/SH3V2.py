@@ -611,9 +611,20 @@ def event_items_handler(window):
             # if find_image(Home, confidence=0.8): press_key(window, 'f')
             if find_image(Home, confidence=0.8): press_screen_with_delays(window, (1265, 351, 2))
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-            elif any(find_image(image) for image in continueF): press_key(window,'c')
+
+            # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 4)
+
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
+
+            # Check if the no_currency image is found
+            elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png', confidence=0.8):
+                # Run the whatsapp.py script
+                subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                # Wait for 1 minute
+                time.sleep(60)
+
             time.sleep(0.05)
     except KeyboardInterrupt: print("Other items thread stopped by user.")
 def Start_Event_Light():
