@@ -69,7 +69,7 @@ pyautogui.FAILSAFE = False
 #! alt2
 error_count = 0  # Initialize the error counter
 command_executed = False  # Flag to check if the command has been executed
-def find_image(image_path, confidence=0.7, timeout=10):
+def find_image(image_path, confidence=0.7, timeout=120):
     """Find the location of the image on the screen and show time in 12-hour format."""
     global error_count, command_executed
     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
