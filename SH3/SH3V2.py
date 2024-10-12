@@ -245,7 +245,8 @@ connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.p
 connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
 doesnt_exist =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\not_exist.png"
 no_activity =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_activity.png"
-notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity]
+no_voidenergy =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_voidEnergy.png"
+notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity,no_voidenergy]
 
 # Others
 #* space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
@@ -266,8 +267,7 @@ toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
 fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
 claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 
-
-DailyMission=r"C:\Users\nahid\OneDrive\backup\shadowfight3\DailyMission.png"
+# DailyMission=r"C:\Users\nahid\OneDrive\backup\shadowfight3\DailyMission.png"
 
 # Event Related
 Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
@@ -690,6 +690,11 @@ def raid_items_handler(window):
             elif find_image(fight, confidence=0.97): press_key(window, 'c')
             elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
+
+            elif any(find_image(image) for image in notifyF):
+                subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                time.sleep(60)
+
             time.sleep(0.05)
     except KeyboardInterrupt: print("Script stopped by user.")
 def Raid_Light():
