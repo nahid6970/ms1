@@ -36,40 +36,12 @@ ROOT.geometry(f"+{x}+{y}")
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
-# find_image
-error_count = 0  # Initialize the error counter
-def find_image(image_path, confidence=0.7):
-    """Find the location of the image on the screen and show time in 12-hour format."""
-    global error_count
-    output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
-    def get_current_time():
-        """Return the current time in 12-hour format."""
-        return datetime.datetime.now().strftime("%I:%M:%S %p")
-    def log_output(message):
-        """Save output message to file."""
-        with open(output_file, 'a') as file:
-            file.write(f"{get_current_time()} - {message}\n")
-    try:
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-        if location:
-            image_name = os.path.basename(image_path)
-            message = f"Found image: {image_name}"
-            print(f"{get_current_time()} - {message}")
-            log_output(message)
-            return location
-    except Exception as e:
-        error_count += 1
-        error_message = f"{error_count} times not found. Error: {e}"
-        print(f"{get_current_time()} - {error_message}")
-        log_output(error_message)
-    return None
-
-
+#! alt1
+# # find_image
 # error_count = 0  # Initialize the error counter
-# command_executed = False  # Flag to check if the command has been executed
-# def find_image(image_path, confidence=0.7, timeout=120):
+# def find_image(image_path, confidence=0.7):
 #     """Find the location of the image on the screen and show time in 12-hour format."""
-#     global error_count, command_executed
+#     global error_count
 #     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
 #     def get_current_time():
 #         """Return the current time in 12-hour format."""
@@ -78,35 +50,65 @@ def find_image(image_path, confidence=0.7):
 #         """Save output message to file."""
 #         with open(output_file, 'a') as file:
 #             file.write(f"{get_current_time()} - {message}\n")
-#     start_time = time.time()  # Record the start time
-#     while True:
-#         try:
-#             location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-#             if location:
-#                 image_name = os.path.basename(image_path)
-#                 message = f"Found image: {image_name}"
-#                 print(f"{get_current_time()} - {message}")
-#                 log_output(message)
-#                 return location
-#         except Exception as e:
-#             error_count += 1
-#             error_message = f"{error_count} times not found. Error: {e}"
-#             print(f"{get_current_time()} - {error_message}")
-#             log_output(error_message)
-#         # Check if the timeout has been reached and the command has not been executed
-#         elapsed_time = time.time() - start_time
-#         if elapsed_time > timeout and not command_executed:
-#             try:
-#                 # Run the PowerShell script
-#                 subprocess.Popen(["powershell.exe", r"C:\ms1\ssh_to_termux.ps1"])
-#                 command_executed = True  # Set the flag to True to prevent multiple executions
-#                 log_output("Executed the command C:\\ms1\\ssh_to_termux.ps1 due to timeout.")
-#             except Exception as e:
-#                 log_output(f"Failed to execute command. Error: {e}")
-#         # Break the loop after timeout to stop trying to find the image
-#         if elapsed_time > timeout:
-#             break
+#     try:
+#         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#         if location:
+#             image_name = os.path.basename(image_path)
+#             message = f"Found image: {image_name}"
+#             print(f"{get_current_time()} - {message}")
+#             log_output(message)
+#             return location
+#     except Exception as e:
+#         error_count += 1
+#         error_message = f"{error_count} times not found. Error: {e}"
+#         print(f"{get_current_time()} - {error_message}")
+#         log_output(error_message)
 #     return None
+
+
+#! alt2
+error_count = 0  # Initialize the error counter
+command_executed = False  # Flag to check if the command has been executed
+def find_image(image_path, confidence=0.7, timeout=10):
+    """Find the location of the image on the screen and show time in 12-hour format."""
+    global error_count, command_executed
+    output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
+    def get_current_time():
+        """Return the current time in 12-hour format."""
+        return datetime.datetime.now().strftime("%I:%M:%S %p")
+    def log_output(message):
+        """Save output message to file."""
+        with open(output_file, 'a') as file:
+            file.write(f"{get_current_time()} - {message}\n")
+    start_time = time.time()  # Record the start time
+    while True:
+        try:
+            location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+            if location:
+                image_name = os.path.basename(image_path)
+                message = f"Found image: {image_name}"
+                print(f"{get_current_time()} - {message}")
+                log_output(message)
+                return location
+        except Exception as e:
+            error_count += 1
+            error_message = f"{error_count} times not found. Error: {e}"
+            print(f"{get_current_time()} - {error_message}")
+            log_output(error_message)
+        # Check if the timeout has been reached and the command has not been executed
+        elapsed_time = time.time() - start_time
+        if elapsed_time > timeout and not command_executed:
+            try:
+                # Run the PowerShell script
+                subprocess.Popen(["powershell.exe", r"C:\ms1\SH3\whatsapp.py"])
+                command_executed = True  # Set the flag to True to prevent multiple executions
+                log_output("Executed the command C:\\ms1\\SH3\\whatsapp.py due to timeout.")
+            except Exception as e:
+                log_output(f"Failed to execute command. Error: {e}")
+        # Break the loop after timeout to stop trying to find the image
+        if elapsed_time > timeout:
+            break
+    return None
 
 
 # focus_window
@@ -239,14 +241,15 @@ cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 continueF = [cont1, cont2, cont3, cont4, cont5]
 
-# notifyF Related Images
-currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
-connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
-connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
-doesnt_exist =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\not_exist.png"
-no_activity =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_activity.png"
-no_voidenergy =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_voidEnergy.png"
-notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity,no_voidenergy]
+# # notifyF Related Images
+# currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
+# connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
+# connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
+# doesnt_exist =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\not_exist.png"
+# no_activity =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_activity.png"
+# no_voidenergy =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_voidEnergy.png"
+# home_screen =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\home_screen.png"
+# notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity,no_voidenergy,home_screen]
 
 # Others
 #* space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
@@ -581,13 +584,13 @@ def fame_items_handler(window):
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
 
+            # elif any(find_image(image) for image in notifyF):
+            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     time.sleep(60)
+
             # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png', confidence=0.8):
             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
             #     time.sleep(60)
-            elif any(find_image(image) for image in notifyF):
-                subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-                time.sleep(60)
-
 
             time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
@@ -638,16 +641,16 @@ def event_items_handler(window):
             elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
 
             # # Check if the no_currency image is found
+            # elif any(find_image(image) for image in notifyF):
+            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     time.sleep(60)
+
+            # # Check if the no_currency image is found
             # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png', confidence=0.8):
             #     # Run the whatsapp.py script
             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
             #     # Wait for 1 minute
             #     time.sleep(60)
-
-            # Check if the no_currency image is found
-            elif any(find_image(image) for image in notifyF):
-                subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-                time.sleep(60)
 
             time.sleep(0.05)
     except KeyboardInterrupt: print("Other items thread stopped by user.")
@@ -691,9 +694,9 @@ def raid_items_handler(window):
             elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
 
-            elif any(find_image(image) for image in notifyF):
-                subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-                time.sleep(60)
+            # elif any(find_image(image) for image in notifyF):
+            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     time.sleep(60)
 
             time.sleep(0.05)
     except KeyboardInterrupt: print("Script stopped by user.")
