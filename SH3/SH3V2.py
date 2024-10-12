@@ -6,7 +6,7 @@ import pyautogui
 import pygetwindow as gw
 import random
 import threading
-from tkinter import Tk, Button
+from tkinter import Tk, Button, messagebox
 # from ctypes import windll, c_char_p, c_buffer
 # from struct import calcsize, pack
 # from PIL import Image
@@ -37,7 +37,7 @@ ROOT.geometry(f"+{x}+{y}")
 pyautogui.FAILSAFE = False
 
 #! alt1
-# # find_image
+# find_image
 # error_count = 0  # Initialize the error counter
 # def find_image(image_path, confidence=0.7):
 #     """Find the location of the image on the screen and show time in 12-hour format."""
@@ -65,50 +65,78 @@ pyautogui.FAILSAFE = False
 #         log_output(error_message)
 #     return None
 
-
-#! alt2
-error_count = 0  # Initialize the error counter
-command_executed = False  # Flag to check if the command has been executed
-def find_image(image_path, confidence=0.7, timeout=120):
-    """Find the location of the image on the screen and show time in 12-hour format."""
-    global error_count, command_executed
-    output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
-    def get_current_time():
-        """Return the current time in 12-hour format."""
-        return datetime.datetime.now().strftime("%I:%M:%S %p")
-    def log_output(message):
-        """Save output message to file."""
-        with open(output_file, 'a') as file:
-            file.write(f"{get_current_time()} - {message}\n")
-    start_time = time.time()  # Record the start time
-    while True:
-        try:
-            location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
-            if location:
-                image_name = os.path.basename(image_path)
-                message = f"Found image: {image_name}"
-                print(f"{get_current_time()} - {message}")
-                log_output(message)
-                return location
-        except Exception as e:
-            error_count += 1
-            error_message = f"{error_count} times not found. Error: {e}"
-            print(f"{get_current_time()} - {error_message}")
-            log_output(error_message)
-        # Check if the timeout has been reached and the command has not been executed
-        elapsed_time = time.time() - start_time
-        if elapsed_time > timeout and not command_executed:
-            try:
-                # Run the PowerShell script
-                subprocess.Popen(["powershell.exe", r"C:\ms1\SH3\whatsapp.py"])
-                command_executed = True  # Set the flag to True to prevent multiple executions
-                log_output("Executed the command C:\\ms1\\SH3\\whatsapp.py due to timeout.")
-            except Exception as e:
-                log_output(f"Failed to execute command. Error: {e}")
-        # Break the loop after timeout to stop trying to find the image
-        if elapsed_time > timeout:
-            break
+error_count = 0
+last_found_time = time.time()
+def find_image(image_path, confidence=0.7):
+    """Find the location of the image on the screen."""
+    global error_count, last_found_time
+    try:
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+        if location:
+            image_name = os.path.basename(image_path)
+            print(f"Found image: {image_name}")
+            last_found_time = time.time()  # Update the last found time
+            return location
+    except Exception as e:
+        error_count += 1
+        print(f"{error_count} times not found. Error: {e}")
+    # Check if 5 seconds have passed since the last found time
+    if time.time() - last_found_time > 120:
+        run_script()  # Run the script instead of showing a message
+        last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
+def run_script():
+    """Run the whatsapp.py script."""
+    try:
+        # Replace "python" with the full path to Python if needed
+        subprocess.run(["python", r"C:\ms1\SH3\whatsapp.py"], check=True)
+        print("whatsapp.py script executed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to execute whatsapp.py: {e}")
+
+#! alt3 not working
+# error_count = 0  # Initialize the error counter
+# command_executed = False  # Flag to check if the command has been executed
+# def find_image(image_path, confidence=0.7, timeout=120):
+#     """Find the location of the image on the screen and show time in 12-hour format."""
+#     global error_count, command_executed
+#     output_file = r"C:\Users\nahid\OneDrive\backup\shadowfight3\output.txt"
+#     def get_current_time():
+#         """Return the current time in 12-hour format."""
+#         return datetime.datetime.now().strftime("%I:%M:%S %p")
+#     def log_output(message):
+#         """Save output message to file."""
+#         with open(output_file, 'a') as file:
+#             file.write(f"{get_current_time()} - {message}\n")
+#     start_time = time.time()  # Record the start time
+#     while True:
+#         try:
+#             location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+#             if location:
+#                 image_name = os.path.basename(image_path)
+#                 message = f"Found image: {image_name}"
+#                 print(f"{get_current_time()} - {message}")
+#                 log_output(message)
+#                 return location
+#         except Exception as e:
+#             error_count += 1
+#             error_message = f"{error_count} times not found. Error: {e}"
+#             print(f"{get_current_time()} - {error_message}")
+#             log_output(error_message)
+#         # Check if the timeout has been reached and the command has not been executed
+#         elapsed_time = time.time() - start_time
+#         if elapsed_time > timeout and not command_executed:
+#             try:
+#                 # Run the PowerShell script
+#                 subprocess.Popen(["powershell.exe", r"C:\ms1\SH3\whatsapp.py"])
+#                 command_executed = True  # Set the flag to True to prevent multiple executions
+#                 log_output("Executed the command C:\\ms1\\SH3\\whatsapp.py due to timeout.")
+#             except Exception as e:
+#                 log_output(f"Failed to execute command. Error: {e}")
+#         # Break the loop after timeout to stop trying to find the image
+#         if elapsed_time > timeout:
+#             break
+#     return None
 
 
 # focus_window
@@ -588,10 +616,6 @@ def fame_items_handler(window):
             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
             #     time.sleep(60)
 
-            # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png', confidence=0.8):
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-            #     time.sleep(60)
-
             time.sleep(2)
     except KeyboardInterrupt: print("Script stopped by user.")
 def fame_Light():
@@ -618,6 +642,13 @@ def fame_function_light():
         Fame_Light_BT.config(text="Fame", bg="#1d2027", fg="#fc0000")
 Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+
+
+
+
+
+
+
 
 
 
@@ -679,6 +710,17 @@ def event_function_light():
         Event_Light_BT.config(text="Event", bg="#1d2027", fg="#fc0000")
 Event_Light_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+
+
+
+
+
+
+
+
+
+
+
 
 # Raid Raid Raid Raid
 stop_thread_raid = True
