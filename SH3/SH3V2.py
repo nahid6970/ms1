@@ -244,7 +244,8 @@ currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.pn
 connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
 connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
 doesnt_exist =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\not_exist.png"
-notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist]
+no_activity =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_activity.png"
+notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity]
 
 # Others
 #* space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
