@@ -177,12 +177,10 @@ def click(window, x, y):
 # press_keys_with_delays
 def press_keys_with_delays(window, *args):
     """Press keys with specified delays in between.
-
     Usage: press_keys_with_delays(window, 'u', 2, 'p', 3, 'z', 2, 'x')
     """
     if len(args) % 2 != 0:
         raise ValueError("Arguments should be in pairs of (key, delay).")
-
     for i in range(0, len(args), 2):
         key = args[i]
         delay = args[i+1]
