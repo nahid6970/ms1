@@ -659,8 +659,8 @@ def event_items_handler(window):
         while not stop_thread_event:
             focus_window(window_title)
             #* Handle the other image searches and actions
-            # if find_image(Home, confidence=0.8): press_key(window, 'f')
-            if find_image(Home, confidence=0.8): press_screen_with_delays(window, (1265, 351, 2))
+            if find_image(Home, confidence=0.8): press_key(window, 'f')
+            # if find_image(Home, confidence=0.8): press_screen_with_delays(window, (1265, 351, 2))
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
