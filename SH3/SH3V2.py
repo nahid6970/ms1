@@ -187,6 +187,20 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
+def press_keys_with_two_delays(window, *args):
+    """Press keys with two specified delays: one before pressing the key and one after pressing it.
+    Usage: press_keys_with_two_delays(window, 1, 'u', 2, 1.5, 'p', 3, 2, 'z', 2, 'x')
+    """
+    if len(args) % 3 != 0:
+        raise ValueError("Arguments should be in sets of (before_delay, key, after_delay).")
+    for i in range(0, len(args), 3):
+        before_delay = args[i]
+        key = args[i+1]
+        after_delay = args[i+2]
+        time.sleep(before_delay)  # Delay before pressing the key
+        press_key(window, key)    # Press the key
+        time.sleep(after_delay)   # Delay after pressing the key
+
 
 def get_window_rect(hwnd):
     """Get the window's position and size."""
@@ -638,7 +652,7 @@ Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
 
-# Event Event Event Event
+# Event
 stop_thread_event = True
 def event_items_handler(window):
     try:
@@ -650,7 +664,8 @@ def event_items_handler(window):
             elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
+            # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
+            elif any(find_image(image) for image in continueF): press_keys_with_two_delays(window, 2, 'c', 2)
 
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
             # elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
