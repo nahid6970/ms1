@@ -630,6 +630,10 @@ Center_Focused_Window() {
 !+left::Send, +{home}
 !BackSpace::Send, +{Delete}{Home}
 
+; !+Right::Send, {End}+{home}
+; !+left::Send, {home}+{end}
+
+
 Replace_Dash_W_Space() {
     ; Backup the clipboard
     ClipboardBackup := ClipboardAll
