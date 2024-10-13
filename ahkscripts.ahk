@@ -624,6 +624,13 @@ Center_Focused_Window() {
 ;*    ██║   ██╔══╝   ██╔██╗    ██║       ██╔══██╗██╔══╝  ██║     ██╔══██║   ██║   ██╔══╝  ██║  ██║
 ;*    ██║   ███████╗██╔╝ ██╗   ██║       ██║  ██║███████╗███████╗██║  ██║   ██║   ███████╗██████╔╝
 ;*    ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═════╝
+!Right::Send, {End}
+!Left::Send, {Home}
+
+!+Right::Send, +{End}
+!+left::Send, +{home}
+
+!BackSpace::Send, +{Delete}{Home}
 
 Replace_Dash_W_Space() {
     ; Backup the clipboard
