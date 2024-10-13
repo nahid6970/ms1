@@ -1,19 +1,20 @@
+# from ctypes import windll, c_char_p, c_buffer
+# from PIL import Image
+# from PIL import Image, ImageDraw
+# from struct import calcsize, pack
+# from tkinter import messagebox
+from tkinter import Tk, Button, messagebox
 import datetime
-import subprocess
-import sys
-import time
+import os
 import pyautogui
 import pygetwindow as gw
 import random
+import subprocess
+import sys
 import threading
-from tkinter import Tk, Button, messagebox
-# from ctypes import windll, c_char_p, c_buffer
-# from struct import calcsize, pack
-# from PIL import Image
-# from PIL import Image, ImageDraw
-import os
-# from tkinter import messagebox
+import time
 import tkinter as tk
+import win32gui
 
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
@@ -188,49 +189,36 @@ def press_keys_with_delays(window, *args):
         press_key(window, key)
         time.sleep(delay)
 
-import win32gui
-
 
 def get_window_rect(hwnd):
     """Get the window's position and size."""
     rect = win32gui.GetWindowRect(hwnd)
     return rect  # Returns (left, top, right, bottom)
-
 # press_buttons_with_delays
 def press_screen_with_delays(window, *args):
     """Press buttons at specified x, y locations with delays, relative to the window's position.
-
     Usage: press_buttons_with_delays(window, (100, 200, 2), (150, 250, 3), (300, 400, 2))
     """
     if len(args) == 0:
         raise ValueError("At least one (x, y, delay) tuple is required.")
-
     # Activate the window
     window.activate()
-
     # Get the window handle (HWND) using the window title
     hwnd = win32gui.FindWindow(None, window.title)
-
     if not hwnd:
         raise ValueError("Could not find window with the specified title.")
-
     # Get the window's position (top-left corner)
     window_rect = get_window_rect(hwnd)
     window_x, window_y = window_rect[0], window_rect[1]
-
     for i in range(len(args)):
         if len(args[i]) != 3:
             raise ValueError("Each argument should be a tuple (x, y, delay).")
-
         x, y, delay = args[i]
-
         # Adjust x, y coordinates to be relative to the window's position
         adjusted_x = window_x + x
         adjusted_y = window_y + y
-
         # Click at the given coordinates relative to the window
         pyautogui.click(adjusted_x, adjusted_y)
-
         # Wait for the specified delay before the next action
         time.sleep(delay)
 
@@ -303,7 +291,7 @@ claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
 # Event Related
 Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
 Tournament_step2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\SELECT.png"
-back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back+battlepass.png'
+back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.png'
 
 #* Threads
 fight_thread = None
