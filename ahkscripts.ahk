@@ -567,15 +567,12 @@ Toggle_Screen_Whiteout() {
 ; ██║███╗██║██║   ██║██╔══██╗██╔═██╗ ╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝      ██╔══██╗██╔══╝  ╚════██║██╔══╝     ██║
 ; ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗███████║██║     ██║  ██║╚██████╗███████╗    ██║  ██║███████╗███████║███████╗   ██║
 ;  ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝   ╚═╝
-
 ; Define a variable to track the state of the taskbar
 taskbarVisible := 1  ; 1 for visible, 0 for hidden
 Toggle_Reset_Workspace() {
     global taskbarVisible
-    
     ; Get the handle of the taskbar
     WinGet, taskbarHandle, ID, ahk_class Shell_TrayWnd
-    
     if (taskbarVisible) {
         ; Hide the taskbar
         WinSet, ExStyle, +0x80, ahk_id %taskbarHandle%  ; WS_EX_TOOLWINDOW
@@ -590,7 +587,6 @@ Toggle_Reset_Workspace() {
         taskbarVisible := 1
     }
 }
-
 
 ;  ██████╗███████╗███╗   ██╗████████╗███████╗██████╗      █████╗ ██████╗ ██████╗
 ; ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██╔════╝██╔══██╗    ██╔══██╗██╔══██╗██╔══██╗
