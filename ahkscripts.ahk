@@ -1111,55 +1111,6 @@ return
 Gui, Hide
 return
 
-;* ███████╗████████╗ █████╗ ██████╗ ████████╗     ██████╗ ██╗   ██╗██╗
-;* ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝ ██║   ██║██║
-;* ███████╗   ██║   ███████║██████╔╝   ██║       ██║  ███╗██║   ██║██║
-;* ╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██║   ██║██║   ██║██║
-;* ███████║   ██║   ██║  ██║██║  ██║   ██║       ╚██████╔╝╚██████╔╝██║
-;* ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═════╝  ╚═════╝ ╚═╝
-
-!s:: ; Define the shortcut Ctrl+H
-Gui, New, +Resize ; Create a new GUI window with resize capability
-Gui, +AlwaysOnTop
-Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x010 y000 w300 h80 +Center cGreen, Start
-; start apps
-Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-Gui, Add, Button, x010 y050 w150 h50                          ,Komorebic
-Gui, Add, Button, x160 y050 w150 h50 gstart_Komorebic         ,Start
-
-
-Gui, Add, Button, x010 y100 w300 h50 gstart_Explorer          ,Explorer
-Gui, Add, Button, x010 y150 w300 h50 gstart_RunningAppsMonitor,RunningAppsMonitor
-Gui, Add, Button, x010 y200 w300 h50 gstart_cmd_asAdmin       ,cmd [Admin]
-Gui, Add, Button, x010 y250 w300 h50 gstart_Run               ,Run
-Gui, Add, Button, x010 y300 w300 h50 gstart_mypygui           ,mypygui
-
-Gui, Show, w600 h500, Apps (Start/Kill)
-return
-Gui, Hide
-return
-
-; start related functions
-start_Explorer:
-Run, pwsh -c explorer.exe,,Hide
-return
-start_Komorebic:
-Run, komorebic start,,Hide
-return
-start_RunningAppsMonitor:
-Run, python.exe C:\ms1\running_apps.py,,Hide
-return
-start_cmd_asAdmin:
-Run, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
-return
-start_Run:
-Run, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
-return
-start_mypygui:
-Run, C:\ms1\mypygui.py ,,Hide 
-return
-
 ;* ██╗   ██╗██╗  ████████╗██╗███╗   ███╗ █████╗ ████████╗███████╗     ██████╗ ██╗   ██╗██╗
 ;* ██║   ██║██║  ╚══██╔══╝██║████╗ ████║██╔══██╗╚══██╔══╝██╔════╝    ██╔════╝ ██║   ██║██║
 ;* ██║   ██║██║     ██║   ██║██╔████╔██║███████║   ██║   █████╗      ██║  ███╗██║   ██║██║
@@ -1185,6 +1136,20 @@ IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
 			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
 ImageButton.Create(hBtn61, IBBtnStyles*)
 Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63 gStart_Komorebi, % "Start"
+IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
+			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
+			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x805CB85C, 2] ]
+ImageButton.Create(hBtn63, IBBtnStyles*)
+
+Gui, Add, Button, xm y+5 w250 h30, Explorer
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn61 gkill_Explorer, % "Kill"
+IBBtnStyles := [ [0, 0x80F0B9B8, , , 0, , 0x80D43F3A, 2]      ; normal
+			   , [0, 0x80E27C79, , , 0, , 0x80D43F3A, 2]      ; hover
+			   , [0, 0x80D43F3A, , , 0, , 0x80D43F3A, 2]      ; pressed
+			   , [0, 0x80F0F0F0, , , 0, , 0x80D43F3A, 2] ]
+ImageButton.Create(hBtn61, IBBtnStyles*)
+Gui, Add, Button, x+5 yp w100 h30 hWndhBtn63 gstart_Explorer, % "Start"
 IBBtnStyles := [ [0, 0x80C6E6C6, , , 0, , 0x805CB85C, 2]      ; normal
 			   , [0, 0x8091CF91, , , 0, , 0x805CB85C, 2]      ; hover
 			   , [0, 0x805CB85C, , , 0, , 0x805CB85C, 2]      ; pressed
@@ -1263,6 +1228,24 @@ Run, taskkill /f /im powershell.exe,,Hide
 return
 Kill_CMD:
 Run, taskkill /f /im cmd.exe,,Hide
+return
+
+start_Explorer:
+Run, pwsh -c explorer.exe,,Hide
+return
+kill_Explorer:
+Run, taskkill /f /im explorer.exe,,Hide
+return
+
+; extra unused
+start_RunningAppsMonitor:
+Run, python.exe C:\ms1\running_apps.py,,Hide
+return
+start_cmd_asAdmin:
+Run, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide
+return
+start_Run:
+Run, "C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\System Tools\Run.lnk"
 return
 
 ;* ██████╗ ██╗ ██████╗      ██████╗ ██╗   ██╗██╗
