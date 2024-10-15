@@ -1086,31 +1086,6 @@ Terminal_Run_File:
     MsgBox, Copied `workbench.action.terminal.runActiveFile` to clipboard
 return
 
-;! ██╗  ██╗██╗██╗     ██╗         ██████╗ ██╗   ██╗██╗
-;! ██║ ██╔╝██║██║     ██║        ██╔════╝ ██║   ██║██║
-;! █████╔╝ ██║██║     ██║        ██║  ███╗██║   ██║██║
-;! ██╔═██╗ ██║██║     ██║        ██║   ██║██║   ██║██║
-;! ██║  ██╗██║███████╗███████╗   ╚██████╔╝╚██████╔╝██║
-;! ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝
-
-!k:: ; Define the shortcut Ctrl+H
-Gui, New, +Resize ; Create a new GUI window with resize capability
-Gui, +AlwaysOnTop
-Gui, Font, s25 Normal Bold, Jetbrainsmono nfp
-Gui, Add, Text, x10 y000 w300 h80 +Center cRed, Kill
-Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
-; kill apps
-Gui, Add, Button, x10 y050 w300 h50 gKill_Python    ,Python
-Gui, Add, Button, x10 y100 w300 h50 gKill_Komorebi  ,Komorebi
-Gui, Add, Button, x10 y150 w300 h50 gKill_PWSH      ,PWSH
-Gui, Add, Button, x10 y200 w300 h50 gKill_Powershell,Powershell
-Gui, Add, Button, x10 y250 w300 h50 gKill_CMD       ,cmd
-
-Gui, Show, w320 h500, Apps (Start/Kill)
-return
-Gui, Hide
-return
-
 ;* ██╗   ██╗██╗  ████████╗██╗███╗   ███╗ █████╗ ████████╗███████╗     ██████╗ ██╗   ██╗██╗
 ;* ██║   ██║██║  ╚══██╔══╝██║████╗ ████║██╔══██╗╚══██╔══╝██╔════╝    ██╔════╝ ██║   ██║██║
 ;* ██║   ██║██║     ██║   ██║██╔████╔██║███████║   ██║   █████╗      ██║  ███╗██║   ██║██║
