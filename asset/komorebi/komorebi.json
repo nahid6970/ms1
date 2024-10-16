@@ -157,8 +157,8 @@
       "matching_strategy": "Equals"
     },
     {
-      "kind": "Exe",
-      "id": "ApplicationFrameHost.exe",
+      "kind": "Title",
+      "id": "WhatsApp",
       "matching_strategy": "Equals"
     },
     {
