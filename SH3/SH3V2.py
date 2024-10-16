@@ -356,35 +356,23 @@ def search_image():
             print("Image not found.")
         time.sleep(0.05)  # Search for the image every 3 seconds
 # Action function for key presses (running in another thread)
+# Action function for triggering F13 in AHK (running in another thread)
 def perform_action(window):
     global pause_other_items, action_timer
-    holding_keys = False
     while not stop_thread_action1:
         if image_found:
             pause_other_items = True
-            holding_keys = True
             action_timer = time.time()  # Reset the 5-second timer when image is found
-            while holding_keys and not stop_thread_action1:
-                # Continuously press keys until 5 seconds expire
-                if time.time() - action_timer >= 5:
-                    print("5 seconds of action completed. Stopping.")
-                    holding_keys = False
-                    break
-                # Perform the key presses
-                # key_down(window, 'x')
-                key_down(window, 'd')
-                press_key(window, 'j')
-                press_key(window, 'j')
-                key_up(window, 'd')
-                # key_up(window, 'x')
-                time.sleep(0.1)  # Small delay between iterations
-            # Release keys after the action is completed
-            key_up(window, 'd')
-            # key_up(window, 'x')
+            print("Triggering F13 in AHK...")
+            # Trigger the F13 key in AHK (AutoHotkey should handle the rest)
+            key_down(window, 'F13')
+            time.sleep(5)  # Wait for 5 seconds as defined in AHK
+            key_up(window, 'F13')
+            print("F13 action completed.")
             pause_other_items = False
         else:
             time.sleep(0.05)  # Prevent high CPU usage when idle
-# Main function to run both threads
+
 def actionF_L(window):
     try:
         # Start the image search thread

@@ -879,14 +879,16 @@ return
             {
                 break  ; Stop if dnplayer.exe is no longer active
             }
-            Send, {x down}
+            ; Send, {x down}
             Send, {l down}
+            Send, {i down}
             Send, {d down}
             Send, j
             Send, j
             Send, {d up}
+            Send, {i up}
             Send, {l up}
-            Send, {x up}
+            ; Send, {x up}
             Sleep, 100  ; Adjust the delay as needed between iterations
         }
     return
