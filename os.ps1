@@ -97,7 +97,7 @@ function Show-MainMenu {
     $window = New-Object System.Windows.Window
     $window.Title = "OS_v2"
     $window.Width = 600
-    $window.Height = 300
+    $window.Height = 500
     $window.Background = [System.Windows.Media.Brushes]::DarkSlateGray
     $window.WindowStartupLocation = "CenterScreen"
 
