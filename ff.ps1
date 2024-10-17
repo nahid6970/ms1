@@ -8,6 +8,7 @@
 $directories = @(
     # $HOME
     # "C:\",
+    "C:\Program Files\WindowsApps",
     "C:\ms1",
     "C:\ms2",
     "C:\ms3",
@@ -20,11 +21,19 @@ $directories = @(
 $ignoreList = @(".git", ".pyc")
 
 # Function to open selected file in Visual Studio Code
+# function OpenFileInVSCode {
+#     param (
+#         [string]$filePath
+#     )
+#     Start-Process "code" $filePath
+# }
+
 function OpenFileInVSCode {
     param (
         [string]$filePath
     )
-    Start-Process "code" $filePath
+    # Surround the file path with double quotes
+    Start-Process "code" "`"$filePath`""
 }
 
 # Main function to search directories and files using fzf
