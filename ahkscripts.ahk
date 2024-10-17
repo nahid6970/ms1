@@ -880,14 +880,14 @@ return
                 break  ; Stop if dnplayer.exe is no longer active
             }
             ; Send, {x down}
-            Send, {l down}
-            Send, {i down}
+            ; Send, {l down}
+            ; Send, {i down}
             Send, {d down}
             Send, j
             Send, j
             Send, {d up}
-            Send, {i up}
-            Send, {l up}
+            ; Send, {i up}
+            ; Send, {l up}
             ; Send, {x up}
             Sleep, 100  ; Adjust the delay as needed between iterations
         }
@@ -958,18 +958,55 @@ DetectHiddenWindows, On
 ;* ██║  ██║╚██████╔╝██║ ╚████║    ██║██║ ╚████║       ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗
 ;* ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚═╝╚═╝  ╚═══╝       ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝
 ; AutoHotkey script to run Python, PowerShell, or batch files with specific commands
+; ^!+Enter::
+;     ; Save the current clipboard content (the path of the script)
+;     ClipSaved := ClipboardAll
+;     Clipboard := ""               ; Clear clipboard
+;     ; Send Ctrl+C to copy the selected file path
+;     Send, ^c
+;     ClipWait, 1                   ; Wait until clipboard has content
+;     if (Clipboard != "") {
+;         ; Get the selected file path from the clipboard
+;         FilePath := Clipboard
+;         Ext := SubStr(FilePath, InStr(FilePath, ".", 0, 0) + 1)
+;         ; Check the extension and prepend the appropriate command
+;         if (Ext = "py") {
+;             Run, cmd /k python "%FilePath%", , , PID
+;         } else if (Ext = "ps1") {
+;             Run, cmd /k powershell -ExecutionPolicy Bypass -File "%FilePath%", , , PID
+;         } else if (Ext = "bat") {
+;             Run, cmd /k "%FilePath%", , , PID
+;         } else {
+;             MsgBox, Unsupported file type: %Ext%
+;         }
+;     } else {
+;         MsgBox, No file path selected or copied.
+;     }
+;     ; Restore original clipboard content
+;     Clipboard := ClipSaved
+;     return
+
 ^!+Enter::
     ; Save the current clipboard content (the path of the script)
     ClipSaved := ClipboardAll
     Clipboard := ""               ; Clear clipboard
-    ; Send Ctrl+C to copy the selected file path
-    Send, ^c
-    ClipWait, 1                   ; Wait until clipboard has content
+    ; Get the active window title
+    WinGetActiveTitle, ActiveTitle
+    ; If the active window is VSCode, simulate the shortcut to copy the file path
+    if InStr(ActiveTitle, "Visual Studio Code") {
+        ; Simulate VSCode's shortcut to copy the current file path (Shift + Alt + C)
+        Send, +!c
+        ClipWait, 1               ; Wait until clipboard has content
+    } else {
+        ; Send Ctrl+C to copy the selected file path in other environments
+        Send, ^c
+        ClipWait, 1               ; Wait until clipboard has content
+    }
     if (Clipboard != "") {
         ; Get the selected file path from the clipboard
         FilePath := Clipboard
         Ext := SubStr(FilePath, InStr(FilePath, ".", 0, 0) + 1)
-        ; Check the extension and prepend the appropriate command
+        ; Check the extension and run the appropriate command
         if (Ext = "py") {
             Run, cmd /k python "%FilePath%", , , PID
         } else if (Ext = "ps1") {
@@ -985,6 +1022,7 @@ DetectHiddenWindows, On
     ; Restore original clipboard content
     Clipboard := ClipSaved
     return
+
 
 ;* ███████╗ ██████╗ ██████╗  ██████╗███████╗    ██████╗ ███████╗██╗     ███████╗████████╗███████╗
 ;* ██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔════╝    ██╔══██╗██╔════╝██║     ██╔════╝╚══██╔══╝██╔════╝
