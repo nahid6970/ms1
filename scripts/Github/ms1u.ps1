@@ -36,12 +36,12 @@ $commitMessage = Read-Host "Enter commit message"
 
 # If 'xx' is entered, generate a commit message with the list of changed files
 if ($commitMessage -eq "xx") {
-    # Get the list of changed files
+    # Get the list of changed files and extract only the file names
     $changedFiles = git status --porcelain | ForEach-Object {
-        $_ -replace '^[^ ]+ ', ''  # Extract the file name from the output
+        Split-Path $_ -Leaf  # Extract the file name from the output
     }
     
-    # Join the changed file names into a single string
+    # Join the file names into a single string
     $fileList = $changedFiles -join ', '
 
     # Create the new commit message
