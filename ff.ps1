@@ -8,11 +8,11 @@
 $directories = @(
     # $HOME
     # "C:\",
-    "C:\Program Files\WindowsApps",
     "C:\ms1",
     "C:\ms2",
     "C:\ms3",
     "D:\",
+    "C:\Program Files\WindowsApps",
     "C:\Users\nahid",
     ""
 ) | Where-Object { $_ -ne "" } # Filter out empty strings
