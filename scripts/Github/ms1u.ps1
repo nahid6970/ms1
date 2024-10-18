@@ -160,7 +160,7 @@ if ($commitMessage -eq "xx") {
     $fileList = $changedFiles -join ', '
 
     # Create the new commit message
-    $commitMessage = "Changes made to the following files: $fileList"
+    $commitMessage = "$fileList"
 }
 
 # Commit the changes with the provided message
