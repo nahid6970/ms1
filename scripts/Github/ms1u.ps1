@@ -70,8 +70,8 @@ if ($commitMessage -eq "xx") {
         # Add emoji based on file extension
         switch -regex ($fileName) {
             '\.py$' { "🐍 $fileName" }    # Python files
-            '\.ps1$' { "⚡ $fileName" }   # PowerShell files
-            '\.ahk$' { "⌨️ $fileName" }  # AutoHotkey files
+            '\.ps1$' { " $fileName" }   # PowerShell files
+            '\.ahk$' { " $fileName" }  # AutoHotkey files
             default { "📝 $fileName" }    # Other files
         }
     }
