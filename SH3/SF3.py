@@ -263,167 +263,157 @@ def close_window(event=None):
 #! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
 # light attack1
 # Global flag for stopping the threads
-Action_Light_Thread = None
-stop_thread_action1 = False
 pause_other_items = False
-image_found = False
-action_timer = None
-# Image searching function (running in one thread)
-def search_image():
-    global image_found
+
+Action_Light_Thread1 = None
+stop_thread_action1 = False
+image_found1 = False
+action_timer1 = None
+
+Action_Light_Thread2 = None
+stop_thread_action2 = False
+image_found2 = False
+action_timer2 = None
+
+def search_image_1():
+    global image_found1
     while not stop_thread_action1:
         if any(find_image(image, confidence=actionF[image]) for image in actionF):
-            image_found = True
-            print("Image found, resetting action timer.")
+            image_found1 = True
+            print("Image found in Light Attack 1, resetting action timer.")
         else:
-            image_found = False
-            print("Image not found.")
-        time.sleep(0.05)  # Search for the image every 3 seconds
-# Action function for key presses (running in another thread)
-def perform_action(window):
-    global pause_other_items, action_timer
+            image_found1 = False
+            print("Image not found in Light Attack 1.")
+        time.sleep(0.05)  # Adjust as necessary
+
+def perform_action_1(window):
+    global pause_other_items1, action_timer1
     holding_keys = False
     while not stop_thread_action1:
-        if image_found:
-            pause_other_items = True
+        if image_found1:
+            pause_other_items1 = True
             holding_keys = True
-            action_timer = time.time()  # Reset the 5-second timer when image is found
+            action_timer1 = time.time()  # Reset 5-second timer
             while holding_keys and not stop_thread_action1:
-                # Continuously press keys until 5 seconds expire
-                if time.time() - action_timer >= 5:
-                    print("5 seconds of action completed. Stopping.")
+                if time.time() - action_timer1 >= 5:
+                    print("5 seconds of Light Attack 1 action completed.")
                     holding_keys = False
                     break
                 # Perform the key presses
-                # key_down(window, 'x')
                 key_down(window, 'd')
                 press_key(window, 'j')
                 press_key(window, 'j')
                 key_up(window, 'd')
-                # key_up(window, 'x')
-                time.sleep(0.1)  # Small delay between iterations
-            # Release keys after the action is completed
+                time.sleep(0.1)
             key_up(window, 'd')
-            # key_up(window, 'x')
-            pause_other_items = False
+            pause_other_items1 = False
         else:
-            time.sleep(0.05)  # Prevent high CPU usage when idle
-# Main function to run both threads
-def actionF_L(window):
+            time.sleep(0.05)
+
+def actionF_L1(window):
     try:
-        # Start the image search thread
-        image_search_thread = threading.Thread(target=search_image)
+        image_search_thread = threading.Thread(target=search_image_1)
         image_search_thread.start()
-        # Start the action thread
-        action_thread = threading.Thread(target=perform_action, args=(window,))
+        action_thread = threading.Thread(target=perform_action_1, args=(window,))
         action_thread.start()
-        # Wait for both threads to finish if stop is triggered
         image_search_thread.join()
         action_thread.join()
     except KeyboardInterrupt:
-        print("ActionF thread stopped by user.")
+        print("ActionF_L1 thread stopped by user.")
 
-def Action__Light__FF():
+def Action_Light_1():
     global stop_thread_action1
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    actionF_thread = threading.Thread(target=actionF_L, args=(window,))
+    actionF_thread = threading.Thread(target=actionF_L1, args=(window,))
     actionF_thread.daemon = True
     actionF_thread.start()
     actionF_thread.join()
+
 def action_adjust_1():
-    global stop_thread_action1, Action_Light_Thread, ACTION_1_PY
-    # window = focus_window(window_title)
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
+    global stop_thread_action1, Action_Light_Thread1, ACTION_1_PY
+    if Action_Light_Thread1 and Action_Light_Thread1.is_alive():
         stop_thread_action1 = True
-        Action_Light_Thread.join()
+        Action_Light_Thread1.join()
         ACTION_1_PY.config(text="AL", bg="#607af0", fg="#9dff00")
     else:
         stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=Action__Light__FF)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
+        Action_Light_Thread1 = threading.Thread(target=Action_Light_1)
+        Action_Light_Thread1.daemon = True
+        Action_Light_Thread1.start()
         ACTION_1_PY.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
 ACTION_1_PY = Button(ROOT, text="AL", bg="#607af0", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_1_PY.pack(padx=(1, 1), pady=(1, 1))
 
 
-# light attack2
-Action_Light_Thread2 = None
-stop_thread_action2 = False
-image_found2 = False
-action_timer2 = None
-# Image searching function (running in one thread)
-def search_image():
+# Light Attack 2 Functions (actionF_L2)
+
+def search_image_2():
     global image_found2
     while not stop_thread_action2:
         if any(find_image(image, confidence=actionF[image]) for image in actionF):
             image_found2 = True
-            print("Image found, resetting action timer.")
+            print("Image found in Light Attack 2, resetting action timer.")
         else:
             image_found2 = False
-            print("Image not found.")
-        time.sleep(0.05)  # Search for the image every 3 seconds
-# Action function for key presses (running in another thread)
-# Action function for triggering F13 in AHK (running in another thread)
-def perform_action(window):
-    global pause_other_items, action_timer2
+            print("Image not found in Light Attack 2.")
+        time.sleep(0.05)
+
+def perform_action_2(window):
+    global pause_other_items2, action_timer2
     while not stop_thread_action2:
         if image_found2:
-            pause_other_items = True
-            action_timer2 = time.time()  # Reset the 5-second timer when image is found
+            pause_other_items2 = True
+            action_timer2 = time.time()
             print("Triggering F13 in AHK...")
-            # Trigger the F13 key in AHK (AutoHotkey should handle the rest)
             key_down(window, 'F13')
-            time.sleep(5)  # Wait for 5 seconds as defined in AHK
+            time.sleep(5)  # Simulate the wait for 5 seconds
             key_up(window, 'F13')
             print("F13 action completed.")
-            pause_other_items = False
+            pause_other_items2 = False
         else:
-            time.sleep(0.05)  # Prevent high CPU usage when idle
+            time.sleep(0.05)
 
-def actionF_L(window):
+def actionF_L2(window):
     try:
-        # Start the image search thread
-        image_search_thread = threading.Thread(target=search_image)
+        image_search_thread = threading.Thread(target=search_image_2)
         image_search_thread.start()
-        # Start the action thread
-        action_thread = threading.Thread(target=perform_action, args=(window,))
+        action_thread = threading.Thread(target=perform_action_2, args=(window,))
         action_thread.start()
-        # Wait for both threads to finish if stop is triggered
         image_search_thread.join()
         action_thread.join()
     except KeyboardInterrupt:
-        print("ActionF thread stopped by user.")
+        print("ActionF_L2 thread stopped by user.")
 
-def Action__Light__FF():
+def Action_Light_2():
     global stop_thread_action2
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    actionF_thread = threading.Thread(target=actionF_L, args=(window,))
+    actionF_thread = threading.Thread(target=actionF_L2, args=(window,))
     actionF_thread.daemon = True
     actionF_thread.start()
     actionF_thread.join()
-def action_adjust_1():
+
+def action_adjust_2():
     global stop_thread_action2, Action_Light_Thread2, ACTION_2_AHK
-    # window = focus_window(window_title)
     if Action_Light_Thread2 and Action_Light_Thread2.is_alive():
         stop_thread_action2 = True
         Action_Light_Thread2.join()
         ACTION_2_AHK.config(text="AL", bg="#5a9b5a", fg="#9dff00")
     else:
         stop_thread_action2 = False
-        Action_Light_Thread2 = threading.Thread(target=Action__Light__FF)
+        Action_Light_Thread2 = threading.Thread(target=Action_Light_2)
         Action_Light_Thread2.daemon = True
         Action_Light_Thread2.start()
         ACTION_2_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")
-ACTION_2_AHK = Button(ROOT, text="AL", bg="#5a9b5a", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_2_AHK.pack(padx=(1, 1), pady=(1, 1))
 
+ACTION_2_AHK = Button(ROOT, text="AL", bg="#5a9b5a", fg="#9dff00", width=5, height=2, command=action_adjust_2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_2_AHK.pack(padx=(1, 1), pady=(1, 1))
 
 
 
