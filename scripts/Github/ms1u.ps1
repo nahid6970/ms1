@@ -48,6 +48,7 @@
 # # Optionally, set the location back to the original directory
 # Set-Location
 
+
 # Set the location to the repository directory
 Set-Location C:\ms1
 
@@ -62,16 +63,19 @@ $commitMessage = Read-Host "Enter commit message"
 
 # If 'xx' is entered, generate a commit message with the list of changed files
 if ($commitMessage -eq "xx") {
-    # Get the list of changed files (skip the 2-character status part and preserve spaces in filenames)
+    # Get the list of changed files and extract the filename (handle quotes and spaces)
     $changedFiles = git status --porcelain | ForEach-Object {
-        $fileName = $_.Substring(3) # Skip the first 3 characters (e.g., 'M ' for modified files)
-        
-        # Add emoji based on file extension
-        switch -regex ($fileName) {
-            '\.py$' { "🐍 $fileName" }    # Python files
-            '\.ps1$' { "⚡ $fileName" }   # PowerShell files
-            '\.ahk$' { "⌨️ $fileName" }  # AutoHotkey files
-            default { "📝 $fileName" }    # Other files
+        # Regex to capture the filename part, skipping status indicators (like M, D, ??)
+        if ($_ -match '^[ MADRCU?]{2} "?(.+?)"?$') {
+            $fileName = $matches[1] # Extract the filename
+            
+            # Add emoji based on file extension
+            switch -regex ($fileName) {
+                '\.py$' { "🐍 $fileName" }    # Python files
+                '\.ps1$' { "⚡ $fileName" }   # PowerShell files
+                '\.ahk$' { "⌨️ $fileName" }  # AutoHotkey files
+                default { "📝 $fileName" }    # Other files
+            }
         }
     }
 
