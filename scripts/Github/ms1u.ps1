@@ -140,7 +140,10 @@ $commitMessage = Read-Host "Enter commit message"
 if ($commitMessage -eq "xx") {
     # Get the list of changed files and apply the appropriate emoji based on file extension
     $changedFiles = git status --porcelain | ForEach-Object {
-        $fileName = Split-Path $_ -Leaf
+        # Get the file name by skipping the first two characters of git status output (status flags)
+        $fileName = $_.Substring(3)
+
+        # Extract the file extension
         $extension = [System.IO.Path]::GetExtension($fileName)
 
         # Add emoji based on file extension
@@ -151,7 +154,7 @@ if ($commitMessage -eq "xx") {
             default { "📝 $fileName" }   # Other files
         }
     }
-    
+
     # Join the file names with emojis into a single string
     $fileList = $changedFiles -join ', '
 
