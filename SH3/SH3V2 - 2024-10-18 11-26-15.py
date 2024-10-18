@@ -310,6 +310,7 @@ def perform_action(window):
             pause_other_items = False
         else:
             time.sleep(0.05)  # Prevent high CPU usage when idle
+            
 # Main function to run both threads
 def actionF_L(window):
     try:
