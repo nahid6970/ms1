@@ -252,7 +252,7 @@ def close_window(event=None):
     # Close the current window
     ROOT.destroy()
     # Start the specified script
-    script_path = r"C:\ms1\SH3\SH3V2__AHK.py"
+    script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
 PY_VERSION = Button(ROOT, text="Py", command=close_window, bg="#607af0", fg="#000000", width=5, height=2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
