@@ -255,9 +255,6 @@ def close_window(event=None):
     script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
-PY_VERSION = Button(ROOT, text="Py", command=close_window, bg="#607af0", fg="#000000", width=5, height=2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-PY_VERSION.pack(padx=(1, 1), pady=(1, 1))
-
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
 #! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝
 #! ███████║   ██║      ██║   ███████║██║     █████╔╝     ███████╗   ██║    ╚████╔╝ ██║     █████╗
@@ -337,30 +334,29 @@ def Action__Light__FF():
     actionF_thread.start()
     actionF_thread.join()
 def action_adjust_1():
-    global stop_thread_action1, Action_Light_Thread, ACTION_1
+    global stop_thread_action1, Action_Light_Thread, ACTION_1_PY
     # window = focus_window(window_title)
     if Action_Light_Thread and Action_Light_Thread.is_alive():
         stop_thread_action1 = True
         Action_Light_Thread.join()
-        ACTION_1.config(text="AL", bg="#6a6a64", fg="#9dff00")
+        ACTION_1_PY.config(text="AL", bg="#607af0", fg="#9dff00")
     else:
         stop_thread_action1 = False
         Action_Light_Thread = threading.Thread(target=Action__Light__FF)
         Action_Light_Thread.daemon = True
         Action_Light_Thread.start()
-        ACTION_1.config(text="Stop", bg="#1d2027", fg="#fc0000")
-ACTION_1 = Button(ROOT, text="AL", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_1.pack(padx=(1, 1), pady=(1, 1))
+        ACTION_1_PY.config(text="Stop", bg="#1d2027", fg="#fc0000")
+ACTION_1_PY = Button(ROOT, text="AL", bg="#607af0", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_1_PY.pack(padx=(1, 1), pady=(1, 1))
 
 
 # light attack2
 Action_Light_Thread2 = None
 stop_thread_action2 = False
-pause_other_items = False
 image_found2 = False
 action_timer2 = None
 # Image searching function (running in one thread)
-def search_image2():
+def search_image():
     global image_found2
     while not stop_thread_action2:
         if any(find_image(image, confidence=actionF[image]) for image in actionF):
@@ -371,48 +367,30 @@ def search_image2():
             print("Image not found.")
         time.sleep(0.05)  # Search for the image every 3 seconds
 # Action function for key presses (running in another thread)
-def perform_action2(window):
+# Action function for triggering F13 in AHK (running in another thread)
+def perform_action(window):
     global pause_other_items, action_timer2
-    holding_keys = False
     while not stop_thread_action2:
         if image_found2:
             pause_other_items = True
-            holding_keys = True
             action_timer2 = time.time()  # Reset the 5-second timer when image is found
-            while holding_keys and not stop_thread_action2:
-                # Continuously press keys until 5 seconds expire
-                if time.time() - action_timer2 >= 5:
-                    print("5 seconds of action completed. Stopping.")
-                    holding_keys = False
-                    break
-                # Perform the key presses
-                # key_down(window, 'x')
-                # key_down(window, 'l')
-                # key_down(window, 'i')
-                key_down(window, 'd')
-                press_key(window, 'j')
-                press_key(window, 'j')
-                # press_key(window, 'l')
-                key_up(window, 'd')
-                # key_up(window, 'i')
-                # key_up(window, 'l')
-                # key_up(window, 'x')
-                time.sleep(0.1)  # Small delay between iterations
-            # Release keys after the action is completed
-            key_up(window, 'd')
-            # key_up(window, 'x')
-            # key_up(window, 'i')
+            print("Triggering F13 in AHK...")
+            # Trigger the F13 key in AHK (AutoHotkey should handle the rest)
+            key_down(window, 'F13')
+            time.sleep(5)  # Wait for 5 seconds as defined in AHK
+            key_up(window, 'F13')
+            print("F13 action completed.")
             pause_other_items = False
         else:
             time.sleep(0.05)  # Prevent high CPU usage when idle
-# Main function to run both threads
-def actionF_L2(window):
+
+def actionF_L(window):
     try:
         # Start the image search thread
-        image_search_thread = threading.Thread(target=search_image2)
+        image_search_thread = threading.Thread(target=search_image)
         image_search_thread.start()
         # Start the action thread
-        action_thread = threading.Thread(target=perform_action2, args=(window,))
+        action_thread = threading.Thread(target=perform_action, args=(window,))
         action_thread.start()
         # Wait for both threads to finish if stop is triggered
         image_search_thread.join()
@@ -420,31 +398,33 @@ def actionF_L2(window):
     except KeyboardInterrupt:
         print("ActionF thread stopped by user.")
 
-def Action__Light__FF2():
+def Action__Light__FF():
     global stop_thread_action2
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    actionF_thread = threading.Thread(target=actionF_L2, args=(window,))
+    actionF_thread = threading.Thread(target=actionF_L, args=(window,))
     actionF_thread.daemon = True
     actionF_thread.start()
     actionF_thread.join()
-def action_adjust_2():
-    global stop_thread_action2, Action_Light_Thread2, ACTION_2
+def action_adjust_1():
+    global stop_thread_action2, Action_Light_Thread2, ACTION_2_AHK
     # window = focus_window(window_title)
     if Action_Light_Thread2 and Action_Light_Thread2.is_alive():
         stop_thread_action2 = True
         Action_Light_Thread2.join()
-        ACTION_2.config(text="AL2", bg="#6a6a64", fg="#9dff00")
+        ACTION_2_AHK.config(text="AL", bg="#5a9b5a", fg="#9dff00")
     else:
         stop_thread_action2 = False
-        Action_Light_Thread2 = threading.Thread(target=Action__Light__FF2)
+        Action_Light_Thread2 = threading.Thread(target=Action__Light__FF)
         Action_Light_Thread2.daemon = True
         Action_Light_Thread2.start()
-        ACTION_2.config(text="Stop", bg="#1d2027", fg="#fc0000")
-ACTION_2 = Button(ROOT, text="AL2", bg="#6a6a64", fg="#9dff00", width=5, height=2, command=action_adjust_2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_2.pack(padx=(1, 1), pady=(1, 1))
+        ACTION_2_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")
+ACTION_2_AHK = Button(ROOT, text="AL", bg="#5a9b5a", fg="#9dff00", width=5, height=2, command=action_adjust_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_2_AHK.pack(padx=(1, 1), pady=(1, 1))
+
+
 
 
 # heavy attack for fight
