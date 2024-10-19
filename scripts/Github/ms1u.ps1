@@ -241,9 +241,17 @@ if ($commitMessage -like "xx*") {
     # Join the file names with emojis into a single string
     $fileList = $changedFiles -join ', '
 
-    # Remove 'xx' from the original commit message and append the file list
-    $customComment = $commitMessage -replace '^xx', ''
-    $commitMessage = "󰅿 $customComment $fileList"
+    # Remove 'xx' from the original commit message and check for extra text
+    $extraComment = $commitMessage -replace '^xx', ''
+
+    # Construct the final commit message
+    if ($extraComment -ne '') {
+        # If there's an extra comment, add the 💬 emoji before it
+        $commitMessage = "💬 $extraComment Changes made to the following files: $fileList"
+    } else {
+        # If there's no extra comment, just include the file list
+        $commitMessage = "Changes made to the following files: $fileList"
+    }
 }
 
 # Commit the changes with the provided message
