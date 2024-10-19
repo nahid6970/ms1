@@ -610,6 +610,22 @@ Center_Focused_Window() {
     WinMove, ahk_id %hwnd%, , %newX%, %newY%
 }
 
+!v::Center_Focused_Window_modLDplayer()
+Center_Focused_Window_modLDplayer() {
+    ; Get the handle of the active (focused) window
+    WinGet, hwnd, ID, A
+    ; Get the position and size of the active window
+    WinGetPos, x, y, w, h, ahk_id %hwnd%
+    ; Get the screen width and height
+    SysGet, ScreenWidth, 78
+    SysGet, ScreenHeight, 79
+    ; Calculate new position to center the window
+    newX := (ScreenWidth - w) / 2
+    newY := (ScreenHeight - h + 700)
+    ; Move the window to the calculated position
+    WinMove, ahk_id %hwnd%, , %newX%, %newY%
+}
+
 ;* ████████╗███████╗██╗  ██╗████████╗    ██████╗ ███████╗██╗      █████╗ ████████╗███████╗██████╗
 ;* ╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝    ██╔══██╗██╔════╝██║     ██╔══██╗╚══██╔══╝██╔════╝██╔══██╗
 ;*    ██║   █████╗   ╚███╔╝    ██║       ██████╔╝█████╗  ██║     ███████║   ██║   █████╗  ██║  ██║
