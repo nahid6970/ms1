@@ -232,21 +232,21 @@ if ($commitMessage -like "xx*") {
             switch -regex ($fileName) {
                 '\.py$' { "🐍 $fileName" }    # Python files
                 '\.ps1$' { "⚡ $fileName" }   # PowerShell files
-                '\.ahk$' { "⌨️ $fileName" }  # AutoHotkey files
+                '\.ahk$' { "🌪️ $fileName" }  # AutoHotkey files
                 default { "📝 $fileName" }    # Other files
             }
         }
     }
 
-    # Join the file names with emojis, each on a new line
-    $fileList = $changedFiles -join "`n"
+    # Join the file names with emojis into a single string, comma-separated
+    $fileList = $changedFiles -join ', '
 
-    # Handle the commit message and prepend 💬 if there is a comment after 'xx'
+    # Handle the commit message, prepend 💬 if there is a comment after 'xx'
     if ($commitMessage -ne "xx") {
         $commitMessage = $commitMessage -replace '^xx', ''
-        $commitMessage = "💬 $commitMessage`n`n$fileList"
+        $commitMessage = "💬 $commitMessage, $fileList"
     } else {
-        $commitMessage = "$fileList"
+        $commitMessage = $fileList
     }
 }
 
