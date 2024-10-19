@@ -341,7 +341,7 @@ def action_main_handler_2():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    def search_and_act_2():
+    def search_and_act():
         while not stop_thread_action1:
             # Image searching logic
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
@@ -370,7 +370,7 @@ def action_main_handler_2():
         ACTION_2_AHK.config(text="djilx", bg="#5a9b5a", fg="#9dff00")  # Update button
     else:
         stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act_2)
+        Action_Light_Thread = threading.Thread(target=search_and_act)
         Action_Light_Thread.daemon = True
         Action_Light_Thread.start()
         ACTION_2_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
@@ -389,7 +389,7 @@ def action_main_handler_3():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-    def search_and_act_2():
+    def search_and_act():
         while not stop_thread_action1:
             # Image searching logic
             if any(find_image(image, confidence=actionF[image]) for image in actionF):
@@ -418,7 +418,7 @@ def action_main_handler_3():
         ACTION_3_AHK.config(text="djil", bg="#5a9b5a", fg="#9dff00")  # Update button
     else:
         stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act_2)
+        Action_Light_Thread = threading.Thread(target=search_and_act)
         Action_Light_Thread.daemon = True
         Action_Light_Thread.start()
         ACTION_3_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
