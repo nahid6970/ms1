@@ -247,10 +247,10 @@ if ($commitMessage -like "xx*") {
     # Construct the final commit message
     if ($extraComment -ne '') {
         # If there's an extra comment, add the 💬 emoji before it
-        $commitMessage = "󰅿 $extraComment  $fileList"
+        $commitMessage = "󰅿 $extraComment --- $fileList"
     } else {
         # If there's no extra comment, just include the file list
-        $commitMessage = " $fileList"
+        $commitMessage = "--- $fileList"
     }
 }
 
