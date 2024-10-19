@@ -6,7 +6,6 @@
 # from tkinter import messagebox
 from tkinter import Tk, Button, messagebox
 from datetime import datetime
-
 import os
 import pyautogui
 import pygetwindow as gw
@@ -53,11 +52,12 @@ def find_image(image_path, confidence=0.7):
             last_found_time = time.time()  # Update the last found time
             return location
     except Exception as e:
+        image_name = os.path.basename(image_path)  # Get the image name
         # Get current date and time for error messages
         current_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
         # Calculate time since the last found time
         elapsed_time = time.time() - last_found_time
-        print(f"{current_time} --> Image not found. {int(elapsed_time)} seconds since last detection. Error: {e}")
+        print(f"{current_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time
     if time.time() - last_found_time > 120:
         run_script()  # Run the script instead of showing a message
