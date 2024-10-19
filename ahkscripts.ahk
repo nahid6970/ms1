@@ -898,15 +898,17 @@ return
             {
                 break  ; Stop if dnplayer.exe is no longer active
             }
-            Send, {l down}  ; Hold down 'd'
-            Send, {i down}  ; Hold down 'd'
-            Send, {d down}  ; Hold down 'd'
-            Send, j         ; Send 'j' multiple times
+            Send, {x down}
+            Send, {l down}
+            Send, {i down}
+            Send, {d down}
             Send, j
-            Send, {d up}    ; Release 'd'
-            Send, {i up}    ; Release 'd'
-            Send, {l up}    ; Release 'd'
-            Sleep, 100      ; Adjust the delay as needed between iterations
+            Send, j
+            Send, {d up}
+            Send, {i up}
+            Send, {l up}
+            Send, {x up}
+            Sleep, 100    
         }
     return
 
@@ -918,11 +920,15 @@ return
             {
                 break
             }
+            Send, {l down}
+            Send, {i down}
             Send, {d down}
             Send, j
             Send, j
             Send, {d up}
-            Sleep, 100
+            Send, {i up}
+            Send, {l up}
+            Sleep, 100    
         }
     return
 
