@@ -39,34 +39,30 @@ ROOT.geometry(f"+{x}+{y}")
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
-error_count = 0
 last_found_time = time.time()
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
-    global error_count, last_found_time
+    global last_found_time
     try:
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             image_name = os.path.basename(image_path)
             # Get current date and time in the desired format
             current_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
-            # ANSI escape code for green text
-            print(f"\033[92m{current_time} --> Found image: {image_name}\033[0m")  # Output in green with date and time
+            print(f"\033[92m{current_time} --> Found image: {image_name}\033[0m")
             last_found_time = time.time()  # Update the last found time
             return location
     except Exception as e:
-        error_count += 1
         # Get current date and time for error messages
         current_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
-        print(f"{current_time} --> {error_count} times not found. Error: {e}")
-    
+        # Calculate time since the last found time
+        elapsed_time = time.time() - last_found_time
+        print(f"{current_time} --> Image not found. {int(elapsed_time)} seconds since last detection. Error: {e}")
     # Check if 120 seconds have passed since the last found time
     if time.time() - last_found_time > 120:
         run_script()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
-
-
 
 def run_script():
     """Run the whatsapp.py script."""
