@@ -250,7 +250,7 @@ if ($commitMessage -like "xx*") {
         $commitMessage = "󰅿 $extraComment Changes made to the following files: $fileList"
     } else {
         # If there's no extra comment, just include the file list
-        $commitMessage = "🎯Files Changed: $fileList"
+        $commitMessage = "🎯Files Changedd: $fileList"
     }
 }
 
