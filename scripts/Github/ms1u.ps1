@@ -165,6 +165,47 @@
 
 
 
+# # Set the location to the repository directory
+# Set-Location C:\ms1
+# # Check the status of the repository
+# git status
+# # Add all changes to the staging area
+# git add .
+# # Prompt for a commit message
+# $commitMessage = Read-Host "Enter commit message"
+# # Check if 'xx' is part of the commit message
+# if ($commitMessage -like "xx*") {
+#     # Get the list of changed files and extract only the file name (handle quotes and spaces)
+#     $changedFiles = git status --porcelain | ForEach-Object {
+#         # Regex to capture the filename part, skipping status indicators (like M, D, ??)
+#         if ($_ -match '^[ MADRCU?]{2} "?(.+?)"?$') {
+#             $fullPath = $matches[1]
+#             # Use Split-Path with -Leaf to get only the file name, no path
+#             $fileName = Split-Path $fullPath -Leaf
+            
+#             # Add emoji based on file extension
+#             switch -regex ($fileName) {
+#                 '\.py$' { "🐍 $fileName" }    # Python files
+#                 '\.ps1$' { " $fileName" }   # PowerShell files
+#                 '\.ahk$' { " $fileName" }  # AutoHotkey files
+#                 default { "📝 $fileName" }    # Other files
+#             }
+#         }
+#     }
+#     # Join the file names with emojis into a single string
+#     $fileList = $changedFiles -join ', '
+#     # Remove 'xx' from the original commit message and append the file list
+#     $commitMessage = $commitMessage -replace '^xx', ''
+#     $commitMessage = "$commitMessage 🎯FilesChanged🎯: $fileList"
+# }
+# # Commit the changes with the provided message
+# git commit -m $commitMessage
+# # Push the changes to the remote repository
+# git push
+# # Optionally, set the location back to the original directory
+# Set-Location
+
+
 # Set the location to the repository directory
 Set-Location C:\ms1
 
@@ -190,19 +231,23 @@ if ($commitMessage -like "xx*") {
             # Add emoji based on file extension
             switch -regex ($fileName) {
                 '\.py$' { "🐍 $fileName" }    # Python files
-                '\.ps1$' { " $fileName" }   # PowerShell files
-                '\.ahk$' { " $fileName" }  # AutoHotkey files
+                '\.ps1$' { "⚡ $fileName" }   # PowerShell files
+                '\.ahk$' { "⌨️ $fileName" }  # AutoHotkey files
                 default { "📝 $fileName" }    # Other files
             }
         }
     }
 
-    # Join the file names with emojis into a single string
-    $fileList = $changedFiles -join ', '
+    # Join the file names with emojis, each on a new line
+    $fileList = $changedFiles -join "`n"
 
-    # Remove 'xx' from the original commit message and append the file list
-    $commitMessage = $commitMessage -replace '^xx', ''
-    $commitMessage = "$commitMessage 🎯FilesChanged🎯: $fileList"
+    # Handle the commit message and prepend 💬 if there is a comment after 'xx'
+    if ($commitMessage -ne "xx") {
+        $commitMessage = $commitMessage -replace '^xx', ''
+        $commitMessage = "💬 $commitMessage`n`n$fileList"
+    } else {
+        $commitMessage = "$fileList"
+    }
 }
 
 # Commit the changes with the provided message
