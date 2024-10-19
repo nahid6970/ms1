@@ -911,32 +911,32 @@ return
     return
 
     F12::
-        StartTime := A_TickCount  ; Record the current time
-        while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
+        StartTime := A_TickCount
+        while (A_TickCount - StartTime < 5000)
         {
-            if !WinActive("ahk_exe dnplayer.exe")  ; Ensure dnplayer.exe is active
+            if !WinActive("ahk_exe dnplayer.exe")
             {
-                break  ; Stop if dnplayer.exe is no longer active
+                break
             }
-            Send, {l down}  ; Hold down 'l'
-            Sleep, 100      ; Delay before releasing
-            Send, {l up}    ; Release 'l'
-            Sleep, 100      ; Adjust the delay as needed between iterations
+            Send, {l down}
+            Sleep, 100
+            Send, {l up}
+            Sleep, 100
         }
     return
 
     F11::
-        StartTime := A_TickCount  ; Record the current time
-        while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
+        StartTime := A_TickCount
+        while (A_TickCount - StartTime < 5000)
         {
-            if !WinActive("ahk_exe dnplayer.exe")  ; Ensure dnplayer.exe is active
+            if !WinActive("ahk_exe dnplayer.exe")
             {
-                break  ; Stop if dnplayer.exe is no longer active
+                break
             }
-            Send, {x down}  ; Hold down 'x'
-            Sleep, 100      ; Delay before releasing
-            Send, {x up}    ; Release 'x'
-            Sleep, 100      ; Adjust the delay as needed between iterations
+            Send, {x down}
+            Sleep, 100
+            Send, {x up}
+            Sleep, 100
         }
     return
 #If
