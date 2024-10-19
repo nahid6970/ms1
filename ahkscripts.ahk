@@ -918,9 +918,10 @@ return
             {
                 break
             }
-            Send, {l down}
-            Sleep, 100
-            Send, {l up}
+            Send, {d down}
+            Send, j
+            Send, j
+            Send, {d up}
             Sleep, 100
         }
     return
@@ -933,10 +934,9 @@ return
             {
                 break
             }
-            Send, {x down}
+            Send, x
             Sleep, 100
-            Send, {x up}
-            Sleep, 100
+            Send, i
         }
     return
 #If
