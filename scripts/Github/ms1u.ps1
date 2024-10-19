@@ -254,7 +254,7 @@ if ($commitMessage -like "xx*") {
     }
 }
 
-# Commit the changes with the provided message
+# Commit the changes
 git commit -m $commitMessage
 
 # Push the changes to the remote repository
