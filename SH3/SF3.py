@@ -282,7 +282,6 @@ def action_main_handler():
     if not window:
         print(f"Window '{window_title}' not found.")
         return
-
     def search_and_act():
         holding_keys = False
         while not stop_thread_action1:
@@ -295,7 +294,6 @@ def action_main_handler():
                 image_found = False
                 print("Image not found.")
             time.sleep(0.05)  # Check image every 0.05 seconds
-
             # Action performing logic
             if image_found:
                 pause_other_items = True
@@ -317,7 +315,6 @@ def action_main_handler():
                 pause_other_items = False
             else:
                 time.sleep(0.05)  # Prevent CPU usage when idle
-
     # Start or stop the action handler
     if Action_Light_Thread and Action_Light_Thread.is_alive():
         stop_thread_action1 = True
@@ -329,7 +326,6 @@ def action_main_handler():
         Action_Light_Thread.daemon = True
         Action_Light_Thread.start()
         ACTION_1.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
-
 # Button definition to start/stop the action
 ACTION_1 = Button(ROOT, text="AL", bg="#6a6a64", fg="#9dff00", width=5, height=2,
                   command=action_main_handler, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
