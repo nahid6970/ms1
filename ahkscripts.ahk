@@ -604,7 +604,8 @@ Center_Focused_Window() {
     SysGet, ScreenHeight, 79
     ; Calculate new position to center the window
     newX := (ScreenWidth - w) / 2
-    newY := (ScreenHeight - h) / 2
+    ; newY := (ScreenHeight - h) / 2
+    newY := (ScreenHeight - h) / 4
     ; Move the window to the calculated position
     WinMove, ahk_id %hwnd%, , %newX%, %newY%
 }
