@@ -243,7 +243,7 @@ if ($commitMessage -like "xx*") {
 
     # Remove 'xx' from the original commit message and append the file list
     $customComment = $commitMessage -replace '^xx', ''
-    $commitMessage = "󰅿 $customComment Changes made to the following files: $fileList"
+    $commitMessage = "󰅿 $customComment $fileList"
 }
 
 # Commit the changes with the provided message
