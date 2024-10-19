@@ -5,7 +5,8 @@
 # from tkinter import messagebox
 # from tkinter import messagebox
 from tkinter import Tk, Button, messagebox
-import datetime
+from datetime import datetime
+
 import os
 import pyautogui
 import pygetwindow as gw
@@ -47,17 +48,26 @@ def find_image(image_path, confidence=0.7):
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             image_name = os.path.basename(image_path)
-            print(f"Found image: {image_name}")
+            # Get current date and time in the desired format
+            current_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
+            # ANSI escape code for green text
+            print(f"\033[92m{current_time} --> Found image: {image_name}\033[0m")  # Output in green with date and time
             last_found_time = time.time()  # Update the last found time
             return location
     except Exception as e:
         error_count += 1
-        print(f"{error_count} times not found. Error: {e}")
-    # Check if 5 seconds have passed since the last found time
+        # Get current date and time for error messages
+        current_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
+        print(f"{current_time} --> {error_count} times not found. Error: {e}")
+    
+    # Check if 120 seconds have passed since the last found time
     if time.time() - last_found_time > 120:
         run_script()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
+
+
+
 def run_script():
     """Run the whatsapp.py script."""
     try:
