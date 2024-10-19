@@ -202,7 +202,7 @@ if ($commitMessage -like "xx*") {
 
     # Remove 'xx' from the original commit message and append the file list
     $commitMessage = $commitMessage -replace '^xx', ''
-    $commitMessage = "$commitMessage @@FilesChanged@@: $fileList"
+    $commitMessage = "$commitMessage 🎯FilesChanged🎯: $fileList"
 }
 
 # Commit the changes with the provided message
