@@ -227,8 +227,8 @@ if ($commitMessage -like "xx*") {
             # Add emoji based on file extension
             switch -regex ($fileName) {
                 '\.py$' { "🐍 $fileName" }    # Python files
-                '\.ps1$' { " $fileName" }   # PowerShell files
-                '\.ahk$' { " $fileName" }  # AutoHotkey files
+                '\.ps1$' { "🎉 $fileName" }   # PowerShell files
+                '\.ahk$' { "⌨ $fileName" }  # AutoHotkey files
                 default { "📝 $fileName" }    # Other files
             }
         }
@@ -252,4 +252,3 @@ git commit -m $commitMessage
 git push
 # Optionally, set the location back to the original directory
 Set-Location
-
