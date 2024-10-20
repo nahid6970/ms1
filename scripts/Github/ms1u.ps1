@@ -252,3 +252,4 @@ git commit -m $commitMessage
 git push
 # Optionally, set the location back to the original directory
 Set-Location
+
