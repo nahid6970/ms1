@@ -208,16 +208,12 @@
 
 # Set the location to the repository directory
 Set-Location C:\ms1
-
 # Check the status of the repository
 git status
-
 # Add all changes to the staging area
 git add .
-
 # Prompt for a commit message
 $commitMessage = Read-Host "Enter commit message"
-
 # Check if 'xx' is part of the commit message
 if ($commitMessage -like "xx*") {
     # Get the list of changed files and extract only the file name (handle quotes and spaces)
@@ -237,28 +233,22 @@ if ($commitMessage -like "xx*") {
             }
         }
     }
-
     # Join the file names with emojis into a single string
     $fileList = $changedFiles -join ', '
-
     # Remove 'xx' from the original commit message and check for extra text
     $extraComment = $commitMessage -replace '^xx', ''
-
     # Construct the final commit message
     if ($extraComment -ne '') {
         # If there's an extra comment, add the 💬 emoji before it
-        $commitMessage = "󰅿 $extraComment  $fileList"
+        $commitMessage = "󰅿 $extraComment $fileList"
     } else {
         # If there's no extra comment, just include the file list
-        $commitMessage = " $fileList"
+        $commitMessage = "$fileList"
     }
 }
-
 # Commit the changes with the provided message
 git commit -m $commitMessage
-
 # Push the changes to the remote repository
 git push
-
 # Optionally, set the location back to the original directory
 Set-Location
