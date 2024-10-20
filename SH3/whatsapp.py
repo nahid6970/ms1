@@ -142,7 +142,7 @@ def WhatsPhotoClick():
                 press_screen_with_delays(window, (94, 181, 2))
             # Check for call_me image and click
             elif find_image(call_me, confidence=0.8): 
-                press_screen_with_delays(window, (835, 71, 2))
+                press_screen_with_delays(window, (835, 71, 120))
 
             time.sleep(0.1)  # Small delay between iterations to reduce CPU usage
 
