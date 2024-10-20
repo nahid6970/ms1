@@ -890,7 +890,7 @@ return
 ;*  ███████║██║     ██████╔╝
 ;*  ╚══════╝╚═╝     ╚═════╝
 #IfWinActive ahk_exe dnplayer.exe
-    F13::
+    F24::
         StartTime := A_TickCount  ; Record the current time
         while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
         {
@@ -912,7 +912,7 @@ return
         }
     return
 
-    F12::
+    F23::
         StartTime := A_TickCount
         while (A_TickCount - StartTime < 5000)
         {
@@ -932,7 +932,7 @@ return
         }
     return
 
-    F11::
+    F22::
         StartTime := A_TickCount
         while (A_TickCount - StartTime < 5000)
         {
