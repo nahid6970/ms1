@@ -38,28 +38,43 @@ ROOT.geometry(f"+{x}+{y}")
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
-last_found_time = time.time()
+last_found_time = None
+is_searching = False
+last_used_time = time.time()  # Tracks when the function was last called
+
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
-    global last_found_time
+    global last_found_time, is_searching, last_used_time
+    current_time = time.time()
+    # Reset timer if the function is not used for 10 seconds
+    if current_time - last_used_time > 10:
+        last_found_time = None
+        is_searching = False
+    last_used_time = current_time  # Update the last used time
     try:
+        # Start counting only when the function is searching for the image
+        if not is_searching:
+            is_searching = True
+            last_found_time = time.time()  # Start the timer when first searching
         location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
         if location:
             image_name = os.path.basename(image_path)
             # Get current date and time in the desired format
-            current_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
-            print(f"\033[92m{current_time} --> Found image: {image_name}\033[0m")
-            last_found_time = time.time()  # Update the last found time
+            formatted_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
+            print(f"\033[92m{formatted_time} --> Found image: {image_name}\033[0m")
+            # Reset search and timer upon finding the image
+            last_found_time = time.time()
+            is_searching = False  # Stop the search
             return location
     except Exception as e:
         image_name = os.path.basename(image_path)  # Get the image name
         # Get current date and time for error messages
-        current_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
-        # Calculate time since the last found time
-        elapsed_time = time.time() - last_found_time
-        print(f"{current_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
-    # Check if 120 seconds have passed since the last found time
-    if time.time() - last_found_time > 120:
+        formatted_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
+        # Calculate time since the last found time (only while searching)
+        elapsed_time = time.time() - last_found_time if last_found_time else 0
+        print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
+    # Check if 120 seconds have passed since the last found time while searching
+    if is_searching and time.time() - last_found_time > 120:
         run_script()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
