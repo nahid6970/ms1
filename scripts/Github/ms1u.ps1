@@ -228,7 +228,7 @@ if ($commitMessage -like "xx*") {
             switch -regex ($fileName) {
                 '\.py$' { "🐍 $fileName" }    # Python files
                 '\.ps1$' { "🎉 $fileName" }   # PowerShell files
-                '\.ahk$' { "⌨ $fileName" }  # AutoHotkey files
+                '\.ahk$' { "  $fileName" }  # AutoHotkey files
                 default { "📝 $fileName" }    # Other files
             }
         }
