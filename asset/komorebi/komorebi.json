@@ -1,33 +1,33 @@
 {
-  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.23/schema.json",
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.29/schema.json",
   "app_specific_configuration_path": "$Env:USERPROFILE/applications.yaml",
   "window_hiding_behaviour": "Cloak",
   "cross_monitor_move_behaviour": "Insert",
-  "global_work_area_offset": {"left": -11, "right": -23, "top": -11, "bottom": 18},
 
-  "default_workspace_padding": 1,
-  "default_container_padding": 0,
+  "default_workspace_padding": 20,
+  "default_container_padding": 20,
 
-  
-
-  "stackbar": {"mode": "OnStack","tabs": {"focused_text":{"r": 0,"g": 255,"b": 164},
-                                          "unfocused_text":{"r": 255,"g": 0,"b": 0},
-                                          "background":{"r": 82,"g": 81,"b": 81}
-                                          },
-                                          "height": 25
-              },  
-  
-  "active_window_border": false,
-  "active_window_border_style":"Square",
-  "active_window_border_colours": { "single": "#0089ff", "stack": "#00a542", "monocle": "#ff3399","unfocused":"#000000" },
-  "border_padding": 1,
-  "border_offset": 10,
+  "border": true,
+  "border_style":"Square",
   "border_width": 2,
-  
-  "mouse_follows_focus":false,
-  
+  "border_offset": -1,
 
+  "global_work_area_offset": {"left": -40, "right": -80, "top": -40, "bottom": -38},
 
+  "theme": {
+    "palette": "Base16",
+    "name": "AtelierCaveLight",
+    "unfocused_border": "Base03",
+    "bar_accent": "Base0D"
+  },
+
+  "stackbar": {
+    "height": 40,
+    "mode": "OnStack",
+    "tabs": {
+      "width": 300
+    }
+  },
   "monitors": [
     {
       "workspaces": [
@@ -50,12 +50,20 @@
         {
           "name": "V",
           "layout": "Rows"
+        },
+        {
+          "name": "VI",
+          "layout": "Grid"
+        },
+        {
+          "name": "VII",
+          "layout": "RightMainVerticalStack"
         }
       ]
     }
   ],
 
-  "float_rules": [
+    "float_rules": [
     {
       "kind": "Class",
       "id": "Qt643QWindowIcon",
@@ -172,6 +180,4 @@
       "matching_strategy": "Equals"
     }
   ]
-
-
 }
