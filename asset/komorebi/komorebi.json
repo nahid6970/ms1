@@ -21,6 +21,8 @@
     "bar_accent": "Base0D"
   },
 
+"mouse_follows_focus": false,
+
   "stackbar": {
     "height": 40,
     "mode": "OnStack",
