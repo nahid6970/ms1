@@ -576,6 +576,24 @@ return
             {
                 break
             }
+            Send, {l down}
+            Send, {d down}
+            Send, j
+            Send, j
+            Send, {d up}
+            Send, {l up}
+            Sleep, 100    
+        }
+    return
+
+    F21::
+        StartTime := A_TickCount
+        while (A_TickCount - StartTime < 5000)
+        {
+            if !WinActive("ahk_exe dnplayer.exe")
+            {
+                break
+            }
             Send, x
             Sleep, 100
             Send, i
