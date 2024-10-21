@@ -83,7 +83,7 @@ def run_script():
     """Run the whatsapp.py script."""
     try:
         # Replace "python" with the full path to Python if needed
-        subprocess.run(["python", r"C:\ms1\SH3\whatsapp.py"], check=True)
+        subprocess.run(["python", r"C:\ms1\scripts\shadowFight3\whatsapp.py"], check=True)
         print("whatsapp.py script executed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Failed to execute whatsapp.py: {e}")
