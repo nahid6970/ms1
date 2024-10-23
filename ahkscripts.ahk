@@ -526,39 +526,6 @@ return
 ;*  ███████║██║     ██████╔╝
 ;*  ╚══════╝╚═╝     ╚═════╝
 #IfWinActive ahk_exe dnplayer.exe
-    ; F24::
-    ;     StartTime := A_TickCount  ; Record the current time
-    ;     while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
-    ;     {
-    ;         if !WinActive("ahk_exe dnplayer.exe")  ; Ensure dnplayer.exe is active
-    ;         {
-    ;             break  ; Stop if dnplayer.exe is no longer active
-    ;         }
-    ;         Send, {x down}
-    ;         Send, {a down}
-    ;         Send, l
-    ;         Send, {a up}
-    ;         Sleep, 100
-    ;         Send, {d down}
-    ;         Send, l
-    ;         Send, {d up}
-    ;         Sleep, 100
-    ;         Send, {s down}
-    ;         Send, l
-    ;         Send, {s up}
-    ;         Sleep, 100
-    ;         Send, {w down}
-    ;         Send, l
-    ;         Send, {w up}
-    ;         Sleep, 100
-    ;         Send, {d down}
-    ;         Send, j
-    ;         Send, j
-    ;         Send, {d up}
-    ;         Send, {x up}
-    ;         Sleep, 100
-    ;     }
-    ; return
 
     F24::
         StartTime := A_TickCount  ; Record the current time
@@ -633,6 +600,79 @@ return
             Send, i
         }
     return
+
+    ;! liberator
+    F20::
+        StartTime := A_TickCount  ; Record the current time
+        while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
+        {
+            if !WinActive("ahk_exe dnplayer.exe")  ; Ensure dnplayer.exe is active
+            {
+                break  ; Stop if dnplayer.exe is no longer active
+            }
+            Send, {x down}
+            Send, {a down}
+            Send, l
+            Send, {a up}
+            Sleep, 100
+            Send, {d down}
+            Send, l
+            Send, {d up}
+            Sleep, 100
+            Send, {s down}
+            Send, l
+            Send, {s up}
+            Sleep, 100
+            Send, {w down}
+            Send, l
+            Send, {w up}
+            Sleep, 100
+            Send, {d down}
+            Send, j
+            Send, j
+            Send, {d up}
+            Send, {x up}
+            Sleep, 100
+        }
+    return
+
+    ;! Possessed
+    F19::
+        StartTime := A_TickCount  ; Record the current time
+        while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
+        {
+            if !WinActive("ahk_exe dnplayer.exe")  ; Ensure dnplayer.exe is active
+            {
+                break  ; Stop if dnplayer.exe is no longer active
+            }
+            Send, {i down}
+
+            Send, {a down}
+            SendInput, l
+            Sleep, 250
+            Send, {a up}
+
+            Send, {d down}
+            SendInput, l
+            Sleep, 250
+            Send, {d up}
+
+            Send, {s down}
+            SendInput, l
+            Sleep, 250
+            Send, {s up}
+
+            Send, {w down}
+            SendInput, l
+            Sleep, 250
+            Send, {w up}
+
+            Send, {i up}
+            Sleep, 100
+        }
+    return
+
+
 #If
 
 

@@ -596,7 +596,7 @@ def action_main_handler_4():
     if Action_Light_Thread and Action_Light_Thread.is_alive():
         stop_thread_action1 = True
         Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_4_AHK.config(text="x-i", bg="#5a9b5a", fg="#222222")  # Update button
+        ACTION_4_AHK.config(text="xi", bg="#5a9b5a", fg="#222222")  # Update button
     else:
         stop_thread_action1 = False
         Action_Light_Thread = threading.Thread(target=search_and_act)
@@ -608,6 +608,54 @@ def action_main_handler_4():
 ACTION_4_AHK = Button(ROOT, text="xi", bg="#5a9b5a", fg="#222222", width=5, height=2,
                       command=action_main_handler_4, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_4_AHK.pack(padx=(1, 1), pady=(1, 1))
+
+
+# Possessed
+def action_main_handler_5():
+    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    def search_and_act():
+        while not stop_thread_action1:
+            # Image searching logic
+            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+                image_found = True
+                print("Image found in Light Attack 2, resetting action timer.")
+                action_timer = time.time()  # Reset the 5-second timer when image is found
+            else:
+                image_found = False
+                print("Image not found in Light Attack 2.")
+            time.sleep(0.05)
+            # Action performing logic
+            if image_found:
+                pause_other_items2 = True
+                print("Triggering F19 in AHK...")
+                key_down(window, 'F19')
+                # time.sleep(5)
+                time.sleep(.05)
+                key_up(window, 'F19')
+                print("F19 action completed.")
+                pause_other_items2 = False
+            else:
+                time.sleep(0.05)  # Prevent CPU usage when idle
+    # Start or stop the action handler
+    if Action_Light_Thread and Action_Light_Thread.is_alive():
+        stop_thread_action1 = True
+        Action_Light_Thread.join()  # Wait for thread to stop
+        ACTION_5_AHK.config(text="POS", bg="#5a9b5a", fg="#222222")  # Update button
+    else:
+        stop_thread_action1 = False
+        Action_Light_Thread = threading.Thread(target=search_and_act)
+        Action_Light_Thread.daemon = True
+        Action_Light_Thread.start()
+        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
+
+# Button definition to start/stop Light Attack 2
+ACTION_5_AHK = Button(ROOT, text="POS", bg="#5a9b5a", fg="#222222", width=5, height=2,
+                      command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
 
 
 # ███╗   ███╗ ██████╗ ██████╗ ███████╗
