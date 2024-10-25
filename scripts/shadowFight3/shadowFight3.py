@@ -740,7 +740,7 @@ def event_items_handler(window):
             elif any(find_image(image) for image in continueF): press_keys_with_two_delays(window, 2, 'c', 2)
 
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, 'y', 1)
+            elif find_image(Tournament_step2, confidence=0.8): press_keys_with_delays(window, '1', 1)
 
             elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
 
