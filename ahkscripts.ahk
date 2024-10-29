@@ -673,6 +673,25 @@ return
     return
 
 
+    ;! Possessed
+    F18::
+        StartTime := A_TickCount  ; Record the current time
+        while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
+        {
+            if !WinActive("ahk_exe dnplayer.exe")  ; Ensure dnplayer.exe is active
+            {
+                break  ; Stop if dnplayer.exe is no longer active
+            }
+            Send, {x down}
+            Sleep, 650
+            Send, {x up}
+
+            Send, {j down}
+            Sleep, 500
+            Send, {j up}
+        }
+    return
+
 #If
 
 
