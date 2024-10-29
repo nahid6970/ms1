@@ -470,11 +470,11 @@ Center_Focused_Window_modLDplayer() {
 ;*    ██║   ██╔══╝   ██╔██╗    ██║       ██╔══██╗██╔══╝  ██║     ██╔══██║   ██║   ██╔══╝  ██║  ██║
 ;*    ██║   ███████╗██╔╝ ██╗   ██║       ██║  ██║███████╗███████╗██║  ██║   ██║   ███████╗██████╔╝
 ;*    ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═════╝
-!Right::Send, {End}
-!Left::Send, {Home}
-!+Right::Send, +{End}
-!+left::Send, +{home}
-!BackSpace::Send, +{Delete}{Home}
+; !Right::Send, {End}
+; !Left::Send, {Home}
+; !+Right::Send, +{End}
+; !+left::Send, +{home}
+; !BackSpace::Send, +{Delete}{Home}
 
 ; !+Right::Send, {End}+{home}
 ; !+left::Send, {home}+{end}
