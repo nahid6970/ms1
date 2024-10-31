@@ -273,6 +273,7 @@ ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10]
 
 back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
 
+Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
 
 #* Threads
 fight_thread = None
@@ -760,6 +761,7 @@ def event_items_handler(window):
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
             # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
             elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
+            elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
             elif any(find_image(image) for image in continueF): press_keys_with_two_delays(window, 2, 'c', 2)
 
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
@@ -768,19 +770,19 @@ def event_items_handler(window):
             elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
 
             # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
-            elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2))
+            elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
 
             elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 7) #! optional
 
-            # for ad_image in ads_images:
+            # for ad_image in ads_images: #! optional
             #     ad_location = find_image(ad_image, confidence=0.8)
             #     if ad_location:
-            #         click(window, ad_location.left, ad_location.top) #! optional
+            #         click(window, ad_location.left, ad_location.top) 
 
             # [click(window, ad_location.left, ad_location.top) for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
 
             # click the middle part of the ads
-            [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) 
+            [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
             for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
 
 
