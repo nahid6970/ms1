@@ -272,10 +272,11 @@ ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
 ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
 ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
 
-ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12]
+sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
+
+ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
 back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
-
 Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
 
 #* Threads
@@ -765,7 +766,7 @@ def event_items_handler(window):
             # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
             # elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
             elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, '3', 5, 'c', 0)
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, '3', 3, 'c', 1, 'c', 0)
 
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
 
