@@ -256,6 +256,20 @@ back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.pn
 Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\CreepyParty.png"
 Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
 
+
+# Advertisement
+ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
+ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
+ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
+ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
+ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
+ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
+ads7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
+ads8 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad8.png"
+ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
+
+ads_images = [ads1, ads2, ads3, ads4, ads5, ads6,ads7,ads8,ads9]
+
 #* Threads
 fight_thread = None
 fightLight_thread = None
@@ -724,7 +738,7 @@ Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
 
-
+Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
 
 # Event
 stop_thread_event = True
@@ -739,6 +753,7 @@ def event_items_handler(window):
 
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
             # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
+            elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1)
             elif any(find_image(image) for image in continueF): press_keys_with_two_delays(window, 2, 'c', 2)
 
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
@@ -747,6 +762,15 @@ def event_items_handler(window):
             elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1)
 
             elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
+
+            elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 5)
+
+
+
+            for ad_image in ads_images:
+                ad_location = find_image(ad_image, confidence=0.8)
+                if ad_location:
+                    click(window, ad_location.left, ad_location.top)
 
             # # Check if the no_currency image is found
             # elif any(find_image(image) for image in notifyF):
