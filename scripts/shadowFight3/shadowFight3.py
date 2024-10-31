@@ -256,7 +256,6 @@ back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.pn
 Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\CreepyParty.png"
 Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
 
-
 # Advertisement
 Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
 ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
@@ -271,6 +270,9 @@ ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
 ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
 
 ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10]
+
+back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
+
 
 #* Threads
 fight_thread = None
@@ -766,6 +768,7 @@ def event_items_handler(window):
             elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
 
             # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
+            elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2))
 
             elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 7) #! optional
 
