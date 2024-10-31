@@ -579,8 +579,9 @@ return
             }
             Send, {l down}
             Send, {d down}
-            Send, j
-            Send, j
+            SendInput, j
+            SendInput, j
+            SendInput, j
             Send, {d up}
             Send, {l up}
             Sleep, 100    
