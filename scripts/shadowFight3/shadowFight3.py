@@ -269,8 +269,9 @@ ads8 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad8.png"
 ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
 ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
 ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
+ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
 
-ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11]
+ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12]
 
 back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
 
