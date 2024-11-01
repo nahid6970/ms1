@@ -184,6 +184,8 @@ def press_screen_with_delays(window, *args):
         time.sleep(delay)
 
 
+# mhome = r"C:\Users\nahid\OneDrive\backup\shadowfight3"
+# Home = rf"{mhome}\Home.png"
 
 # window title
 window_title='LDPlayer'
