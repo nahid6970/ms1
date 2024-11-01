@@ -304,8 +304,6 @@ def close_window(event=None):
     script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
-
-
 # ███╗   ███╗ ██████╗ ██████╗ ███████╗
 # ████╗ ████║██╔═══██╗██╔══██╗██╔════╝
 # ██╔████╔██║██║   ██║██║  ██║█████╗
@@ -363,18 +361,12 @@ def fame_function_light():
 Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
-
-
-
-
-
 #! ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
 #! ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
 #! █████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║
 #! ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║
 #! ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 #! ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
-
 stop_thread_event = True
 def event_items_handler(window):
     try:
