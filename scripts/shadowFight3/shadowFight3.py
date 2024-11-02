@@ -933,7 +933,14 @@ ACTION_4_AHK = Button(ROOT, text="xi", bg="#5a9b5a", fg="#222222", width=5, heig
                       command=action_main_handler_4, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_4_AHK.pack(padx=(1, 1), pady=(1, 1))
 
-
+"""
+██████╗  ██████╗ ███████╗███████╗███████╗███████╗███████╗███████╗██████╗
+██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝██╔══██╗
+██████╔╝██║   ██║███████╗███████╗█████╗  ███████╗███████╗█████╗  ██║  ██║
+██╔═══╝ ██║   ██║╚════██║╚════██║██╔══╝  ╚════██║╚════██║██╔══╝  ██║  ██║
+██║     ╚██████╔╝███████║███████║███████╗███████║███████║███████╗██████╔╝
+╚═╝      ╚═════╝ ╚══════╝╚══════╝╚══════╝╚══════╝╚══════╝╚══════╝╚═════╝
+"""
 # Possessed
 def action_main_handler_5():
     global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
@@ -944,7 +951,7 @@ def action_main_handler_5():
     def search_and_act():
         while not stop_thread_action1:
             # Image searching logic
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
                 image_found = True
                 print("Image found in Light Attack 2, resetting action timer.")
                 action_timer = time.time()  # Reset the 5-second timer when image is found
