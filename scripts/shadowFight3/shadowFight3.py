@@ -40,11 +40,6 @@ ROOT.geometry(f"+{x}+{y}")
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
-import pyautogui
-import os
-import time
-from datetime import datetime
-
 # Initialize variables
 last_found_time = None
 is_searching = False
@@ -60,7 +55,10 @@ def display_image_found_chart():
     print("\033[94m-------------------------------------\033[0m\n")
 
 def find_image(image_path, confidence=0.7, region=None):
-    """Find the location of the image on the screen within an optional specified region."""
+    """Find the location of the image on the screen within an optional specified region.
+    
+    region should be a tuple of (x1, y1, x2, y2). If not provided, the function searches the entire screen.
+    """
     global last_found_time, is_searching, last_used_time, chart_last_displayed
     current_time = time.time()
     # Display the chart every 60 seconds without resetting counts
@@ -72,6 +70,10 @@ def find_image(image_path, confidence=0.7, region=None):
         last_found_time = None
         is_searching = False
     last_used_time = current_time  # Update the last used time
+    # Convert (x1, y1, x2, y2) region format to (x, y, width, height) for pyautogui
+    if region:
+        x1, y1, x2, y2 = region
+        region = (x1, y1, x2 - x1, y2 - y1)
     try:
         # Start counting only when the function is searching for the image
         if not is_searching:
@@ -265,7 +267,7 @@ Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
 # Fame Related Images
 e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
-e_image_region = (174, 651, 300, 300)  # Example coordinates and dimensions
+e_image_region = (196, 656, 384, 845)  # Example coordinates and dimensions
 
 
 StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
