@@ -34,7 +34,7 @@ BORDER_FRAME = create_custom_border(ROOT)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 x = screen_width - 60
-y = screen_height - 800
+y = screen_height - 950
 ROOT.geometry(f"+{x}+{y}")
 
 # Disable fail-safe to prevent interruptions
@@ -725,214 +725,6 @@ def fight_function():
 ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_3.pack(padx=(1,1), pady=(1,1))
 
-#* ██████╗      ██╗██╗██╗     ██╗  ██╗
-#* ██╔══██╗     ██║██║██║     ╚██╗██╔╝
-#* ██║  ██║     ██║██║██║      ╚███╔╝
-#* ██║  ██║██   ██║██║██║      ██╔██╗
-#* ██████╔╝╚█████╔╝██║███████╗██╔╝ ██╗
-#* ╚═════╝  ╚════╝ ╚═╝╚══════╝╚═╝  ╚═╝
-def action_main_handler_2():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    def search_and_act():
-        while not stop_thread_action1:
-            # Image searching logic
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print("Triggering F24 in AHK...")
-                key_down(window, 'F24')
-                # time.sleep(5)
-                time.sleep(.05)
-                key_up(window, 'F24')
-                print("F24 action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_2_AHK.config(text="djilx", bg="#5a9b5a", fg="#222222")  # Update button
-    else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_2_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
-
-# Button definition to start/stop Light Attack 2
-ACTION_2_AHK = Button(ROOT, text="djilx", bg="#5a9b5a", fg="#222222", width=5, height=2,
-                      command=action_main_handler_2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_2_AHK.pack(padx=(1, 1), pady=(1, 1))
-
-#* ██████╗      ██╗██╗██╗
-#* ██╔══██╗     ██║██║██║
-#* ██║  ██║     ██║██║██║
-#* ██║  ██║██   ██║██║██║
-#* ██████╔╝╚█████╔╝██║███████╗
-#* ╚═════╝  ╚════╝ ╚═╝╚══════╝
-def action_main_handler_3():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    def search_and_act():
-        while not stop_thread_action1:
-            # Image searching logic
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print("Triggering F23 in AHK...")
-                key_down(window, 'F23')
-                # time.sleep(5)
-                time.sleep(.05)
-                key_up(window, 'F23')
-                print("F23 action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_3_AHK.config(text="djil", bg="#5a9b5a", fg="#222222")  # Update button
-    else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_3_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
-
-# Button definition to start/stop Light Attack 2
-ACTION_3_AHK = Button(ROOT, text="djil", bg="#5a9b5a", fg="#222222", width=5, height=2,
-                      command=action_main_handler_3, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_3_AHK.pack(padx=(1, 1), pady=(1, 1))
-
-#* ██████╗      ██╗██╗
-#* ██╔══██╗     ██║██║
-#* ██║  ██║     ██║██║
-#* ██║  ██║██   ██║██║
-#* ██████╔╝╚█████╔╝███████╗
-#* ╚═════╝  ╚════╝ ╚══════╝
-def action_main_handler_djl():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    def search_and_act():
-        while not stop_thread_action1:
-            # Image searching logic
-            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print("Triggering F22 in AHK...")
-                key_down(window, 'F22')
-                # time.sleep(5)
-                time.sleep(.05)
-                key_up(window, 'F22')
-                print("F22 action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_AHK_DJL.config(text="djl", bg="#5a9b5a", fg="#222222")  # Update button
-    else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_AHK_DJL.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
-
-# Button definition to start/stop Light Attack 2
-ACTION_AHK_DJL = Button(ROOT, text="djl", bg="#5a9b5a", fg="#2c0202", width=5, height=2,
-                      command=action_main_handler_djl, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_AHK_DJL.pack(padx=(1, 1), pady=(1, 1))
-
-#* ██╗  ██╗██╗
-#* ╚██╗██╔╝██║
-#*  ╚███╔╝ ██║
-#*  ██╔██╗ ██║
-#* ██╔╝ ██╗██║
-#* ╚═╝  ╚═╝╚═╝
-def action_main_handler_4():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    def search_and_act():
-        while not stop_thread_action1:
-            # Image searching logic
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print("Triggering F21 in AHK...")
-                key_down(window, 'F21')
-                # time.sleep(5)
-                time.sleep(.05)
-                key_up(window, 'F21')
-                print("F21 action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_4_AHK.config(text="xi", bg="#5a9b5a", fg="#222222")  # Update button
-    else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_4_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
-
-# Button definition to start/stop Light Attack 2
-ACTION_4_AHK = Button(ROOT, text="xi", bg="#5a9b5a", fg="#222222", width=5, height=2,
-                      command=action_main_handler_4, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_4_AHK.pack(padx=(1, 1), pady=(1, 1))
-
 """
 ██████╗  ██████╗ ███████╗███████╗███████╗███████╗███████╗███████╗██████╗
 ██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝██╔══██╗
@@ -963,10 +755,18 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering F19 in AHK...")
-                key_down(window, 'F19')
-                # time.sleep(5)
-                time.sleep(.05)
-                key_up(window, 'F19')
+                key_down(window, 'F13'); time.sleep(0.05); key_up(window, 'F13')
+                key_down(window, 'F14'); time.sleep(0.05); key_up(window, 'F14')
+                key_down(window, 'F15'); time.sleep(0.05); key_up(window, 'F15')
+                key_down(window, 'F16'); time.sleep(0.05); key_up(window, 'F16')
+                key_down(window, 'F17'); time.sleep(0.05); key_up(window, 'F17')
+                key_down(window, 'F18'); time.sleep(0.05); key_up(window, 'F18')
+                key_down(window, 'F19'); time.sleep(0.05); key_up(window, 'F19') # Possessed
+                key_down(window, 'F20'); time.sleep(0.05); key_up(window, 'F20')
+                key_down(window, 'F21'); time.sleep(0.05); key_up(window, 'F21')
+                key_down(window, 'F22'); time.sleep(0.05); key_up(window, 'F22')
+                key_down(window, 'F23'); time.sleep(0.05); key_up(window, 'F23')
+                key_down(window, 'F24'); time.sleep(0.05); key_up(window, 'F24')
                 print("F19 action completed.")
                 pause_other_items2 = False
             else:
@@ -987,6 +787,77 @@ def action_main_handler_5():
 ACTION_5_AHK = Button(ROOT, text="POS", bg="#5a9b5a", fg="#222222", width=5, height=2,
                       command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
+
+
+
+
+file_path = r"C:\ms1\scripts\shadowFight3\shadowFight3.py"  # Path to your script file
+# Generalized function to toggle comments on specified line number
+def toggle_comment(line_number, button):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+    # Check if line is commented
+    if lines[line_number - 1].strip().startswith("#"):
+        # Uncomment line by removing the #
+        lines[line_number - 1] = lines[line_number - 1][1:]  # Remove the first character (the #)
+        button.config(bg="yellow")  # Change color to yellow for uncommented
+    else:
+        # Comment line by adding a #
+        lines[line_number - 1] = "#" + lines[line_number - 1]
+        button.config(bg="red")  # Change color to red for commented
+    # Write back the modified lines
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.writelines(lines)
+
+def initialize_button(line_number, button_name):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    # Create a button and determine its initial state
+    button = tk.Button(
+        ROOT, 
+        text=button_name,  # Set the custom button name
+        bg="red",  # Default background color when first loaded
+        fg="#222222",  # Text color
+        width=0,  # Width adjusted for longer names
+        height=1,
+        font=("Jetbrains Mono", 10, "bold"),  # Font style
+        relief="flat"  # Relief style
+        
+    )
+    # Check if the line is commented to set the initial state
+    if lines[line_number - 1].strip().startswith("#"):
+        button.config(bg="red")  # Line is commented
+    else:
+        button.config(bg="yellow")  # Line is uncommented
+    # Set the command for the button
+    button.config(command=lambda: toggle_comment(line_number, button))
+    button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
+
+
+# Initialize buttons for specified lines with custom names
+initialize_button(758, "758")
+initialize_button(759, "759")
+initialize_button(760, "760")
+initialize_button(761, "761")
+initialize_button(762, "762")
+initialize_button(763, "763")
+initialize_button(764, "764")
+initialize_button(765, "765")
+initialize_button(766, "766")
+initialize_button(767, "767")
+initialize_button(768, "768")
+initialize_button(769, "769")
+
+
+
+
+
+
+
+
+
+
 
 
 
