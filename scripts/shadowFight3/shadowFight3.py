@@ -16,6 +16,8 @@ import threading
 import time
 import tkinter as tk
 import win32gui
+import gc  # Import garbage collector
+
 
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
@@ -38,6 +40,11 @@ ROOT.geometry(f"+{x}+{y}")
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
+import pyautogui
+import os
+import time
+from datetime import datetime
+
 # Initialize variables
 last_found_time = None
 is_searching = False
@@ -52,8 +59,8 @@ def display_image_found_chart():
         print(f"{image}: {count} times")
     print("\033[94m-------------------------------------\033[0m\n")
 
-def find_image(image_path, confidence=0.7):
-    """Find the location of the image on the screen."""
+def find_image(image_path, confidence=0.7, region=None):
+    """Find the location of the image on the screen within an optional specified region."""
     global last_found_time, is_searching, last_used_time, chart_last_displayed
     current_time = time.time()
     # Display the chart every 60 seconds without resetting counts
@@ -70,7 +77,7 @@ def find_image(image_path, confidence=0.7):
         if not is_searching:
             is_searching = True
             last_found_time = time.time()  # Start the timer when first searching
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True)
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True, region=region)
         if location:
             image_name = os.path.basename(image_path)
             # Get current date and time in the desired format
@@ -258,6 +265,9 @@ Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
 # Fame Related Images
 e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
+e_image_region = (174, 651, 300, 300)  # Example coordinates and dimensions
+
+
 StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
 WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
 GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
@@ -342,7 +352,7 @@ def fame_items_handler(window):
             elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
             elif find_image(StartFame): press_key(window, 'p')
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-            elif find_image(e_image): press_key(window, 'e')
+            elif find_image(e_image, region=e_image_region): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
 
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
@@ -411,7 +421,7 @@ def event_items_handler(window):
             # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
             elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
 
-            # elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
+            elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
 
             # for ad_image in ads_images: #! optional
             #     ad_location = find_image(ad_image, confidence=0.8)
