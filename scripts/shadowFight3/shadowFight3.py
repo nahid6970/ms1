@@ -755,18 +755,18 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering F19 in AHK...")
-                key_down(window, 'F13'); time.sleep(0.05); key_up(window, 'F13')
-                key_down(window, 'F14'); time.sleep(0.05); key_up(window, 'F14')
-                key_down(window, 'F15'); time.sleep(0.05); key_up(window, 'F15')
-                key_down(window, 'F16'); time.sleep(0.05); key_up(window, 'F16')
-                key_down(window, 'F17'); time.sleep(0.05); key_up(window, 'F17')
-                key_down(window, 'F18'); time.sleep(0.05); key_up(window, 'F18')
+#                key_down(window, 'F13'); time.sleep(0.05); key_up(window, 'F13')
+#                key_down(window, 'F14'); time.sleep(0.05); key_up(window, 'F14')
+#                key_down(window, 'F15'); time.sleep(0.05); key_up(window, 'F15')
+#                key_down(window, 'F16'); time.sleep(0.05); key_up(window, 'F16')
+#                key_down(window, 'F17'); time.sleep(0.05); key_up(window, 'F17')
+#                key_down(window, 'F18'); time.sleep(0.05); key_up(window, 'F18')
                 key_down(window, 'F19'); time.sleep(0.05); key_up(window, 'F19') # Possessed
-                key_down(window, 'F20'); time.sleep(0.05); key_up(window, 'F20')
-                key_down(window, 'F21'); time.sleep(0.05); key_up(window, 'F21')
-                key_down(window, 'F22'); time.sleep(0.05); key_up(window, 'F22')
-                key_down(window, 'F23'); time.sleep(0.05); key_up(window, 'F23')
-                key_down(window, 'F24'); time.sleep(0.05); key_up(window, 'F24')
+#                key_down(window, 'F20'); time.sleep(0.05); key_up(window, 'F20')
+#                key_down(window, 'F21'); time.sleep(0.05); key_up(window, 'F21')
+#                key_down(window, 'F22'); time.sleep(0.05); key_up(window, 'F22')
+#                key_down(window, 'F23'); time.sleep(0.05); key_up(window, 'F23')
+#                key_down(window, 'F24'); time.sleep(0.05); key_up(window, 'F24')
                 print("F19 action completed.")
                 pause_other_items2 = False
             else:
@@ -836,18 +836,18 @@ def initialize_button(line_number, button_name):
 
 
 # Initialize buttons for specified lines with custom names
-initialize_button(758, "758")
-initialize_button(759, "759")
-initialize_button(760, "760")
-initialize_button(761, "761")
-initialize_button(762, "762")
-initialize_button(763, "763")
-initialize_button(764, "764")
-initialize_button(765, "765")
-initialize_button(766, "766")
-initialize_button(767, "767")
-initialize_button(768, "768")
-initialize_button(769, "769")
+initialize_button(758, "F13")
+initialize_button(759, "F14")
+initialize_button(760, "F15")
+initialize_button(761, "F16")
+initialize_button(762, "F17")
+initialize_button(763, "F18")
+initialize_button(764, "F19")
+initialize_button(765, "F20")
+initialize_button(766, "F21")
+initialize_button(767, "F22")
+initialize_button(768, "F23")
+initialize_button(769, "F24")
 
 
 
