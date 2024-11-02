@@ -66,3 +66,28 @@ echo hi
 echo hiasdas asdasd a dsdasd
 echo "hiasdas asdasd a dsdasd"
 cls
+echo $nu.config-path
+dark
+light
+yay
+dark
+light
+whoami
+start https://google.com
+rclone ndu d:
+ms1
+cls
+cd C:\ms1\
+ls
+ms1
+ls
+ms1
+ls
+cd C:\ms1\
+ls
+ms1
+ls
+cls
+ms2
+ls
+cls
