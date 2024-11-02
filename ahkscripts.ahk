@@ -570,23 +570,27 @@ return
     return
 
     F22::
-        StartTime := A_TickCount
-        while (A_TickCount - StartTime < 5000)
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000)  ; Run the loop for 5 seconds
+    {
+        if !WinActive("ahk_exe dnplayer.exe")
+            break
+
+        Send, {l down}     ; Hold down 'l'
+        Send, {d down}     ; Hold down 'd'
+
+        Loop, 15           ; Repeat 'j' press for 1.5 seconds
         {
-            if !WinActive("ahk_exe dnplayer.exe")
-            {
-                break
-            }
-            Send, {l down}
-            Send, {d down}
-            SendInput, j
-            SendInput, j
-            SendInput, j
-            Send, {d up}
-            Send, {l up}
-            Sleep, 100    
+            SendInput, j   ; Press 'j'
+            Sleep, 100     ; Delay between each 'j' press (adjustable)
         }
-    return
+
+        Send, {d up}       ; Release 'd' after 1.5 seconds
+        Send, {l up}       ; Release 'l' after 1.5 seconds
+        Sleep, 100         ; Small pause before repeating the main loop
+    }
+return
+
 
     F21::
         StartTime := A_TickCount
