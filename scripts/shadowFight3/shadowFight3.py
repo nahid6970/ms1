@@ -292,23 +292,26 @@ Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Cr
 Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
 
 # Advertisement
-Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
-ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
-ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
-ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
-ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
-ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
-ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
-ads7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
-ads8 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad8.png"
-ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
-ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
-ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
-ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
-
+# ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
+# ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
+# ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
+# ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
+# ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
+# ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
+# ads7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
+# ads8 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad8.png"
+# ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
+# ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
+# ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
+# ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
 sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
+# ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
-ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
+import glob
+ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
+ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
+
+Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
 
 back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
 Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
@@ -424,7 +427,7 @@ def event_items_handler(window):
             # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
             elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
 
-            # elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
+            elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
 
             # for ad_image in ads_images: #! optional
             #     ad_location = find_image(ad_image, confidence=0.8)
@@ -434,7 +437,10 @@ def event_items_handler(window):
             # [click(window, ad_location.left, ad_location.top) for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
 
             # click the middle part of the ads
-            [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
+            # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
+            # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+
+            [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
             for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
 
 

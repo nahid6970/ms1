@@ -1,6 +1,7 @@
 # Nushell Config File
 #
 # version = "0.97.1"
+# config.nu
 
 # For more information on defining custom themes, see
 # https://www.nushell.sh/book/coloring_and_theming.html
@@ -890,3 +891,19 @@ $env.config = {
         }
     ]
 }
+
+
+
+def yay [] { pwsh -c "C:\\ms1\\scripts\\winget_scoop\\scoop_install.ps1" }
+def nay [] { pwsh -c "C:\\ms1\\scripts\\winget_scoop\\scoop_uninstall.ps1" }
+
+def yayw1 [] { pwsh -c "C:\\ms1\\scripts\\winget_scoop\\wget_install.ps1" }
+def yayw2 [] { pwsh -c "C:\\ms1\\scripts\\winget_scoop\\wget_install2.ps1" }
+def nayw [] { pwsh -c "C:\\ms1\\scripts\\winget_scoop\\wget_install2.ps1" }
+
+def yaywn1 [] { pwsh -c "C:\\ms1\\scripts\\winget_scoop\\wget_n_install.ps1" }
+def yaywn2 [] { pwsh -c "C:\\ms1\\scripts\\winget_scoop\\wget_n_install2.ps1" }
+
+alias ms1 = cd "C:\\ms1"
+alias ms2 = cd "C:\\ms2"
+alias ms3 = cd "C:\\ms3"
