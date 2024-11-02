@@ -4,20 +4,20 @@
 # from struct import calcsize, pack
 # from tkinter import messagebox
 # from tkinter import messagebox
-from tkinter import Tk, Button, messagebox
+# import gc  # Import garbage collector
+# import random
 from datetime import datetime
+from tkinter import Tk, Button, messagebox
+import glob
 import os
 import pyautogui
 import pygetwindow as gw
-import random
 import subprocess
 import sys
 import threading
 import time
 import tkinter as tk
 import win32gui
-import gc  # Import garbage collector
-
 
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
@@ -238,7 +238,7 @@ actionF = {
 }
 Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
 
-# Continue Related Images
+#* Continue Related Images
 # cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
 # cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
 # cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
@@ -250,7 +250,7 @@ Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
 ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
 continueF = [ads_with_token_cont]
 
-# # notifyF Related Images
+#* notifyF Related Images
 # currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
 # connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
 # connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
@@ -260,9 +260,9 @@ continueF = [ads_with_token_cont]
 # home_screen =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\home_screen.png"
 # notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity,no_voidenergy,home_screen]
 
-# Others
-#* space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
-#* space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
+#* Others
+# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
+# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
 SPACE =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
 Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
 
@@ -307,7 +307,6 @@ Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\S
 sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
 # ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
-import glob
 ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
 ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
 
@@ -318,15 +317,11 @@ Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_V
 
 #* Threads
 fight_thread = None
-fightLight_thread = None
 
-fame_heavy_thread = None
 fame_light_thread = None
 
 event_light_thread = None
-event_heavy_thread = None
 
-raid_heavy_thread = None
 raid_light_thread = None
 
 loss_thread = None
@@ -338,12 +333,14 @@ def close_window(event=None):
     script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
-# ███╗   ███╗ ██████╗ ██████╗ ███████╗
-# ████╗ ████║██╔═══██╗██╔══██╗██╔════╝
-# ██╔████╔██║██║   ██║██║  ██║█████╗
-# ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝
-# ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗
-# ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
+"""
+███████╗ █████╗ ███╗   ███╗███████╗
+██╔════╝██╔══██╗████╗ ████║██╔════╝
+█████╗  ███████║██╔████╔██║█████╗
+██╔══╝  ██╔══██║██║╚██╔╝██║██╔══╝
+██║     ██║  ██║██║ ╚═╝ ██║███████╗
+╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+"""
 # Fame Fame Fame Fame
 stop_thread_fame = True
 def fame_items_handler(window):
@@ -443,7 +440,6 @@ def event_items_handler(window):
             [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
             for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
 
-
             # # Check if the no_currency image is found
             # elif any(find_image(image) for image in notifyF):
             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
@@ -484,17 +480,14 @@ def event_function_light():
 Event_Light_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
-
-
-
-
-
-
-
-
-
-
-
+"""
+██████╗  █████╗ ██╗██████╗ ███████╗
+██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
+██████╔╝███████║██║██║  ██║███████╗
+██╔══██╗██╔══██║██║██║  ██║╚════██║
+██║  ██║██║  ██║██║██████╔╝███████║
+╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═════╝ ╚══════╝
+"""
 # Raid Raid Raid Raid
 stop_thread_raid = True
 def raid_items_handler(window):
@@ -566,13 +559,10 @@ def TakeL():
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
-
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
-
 def loss_function():
     global stop_thread_loss, loss_thread, Loss_BT
     if loss_thread and loss_thread.is_alive():
@@ -585,7 +575,6 @@ def loss_function():
         loss_thread.daemon = True
         loss_thread.start()
         Loss_BT.config(text="Loss", bg="#1d2027", fg="#fc0000")
-
 Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Loss_BT.pack(padx=(1, 1), pady=(1, 1))
 
@@ -603,6 +592,12 @@ stop_thread_action1 = False
 image_found = False
 action_timer = None
 
+#? ██████╗      ██╗
+#? ██╔══██╗     ██║
+#? ██║  ██║     ██║
+#? ██║  ██║██   ██║
+#? ██████╔╝╚█████╔╝
+#? ╚═════╝  ╚════╝
 # Unified function to handle both image searching and performing actions
 def action_main_handler_1():
     global stop_thread_action1, image_found, pause_other_items, action_timer, Action_Light_Thread
@@ -647,7 +642,7 @@ def action_main_handler_1():
     if Action_Light_Thread and Action_Light_Thread.is_alive():
         stop_thread_action1 = True
         Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_1_PY.config(text="d-j", bg="#607af0", fg="#222222")  # Update button
+        ACTION_1_PY.config(text="dj", bg="#607af0", fg="#222222")  # Update button
     else:
         stop_thread_action1 = False
         Action_Light_Thread = threading.Thread(target=search_and_act)
@@ -655,13 +650,16 @@ def action_main_handler_1():
         Action_Light_Thread.start()
         ACTION_1_PY.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
 # Button definition to start/stop the action
-ACTION_1_PY = Button(ROOT, text="d-j", bg="#607af0", fg="#222222", width=5, height=2,
+ACTION_1_PY = Button(ROOT, text="dj", bg="#607af0", fg="#222222", width=5, height=2,
                   command=action_main_handler_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_1_PY.pack(padx=(1, 1), pady=(1, 1))
 
-
-
-# heavy attack for fight
+#* ██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗
+#* ██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝
+#* ███████║█████╗  ███████║██║   ██║ ╚████╔╝
+#* ██╔══██║██╔══╝  ██╔══██║╚██╗ ██╔╝  ╚██╔╝
+#* ██║  ██║███████╗██║  ██║ ╚████╔╝    ██║
+#* ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝     ╚═╝
 stop_thread_action3 = True
 fight_thread = None
 pause_other_items = False
@@ -727,10 +725,12 @@ def fight_function():
 ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_3.pack(padx=(1,1), pady=(1,1))
 
-
-
-
-# Light Attack 2
+#* ██████╗      ██╗██╗██╗     ██╗  ██╗
+#* ██╔══██╗     ██║██║██║     ╚██╗██╔╝
+#* ██║  ██║     ██║██║██║      ╚███╔╝
+#* ██║  ██║██   ██║██║██║      ██╔██╗
+#* ██████╔╝╚█████╔╝██║███████╗██╔╝ ██╗
+#* ╚═════╝  ╚════╝ ╚═╝╚══════╝╚═╝  ╚═╝
 def action_main_handler_2():
     global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
     window = focus_window(window_title)
@@ -777,9 +777,12 @@ ACTION_2_AHK = Button(ROOT, text="djilx", bg="#5a9b5a", fg="#222222", width=5, h
                       command=action_main_handler_2, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_2_AHK.pack(padx=(1, 1), pady=(1, 1))
 
-
-
-# Light Attack 33
+#* ██████╗      ██╗██╗██╗
+#* ██╔══██╗     ██║██║██║
+#* ██║  ██║     ██║██║██║
+#* ██║  ██║██   ██║██║██║
+#* ██████╔╝╚█████╔╝██║███████╗
+#* ╚═════╝  ╚════╝ ╚═╝╚══════╝
 def action_main_handler_3():
     global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
     window = focus_window(window_title)
@@ -826,8 +829,12 @@ ACTION_3_AHK = Button(ROOT, text="djil", bg="#5a9b5a", fg="#222222", width=5, he
                       command=action_main_handler_3, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_3_AHK.pack(padx=(1, 1), pady=(1, 1))
 
-
-# Light Attack djl
+#* ██████╗      ██╗██╗
+#* ██╔══██╗     ██║██║
+#* ██║  ██║     ██║██║
+#* ██║  ██║██   ██║██║
+#* ██████╔╝╚█████╔╝███████╗
+#* ╚═════╝  ╚════╝ ╚══════╝
 def action_main_handler_djl():
     global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
     window = focus_window(window_title)
@@ -874,8 +881,12 @@ ACTION_AHK_DJL = Button(ROOT, text="djl", bg="#5a9b5a", fg="#2c0202", width=5, h
                       command=action_main_handler_djl, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_AHK_DJL.pack(padx=(1, 1), pady=(1, 1))
 
-
-# Light Attack xi
+#* ██╗  ██╗██╗
+#* ╚██╗██╔╝██║
+#*  ╚███╔╝ ██║
+#*  ██╔██╗ ██║
+#* ██╔╝ ██╗██║
+#* ╚═╝  ╚═╝╚═╝
 def action_main_handler_4():
     global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
     window = focus_window(window_title)
