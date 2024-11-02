@@ -42,25 +42,24 @@ pyautogui.FAILSAFE = False
 last_found_time = None
 is_searching = False
 last_used_time = time.time()  # Tracks when the function was last called
-image_found_count = {}  # Dictionary to store counts of found images
+image_found_count = {}  # Dictionary to store cumulative counts of found images
 chart_last_displayed = time.time()  # Tracks the last time the chart was displayed
 
 def display_image_found_chart():
-    """Display a chart of found images and their counts."""
-    print("\n\033[94m--- Image Found Summary (last minute) ---\033[0m")
+    """Display a chart of found images and their cumulative counts."""
+    print("\n\033[94m--- Cumulative Image Found Summary ---\033[0m")
     for image, count in image_found_count.items():
         print(f"{image}: {count} times")
-    print("\033[94m----------------------------------------\033[0m\n")
+    print("\033[94m-------------------------------------\033[0m\n")
 
 def find_image(image_path, confidence=0.7):
     """Find the location of the image on the screen."""
     global last_found_time, is_searching, last_used_time, chart_last_displayed
     current_time = time.time()
-    # Display the chart every 60 seconds and reset it for a new minute
+    # Display the chart every 60 seconds without resetting counts
     if current_time - chart_last_displayed >= 60:
         display_image_found_chart()
         chart_last_displayed = current_time  # Update chart display time
-        image_found_count.clear()  # Reset counts for the new minute
     # Reset timer if the function is not used for 10 seconds
     if current_time - last_used_time > 10:
         last_found_time = None
@@ -77,11 +76,8 @@ def find_image(image_path, confidence=0.7):
             # Get current date and time in the desired format
             formatted_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
             print(f"\033[92m{formatted_time} --> Found image: {image_name}\033[0m")
-            # Update count of found images
-            if image_name in image_found_count:
-                image_found_count[image_name] += 1
-            else:
-                image_found_count[image_name] = 1
+            # Update cumulative count of found images
+            image_found_count[image_name] = image_found_count.get(image_name, 0) + 1
             # Reset search and timer upon finding the image
             last_found_time = time.time()
             is_searching = False  # Stop the search
@@ -98,6 +94,7 @@ def find_image(image_path, confidence=0.7):
         run_script()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
+
 
 def run_script():
     """Run the whatsapp.py script."""
