@@ -95,7 +95,6 @@ def find_image(image_path, confidence=0.7):
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
 
-
 def run_script():
     """Run the whatsapp.py script."""
     try:
