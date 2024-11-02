@@ -1,0 +1,68 @@
+hi
+cls
+cfg
+config
+cls
+ls
+rclone ncdu d:
+cls
+start
+sudo whatsapp
+sudo
+sudo rclone
+ls
+cd
+cd 'D:\Downloads\Rain World [FitGirl Repack]\'
+ls
+cd
+ls
+cd
+ls
+cd
+cls
+cd
+ps
+kc
+cls
+ps
+cls
+$env
+cls
+ls | sort-by 
+ls | sort-by 1
+cls
+ls | sort-by name
+$nu.env-path
+ms1
+start-process
+ls | where size > 1mb | sort-by size
+ls
+sudo ls
+ff
+ll
+la
+cls
+cp
+goto
+cls
+g
+cls
+C:\ms1\kp.ps1
+C:/ms1/kp.ps1
+C:\ms1\mypygui.py
+cls
+python C:\ms1\mypygui.py
+cls
+C:\ms1\kill_processes.nu
+nu C:\ms1\kill_processes.nu
+cls
+nu C:\ms1\kill_processes.nu
+powershell C:\ms1\kp.ps1
+p C:\ms1\kp.ps1
+nvim
+emacs
+cls
+echo hi
+echo hiasdas asdasd a dsdasd
+echo "hiasdas asdasd a dsdasd"
+cls
