@@ -427,7 +427,7 @@ def event_items_handler(window):
             # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
             elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
 
-            elif any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
+            elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
 
             # for ad_image in ads_images: #! optional
             #     ad_location = find_image(ad_image, confidence=0.8)
