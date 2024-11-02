@@ -236,6 +236,7 @@ actionF = {
     Peg_Top: 0.85,
     # bolt: 1,
 }
+Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
 
 # Continue Related Images
 # cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
@@ -830,7 +831,7 @@ def action_main_handler_djl():
     def search_and_act():
         while not stop_thread_action1:
             # Image searching logic
-            if any(find_image(image, confidence=actionF[image]) for image in actionF):
+            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
                 image_found = True
                 print("Image found in Light Attack 2, resetting action timer.")
                 action_timer = time.time()  # Reset the 5-second timer when image is found
