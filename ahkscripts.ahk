@@ -677,8 +677,7 @@ return
         }
     return
 
-
-    ;! Possessed
+    ;! xi
     F18::
         StartTime := A_TickCount  ; Record the current time
         while (A_TickCount - StartTime < 5000)  ; Run for 5000 milliseconds (5 seconds)
@@ -698,7 +697,6 @@ return
     return
 
 #If
-
 
 ;* ███████╗██╗  ██╗██████╗ ██╗      ██████╗ ██████╗ ███████╗██████╗
 ;* ██╔════╝╚██╗██╔╝██╔══██╗██║     ██╔═══██╗██╔══██╗██╔════╝██╔══██╗
