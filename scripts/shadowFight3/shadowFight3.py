@@ -755,18 +755,18 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering F19 in AHK...")
-#                key_down(window, 'F13'); time.sleep(0.05); key_up(window, 'F13')
-#                key_down(window, 'F14'); time.sleep(0.05); key_up(window, 'F14')
-#                key_down(window, 'F15'); time.sleep(0.05); key_up(window, 'F15')
-#                key_down(window, 'F16'); time.sleep(0.05); key_up(window, 'F16')
-#                key_down(window, 'F17'); time.sleep(0.05); key_up(window, 'F17')
-#                key_down(window, 'F18'); time.sleep(0.05); key_up(window, 'F18')
+#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13')
+#                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
+#                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
+#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16')
+#                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
+#                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
                 key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
-#                key_down(window, 'F20'); time.sleep(0.05); key_up(window, 'F20')
-#                key_down(window, 'F21'); time.sleep(0.05); key_up(window, 'F21')
-#                key_down(window, 'F22'); time.sleep(0.05); key_up(window, 'F22')
-#                key_down(window, 'F23'); time.sleep(0.05); key_up(window, 'F23')
-#                key_down(window, 'F24'); time.sleep(0.05); key_up(window, 'F24')
+#                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
+#                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
+#                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
+#                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
+#                key_down(window, 'F24'); time.sleep(5); key_up(window, 'F24')
                 print("F19 action completed.")
                 pause_other_items2 = False
             else:
