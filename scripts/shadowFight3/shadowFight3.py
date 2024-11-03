@@ -761,7 +761,7 @@ def action_main_handler_5():
 #                key_down(window, 'F16'); time.sleep(0.05); key_up(window, 'F16')
 #                key_down(window, 'F17'); time.sleep(0.05); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(0.05); key_up(window, 'F18')
-#                key_down(window, 'F19'); time.sleep(0.05); key_up(window, 'F19') # Possessed
+                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
 #                key_down(window, 'F20'); time.sleep(0.05); key_up(window, 'F20')
 #                key_down(window, 'F21'); time.sleep(0.05); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(0.05); key_up(window, 'F22')
@@ -784,13 +784,17 @@ def action_main_handler_5():
         ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
 
 # Button definition to start/stop Light Attack 2
-ACTION_5_AHK = Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2,
-                      command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_5_AHK = Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
 
-
-
-
+"""
+ ██████╗ ██████╗ ███╗   ███╗███╗   ███╗███████╗███╗   ██╗████████╗     ██████╗ ██╗   ██╗████████╗
+██╔════╝██╔═══██╗████╗ ████║████╗ ████║██╔════╝████╗  ██║╚══██╔══╝    ██╔═══██╗██║   ██║╚══██╔══╝
+██║     ██║   ██║██╔████╔██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║       ██║   ██║██║   ██║   ██║
+██║     ██║   ██║██║╚██╔╝██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║       ██║   ██║██║   ██║   ██║
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██║ ╚═╝ ██║███████╗██║ ╚████║   ██║       ╚██████╔╝╚██████╔╝   ██║
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝        ╚═════╝  ╚═════╝    ╚═╝
+"""
 file_path = r"C:\ms1\scripts\shadowFight3\shadowFight3.py"  # Path to your script file
 # Generalized function to toggle comments on specified line number
 def toggle_comment(line_number, button):
