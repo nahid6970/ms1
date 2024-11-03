@@ -654,12 +654,12 @@ ACTION_1_PY = Button(ROOT, text="dj", bg="#607af0", fg="#222222", width=5, heigh
                   command=action_main_handler_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_1_PY.pack(padx=(1, 1), pady=(1, 1))
 
-#* ██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗
-#* ██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝
-#* ███████║█████╗  ███████║██║   ██║ ╚████╔╝
-#* ██╔══██║██╔══╝  ██╔══██║╚██╗ ██╔╝  ╚██╔╝
-#* ██║  ██║███████╗██║  ██║ ╚████╔╝    ██║
-#* ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝     ╚═╝
+#? ██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗
+#? ██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝
+#? ███████║█████╗  ███████║██║   ██║ ╚████╔╝
+#? ██╔══██║██╔══╝  ██╔══██║╚██╗ ██╔╝  ╚██╔╝
+#? ██║  ██║███████╗██║  ██║ ╚████╔╝    ██║
+#? ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝     ╚═╝
 stop_thread_action3 = True
 fight_thread = None
 pause_other_items = False
@@ -726,12 +726,12 @@ ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, heigh
 ACTION_3.pack(padx=(1,1), pady=(1,1))
 
 """
-██████╗  ██████╗ ███████╗███████╗███████╗███████╗███████╗███████╗██████╗
-██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝██╔══██╗
-██████╔╝██║   ██║███████╗███████╗█████╗  ███████╗███████╗█████╗  ██║  ██║
-██╔═══╝ ██║   ██║╚════██║╚════██║██╔══╝  ╚════██║╚════██║██╔══╝  ██║  ██║
-██║     ╚██████╔╝███████║███████║███████╗███████║███████║███████╗██████╔╝
-╚═╝      ╚═════╝ ╚══════╝╚══════╝╚══════╝╚══════╝╚══════╝╚══════╝╚═════╝
+ █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
+██╔══██╗██║  ██║██║ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+███████║███████║█████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
+██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
+██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
+╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 """
 # Possessed
 def action_main_handler_5():
@@ -775,7 +775,7 @@ def action_main_handler_5():
     if Action_Light_Thread and Action_Light_Thread.is_alive():
         stop_thread_action1 = True
         Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_5_AHK.config(text="POS", bg="#5a9b5a", fg="#222222")  # Update button
+        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
     else:
         stop_thread_action1 = False
         Action_Light_Thread = threading.Thread(target=search_and_act)
@@ -784,7 +784,7 @@ def action_main_handler_5():
         ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
 
 # Button definition to start/stop Light Attack 2
-ACTION_5_AHK = Button(ROOT, text="POS", bg="#5a9b5a", fg="#222222", width=5, height=2,
+ACTION_5_AHK = Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2,
                       command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
 
