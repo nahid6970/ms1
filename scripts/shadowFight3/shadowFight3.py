@@ -239,16 +239,16 @@ actionF = {
 Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
 
 #* Continue Related Images
-# cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-# cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-# cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-# cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-# cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
+cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
+cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
+cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
+cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
+cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 # continueF = [cont1, cont2, cont3, cont4, cont5]
-# continueF = [cont4]
+continueF = [cont4]
 
-ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
-continueF = [ads_with_token_cont]
+# ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
+# continueF = [ads_with_token_cont]
 
 #* notifyF Related Images
 # currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
@@ -761,7 +761,7 @@ def action_main_handler_5():
 #                key_down(window, 'F16'); time.sleep(0.05); key_up(window, 'F16')
 #                key_down(window, 'F17'); time.sleep(0.05); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(0.05); key_up(window, 'F18')
-                key_down(window, 'F19'); time.sleep(0.05); key_up(window, 'F19') # Possessed
+#                key_down(window, 'F19'); time.sleep(0.05); key_up(window, 'F19') # Possessed
 #                key_down(window, 'F20'); time.sleep(0.05); key_up(window, 'F20')
 #                key_down(window, 'F21'); time.sleep(0.05); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(0.05); key_up(window, 'F22')
@@ -800,11 +800,11 @@ def toggle_comment(line_number, button):
     if lines[line_number - 1].strip().startswith("#"):
         # Uncomment line by removing the #
         lines[line_number - 1] = lines[line_number - 1][1:]  # Remove the first character (the #)
-        button.config(bg="yellow")  # Change color to yellow for uncommented
+        button.config(bg="#1e883e")  # Change color to #ffffff for uncommented
     else:
         # Comment line by adding a #
         lines[line_number - 1] = "#" + lines[line_number - 1]
-        button.config(bg="red")  # Change color to red for commented
+        button.config(bg="#6b6a6a")  # Change color to red for commented
     # Write back the modified lines
     with open(file_path, 'w', encoding='utf-8') as f:
         f.writelines(lines)
@@ -817,23 +817,21 @@ def initialize_button(line_number, button_name):
     button = tk.Button(
         ROOT, 
         text=button_name,  # Set the custom button name
-        bg="red",  # Default background color when first loaded
-        fg="#222222",  # Text color
+        bg="#6b6a6a",  # Default background color when first loaded
+        fg="#ffffff",  # Text color
         width=0,  # Width adjusted for longer names
         height=1,
         font=("Jetbrains Mono", 10, "bold"),  # Font style
         relief="flat"  # Relief style
-        
     )
     # Check if the line is commented to set the initial state
     if lines[line_number - 1].strip().startswith("#"):
-        button.config(bg="red")  # Line is commented
+        button.config(bg="#6b6a6a")  # Line is commented
     else:
-        button.config(bg="yellow")  # Line is uncommented
+        button.config(bg="#1e883e")  # Line is uncommented
     # Set the command for the button
     button.config(command=lambda: toggle_comment(line_number, button))
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
-
 
 # Initialize buttons for specified lines with custom names
 initialize_button(758, "F13")
@@ -848,18 +846,6 @@ initialize_button(766, "F21")
 initialize_button(767, "F22")
 initialize_button(768, "F23")
 initialize_button(769, "F24")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def restart(event=None):
