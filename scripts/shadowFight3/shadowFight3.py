@@ -209,121 +209,11 @@ def press_screen_with_delays(window, *args):
         time.sleep(delay)
 
 
-# mhome = r"C:\Users\nahid\OneDrive\backup\shadowfight3"
-# Home = rf"{mhome}\Home.png"
-
-# window title
-window_title='LDPlayer'
-
-# Home Page of the SH3
-Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
-
-# Action Related Images
-void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
-uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
-Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
-#! actionF = [void_compass, eruption, thud, collector]
-actionF = {
-    void_compass: 0.7,
-    eruption: 0.85,
-    thud: 0.7,
-    collector: 0.7,
-    uppercut: 0.7,
-    Peg_Top: 0.85,
-    # bolt: 1,
-}
-Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
-
-#* Continue Related Images
-cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
-# continueF = [cont1, cont2, cont3, cont4, cont5]
-continueF = [cont4]
-
-# ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
-# continueF = [ads_with_token_cont]
-
-#* notifyF Related Images
-# currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
-# connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
-# connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
-# doesnt_exist =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\not_exist.png"
-# no_activity =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_activity.png"
-# no_voidenergy =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_voidEnergy.png"
-# home_screen =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\home_screen.png"
-# notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity,no_voidenergy,home_screen]
-
-#* Others
-# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
-# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
-SPACE =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
-Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
-
-# Fame Related Images
-e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
-e_image_region = (196, 656, 384, 845)  # Example coordinates and dimensions
-
-
-StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
-WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
-GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
-
-# Raids Related Images
-level3         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
-participate    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
-toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
-fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
-claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
-
-# DailyMission=r"C:\Users\nahid\OneDrive\backup\shadowfight3\DailyMission.png"
-
-# Event Related
-Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
-back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.png'
-
-Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\CreepyParty.png"
-Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
-
-# Advertisement
-# ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
-# ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
-# ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
-# ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
-# ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
-# ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
-# ads7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
-# ads8 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad8.png"
-# ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
-# ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
-# ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
-# ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
-sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
-# ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
-
-ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
-ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
-
-Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
-
-back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
-Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
-
 #* Threads
 fight_thread = None
-
 fame_light_thread = None
-
 event_light_thread = None
-
 raid_light_thread = None
-
 loss_thread = None
 
 def close_window(event=None):
@@ -424,7 +314,7 @@ def event_items_handler(window):
             # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
             elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
 
-            elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
+            # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
 
             # for ad_image in ads_images: #! optional
             #     ad_location = find_image(ad_image, confidence=0.8)
@@ -838,25 +728,139 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(758, "F13")
-initialize_button(759, "F14")
-initialize_button(760, "F15")
-initialize_button(761, "F16")
-initialize_button(762, "F17")
-initialize_button(763, "F18")
-initialize_button(764, "F19")
-initialize_button(765, "F20")
-initialize_button(766, "F21")
-initialize_button(767, "F22")
-initialize_button(768, "F23")
-initialize_button(769, "F24")
-
+initialize_button(648, "F13")
+initialize_button(649, "F14")
+initialize_button(650, "F15")
+initialize_button(651, "F16")
+initialize_button(652, "F17")
+initialize_button(653, "F18")
+initialize_button(654, "F19")
+initialize_button(655, "F20")
+initialize_button(656, "F21")
+initialize_button(657, "F22")
+initialize_button(658, "F23")
+initialize_button(659, "F24")
 
 def restart(event=None):
     ROOT.destroy()
     subprocess.Popen([sys.executable] + sys.argv)
-
 Destroy_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Destroy_BT.pack(padx=(1, 1), pady=(1, 1))
 
+
+"""
+███████╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
+██╔════╝████╗  ██║██╔══██╗██║████╗  ██║██╔════╝
+█████╗  ██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║  ███╗
+██╔══╝  ██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
+███████╗██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
+╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
+"""
+# mhome = r"C:\Users\nahid\OneDrive\backup\shadowfight3"
+# Home = rf"{mhome}\Home.png"
+
+# window title
+window_title='LDPlayer'
+
+# Home Page of the SH3
+Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
+
+# Action Related Images
+void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
+eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
+thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
+collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
+bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
+uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
+Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
+#! actionF = [void_compass, eruption, thud, collector]
+actionF = {
+    void_compass: 0.7,
+    eruption: 0.85,
+    thud: 0.7,
+    collector: 0.7,
+    uppercut: 0.7,
+    Peg_Top: 0.85,
+    # bolt: 1,
+}
+Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
+
+#* Continue Related Images
+# cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
+# cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
+# cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
+# cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
+# cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
+# # continueF = [cont1, cont2, cont3, cont4, cont5]
+# continueF = [cont4]
+ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
+ads_with_token_cont2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont_notshown.png"
+continueF = [ads_with_token_cont,ads_with_token_cont2]
+
+#* notifyF Related Images
+# currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
+# connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
+# connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
+# doesnt_exist =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\not_exist.png"
+# no_activity =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_activity.png"
+# no_voidenergy =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_voidEnergy.png"
+# home_screen =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\home_screen.png"
+# notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity,no_voidenergy,home_screen]
+
+#* Others
+# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
+# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
+SPACE =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
+Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
+
+# Fame Related Images
+e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
+e_image_region = (196, 656, 384, 845)  # Example coordinates and dimensions
+
+
+StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
+WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
+GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
+
+# Raids Related Images
+level3         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
+participate    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
+toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
+fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
+claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
+
+# DailyMission=r"C:\Users\nahid\OneDrive\backup\shadowfight3\DailyMission.png"
+
+# Event Related
+Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
+back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.png'
+
+Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\CreepyParty.png"
+Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
+
+# Advertisement
+# ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
+# ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
+# ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
+# ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
+# ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
+# ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
+# ads7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
+# ads8 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad8.png"
+# ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
+# ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
+# ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
+# ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
+sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
+# ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
+
+ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
+ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
+
+Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
+
+back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
+Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
+
 ROOT.mainloop()
+
