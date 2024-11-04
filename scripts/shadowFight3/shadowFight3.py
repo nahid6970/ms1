@@ -789,8 +789,8 @@ temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.pn
 health_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_health.png"
 shadow_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_shadow.png"
 actionF = {
-    health_bar: 0.7,
-    shadow_bar: 0.7,
+    health_bar: 0.98,
+    shadow_bar: 0.85,
 }
 # Action_region = (352, 187, 887, 273)
 Action_region = (815, 110, 892, 168)
