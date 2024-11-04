@@ -710,6 +710,8 @@ def Folder(EDIT_FRAME):
     AHKEDIT.pack(side="left" ,padx=(0,0))
     KOMOREBIC=tk.Button(BOX,text="Komoreb",width=0 ,fg="#080808", bg="#7fc8f3", command=lambda:(subprocess.Popen(["cmd /c Code C:\\Users\\nahid\\komorebi.json"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
     KOMOREBIC.pack(side="left" ,padx=(0,0))
+    MYHOMEHTML=tk.Button(BOX,text="myhome.html",width=0 ,fg="#080808", bg="#c7d449", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms2\\myhome.html"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+    MYHOMEHTML.pack(side="left" ,padx=(0,0))
 Folder(EDIT_FRAME)
 
 #! Function SPACE
