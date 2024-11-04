@@ -11,17 +11,15 @@
     while (A_TickCount - StartTime < 5000)
     {
         if !WinActive("ahk_exe dnplayer.exe")
-            break
-        Send, {l down}
-        Send, {d down}
-        Loop, 15
         {
-            SendInput, j
-            Sleep, 100
+            break
         }
+        Send, {d down}
+        SendInput, j
+        SendInput, j
+        SendInput, j
         Send, {d up}
-        Send, {l up}
-        Sleep, 100
+        Sleep, 100    
     }
 return
 
