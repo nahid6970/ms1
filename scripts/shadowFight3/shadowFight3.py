@@ -645,7 +645,7 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering AHK...")
-#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13')
+#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
 #                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
 #                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
 #                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16')
@@ -734,7 +734,7 @@ initialize_button(650, "F15")
 initialize_button(651, "F16")
 initialize_button(652, "F17")
 initialize_button(653, "F18")
-initialize_button(654, "F19")
+initialize_button(654, "F19\nPOSS")
 initialize_button(655, "F20")
 initialize_button(656, "F21")
 initialize_button(657, "F22")
@@ -785,14 +785,15 @@ Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 # }
 # Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
 
-
 temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.png"
+health_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_health.png"
+shadow_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_shadow.png"
 actionF = {
-    temp_ac: 0.7,
+    health_bar: 0.7,
+    shadow_bar: 0.7,
 }
-Action_region = (352, 187, 887, 273)  # Replace with your actual coordinates
-
-
+# Action_region = (352, 187, 887, 273)
+Action_region = (815, 110, 892, 168)
 
 
 #* Continue Related Images
