@@ -644,7 +644,7 @@ def action_main_handler_5():
             # Action performing logic
             if image_found:
                 pause_other_items2 = True
-                print("Triggering F19 in AHK...")
+                print("Triggering AHK...")
 #                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13')
 #                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
 #                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
@@ -657,7 +657,7 @@ def action_main_handler_5():
 #                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
 #                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
 #                key_down(window, 'F24'); time.sleep(5); key_up(window, 'F24')
-                print("F19 action completed.")
+                print("AHK action completed.")
                 pause_other_items2 = False
             else:
                 time.sleep(0.05)  # Prevent CPU usage when idle
@@ -714,7 +714,7 @@ def initialize_button(line_number, button_name):
         bg="#6b6a6a",  # Default background color when first loaded
         fg="#ffffff",  # Text color
         width=0,  # Width adjusted for longer names
-        height=1,
+        height=0,
         font=("Jetbrains Mono", 10, "bold"),  # Font style
         relief="flat"  # Relief style
     )
@@ -728,7 +728,7 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(648, "F13")
+initialize_button(648, "F13\ndj")
 initialize_button(649, "F14")
 initialize_button(650, "F15")
 initialize_button(651, "F16")
@@ -756,34 +756,44 @@ Destroy_BT.pack(padx=(1, 1), pady=(1, 1))
 ███████╗██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
 ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
 """
-# mhome = r"C:\Users\nahid\OneDrive\backup\shadowfight3"
-# Home = rf"{mhome}\Home.png"
-
 # window title
 window_title='LDPlayer'
+
+# mhome = r"C:\Users\nahid\OneDrive\backup\shadowfight3"
+# Home = rf"{mhome}\Home.png"
 
 # Home Page of the SH3
 Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 
 # Action Related Images
-void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
-uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
-Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
-#! actionF = [void_compass, eruption, thud, collector]
+# void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
+# eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
+# thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
+# collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
+# bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
+# uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
+# Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
+# #! actionF = [void_compass, eruption, thud, collector]
+# actionF = {
+#     void_compass: 0.7,
+#     eruption: 0.85,
+#     thud: 0.7,
+#     collector: 0.7,
+#     uppercut: 0.7,
+#     Peg_Top: 0.85,
+#     # bolt: 1,
+# }
+# Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
+
+
+temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.png"
 actionF = {
-    void_compass: 0.7,
-    eruption: 0.85,
-    thud: 0.7,
-    collector: 0.7,
-    uppercut: 0.7,
-    Peg_Top: 0.85,
-    # bolt: 1,
+    temp_ac: 0.7,
 }
-Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
+Action_region = (352, 187, 887, 273)  # Replace with your actual coordinates
+
+
+
 
 #* Continue Related Images
 # cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
