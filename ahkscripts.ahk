@@ -448,21 +448,42 @@ Center_Focused_Window() {
 #IfWinActive ahk_exe dnplayer.exe
 !v::Center_Focused_Window_modLDplayer()
 #IfWinActive  ; End the condition
-
+; Initialize a variable to keep track of the toggle state
+isFirstPosition := true
 Center_Focused_Window_modLDplayer() {
-    ; Get the handle of the active (focused) window
+    global isFirstPosition  ; Access the toggle variable
+    ; Get the handle of the dnplayer.exe window
     WinGet, hwnd, ID, A
-    ; Get the position and size of the active window
-    WinGetPos, x, y, w, h, ahk_id %hwnd%
-    ; Get the screen width and height
-    SysGet, ScreenWidth, 78
-    SysGet, ScreenHeight, 79
-    ; Calculate new position to center the window (horizontal centering)
-    newX := (ScreenWidth - w) / 2
-    newY := (ScreenHeight - h +700)
-    ; Move the window to the calculated position
-    WinMove, ahk_id %hwnd%, , %newX%, %newY%
+    ; Toggle between the two positions
+    if (isFirstPosition) {
+        ; Set the window to x=1250, y=120
+        WinMove, ahk_id %hwnd%, , 159, 49
+    } else {
+        ; Set the window to x=1150, y=550
+        WinMove, ahk_id %hwnd%, , 159, 49
+    }
+    ; Toggle the position state for the next activation
+    isFirstPosition := !isFirstPosition
 }
+
+#IfWinActive  ; Remove window-specific condition for general usage
+; Define a shortcut to show the position of the foreground window under the mouse
+^!v::ShowWindowPositionUnderMouse()
+ShowWindowPositionUnderMouse() {
+    ; Get the handle of the active (foreground) window
+    WinGet, hwnd, ID, A
+    ; Get the position of the active window
+    WinGetPos, x, y, w, h, ahk_id %hwnd%
+    ; Display the starting x and y coordinates as a tooltip under the mouse
+    MouseGetPos, mouseX, mouseY  ; Get the current mouse position
+    ToolTip, Starting Position: `nX: %x%`nY: %y%, %mouseX%, %mouseY%
+    ; Hide the tooltip after 2 seconds
+    SetTimer, HideToolTip, -2000
+}
+HideToolTip:
+    ToolTip  ; Clear the tooltip
+return
+
 
 
 ;* ████████╗███████╗██╗  ██╗████████╗    ██████╗ ███████╗██╗      █████╗ ████████╗███████╗██████╗
