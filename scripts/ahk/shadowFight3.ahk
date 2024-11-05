@@ -18,8 +18,8 @@
         SendInput, j
         SendInput, j
         SendInput, j
+        Sleep, 250
         Send, {d up}
-        Sleep, 100    
     }
 return
 
@@ -75,6 +75,12 @@ return
             {
                 break
             }
+            Send, x
+            Sleep, 100
+            Send, x
+            Sleep, 100
+            Send, x
+            Sleep, 100
             Send, x
             Sleep, 100
             Send, i

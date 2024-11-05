@@ -645,13 +645,13 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering AHK...")
-#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
+                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
 #                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
 #                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
-#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16')
+#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # THOR
 #                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
-                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
+#                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
 #                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
 #                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
@@ -731,7 +731,7 @@ def initialize_button(line_number, button_name):
 initialize_button(648, "F13\ndj")
 initialize_button(649, "F14")
 initialize_button(650, "F15")
-initialize_button(651, "F16")
+initialize_button(651, "F16\nTHOR")
 initialize_button(652, "F17")
 initialize_button(653, "F18")
 initialize_button(654, "F19\nPOSS")
@@ -765,7 +765,7 @@ window_title='LDPlayer'
 # Home Page of the SH3
 Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 
-# Action Related Images
+# # Action Related Images
 # void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
 # eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
 # thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
@@ -785,14 +785,13 @@ Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 # }
 # Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
 
-temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.png"
+# temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.png"
 health_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_health.png"
 shadow_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_shadow.png"
 actionF = {
     health_bar: 0.98,
     shadow_bar: 0.85,
 }
-# Action_region = (352, 187, 887, 273)
 Action_region = (800, 100, 920, 190)
 
 
