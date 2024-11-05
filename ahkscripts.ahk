@@ -460,7 +460,7 @@ Center_Focused_Window_modLDplayer() {
         WinMove, ahk_id %hwnd%, , 159, 49
     } else {
         ; Set the window to x=1150, y=550
-        WinMove, ahk_id %hwnd%, , 159, 49
+        WinMove, ahk_id %hwnd%, , 159, 865
     }
     ; Toggle the position state for the next activation
     isFirstPosition := !isFirstPosition
