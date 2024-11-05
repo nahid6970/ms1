@@ -645,13 +645,13 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering AHK...")
-                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
+#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
 #                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
 #                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
 #                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # THOR
 #                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
-#                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
+                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
 #                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
 #                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
@@ -796,9 +796,9 @@ Action_region = (800, 100, 920, 190)
 
 
 #* Continue Related Images
-# cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
+cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
 # cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-# cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
+cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
 cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 # cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
 # # continueF = [cont1, cont2, cont3, cont4, cont5]
@@ -806,7 +806,7 @@ cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
 ads_with_token_cont2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont_notshown.png"
 continueF = [ads_with_token_cont,ads_with_token_cont2]
-continueFame = [cont4]
+continueFame = [cont1, cont3, cont4]
 
 #* notifyF Related Images
 # currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
