@@ -249,7 +249,7 @@ def fame_items_handler(window):
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
 
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            elif any(find_image(image) for image in continueFame): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
 
             # elif any(find_image(image) for image in notifyF):
             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
@@ -302,19 +302,19 @@ def event_items_handler(window):
             # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
             
             # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 1)
-            elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
-            elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
+            # elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
+            # elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
             elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
 
             elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
 
-            elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
-            elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
+            # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
+            # elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
 
             # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
-            elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
+            # elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
 
-            elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
+            # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
 
             # for ad_image in ads_images: #! optional
             #     ad_location = find_image(ad_image, confidence=0.8)
@@ -327,8 +327,8 @@ def event_items_handler(window):
             # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
             # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
 
-            [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
-            for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+            # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
+            # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
 
             # # Check if the no_currency image is found
             # elif any(find_image(image) for image in notifyF):
@@ -442,7 +442,7 @@ def TakeL():
         while not stop_thread_loss:
             focus_window(window_title)
             #* if any(find_image(image) for image in actionF):
-            if any(find_image(image, confidence=actionF[image]) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
+            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
             # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(SPACE, confidence=0.8) : press_key(window, ' ')
             elif find_image(StartFame): press_key(window, 'p')
@@ -792,7 +792,7 @@ actionF = {
     health_bar: 0.98,
     shadow_bar: 0.85,
 }
-Action_region = (800, 100, 920, 190)
+Action_region = (835, 125, 910, 180)
 
 
 #* Continue Related Images
@@ -801,12 +801,12 @@ cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
 cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
 cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 # cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
-# # continueF = [cont1, cont2, cont3, cont4, cont5]
-# continueF = [cont4]
-ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
-ads_with_token_cont2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont_notshown.png"
-continueF = [ads_with_token_cont,ads_with_token_cont2]
-continueFame = [cont1, cont3, cont4]
+continueF = [cont1, cont3, cont4]
+contF_Region = (1380, 792, 1738, 966)
+
+# ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
+# ads_with_token_cont2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont_notshown.png"
+# continueF = [ads_with_token_cont,ads_with_token_cont2]
 
 #* notifyF Related Images
 # currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
