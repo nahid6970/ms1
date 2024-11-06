@@ -247,9 +247,9 @@ def fame_items_handler(window):
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image, region=e_image_region): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-
             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+            # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+            elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
 
             # elif any(find_image(image) for image in notifyF):
             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
