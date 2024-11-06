@@ -1,64 +1,70 @@
 import tkinter as tk
 from pynput import mouse
+import keyboard  # For global hotkeys
 
-class CrosshairGUI:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Crosshair GUI")
-        self.root.geometry("300x100")
-        self.root.resizable(False, False)
-        
-        # Initialize crosshair lines and label
+class CrosshairOverlay:
+    def __init__(self):
         self.vertical_line = None
         self.horizontal_line = None
         self.coord_label = None
-        self.crosshair_visible = False
 
-        # Toggle Button
-        self.toggle_button = tk.Button(self.root, text="Toggle Crosshair", command=self.toggle_crosshair)
-        self.toggle_button.pack(pady=20)
+        # Set up global hotkeys for refreshing the crosshair and exiting
+        keyboard.add_hotkey("ctrl+space", self.refresh_crosshair)
+        keyboard.add_hotkey("esc", self.exit_script)
 
-        # Bind the Space key to toggle crosshair
-        self.root.bind("<space>", lambda event: self.toggle_crosshair())
+    def refresh_crosshair(self):
+        # Remove any existing crosshair and label
+        self.remove_crosshair()
 
-    def toggle_crosshair(self):
-        if self.crosshair_visible:
-            # Hide crosshair
-            self.remove_crosshair()
-        else:
-            # Show crosshair
-            self.show_crosshair()
-        self.crosshair_visible = not self.crosshair_visible
-
-    def show_crosshair(self):
-        # Capture mouse position
+        # Get current mouse position
         with mouse.Controller() as m:
-            mouse_pos = m.position
-        
-        # Coordinates label
-        self.coord_label = tk.Label(self.root, text=f"Mouse Position: X={mouse_pos[0]} Y={mouse_pos[1]}")
-        self.coord_label.pack()
+            mouse_x, mouse_y = m.position
 
-        # Create vertical and horizontal crosshair lines
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
+        # Screen dimensions
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
 
-        # Vertical line
-        self.vertical_line = tk.Toplevel(self.root)
-        self.vertical_line.geometry(f"2x{screen_height}+{mouse_pos[0]}+0")
+        # Create vertical line (crosshair)
+        self.vertical_line = tk.Toplevel()
+        self.vertical_line.geometry(f"2x{screen_height}+{mouse_x}+0")
         self.vertical_line.configure(bg="green")
         self.vertical_line.overrideredirect(True)
         self.vertical_line.attributes("-topmost", True)
 
-        # Horizontal line
-        self.horizontal_line = tk.Toplevel(self.root)
-        self.horizontal_line.geometry(f"{screen_width}x2+0+{mouse_pos[1]}")
+        # Create horizontal line (crosshair)
+        self.horizontal_line = tk.Toplevel()
+        self.horizontal_line.geometry(f"{screen_width}x2+0+{mouse_y}")
         self.horizontal_line.configure(bg="green")
         self.horizontal_line.overrideredirect(True)
         self.horizontal_line.attributes("-topmost", True)
 
+        # Coordinates label with edge detection
+        self.coord_label = tk.Toplevel()
+        label = tk.Label(self.coord_label, text=f"X={mouse_x}, Y={mouse_y}", bg="yellow", fg="black")
+        label.pack()
+
+        # Adjust label position to stay within screen bounds
+        offset_x = 20
+        offset_y = 20
+
+        # If near the right edge of the screen, adjust position to the left
+        if mouse_x + offset_x + 100 > screen_width:
+            label_x = mouse_x - offset_x - 100  # Position to the left
+        else:
+            label_x = mouse_x + offset_x  # Position to the right
+
+        # If near the bottom edge of the screen, adjust position upward
+        if mouse_y + offset_y + 30 > screen_height:
+            label_y = mouse_y - offset_y - 30  # Position above
+        else:
+            label_y = mouse_y + offset_y  # Position below
+
+        self.coord_label.geometry(f"+{label_x}+{label_y}")
+        self.coord_label.overrideredirect(True)
+        self.coord_label.attributes("-topmost", True)
+
     def remove_crosshair(self):
-        # Destroy the crosshair lines and coordinate label if they exist
+        # Destroy existing crosshair and label windows if they exist
         if self.vertical_line:
             self.vertical_line.destroy()
             self.vertical_line = None
@@ -69,7 +75,15 @@ class CrosshairGUI:
             self.coord_label.destroy()
             self.coord_label = None
 
+    def exit_script(self):
+        # Remove the hotkeys and exit the script
+        keyboard.remove_hotkey("ctrl+space")
+        keyboard.remove_hotkey("esc")
+        root.quit()  # Close the tkinter event loop
+
 if __name__ == "__main__":
     root = tk.Tk()
-    app = CrosshairGUI(root)
+    root.withdraw()  # Hide the main tkinter window
+    overlay = CrosshairOverlay()
+    # Run the tkinter event loop for crosshair display
     root.mainloop()
