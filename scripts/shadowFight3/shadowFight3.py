@@ -651,8 +651,8 @@ def action_main_handler_5():
 #                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # THOR
 #                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
-                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
-#                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
+#                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
+                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
 #                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
 #                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
@@ -735,7 +735,7 @@ initialize_button(651, "F16\nTHOR")
 initialize_button(652, "F17")
 initialize_button(653, "F18")
 initialize_button(654, "F19\nPOSS")
-initialize_button(655, "F20")
+initialize_button(655, "F20\nHound")
 initialize_button(656, "F21")
 initialize_button(657, "F22")
 initialize_button(658, "F23")
@@ -766,33 +766,33 @@ window_title='LDPlayer'
 Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
 
 # # Action Related Images
-# void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-# eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-# thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-# collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-# bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
-# uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
-# Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
-# #! actionF = [void_compass, eruption, thud, collector]
-# actionF = {
-#     void_compass: 0.7,
-#     eruption: 0.85,
-#     thud: 0.7,
-#     collector: 0.7,
-#     uppercut: 0.7,
-#     Peg_Top: 0.85,
-#     # bolt: 1,
-# }
-# Action_region = (198, 84, 359, 241)  # Replace with your actual coordinates
-
-# temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.png"
-health_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_health.png"
-shadow_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_shadow.png"
+void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
+eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
+thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
+collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
+bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
+uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
+Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
+#! actionF = [void_compass, eruption, thud, collector]
 actionF = {
-    health_bar: 0.98,
-    shadow_bar: 0.85,
+    void_compass: 0.7,
+    eruption: 0.85,
+    thud: 0.7,
+    collector: 0.7,
+    uppercut: 0.7,
+    Peg_Top: 0.85,
+    # bolt: 1,
 }
-Action_region = (835, 125, 910, 180)
+Action_region = (216, 99, 374, 253)  # Replace with your actual coordinates
+
+# # temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.png"
+# health_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_health.png"
+# shadow_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_shadow.png"
+# actionF = {
+#     health_bar: 0.98,
+#     shadow_bar: 0.85,
+# }
+# Action_region = (835, 125, 910, 180)
 
 
 #* Continue Related Images
