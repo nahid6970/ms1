@@ -177,4 +177,26 @@ return
         }
     return
 
+
+    F20:: ; Hound
+        StartTime := A_TickCount
+        while (A_TickCount - StartTime < 5000)
+        {
+            if !WinActive("ahk_exe dnplayer.exe")
+            {
+                break
+            }
+            Send, {d down}
+            Send, {i down}
+            Send, {x down}
+            SendInput, j
+            SendInput, j
+            SendInput, j
+            Send, {i up}
+            Send, {x up}
+            Send, {d up}
+            Sleep, 100
+        }
+    return
+
 #If
