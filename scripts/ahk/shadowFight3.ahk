@@ -160,26 +160,25 @@ return
 
             Send, {a down}
             SendInput, l
-            Sleep, 250
+            Sleep, 100
             Send, {a up}
 
             Send, {d down}
             SendInput, l
-            Sleep, 250
+            Sleep, 100
             Send, {d up}
 
             Send, {s down}
             SendInput, l
-            Sleep, 250
+            Sleep, 100
             Send, {s up}
 
             Send, {w down}
             SendInput, l
-            Sleep, 250
+            Sleep, 100
             Send, {w up}
 
             Send, {i up}
-            Sleep, 100
         }
     return
 
