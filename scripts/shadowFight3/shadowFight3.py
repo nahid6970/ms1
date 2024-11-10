@@ -45,7 +45,6 @@ last_found_time = None
 is_searching = False
 last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
-chart_last_displayed = time.time()  # Tracks the last time the chart was displayed
 
 def display_image_found_chart():
     """Display a chart of found images and their cumulative counts."""
@@ -59,12 +58,8 @@ def find_image(image_path, confidence=0.7, region=None):
     
     region should be a tuple of (x1, y1, x2, y2). If not provided, the function searches the entire screen.
     """
-    global last_found_time, is_searching, last_used_time, chart_last_displayed
+    global last_found_time, is_searching, last_used_time
     current_time = time.time()
-    # Display the chart every 60 seconds without resetting counts
-    if current_time - chart_last_displayed >= 60:
-        display_image_found_chart()
-        chart_last_displayed = current_time  # Update chart display time
     # Reset timer if the function is not used for 10 seconds
     if current_time - last_used_time > 10:
         last_found_time = None
@@ -112,7 +107,6 @@ def run_script():
         print("whatsapp.py script executed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Failed to execute whatsapp.py: {e}")
-
 
 # focus_window
 def focus_window(window_title):
@@ -207,7 +201,6 @@ def press_screen_with_delays(window, *args):
         pyautogui.click(adjusted_x, adjusted_y)
         # Wait for the specified delay before the next action
         time.sleep(delay)
-
 
 #* Threads
 fight_thread = None
@@ -728,23 +721,28 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(648, "F13\ndj")
-initialize_button(649, "F14")
-initialize_button(650, "F15")
-initialize_button(651, "F16\nTHOR")
-initialize_button(652, "F17")
-initialize_button(653, "F18")
-initialize_button(654, "F19\nPOSS")
-initialize_button(655, "F20\nHound")
-initialize_button(656, "F21")
-initialize_button(657, "F22")
-initialize_button(658, "F23")
-initialize_button(659, "F24")
+initialize_button(641, "F13\ndj")
+initialize_button(642, "F14")
+initialize_button(643, "F15")
+initialize_button(644, "F16\nTHOR")
+initialize_button(645, "F17")
+initialize_button(646, "F18")
+initialize_button(647, "F19\nPOSS")
+initialize_button(648, "F20\nHound")
+initialize_button(649, "F21")
+initialize_button(650, "F22")
+initialize_button(651, "F23")
+initialize_button(652, "F24")
 
+# Restart function that displays the cumulative summary before restarting
 def restart(event=None):
+    display_image_found_chart()  # Show the summary of found images
     ROOT.destroy()
     subprocess.Popen([sys.executable] + sys.argv)
-Destroy_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+
+# Button to restart the script
+Destroy_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2,
+                    command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Destroy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
