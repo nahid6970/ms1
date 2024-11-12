@@ -16,11 +16,11 @@ import os
 # from tkinter import messagebox
 import tkinter as tk
 
-# Path to the shortcut file
-shortcut_path = r'C:\Users\nahid\OneDrive\Desktop\WhatsApp - Shortcut.lnk'
+# # Path to the shortcut file
+# shortcut_path = r'C:\Users\nahid\OneDrive\Desktop\WhatsApp - Shortcut.lnk'
 
-# Use os.startfile to open the shortcut
-os.startfile(shortcut_path)
+# # Use os.startfile to open the shortcut
+# os.startfile(shortcut_path)
 
 
 ROOT = tk.Tk()
@@ -114,12 +114,29 @@ def press_screen_with_delays(window, *args):
         pyautogui.click(adjusted_x, adjusted_y)
         # Wait for the specified delay before the next action
         time.sleep(delay)
+def press_key(window, key):
+    """Send a key press to a specific window."""
+    window.activate()
+    pyautogui.press(key)
+
+def press_keys_with_delays(window, *args):
+    """Press keys with specified delays in between.
+    Usage: press_keys_with_delays(window, 'u', 2, 'p', 3, 'z', 2, 'x')
+    """
+    if len(args) % 2 != 0:
+        raise ValueError("Arguments should be in pairs of (key, delay).")
+    for i in range(0, len(args), 2):
+        key = args[i]
+        delay = args[i+1]
+        press_key(window, key)
+        time.sleep(delay)
 
 # window title
-window_title='WhatsApp'
+window_title='LDPlayer'
 
-profile_pic=r'C:\Users\nahid\OneDrive\backup\whatsapp_notify\image_59.png'
-call_me=r'C:\Users\nahid\OneDrive\backup\whatsapp_notify\image_60.png'
+profile_pic=r'C:\Users\nahid\OneDrive\Desktop\image_112.png'
+call_me=r'C:\Users\nahid\OneDrive\Desktop\image_113.png'
+cancel=r'C:\Users\nahid\OneDrive\Desktop\image_114.png'
 
 def close_window(event=None):
     # Close the current window
@@ -137,19 +154,20 @@ def WhatsPhotoClick():
         while True:  # Loop will continue indefinitely unless interrupted by an external condition
             focus_window(window_title)
 
-            # Check for profile_pic image and click
             if find_image(profile_pic): 
-                press_screen_with_delays(window, (94, 181, 2))
-            # Check for call_me image and click
+                press_screen_with_delays(window, (1422, 480, 2))
             elif find_image(call_me, confidence=0.8): 
-                press_screen_with_delays(window, (1841, 69, 120))
+                press_keys_with_delays(window, "a", 1, "b", 120)
+            elif find_image(cancel, confidence=0.8): 
+                press_keys_with_delays(window, "c", 1)
+            else:
+                # Perform this click if none of the conditions above are met
+                pyautogui.click(x=1781, y=900)
 
             time.sleep(0.1)  # Small delay between iterations to reduce CPU usage
-
     except KeyboardInterrupt:
         print("Script stopped by user.")
 
 
 WhatsPhotoClick()
-
 ROOT.mainloop()
