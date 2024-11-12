@@ -638,7 +638,7 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering AHK...")
-                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
+#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
 #                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
 #                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
 #                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # THOR
