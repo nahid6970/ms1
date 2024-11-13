@@ -94,7 +94,7 @@ def find_image(image_path, confidence=0.7, region=None):
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
-    if is_searching and time.time() - last_found_time > 5:
+    if is_searching and time.time() - last_found_time > 120:
         WhatsPhotoClick()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
@@ -109,7 +109,7 @@ def WhatsPhotoClick():
         while True:  # Loop will continue indefinitely unless interrupted by an external condition
             focus_window(window_title)
             if find_image(profile_pic): press_screen_with_delays(window, (1422, 480, 2))
-            elif find_image(call_me, confidence=0.8): press_keys_with_delays(window, "a", 1, "b", 1)
+            elif find_image(call_me, confidence=0.8): press_keys_with_delays(window, "a", 1, "b", 120)
             elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
