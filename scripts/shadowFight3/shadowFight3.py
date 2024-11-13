@@ -94,19 +94,25 @@ def find_image(image_path, confidence=0.7, region=None):
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
-    if is_searching and time.time() - last_found_time > 120:
-        run_script()  # Run the script instead of showing a message
+    if is_searching and time.time() - last_found_time > 5:
+        WhatsPhotoClick()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
 
-def run_script():
-    """Run the whatsapp.py script."""
+def WhatsPhotoClick():
+    pyautogui.click(x=1781, y=900)
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
     try:
-        # Replace "python" with the full path to Python if needed
-        subprocess.run(["python", r"C:\ms1\scripts\shadowFight3\whatsapp.py"], check=True)
-        print("whatsapp.py script executed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to execute whatsapp.py: {e}")
+        while True:  # Loop will continue indefinitely unless interrupted by an external condition
+            focus_window(window_title)
+            if find_image(profile_pic): press_screen_with_delays(window, (1422, 480, 2))
+            elif find_image(call_me, confidence=0.8): press_keys_with_delays(window, "a", 1, "b", 1)
+            elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
+            time.sleep(0.1)
+    except KeyboardInterrupt: print("Script stopped by user.")
 
 # focus_window
 def focus_window(window_title):
@@ -721,18 +727,18 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(641, "F13\ndj")
-initialize_button(642, "F14")
-initialize_button(643, "F15")
-initialize_button(644, "F16\nTHOR")
-initialize_button(645, "F17")
-initialize_button(646, "F18")
-initialize_button(647, "F19\nPOSS")
-initialize_button(648, "F20\nHound")
-initialize_button(649, "F21")
-initialize_button(650, "F22")
-initialize_button(651, "F23")
-initialize_button(652, "F24")
+initialize_button(647, "F13\ndj")
+initialize_button(648, "F14")
+initialize_button(649, "F15")
+initialize_button(650, "F16\nTHOR")
+initialize_button(651, "F17")
+initialize_button(652, "F18")
+initialize_button(653, "F19\nPOSS")
+initialize_button(654, "F20\nHound")
+initialize_button(655, "F21")
+initialize_button(656, "F22")
+initialize_button(657, "F23")
+initialize_button(658, "F24")
 
 # Restart function that displays the cumulative summary before restarting
 def restart(event=None):
@@ -741,8 +747,7 @@ def restart(event=None):
     subprocess.Popen([sys.executable] + sys.argv)
 
 # Button to restart the script
-Destroy_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2,
-                    command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Destroy_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Destroy_BT.pack(padx=(1, 1), pady=(1, 1))
 
 
@@ -871,5 +876,15 @@ Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
 back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
 Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
 
+"""
+██╗    ██╗██╗  ██╗ █████╗ ████████╗███████╗ █████╗ ██████╗ ██████╗
+██║    ██║██║  ██║██╔══██╗╚══██╔══╝██╔════╝██╔══██╗██╔══██╗██╔══██╗
+██║ █╗ ██║███████║███████║   ██║   ███████╗███████║██████╔╝██████╔╝
+██║███╗██║██╔══██║██╔══██║   ██║   ╚════██║██╔══██║██╔═══╝ ██╔═══╝
+╚███╔███╔╝██║  ██║██║  ██║   ██║   ███████║██║  ██║██║     ██║
+ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝
+"""
+profile_pic=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
+call_me=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\call.png'
+cancel=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
 ROOT.mainloop()
-

@@ -134,16 +134,10 @@ def press_keys_with_delays(window, *args):
 # window title
 window_title='LDPlayer'
 
-profile_pic=r'C:\Users\nahid\OneDrive\Desktop\image_112.png'
-call_me=r'C:\Users\nahid\OneDrive\Desktop\image_113.png'
-cancel=r'C:\Users\nahid\OneDrive\Desktop\image_114.png'
+profile_pic=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
+call_me=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\call.png'
+cancel=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
 
-def close_window(event=None):
-    # Close the current window
-    ROOT.destroy()
-    # Start the specified script
-    script_path = r"C:\ms1\SH3\SH3V2__AHK.py"
-    subprocess.Popen([sys.executable, script_path])
 
 def WhatsPhotoClick():
     window = focus_window(window_title)
