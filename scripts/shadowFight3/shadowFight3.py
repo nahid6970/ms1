@@ -34,7 +34,7 @@ BORDER_FRAME = create_custom_border(ROOT)
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 x = screen_width - 60
-y = screen_height - 950
+y = screen_height - 970
 ROOT.geometry(f"+{x}+{y}")
 
 # Disable fail-safe to prevent interruptions
@@ -427,15 +427,71 @@ def event_function_Main():
 Event_Light_BT = Button( ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_Main, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
-"""
-███████╗██╗   ██╗███████╗███╗   ██╗████████╗     █████╗ ██████╗
-██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝    ██╔══██╗██╔══██╗
-█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║       ███████║██║  ██║
-██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║       ██╔══██║██║  ██║
-███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║       ██║  ██║██████╔╝
-╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝       ╚═╝  ╚═╝╚═════╝
-"""
 
+
+#!  ███████╗██╗   ██╗███████╗███╗   ██╗████████╗    ██╗    ██╗     █████╗ ██████╗ ███████╗
+#!  ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝    ██║    ██║    ██╔══██╗██╔══██╗██╔════╝
+#!  █████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║       ██║ █╗ ██║    ███████║██║  ██║███████╗
+#!  ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║       ██║███╗██║    ██╔══██║██║  ██║╚════██║
+#!  ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║       ╚███╔███╔╝    ██║  ██║██████╔╝███████║
+#!  ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝        ╚══╝╚══╝     ╚═╝  ╚═╝╚═════╝ ╚══════╝
+def event_function_Ads():
+    global stop_thread_event, event_light_thread, Event_Light_BT
+    def event_items_handler(window):
+        try:
+            while not stop_thread_event:
+                focus_window(window_title)
+                # Handle the other image searches and actions
+                if find_image(Home, confidence=0.8): press_key(window, 'f')
+                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+
+                elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
+                elif any(find_image(image, confidence=0.95) for image in continueADS): press_keys_with_delays(window, 'c', 1)
+
+                elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+
+                # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
+                elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
+
+                # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
+                elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
+
+                # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
+
+                [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
+                for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+
+                # for ad_image in ads_images: #! optional
+                #     ad_location = find_image(ad_image, confidence=0.8)
+                #     if ad_location:
+                #         click(window, ad_location.left, ad_location.top) 
+
+                # [click(window, ad_location.left, ad_location.top) for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+
+                # click the middle part of the ads
+                # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
+                # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+
+                time.sleep(0.05)
+        except KeyboardInterrupt: print("Other items thread stopped by user.")
+
+    if event_light_thread and event_light_thread.is_alive():
+        stop_thread_event = True
+        event_light_thread.join()
+        Event_w_Ads_BT.config(text="Event\nAds", bg="#ce5129", fg="#000000")
+    else:
+        stop_thread_event = False
+        window = focus_window(window_title)
+        if not window:
+            print(f"Window '{window_title}' not found.")
+            return
+        event_light_thread = threading.Thread(target=event_items_handler, args=(window,))
+        event_light_thread.daemon = True
+        event_light_thread.start()
+        Event_w_Ads_BT.config(text="Event\nAds", bg="#1d2027", fg="#fc0000")
+
+Event_w_Ads_BT = Button( ROOT, text="Event\nAds", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_Ads, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Event_w_Ads_BT.pack(padx=(1, 1), pady=(1, 1))
 """
 ██████╗  █████╗ ██╗██████╗ ███████╗
 ██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
@@ -812,10 +868,6 @@ cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
 continueF = [cont1, cont3, cont4]
 contF_Region = (1380, 792, 1738, 966)
 
-# ads_with_token_cont=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont.png"
-# ads_with_token_cont2=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\ads_cont_notshown.png"
-# continueF = [ads_with_token_cont,ads_with_token_cont2]
-
 #* notifyF Related Images
 # currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
 # connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
@@ -857,6 +909,18 @@ back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.pn
 Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\CreepyParty.png"
 Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
 
+
+# continue for ads
+passed_50sv=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont_ads\50sv.png"
+failed_50sv=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont_ads\50sv_failed.png"
+continueADS = [passed_50sv, failed_50sv]
+
+ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
+ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
+
+back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
+Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
+
 # Advertisement
 # ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
 # ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
@@ -870,16 +934,10 @@ Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\S
 # ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
 # ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
 # ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
-sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
+# sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
 # ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
-ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
-ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
-
-Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
-
-back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
-Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
+# Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
 
 """
 ██╗    ██╗██╗  ██╗ █████╗ ████████╗███████╗ █████╗ ██████╗ ██████╗
