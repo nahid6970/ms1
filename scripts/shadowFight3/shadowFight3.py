@@ -40,6 +40,68 @@ ROOT.geometry(f"+{x}+{y}")
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
+"""
+ █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
+██╔══██╗██║  ██║██║ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+███████║███████║█████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
+██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
+██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
+╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+"""
+# Possessed
+def action_main_handler_5():
+    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    def search_and_act():
+        while not stop_thread_action1:
+            # Image searching logic
+            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
+                image_found = True
+                print("Image found in Light Attack 2, resetting action timer.")
+                action_timer = time.time()  # Reset the 5-second timer when image is found
+            else:
+                image_found = False
+                print("Image not found in Light Attack 2.")
+            time.sleep(0.05)
+            # Action performing logic
+            if image_found:
+                pause_other_items2 = True
+                print("Triggering AHK...")
+#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
+#                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
+#                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
+#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # THOR
+#                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
+#                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
+#                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
+                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
+#                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
+#                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
+#                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
+#                key_down(window, 'F24'); time.sleep(5); key_up(window, 'F24')
+                print("AHK action completed.")
+                pause_other_items2 = False
+            else:
+                time.sleep(0.05)  # Prevent CPU usage when idle
+    # Start or stop the action handler
+    if Action_Light_Thread and Action_Light_Thread.is_alive():
+        stop_thread_action1 = True
+        Action_Light_Thread.join()  # Wait for thread to stop
+        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
+    else:
+        stop_thread_action1 = False
+        Action_Light_Thread = threading.Thread(target=search_and_act)
+        Action_Light_Thread.daemon = True
+        Action_Light_Thread.start()
+        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
+
+# Button definition to start/stop Light Attack 2
+ACTION_5_AHK = Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
+
 # Initialize variables
 last_found_time = None
 is_searching = False
@@ -288,85 +350,82 @@ Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 #! ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 #! ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
 stop_thread_event = True
-def event_items_handler(window):
-    try:
-        while not stop_thread_event:
-            focus_window(window_title)
-            #* Handle the other image searches and actions
-            if find_image(Home, confidence=0.8): press_key(window, 'f')
-            # if find_image(Home, confidence=0.8): press_screen_with_delays(window, (1265, 351, 2))
-            elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
-            # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
-            
-            # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 1)
-            # elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
-            # elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
-            elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
-
-            elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-
-            # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
-            # elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
-
-            # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
-            # elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
-
-            # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
-
-            # for ad_image in ads_images: #! optional
-            #     ad_location = find_image(ad_image, confidence=0.8)
-            #     if ad_location:
-            #         click(window, ad_location.left, ad_location.top) 
-
-            # [click(window, ad_location.left, ad_location.top) for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-            # click the middle part of the ads
-            # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
-            # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-            # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
-            # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-            # # Check if the no_currency image is found
-            # elif any(find_image(image) for image in notifyF):
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-            #     time.sleep(60)
-
-            # # Check if the no_currency image is found
-            # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png', confidence=0.8):
-            #     # Run the whatsapp.py script
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-            #     # Wait for 1 minute
-            #     time.sleep(60)
-
-            time.sleep(0.05)
-    except KeyboardInterrupt: print("Other items thread stopped by user.")
-def Start_Event_Light():
-    global stop_thread_event
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    other_items_thread = threading.Thread(target=event_items_handler, args=(window,))
-    other_items_thread.daemon = True
-    other_items_thread.start()
-    other_items_thread.join()
-
-def event_function_light():
+def event_function_Main():
     global stop_thread_event, event_light_thread, Event_Light_BT
+    def event_items_handler(window):
+        try:
+            while not stop_thread_event:
+                focus_window(window_title)
+                # Handle the other image searches and actions
+                if find_image(Home, confidence=0.8): press_key(window, 'f')
+                # if find_image(Home, confidence=0.8): press_screen_with_delays(window, (1265, 351, 2))
+                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+
+                # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+                # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
+                
+                # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 1)
+                # elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
+                # elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
+                elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
+
+                elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+
+                # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
+                # elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
+
+                # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
+                # elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
+
+                # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
+
+                # for ad_image in ads_images: #! optional
+                #     ad_location = find_image(ad_image, confidence=0.8)
+                #     if ad_location:
+                #         click(window, ad_location.left, ad_location.top) 
+
+                # [click(window, ad_location.left, ad_location.top) for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+
+                # click the middle part of the ads
+                # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
+                # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+
+                # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
+                # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
+
+                # # Check if the no_currency image is found
+                # elif any(find_image(image) for image in notifyF):
+                #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                #     time.sleep(60)
+
+                # # Check if the no_currency image is found
+                # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png', confidence=0.8):
+                #     # Run the whatsapp.py script
+                #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                #     # Wait for 1 minute
+                #     time.sleep(60)
+
+                time.sleep(0.05)
+        except KeyboardInterrupt:
+            print("Other items thread stopped by user.")
+
     if event_light_thread and event_light_thread.is_alive():
         stop_thread_event = True
         event_light_thread.join()
         Event_Light_BT.config(text="Event", bg="#ce5129", fg="#000000")
     else:
         stop_thread_event = False
-        event_light_thread = threading.Thread(target=Start_Event_Light)
+        window = focus_window(window_title)
+        if not window:
+            print(f"Window '{window_title}' not found.")
+            return
+        event_light_thread = threading.Thread(target=event_items_handler, args=(window,))
         event_light_thread.daemon = True
         event_light_thread.start()
         Event_Light_BT.config(text="Event", bg="#1d2027", fg="#fc0000")
-Event_Light_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+
+Event_Light_BT = Button( ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_Main, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
 
 """
@@ -615,68 +674,6 @@ ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, heigh
 ACTION_3.pack(padx=(1,1), pady=(1,1))
 
 """
- █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
-██╔══██╗██║  ██║██║ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-███████║███████║█████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
-██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
-██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
-╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-"""
-# Possessed
-def action_main_handler_5():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    def search_and_act():
-        while not stop_thread_action1:
-            # Image searching logic
-            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print("Triggering AHK...")
-#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
-#                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
-#                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
-#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # THOR
-#                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
-#                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
-#                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
-                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
-#                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
-#                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
-#                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
-#                key_down(window, 'F24'); time.sleep(5); key_up(window, 'F24')
-                print("AHK action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
-    else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
-
-# Button definition to start/stop Light Attack 2
-ACTION_5_AHK = Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
-
-"""
  ██████╗ ██████╗ ███╗   ███╗███╗   ███╗███████╗███╗   ██╗████████╗     ██████╗ ██╗   ██╗████████╗
 ██╔════╝██╔═══██╗████╗ ████║████╗ ████║██╔════╝████╗  ██║╚══██╔══╝    ██╔═══██╗██║   ██║╚══██╔══╝
 ██║     ██║   ██║██╔████╔██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║       ██║   ██║██║   ██║   ██║
@@ -727,18 +724,18 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(647, "F13\ndj")
-initialize_button(648, "F14")
-initialize_button(649, "F15")
-initialize_button(650, "F16\nTHOR")
-initialize_button(651, "F17")
-initialize_button(652, "F18")
-initialize_button(653, "F19\nPOSS")
-initialize_button(654, "F20\nHound")
-initialize_button(655, "F21")
-initialize_button(656, "F22")
-initialize_button(657, "F23")
-initialize_button(658, "F24")
+initialize_button(73, "F13\ndj")
+initialize_button(74, "F14")
+initialize_button(75, "F15")
+initialize_button(76, "F16\nTHOR")
+initialize_button(77, "F17")
+initialize_button(78, "F18")
+initialize_button(79, "F19\nPOSS")
+initialize_button(80, "F20\nHound")
+initialize_button(81, "F21")
+initialize_button(82, "F22")
+initialize_button(83, "F23")
+initialize_button(84, "F24")
 
 # Restart function that displays the cumulative summary before restarting
 def restart(event=None):
