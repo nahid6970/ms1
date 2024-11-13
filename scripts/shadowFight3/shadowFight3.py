@@ -407,8 +407,7 @@ def event_function_Main():
                 #     time.sleep(60)
 
                 time.sleep(0.05)
-        except KeyboardInterrupt:
-            print("Other items thread stopped by user.")
+        except KeyboardInterrupt: print("Other items thread stopped by user.")
 
     if event_light_thread and event_light_thread.is_alive():
         stop_thread_event = True
@@ -427,6 +426,15 @@ def event_function_Main():
 
 Event_Light_BT = Button( ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_Main, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+
+"""
+███████╗██╗   ██╗███████╗███╗   ██╗████████╗     █████╗ ██████╗
+██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝    ██╔══██╗██╔══██╗
+█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║       ███████║██║  ██║
+██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║       ██╔══██║██║  ██║
+███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║       ██║  ██║██████╔╝
+╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝       ╚═╝  ╚═╝╚═════╝
+"""
 
 """
 ██████╗  █████╗ ██╗██████╗ ███████╗
