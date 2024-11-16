@@ -368,9 +368,14 @@ def event_function_Main():
                 # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 1)
                 # elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
                 # elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
-                elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
+                
+                # elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
 
                 elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+        
+                #* dynamic folder img
+                [press_keys_with_delays(window, 'c', 1) 
+                for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
 
                 # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
                 # elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
@@ -426,8 +431,6 @@ def event_function_Main():
 
 Event_Light_BT = Button( ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_Main, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Event_Light_BT.pack(padx=(1, 1), pady=(1, 1))
-
-
 
 #!  ███████╗██╗   ██╗███████╗███╗   ██╗████████╗    ██╗    ██╗     █████╗ ██████╗ ███████╗
 #!  ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝    ██║    ██║    ██╔══██╗██╔══██╗██╔════╝
@@ -917,6 +920,9 @@ continueADS = [passed_50sv, failed_50sv]
 
 ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
 ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
+
+cont_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\cont_dynamic"
+cont_dynamic = glob.glob(os.path.join(cont_folder, "*.png"))
 
 back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
 Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
