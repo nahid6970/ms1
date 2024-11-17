@@ -372,6 +372,8 @@ def event_function_Main():
                 # elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
 
                 elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+                
+                elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
         
                 #* dynamic folder img
                 [press_keys_with_delays(window, 'c', 1) 
@@ -912,6 +914,7 @@ back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.pn
 Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\CreepyParty.png"
 Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
 
+Open_Chest=r"C:\Users\nahid\OneDrive\backup\shadowfight3\chest.png"
 
 # continue for ads
 passed_50sv=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont_ads\50sv.png"
