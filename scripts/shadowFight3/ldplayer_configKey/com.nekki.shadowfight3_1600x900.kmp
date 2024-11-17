@@ -1,0 +1,1304 @@
+{
+    "keyboardMappings": [
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 32,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 4987,
+                        "y": 9074,
+                        "timing": 0
+                    },
+                    {
+                        "x": 4987,
+                        "y": 9074,
+                        "timing": 119
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 67,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 8648,
+                        "y": 9063,
+                        "timing": 0
+                    },
+                    {
+                        "x": 8648,
+                        "y": 9063,
+                        "timing": 55
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 69,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 926,
+                        "y": 7212,
+                        "timing": 0
+                    },
+                    {
+                        "x": 926,
+                        "y": 7212,
+                        "timing": 65
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 84,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 4340,
+                        "y": 5767,
+                        "timing": 0
+                    },
+                    {
+                        "x": 4340,
+                        "y": 5767,
+                        "timing": 67
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 50,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 7195,
+                        "y": 6727,
+                        "timing": 0
+                    },
+                    {
+                        "x": 7195,
+                        "y": 6727,
+                        "timing": 103
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 86,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 5730,
+                        "y": 5451,
+                        "timing": 0
+                    },
+                    {
+                        "x": 5730,
+                        "y": 5451,
+                        "timing": 62
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 70,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 7906,
+                        "y": 3950,
+                        "timing": 0
+                    },
+                    {
+                        "x": 7906,
+                        "y": 3950,
+                        "timing": 72
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 51,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 6561,
+                        "y": 4989,
+                        "timing": 0
+                    },
+                    {
+                        "x": 6561,
+                        "y": 4989,
+                        "timing": 66
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 90,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 7912,
+                        "y": 5508,
+                        "timing": 0
+                    },
+                    {
+                        "x": 7912,
+                        "y": 5508,
+                        "timing": 75
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 82,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 4981,
+                        "y": 3307,
+                        "timing": 0
+                    },
+                    {
+                        "x": 4981,
+                        "y": 3307,
+                        "timing": 80
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardRecord",
+            "data": {
+                "key": 34,
+                "secondKey": 0,
+                "origin": {
+                    "x": 9435,
+                    "y": 1648
+                },
+                "recordData": "{\"operations\":[{\"timing\":0,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14652,\"y\":6588,\"state\":1}]},{\"timing\":1,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":46,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14652,\"y\":6576,\"state\":1}]},{\"timing\":49,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":54,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14628,\"y\":6468,\"state\":1}]},{\"timing\":58,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":62,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14616,\"y\":6372,\"state\":1}]},{\"timing\":65,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":71,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14604,\"y\":6239,\"state\":1}]},{\"timing\":73,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":78,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14604,\"y\":6048,\"state\":1}]},{\"timing\":81,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":86,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14604,\"y\":5820,\"state\":1}]},{\"timing\":89,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":94,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":5472,\"state\":1}]},{\"timing\":97,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":102,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":5112,\"state\":1}]},{\"timing\":105,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":110,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":4680,\"state\":1}]},{\"timing\":113,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":118,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":4176,\"state\":1}]},{\"timing\":121,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":126,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":3660,\"state\":1}]},{\"timing\":129,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":135,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":3192,\"state\":1}]},{\"timing\":137,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":142,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":2688,\"state\":1}]},{\"timing\":145,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":151,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":2232,\"state\":1}]},{\"timing\":151,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":158,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14580,\"y\":1836,\"state\":1}]},{\"timing\":161,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":166,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14592,\"y\":1536,\"state\":1}]},{\"timing\":169,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":174,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14640,\"y\":1272,\"state\":1}]},{\"timing\":177,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":182,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14652,\"y\":1056,\"state\":1}]},{\"timing\":185,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":190,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14700,\"y\":840,\"state\":1}]},{\"timing\":193,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":198,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14712,\"y\":720,\"state\":1}]},{\"timing\":201,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":206,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14724,\"y\":588,\"state\":1}]},{\"timing\":209,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":215,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14736,\"y\":492,\"state\":1}]},{\"timing\":216,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":216,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14736,\"y\":492,\"state\":0}]},{\"timing\":217,\"operationId\":\"PutMultiTouch\",\"points\":[]}],\"recordInfo\":{\"loopType\":0,\"loopTimes\":1,\"circleDuration\":217,\"loopInterval\":0,\"loopDuration\":0,\"accelerateTimes\":1,\"accelerateTimesEx\":1,\"recordName\":\"\",\"createTime\":\"2024-06-03 20:31:36\",\"playOnBoot\":false,\"rebootTiming\":0,\"closeTiming\":0,\"resolutionWidth\":1600,\"resolutionHeight\":900,\"randomTouch\":false}}",
+                "description": "",
+                "moreDescription": "",
+                "extraData": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardRecord",
+            "data": {
+                "key": 33,
+                "secondKey": 0,
+                "origin": {
+                    "x": 9404,
+                    "y": 948
+                },
+                "recordData": "{\"operations\":[{\"timing\":0,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14232,\"y\":3624,\"state\":1}]},{\"timing\":5,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":30,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14208,\"y\":3624,\"state\":1}]},{\"timing\":37,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":38,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14208,\"y\":3768,\"state\":1}]},{\"timing\":45,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":47,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":3959,\"state\":1}]},{\"timing\":53,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":54,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":4224,\"state\":1}]},{\"timing\":61,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":62,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":4632,\"state\":1}]},{\"timing\":69,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":70,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":5136,\"state\":1}]},{\"timing\":77,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":78,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":5616,\"state\":1}]},{\"timing\":85,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":86,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":6180,\"state\":1}]},{\"timing\":93,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":94,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":6780,\"state\":1}]},{\"timing\":101,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":102,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14196,\"y\":7344,\"state\":1}]},{\"timing\":109,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":110,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14268,\"y\":7980,\"state\":1}]},{\"timing\":116,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":118,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14364,\"y\":8628,\"state\":1}]},{\"timing\":121,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":126,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14412,\"y\":9264,\"state\":1}]},{\"timing\":133,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":134,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14484,\"y\":9936,\"state\":1}]},{\"timing\":141,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":142,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14508,\"y\":10536,\"state\":1}]},{\"timing\":149,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":150,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14592,\"y\":11076,\"state\":1}]},{\"timing\":157,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":159,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14664,\"y\":11568,\"state\":1}]},{\"timing\":164,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":166,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14712,\"y\":11880,\"state\":1}]},{\"timing\":173,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":174,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14747,\"y\":12108,\"state\":1}]},{\"timing\":181,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":182,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14784,\"y\":12120,\"state\":1}]},{\"timing\":189,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":190,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14808,\"y\":12120,\"state\":1}]},{\"timing\":197,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":198,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14832,\"y\":12120,\"state\":1}]},{\"timing\":202,\"operationId\":\"PutMultiTouch\",\"points\":[]},{\"timing\":202,\"operationId\":\"PutMultiTouch\",\"points\":[{\"id\":1,\"x\":14832,\"y\":12120,\"state\":0}]},{\"timing\":205,\"operationId\":\"PutMultiTouch\",\"points\":[]}],\"recordInfo\":{\"loopType\":0,\"loopTimes\":1,\"circleDuration\":205,\"loopInterval\":0,\"loopDuration\":0,\"accelerateTimes\":1,\"accelerateTimesEx\":1,\"recordName\":\"\",\"createTime\":\"2024-06-03 20:32:08\",\"playOnBoot\":false,\"rebootTiming\":0,\"closeTiming\":0,\"resolutionWidth\":1600,\"resolutionHeight\":900,\"randomTouch\":false}}",
+                "description": "",
+                "moreDescription": "",
+                "extraData": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 89,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 2874,
+                        "y": 9142,
+                        "timing": 0
+                    },
+                    {
+                        "x": 2874,
+                        "y": 9142,
+                        "timing": 70
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 80,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 9226,
+                        "y": 9108,
+                        "timing": 0
+                    },
+                    {
+                        "x": 9226,
+                        "y": 9108,
+                        "timing": 76
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 79,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 9473,
+                        "y": 3149,
+                        "timing": 0
+                    },
+                    {
+                        "x": 9473,
+                        "y": 3149,
+                        "timing": 52
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 81,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 5000,
+                        "y": 316,
+                        "timing": 0
+                    },
+                    {
+                        "x": 5000,
+                        "y": 316,
+                        "timing": 103
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 77,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 7189,
+                        "y": 7325,
+                        "timing": 0
+                    },
+                    {
+                        "x": 7189,
+                        "y": 7325,
+                        "timing": 74
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 49,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 7259,
+                        "y": 9120,
+                        "timing": 0
+                    },
+                    {
+                        "x": 7259,
+                        "y": 9120,
+                        "timing": 63
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 66,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 508,
+                        "y": 395,
+                        "timing": 0
+                    },
+                    {
+                        "x": 508,
+                        "y": 395,
+                        "timing": 104
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardMacros",
+            "data": {
+                "key": 186,
+                "secondKey": 0,
+                "origin": {
+                    "x": 9613,
+                    "y": 7686
+                },
+                "macros": "size 1600 900\rtouch 270 730 50\rkey j\rkey j",
+                "description": "",
+                "moreDescription": "",
+                "extraData": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 48,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 4987,
+                        "y": 7664,
+                        "timing": 0
+                    },
+                    {
+                        "x": 4987,
+                        "y": 7664,
+                        "timing": 81
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardDisc",
+            "data": {
+                "type": 0,
+                "origin": {
+                    "x": 803,
+                    "y": 4757
+                },
+                "radius": 790,
+                "leftKey": 65,
+                "upKey": 87,
+                "rightKey": 68,
+                "downKey": 83,
+                "description": "",
+                "moreDescription": "",
+                "extraData": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 73,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 9626,
+                        "y": 2777,
+                        "timing": 0
+                    },
+                    {
+                        "x": 9626,
+                        "y": 2777,
+                        "timing": 63
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 74,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 9645,
+                        "y": 3883,
+                        "timing": 0
+                    },
+                    {
+                        "x": 9645,
+                        "y": 3883,
+                        "timing": 63
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 76,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 9657,
+                        "y": 5011,
+                        "timing": 0
+                    },
+                    {
+                        "x": 9657,
+                        "y": 5011,
+                        "timing": 96
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 75,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 9695,
+                        "y": 6208,
+                        "timing": 0
+                    },
+                    {
+                        "x": 9695,
+                        "y": 6208,
+                        "timing": 71
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 88,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 8972,
+                        "y": 3375,
+                        "timing": 0
+                    },
+                    {
+                        "x": 8972,
+                        "y": 3375,
+                        "timing": 98
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 71,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 4994,
+                        "y": 5677,
+                        "timing": 0
+                    },
+                    {
+                        "x": 5000,
+                        "y": 5632,
+                        "timing": 87
+                    },
+                    {
+                        "x": 5044,
+                        "y": 5530,
+                        "timing": 100
+                    },
+                    {
+                        "x": 5070,
+                        "y": 5474,
+                        "timing": 109
+                    },
+                    {
+                        "x": 5121,
+                        "y": 5361,
+                        "timing": 111
+                    },
+                    {
+                        "x": 5171,
+                        "y": 5271,
+                        "timing": 125
+                    },
+                    {
+                        "x": 5228,
+                        "y": 5169,
+                        "timing": 127
+                    },
+                    {
+                        "x": 5286,
+                        "y": 5056,
+                        "timing": 139
+                    },
+                    {
+                        "x": 5355,
+                        "y": 4921,
+                        "timing": 144
+                    },
+                    {
+                        "x": 5425,
+                        "y": 4786,
+                        "timing": 151
+                    },
+                    {
+                        "x": 5476,
+                        "y": 4673,
+                        "timing": 161
+                    },
+                    {
+                        "x": 5520,
+                        "y": 4549,
+                        "timing": 172
+                    },
+                    {
+                        "x": 5571,
+                        "y": 4436,
+                        "timing": 174
+                    },
+                    {
+                        "x": 5609,
+                        "y": 4334,
+                        "timing": 188
+                    },
+                    {
+                        "x": 5635,
+                        "y": 4244,
+                        "timing": 192
+                    },
+                    {
+                        "x": 5654,
+                        "y": 4165,
+                        "timing": 198
+                    },
+                    {
+                        "x": 5666,
+                        "y": 4108,
+                        "timing": 211
+                    },
+                    {
+                        "x": 5673,
+                        "y": 4074,
+                        "timing": 215
+                    },
+                    {
+                        "x": 5685,
+                        "y": 4052,
+                        "timing": 223
+                    },
+                    {
+                        "x": 5692,
+                        "y": 4018,
+                        "timing": 231
+                    },
+                    {
+                        "x": 5685,
+                        "y": 4018,
+                        "timing": 343
+                    },
+                    {
+                        "x": 5654,
+                        "y": 4018,
+                        "timing": 351
+                    },
+                    {
+                        "x": 5603,
+                        "y": 4041,
+                        "timing": 361
+                    },
+                    {
+                        "x": 5539,
+                        "y": 4052,
+                        "timing": 367
+                    },
+                    {
+                        "x": 5463,
+                        "y": 4086,
+                        "timing": 375
+                    },
+                    {
+                        "x": 5362,
+                        "y": 4097,
+                        "timing": 384
+                    },
+                    {
+                        "x": 5260,
+                        "y": 4120,
+                        "timing": 392
+                    },
+                    {
+                        "x": 5178,
+                        "y": 4142,
+                        "timing": 398
+                    },
+                    {
+                        "x": 5095,
+                        "y": 4176,
+                        "timing": 407
+                    },
+                    {
+                        "x": 5019,
+                        "y": 4187,
+                        "timing": 415
+                    },
+                    {
+                        "x": 4962,
+                        "y": 4210,
+                        "timing": 438
+                    },
+                    {
+                        "x": 4918,
+                        "y": 4221,
+                        "timing": 439
+                    },
+                    {
+                        "x": 4873,
+                        "y": 4233,
+                        "timing": 440
+                    },
+                    {
+                        "x": 4867,
+                        "y": 4233,
+                        "timing": 447
+                    },
+                    {
+                        "x": 4860,
+                        "y": 4233,
+                        "timing": 455
+                    },
+                    {
+                        "x": 4854,
+                        "y": 4233,
+                        "timing": 464
+                    },
+                    {
+                        "x": 4848,
+                        "y": 4244,
+                        "timing": 512
+                    },
+                    {
+                        "x": 4841,
+                        "y": 4255,
+                        "timing": 535
+                    },
+                    {
+                        "x": 4841,
+                        "y": 4266,
+                        "timing": 558
+                    },
+                    {
+                        "x": 4841,
+                        "y": 4278,
+                        "timing": 567
+                    },
+                    {
+                        "x": 4841,
+                        "y": 4289,
+                        "timing": 578
+                    },
+                    {
+                        "x": 4841,
+                        "y": 4312,
+                        "timing": 586
+                    },
+                    {
+                        "x": 4841,
+                        "y": 4334,
+                        "timing": 594
+                    },
+                    {
+                        "x": 4860,
+                        "y": 4379,
+                        "timing": 600
+                    },
+                    {
+                        "x": 4905,
+                        "y": 4436,
+                        "timing": 607
+                    },
+                    {
+                        "x": 4943,
+                        "y": 4492,
+                        "timing": 617
+                    },
+                    {
+                        "x": 5019,
+                        "y": 4571,
+                        "timing": 623
+                    },
+                    {
+                        "x": 5070,
+                        "y": 4650,
+                        "timing": 632
+                    },
+                    {
+                        "x": 5127,
+                        "y": 4718,
+                        "timing": 645
+                    },
+                    {
+                        "x": 5184,
+                        "y": 4797,
+                        "timing": 648
+                    },
+                    {
+                        "x": 5228,
+                        "y": 4865,
+                        "timing": 655
+                    },
+                    {
+                        "x": 5279,
+                        "y": 4932,
+                        "timing": 663
+                    },
+                    {
+                        "x": 5311,
+                        "y": 5023,
+                        "timing": 671
+                    },
+                    {
+                        "x": 5343,
+                        "y": 5102,
+                        "timing": 687
+                    },
+                    {
+                        "x": 5368,
+                        "y": 5169,
+                        "timing": 687
+                    },
+                    {
+                        "x": 5387,
+                        "y": 5248,
+                        "timing": 695
+                    },
+                    {
+                        "x": 5406,
+                        "y": 5316,
+                        "timing": 704
+                    },
+                    {
+                        "x": 5425,
+                        "y": 5372,
+                        "timing": 712
+                    },
+                    {
+                        "x": 5438,
+                        "y": 5418,
+                        "timing": 720
+                    },
+                    {
+                        "x": 5444,
+                        "y": 5463,
+                        "timing": 727
+                    },
+                    {
+                        "x": 5451,
+                        "y": 5485,
+                        "timing": 736
+                    },
+                    {
+                        "x": 5463,
+                        "y": 5508,
+                        "timing": 754
+                    },
+                    {
+                        "x": 5463,
+                        "y": 5485,
+                        "timing": 807
+                    },
+                    {
+                        "x": 5463,
+                        "y": 5440,
+                        "timing": 815
+                    },
+                    {
+                        "x": 5463,
+                        "y": 5372,
+                        "timing": 823
+                    },
+                    {
+                        "x": 5463,
+                        "y": 5316,
+                        "timing": 832
+                    },
+                    {
+                        "x": 5463,
+                        "y": 5226,
+                        "timing": 839
+                    },
+                    {
+                        "x": 5463,
+                        "y": 5124,
+                        "timing": 849
+                    },
+                    {
+                        "x": 5438,
+                        "y": 5011,
+                        "timing": 865
+                    },
+                    {
+                        "x": 5400,
+                        "y": 4740,
+                        "timing": 875
+                    },
+                    {
+                        "x": 5374,
+                        "y": 4594,
+                        "timing": 879
+                    },
+                    {
+                        "x": 5355,
+                        "y": 4424,
+                        "timing": 887
+                    },
+                    {
+                        "x": 5330,
+                        "y": 4266,
+                        "timing": 896
+                    },
+                    {
+                        "x": 5324,
+                        "y": 4131,
+                        "timing": 907
+                    },
+                    {
+                        "x": 5317,
+                        "y": 3984,
+                        "timing": 912
+                    },
+                    {
+                        "x": 5305,
+                        "y": 3725,
+                        "timing": 933
+                    },
+                    {
+                        "x": 5305,
+                        "y": 3544,
+                        "timing": 948
+                    },
+                    {
+                        "x": 5305,
+                        "y": 3442,
+                        "timing": 967
+                    },
+                    {
+                        "x": 5305,
+                        "y": 3409,
+                        "timing": 982
+                    },
+                    {
+                        "x": 5305,
+                        "y": 3386,
+                        "timing": 997
+                    },
+                    {
+                        "x": 5298,
+                        "y": 3397,
+                        "timing": 1055
+                    },
+                    {
+                        "x": 5298,
+                        "y": 3454,
+                        "timing": 1065
+                    },
+                    {
+                        "x": 5279,
+                        "y": 3488,
+                        "timing": 1071
+                    },
+                    {
+                        "x": 5273,
+                        "y": 3567,
+                        "timing": 1084
+                    },
+                    {
+                        "x": 5260,
+                        "y": 3657,
+                        "timing": 1088
+                    },
+                    {
+                        "x": 5247,
+                        "y": 3758,
+                        "timing": 1097
+                    },
+                    {
+                        "x": 5228,
+                        "y": 3860,
+                        "timing": 1103
+                    },
+                    {
+                        "x": 5203,
+                        "y": 3984,
+                        "timing": 1114
+                    },
+                    {
+                        "x": 5178,
+                        "y": 4165,
+                        "timing": 1127
+                    },
+                    {
+                        "x": 5159,
+                        "y": 4300,
+                        "timing": 1129
+                    },
+                    {
+                        "x": 5133,
+                        "y": 4436,
+                        "timing": 1135
+                    },
+                    {
+                        "x": 5121,
+                        "y": 4605,
+                        "timing": 1144
+                    },
+                    {
+                        "x": 5102,
+                        "y": 4763,
+                        "timing": 1157
+                    },
+                    {
+                        "x": 5082,
+                        "y": 4898,
+                        "timing": 1159
+                    },
+                    {
+                        "x": 5057,
+                        "y": 5068,
+                        "timing": 1167
+                    },
+                    {
+                        "x": 5051,
+                        "y": 5203,
+                        "timing": 1177
+                    },
+                    {
+                        "x": 5044,
+                        "y": 5339,
+                        "timing": 1190
+                    },
+                    {
+                        "x": 5025,
+                        "y": 5440,
+                        "timing": 1191
+                    },
+                    {
+                        "x": 5025,
+                        "y": 5497,
+                        "timing": 1199
+                    },
+                    {
+                        "x": 5025,
+                        "y": 5519,
+                        "timing": 1212
+                    },
+                    {
+                        "x": 5025,
+                        "y": 5564,
+                        "timing": 1220
+                    },
+                    {
+                        "x": 5025,
+                        "y": 5587,
+                        "timing": 1223
+                    },
+                    {
+                        "x": 5025,
+                        "y": 5598,
+                        "timing": 1239
+                    },
+                    {
+                        "x": 5025,
+                        "y": 5598,
+                        "timing": 1296
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        },
+        {
+            "class": "ClassKeyboardCurve",
+            "data": {
+                "key": 85,
+                "secondKey": 0,
+                "curve": [
+                    {
+                        "x": 3953,
+                        "y": 1930,
+                        "timing": 0
+                    },
+                    {
+                        "x": 3953,
+                        "y": 1930,
+                        "timing": 159
+                    }
+                ],
+                "extraData": "",
+                "description": "",
+                "moreDescription": "",
+                "hintVisible": true,
+                "hintOffset": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        }
+    ],
+    "configInfo": {
+        "version": 0,
+        "versionMessage": "",
+        "packageNameType": 0,
+        "packageNamePattern": "com.nekki.shadowfight3",
+        "resolutionType": 1,
+        "resolutionPattern": {
+            "width": 1600,
+            "height": 900
+        },
+        "priority": 0,
+        "search": ""
+    },
+    "keyboardConfig": {
+        "mouseCenter": {
+            "x": 5000,
+            "y": 5000
+        },
+        "mouseScrollType": 0,
+        "discType": 0,
+        "advertising": false,
+        "advertiseDuration": 5000,
+        "advertiseText": "",
+        "cancelPoint": {
+            "x": 0,
+            "y": 0
+        },
+        "cancelKey": 0,
+        "cancelMode": 0,
+        "cursor": "lolCursor",
+        "extraData": ""
+    }
+}
