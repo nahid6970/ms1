@@ -170,7 +170,7 @@ def WhatsPhotoClick():
     try:
         while True:  # Loop will continue indefinitely unless interrupted by an external condition
             focus_window(window_title)
-            if find_image(profile_pic): press_screen_with_delays(window, (1422, 480, 2))
+            if find_image(profile_pic): press_ldplayer_screen_with_delays(window, (1422, 480, 2))
             elif find_image(call_me, confidence=0.8): press_keys_with_delays(window, "a", 1, "b", 120)
             elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
             time.sleep(0.1)
@@ -243,7 +243,7 @@ def get_window_rect(hwnd):
     rect = win32gui.GetWindowRect(hwnd)
     return rect  # Returns (left, top, right, bottom)
 # press_buttons_with_delays
-def press_screen_with_delays(window, *args):
+def press_ldplayer_screen_with_delays(window, *args):
     """Press buttons at specified x, y locations with delays, relative to the window's position.
     Usage: press_buttons_with_delays(window, (100, 200, 2), (150, 250, 3), (300, 400, 2))
     """
@@ -269,6 +269,23 @@ def press_screen_with_delays(window, *args):
         pyautogui.click(adjusted_x, adjusted_y)
         # Wait for the specified delay before the next action
         time.sleep(delay)
+
+def press_global_screen_with_delays(*args):
+    """
+    Press buttons at specified x, y locations on the global screen with delays.
+    Usage: press_global_screen_with_delays((100, 200, 2), (150, 250, 3), (300, 400, 2))
+    """
+    if len(args) == 0:
+        raise ValueError("At least one (x, y, delay) tuple is required.")
+    for i in range(len(args)):
+        if len(args[i]) != 3:
+            raise ValueError("Each argument should be a tuple (x, y, delay).")
+        x, y, delay = args[i]
+        # Click at the specified global screen coordinates
+        pyautogui.click(x, y)
+        # Wait for the specified delay before the next action
+        time.sleep(delay)
+
 
 #* Threads
 fight_thread = None
@@ -359,7 +376,7 @@ def event_function_Main():
                 focus_window(window_title)
                 # Handle the other image searches and actions
                 if find_image(Home, confidence=0.8): press_key(window, 'f')
-                # if find_image(Home, confidence=0.8): press_screen_with_delays(window, (1265, 351, 2))
+                # if find_image(Home, confidence=0.8): press_ldplayer_screen_with_delays(window, (1265, 351, 2))
                 elif find_image(Resume, confidence=0.8): press_key(window, 'r')
 
                 # elif any(find_image(image) for image in continueF): press_key(window, 'c')
@@ -372,6 +389,8 @@ def event_function_Main():
                 # elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
 
                 elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
+
+                elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
                 
                 elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
         
@@ -383,7 +402,7 @@ def event_function_Main():
                 # elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
 
                 # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
-                # elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
+                # elif find_image(back_GPlay, confidence=0.8): press_ldplayer_screen_with_delays(window, (1628, 815, 2)) #! optional
 
                 # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
 
@@ -455,11 +474,13 @@ def event_function_Ads():
 
                 elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
 
+                elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
+
                 # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
                 elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
 
                 # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
-                elif find_image(back_GPlay, confidence=0.8): press_screen_with_delays(window, (1628, 815, 2)) #! optional
+                elif find_image(back_GPlay, confidence=0.8): press_ldplayer_screen_with_delays(window, (1628, 815, 2)) #! optional
 
                 # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
 
@@ -888,6 +909,7 @@ contF_Region = (1380, 792, 1738, 966)
 # space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
 SPACE =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
 Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
+later =r"C:\Users\nahid\OneDrive\backup\shadowfight3\later.png"
 
 # Fame Related Images
 e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
