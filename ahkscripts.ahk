@@ -660,6 +660,8 @@ DetectHiddenWindows, On
             Run, cmd /k powershell -ExecutionPolicy Bypass -File "%FilePath%", , , PID
         } else if (Ext = "bat") {
             Run, cmd /k "%FilePath%", , , PID
+        } else if (Ext = "ahk") {
+            Run, cmd /k "%FilePath%", , , PID
         } else {
             MsgBox, Unsupported file type: %Ext%
         }
