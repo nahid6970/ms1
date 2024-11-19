@@ -18,7 +18,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "MYPYGUI"             ,"command": "Start-Process  'C:\\ms1\\mypygui.py' -WindowStyle Hidden"},
 {"type": "Command","name": "NetworkCondition"    ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "Open WebUI"          ,"command": "Start-Process open-webui serve"},
-{"type": "Command","name": "RoundedCornerDisable","command": "Start-Process 'C:\\Users\\nahid\\OneDrive\\backup\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"},
+{"type": "Command","name": "Square-Corner"       ,"command": "Start-Process 'C:\\Users\\nahid\\OneDrive\\backup\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"},
 {"type": "Command","name": "SCHEDULED"           ,"command": "Start-Process C:\\ms1\\scheduled.ps1"},
 {"type": "Command","name": "Share Text"          ,"command": "Start-Process 'C:\\ms1\\flask\\share_text\\share_text.py' -WindowStyle Hidden"},
 {"type": "Command","name": "Share File"          ,"command": "Start-Process 'C:\\ms1\\flask\\upload_files.py' -WindowStyle Hidden"},
