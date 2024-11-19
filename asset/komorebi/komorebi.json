@@ -66,16 +66,17 @@
   ],
 
     "float_rules": [
-    {
-      "kind": "Class",
-      "id": "Qt643QWindowIcon",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+    {"kind": "Class",
+    "id": "Qt643QWindowIcon",
+    "matching_strategy": "Equals"},
+
+    {"kind": "Exe",
+    "id": "AutoHotkey.exe",
+    "matching_strategy": "Equals"},
+
+    { "kind": "Exe",
       "id": "Cloudflare WARP.exe",
-      "matching_strategy": "Equals"
-    },
+      "matching_strategy": "Equals"},
     {
       "kind": "Exe",
       "id": "qbittorrent.exe",
