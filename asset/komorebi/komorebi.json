@@ -65,134 +65,116 @@
     }
   ],
 
-    "float_rules": [
-    {"kind": "Class",
+"float_rules": [
+    { "kind": "Class",
     "id": "Qt643QWindowIcon",
-    "matching_strategy": "Equals"},
+    "matching_strategy": "Equals" },
 
-    {"kind": "Exe",
+    { "kind": "Exe",
     "id": "AutoHotkey.exe",
-    "matching_strategy": "Equals"},
+    "matching_strategy": "Equals" },
 
     { "kind": "Exe",
       "id": "Cloudflare WARP.exe",
-      "matching_strategy": "Equals"},
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "qbittorrent.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "7zFM.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Class",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Class",
       "id": "CASCADIA_HOSTING_WINDOW_CLASS",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "GlassWire.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "fdm.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "Riot Client.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "PowerToys.Settings.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Title",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Title",
       "id": "Settingsssssss",
-      "matching_strategy": "Equals"
-    },
+      "matching_strategy": "Equals" },
+
     {
       "kind": "Exe",
       "id": "PotPlayerMini64",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "WorkspaceUtilities.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "VALORANT-Win64-Shipping.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "mylbx.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "DesktopCoral.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "LosslessScaling.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "python.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "VirtualBox.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "VirtualBoxVM.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Title",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Title",
       "id": "WhatsApp",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Title",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Title",
       "id": "WhatsApp",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "PCHealthCheck.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "WsaClient.exe",
-      "matching_strategy": "Equals"
-    },
-    {
-      "kind": "Title",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Title",
       "id": "OS_v2",
-      "matching_strategy": "Equals"
-    }
+      "matching_strategy": "Equals" }
   ],
 
-
-  "tray_and_multi_window_applications": [[
+"tray_and_multi_window_applications": [
       {"kind": "Exe",
       "id": "rssguard.exe",
-      "matching_strategy": "Equals"}
-    ]]
+      "matching_strategy": "Equals"},
+
+      { "kind": "Exe",
+      "id": "ChatGPT.exe",
+      "matching_strategy": "Equals" }
+    ]
 }
