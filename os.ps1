@@ -11,20 +11,26 @@
 #     exit
 # }
 
-# Check if the script is running with administrator privileges
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    # Check for PowerShell Core (pwsh) availability
-    $pwshPath = Get-Command pwsh -ErrorAction SilentlyContinue
-    if ($pwshPath) {
-        # PowerShell Core (pwsh) is available, relaunch with it
-        $scriptPath = $MyInvocation.MyCommand.Definition
-        Start-Process pwsh -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
-    } else {
-        # PowerShell Core is not available, fallback to old PowerShell
-        $scriptPath = $MyInvocation.MyCommand.Definition
-        Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+# Prompt the user if they want to run the script as admin
+$adminResponse = Read-Host "Do you want to run this script with administrator privileges? (Y/N)"
+if ($adminResponse -match '^(Y|y)$') {
+    # Check if the script is already running as admin
+    if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+        # Check for PowerShell Core (pwsh) availability
+        $pwshPath = Get-Command pwsh -ErrorAction SilentlyContinue
+        if ($pwshPath) {
+            # PowerShell Core (pwsh) is available, relaunch with it
+            $scriptPath = $MyInvocation.MyCommand.Definition
+            Start-Process pwsh -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+        } else {
+            # PowerShell Core is not available, fallback to old PowerShell
+            $scriptPath = $MyInvocation.MyCommand.Definition
+            Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+        }
+        exit
     }
-    exit
+} else {
+    Write-Host "Running script without administrator privileges."
 }
 
 Add-Type -AssemblyName PresentationFramework
@@ -182,9 +188,7 @@ function Show-MainMenu {
             "Initial Setup" {
                 $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("Policies")
-                $submenuListBox.Items.Add("Setup Scoop")
-                $submenuListBox.Items.Add("Must Packages")
-                $submenuListBox.Items.Add("Setup Winget")
+                $submenuListBox.Items.Add("PKG Manager & Must Apps")
                 $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
                 $submenuListBox.Items.Add("Font Setup")
@@ -243,7 +247,7 @@ function Show-MainMenu {
                 Install-Module -Name Microsoft.WinGet.Client -Force -AllowClobber
                                          "
             }
-            "Setup Scoop" {
+            "PKG Manager & Must Apps" {
                 New_Window_powershell -Command "
                     if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
                         Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
@@ -257,40 +261,28 @@ function Show-MainMenu {
 
                     'Add Buckets'
                     scoop bucket add nonportable
-                    scoop bucket add main
+                  # scoop bucket add main
                     scoop bucket add extras
                     scoop bucket add versions
-                                         "
-            }
-            # "Setup Scoop_Test_Win10" {
-            #     New_Window_powershell -Command "
-            #         if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-            #             Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
-            #         } else {
-            #             Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
-            #         }
-            #         scoop config cache_path C:\scoopFiles\cache
-            #         scoop install git
 
-            #         scoop bucket add main
-            #         scoop bucket add extras
-            #         scoop bucket add versions
-            #         scoop bucket add nonportable
-
-            #         scoop install winget
-            #         scoop install pwsh
-            #                              "
-            # }
-            "Must Packages" {
-                New_Window_powershell -Command "
-                    winget install Microsoft.PowerShell
                     scoop install sudo
                     scoop install python312
                     scoop install oh-my-posh
                     scoop install fzf
-                    scoop install komorebi
-                                        "
+
+                    winget upgrade --source msstore
+                    winget upgrade --source winget
+                    Write-Host 'winget Source updated successfully!' -ForegroundColor Green
+                    winget upgrade --all
+                    winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+                    Write-Host 'Winget Upgraded ☑️'
+                    Write-Host 'Packages updated successfully' -ForegroundColor Green
+
+                    winget install Microsoft.PowerShell
+                    winget install LGUG2Z.komorebi
+                                         "
             }
+
             "Install Scoop Packages" {
                 New_Window_powershell -Command "
                     # scoop install scoop-completion
@@ -321,30 +313,27 @@ function Show-MainMenu {
             }
             "Pip Packages" {
                 New_Window_pwsh -Command "
-                    # pip install cryptography
+            # needed
                     # pip install customtkinter
-                    # pip install importlib
-                    # pip install keyboard
-                    # pip install pillow
-                    # pip install psutil
-                    # pip install pyadl
                     # pip install pyautogui
+                    # pip install pillow
+                    # pip install pyadl
+                    # pip install keyboard
+                    # pip install psutil
+                    # pip install Flask
                     # pip install pycryptodomex
+            # not sure if needed
+                    # pip install cryptography
+                    # pip install importlib
                     # pip install PyDictionary
                     # pip install pywin32
                     # pip install screeninfo
                     # pip install winshell
-                    # pip install Flask
-                    sudo C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
+
+                    C:\Users\nahid\scoop\shims\sudo C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
                                          "
             }
-            "Setup Winget" {
-                New_Window_powershell -Command "
-                    winget upgrade --source msstore
-                    winget upgrade --source winget
-                    Write-Host 'winget Source updated successfully!' -ForegroundColor Green
-                                        "
-            }
+
             "Update Packages " {
                 New_Window_pwsh -Command "scoop status
                                      scoop update
