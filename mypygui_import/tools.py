@@ -91,7 +91,7 @@ def Folder(WINDOWSTOOLS_FRAME):
     items = [
 ("#204892", "#ffffff", "Advanced Adapter",              {"command": "control ncpa.cpl"}),
 ("#204892", "#ffffff", "CheckDisk",                     {"command": ["powershell", "Start-Process", "-FilePath", "chkdsk", "-ArgumentList", '"/f /r"', "-Verb", "RunAs"]}),
-("#000000", "#ffffff", "Chris Titus Win Utility",       {"command": 'sudo C:/ms1/scripts/ctt.ps1'}),
+("#000000", "#ffffff", "Chris Titus Win Utility",       {"command": 'C:\\Users\\nahid\\scoop\\shims\\sudo C:/ms1/scripts/ctt.ps1'}),
 ("#204892", "#ffffff", "Disk Cleanup",                  {"command": ["powershell", "Start-Process", "-FilePath","cleanmgr","-Verb", "RunAs"]}),
 ("#204892", "#ffffff", "DISM",                          {"command": ["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"]}),
 ("#204892", "#ffffff", "DxDiag",                        {"command": "dxdiag"}),
@@ -112,7 +112,7 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "God Mode",                      {"command": "explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"}),
 ("#204892", "#ffffff", "Performance Options",           {"command": "systempropertiesperformance"}),
 ("#204892", "#ffffff", "Windows Activation Info",       {"command": "slmgr /dli"}),
-("#ee4816", "#ffffff", "Windows [Activate-Script]",     {"command": "C:\ms1\scripts\mas.ps1"}),
+("#ee4816", "#ffffff", "Windows [Activate-Script]",     {"command": "C:\\ms1\\scripts\\mas.ps1"}),
     ]
 
     # Sort the items alphabetically by their text
