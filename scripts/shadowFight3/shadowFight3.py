@@ -426,7 +426,7 @@ def event_function_Main():
                 #     time.sleep(60)
 
                 # # Check if the no_currency image is found
-                # elif find_image(r'C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png', confidence=0.8):
+                # elif find_image(r'C:\msBackups\shadowfight3\notify\no_currency.png', confidence=0.8):
                 #     # Run the whatsapp.py script
                 #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
                 #     # Wait for 1 minute
@@ -849,20 +849,20 @@ Destroy_BT.pack(padx=(1, 1), pady=(1, 1))
 # window title
 window_title='LDPlayer'
 
-# mhome = r"C:\Users\nahid\OneDrive\backup\shadowfight3"
+# mhome = r"C:\msBackups\shadowfight3"
 # Home = rf"{mhome}\Home.png"
 
 # Home Page of the SH3
-Home=r"C:\Users\nahid\OneDrive\backup\shadowfight3\Home.png"
+Home=r"C:\msBackups\shadowfight3\Home.png"
 
 # # Action Related Images
-void_compass=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\void_compass.png"
-eruption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\eruption.png"
-thud=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\thud.png"
-collector=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\collector.png"
-bolt=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bolt.png"
-uppercut=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\uppercut.png"
-Peg_Top=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\peg_top.png"
+void_compass=r"C:\msBackups\shadowfight3\action\void_compass.png"
+eruption=r"C:\msBackups\shadowfight3\action\eruption.png"
+thud=r"C:\msBackups\shadowfight3\action\thud.png"
+collector=r"C:\msBackups\shadowfight3\action\collector.png"
+bolt=r"C:\msBackups\shadowfight3\action\bolt.png"
+uppercut=r"C:\msBackups\shadowfight3\action\uppercut.png"
+Peg_Top=r"C:\msBackups\shadowfight3\action\peg_top.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
@@ -875,9 +875,9 @@ actionF = {
 }
 Action_region = (216, 99, 374, 253)  # Replace with your actual coordinates
 
-# # temp_ac=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\temporary_action.png"
-# health_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_health.png"
-# shadow_bar=r"C:\Users\nahid\OneDrive\backup\shadowfight3\action\bar_shadow.png"
+# # temp_ac=r"C:\msBackups\shadowfight3\action\temporary_action.png"
+# health_bar=r"C:\msBackups\shadowfight3\action\bar_health.png"
+# shadow_bar=r"C:\msBackups\shadowfight3\action\bar_shadow.png"
 # actionF = {
 #     health_bar: 0.98,
 #     shadow_bar: 0.85,
@@ -886,89 +886,89 @@ Action_region = (216, 99, 374, 253)  # Replace with your actual coordinates
 
 
 #* Continue Related Images
-cont1 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont1.png"
-# cont2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont2.png"
-cont3 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont3.png"
-cont4 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont4.png"
-# cont5 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont5.png"
+cont1 =r"C:\msBackups\shadowfight3\continue\cont1.png"
+# cont2 =r"C:\msBackups\shadowfight3\continue\cont2.png"
+cont3 =r"C:\msBackups\shadowfight3\continue\cont3.png"
+cont4 =r"C:\msBackups\shadowfight3\continue\cont4.png"
+# cont5 =r"C:\msBackups\shadowfight3\continue\cont5.png"
 continueF = [cont1, cont3, cont4]
 contF_Region = (1380, 792, 1738, 966)
 
 #* notifyF Related Images
-# currencyERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_currency.png"
-# connectionERR =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_server1.png"
-# connectionERR2 =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\image_65.png"
-# doesnt_exist =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\not_exist.png"
-# no_activity =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_activity.png"
-# no_voidenergy =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\no_voidEnergy.png"
-# home_screen =r"C:\Users\nahid\OneDrive\backup\shadowfight3\notify\home_screen.png"
+# currencyERR =r"C:\msBackups\shadowfight3\notify\no_currency.png"
+# connectionERR =r"C:\msBackups\shadowfight3\notify\no_server1.png"
+# connectionERR2 =r"C:\msBackups\shadowfight3\notify\image_65.png"
+# doesnt_exist =r"C:\msBackups\shadowfight3\notify\not_exist.png"
+# no_activity =r"C:\msBackups\shadowfight3\notify\no_activity.png"
+# no_voidenergy =r"C:\msBackups\shadowfight3\notify\no_voidEnergy.png"
+# home_screen =r"C:\msBackups\shadowfight3\notify\home_screen.png"
 # notifyF = [currencyERR, connectionERR,connectionERR2,doesnt_exist,no_activity,no_voidenergy,home_screen]
 
 #* Others
-# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
-# space_image  =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space.png"
-SPACE =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_space2.png"
-Resume =r"C:\Users\nahid\OneDrive\backup\shadowfight3\resume.png"
-later =r"C:\Users\nahid\OneDrive\backup\shadowfight3\later.png"
+# space_image  =r"C:\msBackups\shadowfight3\fame\b_space.png"
+# space_image  =r"C:\msBackups\shadowfight3\fame\b_space.png"
+SPACE =r"C:\msBackups\shadowfight3\fame\b_space2.png"
+Resume =r"C:\msBackups\shadowfight3\resume.png"
+later =r"C:\msBackups\shadowfight3\later.png"
 
 # Fame Related Images
-e_image      =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\b_tournament.png"
+e_image      =r"C:\msBackups\shadowfight3\fame\b_tournament.png"
 e_image_region = (196, 656, 384, 845)  # Example coordinates and dimensions
 
 
-StartFame    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_19.png"
-WorldIcon    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_20.png"
-GoBack       =r"C:\Users\nahid\OneDrive\backup\shadowfight3\fame\image_21.png"
+StartFame    =r"C:\msBackups\shadowfight3\fame\image_19.png"
+WorldIcon    =r"C:\msBackups\shadowfight3\fame\image_20.png"
+GoBack       =r"C:\msBackups\shadowfight3\fame\image_21.png"
 
 # Raids Related Images
-level3         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\level3.png"
-participate    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\participate.png"
-toraid         =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\to_raid.png"
-fight          =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\fightttttt.png"
-claimreward    =r"C:\Users\nahid\OneDrive\backup\shadowfight3\raids\claim.png"
+level3         =r"C:\msBackups\shadowfight3\raids\level3.png"
+participate    =r"C:\msBackups\shadowfight3\raids\participate.png"
+toraid         =r"C:\msBackups\shadowfight3\raids\to_raid.png"
+fight          =r"C:\msBackups\shadowfight3\raids\fightttttt.png"
+claimreward    =r"C:\msBackups\shadowfight3\raids\claim.png"
 
-# DailyMission=r"C:\Users\nahid\OneDrive\backup\shadowfight3\DailyMission.png"
+# DailyMission=r"C:\msBackups\shadowfight3\DailyMission.png"
 
 # Event Related
-Tournament_step1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Tournament.png"
-back_battlepass=r'C:\Users\nahid\OneDrive\backup\shadowfight3\back_battlepass.png'
+Tournament_step1=r"C:\msBackups\shadowfight3\event\Tournament.png"
+back_battlepass=r'C:\msBackups\shadowfight3\back_battlepass.png'
 
-Select_CreepyParty=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\CreepyParty.png"
-Select_SelectOption=r"C:\Users\nahid\OneDrive\backup\shadowfight3\event\Select\Select.png"
+Select_CreepyParty=r"C:\msBackups\shadowfight3\event\Select\CreepyParty.png"
+Select_SelectOption=r"C:\msBackups\shadowfight3\event\Select\Select.png"
 
-Open_Chest=r"C:\Users\nahid\OneDrive\backup\shadowfight3\chest.png"
+Open_Chest=r"C:\msBackups\shadowfight3\chest.png"
 
 # continue for ads
-passed_50sv=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont_ads\50sv.png"
-failed_50sv=r"C:\Users\nahid\OneDrive\backup\shadowfight3\continue\cont_ads\50sv_failed.png"
+passed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv.png"
+failed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv_failed.png"
 continueADS = [passed_50sv, failed_50sv]
 
-ads_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ads_auto_click"
+ads_folder = r"C:\msBackups\shadowfight3\ads\ads_auto_click"
 ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
 
-cont_folder = r"C:\Users\nahid\OneDrive\backup\shadowfight3\cont_dynamic"
+cont_folder = r"C:\msBackups\shadowfight3\cont_dynamic"
 cont_dynamic = glob.glob(os.path.join(cont_folder, "*.png"))
 
-back_GPlay=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Back_GooglePlay.png"
-Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_Video.png"
+back_GPlay=r"C:\msBackups\shadowfight3\ads\Back_GooglePlay.png"
+Error_Processing_Video=r"C:\msBackups\shadowfight3\ads\error_Video.png"
 
 # Advertisement
-# ads1 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad1.png"
-# ads2 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad2.png"
-# ads3 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad3.png"
-# ads4 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad4.png"
-# ads5 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad5.png"
-# ads6 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad6.png"
-# ads7 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad7.png"
-# ads8 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad8.png"
-# ads9 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad9.png"
-# ads10 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad10.png"
-# ads11 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad11.png"
-# ads12 = r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\ad12.png"
-# sf_ads1=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\sf_ads1.png"
+# ads1 = r"C:\msBackups\shadowfight3\ads\ad1.png"
+# ads2 = r"C:\msBackups\shadowfight3\ads\ad2.png"
+# ads3 = r"C:\msBackups\shadowfight3\ads\ad3.png"
+# ads4 = r"C:\msBackups\shadowfight3\ads\ad4.png"
+# ads5 = r"C:\msBackups\shadowfight3\ads\ad5.png"
+# ads6 = r"C:\msBackups\shadowfight3\ads\ad6.png"
+# ads7 = r"C:\msBackups\shadowfight3\ads\ad7.png"
+# ads8 = r"C:\msBackups\shadowfight3\ads\ad8.png"
+# ads9 = r"C:\msBackups\shadowfight3\ads\ad9.png"
+# ads10 = r"C:\msBackups\shadowfight3\ads\ad10.png"
+# ads11 = r"C:\msBackups\shadowfight3\ads\ad11.png"
+# ads12 = r"C:\msBackups\shadowfight3\ads\ad12.png"
+# sf_ads1=r"C:\msBackups\shadowfight3\ads\sf_ads1.png"
 # ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
-# Click_Ads=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\Click_ADS.png"
+# Click_Ads=r"C:\msBackups\shadowfight3\ads\Click_ADS.png"
 
 """
 ██╗    ██╗██╗  ██╗ █████╗ ████████╗███████╗ █████╗ ██████╗ ██████╗
@@ -978,7 +978,7 @@ Error_Processing_Video=r"C:\Users\nahid\OneDrive\backup\shadowfight3\ads\error_V
 ╚███╔███╔╝██║  ██║██║  ██║   ██║   ███████║██║  ██║██║     ██║
  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝
 """
-profile_pic=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
-call_me=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\call.png'
-cancel=r'C:\Users\nahid\OneDrive\backup\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
+profile_pic=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
+call_me=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
+cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
 ROOT.mainloop()
