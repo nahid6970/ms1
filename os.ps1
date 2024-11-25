@@ -278,6 +278,7 @@ function Show-MainMenu {
                     scoop install oh-my-posh
                     scoop install fzf
                     scoop install komorebi
+                    scoop install rclone
 
                     winget upgrade --source msstore
                     winget upgrade --source winget
@@ -306,7 +307,6 @@ function Show-MainMenu {
                     scoop install kitty
                     scoop install neovim
                     scoop install putty
-                    scoop install rclone
                     scoop install rssguard
                     scoop install rufus
                     scoop install ventoy
