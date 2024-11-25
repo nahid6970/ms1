@@ -443,6 +443,7 @@ function Show-MainMenu {
                     Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
                                          "
             }
+	# initially after creating with  quickstart have to run komorebi with the default profile then we can mklink
             "Komorebi" {
                 New_Window_pwsh -Command "
                     Komorebic quickstart
