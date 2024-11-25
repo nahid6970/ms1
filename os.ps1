@@ -217,15 +217,15 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("5002")
             }
             "mklink" {
+                $submenuListBox.Items.Add("PowerShell Profile")
+                $submenuListBox.Items.Add("Terminal Profile")
+                $submenuListBox.Items.Add("VSCode")
+                $submenuListBox.Items.Add("Komorebi")
+                $submenuListBox.Items.Add("PotPlayer Register")
                 $submenuListBox.Items.Add("Path_Var")
                 $submenuListBox.Items.Add("Sonarr")
                 $submenuListBox.Items.Add("Radarr")
                 $submenuListBox.Items.Add("Prowlarr")
-                $submenuListBox.Items.Add("Komorebi")
-                $submenuListBox.Items.Add("VSCode")
-                $submenuListBox.Items.Add("PowerShell Profile")
-                $submenuListBox.Items.Add("Terminal Profile")
-                $submenuListBox.Items.Add("PotPlayer Register")
             }
         }
     })
