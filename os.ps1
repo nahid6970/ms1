@@ -279,6 +279,7 @@ function Show-MainMenu {
                     scoop install fzf
                     scoop install komorebi
                     scoop install rclone
+                    scoop install ditto
 
                     winget upgrade --source msstore
                     winget upgrade --source winget
