@@ -224,6 +224,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Komorebi")
                 $submenuListBox.Items.Add("VSCode")
                 $submenuListBox.Items.Add("PowerShell Profile")
+                $submenuListBox.Items.Add("Terminal Profile")
                 $submenuListBox.Items.Add("PotPlayer Register")
             }
         }
@@ -465,6 +466,11 @@ function Show-MainMenu {
             "PowerShell Profile" {
                 New_Window_pwsh -Command "
                     $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
+                                         "
+            }
+            "Terminal Profile" {
+                New_Window_pwsh -Command "
+                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\ms1\asset\terminal\settings.json -Force
                                          "
             }
             "PotPlayer Register" {
