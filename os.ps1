@@ -162,8 +162,9 @@ function Show-MainMenu {
     #* ██║     ██║██║  ██║███████║   ██║
     #* ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝
     $mainMenuListBox.Items.Add("Initial Setup")
+    $mainMenuListBox.Items.Add("Clone Projects")
+    $mainMenuListBox.Items.Add("rclone")
     $mainMenuListBox.Items.Add("Application Setup")
-    $mainMenuListBox.Items.Add("Git Setup")
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
     $mainMenuListBox.Items.Add("Github Projects")
@@ -213,11 +214,10 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Set up Neovim")
                 $submenuListBox.Items.Add("Set up Neovim2")
             }
-            "Git Setup" {
+            "Clone Projects" {
                 $submenuListBox.Items.Add("clone ms1")
                 $submenuListBox.Items.Add("clone ms2")
                 $submenuListBox.Items.Add("clone ms3")
-
             }
             "Port" {
                 $submenuListBox.Items.Add("5000")
@@ -238,7 +238,10 @@ function Show-MainMenu {
             "Github Projects" {
                 $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("WIMUtil")
-
+            }
+            "rclone" {
+                $submenuListBox.Items.Add("decrypt rclone.conf & move")
+                $submenuListBox.Items.Add("Restore msBackups")
             }
         }
     })
