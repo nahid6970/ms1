@@ -281,6 +281,7 @@ function Show-MainMenu {
                     } else {
                         Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
                     }
+
                     'Change cache Path'
                     scoop config cache_path D:\@install\scoop\cache
 
