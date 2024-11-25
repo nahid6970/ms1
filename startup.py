@@ -26,7 +26,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "SSHD"                ,"command": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
 {"type": "Command","name": "SYNC"                ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"},
 {"type": "Command","name": "SYNCTHING"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
-{"type": "Command","name": "Virtual_Monitor"     ,"command": "cmd /c 'C:\\Users\\nahid\\OneDrive\\backup\\usbmmidd_v2\\2ndMonitor.bat'; cmd /c 'C:\\Users\\nahid\\OneDrive\\backup\\DisplaySwitch.exe /internal'"},
+{"type": "Command","name": "Virtual_Monitor"     ,"command": "cmd /c 'C:\\msBackups\\Display\\usbmmidd_v2\\2ndMonitor.bat'; cmd /c 'C:\\msBackups\\Display\\DisplaySwitch.exe /internal'"},
 {"type": "Command","name": "WHKD"                ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
 {"type": "Command","name": "YASB"                ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
