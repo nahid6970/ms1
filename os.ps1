@@ -395,7 +395,7 @@ function Show-MainMenu {
 
             # git
             "clone ms1" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                 Write-Host Cloning ms1 to c:\
                 cd c:\
                 git clone https://github.com/nahid6970/ms1
@@ -403,7 +403,7 @@ function Show-MainMenu {
                                          "
             }
             "clone ms2" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                     Write-Host Cloning ms2 to c:\ 
                     cd c:\
                     git clone https://github.com/nahid6970/ms2
@@ -411,7 +411,7 @@ function Show-MainMenu {
                                          "
             }
             "clone ms3" {
-                New_Window_pwsh -Command "
+                New_Window_powershell -Command "
                 Write-Host Cloning ms3 to c:\
                 cd c:\
                 git clone https://github.com/nahid6970/ms3
