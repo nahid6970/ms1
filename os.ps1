@@ -348,6 +348,7 @@ function Show-MainMenu {
                     # pip install psutil
                     # pip install Flask
                     # pip install pycryptodomex
+                    # pip install opencv-python
             # not sure if needed
                     # pip install cryptography
                     # pip install importlib
