@@ -96,6 +96,14 @@ function New_Window_powershell {
     Start-Process powershell -ArgumentList "-NoExit", "-Command", $Command
 }
 
+function New_Window_powershell_asadmin {
+    param (
+        [string]$Command
+    )
+    Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
+}
+
+
 function New_Window_pwsh {
     param (
         [string]$Command
@@ -158,6 +166,7 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Git Setup")
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
+    $mainMenuListBox.Items.Add("Github Projects")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -193,9 +202,8 @@ function Show-MainMenu {
 
         switch ($mainMenuListBox.SelectedItem) {
             "Initial Setup" {
-                $submenuListBox.Items.Add("ChrisTitus WinUtility")
-                $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("PKG Manager & Must Apps")
+                $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("Install Scoop Packages")
                 $submenuListBox.Items.Add("Font Setup")
                 $submenuListBox.Items.Add("pip Packages")
@@ -227,6 +235,11 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Radarr")
                 $submenuListBox.Items.Add("Prowlarr")
             }
+            "Github Projects" {
+                $submenuListBox.Items.Add("ChrisTitus WinUtility")
+                $submenuListBox.Items.Add("WIMUtil")
+
+            }
         }
     })
 
@@ -241,12 +254,14 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             # package
-            
             "ChrisTitus WinUtility" {
-                New_Window_powershell -Command "
-                    iwr -useb https://christitus.com/win | iex
-                                         "
+                New_Window_powershell_asadmin -Command "iwr -useb https://christitus.com/win | iex"
             }
+
+            "WIMUtil" {
+                New_Window_powershell_asadmin -Command "irm 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | iex"
+            }
+
             "Policies" {
                 New_Window_powershell -Command "
                 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -255,6 +270,7 @@ function Show-MainMenu {
                 Install-Module -Name Microsoft.WinGet.Client -Force -AllowClobber
                                          "
             }
+
             "PKG Manager & Must Apps" {
                 New_Window_powershell -Command "
                     if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
