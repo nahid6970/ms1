@@ -697,7 +697,7 @@ Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 # Import-Module -Name C:\ms1\asset\Powershell\pwsh_Polyfill.ps1
 
 #* Enable Zoxide at the end of the script to work
-Invoke-Expression (& { (zoxide init powershell | Out-String) })
+# Invoke-Expression (& { (zoxide init powershell | Out-String) })
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
 
 # Import-Module -Name Microsoft.WinGet.CommandNotFound

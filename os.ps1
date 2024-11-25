@@ -334,7 +334,7 @@ function Show-MainMenu {
                     # pip install screeninfo
                     # pip install winshell
 
-                    C:\Users\nahid\scoop\shims\sudo C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
+                    $su C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
                                          "
             }
 
@@ -354,7 +354,7 @@ function Show-MainMenu {
             }
             "Font Setup" {
                 New_Window_powershell -Command "
-                    sudo oh-my-posh font install
+                    $su oh-my-posh font install
                                                "
             }
             # neovim
@@ -403,27 +403,27 @@ function Show-MainMenu {
             # port
             "5000" {
                 New_Window_pwsh -Command "
-                    sudo New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+                    $su New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
                                          "
             }
             "5001" {
                 New_Window_pwsh -Command "
-                sudo New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
+                $su New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
                                          "
             }
             "5002" {
                 New_Window_pwsh -Command "
-                    sudo New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                    $su New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
                                          "
             }
             # mklink
             "Path_Var" {
-                New_Window_pwsh -Command 'sudo New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python312\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
+                New_Window_pwsh -Command '$su New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python312\current\Lib\Path_Var.py" -Target "C:\ms1\Path_Var.py" -Force #[pwsh]'
             }
             "Sonarr" {
                 New_Window_pwsh -Command "
                     Winget install TeamSonarr.Sonarr
-                    sudo Stop-Process -Name 'Sonarr' -Verbose
+                    $su Stop-Process -Name 'Sonarr' -Verbose
                     Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\sonarr\sonarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
@@ -432,7 +432,7 @@ function Show-MainMenu {
             "Radarr" {
                 New_Window_pwsh -Command "
                     Winget install TeamRadarr.Radarr
-                    sudo Stop-Process -Name 'Radarr' -Verbose
+                    $su Stop-Process -Name 'Radarr' -Verbose
                     Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\radarr\radarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
@@ -441,19 +441,19 @@ function Show-MainMenu {
             "Prowlarr" {
                 New_Window_pwsh -Command "
                     Winget install TeamProwlarr.Prowlarr
-                    sudo Stop-Process -Name 'Prowlarr' -Verbose
+                    $su Stop-Process -Name 'Prowlarr' -Verbose
                     Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
                     New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db -Force -Verbose
                     Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
                                          "
             }
 	# initially after creating with  quickstart have to run komorebi with the default profile then we can mklink
-    #it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in
+    # it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in
             "Komorebi" {
                 New_Window_pwsh -Command "
                     Komorebic quickstart
                     Remove-Item 'C:\Users\nahid\komorebi.json'
-                   $su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
+                    $su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
                                          "
             }
             "VSCode" {
@@ -464,7 +464,7 @@ function Show-MainMenu {
             }
             "PowerShell Profile" {
                 New_Window_pwsh -Command "
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
+                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
                                          "
             }
             "PotPlayer Register" {
