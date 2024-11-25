@@ -11,27 +11,32 @@
 #     exit
 # }
 
-# Prompt the user if they want to run the script as admin
-$adminResponse = Read-Host "Do you want to run this script with administrator privileges? (Y/N)"
-if ($adminResponse -match '^(Y|y)$') {
-    # Check if the script is already running as admin
-    if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-        # Check for PowerShell Core (pwsh) availability
-        $pwshPath = Get-Command pwsh -ErrorAction SilentlyContinue
-        if ($pwshPath) {
-            # PowerShell Core (pwsh) is available, relaunch with it
-            $scriptPath = $MyInvocation.MyCommand.Definition
-            Start-Process pwsh -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
-        } else {
-            # PowerShell Core is not available, fallback to old PowerShell
-            $scriptPath = $MyInvocation.MyCommand.Definition
-            Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
-        }
-        exit
-    }
-} else {
-    Write-Host "Running script without administrator privileges."
-}
+
+
+
+# # Prompt the user if they want to run the script as admin
+# $adminResponse = Read-Host "Do you want to run this script with administrator privileges? (Y/N)"
+# if ($adminResponse -match '^(Y|y)$') {
+#     # Check if the script is already running as admin
+#     if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+#         # Check for PowerShell Core (pwsh) availability
+#         $pwshPath = Get-Command pwsh -ErrorAction SilentlyContinue
+#         if ($pwshPath) {
+#             # PowerShell Core (pwsh) is available, relaunch with it
+#             $scriptPath = $MyInvocation.MyCommand.Definition
+#             Start-Process pwsh -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+#         } else {
+#             # PowerShell Core is not available, fallback to old PowerShell
+#             $scriptPath = $MyInvocation.MyCommand.Definition
+#             Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+#         }
+#         exit
+#     }
+# } else {
+#     Write-Host "Running script without administrator privileges."
+# }
+
+
 
 Add-Type -AssemblyName PresentationFramework
 
@@ -97,6 +102,8 @@ function New_Window_pwsh {
     )
     Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
+
+$su = "C:\Users\nahid\scoop\shims\sudo.ps1"
 
 # Main Menu and Submenu in a side-by-side view
 function Show-MainMenu {
@@ -189,7 +196,6 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("PKG Manager & Must Apps")
-                $submenuListBox.Items.Add("Install Winget Packages")
                 $submenuListBox.Items.Add("Install Scoop Packages")
                 $submenuListBox.Items.Add("Font Setup")
                 $submenuListBox.Items.Add("pip Packages")
@@ -234,6 +240,7 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         switch ($submenuListBox.SelectedItem) {
             # package
+            
             "ChrisTitus WinUtility" {
                 New_Window_powershell -Command "
                     iwr -useb https://christitus.com/win | iex
@@ -241,8 +248,8 @@ function Show-MainMenu {
             }
             "Policies" {
                 New_Window_powershell -Command "
-                Set-ExecutionPolicy RemoteSigned
                 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+                Set-ExecutionPolicy RemoteSigned
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
                 Install-Module -Name Microsoft.WinGet.Client -Force -AllowClobber
                                          "
@@ -269,6 +276,7 @@ function Show-MainMenu {
                     scoop install python312
                     scoop install oh-my-posh
                     scoop install fzf
+                    scoop install komorebi
 
                     winget upgrade --source msstore
                     winget upgrade --source winget
@@ -279,7 +287,7 @@ function Show-MainMenu {
                     Write-Host 'Packages updated successfully' -ForegroundColor Green
 
                     winget install Microsoft.PowerShell
-                    winget install LGUG2Z.komorebi
+                    winget install 9NQ8Q8J78637 # ahk (probably need to check)
                                          "
             }
 
@@ -306,11 +314,7 @@ function Show-MainMenu {
                     Write-Host 'Packages installed successfully' --ForegroundColor Green
                                         "
             }
-            "Install Winget Packages" {
-                New_Window_powershell -Command "
-                    winget install 9NQ8Q8J78637 # ahk (probably)
-                                        "
-            }
+
             "Pip Packages" {
                 New_Window_pwsh -Command "
             # needed
@@ -444,11 +448,12 @@ function Show-MainMenu {
                                          "
             }
 	# initially after creating with  quickstart have to run komorebi with the default profile then we can mklink
+    #it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in
             "Komorebi" {
                 New_Window_pwsh -Command "
                     Komorebic quickstart
                     Remove-Item 'C:\Users\nahid\komorebi.json'
-                    New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
+                   $su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
                                          "
             }
             "VSCode" {
