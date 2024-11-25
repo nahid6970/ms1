@@ -162,7 +162,8 @@ def find_image(image_path, confidence=0.7, region=None):
     return None
 
 def WhatsPhotoClick():
-    pyautogui.click(x=1781, y=900)
+    pyautogui.click(x=1740, y=900)
+    time.sleep(2)
     window = focus_window(window_title)
     if not window:
         print(f"Window '{window_title}' not found.")
@@ -170,7 +171,7 @@ def WhatsPhotoClick():
     try:
         while True:  # Loop will continue indefinitely unless interrupted by an external condition
             focus_window(window_title)
-            if find_image(profile_pic): press_ldplayer_screen_with_delays(window, (1422, 480, 2))
+            if find_image(profile_pic): press_ldplayer_screen_with_delays(window, (166, 780, 2))
             elif find_image(call_me, confidence=0.8): press_keys_with_delays(window, "a", 1, "b", 120)
             elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
             time.sleep(0.1)
