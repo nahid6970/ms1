@@ -444,31 +444,36 @@ function Show-MainMenu {
             "Path_Var" {
                 New_Window_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Path_Var.py' -Target 'C:\ms1\Path_Var.py' -Force #[pwsh]"
             }
+            # sonarr will take some time to resolve the issue internally just wait
             "Sonarr" {
                 New_Window_pwsh -Command "
                     Winget install TeamSonarr.Sonarr
-                    $su Stop-Process -Name 'Sonarr' -Verbose
-                    Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
-                    New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\sonarr\sonarr.db -Force -Verbose
-                    Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
+                    # $su Stop-Process -Name 'Sonarr' -Verbose
+                    # Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
+                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
+                    # Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
+                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
                                          "
             }
             "Radarr" {
                 New_Window_pwsh -Command "
                     Winget install TeamRadarr.Radarr
-                    $su Stop-Process -Name 'Radarr' -Verbose
-                    Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
-                    New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\radarr\radarr.db -Force -Verbose
-                    Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
+                    # $su Stop-Process -Name 'Radarr' -Verbose
+                    # $su Stop-Process -Name 'Radarr.Console' -Verbose
+                    # Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
+                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\msBackups\@mklink\radarr\radarr.db -Force -Verbose
+                    # Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
+                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
                                          "
             }
             "Prowlarr" {
                 New_Window_pwsh -Command "
                     Winget install TeamProwlarr.Prowlarr
-                    $su Stop-Process -Name 'Prowlarr' -Verbose
-                    Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
-                    New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\OneDrive\backup\@mklink\prowlarr\prowlarr.db -Force -Verbose
-                    Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
+                    # $su Stop-Process -Name 'Prowlarr' -Verbose
+                    # Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
+                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
+                    # Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
+                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
                                          "
             }
 	# initially after creating with  quickstart have to run komorebi with the default profile then we can mklink
