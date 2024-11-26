@@ -21,7 +21,7 @@ Write-Host "Scoop Status & Bucked Updated ☑️"
 Write-Host "Apps Closed for Update ☑️"
 
 scoop update *
-scoop export > C:\Users\nahid\OneDrive\backup\installed_apps\list_scoop.txt
+# scoop export > C:\Users\nahid\OneDrive\backup\installed_apps\list_scoop.txt
 Write-Host "scoop updated ☑️"
 
 #Start closed processes again
@@ -38,7 +38,7 @@ Write-Host "Scoop Cleanedup ☑️"
 #winget source update --name winget
 # winget upgrade --all --include-unknown
 winget upgrade --all
-winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+# winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
 Write-Host "Winget Upgraded ☑️"
 
 # Start-Process powershell -ArgumentList "choco upgrade all -y" -Verb RunAs 
