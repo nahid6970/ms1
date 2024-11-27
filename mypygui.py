@@ -736,15 +736,15 @@ BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=la
 BACK.pack(side="left" ,padx=(0,0))
 def Folder(FUNCTION_FRAME):
         # Function to simulate key press
-        def send_f13():
-            keyboard.send('f13')
-        F13=tk.Button(BOX,text="F13",width=0 ,fg="#ffffff", bg="#204892", command=send_f13)
-        F13.pack(side="left" ,padx=(0,0))
+        # def send_f13():
+        #     keyboard.send('f13')
+        # F13=tk.Button(BOX,text="F13",width=0 ,fg="#ffffff", bg="#204892", command=send_f13)
+        # F13.pack(side="left" ,padx=(0,0))
 
-        def send_f15():
-            keyboard.send('f15')
-        F15=tk.Button(BOX,text="F15",width=0 ,fg="#ffffff", bg="#204892", command=send_f15)
-        F15.pack(side="left" ,padx=(0,0))
+        # def send_f15():
+        #     keyboard.send('f15')
+        # F15=tk.Button(BOX,text="F15",width=0 ,fg="#ffffff", bg="#204892", command=send_f15)
+        # F15.pack(side="left" ,padx=(0,0))
 
         def powertoys_ruler():
             keyboard.press_and_release('win+shift+m')
@@ -757,7 +757,7 @@ def Folder(FUNCTION_FRAME):
         TOY_MCROSSHAIR.pack(side="left" ,padx=(0,0))
 
         def powertoys_TextExtract():
-            keyboard.press_and_release('win+shift+t')
+            keyboard.press_and_release('win+shift+f')
         TOY_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_TextExtract)
         TOY_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
 
