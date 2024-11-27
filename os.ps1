@@ -311,6 +311,7 @@ function Show-MainMenu {
                     Write-Host 'Packages updated successfully' -ForegroundColor Green
 
                     winget install Microsoft.PowerShell
+                    winget install Notepad++.Notepad++
                     winget install 9NQ8Q8J78637 # ahk (probably need to check)
                                          "
             }
