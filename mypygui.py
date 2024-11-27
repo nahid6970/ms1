@@ -529,6 +529,11 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
+OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#54a9f0", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
+OS_LB.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\os.ps1'))
+OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\os.ps1'))
+
 Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Tools_bt.pack(side="left",padx=(2,0),pady=(1,0))
 Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
@@ -620,11 +625,6 @@ ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 # ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\SH3\\SH3V2.py'))
 ShadowFight3_lb.bind("<Button-1>", lambda event=None: subprocess.Popen('cmd /k start powershell -ExecutionPolicy Bypass -NoExit -Command "python C:\\ms1\\scripts\\shadowFight3\\shadowFight3.py"'))
 ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\scripts\\shadowFight3\\shadowFight3.py'))
-
-OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#54a9f0", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
-OS_LB.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\os.ps1'))
-OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\os.ps1'))
 
 
 #! FFMPEG
