@@ -529,15 +529,10 @@ ROOT2.pack(side="right", pady=(2,2),padx=(5,1), anchor="e", fill="x")
 uptime_label=CTkLabel(ROOT1, text="", corner_radius=3, width=100,height=20,  text_color="#6bc0f8",fg_color="#1d2027", font=("JetBrainsMono NFP" ,16,"bold"))
 uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
-OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#54a9f0", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
 OS_LB.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\os.ps1'))
 OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\os.ps1'))
-
-Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-Tools_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
-Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\tools.py"], shell=True))
 
 Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
@@ -547,6 +542,12 @@ Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\
 # Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 # Update.pack(side="left",padx=(0,0),pady=(1,0))
 # Update.bind("<Button-1>",lambda event:subprocess.Popen(["C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"], shell=True))
+
+
+Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+Tools_bt.pack(side="left",padx=(2,0),pady=(1,0))
+Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
+Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\tools.py"], shell=True))
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
