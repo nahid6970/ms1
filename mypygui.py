@@ -541,7 +541,12 @@ Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C
 
 Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
-Update.bind("<Button-1>",lambda event:subprocess.Popen(["C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"], shell=True))
+Update.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\update.ps1"], shell=True))
+Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\update.ps1"], shell=True))
+
+# Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+# Update.pack(side="left",padx=(0,0),pady=(1,0))
+# Update.bind("<Button-1>",lambda event:subprocess.Popen(["C:\\Users\\nahid\\AppData\\Local\\Programs\\UniGetUI\\UniGetUI.exe"], shell=True))
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
