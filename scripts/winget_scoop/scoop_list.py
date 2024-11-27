@@ -10,7 +10,7 @@ folders = [
 ]
 
 # Set the output text file
-output_file = "C:\\Users\\nahid\\OneDrive\\backup\\installed_apps\\python_scoop_list_fzf.txt"
+output_file = "C:\\Users\\nahid\\python_scoop_list_fzf.txt"
 
 # Function to list packages from a folder
 def list_packages(folder):
