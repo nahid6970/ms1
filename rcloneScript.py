@@ -114,7 +114,7 @@ command_radios = [
     {"text": "tree" ,"value": "tree"} ,
     {"text": "ncdu" ,"value": "ncdu"} ,
     {"text": "size" ,"value": "size"} ,
-    {"text": "mount","value": "mount"},
+    {"text": "mount(winfsp)","value": "mount"},
     {"text": "rcd","value": "rcd"},
 ]
 # Initialize command radio buttons
