@@ -300,6 +300,7 @@ function Show-MainMenu {
                     scoop install komorebi
                     scoop install rclone
                     scoop install ditto
+                    scoop install text-grab
 
                     winget upgrade --source msstore
                     winget upgrade --source winget

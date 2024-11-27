@@ -173,6 +173,10 @@
       "id": "rssguard.exe",
       "matching_strategy": "Equals"},
 
+      {"kind": "Exe",
+      "id": "Text-Grab.exe",
+      "matching_strategy": "Equals"},
+
       { "kind": "Exe",
       "id": "ChatGPT.exe",
       "matching_strategy": "Equals" }
