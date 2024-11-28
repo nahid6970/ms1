@@ -525,10 +525,8 @@ return
 {
     ; Get the window under the mouse
     MouseGetPos, , , winID
-    
     ; Get the process path
     WinGet, processPath, ProcessPath, ahk_id %winID%
-    
     ; Run the process as administrator
     if (processPath != "")
     {

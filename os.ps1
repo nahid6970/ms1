@@ -213,6 +213,7 @@ function Show-MainMenu {
             "Application Setup" {
                 $submenuListBox.Items.Add("Set up Neovim")
                 $submenuListBox.Items.Add("Set up Neovim2")
+                $submenuListBox.Items.Add("Notepad++ Theme Setup")
             }
             "Clone Projects" {
                 $submenuListBox.Items.Add("clone ms1")
@@ -399,6 +400,17 @@ function Show-MainMenu {
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
                 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init2.lua -Force
                 "
+            }
+
+            "Notepad++ Theme Setup" {
+                New_Window_pwsh -Command '
+                # git clone https://github.com/dracula/notepad-plus-plus.git
+                Start-Process "$env:AppData\Notepad++\themes"
+                Start-Process "C:\Users\nahid\notepad-plus-plus"
+                Write-Host -ForegroundColor Green step1: Copy Dracula.xml from github folder to %AppData%\Notepad++\themes
+                Write-Host -ForegroundColor Green step2: Restart Notepad++
+                Write-Host -ForegroundColor Green step3: Dracula will be available in Settings > Style Configurator
+                '
             }
 
             # git
