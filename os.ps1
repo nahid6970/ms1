@@ -404,7 +404,8 @@ function Show-MainMenu {
 
             "Notepad++ Theme Setup" {
                 New_Window_pwsh -Command '
-                # git clone https://github.com/dracula/notepad-plus-plus.git
+                cd C:\Users\nahid 
+                git clone https://github.com/dracula/notepad-plus-plus.git
                 Start-Process "$env:AppData\Notepad++\themes"
                 Start-Process "C:\Users\nahid\notepad-plus-plus"
                 Write-Host -ForegroundColor Green step1: Copy Dracula.xml from github folder to %AppData%\Notepad++\themes
