@@ -404,11 +404,19 @@ function Show-MainMenu {
 
             "Notepad++ Theme Setup" {
                 New_Window_pwsh -Command '
-                cd C:\Users\nahid 
+                cd C:\Users\nahid
+
+                Write-Host -ForegroundColor Blue "Dracula Theme"
                 git clone https://github.com/dracula/notepad-plus-plus.git
-                Start-Process "$env:AppData\Notepad++\themes"
                 Start-Process "C:\Users\nahid\notepad-plus-plus"
-                Write-Host -ForegroundColor Green step1: Copy Dracula.xml from github folder to %AppData%\Notepad++\themes
+
+                # Write-Host -ForegroundColor Blue "Material Theme"
+                # git clone https://github.com/Codextor/npp-material-theme.git
+                # Start-Process "C:\Users\nahid\npp-material-theme"
+
+                Start-Process "$env:AppData\Notepad++\themes"
+                
+                Write-Host -ForegroundColor Green step1: Copy Example.xml from github folder to %AppData%\Notepad++\themes
                 Write-Host -ForegroundColor Green step2: Restart Notepad++
                 Write-Host -ForegroundColor Green step3: Dracula will be available in Settings > Style Configurator
                 '
