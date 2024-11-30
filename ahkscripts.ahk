@@ -11,9 +11,9 @@
 ; !Numpad1::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/internal"",,Hide
 ; !Numpad2::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/external"",,Hide
 ; !Numpad3::Run, pwsh -c "Start-Process "C:\Windows\System32\DisplaySwitch.exe" -ArgumentList "/extend"",,Hide
-!Numpad1::Run, %ComSpec% /c "C:\msBackups\Display\DisplaySwitch.exe /internal",,Hide
-!Numpad2::Run, %ComSpec% /c "C:\msBackups\Display\DisplaySwitch.exe /external",,Hide
-!Numpad3::Run, %ComSpec% /c "C:\msBackups\Display\DisplaySwitch.exe /extend",,Hide
+RAlt & Numpad1::Run, %ComSpec% /c "C:\msBackups\Display\DisplaySwitch.exe /internal",,Hide
+RAlt & Numpad2::Run, %ComSpec% /c "C:\msBackups\Display\DisplaySwitch.exe /external",,Hide
+RAlt & Numpad3::Run, %ComSpec% /c "C:\msBackups\Display\DisplaySwitch.exe /extend",,Hide
 #2:: Run, cmd /c C:\Users\nahid\OneDrive\backup\usbmmidd_v2\2ndMonitor.bat,,Hide
 !c::Center_Focused_Window()
 !1::Send_to_2nd_Monitor()
