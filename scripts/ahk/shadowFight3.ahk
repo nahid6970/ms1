@@ -183,6 +183,33 @@ return
     return
 
 
+    ; F20:: ; Hound
+    ; StartTime := A_TickCount
+    ; while (A_TickCount - StartTime < 5000)
+    ; {
+    ;     if !WinActive("ahk_exe dnplayer.exe")
+    ;     {
+    ;         break
+    ;     }
+        
+    ;     Send, {i down}
+    ;     Send, {x down}
+    ;     Sleep, 1500
+        
+    ;     ; Hold down 'd' for 3 seconds while pressing 'j' repeatedly
+    ;     Send, {d down}
+    ;     Loop, 10 ; Press 'j' 30 times (approx 1 press per 100ms for 3 seconds)
+    ;     {
+    ;         SendInput, j
+    ;         Sleep, 100 ; Adjust the delay between each 'j' press
+    ;     }
+    ;     Send, {d up} ; Release 'd' after 3 seconds
+    ;     Send, {x up}
+    ;     Send, {i up}
+    ; }
+    ; return
+
+
     F20:: ; Hound
     StartTime := A_TickCount
     while (A_TickCount - StartTime < 5000)
@@ -194,16 +221,12 @@ return
         
         Send, {i down}
         Send, {x down}
-        Sleep, 1500
-        
-        ; Hold down 'd' for 3 seconds while pressing 'j' repeatedly
+        Sleep, 300
         Send, {d down}
-        Loop, 10 ; Press 'j' 30 times (approx 1 press per 100ms for 3 seconds)
-        {
-            SendInput, j
-            Sleep, 100 ; Adjust the delay between each 'j' press
-        }
-        Send, {d up} ; Release 'd' after 3 seconds
+        SendInput, j
+        SendInput, j
+        SendInput, j
+        Send, {d up}
         Send, {x up}
         Send, {i up}
     }
