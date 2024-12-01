@@ -214,6 +214,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Set up Neovim")
                 $submenuListBox.Items.Add("Set up Neovim2")
                 $submenuListBox.Items.Add("Notepad++ Theme Setup")
+                $submenuListBox.Items.Add("jackett + qbittorrent")
             }
             "Clone Projects" {
                 $submenuListBox.Items.Add("clone ms1")
@@ -419,6 +420,16 @@ function Show-MainMenu {
                 Write-Host -ForegroundColor Green step1: Copy Example.xml from github folder to %AppData%\Notepad++\themes
                 Write-Host -ForegroundColor Green step2: Restart Notepad++
                 Write-Host -ForegroundColor Green step3: Dracula will be available in Settings > Style Configurator
+                '
+            }
+
+            "jackett + qbittorrent" {
+                New_Window_pwsh -Command '
+                # cd C:\Users\nahid
+                Write-Host -ForegroundColor Green Step 1: open qbittorrent -> view -> search engine -> Go To search engine tab -> search plugin -> check for updates -> now nova3 folder will be added
+                Write-Host -ForegroundColor Green Step 2: Start Jackett and add the necessary indexes to th list
+                Write-Host -ForegroundColor Green Step 3: Copy jacket api from webui to jackett.json
+                Start-Process "C:\Users\nahid\AppData\Local\qBittorrent\nova3\engines"
                 '
             }
 
