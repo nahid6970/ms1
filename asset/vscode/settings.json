@@ -8,7 +8,7 @@
     "workbench.startupEditor": "none",
     "workbench.editor.enablePreview": false,
     "workbench.sideBar.location": "right",
-    "workbench.colorTheme": "Default Dark+",
+    "workbench.colorTheme": "Dracula Theme Soft",
     "workbench.iconTheme": "material-icon-theme",
 
     // // Silence the Noise
