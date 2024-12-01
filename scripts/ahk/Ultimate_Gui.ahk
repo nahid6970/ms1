@@ -1,7 +1,6 @@
 #Include C:\ms1\scripts\AHK_BT\V1_4\Class_ImageButton.ahk
 Gui, +AlwaysOnTop
 Gui, Margin, 20, 20
-; Gui, Font, s11 normal, Segoe UI
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
 
 Gui, Add, Button, xm ym h30 gkomorebic_save ,Komorebic Save

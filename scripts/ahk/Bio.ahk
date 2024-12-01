@@ -1,24 +1,25 @@
 Gui, Destroy
 Gui, New, +Resize
 Gui, +AlwaysOnTop
-
+Gui, Margin, 20, 20
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
 
-Gui,Add,Button,x000 y000 w200 h50               ,Nahid Ahmed
-Gui,Add,Button,x200 y000 w100 h50 gname_en_nahid,[EN]
-Gui,Add,Button,x300 y000 w100 h50 gname_bd_nahid,[BD]
+Gui,Add,Button,xm ym w200 h50               ,Nahid Ahmed
+Gui,Add,Button,x+5 yp w100 h50 gname_en_nahid,[EN]
+Gui,Add,Button,x+5 yp w100 h50 gname_bd_nahid,[BD]
 
-Gui,Add,Button,x000 y050 w200 h50               ,Father
-Gui,Add,Button,x200 y050 w100 h50 gname_en_father,[EN]
-Gui,Add,Button,x300 y050 w100 h50 gname_bd_father,[BD]
+Gui,Add,Button,xm y+5 w200 h50               ,Father
+Gui,Add,Button,x+5 yp w100 h50 gname_en_father,[EN]
+Gui,Add,Button,x+5 yp w100 h50 gname_bd_father,[BD]
 
-Gui,Add,Button,x000 y100 w200 h50               ,Mother
-Gui,Add,Button,x200 y100 w100 h50 gname_en_mother,[EN]
-Gui,Add,Button,x300 y100 w100 h50 gname_bd_mother,[BD]
+Gui,Add,Button,xm y+5 w200 h50               ,Mother
+Gui,Add,Button,x+5 yp w100 h50 gname_en_mother,[EN]
+Gui,Add,Button,x+5 yp w100 h50 gname_bd_mother,[BD]
 
-Gui,Add,Button,x000 y150 w400 h50 gPermanentAddress,Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+Gui,Add,Button,xm y+5 w410 h50 gPermanentAddress,Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
 
-Gui, Show, w400 h500, BIO
+; Gui, Show, w400 h500, BIO
+Gui, Show, , BIO
 return
 
 GuiClose:
