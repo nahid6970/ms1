@@ -40,7 +40,7 @@ Gui,Add,Button, x+5 yp w100 h50 gbba_year,       Year
 Gui,Add,Button, x+5 yp w100 h50 gbba_versity,    versity
 Gui,Add,Button, x+5 yp w100 h50 gbba_score,      Score
 
-; BBA
+; MBA
 Gui,Add,Button, xm y+5 w200 h50,                 MBA
 Gui,Add,Button, x+5 yp w100 h50 gmba_roll,       Roll
 Gui,Add,Button, x+5 yp w100 h50 gmba_year,       Year
