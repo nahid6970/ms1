@@ -33,6 +33,20 @@ Gui,Add,Button, x+5 yp w100 h50 ghsc_roll,       Roll
 Gui,Add,Button, x+5 yp w100 h50 ghsc_year,       Year
 Gui,Add,Button, x+5 yp w100 h50 ghsc_college,    College
 
+; BBA
+Gui,Add,Button, xm y+5 w200 h50,                 BBA
+Gui,Add,Button, x+5 yp w100 h50 gbba_roll,       Roll
+Gui,Add,Button, x+5 yp w100 h50 gbba_year,       Year
+Gui,Add,Button, x+5 yp w100 h50 gbba_versity,    versity
+Gui,Add,Button, x+5 yp w100 h50 gbba_score,      Score
+
+; BBA
+Gui,Add,Button, xm y+5 w200 h50,                 MBA
+Gui,Add,Button, x+5 yp w100 h50 gmba_roll,       Roll
+Gui,Add,Button, x+5 yp w100 h50 gmba_year,       Year
+Gui,Add,Button, x+5 yp w100 h50 gmba_versity,    versity
+Gui,Add,Button, x+5 yp w100 h50 gmba_score,      Score
+
 ; Gui, Show, w400 h500, BIO
 Gui, Show, , BIO
 return
@@ -109,6 +123,48 @@ return
 hsc_college:
     Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
     Send, Notre Dame College
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+
+bba_roll:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 23-208
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+bba_year:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 2020
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+bba_versity:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, University of Dhaka
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+bba_score:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 3.3
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+
+mba_roll:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 23-208
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+mba_year:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 2021
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+mba_versity:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, University of Dhaka
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+mba_score:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 3.23
     Gui, Show ; Brings the GUI back (if you used Hide above)
 return
 
