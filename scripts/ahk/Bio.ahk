@@ -4,19 +4,34 @@ Gui, +AlwaysOnTop
 Gui, Margin, 20, 20
 Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
 
-Gui,Add,Button,xm ym w200 h50               ,Nahid Ahmed
-Gui,Add,Button,x+5 yp w100 h50 gname_en_nahid,[EN]
-Gui,Add,Button,x+5 yp w100 h50 gname_bd_nahid,[BD]
+; ME
+Gui,Add,Button, xm ym w200 h50,                Nahid Ahmed
+Gui,Add,Button, x+5 yp w100 h50 gname_en_nahid,en
+Gui,Add,Button, x+5 yp w100 h50 gname_bd_nahid,bn
 
-Gui,Add,Button,xm y+5 w200 h50               ,Father
-Gui,Add,Button,x+5 yp w100 h50 gname_en_father,[EN]
-Gui,Add,Button,x+5 yp w100 h50 gname_bd_father,[BD]
+; Father
+Gui,Add,Button, xm y+5 w200 h50,                Father
+Gui,Add,Button, x+5 yp w100 h50 gname_en_father,en
+Gui,Add,Button, x+5 yp w100 h50 gname_bd_father,bn
 
-Gui,Add,Button,xm y+5 w200 h50               ,Mother
-Gui,Add,Button,x+5 yp w100 h50 gname_en_mother,[EN]
-Gui,Add,Button,x+5 yp w100 h50 gname_bd_mother,[BD]
+; Mother
+Gui,Add,Button, xm y+5 w200 h50,                Mother
+Gui,Add,Button, x+5 yp w100 h50 gname_en_mother,en
+Gui,Add,Button, x+5 yp w100 h50 gname_bd_mother,bn
 
 Gui,Add,Button,xm y+5 w410 h50 gPermanentAddress,Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+
+; SSC
+Gui,Add,Button, xm y+5 w200 h50,                 SSC
+Gui,Add,Button, x+5 yp w100 h50 gssc_roll,       Roll
+Gui,Add,Button, x+5 yp w100 h50 gssc_year,       Year
+Gui,Add,Button, x+5 yp w100 h50 gssc_school,     School
+
+; HSC
+Gui,Add,Button, xm y+5 w200 h50,                 HSC
+Gui,Add,Button, x+5 yp w100 h50 ghsc_roll,       Roll
+Gui,Add,Button, x+5 yp w100 h50 ghsc_year,       Year
+Gui,Add,Button, x+5 yp w100 h50 ghsc_college,    College
 
 ; Gui, Show, w400 h500, BIO
 Gui, Show, , BIO
@@ -65,4 +80,35 @@ PermanentAddress:
     Gui, Show ; Brings the GUI back (if you used Hide above)
 return
 
+ssc_roll:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 402206
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+ssc_year:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 2014
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+ssc_school:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, Provati Uchya Bidyanikaton
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+
+hsc_roll:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 510014
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+hsc_year:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 2016
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+hsc_college:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, Notre Dame College
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
 
