@@ -5,8 +5,19 @@ Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
 ; Create a tray icon with a right-click menu
 Menu, Tray, Add, Reset WorkSpace, Toggle_Reset_Workspace
 Menu, Tray, Add, Exit, ExitScript
+Menu, Tray, Add, VScode, OpenWithVSCode
 
-Menu, Tray, Default, Exit ; Sets default menu item for left-click on tray icon
+; Menu, Tray, Default, Exit ; Sets default menu item for left-click on tray icon
+
+; Detect double-click on the tray icon
+OnMessage(0x404, "TrayIconClick")
+; what happens when double click Detected
+
+TrayIconClick(wParam, lParam) {
+    if (lParam = 0x201) { ; Double-click detected
+        Run, "C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe" "%A_ScriptFullPath%" ; Open the script in VSCode
+    }
+}
 
 ; Optional: Right-click on tray icon for menu
 TrayIconShortcut:
@@ -14,6 +25,10 @@ TrayIconShortcut:
 ; Function to exit the script when selected from tray menu
 ExitScript:
     ExitApp
+; Define the action to open the script in VS Code
+OpenWithVSCode:
+    Run, "C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe" "%A_ScriptFullPath%"
+return
 
 
 
