@@ -26,6 +26,7 @@ Gui,Add,Button, xm y+5 w200 h50,                 SSC
 Gui,Add,Button, x+5 yp w100 h50 gssc_roll,       Roll
 Gui,Add,Button, x+5 yp w100 h50 gssc_year,       Year
 Gui,Add,Button, x+5 yp w100 h50 gssc_school,     School
+Gui,Add,Button, x+5 yp w100 h50 gssc_hsc_reg,    REG:
 
 ; HSC
 Gui,Add,Button, xm y+5 w200 h50,                 HSC
@@ -109,6 +110,11 @@ ssc_school:
     Send, Provati Uchya Bidyanikaton
     Gui, Show ; Brings the GUI back (if you used Hide above)
 return
+ssc_hsc_reg:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 1110241111
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
 
 hsc_roll:
     Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
@@ -167,4 +173,3 @@ mba_score:
     Send, 3.23
     Gui, Show ; Brings the GUI back (if you used Hide above)
 return
-
