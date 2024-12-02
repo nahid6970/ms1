@@ -4,7 +4,7 @@ $eventtype = $env:radarr_eventtype
 $movie_title = $env:radarr_movie_title
 $releasedyear = $env:radarr_movie_year
 $movie_quality = $env:radarr_release_quality
-$iconPath = "C:\Users\nahid\OneDrive\backup\icon\radarr.png" # Path to Radarr icon file
+$iconPath = "C:\msBackups\icon\radarr.png" # Path to Radarr icon file
 
 switch ($eventtype) {
     Grab {
