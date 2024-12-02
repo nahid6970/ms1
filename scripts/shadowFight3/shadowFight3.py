@@ -534,7 +534,7 @@ def raid_items_handler(window):
         while not stop_thread_raid:
             focus_window(window_title)
             if find_image(Home, confidence=0.8): press_key(window, 'z')
-            elif find_image(level3, confidence=0.85): press_key(window, '3')
+            elif find_image(level3, confidence=0.85): press_keys_with_delays(window, '3',2, "c",1)
             elif find_image(participate, confidence=0.97): press_key(window, 'c')
             elif find_image(toraid, confidence=0.97): press_key(window, ' ')
             elif find_image(fight, confidence=0.97): press_key(window, 'c')

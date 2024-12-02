@@ -311,6 +311,8 @@ function Show-MainMenu {
                     scoop install rclone
                     scoop install ditto
                     scoop install text-grab
+                    scoop install yt-dlp
+                    scoop install ffmpeg
 
                     winget upgrade --source msstore
                     winget upgrade --source winget
