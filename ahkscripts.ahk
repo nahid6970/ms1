@@ -1,3 +1,22 @@
+#Persistent ; Keeps the script running
+Menu, Tray, Icon, C:\msBackups\icon\shutdown3.png ; Set the tray icon
+Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
+
+; Create a tray icon with a right-click menu
+Menu, Tray, Add, Reset WorkSpace, Toggle_Reset_Workspace
+Menu, Tray, Add, Exit, ExitScript
+
+Menu, Tray, Default, Exit ; Sets default menu item for left-click on tray icon
+
+; Optional: Right-click on tray icon for menu
+TrayIconShortcut:
+    Return
+; Function to exit the script when selected from tray menu
+ExitScript:
+    ExitApp
+
+
+
 #Include, C:\ms1\scripts\ahk\Text_Related.ahk
 #Include, C:\ms1\scripts\ahk\Windows_Screen_related.ahk
 #Include, C:\ms1\scripts\ahk\shadowFight3.ahk
