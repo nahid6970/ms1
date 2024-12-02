@@ -103,6 +103,13 @@ function New_Window_powershell_asadmin {
     Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
 }
 
+function New_Window_pwsh_asadmin {
+    param (
+        [string]$Command
+    )
+    Start-Process pwsh -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
+}
+
 
 function New_Window_pwsh {
     param (
@@ -206,6 +213,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("PKG Manager & Must Apps")
                 $submenuListBox.Items.Add("Policies")
                 $submenuListBox.Items.Add("Install Scoop Packages")
+                $submenuListBox.Items.Add("Install Pwsh Modules")
                 $submenuListBox.Items.Add("Font Setup")
                 $submenuListBox.Items.Add("pip Packages")
                 $submenuListBox.Items.Add("Update Packages ")
@@ -380,11 +388,19 @@ function Show-MainMenu {
                                      Write-Host 'Winget Upgraded ☑️'
                                      Write-Host 'Packages updated successfully' -ForegroundColor Green"
             }
+
             "Font Setup" {
                 New_Window_powershell -Command "
                     $su oh-my-posh font install
                                                "
             }
+
+            "Install Pwsh Modules" {
+                New_Window_pwsh_asadmin -Command "
+                    Install-Module -Name BurntToast -Scope CurrentUser
+                                               "
+            }
+
             # neovim
             "Set up Neovim" {
                 New_Window_pwsh -Command "
