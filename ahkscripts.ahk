@@ -5,7 +5,6 @@ Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
 ; Create a tray icon with a right-click menu
 Menu, Tray, Add, Reset WorkSpace, Toggle_Reset_Workspace
 Menu, Tray, Add, Exit, ExitScript
-Menu, Tray, Add, VScode, OpenWithVSCode
 
 ; Menu, Tray, Default, Exit ; Sets default menu item for left-click on tray icon
 
@@ -25,10 +24,6 @@ TrayIconShortcut:
 ; Function to exit the script when selected from tray menu
 ExitScript:
     ExitApp
-; Define the action to open the script in VS Code
-OpenWithVSCode:
-    Run, "C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe" "%A_ScriptFullPath%"
-return
 
 
 
