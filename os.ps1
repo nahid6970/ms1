@@ -89,21 +89,21 @@ function Show-NewWindow {
 }
 
 # Function to run a command in a new PowerShell window
-function New_Window_powershell {
+function nw_powershell {
     param (
         [string]$Command
     )
     Start-Process powershell -ArgumentList "-NoExit", "-Command", $Command
 }
 
-function New_Window_powershell_asadmin {
+function nw_powershell_asadmin {
     param (
         [string]$Command
     )
     Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
 }
 
-function New_Window_pwsh_asadmin {
+function nw_pwsh_asadmin {
     param (
         [string]$Command
     )
@@ -111,7 +111,7 @@ function New_Window_pwsh_asadmin {
 }
 
 
-function New_Window_pwsh {
+function nw_pwsh {
     param (
         [string]$Command
     )
@@ -268,15 +268,15 @@ function Show-MainMenu {
         switch ($submenuListBox.SelectedItem) {
             # package
             "ChrisTitus WinUtility" {
-                New_Window_powershell_asadmin -Command "iwr -useb https://christitus.com/win | iex"
+                nw_powershell_asadmin -Command "iwr -useb https://christitus.com/win | iex"
             }
 
             "WIMUtil" {
-                New_Window_powershell_asadmin -Command "irm 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | iex"
+                nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | iex"
             }
 
             "Policies" {
-                New_Window_powershell -Command "
+                nw_powershell -Command "
                 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
                 Set-ExecutionPolicy RemoteSigned
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -285,7 +285,7 @@ function Show-MainMenu {
             }
 
             "PKG Manager & Must Apps" {
-                New_Window_powershell -Command "
+                nw_powershell -Command "
                     if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
                         Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
                     } else {
@@ -327,7 +327,7 @@ function Show-MainMenu {
             }
 
             "Install Scoop Packages" {
-                New_Window_powershell -Command "
+                nw_powershell -Command "
                     # scoop install scoop-completion
                     # scoop install scoop-search
                     scoop install ack
@@ -350,7 +350,7 @@ function Show-MainMenu {
             }
 
             "Pip Packages" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
             # needed
                     # pip install customtkinter
                     # pip install pyautogui
@@ -375,7 +375,7 @@ function Show-MainMenu {
             }
 
             "Update Packages " {
-                New_Window_pwsh -Command "scoop status
+                nw_pwsh -Command "scoop status
                                      scoop update
                                      Write-Host 'Scoop Status & Bucked Updated ☑️'
                                      scoop update *
@@ -390,20 +390,20 @@ function Show-MainMenu {
             }
 
             "Font Setup" {
-                New_Window_powershell -Command "
+                nw_powershell -Command "
                     $su oh-my-posh font install
                                                "
             }
 
             "Install Pwsh Modules" {
-                New_Window_pwsh_asadmin -Command "
+                nw_pwsh_asadmin -Command "
                     Install-Module -Name BurntToast -Scope CurrentUser
                                                "
             }
 
             # neovim
             "Set up Neovim" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
@@ -411,7 +411,7 @@ function Show-MainMenu {
                 "
             }
             "Set up Neovim2" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
@@ -420,7 +420,7 @@ function Show-MainMenu {
             }
 
             "Notepad++ Theme Setup" {
-                New_Window_pwsh -Command '
+                nw_pwsh -Command '
                 cd C:\Users\nahid
 
                 Write-Host -ForegroundColor Blue "Dracula Theme"
@@ -440,7 +440,7 @@ function Show-MainMenu {
             }
 
             "jackett + qbittorrent" {
-                New_Window_pwsh -Command '
+                nw_pwsh -Command '
                 # cd C:\Users\nahid
                 Write-Host -ForegroundColor Green Step 1: open qbittorrent -> view -> search engine -> Go To search engine tab -> search plugin -> check for updates -> now nova3 folder will be added
                 Write-Host -ForegroundColor Green Step 2: Start Jackett and add the necessary indexes to th list
@@ -451,7 +451,7 @@ function Show-MainMenu {
 
             # git
             "clone ms1" {
-                New_Window_powershell -Command "
+                nw_powershell -Command "
                 Write-Host Cloning ms1 to c:\
                 cd c:\
                 git clone https://github.com/nahid6970/ms1
@@ -459,7 +459,7 @@ function Show-MainMenu {
                                          "
             }
             "clone ms2" {
-                New_Window_powershell -Command "
+                nw_powershell -Command "
                     Write-Host Cloning ms2 to c:\ 
                     cd c:\
                     git clone https://github.com/nahid6970/ms2
@@ -467,7 +467,7 @@ function Show-MainMenu {
                                          "
             }
             "clone ms3" {
-                New_Window_powershell -Command "
+                nw_powershell -Command "
                 Write-Host Cloning ms3 to c:\
                 cd c:\
                 git clone https://github.com/nahid6970/ms3
@@ -476,27 +476,27 @@ function Show-MainMenu {
             }
             # port
             "5000" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     $su New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
                                          "
             }
             "5001" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                 $su New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
                                          "
             }
             "5002" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     $su New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
                                          "
             }
             # mklink
             "Path_Var" {
-                New_Window_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Path_Var.py' -Target 'C:\ms1\Path_Var.py' -Force #[pwsh]"
+                nw_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Path_Var.py' -Target 'C:\ms1\Path_Var.py' -Force #[pwsh]"
             }
             # sonarr will take some time to resolve the issue internally just wait
             "Sonarr" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     Winget install TeamSonarr.Sonarr
                     # $su Stop-Process -Name 'Sonarr' -Verbose
                     # Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
@@ -506,7 +506,7 @@ function Show-MainMenu {
                                          "
             }
             "Radarr" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     Winget install TeamRadarr.Radarr
                     # $su Stop-Process -Name 'Radarr' -Verbose
                     # $su Stop-Process -Name 'Radarr.Console' -Verbose
@@ -517,7 +517,7 @@ function Show-MainMenu {
                                          "
             }
             "Prowlarr" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     Winget install TeamProwlarr.Prowlarr
                     # $su Stop-Process -Name 'Prowlarr' -Verbose
                     # Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
@@ -529,30 +529,30 @@ function Show-MainMenu {
 	# initially after creating with  quickstart have to run komorebi with the default profile then we can mklink
     # it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in
             "Komorebi" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     Komorebic quickstart
                     Remove-Item 'C:\Users\nahid\komorebi.json'
                     $su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
                                          "
             }
             "VSCode" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\asset\vscode\keybindings.json -Force
                     New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\asset\vscode\settings.json -Force
                                          "
             }
             "PowerShell Profile" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
                                          "
             }
             "Terminal Profile" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\ms1\asset\terminal\settings.json -Force
                                          "
             }
             "PotPlayer Register" {
-                New_Window_pwsh -Command "
+                nw_pwsh -Command "
                     Start-Process 'C:\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
                                          "
             }
