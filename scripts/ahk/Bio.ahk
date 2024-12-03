@@ -8,6 +8,7 @@ Gui,Font,s12 Normal Bold,Jetbrainsmono nfp
 Gui,Add,Button, xm ym w200 h50,                Nahid Ahmed
 Gui,Add,Button, x+5 yp w100 h50 gname_en_nahid,en
 Gui,Add,Button, x+5 yp w100 h50 gname_bd_nahid,bn
+Gui,Add,Button, x+5 yp w100 h50 gnahid_nid,    NID
 
 ; Father
 Gui,Add,Button, xm y+5 w200 h50,                Father
@@ -20,6 +21,8 @@ Gui,Add,Button, x+5 yp w100 h50 gname_en_mother,en
 Gui,Add,Button, x+5 yp w100 h50 gname_bd_mother,bn
 
 Gui,Add,Button,xm y+5 w410 h50 gPermanentAddress,Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+Gui,Add,Button, x+5 yp w100 h50 gpost_office,       Post Office
+Gui,Add,Button, x+5 yp w100 h50 gpost_code,         Post Code
 
 ; SSC
 Gui,Add,Button, xm y+5 w200 h50,                 SSC
@@ -66,6 +69,11 @@ name_en_nahid:
     Send, Nahid Ahmed
     Gui, Show ; Brings the GUI back (if you used Hide above)
 return
+nahid_nid:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 1505190676
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
 
 name_bd_father:
     Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
@@ -92,6 +100,19 @@ return
 PermanentAddress:
     Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
     Send, Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+
+post_office:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    ; Send, Datta Para SO
+    Send, Radhapur
+    Gui, Show ; Brings the GUI back (if you used Hide above)
+return
+
+post_code:
+    Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
+    Send, 3706
     Gui, Show ; Brings the GUI back (if you used Hide above)
 return
 
