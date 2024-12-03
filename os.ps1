@@ -255,8 +255,8 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("msBackups [rs]")
             }
             "Backup" {
-                $submenuListBox.Items.Add("nilesoft nss [bk]")
                 $submenuListBox.Items.Add("msBackups [bk]")
+                $submenuListBox.Items.Add("nilesoft nss [bk]")
             }
         }
     })
