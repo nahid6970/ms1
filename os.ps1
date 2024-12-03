@@ -169,13 +169,13 @@ function Show-MainMenu {
     #* ██║     ██║██║  ██║███████║   ██║
     #* ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝
     $mainMenuListBox.Items.Add("Initial Setup")
-    $mainMenuListBox.Items.Add("Clone Projects")
-    $mainMenuListBox.Items.Add("rclone")
     $mainMenuListBox.Items.Add("Application Setup")
+    $mainMenuListBox.Items.Add("Clone Projects")
+    $mainMenuListBox.Items.Add("Backup")
+    $mainMenuListBox.Items.Add("Restore")
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
     $mainMenuListBox.Items.Add("Github Projects")
-    $mainMenuListBox.Items.Add("Backup")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -250,13 +250,12 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("WIMUtil")
             }
-            "rclone" {
+            "Restore" {
                 $submenuListBox.Items.Add("decrypt rclone.conf & move")
-                $submenuListBox.Items.Add("Restore msBackups")
+                $submenuListBox.Items.Add("msBackups [rs]")
             }
             "Backup" {
-                $submenuListBox.Items.Add("nilesoft nss")
-                $submenuListBox.Items.Add("Restore msBackups")
+                $submenuListBox.Items.Add("nilesoft nss [bk]")
             }
         }
     })
@@ -482,11 +481,11 @@ function Show-MainMenu {
                                          "
             }
 
-            "nilesoft nss" {
+            "nilesoft nss [bk]" {
                 nw_powershell -Command "
                     cd c:\
-                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\ms1\asset\nilesoft_shell\shell.nss' -Force
-                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\ms1\asset\nilesoft_shell\' -Recurse -Force
+                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\ms1\asset\nilesoft_shell\shell.nss' -Force -Verbose
+                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\ms1\asset\nilesoft_shell\' -Recurse -Force -Verbose
                                          "
             }
 
