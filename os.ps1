@@ -175,6 +175,7 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
     $mainMenuListBox.Items.Add("Github Projects")
+    $mainMenuListBox.Items.Add("Backup")
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
@@ -251,6 +252,10 @@ function Show-MainMenu {
             }
             "rclone" {
                 $submenuListBox.Items.Add("decrypt rclone.conf & move")
+                $submenuListBox.Items.Add("Restore msBackups")
+            }
+            "Backup" {
+                $submenuListBox.Items.Add("nilesoft nss")
                 $submenuListBox.Items.Add("Restore msBackups")
             }
         }
@@ -476,6 +481,15 @@ function Show-MainMenu {
                 Write-Host Cloned ms3 successfully! -ForegroundColor Green
                                          "
             }
+
+            "nilesoft nss" {
+                nw_powershell -Command "
+                    cd c:\
+                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\ms1\asset\nilesoft_shell\shell.nss' -Force
+                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\ms1\asset\nilesoft_shell\' -Recurse -Force
+                                         "
+            }
+
             # port
             "5000" {
                 nw_pwsh -Command "
