@@ -37,7 +37,7 @@
 # }
 
 
-
+Set-Location c:\
 Add-Type -AssemblyName PresentationFramework
 
 # Function to create a new styled pop-up window
@@ -484,7 +484,7 @@ function Show-MainMenu {
 
             "nilesoft nss [bk]" {
                 nw_powershell -Command "
-                    cd c:\
+                    # cd c:\
                     Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\ms1\asset\nilesoft_shell\shell.nss' -Force -Verbose
                     Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\ms1\asset\nilesoft_shell\' -Recurse -Force -Verbose
                                          "
