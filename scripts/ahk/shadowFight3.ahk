@@ -221,7 +221,6 @@ return
         
         Send, {i down}
         Send, {x down}
-        Sleep, 300
         Send, {d down}
         SendInput, j
         SendInput, j
