@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0
-
-myGui := Gui("+Resize +AlwaysOnTop", "Custom Colored Buttons")
+; +Resize
+myGui := Gui("+AlwaysOnTop", "Custom Colored Buttons")
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.MarginX := 20
 myGui.MarginY := 20
