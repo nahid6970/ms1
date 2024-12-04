@@ -97,13 +97,6 @@ name_en_mother:
     Gui, Show ; Brings the GUI back (if you used Hide above)
 return
 
-
-
-
-
-
-
-
 PermanentAddress:
     Gui, Hide ; Temporarily hides the GUI (optional, based on your needs)
     Send, Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706
