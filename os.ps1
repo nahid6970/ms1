@@ -249,6 +249,8 @@ function Show-MainMenu {
             "Github Projects" {
                 $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("WIMUtil")
+                $submenuListBox.Items.Add("AppControl Manager")
+                $submenuListBox.Items.Add("Harden Windows Security Using GUI")
             }
             "Restore" {
                 $submenuListBox.Items.Add("decrypt rclone.conf & move")
@@ -278,6 +280,14 @@ function Show-MainMenu {
 
             "WIMUtil" {
                 nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | iex"
+            }
+
+            "Harden Windows Security Using GUI" {
+                nw_powershell_asadmin -Command "(irm 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|iex"
+            }
+
+            "AppControl Manager" {
+                nw_pwsh_asadmin -Command "(irm 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'AppControl'|iex"
             }
 
             "Policies" {
