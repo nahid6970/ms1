@@ -14,5 +14,4 @@ myGui.Add("Button", "x+5 yp w200 h50 +Center", "Kill Python").OnEvent("Click", (
 myGui.Add("Button", "x+5 yp w200 h50 +Center", "Start Python (myGui)").OnEvent("Click", (*) => Run("C:\ms1\mypygui.py", , "Hide"))
 
 myGui.Show()
-
 myGui.OnEvent("Close", (*) => ExitApp())
