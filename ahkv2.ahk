@@ -4,7 +4,6 @@
 #SingleInstance 
 Persistent
 
-
 ; Set the tray icon
 TraySetIcon("C:\msBackups\icon\shutdown3.png")
 
@@ -31,6 +30,9 @@ RestartExplorer() {
 RAlt & Numpad1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
 RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
 RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
+
+!b::Run("C:\ms1\scripts\ahk\Bio.ahk", "", "Hide")
+!u::Run("C:\ms1\scripts\ahk\Ultimate_Gui.ahk", "", "Hide")
 
 
 ^!t::Toggle_Reset_Workspace()
@@ -111,6 +113,35 @@ Toggle_Screen_Blackout() {
     } else {
         ; If the screen is already blacked out, close the window
         blackoutState := 0
+        myGui.Destroy()
+        myGui := ""  ; Clear the myGui object
+    }
+}
+
+
+
+^!w::Toggle_Screen_Whiteout()
+; Define a variable to track the state of the screen blackout
+whiteState := 0
+; Define a global variable to store the Gui object
+myGui := ""
+
+; Define a function to toggle the screen blackout
+Toggle_Screen_Whiteout() {
+    global whiteState, myGui  ; Declare the variables as global so they can be accessed inside the function
+
+    if (whiteState = 0) {
+        ; If the screen is not blacked out, create a black fullscreen window
+        whiteState := 1
+
+        ; Create the black window to cover the entire screen
+        myGui := Gui()
+        myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
+        myGui.BackColor := "ffffff"
+        myGui.Show("w" . A_ScreenWidth . " h" . A_ScreenHeight . " x0 y0 NoActivate")
+    } else {
+        ; If the screen is already blacked out, close the window
+        whiteState := 0
         myGui.Destroy()
         myGui := ""  ; Clear the myGui object
     }
