@@ -6,24 +6,26 @@ myGui.MarginX := 20
 myGui.MarginY := 20
 
 ; Add buttons with labels and actions for each command
-myGui.Add("Text", "xm  ym w200 Backgroundffa114 +Center", "Komorebic Save").OnEvent("Click", (*) => RunWait("komorebic quick-save-resize", , "Hide"))
-myGui.Add("Text", "x+5 yp w200 Backgroundffa114 +Center", "Komorebic Load").OnEvent("Click", (*) => RunWait("komorebic quick-load-resize", , "Hide"))
+myGui.Add("Text", "xm  ym w200 Backgroundffa114 +Center Border", "Komorebic Save").OnEvent("Click", (*) => RunWait("komorebic quick-save-resize", , "Hide"))
+myGui.Add("Text", "x+5 yp w200 Backgroundffa114 +Center Border", "Komorebic Load").OnEvent("Click", (*) => RunWait("komorebic quick-load-resize", , "Hide"))
 
-myGui.Add("Text", "xm y+5  w200 +Center", "Komorebi")
+myGui.Add("Text", "xm y+5  w200 +Center Border", "Komorebi")
 myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "").OnEvent("Click", (*) => KillProcess("komorebi.exe"))
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "").OnEvent("Click", (*) => Run("komorebi.exe", , "Hide"))
 
-myGui.Add("Text", "xm y+5  w200 +Center", "Python")
+myGui.Add("Text", "xm y+5  w200 +Center Border", "Python")
 myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "").OnEvent("Click", (*) => KillProcess("python.exe"))
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "mypygui-H").OnEvent("Click", (*) => Run("C:\ms1\mypygui.py", , "Hide"))
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "mypygui-S").OnEvent("Click", (*) =>  StartPython_ST())
 
-myGui.Add("Text", "xm y+5  w200 +Center", "Terminals")
+myGui.Add("Text", "xm y+5  w200 +Center Border", "Explorer")
+myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "") .OnEvent("Click", (*) => KillProcess("explorer.exe"))
+myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "").OnEvent("Click", (*) =>  RestartExplorer())
+
+myGui.Add("Text", "xm y+5  w200 +Center Border", "Terminals")
 myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "pwsh")      .OnEvent("Click", (*) => KillProcess("pwsh.exe"))
 myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "powershell").OnEvent("Click", (*) => KillProcess("powershell.exe"))
 myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "cmd")       .OnEvent("Click", (*) => KillProcess("cmd.exe"))
-
-
 
 
 myGui.Show()
@@ -37,4 +39,11 @@ KillProcess(processName) {
 ; Function to start Python with a specific script, keeping PowerShell open for errors
 startpython_st() {
     Run('pwsh -NoExit -Command "python C:\ms1\mypygui.py"', , "") 
+}
+
+; Function to restart explorer.exe
+RestartExplorer() {
+    Run("taskkill /f /im explorer.exe")
+    Sleep(500) 
+    Run('pwsh -Command "Start-Process explorer"', ,)
 }
