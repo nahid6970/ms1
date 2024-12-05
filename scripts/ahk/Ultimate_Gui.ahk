@@ -6,8 +6,8 @@ myGui.MarginX := 20
 myGui.MarginY := 20
 
 ; Add buttons with labels and actions for each command
-myGui.Add("Text", "xm  ym w200 +Center", "Komorebic Save").OnEvent("Click", (*) => RunWait("komorebic quick-save-resize", , "Hide"))
-myGui.Add("Text", "x+5 yp w200 +Center", "Komorebic Load").OnEvent("Click", (*) => RunWait("komorebic quick-load-resize", , "Hide"))
+myGui.Add("Text", "xm  ym w200 Backgroundffa114 +Center", "Komorebic Save").OnEvent("Click", (*) => RunWait("komorebic quick-save-resize", , "Hide"))
+myGui.Add("Text", "x+5 yp w200 Backgroundffa114 +Center", "Komorebic Load").OnEvent("Click", (*) => RunWait("komorebic quick-load-resize", , "Hide"))
 
 myGui.Add("Text", "xm y+5  w200 +Center", "Komorebi")
 myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "").OnEvent("Click", (*) => KillProcess("komorebi.exe"))
