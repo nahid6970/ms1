@@ -86,3 +86,32 @@ Center_Focused_Window() {
     WinMove(newX, newY, , , "ahk_id " hwnd)
 }
 
+
+
+
+^!b::Toggle_Screen_Blackout()
+; Define a variable to track the state of the screen blackout
+blackoutState := 0
+; Define a global variable to store the Gui object
+myGui := ""
+
+; Define a function to toggle the screen blackout
+Toggle_Screen_Blackout() {
+    global blackoutState, myGui  ; Declare the variables as global so they can be accessed inside the function
+    
+    if (blackoutState = 0) {
+        ; If the screen is not blacked out, create a black fullscreen window
+        blackoutState := 1
+
+        ; Create the black window to cover the entire screen
+        myGui := Gui()
+        myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
+        myGui.BackColor := "Black"
+        myGui.Show("w" . A_ScreenWidth . " h" . A_ScreenHeight . " x0 y0 NoActivate")
+    } else {
+        ; If the screen is already blacked out, close the window
+        blackoutState := 0
+        myGui.Destroy()
+        myGui := ""  ; Clear the myGui object
+    }
+}
