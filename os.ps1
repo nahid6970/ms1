@@ -224,6 +224,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Set up Neovim2")
                 $submenuListBox.Items.Add("Notepad++ Theme Setup")
                 $submenuListBox.Items.Add("jackett + qbittorrent")
+                $submenuListBox.Items.Add("RssGuard")
             }
             "Clone Projects" {
                 $submenuListBox.Items.Add("clone ms1")
@@ -453,6 +454,16 @@ function Show-MainMenu {
                 Write-Host -ForegroundColor Green step1: Copy Example.xml from github folder to %AppData%\Notepad++\themes
                 Write-Host -ForegroundColor Green step2: Restart Notepad++
                 Write-Host -ForegroundColor Green step3: Dracula will be available in Settings > Style Configurator
+                '
+            }
+            "RssGuard" {
+                nw_pwsh_asadmin -Command '
+                scoop install rssguard
+                Stop-Process -Name "rssguard"
+                Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Recurse
+                Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Recurse
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\msBackups\@mklink\rssguard\config" -Force
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\msBackups\@mklink\rssguard\database" -Force
                 '
             }
 
