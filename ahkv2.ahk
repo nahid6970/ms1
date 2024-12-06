@@ -10,10 +10,15 @@ TraySetIcon("C:\msBackups\icon\shutdown3.png")
 ; Create a custom tray menu
 Tray := A_TrayMenu
 Tray.Delete() ; Remove default items
-Tray.Add("Restart Explorer", (*) => RestartExplorer()) ; Attach the function
-Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace()) ; Attach the function
+
+Tray.Add("Restart Explorer", (*) => RestartExplorer())
+Tray.SetIcon("Restart Explorer", "C:\msBackups\icon\system_icon\imageres\31.ico")
+
+Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
+
 Tray.Add() ; Add a separator
 Tray.Add("Exit", (*) => ExitApp()) ; Add Exit button
+Tray.SetIcon("Exit","C:\msBackups\icon\system_icon\shell32\295.ico")
 
 ; Function to restart explorer.exe using PowerShell
 RestartExplorer() {
