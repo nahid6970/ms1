@@ -170,3 +170,56 @@ KillForeground() {
     ; Use taskkill command to forcefully terminate the process by ID
     Run("taskkill /f /pid " ProcessID, , "Hide")
 }
+
+
+
+; ^!m::CopyPath_File()
+; CopyPath_File() {
+;     ClipboardBackup := ClipboardAll()
+;     A_Clipboard := "" 
+;     Send("^c")
+;     Errorlevel := !ClipWait(1)
+;     if ErrorLevel
+;     {
+;     MsgBox("No valid file path found.")
+;     }
+;     else
+;     {
+;     ClipBoardContent := A_Clipboard
+;     ; V1toV2: StrReplace() is not case sensitive
+;     ; check for StringCaseSense in v1 source script
+;     ; and change the CaseSense param in StrReplace() if necessary
+;     ClipBoardContent := StrReplace(ClipBoardContent, "`n", "`t")
+;     A_Clipboard := ClipboardBackup
+;     A_Clipboard := ClipBoardContent
+;     TrayTip("Copy as Path", "Copied `"" ClipBoardContent "`" to clipboard.")
+;     }}
+
+
+^!m::CopyPath_File()
+CopyPath_File() {
+    ClipboardBackup := ClipboardAll()  ; Backup current clipboard content
+    A_Clipboard := ""  ; Clear the clipboard
+    Send("^c")  ; Simulate pressing Ctrl + C to copy
+    Errorlevel := !ClipWait(1)  ; Wait for the clipboard content
+    if (Errorlevel) {
+        MsgBox("No valid file path found.")
+    } else {
+        ClipBoardContent := A_Clipboard  ; Get the copied content
+        ; Prompt for the type of path you want (backslash, double backslash, or normal slash)
+        choice := MsgBox("Choose the format for the path: `nYes: Double Backslash `nNo: Single Backslash `nCancel: Normal Slash", "Choose Path Format", 3)  ; Message box with options
+
+        if (choice = "Yes") {  ; Double backslash
+            ClipBoardContent := StrReplace(ClipBoardContent, "\", "\\")
+        } else if (choice = "No") {  ; Single backslash
+            ; Do nothing as we keep the default single backslash
+        } else if (choice = "Cancel") {  ; Normal slash
+            ClipBoardContent := StrReplace(ClipBoardContent, "\", "/")
+        }
+        A_Clipboard := ClipboardBackup  ; Restore original clipboard content
+        A_Clipboard := ClipBoardContent  ; Set the clipboard to the modified content
+        TrayTip("Copy as Path", "Copied path: " ClipBoardContent " to clipboard.")
+    }
+}
+
+
