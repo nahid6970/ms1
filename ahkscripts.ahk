@@ -44,8 +44,10 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 
 !b::Run("C:\ms1\scripts\ahk\Bio.ahk", "", "Hide")
 !u::Run("C:\ms1\scripts\ahk\Ultimate_Gui.ahk", "", "Hide")
-
 ^!n::Run("C:\ms1\scripts\ahk\v1_VScode_OpenWith.ahk", "", "Hide")
+
+!e::Run('pwsh -c explorer.exe', , 'Hide')
+
 
 
 ^!t::Toggle_Reset_Workspace()
