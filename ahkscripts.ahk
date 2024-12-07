@@ -27,6 +27,7 @@ RestartExplorer() {
 
 
 
+
 ;;* AHK Related
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
@@ -38,6 +39,8 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 
 !b::Run("C:\ms1\scripts\ahk\Bio.ahk", "", "Hide")
 !u::Run("C:\ms1\scripts\ahk\Ultimate_Gui.ahk", "", "Hide")
+
+^!n::Run("C:\ms1\scripts\ahk\v1_VScode_OpenWith.ahk", "", "Hide")
 
 
 ^!t::Toggle_Reset_Workspace()
@@ -76,7 +79,6 @@ Always_on_Top(){
 
 
 
-
 !c::Center_Focused_Window()
 Center_Focused_Window() {
     ; Get the handle of the active (focused) window
@@ -92,7 +94,6 @@ Center_Focused_Window() {
     ; Move the window to the calculated position
     WinMove(newX, newY, , , "ahk_id " hwnd)
 }
-
 
 
 
