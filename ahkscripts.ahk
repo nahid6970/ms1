@@ -221,5 +221,3 @@ CopyPath_File() {
         TrayTip("Copy as Path", "Copied path: " ClipBoardContent " to clipboard.")
     }
 }
-
-
