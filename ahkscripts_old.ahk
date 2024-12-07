@@ -29,7 +29,7 @@ ExitScript:
 
 #Include, C:\ms1\scripts\ahk\Text_Related.ahk
 #Include, C:\ms1\scripts\ahk\Windows_Screen_related.ahk
-#Include, C:\ms1\scripts\ahk\shadowFight3.ahk
+; #Include, C:\ms1\scripts\ahk\shadowFight3.ahk
 
 ;;* AHK Related
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
