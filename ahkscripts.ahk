@@ -27,6 +27,10 @@ RestartExplorer() {
 
 
 
+; Run the v1 AHK script when this v2 script starts
+Run("C:\ms1\scripts\ahk\shadowFight3.ahk")
+
+
 
 ;;* AHK Related
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
@@ -151,4 +155,18 @@ Toggle_Screen_Whiteout() {
         myGui.Destroy()
         myGui := ""  ; Clear the myGui object
     }
+}
+
+
+
+!q::KillForeground()
+KillForeground() {
+    ; Get the window handle of the window under the mouse cursor
+    MouseGetPos(, , &WinID)
+    
+    ; Get the process ID of the window
+    ProcessID := WinGetPID("ahk_id " WinID)
+    
+    ; Use taskkill command to forcefully terminate the process by ID
+    Run("taskkill /f /pid " ProcessID, , "Hide")
 }
