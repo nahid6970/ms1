@@ -26,9 +26,10 @@ RestartExplorer() {
 }
 
 
+#Include C:\ms1\scripts\ahk\not_working_properly\v2_shadowFight3_not_working.ahk
 
 ; Run the v1 AHK script when this v2 script starts
-Run("C:\ms1\scripts\ahk\shadowFight3.ahk")
+; Run("C:\ms1\scripts\ahk\shadowFight3.ahk")
 
 
 

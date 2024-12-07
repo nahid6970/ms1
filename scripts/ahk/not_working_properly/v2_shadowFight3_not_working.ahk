@@ -1,4 +1,5 @@
 #Requires AutoHotkey v2.0
+#SingleInstance Force
 
 #HotIf WinActive("ahk_exe dnplayer.exe", )
 
@@ -13,12 +14,12 @@ global ; V1toV2: Made function global
         {
             break
         }
-        Send("{d down}")
-        SendInput("j")
-        SendInput("j")
-        SendInput("j")
+        SendEvent("{d down}")
+        SendEvent("j")
+        SendEvent("j")
+        SendEvent("j")
         Sleep(250)
-        Send("{d up}")
+        SendEvent("{d up}")
     }
 return
 } ; V1toV2: Added Bracket before hotkey or Hotstring
@@ -34,14 +35,14 @@ global ; V1toV2: Made function global
             {
                 break
             }
-            Send("{l down}")
-            Send("{i down}")
-            Send("{d down}")
-            Send("j")
-            Send("j")
-            Send("{d up}")
-            Send("{i up}")
-            Send("{l up}")
+            SendEvent("{l down}")
+            SendEvent("{i down}")
+            SendEvent("{d down}")
+            SendEvent("j")
+            SendEvent("j")
+            SendEvent("{d up}")
+            SendEvent("{i up}")
+            SendEvent("{l up}")
             Sleep(100)
         }
     return
@@ -57,16 +58,16 @@ global ; V1toV2: Made function global
         {
             break
         }
-        Send("{x down}")
-        Send("{l down}")
-        Send("{i down}")
-        Send("{d down}")
-        Send("j")
-        Send("j")
-        Send("{d up}")
-        Send("{i up}")
-        Send("{l up}")
-        Send("{x up}")
+        SendEvent("{x down}")
+        SendEvent("{l down}")
+        SendEvent("{i down}")
+        SendEvent("{d down}")
+        SendEvent("j")
+        SendEvent("j")
+        SendEvent("{d up}")
+        SendEvent("{i up}")
+        SendEvent("{l up}")
+        SendEvent("{x up}")
         Sleep(100)
     }
 return
@@ -83,15 +84,15 @@ global ; V1toV2: Made function global
             {
                 break
             }
-            Send("x")
+            SendEvent("x")
             Sleep(100)
-            Send("x")
+            SendEvent("x")
             Sleep(100)
-            Send("x")
+            SendEvent("x")
             Sleep(100)
-            Send("x")
+            SendEvent("x")
             Sleep(100)
-            Send("i")
+            SendEvent("i")
         }
     return
 } ; V1toV2: Added Bracket before hotkey or Hotstring
@@ -107,28 +108,28 @@ global ; V1toV2: Made function global
             {
                 break
             }
-            Send("{x down}")
-            Send("{a down}")
-            Send("l")
-            Send("{a up}")
+            SendEvent("{x down}")
+            SendEvent("{a down}")
+            SendEvent("l")
+            SendEvent("{a up}")
             Sleep(100)
-            Send("{d down}")
-            Send("l")
-            Send("{d up}")
+            SendEvent("{d down}")
+            SendEvent("l")
+            SendEvent("{d up}")
             Sleep(100)
-            Send("{s down}")
-            Send("l")
-            Send("{s up}")
+            SendEvent("{s down}")
+            SendEvent("l")
+            SendEvent("{s up}")
             Sleep(100)
-            Send("{w down}")
-            Send("l")
-            Send("{w up}")
+            SendEvent("{w down}")
+            SendEvent("l")
+            SendEvent("{w up}")
             Sleep(100)
-            Send("{d down}")
-            Send("j")
-            Send("j")
-            Send("{d up}")
-            Send("{x up}")
+            SendEvent("{d down}")
+            SendEvent("j")
+            SendEvent("j")
+            SendEvent("{d up}")
+            SendEvent("{x up}")
             Sleep(100)
         }
     return
@@ -145,13 +146,13 @@ global ; V1toV2: Made function global
             {
                 break
             }
-            Send("{x down}")
+            SendEvent("{x down}")
             Sleep(650)
-            Send("{x up}")
+            SendEvent("{x up}")
 
-            Send("{j down}")
+            SendEvent("{j down}")
             Sleep(500)
-            Send("{j up}")
+            SendEvent("{j up}")
         }
     return
 } ; V1toV2: Added Bracket before hotkey or Hotstring
@@ -167,29 +168,29 @@ global ; V1toV2: Made function global
             {
                 break
             }
-            Send("{i down}")
+            SendEvent("{i down}")
 
-            Send("{a down}")
-            SendInput("l")
+            SendEvent("{a down}")
+            SendEvent("l")
             Sleep(100)
-            Send("{a up}")
+            SendEvent("{a up}")
 
-            Send("{d down}")
-            SendInput("l")
+            SendEvent("{d down}")
+            SendEvent("l")
             Sleep(100)
-            Send("{d up}")
+            SendEvent("{d up}")
 
-            Send("{s down}")
-            SendInput("l")
+            SendEvent("{s down}")
+            SendEvent("l")
             Sleep(100)
-            Send("{s up}")
+            SendEvent("{s up}")
 
-            Send("{w down}")
-            SendInput("l")
+            SendEvent("{w down}")
+            SendEvent("l")
             Sleep(100)
-            Send("{w up}")
+            SendEvent("{w up}")
 
-            Send("{i up}")
+            SendEvent("{i up}")
         }
     return
 
@@ -203,20 +204,20 @@ global ; V1toV2: Made function global
     ;         break
     ;     }
         
-    ;     Send, {i down}
-    ;     Send, {x down}
+    ;     SendEvent, {i down}
+    ;     SendEvent, {x down}
     ;     Sleep, 1500
         
     ;     ; Hold down 'd' for 3 seconds while pressing 'j' repeatedly
-    ;     Send, {d down}
+    ;     SendEvent, {d down}
     ;     Loop, 10 ; Press 'j' 30 times (approx 1 press per 100ms for 3 seconds)
     ;     {
-    ;         SendInput, j
+    ;         SendEvent, j
     ;         Sleep, 100 ; Adjust the delay between each 'j' press
     ;     }
-    ;     Send, {d up} ; Release 'd' after 3 seconds
-    ;     Send, {x up}
-    ;     Send, {i up}
+    ;     SendEvent, {d up} ; Release 'd' after 3 seconds
+    ;     SendEvent, {x up}
+    ;     SendEvent, {i up}
     ; }
     ; return
 } ; V1toV2: Added Bracket before hotkey or Hotstring
@@ -233,15 +234,15 @@ global ; V1toV2: Made function global
             break
         }
         
-        Send("{i down}")
-        Send("{x down}")
-        Send("{d down}")
-        SendInput("j")
-        SendInput("j")
-        SendInput("j")
-        Send("{d up}")
-        Send("{x up}")
-        Send("{i up}")
+        SendEvent("{i down}")
+        SendEvent("{x down}")
+        SendEvent("{d down}")
+        SendEvent("j")
+        SendEvent("j")
+        SendEvent("j")
+        SendEvent("{d up}")
+        SendEvent("{x up}")
+        SendEvent("{i up}")
     }
     return
 
