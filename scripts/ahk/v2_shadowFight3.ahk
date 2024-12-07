@@ -235,13 +235,11 @@ global ; V1toV2: Made function global
         }
         
         SendEvent("{i down}")
-        SendEvent("{x down}")
         SendEvent("{d down}")
         SendEvent("j")
         SendEvent("j")
         SendEvent("j")
         SendEvent("{d up}")
-        SendEvent("{x up}")
         SendEvent("{i up}")
     }
     return
