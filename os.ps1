@@ -225,6 +225,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Notepad++ Theme Setup")
                 $submenuListBox.Items.Add("jackett + qbittorrent")
                 $submenuListBox.Items.Add("RssGuard")
+                $submenuListBox.Items.Add("Ldplayer")
             }
             "Clone Projects" {
                 $submenuListBox.Items.Add("clone ms1")
@@ -456,6 +457,7 @@ function Show-MainMenu {
                 Write-Host -ForegroundColor Green step3: Dracula will be available in Settings > Style Configurator
                 '
             }
+
             "RssGuard" {
                 nw_pwsh_asadmin -Command '
                 scoop install rssguard
@@ -465,6 +467,13 @@ function Show-MainMenu {
                 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\msBackups\@mklink\rssguard\config" -Force
                 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\msBackups\@mklink\rssguard\database" -Force
                 '
+            }
+
+            "Ldplayer" {
+                nw_pwsh_asadmin -Command "
+                Remove-Item 'C:\Users\nahid\AppData\Roaming\XuanZhi9\cache\*' -Recurse
+                New-NetFirewallRule -DisplayName '@Block_Ld9BoxHeadless_OutInbound' -Direction Outbound -Program 'C:\LDPlayer\LDPlayer9\dnplayer.exe' -Action Block -Enabled True
+                "
             }
 
             "jackett + qbittorrent" {
