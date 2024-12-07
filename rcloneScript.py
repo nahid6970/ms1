@@ -5,8 +5,6 @@ import subprocess
 import pyautogui
 
 
-
-
 def center_and_press_alt_2(window):
     def center_window():
         window.update_idletasks()
@@ -34,6 +32,8 @@ maxage_var = tk.StringVar(value="1d")
 minage_var = tk.StringVar(value="1d")
 maxsize_var = tk.StringVar(value="100M")
 minsize_var = tk.StringVar(value="100M")
+grep_var = tk.StringVar(value="")
+
 
 style = ttk.Style()
 style.configure("Custom.TRadiobutton", font=("JetBrainsmono nfp", 12, "bold"), foreground="#e6f752", background="#282c34")
@@ -122,16 +122,6 @@ for idx, item in enumerate(command_radios):
     radio = ttk.Radiobutton(command_frame, text=item["text"], variable=command_var, value=item["value"], style="Custom.TRadiobutton")
     radio.grid(row=0, column=idx+1, sticky=tk.W)
 
-# ls_radio = ttk.Radiobutton(command_frame, text="ls", variable=command_var, value="ls", style="Custom.TRadiobutton")
-# ls_radio.grid(row=0, column=1, sticky=tk.W)
-# tree_radio = ttk.Radiobutton(command_frame, text="tree", variable=command_var, value="tree", style="Custom.TRadiobutton")
-# tree_radio.grid(row=0, column=2, sticky=tk.W)
-# ncdu_radio = ttk.Radiobutton(command_frame, text="ncdu", variable=command_var, value="ncdu", style="Custom.TRadiobutton")
-# ncdu_radio.grid(row=0, column=3, sticky=tk.W)
-# size_radio = ttk.Radiobutton(command_frame, text="size", variable=command_var, value="size", style="Custom.TRadiobutton")
-# size_radio.grid(row=0, column=4, sticky=tk.W)
-# mount_radio = ttk.Radiobutton(command_frame, text="mount", variable=command_var, value="mount", style="Custom.TRadiobutton")
-# mount_radio.grid(row=0, column=5, sticky=tk.W)
 
 # Create storage frame
 storage_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
@@ -177,43 +167,6 @@ storage_radios = [
 for item in storage_radios:
     radio = ttk.Radiobutton(storage_frame, text=item["text"], variable=storage_var, value=item["value"], style="Custom.TRadiobutton")
     radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
-#! alt1 end
-
-# ttk.Label(storage_frame, text="Storage:",background="#f15812", font=("Jetbrainsmono nfp",12,"bold")).grid(row=0, column=0, sticky=tk.W)
-# storage_radios = [
-#     ("C:/", "C:/"),
-#     ("D:/", "D:/"),
-#     ("cgu:/", "cgu:/"),
-#     ("gu:/", "gu:/"),
-#     ("g00:/", "g00:/"),
-#     ("g01:/", "g01:/"),
-#     ("g02:/", "g02:/"),
-#     ("g03:/", "g03:/"),
-#     ("g04:/", "g04:/"),
-#     ("g05:/", "g05:/"),
-#     ("g06:/", "g06:/"),
-#     ("g07:/", "g07:/"),
-#     ("g08:/", "g08:/"),
-#     ("g09:/", "g09:/"),
-#     ("g10:/", "g10:/"),
-#     ("g11:/", "g11:/"),
-#     ("g12:/", "g12:/"),
-#     ("g13:/", "g13:/"),
-#     ("g14:/", "g14:/"),
-#     ("g15:/", "g15:/"),
-# ]
-
-# for idx, (text, value) in enumerate(storage_radios):
-#     if idx < 4:
-#         row = idx // 2
-#         column = idx % 2 + 1
-#     else:
-#         row = 2
-#         column = idx - 3
-#     style = ttk.Style()
-#     style.configure("Custom.TRadiobutton", font=("JetBrains Mono", 12, "bold"), foreground="#efd0b5", )
-#     radio = ttk.Radiobutton(storage_frame, text=text, variable=storage_var, value=value, style="Custom.TRadiobutton")
-#     radio.grid(row=row, column=column, sticky=tk.W)
 
 
 # Create arguments frame
@@ -226,6 +179,13 @@ initialize_labels()
 # Create options frame for --transfer, --include, and --exclude
 options_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 options_frame.grid(row=3, column=0, sticky=tk.W)
+
+grep_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
+grep_frame.grid(row=4, column=0, sticky=tk.W)
+
+ttk.Label(grep_frame, text="Grep Text:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
+grep_entry = ttk.Entry(grep_frame, textvariable=grep_var, width=30)
+grep_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
 
 # Update labels for extra items
 update_extra_labels()
@@ -243,14 +203,22 @@ def execute_command():
     for key, item in extra_items.items():
         if item["state"]:
             command.append(f"{item['prefix']}={item['var'].get()}")
+
+    # Append grep filter if text is provided
+    grep_text = grep_var.get().strip()
+    if grep_text:
+        command.append(f"| grep -i {grep_text}")
+
     final_command = " ".join(command)
     print("Executing:", final_command)
+
     def run_command():
         process = subprocess.Popen(final_command, shell=True)
         process.wait()
         print("\033[92mTask Completed\033[0m")
     thread = threading.Thread(target=run_command)
     thread.start()
+
 
 
 def clear_terminal():
