@@ -48,7 +48,7 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 !u::Run("C:\ms1\scripts\ahk\version2\gui\Ultimate_Gui.ahk", "", "Hide")
 
 ; shortcuts
-^!n::Run("C:\ms1\scripts\ahk\v1_VScode_OpenWith.ahk", "", "Hide")
+^!n::Run("C:\ms1\scripts\ahk\version1\VScode_OpenWith.ahk", "", "Hide")
 !e::Run('pwsh -c explorer.exe', , 'Hide')
 
 
