@@ -26,7 +26,7 @@ RestartExplorer() {
 }
 
 
-#Include C:\ms1\scripts\ahk\v2_shadowFight3.ahk
+#Include C:\ms1\scripts\ahk\version2\shadowFight3.ahk
 
 ; Run the v1 AHK script when this v2 script starts
 ; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
@@ -38,14 +38,17 @@ RestartExplorer() {
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
+; monitor
 RAlt & Numpad1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
 RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
 RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
 
-!b::Run("C:\ms1\scripts\ahk\Bio.ahk", "", "Hide")
-!u::Run("C:\ms1\scripts\ahk\Ultimate_Gui.ahk", "", "Hide")
-^!n::Run("C:\ms1\scripts\ahk\v1_VScode_OpenWith.ahk", "", "Hide")
+; gui
+!b::Run("C:\ms1\scripts\ahk\version2\gui\Bio.ahk", "", "Hide")
+!u::Run("C:\ms1\scripts\ahk\version2\gui\Ultimate_Gui.ahk", "", "Hide")
 
+; shortcuts
+^!n::Run("C:\ms1\scripts\ahk\v1_VScode_OpenWith.ahk", "", "Hide")
 !e::Run('pwsh -c explorer.exe', , 'Hide')
 
 
@@ -176,51 +179,24 @@ KillForeground() {
 
 
 
-; ^!m::CopyPath_File()
-; CopyPath_File() {
-;     ClipboardBackup := ClipboardAll()
-;     A_Clipboard := "" 
-;     Send("^c")
-;     Errorlevel := !ClipWait(1)
-;     if ErrorLevel
-;     {
-;     MsgBox("No valid file path found.")
-;     }
-;     else
-;     {
-;     ClipBoardContent := A_Clipboard
-;     ; V1toV2: StrReplace() is not case sensitive
-;     ; check for StringCaseSense in v1 source script
-;     ; and change the CaseSense param in StrReplace() if necessary
-;     ClipBoardContent := StrReplace(ClipBoardContent, "`n", "`t")
-;     A_Clipboard := ClipboardBackup
-;     A_Clipboard := ClipBoardContent
-;     TrayTip("Copy as Path", "Copied `"" ClipBoardContent "`" to clipboard.")
-;     }}
-
-
 ^!m::CopyPath_File()
 CopyPath_File() {
-    ClipboardBackup := ClipboardAll()  ; Backup current clipboard content
-    A_Clipboard := ""  ; Clear the clipboard
-    Send("^c")  ; Simulate pressing Ctrl + C to copy
-    Errorlevel := !ClipWait(1)  ; Wait for the clipboard content
-    if (Errorlevel) {
-        MsgBox("No valid file path found.")
-    } else {
-        ClipBoardContent := A_Clipboard  ; Get the copied content
-        ; Prompt for the type of path you want (backslash, double backslash, or normal slash)
-        choice := MsgBox("Choose the format for the path: `nYes: Double Backslash `nNo: Single Backslash `nCancel: Normal Slash", "Choose Path Format", 3)  ; Message box with options
-
-        if (choice = "Yes") {  ; Double backslash
-            ClipBoardContent := StrReplace(ClipBoardContent, "\", "\\")
-        } else if (choice = "No") {  ; Single backslash
-            ; Do nothing as we keep the default single backslash
-        } else if (choice = "Cancel") {  ; Normal slash
-            ClipBoardContent := StrReplace(ClipBoardContent, "\", "/")
-        }
-        A_Clipboard := ClipboardBackup  ; Restore original clipboard content
-        A_Clipboard := ClipBoardContent  ; Set the clipboard to the modified content
-        TrayTip("Copy as Path", "Copied path: " ClipBoardContent " to clipboard.")
+    ClipboardBackup := ClipboardAll()
+    A_Clipboard := "" 
+    Send("^c")
+    Errorlevel := !ClipWait(1)
+    if ErrorLevel
+    {
+    MsgBox("No valid file path found.")
     }
-}
+    else
+    {
+    ClipBoardContent := A_Clipboard
+    ; V1toV2: StrReplace() is not case sensitive
+    ; check for StringCaseSense in v1 source script
+    ; and change the CaseSense param in StrReplace() if necessary
+    ClipBoardContent := StrReplace(ClipBoardContent, "`n", "`t")
+    A_Clipboard := ClipboardBackup
+    A_Clipboard := ClipBoardContent
+    TrayTip("Copy as Path", "Copied `"" ClipBoardContent "`" to clipboard.")
+    }}
