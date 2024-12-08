@@ -141,15 +141,12 @@ Toggle_Screen_Blackout() {
 whiteState := 0
 ; Define a global variable to store the Gui object
 myGui := ""
-
 ; Define a function to toggle the screen blackout
 Toggle_Screen_Whiteout() {
     global whiteState, myGui  ; Declare the variables as global so they can be accessed inside the function
-
     if (whiteState = 0) {
         ; If the screen is not blacked out, create a black fullscreen window
         whiteState := 1
-
         ; Create the black window to cover the entire screen
         myGui := Gui()
         myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
@@ -169,10 +166,8 @@ Toggle_Screen_Whiteout() {
 KillForeground() {
     ; Get the window handle of the window under the mouse cursor
     MouseGetPos(, , &WinID)
-    
     ; Get the process ID of the window
     ProcessID := WinGetPID("ahk_id " WinID)
-    
     ; Use taskkill command to forcefully terminate the process by ID
     Run("taskkill /f /pid " ProcessID, , "Hide")
 }
