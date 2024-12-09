@@ -14,6 +14,8 @@ Tray.Delete() ; Remove default items
 Tray.Add("Restart Explorer", (*) => RestartExplorer())
 Tray.SetIcon("Restart Explorer", "C:\msBackups\icon\system_icon\imageres\31.ico")
 
+Tray.Add("Screen Dimmer", (*) => Run("C:\ms1\scripts\ahk\version1\Display\ScreenDimmer.ahk"))
+
 Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
 
 Tray.Add() ; Add a separator
@@ -31,7 +33,7 @@ RestartExplorer() {
 ; Run the v1 AHK script when this v2 script starts
 ; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
 
-
+ #Requires AutoHotkey v2.0 
 
 ;;* AHK Related
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
@@ -51,7 +53,9 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 ^!n::Run("C:\ms1\scripts\ahk\version1\VScode_OpenWith.ahk", "", "Hide")
 !e::Run('pwsh -c explorer.exe', , 'Hide')
 
-
+; text
+::;v1:: {#}Requires AutoHotkey v1.0
+::;v2:: {#}Requires AutoHotkey v2.0
 
 ^!t::Toggle_Reset_Workspace()
 taskbarVisible := 1  ; 1 for visible, 0 for hidden

@@ -1,3 +1,5 @@
+#Requires AutoHotkey v1.0
+
 #Persistent ; Keeps the script running
 Menu, Tray, Icon, C:\msBackups\icon\shutdown3.png ; Set the tray icon
 Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
