@@ -27,10 +27,10 @@ RestartExplorer() {
     Run('pwsh -Command "Stop-Process -Name explorer -Force; Start-Process explorer"', , "")
 }
 
-
+; include files
 #Include C:\ms1\scripts\ahk\version2\shadowFight3.ahk
 
-; Run the v1 AHK script when this v2 script starts
+; add v1 startups
 ; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
 
  #Requires AutoHotkey v2.0 
