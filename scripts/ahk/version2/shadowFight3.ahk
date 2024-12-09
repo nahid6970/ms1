@@ -193,37 +193,63 @@ global ; V1toV2: Made function global
             SendEvent("{i up}")
         }
     return
+    }
 
 
-    ; F20:: ; Hound
-    ; StartTime := A_TickCount
-    ; while (A_TickCount - StartTime < 5000)
-    ; {
-    ;     if !WinActive("ahk_exe dnplayer.exe")
-    ;     {
-    ;         break
-    ;     }
+
+;     F20:: ; Hound
+; { ; V1toV2: Added bracket
+; global ; V1toV2: Made function global
+;     StartTime := A_TickCount
+;     while (A_TickCount - StartTime < 5000)
+;     {
+;         if !WinActive("ahk_exe dnplayer.exe")
+;         {
+;             break
+;         }
         
-    ;     SendEvent, {i down}
-    ;     SendEvent, {x down}
-    ;     Sleep, 1500
+;         SendEvent("{i down}")
+;         SendEvent("{x down}")
+;         Sleep(1500)
         
-    ;     ; Hold down 'd' for 3 seconds while pressing 'j' repeatedly
-    ;     SendEvent, {d down}
-    ;     Loop, 10 ; Press 'j' 30 times (approx 1 press per 100ms for 3 seconds)
-    ;     {
-    ;         SendEvent, j
-    ;         Sleep, 100 ; Adjust the delay between each 'j' press
-    ;     }
-    ;     SendEvent, {d up} ; Release 'd' after 3 seconds
-    ;     SendEvent, {x up}
-    ;     SendEvent, {i up}
-    ; }
-    ; return
-} ; V1toV2: Added Bracket before hotkey or Hotstring
+;         ; Hold down 'd' for 3 seconds while pressing 'j' repeatedly
+;         SendEvent("{d down}")
+;         Loop 10 ; Press 'j' 30 times (approx 1 press per 100ms for 3 seconds)
+;         {
+;             SendInput("j")
+;             Sleep(100) ; Adjust the delay between each 'j' press
+;         }
+;         SendEvent("{d up}") ; Release 'd' after 3 seconds
+;         SendEvent("{x up}")
+;         SendEvent("{i up}")
+;     }
+;     return
+;     }
 
 
-    F20:: ; Hound
+;     F20:: ; Hound
+; { ; V1toV2: Added bracket
+; global ; V1toV2: Made function global
+;     StartTime := A_TickCount
+;     while (A_TickCount - StartTime < 5000)
+;     {
+;         if !WinActive("ahk_exe dnplayer.exe")
+;         {
+;             break
+;         }
+;         SendEvent("{i down}")
+;         SendEvent("{d down}")
+;         SendEvent("j")
+;         SendEvent("j")
+;         SendEvent("j")
+;         SendEvent("{d up}")
+;         SendEvent("{i up}")
+;     }
+;     return
+;     }
+
+
+F20:: ; Hound
 { ; V1toV2: Added bracket
 global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -235,15 +261,13 @@ global ; V1toV2: Made function global
         }
         
         SendEvent("{i down}")
-        SendEvent("{d down}")
-        SendEvent("j")
-        SendEvent("j")
-        SendEvent("j")
-        SendEvent("{d up}")
+        SendEvent("{x down}")
+        SendEvent("jjj")
+        SendEvent("{x up}")
         SendEvent("{i up}")
     }
     return
+    }
 
 
-} ; V1toV2: Added bracket in the end
 #HotIf
