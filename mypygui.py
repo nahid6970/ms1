@@ -510,6 +510,48 @@ BAR_WIDTH = 8
 BAR_HEIGHT = 25
 
 
+# Global variable to track if countdown is active
+countdown_active = False
+shutdown_thread = None
+# Function to shutdown the computer
+def shutdown_timer(minutes):
+    global countdown_active
+    countdown_time = minutes * 60  # Convert minutes to seconds
+    for remaining_time in range(countdown_time, 0, -1):
+        if not countdown_active:
+            time_left_label.config(text="Timer")  # Reset label text
+            return  # Exit if countdown is canceled
+        
+        minutes_left = remaining_time // 60
+        seconds_left = remaining_time % 60
+        time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
+        ROOT.update()
+        time.sleep(1)
+    if countdown_active:
+        os.system("shutdown /s /f /t 1")  # Shutdown command for Windows
+        countdown_active = False  # Reset the state after shutdown
+# Function to ask for the time input and start the countdown
+def start_shutdown_timer(event=None):
+    global countdown_active, shutdown_thread
+    # If countdown is active, cancel it
+    if countdown_active:
+        countdown_active = False
+        time_left_label.config(text="Timer")  # Reset label text
+        return
+    # Ask the user for the number of minutes
+    minutes = simpledialog.askinteger("Shutdown Timer", "Enter minutes to shutdown:")
+    if minutes is not None and minutes > 0:
+        countdown_active = True
+        # Start the countdown timer in a separate thread to avoid freezing the GUI
+        shutdown_thread = threading.Thread(target=shutdown_timer, args=(minutes,))
+        shutdown_thread.start()
+        time_left_label.config(text=f"Time left: {minutes:02}:00")
+
+
+
+
+
+
 #! ALL Boxes
 ROOT1 = tk.Frame(MAIN_FRAME, bg="#1d2027")
 ROOT1.pack(side="left", pady=(2,2),padx=(5,1),  anchor="w", fill="x")
@@ -883,6 +925,10 @@ LB_DUD.bind("<Button-1>",None)
 # CLEAR=tk.Label(ROOT2, text="\ueabf",bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",12,"bold"))
 # CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
 # CLEAR.bind("<Button-1>",lambda event:clear_screen())
+
+time_left_label = tk.Label(ROOT2, text="Timer", font=("JetBrainsMono NFP", 14, "bold"), fg="#fc6a35", bg="#1d2027", cursor="hand2")
+time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))
+time_left_label.bind("<Button-1>", start_shutdown_timer)
 
 ShutReboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
 ShutReboot.pack(side="left",padx=(1,1),pady=(0,0))
