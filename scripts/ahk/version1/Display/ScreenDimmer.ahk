@@ -22,10 +22,11 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ScreenDimmer:
 
 Gui Dimmer:+AlwaysOnTop
+Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
 Gui, Dimmer:Add, Text, vDim x0 y0, Dimmer
 Gui, Dimmer:Add, Text, vBright x0 y0, Brighter
-Options := "Range60-180 NoTicks Buddy1Dim Buddy2Bright vSD_MySlider gSD_Dimmer"
-Gui, Dimmer:Add, Slider, W200 x50 y5 AltSubmit Tooltip Reverse %options% , 128
+Options := "Range0-180 NoTicks Buddy1Dim Buddy2Bright vSD_MySlider gSD_Dimmer"
+Gui, Dimmer:Add, Slider, W200 x50 y5 AltSubmit Tooltip Reverse %Options%, 128
 Gui, Dimmer:Add, StatusBar, gSD_Reset, Default Brightness 128 `t`t(Click Status Bar to Reset)
 SB_SetIcon("Shell32.dll", 44)
 DisplaySetBrightness( 128 )

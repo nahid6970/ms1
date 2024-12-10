@@ -117,15 +117,12 @@ Center_Focused_Window() {
 blackoutState := 0
 ; Define a global variable to store the Gui object
 myGui := ""
-
 ; Define a function to toggle the screen blackout
 Toggle_Screen_Blackout() {
     global blackoutState, myGui  ; Declare the variables as global so they can be accessed inside the function
-    
     if (blackoutState = 0) {
         ; If the screen is not blacked out, create a black fullscreen window
         blackoutState := 1
-
         ; Create the black window to cover the entire screen
         myGui := Gui()
         myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
