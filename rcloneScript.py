@@ -45,9 +45,13 @@ style.configure("Black.TFrame", background="#282c34")
 # Additional options with display names
 additional_options = [
     ("Fast List"              ,"--fast-list"                     ,True) ,
+    ("Progress"               ,"-P"                              ,True) ,
     ("Readable"               ,"--human-readable"                ,True) ,
     ("Acknowledge Abuse"      ,"--drive-acknowledge-abuse"       ,True) ,
     ("Web Gui **Rcd"          ,"--rc-web-gui"                    ,False) ,
+    ("vfs-cache"              ,"--vfs-cache-mode writes"         ,False) ,
+    ("Verbose Lengthy"        ,"-vv"                             ,False) ,
+    ("Verbose Minimal"        ,"-v"                              ,False) ,
     ("Log Level"              ,"--log-level ERROR"               ,False),
     ("Stats Oneline"          ,"--stats-one-line"                ,False),
     ("Trashed Only"           ,"--drive-trashed-only "           ,False),
