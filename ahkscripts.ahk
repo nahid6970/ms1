@@ -52,6 +52,7 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 ; shortcuts
 ^!n::Run("C:\ms1\scripts\ahk\version1\VScode_OpenWith.ahk", "", "Hide")
 !e::Run('pwsh -c explorer.exe', , 'Hide')
+#x::Run("C:\ms1\mypygui.py", , "Hide")
 
 ; text
 ::;v1:: {#}Requires AutoHotkey v1.0
