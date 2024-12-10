@@ -2,34 +2,20 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# Function to show a folder browser dialog and return the selected path
-function Get-DownloadLocation {
-    $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
-    $folderBrowser.Description = "Select the download location"
-    $folderBrowser.ShowNewFolderButton = $true
-
-    if ($folderBrowser.ShowDialog() -eq "OK") {
-        return $folderBrowser.SelectedPath
-    } else {
-        Write-Output "No folder selected. Exiting script."
-        exit
-    }
+# Prompt for download location with a default value
+$download_location = Read-Host "Enter the download location (default: D:\):"
+if (-not $download_location) {
+    $download_location = "D:\"  # Set default location if no input is provided
 }
 
-# Get download location from the folder browser dialog
-$download_location = Get-DownloadLocation
-
-# Display the full path selected
-Write-Output "Selected download location: $download_location"
-
-# Verify if the path exists
 if (-not (Test-Path $download_location)) {
     Write-Output "The specified download location does not exist. Exiting script."
     exit
 }
 
 # Change to the download location
-cd $download_location
+Set-Location $download_location
+
 
 # Update the options to remove --output
 $options = "--no-mtime"
