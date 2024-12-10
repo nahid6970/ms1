@@ -249,6 +249,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Prowlarr")
             }
             "Github Projects" {
+                $submenuListBox.Items.Add("Microsoft Activation Scripts (MAS)")
                 $submenuListBox.Items.Add("ChrisTitus WinUtility")
                 $submenuListBox.Items.Add("WIMUtil")
                 $submenuListBox.Items.Add("AppControl Manager")
@@ -278,6 +279,9 @@ function Show-MainMenu {
             # package
             "ChrisTitus WinUtility" {
                 nw_powershell_asadmin -Command "iwr -useb https://christitus.com/win | iex"
+            }
+            "Microsoft Activation Scripts (MAS)" {
+                nw_powershell_asadmin -Command "irm https://get.activated.win | iex"
             }
 
             "WIMUtil" {
