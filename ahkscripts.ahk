@@ -112,6 +112,53 @@ Center_Focused_Window() {
 
 
 
+
+#HotIf WinActive("ahk_exe dnplayer.exe", )
+!v::Center_Focused_Window_modLDplayer()
+#HotIf  ; End the condition
+; Initialize a variable to keep track of the toggle state
+isFirstPosition := true
+Center_Focused_Window_modLDplayer() {
+    global isFirstPosition  ; Access the toggle variable
+    ; Get the handle of the dnplayer.exe window
+    hwnd := WinGetID("A")
+    ; Toggle between the two positions
+    if (isFirstPosition) {
+        ; Set the window to x=1250, y=120
+        WinMove(159, 49, , , "ahk_id " hwnd)
+    } else {
+        ; Set the window to x=1150, y=550
+        WinMove(159, 865, , , "ahk_id " hwnd)
+    }
+    ; Toggle the position state for the next activation
+    isFirstPosition := !isFirstPosition
+}
+
+
+
+#HotIf  ; Remove window-specific condition for general usage
+; Define a shortcut to show the position of the foreground window under the mouse
+^!v::ShowWindowPositionUnderMouse()
+ShowWindowPositionUnderMouse() {
+    ; Get the handle of the active (foreground) window
+    hwnd := WinGetID("A")
+    ; Get the position of the active window
+    WinGetPos(&x, &y, &w, &h, "ahk_id " hwnd)
+    ; Display the starting x and y coordinates as a tooltip under the mouse
+    MouseGetPos(&mouseX, &mouseY)  ; Get the current mouse position
+    ToolTip("Starting Position: `nX: " x "`nY: " y, mouseX, mouseY)
+    ; Hide the tooltip after 2 seconds
+    SetTimer(HideToolTip,-2000)
+}
+HideToolTip()
+{ ; V1toV2: Added bracket
+global ; V1toV2: Made function global
+    ToolTip()  ; Clear the tooltip
+return
+} ; V1toV2: Added bracket in the end
+
+
+
 ^!b::Toggle_Screen_Blackout()
 ; Define a variable to track the state of the screen blackout
 blackoutState := 0
