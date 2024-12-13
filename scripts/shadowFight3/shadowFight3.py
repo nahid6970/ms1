@@ -171,7 +171,7 @@ def WhatsPhotoClick():
     try:
         while True:  # Loop will continue indefinitely unless interrupted by an external condition
             focus_window(window_title)
-            if find_image(profile_pic): press_global_screen_with_delays((333, 878, 2))
+            if find_image(profile_pic): press_global_screen_with_delays((294, 299, 2))
             elif find_image(call_me, confidence=0.8): press_keys_with_delays(window, "a", 1, "b", 120)
             elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
             time.sleep(0.1)
