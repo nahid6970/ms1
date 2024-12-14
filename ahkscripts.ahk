@@ -246,3 +246,47 @@ CopyPath_File() {
     A_Clipboard := ClipBoardContent
     TrayTip("Copy as Path", "Copied `"" ClipBoardContent "`" to clipboard.")
     }}
+
+
+
+    ^!+Enter::
+    ; Save the current clipboard content (the path of the script)
+{ ; V1toV2: Added bracket
+global ; V1toV2: Made function global
+    ClipSaved := ClipboardAll()
+    A_Clipboard := ""               ; Clear clipboard
+    ; Get the active window title
+    ActiveTitle := WinGetTitle("A")
+    ; If the active window is VSCode, simulate the shortcut to copy the file path
+    if InStr(ActiveTitle, "Visual Studio Code") {
+        ; Simulate VSCode's shortcut to copy the current file path (Shift + Alt + C)
+        Send("+!c")
+        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content
+    } else {
+        ; Send Ctrl+C to copy the selected file path in other environments
+        Send("^c")
+        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content
+    }
+    if (A_Clipboard != "") {
+        ; Get the selected file path from the clipboard
+        FilePath := A_Clipboard
+        Ext := SubStr(FilePath, (InStr(FilePath, ".", 0, -1) + 1)<1 ? (InStr(FilePath, ".", 0, -1) + 1)-1 : (InStr(FilePath, ".", 0, -1) + 1))
+        ; Check the extension and run the appropriate command
+        if (Ext = "py") {
+            Run("cmd /k python `"" FilePath "`"", , , &PID)
+        } else if (Ext = "ps1") {
+            Run("cmd /k powershell -ExecutionPolicy Bypass -File `"" FilePath "`"", , , &PID)
+        } else if (Ext = "bat") {
+            Run("cmd /k `"" FilePath "`"", , , &PID)
+        } else if (Ext = "ahk") {
+            Run("cmd /k `"" FilePath "`"", , , &PID)
+        } else {
+            MsgBox("Unsupported file type: " Ext)
+        }
+    } else {
+        MsgBox("No file path selected or copied.")
+    }
+    ; Restore original clipboard content
+    A_Clipboard := ClipSaved
+    return
+} ; V1toV2: Added bracket in the end
