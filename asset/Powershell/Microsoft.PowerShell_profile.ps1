@@ -670,6 +670,20 @@ function light { cmd /c "C:\Users\nahid\OneDrive\backup\PSTools\PsExec64.exe -h 
 function sd { cmd /c "shutdown /s /f /t 0" }
 function rb { cmd /c "shutdown /r /f /t 0" }
 
+
+function su {
+    param (
+        [Parameter(ValueFromRemainingArguments=$true)]
+        [string[]]$Command
+    )
+    # Path to sudo.ps1
+    $suPath = "C:\Users\nahid\scoop\shims\sudo.ps1"
+    # Combine the command arguments into a single string and pass to sudo.ps1
+    & $suPath $Command
+}
+
+
+
 function gitpush {
 git add .
 git commit -m "XX"
