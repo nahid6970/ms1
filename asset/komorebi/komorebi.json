@@ -7,7 +7,7 @@
   "default_workspace_padding": 20,
   "default_container_padding": 20,
 
-  "border": true,
+  "border": false,
   "border_style":"System",
   "border_width": 2,
   "border_offset": -1,
