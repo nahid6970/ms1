@@ -220,8 +220,8 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Update Packages ")
             }
             "Application Setup" {
-                $submenuListBox.Items.Add("Set up Neovim")
-                $submenuListBox.Items.Add("Set up Neovim2")
+                $submenuListBox.Items.Add("Neovim_1.conf")
+                $submenuListBox.Items.Add("Neovim_2.conf")
                 $submenuListBox.Items.Add("Notepad++ Theme Setup")
                 $submenuListBox.Items.Add("jackett + qbittorrent")
                 $submenuListBox.Items.Add("RssGuard")
@@ -425,15 +425,15 @@ function Show-MainMenu {
             }
 
             # neovim
-            "Set up Neovim" {
+            "Neovim_1.conf" {
                 nw_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
-                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
-                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
+                $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
+                $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
+                $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
                 "
             }
-            "Set up Neovim2" {
+            "Neovim_2.conf" {
                 nw_pwsh -Command "
                 Write-Host 'Setting up Neovim...'
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
