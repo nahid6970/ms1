@@ -33,6 +33,8 @@ RestartExplorer() {
 
 ; add v1 startups
 ; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
+; Run("control.exe folders")
+
 
  #Requires AutoHotkey v2.0 
 
