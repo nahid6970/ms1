@@ -10,7 +10,8 @@ myGui.Add("Text", "xm  ym w200 Backgroundffa114 +Center Border", "Komorebic Save
 myGui.Add("Text", "x+5 yp w200 Backgroundffa114 +Center Border", "Komorebic Load").OnEvent("Click", (*) => RunWait("komorebic quick-load-resize", , "Hide"))
 
 myGui.Add("Text", "xm y+5  w200 +Center Border", "AHK")
-myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "AhkConverter").OnEvent("Click", (*) => Run("C:\msBackups\AHK_converter\QuickConvertorV2_scintilla.ahk", , "Hide"))
+myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "AhkConverter").OnEvent("Click", (*) => Run("C:\msBackups\Autohotkey\AHK_converter\QuickConvertorV2_scintilla.ahk", , "Hide"))
+myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "UIA-V2").OnEvent("Click", (*) => Run("C:\msBackups\Autohotkey\UIA_v2\UIATreeInspector.ahk", , "Hide"))
 
 myGui.Add("Text", "xm y+5  w200 +Center Border", "Komorebi")
 myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w200 +Center", "").OnEvent("Click", (*) => KillProcess("komorebi.exe"))
