@@ -228,27 +228,27 @@ global ; V1toV2: Made function global
 
 
 
-; F20:: ; Hound
-; { ; V1toV2: Added bracket
-; global ; V1toV2: Made function global
-;     StartTime := A_TickCount
-;     while (A_TickCount - StartTime < 5000)
-;     {
-;         if !WinActive("ahk_exe dnplayer.exe")
-;         {
-;             break
-;         }
+F20:: ; Hound
+{ ; V1toV2: Added bracket
+global ; V1toV2: Made function global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000)
+    {
+        if !WinActive("ahk_exe dnplayer.exe")
+        {
+            break
+        }
         
-;         SendEvent("{i down}")
-;         SendEvent("{x down}")
-;         SendEvent("jjj")
-;         SendEvent("{x up}")
-;         SendEvent("{i up}")
-;     }
-;     return
-;     }
+        SendEvent("{i down}")
+        SendEvent("{x down}")
+        SendEvent("jjj")
+        SendEvent("{x up}")
+        SendEvent("{i up}")
+    }
+    return
+    }
 
-F20:: ; Hound laggy
+F21:: ; Laggy
 { ; V1toV2: Added bracket
 global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -260,9 +260,7 @@ global ; V1toV2: Made function global
         }
         
         Send("{i down}")
-        Send("{x down}")
-        SendInput("jjj")
-        Send("{x up}")
+        SendInput("lll")
         Send("{i up}")
     }
     return
