@@ -227,7 +227,8 @@ global ; V1toV2: Made function global
 ;     }
 
 
-;     F20:: ; Hound
+
+; F20:: ; Hound
 ; { ; V1toV2: Added bracket
 ; global ; V1toV2: Made function global
 ;     StartTime := A_TickCount
@@ -237,19 +238,17 @@ global ; V1toV2: Made function global
 ;         {
 ;             break
 ;         }
+        
 ;         SendEvent("{i down}")
-;         SendEvent("{d down}")
-;         SendEvent("j")
-;         SendEvent("j")
-;         SendEvent("j")
-;         SendEvent("{d up}")
+;         SendEvent("{x down}")
+;         SendEvent("jjj")
+;         SendEvent("{x up}")
 ;         SendEvent("{i up}")
 ;     }
 ;     return
 ;     }
 
-
-F20:: ; Hound
+F20:: ; Hound laggy
 { ; V1toV2: Added bracket
 global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -260,11 +259,11 @@ global ; V1toV2: Made function global
             break
         }
         
-        SendEvent("{i down}")
-        SendEvent("{x down}")
-        SendEvent("jjj")
-        SendEvent("{x up}")
-        SendEvent("{i up}")
+        Send("{i down}")
+        Send("{x down}")
+        SendInput("jjj")
+        Send("{x up}")
+        Send("{i up}")
     }
     return
     }
