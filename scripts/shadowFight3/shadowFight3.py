@@ -10,6 +10,7 @@ from datetime import datetime
 from tkinter import Tk, Button, messagebox
 import glob
 import os
+import keyboard
 import pyautogui
 import pygetwindow as gw
 import subprocess
@@ -829,15 +830,15 @@ initialize_button(83, "F23")
 initialize_button(84, "F24")
 
 # Restart function that displays the cumulative summary before restarting
-def restart(event=None):
+def restart():
     display_image_found_chart()  # Show the summary of found images
     ROOT.destroy()
     subprocess.Popen([sys.executable] + sys.argv)
 
 # Button to restart the script
-Destroy_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Destroy_BT.pack(padx=(1, 1), pady=(1, 1))
-
+Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Restart_BT.pack(padx=(1, 1), pady=(1, 1))
+keyboard.add_hotkey("esc", restart)
 
 """
 ███████╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
