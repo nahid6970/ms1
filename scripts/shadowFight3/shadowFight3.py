@@ -77,8 +77,8 @@ def action_main_handler_5():
 #                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
 #                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
-#                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
-                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
+                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
+#                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
 #                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
 #                key_down(window, 'F24'); time.sleep(5); key_up(window, 'F24')
@@ -837,7 +837,7 @@ def restart():
 # Button to restart the script
 Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Restart_BT.pack(padx=(1, 1), pady=(1, 1))
-keyboard.add_hotkey("esc", restart)
+# keyboard.add_hotkey("esc", restart)
 
 """
 ███████╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
