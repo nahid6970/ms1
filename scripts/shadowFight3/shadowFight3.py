@@ -3,7 +3,6 @@
 # from PIL import Image, ImageDraw
 # from struct import calcsize, pack
 # from tkinter import messagebox
-# from tkinter import messagebox
 # import gc  # Import garbage collector
 # import random
 from datetime import datetime
