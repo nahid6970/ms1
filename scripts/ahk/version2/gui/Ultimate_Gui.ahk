@@ -13,12 +13,12 @@ myGui.Add("Text", "xm  ym w200 Backgroundffa114 +Center Border", "Komorebic Save
 myGui.Add("Text", "x+5 yp w200 Backgroundffa114 +Center Border", "Komorebic Load").OnEvent("Click", (*) => RunWait("komorebic quick-load-resize", , "Hide"))
 
 myGui.SetFont("s30 Bold", "Jetbrainsmono nfp")
-myGui.Add("Text", "xm y+5 Backgroundf30000 cWhite w100 +Center", "").OnEvent("Click", (*) => KillProcess("python.exe"))
-myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w100 +Center", "󱂬").OnEvent("Click", (*) => KillProcess("komorebi.exe"))
-myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w100 +Center", "").OnEvent("Click", (*) => KillProcess("explorer.exe"))
-myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w100 +Center", "").OnEvent("Click", (*) => KillProcess("cmd.exe"))
-myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w100 +Center", "󰨊").OnEvent("Click", (*) => KillProcess("powershell.exe"))
-myGui.Add("Text", "x+5 yp Backgroundf30000 cWhite w100 +Center", "").OnEvent("Click", (*) => KillProcess("pwsh.exe"))
+myGui.Add("Text", "xm y+5 Backgroundf30000 cffffff w100 +Center", "").OnEvent("Click", (*) => KillProcess("python.exe"))
+myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "󱂬").OnEvent("Click", (*) => KillProcess("komorebi.exe"))
+myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "").OnEvent("Click", (*) => KillProcess("explorer.exe"))
+myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "").OnEvent("Click", (*) => KillProcess("cmd.exe"))
+myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "󰨊").OnEvent("Click", (*) => KillProcess("powershell.exe"))
+myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "").OnEvent("Click", (*) => KillProcess("pwsh.exe"))
 
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "xm y+5  w200 +Center Border", "AHK-Scripts").SetFont("s12 Bold", "Jetbrainsmono nfp")
