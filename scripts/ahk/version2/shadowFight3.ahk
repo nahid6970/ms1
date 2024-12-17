@@ -268,27 +268,7 @@ global ; V1toV2: Made function global
 ;     return
 ;     }
 
-; F21:: ; Laggy heritage
-; { ; V1toV2: Added bracket
-; global ; V1toV2: Made function global
-;     StartTime := A_TickCount
-;     while (A_TickCount - StartTime < 5000)
-;     {
-;         if !WinActive("ahk_exe dnplayer.exe")
-;         {
-;             break
-;         }
-        
-;         Send("{i down}")
-;         Send("{l down}")
-;         SendInput("iii")
-;         Send("{l up}")
-;         Send("{i up}")
-;     }
-;     return
-;     }
-
-F21:: ; Laggy other set
+F21:: ; Laggy heritage
 { ; V1toV2: Added bracket
 global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -299,16 +279,32 @@ global ; V1toV2: Made function global
             break
         }
         
-        Send("{s down}")
-
-
-        Sendinput("s")
-
-
-        Send("{s up}")
+        Send("{i down}")
+        Send("{l down}")
+        SendInput("iii")
+        Send("{l up}")
+        Send("{i up}")
     }
     return
     }
+
+; F21:: ; Laggy other set
+; { ; V1toV2: Added bracket
+; global ; V1toV2: Made function global
+;     StartTime := A_TickCount
+;     while (A_TickCount - StartTime < 5000)
+;     {
+;         if !WinActive("ahk_exe dnplayer.exe")
+;         {
+;             break
+;         }
+        
+;         Send("{s down}")
+;         Sendinput("s")
+;         Send("{s up}")
+;     }
+;     return
+;     }
 
 
 #HotIf
