@@ -1,3 +1,6 @@
+; Help
+; For line breaks use `n
+
 #Requires AutoHotkey v2.0
 
 myGui := Gui("+AlwaysOnTop", "Control Panel")
