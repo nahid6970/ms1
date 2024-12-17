@@ -23,6 +23,7 @@ import time
 import tkinter as tk
 import win32gui
 import win32process
+from queue import Queue
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -343,7 +344,7 @@ get_net_speed.upload_speed_last = 0
 get_net_speed.download_speed_last = 0
 
 #! Github status
-from queue import Queue
+
 
 def check_git_status(git_path, queue):
     if not os.path.exists(git_path):
@@ -641,7 +642,7 @@ PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c c
 PositionXY_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_APP.py"], shell=True))
 PositionXY_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_APP.py"],shell=True))
 
-PositionXY_CrossHair_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+PositionXY_CrossHair_bt=tk.Label(ROOT1, text="\uf05b",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_CrossHair_bt.pack(side="left",padx=(3,0),pady=(0,0))
 PositionXY_CrossHair_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_CroosHair.py"], shell=True))
 PositionXY_CrossHair_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_CroosHair.py"],shell=True))
@@ -843,7 +844,7 @@ STATUS_MS3.bind("<Button-3>",lambda event:show_git_changes("C:\\ms3"))
 def delete_git_lock_files():
     files_to_delete = [
         r'C:\ms1\.git\index.lock',
-        r'C:\ms2\.git\index.lock'
+        r'C:\ms2\.git\index.lock',
         r'C:\ms3\.git\index.lock'
     ]
     for file in files_to_delete:
