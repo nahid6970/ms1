@@ -24,6 +24,12 @@ myGui.SetFont("s20 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(1000), Send("#+f"))) ;; App--> Text Grab
 myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\Locker.py", , "Hide"))) ;; Locker ;; python script
 
+myGui.SetFont("s20 Bold", "Jetbrainsmono nfp")
+myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\ffmpeg\trim.ps1",, "Show"))) ;; ffmpeg video cut
+myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\ffmpeg\convert.ps1",, "Show"))) ;; ffmpeg video Convert
+myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "󰕩").OnEvent("Click", (*) => (Run("C:\ms1\scripts\ffmpeg\merge.ps1",, "Show"))) ;; ffmpeg video merge
+myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\ffmpeg\img_dim.ps1",, "Show"))) ;; ffmpeg image dimension
+
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "xm y+5  w200 +Center Border", "AHK-Scripts").SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "AhkConverter").OnEvent("Click", (*) => Run("C:\msBackups\Autohotkey\AHK_converter\QuickConvertorV2_scintilla.ahk", , "Hide"))
