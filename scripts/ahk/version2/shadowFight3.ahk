@@ -260,9 +260,9 @@ global ; V1toV2: Made function global
         }
         
         Send("{i down}")
-        Send("{x down}")
+        Send("{l down}")
         SendInput("jjj")
-        Send("{x up}")
+        Send("{l up}")
         Send("{i up}")
     }
     return
