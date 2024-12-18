@@ -20,6 +20,10 @@ myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "").OnEvent
 myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "󰨊").OnEvent("Click", (*) => KillProcess("powershell.exe"))
 myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "").OnEvent("Click", (*) => KillProcess("pwsh.exe"))
 
+myGui.SetFont("s20 Bold", "Jetbrainsmono nfp")
+myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) =>  Send("#+f")) ;; App--> Text Grab
+
+
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "xm y+5  w200 +Center Border", "AHK-Scripts").SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "AhkConverter").OnEvent("Click", (*) => Run("C:\msBackups\Autohotkey\AHK_converter\QuickConvertorV2_scintilla.ahk", , "Hide"))
