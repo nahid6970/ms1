@@ -395,12 +395,13 @@ def event_function_Main():
                 
                 elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
         
+                # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
+                elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
+                elif find_image(skip, confidence=0.8): press_keys_with_delays(window, ' ', 1) #! optional
+
                 #* dynamic folder img
                 [press_keys_with_delays(window, 'c', 1) 
                 for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
-
-                # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
-                # elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
 
                 # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
                 # elif find_image(back_GPlay, confidence=0.8): press_ldplayer_screen_with_delays(window, (1628, 815, 2)) #! optional
@@ -953,6 +954,7 @@ cont_dynamic = glob.glob(os.path.join(cont_folder, "*.png"))
 back_GPlay=r"C:\msBackups\shadowfight3\ads\Back_GooglePlay.png"
 Error_Processing_Video=r"C:\msBackups\shadowfight3\ads\error_Video.png"
 
+skip=r'C:\msBackups\shadowfight3\skip.png'
 # Advertisement
 # ads1 = r"C:\msBackups\shadowfight3\ads\ad1.png"
 # ads2 = r"C:\msBackups\shadowfight3\ads\ad2.png"
