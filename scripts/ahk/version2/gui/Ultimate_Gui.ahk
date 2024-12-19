@@ -21,8 +21,8 @@ myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "󰨊").OnEven
 myGui.Add("Text", "x+5 yp Backgroundf30000 cffffff w100 +Center", "").OnEvent("Click", (*) => KillProcess("pwsh.exe"))
 
 myGui.SetFont("s20 Bold", "Jetbrainsmono nfp")
-myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(1000), Send("#+f"))) ;; App--> Text Grab
-myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\Locker.py", , "Hide"))) ;; Locker ;; python script
+myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(500), Send("#+f"))) ;; App--> Text Grab
+myGui.Add("Text", "x+5 yp Background31ffc1 cec2d47 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\Locker.py",, "Hide"))) ;; Locker ;; python script
 
 myGui.SetFont("s20 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w50 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\ffmpeg\trim.ps1",, "Show"))) ;; ffmpeg video cut
