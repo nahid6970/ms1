@@ -98,7 +98,7 @@ Always_on_Top(){
 
 
 
-!c::Center_Focused_Window()
+LAlt & c::Center_Focused_Window()
 Center_Focused_Window() {
     ; Get the handle of the active (focused) window
     hwnd := WinGetID("A")
