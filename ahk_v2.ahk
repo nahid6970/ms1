@@ -43,6 +43,16 @@ RestartExplorer() {
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
 
+^!+r:: {
+    ; Kill dnplayer.exe
+    Run("taskkill /F /IM dnplayer.exe",,"Hide")
+    ; Kill python.exe
+    Run("taskkill /F /IM python.exe",,"Hide")
+    ; Run the command
+    Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
+}
+
+
 ; monitorcls
 RAlt & Numpad1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
 RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
