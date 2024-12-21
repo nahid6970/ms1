@@ -77,8 +77,8 @@ def action_main_handler_5():
 #                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
 #                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
-#                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
-                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
+                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
+#                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
 #                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
 #                key_down(window, 'F24'); time.sleep(5); key_up(window, 'F24')
