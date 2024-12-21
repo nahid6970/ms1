@@ -49,7 +49,7 @@ RestartExplorer() {
     ; Kill python.exe
     Run("taskkill /F /IM python.exe",,"Hide")
     ; Run the command
-    Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
+    Run("C:\msBackups\Display\DisplaySwitch.exe /internal",,"Hide")
 }
 
 
