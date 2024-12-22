@@ -824,13 +824,13 @@ SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,rel
 SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 
 def git_backup(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; C:\\ms1\\scripts\\Github\\ms3u.ps1 ; cd C:\\ms1}"], shell=True)
+    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; C:\\ms1\\scripts\\Github\\ms3u.ps1 ; cd ~}"], shell=True)
 bkup=tk.Label(ROOT1,text="\udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
 bkup.pack(side="left",padx=(0,0),pady=(0,0))
 bkup.bind ("<Button-1>",git_backup)
 
 def git_backup_ms1(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; cd ~}"], shell=True)
+    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; cd C:\\ms1}"], shell=True)
 STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS1.bind ("<Button-1>",git_backup_ms1)
