@@ -208,47 +208,72 @@
 
 # Set the location to the repository directory
 Set-Location C:\ms1
+
 # Check the status of the repository
 git status
+
 # Add all changes to the staging area
 git add .
+
 # Prompt for a commit message
 $commitMessage = Read-Host "Enter commit message"
-# Check if 'xx' is part of the commit message
+
+# Handle special "xx" commit message logic
 if ($commitMessage -like "xx*") {
-    # Get the list of changed files and extract only the file name (handle quotes and spaces)
     $changedFiles = git status --porcelain | ForEach-Object {
-        # Regex to capture the filename part, skipping status indicators (like M, D, ??)
         if ($_ -match '^[ MADRCU?]{2} "?(.+?)"?$') {
             $fullPath = $matches[1]
-            # Use Split-Path with -Leaf to get only the file name, no path
             $fileName = Split-Path $fullPath -Leaf
-            
-            # Add emoji based on file extension
             switch -regex ($fileName) {
-                '\.py$' { "🐍 $fileName" }    # Python files
-                '\.ps1$' { " $fileName" }   # PowerShell files
-                '\.ahk$' { " $fileName" }  # AutoHotkey files
-                default { "📝 $fileName" }    # Other files
+                '\.py$' { "🐍 $fileName" }
+                '\.ps1$' { " $fileName" }
+                '\.ahk$' { " $fileName" }
+                default { "📝 $fileName" }
             }
         }
     }
-    # Join the file names with emojis into a single string
     $fileList = $changedFiles -join ', '
-    # Remove 'xx' from the original commit message and check for extra text
     $extraComment = $commitMessage -replace '^xx', ''
-    # Construct the final commit message
-    if ($extraComment -ne '') {
-        # If there's an extra comment, add the 💬 emoji before it
-        $commitMessage = "󰅿 $extraComment $fileList"
-    } else {
-        # If there's no extra comment, just include the file list
-        $commitMessage = "$fileList"
-    }
+    $commitMessage = if ($extraComment -ne '') { "󰅿 $extraComment $fileList" } else { "$fileList" }
 }
+
 # Commit the changes with the provided message
 git commit -m $commitMessage
+
+# Check for upstream branch configuration
+$remoteBranchExists = git remote show origin | Select-String -Pattern "main tracked" -Quiet
+
+if (-not $remoteBranchExists) {
+    # Set upstream branch if not configured
+    git push --set-upstream origin main
+} else {
+    # Attempt to pull changes before pushing
+    try {
+        git pull origin main
+    } catch {
+        # Handle divergence errors
+        Write-Host "Divergent branches detected. How do you want to resolve this?"
+        Write-Host "1. Merge (default)"
+        Write-Host "2. Rebase"
+        Write-Host "3. Fast-forward only"
+        $choice = Read-Host "Enter your choice (1/2/3)"
+        
+        switch ($choice) {
+            "2" {
+                Write-Host "Rebasing..."
+                git pull --rebase origin main
+            }
+            "3" {
+                Write-Host "Fast-forwarding..."
+                git pull --ff-only origin main
+            }
+            default {
+                Write-Host "Merging..."
+                git pull --no-rebase origin main
+            }
+        }
+    }
+}
+
 # Push the changes to the remote repository
 git push
-# Optionally, set the location back to the original directory
-Set-Location
