@@ -208,52 +208,47 @@
 
 # Set the location to the repository directory
 Set-Location C:\ms1
-
 # Check the status of the repository
 git status
-
 # Add all changes to the staging area
 git add .
-
 # Prompt for a commit message
 $commitMessage = Read-Host "Enter commit message"
-
 # Check if 'xx' is part of the commit message
 if ($commitMessage -like "xx*") {
+    # Get the list of changed files and extract only the file name (handle quotes and spaces)
     $changedFiles = git status --porcelain | ForEach-Object {
+        # Regex to capture the filename part, skipping status indicators (like M, D, ??)
         if ($_ -match '^[ MADRCU?]{2} "?(.+?)"?$') {
             $fullPath = $matches[1]
+            # Use Split-Path with -Leaf to get only the file name, no path
             $fileName = Split-Path $fullPath -Leaf
+            
+            # Add emoji based on file extension
             switch -regex ($fileName) {
-                '\.py$' { "🐍 $fileName" }
-                '\.ps1$' { " $fileName" }
-                '\.ahk$' { " $fileName" }
-                default { "📝 $fileName" }
+                '\.py$' { "🐍 $fileName" }    # Python files
+                '\.ps1$' { " $fileName" }   # PowerShell files
+                '\.ahk$' { " $fileName" }  # AutoHotkey files
+                default { "📝 $fileName" }    # Other files
             }
         }
     }
+    # Join the file names with emojis into a single string
     $fileList = $changedFiles -join ', '
+    # Remove 'xx' from the original commit message and check for extra text
     $extraComment = $commitMessage -replace '^xx', ''
+    # Construct the final commit message
     if ($extraComment -ne '') {
+        # If there's an extra comment, add the 💬 emoji before it
         $commitMessage = "󰅿 $extraComment $fileList"
     } else {
+        # If there's no extra comment, just include the file list
         $commitMessage = "$fileList"
     }
 }
-
 # Commit the changes with the provided message
 git commit -m $commitMessage
-
-# Check if a remote repository is configured
-$remoteCheck = git remote -v
-if ($remoteCheck -eq $null) {
-    Write-Host "No remote repository configured. Adding the default remote 'origin'."
-    git remote add origin https://github.com/nahid6970/ms1.git
-    git push -u origin main
-} else {
-    # Push the changes to the remote repository
-    git push
-}
-
+# Push the changes to the remote repository
+git push
 # Optionally, set the location back to the original directory
 Set-Location
