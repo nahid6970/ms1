@@ -277,5 +277,3 @@ if (-not $remoteBranchExists) {
 
 # Push the changes to the remote repository
 git push
-
-Set-Location C:\ms1
