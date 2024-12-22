@@ -830,7 +830,7 @@ bkup.pack(side="left",padx=(0,0),pady=(0,0))
 bkup.bind ("<Button-1>",git_backup)
 
 def git_backup_ms1(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; cd 'C:\\ms1\\'}"], shell=True)
+    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; cd ~}"], shell=True)
 STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS1.bind ("<Button-1>",git_backup_ms1)
