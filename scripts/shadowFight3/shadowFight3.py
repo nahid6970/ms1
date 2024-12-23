@@ -174,6 +174,13 @@ def WhatsPhotoClick():
             if find_image(profile_pic): press_global_screen_with_delays((294, 299, 2),(305,285,2))
             elif find_image(call_me, confidence=0.8): press_keys_with_delays(window, "a", 1, "b", 120)
             elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
+
+            # [click(window, IMG_CORDINATE.left + IMG_CORDINATE.width // 2, IMG_CORDINATE.top + IMG_CORDINATE.height // 2) or time.sleep(5) 
+            # for _ in [1] if (IMG_CORDINATE := find_image(profile_pic, confidence=0.8))]
+
+            # [click(window, IMG_CORDINATE.left + IMG_CORDINATE.width // 2, IMG_CORDINATE.top + IMG_CORDINATE.height // 2) or time.sleep(5) 
+            # for _ in [1] if (IMG_CORDINATE := find_image(call_me, confidence=0.8))]
+
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
 
