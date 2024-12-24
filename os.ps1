@@ -528,8 +528,8 @@ function Show-MainMenu {
             }
 
             "song [rclone] [bk]" {
-                nw_powershell -Command "
-                    rclone sync D:/song/ gu:/song/ -P --check-first --transfers=1 --track-renames --fast-list
+                nw_pwsh -Command "
+                    rclone sync D:/song/ gu:/song/ -P --check-first --transfers=1 --track-renames --fast-list #--dry-run
                                          "
             }
 
