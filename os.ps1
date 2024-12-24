@@ -171,8 +171,7 @@ function Show-MainMenu {
     $mainMenuListBox.Items.Add("Initial Setup")
     $mainMenuListBox.Items.Add("Application Setup")
     $mainMenuListBox.Items.Add("Clone Projects")
-    $mainMenuListBox.Items.Add("Backup")
-    $mainMenuListBox.Items.Add("Restore")
+    $mainMenuListBox.Items.Add("Backup & Restore")
     $mainMenuListBox.Items.Add("Port")
     $mainMenuListBox.Items.Add("mklink")
     $mainMenuListBox.Items.Add("Github Projects")
@@ -255,14 +254,15 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("AppControl Manager")
                 $submenuListBox.Items.Add("Harden Windows Security Using GUI")
             }
-            "Restore" {
+            "Backup & Restore" {
                 $submenuListBox.Items.Add("decrypt rclone.conf & move")
+                $submenuListBox.Items.Add("------------------*------------------")
                 $submenuListBox.Items.Add("msBackups [rs]")
-            }
-            "Backup" {
                 $submenuListBox.Items.Add("msBackups [bk]")
+                $submenuListBox.Items.Add("------------------*------------------")
                 $submenuListBox.Items.Add("nilesoft nss [bk]")
             }
+
         }
     })
 
@@ -334,6 +334,7 @@ function Show-MainMenu {
                     scoop install text-grab
                     scoop install yt-dlp
                     scoop install ffmpeg
+                    scoop install highlight
 
                     winget upgrade --source msstore
                     winget upgrade --source winget
