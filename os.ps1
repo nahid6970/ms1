@@ -261,6 +261,8 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("msBackups [bk]")
                 $submenuListBox.Items.Add("------------------*------------------")
                 $submenuListBox.Items.Add("nilesoft nss [bk]")
+                $submenuListBox.Items.Add("------------------*------------------")
+                $submenuListBox.Items.Add("song [rclone] [bk]")
             }
 
         }
@@ -522,6 +524,12 @@ function Show-MainMenu {
                     # cd c:\
                     Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\ms1\asset\nilesoft_shell\shell.nss' -Force -Verbose
                     Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\ms1\asset\nilesoft_shell\' -Recurse -Force -Verbose
+                                         "
+            }
+
+            "song [rclone] [bk]" {
+                nw_powershell -Command "
+                    rclone sync D:/song/ gu:/song/ -P --check-first --transfers=1 --track-renames --fast-list
                                          "
             }
 
