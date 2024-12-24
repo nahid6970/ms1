@@ -302,3 +302,15 @@ global ; V1toV2: Made function global
     A_Clipboard := ClipSaved
     return
 } ; V1toV2: Added bracket in the end
+
+
+
+i := 1
+#s::
+{ ; V1toV2: Added bracket
+global ; V1toV2: Made function global
+	PID := WinGetPID("A")
+	ProcessSetPriority(((i = 1) ? "L" : ((i = 2) ? "N" : "H")), PID)
+	i := (i > 2) ? 1 : i + 1
+return
+} ; V1toV2: Added bracket in the end
