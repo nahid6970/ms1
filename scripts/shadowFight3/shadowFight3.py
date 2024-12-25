@@ -115,7 +115,7 @@ def display_image_found_chart():
     print(f"{'Image Name'.ljust(column_width)} : Count")
     print("-" * (column_width + 10))  # Adjust width for alignment
     for image, count in image_found_count.items():
-        print(f"{image.ljust(column_width)} : {count} times")
+        print(f"{image.ljust(column_width)} : {count}")
     print("\033[94m-------------------------------------\033[0m\n")
 
 def find_image(image_path, confidence=0.7, region=None):
