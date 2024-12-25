@@ -109,11 +109,14 @@ last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
 
 def display_image_found_chart():
-    """Display a chart of found images and their cumulative counts."""
+    """Display a chart of found images and their cumulative counts in aligned columns."""
+    # Calculate the width for the first column (image names)
+    max_image_name_length = max(len(image) for image in image_found_count.keys())
     print("\n\033[94m--- Cumulative Image Found Summary ---\033[0m")
     for image, count in image_found_count.items():
-        print(f"{image}: {count} times")
+        print(f"{image.ljust(max_image_name_length)} : {count} times")
     print("\033[94m-------------------------------------\033[0m\n")
+
 
 def find_image(image_path, confidence=0.7, region=None):
     """Find the location of the image on the screen within an optional specified region.
