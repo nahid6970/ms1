@@ -314,3 +314,35 @@ global ; V1toV2: Made function global
 	i := (i > 2) ? 1 : i + 1
 return
 } ; V1toV2: Added bracket in the end
+
+
+
+
+
+; ; Detect when the right mouse button is pressed down
+; RButton::
+; {
+;     ; Keep sending 'j' while the right mouse button is held down
+;     while (GetKeyState("RButton", "P")) {
+;         Send("j")
+;         Sleep(50) ; Adjust the delay for how fast 'j' is sent
+;     }
+; }
+
+
+
+Persistent
+SetTitleMatchMode(2) ; Allow partial matching of window titles
+; Allow the right mouse button to work normally in other apps
+~RButton::
+{
+    ; Check if 'dnplayer' is the active window
+    if (WinActive("ahk_exe dnplayer.exe")) {
+        ; Keep sending 'j' while the right mouse button is held down
+        while (GetKeyState("RButton", "P") && WinActive("ahk_exe dnplayer.exe")) {
+            Send("j")
+            Sleep(50) ; Adjust the delay for how fast 'j' is sent
+        }
+    }
+    return
+}
