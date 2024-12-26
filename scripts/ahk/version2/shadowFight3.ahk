@@ -259,11 +259,11 @@ global ; V1toV2: Made function global
             break
         }
         
-        Send("{l down}")
+        Send("{s down}")
         Send("{i down}")
         SendInput("iii")
         Send("{i up}")
-        Send("{l up}")
+        Send("{s up}")
     }
     return
     }
