@@ -72,12 +72,15 @@ RAlt & -::Run("C:\ms1\scripts\ahk\version1\text\Replace_Dash_W_Space.ahk", "", "
 ::;v1:: {#}Requires AutoHotkey v1.0
 ::;v2:: {#}Requires AutoHotkey v2.0
 
-^!t::Toggle_Reset_Workspace()
-taskbarVisible := 1  ; 1 for visible, 0 for hidden
+
+
+^!t::Toggle_Reset_Workspace() ; Define the shortcut outside
 Toggle_Reset_Workspace() {
-    global taskbarVisible
+    static taskbarVisible := 1 ; Initialize the taskbar visibility state (1 for visible, 0 for hidden)
+
     ; Get the handle of the taskbar
     taskbarHandle := WinGetID("ahk_class Shell_TrayWnd")
+    
     if taskbarVisible {
         ; Hide the taskbar
         WinSetExStyle("+0x80", "ahk_id " taskbarHandle)  ; WS_EX_TOOLWINDOW
@@ -305,17 +308,21 @@ global ; V1toV2: Made function global
 
 
 
-i := 1
-#s::
-{ ; V1toV2: Added bracket
-global ; V1toV2: Made function global
-	PID := WinGetPID("A")
-	ProcessSetPriority(((i = 1) ? "L" : ((i = 2) ? "N" : "H")), PID)
-	i := (i > 2) ? 1 : i + 1
-return
-} ; V1toV2: Added bracket in the end
 
+#s:: ; Define the shortcut outside
+{
+    global ; Declare global scope for variables
+    i := 1 ; Initialize the variable if not already set
 
+    ; Get the process ID of the active window
+    PID := WinGetPID("A")
+
+    ; Set process priority based on the value of 'i'
+    ProcessSetPriority(((i = 1) ? "L" : ((i = 2) ? "N" : "H")), PID)
+
+    ; Update 'i' for the next use, cycling through 1, 2, and 3
+    i := (i > 2) ? 1 : i + 1
+}
 
 
 
