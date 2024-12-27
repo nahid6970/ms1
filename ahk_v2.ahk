@@ -130,13 +130,12 @@ Center_Focused_Window() {
 
 
 
-#HotIf WinActive("ahk_exe dnplayer.exe", )
-!v::Center_Focused_Window_modLDplayer()
+#HotIf WinActive("ahk_exe dnplayer.exe") ; Apply condition for dnplayer.exe
+!v::Center_Focused_Window_modLDplayer() ; Define the shortcut outside
 #HotIf  ; End the condition
-; Initialize a variable to keep track of the toggle state
-isFirstPosition := true
+
 Center_Focused_Window_modLDplayer() {
-    global isFirstPosition  ; Access the toggle variable
+    static isFirstPosition := true ; Initialize the toggle state (true for first position)
     ; Get the handle of the dnplayer.exe window
     hwnd := WinGetID("A")
     ; Toggle between the two positions
@@ -150,6 +149,7 @@ Center_Focused_Window_modLDplayer() {
     ; Toggle the position state for the next activation
     isFirstPosition := !isFirstPosition
 }
+
 
 
 
