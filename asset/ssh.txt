@@ -261,6 +261,8 @@ Host key verification failed.
 solution ---> just reset the host from android termux
 ssh-keygen -R 192.168.0.101
 
+enaable port 22
+
 made sure i have a password setup if i dont use onedrive
 
 also need to use ssh nahid@192.168.0.101 to first time to get the 
