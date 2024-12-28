@@ -240,3 +240,29 @@ sshpass -p "xxx" ssh nahid@192.168.0.101
 [PC-->Android]
 plink -ssh -P 8022 -pw "xxx" u0_a827@192.168.0.102
 kitty.exe -ssh u0_a827@192.168.0.102 -P 8022
+
+
+
+[user@hostname ~]$ ssh root@pong
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that a host key has just been changed.
+The fingerprint for the RSA key sent by the remote host is
+6e:45:f9:a8:af:38:3d:a1:a5:c7:76:1d:02:f8:77:00.
+Please contact your system administrator.
+Add correct host key in /home/hostname /.ssh/known_hosts to get rid of this message.
+Offending RSA key in /var/lib/sss/pubconf/known_hosts:4
+RSA host key for pong has changed and you have requested strict checking.
+Host key verification failed.
+
+solution ---> just reset the host from android termux
+ssh-keygen -R 192.168.0.101
+
+made sure i have a password setup if i dont use onedrive
+
+also need to use ssh nahid@192.168.0.101 to first time to get the 
+fingerpring confirmation and say yes
+
