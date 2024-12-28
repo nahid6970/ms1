@@ -184,12 +184,8 @@ after that restart is needed
 restart-Service sshd
 
 use xposed edge to input password 
-or can use a local user without password
+or can use a local user without password (lie tried didnt work)
 
-run this command as admin to change from cmd to powershell
-New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
-or for powershell default one
-New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
 
 
 
@@ -268,3 +264,7 @@ made sure i have a password setup if i dont use onedrive
 also need to use ssh nahid@192.168.0.101 to first time to get the 
 fingerpring confirmation and say yes
 
+run this command as admin to change from cmd to powershell
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\PowerShell\7\pwsh.exe" -PropertyType String -Force
+or for powershell default one
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
