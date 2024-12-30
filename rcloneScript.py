@@ -44,14 +44,15 @@ style.configure("Black.TFrame", background="#282c34")
 
 # Additional options with display names
 additional_options = [
-    ("Fast List",              "--fast-list"                     ,True) ,
-    ("Progress",               "-P"                              ,True) ,
-    ("Readable",               "--human-readable"                ,True) ,
-    ("Acknowledge Abuse",      "--drive-acknowledge-abuse"       ,True) ,
-    ("Web Gui **Rcd",          "--rc-web-gui"                    ,False) ,
-    ("vfs-cache",              "--vfs-cache-mode writes"         ,False) ,
-    ("Verbose Lengthy",        "-vv"                             ,False) ,
-    ("Verbose Minimal",        "-v"                              ,False) ,
+    ("Fast List",              "--fast-list"                     ,True),
+    ("Readable",               "--human-readable"                ,True),
+    ("Acknowledge Abuse",      "--drive-acknowledge-abuse"       ,True),
+    ("Progress",               "-P"                              ,False),
+    ("Dry Run",                "--dry-run"                       ,False),
+    ("Web Gui **Rcd",          "--rc-web-gui"                    ,False),
+    ("vfs-cache",              "--vfs-cache-mode writes"         ,False),
+    ("Verbose Lengthy",        "-vv"                             ,False),
+    ("Verbose Minimal",        "-v"                              ,False),
     ("Log Level",              "--log-level ERROR"               ,False),
     ("Stats Oneline",          "--stats-one-line"                ,False),
     ("Trashed Only",           "--drive-trashed-only "           ,False),
@@ -60,7 +61,6 @@ additional_options = [
     ("Skip Shortcuts",         "--drive-skip-shortcuts "         ,False),
     ("Date **tree ",           "-D "                             ,False),
     ("Modified Time **tree",   "-t "                             ,False),
-    ("Dry Run",                "--dry-run"                             ,False),
 ]
 
 # Manage additional items
