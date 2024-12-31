@@ -147,6 +147,10 @@
       "id": "VirtualBoxVM.exe",
       "matching_strategy": "Equals" },
 
+    { "kind": "Exe",
+      "id": "crosvm.exe",
+      "matching_strategy": "Equals" },
+
     { "kind": "Title",
       "id": "WhatsApp",
       "matching_strategy": "Equals" },
