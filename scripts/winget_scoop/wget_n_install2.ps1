@@ -1,6 +1,6 @@
 # always keep 1 value less  form the next columns starting point
-$firstLimit = 47
-$secondLimit = 95
+$firstLimit = 43
+$secondLimit = 92
 
 function SearchPackages {
     $packageListFile = ".\package-listn2.txt"
