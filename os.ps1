@@ -232,7 +232,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("clone ms3")
             }
             "Port" {
-                $submenuListBox.Items.Add("22") # ssh
+                $submenuListBox.Items.Add("22 [SSH]") # ssh
                 $submenuListBox.Items.Add("5000")
                 $submenuListBox.Items.Add("5001")
                 $submenuListBox.Items.Add("5002")
@@ -550,7 +550,7 @@ function Show-MainMenu {
                     $su New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
                                          "
             }
-            "22" {
+            "22 [SSH]" {
                 nw_pwsh -Command "
                     $su New-NetFirewallRule -DisplayName 'Allow_Port_22' -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -Profile Any
                                          "
