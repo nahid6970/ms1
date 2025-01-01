@@ -396,7 +396,7 @@ def event_function_Main():
                 (r'C:\msBackups\shadowfight3\priority_images\Patient_Tamer.png'      , 7) ,
                 (r'C:\msBackups\shadowfight3\priority_images\Wary_Hedgehog.png'      , 8) ,
                 (r'C:\msBackups\shadowfight3\priority_images\Silent_Avalanche.png'   , 9) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Hasty_Jackal.png'       , 10) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Hasty_Jackal.png'       , 10),
                 (r'C:\msBackups\shadowfight3\priority_images\Furious_Ferret.png'     , 11),
                 (r'C:\msBackups\shadowfight3\priority_images\Merciless_Crow.png'     , 12),
                 (r'C:\msBackups\shadowfight3\priority_images\Shadow_Snowbird.png'    , 13),
