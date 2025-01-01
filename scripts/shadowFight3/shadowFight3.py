@@ -387,17 +387,19 @@ def event_function_Main():
             # Define the images and their priorities
             prioritized_images = [
                 # Image1 with priority 1 (highest)
-                (r'C:\msBackups\shadowfight3\priority_images\Tough_Bear.png'         , 1) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Cautious_Panther.png'   , 2) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Stiff_Cliff.png'        , 3) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Steadfast_Tortoise.png' , 4) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Skilled_Master.png'     , 5) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Patient_Tamer.png'      , 6) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Silent_Avalanche.png'   , 7) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Hasty_Jackal.png'       , 8) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Furious_Ferret.png'     , 9) ,
-                (r'C:\msBackups\shadowfight3\priority_images\Merciless_Crow.png'     , 10),
-                (r'C:\msBackups\shadowfight3\priority_images\Shadow_Snowbird.png'    , 11),
+                (r'C:\msBackups\shadowfight3\priority_images\Greedy_Squirrel.png'    , 1) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Tough_Bear.png'         , 2) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Cautious_Panther.png'   , 3) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Stiff_Cliff.png'        , 4) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Steadfast_Tortoise.png' , 5) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Skilled_Master.png'     , 6) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Patient_Tamer.png'      , 7) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Wary_Hedgehog.png'      , 8) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Silent_Avalanche.png'   , 9) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Hasty_Jackal.png'       , 10) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Furious_Ferret.png'     , 11),
+                (r'C:\msBackups\shadowfight3\priority_images\Merciless_Crow.png'     , 12),
+                (r'C:\msBackups\shadowfight3\priority_images\Shadow_Snowbird.png'    , 13),
             ]
 
             # Sort the images by priority (ascending)
@@ -434,17 +436,30 @@ def event_function_Main():
                     if location:
                         # Extract the coordinates of the found image
                         x, y = location[0], location[1]
-                        
                         # Add the offset to the image location (10, 5)
                         click_x = x + 187
-                        click_y = y + 575
-
+                        click_y = y + 550
                         # Simulate a click at the adjusted coordinates
                         pyautogui.click(click_x, click_y)
                         break  # Click only the first detected image with the highest priority
 
-                time.sleep(0.05)
+                # # Test First
+                # for img_path, _ in prioritized_images:
+                #     location = find_image(img_path, confidence=0.8)
+                #     if location:
+                #         # Extract the coordinates of the found image
+                #         x, y = location[0], location[1]
+                #         # Add the offset to the image location (187, 575)
+                #         move_x = x + 187
+                #         move_y = y + 550
+                #         # Move the mouse to the adjusted coordinates (no click)
+                #         pyautogui.moveTo(move_x, move_y, duration=1)  # The duration can be adjusted
+                #         # Optionally, print out the coordinates for debugging
+                #         print(f"Mouse moved to: {move_x}, {move_y}")
+                #         break
 
+
+                time.sleep(0.05)
         except KeyboardInterrupt:
             print("Other items thread stopped by user.")
 
