@@ -401,7 +401,6 @@ def event_function_Main():
                 (r'C:\msBackups\shadowfight3\priority_images\Merciless_Crow.png'     , 12),
                 (r'C:\msBackups\shadowfight3\priority_images\Shadow_Snowbird.png'    , 13),
             ]
-
             # Sort the images by priority (ascending)
             prioritized_images.sort(key=lambda img: img[1])
 
