@@ -387,16 +387,17 @@ def event_function_Main():
             # Define the images and their priorities
             prioritized_images = [
                 # Image1 with priority 1 (highest)
-                (r'C:\msBackups\shadowfight3\priority_images\Tough_Bear.png'         , 1),
-                (r'C:\msBackups\shadowfight3\priority_images\Cautious_Panther.png'   , 2),
-                (r'C:\msBackups\shadowfight3\priority_images\Stiff_Cliff.png'        , 3),
-                (r'C:\msBackups\shadowfight3\priority_images\Steadfast_Tortoise.png' , 4),
-                (r'C:\msBackups\shadowfight3\priority_images\Skilled_Master.png'     , 5),
-                (r'C:\msBackups\shadowfight3\priority_images\Patient_Tamer.png'      , 6),
-                (r'C:\msBackups\shadowfight3\priority_images\Silent_Avalanche.png'   , 7),
-                (r'C:\msBackups\shadowfight3\priority_images\Furious_Ferret.png'     , 8),
-                (r'C:\msBackups\shadowfight3\priority_images\Merciless_Crow.png'     , 9),
-                (r'C:\msBackups\shadowfight3\priority_images\Shadow_Snowbird.png'    , 10),
+                (r'C:\msBackups\shadowfight3\priority_images\Tough_Bear.png'         , 1) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Cautious_Panther.png'   , 2) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Stiff_Cliff.png'        , 3) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Steadfast_Tortoise.png' , 4) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Skilled_Master.png'     , 5) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Patient_Tamer.png'      , 6) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Silent_Avalanche.png'   , 7) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Hasty_Jackal.png'       , 8) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Furious_Ferret.png'     , 9) ,
+                (r'C:\msBackups\shadowfight3\priority_images\Merciless_Crow.png'     , 10),
+                (r'C:\msBackups\shadowfight3\priority_images\Shadow_Snowbird.png'    , 11),
             ]
 
             # Sort the images by priority (ascending)
@@ -435,8 +436,8 @@ def event_function_Main():
                         x, y = location[0], location[1]
                         
                         # Add the offset to the image location (10, 5)
-                        click_x = x + 10
-                        click_y = y + 5
+                        click_x = x + 187
+                        click_y = y + 575
 
                         # Simulate a click at the adjusted coordinates
                         pyautogui.click(click_x, click_y)
