@@ -190,6 +190,10 @@
       "matching_strategy": "Equals" },
 
       { "kind": "Exe",
+      "id": "OpenVPNConnect.exe",
+      "matching_strategy": "Equals" },
+
+      { "kind": "Exe",
       "id": "AutoHotkey.exe",
       "matching_strategy": "Equals" }
     ]
