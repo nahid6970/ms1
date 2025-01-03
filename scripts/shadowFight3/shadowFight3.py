@@ -391,6 +391,11 @@ def event_function_Main():
                 elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
                 
                 elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
+
+                # for ck fighkt
+                elif find_image(r"C:\msBackups\shadowfight3\temporary\to_battle.png", confidence=0.8): press_keys_with_delays(window, ' ', 2,)
+                elif find_image(r"C:\msBackups\shadowfight3\temporary\fightttt.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
+                elif find_image(r"C:\msBackups\shadowfight3\temporary\Claim.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
         
                 # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
                 elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
