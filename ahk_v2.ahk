@@ -179,11 +179,11 @@ return
 
 ^!b::Toggle_Screen_Blackout()
 ; Define a variable to track the state of the screen blackout
+Toggle_Screen_Blackout() {
 blackoutState := 0
 ; Define a global variable to store the Gui object
 myGui := ""
 ; Define a function to toggle the screen blackout
-Toggle_Screen_Blackout() {
     global blackoutState, myGui  ; Declare the variables as global so they can be accessed inside the function
     if (blackoutState = 0) {
         ; If the screen is not blacked out, create a black fullscreen window
@@ -201,6 +201,7 @@ Toggle_Screen_Blackout() {
     }
 }
 
+
 showCursorPosition() {
     ; Loop to constantly update the tooltip with the mouse position
     Loop {
@@ -211,10 +212,10 @@ showCursorPosition() {
         }
         ; Retrieve the current position of the mouse cursor
         MouseGetPos(&x, &y)
-        
         ; Show the tooltip with the mouse position
         ToolTip("X: " x "`nY: " y)
-        
+        ; Copy the coordinates to the clipboard
+        Clipboard := "X: " x "`nY: " y
         ; Add a small delay to avoid overloading the CPU (50 ms)
         Sleep 50
     }
@@ -226,11 +227,11 @@ showCursorPosition() {
 
 ^!w::Toggle_Screen_Whiteout()
 ; Define a variable to track the state of the screen blackout
+Toggle_Screen_Whiteout() {
 whiteState := 0
 ; Define a global variable to store the Gui object
 myGui := ""
 ; Define a function to toggle the screen blackout
-Toggle_Screen_Whiteout() {
     global whiteState, myGui  ; Declare the variables as global so they can be accessed inside the function
     if (whiteState = 0) {
         ; If the screen is not blacked out, create a black fullscreen window
