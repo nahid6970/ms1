@@ -202,13 +202,26 @@ Toggle_Screen_Blackout() {
 }
 
 showCursorPosition() {
-    ; Retrieve the current position of the mouse cursor
-    MouseGetPos(&x, &y)
-    ; Display the position in a message box
-    MsgBox("Mouse Position:`nX: " x "`nY: " y)
+    ; Loop to constantly update the tooltip with the mouse position
+    Loop {
+        ; Check if the Esc key is pressed to exit the loop
+        if GetKeyState("Esc", "P") {
+            ToolTip  ; Close the tooltip
+            break
+        }
+        ; Retrieve the current position of the mouse cursor
+        MouseGetPos(&x, &y)
+        
+        ; Show the tooltip with the mouse position
+        ToolTip("X: " x "`nY: " y)
+        
+        ; Add a small delay to avoid overloading the CPU (50 ms)
+        Sleep 50
+    }
 }
 ; Example usage: call the function when pressing Ctrl+Shift+M
 ^+m::showCursorPosition()
+
 
 
 ^!w::Toggle_Screen_Whiteout()
