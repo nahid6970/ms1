@@ -202,28 +202,6 @@ myGui := ""
 }
 
 
-showCursorPosition() {
-    ; Loop to constantly update the tooltip with the mouse position
-    Loop {
-        ; Check if the Esc key is pressed to exit the loop
-        if GetKeyState("Esc", "P") {
-            ToolTip  ; Close the tooltip
-            break
-        }
-        ; Retrieve the current position of the mouse cursor
-        MouseGetPos(&x, &y)
-        ; Show the tooltip with the mouse position
-        ToolTip("X: " x "`nY: " y)
-        ; Copy the coordinates to the clipboard
-        Clipboard := "X: " x "`nY: " y
-        ; Add a small delay to avoid overloading the CPU (50 ms)
-        Sleep 50
-    }
-}
-; Example usage: call the function when pressing Ctrl+Shift+M
-^+m::showCursorPosition()
-
-
 
 ^!w::Toggle_Screen_Whiteout()
 ; Define a variable to track the state of the screen blackout
