@@ -239,11 +239,12 @@ global ; V1toV2: Made function global
             break
         }
         
-        SendEvent("{i down}")
         SendEvent("{x down}")
-        SendEvent("jjj")
-        SendEvent("{x up}")
+        Sleep(500)
+        SendEvent("{i down}")
+        Send("j")
         SendEvent("{i up}")
+        SendEvent("{x up}")
     }
     return
     }
