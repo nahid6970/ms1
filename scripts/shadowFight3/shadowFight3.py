@@ -375,7 +375,7 @@ def event_function_Main():
                 # Handle the other image searches and actions
                 if find_image(Home, confidence=0.8): press_key(window, 'f')
                 # if find_image(Home, confidence=0.8): press_ldplayer_screen_with_delays(window, (1265, 351, 2))
-                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+                elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
 
                 # elif any(find_image(image) for image in continueF): press_key(window, 'c')
                 # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
