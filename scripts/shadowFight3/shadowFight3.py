@@ -398,7 +398,7 @@ def event_function_Main():
                 elif find_image(r"C:\msBackups\shadowfight3\temporary\Claim.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
         
                 # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
-                elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, '2', 1) #! optional
+                elif find_image(Select_SelectOption, confidence=0.8, region=(385, 622, 816, 753 )): press_keys_with_delays(window, '2', 1) #! optional
                 elif find_image(skip, confidence=0.8): press_keys_with_delays(window, ' ', 1) #! optional
 
                 #* dynamic folder img
