@@ -1,20 +1,16 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-#HotIf WinActive("ahk_exe dnplayer.exe", )
-
+#HotIf WinActive("ahk_exe dnplayer.exe",)
 
 F13:: ; Hound
 { ; V1toV2: Added bracket
-global ; V1toV2: Made function global
+    global ; V1toV2: Made function global
     StartTime := A_TickCount
-    while (A_TickCount - StartTime < 5000)
-    {
-        if !WinActive("ahk_exe dnplayer.exe")
-        {
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-        
         SendEvent("{i down}")
         SendEvent("{x down}")
         SendEvent("jjj")
@@ -22,19 +18,16 @@ global ; V1toV2: Made function global
         SendEvent("{i up}")
     }
     return
-    }
+}
 
 F14:: ; Hound vortex
 { ; V1toV2: Added bracket
-global ; V1toV2: Made function global
+    global ; V1toV2: Made function global
     StartTime := A_TickCount
-    while (A_TickCount - StartTime < 5000)
-    {
-        if !WinActive("ahk_exe dnplayer.exe")
-        {
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-        
         SendEvent("{x down}")
         Sleep(500)
         SendEvent("{i down}")
@@ -43,39 +36,33 @@ global ; V1toV2: Made function global
         SendEvent("{x up}")
     }
     return
-    }
+}
 
 F15:: ; Hound Laggy
 { ; V1toV2: Added bracket
-global ; V1toV2: Made function global
-StartTime := A_TickCount
-while (A_TickCount - StartTime < 5000)
-{
-    if !WinActive("ahk_exe dnplayer.exe")
-    {
-        break
-    }
-    
-    Send("{s down}")
-    Send("{i down}")
-    SendInput("iii")
-    Send("{i up}")
-    Send("{s up}")
-}
-return
-}
-
-F16:: ; Heritage Laggy 
-{ ; V1toV2: Added bracket
-global ; V1toV2: Made function global
+    global ; V1toV2: Made function global
     StartTime := A_TickCount
-    while (A_TickCount - StartTime < 5000)
-    {
-        if !WinActive("ahk_exe dnplayer.exe")
-        {
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-    
+        Send("{i down}")
+        Send("{x down}")
+        SendInput("jjj")
+        Send("{x up}")
+        Send("{i up}")
+    }
+    return
+}
+
+F16:: ; Heritage Laggy
+{ ; V1toV2: Added bracket
+    global ; V1toV2: Made function global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
         Send("{i down}")
         Send("{l down}")
         SendInput("iii")
@@ -83,16 +70,7 @@ global ; V1toV2: Made function global
         Send("{i up}")
     }
     return
-    }
-
-
-
-
-
-
-
-
-
+}
 
 ;     F13:: ; dj
 ; { ; V1toV2: Added bracket
@@ -112,8 +90,7 @@ global ; V1toV2: Made function global
 ;         SendEvent("{d up}")
 ;     }
 ; return
-; } ; V1toV2: Added Bracket before hotkey or Hotstring
-
+; }
 
 ;     F14::
 ; { ; V1toV2: Added bracket
@@ -163,7 +140,6 @@ global ; V1toV2: Made function global
 ; return
 ; } ; V1toV2: Added Bracket before hotkey or Hotstring
 
-
 ;     F16::
 ; { ; V1toV2: Added bracket
 ; global ; V1toV2: Made function global
@@ -186,7 +162,6 @@ global ; V1toV2: Made function global
 ;         }
 ;     return
 ; } ; V1toV2: Added Bracket before hotkey or Hotstring
-
 
 ;     F17:: ; liberator
 ; { ; V1toV2: Added bracket
@@ -225,7 +200,6 @@ global ; V1toV2: Made function global
 ;     return
 ; } ; V1toV2: Added Bracket before hotkey or Hotstring
 
-
 ;     F18:: ; xj
 ; { ; V1toV2: Added bracket
 ; global ; V1toV2: Made function global
@@ -246,7 +220,6 @@ global ; V1toV2: Made function global
 ;         }
 ;     return
 ; } ; V1toV2: Added Bracket before hotkey or Hotstring
-
 
 ;     F19:: ; possessed
 ; { ; V1toV2: Added bracket
@@ -285,8 +258,6 @@ global ; V1toV2: Made function global
 ;     return
 ;     }
 
-
-
 ; ;     F20:: ; Hound
 ; ; { ; V1toV2: Added bracket
 ; ; global ; V1toV2: Made function global
@@ -297,11 +268,11 @@ global ; V1toV2: Made function global
 ; ;         {
 ; ;             break
 ; ;         }
-        
+
 ; ;         SendEvent("{i down}")
 ; ;         SendEvent("{x down}")
 ; ;         Sleep(1500)
-        
+
 ; ;         ; Hold down 'd' for 3 seconds while pressing 'j' repeatedly
 ; ;         SendEvent("{d down}")
 ; ;         Loop 10 ; Press 'j' 30 times (approx 1 press per 100ms for 3 seconds)
@@ -316,10 +287,6 @@ global ; V1toV2: Made function global
 ; ;     return
 ; ;     }
 
-
-
-
-
 ; ; F21:: ; Laggy other set
 ; ; { ; V1toV2: Added bracket
 ; ; global ; V1toV2: Made function global
@@ -330,13 +297,12 @@ global ; V1toV2: Made function global
 ; ;         {
 ; ;             break
 ; ;         }
-        
+
 ; ;         Send("{s down}")
 ; ;         Sendinput("s")
 ; ;         Send("{s up}")
 ; ;     }
 ; ;     return
 ; ;     }
-
 
 #HotIf
