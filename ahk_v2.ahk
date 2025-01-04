@@ -1,23 +1,17 @@
 #Requires AutoHotkey v2.0
-
 ; wont pop up older verson running
 #SingleInstance 
 Persistent
 
 ; Set the tray icon
 TraySetIcon("C:\msBackups\icon\shutdown3.png")
-
 ; Create a custom tray menu
 Tray := A_TrayMenu
 Tray.Delete() ; Remove default items
-
 Tray.Add("Restart Explorer", (*) => RestartExplorer())
 Tray.SetIcon("Restart Explorer", "C:\msBackups\icon\system_icon\shell32\965.ico")
-
 Tray.Add("Screen Dimmer", (*) => Run("C:\ms1\scripts\ahk\version1\Display\ScreenDimmer.ahk"))
-
 Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
-
 Tray.Add() ; Add a separator
 Tray.Add("Exit", (*) => ExitApp()) ; Add Exit button
 Tray.SetIcon("Exit","C:\msBackups\icon\system_icon\shell32\295.ico")
@@ -26,6 +20,8 @@ Tray.SetIcon("Exit","C:\msBackups\icon\system_icon\shell32\295.ico")
 RestartExplorer() {
     Run('pwsh -Command "Stop-Process -Name explorer -Force; Start-Process explorer"', , "")
 }
+
+
 
 ; include files
 #Include C:\ms1\scripts\ahk\version2\shadowFight3.ahk
