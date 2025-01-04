@@ -1,6 +1,7 @@
 import tkinter as tk
 from pynput import mouse
 import keyboard  # For global hotkeys
+import pyperclip  # For clipboard functionality
 
 class CrosshairOverlay:
     def __init__(self):
@@ -19,6 +20,9 @@ class CrosshairOverlay:
         # Get current mouse position
         with mouse.Controller() as m:
             mouse_x, mouse_y = m.position
+
+        # Copy coordinates to clipboard
+        pyperclip.copy(f"X={mouse_x}, Y={mouse_y}")
 
         # Screen dimensions
         screen_width = root.winfo_screenwidth()
