@@ -63,11 +63,11 @@ F16:: ; Heritage Laggy
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
+        Send("{s down}")
         Send("{i down}")
-        Send("{l down}")
         SendInput("iii")
-        Send("{l up}")
         Send("{i up}")
+        Send("{s up}")
     }
     return
 }
