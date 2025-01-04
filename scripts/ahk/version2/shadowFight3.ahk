@@ -228,26 +228,46 @@ global ; V1toV2: Made function global
 
 
 
-F20:: ; Hound
-{ ; V1toV2: Added bracket
-global ; V1toV2: Made function global
-    StartTime := A_TickCount
-    while (A_TickCount - StartTime < 5000)
-    {
-        if !WinActive("ahk_exe dnplayer.exe")
-        {
-            break
-        }
+; F20:: ; Hound
+; { ; V1toV2: Added bracket
+; global ; V1toV2: Made function global
+;     StartTime := A_TickCount
+;     while (A_TickCount - StartTime < 5000)
+;     {
+;         if !WinActive("ahk_exe dnplayer.exe")
+;         {
+;             break
+;         }
         
-        SendEvent("{x down}")
-        Sleep(500)
-        SendEvent("{i down}")
-        Send("j")
-        SendEvent("{i up}")
-        SendEvent("{x up}")
-    }
-    return
-    }
+;         SendEvent("{i down}")
+;         SendEvent("{x down}")
+;         SendEvent("jjj")
+;         SendEvent("{x up}")
+;         SendEvent("{i up}")
+;     }
+;     return
+;     }
+
+    F20:: ; Hound for vortex
+    { ; V1toV2: Added bracket
+    global ; V1toV2: Made function global
+        StartTime := A_TickCount
+        while (A_TickCount - StartTime < 5000)
+        {
+            if !WinActive("ahk_exe dnplayer.exe")
+            {
+                break
+            }
+            
+            SendEvent("{x down}")
+            Sleep(500)
+            SendEvent("{i down}")
+            Send("j")
+            SendEvent("{i up}")
+            SendEvent("{x up}")
+        }
+        return
+        }
 
 F21:: ; Laggy
 { ; V1toV2: Added bracket
