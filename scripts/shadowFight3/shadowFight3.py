@@ -70,14 +70,14 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering AHK...")
-#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # dj
-#                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
-#                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
-#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # THOR
+                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # Hound
+#                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14') # Hound vortex
+#                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15') # Hound Laggy
+#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # Heritage Laggy 
 #                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
 #                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
-                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
+#                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
 #                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
 #                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
 #                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
@@ -818,18 +818,18 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(73, "F13\ndj")
-initialize_button(74, "F14")
-initialize_button(75, "F15")
-initialize_button(76, "F16\nTHOR")
-initialize_button(77, "F17")
-initialize_button(78, "F18")
-initialize_button(79, "F19\nPOSS")
-initialize_button(80, "F20\nHound")
-initialize_button(81, "F21\nLaggy")
-initialize_button(82, "F22")
-initialize_button(83, "F23")
-initialize_button(84, "F24")
+initialize_button(73, "F13\nHound")
+initialize_button(74, "F14\nHound\nVortex")
+initialize_button(75, "F15\nHound\nLaggy")
+initialize_button(76, "F16\nHeri\nLaggy")
+# initialize_button(77, "F17")
+# initialize_button(78, "F18")
+# initialize_button(79, "F19\nPOSS")
+# initialize_button(80, "F20\nHound")
+# initialize_button(81, "F21\nLaggy")
+# initialize_button(82, "F22")
+# initialize_button(83, "F23")
+# initialize_button(84, "F24")
 
 # Restart function that displays the cumulative summary before restarting
 def restart():
