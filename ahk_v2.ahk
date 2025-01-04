@@ -201,6 +201,14 @@ Toggle_Screen_Blackout() {
     }
 }
 
+showCursorPosition() {
+    ; Retrieve the current position of the mouse cursor
+    MouseGetPos(&x, &y)
+    ; Display the position in a message box
+    MsgBox("Mouse Position:`nX: " x "`nY: " y)
+}
+; Example usage: call the function when pressing Ctrl+Shift+M
+^+m::showCursorPosition()
 
 
 ^!w::Toggle_Screen_Whiteout()
