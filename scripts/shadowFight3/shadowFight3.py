@@ -1,15 +1,7 @@
-# from ctypes import windll, c_char_p, c_buffer
-# from PIL import Image
-# from PIL import Image, ImageDraw
-# from struct import calcsize, pack
-# from tkinter import messagebox
-# import gc  # Import garbage collector
-# import random
 from datetime import datetime
 from tkinter import Tk, Button, messagebox
 import glob
 import os
-import keyboard
 import pyautogui
 import pygetwindow as gw
 import subprocess
@@ -29,13 +21,7 @@ def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#66fd1f")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
-
 BORDER_FRAME = create_custom_border(ROOT)
-screen_width = ROOT.winfo_screenwidth()
-screen_height = ROOT.winfo_screenheight()
-x = screen_width - 60
-y = screen_height - 970
-ROOT.geometry(f"+{x}+{y}")
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
@@ -818,18 +804,18 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(73, "F13\nHound")
-initialize_button(74, "F14\nHound\nVortex")
-initialize_button(75, "F15\nHound\nLaggy")
-initialize_button(76, "F16\nHeri\nLaggy")
-# initialize_button(77, "F17")
-# initialize_button(78, "F18")
-# initialize_button(79, "F19\nPOSS")
-# initialize_button(80, "F20\nHound")
-# initialize_button(81, "F21\nLaggy")
-# initialize_button(82, "F22")
-# initialize_button(83, "F23")
-# initialize_button(84, "F24")
+initialize_button(59, "F13\nHound")
+initialize_button(60, "F14\nHound\nVortex")
+initialize_button(61, "F15\nHound\nLaggy")
+initialize_button(62, "F16\nHeri\nLaggy")
+# initialize_button(63, "F17")
+# initialize_button(64, "F18")
+# initialize_button(65, "F19\nPOSS")
+# initialize_button(66, "F20\nHound")
+# initialize_button(67, "F21\nLaggy")
+# initialize_button(68, "F22")
+# initialize_button(69, "F23")
+# initialize_button(70, "F24")
 
 # Restart function that displays the cumulative summary before restarting
 def restart():
@@ -986,4 +972,35 @@ skip=r'C:\msBackups\shadowfight3\skip.png'
 profile_pic=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
 call_me=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
 cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
+
+
+
+
+
+
+
+# ending
+
+ROOT.update_idletasks()
+width = ROOT.winfo_width()
+height = ROOT.winfo_height()
+
+# Set x to place the window on the right side of the screen
+x = ROOT.winfo_screenwidth() - width
+# Calculate y to center the window vertically
+y = (ROOT.winfo_screenheight() // 2) - (height // 2)
+
+ROOT.geometry(f'{width}x{height}+{x}+{y}')
+
 ROOT.mainloop()
+
+
+
+# from ctypes import windll, c_char_p, c_buffer
+# from PIL import Image
+# from PIL import Image, ImageDraw
+# from struct import calcsize, pack
+# from tkinter import messagebox
+# import gc  # Import garbage collector
+# import keyboard
+# import random
