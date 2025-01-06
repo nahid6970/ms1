@@ -14,7 +14,7 @@ REMOTE_OUTPUT_FILE = r"g00:\Remote_Control\output.txt"
 POWERSHELL_PATH = r"C:\Program Files\PowerShell\7\pwsh.exe"
 
 # Time interval to check for updates (in seconds)
-CHECK_INTERVAL = 10
+CHECK_INTERVAL = 1
 
 def read_remote_file():
     """Reads the content of the remote file using rclone cat."""
