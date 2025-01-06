@@ -80,13 +80,13 @@ F20:: ; Right Side Enemy
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-        SendEvent("{x down}")
         SendEvent("{i down}")
+        SendEvent("{x down}")
         SendEvent("{d down}")
-        SendEvent("jjj")
+        SendEvent("jj")
         SendEvent("{d up}")
-        SendEvent("{i up}")
         SendEvent("{x up}")
+        SendEvent("{i up}")
     }
     return
 }
@@ -99,13 +99,13 @@ F21:: ; Left Side Enemy
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-        SendEvent("{x down}")
         SendEvent("{i down}")
+        SendEvent("{x down}")
         SendEvent("{a down}")
-        SendEvent("jjj")
+        SendEvent("jj")
         SendEvent("{a up}")
-        SendEvent("{i up}")
         SendEvent("{x up}")
+        SendEvent("{i up}")
     }
     return
 }
