@@ -151,7 +151,6 @@ def display_image_found_chart():
 
 def find_image(image_path, confidence=0.7, region=None):
     """Find the location of the image on the screen within an optional specified region.
-    
     region should be a tuple of (x1, y1, x2, y2). If not provided, the function searches the entire screen.
     """
     global last_found_time, is_searching, last_used_time
