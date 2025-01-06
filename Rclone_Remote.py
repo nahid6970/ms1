@@ -10,6 +10,9 @@ LOCAL_OUTPUT_FILE = r"C:\msBackups\Remote_Control\output.txt"
 # Cloud file to upload command output
 REMOTE_OUTPUT_FILE = r"g00:\Remote_Control\output.txt"
 
+# Path to the latest PowerShell executable
+POWERSHELL_PATH = r"C:\Program Files\PowerShell\7\pwsh.exe"
+
 # Time interval to check for updates (in seconds)
 CHECK_INTERVAL = 10
 
@@ -30,9 +33,9 @@ def execute_command(command):
     """Executes the given command in PowerShell and writes its output to a local file."""
     try:
         print(f"Executing: {command}")
-        # Execute the command using PowerShell (pwsh) with -NoProfile
+        # Execute the command using PowerShell with -NoProfile
         result = subprocess.run(
-            ["pwsh", "-NoProfile", "-Command", command],
+            [POWERSHELL_PATH, "-Command", command],
             capture_output=True,
             text=True
         )
@@ -59,7 +62,6 @@ def upload_output_file():
             print(f"Error uploading output: {result.stderr}")
     except Exception as e:
         print(f"Error during upload: {e}")
-
 
 if __name__ == "__main__":
     last_command = ""
