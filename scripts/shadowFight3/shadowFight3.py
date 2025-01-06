@@ -842,18 +842,18 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(59, "F13\nHound")
-initialize_button(60, "F14\nHound\nVortex")
-initialize_button(61, "F15\nHound\nLaggy")
-initialize_button(62, "F16\nHeri\nLaggy")
-# initialize_button(63, "F17")
-# initialize_button(64, "F18")
-# initialize_button(65, "F19\nPOSS")
-# initialize_button(66, "F20\nHound")
-# initialize_button(67, "F21\nLaggy")
-# initialize_button(68, "F22")
-# initialize_button(69, "F23")
-# initialize_button(70, "F24")
+initialize_button(56, "F13\nHound")
+initialize_button(57, "F14\nHound\nVortex")
+initialize_button(58, "F15\nHound\nLaggy")
+initialize_button(59, "F16\nHeri\nLaggy")
+# initialize_button(60, "F17")
+# initialize_button(61, "F18")
+# initialize_button(62, "F19\nPOSS")
+# initialize_button(63, "F20\nHound")
+# initialize_button(64, "F21\nLaggy")
+# initialize_button(65, "F22")
+# initialize_button(66, "F23")
+# initialize_button(67, "F24")
 
 # Restart function that displays the cumulative summary before restarting
 def restart():
