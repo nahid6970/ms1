@@ -76,13 +76,17 @@ F20:: ; Right Side Enemy
 {
     global
     StartTime := A_TickCount
-    while (A_TickCount - StartTime < 5000) {
+    while (A_TickCount - StartTime < 1000) {
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
+        SendEvent("{x down}")
+        SendEvent("{i down}")
         SendEvent("{d down}")
         SendEvent("jjj")
         SendEvent("{d up}")
+        SendEvent("{i up}")
+        SendEvent("{x up}")
     }
     return
 }
@@ -91,13 +95,17 @@ F21:: ; Left Side Enemy
 {
     global
     StartTime := A_TickCount
-    while (A_TickCount - StartTime < 5000) {
+    while (A_TickCount - StartTime < 1000) {
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
+        SendEvent("{x down}")
+        SendEvent("{i down}")
         SendEvent("{a down}")
         SendEvent("jjj")
         SendEvent("{a up}")
+        SendEvent("{i up}")
+        SendEvent("{x up}")
     }
     return
 }
