@@ -134,6 +134,10 @@ last_found_time = None
 is_searching = False
 last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
+output_file_path = r"C:\msBackups\sf3_img.txt"  # Path to save found image output
+
+# Ensure the output directory exists
+os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
 def display_image_found_chart():
     """Display a chart of found images and their cumulative counts in aligned columns."""
@@ -170,10 +174,16 @@ def find_image(image_path, confidence=0.7, region=None):
         if location:
             image_name = os.path.basename(image_path)
             # Get current date and time in the desired format
-            formatted_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
-            print(f"\033[92m{formatted_time} --> Found image: {image_name}\033[0m")
+            formatted_time = datetime.now().strftime('%I:%M:%S %p')
+            print(f"\033[92m󱑂 {formatted_time} --> Found image: {image_name}\033[0m")
+            
             # Update cumulative count of found images
             image_found_count[image_name] = image_found_count.get(image_name, 0) + 1
+            
+            # Save the output to the file
+            with open(output_file_path, 'a') as file:
+                file.write(f"{formatted_time} --> Found image: {image_name}\n")
+            
             # Reset search and timer upon finding the image
             last_found_time = time.time()
             is_searching = False  # Stop the search
@@ -181,7 +191,7 @@ def find_image(image_path, confidence=0.7, region=None):
     except Exception as e:
         image_name = os.path.basename(image_path)  # Get the image name
         # Get current date and time for error messages
-        formatted_time = datetime.now().strftime('%Y-%m-%d %I-%M-%S %p')
+        formatted_time = datetime.now().strftime(' %I:%M:%S %p')
         # Calculate time since the last found time (only while searching)
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
