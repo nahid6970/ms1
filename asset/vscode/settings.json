@@ -46,6 +46,7 @@
 "editor.scrollbar.verticalScrollbarSize": 5,
 "editor.scrollbar.horizontal": "visible",
 "editor.scrollbar.vertical": "visible",
-"git.openRepositoryInParentFolders": "always"
+"git.openRepositoryInParentFolders": "always",
+"banner-comments.h1": "ANSI Shadow"
 
 }
