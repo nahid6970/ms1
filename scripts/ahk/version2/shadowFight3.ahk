@@ -72,25 +72,35 @@ F16:: ; Heritage Laggy
     return
 }
 
-;     F13:: ; dj
-; { ; V1toV2: Added bracket
-; global ; V1toV2: Made function global
-;     StartTime := A_TickCount
-;     while (A_TickCount - StartTime < 5000)
-;     {
-;         if !WinActive("ahk_exe dnplayer.exe")
-;         {
-;             break
-;         }
-;         SendEvent("{d down}")
-;         SendEvent("j")
-;         SendEvent("j")
-;         SendEvent("j")
-;         Sleep(250)
-;         SendEvent("{d up}")
-;     }
-; return
-; }
+F20:: ; Right Side Enemy
+{
+    global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        SendEvent("{d down}")
+        SendEvent("jjj")
+        SendEvent("{d up}")
+    }
+    return
+}
+
+F21:: ; Left Side Enemy
+{
+    global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        SendEvent("{a down}")
+        SendEvent("jjj")
+        SendEvent("{a up}")
+    }
+    return
+}
 
 ;     F14::
 ; { ; V1toV2: Added bracket
