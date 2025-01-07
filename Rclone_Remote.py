@@ -3,16 +3,12 @@ import time
 
 # Cloud file to read commands from
 REMOTE_COMMAND_FILE = r"g00:\Remote_Control\Command.txt"
-
 # Local file for storing command output
 LOCAL_OUTPUT_FILE = r"C:\msBackups\Remote_Control\output.txt"
-
 # Cloud file to upload command output
 REMOTE_OUTPUT_FILE = r"g00:\Remote_Control\output.txt"
-
 # Path to the latest PowerShell executable
 POWERSHELL_PATH = r"C:\Program Files\PowerShell\7\pwsh.exe"
-
 # Time interval to check for updates (in seconds)
 CHECK_INTERVAL = 1
 

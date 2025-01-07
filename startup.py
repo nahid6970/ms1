@@ -16,6 +16,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "Komorebi"           ,"command": "komorebic start"},
 {"type": "Command","name": "MONITOR_SIZE"        ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
 {"type": "Command","name": "mypygui"             ,"command": "Start-Process  'C:\\ms1\\mypygui.py' -WindowStyle Hidden"},
+{"type": "Command","name": "Remote Control"        ,"command": "Start-Process  'C:\\ms1\\Rclone_Remote.py' -WindowStyle Hidden"},
 {"type": "Command","name": "NetworkCondition"    ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "Open WebUI"          ,"command": "Start-Process open-webui serve"},
 {"type": "Command","name": "Square-Corner"       ,"command": "Start-Process 'C:\\msBackups\\Display\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"},
