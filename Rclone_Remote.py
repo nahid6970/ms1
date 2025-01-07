@@ -1,16 +1,22 @@
+import os
 import subprocess
 import time
 
 # Cloud file to read commands from
-REMOTE_COMMAND_FILE = r"g00:/Remote_Control/Command.txt"
+REMOTE_COMMAND_FILE = r"g00:\Remote_Control\Command.txt"
 # Local file for storing command output
 LOCAL_OUTPUT_FILE = r"C:\msBackups\Remote_Control\output.txt"
 # Cloud file to upload command output
-REMOTE_OUTPUT_FILE = r"g00:/Remote_Control/output.txt"
+REMOTE_OUTPUT_FILE = r"g00:\Remote_Control\output.txt"
 # Path to the latest PowerShell executable
 POWERSHELL_PATH = r"C:\Program Files\PowerShell\7\pwsh.exe"
 # Time interval to check for updates (in seconds)
 CHECK_INTERVAL = 1
+
+# Ensure the script starts in the home directory
+HOME_DIR = os.path.expanduser("~")
+os.chdir(HOME_DIR)
+print(f"Working directory set to: {os.getcwd()}")
 
 def read_remote_file():
     """Reads the content of the remote file using rclone cat."""
