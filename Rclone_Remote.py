@@ -25,10 +25,20 @@ def read_remote_file():
         print(f"Error: {e}")
         return ""
 
+def clear_output_file():
+    """Clears the local output file."""
+    try:
+        with open(LOCAL_OUTPUT_FILE, "w") as f:
+            f.write("")  # Write an empty string to clear the file
+    except Exception as e:
+        print(f"Error clearing local output file: {e}")
+
 def execute_command(command):
     """Executes the given command in PowerShell and writes its output to a local file."""
     try:
         print(f"Executing: {command}")
+        # Clear the output file before executing the command
+        clear_output_file()
         # Execute the command using PowerShell with -NoProfile
         result = subprocess.run(
             [POWERSHELL_PATH, "-Command", command],
@@ -54,6 +64,8 @@ def upload_output_file():
         )
         if result.returncode == 0:
             print("Output uploaded successfully.")
+            # Clear the local output file after uploading
+            clear_output_file()
         else:
             print(f"Error uploading output: {result.stderr}")
     except Exception as e:
