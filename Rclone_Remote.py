@@ -2,11 +2,11 @@ import subprocess
 import time
 
 # Cloud file to read commands from
-REMOTE_COMMAND_FILE = r"g00:\Remote_Control\Command.txt"
+REMOTE_COMMAND_FILE = r"g00:/Remote_Control/Command.txt"
 # Local file for storing command output
 LOCAL_OUTPUT_FILE = r"C:\msBackups\Remote_Control\output.txt"
 # Cloud file to upload command output
-REMOTE_OUTPUT_FILE = r"g00:\Remote_Control\output.txt"
+REMOTE_OUTPUT_FILE = r"g00:/Remote_Control/output.txt"
 # Path to the latest PowerShell executable
 POWERSHELL_PATH = r"C:\Program Files\PowerShell\7\pwsh.exe"
 # Time interval to check for updates (in seconds)
@@ -25,7 +25,7 @@ def read_remote_file():
         print(f"Error: {e}")
         return ""
 
-def execute_command(command):
+def execute_command(command, unique_id):
     """Executes the given command in PowerShell and writes its output to a local file."""
     try:
         print(f"Executing: {command}")
@@ -41,6 +41,8 @@ def execute_command(command):
             if result.stderr:
                 f.write("\nError Output:\n")
                 f.write(result.stderr)
+            # Add the unique ID to the output for validation
+            f.write(f"\nCommand ID: {unique_id}")
     except Exception as e:
         print(f"Error executing command: {e}")
 
@@ -65,7 +67,9 @@ if __name__ == "__main__":
     while True:
         command = read_remote_file()
         if command and command != last_command:  # Check if the command is new
-            execute_command(command)
+            # Extract the unique ID and command from the remote file
+            unique_id, cmd = command.split(":", 1)
+            execute_command(cmd.strip(), unique_id)
             upload_output_file()
             last_command = command
         time.sleep(CHECK_INTERVAL)
