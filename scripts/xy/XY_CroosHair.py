@@ -24,7 +24,7 @@ class CrosshairOverlay:
         # Set up global hotkeys
         keyboard.add_hotkey("ctrl+c", self.copy_coordinates)
         keyboard.add_hotkey("esc", self.exit_script)
-        keyboard.add_hotkey("f", self.toggle_coordinates)
+        keyboard.add_hotkey("CAPSLOCK", self.toggle_coordinates)
 
     def update_crosshair(self):
         """Continuously update the crosshair position and display coordinates."""
@@ -48,7 +48,7 @@ class CrosshairOverlay:
         self.coord_label = tk.Toplevel()
         self.coord_label.overrideredirect(True)
         self.coord_label.attributes("-topmost", True)
-        label = tk.Label(self.coord_label, bg="yellow", fg="black")
+        label = tk.Label(self.coord_label, bg="#9ffb63", fg="black", font=("JetBrainsMono NFP", 12, "bold"))
         label.pack()
 
         while self.running:
