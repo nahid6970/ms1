@@ -9,7 +9,9 @@ class CrosshairOverlay:
     def __init__(self):
         self.vertical_line = None
         self.horizontal_line = None
+        self.coord_label = None
         self.running = True
+        self.show_coordinates = True  # Toggle to show or hide coordinates
 
         # Hide Python console window
         ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
@@ -22,9 +24,10 @@ class CrosshairOverlay:
         # Set up global hotkeys
         keyboard.add_hotkey("ctrl+c", self.copy_coordinates)
         keyboard.add_hotkey("esc", self.exit_script)
+        keyboard.add_hotkey("f", self.toggle_coordinates)
 
     def update_crosshair(self):
-        """Continuously update the crosshair position based on the mouse location."""
+        """Continuously update the crosshair position and display coordinates."""
         root = tk.Tk()
         root.withdraw()  # Hide the main tkinter window
 
@@ -42,6 +45,12 @@ class CrosshairOverlay:
         self.horizontal_line.overrideredirect(True)
         self.horizontal_line.attributes("-topmost", True)
 
+        self.coord_label = tk.Toplevel()
+        self.coord_label.overrideredirect(True)
+        self.coord_label.attributes("-topmost", True)
+        label = tk.Label(self.coord_label, bg="yellow", fg="black")
+        label.pack()
+
         while self.running:
             with mouse.Controller() as m:
                 mouse_x, mouse_y = m.position
@@ -52,18 +61,46 @@ class CrosshairOverlay:
             # Update horizontal line
             self.horizontal_line.geometry(f"{screen_width}x2+0+{mouse_y}")
 
+            if self.show_coordinates:
+                # Update coordinate label
+                label.config(text=f"X={mouse_x}, Y={mouse_y}")
+
+                # Position label with edge detection
+                offset_x = 20
+                offset_y = 20
+
+                if mouse_x + offset_x + 100 > screen_width:
+                    label_x = mouse_x - offset_x - 100
+                else:
+                    label_x = mouse_x + offset_x
+
+                if mouse_y + offset_y + 30 > screen_height:
+                    label_y = mouse_y - offset_y - 30
+                else:
+                    label_y = mouse_y + offset_y
+
+                self.coord_label.geometry(f"+{label_x}+{label_y}")
+                self.coord_label.deiconify()  # Show the label
+            else:
+                self.coord_label.withdraw()  # Hide the label
+
             root.update_idletasks()
             root.update()
 
         # Clean up when stopped
         self.vertical_line.destroy()
         self.horizontal_line.destroy()
+        self.coord_label.destroy()
 
     def copy_coordinates(self):
         """Copy the current mouse coordinates to the clipboard."""
         with mouse.Controller() as m:
             mouse_x, mouse_y = m.position
         pyperclip.copy(f"X={mouse_x}, Y={mouse_y}")
+
+    def toggle_coordinates(self):
+        """Toggle the visibility of the coordinates."""
+        self.show_coordinates = not self.show_coordinates
 
     def exit_script(self):
         """Exit the script and remove the crosshair."""
