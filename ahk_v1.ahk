@@ -29,8 +29,8 @@ ExitScript:
 
 
 
-#Include, C:\ms1\scripts\ahk\Text_Related.ahk
-#Include, C:\ms1\scripts\ahk\Windows_Screen_related.ahk
+#Include, C:\ms1\scripts\ahk\version1\text\Text_Related.ahk
+#Include, C:\ms1\scripts\ahk\version1\Windows_Screen_related.ahk
 ; #Include, C:\ms1\scripts\ahk\shadowFight3.ahk
 
 ;;* AHK Related
