@@ -389,6 +389,8 @@ function Show-MainMenu {
                     # pip install pycryptodomex
                     # pip install opencv-python
                     # pip install pynput
+                    # pip install mss # for 2nd display
+                    # pip install screeninfo # for 2nd display
             # not sure if needed
                     # pip install cryptography
                     # pip install importlib
