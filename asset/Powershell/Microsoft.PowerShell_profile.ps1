@@ -720,16 +720,8 @@ Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 # Invoke-Expression (&starship init powershell)
 
 function cc {
-    param (
-        [Parameter(Mandatory=$true, Position=0)]
-        [string]$Command1,
-
-        [Parameter(Mandatory=$true, Position=1)]
-        [string]$Command2
-    )
-    Invoke-Expression $Command1
-    if ($LASTEXITCODE -eq 0) {
-        Invoke-Expression $Command2
+    $args | ForEach-Object { 
+        Invoke-Expression $_
     }
 }
 
