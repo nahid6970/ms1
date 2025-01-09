@@ -70,7 +70,7 @@ class CrosshairOverlay:
                 offset_y = 20
 
                 if mouse_x + offset_x + 100 > screen_width:
-                    label_x = mouse_x - offset_x - 100
+                    label_x = mouse_x - offset_x - 135
                 else:
                     label_x = mouse_x + offset_x
 
