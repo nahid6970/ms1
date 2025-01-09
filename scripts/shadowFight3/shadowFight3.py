@@ -428,14 +428,14 @@ def event_function_Main():
                 
                 elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
 
-                # for ck fighkt
-                elif find_image(r"C:\msBackups\shadowfight3\temporary\to_battle.png", confidence=0.8): press_keys_with_delays(window, ' ', 2,)
-                elif find_image(r"C:\msBackups\shadowfight3\temporary\fightttt.png", confidence=0.8, region=(1286, 831, 1713, 942)): press_keys_with_delays(window, 'c', 2,)
-                elif find_image(r"C:\msBackups\shadowfight3\temporary\Claim.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
+                # # for ck fighkt
+                # elif find_image(r"C:\msBackups\shadowfight3\temporary\to_battle.png", confidence=0.8): press_keys_with_delays(window, ' ', 2,)
+                # elif find_image(r"C:\msBackups\shadowfight3\temporary\fightttt.png", confidence=0.8, region=(1286, 831, 1713, 942)): press_keys_with_delays(window, 'c', 2,)
+                # elif find_image(r"C:\msBackups\shadowfight3\temporary\Claim.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
         
-                # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
-                elif find_image(Select_SelectOption, confidence=0.8, region=(385, 622, 816, 753 )): press_keys_with_delays(window, '2', 1) #! optional
-                elif find_image(skip, confidence=0.8): press_keys_with_delays(window, ' ', 1) #! optional
+                # # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
+                # elif find_image(Select_SelectOption, confidence=0.8, region=(385, 622, 816, 753 )): press_keys_with_delays(window, '2', 1) #! optional
+                # elif find_image(skip, confidence=0.8): press_keys_with_delays(window, ' ', 1) #! optional
 
                 #* dynamic folder img
                 [press_keys_with_delays(window, 'c', 1) 
