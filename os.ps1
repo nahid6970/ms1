@@ -338,6 +338,7 @@ function Show-MainMenu {
                     scoop install yt-dlp
                     scoop install ffmpeg
                     scoop install highlight
+                    scoop install zoxide
 
                     winget upgrade --source msstore
                     winget upgrade --source winget
