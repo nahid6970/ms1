@@ -1,40 +1,18 @@
 #Requires AutoHotkey v2.0
-; wont pop up older verson running
+
+;! wont pop up older verson running
 #SingleInstance 
 Persistent
 
-; Set the tray icon
-TraySetIcon("C:\msBackups\icon\shutdown3.png")
-; Create a custom tray menu
-Tray := A_TrayMenu
-Tray.Delete() ; Remove default items
-Tray.Add("Restart Explorer", (*) => RestartExplorer())
-Tray.SetIcon("Restart Explorer", "C:\msBackups\icon\system_icon\shell32\965.ico")
-Tray.Add("Screen Dimmer", (*) => Run("C:\ms1\scripts\ahk\version1\Display\ScreenDimmer.ahk"))
-Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
-Tray.Add() ; Add a separator
-Tray.Add("Exit", (*) => ExitApp()) ; Add Exit button
-Tray.SetIcon("Exit","C:\msBackups\icon\system_icon\shell32\295.ico")
-
-; Function to restart explorer.exe using PowerShell
-RestartExplorer() {
-    Run('pwsh -Command "Stop-Process -Name explorer -Force; Start-Process explorer"', , "")
-}
-
-
-
 ; include files
+#Include C:\ms1\scripts\ahk\version2\tray.ahk
 #Include C:\ms1\scripts\ahk\version2\shadowFight3.ahk
 
-
-; add v1 startups
+;! add v1 startups
 ; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
 ; Run("control.exe folders")
 
-
- #Requires AutoHotkey v2.0 
-
-;;* AHK Related
+;! AHK Related
 ^+p::Pause    ; Pause script with Ctrl+Alt+P
 ^+s::Suspend  ; Suspend script with Ctrl+Alt+S
 ^+r::Reload   ; Reload script with Ctrl+Alt+R
@@ -49,16 +27,16 @@ RestartExplorer() {
 }
 
 
-; monitor
+;! monitor
 RAlt & Numpad1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
 RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
 RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
 
-; gui
+;! gui
 !b::Run("C:\ms1\scripts\ahk\version2\gui\Bio.ahk", "", "Hide")
 !u::Run("C:\ms1\scripts\ahk\version2\gui\Ultimate_Gui.ahk", "", "Hide")
 
-; shortcuts
+;! shortcuts
 ^!n::Run("C:\ms1\scripts\ahk\version1\VScode_OpenWith.ahk", "", "Hide")
 !1::Run("C:\ms1\scripts\ahk\version2\display\send_to_2nd.ahk", "", "Hide")
 RAlt & -::Run("C:\ms1\scripts\ahk\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
@@ -67,7 +45,7 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ^+m::Run("C:\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 !x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
 
-; text
+;! text
 ::;v1:: {#}Requires AutoHotkey v1.0
 ::;v2:: {#}Requires AutoHotkey v2.0
 
