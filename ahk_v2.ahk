@@ -129,14 +129,20 @@ Center_Focused_Window() {
 
 
 
-#HotIf WinActive("ahk_exe dnplayer.exe") ; Apply condition for dnplayer.exe
+#HotIf WinExist("ahk_exe dnplayer.exe") ; Apply condition for dnplayer.exe
 !v::Center_Focused_Window_modLDplayer() ; Define the shortcut outside
 #HotIf  ; End the condition
 
 Center_Focused_Window_modLDplayer() {
     static isFirstPosition := true ; Initialize the toggle state (true for first position)
-    ; Get the handle of the dnplayer.exe window
-    hwnd := WinGetID("A")
+    hwnd := WinGetID("ahk_exe dnplayer.exe") ; Get the handle of dnplayer.exe
+
+    ; Check if the window is active
+    if (!WinActive("ahk_id " hwnd)) {
+        WinActivate("ahk_id " hwnd) ; Activate the window if it's not focused
+        WinWaitActive("ahk_id " hwnd) ; Wait until the window is active
+    }
+
     ; Toggle between the two positions
     if (isFirstPosition) {
         ; Set the window to x=1250, y=120
@@ -145,6 +151,7 @@ Center_Focused_Window_modLDplayer() {
         ; Set the window to x=1150, y=550
         WinMove(159, 865, , , "ahk_id " hwnd)
     }
+
     ; Toggle the position state for the next activation
     isFirstPosition := !isFirstPosition
 }
