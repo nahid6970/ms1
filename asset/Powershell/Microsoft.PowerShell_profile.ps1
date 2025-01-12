@@ -724,7 +724,7 @@ function cc {
     }
 }
 
-
+function e   { explorer . }
 
 oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
