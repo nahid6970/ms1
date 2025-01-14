@@ -14,6 +14,19 @@ https://www.tecmint.com/fix-failed-to-set-locale-defaulting-to-c-utf-8-in-centos
 #?  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝
 pacman -Syu archlinux-keyring					# This step is necessary to use pacman
 
+
+su root 
+nano /etc/sudoers
+
+## if the file cant be accessible use 
+nano sudo  /etc/sudoers
+
+## Then add the user below admin user like below syntax.
+user_name ALL=(ALL)  ALL
+
+## also to login use 
+su username
+
 sudo pacman-key --init
 sudo pacman-key --populate archlinux
 

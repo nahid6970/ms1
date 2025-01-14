@@ -4,10 +4,6 @@
     "actions": 
     [
         {
-            "command": "unbound",
-            "keys": "alt+space"
-        },
-        {
             "command": 
             {
                 "action": "copy",
@@ -17,14 +13,18 @@
             "keys": "ctrl+c"
         },
         {
-            "command": "paste",
-            "id": "User.paste",
-            "keys": "ctrl+v"
+            "command": "unbound",
+            "keys": "alt+space"
         },
         {
             "command": "openSystemMenu",
             "id": "User.openSystemMenu",
             "keys": "ctrl+alt+space"
+        },
+        {
+            "command": "paste",
+            "id": "User.paste",
+            "keys": "ctrl+v"
         },
         {
             "command": 
@@ -100,6 +100,12 @@
                 "hidden": false,
                 "name": "Azure Cloud Shell",
                 "source": "Windows.Terminal.Azure"
+            },
+            {
+                "guid": "{a5a97cb8-8961-5535-816d-772efe0c6a3f}",
+                "hidden": false,
+                "name": "Arch",
+                "source": "Windows.Terminal.Wsl"
             }
         ]
     },
