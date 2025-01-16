@@ -158,11 +158,12 @@ def find_image(image_path, confidence=0.7, region=None):
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
     if is_searching and time.time() - last_found_time > 60: # for ads do 120 second
-        run_rclone_touch()  # Run the script instead of showing a message
+        ntfy_termux_rclone_touch()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
 
-def run_rclone_touch():
+
+def ntfy_termux_rclone_touch():
     command = "rclone touch g00:ntfy"
     try:
         while True:
@@ -171,6 +172,31 @@ def run_rclone_touch():
             time.sleep(30)
     except KeyboardInterrupt:
         print("Script stopped by user.")
+
+
+def ntfy_Signal():
+    pyautogui.click(x=1778, y=900)
+    time.sleep(2)
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while True:  # Loop will continue indefinitely unless interrupted by an external condition
+            focus_window(window_title)
+            if find_image(profile_pic): press_global_screen_with_delays((294,299,5),(594,908,2))
+            if find_image(call_me): press_global_screen_with_delays((238,271,60))
+            # elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
+
+            # [click(window, IMG_CORDINATE.left + IMG_CORDINATE.width // 2, IMG_CORDINATE.top + IMG_CORDINATE.height // 2) or time.sleep(5) 
+            # for _ in [1] if (IMG_CORDINATE := find_image(profile_pic, confidence=0.8))]
+
+            # [click(window, IMG_CORDINATE.left + IMG_CORDINATE.width // 2, IMG_CORDINATE.top + IMG_CORDINATE.height // 2) or time.sleep(5) 
+            # for _ in [1] if (IMG_CORDINATE := find_image(call_me, confidence=0.8))]
+
+            time.sleep(0.1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+
 
 # focus_window
 def focus_window(window_title):
