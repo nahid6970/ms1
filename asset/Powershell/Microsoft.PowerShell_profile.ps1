@@ -724,11 +724,36 @@ function cc {
     }
 }
 
+# # Alias to save the current directory to the location stack
+# Set-Alias cds Push-Location
+# # Alias to return to the last saved directory from the location stack
+# Set-Alias cdl Pop-Location
+
+
+# File to store the last directory
+$global:LastDirectoryFile = "$env:USERPROFILE\last_directory.txt"
+
+# Function to save the current directory to a file
+function Save-LastDirectory {
+    Set-Content -Path $global:LastDirectoryFile -Value (Get-Location).Path
+}
+
+# Load the last directory from the file, if it exists
+if (Test-Path $global:LastDirectoryFile) {
+    $global:LastDirectory = Get-Content -Path $global:LastDirectoryFile
+}
+
 # Alias to save the current directory to the location stack
-Set-Alias cds Push-Location
+Set-Alias cds Save-LastDirectory
 
 # Alias to return to the last saved directory from the location stack
-Set-Alias cdl Pop-Location
+function cdl {
+    if ($global:LastDirectory) {
+        Set-Location -Path $global:LastDirectory
+    } else {
+        Write-Host "No last directory found." -ForegroundColor Yellow
+    }
+}
 
 
 # Dynamically define functions to avoid IDE references
