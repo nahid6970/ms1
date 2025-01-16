@@ -13,6 +13,11 @@ POWERSHELL_PATH = r"C:\Program Files\PowerShell\7\pwsh.exe"
 # Time interval to check for updates (in seconds)
 CHECK_INTERVAL = 1
 
+# ANSI escape codes for color
+GREEN = "\033[92m"
+BLUE = "\033[94m"
+RESET = "\033[0m"
+
 # Ensure the script starts in the home directory
 HOME_DIR = os.path.expanduser("~")
 os.chdir(HOME_DIR)
@@ -41,14 +46,14 @@ def execute_command(command, unique_id):
             capture_output=True,
             text=True
         )
-        # Write the output to the local file
+        # Write the color-coded output to the local file
         with open(LOCAL_OUTPUT_FILE, "w") as f:
+            f.write(f"{GREEN}Command ID: {unique_id}{RESET}\n")
+            f.write(f"{BLUE}Executed Command: {command}{RESET}\n\n")
             f.write(result.stdout)
             if result.stderr:
                 f.write("\nError Output:\n")
                 f.write(result.stderr)
-            # Add the unique ID to the output for validation
-            f.write(f"\nCommand ID: {unique_id}")
     except Exception as e:
         print(f"Error executing command: {e}")
 

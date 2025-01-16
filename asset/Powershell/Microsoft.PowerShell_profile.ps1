@@ -718,11 +718,11 @@ Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 
 # Invoke-Expression (&starship init powershell)
 
-function cc {
-    $args | ForEach-Object { 
-        Invoke-Expression $_
-    }
-}
+# function cc {
+#     $args | ForEach-Object { 
+#         Invoke-Expression $_
+#     }
+# }
 
 # # Alias to save the current directory to the location stack
 # Set-Alias cds Push-Location
