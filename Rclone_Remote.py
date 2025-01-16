@@ -47,18 +47,21 @@ def execute_command(command, unique_id):
         result = subprocess.run(
             [POWERSHELL_PATH, "-Command", transformed_command],
             capture_output=True,
-            text=True
+            text=True,
+            encoding="utf-8",  # Force UTF-8 encoding
+            errors="replace",  # Replace invalid characters
         )
         # Write the color-coded output to the local file
-        with open(LOCAL_OUTPUT_FILE, "w") as f:
+        with open(LOCAL_OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write(f"{GREEN}Command ID: {unique_id}{RESET}\n")
             f.write(f"{BLUE}Executed Command: {transformed_command}{RESET}\n\n")
-            f.write(result.stdout)
+            f.write(result.stdout if result.stdout else "No output returned.\n")
             if result.stderr:
                 f.write("\nError Output:\n")
                 f.write(result.stderr)
     except Exception as e:
         print(f"Error executing command: {e}")
+
 
 def upload_output_file():
     """Uploads the local output file to the cloud drive."""
