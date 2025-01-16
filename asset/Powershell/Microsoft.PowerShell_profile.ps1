@@ -724,7 +724,26 @@ function cc {
     }
 }
 
-function e   { explorer . }
+# Alias to save the current directory to the location stack
+Set-Alias cds Push-Location
+
+# Alias to return to the last saved directory from the location stack
+Set-Alias cdl Pop-Location
+
+
+# Dynamically define functions to avoid IDE references
+Remove-Item -Path Function:e -ErrorAction SilentlyContinue
+Remove-Item -Path Function:lse -ErrorAction SilentlyContinue
+
+New-Item -Path Function:e -Value {
+    explorer .
+} -Force | Out-Null
+
+New-Item -Path Function:lse -Value {
+    eza -al --color=always --group-directories-first
+} -Force | Out-Null
+
+
 
 oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
