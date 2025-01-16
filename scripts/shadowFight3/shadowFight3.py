@@ -158,7 +158,7 @@ def find_image(image_path, confidence=0.7, region=None):
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
     if is_searching and time.time() - last_found_time > 60: # for ads do 120 second
-        ntfy_termux_rclone_touch()  # Run the script instead of showing a message
+        ntfy_Signal()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
 
@@ -174,7 +174,10 @@ def ntfy_termux_rclone_touch():
         print("Script stopped by user.")
 
 
-def ntfy_Signal():
+profile_pic=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
+call_me=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
+cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
+def ntfy_WhatsApp():
     pyautogui.click(x=1778, y=900)
     time.sleep(2)
     window = focus_window(window_title)
@@ -187,13 +190,25 @@ def ntfy_Signal():
             if find_image(profile_pic): press_global_screen_with_delays((294,299,5),(594,908,2))
             if find_image(call_me): press_global_screen_with_delays((238,271,60))
             # elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
+            time.sleep(0.1)
+    except KeyboardInterrupt: print("Script stopped by user.")
 
-            # [click(window, IMG_CORDINATE.left + IMG_CORDINATE.width // 2, IMG_CORDINATE.top + IMG_CORDINATE.height // 2) or time.sleep(5) 
-            # for _ in [1] if (IMG_CORDINATE := find_image(profile_pic, confidence=0.8))]
 
-            # [click(window, IMG_CORDINATE.left + IMG_CORDINATE.width // 2, IMG_CORDINATE.top + IMG_CORDINATE.height // 2) or time.sleep(5) 
-            # for _ in [1] if (IMG_CORDINATE := find_image(call_me, confidence=0.8))]
-
+Signal_Entry =r"C:\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
+Signal_Cally =r"C:\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
+def ntfy_Signal():
+    pyautogui.click(x=1778, y=900)
+    time.sleep(2)
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while True:  # Loop will continue indefinitely unless interrupted by an external condition
+            focus_window(window_title)
+            if find_image(Signal_Entry, region=(233,241, 367,387)): press_global_screen_with_delays((294,299,3),(414,270,2))
+            if find_image(Signal_Cally, region=(1500,115, 1755,211)): press_global_screen_with_delays((1656,170,2),(1297,588,60))
+            # elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
 
@@ -1030,21 +1045,6 @@ skip=r'C:\msBackups\shadowfight3\skip.png'
 # ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
 # Click_Ads=r"C:\msBackups\shadowfight3\ads\Click_ADS.png"
-
-"""
-██╗    ██╗██╗  ██╗ █████╗ ████████╗███████╗ █████╗ ██████╗ ██████╗
-██║    ██║██║  ██║██╔══██╗╚══██╔══╝██╔════╝██╔══██╗██╔══██╗██╔══██╗
-██║ █╗ ██║███████║███████║   ██║   ███████╗███████║██████╔╝██████╔╝
-██║███╗██║██╔══██║██╔══██║   ██║   ╚════██║██╔══██║██╔═══╝ ██╔═══╝
-╚███╔███╔╝██║  ██║██║  ██║   ██║   ███████║██║  ██║██║     ██║
- ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝
-"""
-profile_pic=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
-call_me=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
-cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
-
-
-
 
 
 
