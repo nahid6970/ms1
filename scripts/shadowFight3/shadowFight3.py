@@ -174,9 +174,9 @@ def ntfy_termux_rclone_touch():
         print("Script stopped by user.")
 
 
-profile_pic=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
-call_me=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
-cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
+WhatsApp_Entry=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
+WhatsApp_Cally=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
+WhatsApp_Cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
 def ntfy_WhatsApp():
     pyautogui.click(x=1778, y=900)
     time.sleep(2)
@@ -187,9 +187,9 @@ def ntfy_WhatsApp():
     try:
         while True:  # Loop will continue indefinitely unless interrupted by an external condition
             focus_window(window_title)
-            if find_image(profile_pic): press_global_screen_with_delays((294,299,5),(594,908,2))
-            if find_image(call_me): press_global_screen_with_delays((238,271,60))
-            # elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
+            if find_image(WhatsApp_Entry): press_global_screen_with_delays((294,299,5),(594,908,2))
+            if find_image(WhatsApp_Cally): press_global_screen_with_delays((238,271,60))
+            # elif find_image(WhatsApp_Cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
 
