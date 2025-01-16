@@ -39,17 +39,20 @@ def read_remote_file():
 def execute_command(command, unique_id):
     """Executes the given command in PowerShell and writes its output to a local file."""
     try:
-        print(f"Executing: {command}")
+        # Replace 'cc' with '&&' in the command
+        transformed_command = command.replace(" cc ", " && ")
+        print(f"Executing transformed command: {transformed_command}")
+
         # Execute the command using PowerShell with -NoProfile
         result = subprocess.run(
-            [POWERSHELL_PATH, "-Command", command],
+            [POWERSHELL_PATH, "-Command", transformed_command],
             capture_output=True,
             text=True
         )
         # Write the color-coded output to the local file
         with open(LOCAL_OUTPUT_FILE, "w") as f:
             f.write(f"{GREEN}Command ID: {unique_id}{RESET}\n")
-            f.write(f"{BLUE}Executed Command: {command}{RESET}\n\n")
+            f.write(f"{BLUE}Executed Command: {transformed_command}{RESET}\n\n")
             f.write(result.stdout)
             if result.stderr:
                 f.write("\nError Output:\n")
