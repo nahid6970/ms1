@@ -5,7 +5,7 @@ $processes = Get-Process | ForEach-Object {
 }
 
 # Use fzf to allow the user to select a process
-$selectedProcess = $processes | fzf --header="Id       Name                     CPU        Memory" --preview "echo {}" --preview-window=up:10
+$selectedProcess = $processes | fzf -i --multi
 
 # Extract the process name from the selected line (second column)
 if ($selectedProcess) {
