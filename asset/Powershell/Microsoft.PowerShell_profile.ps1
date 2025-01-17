@@ -772,5 +772,22 @@ New-Item -Path Function:ms3 -Value  { Set-Location c:\ms3\ } -Force | Out-Null
 
 New-Item -Path Function:trim -Value { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 } -Force | Out-Null
 
+function wget_install_fzf { winget search --exact "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget install $_.split()[0] } }
+function wget_uninstall_fzf { winget list  "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget uninstall $_.split()[0] } }
+
+function scoop_install_fzf { winget search  "" | fzf --multi --preview 'scoop info {1}' | ForEach-Object { scoop install $_.split()[0] } }
+function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop show {1}' | ForEach-Object { scoop uninstall $_.split()[0] } }
+
+Set-Alias trim C:\ms1\scripts\ffmpeg\trim.ps1
+
+function sync { c:\ms1\sync.ps1 }
+
+function prowlarr_stop { Stop-Process -Name prowlarr }
+function prowlarr      { Start-Process -FilePath "C:\ProgramData\Prowlarr\bin\Prowlarr.exe" }
+function sonarr        { Start-Process -FilePath "C:\ProgramData\Sonarr\bin\Sonarr.exe" }
+function sonarr_stop   { Stop-Process -Name sonarr }
+function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Radarr.exe" }
+function radarr_stop   { Stop-Process -Name radarr }
+
 oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })

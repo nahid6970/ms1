@@ -12,25 +12,3 @@ function filterfzf {
     $filteredOutput = $output -split "`n" | fzf --query="$Text"
     Write-Output $filteredOutput
 }
-
-function wget_install_fzf { winget search --exact "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget install $_.split()[0] } }
-function wget_uninstall_fzf { winget list  "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget uninstall $_.split()[0] } }
-
-function scoop_install_fzf { winget search  "" | fzf --multi --preview 'scoop info {1}' | ForEach-Object { scoop install $_.split()[0] } }
-function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop show {1}' | ForEach-Object { scoop uninstall $_.split()[0] } }
-
-
-Set-Alias trim C:\ms1\scripts\ffmpeg\trim.ps1
-
-
-
-
-
-function sync { c:\ms1\sync.ps1 }
-
-function prowlarr_stop { Stop-Process -Name prowlarr }
-function prowlarr      { Start-Process -FilePath "C:\ProgramData\Prowlarr\bin\Prowlarr.exe" }
-function sonarr        { Start-Process -FilePath "C:\ProgramData\Sonarr\bin\Sonarr.exe" }
-function sonarr_stop   { Stop-Process -Name sonarr }
-function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Radarr.exe" }
-function radarr_stop   { Stop-Process -Name radarr }
