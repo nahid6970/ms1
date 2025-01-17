@@ -1,10 +1,12 @@
 # Get all processes with additional details (Name, CPU, CommandLine)
 $processes = Get-Process | ForEach-Object {
+    # Retrieve the CommandLine and clean it up by removing unwanted characters
     $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)").CommandLine
+    $cleanedCommandLine = $commandLine -replace '[\r\u00b9\u00b2\u00b3\u2070\u2074\u2075\u2076\u2077\u2078\u2079\u00ae\u2122]', '' # Remove unwanted chars
     [PSCustomObject]@{
         Name        = $_.Name
         CPU         = $_.CPU
-        CommandLine = $commandLine
+        CommandLine = $cleanedCommandLine
     }
 } | Sort-Object CPU -Descending
 
@@ -35,6 +37,7 @@ if ($processNames) {
 } else {
     Write-Host "No processes selected."
 }
+
 
 
 
