@@ -1,12 +1,10 @@
 # Get all processes with additional details (Name, CPU, CommandLine)
 $processes = Get-Process | ForEach-Object {
-    # Retrieve the CommandLine and clean it up by removing unwanted characters
     $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)").CommandLine
-    $cleanedCommandLine = $commandLine -replace '[\r\u00b9\u00b2\u00b3\u2070\u2074\u2075\u2076\u2077\u2078\u2079\u00ae\u2122]', '' # Remove unwanted chars
     [PSCustomObject]@{
         Name        = $_.Name
         CPU         = $_.CPU
-        CommandLine = $cleanedCommandLine
+        CommandLine = $commandLine
     }
 } | Sort-Object CPU -Descending
 
@@ -37,6 +35,50 @@ if ($processNames) {
 } else {
     Write-Host "No processes selected."
 }
+
+
+
+
+
+# # Get all processes with additional details (Name, CPU, CommandLine)
+# $processes = Get-Process | ForEach-Object {
+#     # Retrieve the CommandLine and clean it up by removing unwanted characters
+#     $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)").CommandLine
+#     $cleanedCommandLine = $commandLine -replace '[\r\u00b9\u00b2\u00b3\u2070\u2074\u2075\u2076\u2077\u2078\u2079\u00ae\u2122]', '' # Remove unwanted chars
+#     [PSCustomObject]@{
+#         Name        = $_.Name
+#         CPU         = $_.CPU
+#         CommandLine = $cleanedCommandLine
+#     }
+# } | Sort-Object CPU -Descending
+
+# # Format processes for display
+# $processDisplay = $processes | Format-Table Name, CPU, CommandLine -AutoSize | Out-String
+
+# # Skip the first two lines (header and separator) and then allow selection via fzf
+# $filteredProcesses = $processDisplay -split "`n" | Select-Object -Skip 3
+# $selectedProcesses = $filteredProcesses | fzf -m
+
+# # Extract the process names from the selected strings
+# $processNames = $selectedProcesses -split '\r?\n' | ForEach-Object {
+#     ($_ -split '\s{2,}')[0]
+# }
+
+# # If user selects one or more processes, kill them
+# if ($processNames) {
+#     foreach ($processName in $processNames) {
+#         if ($processName) {
+#             try {
+#                 Stop-Process -Name $processName -Force
+#                 Write-Host "Process $processName terminated."
+#             } catch {
+#                 Write-Host "Failed to terminate process $processName. Error: $_"
+#             }
+#         }
+#     }
+# } else {
+#     Write-Host "No processes selected."
+# }
 
 
 

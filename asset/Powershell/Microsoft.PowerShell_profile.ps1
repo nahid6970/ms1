@@ -768,6 +768,7 @@ New-Item -Path Function:lse -Value {
     eza -al --color=always --group-directories-first
 } -Force | Out-Null
 
+Set-Alias time date
 
 
 oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
