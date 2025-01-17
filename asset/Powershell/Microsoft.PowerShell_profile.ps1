@@ -756,20 +756,21 @@ function cdl {
 }
 
 
-# Dynamically define functions to avoid IDE references
-Remove-Item -Path Function:e -ErrorAction SilentlyContinue
-Remove-Item -Path Function:lse -ErrorAction SilentlyContinue
+# # Dynamically define functions to avoid IDE references
+# Remove-Item -Path Function:e -ErrorAction SilentlyContinue
+# Remove-Item -Path Function:lse -ErrorAction SilentlyContinue
 
-New-Item -Path Function:e -Value {
-    explorer .
-} -Force | Out-Null
 
-New-Item -Path Function:lse -Value {
-    eza -al --color=always --group-directories-first
-} -Force | Out-Null
-
+New-Item -Path Function:e -Value { explorer . } -Force | Out-Null
+New-Item -Path Function:lse -Value { eza -al --color=always --group-directories-first } -Force | Out-Null
+New-Item -Path Function:pk -Value { C:\WINDOWS\SYSTEM32\cmd.exe /c start powershell -ExecutionPolicy Bypass -File "C:\ms1\kp.ps1" } -Force | Out-Null
 Set-Alias time date
+New-Item -Path Function:ms1 -Value  { Set-Location c:\ms1\ } -Force | Out-Null
+New-Item -Path Function:ms2 -Value  { Set-Location c:\ms2\ } -Force | Out-Null
+New-Item -Path Function:ms3 -Value  { Set-Location c:\ms3\ } -Force | Out-Null
+# New-Item -Path Function:yt -Value {yt-dlp} -Force | Out-Null
 
+New-Item -Path Function:trim -Value { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 } -Force | Out-Null
 
 oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
