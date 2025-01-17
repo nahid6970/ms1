@@ -1,40 +1,103 @@
-# Get all processes with additional details (Name, CPU, CommandLine)
+# Get a list of processes with structured output for fzf
 $processes = Get-Process | ForEach-Object {
-    $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)").CommandLine
-    [PSCustomObject]@{
-        Name        = $_.Name
-        CPU         = $_.CPU
-        CommandLine = $commandLine
-    }
-} | Sort-Object CPU -Descending
-
-# Format processes for display
-$processDisplay = $processes | Format-Table Name, CPU, CommandLine -AutoSize | Out-String
-
-# Skip the first two lines (header and separator) and then allow selection via fzf
-$filteredProcesses = $processDisplay -split "`n" | Select-Object -Skip 3
-$selectedProcesses = $filteredProcesses | fzf -m
-
-# Extract the process names from the selected strings
-$processNames = $selectedProcesses -split '\r?\n' | ForEach-Object {
-    ($_ -split '\s{2,}')[0]
+    # Create a formatted string: "Id Name CPU Memory"
+    "{0,-8} {1,-25} {2,-10:N2} {3,-10:N2}" -f $_.Id, $_.Name, $_.CPU, ($_.PM / 1MB)
 }
 
-# If user selects one or more processes, kill them
-if ($processNames) {
-    foreach ($processName in $processNames) {
-        if ($processName) {
-            try {
-                Stop-Process -Name $processName -Force
-                Write-Host "Process $processName terminated."
-            } catch {
-                Write-Host "Failed to terminate process $processName. Error: $_"
-            }
+# Use fzf to allow the user to select a process
+$selectedProcess = $processes | fzf --header="Id       Name                     CPU        Memory" --preview "echo {}" --preview-window=up:10
+
+# Extract the process name from the selected line (second column)
+if ($selectedProcess) {
+    # Use regex to capture the name from the formatted line
+    if ($selectedProcess -match '^\d+\s+(\S+)\s') {
+        $processName = $matches[1]
+
+        # Kill the selected process by name
+        try {
+            Stop-Process -Name $processName -Force
+            Write-Host "Process with name '$processName' has been terminated."
+        } catch {
+            Write-Host "Failed to terminate process: $_"
         }
+    } else {
+        Write-Host "Invalid process selection. No valid process name found."
     }
 } else {
-    Write-Host "No processes selected."
+    Write-Host "No process selected."
 }
+
+
+
+# #! kill with id
+# $processes = Get-Process | ForEach-Object {
+#     # Create a formatted string: "Id Name CPU Memory"
+#     "{0,-8} {1,-25} {2,-10:N2} {3,-10:N2}" -f $_.Id, $_.Name, $_.CPU, ($_.PM / 1MB)
+# }
+
+# # Use fzf to allow the user to select a process
+# $selectedProcess = $processes | fzf --header="Id       Name                     CPU        Memory" --preview "echo {}" --preview-window=up:10
+
+# # Extract the process ID from the selected line (first column)
+# if ($selectedProcess) {
+#     # Use a regex to extract the numeric ID from the start of the line
+#     if ($selectedProcess -match '^(\d+)\s') {
+#         $processId = $matches[1] -as [int]
+
+#         # Kill the selected process
+#         try {
+#             Stop-Process -Id $processId -Force
+#             Write-Host "Process with ID $processId has been terminated."
+#         } catch {
+#             Write-Host "Failed to terminate process: $_"
+#         }
+#     } else {
+#         Write-Host "Invalid process selection. No valid process ID found."
+#     }
+# } else {
+#     Write-Host "No process selected."
+# }
+
+
+
+
+# #! Get all processes with additional details (Name, CPU, CommandLine) // slower
+# $processes = Get-Process | ForEach-Object {
+#     $commandLine = (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)").CommandLine
+#     [PSCustomObject]@{
+#         Name        = $_.Name
+#         CPU         = $_.CPU
+#         CommandLine = $commandLine
+#     }
+# } | Sort-Object CPU -Descending
+
+# # Format processes for display
+# $processDisplay = $processes | Format-Table Name, CPU, CommandLine -AutoSize | Out-String
+
+# # Skip the first two lines (header and separator) and then allow selection via fzf
+# $filteredProcesses = $processDisplay -split "`n" | Select-Object -Skip 3
+# $selectedProcesses = $filteredProcesses | fzf -m
+
+# # Extract the process names from the selected strings
+# $processNames = $selectedProcesses -split '\r?\n' | ForEach-Object {
+#     ($_ -split '\s{2,}')[0]
+# }
+
+# # If user selects one or more processes, kill them
+# if ($processNames) {
+#     foreach ($processName in $processNames) {
+#         if ($processName) {
+#             try {
+#                 Stop-Process -Name $processName -Force
+#                 Write-Host "Process $processName terminated."
+#             } catch {
+#                 Write-Host "Failed to terminate process $processName. Error: $_"
+#             }
+#         }
+#     }
+# } else {
+#     Write-Host "No processes selected."
+# }
 
 
 
