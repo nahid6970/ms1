@@ -23,11 +23,11 @@ function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop sho
 Set-Alias trim C:\ms1\scripts\ffmpeg\trim.ps1
 
 
-function ms1  { Set-Location c:\ms1\ }
-function ms2  { Set-Location c:\ms2\ }
-function yt {yt-dlp}
+
+
+
 function sync { c:\ms1\sync.ps1 }
-function trim { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 }
+
 function prowlarr_stop { Stop-Process -Name prowlarr }
 function prowlarr      { Start-Process -FilePath "C:\ProgramData\Prowlarr\bin\Prowlarr.exe" }
 function sonarr        { Start-Process -FilePath "C:\ProgramData\Sonarr\bin\Sonarr.exe" }
