@@ -14,12 +14,12 @@ class StartupManager(tk.Tk):
     def load_items(self):
         # Define your items here
         return [
-{"type": "Command","name": "Komorebi"         ,"command": "komorebic start"},
-{"type": "Command","name": "mypygui"          ,"command": "Start-Process C:/ms1/mypygui.py -WindowStyle Hidden"},
-{"type": "Command","name": "Square-Corner"    ,"command": "Start-Process C:/msBackups/Display/win11-toggle-rounded-corners.exe -ArgumentList --disable -Verb RunAs -WindowStyle Hidden"},
-{"type": "Command","name": "Text-[Share]"     ,"command": "Start-Process C:/ms1/flask/share_text/share_text.py -WindowStyle Hidden"},
-{"type": "Command","name": "File-[Share]"     ,"command": "Start-Process C:/ms1/flask/upload_files.py -WindowStyle Hidden"},
-{"type": "Command","name": "Drive-[Share]"    ,"command": "Start-Process C:/ms1/flask/Browse_PC_Files/Browse_PC_Files.py -WindowStyle Hidden"},
+{"type": "Command","name": "Komorebi"         ,"command": r"C:\ms1\startup\Command\komorebi.ahk"},
+{"type": "Command","name": "mypygui"          ,"command": "Start-Process C:\\ms1\\mypygui.py -WindowStyle Hidden"},
+{"type": "Command","name": "Square-Corner"    ,"command": "Start-Process C:\\msBackups\\Display\\win11-toggle-rounded-corners.exe -ArgumentList --disable -Verb RunAs -WindowStyle Hidden"},
+{"type": "Command","name": "Text-[Share]"     ,"command": "Start-Process C:\\ms1\\flask\\share_text\\share_text.py -WindowStyle Hidden"},
+{"type": "Command","name": "File-[Share]"     ,"command": "Start-Process C:\\ms1\\flask\\upload_files.py -WindowStyle Hidden"},
+{"type": "Command","name": "Drive-[Share]"    ,"command": "Start-Process C:\\ms1\\flask\\Browse_PC_Files\\Browse_PC_Files.py -WindowStyle Hidden"},
 
 {"type": "Command","name": "arr_monitor"      ,"command": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "Remote Control"   ,"command": "Start-Process 'C:\\ms1\\Rclone_Remote.py' -WindowStyle Hidden"},
