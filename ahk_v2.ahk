@@ -42,6 +42,7 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 RAlt & -::Run("C:\ms1\scripts\ahk\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 #x::Run("C:\ms1\mypygui.py", , "Hide")
+#s::Run("C:\ms1\startup.py", , "Hide")
 ^+m::Run("C:\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 !x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
 
@@ -294,20 +295,20 @@ global ; V1toV2: Made function global
 
 
 
-#s:: ; Define the shortcut outside
-{
-    global ; Declare global scope for variables
-    i := 1 ; Initialize the variable if not already set
+; #s:: ; Define the shortcut outside
+; {
+;     global ; Declare global scope for variables
+;     i := 1 ; Initialize the variable if not already set
 
-    ; Get the process ID of the active window
-    PID := WinGetPID("A")
+;     ; Get the process ID of the active window
+;     PID := WinGetPID("A")
 
-    ; Set process priority based on the value of 'i'
-    ProcessSetPriority(((i = 1) ? "L" : ((i = 2) ? "N" : "H")), PID)
+;     ; Set process priority based on the value of 'i'
+;     ProcessSetPriority(((i = 1) ? "L" : ((i = 2) ? "N" : "H")), PID)
 
-    ; Update 'i' for the next use, cycling through 1, 2, and 3
-    i := (i > 2) ? 1 : i + 1
-}
+;     ; Update 'i' for the next use, cycling through 1, 2, and 3
+;     i := (i > 2) ? 1 : i + 1
+; }
 
 
 
