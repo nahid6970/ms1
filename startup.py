@@ -12,30 +12,31 @@ class StartupManager(tk.Tk):
         self.create_widgets()
 
     def load_items(self):
-        # Define your items here
+        # Define your items here, now using "App2" instead of "Command"
         return [
-{"type": "Command","name": "Komorebi"         ,"command": r"C:\ms1\startup\Command\komorebi.ahk"},
-{"type": "Command","name": "mypygui"          ,"command": "Start-Process C:\\ms1\\mypygui.py -WindowStyle Hidden"},
-{"type": "Command","name": "Square-Corner"    ,"command": "Start-Process C:\\msBackups\\Display\\win11-toggle-rounded-corners.exe -ArgumentList --disable -Verb RunAs -WindowStyle Hidden"},
-{"type": "Command","name": "Text-[Share]"     ,"command": "Start-Process C:\\ms1\\flask\\share_text\\share_text.py -WindowStyle Hidden"},
-{"type": "Command","name": "File-[Share]"     ,"command": "Start-Process C:\\ms1\\flask\\upload_files.py -WindowStyle Hidden"},
-{"type": "Command","name": "Drive-[Share]"    ,"command": "Start-Process C:\\ms1\\flask\\Browse_PC_Files\\Browse_PC_Files.py -WindowStyle Hidden"},
 
-{"type": "Command","name": "arr_monitor"      ,"command": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
-{"type": "Command","name": "Remote Control"   ,"command": "Start-Process 'C:\\ms1\\Rclone_Remote.py' -WindowStyle Hidden"},
-{"type": "Command","name": "NetworkCondition" ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
-{"type": "Command","name": "Scheduled_Task"   ,"command": "C:\\ms1\\scheduled.ps1"},
-{"type": "Command","name": "sshd"             ,"command": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
-{"type": "Command","name": "Sync"             ,"command": "Start-Process 'C:\\ms1\\sync.ps1'"},
-{"type": "Command","name": "Virtual_Monitor"  ,"command": "cmd /c 'C:\\msBackups\\Display\\usbmmidd_v2\\2ndMonitor.bat'; cmd /c 'C:\\msBackups\\Display\\DisplaySwitch.exe /internal'"},
-# {"type": "Command","name": "MONITOR_SIZE"     ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
-# {"type": "Command","name": "Bazarr"         ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
-# {"type": "Command","name": "Flaresolverr"   ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
-# {"type": "Command","name": "GlazeWm"        ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
-# {"type": "Command","name": "Open WebUI"     ,"command": "Start-Process open-webui serve"},
-# {"type": "Command","name": "Syncthing"      ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
-# {"type": "Command","name": "whkd"           ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
-# {"type": "Command","name": "Yasb"           ,"command": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
+{"type": "App2","name": "Komorebi"         ,"path": r"C:\ms1\startup\Command\komorebi.ahk"},
+{"type": "App2","name": "mypygui"          ,"path": r"C:\ms1\startup\Command\mypygui.ahk"},
+{"type": "App2","name": "Square-Corner"    ,"path": "Start-Process C:\\msBackups\\Display\\win11-toggle-rounded-corners.exe -ArgumentList --disable -Verb RunAs -WindowStyle Hidden"},
+{"type": "App2","name": "Text-[Share]"     ,"path": "Start-Process C:\\ms1\\flask\\share_text\\share_text.py -WindowStyle Hidden"},
+{"type": "App2","name": "File-[Share]"     ,"path": "Start-Process C:\\ms1\\flask\\upload_files.py -WindowStyle Hidden"},
+{"type": "App2","name": "Drive-[Share]"    ,"path": "Start-Process C:\\ms1\\flask\\Browse_PC_Files\\Browse_PC_Files.py -WindowStyle Hidden"},
+
+{"type": "App2","name": "arr_monitor"      ,"path": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
+{"type": "App2","name": "Remote Control"   ,"path": "Start-Process 'C:\\ms1\\Rclone_Remote.py' -WindowStyle Hidden"},
+{"type": "App2","name": "NetworkCondition" ,"path": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
+{"type": "App2","name": "Scheduled_Task"   ,"path": "C:\\ms1\\scheduled.ps1"},
+{"type": "App2","name": "sshd"             ,"path": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
+{"type": "App2","name": "Sync"             ,"path": "Start-Process 'C:\\ms1\\sync.ps1'"},
+{"type": "App2","name": "Virtual_Monitor"  ,"path": "cmd /c 'C:\\msBackups\\Display\\usbmmidd_v2\\2ndMonitor.bat'; cmd /c 'C:\\msBackups\\Display\\DisplaySwitch.exe /internal'"},
+# {"type": "App2","name": "MONITOR_SIZE"   ,"path": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
+# {"type": "App2","name": "Bazarr"         ,"path": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
+# {"type": "App2","name": "Flaresolverr"   ,"path": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
+# {"type": "App2","name": "GlazeWm"        ,"path": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
+# {"type": "App2","name": "Open WebUI"     ,"path": "Start-Process open-webui serve"},
+# {"type": "App2","name": "Syncthing"      ,"path": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
+# {"type": "App2","name": "whkd"           ,"path": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
+# {"type": "App2","name": "Yasb"           ,"path": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
 {"type": "App","name": "ahk_v2"            ,"path": r"C:\ms1\ahk_v2.ahk"},
 {"type": "App","name": "ahk_v1"            ,"path": r"C:\ms1\ahk_v1.ahk"},
@@ -49,31 +50,30 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Radarr"            ,"path": r"C:\ProgramData\Radarr\bin\Radarr.exe"},
 {"type": "App","name": "RssGuard"          ,"path": r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"},
 {"type": "App","name": "Sonarr"            ,"path": r"C:\ProgramData\Sonarr\bin\Sonarr.exe"},
-
         ]
 
     def create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # Separate commands and apps
-        checked_commands = [item for item in self.items if item["type"] == "Command" and self.is_checked(item)]
-        unchecked_commands = [item for item in self.items if item["type"] == "Command" and not self.is_checked(item)]
+        # Separate App2 and Apps
+        checked_app2 = [item for item in self.items if item["type"] == "App2" and self.is_checked(item)]
+        unchecked_app2 = [item for item in self.items if item["type"] == "App2" and not self.is_checked(item)]
         checked_apps = [item for item in self.items if item["type"] == "App" and self.is_checked(item)]
         unchecked_apps = [item for item in self.items if item["type"] == "App" and not self.is_checked(item)]
 
-        # Commands Section
-        command_separator = tk.Label(self, text="Commands", font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
-        command_separator.grid(row=0, column=0, pady=5, sticky="ew")
+        # App2 Section
+        app2_separator = tk.Label(self, text="Command", font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
+        app2_separator.grid(row=0, column=0, pady=5, sticky="ew")
 
-        command_row = 1
-        for item in checked_commands + unchecked_commands:
-            self.create_item_widget(item, command_row, 0)
-            command_row += 1
+        app2_row = 1
+        for item in checked_app2 + unchecked_app2:
+            self.create_item_widget(item, app2_row, 0)
+            app2_row += 1
 
         # Add vertical separator
         separator = tk.Frame(self, width=2, bg="#4a4b5a")
-        separator.grid(row=1, column=1, rowspan=max(len(checked_commands) + len(unchecked_commands), len(checked_apps) + len(unchecked_apps)), sticky="ns")
+        separator.grid(row=1, column=1, rowspan=max(len(checked_app2) + len(unchecked_app2), len(checked_apps) + len(unchecked_apps)), sticky="ns")
 
         # Apps Section
         app_separator = tk.Label(self, text="Apps", font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
@@ -103,8 +103,9 @@ class StartupManager(tk.Tk):
     def launch_command(self, item):
         if item["type"] == "App":
             os.system(f'start "" "{item["path"]}"')
-        else:
-            os.system(f'PowerShell -Command "{item["command"]}"')
+        elif item["type"] == "App2":
+            # Launch App2 (no command needed)
+            os.system(f'start "" "{item["path"]}"')
 
     def is_checked(self, item):
         try:
@@ -130,10 +131,9 @@ class StartupManager(tk.Tk):
                 # Add to startup
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
                     if item["type"] == "App":
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
-                    else:
-                        # winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'powershell -WindowStyle Hidden -Command "{item["command"]}"')
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'pythonw -c "import subprocess; subprocess.run([\'powershell\', \'-WindowStyle\', \'Hidden\', \'-Command\', \'{item["command"]}\'], shell=True)"')
+                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'pythonw -c "import subprocess; subprocess.run([\'powershell\', \'-WindowStyle\', \'Hidden\', \'-Command\', \'{item["path"]}\'], shell=True)"')
+                    elif item["type"] == "App2":
+                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'pythonw -c "import subprocess; subprocess.run([\'powershell\', \'-WindowStyle\', \'Hidden\', \'-Command\', \'{item["path"]}\'], shell=True)"')
                     name_label.config(fg="green")
                     icon_label.config(text="\uf205", fg="#9ef959")
         except Exception as e:
