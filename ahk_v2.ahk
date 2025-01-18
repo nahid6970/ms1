@@ -48,6 +48,7 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ;! text
 ::;v1:: {#}Requires AutoHotkey v1.0
 ::;v2:: {#}Requires AutoHotkey v2.0
+::;run:: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
 
 
 

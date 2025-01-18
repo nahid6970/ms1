@@ -6,7 +6,7 @@ import winreg
 class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Startup Manager")
+        self.title("Startup Manager - Python")
         self.configure(bg="#2e2f3e")
         self.items = self.load_items()  # Load items dynamically or define them here
         self.create_widgets()
@@ -17,7 +17,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "arr_monitor"      ,"command": "Start-Process 'C:\\ms1\\arr_monitor.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "Komorebi"         ,"command": "komorebic start"},
 {"type": "Command","name": "MONITOR_SIZE"     ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
-{"type": "Command","name": "mypygui"          ,"command": "Start-Process  'C:\\ms1\\mypygui.py' -WindowStyle Hidden"},
+{"type": "Command","name": "mypygui"          ,"command": "C:\\ms1\\mypygui.py"},
 {"type": "Command","name": "Remote Control"   ,"command": "Start-Process  'C:\\ms1\\Rclone_Remote.py' -WindowStyle Hidden"},
 {"type": "Command","name": "NetworkCondition" ,"command": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "Square-Corner"    ,"command": "Start-Process 'C:\\msBackups\\Display\\win11-toggle-rounded-corners.exe' -ArgumentList '--disable' -Verb RunAs -WindowStyle Hidden"},
@@ -118,6 +118,9 @@ class StartupManager(tk.Tk):
 
     def toggle_startup(self, item, name_label, icon_label):
         reg_path = r"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+        launcher_script = r"C:\ms1\startup\silent_launcher.py"
+        pythonw_path = r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"
+
         try:
             if self.is_checked(item):
                 # Remove from startup
@@ -128,14 +131,20 @@ class StartupManager(tk.Tk):
             else:
                 # Add to startup
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
-                    if item["type"] == "App":
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
-                    else:
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'powershell -WindowStyle Hidden -Command "{item["command"]}"')
+                    # Use pythonw.exe and silent_launcher.py to launch the command or app silently
+                    target = item["command"] if item["type"] == "Command" else item["path"]
+                    winreg.SetValueEx(
+                        reg_key,
+                        item["name"],
+                        0,
+                        winreg.REG_SZ,
+                        f'"{pythonw_path}" "{launcher_script}" "{target}"'
+                    )
                     name_label.config(fg="green")
-                    icon_label.config(text="\uf205", fg="#9ef959")
+                    icon_label.config(text="\uf205", fg="blue")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to modify {item['name']} in startup: {e}")
+
 
     def update_label_color(self, label, checked):
         if checked:
