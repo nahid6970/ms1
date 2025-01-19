@@ -49,12 +49,14 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "DesktopCoral"           ,"paths": [r"C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe"]},
 {"type": "App","name": "Ditto"                  ,"paths": [r"C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"]},
 {"type": "App","name": "Flow.Launcher"          ,"paths": [r"C:\Users\nahid\AppData\Local\FlowLauncher\app-1.19.4\Flow.Launcher.exe"]},
-{"type": "App","name": "Free Download Manager"  ,"paths": [r"C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe"], "H":True},
 {"type": "App","name": "Ollama"                 ,"paths": [r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"]},
 {"type": "App","name": "Prowlarr"               ,"paths": [r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"]},
 {"type": "App","name": "Radarr"                 ,"paths": [r"C:\ProgramData\Radarr\bin\Radarr.exe"]},
 {"type": "App","name": "RssGuard"               ,"paths": [r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"]},
 {"type": "App","name": "Sonarr"                 ,"paths": [r"C:\ProgramData\Sonarr\bin\Sonarr.exe"]},
+{"type": "App", "name": "Free Download Manager", "paths": [r"C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe"], "Command": "--hidden"},
+{"type": "App", "name": "MicrosoftEdgeAutoLaunch_A85A975CFCA9AFD77D01E7227175D0CA", "paths": [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"], "Command": "--no-startup-window --win-session-start"},
+{"type": "App", "name": "GoogleChromeAutoLaunch_2ABF856BE97FD219EC4C9BF1EB18E55A", "paths": [r"C:\Program Files\Google\Chrome\Application\chrome.exe"], "Command": "--no-startup-window /prefetch:5"},
         ]
 
     def filter_existing_items(self, items):
@@ -63,10 +65,14 @@ class StartupManager(tk.Tk):
         for item in items:
             for path in item["paths"]:
                 if os.path.exists(path):
-                    filtered_items.append({"type": item["type"], "name": item["name"], "path": path, "hidden": "H" in item})
-                    break  # Use only the first valid path
+                    filtered_items.append({
+                        "type": item["type"],
+                        "name": item["name"],
+                        "paths": [path],  # Use a list for compatibility
+                        "Command": item.get("Command", ""),  # Include the Command field
+                    })
+                    break  # Stop after the first valid path
         return filtered_items
-
 
     def create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
@@ -109,10 +115,22 @@ class StartupManager(tk.Tk):
 
     def launch_command(self, item):
         if item["type"] == "App":
-            # Launch normally, without --hidden flag
-            os.system(f'start "" "{item["path"]}"')
+            # Retrieve the first path and the command if it exists
+            path = item["paths"][0]
+            command = item.get("Command", "")
+            
+            # Format the launch command
+            if command:
+                # If a command exists, append it to the path
+                # os.system(f'start "" "{path}" {command}')
+                os.system(f'start "" "{path}"')
+            else:
+                # If no command, only use the path
+                os.system(f'start "" "{path}"')
         else:
-            os.system(f'start "" "{item["path"]}"')
+            # Fallback for other types
+            os.system(f'start "" "{item["paths"][0]}"')
+
 
     def is_checked(self, item):
         try:
@@ -124,6 +142,7 @@ class StartupManager(tk.Tk):
                     return False
         except WindowsError:
             return False
+
 
     def toggle_startup(self, item, name_label, icon_label):
         reg_path = r"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
@@ -137,10 +156,11 @@ class StartupManager(tk.Tk):
             else:
                 # Add to startup
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
-                    path = item["path"]
-                    if item.get("hidden", False):
-                        # Append the hidden flag to the path if needed
-                        path = f'"{path}" --hidden'  # The path is enclosed in quotes, and --hidden is outside
+                    path = item["paths"][0]  # Use the first path in the list
+                    command = item.get("Command", "")  # Get the command or an empty string
+                    # Combine the path and command
+                    if command:
+                        path = f'"{path}" {command}'  # Append the command after the quoted path
                     else:
                         # Enclose the path in quotes if it's not already enclosed
                         if not path.startswith('"') and not path.endswith('"'):
