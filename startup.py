@@ -43,28 +43,30 @@ class StartupManager(tk.Tk):
 # {"type": "Command","name": "whkd"             ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
 # {"type": "Command","name": "Yasb"             ,"paths": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
-{"type": "App","name": "BijoyBayanno"      ,"paths": [r"C:\Program Files (x86)\Ananda Computers\BijoyBayanno\BijoyBayanno.exe"]},
-{"type": "App","name": "Capture2Text"      ,"paths": [r"C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe"]},
-{"type": "App","name": "Cloudflare WARP"   ,"paths": [r"C:\Program Files\Cloudflare\Cloudflare WARP\Cloudflare WARP.exe"]},
-{"type": "App","name": "DesktopCoral"      ,"paths": [r"C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe"]},
-{"type": "App","name": "Ditto"             ,"paths": [r"C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"]},
-{"type": "App","name": "Flow.Launcher"     ,"paths": [r"C:\Users\nahid\AppData\Local\FlowLauncher\app-1.19.4\Flow.Launcher.exe"]},
-{"type": "App","name": "Ollama"            ,"paths": [r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"]},
-{"type": "App","name": "Prowlarr"          ,"paths": [r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"]},
-{"type": "App","name": "Radarr"            ,"paths": [r"C:\ProgramData\Radarr\bin\Radarr.exe"]},
-{"type": "App","name": "RssGuard"          ,"paths": [r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"]},
-{"type": "App","name": "Sonarr"            ,"paths": [r"C:\ProgramData\Sonarr\bin\Sonarr.exe"]},
+{"type": "App","name": "BijoyBayanno"           ,"paths": [r"C:\Program Files (x86)\Ananda Computers\BijoyBayanno\BijoyBayanno.exe"]},
+{"type": "App","name": "Capture2Text"           ,"paths": [r"C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe"]},
+{"type": "App","name": "Cloudflare WARP"        ,"paths": [r"C:\Program Files\Cloudflare\Cloudflare WARP\Cloudflare WARP.exe"]},
+{"type": "App","name": "DesktopCoral"           ,"paths": [r"C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe"]},
+{"type": "App","name": "Ditto"                  ,"paths": [r"C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"]},
+{"type": "App","name": "Flow.Launcher"          ,"paths": [r"C:\Users\nahid\AppData\Local\FlowLauncher\app-1.19.4\Flow.Launcher.exe"]},
+{"type": "App","name": "Free Download Manager"  ,"paths": [r"C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe"], "H":True},
+{"type": "App","name": "Ollama"                 ,"paths": [r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"]},
+{"type": "App","name": "Prowlarr"               ,"paths": [r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"]},
+{"type": "App","name": "Radarr"                 ,"paths": [r"C:\ProgramData\Radarr\bin\Radarr.exe"]},
+{"type": "App","name": "RssGuard"               ,"paths": [r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"], "H":True},
+{"type": "App","name": "Sonarr"                 ,"paths": [r"C:\ProgramData\Sonarr\bin\Sonarr.exe"]},
         ]
 
     def filter_existing_items(self, items):
         """Filter out items with no valid paths."""
         filtered_items = []
         for item in items:
-            valid_path = next((path for path in item["paths"] if os.path.exists(path)), None)
-            if valid_path:
-                item["path"] = valid_path  # Save the first valid path
-                filtered_items.append(item)
+            for path in item["paths"]:
+                if os.path.exists(path):
+                    filtered_items.append({"type": item["type"], "name": item["name"], "path": path, "hidden": "H" in item})
+                    break  # Use only the first valid path
         return filtered_items
+
 
     def create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
@@ -106,7 +108,12 @@ class StartupManager(tk.Tk):
         self.update_label_color(name_label, checked)
 
     def launch_command(self, item):
-        os.system(f'start "" "{item["path"]}"')
+        if item["type"] == "App":
+            # Launch normally, without -hidden flag
+            os.system(f'start "" "{item["path"]}"')
+        else:
+            os.system(f'start "" "{item["path"]}"')
+
 
     def is_checked(self, item):
         try:
@@ -131,11 +138,24 @@ class StartupManager(tk.Tk):
             else:
                 # Add to startup
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
-                    winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
+                    path = item["path"]
+                    if item.get("hidden", False):
+                        # Append the hidden flag to the path if needed
+                        path = f'"{path}" -hidden'  # The path is enclosed in quotes, and -hidden is outside
+                    else:
+                        # Enclose the path in quotes if it's not already enclosed
+                        if not path.startswith('"') and not path.endswith('"'):
+                            path = f'"{path}"'
+                    
+                    winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, path)
                     name_label.config(fg="green")
                     icon_label.config(text="\uf205", fg="#9ef959")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to modify {item['name']} in startup: {e}")
+
+
+
+
 
     def update_label_color(self, label, checked):
         if checked:
