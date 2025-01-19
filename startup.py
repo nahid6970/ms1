@@ -3,6 +3,11 @@ from tkinter import messagebox
 import os
 import winreg
 
+def create_custom_border(parent):
+    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
+    BORDER_FRAME.place(relwidth=1, relheight=1)
+    return BORDER_FRAME
+
 class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -12,6 +17,8 @@ class StartupManager(tk.Tk):
         self.items = self.filter_existing_items(self.load_items())  # Load and filter items
         self.create_widgets()
         self.center_window()
+        self.attributes('-topmost', True)  # Set always on top
+        # self.overrideredirect(True)  # Remove default borders
         self.deiconify()  # Show the window after fully initializing
 
     def load_items(self):
