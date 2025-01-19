@@ -699,9 +699,8 @@ function gitter {
         Write-Host "This is not a Git repository." -ForegroundColor Red
         return
     }
-
-    # Generate a commit message with the current date and time
-    $CurrentDateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    # Generate a commit message with the custom date and time format
+    $CurrentDateTime = Get-Date -Format "MMMM dd / yyyy, hh:mm tt"
     $CommitMessage = "Auto commit on $CurrentDateTime"
 
     # Show what changed
