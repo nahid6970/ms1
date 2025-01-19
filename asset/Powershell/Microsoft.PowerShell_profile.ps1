@@ -690,15 +690,49 @@ git commit -m "XX"
 git push
 }
 
+
+function gitter {
+    # Navigate to the current directory
+    Set-Location -Path $PWD
+    # Check if the current directory is a Git repository
+    if (-not (Test-Path ".git")) {
+        Write-Host "This is not a Git repository." -ForegroundColor Red
+        return
+    }
+
+    # Generate a commit message with the current date and time
+    $CurrentDateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $CommitMessage = "Auto commit on $CurrentDateTime"
+
+    # Stage all changes
+    git add .
+    # Commit with the generated message
+    git commit -m $CommitMessage
+    # Push to the remote repository
+    git push
+    # Completion message
+    Read-Host "Done! Press Enter to exit"
+}
+
+# Adding the function to your PowerShell profile
+$ProfilePath = $PROFILE.CurrentUserAllHosts
+if (-not (Test-Path $ProfilePath)) {
+    New-Item -ItemType File -Path $ProfilePath -Force
+}
+Add-Content -Path $ProfilePath -Value "function gitter { $(Get-Content Function:gitter | Out-String) }"
+Write-Host "Function 'gitter' added to your PowerShell profile." -ForegroundColor Green
+
+
+
 # function Prompt {
 #     $currentLocation = Get-Location
 #     Write-Host ("->" + $currentLocation + " ⚡") -ForegroundColor Yellow -BackgroundColor Blue -NoNewline
 #     return " "
 # }
 
-function build {
-    cargo build --target-dir C:\Builds
-}
+# function build {
+#     cargo build --target-dir C:\Builds
+# }
 
 #* Override PSReadLine's history search
 #Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' `
@@ -732,20 +766,16 @@ Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 
 # File to store the last directory
 $global:LastDirectoryFile = "$env:USERPROFILE\last_directory.txt"
-
 # Function to save the current directory to a file
 function Save-LastDirectory {
     Set-Content -Path $global:LastDirectoryFile -Value (Get-Location).Path
 }
-
 # Load the last directory from the file, if it exists
 if (Test-Path $global:LastDirectoryFile) {
     $global:LastDirectory = Get-Content -Path $global:LastDirectoryFile
 }
-
 # Alias to save the current directory to the location stack
 Set-Alias cds Save-LastDirectory
-
 # Alias to return to the last saved directory from the location stack
 function cdl {
     if ($global:LastDirectory) {
@@ -756,10 +786,9 @@ function cdl {
 }
 
 
-# # Dynamically define functions to avoid IDE references
+# #! Dynamically define functions to avoid IDE references
 # Remove-Item -Path Function:e -ErrorAction SilentlyContinue
 # Remove-Item -Path Function:lse -ErrorAction SilentlyContinue
-
 
 New-Item -Path Function:e -Value { explorer . } -Force | Out-Null
 New-Item -Path Function:lse -Value { eza -al --color=always --group-directories-first } -Force | Out-Null
