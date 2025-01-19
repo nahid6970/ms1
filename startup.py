@@ -15,81 +15,78 @@ class StartupManager(tk.Tk):
         self.deiconify()  # Show the window after fully initializing
 
     def load_items(self):
-        # Define your items here
+        # Define items with multiple potential paths
         return [
-{"type": "Command","name": "ahk_v2"           ,"path": r"C:\ms1\ahk_v2.ahk"},
-{"type": "Command","name": "Komorebi"         ,"path": r"C:\ms1\startup\Command\komorebi.ahk"},
-{"type": "Command","name": "mypygui"          ,"path": r"C:\ms1\startup\Command\mypygui.ahk"},
-{"type": "Command","name": "Square-Corner"    ,"path": r"C:\ms1\startup\Command\square_corner.ahk"},
-{"type": "Command","name": "Remote Control"   ,"path": r"C:\ms1\startup\Command\remote_control.ahk"},
-{"type": "Command","name": "Virtual_Monitor"  ,"path": r"C:\ms1\startup\Command\virtual_monitor.ahk"},
-{"type": "Command","name": "Text-[Share]"     ,"path": r"C:\ms1\startup\Command\flask\flask_text.ahk"},
-{"type": "Command","name": "File-[Share]"     ,"path": r"C:\ms1\startup\Command\flask\flask_file.ahk"},
-{"type": "Command","name": "Drive-[Share]"    ,"path": r"C:\ms1\startup\Command\flask\flask_drive.ahk"},
+{"type": "Command","name": "ahk_v2"           ,"paths": [r"C:\ms1\ahk_v2.ahk"]},
+{"type": "Command","name": "Komorebi"         ,"paths": [r"C:\ms1\startup\Command\komorebi.ahk"]},
+{"type": "Command","name": "mypygui"          ,"paths": [r"C:\ms1\startup\Command\mypygui.ahk"]},
+{"type": "Command","name": "Square-Corner"    ,"paths": [r"C:\ms1\startup\Command\square_corner.ahk"]},
+{"type": "Command","name": "Remote Control"   ,"paths": [r"C:\ms1\startup\Command\remote_control.ahk"]},
+{"type": "Command","name": "Virtual_Monitor"  ,"paths": [r"C:\ms1\startup\Command\virtual_monitor.ahk"]},
+{"type": "Command","name": "Text-[Share]"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_text.ahk"]},
+{"type": "Command","name": "File-[Share]"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_file.ahk"]},
+{"type": "Command","name": "Drive-[Share]"    ,"paths": [r"C:\ms1\startup\Command\flask\flask_drive.ahk"]},
 
-{"type": "Command","name": "arr_monitor"      ,"path": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
-{"type": "Command","name": "NetworkCondition" ,"path": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
-{"type": "Command","name": "Scheduled_Task"   ,"path": "C:\\ms1\\scheduled.ps1"},
-{"type": "Command","name": "sshd"             ,"path": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
-{"type": "Command","name": "Sync"             ,"path": "Start-Process 'C:\\ms1\\sync.ps1'"},
+# {"type": "Command","name": "arr_monitor"      ,"paths": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
+# {"type": "Command","name": "NetworkCondition" ,"paths": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
+# {"type": "Command","name": "Scheduled_Task"   ,"paths": "C:\\ms1\\scheduled.ps1"},
+# {"type": "Command","name": "sshd"             ,"paths": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
+# {"type": "Command","name": "Sync"             ,"paths": "Start-Process 'C:\\ms1\\sync.ps1'"},
 
-# {"type": "Command","name": "ahk_v1"           ,"path": r"C:\ms1\ahk_v1.ahk"},
-# {"type": "Command","name": "MONITOR_SIZE"     ,"path": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
-# {"type": "Command","name": "Bazarr"           ,"path": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
-# {"type": "Command","name": "Flaresolverr"     ,"path": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
-# {"type": "Command","name": "GlazeWm"          ,"path": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
-# {"type": "Command","name": "Open WebUI"       ,"path": "Start-Process open-webui serve"},
-# {"type": "Command","name": "Syncthing"        ,"path": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
-# {"type": "Command","name": "whkd"             ,"path": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
-# {"type": "Command","name": "Yasb"             ,"path": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
+# {"type": "Command","name": "ahk_v1"           ,"paths": r"C:\ms1\ahk_v1.ahk"},
+# {"type": "Command","name": "MONITOR_SIZE"     ,"paths": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
+# {"type": "Command","name": "Bazarr"           ,"paths": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
+# {"type": "Command","name": "Flaresolverr"     ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
+# {"type": "Command","name": "GlazeWm"          ,"paths": "Start-Process 'glazewm.exe' -WindowStyle hidden"},
+# {"type": "Command","name": "Open WebUI"       ,"paths": "Start-Process open-webui serve"},
+# {"type": "Command","name": "Syncthing"        ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe' -WindowStyle Hidden"},
+# {"type": "Command","name": "whkd"             ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
+# {"type": "Command","name": "Yasb"             ,"paths": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
-{"type": "App","name": "BijoyBayanno"      ,"path": r"C:\Program Files (x86)\Ananda Computers\BijoyBayanno\BijoyBayanno.exe"},
-{"type": "App","name": "Capture2Text"      ,"path": r"C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe"},
-{"type": "App","name": "Cloudflare WARP"   ,"path": r"C:\Program Files\Cloudflare\Cloudflare WARP\Cloudflare WARP.exe"},
-{"type": "App","name": "DesktopCoral"      ,"path": r"C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe"},
-{"type": "App","name": "Ditto"             ,"path": r"C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"},
-{"type": "App","name": "Ollama"            ,"path": r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"},
-{"type": "App","name": "Prowlarr"          ,"path": r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"},
-{"type": "App","name": "Radarr"            ,"path": r"C:\ProgramData\Radarr\bin\Radarr.exe"},
-{"type": "App","name": "RssGuard"          ,"path": r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"},
-{"type": "App","name": "Sonarr"            ,"path": r"C:\ProgramData\Sonarr\bin\Sonarr.exe"},
+{"type": "App","name": "BijoyBayanno"      ,"paths": [r"C:\Program Files (x86)\Ananda Computers\BijoyBayanno\BijoyBayanno.exe"]},
+{"type": "App","name": "Capture2Text"      ,"paths": [r"C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe"]},
+{"type": "App","name": "Cloudflare WARP"   ,"paths": [r"C:\Program Files\Cloudflare\Cloudflare WARP\Cloudflare WARP.exe"]},
+{"type": "App","name": "DesktopCoral"      ,"paths": [r"C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe"]},
+{"type": "App","name": "Ditto"             ,"paths": [r"C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"]},
+{"type": "App","name": "Ollama"            ,"paths": [r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"]},
+{"type": "App","name": "Prowlarr"          ,"paths": [r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"]},
+{"type": "App","name": "Radarr"            ,"paths": [r"C:\ProgramData\Radarr\bin\Radarr.exe"]},
+{"type": "App","name": "RssGuard"          ,"paths": [r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"]},
+{"type": "App","name": "Sonarr"            ,"paths": [r"C:\ProgramData\Sonarr\bin\Sonarr.exe"]},
         ]
 
     def filter_existing_items(self, items):
-        """Filter out items with non-existent paths."""
-        return [item for item in items if os.path.exists(item["path"])]
+        """Filter out items with no valid paths."""
+        filtered_items = []
+        for item in items:
+            valid_path = next((path for path in item["paths"] if os.path.exists(path)), None)
+            if valid_path:
+                item["path"] = valid_path  # Save the first valid path
+                filtered_items.append(item)
+        return filtered_items
 
     def create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
-
+        self.grid_columnconfigure(2, weight=1)
         # Separate commands and apps
-        checked_commands = [item for item in self.items if item["type"] == "Command" and self.is_checked(item)]
-        unchecked_commands = [item for item in self.items if item["type"] == "Command" and not self.is_checked(item)]
-        checked_apps = [item for item in self.items if item["type"] == "App" and self.is_checked(item)]
-        unchecked_apps = [item for item in self.items if item["type"] == "App" and not self.is_checked(item)]
-
+        commands = [item for item in self.items if item["type"] == "Command"]
+        apps = [item for item in self.items if item["type"] == "App"]
         # Commands Section
-        command_separator = tk.Label(self, text="Commands", font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
-        command_separator.grid(row=0, column=0, pady=5, sticky="ew")
-
-        command_row = 1
-        for item in checked_commands + unchecked_commands:
-            self.create_item_widget(item, command_row, 0)
-            command_row += 1
-
-        # Add vertical separator
-        separator = tk.Frame(self, width=2, bg="#4a4b5a")
-        separator.grid(row=1, column=1, rowspan=max(len(checked_commands) + len(unchecked_commands), len(checked_apps) + len(unchecked_apps)), sticky="ns")
-
+        self.create_section("Commands", commands, column=0)
+        # Vertical Separator
+        separator = tk.Frame(self, width=2, bg="#4a4b5a")  # Create a thin vertical line
+        separator.grid(row=1, column=1, rowspan=max(len(commands), len(apps)) + 1, sticky="ns")  # Stretch vertically
         # Apps Section
-        app_separator = tk.Label(self, text="Apps", font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
-        app_separator.grid(row=0, column=2, pady=5, sticky="ew")
+        self.create_section("Apps", apps, column=2)
 
-        app_row = 1
-        for item in checked_apps + unchecked_apps:
-            self.create_item_widget(item, app_row, 2)
-            app_row += 1
+    def create_section(self, section_name, items, column):
+        separator = tk.Label(self, text=section_name, font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
+        separator.grid(row=0, column=column, pady=5, sticky="ew")
+
+        row = 1
+        for item in items:
+            self.create_item_widget(item, row, column)
+            row += 1
 
     def create_item_widget(self, item, row, col):
         frame = tk.Frame(self, bg="#2e2f3e")
@@ -108,10 +105,7 @@ class StartupManager(tk.Tk):
         self.update_label_color(name_label, checked)
 
     def launch_command(self, item):
-        if item["type"] == "App":
-            os.system(f'start "" "{item["path"]}"')
-        else:
-            os.system(f'start "" "{item["path"]}"')
+        os.system(f'start "" "{item["path"]}"')
 
     def is_checked(self, item):
         try:
