@@ -7,6 +7,7 @@ folders = [
     r"C:\Users\nahid\scoop\buckets\nirsoft\bucket",
     r"C:\Users\nahid\scoop\buckets\nonportable\bucket",
     r"C:\Users\nahid\scoop\buckets\versions\bucket",
+    r"C:\Users\nahid\scoop\buckets\games\bucket",
 ]
 
 # Set the output text file

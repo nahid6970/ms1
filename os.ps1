@@ -292,6 +292,7 @@ function Show-MainMenu {
                   # scoop bucket add main
                     scoop bucket add extras
                     scoop bucket add versions
+                    scoop bucket add games
 
                     scoop install sudo
                     scoop install python312
