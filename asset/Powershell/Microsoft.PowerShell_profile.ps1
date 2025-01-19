@@ -704,6 +704,8 @@ function gitter {
     $CurrentDateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $CommitMessage = "Auto commit on $CurrentDateTime"
 
+    # Show what changed
+    git status
     # Stage all changes
     git add .
     # Commit with the generated message
