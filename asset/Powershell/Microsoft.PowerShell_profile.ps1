@@ -719,8 +719,6 @@ $ProfilePath = $PROFILE.CurrentUserAllHosts
 if (-not (Test-Path $ProfilePath)) {
     New-Item -ItemType File -Path $ProfilePath -Force
 }
-Add-Content -Path $ProfilePath -Value "function gitter { $(Get-Content Function:gitter | Out-String) }"
-Write-Host "Function 'gitter' added to your PowerShell profile." -ForegroundColor Green
 
 
 
