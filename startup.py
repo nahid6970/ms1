@@ -50,20 +50,24 @@ class StartupManager(tk.Tk):
 # {"type": "Command","name": "whkd"             ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe' -WindowStyle Hidden"},
 # {"type": "Command","name": "Yasb"             ,"paths": "Start-Process 'python.exe' -ArgumentList 'C:\\ms1\\yasb\\main.py' -WindowStyle Hidden"},
 
+{"type": "App","name": "AMDNoiseSuppression"    ,"paths": [r"C:\WINDOWS\system32\AMD\ANR\AMDNoiseSuppression.exe"]},
 {"type": "App","name": "BijoyBayanno"           ,"paths": [r"C:\Program Files (x86)\Ananda Computers\BijoyBayanno\BijoyBayanno.exe"]},
 {"type": "App","name": "Capture2Text"           ,"paths": [r"C:\Users\nahid\scoop\apps\capture2text\current\Capture2Text.exe"]},
 {"type": "App","name": "Cloudflare WARP"        ,"paths": [r"C:\Program Files\Cloudflare\Cloudflare WARP\Cloudflare WARP.exe"]},
 {"type": "App","name": "DesktopCoral"           ,"paths": [r"C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe"]},
 {"type": "App","name": "Ditto"                  ,"paths": [r"C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"]},
 {"type": "App","name": "Flow.Launcher"          ,"paths": [r"C:\Users\nahid\AppData\Local\FlowLauncher\app-1.19.4\Flow.Launcher.exe"]},
+{"type": "App","name": "Free Download Manager"  ,"paths": [r"C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe"], "Command": "--hidden"},
 {"type": "App","name": "Ollama"                 ,"paths": [r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"]},
 {"type": "App","name": "Prowlarr"               ,"paths": [r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"]},
+{"type": "App","name": "qBittorrent"            ,"paths": [r"C:\Program Files\qBittorrent\qbittorrent.exe"], "Command": '"--profile=" "--configuration="'},
 {"type": "App","name": "Radarr"                 ,"paths": [r"C:\ProgramData\Radarr\bin\Radarr.exe"]},
 {"type": "App","name": "RssGuard"               ,"paths": [r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"]},
 {"type": "App","name": "Sonarr"                 ,"paths": [r"C:\ProgramData\Sonarr\bin\Sonarr.exe"]},
-{"type": "App", "name": "Free Download Manager", "paths": [r"C:\Users\nahid\AppData\Local\Softdeluxe\Free Download Manager\fdm.exe"], "Command": "--hidden"},
-{"type": "App", "name": "MicrosoftEdgeAutoLaunch_A85A975CFCA9AFD77D01E7227175D0CA", "paths": [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"], "Command": "--no-startup-window --win-session-start"},
-{"type": "App", "name": "GoogleChromeAutoLaunch_2ABF856BE97FD219EC4C9BF1EB18E55A", "paths": [r"C:\Program Files\Google\Chrome\Application\chrome.exe"], "Command": "--no-startup-window /prefetch:5"},
+{"type": "App","name": "Text-Grab"              ,"paths": [r"C:\Users\nahid\scoop\apps\text-grab\current\Text-Grab.exe"]},
+
+{"type": "App","name": "GoogleChromeAutoLaunch_2ABF856BE97FD219EC4C9BF1EB18E55A", "paths": [r"C:\Program Files\Google\Chrome\Application\chrome.exe"], "Command": "--no-startup-window /prefetch:5"},
+{"type": "App","name": "MicrosoftEdgeAutoLaunch_A85A975CFCA9AFD77D01E7227175D0CA", "paths": [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"], "Command": "--no-startup-window --win-session-start"},
         ]
 
     def filter_existing_items(self, items):
