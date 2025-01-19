@@ -3,40 +3,6 @@
 # 'Open store and update AppManager'
 # 'run powrshell as admin'
 
-# # Check if the script is running with administrator privileges
-# if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-#     # Relaunch the script with admin rights
-#     $scriptPath = $MyInvocation.MyCommand.Definition
-#     Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
-#     exit
-# }
-
-
-
-
-# # Prompt the user if they want to run the script as admin
-# $adminResponse = Read-Host "Do you want to run this script with administrator privileges? (Y/N)"
-# if ($adminResponse -match '^(Y|y)$') {
-#     # Check if the script is already running as admin
-#     if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-#         # Check for PowerShell Core (pwsh) availability
-#         $pwshPath = Get-Command pwsh -ErrorAction SilentlyContinue
-#         if ($pwshPath) {
-#             # PowerShell Core (pwsh) is available, relaunch with it
-#             $scriptPath = $MyInvocation.MyCommand.Definition
-#             Start-Process pwsh -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
-#         } else {
-#             # PowerShell Core is not available, fallback to old PowerShell
-#             $scriptPath = $MyInvocation.MyCommand.Definition
-#             Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
-#         }
-#         exit
-#     }
-# } else {
-#     Write-Host "Running script without administrator privileges."
-# }
-
-
 Set-Location c:\
 Add-Type -AssemblyName PresentationFramework
 
@@ -219,12 +185,12 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("Update Packages ")
             }
             "Application Setup" {
+                $submenuListBox.Items.Add("jackett + qbittorrent")
+                $submenuListBox.Items.Add("Ldplayer")
                 $submenuListBox.Items.Add("Neovim_1.conf")
                 $submenuListBox.Items.Add("Neovim_2.conf")
                 $submenuListBox.Items.Add("Notepad++ Theme Setup")
-                $submenuListBox.Items.Add("jackett + qbittorrent")
-                $submenuListBox.Items.Add("RssGuard")
-                $submenuListBox.Items.Add("Ldplayer")
+                $submenuListBox.Items.Add("PotPlayer Register")
             }
             "Clone Projects" {
                 $submenuListBox.Items.Add("clone ms1")
@@ -238,15 +204,15 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("5002")
             }
             "mklink" {
+                $submenuListBox.Items.Add("Komorebi")
+                $submenuListBox.Items.Add("Path_Var")
                 $submenuListBox.Items.Add("PowerShell Profile")
+                $submenuListBox.Items.Add("Prowlarr")
+                $submenuListBox.Items.Add("Radarr")
+                $submenuListBox.Items.Add("RssGuard")
+                $submenuListBox.Items.Add("Sonarr")
                 $submenuListBox.Items.Add("Terminal Profile")
                 $submenuListBox.Items.Add("VSCode")
-                $submenuListBox.Items.Add("Komorebi")
-                $submenuListBox.Items.Add("PotPlayer Register")
-                $submenuListBox.Items.Add("Path_Var")
-                $submenuListBox.Items.Add("Sonarr")
-                $submenuListBox.Items.Add("Radarr")
-                $submenuListBox.Items.Add("Prowlarr")
             }
             "Github Projects" {
                 $submenuListBox.Items.Add("Microsoft Activation Scripts (MAS)")
