@@ -700,8 +700,8 @@ function gitter {
         return
     }
     # Generate a commit message with the custom date and time format
-    $CurrentDateTime = Get-Date -Format "MMMM dd / yyyy, hh:mm tt"
-    $CommitMessage = "Auto commit on $CurrentDateTime"
+    $CurrentDateTime = Get-Date -Format "MMMM dd - yyyy, hh:mm tt"
+    $CommitMessage = "$CurrentDateTime"
 
     # Show what changed
     git status
