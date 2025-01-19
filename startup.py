@@ -6,10 +6,13 @@ import winreg
 class StartupManager(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.withdraw()  # Hide the window initially
         self.title("Startup Manager - Powershell")
         self.configure(bg="#2e2f3e")
-        self.items = self.load_items()  # Load items dynamically or define them here
+        self.items = self.filter_existing_items(self.load_items())  # Load and filter items
         self.create_widgets()
+        self.center_window()
+        self.deiconify()  # Show the window after fully initializing
 
     def load_items(self):
         # Define your items here
@@ -51,6 +54,10 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "RssGuard"          ,"path": r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"},
 {"type": "App","name": "Sonarr"            ,"path": r"C:\ProgramData\Sonarr\bin\Sonarr.exe"},
         ]
+
+    def filter_existing_items(self, items):
+        """Filter out items with non-existent paths."""
+        return [item for item in items if os.path.exists(item["path"])]
 
     def create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
@@ -129,12 +136,7 @@ class StartupManager(tk.Tk):
             else:
                 # Add to startup
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
-                    if item["type"] == "App":
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
-                    else:
-                        winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
-                        # winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'powershell -WindowStyle Hidden -Command "{item["command"]}"')
-                        # winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, f'pythonw -c "import subprocess; subprocess.run([\'powershell\', \'-WindowStyle\', \'Hidden\', \'-Command\', \'{item["command"]}\'], shell=True)"')
+                    winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, item["path"])
                     name_label.config(fg="green")
                     icon_label.config(text="\uf205", fg="#9ef959")
         except Exception as e:
@@ -146,16 +148,15 @@ class StartupManager(tk.Tk):
         else:
             label.config(fg="red")
 
+    def center_window(self):
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'{width}x{height}+{x}+{y}')
 
-def Center_Window(window):
-    window.update_idletasks()
-    width = window.winfo_width()
-    height = window.winfo_height()
-    x = (window.winfo_screenwidth() // 2) - (width // 2)
-    y = (window.winfo_screenheight() // 2) - (height // 2)
-    window.geometry(f'{width}x{height}+{x}+{y}')
 
 if __name__ == "__main__":
     app = StartupManager()
-    Center_Window(app)
     app.mainloop()
