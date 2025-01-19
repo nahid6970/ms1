@@ -48,6 +48,7 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Cloudflare WARP"   ,"paths": [r"C:\Program Files\Cloudflare\Cloudflare WARP\Cloudflare WARP.exe"]},
 {"type": "App","name": "DesktopCoral"      ,"paths": [r"C:\Program Files (x86)\DesktopCoral\DesktopCoral.exe"]},
 {"type": "App","name": "Ditto"             ,"paths": [r"C:\Users\nahid\scoop\apps\ditto\current\Ditto.exe"]},
+{"type": "App","name": "Flow.Launcher"     ,"paths": [r"C:\Users\nahid\AppData\Local\FlowLauncher\app-1.19.4\Flow.Launcher.exe"]},
 {"type": "App","name": "Ollama"            ,"paths": [r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"]},
 {"type": "App","name": "Prowlarr"          ,"paths": [r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"]},
 {"type": "App","name": "Radarr"            ,"paths": [r"C:\ProgramData\Radarr\bin\Radarr.exe"]},
