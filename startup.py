@@ -114,7 +114,6 @@ class StartupManager(tk.Tk):
         else:
             os.system(f'start "" "{item["path"]}"')
 
-
     def is_checked(self, item):
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, winreg.KEY_READ) as reg_key:
@@ -154,9 +153,6 @@ class StartupManager(tk.Tk):
             messagebox.showerror("Error", f"Failed to modify {item['name']} in startup: {e}")
 
 
-
-
-
     def update_label_color(self, label, checked):
         if checked:
             label.config(fg="#63dbff")
@@ -170,7 +166,6 @@ class StartupManager(tk.Tk):
         x = (self.winfo_screenwidth() // 2) - (width // 2)
         y = (self.winfo_screenheight() // 2) - (height // 2)
         self.geometry(f'{width}x{height}+{x}+{y}')
-
 
 if __name__ == "__main__":
     app = StartupManager()
