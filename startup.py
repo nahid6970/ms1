@@ -50,7 +50,6 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Radarr"            ,"path": r"C:\ProgramData\Radarr\bin\Radarr.exe"},
 {"type": "App","name": "RssGuard"          ,"path": r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"},
 {"type": "App","name": "Sonarr"            ,"path": r"C:\ProgramData\Sonarr\bin\Sonarr.exe"},
-
         ]
 
     def create_widgets(self):
