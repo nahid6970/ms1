@@ -53,7 +53,7 @@ class StartupManager(tk.Tk):
 {"type": "App","name": "Ollama"                 ,"paths": [r"C:\Users\nahid\AppData\Local\Programs\Ollama\ollama app.exe"]},
 {"type": "App","name": "Prowlarr"               ,"paths": [r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"]},
 {"type": "App","name": "Radarr"                 ,"paths": [r"C:\ProgramData\Radarr\bin\Radarr.exe"]},
-{"type": "App","name": "RssGuard"               ,"paths": [r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"], "H":True},
+{"type": "App","name": "RssGuard"               ,"paths": [r"C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe"]},
 {"type": "App","name": "Sonarr"                 ,"paths": [r"C:\ProgramData\Sonarr\bin\Sonarr.exe"]},
         ]
 
@@ -109,7 +109,7 @@ class StartupManager(tk.Tk):
 
     def launch_command(self, item):
         if item["type"] == "App":
-            # Launch normally, without -hidden flag
+            # Launch normally, without --hidden flag
             os.system(f'start "" "{item["path"]}"')
         else:
             os.system(f'start "" "{item["path"]}"')
@@ -141,7 +141,7 @@ class StartupManager(tk.Tk):
                     path = item["path"]
                     if item.get("hidden", False):
                         # Append the hidden flag to the path if needed
-                        path = f'"{path}" -hidden'  # The path is enclosed in quotes, and -hidden is outside
+                        path = f'"{path}" --hidden'  # The path is enclosed in quotes, and --hidden is outside
                     else:
                         # Enclose the path in quotes if it's not already enclosed
                         if not path.startswith('"') and not path.endswith('"'):
