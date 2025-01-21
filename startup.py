@@ -33,11 +33,11 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "Text-[Share]"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_text.ahk"]},
 {"type": "Command","name": "File-[Share]"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_file.ahk"]},
 {"type": "Command","name": "Drive-[Share]"    ,"paths": [r"C:\ms1\startup\Command\flask\flask_drive.ahk"]},
+{"type": "Command","name": "sshd"             ,"paths": [r"C:\ms1\startup\Command\sshd.ahk"]},
 
 # {"type": "Command","name": "arr_monitor"      ,"paths": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "NetworkCondition" ,"paths": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "Scheduled_Task"   ,"paths": "C:\\ms1\\scheduled.ps1"},
-# {"type": "Command","name": "sshd"             ,"paths": "Start-Process 'powershell.exe' -ArgumentList 'restart-Service sshd' -Verb RunAs -WindowStyle Hidden"},
 # {"type": "Command","name": "Sync"             ,"paths": "Start-Process 'C:\\ms1\\sync.ps1'"},
 
 # {"type": "Command","name": "ahk_v1"           ,"paths": r"C:\ms1\ahk_v1.ahk"},
