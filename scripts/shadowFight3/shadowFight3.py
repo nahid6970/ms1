@@ -693,6 +693,71 @@ def loss_function():
 Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Loss_BT.pack(padx=(1, 1), pady=(1, 1))
 
+
+# ███████╗███████╗██╗  ██╗
+# ██╔════╝██╔════╝██║  ██║
+# ███████╗█████╗  ███████║
+# ╚════██║██╔══╝  ╚════██║
+# ███████║██║          ██║
+# ╚══════╝╚═╝          ╚═╝
+sf4_FIGHT = r"C:\msBackups\shadowfight3\sf4\Fight.png"
+sf4_CLOSE = r"C:\msBackups\shadowfight3\sf4\Close.png"
+sf4_Claim_Middle = r"C:\msBackups\shadowfight3\sf4\Claim_Middle.png"
+sf4_Claim_Right = r"C:\msBackups\shadowfight3\sf4\Claim_Right.png"
+sf4_Select_Hero = r"C:\msBackups\shadowfight3\sf4\Select_Hero.png"
+sf4_Continue = r"C:\msBackups\shadowfight3\sf4\Continue.png"
+sf4_Skip = r"C:\msBackups\shadowfight3\sf4\SKIP.png"
+sf4_ART_of_Servitude = r"C:\msBackups\shadowfight3\sf4\ART_of_Servitude.png"
+sf4_Register = r"C:\msBackups\shadowfight3\sf4\Register.png"
+sf4_My_Hero = r"C:\msBackups\shadowfight3\sf4\Choose_Hero.png"
+
+stop_thread_loss = True
+def SF4_event():
+    global stop_thread_loss
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread_loss:
+            focus_window(window_title)
+            #* if any(find_image(image) for image in actionF):
+            # if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
+            # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+            if find_image(sf4_ART_of_Servitude, confidence=0.8, region=(1006, 227, 1535, 738)) : press_global_screen_with_delays((1261, 884, 2))
+            if find_image(sf4_Register, confidence=0.8, region=(1422, 828, 1749, 936)) : press_global_screen_with_delays((1588, 887, 2), (1185, 697,0))
+            if find_image(sf4_My_Hero, confidence=0.8, region=(831, 438, 1072, 501)) : press_global_screen_with_delays((1068, 653, 2), (957, 884, 1))
+            if find_image(sf4_FIGHT, confidence=0.8, region=(1421,827, 1749,939)) : press_global_screen_with_delays((1587, 886, 2))
+            if find_image(sf4_CLOSE, confidence=0.8, region=(713,825, 1205,954)) : press_global_screen_with_delays((957, 884, 2))
+            if find_image(sf4_Claim_Middle, confidence=0.8, region=(713,825, 1205,954)) : press_global_screen_with_delays((957, 884, 2))
+            if find_image(sf4_Claim_Right, confidence=0.8, region=(1417,830, 1757,947)) : press_global_screen_with_delays((1585,886, 2))
+            if find_image(sf4_Continue, confidence=0.8, region=(713,825, 1205,954)) : press_global_screen_with_delays((957, 884, 2))
+            if find_image(sf4_Skip, confidence=0.8, region=(187,835, 374,941)) : press_global_screen_with_delays((242, 884, 2))
+            if find_image(sf4_Select_Hero, confidence=0.8, region=(702,124, 1194,229)) : press_global_screen_with_delays((336,553,1),(336,553,1), (520, 563,1),(520, 563,1), (704,593,8),(704,593,5),
+                                                                                                                         (957,581,2),(957,581,2),(957,581,2),(957,581,2),(957,581,2),(957,581,2),(957,581,2),(957,581,2),(957,581,2),(957,581,2))
+            elif find_image(StartFame): press_key(window, 'p')
+            elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+            elif find_image(e_image): press_key(window, 'e')
+            elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+            # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+            time.sleep(0.1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+def start_sf4():
+    global stop_thread_loss, loss_thread, SF4_BT
+    if loss_thread and loss_thread.is_alive():
+        stop_thread_loss = True
+        loss_thread.join()
+        SF4_BT.config(text="SF4", bg="#8e9636", fg="#000000")
+    else:
+        stop_thread_loss = False
+        loss_thread = threading.Thread(target=SF4_event)
+        loss_thread.daemon = True
+        loss_thread.start()
+        SF4_BT.config(text="SF4", bg="#1d2027", fg="#fc0000")
+SF4_BT = Button(ROOT, text="SF4", bg="#8e9636", fg="#000000", width=5, height=2, command=start_sf4, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+SF4_BT.pack(padx=(1, 1), pady=(1, 1))
+
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
 #! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝
 #! ███████║   ██║      ██║   ███████║██║     █████╔╝     ███████╗   ██║    ╚████╔╝ ██║     █████╗
