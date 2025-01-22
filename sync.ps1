@@ -1,14 +1,12 @@
 #Define Variables
-$mx_src = "D:\mi9t\mx"
-$mx_dst = "cgu:"
+# $mx_src = "D:\mi9t\mx"
+# $mx_dst = "cgu:"
 
-$song_src = "D:/song"
-$song_dst = "gu:song"
+# $song_src = "D:/song"
+# $song_dst = "gu:song"
 
-$software_src = "D:/software"
-$software_dst = "gu:/software"
-
-
+# $software_src = "D:/software"
+# $software_dst = "gu:/software"
 
 
 $host.UI.RawUI.WindowTitle = "Sync"
@@ -29,10 +27,9 @@ for ($i = 1; ; $i++) {
 #     rclone sync $software_src $software_dst -P --check-first --transfers=5 --track-renames --exclude @ignore/ --fast-list --max-size 1M --log-level INFO --log-file="C:\Users\nahid\OneDrive\backup\rclone\software.txt"
 #     rclone sync $software_src $software_dst -P --check-first --transfers=1 --track-renames --exclude @ignore/ --fast-list               --log-level INFO --log-file="C:\Users\nahid\OneDrive\backup\rclone\software.txt"
 
- Copy-Item -Path C:\msBackups\sf3_img.txt -Destination C:\msBackups\sf3_img2.txt
- rclone copy C:\msBackups\sf3_img2.txt g00:\msBackups\sf3_img2.txt -P --check-first --transfers=10 --track-renames --fast-list
+rclone sync C:\msBackups\ o0:\msBackups\ -P --check-first --transfers=10 --track-renames --fast-list
 
-timeout /T 10 /NOBREAK
+timeout /T 360 /NOBREAK
 Clear-Host
 }
 
