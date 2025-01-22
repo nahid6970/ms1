@@ -53,11 +53,11 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering AHK...")
-                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # Hound
+#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13') # Hound
 #                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14') # Hound vortex
 #                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15') # Hound Laggy
 #                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16') # Heritage Laggy 
-#                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
+                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17') # KOS
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
 #                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19') # Possessed
 #                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
@@ -959,7 +959,7 @@ initialize_button(56, "F13\nHound")
 initialize_button(57, "F14\nHound\nVortex")
 initialize_button(58, "F15\nHound\nLaggy")
 initialize_button(59, "F16\nHeri\nLaggy")
-# initialize_button(60, "F17")
+initialize_button(60, "F17\nKOS")
 # initialize_button(61, "F18")
 # initialize_button(62, "F19\nPOSS")
 # initialize_button(63, "F20\nHound")

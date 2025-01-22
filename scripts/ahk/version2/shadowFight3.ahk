@@ -110,6 +110,23 @@ F21:: ; Left Side Enemy
     return
 }
 
+F17:: ; KOS
+{ ; V1toV2: Added bracket
+    global ; V1toV2: Made function global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        SendEvent("{i down}")
+        SendEvent("{x down}")
+        SendEvent("ixixixixixix")
+        SendEvent("{x up}")
+        SendEvent("{i up}")
+    }
+    return
+}
+
 ;     F14::
 ; { ; V1toV2: Added bracket
 ; global ; V1toV2: Made function global
