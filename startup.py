@@ -25,15 +25,15 @@ class StartupManager(tk.Tk):
         # Define items with multiple potential paths
         return [
 {"type": "Command","name": "ahk_v2"           ,"paths": [r"C:\ms1\ahk_v2.ahk"]},
+{"type": "Command","name": "Flask - Drive"    ,"paths": [r"C:\ms1\startup\Command\flask\flask_drive.ahk"]},
+{"type": "Command","name": "Flask - File"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_file.ahk"]},
+{"type": "Command","name": "Flask - Text"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_text.ahk"]},
 {"type": "Command","name": "Komorebi"         ,"paths": [r"C:\ms1\startup\Command\komorebi.ahk"]},
 {"type": "Command","name": "mypygui"          ,"paths": [r"C:\ms1\startup\Command\mypygui.ahk"]},
-{"type": "Command","name": "Square-Corner"    ,"paths": [r"C:\ms1\startup\Command\square_corner.ahk"]},
 {"type": "Command","name": "Remote Control"   ,"paths": [r"C:\ms1\startup\Command\remote_control.ahk"]},
+{"type": "Command","name": "Square-Corner"    ,"paths": [r"C:\ms1\startup\Command\square_corner.ahk"]},
+{"type": "Command","name": "SSHD"             ,"paths": [r"C:\ms1\startup\Command\sshd.ahk"]},
 {"type": "Command","name": "Virtual_Monitor"  ,"paths": [r"C:\ms1\startup\Command\virtual_monitor.ahk"]},
-{"type": "Command","name": "Text-[Share]"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_text.ahk"]},
-{"type": "Command","name": "File-[Share]"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_file.ahk"]},
-{"type": "Command","name": "Drive-[Share]"    ,"paths": [r"C:\ms1\startup\Command\flask\flask_drive.ahk"]},
-{"type": "Command","name": "sshd"             ,"paths": [r"C:\ms1\startup\Command\sshd.ahk"]},
 
 # {"type": "Command","name": "arr_monitor"      ,"paths": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "NetworkCondition" ,"paths": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
