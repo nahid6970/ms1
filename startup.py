@@ -33,12 +33,12 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "Remote Control"   ,"paths": [r"C:\ms1\startup\Command\remote_control.ahk"]},
 {"type": "Command","name": "Square-Corner"    ,"paths": [r"C:\ms1\startup\Command\square_corner.ahk"]},
 {"type": "Command","name": "SSHD"             ,"paths": [r"C:\ms1\startup\Command\sshd.ahk"]},
+{"type": "Command","name": "Sync"             ,"paths": [r"C:\\ms1\\sync.ps1"]},
 {"type": "Command","name": "Virtual_Monitor"  ,"paths": [r"C:\ms1\startup\Command\virtual_monitor.ahk"]},
 
 # {"type": "Command","name": "arr_monitor"      ,"paths": "Start-Process 'C:/ms1/arr_monitor.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "NetworkCondition" ,"paths": "Start-Process 'C:\\ms1\\utility\\NetworkCondition.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "Scheduled_Task"   ,"paths": "C:\\ms1\\scheduled.ps1"},
-{"type": "Command","name": "Sync"             ,"paths": [r"C:\\ms1\\sync.ps1"]},
 
 # {"type": "Command","name": "ahk_v1"           ,"paths": r"C:\ms1\ahk_v1.ahk"},
 # {"type": "Command","name": "MONITOR_SIZE"     ,"paths": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
