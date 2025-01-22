@@ -1003,10 +1003,12 @@ collector=r"C:\msBackups\shadowfight3\action\collector.png"
 bolt=r"C:\msBackups\shadowfight3\action\bolt.png"
 uppercut=r"C:\msBackups\shadowfight3\action\uppercut.png"
 Peg_Top=r"C:\msBackups\shadowfight3\action\peg_top.png"
+KOS_Cloud=r"C:\msBackups\shadowfight3\action\Kos_Cloud.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
     eruption: 0.85,
+    KOS_Cloud: 0.7,
     thud: 0.7,
     collector: 0.7,
     uppercut: 0.7,
