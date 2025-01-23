@@ -3,7 +3,61 @@
 
 #HotIf WinActive("ahk_exe dnplayer.exe",)
 
-F13:: ; Hound
+
+F13:: ;! KOS 2 Button Spamm
+{ ; V1toV2: Added bracket
+    global ; V1toV2: Made function global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        SendEvent("{i down}")
+        SendEvent("{x down}")
+        SendEvent("ixixixixixix")
+        SendEvent("{x up}")
+        SendEvent("{i up}")
+    }
+    return
+}
+
+F14:: ;! KOS 4 Ability
+{ ; V1toV2: Added bracket
+    global ; V1toV2: Made function global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        SendEvent("{i down}")
+        SendEvent("{x down}")
+        SendEvent("ixixixixixix")
+
+        SendEvent("{a down}")
+        SendEvent("l")
+        SendEvent("{a up}")
+        Sleep(100)
+        SendEvent("{d down}")
+        SendEvent("l")
+        SendEvent("{d up}")
+        Sleep(100)
+        SendEvent("{s down}")
+        SendEvent("l")
+        SendEvent("{s up}")
+        Sleep(100)
+        SendEvent("{w down}")
+        SendEvent("l")
+        SendEvent("{w up}")
+
+        SendEvent("{x up}")
+        SendEvent("{i up}")
+    }
+    return
+}
+
+
+
+F15:: ; Hound
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -20,7 +74,7 @@ F13:: ; Hound
     return
 }
 
-F14:: ; Hound vortex
+F16:: ; Hound vortex
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -38,7 +92,7 @@ F14:: ; Hound vortex
     return
 }
 
-F15:: ; Hound Laggy
+F17:: ; Hound Laggy
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -55,7 +109,7 @@ F15:: ; Hound Laggy
     return
 }
 
-F16:: ; Heritage Laggy
+F18:: ; Heritage Laggy
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -110,22 +164,8 @@ F21:: ; Left Side Enemy
     return
 }
 
-F17:: ; KOS
-{ ; V1toV2: Added bracket
-    global ; V1toV2: Made function global
-    StartTime := A_TickCount
-    while (A_TickCount - StartTime < 5000) {
-        if !WinActive("ahk_exe dnplayer.exe") {
-            break
-        }
-        SendEvent("{i down}")
-        SendEvent("{x down}")
-        SendEvent("ixixixixixix")
-        SendEvent("{x up}")
-        SendEvent("{i up}")
-    }
-    return
-}
+
+
 
 ;     F14::
 ; { ; V1toV2: Added bracket
