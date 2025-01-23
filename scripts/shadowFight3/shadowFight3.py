@@ -345,36 +345,84 @@ def close_window(event=None):
 #! ███████╗╚███╔███╔╝██║  ██║   ██║       ██║  ██║██║  ██║██║  ██╗
 #! ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
-stop_thread_loss = True
-def Tst_2_Region():
-    global stop_thread_loss
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while not stop_thread_loss:
-            focus_window(window_title)
-            #* if any(find_image(image) for image in actionF):
-            # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-            if find_image(hornass, confidence=0.7,region=(219, 140, 291, 210)) : press_key(window, 'F20')
-            elif find_image(hornass, confidence=0.7,region=(302, 144, 370, 209)) : press_key(window, 'F21')
-            time.sleep(0.1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-def Test_2_region_attack():
-    global stop_thread_loss, loss_thread, T2REGION_BT
-    if loss_thread and loss_thread.is_alive():
-        stop_thread_loss = True
-        loss_thread.join()
-        T2REGION_BT.config(text="2Way", bg="#5a9b5a", fg="#fff")
+# stop_thread_loss = True
+# def Tst_2_Region():
+#     global stop_thread_loss
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     try:
+#         while not stop_thread_loss:
+#             focus_window(window_title)
+#             #* if any(find_image(image) for image in actionF):
+#             # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
+#             if find_image(hornass, confidence=0.7,region=(219, 140, 291, 210)) : press_key(window, 'F20')
+#             elif find_image(hornass, confidence=0.7,region=(302, 144, 370, 209)) : press_key(window, 'F21')
+#             time.sleep(0.1)
+#     except KeyboardInterrupt: print("Script stopped by user.")
+# def Test_2_region_attack():
+#     global stop_thread_loss, loss_thread, T2REGION_BT
+#     if loss_thread and loss_thread.is_alive():
+#         stop_thread_loss = True
+#         loss_thread.join()
+#         T2REGION_BT.config(text="2Way", bg="#5a9b5a", fg="#fff")
+#     else:
+#         stop_thread_loss = False
+#         loss_thread = threading.Thread(target=Tst_2_Region)
+#         loss_thread.daemon = True
+#         loss_thread.start()
+#         T2REGION_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+# T2REGION_BT = Button(ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=2, command=Test_2_region_attack, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# T2REGION_BT.pack(padx=(1, 1), pady=(1, 1))
+
+def Attack2Way(button):
+    """Toggles the two-region attack functionality."""
+    # Use a dictionary to manage thread state and reference inside the function
+    state = getattr(Attack2Way, "state", {"thread": None, "stop_flag": True})
+    
+    if state["thread"] and state["thread"].is_alive():
+        # Stop the thread
+        state["stop_flag"] = True
+        state["thread"].join()
+        button.config(text="2Way", bg="#5a9b5a", fg="#fff")
     else:
-        stop_thread_loss = False
-        loss_thread = threading.Thread(target=Tst_2_Region)
-        loss_thread.daemon = True
-        loss_thread.start()
-        T2REGION_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-T2REGION_BT = Button(ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=2, command=Test_2_region_attack, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+        # Start the thread
+        state["stop_flag"] = False
+
+        def AdditionalFunction():
+            window = focus_window(window_title)
+            if not window:
+                print(f"Window '{window_title}' not found.")
+                return
+            try:
+                while not state["stop_flag"]:
+                    focus_window(window_title)
+                    # Example logic
+                    if find_image(hornass, confidence=0.7, region=(219, 140, 291, 210)):
+                        press_key(window, 'F20')
+                    elif find_image(hornass, confidence=0.7, region=(302, 144, 370, 209)):
+                        press_key(window, 'F21')
+                    time.sleep(0.1)
+            except KeyboardInterrupt:
+                print("Script stopped by user.")
+
+        # Create and start the thread
+        thread = threading.Thread(target=AdditionalFunction)
+        thread.daemon = True
+        thread.start()
+
+        # Save the thread in the state dictionary
+        state["thread"] = thread
+        button.config(text="Stop", bg="#1d2027", fg="#fc0000")
+
+    # Save state to the function attribute for persistence
+    Attack2Way.state = state
+
+# Button logic
+T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=2, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 T2REGION_BT.pack(padx=(1, 1), pady=(1, 1))
+
 
 #* ███████╗ █████╗ ███╗   ███╗███████╗
 #* ██╔════╝██╔══██╗████╗ ████║██╔════╝
@@ -382,56 +430,107 @@ T2REGION_BT.pack(padx=(1, 1), pady=(1, 1))
 #* ██╔══╝  ██╔══██║██║╚██╔╝██║██╔══╝
 #* ██║     ██║  ██║██║ ╚═╝ ██║███████╗
 #* ╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
-#* Fame Fame Fame Fame
-stop_thread_fame = True
-def fame_items_handler(window):
-    try:
-        while not stop_thread_fame:
-            # Check if we need to pause this handler
-            if pause_other_items:
-                print("Paused other items handler for 5 seconds.")
-                while pause_other_items:
-                    time.sleep(0.1)  # Wait until actionF is done
-            if find_image(Resume, confidence=0.8): press_key(window, 'r')
-            elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
-            elif find_image(StartFame): press_key(window, 'p')
-            elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-            elif find_image(e_image, region=e_image_region): press_key(window, 'e')
-            elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-            # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
-            elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
+# #* Fame Fame Fame Fame
+# stop_thread_fame = True
+# def fame_items_handler(window):
+#     try:
+#         while not stop_thread_fame:
+#             # Check if we need to pause this handler
+#             if pause_other_items:
+#                 print("Paused other items handler for 5 seconds.")
+#                 while pause_other_items:
+#                     time.sleep(0.1)  # Wait until actionF is done
+#             if find_image(Resume, confidence=0.8): press_key(window, 'r')
+#             elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+#             elif find_image(StartFame): press_key(window, 'p')
+#             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+#             elif find_image(e_image, region=e_image_region): press_key(window, 'e')
+#             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+#             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+#             # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+#             elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
 
-            # elif any(find_image(image) for image in notifyF):
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-            #     time.sleep(60)
+#             # elif any(find_image(image) for image in notifyF):
+#             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+#             #     time.sleep(60)
 
-            time.sleep(2)
-    except KeyboardInterrupt: print("Script stopped by user.")
-def fame_Light():
-    global stop_thread_fame
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    fame_items_thread = threading.Thread(target=fame_items_handler, args=(window,))
-    fame_items_thread.daemon = True
-    fame_items_thread.start()
-    fame_items_thread.join()
-def fame_function_light():
-    global stop_thread_fame, fame_light_thread, Fame_Light_BT
-    if fame_light_thread and fame_light_thread.is_alive():
-        stop_thread_fame = True
-        fame_light_thread.join()
-        Fame_Light_BT.config(text="Fame", bg="#bda24a", fg="#000000")
+#             time.sleep(2)
+#     except KeyboardInterrupt: print("Script stopped by user.")
+# def fame_Light():
+#     global stop_thread_fame
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     fame_items_thread = threading.Thread(target=fame_items_handler, args=(window,))
+#     fame_items_thread.daemon = True
+#     fame_items_thread.start()
+#     fame_items_thread.join()
+# def fame_function_light():
+#     global stop_thread_fame, fame_light_thread, Fame_Light_BT
+#     if fame_light_thread and fame_light_thread.is_alive():
+#         stop_thread_fame = True
+#         fame_light_thread.join()
+#         Fame_Light_BT.config(text="Fame", bg="#bda24a", fg="#000000")
+#     else:
+#         stop_thread_fame = False
+#         fame_light_thread = threading.Thread(target=fame_Light)
+#         fame_light_thread.daemon = True
+#         fame_light_thread.start()
+#         Fame_Light_BT.config(text="Fame", bg="#1d2027", fg="#fc0000")
+# Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+
+def FameFunction(button):
+    """Toggles the two-region attack functionality."""
+    # Use a dictionary to manage thread state and reference inside the function
+    state = getattr(FameFunction, "state", {"thread": None, "stop_flag": True})
+
+    if state["thread"] and state["thread"].is_alive():
+        # Stop the thread
+        state["stop_flag"] = True
+        state["thread"].join()
+        button.config(text="Fame", bg="#bda24a", fg="#000000")
     else:
-        stop_thread_fame = False
-        fame_light_thread = threading.Thread(target=fame_Light)
-        fame_light_thread.daemon = True
-        fame_light_thread.start()
-        Fame_Light_BT.config(text="Fame", bg="#1d2027", fg="#fc0000")
-Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+        # Start the thread
+        state["stop_flag"] = False
+
+        def AdditionalFunction():
+            window = focus_window(window_title)
+            if not window:
+                print(f"Window '{window_title}' not found.")
+                return
+            try:
+                while not state["stop_flag"]:
+                    focus_window(window_title)
+                    # Example logic
+                    if find_image(Resume, confidence=0.8): press_key(window, 'r')
+                    elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+                    elif find_image(StartFame): press_key(window, 'p')
+                    elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+                    elif find_image(e_image, region=e_image_region): press_key(window, 'e')
+                    elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+                    # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+                    # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+                    elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
+                    # elif any(find_image(image) for image in notifyF):
+                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                    #     time.sleep(60)
+                    time.sleep(2)
+            except KeyboardInterrupt: print("Script stopped by user.")
+
+        # Create and start the thread
+        thread = threading.Thread(target=AdditionalFunction)
+        thread.daemon = True
+        thread.start()
+        # Save the thread in the state dictionary
+        state["thread"] = thread
+        button.config(text="Stop", bg="#1d2027", fg="#fc0000")
+    # Save state to the function attribute for persistence
+    FameFunction.state = state
+# Button logic
+Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Fame_BT.pack(padx=(1, 1), pady=(1, 1))
 
 #* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
 #* ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
@@ -702,33 +801,88 @@ Loss_BT.pack(padx=(1, 1), pady=(1, 1))
 #* ███████║███████╗╚██████╗██║  ██║███████╗   ██║       ██║     ██║╚██████╔╝██║  ██║   ██║
 #* ╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 
-Thread_Secret_Fights = True
-Thread_Reset_Secret_Fight = None
-def SecretFights():
-    global Thread_Secret_Fights
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while not Thread_Secret_Fights:
-            focus_window(window_title)
-            if any(find_image(image, confidence=actionF[image], region=(214, 914, 375, 1031)) for image in actionF): press_keys_with_delays(window, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5)
-            time.sleep(0.1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-def Start_SecretFight():
-    global Thread_Secret_Fights, Thread_Reset_Secret_Fight, BT_Secret_Fights
-    if Thread_Reset_Secret_Fight and Thread_Reset_Secret_Fight.is_alive():
-        Thread_Secret_Fights = True
-        Thread_Reset_Secret_Fight.join()
-        BT_Secret_Fights.config(text="Secret", bg="#62e7ff", fg="#000000")
+# Thread_Secret_Fights = True
+# Thread_Reset_Secret_Fight = None
+# def SecretFights():
+#     global Thread_Secret_Fights
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     try:
+#         while not Thread_Secret_Fights:
+#             focus_window(window_title)
+#             if any(find_image(image, confidence=actionF[image], region=(214, 914, 375, 1031)) for image in actionF): press_keys_with_delays(window, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5)
+#             time.sleep(0.1)
+#     except KeyboardInterrupt: print("Script stopped by user.")
+# def Start_SecretFight():
+#     global Thread_Secret_Fights, Thread_Reset_Secret_Fight, BT_Secret_Fights
+#     if Thread_Reset_Secret_Fight and Thread_Reset_Secret_Fight.is_alive():
+#         Thread_Secret_Fights = True
+#         Thread_Reset_Secret_Fight.join()
+#         BT_Secret_Fights.config(text="Secret", bg="#62e7ff", fg="#000000")
+#     else:
+#         Thread_Secret_Fights = False
+#         Thread_Reset_Secret_Fight = threading.Thread(target=SecretFights)
+#         Thread_Reset_Secret_Fight.daemon = True
+#         Thread_Reset_Secret_Fight.start()
+#         BT_Secret_Fights.config(text="Secret", bg="#1d2027", fg="#fc0000")
+# BT_Secret_Fights = Button(ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=2, command=Start_SecretFight, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# BT_Secret_Fights.pack(padx=(1, 1), pady=(1, 1))
+
+def SecretFightHandler(button):
+    """Toggles the Secret Fight functionality."""
+    # Use a dictionary to manage thread state and reference inside the function
+    state = getattr(SecretFightHandler, "state", {"thread": None, "stop_flag": True})
+    
+    if state["thread"] and state["thread"].is_alive():
+        # Stop the thread
+        state["stop_flag"] = True
+        state["thread"].join()
+        button.config(text="Secret", bg="#62e7ff", fg="#000000")
     else:
-        Thread_Secret_Fights = False
-        Thread_Reset_Secret_Fight = threading.Thread(target=SecretFights)
-        Thread_Reset_Secret_Fight.daemon = True
-        Thread_Reset_Secret_Fight.start()
-        BT_Secret_Fights.config(text="Secret", bg="#1d2027", fg="#fc0000")
-BT_Secret_Fights = Button(ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=2, command=Start_SecretFight, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+        # Start the thread
+        state["stop_flag"] = False
+
+        def SecretFights():
+            window = focus_window(window_title)
+            if not window:
+                print(f"Window '{window_title}' not found.")
+                return
+            try:
+                while not state["stop_flag"]:
+                    focus_window(window_title)
+                    if any(find_image(image, confidence=actionF[image], region=(214, 914, 375, 1031)) for image in actionF):
+                        press_keys_with_delays(window, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5)
+                    time.sleep(0.1)
+            except KeyboardInterrupt:
+                print("Script stopped by user.")
+
+        # Create and start the thread
+        thread = threading.Thread(target=SecretFights)
+        thread.daemon = True
+        thread.start()
+
+        # Save the thread in the state dictionary
+        state["thread"] = thread
+        button.config(text="Secret", bg="#1d2027", fg="#fc0000")
+
+    # Save state to the function attribute for persistence
+    SecretFightHandler.state = state
+
+
+# Button logic
+BT_Secret_Fights = Button(
+    ROOT,
+    text="Secret",
+    bg="#62e7ff",
+    fg="#000000",
+    width=5,
+    height=2,
+    command=lambda: SecretFightHandler(BT_Secret_Fights),
+    font=("Jetbrainsmono nfp", 10, "bold"),
+    relief="flat"
+)
 BT_Secret_Fights.pack(padx=(1, 1), pady=(1, 1))
 
 
