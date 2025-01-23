@@ -1,6 +1,6 @@
 {
 	"New Feature Handler": {
-	  "prefix": "handler", 
+	  "prefix": "sf3_example", 
 	  "body": [
 		"def Example_Function(button):",
 		"    \"\"\"Toggles the functionality.\"\"\"",
@@ -10,7 +10,7 @@
 		"        # Stop the thread",
 		"        state[\"stop_flag\"] = True",
 		"        state[\"thread\"].join()",
-		"        button.config(text=\"${2:Button Name}\", bg=\"#FFFFFF\", fg=\"#000000\")",
+		"        button.config(text=\"${2:example_Button_Name}\", bg=\"#FFFFFF\", fg=\"#000000\")",
 		"    else:",
 		"        # Start the thread",
 		"        state[\"stop_flag\"] = False",
@@ -27,8 +27,7 @@
 		"                    if find_image(${3:new_image}, confidence=0.8, region=(200, 100, 300, 200)):",
 		"                        press_key(window, '${4:n}')",
 		"                    time.sleep(0.1)",
-		"            except KeyboardInterrupt:",
-		"                print(\"Script stopped by user.\")",
+		"            except KeyboardInterrupt: print(\"Script stopped by user.\")",
 		"",
 		"        # Create and start the thread",
 		"        thread = threading.Thread(target=Additional_Function)",
@@ -42,7 +41,7 @@
 		"    Example_Function.state = state",
 		"",
 		"# Create the button for the handler",
-		"${5:NewFeatureButton} = Button(ROOT, text=\"${2:Button Name}\", bg=\"#FFFFFF\", fg=\"#000000\", width=5, height=2, command=lambda: Example_Function(${5:NewFeatureButton}), font=(\"Jetbrainsmono nfp\", 10, \"bold\"), relief=\"flat\")",
+		"${5:NewFeatureButton} = Button(ROOT, text=\"${2:example_Button_Name}\", bg=\"#FFFFFF\", fg=\"#000000\", width=5, height=2, command=lambda: Example_Function(${5:NewFeatureButton}), font=(\"Jetbrainsmono nfp\", 10, \"bold\"), relief=\"flat\")",
 		"${5:NewFeatureButton}.pack(padx=(1, 1), pady=(1, 1))"
 	  ],
 	  "description": "Creates a new handler function with its button for thread-based toggling."
