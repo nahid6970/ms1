@@ -125,22 +125,25 @@ class StartupManager(tk.Tk):
         self.update_label_color(name_label, checked)
 
     def launch_command(self, item):
-        if item["type"] == "App":
-            # Retrieve the first path and the command if it exists
-            path = item["paths"][0]
-            command = item.get("Command", "")
-            
-            # Format the launch command
-            if command:
-                # If a command exists, append it to the path
-                # os.system(f'start "" "{path}" {command}')
-                os.system(f'start "" "{path}"')
-            else:
-                # If no command, only use the path
-                os.system(f'start "" "{path}"')
+        # Retrieve the first path and the command if it exists
+        path = item["paths"][0]
+        command = item.get("Command", "")
+        
+        # Format the full command as it would appear in the registry
+        if command:
+            full_command = f'"{path}" {command}'
         else:
-            # Fallback for other types
-            os.system(f'start "" "{item["paths"][0]}"')
+            # Ensure the path is enclosed in quotes for safety
+            if not path.startswith('"') and not path.endswith('"'):
+                full_command = f'"{path}"'
+            else:
+                full_command = path
+        try:
+            # Execute the command using os.system
+            os.system(f'start "" {full_command}')
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch {item['name']}: {e}")
+
 
 
     def is_checked(self, item):
