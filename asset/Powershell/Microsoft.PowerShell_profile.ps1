@@ -711,8 +711,15 @@ function gitter {
     git commit -m $CommitMessage
     # Push to the remote repository
     git push
+
     # Completion message
-    Write-Host "Git Push Complete" -ForegroundColor Green
+    Write-Host " ██████╗ ██████╗ ███╗   ███╗██████╗ ██╗     ███████╗████████╗███████╗" -ForegroundColor Green
+    Write-Host "██╔════╝██╔═══██╗████╗ ████║██╔══██╗██║     ██╔════╝╚══██╔══╝██╔════╝" -ForegroundColor Green
+    Write-Host "██║     ██║   ██║██╔████╔██║██████╔╝██║     █████╗     ██║   █████╗  " -ForegroundColor Green
+    Write-Host "██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝     ██║   ██╔══╝  " -ForegroundColor Green
+    Write-Host "╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗" -ForegroundColor Green
+    Write-Host " ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝   ╚═╝   ╚══════╝" -ForegroundColor Green
+
 }
 
 
