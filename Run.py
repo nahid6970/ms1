@@ -4,133 +4,170 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from collections import Counter
 import pickle
+import pyperclip  # We will use this library to copy to clipboard
 
-class FileSearchApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("File Search and Open in VSCode")
-        self.root.geometry("600x400")  # Extended window for initial suggestions
-        self.root.resizable(False, False)
+# Initialize the main window
+root = tk.Tk()
+root.title("File Search and Open in VSCode")
+root.geometry("600x400")  # Extended window for initial suggestions
+root.resizable(False, False)
 
-        # Directories to search
-        self.directories = [
-            "C:/ms1/",  # Example directory
-            "C:/ms2/",  # Example directory
-            "C:/ms3/",  # Example directory
-        ]
+# Directories to search
+directories = [
+    "C:/ms1/",  # Example directory
+    "C:/ms2/",  # Example directory
+    "C:/ms3/",  # Example directory
+]
 
-        # Load or initialize file usage counter
-        self.usage_data_file = r"C:\Users\nahid\file_usage_data.pkl"
-        self.file_usage_counter = self.load_usage_data()
+# Load or initialize file usage counter
+def load_usage_data():
+    usage_data_file = r"C:\Users\nahid\file_usage_data.pkl"
+    if os.path.exists(usage_data_file):
+        with open(usage_data_file, "rb") as f:
+            return pickle.load(f)
+    return Counter()
 
-        # Search bar
-        self.search_var = tk.StringVar()
-        self.search_bar = ttk.Entry(root, textvariable=self.search_var, font=("JetBrainsmono nfp", 12))
-        self.search_bar.pack(fill=tk.X, padx=10, pady=10)
-        self.search_bar.bind("<KeyRelease>", self.perform_search)
-        self.search_bar.bind("<Return>", self.open_selected_file)
+def save_usage_data():
+    with open(r"C:\Users\nahid\file_usage_data.pkl", "wb") as f:
+        pickle.dump(file_usage_counter, f)
 
-        # Automatically focus on the search bar
-        self.search_bar.focus_set()
+# Clear usage data
+def clear_usage_data():
+    confirm = messagebox.askyesno("Confirm", "Are you sure you want to clear all usage data?")
+    if confirm:
+        file_usage_counter.clear()
+        save_usage_data()
+        show_top_files()
+        messagebox.showinfo("Cleared", "Usage data has been cleared.")
 
-        # Listbox for suggestions (always shown for top suggestions)
-        self.suggestions_list = tk.Listbox(
-            root,
-            font=("JetBrainsMono nfp", 12),
-            height=5,
-            bg="#282a36",      # Set background color to black
-            fg="white",       # Set foreground (text) color to white
-            selectbackground="white",  # Set background color for selected item
-            selectforeground="blue"   # Set foreground (text) color for selected item
+# Show most opened files
+def show_top_files():
+    suggestions_list.delete(0, tk.END)
+    top_files = file_usage_counter.most_common(10)
 
-        )
-        self.suggestions_list.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        self.suggestions_list.bind("<Double-1>", self.open_selected_file)
+    if top_files:
+        for file, _ in top_files:
+            suggestions_list.insert(tk.END, file)
+    else:
+        suggestions_list.insert(tk.END, "No files opened yet")
 
+# Perform search
+def perform_search(event):
+    query = search_var.get().lower()
+    suggestions_list.delete(0, tk.END)
 
-        # Status label
-        self.status_label = ttk.Label(root, text="Most opened files:", font=("JetBrainsMono nfp", 10), anchor="w")
-        self.status_label.pack(fill=tk.X, padx=10, pady=5)
+    if not query:
+        status_label.config(text="Most opened files:")
+        show_top_files()
+        return
 
-        # Show most opened files initially
-        self.show_top_files()
+    results = []
+    search_terms = query.split()  # Split the query into separate words
 
-    def load_usage_data(self):
-        if os.path.exists(self.usage_data_file):
-            with open(self.usage_data_file, "rb") as f:
-                return pickle.load(f)
-        return Counter()
+    for directory in directories:
+        for root, _, files in os.walk(directory):
+            for file in files:
+                # Check if all search terms are present in the path (directory + filename)
+                full_path = os.path.join(root, file).lower()
+                if all(term in full_path for term in search_terms):
+                    results.append(os.path.normpath(full_path))  # Normalize the path
 
-    def save_usage_data(self):
-        with open(self.usage_data_file, "wb") as f:
-            pickle.dump(self.file_usage_counter, f)
-
-    def show_top_files(self):
-        self.suggestions_list.delete(0, tk.END)
-        top_files = self.file_usage_counter.most_common(10)
-
-        if top_files:
-            for file, _ in top_files:
-                self.suggestions_list.insert(tk.END, file)
-        else:
-            self.suggestions_list.insert(tk.END, "No files opened yet")
-
-    def perform_search(self, event):
-        query = self.search_var.get().lower()
-        self.suggestions_list.delete(0, tk.END)
-
-        if not query:
-            self.status_label.config(text="Most opened files:")
-            self.show_top_files()
-            return
-
-        results = []
-        for directory in self.directories:
-            for root, _, files in os.walk(directory):
-                for file in files:
-                    if query in file.lower():
-                        full_path = os.path.join(root, file)
-                        results.append(os.path.normpath(full_path))  # Normalize the path
-
-        if results:
-            self.status_label.config(text=f"{len(results)} file(s) found")
-            for result in results:
-                self.suggestions_list.insert(tk.END, result)
-        else:
-            self.status_label.config(text="No files found")
-            self.suggestions_list.insert(tk.END, "No matches found")
-
-    def open_selected_file(self, event):
-        try:
-            selected = self.suggestions_list.get(self.suggestions_list.curselection())
-            # Normalize the selected file path
-            selected = os.path.normpath(selected)
-            
-            # Run the subprocess to open the file in VSCode
-            subprocess.run(["code", selected], shell=True, check=True)
-            
-            # Close the GUI after opening the file
-            self.root.quit()  # This will close the Tkinter window
-            
-            # Update the usage counter and save
-            self.file_usage_counter[selected] += 1
-            self.save_usage_data()
-        except IndexError:
-            messagebox.showwarning("No Selection", "Please select a file to open.")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+    if results:
+        status_label.config(text=f"{len(results)} file(s) found")
+        for result in results:
+            suggestions_list.insert(tk.END, result)
+    else:
+        status_label.config(text="No files found")
+        suggestions_list.insert(tk.END, "No matches found")
 
 
+# Open selected file
+def open_selected_file(event):
+    try:
+        selected = suggestions_list.get(suggestions_list.curselection())
+        selected = os.path.normpath(selected)
+        subprocess.run(["code", selected], shell=True, check=True)
+        root.quit()
+        file_usage_counter[selected] += 1
+        save_usage_data()
+    except IndexError:
+        messagebox.showwarning("No Selection", "Please select a file to open.")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = FileSearchApp(root)
-    root.update_idletasks()
-    root.configure(bg="#9aa1ff")
-    root.attributes('-topmost', True)  # Set always on top
-    width = root.winfo_width()
-    height = root.winfo_height()
-    x = (root.winfo_screenwidth() // 2) - (width // 2)
-    y = (root.winfo_screenheight() // 2) - (height // 2)
-    root.geometry(f'{width}x{height}+{x}+{y}')
-    root.mainloop()
+# Copy selected file path to clipboard
+def copy_to_clipboard(event):
+    try:
+        selected = suggestions_list.get(suggestions_list.curselection())
+        pyperclip.copy(selected)  # Copy file path to clipboard
+        messagebox.showinfo("Copied", f"File path copied to clipboard:\n{selected}")
+    except IndexError:
+        messagebox.showwarning("No Selection", "Please select a file to copy.")
+
+# Initialize file usage data
+file_usage_counter = load_usage_data()
+
+# Top buttons frame
+top_buttons_frame = ttk.Frame(root)
+top_buttons_frame.pack(fill=tk.X, padx=10, pady=5)
+
+# Close GUI button
+close_button = ttk.Button(
+    top_buttons_frame, 
+    text="Close GUI", 
+    command=root.quit
+)
+close_button.pack(side=tk.RIGHT, padx=5)
+
+# Clear usage data button
+clear_button = ttk.Button(
+    top_buttons_frame, 
+    text="Clear Usage Data", 
+    command=clear_usage_data,
+    style="Red.TButton"
+)
+clear_button.pack(side=tk.RIGHT, padx=5)
+
+# Search bar
+search_var = tk.StringVar()
+search_bar = ttk.Entry(root, textvariable=search_var, font=("JetBrainsmono nfp", 12))
+search_bar.pack(fill=tk.X, padx=10, pady=10)
+search_bar.bind("<KeyRelease>", perform_search)
+search_bar.bind("<Return>", open_selected_file)
+search_bar.focus_set()
+
+# Suggestions listbox
+suggestions_list = tk.Listbox(
+    root,
+    font=("JetBrainsMono nfp", 12),
+    height=5,
+    bg="#282a36",
+    fg="white",
+    selectbackground="#282a36",
+    selectforeground="#FFFFFF"
+)
+suggestions_list.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+suggestions_list.bind("<Double-1>", open_selected_file)
+
+# Status label
+status_label = ttk.Label(root, text="Most opened files:", font=("JetBrainsMono nfp", 10), anchor="w")
+status_label.pack(fill=tk.X, padx=10, pady=5)
+
+# Show top files initially
+show_top_files()
+
+# Configure root window
+root.update_idletasks()
+root.configure(bg="#9aa1ff")
+root.attributes('-topmost', True)
+width = root.winfo_width()
+height = root.winfo_height()
+x = (root.winfo_screenwidth() // 2) - (width // 2)
+y = (root.winfo_screenheight() // 2) - (height // 2)
+root.geometry(f'{width}x{height}+{x}+{y}')
+
+# Bind Ctrl+C to the copy_to_clipboard function
+root.bind('<Control-c>', copy_to_clipboard)
+
+# Main loop
+root.mainloop()
