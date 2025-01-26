@@ -712,8 +712,9 @@ function gitter {
     # Push to the remote repository
     git push
     # Completion message
-    Read-Host "Done! Press Enter to exit" -ForegroundColor Green
+    Write-Host "Git Push Complete" -ForegroundColor Green
 }
+
 
 # Adding the function to your PowerShell profile
 $ProfilePath = $PROFILE.CurrentUserAllHosts
