@@ -48,8 +48,13 @@ def show_top_files():
     if top_files:
         for file, _ in top_files:
             suggestions_list.insert(tk.END, file)
+        suggestions_list.select_set(0)  # Automatically select the first item
+        suggestions_list.focus_set()  # Set focus to the Listbox
     else:
         suggestions_list.insert(tk.END, "No files opened yet")
+    
+    # Refocus on the search bar to allow typing
+    search_bar.focus_set()
 
 # Perform search
 def perform_search(event):
@@ -68,17 +73,22 @@ def perform_search(event):
         for root, _, files in os.walk(directory):
             for file in files:
                 # Check if all search terms are present in the path (directory + filename)
-                full_path = os.path.join(root, file).lower()
-                if all(term in full_path for term in search_terms):
-                    results.append(os.path.normpath(full_path))  # Normalize the path
-
+                full_path = os.path.join(root, file)
+                if all(term in full_path.lower() for term in search_terms):
+                    # Normalize the path to use backslashes and keep original case
+                    results.append(os.path.normpath(full_path))
     if results:
         status_label.config(text=f"{len(results)} file(s) found")
         for result in results:
             suggestions_list.insert(tk.END, result)
+        suggestions_list.select_set(0)  # Automatically select the first item
+        suggestions_list.focus_set()  # Set focus to the Listbox
     else:
         status_label.config(text="No files found")
         suggestions_list.insert(tk.END, "No matches found")
+    
+    # Refocus on the search bar to allow typing
+    search_bar.focus_set()
 
 
 # Open selected file
@@ -118,6 +128,7 @@ close_button = ttk.Button(
     command=root.quit
 )
 close_button.pack(side=tk.RIGHT, padx=5)
+close_button.config(takefocus=False)  # Prevent tabbing to this button
 
 # Clear usage data button
 clear_button = ttk.Button(
@@ -127,6 +138,8 @@ clear_button = ttk.Button(
     style="Red.TButton"
 )
 clear_button.pack(side=tk.RIGHT, padx=5)
+clear_button.config(takefocus=False)  # Prevent tabbing to this button
+
 
 # Search bar
 search_var = tk.StringVar()
@@ -142,12 +155,13 @@ suggestions_list = tk.Listbox(
     font=("JetBrainsMono nfp", 12),
     height=5,
     bg="#282a36",
-    fg="white",
+    fg="#FFFFFF",
     selectbackground="#282a36",
     selectforeground="#FFFFFF"
 )
 suggestions_list.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 suggestions_list.bind("<Double-1>", open_selected_file)
+suggestions_list.bind("<Return>", open_selected_file)
 
 # Status label
 status_label = ttk.Label(root, text="Most opened files:", font=("JetBrainsMono nfp", 10), anchor="w")
@@ -157,8 +171,9 @@ status_label.pack(fill=tk.X, padx=10, pady=5)
 show_top_files()
 
 # Configure root window
+root.overrideredirect(True)  # Remove default borders
 root.update_idletasks()
-root.configure(bg="#9aa1ff")
+root.configure(bg="#7d7de4")
 root.attributes('-topmost', True)
 width = root.winfo_width()
 height = root.winfo_height()
