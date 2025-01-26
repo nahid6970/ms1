@@ -712,7 +712,7 @@ function gitter {
     # Push to the remote repository
     git push
     # Completion message
-    Read-Host -ForegroundColor Green "Done! Press Enter to exit"
+    Read-Host "Done! Press Enter to exit" -ForegroundColor Green
 }
 
 # Adding the function to your PowerShell profile
