@@ -12,10 +12,13 @@ REMOTE_OUTPUT_FILE = r"g00:\Remote_Control\output.txt"
 POWERSHELL_PATH = r"C:\Program Files\PowerShell\7\pwsh.exe"
 # Time interval to check for updates (in seconds)
 CHECK_INTERVAL = 1
+# Timeout for command execution (in seconds)
+COMMAND_TIMEOUT = 30
 
 # ANSI escape codes for color
 GREEN = "\033[92m"
 BLUE = "\033[94m"
+RED = "\033[91m"
 RESET = "\033[0m"
 
 # Ensure the script starts in the home directory
@@ -43,25 +46,34 @@ def execute_command(command, unique_id):
         transformed_command = command.replace(" cc ", " && ")
         print(f"Executing transformed command: {transformed_command}")
 
-        # Execute the command using PowerShell with -NoProfile
-        result = subprocess.run(
+        # Start the PowerShell command process
+        process = subprocess.Popen(
             [POWERSHELL_PATH, "-Command", transformed_command],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             encoding="utf-8",  # Force UTF-8 encoding
-            errors="replace",  # Replace invalid characters
+            errors="replace"  # Replace invalid characters
         )
+
+        try:
+            # Wait for the process to complete or timeout
+            stdout, stderr = process.communicate(timeout=COMMAND_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            # Kill the process if it exceeds the timeout
+            process.kill()
+            stdout, stderr = "", f"Command exceeded {COMMAND_TIMEOUT} seconds and was terminated."
+
         # Write the color-coded output to the local file
         with open(LOCAL_OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write(f"{GREEN}Command ID: {unique_id}{RESET}\n")
             f.write(f"{BLUE}Executed Command: {transformed_command}{RESET}\n\n")
-            f.write(result.stdout if result.stdout else "No output returned.\n")
-            if result.stderr:
+            f.write(stdout if stdout else "No output returned.\n")
+            if stderr:
                 f.write("\nError Output:\n")
-                f.write(result.stderr)
+                f.write(stderr)
     except Exception as e:
         print(f"Error executing command: {e}")
-
 
 def upload_output_file():
     """Uploads the local output file to the cloud drive."""
@@ -85,8 +97,11 @@ if __name__ == "__main__":
         command = read_remote_file()
         if command and command != last_command:  # Check if the command is new
             # Extract the unique ID and command from the remote file
-            unique_id, cmd = command.split(":", 1)
-            execute_command(cmd.strip(), unique_id)
-            upload_output_file()
-            last_command = command
+            try:
+                unique_id, cmd = command.split(":", 1)
+                execute_command(cmd.strip(), unique_id)
+                upload_output_file()
+                last_command = command
+            except ValueError:
+                print(f"{RED}Error parsing command: {command}{RESET}")
         time.sleep(CHECK_INTERVAL)
