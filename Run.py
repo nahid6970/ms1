@@ -9,7 +9,7 @@ import pyperclip  # We will use this library to copy to clipboard
 # Initialize the main window
 root = tk.Tk()
 root.title("File Search and Open in VSCode")
-root.geometry("600x400")  # Extended window for initial suggestions
+root.geometry("1000x500")  # Extended window for initial suggestions
 root.resizable(False, False)
 
 # Directories to search
@@ -194,7 +194,7 @@ show_top_files()
 # Configure root window
 root.overrideredirect(True)  # Remove default borders
 root.update_idletasks()
-root.configure(bg="#7d7de4")
+root.configure(bg="#4c44cb")
 root.attributes('-topmost', True)
 width = root.winfo_width()
 height = root.winfo_height()
