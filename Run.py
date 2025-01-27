@@ -92,19 +92,38 @@ def perform_search(event):
     search_bar.focus_set()
 
 
-# Open selected file
+# Open selected file with the appropriate application
 def open_selected_file(event):
     try:
         selected = suggestions_list.get(suggestions_list.curselection())
         selected = os.path.normpath(selected)
-        subprocess.run(["code", selected], shell=True, check=True)
-        root.quit()
+        
+        # Get the file extension
+        file_extension = os.path.splitext(selected)[1].lower()
+        
+        # Open file with the appropriate application based on extension
+        if file_extension == '.xls' or file_extension == '.xlsx':
+            # Open Excel file
+            subprocess.run(["start", "excel", selected], shell=True, check=True)
+        elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
+            # Open image file with Photos app (Windows)
+            subprocess.run(["start", "mspaint", selected], shell=True, check=True)
+        elif file_extension == '.json':
+            # Open JSON file in Notepad
+            subprocess.run(["notepad", selected], shell=True, check=True)
+        else:
+            # Open all other files in VSCode
+            subprocess.run(["code", selected], shell=True, check=True)
+
+        # Update file usage counter and save
         file_usage_counter[selected] += 1
         save_usage_data()
+
     except IndexError:
         messagebox.showwarning("No Selection", "Please select a file to open.")
     except Exception as e:
         messagebox.showerror("Error", str(e))
+
 
 # Copy selected file path to clipboard
 def copy_to_clipboard(event):
@@ -144,8 +163,6 @@ clear_label = tk.Label(
 )
 clear_label.pack(side=tk.RIGHT, padx=5)
 clear_label.bind("<Button-1>", lambda e: clear_usage_data())
-
-
 
 # Search bar
 search_var = tk.StringVar()
