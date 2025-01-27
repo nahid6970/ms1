@@ -108,16 +108,16 @@ def open_selected_file(event):
         else:
             # Open all other files in VSCode
             subprocess.run(["code", selected], shell=True, check=True)
-
         # Update file usage counter and save
         root.quit()
         file_usage_counter[selected] += 1
         save_usage_data()
-
     except IndexError:
         messagebox.showwarning("No Selection", "Please select a file to open.")
     except Exception as e:
         messagebox.showerror("Error", str(e))
+# Initialize file usage data
+file_usage_counter = load_usage_data()
 
 
 # Copy selected file path to clipboard
@@ -129,21 +129,18 @@ def copy_to_clipboard(event):
     except IndexError:
         messagebox.showwarning("No Selection", "Please select a file to copy.")
 
-# Initialize file usage data
-file_usage_counter = load_usage_data()
 
 # Top buttons frame
-top_buttons_frame = ttk.Frame(root)
+top_buttons_frame = tk.Frame(root, bg="#4c44cb")
 top_buttons_frame.pack(anchor="e" ,padx=10, pady=5)
 
-
 # Create the Close GUI label
-close_label = tk.Label( top_buttons_frame, text="\uf2d3", font=("JetBrainsMono NF", 16), fg="red", relief="flat", )
+close_label = tk.Label( top_buttons_frame, text="\uf2d3", font=("JetBrainsMono NFP", 16), fg="#ffffff", bg="#4c44cb", relief="flat", )
 close_label.pack(side=tk.RIGHT, padx=5)
 close_label.bind("<Button-1>", lambda e: root.quit())
 
 # Create the Clear Usage Data label
-clear_label = tk.Label( top_buttons_frame, text="\udb85\ude35", font=("JetBrainsMono NF", 16), fg="red", relief="flat", )
+clear_label = tk.Label( top_buttons_frame, text="\udb85\ude35", font=("JetBrainsMono NFP", 16), fg="#ffffff", bg="#4c44cb", relief="flat", )
 clear_label.pack(side=tk.RIGHT, padx=5)
 clear_label.bind("<Button-1>", lambda e: clear_usage_data())
 
@@ -165,14 +162,14 @@ suggestions_list = tk.Listbox(
     bg="#282a36",
     fg="#93eea2",
     selectbackground="#282a36",
-    selectforeground="#FFFFFF"
+    selectforeground="#FFFFFF",
 )
 suggestions_list.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 suggestions_list.bind("<Double-1>", open_selected_file)
 suggestions_list.bind("<Return>", open_selected_file)
 
 # Status label
-status_label = ttk.Label(root, text="Most opened files:", font=("JetBrainsMono nfp", 10), anchor="w")
+status_label = ttk.Label(root, text="Most opened files:", font=("JetBrainsMono nfp", 10, "bold"), foreground="#060efe", anchor="n")
 status_label.pack(fill=tk.X, padx=10, pady=5)
 
 # Show top files initially
