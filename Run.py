@@ -162,13 +162,15 @@ clear_label = tk.Label(
 clear_label.pack(side=tk.RIGHT, padx=5)
 clear_label.bind("<Button-1>", lambda e: clear_usage_data())
 
-# Search bar
+
+# Create the search bar with tk.Entry instead of ttk.Entry
 search_var = tk.StringVar()
-search_bar = ttk.Entry(root, textvariable=search_var, font=("JetBrainsmono nfp", 12))
+search_bar = tk.Entry(root, textvariable=search_var, font=("JetBrainsMono nfp", 12), bg="#c0c8f3", fg="#000000")
 search_bar.pack(fill=tk.X, padx=10, pady=10)
 search_bar.bind("<KeyRelease>", perform_search)
 search_bar.bind("<Return>", open_selected_file)
 search_bar.focus_set()
+
 
 # Suggestions listbox
 suggestions_list = tk.Listbox(
