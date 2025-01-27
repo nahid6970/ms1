@@ -51,7 +51,6 @@ def show_top_files():
         suggestions_list.focus_set()  # Set focus to the Listbox
     else:
         suggestions_list.insert(tk.END, "No files opened yet")
-    
     # Refocus on the search bar to allow typing
     search_bar.focus_set()
 
@@ -139,24 +138,12 @@ top_buttons_frame.pack(anchor="e" ,padx=10, pady=5)
 
 
 # Create the Close GUI label
-close_label = tk.Label(
-    top_buttons_frame, 
-    text="\uf2d3",  # FontAwesome or icon text
-    font=("JetBrainsMono NF", 16),
-    fg="red",
-    relief="flat",
-)
+close_label = tk.Label( top_buttons_frame, text="\uf2d3", font=("JetBrainsMono NF", 16), fg="red", relief="flat", )
 close_label.pack(side=tk.RIGHT, padx=5)
 close_label.bind("<Button-1>", lambda e: root.quit())
 
 # Create the Clear Usage Data label
-clear_label = tk.Label(
-    top_buttons_frame, 
-    text="\udb85\ude35",  # Unicode character
-    font=("JetBrainsMono NF", 16),
-    fg="red",
-    relief="flat",
-)
+clear_label = tk.Label( top_buttons_frame, text="\udb85\ude35", font=("JetBrainsMono NF", 16), fg="red", relief="flat", )
 clear_label.pack(side=tk.RIGHT, padx=5)
 clear_label.bind("<Button-1>", lambda e: clear_usage_data())
 
@@ -176,7 +163,7 @@ suggestions_list = tk.Listbox(
     font=("JetBrainsMono nfp", 12),
     height=5,
     bg="#282a36",
-    fg="#FFFFFF",
+    fg="#93eea2",
     selectbackground="#282a36",
     selectforeground="#FFFFFF"
 )
