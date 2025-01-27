@@ -34,12 +34,10 @@ def save_usage_data():
 
 # Clear usage data
 def clear_usage_data():
-    confirm = messagebox.askyesno("Confirm", "Are you sure you want to clear all usage data?")
-    if confirm:
-        file_usage_counter.clear()
-        save_usage_data()
-        show_top_files()
-        messagebox.showinfo("Cleared", "Usage data has been cleared.")
+    file_usage_counter.clear()
+    save_usage_data()
+    show_top_files()
+
 
 # Show most opened files
 def show_top_files():
