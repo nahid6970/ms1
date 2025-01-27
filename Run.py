@@ -116,6 +116,7 @@ def open_selected_file(event):
             subprocess.run(["code", selected], shell=True, check=True)
 
         # Update file usage counter and save
+        root.quit()
         file_usage_counter[selected] += 1
         save_usage_data()
 
