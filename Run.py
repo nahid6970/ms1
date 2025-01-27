@@ -14,9 +14,10 @@ root.resizable(False, False)
 
 # Directories to search
 directories = [
-    "C:/ms1/",  # Example directory
-    "C:/ms2/",  # Example directory
-    "C:/ms3/",  # Example directory
+    "C:/ms1/",
+    "C:/ms2/",
+    "C:/ms3/",
+    "C:/msBackups/",
 ]
 
 # Load or initialize file usage counter
@@ -119,26 +120,31 @@ file_usage_counter = load_usage_data()
 
 # Top buttons frame
 top_buttons_frame = ttk.Frame(root)
-top_buttons_frame.pack(fill=tk.X, padx=10, pady=5)
+top_buttons_frame.pack(anchor="e" ,padx=10, pady=5)
 
-# Close GUI button
-close_button = ttk.Button(
-    top_buttons_frame, 
-    text="Close GUI", 
-    command=root.quit
-)
-close_button.pack(side=tk.RIGHT, padx=5)
-close_button.config(takefocus=False)  # Prevent tabbing to this button
 
-# Clear usage data button
-clear_button = ttk.Button(
+# Create the Close GUI label
+close_label = tk.Label(
     top_buttons_frame, 
-    text="Clear Usage Data", 
-    command=clear_usage_data,
-    style="Red.TButton"
+    text="\uf2d3",  # FontAwesome or icon text
+    font=("JetBrainsMono NF", 16),
+    fg="red",
+    relief="flat",
 )
-clear_button.pack(side=tk.RIGHT, padx=5)
-clear_button.config(takefocus=False)  # Prevent tabbing to this button
+close_label.pack(side=tk.RIGHT, padx=5)
+close_label.bind("<Button-1>", lambda e: root.quit())
+
+# Create the Clear Usage Data label
+clear_label = tk.Label(
+    top_buttons_frame, 
+    text="\udb85\ude35",  # Unicode character
+    font=("JetBrainsMono NF", 16),
+    fg="red",
+    relief="flat",
+)
+clear_label.pack(side=tk.RIGHT, padx=5)
+clear_label.bind("<Button-1>", lambda e: clear_usage_data())
+
 
 
 # Search bar
