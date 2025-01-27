@@ -108,9 +108,6 @@ def open_selected_file(event):
         elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
             # Open image file with Photos app (Windows)
             subprocess.run(["start", "mspaint", selected], shell=True, check=True)
-        elif file_extension == '.json':
-            # Open JSON file in Notepad
-            subprocess.run(["notepad", selected], shell=True, check=True)
         else:
             # Open all other files in VSCode
             subprocess.run(["code", selected], shell=True, check=True)
