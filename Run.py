@@ -6,11 +6,17 @@ from collections import Counter
 import pickle
 import pyperclip  # We will use this library to copy to clipboard
 
+def create_custom_border(parent):
+    BORDER_FRAME = tk.Frame(parent, bg="#4c44cb", bd=0, highlightthickness=1, highlightbackground="#fb674b")
+    BORDER_FRAME.place(relwidth=1, relheight=1)
+    return BORDER_FRAME
+
 # Initialize the main window
 root = tk.Tk()
 root.title("File Search and Open in VSCode")
 root.geometry("1000x500")  # Extended window for initial suggestions
 root.resizable(False, False)
+BORDER_FRAME = create_custom_border(root)
 
 # Directories to search
 directories = [
@@ -178,13 +184,13 @@ show_top_files()
 # Configure root window
 root.overrideredirect(True)  # Remove default borders
 root.update_idletasks()
-root.configure(bg="#4c44cb")
 root.attributes('-topmost', True)
 width = root.winfo_width()
 height = root.winfo_height()
 x = (root.winfo_screenwidth() // 2) - (width // 2)
 y = (root.winfo_screenheight() // 2) - (height // 2)
 root.geometry(f'{width}x{height}+{x}+{y}')
+
 
 # Bind Ctrl+C to the copy_to_clipboard function
 root.bind('<Control-c>', copy_to_clipboard)
