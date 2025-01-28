@@ -157,11 +157,25 @@ def find_image(image_path, confidence=0.7, region=None):
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
-    if is_searching and time.time() - last_found_time > 120: # for ads do 120 second
-        ntfy_Signal()  # Run the script instead of showing a message
+    if is_searching and time.time() - last_found_time > 100: # for ads do 120 second
+        ntfy_signal_cli()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
 
+
+def ntfy_signal_cli():
+    try:
+        while True:
+            # Get the current date and time in 12-hour format
+            current_time = datetime.now().strftime("%I:%M %p, %d-%b-%Y")
+            # Properly escape the message for PowerShell
+            command = f'signal-cli -a +8801533876178 send -m \'{current_time}\' +8801779787186'
+            # Execute the command
+            os.system(f"powershell -Command \"{command}\"")
+            print(f"Command executed: {command}")
+            time.sleep(30)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
 
 def ntfy_termux_rclone_touch():
     command = "rclone touch g00:ntfy"
