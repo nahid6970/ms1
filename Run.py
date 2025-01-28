@@ -90,7 +90,6 @@ def perform_search(event):
     else:
         status_label.config(text="No files found")
         suggestions_list.insert(tk.END, "No matches found")
-    
     # Refocus on the search bar to allow typing
     search_bar.focus_set()
 
@@ -100,7 +99,6 @@ def open_selected_file(event):
     try:
         selected = suggestions_list.get(suggestions_list.curselection())
         selected = os.path.normpath(selected)
-        
         # Get the file extension
         file_extension = os.path.splitext(selected)[1].lower()
         
@@ -188,7 +186,7 @@ search_bar = tk.Entry(root, textvariable=search_var, font=("JetBrainsMono nfp", 
 search_bar.pack(fill=tk.X, padx=10, pady=10)
 search_bar.bind("<KeyRelease>", perform_search)
 search_bar.bind("<Return>", open_selected_file)
-search_bar.bind("<Down>", focus_suggestions)  # Down Arrow to move to the list
+search_bar.bind("<Down>", focus_suggestions)
 search_bar.focus_set()
 
 # Suggestions listbox
@@ -196,18 +194,15 @@ suggestions_list = tk.Listbox( root, font=("JetBrainsMono nfp", 12), height=5, b
 suggestions_list.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 suggestions_list.bind("<Double-1>", open_selected_file)
 suggestions_list.bind("<Return>", open_selected_file)
-suggestions_list.bind("<Up>", navigate_up)  # Up Arrow to move up or to the search bar
-suggestions_list.bind("<Down>", navigate_down)  # Down Arrow to move down the list
+suggestions_list.bind("<Up>", navigate_up)
+suggestions_list.bind("<Down>", navigate_down)
 
 # Status label
 status_label = ttk.Label(root, text="Most opened files:", width=50, font=("JetBrainsMono nfp", 10, "bold"), foreground="#060efe", anchor="n")
 status_label.pack(padx=10, pady=5)
 
-# Show top files initially
-show_top_files()
-
 # Configure root window
-root.overrideredirect(True)  # Remove default borders
+root.overrideredirect(True)
 root.update_idletasks()
 root.attributes('-topmost', True)
 width = root.winfo_width()
@@ -216,10 +211,12 @@ x = (root.winfo_screenwidth() // 2) - (width // 2)
 y = (root.winfo_screenheight() // 2) - (height // 2)
 root.geometry(f'{width}x{height}+{x}+{y}')
 
-
-# Bind Ctrl+C to the copy_to_clipboard function
+# Bind Keys
 root.bind('<Control-c>', copy_to_clipboard)
 root.bind("<Escape>", lambda e: root.destroy())
+
+#load for initial
+show_top_files()
 
 # Main loop
 root.mainloop()
