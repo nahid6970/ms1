@@ -150,6 +150,37 @@ clear_label = tk.Label( top_buttons_frame, text="\udb85\ude35", font=("JetBrains
 clear_label.pack(side=tk.RIGHT, padx=5)
 clear_label.bind("<Button-1>", lambda e: clear_usage_data())
 
+# Navigate from search bar to suggestions list with Down Arrow
+def focus_suggestions(event):
+    if suggestions_list.size() > 0:  # Ensure there are items in the list
+        suggestions_list.focus_set()
+        suggestions_list.select_set(0)  # Select the first item
+
+# Navigate from suggestions list to search bar with Up Arrow
+def navigate_up(event):
+    selected_index = suggestions_list.curselection()
+    if selected_index:
+        current_index = selected_index[0]
+        if current_index == 0:  # If already at the first item
+            search_bar.focus_set()  # Move focus to the search bar
+            search_bar.icursor(tk.END)  # Place the cursor at the end of the text
+        else:
+            suggestions_list.select_clear(current_index)
+            suggestions_list.select_set(current_index - 1)  # Move selection up
+            suggestions_list.activate(current_index - 1)  # Highlight the new selection
+    else:
+        # If no selection, just select the last item
+        suggestions_list.select_set(suggestions_list.size() - 1)
+
+# Navigate through the list with Down Arrow
+def navigate_down(event):
+    selected_index = suggestions_list.curselection()
+    if selected_index:
+        current_index = selected_index[0]
+        if current_index < suggestions_list.size() - 1:  # If not the last item
+            suggestions_list.select_clear(current_index)
+            suggestions_list.select_set(current_index + 1)  # Move selection down
+            suggestions_list.activate(current_index + 1)  # Highlight the new selection
 
 # Create the search bar with tk.Entry instead of ttk.Entry
 search_var = tk.StringVar()
@@ -157,22 +188,16 @@ search_bar = tk.Entry(root, textvariable=search_var, font=("JetBrainsMono nfp", 
 search_bar.pack(fill=tk.X, padx=10, pady=10)
 search_bar.bind("<KeyRelease>", perform_search)
 search_bar.bind("<Return>", open_selected_file)
+search_bar.bind("<Down>", focus_suggestions)  # Down Arrow to move to the list
 search_bar.focus_set()
 
-
 # Suggestions listbox
-suggestions_list = tk.Listbox(
-    root,
-    font=("JetBrainsMono nfp", 12),
-    height=5,
-    bg="#282a36",
-    fg="#93eea2",
-    selectbackground="#282a36",
-    selectforeground="#FFFFFF",
-)
+suggestions_list = tk.Listbox( root, font=("JetBrainsMono nfp", 12), height=5, bg="#282a36", fg="#93eea2", selectbackground="#282a36", selectforeground="#FFFFFF", )
 suggestions_list.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 suggestions_list.bind("<Double-1>", open_selected_file)
 suggestions_list.bind("<Return>", open_selected_file)
+suggestions_list.bind("<Up>", navigate_up)  # Up Arrow to move up or to the search bar
+suggestions_list.bind("<Down>", navigate_down)  # Down Arrow to move down the list
 
 # Status label
 status_label = ttk.Label(root, text="Most opened files:", font=("JetBrainsMono nfp", 10, "bold"), foreground="#060efe", anchor="n")
@@ -194,6 +219,7 @@ root.geometry(f'{width}x{height}+{x}+{y}')
 
 # Bind Ctrl+C to the copy_to_clipboard function
 root.bind('<Control-c>', copy_to_clipboard)
+root.bind("<Escape>", lambda e: root.destroy())
 
 # Main loop
 root.mainloop()
