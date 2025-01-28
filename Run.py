@@ -166,8 +166,8 @@ def navigate_up(event):
             search_bar.icursor(tk.END)  # Place the cursor at the end of the text
         else:
             suggestions_list.select_clear(current_index)
-            suggestions_list.select_set(current_index - 1)  # Move selection up
-            suggestions_list.activate(current_index - 1)  # Highlight the new selection
+            suggestions_list.select_set(current_index - 0)  # Move selection up
+            suggestions_list.activate(current_index - 0)  # Highlight the new selection
     else:
         # If no selection, just select the last item
         suggestions_list.select_set(suggestions_list.size() - 1)
@@ -179,8 +179,8 @@ def navigate_down(event):
         current_index = selected_index[0]
         if current_index < suggestions_list.size() - 1:  # If not the last item
             suggestions_list.select_clear(current_index)
-            suggestions_list.select_set(current_index + 1)  # Move selection down
-            suggestions_list.activate(current_index + 1)  # Highlight the new selection
+            suggestions_list.select_set(current_index + 0)  # Move selection down
+            suggestions_list.activate(current_index + 0)  # Highlight the new selection
 
 # Create the search bar with tk.Entry instead of ttk.Entry
 search_var = tk.StringVar()
