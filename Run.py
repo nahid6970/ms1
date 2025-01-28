@@ -200,8 +200,8 @@ suggestions_list.bind("<Up>", navigate_up)  # Up Arrow to move up or to the sear
 suggestions_list.bind("<Down>", navigate_down)  # Down Arrow to move down the list
 
 # Status label
-status_label = ttk.Label(root, text="Most opened files:", font=("JetBrainsMono nfp", 10, "bold"), foreground="#060efe", anchor="n")
-status_label.pack(fill=tk.X, padx=10, pady=5)
+status_label = ttk.Label(root, text="Most opened files:", width=50, font=("JetBrainsMono nfp", 10, "bold"), foreground="#060efe", anchor="n")
+status_label.pack(padx=10, pady=5)
 
 # Show top files initially
 show_top_files()
