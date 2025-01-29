@@ -103,19 +103,26 @@ def open_selected_file(event):
         file_extension = os.path.splitext(selected)[1].lower()
         
         # Open file with the appropriate application based on extension
-        if file_extension == '.xls' or file_extension == '.xlsx':
+        if file_extension in ['.xls', '.xlsx']:
             # Open Excel file
             subprocess.run(["start", "excel", selected], shell=True, check=True)
         elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
             # Open image file with Photos app (Windows)
             subprocess.run(["start", "mspaint", selected], shell=True, check=True)
+        elif file_extension == '.exe':
+            # Open executable file (non-blocking)
+            subprocess.Popen([selected], shell=True)
         else:
             # Open all other files in VSCode
             subprocess.run(["code", selected], shell=True, check=True)
+
         # Update file usage counter and save
-        root.quit()
         file_usage_counter[selected] += 1
         save_usage_data()
+
+        # Close the application window
+        root.quit()
+        
     except IndexError:
         messagebox.showwarning("No Selection", "Please select a file to open.")
     except Exception as e:
