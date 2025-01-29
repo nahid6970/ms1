@@ -1,5 +1,8 @@
 # python
 always run pip install as administrative so some error may be solved
+python.exe -m pip install --upgrade pip
 pip install --upgrade pip setuptools wheel
 C:\Users\nahid\scoop\apps\python\current\python.exe -m pip install Module_Name
+
+open-webui only supports 3.11 python version
 C:\Users\nahid\scoop\apps\python311\current\python.exe -m pip install open-webui
