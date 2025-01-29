@@ -96,7 +96,8 @@ class CrosshairOverlay:
         """Copy the current mouse coordinates to the clipboard."""
         with mouse.Controller() as m:
             mouse_x, mouse_y = m.position
-        pyperclip.copy(f"X={mouse_x}, Y={mouse_y}")
+        # pyperclip.copy(f"X={mouse_x}, Y={mouse_y}")
+        pyperclip.copy(f"{mouse_x}, {mouse_y}")
 
     def toggle_coordinates(self):
         """Toggle the visibility of the coordinates."""
