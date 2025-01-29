@@ -368,7 +368,6 @@ def close_window(event=None):
 #! ██╔═══╝ ██║███╗██║██╔══██║  ╚██╔╝      ██╔══██║██╔══██║██╔═██╗
 #! ███████╗╚███╔███╔╝██║  ██║   ██║       ██║  ██║██║  ██║██║  ██╗
 #! ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
-hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
 # stop_thread_loss = True
 # def Tst_2_Region():
 #     global stop_thread_loss
@@ -399,6 +398,9 @@ hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
 #         T2REGION_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 # T2REGION_BT = Button(ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=2, command=Test_2_region_attack, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 # T2REGION_BT.pack(padx=(1, 1), pady=(1, 1))
+
+# hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
+hornass =r"C:\msBackups\shadowfight3\testing\guardian_trash.png"
 
 def Attack2Way(button):
     """Toggles the two-region attack functionality."""
@@ -1229,7 +1231,7 @@ KOS_Cloud=r"C:\msBackups\shadowfight3\action\Kos_Cloud.png"
 actionF = {
     void_compass: 0.7,
     eruption: 0.85,
-    KOS_Cloud: 0.7,
+    KOS_Cloud: 0.85,
     thud: 0.7,
     collector: 0.7,
     uppercut: 0.7,
