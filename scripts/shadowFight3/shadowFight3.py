@@ -53,9 +53,9 @@ def action_main_handler_5():
             if image_found:
                 pause_other_items2 = True
                 print("Triggering AHK...")
-#                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13')
+                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13')
 #                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
-                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
+#                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
 #                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16')
 #                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
 #                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
@@ -1176,7 +1176,7 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(56, "F13\nKOS\nFast")
+initialize_button(56, "F13\nKOS\n1 tap")
 initialize_button(57, "F14\nKOS\nFame")
 initialize_button(58, "F15\nHound")
 # initialize_button(59, "F16\nHound\nVortex")
