@@ -163,19 +163,29 @@ def find_image(image_path, confidence=0.7, region=None):
     return None
 
 
+# Flag to track if the notification has been sent
+notification_sent = False
 def ntfy_signal_cli():
+    global notification_sent
     try:
-        while True:
-            # Get the current date and time in 12-hour format
-            current_time = datetime.now().strftime("%I:%M %p, %d-%b-%Y")
-            # Properly escape the message for PowerShell
-            command = f'signal-cli -a +8801533876178 send -m \'{current_time}\' +8801779787186'
-            # Execute the command
-            os.system(f"powershell -Command \"{command}\"")
-            print(f"Command executed: {command}")
-            time.sleep(30)
+        # Only send the command if it hasn't been sent already
+        if not notification_sent:
+            notification_sent = True
+            while True:
+                # Get the current date and time in 12-hour format
+                current_time = datetime.now().strftime("%I:%M %p, %d-%b-%Y")
+                # Properly escape the message for PowerShell
+                command = f'signal-cli -a +8801533876178 send -m \'{current_time}\' +8801779787186'
+                # Execute the command
+                os.system(f"powershell -Command \"{command}\"")
+                print(f"Command executed: {command}")
+                time.sleep(30)
     except KeyboardInterrupt:
         print("Script stopped by user.")
+    finally:
+        # Reset the flag when the function finishes
+        notification_sent = False
+
 
 def ntfy_termux_rclone_touch():
     command = "rclone touch g00:ntfy"
