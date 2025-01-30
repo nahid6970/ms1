@@ -33,121 +33,6 @@ BORDER_FRAME = create_custom_border(ROOT)
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
 
-#!  █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
-#! ██╔══██╗██║  ██║██║ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-#! ███████║███████║█████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
-#! ██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
-#! ██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
-#! ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-
-# File path to save the selected key
-SAVE_FILE = r"C:\Users\nahid\selected_key.txt"
-
-# Mapping keys to descriptions
-key_mapping = {
-    "F13": "KOS",
-    "F14": "Attack",
-    "F15": "Defend",
-    "F16": "Special"
-}
-
-# Generate dropdown values like "F13: KOS"
-dropdown_values = {f"{key}: {desc}": key for key, desc in key_mapping.items()}
-
-def save_selected_key(key):
-    """Save the selected key to a file."""
-    try:
-        with open(SAVE_FILE, "w") as file:
-            file.write(key)
-    except Exception as e:
-        print(f"Error saving key: {e}")
-
-def load_selected_key():
-    """Load the last selected key from the file."""
-    if os.path.exists(SAVE_FILE):
-        try:
-            with open(SAVE_FILE, "r") as file:
-                key = file.read().strip()
-                if key in key_mapping:  # Ensure it's a valid option
-                    return key
-        except Exception as e:
-            print(f"Error loading key: {e}")
-    return "F13"  # Default to F13 if no file found
-
-def update_dropdown_display(event=None):
-    """Update the dropdown display to show only the description."""
-    selected_full = key_var.get()  # "F13: KOS"
-    selected_key = dropdown_values[selected_full]  # Extract "F13"
-    key_var.set(key_mapping[selected_key])  # Set only "KOS" in dropdown
-    save_selected_key(selected_key)  # Save selection
-
-def action_main_handler_5():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-
-    # Get selected function key
-    selected_description = key_var.get()  # "KOS"
-    selected_key = next(k for k, v in key_mapping.items() if v == selected_description)  # Get "F13"
-
-    save_selected_key(selected_key)  # Save selection
-
-    def search_and_act():
-        while not stop_thread_action1:
-            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print(f"Triggering AHK with {selected_key} ({selected_description})...")
-                key_down(window, selected_key); time.sleep(5); key_up(window, selected_key)
-                print("AHK action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
-    else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
-
-
-# Load last saved key
-last_selected_key = load_selected_key()
-last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
-
-# Dropdown variable (stores the displayed value like "KOS")
-key_var = tk.StringVar(value=key_mapping[last_selected_key])
-
-# Dropdown widget (shows "F13: KOS" in the menu but only "KOS" when selected)
-key_dropdown = ttk.Combobox(ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("Jetbrainsmono nfp", 10), width=12, state="readonly")
-key_dropdown.pack(side="left",padx=10, pady=5)
-
-# Set the default dropdown display to just the description
-key_dropdown.set(key_mapping[last_selected_key])
-
-# Update variable when selection changes
-key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
-
-# Button to start/stop Light Attack 2
-ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
-
 #* ███████╗██╗███╗   ██╗██████╗     ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗
 #* ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║
 #* █████╗  ██║██╔██╗ ██║██║  ██║    █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║
@@ -424,6 +309,116 @@ def close_window(event=None):
     # Start the specified script
     script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
+
+#!  █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
+#! ██╔══██╗██║  ██║██║ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
+#! ███████║███████║█████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
+#! ██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
+#! ██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
+#! ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
+
+# File path to save the selected key
+SAVE_FILE = r"C:\Users\nahid\selected_key.txt"
+
+# Mapping keys to descriptions
+key_mapping = {
+    "F13": "KOS",
+    "F14": "Attack",
+    "F15": "Defend",
+    "F16": "Special"
+}
+
+# Generate dropdown values like "F13: KOS"
+dropdown_values = {f"{key}: {desc}": key for key, desc in key_mapping.items()}
+
+def save_selected_key(key):
+    """Save the selected key to a file."""
+    try:
+        with open(SAVE_FILE, "w") as file:
+            file.write(key)
+    except Exception as e:
+        print(f"Error saving key: {e}")
+
+def load_selected_key():
+    """Load the last selected key from the file."""
+    if os.path.exists(SAVE_FILE):
+        try:
+            with open(SAVE_FILE, "r") as file:
+                key = file.read().strip()
+                if key in key_mapping:  # Ensure it's a valid option
+                    return key
+        except Exception as e:
+            print(f"Error loading key: {e}")
+    return "F13"  # Default to F13 if no file found
+
+def update_dropdown_display(event=None):
+    """Update the dropdown display to show only the description."""
+    selected_full = key_var.get()  # "F13: KOS"
+    selected_key = dropdown_values[selected_full]  # Extract "F13"
+    key_var.set(key_mapping[selected_key])  # Set only "KOS" in dropdown
+    save_selected_key(selected_key)  # Save selection
+
+def action_main_handler_5():
+    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+
+    # Get selected function key
+    selected_description = key_var.get()  # "KOS"
+    selected_key = next(k for k, v in key_mapping.items() if v == selected_description)  # Get "F13"
+
+    save_selected_key(selected_key)  # Save selection
+
+    def search_and_act():
+        while not stop_thread_action1:
+            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
+                image_found = True
+                print("Image found in Light Attack 2, resetting action timer.")
+                action_timer = time.time()  # Reset the 5-second timer when image is found
+            else:
+                image_found = False
+                print("Image not found in Light Attack 2.")
+            time.sleep(0.05)
+            # Action performing logic
+            if image_found:
+                pause_other_items2 = True
+                print(f"Triggering AHK with {selected_key} ({selected_description})...")
+                key_down(window, selected_key); time.sleep(5); key_up(window, selected_key)
+                print("AHK action completed.")
+                pause_other_items2 = False
+            else:
+                time.sleep(0.05)  # Prevent CPU usage when idle
+
+    # Start or stop the action handler
+    if Action_Light_Thread and Action_Light_Thread.is_alive():
+        stop_thread_action1 = True
+        Action_Light_Thread.join()  # Wait for thread to stop
+        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
+    else:
+        stop_thread_action1 = False
+        Action_Light_Thread = threading.Thread(target=search_and_act)
+        Action_Light_Thread.daemon = True
+        Action_Light_Thread.start()
+        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
+
+# Load last saved key
+last_selected_key = load_selected_key()
+last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
+# Dropdown variable (stores the displayed value like "KOS")
+key_var = tk.StringVar(value=key_mapping[last_selected_key])
+# Dropdown widget (shows "F13: KOS" in the menu but only "KOS" when selected)
+key_dropdown = ttk.Combobox(ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("Jetbrainsmono nfp", 10), width=12, state="readonly")
+key_dropdown.pack(side="left",padx=10, pady=5, anchor="center")
+# Set the default dropdown display to just the description
+key_dropdown.set(key_mapping[last_selected_key])
+# Update variable when selection changes
+key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
+
+# Button to start/stop Light Attack 2
+ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #! ██████╗ ██╗    ██╗ █████╗ ██╗   ██╗     █████╗ ██╗  ██╗██╗  ██╗
 #! ╚════██╗██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔══██╗██║  ██║██║ ██╔╝
@@ -723,7 +718,7 @@ def Event_Function(button):
     Event_Function.state = state
 # Create the button for the handler
 EVENT_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=lambda: Event_Function(EVENT_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-EVENT_BT.pack(padx=(1, 1), pady=(1, 1))
+EVENT_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 #*  ███████╗██╗   ██╗███████╗███╗   ██╗████████╗    ██╗    ██╗     █████╗ ██████╗ ███████╗
 #*  ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝    ██║    ██║    ██╔══██╗██╔══██╗██╔════╝
@@ -789,7 +784,7 @@ def event_function_Ads():
         Event_w_Ads_BT.config(text="Event\nAds", bg="#1d2027", fg="#fc0000")
 
 Event_w_Ads_BT = Button( ROOT, text="Event\nAds", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_Ads, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-Event_w_Ads_BT.pack(padx=(1, 1), pady=(1, 1))
+Event_w_Ads_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #? ██████╗  █████╗ ██╗██████╗ ███████╗
 #? ██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
@@ -840,7 +835,7 @@ def raid_function_light():
         raid_light_thread.start()
         Raid_Light_BT.config(text="Raid", bg="#1d2027", fg="#fc0000")
 Raid_Light_BT = Button(ROOT, text="Raid", bg="#5a9bf7", fg="#000000", width=5, height=2, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Raid_Light_BT.pack(padx=(1, 1), pady=(1, 1))
+Raid_Light_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 
 #* ██╗      ██████╗ ███████╗███████╗
@@ -884,9 +879,7 @@ def loss_function():
         loss_thread.start()
         Loss_BT.config(text="Loss", bg="#1d2027", fg="#fc0000")
 Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Loss_BT.pack(padx=(1, 1), pady=(1, 1))
-
-
+Loss_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 #* ███████╗███████╗ ██████╗██████╗ ███████╗████████╗    ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 #* ██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝╚══██╔══╝    ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
@@ -964,21 +957,9 @@ def SecretFightHandler(button):
     # Save state to the function attribute for persistence
     SecretFightHandler.state = state
 
-
 # Button logic
-BT_Secret_Fights = Button(
-    ROOT,
-    text="Secret",
-    bg="#62e7ff",
-    fg="#000000",
-    width=5,
-    height=2,
-    command=lambda: SecretFightHandler(BT_Secret_Fights),
-    font=("Jetbrainsmono nfp", 10, "bold"),
-    relief="flat"
-)
-BT_Secret_Fights.pack(padx=(1, 1), pady=(1, 1))
-
+BT_Secret_Fights = Button( ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=2, command=lambda: SecretFightHandler(BT_Secret_Fights), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+BT_Secret_Fights.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 # ███████╗███████╗██╗  ██╗
 # ██╔════╝██╔════╝██║  ██║
@@ -1042,7 +1023,7 @@ def start_sf4():
         loss_thread.start()
         SF4_BT.config(text="SF4", bg="#1d2027", fg="#fc0000")
 SF4_BT = Button(ROOT, text="SF4", bg="#8e9636", fg="#000000", width=5, height=2, command=start_sf4, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-SF4_BT.pack(padx=(1, 1), pady=(1, 1))
+SF4_BT.pack( side="left", padx=(1, 1), pady=(1, 1))
 
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
 #! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝
@@ -1118,7 +1099,7 @@ def action_main_handler_1():
 # Button definition to start/stop the action
 ACTION_1_PY = Button(ROOT, text="dj", bg="#607af0", fg="#222222", width=5, height=2,
                   command=action_main_handler_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_1_PY.pack(padx=(1, 1), pady=(1, 1))
+ACTION_1_PY.pack( side="left", padx=(1, 1), pady=(1, 1))
 
 #! ██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗
 #! ██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝
@@ -1189,70 +1170,7 @@ def fight_function():
         fight_thread.start()
         ACTION_3.config(text="Stop", bg="#1d2027", fg="#fc0000")
 ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_3.pack(padx=(1,1), pady=(1,1))
-
-
-#*  ██████╗ ██████╗ ███╗   ███╗███╗   ███╗███████╗███╗   ██╗████████╗     ██████╗ ██╗   ██╗████████╗
-#* ██╔════╝██╔═══██╗████╗ ████║████╗ ████║██╔════╝████╗  ██║╚══██╔══╝    ██╔═══██╗██║   ██║╚══██╔══╝
-#* ██║     ██║   ██║██╔████╔██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║       ██║   ██║██║   ██║   ██║
-#* ██║     ██║   ██║██║╚██╔╝██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║       ██║   ██║██║   ██║   ██║
-#* ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║ ╚═╝ ██║███████╗██║ ╚████║   ██║       ╚██████╔╝╚██████╔╝   ██║
-#*  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝        ╚═════╝  ╚═════╝    ╚═╝
-file_path = r"C:\ms1\scripts\shadowFight3\shadowFight3.py"  # Path to your script file
-# Generalized function to toggle comments on specified line number
-def toggle_comment(line_number, button):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-    # Check if line is commented
-    if lines[line_number - 1].strip().startswith("#"):
-        # Uncomment line by removing the #
-        lines[line_number - 1] = lines[line_number - 1][1:]  # Remove the first character (the #)
-        button.config(bg="#1e883e")  # Change color to #ffffff for uncommented
-    else:
-        # Comment line by adding a #
-        lines[line_number - 1] = "#" + lines[line_number - 1]
-        button.config(bg="#6b6a6a")  # Change color to red for commented
-    # Write back the modified lines
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.writelines(lines)
-
-def initialize_button(line_number, button_name):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-
-    # Create a button and determine its initial state
-    button = tk.Button(
-        ROOT, 
-        text=button_name,  # Set the custom button name
-        bg="#6b6a6a",  # Default background color when first loaded
-        fg="#ffffff",  # Text color
-        width=0,  # Width adjusted for longer names
-        height=0,
-        font=("Jetbrains Mono", 10, "bold"),  # Font style
-        relief="flat"  # Relief style
-    )
-    # Check if the line is commented to set the initial state
-    if lines[line_number - 1].strip().startswith("#"):
-        button.config(bg="#6b6a6a")  # Line is commented
-    else:
-        button.config(bg="#1e883e")  # Line is uncommented
-    # Set the command for the button
-    button.config(command=lambda: toggle_comment(line_number, button))
-    button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
-
-# Initialize buttons for specified lines with custom names
-initialize_button(62, "F13\nKOS\n1 tap")
-initialize_button(63, "F14\nKOS\nFame")
-initialize_button(64, "F15\nHound")
-# initialize_button(59, "F16\nHound\nVortex")
-# initialize_button(60, "F17\nHound\nLaggy")
-# initialize_button(61, "F18")
-# initialize_button(62, "F19\nPOSS")
-# initialize_button(63, "F20\nHound")
-# initialize_button(64, "F21\nLaggy")
-# initialize_button(65, "F22")
-# initialize_button(66, "F23")
-# initialize_button(67, "F24")
+ACTION_3.pack( side="left",padx=(1,1), pady=(1,1))
 
 # Restart function that displays the cumulative summary before restarting
 def restart():
@@ -1262,9 +1180,8 @@ def restart():
 
 # Button to restart the script
 Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Restart_BT.pack(padx=(1, 1), pady=(1, 1))
+Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 # keyboard.add_hotkey("esc", restart)
-
 
 #* ███████╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
 #* ██╔════╝████╗  ██║██╔══██╗██║████╗  ██║██╔════╝
@@ -1311,7 +1228,6 @@ Action_region = (216, 99, 374, 253)  # Replace with your actual coordinates
 #     shadow_bar: 0.85,
 # }
 # Action_region = (835, 125, 910, 180)
-
 
 #* Continue Related Images
 cont1 =r"C:\msBackups\shadowfight3\continue\cont1.png"
@@ -1409,15 +1325,14 @@ ROOT.update_idletasks()
 width = ROOT.winfo_width()
 height = ROOT.winfo_height()
 
-# Set x to place the window on the right side of the screen
-x = ROOT.winfo_screenwidth() - width
-# Calculate y to center the window vertically
-y = (ROOT.winfo_screenheight() // 2) - (height // 2)
+# x = ROOT.winfo_screenwidth() - width
+# y = (ROOT.winfo_screenheight() // 2) - (height // 2)
+
+x = (ROOT.winfo_screenwidth() // 2) - (width // 2)
+y = 0
 
 ROOT.geometry(f'{width}x{height}+{x}+{y}')
-
 ROOT.mainloop()
-
 
 
 # from ctypes import windll, c_char_p, c_buffer
