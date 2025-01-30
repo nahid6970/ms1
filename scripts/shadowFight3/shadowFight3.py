@@ -7,7 +7,7 @@ if "python312" not in sys.executable:  # Check if the script is NOT running with
 print(f"Running with: {sys.executable}")
 
 from datetime import datetime
-from tkinter import Tk, Button, messagebox
+from tkinter import Label, Tk, Button, messagebox
 from tkinter import ttk
 import glob
 import pyautogui
@@ -503,8 +503,24 @@ def Attack2Way(button):
     # Save state to the function attribute for persistence
     Attack2Way.state = state
 # Button logic
-T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=0, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+# T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=0, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="ridge" )
+# T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+
+T2REGION_LB = Label(
+    ROOT,
+    text="2Way",
+    bg="#5a9b5a",
+    fg="#ffffff",
+    width=5,
+    height=0,
+    font=("Jetbrainsmono nfp", 12, "bold"),
+    relief="flat",
+    highlightbackground="#ffffff",
+    highlightthickness=1,
+)
+T2REGION_LB.pack(side="left", padx=(1, 1), pady=(1, 1))
+T2REGION_LB.bind("<Button-1>", lambda event: Attack2Way(T2REGION_LB))
+
 
 #* ███████╗ █████╗ ███╗   ███╗███████╗
 #* ██╔════╝██╔══██╗████╗ ████║██╔════╝
