@@ -362,7 +362,8 @@ def show_git_changes(git_path):
         print("Invalid path")
         return
     os.chdir(git_path)
-    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status"])
+    # subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status"])
+    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git diff --stat"])
 
 def update_status():
     while True:
@@ -750,25 +751,25 @@ find(FR_Find)
 # BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,WorkSpace_1))
 # BACK.pack(side="left" ,padx=(0,0))
 
-#! EDIT SPACE
-EDIT_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-EDIT_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROOT1, text="\uf07cedit", width=0, command=lambda:switch_to_frame(EDIT_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
-ENTER_FRAME.pack(side="left", padx=(1,1))
-BOX = tk.Frame(EDIT_FRAME, bg="#1D2027")
-BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
-BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_FRAME))
-BACK.pack(side="left" ,padx=(0,0))
-def Folder(EDIT_FRAME):
-    MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
-    MYPYGUI.pack(side="left" ,padx=(0,0))
-    AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#020202", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahk_v2.ahk"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
-    AHKEDIT.pack(side="left" ,padx=(0,0))
-    KOMOREBIC=tk.Button(BOX,text="Komoreb",width=0 ,fg="#080808", bg="#7fc8f3", command=lambda:(subprocess.Popen(["cmd /c Code C:\\Users\\nahid\\komorebi.json"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
-    KOMOREBIC.pack(side="left" ,padx=(0,0))
-    MYHOMEHTML=tk.Button(BOX,text="myhome.html",width=0 ,fg="#080808", bg="#c7d449", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms2\\myhome.html"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
-    MYHOMEHTML.pack(side="left" ,padx=(0,0))
-Folder(EDIT_FRAME)
+# #! EDIT SPACE
+# EDIT_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+# EDIT_FRAME.pack_propagate(True)
+# ENTER_FRAME = CTkButton(ROOT1, text="\uf07cedit", width=0, command=lambda:switch_to_frame(EDIT_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
+# ENTER_FRAME.pack(side="left", padx=(1,1))
+# BOX = tk.Frame(EDIT_FRAME, bg="#1D2027")
+# BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+# BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_FRAME))
+# BACK.pack(side="left" ,padx=(0,0))
+# def Folder(EDIT_FRAME):
+#     MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+#     MYPYGUI.pack(side="left" ,padx=(0,0))
+#     AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#020202", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahk_v2.ahk"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+#     AHKEDIT.pack(side="left" ,padx=(0,0))
+#     KOMOREBIC=tk.Button(BOX,text="Komoreb",width=0 ,fg="#080808", bg="#7fc8f3", command=lambda:(subprocess.Popen(["cmd /c Code C:\\Users\\nahid\\komorebi.json"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+#     KOMOREBIC.pack(side="left" ,padx=(0,0))
+#     MYHOMEHTML=tk.Button(BOX,text="myhome.html",width=0 ,fg="#080808", bg="#c7d449", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms2\\myhome.html"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+#     MYHOMEHTML.pack(side="left" ,padx=(0,0))
+# Folder(EDIT_FRAME)
 
 #! Function SPACE
 FUNCTION_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
