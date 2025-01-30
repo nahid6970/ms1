@@ -1184,9 +1184,9 @@ def initialize_button(line_number, button_name):
     button.pack(fill='x', padx=(1, 1), pady=(1, 1))  # Fill the horizontal space
 
 # Initialize buttons for specified lines with custom names
-initialize_button(56, "F13\nKOS\n1 tap")
-initialize_button(57, "F14\nKOS\nFame")
-initialize_button(58, "F15\nHound")
+initialize_button(62, "F13\nKOS\n1 tap")
+initialize_button(63, "F14\nKOS\nFame")
+initialize_button(64, "F15\nHound")
 # initialize_button(59, "F16\nHound\nVortex")
 # initialize_button(60, "F17\nHound\nLaggy")
 # initialize_button(61, "F18")
