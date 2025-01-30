@@ -447,7 +447,7 @@ style.map(
     foreground=[("readonly", "#000000")], # Text color
 )
 # Custom Combobox widget (direct styling without ttk.Style)
-key_dropdown = ttk.Combobox( ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("JetBrainsMono NFP", 10), width=14, state="readonly", style="Custom.TCombobox", justify="center")
+key_dropdown = ttk.Combobox( ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("JetBrainsMono NFP", 10, "bold"), width=14, state="readonly", style="Custom.TCombobox", justify="center")
 key_dropdown.pack(side="left", padx=10, pady=5, anchor="center")
 # Set the default dropdown display to just the description
 key_dropdown.set(key_mapping[last_selected_key])
