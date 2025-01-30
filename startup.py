@@ -30,6 +30,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "Flask - Text"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_text.ahk"]},
 {"type": "Command","name": "Komorebi"         ,"paths": [r"C:\ms1\startup\Command\komorebi.ahk"]},
 {"type": "Command","name": "mypygui"          ,"paths": [r"C:\ms1\startup\Command\mypygui.ahk"]},
+{"type": "Command","name": "Open WebUI"  ,"paths": [r"C:\ms1\startup\Command\openwebui.ahk"]},
 {"type": "Command","name": "Remote Control"   ,"paths": [r"C:\ms1\startup\Command\remote_control.ahk"]},
 {"type": "Command","name": "Square-Corner"    ,"paths": [r"C:\ms1\startup\Command\square_corner.ahk"]},
 {"type": "Command","name": "SSHD"             ,"paths": [r"C:\ms1\startup\Command\sshd.ahk"]},
