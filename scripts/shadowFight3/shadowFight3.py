@@ -41,6 +41,7 @@ pyautogui.FAILSAFE = False
 
 
 
+
 import tkinter as tk
 from tkinter import ttk
 import os
@@ -86,6 +87,50 @@ def update_dropdown_display(event=None):
     key_var.set(key_mapping[selected_key])  # Set only "KOS" in dropdown
     save_selected_key(selected_key)  # Save selection
 
+def action_main_handler_5():
+    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+
+    # Get selected function key
+    selected_description = key_var.get()  # "KOS"
+    selected_key = next(k for k, v in key_mapping.items() if v == selected_description)  # Get "F13"
+
+    save_selected_key(selected_key)  # Save selection
+
+    def search_and_act():
+        while not stop_thread_action1:
+            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
+                image_found = True
+                print("Image found in Light Attack 2, resetting action timer.")
+                action_timer = time.time()  # Reset the 5-second timer when image is found
+            else:
+                image_found = False
+                print("Image not found in Light Attack 2.")
+            time.sleep(0.05)
+            # Action performing logic
+            if image_found:
+                pause_other_items2 = True
+                print(f"Triggering AHK with {selected_key} ({selected_description})...")
+                key_down(window, selected_key); time.sleep(5); key_up(window, selected_key)
+                print("AHK action completed.")
+                pause_other_items2 = False
+            else:
+                time.sleep(0.05)  # Prevent CPU usage when idle
+
+    # Start or stop the action handler
+    if Action_Light_Thread and Action_Light_Thread.is_alive():
+        stop_thread_action1 = True
+        Action_Light_Thread.join()  # Wait for thread to stop
+        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
+    else:
+        stop_thread_action1 = False
+        Action_Light_Thread = threading.Thread(target=search_and_act)
+        Action_Light_Thread.daemon = True
+        Action_Light_Thread.start()
+        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
 
 
 # Load last saved key
@@ -95,19 +140,23 @@ last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
 # Dropdown variable (stores the displayed value like "KOS")
 key_var = tk.StringVar(value=key_mapping[last_selected_key])
 
-# Apply a right-to-left effect using justification
-style = ttk.Style()
-style.configure("TCombobox", justify="right")
-
-# Dropdown widget (right-aligned text)
-key_dropdown = ttk.Combobox(ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("Jetbrainsmono nfp", 10), width=12, state="readonly", style="TCombobox")
-key_dropdown.pack(padx=10, pady=5, anchor='e')  # Align to the right side
+# Dropdown widget (shows "F13: KOS" in the menu but only "KOS" when selected)
+key_dropdown = ttk.Combobox(ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("Jetbrainsmono nfp", 10), width=12, state="readonly")
+key_dropdown.pack(padx=10, pady=5)
 
 # Set the default dropdown display to just the description
 key_dropdown.set(key_mapping[last_selected_key])
 
 # Update variable when selection changes
 key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
+
+# Button to start/stop Light Attack 2
+ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
+
+
+
+
 
 
 
