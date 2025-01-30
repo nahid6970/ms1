@@ -417,7 +417,7 @@ key_dropdown.set(key_mapping[last_selected_key])
 key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
 
 # Button to start/stop Light Attack 2
-ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=0, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #! ██████╗ ██╗    ██╗ █████╗ ██╗   ██╗     █████╗ ██╗  ██╗██╗  ██╗
@@ -454,7 +454,7 @@ ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
 #         loss_thread.daemon = True
 #         loss_thread.start()
 #         T2REGION_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-# T2REGION_BT = Button(ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=2, command=Test_2_region_attack, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# T2REGION_BT = Button(ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=0, command=Test_2_region_attack, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 # T2REGION_BT.pack(padx=(1, 1), pady=(1, 1))
 
 # hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
@@ -504,7 +504,7 @@ def Attack2Way(button):
     Attack2Way.state = state
 
 # Button logic
-T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=2, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=0, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 
@@ -515,56 +515,6 @@ T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 #* ██║     ██║  ██║██║ ╚═╝ ██║███████╗
 #* ╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 # #* Fame Fame Fame Fame
-# stop_thread_fame = True
-# def fame_items_handler(window):
-#     try:
-#         while not stop_thread_fame:
-#             # Check if we need to pause this handler
-#             if pause_other_items:
-#                 print("Paused other items handler for 5 seconds.")
-#                 while pause_other_items:
-#                     time.sleep(0.1)  # Wait until actionF is done
-#             if find_image(Resume, confidence=0.8): press_key(window, 'r')
-#             elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
-#             elif find_image(StartFame): press_key(window, 'p')
-#             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-#             elif find_image(e_image, region=e_image_region): press_key(window, 'e')
-#             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-#             # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-#             # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
-#             elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
-
-#             # elif any(find_image(image) for image in notifyF):
-#             #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-#             #     time.sleep(60)
-
-#             time.sleep(2)
-#     except KeyboardInterrupt: print("Script stopped by user.")
-# def fame_Light():
-#     global stop_thread_fame
-#     window = focus_window(window_title)
-#     if not window:
-#         print(f"Window '{window_title}' not found.")
-#         return
-#     fame_items_thread = threading.Thread(target=fame_items_handler, args=(window,))
-#     fame_items_thread.daemon = True
-#     fame_items_thread.start()
-#     fame_items_thread.join()
-# def fame_function_light():
-#     global stop_thread_fame, fame_light_thread, Fame_Light_BT
-#     if fame_light_thread and fame_light_thread.is_alive():
-#         stop_thread_fame = True
-#         fame_light_thread.join()
-#         Fame_Light_BT.config(text="Fame", bg="#bda24a", fg="#000000")
-#     else:
-#         stop_thread_fame = False
-#         fame_light_thread = threading.Thread(target=fame_Light)
-#         fame_light_thread.daemon = True
-#         fame_light_thread.start()
-#         Fame_Light_BT.config(text="Fame", bg="#1d2027", fg="#fc0000")
-# Fame_Light_BT = Button(ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=fame_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-# Fame_Light_BT.pack(padx=(1, 1), pady=(1, 1))
-
 def FameFunction(button):
     """Toggles the two-region attack functionality."""
     # Use a dictionary to manage thread state and reference inside the function
@@ -612,7 +562,7 @@ def FameFunction(button):
     # Save state to the function attribute for persistence
     FameFunction.state = state
 # Button logic
-Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
@@ -717,7 +667,7 @@ def Event_Function(button):
         button.config(text="Stop", bg="#1d2027", fg="#fc0000")
     Event_Function.state = state
 # Create the button for the handler
-EVENT_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=2, command=lambda: Event_Function(EVENT_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+EVENT_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=0, command=lambda: Event_Function(EVENT_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 EVENT_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 #*  ███████╗██╗   ██╗███████╗███╗   ██╗████████╗    ██╗    ██╗     █████╗ ██████╗ ███████╗
@@ -771,7 +721,7 @@ def event_function_Ads():
     if event_light_thread and event_light_thread.is_alive():
         stop_thread_event = True
         event_light_thread.join()
-        Event_w_Ads_BT.config(text="Event\nAds", bg="#ce5129", fg="#000000")
+        Event_w_Ads_BT.config(text="EventA", bg="#ce5129", fg="#000000")
     else:
         stop_thread_event = False
         window = focus_window(window_title)
@@ -781,10 +731,10 @@ def event_function_Ads():
         event_light_thread = threading.Thread(target=event_items_handler, args=(window,))
         event_light_thread.daemon = True
         event_light_thread.start()
-        Event_w_Ads_BT.config(text="Event\nAds", bg="#1d2027", fg="#fc0000")
+        Event_w_Ads_BT.config(text="EventA", bg="#1d2027", fg="#fc0000")
 
-Event_w_Ads_BT = Button( ROOT, text="Event\nAds", bg="#ce5129", fg="#000000", width=5, height=2, command=event_function_Ads, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-Event_w_Ads_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+Event_w_Ads_BT = Button( ROOT, text="EventA", bg="#ce5129", fg="#000000", width=5, height=0, command=event_function_Ads, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 
 #? ██████╗  █████╗ ██╗██████╗ ███████╗
 #? ██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
@@ -834,7 +784,7 @@ def raid_function_light():
         raid_light_thread.daemon = True
         raid_light_thread.start()
         Raid_Light_BT.config(text="Raid", bg="#1d2027", fg="#fc0000")
-Raid_Light_BT = Button(ROOT, text="Raid", bg="#5a9bf7", fg="#000000", width=5, height=2, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Raid_Light_BT = Button(ROOT, text="Raid", bg="#5a9bf7", fg="#000000", width=5, height=0, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Light_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 
@@ -878,7 +828,7 @@ def loss_function():
         loss_thread.daemon = True
         loss_thread.start()
         Loss_BT.config(text="Loss", bg="#1d2027", fg="#fc0000")
-Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=2, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=0, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Loss_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 #* ███████╗███████╗ ██████╗██████╗ ███████╗████████╗    ███████╗██╗ ██████╗ ██╗  ██╗████████╗
@@ -914,7 +864,7 @@ Loss_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 #         Thread_Reset_Secret_Fight.daemon = True
 #         Thread_Reset_Secret_Fight.start()
 #         BT_Secret_Fights.config(text="Secret", bg="#1d2027", fg="#fc0000")
-# BT_Secret_Fights = Button(ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=2, command=Start_SecretFight, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# BT_Secret_Fights = Button(ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=0, command=Start_SecretFight, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 # BT_Secret_Fights.pack(padx=(1, 1), pady=(1, 1))
 
 def SecretFightHandler(button):
@@ -958,7 +908,7 @@ def SecretFightHandler(button):
     SecretFightHandler.state = state
 
 # Button logic
-BT_Secret_Fights = Button( ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=2, command=lambda: SecretFightHandler(BT_Secret_Fights), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+BT_Secret_Fights = Button( ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=0, command=lambda: SecretFightHandler(BT_Secret_Fights), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 BT_Secret_Fights.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 # ███████╗███████╗██╗  ██╗
@@ -1022,7 +972,7 @@ def start_sf4():
         loss_thread.daemon = True
         loss_thread.start()
         SF4_BT.config(text="SF4", bg="#1d2027", fg="#fc0000")
-SF4_BT = Button(ROOT, text="SF4", bg="#8e9636", fg="#000000", width=5, height=2, command=start_sf4, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+SF4_BT = Button(ROOT, text="SF4", bg="#8e9636", fg="#000000", width=5, height=0, command=start_sf4, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 SF4_BT.pack( side="left", padx=(1, 1), pady=(1, 1))
 
 #!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
@@ -1097,7 +1047,7 @@ def action_main_handler_1():
         Action_Light_Thread.start()
         ACTION_1_PY.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
 # Button definition to start/stop the action
-ACTION_1_PY = Button(ROOT, text="dj", bg="#607af0", fg="#222222", width=5, height=2,
+ACTION_1_PY = Button(ROOT, text="dj", bg="#607af0", fg="#222222", width=5, height=0,
                   command=action_main_handler_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_1_PY.pack( side="left", padx=(1, 1), pady=(1, 1))
 
@@ -1169,7 +1119,7 @@ def fight_function():
         fight_thread.daemon = True
         fight_thread.start()
         ACTION_3.config(text="Stop", bg="#1d2027", fg="#fc0000")
-ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, height=2, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, height=0, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 ACTION_3.pack( side="left",padx=(1,1), pady=(1,1))
 
 # Restart function that displays the cumulative summary before restarting
@@ -1179,7 +1129,7 @@ def restart():
     subprocess.Popen([sys.executable] + sys.argv)
 
 # Button to restart the script
-Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=2, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=0, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 # keyboard.add_hotkey("esc", restart)
 
