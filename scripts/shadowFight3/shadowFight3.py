@@ -458,37 +458,6 @@ ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
 #! ██╔═══╝ ██║███╗██║██╔══██║  ╚██╔╝      ██╔══██║██╔══██║██╔═██╗
 #! ███████╗╚███╔███╔╝██║  ██║   ██║       ██║  ██║██║  ██║██║  ██╗
 #! ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
-# stop_thread_loss = True
-# def Tst_2_Region():
-#     global stop_thread_loss
-#     window = focus_window(window_title)
-#     if not window:
-#         print(f"Window '{window_title}' not found.")
-#         return
-#     try:
-#         while not stop_thread_loss:
-#             focus_window(window_title)
-#             #* if any(find_image(image) for image in actionF):
-#             # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-#             if find_image(hornass, confidence=0.7,region=(219, 140, 291, 210)) : press_key(window, 'F20')
-#             elif find_image(hornass, confidence=0.7,region=(302, 144, 370, 209)) : press_key(window, 'F21')
-#             time.sleep(0.1)
-#     except KeyboardInterrupt: print("Script stopped by user.")
-# def Test_2_region_attack():
-#     global stop_thread_loss, loss_thread, T2REGION_BT
-#     if loss_thread and loss_thread.is_alive():
-#         stop_thread_loss = True
-#         loss_thread.join()
-#         T2REGION_BT.config(text="2Way", bg="#5a9b5a", fg="#fff")
-#     else:
-#         stop_thread_loss = False
-#         loss_thread = threading.Thread(target=Tst_2_Region)
-#         loss_thread.daemon = True
-#         loss_thread.start()
-#         T2REGION_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-# T2REGION_BT = Button(ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=0, command=Test_2_region_attack, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-# T2REGION_BT.pack(padx=(1, 1), pady=(1, 1))
-
 # hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
 hornass =r"C:\msBackups\shadowfight3\testing\guardian_trash.png"
 
@@ -531,14 +500,11 @@ def Attack2Way(button):
         # Save the thread in the state dictionary
         state["thread"] = thread
         button.config(text="Stop", bg="#1d2027", fg="#fc0000")
-
     # Save state to the function attribute for persistence
     Attack2Way.state = state
-
 # Button logic
 T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=0, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
-
 
 #* ███████╗ █████╗ ███╗   ███╗███████╗
 #* ██╔════╝██╔══██╗████╗ ████║██╔════╝
