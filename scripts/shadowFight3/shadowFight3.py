@@ -38,58 +38,80 @@ pyautogui.FAILSAFE = False
 #! ██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
 #! ██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
 #! ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-def action_main_handler_5():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    def search_and_act():
-        while not stop_thread_action1:
-            # Image searching logic
-            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print("Triggering AHK...")
-                key_down(window, 'F13'); time.sleep(5); key_up(window, 'F13')
-#                key_down(window, 'F14'); time.sleep(5); key_up(window, 'F14')
-#                key_down(window, 'F15'); time.sleep(5); key_up(window, 'F15')
-#                key_down(window, 'F16'); time.sleep(5); key_up(window, 'F16')
-#                key_down(window, 'F17'); time.sleep(5); key_up(window, 'F17')
-#                key_down(window, 'F18'); time.sleep(5); key_up(window, 'F18')
-#                key_down(window, 'F19'); time.sleep(5); key_up(window, 'F19')
-#                key_down(window, 'F20'); time.sleep(5); key_up(window, 'F20')
-#                key_down(window, 'F21'); time.sleep(5); key_up(window, 'F21')
-#                key_down(window, 'F22'); time.sleep(5); key_up(window, 'F22')
-#                key_down(window, 'F23'); time.sleep(5); key_up(window, 'F23')
-#                key_down(window, 'F24'); time.sleep(5); key_up(window, 'F24')
-                print("AHK action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
-    else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
 
-# Button definition to start/stop Light Attack 2
-ACTION_5_AHK = Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
+
+
+import tkinter as tk
+from tkinter import ttk
+import os
+
+# File path to save the selected key
+SAVE_FILE = r"C:\Users\nahid\selected_key.txt"
+
+# Mapping keys to descriptions
+key_mapping = {
+    "F13": "KOS",
+    "F14": "Attack",
+    "F15": "Defend",
+    "F16": "Special"
+}
+
+# Generate dropdown values like "F13: KOS"
+dropdown_values = {f"{key}: {desc}": key for key, desc in key_mapping.items()}
+
+def save_selected_key(key):
+    """Save the selected key to a file."""
+    try:
+        with open(SAVE_FILE, "w") as file:
+            file.write(key)
+    except Exception as e:
+        print(f"Error saving key: {e}")
+
+def load_selected_key():
+    """Load the last selected key from the file."""
+    if os.path.exists(SAVE_FILE):
+        try:
+            with open(SAVE_FILE, "r") as file:
+                key = file.read().strip()
+                if key in key_mapping:  # Ensure it's a valid option
+                    return key
+        except Exception as e:
+            print(f"Error loading key: {e}")
+    return "F13"  # Default to F13 if no file found
+
+def update_dropdown_display(event=None):
+    """Update the dropdown display to show only the description."""
+    selected_full = key_var.get()  # "F13: KOS"
+    selected_key = dropdown_values[selected_full]  # Extract "F13"
+    key_var.set(key_mapping[selected_key])  # Set only "KOS" in dropdown
+    save_selected_key(selected_key)  # Save selection
+
+
+
+# Load last saved key
+last_selected_key = load_selected_key()
+last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
+
+# Dropdown variable (stores the displayed value like "KOS")
+key_var = tk.StringVar(value=key_mapping[last_selected_key])
+
+# Apply a right-to-left effect using justification
+style = ttk.Style()
+style.configure("TCombobox", justify="right")
+
+# Dropdown widget (right-aligned text)
+key_dropdown = ttk.Combobox(ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("Jetbrainsmono nfp", 10), width=12, state="readonly", style="TCombobox")
+key_dropdown.pack(padx=10, pady=5, anchor='e')  # Align to the right side
+
+# Set the default dropdown display to just the description
+key_dropdown.set(key_mapping[last_selected_key])
+
+# Update variable when selection changes
+key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
+
+
+
+
 
 #* ███████╗██╗███╗   ██╗██████╗     ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗
 #* ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║
