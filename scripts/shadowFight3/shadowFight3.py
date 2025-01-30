@@ -329,10 +329,12 @@ SAVE_FILE = r"C:\Users\nahid\selected_key.txt"
 
 # Mapping keys to descriptions
 key_mapping = {
-    "F13": "KOS",
-    "F14": "Attack",
-    "F15": "Defend",
-    "F16": "Special"
+    "F13": "KOS 2 Tap",
+    "F14": "KOS Fame",
+    "F15": "Hound",
+    "F16": "Hound vortex",
+    "F17": "Hound Laggy",
+    "F18": "Heritage Laggy",
 }
 
 # Generate dropdown values like "F13: KOS"
@@ -514,9 +516,9 @@ def Attack2Way(button):
                     focus_window(window_title)
                     # Example logic
                     if find_image(hornass, confidence=0.7, region=(219, 140, 291, 210)):
-                        press_key(window, 'F20')
+                        press_key(window, 'F23')
                     elif find_image(hornass, confidence=0.7, region=(302, 144, 370, 209)):
-                        press_key(window, 'F21')
+                        press_key(window, 'F24')
                     time.sleep(0.1)
             except KeyboardInterrupt:
                 print("Script stopped by user.")

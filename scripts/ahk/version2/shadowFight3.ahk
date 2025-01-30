@@ -125,7 +125,7 @@ F18:: ; Heritage Laggy
     return
 }
 
-F20:: ; Right Side Enemy
+F23:: ; Right Side Enemy
 {
     global
     StartTime := A_TickCount
@@ -147,7 +147,7 @@ F20:: ; Right Side Enemy
     return
 }
 
-F21:: ; Left Side Enemy
+F24:: ; Left Side Enemy
 {
     global
     StartTime := A_TickCount
