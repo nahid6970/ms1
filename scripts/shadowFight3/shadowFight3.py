@@ -8,6 +8,7 @@ print(f"Running with: {sys.executable}")
 
 from datetime import datetime
 from tkinter import Tk, Button, messagebox
+from tkinter import ttk
 import glob
 import pyautogui
 import pygetwindow as gw
@@ -38,13 +39,6 @@ pyautogui.FAILSAFE = False
 #! ██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
 #! ██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
 #! ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-
-
-
-
-import tkinter as tk
-from tkinter import ttk
-import os
 
 # File path to save the selected key
 SAVE_FILE = r"C:\Users\nahid\selected_key.txt"
@@ -142,7 +136,7 @@ key_var = tk.StringVar(value=key_mapping[last_selected_key])
 
 # Dropdown widget (shows "F13: KOS" in the menu but only "KOS" when selected)
 key_dropdown = ttk.Combobox(ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("Jetbrainsmono nfp", 10), width=12, state="readonly")
-key_dropdown.pack(padx=10, pady=5)
+key_dropdown.pack(side="left",padx=10, pady=5)
 
 # Set the default dropdown display to just the description
 key_dropdown.set(key_mapping[last_selected_key])
@@ -152,15 +146,7 @@ key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
 
 # Button to start/stop Light Attack 2
 ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=2, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_5_AHK.pack(padx=(1, 1), pady=(1, 1))
-
-
-
-
-
-
-
-
+ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #* ███████╗██╗███╗   ██╗██████╗     ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗
 #* ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║
@@ -524,7 +510,7 @@ def Attack2Way(button):
 
 # Button logic
 T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=2, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-T2REGION_BT.pack(padx=(1, 1), pady=(1, 1))
+T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 
 #* ███████╗ █████╗ ███╗   ███╗███████╗
@@ -632,7 +618,7 @@ def FameFunction(button):
     FameFunction.state = state
 # Button logic
 Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=2, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-Fame_BT.pack(padx=(1, 1), pady=(1, 1))
+Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
 #* ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
