@@ -363,8 +363,8 @@ def show_git_changes(git_path):
         return
     os.chdir(git_path)
     # subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status"])
-    # subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git diff --stat"])
-    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git diff --stat && git diff"])
+    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status && git diff --stat"])
+    # subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git diff --stat && git diff"])
 
 
 def update_status():
