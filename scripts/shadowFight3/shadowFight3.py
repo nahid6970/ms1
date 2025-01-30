@@ -163,7 +163,7 @@ def find_image(image_path, confidence=0.7, region=None):
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
-    if is_searching and time.time() - last_found_time > 100: # for ads do 120 second
+    if is_searching and time.time() - last_found_time > 50: # for ads do 120 second
         ntfy_signal_cli()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
