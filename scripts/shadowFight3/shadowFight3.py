@@ -415,9 +415,40 @@ last_selected_key = load_selected_key()
 last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
 # Dropdown variable (stores the displayed value like "KOS")
 key_var = tk.StringVar(value=key_mapping[last_selected_key])
-# Dropdown widget (shows "F13: KOS" in the menu but only "KOS" when selected)
-key_dropdown = ttk.Combobox(ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("Jetbrainsmono nfp", 10), width=12, state="readonly")
-key_dropdown.pack(side="left",padx=10, pady=5, anchor="center")
+
+
+# Create a style object
+style = ttk.Style()
+style.theme_use("alt")
+# themelist
+# "clam" - A modern, clean theme.
+# "alt" - A modern theme with a different style than "clam."
+# "default" - The default theme that comes with Tkinter.
+# "classic" - A classic, older theme.
+# "vista" - A Windows Vista-style theme.
+# "xpnative" - A Windows XP-style theme.
+# "winnative" - A native Windows theme for newer versions of Windows (typically available on Windows OS).
+
+# Configure the Combobox style
+style.configure(
+    "Custom.TCombobox",
+    padding=5,
+    selectbackground="#49ff43",  # Background when selected (fixed)
+    selectforeground="#000000",  # Text color when selected
+    # borderwidth=2,
+    # relief="solid",
+)
+
+# Hover & Selection effects
+style.map(
+    "Custom.TCombobox",
+    background=[("readonly", "#ff6d6d"), ("active", "#ff2323")],
+    fieldbackground=[("readonly", "#49ff43")],
+    foreground=[("readonly", "#000000")], # Text color
+)
+# Custom Combobox widget (direct styling without ttk.Style)
+key_dropdown = ttk.Combobox( ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("JetBrainsMono NFP", 10), width=14, state="readonly", style="Custom.TCombobox", justify="center")
+key_dropdown.pack(side="left", padx=10, pady=5, anchor="center")
 # Set the default dropdown display to just the description
 key_dropdown.set(key_mapping[last_selected_key])
 # Update variable when selection changes
