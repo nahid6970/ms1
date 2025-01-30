@@ -1,11 +1,17 @@
+import sys
+import os
+
+if "python312" not in sys.executable:  # Check if the script is NOT running with Python 3.12
+    os.execvp("python312", ["python312"] + sys.argv)  # Restart with python312
+# Continue running with Python 3.12
+print(f"Running with: {sys.executable}")
+
 from datetime import datetime
 from tkinter import Tk, Button, messagebox
 import glob
-import os
 import pyautogui
 import pygetwindow as gw
 import subprocess
-import sys
 import threading
 import time
 import tkinter as tk
@@ -1335,6 +1341,7 @@ skip=r'C:\msBackups\shadowfight3\skip.png'
 # ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
 # Click_Ads=r"C:\msBackups\shadowfight3\ads\Click_ADS.png"
+
 
 
 
