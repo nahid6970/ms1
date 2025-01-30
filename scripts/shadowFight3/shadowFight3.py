@@ -416,18 +416,10 @@ last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
 # Dropdown variable (stores the displayed value like "KOS")
 key_var = tk.StringVar(value=key_mapping[last_selected_key])
 
-
 # Create a style object
 style = ttk.Style()
 style.theme_use("alt")
-# themelist
-# "clam" - A modern, clean theme.
-# "alt" - A modern theme with a different style than "clam."
-# "default" - The default theme that comes with Tkinter.
-# "classic" - A classic, older theme.
-# "vista" - A Windows Vista-style theme.
-# "xpnative" - A Windows XP-style theme.
-# "winnative" - A native Windows theme for newer versions of Windows (typically available on Windows OS).
+# themelist = clam, alt, default, classic, vista, xpnative, winnative
 
 # Configure the Combobox style
 style.configure(
