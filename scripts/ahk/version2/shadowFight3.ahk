@@ -125,7 +125,29 @@ F18:: ; Heritage Laggy
     return
 }
 
-F23:: ; Right Side Enemy
+F20:: ;! Event
+{
+    global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 1000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        ; SendEvent("{i down}")
+        SendEvent("{x down}")
+        ; SendEvent("{d down}")
+        ; SendEvent("{l down}")
+        ; SendEvent("iiiiiixxxxxxjjiiiiiixxxxxx")
+        SendEvent("jjj")
+        ; SendEvent("{d up}")
+        ; SendEvent("{l up}")
+        SendEvent("{x up}")
+        ; SendEvent("{i up}")
+    }
+    return
+}
+
+F23:: ;! Right Side Enemy
 {
     global
     StartTime := A_TickCount

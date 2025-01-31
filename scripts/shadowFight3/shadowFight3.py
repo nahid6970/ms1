@@ -335,6 +335,7 @@ key_mapping = {
     "F16": "Hound vortex",
     "F17": "Hound Laggy",
     "F18": "Heritage Laggy",
+    "F20": "Event",
 }
 
 # Generate dropdown values like "F13: KOS"
