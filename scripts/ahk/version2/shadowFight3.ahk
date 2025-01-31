@@ -129,7 +129,7 @@ F20:: ;! Event
 {
     global
     StartTime := A_TickCount
-    while (A_TickCount - StartTime < 1000) {
+    while (A_TickCount - StartTime < 5000) {
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
