@@ -316,11 +316,7 @@ def close_window(event=None):
 #! ██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
 #! ██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
 #! ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-
 # Global flag for stopping the threads
-pause_other_items = False
-Action_Light_Thread = None
-stop_thread_action1 = False
 image_found = False
 action_timer = None
 
@@ -369,49 +365,50 @@ def update_dropdown_display(event=None):
     save_selected_key(selected_key)  # Save selection
 
 def action_main_handler_5():
-    global stop_thread_action1, image_found, pause_other_items2, action_timer, Action_Light_Thread
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
+    """Toggles the functionality for Light Attack 2."""
+    state = getattr(action_main_handler_5, "state", {"thread": None, "stop_flag": True})
 
-    # Get selected function key
-    selected_description = key_var.get()  # "KOS"
-    selected_key = next(k for k, v in key_mapping.items() if v == selected_description)  # Get "F13"
-
-    save_selected_key(selected_key)  # Save selection
-
-    def search_and_act():
-        while not stop_thread_action1:
-            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
-                image_found = True
-                print("Image found in Light Attack 2, resetting action timer.")
-                action_timer = time.time()  # Reset the 5-second timer when image is found
-            else:
-                image_found = False
-                print("Image not found in Light Attack 2.")
-            time.sleep(0.05)
-            # Action performing logic
-            if image_found:
-                pause_other_items2 = True
-                print(f"Triggering AHK with {selected_key} ({selected_description})...")
-                key_down(window, selected_key); time.sleep(5); key_up(window, selected_key)
-                print("AHK action completed.")
-                pause_other_items2 = False
-            else:
-                time.sleep(0.05)  # Prevent CPU usage when idle
-
-    # Start or stop the action handler
-    if Action_Light_Thread and Action_Light_Thread.is_alive():
-        stop_thread_action1 = True
-        Action_Light_Thread.join()  # Wait for thread to stop
-        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")  # Update button
+    if state["thread"] and state["thread"].is_alive():
+        # Stop the thread
+        state["stop_flag"] = True
+        state["thread"].join()
+        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")
     else:
-        stop_thread_action1 = False
-        Action_Light_Thread = threading.Thread(target=search_and_act)
-        Action_Light_Thread.daemon = True
-        Action_Light_Thread.start()
-        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
+        # Start the thread
+        state["stop_flag"] = False
+        
+        def search_and_act():
+            window = focus_window(window_title)
+            if not window:
+                print(f"Window '{window_title}' not found.")
+                return
+            
+            selected_description = key_var.get()
+            selected_key = next(k for k, v in key_mapping.items() if v == selected_description)
+            save_selected_key(selected_key)
+            
+            try:
+                while not state["stop_flag"]:
+                    if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
+                        print("Image found in Light Attack 2, resetting action timer.")
+                        action_timer = time.time()
+                        print(f"Triggering AHK with {selected_key} ({selected_description})...")
+                        key_down(window, selected_key); time.sleep(5); key_up(window, selected_key)
+                        print("AHK action completed.")
+                    else:
+                        time.sleep(0.05)
+            except KeyboardInterrupt:
+                print("Script stopped by user.")
+        
+        # Create and start the thread
+        thread = threading.Thread(target=search_and_act)
+        thread.daemon = True
+        thread.start()
+        # Save the thread in the state dictionary
+        state["thread"] = thread
+        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")
+    
+    action_main_handler_5.state = state
 
 # Load last saved key
 last_selected_key = load_selected_key()
