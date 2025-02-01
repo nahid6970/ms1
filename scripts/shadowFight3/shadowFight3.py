@@ -321,7 +321,7 @@ image_found = False
 action_timer = None
 
 # File path to save the selected key
-SAVE_FILE = r"C:\Users\nahid\selected_key.txt"
+SAVE_FILE = r"C:\Users\nahid\sf3_attack.txt"
 
 # Mapping keys to descriptions
 key_mapping = {
