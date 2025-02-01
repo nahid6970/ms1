@@ -751,55 +751,12 @@ def raid_function_light():
 Raid_Light_BT = Button(ROOT, text="Raid", bg="#5a9bf7", fg="#000000", width=5, height=0, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Light_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
-#* ██╗      ██████╗ ███████╗███████╗
-#* ██║     ██╔═══██╗██╔════╝██╔════╝
-#* ██║     ██║   ██║███████╗███████╗
-#* ██║     ██║   ██║╚════██║╚════██║
-#* ███████╗╚██████╔╝███████║███████║
-#* ╚══════╝ ╚═════╝ ╚══════╝╚══════╝
-stop_thread_loss = True
-def TakeL():
-    global stop_thread_loss
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while not stop_thread_loss:
-            focus_window(window_title)
-            #* if any(find_image(image) for image in actionF):
-            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
-            elif find_image(SPACE, confidence=0.8) : press_key(window, ' ')
-            elif find_image(StartFame): press_key(window, 'p')
-            elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-            elif find_image(e_image): press_key(window, 'e')
-            elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-
-            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
-            time.sleep(0.1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-def loss_function():
-    global stop_thread_loss, loss_thread, Loss_BT
-    if loss_thread and loss_thread.is_alive():
-        stop_thread_loss = True
-        loss_thread.join()
-        Loss_BT.config(text="Loss", bg="#443e3e", fg="#fff")
-    else:
-        stop_thread_loss = False
-        loss_thread = threading.Thread(target=TakeL)
-        loss_thread.daemon = True
-        loss_thread.start()
-        Loss_BT.config(text="Loss", bg="#1d2027", fg="#fc0000")
-Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=0, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Loss_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
-
 #* ███████╗███████╗ ██████╗██████╗ ███████╗████████╗    ███████╗██╗ ██████╗ ██╗  ██╗████████╗
 #* ██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝╚══██╔══╝    ██╔════╝██║██╔════╝ ██║  ██║╚══██╔══╝
 #* ███████╗█████╗  ██║     ██████╔╝█████╗     ██║       █████╗  ██║██║  ███╗███████║   ██║
 #* ╚════██║██╔══╝  ██║     ██╔══██╗██╔══╝     ██║       ██╔══╝  ██║██║   ██║██╔══██║   ██║
 #* ███████║███████╗╚██████╗██║  ██║███████╗   ██║       ██║     ██║╚██████╔╝██║  ██║   ██║
 #* ╚══════╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
-
 def SecretFightHandler(button):
     """Toggles the Secret Fight functionality."""
     # Use a dictionary to manage thread state and reference inside the function
@@ -843,6 +800,48 @@ def SecretFightHandler(button):
 # Button logic
 BT_Secret_Fights = Button( ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=0, command=lambda: SecretFightHandler(BT_Secret_Fights), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 BT_Secret_Fights.pack(side="left",padx=(1, 1), pady=(1, 1))
+
+#* ██╗      ██████╗ ███████╗███████╗
+#* ██║     ██╔═══██╗██╔════╝██╔════╝
+#* ██║     ██║   ██║███████╗███████╗
+#* ██║     ██║   ██║╚════██║╚════██║
+#* ███████╗╚██████╔╝███████║███████║
+#* ╚══════╝ ╚═════╝ ╚══════╝╚══════╝
+stop_thread_loss = True
+def TakeL():
+    global stop_thread_loss
+    window = focus_window(window_title)
+    if not window:
+        print(f"Window '{window_title}' not found.")
+        return
+    try:
+        while not stop_thread_loss:
+            focus_window(window_title)
+            #* if any(find_image(image) for image in actionF):
+            if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
+            elif find_image(SPACE, confidence=0.8) : press_key(window, ' ')
+            elif find_image(StartFame): press_key(window, 'p')
+            elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+            elif find_image(e_image): press_key(window, 'e')
+            elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+
+            elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+            time.sleep(0.1)
+    except KeyboardInterrupt: print("Script stopped by user.")
+def loss_function():
+    global stop_thread_loss, loss_thread, Loss_BT
+    if loss_thread and loss_thread.is_alive():
+        stop_thread_loss = True
+        loss_thread.join()
+        Loss_BT.config(text="Loss", bg="#443e3e", fg="#fff")
+    else:
+        stop_thread_loss = False
+        loss_thread = threading.Thread(target=TakeL)
+        loss_thread.daemon = True
+        loss_thread.start()
+        Loss_BT.config(text="Loss", bg="#1d2027", fg="#fc0000")
+Loss_BT = Button(ROOT, text="Loss", bg="#443e3e", fg="#fff", width=5, height=0, command=loss_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+Loss_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 # ███████╗███████╗██╗  ██╗
 # ██╔════╝██╔════╝██║  ██║
