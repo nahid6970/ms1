@@ -594,7 +594,7 @@ def Event_Function(button):
         # Stop the thread
         state["stop_flag"] = True
         state["thread"].join()
-        button.config(text="Event", bg="#FFFFFF", fg="#000000")
+        button.config(text="T1", bg="#ce5129", fg="#000000")
     else:
         # Start the thread
         state["stop_flag"] = False
@@ -607,70 +607,15 @@ def Event_Function(button):
             try:
                 while not state["stop_flag"]:
                     focus_window(window_title)
-                    # Replace with your specific feature logic
                     if find_image(Home, confidence=0.8): press_key(window, 'f')
-                    # if find_image(Home, confidence=0.8): press_ldplayer_screen_with_delays(window, (1265, 351, 2))
                     elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
-
-                    # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-                    # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2)
-                    
-                    # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 1)
-                    # elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
-                    # elif find_image(Click_Ads, confidence=0.95): press_keys_with_delays(window, '3', 1) #! optional
-                    
-                    # elif any(find_image(image, confidence=0.95) for image in continueF): press_keys_with_delays(window, 'c', 1)
-
-                    elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-
+                    elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'num1', 1, 'c', 1)
                     elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
-                    
                     elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
                     elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
-                    # # for ck fighkt
-                    # elif find_image(r"C:\msBackups\shadowfight3\temporary\to_battle.png", confidence=0.8): press_keys_with_delays(window, ' ', 2,)
-                    # elif find_image(r"C:\msBackups\shadowfight3\temporary\fightttt.png", confidence=0.8, region=(1286, 831, 1713, 942)): press_keys_with_delays(window, 'c', 2,)
-                    # elif find_image(r"C:\msBackups\shadowfight3\temporary\Claim.png", confidence=0.8): press_keys_with_delays(window, 'c', 2,)
-            
-                    # # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
-                    # elif find_image(Select_SelectOption, confidence=0.8, region=(385, 622, 816, 753 )): press_keys_with_delays(window, '2', 1) #! optional
-                    # elif find_image(skip, confidence=0.8): press_keys_with_delays(window, ' ', 1) #! optional
-
-                    #* dynamic folder img
+                    #! dynamic folder img
                     [press_keys_with_delays(window, 'c', 1) 
                     for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
-
-                    # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
-                    # elif find_image(back_GPlay, confidence=0.8): press_ldplayer_screen_with_delays(window, (1628, 815, 2)) #! optional
-
-                    # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
-
-                    # for ad_image in ads_images: #! optional
-                    #     ad_location = find_image(ad_image, confidence=0.8)
-                    #     if ad_location:
-                    #         click(window, ad_location.left, ad_location.top) 
-
-                    # [click(window, ad_location.left, ad_location.top) for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-                    # click the middle part of the ads
-                    # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
-                    # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-                    # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
-                    # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-                    # # Check if the no_currency image is found
-                    # elif any(find_image(image) for image in notifyF):
-                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-                    #     time.sleep(60)
-
-                    # # Check if the no_currency image is found
-                    # elif find_image(r'C:\msBackups\shadowfight3\notify\no_currency.png', confidence=0.8):
-                    #     # Run the whatsapp.py script
-                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-                    #     # Wait for 1 minute
-                    #     time.sleep(60)
-
                     time.sleep(0.05)
             except KeyboardInterrupt: print("Script stopped by user.")
         # Create and start the thread
@@ -682,74 +627,8 @@ def Event_Function(button):
         button.config(text="Stop", bg="#1d2027", fg="#fc0000")
     Event_Function.state = state
 # Create the button for the handler
-EVENT_BT = Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=0, command=lambda: Event_Function(EVENT_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+EVENT_BT = Button(ROOT, text="T1", bg="#ce5129", fg="#000000", width=5, height=0, command=lambda: Event_Function(EVENT_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 EVENT_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
-
-#*  ███████╗██╗   ██╗███████╗███╗   ██╗████████╗    ██╗    ██╗     █████╗ ██████╗ ███████╗
-#*  ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝    ██║    ██║    ██╔══██╗██╔══██╗██╔════╝
-#*  █████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║       ██║ █╗ ██║    ███████║██║  ██║███████╗
-#*  ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║       ██║███╗██║    ██╔══██║██║  ██║╚════██║
-#*  ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║       ╚███╔███╔╝    ██║  ██║██████╔╝███████║
-#*  ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝        ╚══╝╚══╝     ╚═╝  ╚═╝╚═════╝ ╚══════╝
-def event_function_Ads():
-    global stop_thread_event, event_light_thread, Event_Light_BT
-    def event_items_handler(window):
-        try:
-            while not stop_thread_event:
-                focus_window(window_title)
-                # Handle the other image searches and actions
-                if find_image(Home, confidence=0.8): press_key(window, 'f')
-                elif find_image(Resume, confidence=0.8): press_key(window, 'r')
-
-                elif find_image(Error_Processing_Video, confidence=0.8): press_key(window, 'esc') #! optional
-                elif any(find_image(image, confidence=0.95) for image in continueADS): press_keys_with_delays(window, 'c', 1)
-
-                elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'u', 1, 'c', 1)
-
-                elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
-
-                # elif find_image(Select_CreepyParty, confidence=0.8): press_keys_with_delays(window, 'y', 1) #! optional
-                elif find_image(Select_SelectOption, confidence=0.8): press_keys_with_delays(window, 'h', 1) #! optional
-
-                # elif find_image(back_battlepass, confidence=0.8): press_keys_with_delays(window, 'b', 1)
-                elif find_image(back_GPlay, confidence=0.8): press_ldplayer_screen_with_delays(window, (1628, 815, 2)) #! optional
-
-                # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! optional
-
-                [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2)
-                for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-                # for ad_image in ads_images: #! optional
-                #     ad_location = find_image(ad_image, confidence=0.8)
-                #     if ad_location:
-                #         click(window, ad_location.left, ad_location.top) 
-
-                # [click(window, ad_location.left, ad_location.top) for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-                # click the middle part of the ads
-                # [click(window, ad_location.left + ad_location.width // 2, ad_location.top + ad_location.height // 2) #! optional
-                # for ad_image in ads_images if (ad_location := find_image(ad_image, confidence=0.8))]
-
-                time.sleep(0.05)
-        except KeyboardInterrupt: print("Other items thread stopped by user.")
-
-    if event_light_thread and event_light_thread.is_alive():
-        stop_thread_event = True
-        event_light_thread.join()
-        Event_w_Ads_BT.config(text="AdsEV", bg="#ce5129", fg="#000000")
-    else:
-        stop_thread_event = False
-        window = focus_window(window_title)
-        if not window:
-            print(f"Window '{window_title}' not found.")
-            return
-        event_light_thread = threading.Thread(target=event_items_handler, args=(window,))
-        event_light_thread.daemon = True
-        event_light_thread.start()
-        Event_w_Ads_BT.config(text="AdsEV", bg="#1d2027", fg="#fc0000")
-
-Event_w_Ads_BT = Button( ROOT, text="AdsEV", bg="#ce5129", fg="#000000", width=5, height=0, command=event_function_Ads, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 
 #? ██████╗  █████╗ ██╗██████╗ ███████╗
 #? ██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
@@ -757,7 +636,7 @@ Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 #? ██╔══██╗██╔══██║██║██║  ██║╚════██║
 #? ██║  ██║██║  ██║██║██████╔╝███████║
 #? ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═════╝ ╚══════╝
-# Raid Raid Raid Raid
+#! Raid Raid Raid Raid
 stop_thread_raid = True
 def raid_items_handler(window):
     try:
@@ -770,11 +649,6 @@ def raid_items_handler(window):
             elif find_image(fight, confidence=0.97): press_key(window, 'c')
             elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
-
-            # elif any(find_image(image) for image in notifyF):
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-            #     time.sleep(60)
-
             time.sleep(0.05)
     except KeyboardInterrupt: print("Script stopped by user.")
 def Raid_Light():
@@ -802,7 +676,6 @@ def raid_function_light():
 Raid_Light_BT = Button(ROOT, text="Raid", bg="#5a9bf7", fg="#000000", width=5, height=0, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Raid_Light_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
-
 #* ██╗      ██████╗ ███████╗███████╗
 #* ██║     ██╔═══██╗██╔════╝██╔════╝
 #* ██║     ██║   ██║███████╗███████╗
@@ -821,13 +694,12 @@ def TakeL():
             focus_window(window_title)
             #* if any(find_image(image) for image in actionF):
             if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1)
-            # elif find_image(Resume, confidence=0.8): press_key(window, 'r')
             elif find_image(SPACE, confidence=0.8) : press_key(window, ' ')
             elif find_image(StartFame): press_key(window, 'p')
             elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
             elif find_image(e_image): press_key(window, 'e')
             elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-            # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+
             elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
             time.sleep(0.1)
     except KeyboardInterrupt: print("Script stopped by user.")
@@ -980,9 +852,8 @@ Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 #* ██╔══╝  ██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
 #* ███████╗██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
 #* ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
-# window title
-window_title='LDPlayer'
 
+window_title='LDPlayer'
 # mhome = r"C:\msBackups\shadowfight3"
 # Home = rf"{mhome}\Home.png"
 
