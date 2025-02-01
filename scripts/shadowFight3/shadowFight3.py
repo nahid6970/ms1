@@ -331,7 +331,7 @@ key_mapping = {
     "F16": "Hound vortex",
     "F17": "Hound Laggy",
     "F18": "Heritage Laggy",
-    "F20": "Event",
+    "F20": "Event"
 }
 
 # Generate dropdown values like "F13: KOS"
@@ -519,6 +519,136 @@ T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 # T2REGION_LB.pack(side="left", padx=(1, 1), pady=(1, 1))
 # T2REGION_LB.bind("<Button-1>", lambda event: Attack2Way(T2REGION_LB))
 
+#* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
+#* ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
+#* █████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║
+#* ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║
+#* ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
+#* ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
+# File path to save the selected key
+EVENT_SAVE_FILE = r"C:\Users\nahid\sf3_event.txt"
+
+# Mapping keys to descriptions
+event_key_mapping = {
+    "num1": "T1",
+    "num2": "T2",
+    "num3": "T3",
+    "num4": "T4"
+}
+
+# Generate dropdown values like "F13: KOS"
+event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mapping.items()}
+
+def event_save_selected_key(key):
+    """Save the selected key to a file."""
+    try:
+        with open(EVENT_SAVE_FILE, "w") as file:
+            file.write(key)
+    except Exception as e:
+        print(f"Error saving key: {e}")
+
+def event_load_selected_key():
+    """Load the last selected key from the file."""
+    if os.path.exists(EVENT_SAVE_FILE):
+        try:
+            with open(EVENT_SAVE_FILE, "r") as file:
+                key = file.read().strip()
+                if key in event_key_mapping:  # Ensure it's a valid option
+                    return key
+        except Exception as e:
+            print(f"Error loading key: {e}")
+    return "num1"
+
+def event_update_dropdown_display(event=None):
+    """Update the dropdown display to show only the description."""
+    selected_full = key_var_eve.get()  # "F13: KOS"
+    selected_key = event_dropdown_values[selected_full]  # Extract "F13"
+    key_var_eve.set(event_key_mapping[selected_key])  # Set only "KOS" in dropdown
+    event_save_selected_key(selected_key)  # Save selection
+
+def Event_Function():
+    """Toggles the functionality for Light Attack 2."""
+    state = getattr(Event_Function, "state", {"thread": None, "stop_flag": True})
+
+    if state["thread"] and state["thread"].is_alive():
+        # Stop the thread
+        state["stop_flag"] = True
+        state["thread"].join()
+        EVENT_BT.config(text="Event", bg="#ce5129", fg="#000000")
+    else:
+        # Start the thread
+        state["stop_flag"] = False
+        
+        def search_and_act():
+            window = focus_window(window_title)
+            if not window:
+                print(f"Window '{window_title}' not found.")
+                return
+            
+            selected_description = key_var_eve.get()
+            selected_key = next(k for k, v in event_key_mapping.items() if v == selected_description)
+            event_save_selected_key(selected_key)
+            
+            try:
+                while not state["stop_flag"]:
+                    if find_image(Home, confidence=0.8): press_key(window, 'f')
+                    elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
+                    elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, selected_key, 1, 'c', 1)
+                    elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
+                    elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
+                    elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
+                    #! dynamic folder img
+                    [press_keys_with_delays(window, 'c', 1) 
+                    for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
+                    time.sleep(0.05)
+            except KeyboardInterrupt: print("Script stopped by user.")
+        
+        # Create and start the thread
+        thread = threading.Thread(target=search_and_act)
+        thread.daemon = True
+        thread.start()
+        # Save the thread in the state dictionary
+        state["thread"] = thread
+        EVENT_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
+    
+    Event_Function.state = state
+
+# Load last saved key
+event_last_selected_key = event_load_selected_key()
+event_last_selected_value = f"{event_last_selected_key}: {event_key_mapping[event_last_selected_key]}"
+# Dropdown variable (stores the displayed value like "KOS")
+key_var_eve = tk.StringVar(value=event_key_mapping[event_last_selected_key])
+
+
+
+# Configure the Combobox style
+style.configure(
+    "EVENT.TCombobox",
+    padding=5,
+    selectbackground="#aeb3bf",  # Background when selected (fixed)
+    selectforeground="#000000",  # Text color when selected
+    # borderwidth=2,
+    # relief="solid",
+)
+
+# Hover & Selection effects
+style.map(
+    "EVENT.TCombobox",
+    background=[("readonly", "#ff6d6d"), ("active", "#ff2323")],
+    fieldbackground=[("readonly", "#aeb3bf")],
+    foreground=[("readonly", "#000000")], # Text color
+)
+# event Combobox widget (direct styling without ttk.Style)
+event_key_dropdown = ttk.Combobox( ROOT, values=list(event_dropdown_values.keys()), textvariable=key_var_eve, font=("JetBrainsMono NFP", 10, "bold"), width=14, state="readonly", style="EVENT.TCombobox", justify="center")
+event_key_dropdown.pack(side="left", padx=10, pady=5, anchor="center")
+# Set the default dropdown display to just the description
+event_key_dropdown.set(event_key_mapping[event_last_selected_key])
+# Update variable when selection changes
+event_key_dropdown.bind("<<ComboboxSelected>>", event_update_dropdown_display)
+
+# Button to start/stop Light Attack 2
+EVENT_BT = tk.Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=0, command=Event_Function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+EVENT_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #* ███████╗ █████╗ ███╗   ███╗███████╗
 #* ██╔════╝██╔══██╗████╗ ████║██╔════╝
@@ -576,56 +706,6 @@ def FameFunction(button):
 # Button logic
 Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
-
-#* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
-#* ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
-#* █████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║
-#* ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║
-#* ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
-#* ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
-def Event_Function(button):
-    """Toggles the functionality."""
-    state = getattr(Event_Function, "state", {"thread": None, "stop_flag": True})
-
-    if state["thread"] and state["thread"].is_alive():
-        # Stop the thread
-        state["stop_flag"] = True
-        state["thread"].join()
-        button.config(text="T1", bg="#ce5129", fg="#000000")
-    else:
-        # Start the thread
-        state["stop_flag"] = False
-
-        def Additional_Function():
-            window = focus_window(window_title)
-            if not window:
-                print(f"Window '{window_title}' not found.")
-                return
-            try:
-                while not state["stop_flag"]:
-                    focus_window(window_title)
-                    if find_image(Home, confidence=0.8): press_key(window, 'f')
-                    elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
-                    elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, 'num1', 1, 'c', 1)
-                    elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
-                    elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
-                    elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
-                    #! dynamic folder img
-                    [press_keys_with_delays(window, 'c', 1) 
-                    for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
-                    time.sleep(0.05)
-            except KeyboardInterrupt: print("Script stopped by user.")
-        # Create and start the thread
-        thread = threading.Thread(target=Additional_Function)
-        thread.daemon = True
-        thread.start()
-        # Save the thread in the state dictionary
-        state["thread"] = thread
-        button.config(text="Stop", bg="#1d2027", fg="#fc0000")
-    Event_Function.state = state
-# Create the button for the handler
-EVENT_BT = Button(ROOT, text="T1", bg="#ce5129", fg="#000000", width=5, height=0, command=lambda: Event_Function(EVENT_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-EVENT_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 #? ██████╗  █████╗ ██╗██████╗ ███████╗
 #? ██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
