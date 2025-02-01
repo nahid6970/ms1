@@ -440,7 +440,7 @@ style.map(
 )
 # Custom Combobox widget (direct styling without ttk.Style)
 key_dropdown = ttk.Combobox( ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("JetBrainsMono NFP", 10, "bold"), width=14, state="readonly", style="Custom.TCombobox", justify="center")
-key_dropdown.pack(side="left", padx=10, pady=5, anchor="center")
+key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
 # Set the default dropdown display to just the description
 key_dropdown.set(key_mapping[last_selected_key])
 # Update variable when selection changes
@@ -619,13 +619,11 @@ event_last_selected_value = f"{event_last_selected_key}: {event_key_mapping[even
 # Dropdown variable (stores the displayed value like "KOS")
 key_var_eve = tk.StringVar(value=event_key_mapping[event_last_selected_key])
 
-
-
 # Configure the Combobox style
 style.configure(
     "EVENT.TCombobox",
     padding=5,
-    selectbackground="#aeb3bf",  # Background when selected (fixed)
+    selectbackground="#fa9f49",  # Background when selected (fixed)
     selectforeground="#000000",  # Text color when selected
     # borderwidth=2,
     # relief="solid",
@@ -635,12 +633,12 @@ style.configure(
 style.map(
     "EVENT.TCombobox",
     background=[("readonly", "#ff6d6d"), ("active", "#ff2323")],
-    fieldbackground=[("readonly", "#aeb3bf")],
+    fieldbackground=[("readonly", "#fa9f49")],
     foreground=[("readonly", "#000000")], # Text color
 )
 # event Combobox widget (direct styling without ttk.Style)
 event_key_dropdown = ttk.Combobox( ROOT, values=list(event_dropdown_values.keys()), textvariable=key_var_eve, font=("JetBrainsMono NFP", 10, "bold"), width=14, state="readonly", style="EVENT.TCombobox", justify="center")
-event_key_dropdown.pack(side="left", padx=10, pady=5, anchor="center")
+event_key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
 # Set the default dropdown display to just the description
 event_key_dropdown.set(event_key_mapping[event_last_selected_key])
 # Update variable when selection changes
