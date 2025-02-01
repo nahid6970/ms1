@@ -139,3 +139,38 @@
 # ACTION_3.pack( side="left",padx=(1,1), pady=(1,1))
 
 
+
+
+
+
+# Thread_Secret_Fights = True
+# Thread_Reset_Secret_Fight = None
+# def SecretFights():
+#     global Thread_Secret_Fights
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     try:
+#         while not Thread_Secret_Fights:
+#             focus_window(window_title)
+#             if any(find_image(image, confidence=actionF[image], region=(214, 914, 375, 1031)) for image in actionF): press_keys_with_delays(window, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5)
+#             time.sleep(0.1)
+#     except KeyboardInterrupt: print("Script stopped by user.")
+# def Start_SecretFight():
+#     global Thread_Secret_Fights, Thread_Reset_Secret_Fight, BT_Secret_Fights
+#     if Thread_Reset_Secret_Fight and Thread_Reset_Secret_Fight.is_alive():
+#         Thread_Secret_Fights = True
+#         Thread_Reset_Secret_Fight.join()
+#         BT_Secret_Fights.config(text="Secret", bg="#62e7ff", fg="#000000")
+#     else:
+#         Thread_Secret_Fights = False
+#         Thread_Reset_Secret_Fight = threading.Thread(target=SecretFights)
+#         Thread_Reset_Secret_Fight.daemon = True
+#         Thread_Reset_Secret_Fight.start()
+#         BT_Secret_Fights.config(text="Secret", bg="#1d2027", fg="#fc0000")
+# BT_Secret_Fights = Button(ROOT, text="Secret", bg="#62e7ff", fg="#000000", width=5, height=0, command=Start_SecretFight, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# BT_Secret_Fights.pack(padx=(1, 1), pady=(1, 1))
+
+
+
