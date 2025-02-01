@@ -905,7 +905,7 @@ def SecretFightHandler(button):
                 while not state["stop_flag"]:
                     focus_window(window_title)
                     if any(find_image(image, confidence=actionF[image], region=(214, 914, 375, 1031)) for image in actionF):
-                        press_keys_with_delays(window, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5, 'x', 0.5)
+                        press_keys_with_delays(window, 'x', 0.5, 'x', 0.5, 'i', 0.5, 'i', 0.5)
                     time.sleep(0.1)
             except KeyboardInterrupt:
                 print("Script stopped by user.")
