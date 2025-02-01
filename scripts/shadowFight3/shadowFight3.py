@@ -626,7 +626,7 @@ def Event_Function(button):
                     elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
                     
                     elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
-
+                    elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
                     # # for ck fighkt
                     # elif find_image(r"C:\msBackups\shadowfight3\temporary\to_battle.png", confidence=0.8): press_keys_with_delays(window, ' ', 2,)
                     # elif find_image(r"C:\msBackups\shadowfight3\temporary\fightttt.png", confidence=0.8, region=(1286, 831, 1713, 942)): press_keys_with_delays(window, 'c', 2,)
@@ -736,7 +736,7 @@ def event_function_Ads():
     if event_light_thread and event_light_thread.is_alive():
         stop_thread_event = True
         event_light_thread.join()
-        Event_w_Ads_BT.config(text="EventA", bg="#ce5129", fg="#000000")
+        Event_w_Ads_BT.config(text="AdsEV", bg="#ce5129", fg="#000000")
     else:
         stop_thread_event = False
         window = focus_window(window_title)
@@ -746,9 +746,9 @@ def event_function_Ads():
         event_light_thread = threading.Thread(target=event_items_handler, args=(window,))
         event_light_thread.daemon = True
         event_light_thread.start()
-        Event_w_Ads_BT.config(text="EventA", bg="#1d2027", fg="#fc0000")
+        Event_w_Ads_BT.config(text="AdsEV", bg="#1d2027", fg="#fc0000")
 
-Event_w_Ads_BT = Button( ROOT, text="EventA", bg="#ce5129", fg="#000000", width=5, height=0, command=event_function_Ads, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Event_w_Ads_BT = Button( ROOT, text="AdsEV", bg="#ce5129", fg="#000000", width=5, height=0, command=event_function_Ads, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 
 #? ██████╗  █████╗ ██╗██████╗ ███████╗
@@ -1277,7 +1277,7 @@ skip=r'C:\msBackups\shadowfight3\skip.png'
 # ads_images = [ads1, ads2, ads3, ads4, ads5, ads6, ads7, ads8, ads9, ads10, ads11, ads12, sf_ads1]
 
 # Click_Ads=r"C:\msBackups\shadowfight3\ads\Click_ADS.png"
-
+default_ads=r"C:\msBackups\shadowfight3\event\inside_ads.png"
 
 
 
