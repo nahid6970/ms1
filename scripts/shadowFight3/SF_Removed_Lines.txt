@@ -1,0 +1,141 @@
+#!  █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗    ███████╗████████╗██╗   ██╗██╗     ███████╗
+#! ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝╚══██╔══╝╚██╗ ██╔╝██║     ██╔════╝
+#! ███████║   ██║      ██║   ███████║██║     █████╔╝     ███████╗   ██║    ╚████╔╝ ██║     █████╗
+#! ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗     ╚════██║   ██║     ╚██╔╝  ██║     ██╔══╝
+#! ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗    ███████║   ██║      ██║   ███████╗███████╗
+#! ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝    ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝
+
+#! ██████╗      ██╗
+#! ██╔══██╗     ██║
+#! ██║  ██║     ██║
+#! ██║  ██║██   ██║
+#! ██████╔╝╚█████╔╝
+#! ╚═════╝  ╚════╝
+# # Unified function to handle both image searching and performing actions
+# def action_main_handler_1():
+#     global stop_thread_action1, image_found, pause_other_items, action_timer, Action_Light_Thread
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     def search_and_act():
+#         holding_keys = False
+#         while not stop_thread_action1:
+#             # Image searching logic
+#             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+#                 image_found = True
+#                 print("Image found, resetting action timer.")
+#                 action_timer = time.time()  # Reset the 5-second timer when image is found
+#             else:
+#                 image_found = False
+#                 print("Image not found.")
+#             time.sleep(0.05)  # Check image every 0.05 seconds
+#             # Action performing logic
+#             if image_found:
+#                 pause_other_items = True
+#                 holding_keys = True
+#                 while holding_keys and not stop_thread_action1:
+#                     # Continuously press keys for 5 seconds
+#                     if time.time() - action_timer >= 5:
+#                         print("5 seconds of action completed. Stopping.")
+#                         holding_keys = False
+#                         break
+#                     # Key press logic
+#                     key_down(window, 'd')
+#                     press_key(window, 'j')
+#                     press_key(window, 'j')
+#                     key_up(window, 'd')
+#                     time.sleep(0.1)
+#                 # Release the keys after action is completed
+#                 key_up(window, 'd')
+#                 pause_other_items = False
+#             else:
+#                 time.sleep(0.05)  # Prevent CPU usage when idle
+#     # Start or stop the action handler
+#     if Action_Light_Thread and Action_Light_Thread.is_alive():
+#         stop_thread_action1 = True
+#         Action_Light_Thread.join()  # Wait for thread to stop
+#         ACTION_1_PY.config(text="dj", bg="#607af0", fg="#222222")  # Update button
+#     else:
+#         stop_thread_action1 = False
+#         Action_Light_Thread = threading.Thread(target=search_and_act)
+#         Action_Light_Thread.daemon = True
+#         Action_Light_Thread.start()
+#         ACTION_1_PY.config(text="Stop", bg="#1d2027", fg="#fc0000")  # Update button
+# # Button definition to start/stop the action
+# ACTION_1_PY = Button(ROOT, text="dj", bg="#607af0", fg="#222222", width=5, height=0,
+#                   command=action_main_handler_1, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# ACTION_1_PY.pack( side="left", padx=(1, 1), pady=(1, 1))
+
+#! ██╗  ██╗███████╗ █████╗ ██╗   ██╗██╗   ██╗
+#! ██║  ██║██╔════╝██╔══██╗██║   ██║╚██╗ ██╔╝
+#! ███████║█████╗  ███████║██║   ██║ ╚████╔╝
+#! ██╔══██║██╔══╝  ██╔══██║╚██╗ ██╔╝  ╚██╔╝
+#! ██║  ██║███████╗██║  ██║ ╚████╔╝    ██║
+#! ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝  ╚═══╝     ╚═╝
+# stop_thread_action3 = True
+# fight_thread = None
+# pause_other_items = False
+# def fight_heavy_handler(window):
+#     global pause_other_items
+#     holding_keys = False
+#     fight_duration = 5  # Initial duration for holding the keys (in seconds)
+#     try:
+#         while not stop_thread_action3:
+#             focus_window(window_title)
+#             if any(find_image(image, confidence=actionF[image]) for image in actionF):
+#                 # Pause the other items handler
+#                 pause_other_items = True
+#                 start_time = time.time()
+#                 while time.time() - start_time < fight_duration:
+#                     if not holding_keys:
+#                         key_down(window, 'j')
+#                         key_down(window, 'l')
+#                         holding_keys = True
+#                     # Check at the 3-second mark if the actionF image is still present
+#                     if time.time() - start_time >= 3:
+#                         if any(find_image(image, confidence=actionF[image]) for image in actionF):
+#                             print("Fight image found again. Extending time.")
+#                             # Extend the duration by resetting start_time and adding 5 more seconds
+#                             start_time = time.time()
+#                             fight_duration = 5
+#                 # Release keys if holding
+#                 if holding_keys:
+#                     key_up(window, 'l')
+#                     key_up(window, 'j')
+#                     holding_keys = False
+#                 # Unpause the other items handler after fight is done
+#                 pause_other_items = False
+#             time.sleep(0.05)
+#     except KeyboardInterrupt: 
+#         print("Fight thread stopped by user.")
+#     finally:
+#         key_up(window, 'l')
+#         key_up(window, 'j')
+#         pause_other_items = False
+# def fight_Heavy():
+#     global stop_thread_action3
+#     window = focus_window(window_title)
+#     if not window:
+#         print(f"Window '{window_title}' not found.")
+#         return
+#     fight_thread = threading.Thread(target=fight_heavy_handler, args=(window,))
+#     fight_thread.daemon = True
+#     fight_thread.start()
+#     fight_thread.join()
+# def fight_function():
+#     global stop_thread_action3, fight_thread, ACTION_3
+#     if fight_thread and fight_thread.is_alive():
+#         stop_thread_action3 = True
+#         fight_thread.join()
+#         ACTION_3.config(text="Heavy", bg="#607af0", fg="#222222")
+#     else:
+#         stop_thread_action3 = False
+#         fight_thread = threading.Thread(target=fight_Heavy)
+#         fight_thread.daemon = True
+#         fight_thread.start()
+#         ACTION_3.config(text="Stop", bg="#1d2027", fg="#fc0000")
+# ACTION_3 = Button(ROOT, text="Heavy", bg="#607af0", fg="#222222", width=5, height=0, command=fight_function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+# ACTION_3.pack( side="left",padx=(1,1), pady=(1,1))
+
+
