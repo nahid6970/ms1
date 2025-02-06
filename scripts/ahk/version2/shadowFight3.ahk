@@ -137,7 +137,7 @@ F19:: ;! Possessed
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-        SendEvent("{i down}")
+        ; SendEvent("{i down}")
 
         SendEvent("{a down}")
         SendEvent("l")
@@ -159,7 +159,7 @@ F19:: ;! Possessed
         Sleep(100)
         SendEvent("{w up}")
 
-        SendEvent("{i up}")
+        ; SendEvent("{i up}")
     }
     return
 }
