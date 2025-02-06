@@ -21,6 +21,7 @@ F13:: ;! KOS 2 Button Spamm
     return
 }
 
+
 F14:: ;! KOS 4 Ability
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
@@ -55,8 +56,7 @@ F14:: ;! KOS 4 Ability
 }
 
 
-
-F15:: ; Hound
+F15:: ;! Hound
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -73,7 +73,8 @@ F15:: ; Hound
     return
 }
 
-F16:: ; Hound vortex
+
+F16:: ;! Hound vortex
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -91,7 +92,8 @@ F16:: ; Hound vortex
     return
 }
 
-F17:: ; Hound Laggy
+
+F17:: ;! Hound Laggy
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -108,7 +110,8 @@ F17:: ; Hound Laggy
     return
 }
 
-F18:: ; Heritage Laggy
+
+F18:: ;! Heritage Laggy
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -124,6 +127,44 @@ F18:: ; Heritage Laggy
     }
     return
 }
+
+
+F19:: ;! Possessed
+{ ; V1toV2: Added bracket
+    global ; V1toV2: Made function global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        SendEvent("{i down}")
+
+        SendEvent("{a down}")
+        SendEvent("l")
+        Sleep(100)
+        SendEvent("{a up}")
+
+        SendEvent("{d down}")
+        SendEvent("l")
+        Sleep(100)
+        SendEvent("{d up}")
+
+        SendEvent("{s down}")
+        SendEvent("l")
+        Sleep(100)
+        SendEvent("{s up}")
+
+        SendEvent("{w down}")
+        SendEvent("l")
+        Sleep(100)
+        SendEvent("{w up}")
+
+        SendEvent("{i up}")
+    }
+    return
+}
+
+
 
 F20:: ;! Event
 {
@@ -323,42 +364,9 @@ F24:: ; Left Side Enemy
 ;     return
 ; } ; V1toV2: Added Bracket before hotkey or Hotstring
 
-;     F19:: ; possessed
-; { ; V1toV2: Added bracket
-; global ; V1toV2: Made function global
-;         StartTime := A_TickCount
-;         while (A_TickCount - StartTime < 5000)
-;         {
-;             if !WinActive("ahk_exe dnplayer.exe")
-;             {
-;                 break
-;             }
-;             SendEvent("{i down}")
 
-;             SendEvent("{a down}")
-;             SendEvent("l")
-;             Sleep(100)
-;             SendEvent("{a up}")
 
-;             SendEvent("{d down}")
-;             SendEvent("l")
-;             Sleep(100)
-;             SendEvent("{d up}")
 
-;             SendEvent("{s down}")
-;             SendEvent("l")
-;             Sleep(100)
-;             SendEvent("{s up}")
-
-;             SendEvent("{w down}")
-;             SendEvent("l")
-;             Sleep(100)
-;             SendEvent("{w up}")
-
-;             SendEvent("{i up}")
-;         }
-;     return
-;     }
 
 ; ;     F20:: ; Hound
 ; ; { ; V1toV2: Added bracket
