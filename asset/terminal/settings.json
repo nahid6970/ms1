@@ -4,27 +4,24 @@
     "actions": 
     [
         {
+            "command": "openSystemMenu",
+            "id": "User.openSystemMenu"
+        },
+        {
             "command": 
             {
                 "action": "copy",
                 "singleLine": false
             },
-            "id": "User.copy.644BA8F2",
-            "keys": "ctrl+c"
-        },
-        {
-            "command": "unbound",
-            "keys": "alt+space"
-        },
-        {
-            "command": "openSystemMenu",
-            "id": "User.openSystemMenu",
-            "keys": "ctrl+alt+space"
+            "id": "User.copy.644BA8F2"
         },
         {
             "command": "paste",
-            "id": "User.paste",
-            "keys": "ctrl+v"
+            "id": "User.paste"
+        },
+        {
+            "command": "find",
+            "id": "User.find"
         },
         {
             "command": 
@@ -33,13 +30,7 @@
                 "split": "auto",
                 "splitMode": "duplicate"
             },
-            "id": "User.splitPane.A6751878",
-            "keys": "alt+shift+d"
-        },
-        {
-            "command": "find",
-            "id": "User.find",
-            "keys": "ctrl+shift+f"
+            "id": "User.splitPane.A6751878"
         }
     ],
     "autoHideWindow": false,
@@ -52,6 +43,33 @@
     "firstWindowPreference": "defaultProfile",
     "initialCols": 120,
     "initialPosition": ",",
+    "keybindings": 
+    [
+        {
+            "id": "User.copy.644BA8F2",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": null,
+            "keys": "alt+space"
+        },
+        {
+            "id": "User.openSystemMenu",
+            "keys": "ctrl+alt+space"
+        },
+        {
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "User.paste",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "User.splitPane.A6751878",
+            "keys": "alt+shift+d"
+        }
+    ],
     "launchMode": "default",
     "minimizeToNotificationArea": false,
     "newTabMenu": 
