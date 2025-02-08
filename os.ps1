@@ -220,6 +220,7 @@ function Show-MainMenu {
                 $submenuListBox.Items.Add("WIMUtil")
                 $submenuListBox.Items.Add("AppControl Manager")
                 $submenuListBox.Items.Add("Harden Windows Security Using GUI")
+                $submenuListBox.Items.Add("Winhance")
             }
             "Backup & Restore" {
                 $submenuListBox.Items.Add("decrypt rclone.conf & move")
@@ -256,9 +257,13 @@ function Show-MainMenu {
             "WIMUtil" {
                 nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | iex"
             }
-
+            
             "Harden Windows Security Using GUI" {
                 nw_powershell_asadmin -Command "(irm 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|iex"
+            }
+            
+            "Winhance" {
+                nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | iex"
             }
 
             "AppControl Manager" {
