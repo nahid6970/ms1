@@ -2,7 +2,7 @@
 #include <UIA>
 
 Run("chrome.exe --new-window http://192.168.0.1/")
-Sleep(2000)
+Sleep(3000)
 
 chromeEl := UIA.ElementFromHandle("TL-WR840N - Google Chrome ahk_exe chrome.exe")
 
