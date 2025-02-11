@@ -77,6 +77,7 @@ Write-Output ""
 & yt-dlp.exe --list-formats $URL
 
 # While loop until the user is satisfied with the output and confirms using the Check-Format function
+
 do {
     Write-Output ""
     Write-Output "---------------------------------------------------------------------------"
@@ -89,14 +90,23 @@ do {
     Write-Output "6. -UPDATE PROGRAM- (Admin May Be Required)"
     Write-Output ""
 
-    $choice = Read-Host "Type your choice number" # Takes in choice from the user
-    if (($choice -eq 4) -or ($choice -eq 5)) { $format = Custom-Formats }
-    if ($choice -eq 6) {Update-Program}
-    $format = Set-Format
-    Check-Format
-    $confirm = Read-Host "Press Enter to confirm or type 'n' to reselect format"
+    $choice = Read-Host "Type your choice number" 
 
-} while ($confirm -ne "")
+    if (($choice -eq 4) -or ($choice -eq 5)) { 
+        $format = Custom-Formats
+    }
+    $format = Set-Format
+
+    # Instead of calling Check-Format, we can use the yt-dlp output to get the format
+    Write-Output "Checking Format..."
+    & yt-dlp.exe --get-format $URL | Select-String -Pattern $format
+
+    # Now, let's auto-proceed with the selected format
+    Write-Output ""
+    Write-Output "Running Command:   ./yt-dlp.exe $format $URL"
+    & yt-dlp.exe $format $URL 
+
+} while (Read-Host "Press Enter to continue or type 'n' to reselect format") # Added this line
 
 # Final Run
 Write-Output ""
