@@ -22,7 +22,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ScreenDimmer:
 
 Gui Dimmer:+AlwaysOnTop
-Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
+; Menu, Tray, NoStandard ; Disable default tray menu items (Restore, Pause, etc.)
 Gui, Dimmer:Add, Text, vDim x0 y0, Dimmer
 Gui, Dimmer:Add, Text, vBright x0 y0, Brighter
 Options := "Range0-180 NoTicks Buddy1Dim Buddy2Bright vSD_MySlider gSD_Dimmer"
@@ -31,13 +31,13 @@ Gui, Dimmer:Add, StatusBar, gSD_Reset, Default Brightness 128 `t`t(Click Status 
 SB_SetIcon("Shell32.dll", 44)
 DisplaySetBrightness( 128 )
 
-Menu, Tray, Icon, Shell32.dll, 44
-Menu, Tray, Add, Reset Dimmer, SD_Reset
-Menu, Tray, Icon, Reset Dimmer, Shell32.dll, 44  ; Change icon to a star
-Menu, Tray, Add, Show Dimmer, SD_ShowWindow
-Menu, Tray, Icon, Show Dimmer, Shell32.dll, 44  ; Change icon to a star
-Menu, Tray, Default, Show Dimmer
-Menu, Tray, Click, 1
+; Menu, Tray, Icon, Shell32.dll, 44
+; Menu, Tray, Add, Reset Dimmer, SD_Reset
+; Menu, Tray, Icon, Reset Dimmer, Shell32.dll, 44  ; Change icon to a star
+; Menu, Tray, Add, Show Dimmer, SD_ShowWindow
+; Menu, Tray, Icon, Show Dimmer, Shell32.dll, 44  ; Change icon to a star
+; Menu, Tray, Default, Show Dimmer
+; Menu, Tray, Click, 1
 Gui, Dimmer:Show, W300, Screen Brightness
 
 Return
