@@ -34,7 +34,7 @@ myGui.Add("Text", "x+5 yp Background31ffc1 c000000 w50 +Center +Border", "").
 
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.Add("Text", "xm y+5  w200 +Center Border", "AHK-Scripts").SetFont("s12 Bold", "Jetbrainsmono nfp")
-myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "AhkConverter").OnEvent("Click", (*) => Run("C:\msBackups\Autohotkey\AHK_converter\QuickConvertorV2_scintilla.ahk", , "Hide"))
+myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "AhkConverter").OnEvent("Click", (*) => (myGui.Destroy(),Run("C:\msBackups\Autohotkey\AHK_converter\QuickConvertorV2_scintilla.ahk", , "Hide")))
 myGui.Add("Text", "x+5 yp Background32ec44 cBlack w200 +Center", "UIA-V2").OnEvent("Click", (*) => (myGui.Destroy(),Run("C:\ms1\scripts\ahk\UIA_v2\Lib\UIA.ahk", , "Hide")))
 
 myGui.Add("Text", "xm y+5  w200 +Center Border", "Komorebi").SetFont("s12 Bold", "Jetbrainsmono nfp")
