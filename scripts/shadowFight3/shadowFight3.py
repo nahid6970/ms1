@@ -946,12 +946,14 @@ uppercut=r"C:\msBackups\shadowfight3\action\uppercut.png"
 Peg_Top=r"C:\msBackups\shadowfight3\action\peg_top.png"
 KOS_Cloud=r"C:\msBackups\shadowfight3\action\Kos_Cloud.png"
 Temporary_Kibo=r"C:\msBackups\shadowfight3\action\temporary_kibo.png"
+Temporary_Serge=r"C:\msBackups\shadowfight3\action\temporary_serge.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
     eruption: 0.85,
     KOS_Cloud: 0.85,
     Temporary_Kibo: 0.85,
+    Temporary_Serge: 0.85,
     thud: 0.7,
     collector: 0.7,
     uppercut: 0.7,
