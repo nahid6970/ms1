@@ -598,7 +598,7 @@ def Event_Function():
                     elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
                     elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
                     elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
-                    elif find_image(Select_SelectOption, confidence=0.8, region=(385, 622, 816, 753 )): press_keys_with_delays(window, 'h', 1) #! optional
+                    elif find_image(Select_SelectOption, confidence=0.8, region=(1106, 632, 1509, 748)): press_keys_with_delays(window, 'hxixixix', 1) #! optional
                     #! dynamic folder img
                     [press_keys_with_delays(window, 'c', 1) 
                     for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
@@ -945,11 +945,13 @@ bolt=r"C:\msBackups\shadowfight3\action\bolt.png"
 uppercut=r"C:\msBackups\shadowfight3\action\uppercut.png"
 Peg_Top=r"C:\msBackups\shadowfight3\action\peg_top.png"
 KOS_Cloud=r"C:\msBackups\shadowfight3\action\Kos_Cloud.png"
+Temporary_Kibo=r"C:\msBackups\shadowfight3\action\temporary_kibo.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
     eruption: 0.85,
     KOS_Cloud: 0.85,
+    Temporary_Kibo: 0.85,
     thud: 0.7,
     collector: 0.7,
     uppercut: 0.7,

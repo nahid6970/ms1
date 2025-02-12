@@ -175,14 +175,14 @@ F20:: ;! Event
             break
         }
         ; SendEvent("{i down}")
-        ; SendEvent("{x down}")
-        SendEvent("{d down}")
+        SendEvent("{x down}")
+        ; SendEvent("{d down}")
         ; SendEvent("{l down}")
         ; SendEvent("iiiiiixxxxxxjjiiiiiixxxxxx")
-        SendEvent("jjj")
-        SendEvent("{d up}")
+        SendEvent("xxx")
+        ; SendEvent("{d up}")
         ; SendEvent("{l up}")
-        ; SendEvent("{x up}")
+        SendEvent("{x up}")
         ; SendEvent("{i up}")
     }
     return
