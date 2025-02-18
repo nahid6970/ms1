@@ -123,7 +123,8 @@ def ntfy_signal_cli():
                 # Get the current date and time in 12-hour format
                 current_time = datetime.now().strftime("%I:%M %p, %d-%b-%Y")
                 # Properly escape the message for PowerShell
-                command = f'signal-cli -a +8801533876178 send -m \'{current_time}\' +8801779787186'
+                # command = f'signal-cli -a +8801533876178 send -m \'{current_time}\' +8801779787186'
+                command = f'signal-cli --trust-new-identities always -a +8801533876178 send -m \'{current_time}\' +8801779787186'
                 # Execute the command
                 os.system(f"powershell -Command \"{command}\"")
                 print(f"Command executed: {command}")
