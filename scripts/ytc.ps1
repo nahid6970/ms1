@@ -25,13 +25,14 @@ $options = "--no-mtime"
 # Sets $format variable based on user-inputted choice, which is used in the final command as format-related parameters
 function Set-Format {
     Switch ($choice) {
-        1 {Write-Output $null}
+        1 {Write-Output "-f bestvideo+bestaudio"} # Default for option 1
         2 {Write-Output "-f best"}
         3 {Write-Output "-f bestvideo+bestaudio/best --merge-output-format mp4"}
-        4 {Write-Output -f $format --merge-output-format mp4}
-        5 {Write-Output -f $format}
+        4 {Write-Output "-f $format --merge-output-format mp4"}
+        5 {Write-Output "-f $format"}
     }
 }
+
 
 # Outputs a preview of the format for user approval
 function Check-Format {
