@@ -171,6 +171,10 @@
       "id": "MuMuPlayer.exe",
       "matching_strategy": "Equals" },
 
+    { "kind": "Exe",
+      "id": "ChatGPT.exe",
+      "matching_strategy": "Equals" },
+
     { "kind": "Title",
       "id": "OS_v2",
       "matching_strategy": "Equals" }

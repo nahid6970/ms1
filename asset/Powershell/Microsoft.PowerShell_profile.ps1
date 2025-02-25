@@ -654,10 +654,10 @@ Stop-Process -Name "dnplayer"
 Stop-Process -Name "chrome"
 }
 
-function yay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
+function yy { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
 function nay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
 
-function yayw1 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install.ps1" }
+function ww { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install.ps1" }
 function yayw2 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
 function nayw { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
 function yaywn1 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_n_install.ps1" }
