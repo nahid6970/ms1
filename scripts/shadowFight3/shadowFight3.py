@@ -532,10 +532,10 @@ EVENT_SAVE_FILE = r"C:\Users\nahid\sf3_event.txt"
 
 # Mapping keys to descriptions
 event_key_mapping = {
-    "num4": "T4",
-    "num3": "T3",
-    "num2": "T2",
     "num1": "T1",
+    "num2": "T2",
+    "num3": "T3",
+    "num4": "T4",
 }
 
 # Generate dropdown values like "F13: KOS"
@@ -599,7 +599,8 @@ def Event_Function():
                     elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
                     elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
                     elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
-                    elif find_image(Select_SelectOption, confidence=0.8, region=(1106, 632, 1509, 748)): press_keys_with_delays(window, 'hxixixix', 1) #! optional
+                    # elif find_image(Select_SelectOption, confidence=0.8, region=(1106, 632, 1509, 748)): press_keys_with_delays(window, 'hxixixix', 1) #! optional
+                    elif find_image(r"C:\msBackups\shadowfight3\event\SELECT.png", confidence=0.8, region=(1148,186,1445,503)): press_keys_with_delays(window, '1', 1) #! optional
                     #! dynamic folder img
                     [press_keys_with_delays(window, 'c', 1) 
                     for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
