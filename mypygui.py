@@ -663,10 +663,10 @@ Info_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utilit
 Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True))
 # Info_lb.bind("<Button-1>",lambda event:get_active_window_info())
 
-wifi_reboot_lb=tk.Label(ROOT1, text="\udb85\udec4",bg="#1d2027",fg="#3ac0ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
-wifi_reboot_lb.pack(side="left",padx=(3,3),pady=(0,0))
-wifi_reboot_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\ahk\\UIA_v2\\wifi_reboot.ahk"], shell=True))
-wifi_reboot_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\ahk\\UIA_v2\\wifi_reboot.ahk"], shell=True))
+# wifi_reboot_lb=tk.Label(ROOT1, text="\udb85\udec4",bg="#1d2027",fg="#3ac0ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
+# wifi_reboot_lb.pack(side="left",padx=(3,3),pady=(0,0))
+# wifi_reboot_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\ahk\\UIA_v2\\wifi_reboot.ahk"], shell=True))
+# wifi_reboot_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\ahk\\UIA_v2\\wifi_reboot.ahk"], shell=True))
 
 # LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 # LockBox_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
