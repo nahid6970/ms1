@@ -17,6 +17,7 @@ auto-execute section of the master script.
 */
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+#NoTrayIcon  ; Hides the script's icon from the notification tray
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ScreenDimmer:
