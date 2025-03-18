@@ -148,6 +148,10 @@
       "matching_strategy": "Equals" },
 
     { "kind": "Exe",
+      "id": "localsend_app.exe",
+      "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "crosvm.exe",
       "matching_strategy": "Equals" },
 
