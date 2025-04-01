@@ -181,11 +181,12 @@ for item in storage_radios:
 from_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 from_frame.grid(row=2, column=0, sticky=tk.W)
 
-ttk.Label(from_frame, text="From:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
+ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 from_radios = [
     {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
-    {"text": "Song:/","value": "m0:/","row": 0,"column": 2},
-    {"text": "Software:/","value": "m1:/","row": 0,"column": 3},
+    {"text": "Song:/","value": "gu:/song","row": 0,"column": 2},
+    {"text": "Software:/","value": "gu:/software","row": 0,"column": 3},
+    {"text": "MX:/","value": "gu:/mx","row": 0,"column": 3},
 ]
 
 for item in from_radios:
@@ -196,11 +197,11 @@ for item in from_radios:
 to_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 to_frame.grid(row=3, column=0, sticky=tk.W)
 
-ttk.Label(to_frame, text="To:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
+ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 to_radios = [
     {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
-    {"text": "Song:/","value": "m0:/","row": 0,"column": 2},
-    {"text": "Software:/","value": "m1:/","row": 0,"column": 3},
+    {"text": "C:/","value": "C:/","row": 0,"column": 2},
+    {"text": "D:/","value": "D:/","row": 0,"column": 3},
 ]
 
 for item in to_radios:
@@ -229,7 +230,7 @@ grep_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
 update_extra_labels()
 
 def execute_command():
-    command = ["rclone", command_var.get(), storage_var.get()]
+    command = ["rclone", command_var.get(), storage_var.get(), from_var.get(), to_var.get()]
     if command_var.get() == "mount":
         # For mount command, generate the specific mount argument
         mount_dir = f"c:/{storage_var.get().strip(':/')}/"
