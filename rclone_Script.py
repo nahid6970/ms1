@@ -184,9 +184,9 @@ from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 from_radios = [
     {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
-    {"text": "Song:/","value": "gu:/song","row": 0,"column": 2},
-    {"text": "Software:/","value": "gu:/software","row": 0,"column": 3},
-    {"text": "MX:/","value": "gu:/mx","row": 0,"column": 4},
+    {"text": "song:/","value": "gu:/song","row": 0,"column": 2},
+    {"text": "software:/","value": "gu:/software","row": 0,"column": 3},
+    {"text": "mx:/","value": "gu:/mx","row": 0,"column": 4},
 ]
 for item in from_radios:
     radio = ttk.Radiobutton(from_frame, text=item["text"], variable=from_var, value=item["value"], style="Custom.TRadiobutton")
