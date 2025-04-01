@@ -25,6 +25,8 @@ root.configure(bg="#282c34")
 # Variables
 command_var = tk.StringVar(value="ls")
 storage_var = tk.StringVar(value="")
+from_var = tk.StringVar(value="")
+to_var = tk.StringVar(value="")
 transfer_var = tk.StringVar(value="4")
 include_var = tk.StringVar(value="*.jpg")
 exclude_var = tk.StringVar(value="*.jpg")
@@ -86,23 +88,23 @@ def update_extra_item(label, key):
 def update_label_color(label, is_selected):
     label.config(bg="#b6fba0" if is_selected else "#fa8a93")
 
-def initialize_labels():
+def Main_Flags():
     for idx, (display_text, _, is_selected) in enumerate(additional_options):
         column = idx // 5
         row = idx % 5
-        label = tk.Label(arguments_frame, text=display_text, font=("Jetbrainsmono nfp",10,"bold"), bg="#b6fba0" if is_selected else "#fa8a93", width=25, anchor="center")
+        label = tk.Label(Main_Flags_list, text=display_text, font=("Jetbrainsmono nfp",10,"bold"), bg="#b6fba0" if is_selected else "#fa8a93", width=25, anchor="center")
         label.grid(row=row, column=column, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, i=idx: toggle_option(l, i))
 
 def update_extra_labels():
     for idx, (key, item) in enumerate(extra_items.items()):
         row = idx
-        label = tk.Label(options_frame, text=item["text"], font=("Jetbrainsmono nfp",10,"bold"), bg="#b6fba0" if item["state"] else "#fa8a93", width=15)
+        label = tk.Label(Filter_Flags, text=item["text"], font=("Jetbrainsmono nfp",10,"bold"), bg="#b6fba0" if item["state"] else "#fa8a93", width=15)
         label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, k=key: update_extra_item(l, k))
         
-        ttk.Label(options_frame, text="Value:").grid(row=row, column=1, sticky=tk.W,)
-        entry = ttk.Entry(options_frame, textvariable=item["var"])
+        ttk.Label(Filter_Flags, text="Value:").grid(row=row, column=1, sticky=tk.W,)
+        entry = ttk.Entry(Filter_Flags, textvariable=item["var"])
         entry.grid(row=row, column=2, sticky=tk.W)
 
 # Create the style for the frame
@@ -115,7 +117,9 @@ command_frame.grid(row=0, column=0, sticky=tk.W)
 ttk.Label(command_frame, text="Command:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 # Command radios configuration
 command_radios = [
-    {"text": "ls"   ,"value": "ls"}   ,
+    {"text": "ls"   ,"value": "ls"},
+    {"text": "copy"   ,"value": "copy"},
+    {"text": "sync"   ,"value": "sync"},
     {"text": "tree" ,"value": "tree"} ,
     {"text": "ncdu" ,"value": "ncdu"} ,
     {"text": "size" ,"value": "size"} ,
@@ -131,7 +135,6 @@ for idx, item in enumerate(command_radios):
 # Create storage frame
 storage_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 storage_frame.grid(row=1, column=0, sticky=tk.W)
-
 
 #! alt1 start
 ttk.Label(storage_frame, text="Storage:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
@@ -174,19 +177,49 @@ for item in storage_radios:
     radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
 
 
+# From
+from_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
+from_frame.grid(row=2, column=0, sticky=tk.W)
+
+ttk.Label(from_frame, text="From:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
+from_radios = [
+    {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
+    {"text": "Song:/","value": "m0:/","row": 0,"column": 2},
+    {"text": "Software:/","value": "m1:/","row": 0,"column": 3},
+]
+
+for item in from_radios:
+    radio = ttk.Radiobutton(from_frame, text=item["text"], variable=from_var, value=item["value"], style="Custom.TRadiobutton")
+    radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
+
+# TO
+to_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
+to_frame.grid(row=3, column=0, sticky=tk.W)
+
+ttk.Label(to_frame, text="To:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
+to_radios = [
+    {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
+    {"text": "Song:/","value": "m0:/","row": 0,"column": 2},
+    {"text": "Software:/","value": "m1:/","row": 0,"column": 3},
+]
+
+for item in to_radios:
+    radio = ttk.Radiobutton(to_frame, text=item["text"], variable=to_var, value=item["value"], style="Custom.TRadiobutton")
+    radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
+
 # Create arguments frame
-arguments_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
-arguments_frame.grid(row=2, column=0, sticky=tk.W)
+Main_Flags_list = ttk.Frame(root, padding="10", style="Black.TFrame")
+Main_Flags_list.grid(row=4, column=0, sticky=tk.W)
 
 # Create labels for additional options
-initialize_labels()
+Main_Flags()
 
 # Create options frame for --transfer, --include, and --exclude
-options_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
-options_frame.grid(row=3, column=0, sticky=tk.W)
+Filter_Flags = ttk.Frame(root, padding="10", style="Black.TFrame")
+Filter_Flags.grid(row=5, column=0, sticky=tk.W)
 
 grep_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
-grep_frame.grid(row=4, column=0, sticky=tk.W)
+grep_frame.grid(row=6, column=0, sticky=tk.W)
 
 ttk.Label(grep_frame, text="Grep Text:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 grep_entry = ttk.Entry(grep_frame, textvariable=grep_var, width=30)
@@ -230,7 +263,7 @@ def clear_terminal():
     subprocess.run("cls", shell=True)
 
 BottomFrame = ttk.Frame(root, padding="10", style="Black.TFrame")
-BottomFrame.grid(row=4, column=0, sticky=tk.E)
+BottomFrame.grid(row=6, column=0, sticky=tk.E)
 
 execute_button = tk.Button(BottomFrame, text="Execute", font=("Jetbrainsmono nfp",12,"bold"), bg="#4da9ff", fg="#000000", command=execute_command)
 execute_button.grid(row=4, column=0, pady=10, padx=10, sticky=tk.W)
