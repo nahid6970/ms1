@@ -45,10 +45,6 @@ viewing_bookmarks = False
 # Global list to store full paths corresponding to listbox items
 current_file_paths = []
 
-# A label to display the full path (place it wherever you like)
-path_label = ttk.Label(root, text="", font=("JetBrainsMono nfp", 10, "bold"), foreground="#060efe", anchor="w")
-path_label.pack(padx=10, pady=5, fill=tk.X)
-
 # Update the path label based on the current selection in the listbox
 def update_path_label(event=None):
     selected_indices = suggestions_list.curselection()
@@ -97,19 +93,22 @@ def perform_search(event):
 
 # Function to display bookmarks (only filename with a star) in the listbox
 def show_bookmarks():
-    global viewing_bookmarks
+    global viewing_bookmarks, current_file_paths
     viewing_bookmarks = True  # Ensure it stays in bookmarks mode
     suggestions_list.delete(0, tk.END)
     
+    current_file_paths = bookmarks  # Store full paths for bookmarks
+    
     if bookmarks:
         for bm in bookmarks:
-            suggestions_list.insert(tk.END, bm)
+            suggestions_list.insert(tk.END, os.path.basename(bm) + " ★")
         suggestions_list.select_set(0)
         suggestions_list.focus_set()
     else:
         suggestions_list.insert(tk.END, "No bookmarks found")
 
     search_bar.focus_set()
+
 
 def reset_viewing_bookmarks(event):
     global viewing_bookmarks
@@ -188,6 +187,7 @@ close_label = tk.Label(top_buttons_frame, text="\uf2d3", font=("JetBrainsMono NF
 close_label.pack(side=tk.RIGHT, padx=5)
 close_label.bind("<Button-1>", lambda e: root.quit())
 
+
 def clear_bookmarks():
     global bookmarks
     if messagebox.askyesno("Clear Bookmarks", "Are you sure you want to clear all bookmarks?"):
@@ -197,9 +197,13 @@ def clear_bookmarks():
             suggestions_list.delete(0, tk.END)
             suggestions_list.insert(tk.END, "No bookmarks found")
 
-clear_bm_label = tk.Label(top_buttons_frame, text="\u232b", font=("JetBrainsMono NFP", 16), fg="#ffffff", bg="#4c44cb", relief="flat")
+clear_bm_label = tk.Label(top_buttons_frame, text="\udb85\ude40", font=("JetBrainsMono NFP", 16), fg="#ffffff", bg="#4c44cb", relief="flat")
 clear_bm_label.pack(side=tk.RIGHT, padx=5)
 clear_bm_label.bind("<Button-1>", lambda e: clear_bookmarks())
+
+# A label to display the full path (place it wherever you like)
+path_label = ttk.Label(top_buttons_frame, text="", font=("JetBrainsMono nfp", 10, "bold"), foreground="#060efe", anchor="w")
+path_label.pack(padx=10, pady=5, fill=tk.X)
 
 # Navigation functions
 def focus_suggestions(event):
