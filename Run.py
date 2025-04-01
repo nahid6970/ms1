@@ -45,6 +45,21 @@ def clear_usage_data():
     show_top_files()
 
 
+# # Show most opened files
+# def show_top_files():
+#     suggestions_list.delete(0, tk.END)
+#     top_files = file_usage_counter.most_common(10)
+
+#     if top_files:
+#         for file, _ in top_files:
+#             suggestions_list.insert(tk.END, file)
+#         suggestions_list.select_set(0)  # Automatically select the first item
+#         suggestions_list.focus_set()  # Set focus to the Listbox
+#     else:
+#         suggestions_list.insert(tk.END, "No files opened yet")
+#     # Refocus on the search bar to allow typing
+#     search_bar.focus_set()
+
 # Show most opened files
 def show_top_files():
     suggestions_list.delete(0, tk.END)
@@ -52,7 +67,9 @@ def show_top_files():
 
     if top_files:
         for file, _ in top_files:
-            suggestions_list.insert(tk.END, file)
+            # Extract the filename using os.path.basename
+            filename = os.path.basename(file)
+            suggestions_list.insert(tk.END, filename)
         suggestions_list.select_set(0)  # Automatically select the first item
         suggestions_list.focus_set()  # Set focus to the Listbox
     else:
