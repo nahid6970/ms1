@@ -179,7 +179,7 @@ for item in storage_radios:
 
 # From
 from_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
-from_frame.grid(row=2, column=0, sticky=tk.W)
+from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 from_radios = [
@@ -188,14 +188,13 @@ from_radios = [
     {"text": "Software:/","value": "gu:/software","row": 0,"column": 3},
     {"text": "MX:/","value": "gu:/mx","row": 0,"column": 4},
 ]
-
 for item in from_radios:
     radio = ttk.Radiobutton(from_frame, text=item["text"], variable=from_var, value=item["value"], style="Custom.TRadiobutton")
     radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
 
 # TO
 to_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
-to_frame.grid(row=3, column=0, sticky=tk.W)
+to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10))
 
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 to_radios = [
@@ -203,7 +202,6 @@ to_radios = [
     {"text": "C:/","value": "C:/rclone_download/","row": 0,"column": 2},
     {"text": "D:/","value": "D:/rclone_download/","row": 0,"column": 3},
 ]
-
 for item in to_radios:
     radio = ttk.Radiobutton(to_frame, text=item["text"], variable=to_var, value=item["value"], style="Custom.TRadiobutton")
     radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
