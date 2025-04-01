@@ -186,7 +186,7 @@ from_radios = [
     {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
     {"text": "Song:/","value": "gu:/song","row": 0,"column": 2},
     {"text": "Software:/","value": "gu:/software","row": 0,"column": 3},
-    {"text": "MX:/","value": "gu:/mx","row": 0,"column": 3},
+    {"text": "MX:/","value": "gu:/mx","row": 0,"column": 4},
 ]
 
 for item in from_radios:
@@ -200,8 +200,8 @@ to_frame.grid(row=3, column=0, sticky=tk.W)
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 to_radios = [
     {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
-    {"text": "C:/","value": "C:/","row": 0,"column": 2},
-    {"text": "D:/","value": "D:/","row": 0,"column": 3},
+    {"text": "C:/","value": "C:/rclone_download/","row": 0,"column": 2},
+    {"text": "D:/","value": "D:/rclone_download/","row": 0,"column": 3},
 ]
 
 for item in to_radios:
