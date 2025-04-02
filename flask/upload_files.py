@@ -18,6 +18,7 @@ html_template = '''
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/2840/2840124.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Sharing with Circular Progress</title>
     <style>
