@@ -8,7 +8,7 @@
     <title>Text Sharing</title>
     <style>
         body {
-            font-family: JetBrains Mono;
+            font-family: 'JetBrains Mono', monospace;
             margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
@@ -34,9 +34,16 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #45a049;
+        }
+        .clean-btn {
+            background-color: #e74c3c;  /* Red background for the Clean button */
+        }
+        .clean-btn:hover {
+            background-color: #c0392b;  /* Darker red on hover */
         }
         .shared-text {
             padding: 10px;
@@ -82,21 +89,17 @@
         function copyText(elementId, buttonId) {
             let textElement = document.getElementById(elementId);
             let text = textElement.innerText;
-
-            // Remove the "-----x-----" separator from the copied text
-            text = text.replace(/\n-----x-----$/, '');  // Remove "-----x-----" at the end of the text
-
+            // Create a temporary textarea to copy text without the separator
             let textarea = document.createElement('textarea');
             textarea.value = text;
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand('copy');
             document.body.removeChild(textarea);
-
+            
             let copyBtn = document.getElementById(buttonId);
             copyBtn.innerText = '✔';
             copyBtn.classList.add('success');
-
             setTimeout(() => {
                 copyBtn.innerText = 'Copy';
                 copyBtn.classList.remove('success');
@@ -108,9 +111,11 @@
 
     <h1>Share Text Locally</h1>
 
-    <form method="POST">
+    <form method="POST" action="/">
         <textarea name="text" rows="5" placeholder="Paste your text here..."></textarea><br><br>
         <button type="submit">Share</button>
+        <!-- Clean button calls the /clean route via POST -->
+        <button type="submit" formaction="/clean" class="clean-btn">Clean</button>
     </form>
 
     <div class="logs">
