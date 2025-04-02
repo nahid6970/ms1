@@ -3,7 +3,7 @@ import datetime
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
-log_file = "C:/Users/nahid/nahidna.log"
+log_file = "C:/msBackups/Shared_Text.log"
 
 def write_to_log(text):
     """Write the shared text to the log file with a timestamp."""
