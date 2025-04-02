@@ -15,7 +15,8 @@ def index():
         directories = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
         files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
         file_times = {
-            f: datetime.fromtimestamp(os.path.getmtime(os.path.join(dir_path, f))).strftime("%I:%M %p %d:%m:%Y")
+            f: datetime.fromtimestamp(os.path.getmtime(os.path.join(dir_path, f))).strftime("%d:%m:%Y %I:%M%p").replace("AM", "am").replace("PM", "pm")
+
             for f in files
         }
     except Exception as e:
