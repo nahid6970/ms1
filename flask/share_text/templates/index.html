@@ -82,8 +82,8 @@
             let textElement = document.getElementById(elementId);
             let text = textElement.innerText;
 
-            // Remove the "---" separator from the copied text
-            text = text.replace(/\n---$/, '');  // Remove "---" at the end of the text
+            // Remove the "-----x-----" separator from the copied text
+            text = text.replace(/\n-----x-----$/, '');  // Remove "-----x-----" at the end of the text
 
             let textarea = document.createElement('textarea');
             textarea.value = text;

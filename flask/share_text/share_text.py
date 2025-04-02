@@ -9,14 +9,14 @@ def write_to_log(text):
     """Write the shared text to the log file with a timestamp."""
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")  # 12-hour format with AM/PM
     with open(log_file, "a", encoding="utf-8") as file:
-        file.write(f"{timestamp}\n{text.strip()}\n---\n")  # Use "---" as a separator
+        file.write(f"{timestamp}\n{text.strip()}\n-----x-----\n")  # Use "-----x-----" as a separator
 
 def read_logs():
     """Read the log file and return logs as a list of (timestamp, text) tuples."""
     if os.path.exists(log_file):
         with open(log_file, "r", encoding="utf-8") as file:
             content = file.read().strip()
-        entries = content.split("\n---\n")  # Split logs by "---"
+        entries = content.split("\n-----x-----\n")  # Split logs by "-----x-----"
         logs = []
         for entry in reversed(entries):  # Reverse to show the latest first
             parts = entry.split("\n", 1)  # Split into timestamp and text
