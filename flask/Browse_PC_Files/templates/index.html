@@ -58,6 +58,12 @@
         .file-list li {
             background-color: #267db8;
         }
+        .file-modified-time {
+        font-size: 12px;
+        color: #ddd;
+        margin-left: 10px;
+        }
+
         .file-list a:hover {
             text-decoration: underline;
         }
@@ -194,13 +200,18 @@
                 {% for file in files %}
                     <li class="file-item">
                         <div class="file-name">
-                            <span class="">📃</span>
+                            <span>📃</span>
                             <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
+                            <br>
+                            <small style="color: #ddd;">
+                                {{ file_times[file] }}
+                            </small>
                         </div>
                         <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn">Download</a>
                     </li>
                 {% endfor %}
             </ul>
+                     
         </div>
     </div>
 

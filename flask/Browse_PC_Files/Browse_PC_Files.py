@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+
 from flask import Flask, request, render_template, send_file, redirect, url_for, flash, Response
 
 app = Flask(__name__)
@@ -7,18 +9,20 @@ app.secret_key = 'your_secret_key'
 @app.route("/", methods=["GET", "POST"])
 def index():
     drive = request.args.get('drive', 'C:/')
-    dir_path = request.args.get('dir_path', drive)  # Default to root of selected drive
+    dir_path = request.args.get('dir_path', drive)
 
     try:
-        # List directories and files
         directories = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
         files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+        file_times = {
+            f: datetime.fromtimestamp(os.path.getmtime(os.path.join(dir_path, f))).strftime("%I:%M %p %d:%m:%Y")
+            for f in files
+        }
     except Exception as e:
         flash(f"Error accessing directory: {e}")
-        directories = []
-        files = []
+        directories, files, file_times = [], [], {}
 
-    return render_template('index.html', directories=directories, files=files, current_dir=dir_path, current_drive=drive)
+    return render_template('index.html', directories=directories, files=files, file_times=file_times, current_dir=dir_path, current_drive=drive)
 
 @app.route("/back")
 def go_back():
