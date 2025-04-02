@@ -42,17 +42,31 @@
             background-color: #fff;
             border-radius: 5px;
             border: 1px solid #ccc;
-            white-space: pre-wrap; /* Preserve line breaks */
-            word-wrap: break-word; /* Enable line breaks for long words */
-            word-break: break-all;  /* Ensure long unbroken strings wrap properly */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-entry {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
         }
         .copy-btn {
-            margin-top: 10px;
+            position: absolute;
+            right: 10px;
+            top: 10px;
             background-color: #007BFF;
             border: none;
             color: white;
-            padding: 10px;
-            font-size: 16px;
+            padding: 5px 10px;
+            font-size: 14px;
             cursor: pointer;
             border-radius: 5px;
         }
@@ -64,20 +78,25 @@
         }
     </style>
     <script>
-        // Function to copy the shared text to the clipboard
-        function copyText() {
-            // Create a temporary textarea element to store the text
-            var textarea = document.createElement('textarea');
-            textarea.value = document.getElementById('shared-text').innerText;
+        function copyText(elementId, buttonId) {
+            let textElement = document.getElementById(elementId);
+            let text = textElement.innerText;
+
+            let textarea = document.createElement('textarea');
+            textarea.value = text;
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand('copy');
             document.body.removeChild(textarea);
 
-            // Change the button text and color to indicate success
-            var copyBtn = document.getElementById('copy-btn');
+            let copyBtn = document.getElementById(buttonId);
             copyBtn.innerText = '✔';
             copyBtn.classList.add('success');
+
+            setTimeout(() => {
+                copyBtn.innerText = 'Copy';
+                copyBtn.classList.remove('success');
+            }, 2000);
         }
     </script>
 </head>
@@ -90,11 +109,16 @@
         <button type="submit">Share</button>
     </form>
 
-    {% if shared_text %}
-    <h2>Shared Text:</h2>
-    <div id="shared-text" class="shared-text">{{ shared_text }}</div>
-    <button id="copy-btn" class="copy-btn" onclick="copyText()">Copy</button>
-    {% endif %}
+    <div class="logs">
+        <h2>Previous Shared Texts:</h2>
+        {% for timestamp, text in logs %}
+            <div class="log-entry">
+                <div class="timestamp">{{ timestamp }}</div>
+                <div id="log-{{ loop.index }}" class="shared-text">{{ text }}</div>
+                <button id="copy-btn-{{ loop.index }}" class="copy-btn" onclick="copyText('log-{{ loop.index }}', 'copy-btn-{{ loop.index }}')">Copy</button>
+            </div>
+        {% endfor %}
+    </div>
 
 </body>
 </html>
