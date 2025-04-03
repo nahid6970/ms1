@@ -225,14 +225,14 @@
 
     <div id="filter-panel"
         style="display: none; position: absolute; top: 40px; right: 10px; background-color: white; padding: 10px; border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 10;">
-            <label><input type="checkbox" class="file-filter" value="jpg"> .jpg</label><br>
-            <label><input type="checkbox" class="file-filter" value="png"> .png</label><br>
-            <label><input type="checkbox" class="file-filter" value="ps1"> .ps1</label><br>
-            <label><input type="checkbox" class="file-filter" value="txt"> .txt</label><br>
-            <label><input type="checkbox" class="file-filter" value="html"> .html</label><br>
-            <label><input type="checkbox" class="file-filter" value="css"> .css</label><br>
-            <label><input type="checkbox" class="file-filter" value="pdf"> .pdf</label><br>
-            <label><input type="checkbox" class="file-filter" value="exe"> .exe</label><br>
+        <label><input type="checkbox" class="file-filter" value="jpg"> .jpg</label><br>
+        <label><input type="checkbox" class="file-filter" value="png"> .png</label><br>
+        <label><input type="checkbox" class="file-filter" value="ps1"> .ps1</label><br>
+        <label><input type="checkbox" class="file-filter" value="txt"> .txt</label><br>
+        <label><input type="checkbox" class="file-filter" value="html"> .html</label><br>
+        <label><input type="checkbox" class="file-filter" value="css"> .css</label><br>
+        <label><input type="checkbox" class="file-filter" value="pdf"> .pdf</label><br>
+        <label><input type="checkbox" class="file-filter" value="exe"> .exe</label><br>
         <button onclick="applyFilter()">Apply Filter</button>
     </div>
 
@@ -264,7 +264,7 @@
                         <br>
                         <small style="color: #ddd;">
                             {{ file_times[file] }} - {{ file_sizes[file] }}
-                          </small>
+                        </small>
                     </div>
                     {% if file.endswith(editable_extensions) %}
                     <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn"><i class="nf nf-fa-edit"></i></a>
@@ -286,38 +286,38 @@
     {% endwith %}
 
     <script>
-    function toggleFilterPanel() {
-        const filterPanel = document.getElementById('filter-panel');
-        filterPanel.style.display = (filterPanel.style.display === 'none') ? 'block' : 'none';
-    }
+        function toggleFilterPanel() {
+            const filterPanel = document.getElementById('filter-panel');
+            filterPanel.style.display = (filterPanel.style.display === 'none') ? 'block' : 'none';
+        }
 
-    // Apply the selected filters
-    function applyFilter() {
-        const selectedFilters = Array.from(document.querySelectorAll('.file-filter:checked'))
-                                     .map(input => input.value);
-        const files = document.querySelectorAll('.file-item');
+        // Apply the selected filters
+        function applyFilter() {
+            const selectedFilters = Array.from(document.querySelectorAll('.file-filter:checked'))
+                .map(input => input.value);
+            const files = document.querySelectorAll('.file-item');
 
-        files.forEach(file => {
-            const fileType = file.getAttribute('data-filetype');
-            // Show file if it matches one of the selected filters or if no filter is selected
-            if (selectedFilters.length === 0 || selectedFilters.includes(fileType)) {
-                file.style.display = 'flex';  // Show the file (keep flex layout)
-            } else {
-                file.style.display = 'none';   // Hide the file
+            files.forEach(file => {
+                const fileType = file.getAttribute('data-filetype');
+                // Show file if it matches one of the selected filters or if no filter is selected
+                if (selectedFilters.length === 0 || selectedFilters.includes(fileType)) {
+                    file.style.display = 'flex';  // Show the file (keep flex layout)
+                } else {
+                    file.style.display = 'none';   // Hide the file
+                }
+            });
+        }
+
+        // Close the filter panel if clicking outside
+        window.addEventListener('click', function (event) {
+            const filterPanel = document.getElementById('filter-panel');
+            const filterButton = document.getElementById('filter-btn');
+
+            // If the clicked element is neither the filter panel nor the filter button, close the panel
+            if (!filterPanel.contains(event.target) && event.target !== filterButton) {
+                filterPanel.style.display = 'none';
             }
         });
-    }
-
-    // Close the filter panel if clicking outside
-    window.addEventListener('click', function(event) {
-        const filterPanel = document.getElementById('filter-panel');
-        const filterButton = document.getElementById('filter-btn');
-        
-        // If the clicked element is neither the filter panel nor the filter button, close the panel
-        if (!filterPanel.contains(event.target) && event.target !== filterButton) {
-            filterPanel.style.display = 'none';
-        }
-    });
 
     </script>
 
