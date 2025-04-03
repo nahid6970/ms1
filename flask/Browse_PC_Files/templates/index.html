@@ -179,38 +179,44 @@
             background-color: #45a049;
         }
 
-        .drive-back-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            /* Aligns items to the left */
-            margin-bottom: 20px;
-        }
+    .drive-back-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* Aligns items to the left */
+    margin-bottom: 20px;
+    }
+    .drive-buttons {
+    font-family: JetBrainsMono NFP, sans-serif;
+    position: fixed;  /* Fix it at the top */
+    z-index: 9999;    /* Ensure it's on top of other elements */
+    display: flex;
+    align-items: center;
+    background-color: #333; /* Dark background */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    top: 10px;        /* 10px from the top */
+    }
+    .drive-buttons form {
+    margin-right: 10px;
+    }
 
-        .drive-buttons {
-            display: flex;
-            align-items: center;
-        }
-
-        .drive-buttons form {
-            margin-right: 10px;
-        }
-
-        /* .back-btn {
-            padding: 10px 15px;
-            background-color: #FF5733;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-left: 10px;
-        } */
+    .back-btn {
+    padding: 3px 3px;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    }
     .back-btn:hover {
-    background-color: #e64b2c;
+    color: #e64b2c;
     }
 
     .current-path {
     font-weight: bold;
-    margin-top: 10px;
+    margin-top: 20px;
     }
 
     .flash {
