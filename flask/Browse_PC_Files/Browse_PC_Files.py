@@ -5,7 +5,7 @@ from flask import Flask, request, render_template, send_file, redirect, url_for,
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-EDITABLE_EXTENSIONS = (".py", ".ps1", ".txt", ".log", ".html", ".css")
+EDITABLE_EXTENSIONS = (".py", ".ps1", ".txt", ".log", ".html", ".css", ".ahk", ".md")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
