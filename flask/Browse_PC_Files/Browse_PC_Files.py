@@ -1,10 +1,11 @@
 import os
 from datetime import datetime
-
 from flask import Flask, request, render_template, send_file, redirect, url_for, flash, Response
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+EDITABLE_EXTENSIONS = (".py", ".ps1", ".txt", ".log", ".html", ".css")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -16,64 +17,41 @@ def index():
         files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
         file_times = {
             f: datetime.fromtimestamp(os.path.getmtime(os.path.join(dir_path, f))).strftime("%d/%m/%Y %I:%M%p").replace("AM", "am").replace("PM", "pm")
-
             for f in files
         }
     except Exception as e:
         flash(f"Error accessing directory: {e}")
         directories, files, file_times = [], [], {}
 
-    return render_template('index.html', directories=directories, files=files, file_times=file_times, current_dir=dir_path, current_drive=drive)
+    return render_template('index.html', directories=directories, files=files, file_times=file_times, current_dir=dir_path, current_drive=drive, editable_extensions=EDITABLE_EXTENSIONS)
 
-@app.route("/back")
-def go_back():
-    # Get the current directory and drive
-    dir_path = request.args.get('dir_path', 'C:/')
-    drive = request.args.get('drive', 'C:/')
-    
-    # Move to the parent directory
-    parent_dir = os.path.abspath(os.path.join(dir_path, os.pardir))
-    
-    return redirect(url_for('index', dir_path=parent_dir, drive=drive))
-
-@app.route("/download/<path:file_path>")
-def download_file(file_path):
-    # Serve file for download
-    full_file_path = os.path.join(file_path)
-    try:
-        return send_file(full_file_path, as_attachment=True)
-    except Exception as e:
-        flash(f"Error downloading file: {e}")
-        return redirect(url_for('index', dir_path=os.path.dirname(full_file_path)))
-
-@app.route("/view/<path:file_path>")
-def view_file(file_path):
+@app.route("/edit/<path:file_path>", methods=["GET", "POST"])
+def edit_file(file_path):
     full_file_path = os.path.join(file_path)
 
-    # Detect file type to open or serve the file in the browser
-    if os.path.exists(full_file_path):
-        if full_file_path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
-            return send_file(full_file_path, mimetype='image/*')
-        elif full_file_path.endswith(('.txt', '.py', '.log', '.html', '.css', '.js')):
-            return send_file(full_file_path, mimetype='text/plain')
-        elif full_file_path.endswith(('.mkv','.mp4', '.webm', '.ogg', '.mp3')):
-            return stream_video(full_file_path)  # Stream the video for playing
-        else:
-            flash("File type is not supported for direct viewing")
-            return redirect(url_for('index', dir_path=os.path.dirname(full_file_path)))
-    else:
+    if not os.path.exists(full_file_path):
         flash("File not found")
         return redirect(url_for('index', dir_path=os.path.dirname(full_file_path)))
 
-def stream_video(file_path):
-    """Stream video files for playing in the browser."""
-    def generate():
-        with open(file_path, 'rb') as video:
-            data = video.read(1024)
-            while data:
-                yield data
-                data = video.read(1024)
-    return Response(generate(), mimetype="video/mp4")
+    if request.method == "POST":
+        new_content = request.form.get("file_content")
+        try:
+            with open(full_file_path, "w", encoding="utf-8") as f:
+                f.write(new_content)
+            flash("File saved successfully")
+        except Exception as e:
+            flash(f"Error saving file: {e}")
+
+        return redirect(url_for("index", dir_path=os.path.dirname(full_file_path)))
+
+    try:
+        with open(full_file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except Exception as e:
+        flash(f"Error reading file: {e}")
+        content = ""
+
+    return render_template("edit.html", file_path=file_path, content=content)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)

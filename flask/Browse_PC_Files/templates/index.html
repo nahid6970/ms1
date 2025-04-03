@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/2250/2250195.png" type="image/x-icon">
@@ -12,31 +13,39 @@
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             color: #333;
         }
+
         .container {
             display: flex;
             justify-content: space-between;
         }
+
         .container div {
             flex: 1;
             margin-right: 20px;
         }
+
         .container div:last-child {
             margin-right: 0;
         }
-        .directory-list, .file-list {
+
+        .directory-list,
+        .file-list {
             margin-top: 20px;
             padding: 0;
         }
-        .directory-list li, .file-list li {
+
+        .directory-list li,
+        .file-list li {
             list-style-type: none;
             margin: 5px 0;
             display: flex;
             align-items: center;
             padding: 10px;
-            border-radius: 12px;
+            border-radius: 0px;
         }
 
         .directory-list a {
@@ -44,51 +53,77 @@
             color: #e3e300;
             font-weight: bold;
         }
+
         .directory-list li {
             background-color: #3f3d36;
         }
+
         .directory-list a:hover {
             text-decoration: underline;
         }
+
         .file-list a {
             text-decoration: none;
             color: #ffffff;
             font-weight: bold;
         }
+
         .file-list li {
-            background-color: #267db8;
+            background-color: #282a36;
         }
+
         .file-modified-time {
-        font-size: 12px;
-        color: #ddd;
-        margin-left: 10px;
+            font-size: 12px;
+            color: #ddd;
+            margin-left: 10px;
         }
 
         .file-list a:hover {
             text-decoration: underline;
         }
+
         .file-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
         .file-name {
             flex-grow: 1;
             word-break: break-all;
             overflow-wrap: break-word;
         }
+
         .download-btn {
             padding: 5px 10px;
-            background-color: green;
-            color: white;
+            background-color: rgb(119, 255, 119);
+            color: black !important; /* Change text color for Download button */
             border: none;
             border-radius: 5px;
             cursor: pointer;
             margin-left: 10px;
         }
+
         .download-btn:hover {
             background-color: #45a049;
         }
+
+        .edit-btn {
+            padding: 5px 10px;
+            background-color: #a5d9fc;
+            color: black !important; /* Change text color for Download button */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .edit-btn:hover {
+            background-color: rgb(103, 113, 255);
+            /* Change hover effect */
+        }
+
+
         /* button {
             padding: 10px 15px;
             font-size: 16px;
@@ -102,19 +137,24 @@
         button:hover {
             background-color: #45a049;
         }
+
         .drive-back-container {
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* Aligns items to the left */
+            justify-content: flex-start;
+            /* Aligns items to the left */
             margin-bottom: 20px;
         }
+
         .drive-buttons {
             display: flex;
             align-items: center;
         }
+
         .drive-buttons form {
             margin-right: 10px;
         }
+
         /* .back-btn {
             padding: 10px 15px;
             background-color: #FF5733;
@@ -126,31 +166,38 @@
         .back-btn:hover {
             background-color: #e64b2c;
         }
+
         .current-path {
             font-weight: bold;
             margin-top: 10px;
         }
+
         .flash {
             color: green;
             font-weight: bold;
             margin-top: 20px;
         }
+
         .dot {
             margin-right: 8px;
             color: #6bc0f8;
         }
+
         .folder-icon {
             margin-right: 8px;
             color: yellow;
         }
+
         /* Media query for mobile screens */
         @media screen and (max-width: 768px) {
             body {
                 padding: 10px;
             }
+
             .container {
                 flex-direction: column;
             }
+
             .drive-back-container {
                 flex-direction: column;
                 align-items: flex-start;
@@ -158,6 +205,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- <h1>Browse PC Files</h1> -->
@@ -176,7 +224,7 @@
             <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn">Back</a>
         </div>
     </div>
-    
+
 
     <!-- Path on a new row -->
     <div class="current-path">{{ current_dir }}</div>
@@ -186,10 +234,10 @@
             <h3>Directories:</h3>
             <ul class="directory-list">
                 {% for directory in directories %}
-                    <li>
-                        <span class="folder-icon">&#128193;</span>
-                        <a href="/?dir_path={{ current_dir }}/{{ directory }}&drive={{ current_drive }}">{{ directory }}</a>
-                    </li>
+                <li>
+                    <span class="folder-icon">&#128193;</span>
+                    <a href="/?dir_path={{ current_dir }}/{{ directory }}&drive={{ current_drive }}">{{ directory }}</a>
+                </li>
                 {% endfor %}
             </ul>
         </div>
@@ -198,28 +246,32 @@
             <h3>Files:</h3>
             <ul class="file-list">
                 {% for file in files %}
-                    <li class="file-item">
-                        <div class="file-name">
-                            <span>📃</span>
-                            <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
-                            <br>
-                            <small style="color: #ddd;">
-                                {{ file_times[file] }}
-                            </small>
-                        </div>
-                        <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn">Download</a>
-                    </li>
+                <li class="file-item">
+                    <div class="file-name">
+                        <span>📃</span>
+                        <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
+                        <br>
+                        <small style="color: #ddd;">
+                            {{ file_times[file] }}
+                        </small>
+                    </div>
+                    {% if file.endswith(editable_extensions) %}
+                    <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn"></a>
+                    {% endif %}
+                    <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn">󰇚</a>
+                </li>
                 {% endfor %}
             </ul>
-                     
         </div>
+        
     </div>
 
     {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="flash">{{ messages[0] }}</div>
-        {% endif %}
+    {% if messages %}
+    <div class="flash">{{ messages[0] }}</div>
+    {% endif %}
     {% endwith %}
 
 </body>
+
 </html>
