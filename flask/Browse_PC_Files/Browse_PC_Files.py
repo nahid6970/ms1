@@ -7,6 +7,23 @@ app.secret_key = 'your_secret_key'
 
 EDITABLE_EXTENSIONS = (".py", ".ps1", ".txt", ".log", ".html", ".css", ".ahk", ".md")
 
+def format_size(bytes_size):
+    """Convert file size to human-readable format (KB, MB, GB)."""
+    if bytes_size < 1024:
+        return f"{bytes_size} B"
+    elif bytes_size < 1024 ** 2:
+        return f"{bytes_size / 1024:.2f} KB"
+    elif bytes_size < 1024 ** 3:
+        return f"{bytes_size / (1024 ** 2):.2f} MB"
+    else:
+        return f"{bytes_size / (1024 ** 3):.2f} GB"
+
+def get_size(path):
+    """Return the formatted size of a file."""
+    if os.path.isfile(path):
+        return format_size(os.path.getsize(path))
+    return "0 B"
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     drive = request.args.get('drive', 'C:/')
@@ -15,15 +32,29 @@ def index():
     try:
         directories = [d for d in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, d))]
         files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+
         file_times = {
-            f: datetime.fromtimestamp(os.path.getmtime(os.path.join(dir_path, f))).strftime("%d/%m/%Y %I:%M%p").replace("AM", "am").replace("PM", "pm")
+            f: datetime.fromtimestamp(os.path.getmtime(os.path.join(dir_path, f)))
+            .strftime("%d/%m/%Y %I:%M%p")
+            .replace("AM", "am")
+            .replace("PM", "pm")
             for f in files
+        }
+        file_sizes = {
+            f: get_size(os.path.join(dir_path, f)) for f in files
         }
     except Exception as e:
         flash(f"Error accessing directory: {e}")
-        directories, files, file_times = [], [], {}
+        directories, files, file_times, file_sizes = [], [], {}, {}
 
-    return render_template('index.html', directories=directories, files=files, file_times=file_times, current_dir=dir_path, current_drive=drive, editable_extensions=EDITABLE_EXTENSIONS)
+    return render_template('index.html',
+                           directories=directories,
+                           files=files,
+                           file_times=file_times,
+                           file_sizes=file_sizes,
+                           current_dir=dir_path,
+                           current_drive=drive,
+                           editable_extensions=EDITABLE_EXTENSIONS)
 
 @app.route("/view/<path:file_path>")
 def view_file(file_path):

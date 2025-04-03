@@ -262,8 +262,8 @@
                         <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
                         <br>
                         <small style="color: #ddd;">
-                            {{ file_times[file] }}
-                        </small>
+                            {{ file_times[file] }} - {{ file_sizes[file] }}
+                          </small>
                     </div>
                     {% if file.endswith(editable_extensions) %}
                     <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn"><i class="nf nf-fa-edit"></i></a>
