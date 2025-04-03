@@ -32,7 +32,10 @@ def view_file(file_path):
     # Detect file type to open or serve the file in the browser
     if os.path.exists(full_file_path):
         if full_file_path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
-            return send_file(full_file_path, mimetype='image/*')
+            # Open the image and serve it directly
+            with open(full_file_path, 'rb') as image_file:
+                image_data = image_file.read()
+                return Response(image_data, mimetype='image/jpeg')  # Update mimetype based on actual file extension
         elif full_file_path.endswith(('.txt', '.py', '.ps1', '.log', '.html', '.css', '.js')):
             return send_file(full_file_path, mimetype='text/plain')
         elif full_file_path.endswith(('.mkv','.mp4', '.webm', '.ogg', '.mp3')):
