@@ -28,7 +28,6 @@ def index():
 @app.route("/view/<path:file_path>")
 def view_file(file_path):
     full_file_path = os.path.join(file_path)
-
     # Detect file type to open or serve the file in the browser
     if os.path.exists(full_file_path):
         if full_file_path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
