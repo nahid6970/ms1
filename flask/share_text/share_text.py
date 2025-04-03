@@ -23,16 +23,19 @@ def read_logs():
         with open(log_file, "r", encoding="utf-8") as file:
             content = file.read().strip()
         if content:
-            # Split entries using the new separator
             entries = content.split(f"\n{separator}\n")
             logs = []
-            # Reverse the order to display the most recent first
-            for entry in reversed(entries):
+            for i, entry in enumerate(reversed(entries)):
                 parts = entry.split("\n", 1)
                 if len(parts) == 2:
-                    logs.append((parts[0], parts[1].strip()))
+                    text = parts[1].strip()
+                    # Remove separator from the last entry (most recent)
+                    if i == 0 and text.endswith(separator):
+                        text = text[: -len(separator)].strip()
+                    logs.append((parts[0], text))
             return logs
     return []
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
