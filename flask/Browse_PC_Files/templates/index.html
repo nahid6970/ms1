@@ -34,28 +34,46 @@
             margin-right: 0;
         }
 
-        .directory-list,
-        .file-list {
-            margin-top: 20px;
-            padding: 0;
-        }
+    .directory-list {
+    margin-top: 20px;
+    padding: 0;
+    display: flex;       /* Enable flex layout */
+    flex-wrap: wrap;     /* Wrap items to the next row */
+    }
 
-        .directory-list li,
-        .file-list li {
-            list-style-type: none;
-            margin: 5px 0;
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-radius: 0px;
-        }
+    .directory-list li {
+    list-style-type: none;
+    margin: 5px;         /* Use margin on all sides for spacing */
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;     /* Center vertically */
+    padding: 10px;
+    border-radius: 0px;
+    background-color: #3f3d36;
+    flex-grow: 1;        /* Allow items to grow and fill available space */
+    text-align: center; /* Ensure the text is centered within the element */
+    }
+    .directory-list a {
+    text-decoration: none;
+    color: #e3e300;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+    }
 
-        .directory-list a {
-            text-decoration: none;
-            color: #e3e300;
-            font-weight: bold;
-            overflow-wrap: anywhere;
-        }
+    .file-list {
+    margin-top: 20px;
+    padding: 0;
+    }
+    .file-list li {
+    list-style-type: none;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 0px;
+    }
+
+
 
         .directory-list li {
             background-color: #3f3d36;
