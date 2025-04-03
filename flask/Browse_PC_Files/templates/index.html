@@ -326,24 +326,27 @@ background-color: #fc5c2c; /* Darker green when hovering */
         <div class="drive-back-container">
             <div class="drive-buttons">
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="C:/"></i><i class="nf nf-fa-hard_drive"></i><i class="nf nf-md-alpha_c"></i></button>
+                    <button type="submit" name="drive" value="C:/"></i><i class="nf nf-fa-hard_drive"></i><i
+                            class="nf nf-md-alpha_c"></i></button>
                 </form>
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="D:/"><i class="nf nf-fa-hard_drive"></i><i class="nf nf-md-alpha_d"></i></button>
+                    <button type="submit" name="drive" value="D:/"><i class="nf nf-fa-hard_drive"></i><i
+                            class="nf nf-md-alpha_d"></i></button>
                 </form>
                 <form method="GET" action="/">
                     <button type="submit" name="drive" value="C:/Users/nahid/"><i class="nf nf-fa-user"></i></button>
                 </form>
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="C:/Users/nahid/Desktop/"><i class="nf nf-fa-desktop"></i></button>
+                    <button type="submit" name="drive" value="C:/Users/nahid/Desktop/"><i
+                            class="nf nf-fa-desktop"></i></button>
                 </form>
-                <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn"><i class="nf nf-fa-arrow_circle_left"></i></a>
+                <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn"><i
+                        class="nf nf-fa-arrow_circle_left"></i></a>
             </div>
         </div>
-<div style="position: relative;">
-    <button id="filter-btn" onclick="toggleFilterPanel()">Filter</button>
-</div>
-
+        <div style="position: relative;">
+            <button id="filter-btn" onclick="toggleFilterPanel()">Filter</button>
+        </div>
     </div>
 
     <div id="filter-panel" style="display: none;">
@@ -392,9 +395,11 @@ background-color: #fc5c2c; /* Darker green when hovering */
             <div class="filter-group">
                 <h4>Compressed & Executables</h4>
                 <label><input type="checkbox" class="file-filter" value="exe"> .exe</label>
+                <label><input type="checkbox" class="file-filter" value="apk"> .apk</label>
                 <label><input type="checkbox" class="file-filter" value="zip"> .zip</label>
                 <label><input type="checkbox" class="file-filter" value="rar"> .rar</label>
                 <label><input type="checkbox" class="file-filter" value="7z"> .7z</label>
+                <label><input type="checkbox" class="file-filter" value="iso"> .iso</label>
             </div>
         </div>
         
