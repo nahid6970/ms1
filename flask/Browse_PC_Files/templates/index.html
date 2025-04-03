@@ -224,6 +224,39 @@
             color: #6bc0f8;
         }
 
+    .filter-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+    gap: 10px; /* Space between columns */
+    max-width: 600px; /* Prevents full-width stretching */
+    }
+
+    .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #2e2e2e; /* Optional background */
+    padding: 10px;
+    border-radius: 5px;
+    }
+
+    .filter-group h4 {
+    margin: 0;
+    font-size: 13px;
+    color: yellow;
+    text-align: center;
+    }
+
+    .filter-group label {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    }
+
+
+
 
         /* Media query for mobile screens */
         @media screen and (max-width: 768px) {
@@ -268,28 +301,62 @@
             style="position: absolute; right: 10px; top: 10px;">Filter</button>
     </div>
 
-    <div id="filter-panel"
-        style="display: none; position: absolute; top: 40px; right: 10px; background-color: white; padding: 10px; border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 10;">
-        <label><input type="checkbox" class="file-filter" value="jpg"> .jpg</label>
-        <label><input type="checkbox" class="file-filter" value="png"> .png</label>
-        <label><input type="checkbox" class="file-filter" value="gif"> .gif</label><br>
-
-        <label><input type="checkbox" class="file-filter" value="mp3"> .mp3</label>
-        <label><input type="checkbox" class="file-filter" value="mp4"> .mp4</label>
-        <label><input type="checkbox" class="file-filter" value="webm"> .webm</label>
-        <label><input type="checkbox" class="file-filter" value="mkv"> .mkv</label><br>
-    
-        <label><input type="checkbox" class="file-filter" value="ps1"> .ps1</label>
-        <label><input type="checkbox" class="file-filter" value="py"> .py</label>
-        <label><input type="checkbox" class="file-filter" value="ahk"> .ahk</label><br>
-
-        <label><input type="checkbox" class="file-filter" value="txt"> .txt</label><br>
-        <label><input type="checkbox" class="file-filter" value="html"> .html</label><br>
-        <label><input type="checkbox" class="file-filter" value="css"> .css</label><br>
-        <label><input type="checkbox" class="file-filter" value="pdf"> .pdf</label><br>
-        <label><input type="checkbox" class="file-filter" value="exe"> .exe</label><br>
+    <div id="filter-panel" style="display: none; position: absolute; top: 40px; right: 10px; background-color: white; padding: 10px; border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 10; width: 300px;">
+  
+        <div class="filter-container">
+            <div class="filter-group">
+                <h4>Images</h4>
+                <label><input type="checkbox" class="file-filter" value="jpg"> .jpg</label>
+                <label><input type="checkbox" class="file-filter" value="png"> .png</label>
+                <label><input type="checkbox" class="file-filter" value="gif"> .gif</label>
+            </div>
+        
+            <div class="filter-group">
+                <h4>Videos & Audio</h4>
+                <label><input type="checkbox" class="file-filter" value="mp3"> .mp3</label>
+                <label><input type="checkbox" class="file-filter" value="mp4"> .mp4</label>
+                <label><input type="checkbox" class="file-filter" value="webm"> .webm</label>
+                <label><input type="checkbox" class="file-filter" value="mkv"> .mkv</label>
+            </div>
+        
+            <div class="filter-group">
+                <h4>Scripts</h4>
+                <label><input type="checkbox" class="file-filter" value="ahk"> .ahk</label>
+                <label><input type="checkbox" class="file-filter" value="ps1"> .ps1</label>
+                <label><input type="checkbox" class="file-filter" value="py"> .py</label>
+            </div>
+        
+            <div class="filter-group">
+                <h4>Web Files</h4>
+                <label><input type="checkbox" class="file-filter" value="html"> .html</label>
+                <label><input type="checkbox" class="file-filter" value="css"> .css</label>
+                <label><input type="checkbox" class="file-filter" value="org"> .org</label>
+                <label><input type="checkbox" class="file-filter" value="log"> .log</label>
+                <label><input type="checkbox" class="file-filter" value="ini"> .ini</label>
+                <label><input type="checkbox" class="file-filter" value="txt"> .txt</label>
+            </div>
+        
+            <div class="filter-group">
+                <h4>Documents</h4>
+                <label><input type="checkbox" class="file-filter" value="doc"> .doc</label>
+                <label><input type="checkbox" class="file-filter" value="docx"> .docx</label>
+                <label><input type="checkbox" class="file-filter" value="xlsx"> .xlsx</label>
+                <label><input type="checkbox" class="file-filter" value="pptx"> .pptx</label>
+                <label><input type="checkbox" class="file-filter" value="pdf"> .pdf</label>
+            </div>
+        
+            <div class="filter-group">
+                <h4>Compressed & Executables</h4>
+                <label><input type="checkbox" class="file-filter" value="exe"> .exe</label>
+                <label><input type="checkbox" class="file-filter" value="zip"> .zip</label>
+                <label><input type="checkbox" class="file-filter" value="rar"> .rar</label>
+                <label><input type="checkbox" class="file-filter" value="7z"> .7z</label>
+            </div>
+        </div>
+        
         <button onclick="applyFilter()">Apply Filter</button>
-    </div>
+      </div>
+      
 
     <!-- Path on a new row -->
     <div class="current-path">{{ current_dir }}</div>
