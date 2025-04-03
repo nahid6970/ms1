@@ -66,25 +66,32 @@
     display: flex;       /* Enable flex layout */
     flex-wrap: wrap;     /* Wrap items to the next row */
     }
-
     .directory-list li {
     list-style-type: none;
     margin: 5px;         /* Use margin on all sides for spacing */
     display: flex;
-    justify-content: center; /* Center horizontally */
+
     align-items: center;     /* Center vertically */
     padding: 10px;
     border-radius: 0px;
     background-color: #3f3d36;
     flex-grow: 1;        /* Allow items to grow and fill available space */
-    text-align: center; /* Ensure the text is centered within the element */
+text-align: center;
     }
+
+
+
+
     .directory-list a {
     text-decoration: none;
     color: #e3e300;
     font-weight: bold;
     overflow-wrap: anywhere;
     width: 100%;
+    }
+    .folder-icon {
+        margin-right: 5px;
+    color: yellow;
     }
 
     .file-list {
@@ -222,11 +229,6 @@
             color: #6bc0f8;
         }
 
-        .folder-icon {
-            margin-right: 8px;
-            color: yellow;
-        }
-
 
         /* Media query for mobile screens */
         @media screen and (max-width: 768px) {
@@ -293,7 +295,7 @@
             <ul class="directory-list">
                 {% for directory in directories %}
                 <li>
-                    <span class="folder-icon">&#128193;</span>
+                    <span class="folder-icon"></span>
                     <a href="/?dir_path={{ current_dir }}/{{ directory }}&drive={{ current_drive }}">{{ directory }}</a>
                 </li>
                 {% endfor %}
