@@ -10,9 +10,12 @@ separator = "-----x-----"
 
 def write_to_log(text):
     """Write the shared text to the log file with a timestamp."""
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")  # 12-hour format with AM/PM
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
+    # Normalize Windows-style line endings to Unix-style and remove any trailing newline
+    normalized_text = text.replace("\r\n", "\n").rstrip("\n")
     with open(log_file, "a", encoding="utf-8") as file:
-        file.write(f"{timestamp}\n{text.strip()}\n{separator}\n")
+        file.write(f"{timestamp}\n{normalized_text}\n{separator}\n")
+
 
 def read_logs():
     """Read the log file and return logs as a list of (timestamp, text) tuples."""
