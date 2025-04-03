@@ -66,7 +66,7 @@ def view_file(file_path):
             with open(full_file_path, 'rb') as image_file:
                 image_data = image_file.read()
                 return Response(image_data, mimetype='image/jpeg')  # Update mimetype based on actual file extension
-        elif full_file_path.endswith(('.txt', '.py', '.ps1', '.log', '.html', '.css', '.js')):
+        elif full_file_path.endswith(('.txt', '.py', '.ps1', '.log', 'opml', 'ini', '.html', '.css', '.js')):
             return send_file(full_file_path, mimetype='text/plain')
         elif full_file_path.endswith(('.mkv','.mp4', '.webm', '.ogg', '.mp3')):
             return stream_video(full_file_path)  # Stream the video for playing
