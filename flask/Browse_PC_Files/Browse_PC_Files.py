@@ -105,5 +105,20 @@ def go_back():
     
     return redirect(url_for('index', dir_path=parent_dir, drive=drive))
 
+@app.route("/files/<path:dir_path>")
+def list_files(dir_path):
+    files = []
+    file_times = {}  # Add logic for file times
+
+    # List files in the directory
+    for file_name in os.listdir(dir_path):
+        full_path = os.path.join(dir_path, file_name)
+        if os.path.isfile(full_path):
+            files.append(file_name)
+            # Add logic to populate file_times
+
+    return render_template("file_list.html", files=files, file_times=file_times, current_dir=dir_path)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)

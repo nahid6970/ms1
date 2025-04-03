@@ -8,6 +8,7 @@
     <title>PC File Browser</title>
     <style>
         @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+
         body {
             font-family: JetBrainsMono NFP, sans-serif;
             background-color: #f4f4f4;
@@ -99,7 +100,8 @@
         .download-btn {
             padding: 5px 10px;
             background-color: rgb(119, 255, 119);
-            color: black !important; /* Change text color for Download button */
+            color: black !important;
+            /* Change text color for Download button */
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -113,12 +115,14 @@
         .edit-btn {
             padding: 5px 10px;
             background-color: #a5d9fc;
-            color: black !important; /* Change text color for Download button */
+            color: black !important;
+            /* Change text color for Download button */
             border: none;
             border-radius: 5px;
             cursor: pointer;
             margin-left: 10px;
         }
+
         .edit-btn:hover {
             background-color: rgb(103, 113, 255);
             /* Change hover effect */
@@ -140,6 +144,7 @@
             display: flex;
             align-items: center;
         }
+
         .drive-buttons form {
             margin-right: 10px;
         }
@@ -198,22 +203,37 @@
 <body>
 
     <!-- <h1>Browse PC Files</h1> -->
-
-    <div class="drive-back-container">
-        <div class="drive-buttons">
-            <form method="GET" action="/">
-                <button type="submit" name="drive" value="C:/">C Drive</button>
-            </form>
-            <form method="GET" action="/">
-                <button type="submit" name="drive" value="D:/">D Drive</button>
-            </form>
-            <form method="GET" action="/">
-                <button type="submit" name="drive" value="C:/Users/nahid/">User Folder</button>
-            </form>
-            <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn">Back</a>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="drive-back-container">
+            <div class="drive-buttons">
+                <form method="GET" action="/">
+                    <button type="submit" name="drive" value="C:/">C Drive</button>
+                </form>
+                <form method="GET" action="/">
+                    <button type="submit" name="drive" value="D:/">D Drive</button>
+                </form>
+                <form method="GET" action="/">
+                    <button type="submit" name="drive" value="C:/Users/nahid/">User Folder</button>
+                </form>
+                <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn">Back</a>
+            </div>
         </div>
+        <button id="filter-btn" onclick="toggleFilterPanel()"
+            style="position: absolute; right: 10px; top: 10px;">Filter</button>
     </div>
 
+    <div id="filter-panel"
+        style="display: none; position: absolute; top: 40px; right: 10px; background-color: white; padding: 10px; border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 10;">
+            <label><input type="checkbox" class="file-filter" value="jpg"> .jpg</label><br>
+            <label><input type="checkbox" class="file-filter" value="png"> .png</label><br>
+            <label><input type="checkbox" class="file-filter" value="ps1"> .ps1</label><br>
+            <label><input type="checkbox" class="file-filter" value="txt"> .txt</label><br>
+            <label><input type="checkbox" class="file-filter" value="html"> .html</label><br>
+            <label><input type="checkbox" class="file-filter" value="css"> .css</label><br>
+            <label><input type="checkbox" class="file-filter" value="pdf"> .pdf</label><br>
+            <label><input type="checkbox" class="file-filter" value="exe"> .exe</label><br>
+        <button onclick="applyFilter()">Apply Filter</button>
+    </div>
 
     <!-- Path on a new row -->
     <div class="current-path">{{ current_dir }}</div>
@@ -235,7 +255,7 @@
             <h3>Files:</h3>
             <ul class="file-list">
                 {% for file in files %}
-                <li class="file-item">
+                <li class="file-item" data-filetype="{{ file.split('.')[-1] }}">
                     <div class="file-name">
                         <span>📃</span>
                         <a href="/view/{{ current_dir }}/{{ file }}">{{ file }}</a>
@@ -247,12 +267,14 @@
                     {% if file.endswith(editable_extensions) %}
                     <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn"><i class="nf nf-fa-edit"></i></a>
                     {% endif %}
-                    <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn"><i class="nf nf-oct-download"></i></a>
+                    <a href="/download/{{ current_dir }}/{{ file }}" class="download-btn"><i
+                            class="nf nf-oct-download"></i></a>
                 </li>
                 {% endfor %}
             </ul>
         </div>
-        
+
+
     </div>
 
     {% with messages = get_flashed_messages() %}
@@ -260,6 +282,30 @@
     <div class="flash">{{ messages[0] }}</div>
     {% endif %}
     {% endwith %}
+
+    <script>
+        function toggleFilterPanel() {
+            const filterPanel = document.getElementById('filter-panel');
+            filterPanel.style.display = (filterPanel.style.display === 'none') ? 'block' : 'none';
+        }
+
+        // Apply the selected filters
+        function applyFilter() {
+            const selectedFilters = Array.from(document.querySelectorAll('.file-filter:checked'))
+                .map(input => input.value);
+            const files = document.querySelectorAll('.file-item');
+
+            files.forEach(file => {
+                const fileType = file.getAttribute('data-filetype');
+                // Show file if it matches one of the selected filters or if no filter is selected
+                if (selectedFilters.length === 0 || selectedFilters.includes(fileType)) {
+                    file.style.display = 'flex';  // Show the file (keep flex layout)
+                } else {
+                    file.style.display = 'none';   // Hide the file
+                }
+            });
+        }
+    </script>
 
 </body>
 
