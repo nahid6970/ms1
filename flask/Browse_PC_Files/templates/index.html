@@ -204,27 +204,28 @@
             text-decoration: none;
             margin-left: 10px;
         } */
-        .back-btn:hover {
-            background-color: #e64b2c;
-        }
+    .back-btn:hover {
+    background-color: #e64b2c;
+    }
 
-        .current-path {
-            font-weight: bold;
-            margin-top: 10px;
-        }
+    .current-path {
+    font-weight: bold;
+    margin-top: 10px;
+    }
 
-        .flash {
-            color: green;
-            font-weight: bold;
-            margin-top: 20px;
-        }
+    .flash {
+    color: green;
+    font-weight: bold;
+    margin-top: 20px;
+    }
 
-        .dot {
-            margin-right: 8px;
-            color: #6bc0f8;
-        }
+    .dot {
+    margin-right: 8px;
+    color: #6bc0f8;
+    }
 
 #filter-btn {
+font-family: JetBrainsMono NFP, sans-serif;
 position: fixed;  /* Fix it at the top */
 top: 10px;        /* 10px from the top */
 right: 10px;      /* 10px from the right */
@@ -280,6 +281,27 @@ align-items: center;
 gap: 5px;
 font-size: 12px;
 }
+/* Apply Filter Button Styles */
+#filter-panel button {
+font-family: JetBrainsMono NFP, sans-serif;
+display: block; /* Make button a block-level element */
+margin: 20px auto 0; /* Center the button horizontally and add top margin */
+padding: 10px 20px; /* Add some padding for the button */
+background-color: #4CAF50; /* Green background */
+color: white; /* White text */
+font-size: 14px;
+font-weight: bold;
+border: none; /* Remove border */
+border-radius: 5px; /* Rounded corners */
+cursor: pointer; /* Pointer cursor on hover */
+text-align: center; /* Center text inside the button */
+transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+/* Hover effect for the button */
+#filter-panel button:hover {
+background-color: #fc5c2c; /* Darker green when hovering */
+}
 
 
     /* Media query for mobile screens */
@@ -304,10 +326,10 @@ font-size: 12px;
         <div class="drive-back-container">
             <div class="drive-buttons">
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="C:/"><i class="nf nf-md-alpha_c"></i><i class="nf nf-fa-hard_drive"></i></button>
+                    <button type="submit" name="drive" value="C:/"></i><i class="nf nf-fa-hard_drive"></i><i class="nf nf-md-alpha_c"></i></button>
                 </form>
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="D:/"><i class="nf nf-md-alpha_d"></i><i class="nf nf-fa-hard_drive"></i></button>
+                    <button type="submit" name="drive" value="D:/"><i class="nf nf-fa-hard_drive"></i><i class="nf nf-md-alpha_d"></i></button>
                 </form>
                 <form method="GET" action="/">
                     <button type="submit" name="drive" value="C:/Users/nahid/"><i class="nf nf-fa-user"></i></button>
