@@ -182,6 +182,7 @@
             color: yellow;
         }
 
+
         /* Media query for mobile screens */
         @media screen and (max-width: 768px) {
             body {
@@ -284,27 +285,39 @@
     {% endwith %}
 
     <script>
-        function toggleFilterPanel() {
-            const filterPanel = document.getElementById('filter-panel');
-            filterPanel.style.display = (filterPanel.style.display === 'none') ? 'block' : 'none';
-        }
+    function toggleFilterPanel() {
+        const filterPanel = document.getElementById('filter-panel');
+        filterPanel.style.display = (filterPanel.style.display === 'none') ? 'block' : 'none';
+    }
 
-        // Apply the selected filters
-        function applyFilter() {
-            const selectedFilters = Array.from(document.querySelectorAll('.file-filter:checked'))
-                .map(input => input.value);
-            const files = document.querySelectorAll('.file-item');
+    // Apply the selected filters
+    function applyFilter() {
+        const selectedFilters = Array.from(document.querySelectorAll('.file-filter:checked'))
+                                     .map(input => input.value);
+        const files = document.querySelectorAll('.file-item');
 
-            files.forEach(file => {
-                const fileType = file.getAttribute('data-filetype');
-                // Show file if it matches one of the selected filters or if no filter is selected
-                if (selectedFilters.length === 0 || selectedFilters.includes(fileType)) {
-                    file.style.display = 'flex';  // Show the file (keep flex layout)
-                } else {
-                    file.style.display = 'none';   // Hide the file
-                }
-            });
+        files.forEach(file => {
+            const fileType = file.getAttribute('data-filetype');
+            // Show file if it matches one of the selected filters or if no filter is selected
+            if (selectedFilters.length === 0 || selectedFilters.includes(fileType)) {
+                file.style.display = 'flex';  // Show the file (keep flex layout)
+            } else {
+                file.style.display = 'none';   // Hide the file
+            }
+        });
+    }
+
+    // Close the filter panel if clicking outside
+    window.addEventListener('click', function(event) {
+        const filterPanel = document.getElementById('filter-panel');
+        const filterButton = document.getElementById('filter-btn');
+        
+        // If the clicked element is neither the filter panel nor the filter button, close the panel
+        if (!filterPanel.contains(event.target) && event.target !== filterButton) {
+            filterPanel.style.display = 'none';
         }
+    });
+
     </script>
 
 </body>
