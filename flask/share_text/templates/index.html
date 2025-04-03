@@ -89,17 +89,21 @@
         function copyText(elementId, buttonId) {
             let textElement = document.getElementById(elementId);
             let text = textElement.innerText;
-            // Create a temporary textarea to copy text without the separator
+
+            // Remove the "-----x-----" separator from the copied text
+            text = text.replace(/\n-----x-----$/, '');  // Remove "-----x-----" at the end of the text
+
             let textarea = document.createElement('textarea');
             textarea.value = text;
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand('copy');
             document.body.removeChild(textarea);
-            
+
             let copyBtn = document.getElementById(buttonId);
             copyBtn.innerText = '✔';
             copyBtn.classList.add('success');
+
             setTimeout(() => {
                 copyBtn.innerText = 'Copy';
                 copyBtn.classList.remove('success');
