@@ -33,10 +33,12 @@ def view_file(file_path):
     if os.path.exists(full_file_path):
         if full_file_path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
             return send_file(full_file_path, mimetype='image/*')
-        elif full_file_path.endswith(('.txt', '.py', '.log', '.html', '.css', '.js')):
+        elif full_file_path.endswith(('.txt', '.py', '.ps1', '.log', '.html', '.css', '.js')):
             return send_file(full_file_path, mimetype='text/plain')
         elif full_file_path.endswith(('.mkv','.mp4', '.webm', '.ogg', '.mp3')):
             return stream_video(full_file_path)  # Stream the video for playing
+        elif full_file_path.endswith('.pdf'):
+            return send_file(full_file_path, mimetype='application/pdf')  # Serve PDF files
         else:
             flash("File type is not supported for direct viewing")
             return redirect(url_for('index', dir_path=os.path.dirname(full_file_path)))
