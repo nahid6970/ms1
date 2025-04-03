@@ -250,18 +250,18 @@
         <div class="drive-back-container">
             <div class="drive-buttons">
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="C:/">C Drive</button>
+                    <button type="submit" name="drive" value="C:/"><i class="nf nf-md-alpha_c"></i><i class="nf nf-fa-hard_drive"></i></button>
                 </form>
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="D:/">D Drive</button>
+                    <button type="submit" name="drive" value="D:/"><i class="nf nf-md-alpha_d"></i><i class="nf nf-fa-hard_drive"></i></button>
                 </form>
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="C:/Users/nahid/">User Folder</button>
+                    <button type="submit" name="drive" value="C:/Users/nahid/"><i class="nf nf-fa-user"></i></button>
                 </form>
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="C:/Users/nahid/Desktop/">Desktop</button>
+                    <button type="submit" name="drive" value="C:/Users/nahid/Desktop/"><i class="nf nf-fa-desktop"></i></button>
                 </form>
-                <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn">Back</a>
+                <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn"><i class="nf nf-fa-arrow_circle_left"></i></a>
             </div>
         </div>
         <button id="filter-btn" onclick="toggleFilterPanel()"
@@ -290,7 +290,7 @@
             <ul class="directory-list">
                 {% for directory in directories %}
                 <li>
-                    <span class="folder-icon"></span>
+                    <span class="folder-icon"></span>
                     <a href="/?dir_path={{ current_dir }}/{{ directory }}&drive={{ current_drive }}">{{ directory }}</a>
                 </li>
                 {% endfor %}
