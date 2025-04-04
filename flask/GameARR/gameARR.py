@@ -55,8 +55,9 @@ def index():
     order_clause = 'ASC' if order == 'asc' else 'DESC'
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute(f"SELECT id, name, year, image, rating, progression FROM games ORDER BY {sort_by} COLLATE NOCASE {order_clause}")
+    c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression FROM games ORDER BY {sort_by} COLLATE NOCASE {order_clause}")
     games = c.fetchall()
+    
     conn.close()
     return render_template_string(HTML_TEMPLATE, games=games, sort_by=sort_by, order=order, next_order=next_order)
 
@@ -92,6 +93,7 @@ def edit_game(game_id):
     else:
         c.execute("SELECT name, year, image, rating, progression FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
+        
         conn.close()
         return render_template_string(EDIT_TEMPLATE, game=game, game_id=game_id)
 
