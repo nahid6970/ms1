@@ -20,24 +20,30 @@ def init_db():
     conn.close()
 
 
+
 init_db()
 
 @app.route('/')
 def index():
-    sort_by = request.args.get('sort', 'rating')  # Default sort by rating
+    sort_by = request.args.get('sort_by', 'name')
+    order = request.args.get('order', 'asc')
+
+    # Toggle order for next click
+    next_order = 'desc' if order == 'asc' else 'asc'
+
+    if sort_by not in ['name', 'year', 'rating']:
+        sort_by = 'name'
+
+    order_clause = 'ASC' if order == 'asc' else 'DESC'
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-
-    if sort_by == "name":
-        c.execute("SELECT id, name, year, image, rating FROM games ORDER BY name ASC")
-    elif sort_by == "year":
-        c.execute("SELECT id, name, year, image, rating FROM games ORDER BY year DESC")
-    else:  # Default sort by rating
-        c.execute("SELECT id, name, year, image, rating FROM games ORDER BY rating DESC")
-
+    c.execute(f"SELECT id, name, year, image, rating FROM games ORDER BY {sort_by} COLLATE NOCASE {order_clause}")
     games = c.fetchall()
     conn.close()
-    return render_template_string(HTML_TEMPLATE, games=games, sort_by=sort_by)
+
+    return render_template_string(HTML_TEMPLATE, games=games, sort_by=sort_by, order=order, next_order=next_order)
+
 
 @app.route('/add', methods=['POST'])
 def add_game():
@@ -105,8 +111,26 @@ HTML_TEMPLATE = """
         .btn-add { background: #28a745; color: white; }
         .btn-edit { background: #007bff; color: white; }
         .btn-delete { background: #dc3545; color: white; }
-        .sort-btns { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .sort-btns a { text-decoration: none; background: #ffc107; padding: 8px 12px; color: black; border-radius: 5px; }
+<style>
+    .top-controls { margin-bottom: 20px; }
+    .top-controls button, .top-controls .sort-btn {
+        background: #28a745;
+        color: white;
+        padding: 10px 14px;
+        margin: 0 5px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .top-controls .sort-btn:hover,
+    .top-controls button:hover {
+        transform: scale(1.05);
+        background: #218838;
+    }
+</style>
     </style>
     <script>
         function toggleForm() {
@@ -118,12 +142,13 @@ HTML_TEMPLATE = """
 <body>
     <div class="container">
         <h1>GameARR</h1>
-        <div class="sort-btns">
-            <button class="btn btn-add" onclick="toggleForm()">Add Game</button>
-            <a href="/?sort=name">Sort by Name</a>
-            <a href="/?sort=year">Sort by Year</a>
-            <a href="/?sort=rating">Sort by Rating</a>
-        </div>
+<div class="top-controls">
+    <button onclick="toggleForm()">Add Game</button>
+    <a href="/?sort_by=name&order={{ next_order }}" class="sort-btn">Sort by Name</a>
+    <a href="/?sort_by=year&order={{ next_order }}" class="sort-btn">Sort by Year</a>
+    <a href="/?sort_by=rating&order={{ next_order }}" class="sort-btn">Sort by Rating</a>
+</div>
+
         <div class="form-container" id="gameForm">
             <form action="/add" method="post">
                 <input type="text" name="name" placeholder="Game Name" required><br>
@@ -171,7 +196,7 @@ EDIT_TEMPLATE = """
         <h1>Edit Game</h1>
         <form action="/edit/{{ game_id }}" method="post">
             <input type="text" name="name" value="{{ game[0] }}" required><br>
-<input type="text" name="year" placeholder="Enter Year (e.g., 2021 or July 27, 2021)" required><br>
+            <input type="number" name="year" value="{{ game[1] }}" required><br>
             <input type="text" name="image" value="{{ game[2] }}" required><br>
             <input type="number" name="rating" value="{{ game[3] }}" required min="1" max="5"><br>
             <button type="submit">Save</button>
