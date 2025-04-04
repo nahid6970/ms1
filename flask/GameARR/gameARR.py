@@ -98,7 +98,8 @@ HTML_TEMPLATE = """
     <title>GameARR</title>
     <style>
         body { font-family: Arial, sans-serif; background: #1c1c1c; color: white; text-align: center; }
-        .container { max-width: 900px; margin: auto; padding: 20px; }
+        # .container { max-width: 900px; margin: auto; padding: 20px; }
+        .container { margin: auto; padding: 20px; }
         .game-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .game { background: #2c2c2c; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease; }
         .game:hover { transform: scale(1.05); }
