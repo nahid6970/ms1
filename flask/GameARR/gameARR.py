@@ -127,7 +127,7 @@ align-items: flex-start; /* Align items at the top */
 }
 
 .game {
-  width: 300px;
+  width: 325px;
   flex: 0 0 auto;
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transform and shadow */
 }
