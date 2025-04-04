@@ -125,13 +125,17 @@ padding: 20px;
 justify-content: center; /* Center items if they don’t fill the row */
 align-items: flex-start; /* Align items at the top */
 }
+
 .game {
-width: 300px; /* Fixed width for each game */
-flex: 0 0 auto; /* Prevents the items from growing or shrinking */
+  width: 300px;
+  flex: 0 0 auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transform and shadow */
 }
-{ background: #2c2c2c; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease; }
-        .game:hover { transform: scale(1.05); }
-        .game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
+
+.game:hover {
+  transform: scale(1.05); /* Slight zoom effect */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Add soft shadow on hover */
+}        .game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
         .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
         .game p { font-size: 1.2em; color: gold; }
         .form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; }
