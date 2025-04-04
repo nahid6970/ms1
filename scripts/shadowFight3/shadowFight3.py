@@ -534,8 +534,8 @@ EVENT_SAVE_FILE = r"C:\Users\nahid\sf3_event.txt"
 event_key_mapping = {
     "num1": "T1",
     "num2": "T2",
-    "num3": "T3",
-    "num4": "T4",
+    # "num3": "T3",
+    # "num4": "T4",
 }
 
 # Generate dropdown values like "F13: KOS"
