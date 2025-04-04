@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from flask import Flask, request, render_template, send_file, redirect, url_for, flash, Response
+from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -135,6 +136,56 @@ def go_back():
     parent_dir = os.path.abspath(os.path.join(dir_path, os.pardir))
     
     return redirect(url_for('index', dir_path=parent_dir, drive=drive))
+
+
+
+# Assuming you're using Flask and have a directory for files
+import os
+from flask import request, redirect, url_for, flash
+
+@app.route('/rename/<path:current_dir>/<file_name>', methods=['GET'])
+def rename_file(current_dir, file_name):
+    new_name = request.args.get('new_name')
+    if not new_name:
+        return "New file name is required", 400
+
+    old_file_path = os.path.join(current_dir, file_name)
+    new_file_path = os.path.join(current_dir, new_name)
+
+    if os.path.exists(new_file_path):
+        return "File with this name already exists", 400
+
+    try:
+        os.rename(old_file_path, new_file_path)
+        
+        # Return a meta-refresh response to reload the page
+        return '''
+        <html>
+        <head><meta http-equiv="refresh" content="0;url=/list/''' + current_dir + '''"></head>
+        <body>Renaming successful! Redirecting...</body>
+        </html>
+        '''
+    except FileNotFoundError:
+        return f"Error: File not found: {old_file_path}", 404
+    except Exception as e:
+        return f"Error renaming file: {e}", 500
+
+
+
+@app.route('/delete/<path:current_dir>/<file_name>', methods=['DELETE'])
+def delete_file(current_dir, file_name):
+    file_path = os.path.join(current_dir, file_name)
+
+    # Ensure the file exists before attempting to delete it
+    if not os.path.exists(file_path):
+        return jsonify({"error": "File not found"}), 404
+
+    try:
+        os.remove(file_path)  # Delete the file
+        return jsonify({"success": "File deleted successfully"}), 200  # Send success response
+    except Exception as e:
+        return jsonify({"error": f"Error deleting file: {str(e)}"}), 500  # Send error response
+
 
 @app.route("/files/<path:dir_path>")
 def list_files(dir_path):
