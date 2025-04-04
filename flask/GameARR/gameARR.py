@@ -163,12 +163,12 @@ HTML_TEMPLATE = """
 <div class="game-list">
 {% for game in games %}
     <div class="game">
-        <img src="{{ game[3] }}" alt="{{ game[1] }}">
         <h2>{{ game[1] }}</h2>
         <p style="color: #bbb; font-style: italic;">{{ game[2] }}</p>  <!-- Year on a new line -->
-        <p>{{ game[4] }}/5 ⭐</p>
         <a href="/edit/{{ game[0] }}" class="btn btn-edit">Edit</a>
         <a href="/delete/{{ game[0] }}" class="btn btn-delete">Delete</a>
+        <p>{{ game[4] }}/5 ⭐</p>
+        <img src="{{ game[3] }}" alt="{{ game[1] }}">
     </div>
 {% endfor %}
         </div>
@@ -196,9 +196,9 @@ EDIT_TEMPLATE = """
     <div class="container">
         <h1>Edit Game</h1>
         <form action="/edit/{{ game_id }}" method="post">
-            <input type="text" name="name" value="{{ game[0] }}" required><br>
-            <input type="number" name="year" value="{{ game[1] }}" required><br>
-            <input type="text" name="image" value="{{ game[2] }}" required><br>
+            <input type="text" name="name" value="{{ game[0] }}" placeholder="Game Name" required><br>
+            <input type="number" name="year" value="{{ game[1] }}" placeholder="Enter Year (e.g., 2021)" required><br>
+            <input type="text" name="image" value="{{ game[2] }}" placeholder="Image Link" required><br>
             <input type="number" name="rating" value="{{ game[3] }}" required min="1" max="5"><br>
             <button type="submit">Save</button>
         </form>
