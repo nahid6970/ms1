@@ -150,27 +150,27 @@ HTML_TEMPLATE = """
     <a href="/?sort_by=rating&order={{ next_order }}" class="sort-btn">Sort by Rating</a>
 </div>
 
-        <div class="form-container" id="gameForm">
-            <form action="/add" method="post">
-                <input type="text" name="name" placeholder="Game Name" required><br>
-                <input type="number" name="year" placeholder="Year" required><br>
-                <input type="text" name="image" placeholder="Image URL" required><br>
-                <input type="number" name="rating" placeholder="Rating (1-5)" required min="1" max="5"><br>
-                <button type="submit" class="btn btn-add">Save</button>
-            </form>
-        </div>
-        <div class="game-list">
-        {% for game in games %}
-<div class="game">
-    <img src="{{ game[3] }}" alt="{{ game[1] }}">
-    <h2>{{ game[1] }}</h2>
-    <p style="color: #bbb; font-style: italic;">{{ game[2] }}</p>  <!-- Year on a new line -->
-    <p>{{ game[4] }}/5 ⭐</p>
-                <a href="/edit/{{ game[0] }}" class="btn btn-edit">Edit</a>
-                <a href="/delete/{{ game[0] }}" class="btn btn-delete">Delete</a>
+<div class="form-container" id="gameForm">
+    <form action="/add" method="post">
+        <input type="text" name="name" placeholder="Game Name" required><br>
+        <input type="number" name="year" placeholder="Year" required><br>
+        <input type="text" name="image" placeholder="Image URL" required><br>
+        <input type="number" name="rating" placeholder="Rating (1-5)" required min="1" max="5"><br>
+        <button type="submit" class="btn btn-add">Save</button>
+    </form>
 </div>
 
-        {% endfor %}
+<div class="game-list">
+{% for game in games %}
+    <div class="game">
+        <img src="{{ game[3] }}" alt="{{ game[1] }}">
+        <h2>{{ game[1] }}</h2>
+        <p style="color: #bbb; font-style: italic;">{{ game[2] }}</p>  <!-- Year on a new line -->
+        <p>{{ game[4] }}/5 ⭐</p>
+        <a href="/edit/{{ game[0] }}" class="btn btn-edit">Edit</a>
+        <a href="/delete/{{ game[0] }}" class="btn btn-delete">Delete</a>
+    </div>
+{% endfor %}
         </div>
     </div>
 </body>
