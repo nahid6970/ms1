@@ -144,40 +144,7 @@
             overflow-wrap: break-word;
         }
 
-        .download-btn {
-            padding: 5px 10px;
-            background-color: rgb(119, 255, 119);
-            color: black !important;
-            /* Change text color for Download button */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
 
-        .download-btn:hover {
-            background-color: #45a049;
-        }
-
-        .edit-btn {
-            padding: 5px 10px;
-            background-color: #a5d9fc;
-            color: black !important;
-            /* Change text color for Download button */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .edit-btn:hover {
-            background-color: rgb(103, 113, 255);
-            /* Change hover effect */
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
 
     .drive-back-container {
     display: flex;
@@ -230,6 +197,8 @@
     color: #6bc0f8;
     }
 
+
+    
 #filter-btn {
 font-family: JetBrainsMono NFP, sans-serif;
 position: fixed;  /* Fix it at the top */
@@ -303,11 +272,91 @@ cursor: pointer; /* Pointer cursor on hover */
 text-align: center; /* Center text inside the button */
 transition: background-color 0.3s ease; /* Smooth background color transition */
 }
-
 /* Hover effect for the button */
 #filter-panel button:hover {
 background-color: #fc5c2c; /* Darker green when hovering */
 }
+
+
+    .download-btn {
+    padding: 5px 10px;
+    background-color: rgb(119, 255, 119);
+    color: black !important;
+    /* Change text color for Download button */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+    }
+    .download-btn:hover {
+    background-color: #45a049;
+    }
+
+    .edit-btn {
+    padding: 5px 10px;
+    background-color: #a5d9fc;
+    color: black !important;
+    /* Change text color for Download button */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+    }
+    .edit-btn:hover {
+    background-color: rgb(103, 113, 255);
+    /* Change hover effect */
+    }
+    button:hover {
+    background-color: #45a049;
+    }
+
+
+    div.file-actions {
+    margin-right: 0px;
+    max-width: 10px;
+    }
+    .file-actions {
+    position: relative;
+    display: inline-block;
+    max-width: 10px;
+    margin-right: 0px;
+    }
+
+    .dots-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #ff0000;
+    }
+    .dots-btn:hover {
+    color: #000;
+    }
+    .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 150px;
+    z-index: 1000;
+    padding: 5px 0;
+    }
+    .dropdown-menu a {
+    display: block;
+    padding: 8px 10px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    }
+    .dropdown-menu a:hover {
+    background-color: #f1f1f1;
+    }
+    .dropdown-menu a .nf {
+    margin-right: 8px;
+    }
 
 
     /* Media query for mobile screens */
@@ -430,6 +479,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
             </ul>
         </div>
 
+
         <div>
             <h3>Files:</h3>
             <ul class="file-list">
@@ -444,6 +494,19 @@ background-color: #fc5c2c; /* Darker green when hovering */
                         </small>
                     </div>
         
+                    <!-- Three dots dropdown menu placed before the edit button -->
+                    <div class="file-actions">
+                        <button class="dots-btn" onclick="toggleDropdown('{{ file }}')">⋮</button>
+                        <div class="dropdown-menu" id="dropdown-{{ file }}">
+                            <a href="#" class="rename-btn" onclick="renameFile('{{ current_dir }}', '{{ file }}')">
+                                <i class="nf nf-md-rename_box"></i> Rename
+                            </a>
+                            <a href="#" class="delete-btn" onclick="deleteFile('{{ current_dir }}', '{{ file }}')">
+                                <i class="nf nf-fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+        
                     {% if file.endswith(editable_extensions) %}
                     <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn">
                         <i class="nf nf-fa-edit"></i>
@@ -452,16 +515,6 @@ background-color: #fc5c2c; /* Darker green when hovering */
         
                     <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
                         <i class="nf nf-oct-download"></i>
-                    </a>
-        
-                    <!-- Rename Button -->
-                    <a href="#" class="rename-btn" onclick="renameFile('{{ current_dir }}', '{{ file }}')">
-                        <i class="nf nf-md-rename_box"></i>
-                    </a>
-        
-                    <!-- Delete Button -->
-                    <a href="#" class="delete-btn" onclick="deleteFile('{{ current_dir }}', '{{ file }}')">
-                        <i class="nf nf-fa-trash"></i>
                     </a>
                 </li>
                 {% endfor %}
@@ -533,6 +586,33 @@ background-color: #fc5c2c; /* Darker green when hovering */
             });
         }
     
+            // Toggle the visibility of the dropdown menu
+            function toggleDropdown(fileName) {
+                const dropdownMenu = document.getElementById('dropdown-' + fileName);
+                const isVisible = dropdownMenu.style.display === 'block';
+                
+                // Hide all dropdowns before displaying the clicked one
+                const allDropdowns = document.querySelectorAll('.dropdown-menu');
+                allDropdowns.forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+
+                // Show or hide the clicked dropdown
+                dropdownMenu.style.display = isVisible ? 'none' : 'block';
+            }
+
+            // Close all dropdowns when clicking outside
+            window.addEventListener('click', function (event) {
+                const allDropdowns = document.querySelectorAll('.dropdown-menu');
+                allDropdowns.forEach(dropdown => {
+                    if (!dropdown.contains(event.target) && !event.target.classList.contains('dots-btn')) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            });
+
+
+
         // Close the filter panel if clicking outside
         window.addEventListener('click', function (event) {
             const filterPanel = document.getElementById('filter-panel');
