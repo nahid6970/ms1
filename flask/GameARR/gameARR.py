@@ -119,7 +119,7 @@ HTML_TEMPLATE = """
         .game-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
         .game { background: #2c2c2c; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease; }
         .game:hover { transform: scale(1.05); }
-        .game img { width: 100%; height: auto; border-radius: 10px; }
+        .game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
         .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
         .game p { font-size: 1.2em; color: gold; }
         .form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; }
@@ -128,6 +128,7 @@ HTML_TEMPLATE = """
         .btn-add { background: #28a745; color: white; }
         .btn-edit { background: #007bff; color: white; }
         .btn-delete { background: #dc3545; color: white; }
+
         .top-controls { margin-bottom: 20px; }
         .top-controls button, .top-controls .sort-btn {
             background: #28a745;
@@ -140,7 +141,6 @@ HTML_TEMPLATE = """
             font-weight: bold;
             transition: transform 0.2s, background 0.2s;
         }
-
         .top-controls .sort-btn:hover,
         .top-controls button:hover {
             transform: scale(1.05);
@@ -178,12 +178,12 @@ HTML_TEMPLATE = """
         <div class="game-list">
         {% for game in games %}
             <div class="game">
-                <h2>{{ game[1] }}</h2>
-                <p style="color: #bbb; font-style: italic;">{{ game[2] }}</p>  <!-- Year on a new line -->
+                <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
+                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>  <!-- Year on a new line -->
+                <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p> <!-- Display progression here -->
+                <p>{{ game[4] }}/5 ⭐</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit">Edit</a>
                 <a href="/delete/{{ game[0] }}" class="btn btn-delete">Delete</a>
-                <p>Progression: {{ game[5] }}%</p> <!-- Display progression here -->
-                <p>{{ game[4] }}/5 ⭐</p>
                 <img src="{{ game[3] }}" alt="{{ game[1] }}">
             </div>
         {% endfor %}
