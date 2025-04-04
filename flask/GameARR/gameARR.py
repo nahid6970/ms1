@@ -116,8 +116,20 @@ HTML_TEMPLATE = """
     <style>
         body { font-family: Arial, sans-serif; background: #1c1c1c; color: white; text-align: center; }
         .container { margin: auto; padding: 20px; }
-        .game-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-        .game { background: #2c2c2c; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease; }
+        # .game-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
+.game-list {
+display: flex;
+flex-wrap: wrap;
+gap: 20px;
+padding: 20px;
+justify-content: center; /* Center items if they don’t fill the row */
+align-items: flex-start; /* Align items at the top */
+}
+.game {
+width: 300px; /* Fixed width for each game */
+flex: 0 0 auto; /* Prevents the items from growing or shrinking */
+}
+{ background: #2c2c2c; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease; }
         .game:hover { transform: scale(1.05); }
         .game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
         .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
