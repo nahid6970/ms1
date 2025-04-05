@@ -105,6 +105,19 @@ def add_game():
     conn.close()
     return redirect('/')
 
+@app.route('/search')
+def search_games():
+    query = request.args.get('query')
+    if query:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url FROM games WHERE name LIKE ? ORDER BY name COLLATE NOCASE", ('%' + query + '%',))
+        games = c.fetchall()
+        conn.close()
+        return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc')
+    else:
+        return redirect('/')
+
 @app.route('/edit/<int:game_id>', methods=['GET', 'POST'])
 def edit_game(game_id):
     conn = sqlite3.connect(DB_PATH)

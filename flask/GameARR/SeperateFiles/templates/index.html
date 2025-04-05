@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GameARR</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameARR</title>
 
 <style>
 @import url("https://www.nerdfonts.com/assets/css/webfont.css");
@@ -26,39 +26,35 @@ transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transform and s
 transform: scale(1.05); /* Slight zoom effect */
 border: 2px solid white; /* Add a 2px solid white border on hover */
 box-shadow: none; /* Remove the shadow if you prefer no shadow at all */
-}
-/* .game:hover {
-transform: scale(1.05);
-box-shadow: 0 4px 20px #9aed61;
-} */
-
+}         
 .game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
 .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
 .game p { font-size: 1.2em; color: gold; }
 
-.form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; } input { margin: 5px; padding: 8px; width: 90%; }
+.form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; }
+input { margin: 5px; padding: 8px; width: 90%; }
 .btn { padding: 8px 12px; border: none; cursor: pointer; border-radius: 5px; }
 .btn-add { background: #28a745; color: white; }
 .btn-edit { background: #007bff; color: white; }
 .btn-delete { background: #dc3545; color: white; }
 
-        .top-controls { margin-bottom: 20px; }
-        .top-controls button, .top-controls .sort-btn {
-            background: #28a745;
-            color: white;
-            padding: 10px 14px;
-            margin: 0 5px;
-            border: none;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: transform 0.2s, background 0.2s;
-        }
-        .top-controls .sort-btn:hover,
-        .top-controls button:hover {
-            transform: scale(1.05);
-            background: #218838;
-        }
+.top-controls { margin-bottom: 20px; }
+.top-controls button, .top-controls .sort-btn {
+background: #28a745;
+color: white;
+padding: 10px 14px;
+margin: 0 5px;
+border: none;
+border-radius: 4px;
+text-decoration: none;
+font-weight: bold;
+transition: transform 0.2s, background 0.2s;
+}
+.top-controls .sort-btn:hover,
+.top-controls button:hover {
+transform: scale(1.05);
+background: #218838;
+}
     </style>
     <script>
         function toggleForm() {
@@ -75,12 +71,16 @@ box-shadow: 0 4px 20px #9aed61;
             <a href="/?sort_by=name&order={{ next_order }}" class="sort-btn">Sort by Name</a>
             <a href="/?sort_by=year&order={{ next_order }}" class="sort-btn">Sort by Year</a>
             <a href="/?sort_by=rating&order={{ next_order }}" class="sort-btn">Sort by Rating</a>
+            <form action="/search" method="get" style="display: inline;">
+                <input type="text" name="query" placeholder="Search Games">
+                <button type="submit" class="btn">Search</button>
+            </form>
         </div>
 
         <div class="form-container" id="gameForm">
             <form action="/add" method="post">
                 <input type="text" name="name" placeholder="Game Name" required><br>
-                <input type="text" name="year" placeholder="Year (2021)" required><br>
+                <input type="text" name="year" placeholder="Year (or Full Date like July 27, 2021)" required><br>
                 <input type="text" name="image" placeholder="Image URL" required><br>
                 <input type="text" name="url" placeholder="Game URL (Optional)"><br>
                 <input type="number" name="rating" placeholder="Rating (1-5)" min="1" max="5"><br>
@@ -93,12 +93,11 @@ box-shadow: 0 4px 20px #9aed61;
         {% for game in games %}
             <div class="game">
                 <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
-                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p> 
-                <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p>
-                <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
+                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>  <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p> <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
                 <a href="/delete/{{ game[0] }}" class="btn btn-delete"><i class="nf nf-md-delete"></i></a>
-                <a href="{{ game[6] if game[6] else '#' }}"> <img src="{{ game[3] }}" alt="{{ game[1] }}">
+                <a href="{{ game[6] if game[6] else '#' }}">
+                    <img src="{{ game[3] }}" alt="{{ game[1] }}">
                 </a>
             </div>
         {% endfor %}
