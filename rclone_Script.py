@@ -38,7 +38,7 @@ grep_var = tk.StringVar(value="")
 
 
 style = ttk.Style()
-style.configure("Custom.TRadiobutton", font=("JetBrainsmono nfp", 12, "bold"), foreground="#e6f752", background="#282c34")
+style.configure("Custom.TRadiobutton", font=("Arial", 12, "bold"), foreground="#e6f752", background="#282c34")
 style.map("Custom.TRadiobutton",
     foreground=[('active', '#333333'), ('selected', '#000000')], # Darker text on hover, black when selected
     background=[('active', '#e0e0e0'), ('selected', '#ffffff')]  # Light gray on hover, white when selected
@@ -186,7 +186,7 @@ from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 from_options = ["", "gu:/song", "gu:/software", "gu:/mx"]
-from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, style="TCombobox")
+from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, font=("JetBrainsmono nfp", 12, "bold"))
 from_combo.grid(row=0, column=1, sticky=tk.W)
 from_combo.set("") # Set a default value
 
@@ -196,7 +196,7 @@ to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10), padx=(10,0))
 
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 to_options = ["", "C:/rclone_download/", "D:/rclone_download/"]
-to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, style="TCombobox")
+to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, font=("JetBrainsmono nfp", 12, "bold"))
 to_combo.grid(row=0, column=1, sticky=tk.W)
 to_combo.set("") # Set a default value
 
