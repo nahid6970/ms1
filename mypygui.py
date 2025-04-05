@@ -839,10 +839,13 @@ bkup.bind ("<Button-1>",git_backup)
 
 def git_backup_ms1(event):
     subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; cd C:/ms1/ ; gitter}"], shell=True)
+def git_restore_ms1(event):
+    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='Git Restore' ; cd C:/ms1/ ; git restore . }"], shell=True)
 STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
 STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
 STATUS_MS1.bind ("<Button-1>",git_backup_ms1)
 STATUS_MS1.bind("<Button-3>",lambda event:show_git_changes("C:\\ms1"))
+STATUS_MS1.bind ("<Control-Button-3>", git_restore_ms1)
 
 def git_backup_ms2(event):
     subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; cd C:/ms2/ ; gitter}"], shell=True)
