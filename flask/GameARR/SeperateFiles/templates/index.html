@@ -7,7 +7,6 @@
     <style>
         body { font-family: Arial, sans-serif; background: #1c1c1c; color: white; text-align: center; }
         .container { margin: auto; padding: 20px; }
-         /* .game-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; } */
 .game-list {
 display: flex;
 flex-wrap: wrap;
@@ -76,7 +75,9 @@ align-items: flex-start; /* Align items at the top */
                 <input type="text" name="name" placeholder="Game Name" required><br>
                 <input type="text" name="year" placeholder="Year (or Full Date like July 27, 2021)" required><br>
                 <input type="text" name="image" placeholder="Image URL" required><br>
-                <input type="number" name="rating" placeholder="Rating (1-5)" min="1" max="5"><br>                <input type="number" name="progression" placeholder="Progression (0-100%)" min="0" max="100" required><br>
+                <input type="text" name="url" placeholder="Game URL (Optional)"><br>
+                <input type="number" name="rating" placeholder="Rating (1-5)" min="1" max="5"><br>
+                <input type="number" name="progression" placeholder="Progression (0-100%)" min="0" max="100" required><br>
                 <button type="submit" class="btn btn-add">Save</button>
             </form>
         </div>
@@ -85,12 +86,12 @@ align-items: flex-start; /* Align items at the top */
         {% for game in games %}
             <div class="game">
                 <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
-                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>
-                <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p>
-                <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
+                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>  <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p> <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit">Edit</a>
                 <a href="/delete/{{ game[0] }}" class="btn btn-delete">Delete</a>
-                <img src="{{ game[3] }}" alt="{{ game[1] }}">
+                <a href="{{ game[6] if game[6] else '#' }}">
+                    <img src="{{ game[3] }}" alt="{{ game[1] }}">
+                </a>
             </div>
         {% endfor %}
         </div>
