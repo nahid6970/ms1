@@ -116,7 +116,11 @@ def edit_game(game_id):
         url = request.form['url']
         rating = request.form.get('rating')
         if rating:
-            rating = int(rating)
+            try:
+                rating = int(rating)
+            except ValueError:
+                # Handle invalid input
+                rating = None
         progression = int(request.form['progression'])
         c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ? WHERE id = ?",
                   (name, year, image, rating, progression, url, game_id))

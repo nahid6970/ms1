@@ -28,6 +28,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "Flask - Drive"    ,"paths": [r"C:\ms1\startup\Command\flask\flask_drive.ahk"]},
 {"type": "Command","name": "Flask - File"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_file.ahk"]},
 {"type": "Command","name": "Flask - Text"     ,"paths": [r"C:\ms1\startup\Command\flask\flask_text.ahk"]},
+{"type": "Command","name": "Flask - GameARR"  ,"paths": [r"C:\ms1\startup\Command\flask\flask_GameARR.ahk"]},
 {"type": "Command","name": "Komorebi"         ,"paths": [r"C:\ms1\startup\Command\komorebi.ahk"]},
 {"type": "Command","name": "mypygui"          ,"paths": [r"C:\ms1\startup\Command\mypygui.ahk"]},
 {"type": "Command","name": "Open WebUI"  ,"paths": [r"C:\ms1\startup\Command\openwebui.ahk"]},
