@@ -93,11 +93,12 @@ box-shadow: 0 4px 20px #9aed61;
         {% for game in games %}
             <div class="game">
                 <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
-                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>  <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p> <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
+                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p> 
+                <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p>
+                <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
-                <a href="/delete/{{ game[0] }}" class="btn btn-delete">Delete</a>
-                <a href="{{ game[6] if game[6] else '#' }}">
-                    <img src="{{ game[3] }}" alt="{{ game[1] }}">
+                <a href="/delete/{{ game[0] }}" class="btn btn-delete"><i class="nf nf-md-delete"></i></a>
+                <a href="{{ game[6] if game[6] else '#' }}"> <img src="{{ game[3] }}" alt="{{ game[1] }}">
                 </a>
             </div>
         {% endfor %}
