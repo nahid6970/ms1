@@ -100,10 +100,16 @@ def add_game():
     progression = int(request.form['progression'])
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("INSERT INTO games (name, year, image, rating, progression, url) VALUES (?, ?, ?, ?, ?, ?)", (name, year, image, rating, progression, url))
-    conn.commit()
-    conn.close()
-    return redirect('/')
+    c.execute("SELECT id FROM games WHERE name = ?", (name,))
+    existing_game = c.fetchone()
+    if existing_game:
+        conn.close()
+        return render_template('index.html', error="A game with this name already exists.", **locals()) # Pass error to template
+    else:
+        c.execute("INSERT INTO games (name, year, image, rating, progression, url) VALUES (?, ?, ?, ?, ?, ?)", (name, year, image, rating, progression, url))
+        conn.commit()
+        conn.close()
+        return redirect('/')
 
 @app.route('/search')
 def search_games():
