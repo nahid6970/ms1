@@ -50,27 +50,40 @@ text-decoration: none;
 font-weight: bold;
 transition: transform 0.2s, background 0.2s;
 }
+.top-controls .sort-btn {
+background: #ffc936;
+color: rgb(0, 0, 0);
+padding: 10px 14px;
+margin: 0 5px;
+border: none;
+border-radius: 4px;
+text-decoration: none;
+font-weight: bold;
+transition: transform 0.2s, background 0.2s;
+}
 .top-controls .sort-btn:hover,
 .top-controls button:hover {
 transform: scale(1.05);
 background: #218838;
 }
-    </style>
-    <script>
-        function toggleForm() {
-            var form = document.getElementById("gameForm");
-            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-        }
-    </script>
+</style>
+
+<script>
+    function toggleForm() {
+        var form = document.getElementById("gameForm");
+        form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+    }
+</script>
+
 </head>
 <body>
     <div class="container">
         <h1>GameARR</h1>
         <div class="top-controls">
             <button onclick="toggleForm()">Add Game</button>
-            <a href="/?sort_by=name&order={{ next_order }}" class="sort-btn">Sort by Name</a>
-            <a href="/?sort_by=year&order={{ next_order }}" class="sort-btn">Sort by Year</a>
-            <a href="/?sort_by=rating&order={{ next_order }}" class="sort-btn">Sort by Rating</a>
+            <a href="/?sort_by=name&order={{ next_order }}" class="sort-btn"><i class="nf nf-fa-sort_alpha_asc"></i></a>
+            <a href="/?sort_by=year&order={{ next_order }}" class="sort-btn"><i class="nf nf-md-sort_calendar_ascending"></i></a>
+            <a href="/?sort_by=rating&order={{ next_order }}" class="sort-btn"><i class="nf nf-fa-sort"></i></a>
             <form action="/search" method="get" style="display: inline;">
                 <input type="text" name="query" placeholder="Search Games">
                 <button type="submit" class="btn">Search</button>
@@ -93,7 +106,9 @@ background: #218838;
         {% for game in games %}
             <div class="game">
                 <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
-                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>  <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p> <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
+                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p> 
+                <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p>
+                <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
                 <a href="/delete/{{ game[0] }}" class="btn btn-delete"><i class="nf nf-md-delete"></i></a>
                 <a href="{{ game[6] if game[6] else '#' }}">
