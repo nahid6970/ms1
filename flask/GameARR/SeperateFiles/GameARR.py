@@ -66,8 +66,10 @@ def add_game():
     name = request.form['name']
     year = request.form['year']
     image = request.form['image']
-    rating = request.form['rating']
-    progression = int(request.form['progression'])  # Store progression as integer
+    rating = request.form.get('rating') # Use get to handle missing field
+    if rating:
+        rating = int(rating)
+    progression = int(request.form['progression'])
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("INSERT INTO games (name, year, image, rating, progression) VALUES (?, ?, ?, ?, ?)", (name, year, image, rating, progression))
@@ -83,8 +85,10 @@ def edit_game(game_id):
         name = request.form['name']
         year = request.form['year']
         image = request.form['image']
-        rating = request.form['rating']
-        progression = int(request.form['progression'])  # Update progression as integer
+        rating = request.form.get('rating') # Use get
+        if rating:
+            rating = int(rating)
+        progression = int(request.form['progression'])
         c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ? WHERE id = ?",
                   (name, year, image, rating, progression, game_id))
         conn.commit()
@@ -93,7 +97,6 @@ def edit_game(game_id):
     else:
         c.execute("SELECT name, year, image, rating, progression FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
-
         conn.close()
         return render_template('edit_game.html', game=game, game_id=game_id)
 
