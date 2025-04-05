@@ -5,74 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameARR</title>
 
-<style>
-@import url("https://www.nerdfonts.com/assets/css/webfont.css");
-body { font-family: Arial, sans-serif; background: #1c1c1c; color: white; text-align: center; }
-.container { margin: auto; padding: 20px; }
-.game-list {
-display: flex;
-flex-wrap: wrap;
-gap: 20px;
-padding: 20px;
-justify-content: center; /* Center items if they don’t fill the row */
-align-items: flex-start; /* Align items at the top */
-}
-.game {
-width: 325px;
-flex: 0 0 auto;
-transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transform and shadow */
-}
-.game:hover {
-transform: scale(1.05); /* Slight zoom effect */
-border: 2px solid white; /* Add a 2px solid white border on hover */
-box-shadow: none; /* Remove the shadow if you prefer no shadow at all */
-}         
-.game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
-.game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
-.game p { font-size: 1.2em; color: gold; }
-
-.form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; }
-input { margin: 5px; padding: 8px; width: 90%; }
-.btn { padding: 8px 12px; border: none; cursor: pointer; border-radius: 5px; }
-.btn-add { background: #28a745; color: white; }
-.btn-edit { background: #007bff; color: white; }
-.btn-delete { background: #dc3545; color: white; }
-
-.top-controls { margin-bottom: 20px; }
-.top-controls button, .top-controls .sort-btn {
-background: #28a745;
-color: white;
-padding: 10px 14px;
-margin: 0 5px;
-border: none;
-border-radius: 4px;
-text-decoration: none;
-font-weight: bold;
-transition: transform 0.2s, background 0.2s;
-}
-.top-controls .sort-btn {
-background: #ffc936;
-color: rgb(0, 0, 0);
-padding: 10px 14px;
-margin: 0 5px;
-border: none;
-border-radius: 4px;
-text-decoration: none;
-font-weight: bold;
-transition: transform 0.2s, background 0.2s;
-}
-.top-controls .sort-btn:hover,
-.top-controls button:hover {
-transform: scale(1.05);
-background: #218838;
-}
-</style>
+    <style>
+        @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+        body { font-family: Arial, sans-serif; background: #1c1c1c; color: white; text-align: center; }
+        .container { margin: auto; padding: 20px; }
+        .game-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+        justify-content: center; /* Center items if they don’t fill the row */
+        align-items: flex-start; /* Align items at the top */
+        }
+        .game {
+        width: 325px;
+        flex: 0 0 auto;
+        transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transform and shadow */
+        }
+        .game:hover {
+        transform: scale(1.05); /* Slight zoom effect */
+        border: 2px solid white; /* Add a 2px solid white border on hover */
+        box-shadow: none; /* Remove the shadow if you prefer no shadow at all */
+        }         
+        .game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
+        .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
+        .game p { font-size: 1.2em; color: gold; }
+        
+        .form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; }
+        input { margin: 5px; padding: 8px; width: 90%; }
+        .btn { padding: 8px 12px; border: none; cursor: pointer; border-radius: 5px; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-edit { background: #007bff; color: white; }
+        .btn-delete { background: #dc3545; color: white; }
+        
+        .top-controls { margin-bottom: 20px; }
+        .top-controls button, .top-controls .sort-btn {
+        background: #28a745;
+        color: white;
+        padding: 10px 14px;
+        margin: 0 5px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: transform 0.2s, background 0.2s;
+        }
+        .top-controls .sort-btn {
+        background: #ffc936;
+        color: rgb(0, 0, 0);
+        padding: 10px 14px;
+        margin: 0 5px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: transform 0.2s, background 0.2s;
+        }
+        .top-controls .sort-btn:hover,
+        .top-controls button:hover {
+        transform: scale(1.05);
+        background: #218838;
+        }
+        </style>
+        
 
 <script>
     function toggleForm() {
         var form = document.getElementById("gameForm");
         form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Restore scroll position on page load
+        if (sessionStorage.getItem('scrollPosition') !== null) {
+            window.scrollTo(0, sessionStorage.getItem('scrollPosition'));
+            sessionStorage.removeItem('scrollPosition');
+        }
+    });
+
+    window.addEventListener('beforeunload', function() {
+        // Save scroll position before refresh
+        sessionStorage.setItem('scrollPosition', window.scrollY);
+    });
 </script>
 
 </head>
@@ -81,11 +95,11 @@ background: #218838;
         <h1>GameARR</h1>
         <div class="top-controls">
             <button onclick="toggleForm()">Add Game</button>
-            <a href="/?sort_by=name&order={{ next_order }}" class="sort-btn"><i class="nf nf-fa-sort_alpha_asc"></i></a>
-            <a href="/?sort_by=year&order={{ next_order }}" class="sort-btn"><i class="nf nf-md-sort_calendar_ascending"></i></a>
-            <a href="/?sort_by=rating&order={{ next_order }}" class="sort-btn"><i class="nf nf-fa-sort"></i></a>
+            <a href="/?sort_by=name&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort_alpha_asc"></i></a>
+            <a href="/?sort_by=year&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-md-sort_calendar_ascending"></i></a>
+            <a href="/?sort_by=rating&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort"></i></a>
             <form action="/search" method="get" style="display: inline;">
-                <input type="text" name="query" placeholder="Search Games" style="width: 250px;">
+                <input type="text" name="query" placeholder="Search Games" style="width: 250px;" value="{{ query if query }}">
                 <button type="submit" class="btn">Search</button>
             </form>
         </div>
@@ -106,7 +120,7 @@ background: #218838;
         {% for game in games %}
             <div class="game">
                 <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
-                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p> 
+                <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>
                 <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p>
                 <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
