@@ -39,30 +39,30 @@ grep_var = tk.StringVar(value="")
 
 style = ttk.Style()
 style.configure("Custom.TRadiobutton", font=("JetBrainsmono nfp", 12, "bold"), foreground="#e6f752", background="#282c34")
-
-style = ttk.Style()
 style.configure("Black.TFrame", background="#282c34")
+style.configure("TCombobox", font=("JetBrainsmono nfp", 10)) # Style for Combobox
+style.configure("TEntry", font=("JetBrainsmono nfp", 10)) # Style for Entry fields in extra_items
 
 
 # Additional options with display names
 additional_options = [
-    ("Fast List",              "--fast-list"                     ,True),
-    ("Readable",               "--human-readable"                ,True),
-    ("Acknowledge Abuse",      "--drive-acknowledge-abuse"       ,True),
-    ("Progress",               "-P"                              ,False),
-    ("Dry Run",                "--dry-run"                       ,False),
-    ("Web Gui **Rcd",          "--rc-web-gui"                    ,False),
-    ("vfs-cache",              "--vfs-cache-mode writes"         ,False),
-    ("Verbose Lengthy",        "-vv"                             ,False),
-    ("Verbose Minimal",        "-v"                              ,False),
-    ("Log Level",              "--log-level ERROR"               ,False),
-    ("Stats Oneline",          "--stats-one-line"                ,False),
-    ("Trashed Only",           "--drive-trashed-only "           ,False),
-    ("Shared With Me",         "--drive-shared-with-me "         ,False),
-    ("Skip Dangling Shortcuts","--drive-skip-dangling-shortcuts ",False),
-    ("Skip Shortcuts",         "--drive-skip-shortcuts "         ,False),
-    ("Date **tree ",           "-D "                             ,False),
-    ("Modified Time **tree",   "-t "                             ,False),
+    ("Fast List",                   "--fast-list"                                     ,True),
+    ("Readable",                    "--human-readable"                                ,True),
+    ("Acknowledge Abuse",           "--drive-acknowledge-abuse"                       ,True),
+    ("Progress",                    "-P"                                              ,False),
+    ("Dry Run",                     "--dry-run"                                       ,False),
+    ("Web Gui **Rcd",               "--rc-web-gui"                                    ,False),
+    ("vfs-cache",                   "--vfs-cache-mode writes"                         ,False),
+    ("Verbose Lengthy",             "-vv"                                             ,False),
+    ("Verbose Minimal",             "-v"                                              ,False),
+    ("Log Level",                   "--log-level ERROR"                               ,False),
+    ("Stats Oneline",               "--stats-one-line"                                ,False),
+    ("Trashed Only",                "--drive-trashed-only "                            ,False),
+    ("Shared With Me",              "--drive-shared-with-me "                          ,False),
+    ("Skip Dangling Shortcuts",     "--drive-skip-dangling-shortcuts "                ,False),
+    ("Skip Shortcuts",              "--drive-skip-shortcuts "                          ,False),
+    ("Date **tree ",                "-D "                                             ,False),
+    ("Modified Time **tree",        "-t "                                             ,False),
 ]
 
 # Manage additional items
@@ -102,10 +102,9 @@ def update_extra_labels():
         label = tk.Label(Filter_Flags, text=item["text"], font=("Jetbrainsmono nfp",10,"bold"), bg="#b6fba0" if item["state"] else "#fa8a93", width=15)
         label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, k=key: update_extra_item(l, k))
-        
-        ttk.Label(Filter_Flags, text="Value:").grid(row=row, column=1, sticky=tk.W,)
-        entry = ttk.Entry(Filter_Flags, textvariable=item["var"])
-        entry.grid(row=row, column=2, sticky=tk.W)
+
+        entry = ttk.Entry(Filter_Flags, textvariable=item["var"], style="TEntry")
+        entry.grid(row=row, column=1, sticky=tk.W)
 
 # Create the style for the frame
 
@@ -117,14 +116,14 @@ command_frame.grid(row=0, column=0, sticky=tk.W)
 ttk.Label(command_frame, text="Command:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 # Command radios configuration
 command_radios = [
-    {"text": "ls"   ,"value": "ls"},
-    {"text": "copy"   ,"value": "copy"},
-    {"text": "sync"   ,"value": "sync"},
-    {"text": "tree" ,"value": "tree"} ,
-    {"text": "ncdu" ,"value": "ncdu"} ,
-    {"text": "size" ,"value": "size"} ,
+    {"text": "ls"    ,"value": "ls"},
+    {"text": "copy"  ,"value": "copy"},
+    {"text": "sync"  ,"value": "sync"},
+    {"text": "tree"  ,"value": "tree"} ,
+    {"text": "ncdu"  ,"value": "ncdu"} ,
+    {"text": "size"  ,"value": "size"} ,
     {"text": "mount(winfsp)","value": "mount"},
-    {"text": "rcd","value": "rcd"},
+    {"text": "rcd"   ,"value": "rcd"},
 ]
 # Initialize command radio buttons
 for idx, item in enumerate(command_radios):
@@ -139,37 +138,37 @@ storage_frame.grid(row=1, column=0, sticky=tk.W)
 #! alt1 start
 ttk.Label(storage_frame, text="Storage:", background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
 storage_radios = [
-    {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
-    {"text": "C:/"  ,"value": "C:/"  ,"row": 0,"column": 2},
-    {"text": "D:/"  ,"value": "D:/"  ,"row": 0,"column": 3},
+    {"text": "N/A"   ,"value": ""      ,"row": 0,"column": 1},
+    {"text": "C:/"   ,"value": "C:/"   ,"row": 0,"column": 2},
+    {"text": "D:/"   ,"value": "D:/"   ,"row": 0,"column": 3},
 
-    {"text": "cgu:/","value": "cgu:/","row": 1,"column": 1},
-    {"text": "gu:/" ,"value": "gu:/" ,"row": 1,"column": 2},
-    {"text": "g00:/","value": "g00:/","row": 1,"column": 3},
+    {"text": "cgu:/" ,"value": "cgu:/" ,"row": 1,"column": 1},
+    {"text": "gu:/"  ,"value": "gu:/"  ,"row": 1,"column": 2},
+    {"text": "g00:/" ,"value": "g00:/" ,"row": 1,"column": 3},
 
-    {"text": "g01:/","value": "g01:/","row": 2,"column": 1},
-    {"text": "g02:/","value": "g02:/","row": 2,"column": 2},
-    {"text": "g03:/","value": "g03:/","row": 2,"column": 3},
-    {"text": "g04:/","value": "g04:/","row": 2,"column": 4},
-    {"text": "g05:/","value": "g05:/","row": 2,"column": 5},
+    {"text": "g01:/" ,"value": "g01:/" ,"row": 2,"column": 1},
+    {"text": "g02:/" ,"value": "g02:/" ,"row": 2,"column": 2},
+    {"text": "g03:/" ,"value": "g03:/" ,"row": 2,"column": 3},
+    {"text": "g04:/" ,"value": "g04:/" ,"row": 2,"column": 4},
+    {"text": "g05:/" ,"value": "g05:/" ,"row": 2,"column": 5},
 
-    {"text": "g06:/","value": "g06:/","row": 3,"column": 1},
-    {"text": "g07:/","value": "g07:/","row": 3,"column": 2},
-    {"text": "g08:/","value": "g08:/","row": 3,"column": 3},
-    {"text": "g09:/","value": "g09:/","row": 3,"column": 4},
-    {"text": "g10:/","value": "g10:/","row": 3,"column": 5},
+    {"text": "g06:/" ,"value": "g06:/" ,"row": 3,"column": 1},
+    {"text": "g07:/" ,"value": "g07:/" ,"row": 3,"column": 2},
+    {"text": "g08:/" ,"value": "g08:/" ,"row": 3,"column": 3},
+    {"text": "g09:/" ,"value": "g09:/" ,"row": 3,"column": 4},
+    {"text": "g10:/" ,"value": "g10:/" ,"row": 3,"column": 5},
 
-    {"text": "g11:/","value": "g11:/","row": 4,"column": 1},
-    {"text": "g12:/","value": "g12:/","row": 4,"column": 2},
-    {"text": "g13:/","value": "g13:/","row": 4,"column": 3},
-    {"text": "g14:/","value": "g14:/","row": 4,"column": 4},
-    {"text": "g15:/","value": "g15:/","row": 4,"column": 5},
+    {"text": "g11:/" ,"value": "g11:/" ,"row": 4,"column": 1},
+    {"text": "g12:/" ,"value": "g12:/" ,"row": 4,"column": 2},
+    {"text": "g13:/" ,"value": "g13:/" ,"row": 4,"column": 3},
+    {"text": "g14:/" ,"value": "g14:/" ,"row": 4,"column": 4},
+    {"text": "g15:/" ,"value": "g15:/" ,"row": 4,"column": 5},
 
-    {"text": "o0:/", "value": "o0:/", "row": 5,"column": 1},
-    {"text": "ouk:/","value": "ouk:/","row": 5,"column": 2},
+    {"text": "o0:/"  ,"value": "o0:/"  ,"row": 5,"column": 1},
+    {"text": "ouk:/" ,"value": "ouk:/" ,"row": 5,"column": 2},
 
-    {"text": "m0:/","value": "m0:/","row": 6,"column": 1},
-    {"text": "m1:/","value": "m1:/","row": 6,"column": 2},
+    {"text": "m0:/"  ,"value": "m0:/"  ,"row": 6,"column": 1},
+    {"text": "m1:/"  ,"value": "m1:/"  ,"row": 6,"column": 2},
 ]
 
 for item in storage_radios:
@@ -182,29 +181,20 @@ from_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
 from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-from_radios = [
-    {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
-    {"text": "song:/","value": "gu:/song","row": 0,"column": 2},
-    {"text": "software:/","value": "gu:/software","row": 0,"column": 3},
-    {"text": "mx:/","value": "gu:/mx","row": 0,"column": 4},
-]
-for item in from_radios:
-    radio = ttk.Radiobutton(from_frame, text=item["text"], variable=from_var, value=item["value"], style="Custom.TRadiobutton")
-    radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
+from_options = ["", "gu:/song", "gu:/software", "gu:/mx"]
+from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, style="TCombobox")
+from_combo.grid(row=0, column=1, sticky=tk.W)
+from_combo.set("") # Set a default value
 
 # TO
 to_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
 to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10), padx=(10,0))
 
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-to_radios = [
-    {"text": "N/A"  ,"value": ""     ,"row": 0,"column": 1},
-    {"text": "C:/","value": "C:/rclone_download/","row": 0,"column": 2},
-    {"text": "D:/","value": "D:/rclone_download/","row": 0,"column": 3},
-]
-for item in to_radios:
-    radio = ttk.Radiobutton(to_frame, text=item["text"], variable=to_var, value=item["value"], style="Custom.TRadiobutton")
-    radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
+to_options = ["", "C:/rclone_download/", "D:/rclone_download/"]
+to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, style="TCombobox")
+to_combo.grid(row=0, column=1, sticky=tk.W)
+to_combo.set("") # Set a default value
 
 # Create arguments frame
 Main_Flags_list = ttk.Frame(root, padding="10", style="Black.TFrame")
@@ -221,7 +211,7 @@ grep_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 grep_frame.grid(row=6, column=0, sticky=tk.W)
 
 ttk.Label(grep_frame, text="Grep Text:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-grep_entry = ttk.Entry(grep_frame, textvariable=grep_var, width=30)
+grep_entry = ttk.Entry(grep_frame, textvariable=grep_var, width=30, style="TEntry")
 grep_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
 
 # Update labels for extra items
@@ -262,13 +252,13 @@ def clear_terminal():
     subprocess.run("cls", shell=True)
 
 BottomFrame = ttk.Frame(root, padding="10", style="Black.TFrame")
-BottomFrame.grid(row=6, column=0, sticky=tk.E)
+BottomFrame.grid(row=7, column=0, sticky=tk.E) # Moved down to accommodate new widgets
 
 execute_button = tk.Button(BottomFrame, text="Execute", font=("Jetbrainsmono nfp",12,"bold"), bg="#4da9ff", fg="#000000", command=execute_command)
-execute_button.grid(row=4, column=0, pady=10, padx=10, sticky=tk.W)
+execute_button.grid(row=0, column=0, pady=10, padx=10, sticky=tk.W)
 
 clear_button = tk.Button(BottomFrame, text="Clear", font=("Jetbrainsmono nfp",12,"bold"), bg="#282c34",fg="#ffffff", command=clear_terminal)
-clear_button.grid(row=4, column=1, pady=10, sticky=tk.W)
+clear_button.grid(row=0, column=1, pady=10, sticky=tk.W)
 
 center_and_press_alt_2(root)
 # Run the main event loop
