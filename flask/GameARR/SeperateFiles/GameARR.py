@@ -94,19 +94,40 @@ def add_game():
     year = request.form['year']
     image = request.form['image']
     url = request.form['url']
-    rating = request.form.get('rating')
-    if rating:
-        rating = int(rating)
-    progression = int(request.form['progression'])
+    rating_str = request.form.get('rating') # Use .get() for optional fields
+    progression_str = request.form.get('progression', '').strip() # Get value or empty string, strip whitespace
+    # Handle optional rating
+    rating = None # Default to None if not provided or invalid
+    if rating_str and rating_str.isdigit(): # Check if it exists and contains only digits
+         try:
+             rating = int(rating_str)
+         except ValueError:
+             pass # Keep rating as None if conversion fails
+    # Handle progression, defaulting to 0
+    if progression_str.isdigit(): # Check if it contains only digits (handles empty string correctly)
+        try:
+            progression = int(progression_str)
+        except ValueError:
+            progression = 0 # Should not happen if isdigit() is true, but safe fallback
+    else:
+        progression = 0 # Default to 0 if not provided, empty, or not digits
+        
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id FROM games WHERE name = ?", (name,))
     existing_game = c.fetchone()
+
     if existing_game:
         conn.close()
-        return render_template('index.html', error="A game with this name already exists.", **locals()) # Pass error to template
+        # Fetch current games again to display the list with the error
+        c = sqlite3.connect(DB_PATH).cursor()
+        c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url FROM games ORDER BY name COLLATE NOCASE ASC") # Example default sort
+        games = c.fetchall()
+        c.connection.close()
+        return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc', error="A game with this name already exists.")
     else:
-        c.execute("INSERT INTO games (name, year, image, rating, progression, url) VALUES (?, ?, ?, ?, ?, ?)", (name, year, image, rating, progression, url))
+        c.execute("INSERT INTO games (name, year, image, rating, progression, url) VALUES (?, ?, ?, ?, ?, ?)",
+                  (name, year, image, rating, progression, url))
         conn.commit()
         conn.close()
         return redirect('/')

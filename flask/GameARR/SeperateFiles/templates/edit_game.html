@@ -5,11 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Game</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #1c1c1c; color: white; text-align: center; }
-        .container { max-width: 800px; margin: auto; padding: 20px; }
-        .form-container { background: #333; padding: 10px; border-radius: 5px; }
-        input { margin: 5px; padding: 8px; width: 90%; }
-        button { background: #28a745; color: white; padding: 10px; border: none; cursor: pointer; }
+        body { font-family: Arial, sans-serif; background: #1c1c1c; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #2b2b2b; padding: 20px; border-radius: 8px; }
+        .form-container { background: #333; padding: 20px; border-radius: 5px; margin-top: 15px; }
+        input[type="text"], input[type="number"] { margin-bottom: 10px; padding: 10px; width: calc(100% - 22px); background: #444; border: 1px solid #555; color: white; border-radius: 4px; }
+        button { background: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 4px; font-size: 1em; }
+        button:hover { background: #218838; }
+        .flash-messages .alert { /* Style flash messages */
+             color: white; padding: 8px; border-radius: 4px; margin-bottom: 15px;
+        }
+         .alert-error { background-color: #dc3545; }
+         .alert-success { background-color: #28a745; }
+         .alert-warning { background-color: #ffc107; color: #333; } /* Warning color */
+
+         a.back-link { color: #00aaff; text-decoration: none; display: inline-block; margin-top: 15px;}
+         a.back-link:hover { text-decoration: underline;}
+
     </style>
 </head>
 <body>
