@@ -24,8 +24,14 @@ transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transform and s
 }
 .game:hover {
 transform: scale(1.05); /* Slight zoom effect */
-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Add soft shadow on hover */
+border: 2px solid white; /* Add a 2px solid white border on hover */
+box-shadow: none; /* Remove the shadow if you prefer no shadow at all */
 }
+/* .game:hover {
+transform: scale(1.05);
+box-shadow: 0 4px 20px #9aed61;
+} */
+
 .game img { width: 100%; height: auto; border-radius: 10px;  padding-top: 15px; }
 .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
 .game p { font-size: 1.2em; color: gold; }
