@@ -103,7 +103,7 @@ def update_extra_labels():
         label.grid(row=row, column=0, sticky=tk.W, padx=5, pady=5)
         label.bind("<Button-1>", lambda e, l=label, k=key: update_extra_item(l, k))
 
-        entry = ttk.Entry(Filter_Flags, textvariable=item["var"], style="TEntry")
+        entry = ttk.Entry(Filter_Flags, textvariable=item["var"], font=("JetBrainsmono nfp", 12, "bold"))
         entry.grid(row=row, column=1, sticky=tk.W)
 
 # Create the style for the frame
@@ -211,7 +211,7 @@ grep_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
 grep_frame.grid(row=6, column=0, sticky=tk.W)
 
 ttk.Label(grep_frame, text="Grep Text:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-grep_entry = ttk.Entry(grep_frame, textvariable=grep_var, width=30, style="TEntry")
+grep_entry = ttk.Entry(grep_frame, textvariable=grep_var, width=30, font=("JetBrainsmono nfp", 12, "bold"))
 grep_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
 
 # Update labels for extra items
