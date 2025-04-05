@@ -135,17 +135,24 @@ def edit_game(game_id):
         url = request.form['url']
         rating = request.form.get('rating')
         if rating:
-            try:
-                rating = int(rating)
-            except ValueError:
-                # Handle invalid input
-                rating = None
+            rating = int(rating)
         progression = int(request.form['progression'])
-        c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ? WHERE id = ?",
-                  (name, year, image, rating, progression, url, game_id))
-        conn.commit()
-        conn.close()
-        return redirect('/')
+
+        # Check if a game with the new name already exists (excluding the current game being edited)
+        c.execute("SELECT id FROM games WHERE name = ? AND id != ?", (name, game_id))
+        existing_game = c.fetchone()
+
+        if existing_game:
+            conn.close()
+            c.execute("SELECT name, year, image, rating, progression, url FROM games WHERE id = ?", (game_id,))
+            game_data = c.fetchone()
+            return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.")
+        else:
+            c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ? WHERE id = ?",
+                        (name, year, image, rating, progression, url, game_id))
+            conn.commit()
+            conn.close()
+            return redirect('/')
     else:
         c.execute("SELECT name, year, image, rating, progression, url FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
