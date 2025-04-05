@@ -39,6 +39,10 @@ grep_var = tk.StringVar(value="")
 
 style = ttk.Style()
 style.configure("Custom.TRadiobutton", font=("JetBrainsmono nfp", 12, "bold"), foreground="#e6f752", background="#282c34")
+style.map("Custom.TRadiobutton",
+    foreground=[('active', '#333333'), ('selected', '#000000')], # Darker text on hover, black when selected
+    background=[('active', '#e0e0e0'), ('selected', '#ffffff')]  # Light gray on hover, white when selected
+)
 style.configure("Black.TFrame", background="#282c34")
 style.configure("TCombobox", font=("JetBrainsmono nfp", 10)) # Style for Combobox
 style.configure("TEntry", font=("JetBrainsmono nfp", 10)) # Style for Entry fields in extra_items
