@@ -182,7 +182,6 @@ for item in storage_radios:
 
 # Define common paths with custom names
 common_paths = {
-    "Select": "",
     "Songs_Cloud": "gu:/song",
     "Software_Cloud": "gu:/software",
     "Google Drive MX": "gu:/mx",
