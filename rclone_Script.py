@@ -186,13 +186,17 @@ common_paths = {
     "Software_Cloud": "gu:/software",
     "MX_Cloud": "gu:/mx",
 
+    "": "",
+
     "Desktop_Local": "C:/Users/nahid/Desktop",
     "Desktop_Cloud": "o0/Desktop",
     "Pictures_Local": "C:/Users/nahid/Pictures",
     "Pictures_Cloud": "o0:/Pictures",
 
-    "Download C": "C:/rclone_download/",
-    "Download D": "D:/rclone_download/"
+    "": "",
+
+    "Download_Rclone_C": "C:/rclone_download/",
+    "Download_Rclone_D": "D:/rclone_download/"
 }
 
 # From
