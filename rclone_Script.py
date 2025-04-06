@@ -184,11 +184,13 @@ for item in storage_radios:
 common_paths = {
     "Songs_Cloud": "gu:/song",
     "Software_Cloud": "gu:/software",
-    "Google Drive MX": "gu:/mx",
+    "MX_Cloud": "gu:/mx",
+
     "Desktop_Local": "C:/Users/nahid/Desktop",
     "Desktop_Cloud": "o0/Desktop",
     "Pictures_Local": "C:/Users/nahid/Pictures",
     "Pictures_Cloud": "o0:/Pictures",
+
     "Download C": "C:/rclone_download/",
     "Download D": "D:/rclone_download/"
 }
