@@ -18,20 +18,21 @@
         align-items: flex-start; /* Align items at the top */
         }
         .game {
-        /* width: 325px; */
-        width: 20%;
+        width: 325px;
+        /* width: 20%; */
         flex: 0 0 auto;
         transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transform and shadow */
         }
         .game:hover {
         transform: scale(1.05); /* Slight zoom effect */
-        border: 2px solid white; /* Add a 2px solid white border on hover */
+        border: 2px solid rgb(24, 255, 3); /* Add a 2px solid white border on hover */
+        border-radius: 5px;
         box-shadow: none; /* Remove the shadow if you prefer no shadow at all */
         background-color: #485461;
         }  
 
 .game .img-wrapper {
-margin-top: 25px;
+margin-top: 3%;
 width: 100%;
 aspect-ratio: 16 / 16; /* or fixed height like height: 200px; */
 background-color: rgba(45, 116, 128, 0);
@@ -43,11 +44,11 @@ padding-left: 1px;
 padding-right: 1px;
 }
 .game .img-wrapper img {
-  width: 95%;
-  height: 100%;
-  object-fit: contain; /* or 'cover' if you want to crop */
-  border-radius: 10px;
-  display: block;
+width: 100%;
+height: 100%;
+object-fit: contain; /* or 'cover' if you want to crop */
+border-radius: 10px;
+display: block;
 }
         .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
         .game p { font-size: 1.2em; color: gold; }
