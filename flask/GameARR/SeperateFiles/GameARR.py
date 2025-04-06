@@ -150,6 +150,7 @@ def search_games():
 def edit_game(game_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    collection_filter = request.args.get('collection') # Get the collection filter from the URL
     if request.method == 'POST':
         name = request.form['name']
         year = request.form['year']
@@ -174,27 +175,34 @@ def edit_game(game_id):
             conn.close()
             c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
             game_data = c.fetchone()
-            return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.")
+            return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.", current_collection_filter=collection_filter) # Pass the filter back
         else:
             c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ?, collection = ? WHERE id = ?",
                       (name, year, image, rating, progression, url, collection, game_id))
             conn.commit()
             conn.close()
-            return redirect('/')
+            if collection_filter:
+                return redirect(f'/?collection={collection_filter}') # Redirect back to the collection page
+            else:
+                return redirect('/')
     else:
         c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
         conn.close()
-        return render_template('edit_game.html', game=game, game_id=game_id)
+        return render_template('edit_game.html', game=game, game_id=game_id, current_collection_filter=collection_filter) # Pass the filter to the edit form
 
 @app.route('/delete/<int:game_id>')
 def delete_game(game_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    collection_filter = request.args.get('collection') # Get the collection filter
     c.execute("DELETE FROM games WHERE id = ?", (game_id,))
     conn.commit()
     conn.close()
-    return redirect('/')
+    if collection_filter:
+        return redirect(f'/?collection={collection_filter}') # Redirect back to the collection page
+    else:
+        return redirect('/')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5005, debug=True)
