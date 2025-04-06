@@ -94,17 +94,16 @@ def add_game():
     name = request.form['name']
     year = request.form['year']
     image = request.form['image']
-    url = request.form['url']
-    rating_str = request.form.get('rating') # Use .get() for optional fields
-    progression = request.form.get('progression') # Get progression as string
+    url = request.form['url'] or 'http://192.168.0.101:5005'  # Default URL if empty
+    rating_str = request.form.get('rating')
+    progression = request.form.get('progression')
 
-    # Handle optional rating
-    rating = None # Default to None if not provided or invalid
-    if rating_str and rating_str.isdigit(): # Check if it exists and contains only digits
+    rating = None
+    if rating_str and rating_str.isdigit():
         try:
             rating = int(rating_str)
         except ValueError:
-            pass # Keep rating as None if conversion fails
+            pass
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -113,9 +112,8 @@ def add_game():
 
     if existing_game:
         conn.close()
-        # Fetch current games again to display the list with the error
         c = sqlite3.connect(DB_PATH).cursor()
-        c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url FROM games ORDER BY name COLLATE NOCASE ASC") # Example default sort
+        c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url FROM games ORDER BY name COLLATE NOCASE ASC")
         games = c.fetchall()
         c.connection.close()
         return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc', error="A game with this name already exists.")
