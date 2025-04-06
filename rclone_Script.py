@@ -185,11 +185,12 @@ from_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
 from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-from_options = ["", "gu:/song",
-                 "gu:/software",
-                 "gu:/mx",
-                 "C:/Users/nahid/Desktop",
-                 "o0/Desktop"]
+from_options = ["",
+                "gu:/song",
+                "gu:/software",
+                "gu:/mx",
+                "C:/Users/nahid/Desktop",
+                "o0/Desktop"]
 from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, font=("JetBrainsmono nfp", 12, "bold"))
 from_combo.grid(row=0, column=1, sticky=tk.W)
 from_combo.set("") # Set a default value
@@ -199,7 +200,10 @@ to_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
 to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10), padx=(10,0))
 
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-to_options = ["", "C:/rclone_download/", "D:/rclone_download/"]
+to_options = ["",
+              "C:/rclone_download/",
+              "D:/rclone_download/",
+              "o0:/Desktop"]
 to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, font=("JetBrainsmono nfp", 12, "bold"))
 to_combo.grid(row=0, column=1, sticky=tk.W)
 to_combo.set("") # Set a default value
