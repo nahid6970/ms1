@@ -148,7 +148,20 @@ display: block;
             <div class="game">
                 <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
                 <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>
-                <p style="color: #53f325; margin-bottom: -20px "> {{ game[5] }}</p>
+        
+                <!-- Progress -->
+                <p style="margin-bottom: -20px ">
+                    {% if game[5] == 'Unplayed🆕' %}
+                    <span style="color: red;">{{ game[5] }}</span>
+                    {% elif game[5] == 'Unfinished🔄️' %}
+                    <span style="color: orange;">{{ game[5] }}</span>
+                    {% elif game[5] == 'Complete✅' %}
+                    <span style="color: rgb(8, 247, 8);">{{ game[5] }}</span>
+                    {% else %}
+                    <span>{{ game[5] }}</span>
+                    {% endif %}
+                </p>
+        
                 <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} ~/5 ⭐ {% endif %}</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-md-application_edit"></i></a>
                 <a href="/delete/{{ game[0] }}" class="btn btn-delete"><i class="nf nf-md-delete"></i></a>
