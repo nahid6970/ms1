@@ -12,14 +12,14 @@
         button { background: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 4px; font-size: 1em; }
         button:hover { background: #218838; }
         .flash-messages .alert { /* Style flash messages */
-             color: white; padding: 8px; border-radius: 4px; margin-bottom: 15px;
+            color: white; padding: 8px; border-radius: 4px; margin-bottom: 15px;
         }
-         .alert-error { background-color: #dc3545; }
-         .alert-success { background-color: #28a745; }
-         .alert-warning { background-color: #ffc107; color: #333; } /* Warning color */
+        .alert-error { background-color: #dc3545; }
+        .alert-success { background-color: #28a745; }
+        .alert-warning { background-color: #ffc107; color: #333; } /* Warning color */
 
-         a.back-link { color: #00aaff; text-decoration: none; display: inline-block; margin-top: 15px;}
-         a.back-link:hover { text-decoration: underline;}
+        a.back-link { color: #00aaff; text-decoration: none; display: inline-block; margin-top: 15px;}
+        a.back-link:hover { text-decoration: underline;}
 
     </style>
 </head>
@@ -32,8 +32,12 @@
                 <input type="text" name="year" value="{{ game[1] }}" placeholder="Year" required><br>
                 <input type="text" name="image" value="{{ game[2] }}" placeholder="Image URL" required><br>
                 <input type="text" name="url" value="{{ game[5] if game[5] else '' }}" placeholder="Game URL (Optional)"><br>
-                <input type="number" name="rating" value="{{ game[3]|int }}" placeholder="Rating" min="0" max="5"><br>
-                <input type="number" name="progression" value="{{ game[4] }}" min="0" max="100" placeholder="Progression"><br>
+                <input type="number" name="rating" value="{% if game[3] != 0 %}{{ game[3]|int }}{% endif %}" placeholder="Rating" min="0" max="5"><br>
+                <select name="progression">
+                    <option value="Unplayed🆕" {% if game[4] == 'Unplayed🆕' %}selected{% endif %}>Unplayed🆕</option>
+                    <option value="Unfinished🔄️" {% if game[4] == 'Unfinished🔄️' %}selected{% endif %}>Unfinished🔄️</option>
+                    <option value="Complete✅" {% if game[4] == 'Complete✅' %}selected{% endif %}>Complete✅</option>
+                </select><br>
                 <button type="submit">Save Changes</button>
             </form>
         </div>

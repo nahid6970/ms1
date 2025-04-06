@@ -30,7 +30,7 @@
         border-radius: 5px;
         box-shadow: none; /* Remove the shadow if you prefer no shadow at all */
         background-color: #485461;
-        }  
+        }
 
 .game .img-wrapper {
 margin-top: 3%;
@@ -53,14 +53,14 @@ display: block;
 }
         .game h2 { font-size: 1.5em; color: #e0e0e0; margin-top: 10px; }
         .game p { font-size: 1.2em; color: gold; }
-        
+
         .form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; }
         input { margin: 5px; padding: 8px; width: 90%; }
         .btn { padding: 8px 12px; border: none; cursor: pointer; border-radius: 5px; }
         .btn-add { background: #28a745; color: white; }
         .btn-edit { background: #007bff; color: white; }
         .btn-delete { background: #dc3545; color: white; }
-        
+
         .top-controls { margin-bottom: 20px; }
         .top-controls button, .top-controls .sort-btn {
         background: #28a745;
@@ -90,7 +90,7 @@ display: block;
         background: #218838;
         }
         </style>
-        
+
 
 <script>
     function toggleForm() {
@@ -120,7 +120,7 @@ display: block;
             <button onclick="toggleForm()">Add Game</button>
             <a href="/?sort_by=name&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort_alpha_asc"></i></a>
             <a href="/?sort_by=year&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-md-sort_calendar_ascending"></i></a>
-            <a href="/?sort_by=rating&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort"></i></a>
+            <a href="/?sort_by=rating&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-fa-star"></i></a>
             <form action="/search" method="get" style="display: inline;">
                 <input type="text" name="query" placeholder="Search Games" style="width: 250px;" value="{{ query if query }}">
                 <button type="submit" class="btn">Search</button>
@@ -134,7 +134,11 @@ display: block;
                 <input type="text" name="image" placeholder="Image URL" required><br>
                 <input type="text" name="url" placeholder="Game URL (Optional)"><br>
                 <input type="number" name="rating" placeholder="Rating (1-5)" min="1" max="5"><br>
-                <input type="number" name="progression" placeholder="Progression (0-100%)" min="0" max="100" ><br>
+                <select name="progression">
+                    <option value="Unplayed">Unplayed🆕</option>
+                    <option value="Unfinished">Unfinished🔄️</option>
+                    <option value="Complete">Complete✅</option>
+                </select><br>
                 <button type="submit" class="btn btn-add">Save</button>
             </form>
         </div>
@@ -144,17 +148,17 @@ display: block;
             <div class="game">
                 <h2 style="margin-bottom: -20px">{{ game[1] }}</h2>
                 <p style="color: #bbb; font-style: italic; margin-bottom: -20px ">{{ game[2] }}</p>
-                <p style="color: #53f325; margin-bottom: -20px ">Progress: {{ game[5] }}%</p>
+                <p style="color: #53f325; margin-bottom: -20px "> {{ game[5] }}</p>
                 <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} -/5 {% endif %}</p>
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
                 <a href="/delete/{{ game[0] }}" class="btn btn-delete"><i class="nf nf-md-delete"></i></a>
-               
+
 
                     <div class="img-wrapper">
                 <a href="{{ game[6] if game[6] else '#' }}"> <img src="{{ game[3] }}" alt="{{ game[1] }}"> </a>
 
         </div>
-            </div>
+                </div>
         {% endfor %}
         </div>
     </div>
