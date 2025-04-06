@@ -183,13 +183,13 @@ for item in storage_radios:
 # Define common paths with custom names
 common_paths = {
     "Select": "",
-    "Google Drive Songs": "gu:/song",
-    "Google Drive Software": "gu:/software",
+    "Songs_Cloud": "gu:/song",
+    "Software_Cloud": "gu:/software",
     "Google Drive MX": "gu:/mx",
-    "Desktop Local": "C:/Users/nahid/Desktop",
-    "Desktop o0": "o0/Desktop",
-    "Pictures Local": "C:/Users/nahid/Pictures",
-    "Pictures o0": "o0:/Pictures",
+    "Desktop_Local": "C:/Users/nahid/Desktop",
+    "Desktop_Cloud": "o0/Desktop",
+    "Pictures_Local": "C:/Users/nahid/Pictures",
+    "Pictures_Cloud": "o0:/Pictures",
     "Download C": "C:/rclone_download/",
     "Download D": "D:/rclone_download/"
 }
