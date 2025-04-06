@@ -195,6 +195,19 @@ margin-top: 0px;
         // Save scroll position before refresh
         sessionStorage.setItem('scrollPosition', window.scrollY);
     });
+
+        // ... existing JavaScript ...
+
+        function googleSearch() {
+        const gameNameInput = document.getElementById('gameName');
+        const gameName = gameNameInput.value;
+        if (gameName) {
+            const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(gameName)}`;
+            window.open(googleSearchUrl, '_blank');
+        } else {
+            alert('Please enter a game name first.');
+        }
+    }
 </script>
 
 </head>
@@ -215,7 +228,10 @@ margin-top: 0px;
 
         <div class="form-container" id="gameForm">
             <form action="/add" method="post">
-                <input type="text" name="name" placeholder="Game Name" required><br>
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="text" id="gameName" name="name" placeholder="Game Name" required style="flex-grow: 1; margin-right: 5px;"><!-- Added ID and adjusted style -->
+                    <button type="button" class="btn" onclick="googleSearch()">Google Search</button><!-- Added Google Search button -->
+                </div><br>
                 <input type="text" name="year" placeholder="Year"><br>
                 <input type="text" name="image" placeholder="Image URL"><br>
                 <input type="text" name="url" placeholder="Game URL (Optional)"><br>
