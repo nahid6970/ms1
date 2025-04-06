@@ -60,6 +60,7 @@ display: block;
         .btn-add { background: #28a745; color: white; }
         .btn-edit { background: #007bff; color: white; }
         .btn-delete { background: #dc3545; color: white; }
+        .btn-yt-review { background: #dc3545; color: white; text-decoration: none; }
 
         .top-controls { margin-bottom: 20px; }
         .top-controls button, .top-controls .sort-btn {
@@ -166,6 +167,10 @@ display: block;
                 <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-md-application_edit"></i></a>
                 <a href="/delete/{{ game[0] }}" class="btn btn-delete"><i class="nf nf-md-delete"></i></a>
         
+                <a href="https://www.youtube.com/results?search_query={{ game[1]|urlencode }}+review" class="btn btn-yt-review" target="_blank">
+                    <i class="nf nf-fa-youtube"></i>
+                </a>
+
                 <div class="img-wrapper">
                     <a href="{{ game[6] if game[6] else '#' }}"> <img src="{{ game[3] }}" alt="{{ game[1] }}"> </a>
                 </div>
