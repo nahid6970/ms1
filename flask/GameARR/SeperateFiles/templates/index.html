@@ -115,15 +115,12 @@ div.form-container{
         justify-content: center; /* Center items horizontally */
         align-items: center; /* Center items vertically (optional, but can be useful) */
     }
-
     .progression-group label {
         margin-right: 10px;
     }
-
     .progression-group input[type="radio"] {
         display: none;
     }
-
     .progression-group label span {
         padding: 8px 15px;
         border: 1px solid #555;
@@ -135,7 +132,6 @@ div.form-container{
         min-width: 90px;
         text-align: center;
     }
-
     .progression-group input[type="radio"]:checked + span {
         background-color: #28a745; /* Green for selected progression */
         border-color: #28a745;
@@ -149,15 +145,12 @@ div.form-container{
         justify-content: center; /* Center items horizontally */
         align-items: center; /* Center items vertically (optional) */
     }
-
     .rating-group label {
         margin-right: 10px;
     }
-
     .rating-group input[type="radio"] {
         display: none;
     }
-
     .rating-group label span {
         padding: 8px 15px;
         border: 1px solid #555;
@@ -169,14 +162,22 @@ div.form-container{
         min-width: 30px; /* Smaller width for rating numbers */
         text-align: center;
     }
-
     .rating-group input[type="radio"]:checked + span {
         background-color: gold; /* Gold for selected rating */
         border-color: gold;
         color: black; /* Ensure text is readable on gold */
     }
 
-
+.collection-filter {
+margin-top: 10px;
+}
+.collection-filter select {
+padding: 8px;
+border-radius: 4px;
+border: 1px solid #555;
+background-color: #333;
+color: white;
+}
 
         </style>
 
@@ -201,7 +202,6 @@ div.form-container{
     });
 
         // ... existing JavaScript ...
-
         function googleSearch() {
         const gameNameInput = document.getElementById('gameName');
         const gameName = gameNameInput.value;
@@ -212,6 +212,10 @@ div.form-container{
             alert('Please enter a game name first.');
         }
     }
+
+    function filterByCollection(collection) {
+        window.location.href = '/?collection=' + collection;
+    }
 </script>
 
 </head>
@@ -220,14 +224,22 @@ div.form-container{
         <a href="/" style="text-decoration: none; color: white;"><h1>GameARR</h1></a>
         <div class="top-controls">
             <button onclick="toggleForm()">Add Game</button>
-            <a href="/?sort_by=name&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort_alpha_asc"></i></a>
-            <a href="/?sort_by=year&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-md-sort_calendar_ascending"></i></a>
-            <a href="/?sort_by=rating&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}" class="sort-btn"><i class="nf nf-fa-star"></i></a>
+            <a href="/?sort_by=name&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort_alpha_asc"></i></a>
+            <a href="/?sort_by=year&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-md-sort_calendar_ascending"></i></a>
+            <a href="/?sort_by=rating&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort"></i></a>
             <form action="/search" method="get" style="display: inline;">
                 <input type="text" name="query" placeholder="Search Games" style="width: 250px;" value="{{ query if query }}">
                 <button type="submit" class="btn">Search</button>
             </form>
             <button disabled>Total Games: {{ total_games }}</button> </div>
+            <div class="collection-filter">
+                <select onchange="filterByCollection(this.value)">
+                    <option value="">All Collections</option>
+                    {% for collection in collections %}
+                        <option value="{{ collection }}" {% if collection == current_collection_filter %}selected{% endif %}>{{ collection }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="form-container" id="gameForm">
@@ -267,6 +279,7 @@ div.form-container{
                         <input type="radio" name="progression" value="Complete✅"> <span>Complete✅</span>
                     </label>
                 </div><br>
+                <input type="text" name="collection" placeholder="Collection (Optional)"><br>
                 <button type="submit" class="btn btn-add">Save</button>
             </form>
         </div>
@@ -291,6 +304,7 @@ div.form-container{
                 </p>
         
                 <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} ~/5 ⭐ {% endif %}</p>
+                <!-- <p style="color: lightblue; margin-bottom: -20px ">Collection: {{ game[7] if game[7] }}</p> -->
                 <div class="btn-group">
                     <a href="/edit/{{ game[0] }}" class="btn btn-edit"><i class="nf nf-md-book_edit"></i></a>
                 

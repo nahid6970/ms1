@@ -28,15 +28,12 @@
         justify-content: center; /* Center items horizontally */
         align-items: center; /* Center items vertically (optional, but can be useful) */
     }
-
     .progression-group label {
         margin-right: 10px;
     }
-
     .progression-group input[type="radio"] {
         display: none;
     }
-
     .progression-group label span {
         padding: 8px 15px;
         border: 1px solid #555;
@@ -48,7 +45,6 @@
         min-width: 90px;
         text-align: center;
     }
-
     .progression-group input[type="radio"]:checked + span {
         background-color: #28a745; /* Green for selected progression */
         border-color: #28a745;
@@ -61,15 +57,12 @@
         justify-content: center; /* Center items horizontally */
         align-items: center; /* Center items vertically (optional) */
     }
-
     .rating-group label {
         margin-right: 10px;
     }
-
     .rating-group input[type="radio"] {
         display: none;
     }
-
     .rating-group label span {
         padding: 8px 15px;
         border: 1px solid #555;
@@ -81,13 +74,22 @@
         min-width: 30px; /* Smaller width for rating numbers */
         text-align: center;
     }
-
     .rating-group input[type="radio"]:checked + span {
         background-color: gold; /* Gold for selected rating */
         border-color: gold;
         color: black; /* Ensure text is readable on gold */
     }
 
+.collection-filter {
+margin-top: 10px;
+}
+.collection-filter select {
+padding: 8px;
+border-radius: 4px;
+border: 1px solid #555;
+background-color: #333;
+color: white;
+}
 
     </style>
 </head>
@@ -135,6 +137,7 @@
                             endif %}> <span>Complete✅</span>
                     </label>
                 </div><br>
+                <input type="text" name="collection" value="{{ game[7] if game[7] else '' }}" placeholder="Collection (Optional)"><br>
                 <button type="submit">Save Changes</button>
             </form>
         </div>

@@ -16,9 +16,11 @@ def recreate_table():
                                 image TEXT,
                                 rating REAL,
                                 progression TEXT,
-                                url TEXT
+                                url TEXT,
+                                collection TEXT
+
                             )''')
-    c.execute('''INSERT INTO games_new (id, name, year, image, rating, progression, url)
+    c.execute('''INSERT INTO games_new (id, name, year, image, rating, progression, url, collection)
                             SELECT id, name, year, image, rating,
                                    CASE progression
                                        WHEN 0 THEN 'Unplayed'
@@ -42,7 +44,9 @@ def init_db():
                                 image TEXT,
                                 rating INTEGER,
                                 progression TEXT DEFAULT 'Unplayed',
-                                url TEXT)''')
+                                url TEXT,
+                                collection TEXT DEFAULT ''
+                                )''')
     conn.commit()
     conn.close()
 
@@ -67,6 +71,7 @@ def index():
     sort_by = request.args.get('sort_by', 'name')
     order = request.args.get('order', 'asc')
     query = request.args.get('query') # Get the search query
+    collection_filter = request.args.get('collection')
     # Toggle order for next click
     next_order = 'desc' if order == 'asc' else 'asc'
     if sort_by not in ['name', 'year', 'rating']:
@@ -74,20 +79,28 @@ def index():
     order_clause = 'ASC' if order == 'asc' else 'DESC'
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    sql_query = f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url FROM games"
+    sql_query = f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url, collection FROM games"
+    conditions = []
+    params = []
     if query:
-        sql_query += f" WHERE name LIKE ?"
-        c.execute(sql_query + f" ORDER BY {sort_by} COLLATE NOCASE {order_clause}", ('%' + query + '%',))
-        games = c.fetchall()
-    else:
-        c.execute(sql_query + f" ORDER BY {sort_by} COLLATE NOCASE {order_clause}")
-        games = c.fetchall()
+        conditions.append("name LIKE ?")
+        params.append('%' + query + '%')
+    if collection_filter:
+        conditions.append("collection = ?")
+        params.append(collection_filter)
 
-    c.execute("SELECT COUNT(*) FROM games") # Query to count total games
-    total_games = c.fetchone()[0] # Fetch the count
+    if conditions:
+        sql_query += " WHERE " + " AND ".join(conditions)
 
+    sql_query += f" ORDER BY {sort_by} COLLATE NOCASE {order_clause}"
+    c.execute(sql_query, tuple(params))
+    games = c.fetchall()
+    c.execute("SELECT COUNT(*) FROM games")
+    total_games = c.fetchone()[0]
+    c.execute("SELECT DISTINCT collection FROM games WHERE collection != '' ORDER BY collection COLLATE NOCASE")
+    collections = [row[0] for row in c.fetchall()]
     conn.close()
-    return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query, total_games=total_games) # Pass query to the template
+    return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query, total_games=total_games, collections=collections, current_collection_filter=collection_filter)
 
 @app.route('/add', methods=['POST'])
 def add_game():
@@ -97,6 +110,7 @@ def add_game():
     url = request.form['url'] or 'http://192.168.0.101:5005'  # Default URL if empty
     rating_str = request.form.get('rating')
     progression = request.form.get('progression')
+    collection = request.form.get('collection', '').strip()
 
     rating = None
     if rating_str and rating_str.isdigit():
@@ -113,13 +127,13 @@ def add_game():
     if existing_game:
         conn.close()
         c = sqlite3.connect(DB_PATH).cursor()
-        c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url FROM games ORDER BY name COLLATE NOCASE ASC")
+        c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url, collection FROM games ORDER BY name COLLATE NOCASE ASC")
         games = c.fetchall()
         c.connection.close()
         return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc', error="A game with this name already exists.")
     else:
-        c.execute("INSERT INTO games (name, year, image, rating, progression, url) VALUES (?, ?, ?, ?, ?, ?)",
-                  (name, year, image, rating, progression, url))
+        c.execute("INSERT INTO games (name, year, image, rating, progression, url, collection) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (name, year, image, rating, progression, url, collection))
         conn.commit()
         conn.close()
         return redirect('/')
@@ -150,6 +164,7 @@ def edit_game(game_id):
                 pass
 
         progression = request.form.get('progression') # Get progression as string
+        collection = request.form.get('collection', '').strip()
 
         # Check if a game with the new name already exists (excluding the current game being edited)
         c.execute("SELECT id FROM games WHERE name = ? AND id != ?", (name, game_id))
@@ -157,17 +172,17 @@ def edit_game(game_id):
 
         if existing_game:
             conn.close()
-            c.execute("SELECT name, year, image, rating, progression, url FROM games WHERE id = ?", (game_id,))
+            c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
             game_data = c.fetchone()
             return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.")
         else:
-            c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ? WHERE id = ?",
-                      (name, year, image, rating, progression, url, game_id))
+            c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ?, collection = ? WHERE id = ?",
+                      (name, year, image, rating, progression, url, collection, game_id))
             conn.commit()
             conn.close()
             return redirect('/')
     else:
-        c.execute("SELECT name, year, image, rating, progression, url FROM games WHERE id = ?", (game_id,))
+        c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
         conn.close()
         return render_template('edit_game.html', game=game, game_id=game_id)
