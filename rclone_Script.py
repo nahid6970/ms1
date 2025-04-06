@@ -41,7 +41,7 @@ style = ttk.Style()
 style.configure("Custom.TRadiobutton", font=("Arial", 12, "bold"), foreground="#e6f752", background="#282c34")
 style.map("Custom.TRadiobutton",
     foreground=[('active', '#333333'), ('selected', '#000000')], # Darker text on hover, black when selected
-    background=[('active', '#e0e0e0'), ('selected', '#ffffff')]  # Light gray on hover, white when selected
+    background=[('active', '#e0e0e0'), ('selected', '#ffffff')]   # Light gray on hover, white when selected
 )
 style.configure("Black.TFrame", background="#282c34")
 style.configure("TCombobox", font=("JetBrainsmono nfp", 10)) # Style for Combobox
@@ -50,23 +50,23 @@ style.configure("TEntry", font=("JetBrainsmono nfp", 10)) # Style for Entry fiel
 
 # Additional options with display names
 additional_options = [
-    ("Fast List",                   "--fast-list"                                     ,True),
-    ("Readable",                    "--human-readable"                                ,True),
-    ("Acknowledge Abuse",           "--drive-acknowledge-abuse"                       ,True),
-    ("Progress",                    "-P"                                              ,False),
-    ("Dry Run",                     "--dry-run"                                       ,False),
-    ("Web Gui **Rcd",               "--rc-web-gui"                                    ,False),
-    ("vfs-cache",                   "--vfs-cache-mode writes"                         ,False),
-    ("Verbose Lengthy",             "-vv"                                             ,False),
-    ("Verbose Minimal",             "-v"                                              ,False),
-    ("Log Level",                   "--log-level ERROR"                               ,False),
-    ("Stats Oneline",               "--stats-one-line"                                ,False),
-    ("Trashed Only",                "--drive-trashed-only "                            ,False),
-    ("Shared With Me",              "--drive-shared-with-me "                          ,False),
-    ("Skip Dangling Shortcuts",     "--drive-skip-dangling-shortcuts "                ,False),
-    ("Skip Shortcuts",              "--drive-skip-shortcuts "                          ,False),
-    ("Date **tree ",                "-D "                                             ,False),
-    ("Modified Time **tree",        "-t "                                             ,False),
+    ("Fast List",                                     "--fast-list"                                                                       ,True),
+    ("Readable",                                      "--human-readable"                                                                  ,True),
+    ("Acknowledge Abuse",                             "--drive-acknowledge-abuse"                                                       ,True),
+    ("Progress",                                      "-P"                                                                                ,False),
+    ("Dry Run",                                       "--dry-run"                                                                         ,False),
+    ("Web Gui **Rcd",                                 "--rc-web-gui"                                                                      ,False),
+    ("vfs-cache",                                     "--vfs-cache-mode writes"                                                           ,False),
+    ("Verbose Lengthy",                               "-vv"                                                                                ,False),
+    ("Verbose Minimal",                               "-v"                                                                                 ,False),
+    ("Log Level",                                     "--log-level ERROR"                                                                 ,False),
+    ("Stats Oneline",                                 "--stats-one-line"                                                                  ,True),
+    ("Trashed Only",                                  "--drive-trashed-only "                                                             ,False),
+    ("Shared With Me",                                "--drive-shared-with-me "                                                            ,False),
+    ("Skip Dangling Shortcuts",                       "--drive-skip-dangling-shortcuts "                                                 ,False),
+    ("Skip Shortcuts",                                "--drive-skip-shortcuts "                                                           ,False),
+    ("Date **tree ",                                  "-D "                                                                                ,False),
+    ("Modified Time **tree",                          "-t "                                                                                ,False),
 ]
 
 # Manage additional items
@@ -180,37 +180,58 @@ for item in storage_radios:
     radio.grid(row=item["row"], column=item["column"], sticky=tk.W)
 
 
+# Define common paths with custom names
+common_paths = {
+    "Select": "",
+    "Google Drive Songs": "gu:/song",
+    "Google Drive Software": "gu:/software",
+    "Google Drive MX": "gu:/mx",
+    "Desktop Local": "C:/Users/nahid/Desktop",
+    "Desktop o0": "o0/Desktop",
+    "Pictures Local": "C:/Users/nahid/Pictures",
+    "Pictures o0": "o0:/Pictures",
+    "Download C": "C:/rclone_download/",
+    "Download D": "D:/rclone_download/"
+}
+
 # From
 from_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
 from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-from_options = ["",
-                "gu:/song",
-                "gu:/software",
-                "gu:/mx",
-                "C:/Users/nahid/Desktop",
-                "o0/Desktop",
-                "C:/Users/nahid/Pictures",
-                "o0:/Pictures"]
+from_options = list(common_paths.keys())
 from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
 from_combo.grid(row=0, column=1, sticky=tk.W)
-from_combo.set("") # Set a default value
+from_combo.set("Select") # Set a default value
+
+def update_from_var(event):
+    selected_name = from_combo.get()
+    if selected_name in common_paths:
+        from_var.set(common_paths[selected_name])
+    else:
+        from_var.set("") # Clear if not in the predefined paths
+
+from_combo.bind("<<ComboboxSelected>>", update_from_var)
+
 
 # TO
 to_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
 to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10), padx=(10,0))
 
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-to_options = ["",
-              "C:/rclone_download/",
-              "D:/rclone_download/",
-              "o0:/Desktop",
-              "C:/Users/nahid/Pictures",
-              "o0:/Pictures"]
+to_options = list(common_paths.keys())
 to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
 to_combo.grid(row=0, column=1, sticky=tk.W)
-to_combo.set("") # Set a default value
+to_combo.set("Select") # Set a default value
+
+def update_to_var(event):
+    selected_name = to_combo.get()
+    if selected_name in common_paths:
+        to_var.set(common_paths[selected_name])
+    else:
+        to_var.set("") # Clear if not in the predefined paths
+
+to_combo.bind("<<ComboboxSelected>>", update_to_var)
 
 # Create arguments frame
 Main_Flags_list = ttk.Frame(root, padding="10", style="Black.TFrame")
