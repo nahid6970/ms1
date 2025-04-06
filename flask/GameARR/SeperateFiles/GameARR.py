@@ -83,8 +83,11 @@ def index():
         c.execute(sql_query + f" ORDER BY {sort_by} COLLATE NOCASE {order_clause}")
         games = c.fetchall()
 
+    c.execute("SELECT COUNT(*) FROM games") # Query to count total games
+    total_games = c.fetchone()[0] # Fetch the count
+
     conn.close()
-    return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query) # Pass query to the template
+    return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query, total_games=total_games) # Pass query to the template
 
 @app.route('/add', methods=['POST'])
 def add_game():
