@@ -202,7 +202,7 @@ ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBra
 from_options = list(common_paths.keys())
 from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
 from_combo.grid(row=0, column=1, sticky=tk.W)
-from_combo.set("Select") # Set a default value
+from_combo.set("") # Set a default value
 
 def update_from_var(event):
     selected_name = from_combo.get()
@@ -222,7 +222,7 @@ ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsm
 to_options = list(common_paths.keys())
 to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
 to_combo.grid(row=0, column=1, sticky=tk.W)
-to_combo.set("Select") # Set a default value
+to_combo.set("") # Set a default value
 
 def update_to_var(event):
     selected_name = to_combo.get()
