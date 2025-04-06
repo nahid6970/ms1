@@ -103,6 +103,9 @@
                     placeholder="Game URL (Optional)"><br>
                     <div class="rating-group">
                         <label>
+                            <input type="radio" name="rating" value="0" {% if game[3] == 0 %}checked{% endif %}> <span>~</span>
+                        </label>
+                        <label>
                             <input type="radio" name="rating" value="1" {% if game[3] == 1 %}checked{% endif %}> <span>1</span>
                         </label>
                         <label>
