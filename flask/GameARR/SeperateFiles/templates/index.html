@@ -226,7 +226,9 @@ color: white;
             <button onclick="toggleForm()">Add Game</button>
             <a href="/?sort_by=name&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort_alpha_asc"></i></a>
             <a href="/?sort_by=year&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-md-sort_calendar_ascending"></i></a>
-            <a href="/?sort_by=rating&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort"></i></a>
+            <a href="/?sort_by=rating&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-fa-star"></i></a>
+            <a href="/?sort_by=added&order={{ next_order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="sort-btn"><i class="nf nf-fa-sort_numeric_asc"></i></a>
+
             <form action="/search" method="get" style="display: inline;">
                 <input type="text" name="query" placeholder="Search Games" style="width: 250px;" value="{{ query if query }}">
                 <button type="submit" class="btn">Search</button>

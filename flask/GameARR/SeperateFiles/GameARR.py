@@ -74,7 +74,7 @@ def index():
     collection_filter = request.args.get('collection')
     # Toggle order for next click
     next_order = 'desc' if order == 'asc' else 'asc'
-    if sort_by not in ['name', 'year', 'rating']:
+    if sort_by not in ['name', 'year', 'rating', 'added']:
         sort_by = 'name'
     order_clause = 'ASC' if order == 'asc' else 'DESC'
     conn = sqlite3.connect(DB_PATH)
@@ -92,7 +92,11 @@ def index():
     if conditions:
         sql_query += " WHERE " + " AND ".join(conditions)
 
-    sql_query += f" ORDER BY {sort_by} COLLATE NOCASE {order_clause}"
+    if sort_by == 'added': # Sort by id for 'added' order
+        sql_query += f" ORDER BY id {order_clause}"
+    else:
+        sql_query += f" ORDER BY {sort_by} COLLATE NOCASE {order_clause}"
+
     c.execute(sql_query, tuple(params))
     games = c.fetchall()
     c.execute("SELECT COUNT(*) FROM games")
@@ -101,7 +105,6 @@ def index():
     collections = [row[0] for row in c.fetchall()]
     conn.close()
     return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query, total_games=total_games, collections=collections, current_collection_filter=collection_filter)
-
 @app.route('/add', methods=['POST'])
 def add_game():
     name = request.form['name']
