@@ -191,7 +191,7 @@ from_options = ["",
                 "gu:/mx",
                 "C:/Users/nahid/Desktop",
                 "o0/Desktop"]
-from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, font=("JetBrainsmono nfp", 12, "bold"))
+from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
 from_combo.grid(row=0, column=1, sticky=tk.W)
 from_combo.set("") # Set a default value
 
@@ -204,7 +204,7 @@ to_options = ["",
               "C:/rclone_download/",
               "D:/rclone_download/",
               "o0:/Desktop"]
-to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, font=("JetBrainsmono nfp", 12, "bold"))
+to_combo = ttk.Combobox(to_frame, textvariable=to_var, values=to_options, width=50, font=("JetBrainsmono nfp", 12, "bold"))
 to_combo.grid(row=0, column=1, sticky=tk.W)
 to_combo.set("") # Set a default value
 
