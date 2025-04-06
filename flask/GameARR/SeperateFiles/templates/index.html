@@ -103,6 +103,76 @@ margin-top: 0px;
         transform: scale(1.05);
         background: #218838;
         }
+
+
+        .progression-group {
+        margin-bottom: 15px;
+        display: flex; /* Enable flexbox */
+        justify-content: center; /* Center items horizontally */
+        align-items: center; /* Center items vertically (optional, but can be useful) */
+    }
+
+    .progression-group label {
+        margin-right: 10px;
+    }
+
+    .progression-group input[type="radio"] {
+        display: none;
+    }
+
+    .progression-group label span {
+        padding: 8px 15px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #444;
+        color: white;
+        display: inline-block;
+        min-width: 90px;
+        text-align: center;
+    }
+
+    .progression-group input[type="radio"]:checked + span {
+        background-color: #28a745; /* Green for selected progression */
+        border-color: #28a745;
+    }
+
+    /* Style for the rating radio button group */
+    .rating-group {
+        margin-bottom: 15px;
+        display: flex; /* Enable flexbox */
+        justify-content: center; /* Center items horizontally */
+        align-items: center; /* Center items vertically (optional) */
+    }
+
+    .rating-group label {
+        margin-right: 10px;
+    }
+
+    .rating-group input[type="radio"] {
+        display: none;
+    }
+
+    .rating-group label span {
+        padding: 8px 15px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #444;
+        color: white;
+        display: inline-block;
+        min-width: 30px; /* Smaller width for rating numbers */
+        text-align: center;
+    }
+
+    .rating-group input[type="radio"]:checked + span {
+        background-color: gold; /* Gold for selected rating */
+        border-color: gold;
+        color: black; /* Ensure text is readable on gold */
+    }
+
+
+
         </style>
 
 
@@ -147,12 +217,34 @@ margin-top: 0px;
                 <input type="text" name="year" placeholder="Year"><br>
                 <input type="text" name="image" placeholder="Image URL"><br>
                 <input type="text" name="url" placeholder="Game URL (Optional)"><br>
-                <input type="number" name="rating" placeholder="Rating (1-5)" min="1" max="5"><br>
-                <select name="progression">
-                    <option value="Unplayed🆕">Unplayed🆕</option>
-                    <option value="Unfinished🔄️">Unfinished🔄️</option>
-                    <option value="Complete✅">Complete✅</option>
-                </select><br>
+                <div class="rating-group">
+                    <label>
+                        <input type="radio" name="rating" value="1"> <span>1</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="rating" value="2"> <span>2</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="rating" value="3"> <span>3</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="rating" value="4"> <span>4</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="rating" value="5"> <span>5</span>
+                    </label>
+                </div><br>        
+                <div class="progression-group">
+                    <label>
+                        <input type="radio" name="progression" value="Unplayed🆕" checked> <span>Unplayed🆕</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="progression" value="Unfinished🔄️"> <span>Unfinished🔄️</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="progression" value="Complete✅"> <span>Complete✅</span>
+                    </label>
+                </div><br>
                 <button type="submit" class="btn btn-add">Save</button>
             </form>
         </div>
