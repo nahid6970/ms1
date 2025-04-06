@@ -185,7 +185,11 @@ from_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
 from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
-from_options = ["", "gu:/song", "gu:/software", "gu:/mx"]
+from_options = ["", "gu:/song",
+                 "gu:/software",
+                 "gu:/mx",
+                 "C:/Users/nahid/Desktop",
+                 "o0/Desktop"]
 from_combo = ttk.Combobox(from_frame, textvariable=from_var, values=from_options, font=("JetBrainsmono nfp", 12, "bold"))
 from_combo.grid(row=0, column=1, sticky=tk.W)
 from_combo.set("") # Set a default value
