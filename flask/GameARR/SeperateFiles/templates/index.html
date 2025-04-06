@@ -56,7 +56,7 @@ display: block;
 
         .form-container { display: none; background: #333; padding: 10px; border-radius: 10px; margin: 20px auto; }
         input { margin: 5px; padding: 8px; width: 90%; }
-        
+
 .btn-group {
 display: flex;
 justify-content: center; /* <-- centers horizontally */
@@ -65,9 +65,15 @@ margin-top: 0px;
 }
 .btn { margin: 2px; padding: 8px 10px; border: none; cursor: pointer; border-radius: 5px; }
 .btn-add { background: #28a745; color: white; }
-.btn-edit { background: #007bff; color: white; text-decoration: none; }
-.btn-delete { background: #dc3545; color: white; text-decoration: none; }
-.btn-ytreview { background: #dc3545; color: white; text-decoration: none; }
+
+.btn-edit {  color: white; text-decoration: none; border: 2px solid;}
+.btn-edit:hover { background: #007bff; color: white; }
+
+.btn-delete { color:  rgb(255, 0, 0); text-decoration: none; border: 2px solid red; }
+.btn-delete:hover { background: #ff0019; color: rgb(255, 254, 254); }
+
+.btn-ytreview {  color: rgb(253, 38, 38); text-decoration: none; border: 2px solid white; }
+.btn-ytreview:hover { background: #dc3545; color: white; }
 
         .top-controls { margin-bottom: 20px; }
         .top-controls button, .top-controls .sort-btn {
@@ -176,7 +182,7 @@ margin-top: 0px;
                 
                     <a href="/delete/{{ game[0] }}" class="btn btn-delete"
                        onclick="return confirm('Are you sure you want to delete this game?');">
-                       <i class="nf nf-md-delete_outline"></i>
+                       <i class="nf nf-md-delete"></i>
                     </a>
                 
                     <a href="https://www.youtube.com/results?search_query={{ game[1]|urlencode }}+review" class="btn btn-ytreview" target="_blank">
