@@ -202,16 +202,28 @@ color: white;
     });
 
         // ... existing JavaScript ...
-        function googleSearch() {
-        const gameNameInput = document.getElementById('gameName');
-        const gameName = gameNameInput.value;
-        if (gameName) {
-            const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(gameName)}`;
-            window.open(googleSearchUrl, '_blank');
-        } else {
-            alert('Please enter a game name first.');
-        }
+function googleSearch() {
+    const gameNameInput = document.getElementById('gameName');
+    const gameName = gameNameInput.value;
+    if (gameName) {
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(gameName)}`;
+        window.open(googleSearchUrl, '_blank');
+    } else {
+        alert('Please enter a game name first.');
     }
+}
+
+function googleSearchWithYear() {
+    const gameNameInput = document.getElementById('gameName');
+    const gameName = gameNameInput.value;
+    if (gameName) {
+        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(gameName)} released`;
+        window.open(googleSearchUrl, '_blank');
+    } else {
+        alert('Please enter a game name first.');
+    }
+}
+
 
     function filterByCollection(collection) {
         window.location.href = '/?collection=' + collection;
@@ -246,10 +258,13 @@ color: white;
 
         <div class="form-container" id="gameForm">
             <form action="/add?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" method="post">
+
                 <div style="display: flex; align-items: center; margin-bottom: -15px; justify-content: center;">
                     <input type="text" id="gameName" name="name" placeholder="Game Name" required style="flex-grow: 1; max-width: 65%; text-align: center; font-size: 1.25rem; font-family:JetBrainsMono NFP, sans-serif;">
-                    <button type="button" class="btn" onclick="googleSearch()"><i class="nf nf-dev-google"></i></button><!-- Added Google Search button -->
+                    <button type="button" class="btn" onclick="googleSearch()"><i class="nf nf-dev-google"></i></button><!-- Google Search button -->
+                    <button type="button" class="btn" onclick="googleSearchWithYear()"><i class="nf nf-cod-calendar"></i></button><!-- New button -->
                 </div><br>
+
                 <input type="text" name="image" placeholder="Image URL" style="background-color: #f7fa4f; "><br>
                 <input type="text" name="url" placeholder="Game URL" style="background-color: #f7fa4f;" ><br>
                 <input type="text" name="year" placeholder="Year" style="text-align: center; max-width: 20%; font-size: 1.25rem; font-family:JetBrainsMono NFP, sans-serif;"><br>
