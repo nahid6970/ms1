@@ -231,16 +231,21 @@ def search_games():
 
 from flask import jsonify
 
+from flask import jsonify
+
 @app.route('/get_collection_games')
 def get_collection_games():
     game_id = request.args.get('game_id')
     collection_name = request.args.get('collection_name')
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT id, name, year FROM games WHERE collection = ? AND id != ? ORDER BY year", (collection_name, game_id))
+    c.execute("SELECT id, name, year FROM games WHERE collection = ? ORDER BY year", (collection_name,))
     games = c.fetchall()
     conn.close()
-    game_list = [{'id': game[0], 'name': game[1], 'year': game[2]} for game in games]
+    game_list = []
+    for game in games:
+        style = 'color: red;' if str(game[0]) == game_id else ''
+        game_list.append({'id': game[0], 'name': game[1], 'year': game[2], 'style': style})
     return jsonify(game_list)
 
 if __name__ == '__main__':

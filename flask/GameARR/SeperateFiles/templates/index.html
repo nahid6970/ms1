@@ -205,6 +205,7 @@ color: white;
         display: none;
         margin-left: 0; /* Remove indentation */
         text-align: center; /* Center the collection name */
+        text-decoration: underline;
     }
     .other-collection-games {
         font-size: 0.75em;
@@ -223,6 +224,7 @@ color: white;
         margin-bottom: 3px;
         text-align: left;
     }
+    
         </style>
 
 
@@ -290,7 +292,7 @@ function toggleCollection(toggleElement, collectionId, gameId, collectionName) {
                     let html = '<ul>';
                     if (data.length > 0) {
                         data.forEach(otherGame => {
-                            html += `<li>${otherGame.name} (${otherGame.year})</li>`;
+                            html += `<li style="${otherGame.style}">${otherGame.name} (${otherGame.year})</li>`;
                         });
                     } else {
                         html += '<li>No other games in this collection.</li>';
@@ -315,8 +317,6 @@ function toggleCollection(toggleElement, collectionId, gameId, collectionName) {
         otherGamesDiv.style.display = 'none';
     }
 }
-
-
     function filterByCollection(collection) {
         window.location.href = '/?collection=' + collection;
     }
