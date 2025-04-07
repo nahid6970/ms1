@@ -178,7 +178,51 @@ border: 1px solid #555;
 background-color: #333;
 color: white;
 }
-
+    /* Existing styles */
+    /* Existing styles */
+    .collection-info-container {
+        margin-bottom: 5px;
+        text-align: center; /* Center the toggle text */
+    }
+    .collection-toggle {
+        color: lightblue;
+        cursor: pointer;
+        font-size: 0.8em;
+        display: inline-block; /* Allows text-align to work */
+    }
+    .collection-toggle::before {
+        content: "▼ ";
+        display: inline-block;
+        margin-right: 5px;
+        transition: transform 0.2s ease-in-out;
+    }
+    .collection-toggle.collapsed::before {
+        transform: rotate(-90deg);
+    }
+    .collection-text {
+        color: lightblue;
+        font-size: 0.8em;
+        display: none;
+        margin-left: 0; /* Remove indentation */
+        text-align: center; /* Center the collection name */
+    }
+    .other-collection-games {
+        font-size: 0.75em;
+        color: #aaa;
+        margin-left: 0; /* Remove indentation */
+        text-align: center; /* Center the "Loading..." text and the list */
+    }
+    .other-collection-games ul {
+        list-style-type: none;
+        padding: 0;
+        text-align: left; /* Align list items to the left within the centered ul */
+        display: inline-block; /* Make the ul take only necessary width */
+    }
+    .other-collection-games li {
+        list-style-type: "";
+        margin-bottom: 3px;
+        text-align: left;
+    }
         </style>
 
 
@@ -221,6 +265,54 @@ function googleSearchWithYear() {
         window.open(googleSearchUrl, '_blank');
     } else {
         alert('Please enter a game name first.');
+    }
+}
+
+
+let collectionData = {}; // Object to store loaded data for each game
+
+function toggleCollection(toggleElement, collectionId, gameId, collectionName) {
+    const collectionText = document.getElementById(collectionId);
+    const otherGamesDiv = document.getElementById(`other-games-${gameId}`);
+    toggleElement.classList.toggle('collapsed');
+
+    const isExpanded = collectionText.style.display === 'block';
+
+    if (!isExpanded) {
+        collectionText.style.display = 'block';
+        if (!collectionData[gameId]) {
+            collectionData[gameId] = 'loading';
+            otherGamesDiv.style.display = 'block';
+            otherGamesDiv.innerHTML = 'Loading other games...';
+            fetch(`/get_collection_games?game_id=${gameId}&collection_name=${encodeURIComponent(collectionName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = '<ul>';
+                    if (data.length > 0) {
+                        data.forEach(otherGame => {
+                            html += `<li>${otherGame.name} (${otherGame.year})</li>`;
+                        });
+                    } else {
+                        html += '<li>No other games in this collection.</li>';
+                    }
+                    html += '</ul>';
+                    otherGamesDiv.innerHTML = html;
+                    collectionData[gameId] = data; // Store loaded data
+                })
+                .catch(error => {
+                    console.error('Error fetching collection games:', error);
+                    otherGamesDiv.innerHTML = 'Error loading other games.';
+                    collectionData[gameId] = 'error';
+                });
+        } else if (collectionData[gameId] !== 'loading' && collectionData[gameId] !== 'error') {
+            otherGamesDiv.style.display = 'block'; // Show if already loaded
+        } else if (collectionData[gameId] === 'error') {
+            otherGamesDiv.style.display = 'block';
+            otherGamesDiv.innerHTML = 'Error loading other games.';
+        }
+    } else {
+        collectionText.style.display = 'none';
+        otherGamesDiv.style.display = 'none';
     }
 }
 
@@ -321,16 +413,18 @@ function googleSearchWithYear() {
                 </p>
         
                 <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} ~/5 ⭐ {% endif %}</p>
-                <!-- <p style="color: lightblue; margin-bottom: -20px ">Collection: {{ game[7] if game[7] }}</p> -->
-                <div class="btn-group">
-                    <a href="/edit/{{ game[0] }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
 
-                    <a href="/delete/{{ game[0] }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="btn btn-delete"
-                       onclick="return confirm('Are you sure you want to delete this game?');">
-                       <i class="nf nf-md-delete"></i>
+                <div class="btn-group">
+                    <a href="/edit/{{ game[0] }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}"
+                        class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
+                
+                    <a href="/delete/{{ game[0] }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}"
+                        class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this game?');">
+                        <i class="nf nf-md-delete"></i>
                     </a>
                 
-                    <a href="https://www.youtube.com/results?search_query={{ game[1]|urlencode }}+review" class="btn btn-ytreview" target="_blank">
+                    <a href="https://www.youtube.com/results?search_query={{ game[1]|urlencode }}+review" class="btn btn-ytreview"
+                        target="_blank">
                         <i class="nf nf-fa-youtube"></i>
                     </a>
                 </div>
@@ -339,6 +433,18 @@ function googleSearchWithYear() {
                     <a href="{{ game[6] if game[6] else '#' }}"> <img src="{{ game[3] }}" alt="{{ game[1] }}"> </a>
                 </div>
         
+                <div class="collection-info-container">
+                    {% if game[7] %}
+                    <p class="collection-toggle collapsed" onclick="toggleCollection(this, 'collection-{{ game[0] }}', '{{ game[0] }}', '{{ game[7] }}')">Collection</p>
+                    <div id="collection-{{ game[0] }}" class="collection-text">
+                        {{ game[7] }}
+                        <div id="other-games-{{ game[0] }}" class="other-collection-games" style="display: none;">
+                            Loading other games...
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
             </div>
             {% endfor %}
         </div>
