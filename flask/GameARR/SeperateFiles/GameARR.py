@@ -10,24 +10,24 @@ def recreate_table():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS games_new (
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                name TEXT UNIQUE,
-                                year INTEGER,
-                                image TEXT,
-                                rating REAL,
-                                progression TEXT,
-                                url TEXT,
-                                collection TEXT
+                                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                     name TEXT UNIQUE,
+                                     year INTEGER,
+                                     image TEXT,
+                                     rating REAL,
+                                     progression TEXT,
+                                     url TEXT,
+                                     collection TEXT
 
-                            )''')
+                                 )''')
     c.execute('''INSERT INTO games_new (id, name, year, image, rating, progression, url, collection)
-                            SELECT id, name, year, image, rating,
-                                   CASE progression
-                                       WHEN 0 THEN 'Unplayed'
-                                       WHEN 50 THEN 'Unfinished'
-                                       WHEN 100 THEN 'Complete'
-                                       ELSE CAST(progression AS TEXT)
-                                   END, url FROM games''') # Convert existing progression
+                                 SELECT id, name, year, image, rating,
+                                        CASE progression
+                                            WHEN 0 THEN 'Unplayed'
+                                            WHEN 50 THEN 'Unfinished'
+                                            WHEN 100 THEN 'Complete'
+                                            ELSE CAST(progression AS TEXT)
+                                        END, url FROM games''') # Convert existing progression
     c.execute('DROP TABLE games')
     c.execute('ALTER TABLE games_new RENAME TO games')
     conn.commit()
@@ -38,15 +38,15 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS games (
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                name TEXT UNIQUE,
-                                year TEXT,
-                                image TEXT,
-                                rating INTEGER,
-                                progression TEXT DEFAULT 'Unplayed',
-                                url TEXT,
-                                collection TEXT DEFAULT ''
-                                )''')
+                                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                     name TEXT UNIQUE,
+                                     year TEXT,
+                                     image TEXT,
+                                     rating INTEGER,
+                                     progression TEXT DEFAULT 'Unplayed🆕',
+                                     url TEXT,
+                                     collection TEXT DEFAULT ''
+                                     )''')
     conn.commit()
     conn.close()
 
@@ -58,7 +58,7 @@ except sqlite3.OperationalError:
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
-        c.execute("ALTER TABLE games ADD COLUMN progression TEXT DEFAULT 'Unplayed'")
+        c.execute("ALTER TABLE games ADD COLUMN progression TEXT DEFAULT 'Unplayed🆕'")
         conn.commit()
     except sqlite3.OperationalError:
         pass # Column might already exist
@@ -119,6 +119,7 @@ def add_game():
     sort_by = request.args.get('sort_by', 'name')  # Get current sort_by
     order = request.args.get('order', 'asc')      # Get current order
     collection_filter = request.args.get('collection') # Get current collection filter
+    query = request.args.get('query') # Get the search query
 
     rating = None
     if rating_str and rating_str.isdigit():
@@ -138,7 +139,7 @@ def add_game():
         c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url, collection FROM games ORDER BY name COLLATE NOCASE ASC")
         games = c.fetchall()
         c.connection.close()
-        return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc', error="A game with this name already exists.", current_collection_filter=collection_filter)
+        return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc', error="A game with this name already exists.", current_collection_filter=collection_filter, query=query)
     else:
         c.execute("INSERT INTO games (name, year, image, rating, progression, url, collection) VALUES (?, ?, ?, ?, ?, ?, ?)",
                   (name, year, image, rating, progression, url, collection))
@@ -147,8 +148,10 @@ def add_game():
         redirect_url = f'/?sort_by={sort_by}&order={order}'
         if collection_filter:
             redirect_url += f'&collection={collection_filter}'
+        if query:
+            redirect_url += f'&query={query}'
         return redirect(redirect_url)
-    
+
 @app.route('/edit/<int:game_id>', methods=['GET', 'POST'])
 def edit_game(game_id):
     conn = sqlite3.connect(DB_PATH)
@@ -156,6 +159,7 @@ def edit_game(game_id):
     collection_filter = request.args.get('collection')
     sort_by = request.args.get('sort_by', 'name')  # Get current sort_by
     order = request.args.get('order', 'asc')      # Get current order
+    query = request.args.get('query')  # Get the query parameter
 
     if request.method == 'POST':
         name = request.form['name']
@@ -181,7 +185,7 @@ def edit_game(game_id):
             conn.close()
             c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
             game_data = c.fetchone()
-            return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.", current_collection_filter=collection_filter, sort_by=sort_by, order=order)
+            return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.", current_collection_filter=collection_filter, sort_by=sort_by, order=order, query=query)
         else:
             c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ?, collection = ? WHERE id = ?",
                       (name, year, image, rating, progression, url, collection, game_id))
@@ -190,13 +194,15 @@ def edit_game(game_id):
             redirect_url = f'/?sort_by={sort_by}&order={order}'
             if collection_filter:
                 redirect_url += f'&collection={collection_filter}'
+            if query:
+                redirect_url += f'&query={query}'
             return redirect(redirect_url)
     else:
         c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
         conn.close()
-        return render_template('edit_game.html', game=game, game_id=game_id, current_collection_filter=collection_filter, sort_by=sort_by, order=order)
-    
+        return render_template('edit_game.html', game=game, game_id=game_id, current_collection_filter=collection_filter, sort_by=sort_by, order=order, query=query)
+
 @app.route('/delete/<int:game_id>')
 def delete_game(game_id):
     conn = sqlite3.connect(DB_PATH)
@@ -204,12 +210,15 @@ def delete_game(game_id):
     order = request.args.get('order', 'asc')      # Get current order
     c = conn.cursor()
     collection_filter = request.args.get('collection') # Get the collection filter
+    query = request.args.get('query') # Get the search query
     c.execute("DELETE FROM games WHERE id = ?", (game_id,))
     conn.commit()
     conn.close()
     redirect_url = f'/?sort_by={sort_by}&order={order}'
     if collection_filter:
         redirect_url += f'&collection={collection_filter}'
+    if query:
+        redirect_url += f'&query={query}'
     return redirect(redirect_url)
 
 @app.route('/search')

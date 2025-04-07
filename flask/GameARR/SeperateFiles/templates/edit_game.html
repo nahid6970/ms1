@@ -97,8 +97,7 @@ color: white;
     <div class="container">
         <h1>Edit Game: {{ game[0] }}</h1>
         <div class="form-container">
-            <form action="/edit/{{ game_id }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" method="POST">
-                <input type="text" name="name" value="{{ game[0] }}" placeholder="Game Name" required><br>
+            <form action="/edit/{{ game_id }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}{% if query %}&query={{ query }}{% endif %}" method="POST">                <input type="text" name="name" value="{{ game[0] }}" placeholder="Game Name" required><br>
                 <input type="text" name="year" value="{{ game[1] }}" placeholder="Year"><br>
                 <input type="text" name="image" value="{{ game[2] }}" placeholder="Image URL"><br>
                 <input type="text" name="url" value="{{ game[5] if game[5] else '' }}"
