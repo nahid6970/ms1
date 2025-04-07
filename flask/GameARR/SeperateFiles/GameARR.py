@@ -191,7 +191,6 @@ def edit_game(game_id):
             if collection_filter:
                 redirect_url += f'&collection={collection_filter}'
             return redirect(redirect_url)
-        
     else:
         c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
@@ -212,6 +211,14 @@ def delete_game(game_id):
     if collection_filter:
         redirect_url += f'&collection={collection_filter}'
     return redirect(redirect_url)
+
+@app.route('/search')
+def search_games():
+    query = request.args.get('query')
+    if query:
+        return redirect(f'/?query={query}') # Redirect to the index page with the query
+    else:
+        return redirect('/')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5005, debug=True)
