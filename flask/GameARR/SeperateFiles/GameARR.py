@@ -105,6 +105,8 @@ def index():
     collections = [row[0] for row in c.fetchall()]
     conn.close()
     return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query, total_games=total_games, collections=collections, current_collection_filter=collection_filter)
+
+
 @app.route('/add', methods=['POST'])
 def add_game():
     name = request.form['name']
@@ -114,6 +116,9 @@ def add_game():
     rating_str = request.form.get('rating')
     progression = request.form.get('progression')
     collection = request.form.get('collection', '').strip()
+    sort_by = request.args.get('sort_by', 'name')  # Get current sort_by
+    order = request.args.get('order', 'asc')      # Get current order
+    collection_filter = request.args.get('collection') # Get current collection filter
 
     rating = None
     if rating_str and rating_str.isdigit():
@@ -133,27 +138,25 @@ def add_game():
         c.execute(f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url, collection FROM games ORDER BY name COLLATE NOCASE ASC")
         games = c.fetchall()
         c.connection.close()
-        return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc', error="A game with this name already exists.")
+        return render_template('index.html', games=games, sort_by='name', order='asc', next_order='desc', error="A game with this name already exists.", current_collection_filter=collection_filter)
     else:
         c.execute("INSERT INTO games (name, year, image, rating, progression, url, collection) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (name, year, image, rating, progression, url, collection))
+                  (name, year, image, rating, progression, url, collection))
         conn.commit()
         conn.close()
-        return redirect('/')
-
-@app.route('/search')
-def search_games():
-    query = request.args.get('query')
-    if query:
-        return redirect(f'/?query={query}') # Redirect to the index page with the query
-    else:
-        return redirect('/')
-
+        redirect_url = f'/?sort_by={sort_by}&order={order}'
+        if collection_filter:
+            redirect_url += f'&collection={collection_filter}'
+        return redirect(redirect_url)
+    
 @app.route('/edit/<int:game_id>', methods=['GET', 'POST'])
 def edit_game(game_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    collection_filter = request.args.get('collection') # Get the collection filter from the URL
+    collection_filter = request.args.get('collection')
+    sort_by = request.args.get('sort_by', 'name')  # Get current sort_by
+    order = request.args.get('order', 'asc')      # Get current order
+
     if request.method == 'POST':
         name = request.form['name']
         year = request.form['year']
@@ -178,34 +181,37 @@ def edit_game(game_id):
             conn.close()
             c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
             game_data = c.fetchone()
-            return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.", current_collection_filter=collection_filter) # Pass the filter back
+            return render_template('edit_game.html', game=game_data, game_id=game_id, error="A game with this name already exists.", current_collection_filter=collection_filter, sort_by=sort_by, order=order)
         else:
             c.execute("UPDATE games SET name = ?, year = ?, image = ?, rating = ?, progression = ?, url = ?, collection = ? WHERE id = ?",
                       (name, year, image, rating, progression, url, collection, game_id))
             conn.commit()
             conn.close()
+            redirect_url = f'/?sort_by={sort_by}&order={order}'
             if collection_filter:
-                return redirect(f'/?collection={collection_filter}') # Redirect back to the collection page
-            else:
-                return redirect('/')
+                redirect_url += f'&collection={collection_filter}'
+            return redirect(redirect_url)
+        
     else:
         c.execute("SELECT name, year, image, rating, progression, url, collection FROM games WHERE id = ?", (game_id,))
         game = c.fetchone()
         conn.close()
-        return render_template('edit_game.html', game=game, game_id=game_id, current_collection_filter=collection_filter) # Pass the filter to the edit form
-
+        return render_template('edit_game.html', game=game, game_id=game_id, current_collection_filter=collection_filter, sort_by=sort_by, order=order)
+    
 @app.route('/delete/<int:game_id>')
 def delete_game(game_id):
     conn = sqlite3.connect(DB_PATH)
+    sort_by = request.args.get('sort_by', 'name')  # Get current sort_by
+    order = request.args.get('order', 'asc')      # Get current order
     c = conn.cursor()
     collection_filter = request.args.get('collection') # Get the collection filter
     c.execute("DELETE FROM games WHERE id = ?", (game_id,))
     conn.commit()
     conn.close()
+    redirect_url = f'/?sort_by={sort_by}&order={order}'
     if collection_filter:
-        return redirect(f'/?collection={collection_filter}') # Redirect back to the collection page
-    else:
-        return redirect('/')
+        redirect_url += f'&collection={collection_filter}'
+    return redirect(redirect_url)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5005, debug=True)

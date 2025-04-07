@@ -245,7 +245,7 @@ color: white;
         </div>
 
         <div class="form-container" id="gameForm">
-            <form action="/add" method="post">
+            <form action="/add?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" method="post">
                 <div style="display: flex; align-items: center; margin-bottom: 10px; justify-content: center;">
                     <input type="text" id="gameName" name="name" placeholder="Game Name" required style="flex-grow: 1; max-width: 60%;"><!-- Added ID and adjusted style -->
                     <button type="button" class="btn" onclick="googleSearch()"><i class="nf nf-dev-google"></i></button><!-- Added Google Search button -->
@@ -308,9 +308,9 @@ color: white;
                 <p>{% if game[4] %} {{ game[4] }}/5 ⭐ {% else %} ~/5 ⭐ {% endif %}</p>
                 <!-- <p style="color: lightblue; margin-bottom: -20px ">Collection: {{ game[7] if game[7] }}</p> -->
                 <div class="btn-group">
-                    <a href="/edit/{{ game[0] }}{% if current_collection_filter %}?collection={{ current_collection_filter }}{% endif %}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
-                
-                    <a href="/delete/{{ game[0] }}{% if current_collection_filter %}?collection={{ current_collection_filter }}{% endif %}" class="btn btn-delete"
+                    <a href="/edit/{{ game[0] }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="btn btn-edit"><i class="nf nf-fa-edit"></i></a>
+
+                    <a href="/delete/{{ game[0] }}?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}" class="btn btn-delete"
                        onclick="return confirm('Are you sure you want to delete this game?');">
                        <i class="nf nf-md-delete"></i>
                     </a>
