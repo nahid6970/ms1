@@ -40,6 +40,7 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 ^!n::Run("C:\ms1\scripts\ahk\version1\VScode_OpenWith.ahk", "", "Hide")
 !1::Run("C:\ms1\scripts\ahk\version2\display\send_to_2nd.ahk", "", "Hide")
 RAlt & -::Run("C:\ms1\scripts\ahk\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
+RAlt & Space::Run("C:\ms1\scripts\ahk\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 #x::Run("C:\ms1\mypygui.py", , "Hide")
 !Space::Run("C:\ms1\Run.py", , "Hide")

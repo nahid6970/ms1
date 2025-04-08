@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import os
+from flask import jsonify
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='C:\msBackups\gameARR\static')
 DB_PATH = r"C:\msBackups\gameARR\game.db"
 
 # Ensure database exists and creates the necessary table
@@ -229,9 +230,6 @@ def search_games():
     else:
         return redirect('/')
 
-from flask import jsonify
-
-from flask import jsonify
 
 @app.route('/get_collection_games')
 def get_collection_games():
