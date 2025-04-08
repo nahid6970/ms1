@@ -54,7 +54,6 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ::;run:: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
 
 
-
 ^!t::Toggle_Reset_Workspace() ; Define the shortcut outside
 Toggle_Reset_Workspace() {
     static taskbarVisible := 1 ; Initialize the taskbar visibility state (1 for visible, 0 for hidden)
