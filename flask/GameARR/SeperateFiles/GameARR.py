@@ -242,7 +242,7 @@ def get_collection_games():
     conn.close()
     game_list = []
     for game in games:
-        style = 'color: red;' if str(game[0]) == game_id else ''
+        style = 'color: white;' if str(game[0]) == game_id else ''
         game_list.append({'id': game[0], 'name': game[1], 'year': game[2], 'style': style})
     return jsonify(game_list)
 
