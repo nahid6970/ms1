@@ -1,0 +1,43 @@
+#leftWidget {
+    background-color: #444;
+    color: #eee;
+}
+
+QPushButton {
+    background-color: #555;
+    color: #eee;
+    border: none;
+    padding: 2px 5px; /* Reduced padding */
+    margin: 1px; /* Reduced margin */
+    border-radius: 2px; /* Smaller border radius */
+    font-size: 14px; /* Smaller font size for buttons */
+}
+
+QPushButton:hover {
+    background-color: #666;
+}
+
+#clockLabel {
+    font-size: 16px;
+    color: #eee;
+    padding: 0 5px; /* Add some padding for the clock */
+}
+
+#rightWidget {
+    background-color: #444;
+    color: #eee;
+    padding-right: 5px;
+}
+
+#cpuLabel, #ramLabel {
+    font-size: 16px;
+    margin: 0 3px;
+    min-width: 80px; /* Adjust this value as needed */
+    text-align: center; /* Ensure text stays centered within the fixed width */
+}
+
+QWidget {
+    background-color: #333;
+    color: #eee;
+    font-size: 14px; /* Default font size */
+}
