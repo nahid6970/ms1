@@ -82,7 +82,8 @@
             color: #e0e0e0;
             margin-top: 10px;
             height: 4em;
-            align-content: center;
+            /* align-content: center; */
+            align-content: end;
         }
 
         .game p {
@@ -468,8 +469,8 @@
                 <button type="submit" class="btn">Search</button><br>
             </form>
         </div>
-        <div class="top-controls">
-            <button onclick="toggleForm()" style="background-color: #dc3545;">Add Game</button>
+        <div class="top-controls" style="background-color: #f8f9fa00; padding: 10px; border-bottom: 1px solid #dddddd00; position: fixed; left: 0; top: 50%; width: auto; z-index: 100; transform: translateY(-50%); display: flex; flex-direction: column; align-items: stretch;">
+            <button onclick="toggleForm()" style="color: #1c1c1c; background-color: #ffffff;"><i class="nf nf-cod-add"></i></button>
             <button disabled style="background-color: #007bff;">{{ total_games }}</button>
         </div>
         <div class="collection-filter">
@@ -487,53 +488,54 @@
 
     <div class="form-container" id="gameForm">
         <form
-            action="/add?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}"
-            method="post">
-
-            <div style="display: flex; align-items: center; margin-bottom: -15px; justify-content: center;">
-                <input type="text" id="gameName" name="name" placeholder="Game Name" required
-                    style="flex-grow: 1; max-width: 65%; text-align: center; font-size: 1.25rem; font-family:JetBrainsMono NFP, sans-serif;">
-                <button type="button" class="btn" onclick="googleSearch()"><i
-                        class="nf nf-dev-google"></i></button><!-- Google Search button -->
-                <button type="button" class="btn" onclick="googleSearchWithYear()"><i
-                        class="nf nf-cod-calendar"></i></button><!-- New button -->
-            </div><br>
-
-            <input type="text" name="image" placeholder="Image URL" style="background-color: #f7fa4f; "><br>
-            <input type="text" name="url" placeholder="Game URL" style="background-color: #f7fa4f;"><br>
-            <input type="text" name="year" placeholder="Year"
-                style="text-align: center; max-width: 20%; font-size: 1.25rem; font-family:JetBrainsMono NFP, sans-serif;"><br>
-            <div class="rating-group">
-                <label>
-                    <input type="radio" name="rating" value="1"> <span>1</span>
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="2"> <span>2</span>
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="3"> <span>3</span>
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="4"> <span>4</span>
-                </label>
-                <label>
-                    <input type="radio" name="rating" value="5"> <span>5</span>
-                </label>
-            </div><br>
-            <div class="progression-group">
-                <label>
-                    <input type="radio" name="progression" value="Unplayed🆕" checked> <span>Unplayed🆕</span>
-                </label>
-                <label>
-                    <input type="radio" name="progression" value="Unfinished🔄️"> <span>Unfinished🔄️</span>
-                </label>
-                <label>
-                    <input type="radio" name="progression" value="Complete✅"> <span>Complete✅</span>
-                </label>
-            </div><br>
-            <input type="text" name="collection" placeholder="Collection (Optional)"><br>
-            <button type="submit" class="btn btn-add">Save</button>
-        </form>
+        action="/add?sort_by={{ sort_by }}&order={{ order }}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}"
+        method="post"
+        style="margin-top: 1%; position: fixed; top: 0; left: 50%; transform: translateX(-50%); background-color: #333333; padding: 20px; border: 1px solid #ddd; z-index: 101; width: 80%; max-width: 600px; box-sizing: border-box;">
+    
+        <div style="display: flex; align-items: center; margin-bottom: -15px; justify-content: center;">
+            <input type="text" id="gameName" name="name" placeholder="Game Name" required
+                style="flex-grow: 1; max-width: 65%; text-align: center; font-size: 1.25rem; font-family:JetBrainsMono NFP, sans-serif;">
+            <button type="button" class="btn" onclick="googleSearch()"><i
+                    class="nf nf-dev-google"></i></button><!-- Google Search button -->
+            <button type="button" class="btn" onclick="googleSearchWithYear()"><i
+                    class="nf nf-cod-calendar"></i></button><!-- New button -->
+        </div><br>
+    
+        <input type="text" name="image" placeholder="Image URL" style="background-color: #f7fa4f; "><br>
+        <input type="text" name="url" placeholder="Game URL" style="background-color: #f7fa4f;"><br>
+        <input type="text" name="year" placeholder="Year"
+            style="text-align: center; max-width: 20%; font-size: 1.25rem; font-family:JetBrainsMono NFP, sans-serif;"><br>
+        <div class="rating-group">
+            <label>
+                <input type="radio" name="rating" value="1"> <span>1</span>
+            </label>
+            <label>
+                <input type="radio" name="rating" value="2"> <span>2</span>
+            </label>
+            <label>
+                <input type="radio" name="rating" value="3"> <span>3</span>
+            </label>
+            <label>
+                <input type="radio" name="rating" value="4"> <span>4</span>
+            </label>
+            <label>
+                <input type="radio" name="rating" value="5"> <span>5</span>
+            </label>
+        </div><br>
+        <div class="progression-group">
+            <label>
+                <input type="radio" name="progression" value="Unplayed🆕" checked> <span>Unplayed🆕</span>
+            </label>
+            <label>
+                <input type="radio" name="progression" value="Unfinished🔄️"> <span>Unfinished🔄️</span>
+            </label>
+            <label>
+                <input type="radio" name="progression" value="Complete✅"> <span>Complete✅</span>
+            </label>
+        </div><br>
+        <input type="text" name="collection" placeholder="Collection (Optional)"><br>
+        <button type="submit" class="btn btn-add">Save</button>
+    </form>
     </div>
 
     <div class="game-list">
