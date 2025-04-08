@@ -100,7 +100,7 @@ class CPUMonitor(QWidget):
 
     def apply_stylesheet(self):
         try:
-            with open("C:\\Users\\nahid\\Desktop\\per\\customize\\style.css", "r") as f:
+            with open("C:\\ms1\\pyqt\\customize\\style.css", "r") as f:
                 self.setStyleSheet(f.read())
         except FileNotFoundError:
             print("Stylesheet file not found: customize/style.css")
@@ -115,7 +115,7 @@ class CPUMonitor(QWidget):
         subprocess.Popen(['control', 'panel'])
 
     def update_cpu_ram_usage(self):
-        cpu_percent = int(psutil.cpu_percent())  # Converted to integer
+        cpu_percent = int(psutil.cpu_percent())  # Converted to integera
         ram_info = psutil.virtual_memory()
         ram_percent = int(ram_info.percent)  # Converted to integer
         self.cpu_label.setText(f"CPU: {cpu_percent}%")
