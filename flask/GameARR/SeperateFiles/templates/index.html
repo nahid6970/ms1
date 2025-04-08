@@ -579,8 +579,10 @@
             <div class="collection-info-container">
                 {% if game[7] %}
                 <p class="collection-toggle collapsed"
-                    onclick="toggleCollection(this, 'collection-{{ game[0] }}', '{{ game[0] }}', '{{ game[7] }}')">
-                    Collection</p>
+                    onclick="toggleCollection(this, 'collection-{{ game[0] }}', '{{ game[0] }}', this.dataset.collectionName)"
+                    data-collection-name="{{ game[7] }}">
+                    Collection
+                </p>
                 <div id="collection-{{ game[0] }}" class="collection-text">
                     {{ game[7] }}
                     <div id="other-games-{{ game[0] }}" class="other-collection-games" style="display: none;">
