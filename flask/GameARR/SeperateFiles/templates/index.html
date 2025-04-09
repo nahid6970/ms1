@@ -470,9 +470,11 @@
             </form>
         </div>
         <div class="top-controls" style="background-color: #f8f9fa00; padding: 10px; border-bottom: 1px solid #dddddd00; position: fixed; left: 0; top: 50%; width: auto; z-index: 100; transform: translateY(-50%); display: flex; flex-direction: column; align-items: stretch;">
+            <button onclick="location.href='/'" style="text-decoration: none; color: #000000; background: #4dfa47;"><i class="nf nf-fa-home"></i></button>
             <button onclick="toggleForm()" style="color: #1c1c1c; background-color: #ffffff;"><i class="nf nf-cod-add"></i></button>
             <button disabled style="background-color: #007bff;">{{ total_games }}</button>
         </div>
+        
         <div class="collection-filter">
             <select onchange="filterByCollection(this.value)">
                 <option value="">All Collections</option>
