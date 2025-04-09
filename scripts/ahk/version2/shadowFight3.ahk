@@ -21,6 +21,25 @@ F13:: ;! KOS 2 Button Spamm
     return
 }
 
+F21:: ;! Butcher
+{ ; V1toV2: Added bracket
+    global ; V1toV2: Made function global
+    StartTime := A_TickCount
+    while (A_TickCount - StartTime < 5000) {
+        if !WinActive("ahk_exe dnplayer.exe") {
+            break
+        }
+        ; SendEvent("{i down}")
+        SendEvent("{x down}")
+        SendEvent("{s down}")
+        SendEvent("xxxxxjxjxjx")
+        SendEvent("{s up}")
+        SendEvent("{x up}")
+        ; SendEvent("{i up}")
+    }
+    return
+}
+
 
 F14:: ;! KOS 4 Ability
 { ; V1toV2: Added bracket
