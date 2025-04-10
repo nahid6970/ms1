@@ -209,15 +209,12 @@
             align-items: center;
             /* Center items vertically (optional, but can be useful) */
         }
-
         .progression-group label {
             margin-right: 10px;
         }
-
         .progression-group input[type="radio"] {
             display: none;
         }
-
         .progression-group label span {
             padding: 8px 15px;
             border: 1px solid #555;
@@ -229,14 +226,13 @@
             min-width: 90px;
             text-align: center;
         }
-
         .progression-group input[type="radio"]:checked+span {
             background-color: #28a745;
             /* Green for selected progression */
             border-color: #28a745;
         }
 
-        /* Style for the rating radio button group */
+
         .rating-group {
             margin-top: 20px;
             margin-bottom: 0px;
@@ -247,15 +243,12 @@
             align-items: center;
             /* Center items vertically (optional) */
         }
-
         .rating-group label {
             margin-right: 10px;
         }
-
         .rating-group input[type="radio"] {
             display: none;
         }
-
         .rating-group label span {
             padding: 8px 15px;
             border: 1px solid #555;
@@ -268,7 +261,6 @@
             /* Smaller width for rating numbers */
             text-align: center;
         }
-
         .rating-group input[type="radio"]:checked+span {
             background-color: gold;
             /* Gold for selected rating */
@@ -277,10 +269,10 @@
             /* Ensure text is readable on gold */
         }
 
+
         .collection-filter {
             margin-top: 10px;
         }
-
         .collection-filter select {
             padding: 8px;
             border-radius: 4px;
@@ -289,14 +281,12 @@
             color: white;
         }
 
-        /* Existing styles */
-        /* Existing styles */
+
         .collection-info-container {
             margin-bottom: 5px;
             text-align: center;
             /* Center the toggle text */
         }
-
         .collection-toggle {
             color: lightblue;
             cursor: pointer;
@@ -304,18 +294,15 @@
             display: inline-block;
             /* Allows text-align to work */
         }
-
         .collection-toggle::before {
             content: "▼ ";
             display: inline-block;
             margin-right: 5px;
             transition: transform 0.2s ease-in-out;
         }
-
         .collection-toggle.collapsed::before {
             transform: rotate(-90deg);
         }
-
         .collection-text {
             color: lightblue;
             font-size: 0.8em;
@@ -326,7 +313,6 @@
             /* Center the collection name */
             text-decoration: underline;
         }
-
         .other-collection-games {
             font-size: 0.75em;
             color: #aaa;
@@ -335,7 +321,6 @@
             text-align: center;
             /* Center the "Loading..." text and the list */
         }
-
         .other-collection-games ul {
             list-style-type: none;
             padding: 0;
@@ -344,7 +329,6 @@
             display: inline-block;
             /* Make the ul take only necessary width */
         }
-
         .other-collection-games li {
             list-style-type: "";
             margin-bottom: 3px;
@@ -352,45 +336,40 @@
         }
 
 
-
-
-        .pagination {
-    margin-top: 20px;
-    text-align: center;
-    padding: 10px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px; /* Space between elements */
+.pagination {
+margin-top: 20px;
+text-align: center;
+padding: 10px 0;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 10px;
 }
-
 .pagination a.btn {
-    display: inline-block;
-    padding: 8px 15px;
-    text-decoration: none;
-    color: #fff;
-    background-color: #007bff; /* Bootstrap primary color */
-    border: 1px solid #007bff;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+display: inline-block;
+padding: 8px 15px;
+text-decoration: none;
+color: #fff;
+background-color: #007bff;
+border: 1px solid #007bff;
+border-radius: 5px;
+transition: background-color 0.3s ease;
 }
-
 .pagination a.btn:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+background-color: #0056b3;
+border-color: #0056b3;
 }
-
 .pagination a.btn:disabled {
-    background-color: #6c757d; /* Bootstrap secondary color */
-    border-color: #6c757d;
-    cursor: not-allowed;
+background-color: #6c757d;
+border-color: #6c757d;
+cursor: not-allowed;
+}
+.pagination span {
+font-size: 1rem;
+color: #495057;
 }
 
-.pagination span {
-    font-size: 1rem;
-    color: #495057; /* Bootstrap gray color */
-}
-    </style>
+</style>
 
 
     <script>

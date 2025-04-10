@@ -702,7 +702,7 @@ function gitter {
     }
 
     # Get the current date and time
-    $CurrentDateTime = Get-Date -Format "MMMM dd, yyyy, hh:mm tt"
+    $CurrentDateTime = Get-Date -Format "📅 MMMM dd, yyyy, hh:mm tt"
 
     # Prompt for optional commit message
     $UserInput = Read-Host "Enter commit message (press Enter to skip)"
