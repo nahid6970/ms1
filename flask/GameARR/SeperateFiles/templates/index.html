@@ -350,6 +350,46 @@
             margin-bottom: 3px;
             text-align: left;
         }
+
+
+
+
+        .pagination {
+    margin-top: 20px;
+    text-align: center;
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Space between elements */
+}
+
+.pagination a.btn {
+    display: inline-block;
+    padding: 8px 15px;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff; /* Bootstrap primary color */
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.pagination a.btn:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.pagination a.btn:disabled {
+    background-color: #6c757d; /* Bootstrap secondary color */
+    border-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    font-size: 1rem;
+    color: #495057; /* Bootstrap gray color */
+}
     </style>
 
 
@@ -487,6 +527,17 @@
         </div>
     </div>
 
+    <div class="pagination" style="margin-top: 20px; text-align: center;">
+        {% if page > 1 %}
+        <a href="/?sort_by={{ sort_by }}&order={{ order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}&page={{ page - 1 }}" class="btn"><i class="nf nf-md-skip_previous"></i></a>
+        {% endif %}
+    
+        <span>Page {{ page }} of {{ total_pages }}</span>
+    
+        {% if page < total_pages %}
+        <a href="/?sort_by={{ sort_by }}&order={{ order }}{% if query %}&query={{ query }}{% endif %}{% if current_collection_filter %}&collection={{ current_collection_filter }}{% endif %}&page={{ page + 1 }}" class="btn"><i class="nf nf-md-skip_next"></i></a>
+        {% endif %}
+    </div>
 
     <div class="form-container" id="gameForm">
         <form

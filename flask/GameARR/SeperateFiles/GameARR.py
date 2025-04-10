@@ -2,9 +2,11 @@ from flask import Flask, render_template, request, redirect
 import sqlite3
 import os
 from flask import jsonify
+import math
 
 app = Flask(__name__, static_folder='C:\msBackups\gameARR\static')
 DB_PATH = r"C:\msBackups\gameARR\game.db"
+GAMES_PER_PAGE = 20
 
 # Ensure database exists and creates the necessary table
 def recreate_table():
@@ -67,19 +69,41 @@ except sqlite3.OperationalError:
         conn.close()
 
 
+
 @app.route('/')
 def index():
     sort_by = request.args.get('sort_by', 'name')
     order = request.args.get('order', 'asc')
     query = request.args.get('query') # Get the search query
     collection_filter = request.args.get('collection')
+    page = request.args.get('page', 1, type=int) # Get current page, default to 1
     # Toggle order for next click
     next_order = 'desc' if order == 'asc' else 'asc'
     if sort_by not in ['name', 'year', 'rating', 'added']:
         sort_by = 'name'
     order_clause = 'ASC' if order == 'asc' else 'DESC'
     conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row # To access columns by name
     c = conn.cursor()
+
+    # Count total number of games
+    sql_count = "SELECT COUNT(*) FROM games"
+    conditions_count = []
+    params_count = []
+    if query:
+        conditions_count.append("name LIKE ?")
+        params_count.append('%' + query + '%')
+    if collection_filter:
+        conditions_count.append("collection = ?")
+        params_count.append(collection_filter)
+    if conditions_count:
+        sql_count += " WHERE " + " AND ".join(conditions_count)
+    c.execute(sql_count, tuple(params_count))
+    total_games_count = c.fetchone()[0]
+    total_pages = math.ceil(total_games_count / GAMES_PER_PAGE)
+
+    offset = (page - 1) * GAMES_PER_PAGE
+
     sql_query = f"SELECT id, name, year, image, CAST(rating AS INTEGER) AS rating, progression, url, collection FROM games"
     conditions = []
     params = []
@@ -94,19 +118,18 @@ def index():
         sql_query += " WHERE " + " AND ".join(conditions)
 
     if sort_by == 'added': # Sort by id for 'added' order
-        sql_query += f" ORDER BY id {order_clause}"
+        sql_query += f" ORDER BY id {order_clause} LIMIT ? OFFSET ?"
     else:
-        sql_query += f" ORDER BY {sort_by} COLLATE NOCASE {order_clause}"
+        sql_query += f" ORDER BY {sort_by} COLLATE NOCASE {order_clause} LIMIT ? OFFSET ?"
 
+    params.extend([GAMES_PER_PAGE, offset])
     c.execute(sql_query, tuple(params))
     games = c.fetchall()
-    c.execute("SELECT COUNT(*) FROM games")
-    total_games = c.fetchone()[0]
+
     c.execute("SELECT DISTINCT collection FROM games WHERE collection != '' ORDER BY collection COLLATE NOCASE")
     collections = [row[0] for row in c.fetchall()]
     conn.close()
-    return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query, total_games=total_games, collections=collections, current_collection_filter=collection_filter)
-
+    return render_template('index.html', games=games, sort_by=sort_by, order=order, next_order=next_order, query=query, total_games=total_games_count, collections=collections, current_collection_filter=collection_filter, page=page, total_pages=total_pages)
 
 @app.route('/add', methods=['POST'])
 def add_game():

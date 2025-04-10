@@ -694,14 +694,24 @@ git push
 function gitter {
     # Navigate to the current directory
     Set-Location -Path $PWD
+
     # Check if the current directory is a Git repository
     if (-not (Test-Path ".git")) {
         Write-Host "This is not a Git repository." -ForegroundColor Red
         return
     }
-    # Generate a commit message with the custom date and time format
+
+    # Get the current date and time
     $CurrentDateTime = Get-Date -Format "MMMM dd, yyyy, hh:mm tt"
-    $CommitMessage = "$CurrentDateTime"
+
+    # Prompt for optional commit message
+    $UserInput = Read-Host "Enter commit message (press Enter to skip)"
+
+    if ([string]::IsNullOrWhiteSpace($UserInput)) {
+        $CommitMessage = "$CurrentDateTime"
+    } else {
+        $CommitMessage = "$UserInput - $CurrentDateTime"
+    }
 
     # Show what changed
     git status
@@ -720,6 +730,7 @@ function gitter {
     Write-Host "╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗" -ForegroundColor Green
     Write-Host " ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝   ╚═╝   ╚══════╝" -ForegroundColor Green
 }
+
 
 
 # Adding the function to your PowerShell profile
