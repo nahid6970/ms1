@@ -52,6 +52,7 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ::;v1:: {#}Requires AutoHotkey v1.0
 ::;v2:: {#}Requires AutoHotkey v2.0
 ::;run:: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+::;mklink:: New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
 
 
 ^!t::Toggle_Reset_Workspace() ; Define the shortcut outside
