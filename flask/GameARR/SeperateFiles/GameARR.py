@@ -91,8 +91,8 @@ def index():
     conditions_count = []
     params_count = []
     if query:
-        conditions_count.append("name LIKE ?")
-        params_count.append('%' + query + '%')
+        conditions_count.append("REPLACE(LOWER(name), ' ', '') LIKE ?")
+        params_count.append('%' + query.lower().replace(' ', '') + '%')
     if collection_filter:
         conditions_count.append("collection = ?")
         params_count.append(collection_filter)
@@ -108,8 +108,8 @@ def index():
     conditions = []
     params = []
     if query:
-        conditions.append("name LIKE ?")
-        params.append('%' + query + '%')
+        conditions.append("REPLACE(LOWER(name), ' ', '') LIKE ?")
+        params.append('%' + query.lower().replace(' ', '') + '%')
     if collection_filter:
         conditions.append("collection = ?")
         params.append(collection_filter)
