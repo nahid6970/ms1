@@ -32,7 +32,7 @@ F21:: ;! Butcher
         ; SendEvent("{i down}")
         SendEvent("{x down}")
         SendEvent("{s down}")
-        SendEvent("xxxxxjxjxjx")
+        SendEvent("xjxjxjxjxj")
         SendEvent("{s up}")
         SendEvent("{x up}")
         ; SendEvent("{i up}")
