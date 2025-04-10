@@ -354,8 +354,8 @@ def run_sync_backup():
         print("\033[92mBackup Sync Completed\033[0m")
     thread = threading.Thread(target=run_command)
     thread.start()
-sync_button = tk.Button(quick_commands_frame, text="Sync Backup", font=("Jetbrainsmono nfp",12,"bold"), bg="#a0522d", fg="#ffffff", command=run_sync_backup)
-sync_button.grid(row=1, column=2, pady=10, padx=10, sticky=tk.W)
+msBackups_Backup = tk.Button(quick_commands_frame, text="msBackups \uf40a", font=("Jetbrainsmono nfp",12,"bold"), bg="#a0522d", fg="#ffffff", command=run_sync_backup)
+msBackups_Backup.grid(row=1, column=2, pady=10, padx=10, sticky=tk.W)
 
 
 center_and_press_alt_2(root)
