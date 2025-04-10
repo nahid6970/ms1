@@ -67,7 +67,7 @@ grep_var = tk.StringVar(value="")
 
 
 style = ttk.Style()
-print(style.theme_names())  # See available themes
+# print(style.theme_names())  # See available themes
 style.theme_use('clam')      # Try a different theme (e.g., 'clam', 'alt', 'default', 'classic')
 
 style.configure("Custom.TRadiobutton", font=("Arial", 12, "bold"), foreground="#e6f752", background="#282c34")
