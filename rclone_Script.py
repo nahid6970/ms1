@@ -22,6 +22,35 @@ def center_and_press_alt_2(window):
 root = tk.Tk()
 root.title("Rclone + winfsp")
 root.configure(bg="#282c34")
+
+# Configure row and column weights for root to allow expansion
+root.grid_rowconfigure(0, weight=1)
+root.grid_columnconfigure(0, weight=1)
+root.overrideredirect(True)  # Remove default borders
+
+# Create the Notebook widget (for tabs)
+notebook = ttk.Notebook(root)
+notebook.grid(row=0, column=0, sticky="nsew") # Changed sticky to "nsew"
+
+# First tab: General Commands
+tab1 = ttk.Frame(notebook, style="Black.TFrame")
+notebook.add(tab1, text='General')
+
+# Configure row and column weights for tab1 if needed (though pack might handle this)
+tab1.grid_rowconfigure(0, weight=1)
+tab1.grid_columnconfigure(0, weight=1)
+
+BottomFrame = ttk.Frame(tab1, padding="10", style="Black.TFrame")
+BottomFrame.pack(fill="both", expand=False) # Use fill="both" to expand in both directions
+
+# Second tab: Quick Commands
+tab2 = ttk.Frame(notebook, style="Black.TFrame")
+notebook.add(tab2, text='Quick Commands')
+
+quick_commands_frame = ttk.Frame(tab2, padding="10", style="Black.TFrame")
+quick_commands_frame.pack(fill="x", expand=False)
+
+
 # Variables
 command_var = tk.StringVar(value="ls")
 storage_var = tk.StringVar(value="")
@@ -38,35 +67,51 @@ grep_var = tk.StringVar(value="")
 
 
 style = ttk.Style()
+print(style.theme_names())  # See available themes
+style.theme_use('clam')      # Try a different theme (e.g., 'clam', 'alt', 'default', 'classic')
+
 style.configure("Custom.TRadiobutton", font=("Arial", 12, "bold"), foreground="#e6f752", background="#282c34")
 style.map("Custom.TRadiobutton",
-    foreground=[('active', '#333333'), ('selected', '#000000')], # Darker text on hover, black when selected
-    background=[('active', '#e0e0e0'), ('selected', '#ffffff')]   # Light gray on hover, white when selected
+    foreground=[('active', '#333333'), ('selected', '#000000')],
+    background=[('active', '#e0e0e0'), ('selected', '#ffffff')]
 )
 style.configure("Black.TFrame", background="#282c34")
-style.configure("TCombobox", font=("JetBrainsmono nfp", 10)) # Style for Combobox
-style.configure("TEntry", font=("JetBrainsmono nfp", 10)) # Style for Entry fields in extra_items
+style.configure("TCombobox", font=("JetBrainsmono nfp", 10))
+style.configure("TEntry", font=("JetBrainsmono nfp", 10))
+
+# --- Customizing the Notebook Tab Bar ---
+style.configure("TNotebook.Tab",
+    background="#40444b",  # Background color of inactive tabs
+    foreground="#d1d0c5",  # Text color of inactive tabs
+    font=("JetBrainsmono nfp", 10, "bold"),
+    padding=(10, 5)          # Padding around the tab text (horizontal, vertical)
+)
+
+style.map("TNotebook.Tab",
+    background=[("selected", "#282c34"), ("active", "#4a4e57")], # Background color of selected and active tabs
+    foreground=[("selected", "#e06c75"), ("active", "#d1d0c5")]  # Text color of selected and active tabs
+)
 
 
 # Additional options with display names
 additional_options = [
-    ("Fast List",                                     "--fast-list"                                                                       ,True),
-    ("Readable",                                      "--human-readable"                                                                  ,True),
-    ("Acknowledge Abuse",                             "--drive-acknowledge-abuse"                                                       ,True),
-    ("Progress",                                      "-P"                                                                                ,False),
-    ("Dry Run",                                       "--dry-run"                                                                         ,False),
-    ("Web Gui **Rcd",                                 "--rc-web-gui"                                                                      ,False),
-    ("vfs-cache",                                     "--vfs-cache-mode writes"                                                           ,False),
-    ("Verbose Lengthy",                               "-vv"                                                                                ,False),
-    ("Verbose Minimal",                               "-v"                                                                                 ,False),
-    ("Log Level",                                     "--log-level ERROR"                                                                 ,False),
-    ("Stats Oneline",                                 "--stats-one-line"                                                                  ,True),
-    ("Trashed Only",                                  "--drive-trashed-only "                                                             ,False),
-    ("Shared With Me",                                "--drive-shared-with-me "                                                            ,False),
-    ("Skip Dangling Shortcuts",                       "--drive-skip-dangling-shortcuts "                                                 ,False),
-    ("Skip Shortcuts",                                "--drive-skip-shortcuts "                                                           ,False),
-    ("Date **tree ",                                  "-D "                                                                                ,False),
-    ("Modified Time **tree",                          "-t "                                                                                ,False),
+    ("Fast List",                                                                                                          "--fast-list"                                                                                                                                   ,True),
+    ("Readable",                                                                                                            "--human-readable"                                                                                                                              ,True),
+    ("Acknowledge Abuse",                                                                                                   "--drive-acknowledge-abuse"                                                                                                                   ,True),
+    ("Progress",                                                                                                              "-P"                                                                                                                                            ,False),
+    ("Dry Run",                                                                                                             "--dry-run"                                                                                                                                     ,False),
+    ("Web Gui **Rcd",                                                                                                        "--rc-web-gui"                                                                                                                                ,False),
+    ("vfs-cache",                                                                                                           "--vfs-cache-mode writes"                                                                                                                   ,False),
+    ("Verbose Lengthy",                                                                                                     "-vv"                                                                                                                                            ,False),
+    ("Verbose Minimal",                                                                                                     "-v"                                                                                                                                             ,False),
+    ("Log Level",                                                                                                           "--log-level ERROR"                                                                                                                             ,False),
+    ("Stats Oneline",                                                                                                       "--stats-one-line"                                                                                                                                ,True),
+    ("Trashed Only",                                                                                                        "--drive-trashed-only "                                                                                                                          ,False),
+    ("Shared With Me",                                                                                                      "--drive-shared-with-me "                                                                                                                        ,False),
+    ("Skip Dangling Shortcuts",                                                                                             "--drive-skip-dangling-shortcuts "                                                                                                             ,False),
+    ("Skip Shortcuts",                                                                                                      "--drive-skip-shortcuts "                                                                                                                         ,False),
+    ("Date **tree ",                                                                                                         "-D "                                                                                                                                            ,False),
+    ("Modified Time **tree",                                                                                                "-t "                                                                                                                                            ,False),
 ]
 
 # Manage additional items
@@ -113,7 +158,7 @@ def update_extra_labels():
 # Create the style for the frame
 
 # Create command frame with the new style
-command_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
+command_frame = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
 command_frame.grid(row=0, column=0, sticky=tk.W)
 
 
@@ -136,7 +181,7 @@ for idx, item in enumerate(command_radios):
 
 
 # Create storage frame
-storage_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
+storage_frame = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
 storage_frame.grid(row=1, column=0, sticky=tk.W)
 
 #! alt1 start
@@ -200,7 +245,7 @@ common_paths = {
 }
 
 # From
-from_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
+from_frame = ttk.Frame(BottomFrame, padding="0", style="Black.TFrame")
 from_frame.grid(row=2, column=0, sticky=tk.W, pady=(10,0), padx=(10,0))
 
 ttk.Label(from_frame, text="From:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
@@ -220,7 +265,7 @@ from_combo.bind("<<ComboboxSelected>>", update_from_var)
 
 
 # TO
-to_frame = ttk.Frame(root, padding="0", style="Black.TFrame")
+to_frame = ttk.Frame(BottomFrame, padding="0", style="Black.TFrame")
 to_frame.grid(row=3, column=0, sticky=tk.W, pady=(0,10), padx=(10,0))
 
 ttk.Label(to_frame, text="To:", width=5, background="#f15812", font=("JetBrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
@@ -239,17 +284,17 @@ def update_to_var(event):
 to_combo.bind("<<ComboboxSelected>>", update_to_var)
 
 # Create arguments frame
-Main_Flags_list = ttk.Frame(root, padding="10", style="Black.TFrame")
+Main_Flags_list = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
 Main_Flags_list.grid(row=4, column=0, sticky=tk.W)
 
 # Create labels for additional options
 Main_Flags()
 
 # Create options frame for --transfer, --include, and --exclude
-Filter_Flags = ttk.Frame(root, padding="10", style="Black.TFrame")
+Filter_Flags = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
 Filter_Flags.grid(row=5, column=0, sticky=tk.W)
 
-grep_frame = ttk.Frame(root, padding="10", style="Black.TFrame")
+grep_frame = ttk.Frame(BottomFrame, padding="10", style="Black.TFrame")
 grep_frame.grid(row=6, column=0, sticky=tk.W)
 
 ttk.Label(grep_frame, text="Grep Text:", background="#f15812", font=("Jetbrainsmono nfp", 12, "bold")).grid(row=0, column=0, sticky=tk.W)
@@ -293,14 +338,25 @@ def execute_command():
 def clear_terminal():
     subprocess.run("cls", shell=True)
 
-BottomFrame = ttk.Frame(root, padding="10", style="Black.TFrame")
-BottomFrame.grid(row=7, column=0, sticky=tk.E) # Moved down to accommodate new widgets
-
 execute_button = tk.Button(BottomFrame, text="Execute", font=("Jetbrainsmono nfp",12,"bold"), bg="#4da9ff", fg="#000000", command=execute_command)
-execute_button.grid(row=0, column=0, pady=10, padx=10, sticky=tk.W)
+execute_button.grid(row=10, column=0, pady=10, padx=10, sticky=tk.W)
 
 clear_button = tk.Button(BottomFrame, text="Clear", font=("Jetbrainsmono nfp",12,"bold"), bg="#282c34",fg="#ffffff", command=clear_terminal)
-clear_button.grid(row=0, column=1, pady=10, sticky=tk.W)
+clear_button.grid(row=10, column=1, pady=10, sticky=tk.W)
+
+
+def run_sync_backup():
+    sync_command = "rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"
+    print("Executing:", sync_command)
+    def run_command():
+        process = subprocess.Popen(sync_command, shell=True)
+        process.wait()
+        print("\033[92mBackup Sync Completed\033[0m")
+    thread = threading.Thread(target=run_command)
+    thread.start()
+sync_button = tk.Button(quick_commands_frame, text="Sync Backup", font=("Jetbrainsmono nfp",12,"bold"), bg="#a0522d", fg="#ffffff", command=run_sync_backup)
+sync_button.grid(row=1, column=2, pady=10, padx=10, sticky=tk.W)
+
 
 center_and_press_alt_2(root)
 # Run the main event loop
