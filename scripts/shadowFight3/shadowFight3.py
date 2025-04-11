@@ -606,6 +606,11 @@ def Event_Function():
                     [press_keys_with_delays(window, 'c', 1) 
                     for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
                     time.sleep(0.05)
+
+                    # if find_image(r"C:\Users\nahid\Desktop\image_108.png", confidence=0.8, region=(683, 79, 809, 151)): #! for using double function for the same picture
+                    #      press_global_screen_with_delays((842, 537, 2)),
+                    #      press_keys_with_delays(window, 'c',4)
+
             except KeyboardInterrupt: print("Script stopped by user.")
         
         # Create and start the thread
