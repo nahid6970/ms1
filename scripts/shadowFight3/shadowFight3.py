@@ -60,7 +60,7 @@ def display_image_found_chart():
     print("\033[94m-------------------------------------\033[0m\n")
 
 def find_image(image_path, confidence=0.7, region=None):
-    """Find an image or any image in a folder on the screen."""
+    """Find a single image or any image inside a folder."""
     global last_found_time, is_searching, last_used_time
     current_time = time.time()
 
@@ -74,24 +74,22 @@ def find_image(image_path, confidence=0.7, region=None):
         region = (x1, y1, x2 - x1, y2 - y1)
 
     try:
-        # If it's a folder, loop through all image files inside it
+        image_paths = []
         if os.path.isdir(image_path):
             for filename in os.listdir(image_path):
                 if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
-                    full_path = os.path.join(image_path, filename)
-                    location = find_image(full_path, confidence=confidence, region=region)
-                    if location:
-                        return location
-            return None  # No images found in folder
+                    image_paths.append(os.path.join(image_path, filename))
         else:
-            # It's a file: search directly
+            image_paths = [image_path]
+
+        for img in image_paths:
             if not is_searching:
                 is_searching = True
                 last_found_time = time.time()
 
-            location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True, region=region)
+            location = pyautogui.locateOnScreen(img, confidence=confidence, grayscale=True, region=region)
             if location:
-                image_name = os.path.basename(image_path)
+                image_name = os.path.basename(img)
                 formatted_time = datetime.now().strftime('%I:%M:%S %p')
                 print(f"\033[92m󱑂 {formatted_time} --> Found image: {image_name}\033[0m")
 
@@ -116,31 +114,6 @@ def find_image(image_path, confidence=0.7, region=None):
 
     return None
 
-
-
-# Flag to track if the notification has been sent
-notification_sent = False
-def ntfy_signal_cli():
-    global notification_sent
-    try:
-        # Only send the command if it hasn't been sent already
-        if not notification_sent:
-            notification_sent = True
-            while True:
-                # Get the current date and time in 12-hour format
-                current_time = datetime.now().strftime("%I:%M %p, %d-%b-%Y")
-                # Properly escape the message for PowerShell
-                # command = f'signal-cli -a +8801533876178 send -m \'{current_time}\' +8801779787186'
-                command = f'signal-cli --trust-new-identities always -a +8801533876178 send -m \'{current_time}\' +8801779787186'
-                # Execute the command
-                os.system(f"powershell -Command \"{command}\"")
-                print(f"Command executed: {command}")
-                time.sleep(30)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
-    finally:
-        # Reset the flag when the function finishes
-        notification_sent = False
 
 
 def ntfy_termux_rclone_touch():
