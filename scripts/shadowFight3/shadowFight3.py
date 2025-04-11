@@ -60,55 +60,62 @@ def display_image_found_chart():
     print("\033[94m-------------------------------------\033[0m\n")
 
 def find_image(image_path, confidence=0.7, region=None):
-    """Find the location of the image on the screen within an optional specified region.
-    region should be a tuple of (x1, y1, x2, y2). If not provided, the function searches the entire screen.
-    """
+    """Find an image or any image in a folder on the screen."""
     global last_found_time, is_searching, last_used_time
     current_time = time.time()
-    # Reset timer if the function is not used for 10 seconds
+
     if current_time - last_used_time > 10:
         last_found_time = None
         is_searching = False
-    last_used_time = current_time  # Update the last used time
-    # Convert (x1, y1, x2, y2) region format to (x, y, width, height) for pyautogui
+    last_used_time = current_time
+
     if region:
         x1, y1, x2, y2 = region
         region = (x1, y1, x2 - x1, y2 - y1)
+
     try:
-        # Start counting only when the function is searching for the image
-        if not is_searching:
-            is_searching = True
-            last_found_time = time.time()  # Start the timer when first searching
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True, region=region)
-        if location:
-            image_name = os.path.basename(image_path)
-            # Get current date and time in the desired format
-            formatted_time = datetime.now().strftime('%I:%M:%S %p')
-            print(f"\033[92m󱑂 {formatted_time} --> Found image: {image_name}\033[0m")
-            
-            # Update cumulative count of found images
-            image_found_count[image_name] = image_found_count.get(image_name, 0) + 1
-            
-            # Save the output to the file
-            with open(output_file_path, 'a') as file:
-                file.write(f"{formatted_time} --> Found image: {image_name}\n")
-            
-            # Reset search and timer upon finding the image
-            last_found_time = time.time()
-            is_searching = False  # Stop the search
-            return location
+        # If it's a folder, loop through all image files inside it
+        if os.path.isdir(image_path):
+            for filename in os.listdir(image_path):
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+                    full_path = os.path.join(image_path, filename)
+                    location = find_image(full_path, confidence=confidence, region=region)
+                    if location:
+                        return location
+            return None  # No images found in folder
+        else:
+            # It's a file: search directly
+            if not is_searching:
+                is_searching = True
+                last_found_time = time.time()
+
+            location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True, region=region)
+            if location:
+                image_name = os.path.basename(image_path)
+                formatted_time = datetime.now().strftime('%I:%M:%S %p')
+                print(f"\033[92m󱑂 {formatted_time} --> Found image: {image_name}\033[0m")
+
+                image_found_count[image_name] = image_found_count.get(image_name, 0) + 1
+
+                with open(output_file_path, 'a') as file:
+                    file.write(f"{formatted_time} --> Found image: {image_name}\n")
+
+                last_found_time = time.time()
+                is_searching = False
+                return location
+
     except Exception as e:
-        image_name = os.path.basename(image_path)  # Get the image name
-        # Get current date and time for error messages
+        image_name = os.path.basename(image_path)
         formatted_time = datetime.now().strftime(' %I:%M:%S %p')
-        # Calculate time since the last found time (only while searching)
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
-    # Check if 120 seconds have passed since the last found time while searching
-    if is_searching and time.time() - last_found_time > 50: # for ads do 120 second
-        ntfy_signal_cli()  # Run the script instead of showing a message
-        last_found_time = time.time()  # Reset the last found time to avoid repeated executions
+
+    if is_searching and time.time() - last_found_time > 50:
+        ntfy_signal_cli()
+        last_found_time = time.time()
+
     return None
+
 
 
 # Flag to track if the notification has been sent
@@ -602,10 +609,13 @@ def Event_Function():
                     elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
                     # elif find_image(Select_SelectOption, confidence=0.8, region=(1106, 632, 1509, 748)): press_keys_with_delays(window, 'hxixixix', 1) #! optional
                     elif find_image(r"C:\msBackups\shadowfight3\event\SELECT.png", confidence=0.8, region=(1148,186,1445,503)): press_keys_with_delays(window, '1', 1) #! optional
+
                     #! dynamic folder img
-                    [press_keys_with_delays(window, 'c', 1) 
-                    for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
-                    time.sleep(0.05)
+                    # [press_keys_with_delays(window, 'c', 1) 
+                    # for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
+                    # time.sleep(0.05)
+
+                    elif find_image(r"C:\msBackups\shadowfight3\cont_dynamic", confidence=0.8, region=(1380, 792, 1738, 966)): press_keys_with_delays(window, 'c', 1) 
 
                     # if find_image(r"C:\Users\nahid\Desktop\image_108.png", confidence=0.8, region=(683, 79, 809, 151)): #! for using double function for the same picture
                     #      press_global_screen_with_delays((842, 537, 2)),
