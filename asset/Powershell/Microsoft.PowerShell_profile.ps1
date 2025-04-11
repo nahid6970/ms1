@@ -707,6 +707,7 @@ function gitter {
     # Prompt for optional commit message
     $UserInput = Read-Host "Enter commit message (press Enter to skip)"
 
+    
     if ([string]::IsNullOrWhiteSpace($UserInput)) {
         $CommitMessage = "📅$CurrentDateTime"
     } else {
