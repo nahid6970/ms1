@@ -185,7 +185,7 @@ def create_control_panel_without_tab_border():
 
     # FFmpeg Scripts Section
     ffmpeg_trim_button = tk.Label(ffmpeg_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
-    ffmpeg_trim_button.grid(row=0, column=0, padx=padx, pady=5)
+    ffmpeg_trim_button.grid(row=0, column=0, padx=5, pady=5)
     ffmpeg_trim_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\ffmpeg\\trim.ps1", hide=False))
 
     ffmpeg_convert_button = tk.Label(ffmpeg_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
