@@ -352,14 +352,8 @@ msBackups_Backup.grid(row=1, column=2, pady=10, padx=10, sticky=tk.W)
 root.update_idletasks()
 width = root.winfo_width()
 height = root.winfo_height()
-
-# x = root.winfo_screenwidth() - width
-# y = (root.winfo_screenheight() // 2) - (height // 2)
-
 x = (root.winfo_screenwidth() // 2) - (width // 2)
 y = (root.winfo_screenheight() // 2) - (height // 2)
-
 root.geometry(f'{width}x{height}+{x}+{y}')
 
-# Run the main event loop
 root.mainloop()
