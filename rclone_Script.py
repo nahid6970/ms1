@@ -33,21 +33,21 @@ notebook = ttk.Notebook(root)
 notebook.grid(row=0, column=0, sticky="nsew") # Changed sticky to "nsew"
 
 # First tab: General Commands
-tab1 = ttk.Frame(notebook, style="Black.TFrame")
+tab1 = ttk.Frame(notebook, style="TNotebook.Tab")
 notebook.add(tab1, text='General')
 
 # Configure row and column weights for tab1 if needed (though pack might handle this)
 tab1.grid_rowconfigure(0, weight=1)
 tab1.grid_columnconfigure(0, weight=1)
 
-BottomFrame = ttk.Frame(tab1, padding="10", style="Black.TFrame")
+BottomFrame = ttk.Frame(tab1, padding="10", style="TNotebook.Tab")
 BottomFrame.pack(fill="both", expand=False) # Use fill="both" to expand in both directions
 
 # Second tab: Quick Commands
-tab2 = ttk.Frame(notebook, style="Black.TFrame")
+tab2 = ttk.Frame(notebook, style="TNotebook.Tab")
 notebook.add(tab2, text='Quick Commands')
 
-quick_commands_frame = ttk.Frame(tab2, padding="10", style="Black.TFrame")
+quick_commands_frame = ttk.Frame(tab2, padding="10", style="TNotebook.Tab")
 quick_commands_frame.pack(fill="x", expand=False)
 
 
@@ -68,7 +68,7 @@ grep_var = tk.StringVar(value="")
 
 style = ttk.Style()
 # print(style.theme_names())  # See available themes
-style.theme_use('clam')      # Try a different theme (e.g., 'clam', 'alt', 'default', 'classic')
+style.theme_use('default')      # Try a different theme (e.g., 'clam', 'alt', 'default', 'classic')
 
 style.configure("Custom.TRadiobutton", font=("Arial", 12, "bold"), foreground="#e6f752", background="#282c34")
 style.map("Custom.TRadiobutton",
@@ -80,17 +80,23 @@ style.configure("TCombobox", font=("JetBrainsmono nfp", 10))
 style.configure("TEntry", font=("JetBrainsmono nfp", 10))
 
 # --- Customizing the Notebook Tab Bar ---
+style.configure("TNotebook",
+                    background="#272727",
+                    foreground="#c0c0c0",                   
+                    borderwidth=0)
 style.configure("TNotebook.Tab",
-    background="#40444b",  # Background color of inactive tabs
-    foreground="#d1d0c5",  # Text color of inactive tabs
-    font=("JetBrainsmono nfp", 10, "bold"),
-    padding=(10, 5)          # Padding around the tab text (horizontal, vertical)
-)
+                    background="#333333",
+                    foreground="#c39645",
+                    focuscolor="#666666",
+                    borderwidth=0                            
+                    )
 
-style.map("TNotebook.Tab",
-    background=[("selected", "#282c34"), ("active", "#4a4e57")], # Background color of selected and active tabs
-    foreground=[("selected", "#e06c75"), ("active", "#d1d0c5")]  # Text color of selected and active tabs
-)
+
+style.map('TNotebook.Tab',background=[("selected",'#272727')],
+                    highlightbackground =[("active","#333")],                                    
+                            lightcolor=[("selected", "#333333")],
+                            foreground=[("active","#4f5a69")])
+
 
 
 # Additional options with display names
