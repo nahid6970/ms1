@@ -5,18 +5,6 @@ import subprocess
 import pyautogui
 
 
-def center_and_press_alt_2(window):
-    def center_window():
-        window.update_idletasks()
-        width = window.winfo_width()
-        height = window.winfo_height()
-        x = (window.winfo_screenwidth() // 2) - (width // 2)
-        y = (window.winfo_screenheight() // 2) - (height // 2)
-        window.geometry(f'{width}x{height}+{x}+{y}')
-    def press_alt_2():
-        pyautogui.hotkey('alt', '2')
-    center_window()
-    window.after(25, press_alt_2)
 
 # Create the main window
 root = tk.Tk()
@@ -361,6 +349,17 @@ msBackups_Backup = tk.Button(quick_commands_frame, text="msBackups \uf40a", font
 msBackups_Backup.grid(row=1, column=2, pady=10, padx=10, sticky=tk.W)
 
 
-center_and_press_alt_2(root)
+root.update_idletasks()
+width = root.winfo_width()
+height = root.winfo_height()
+
+# x = root.winfo_screenwidth() - width
+# y = (root.winfo_screenheight() // 2) - (height // 2)
+
+x = (root.winfo_screenwidth() // 2) - (width // 2)
+y = (root.winfo_screenheight() // 2) - (height // 2)
+
+root.geometry(f'{width}x{height}+{x}+{y}')
+
 # Run the main event loop
 root.mainloop()
