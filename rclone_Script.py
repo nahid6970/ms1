@@ -28,6 +28,7 @@ root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
 root.overrideredirect(True)  # Remove default borders
 
+
 # Create the Notebook widget (for tabs)
 notebook = ttk.Notebook(root)
 notebook.grid(row=0, column=0, sticky="nsew") # Changed sticky to "nsew"
@@ -50,25 +51,9 @@ notebook.add(tab2, text='Quick Commands')
 quick_commands_frame = ttk.Frame(tab2, padding="10", style="TNotebook.Tab")
 quick_commands_frame.pack(fill="x", expand=False)
 
-
-# Variables
-command_var = tk.StringVar(value="ls")
-storage_var = tk.StringVar(value="")
-from_var = tk.StringVar(value="")
-to_var = tk.StringVar(value="")
-transfer_var = tk.StringVar(value="4")
-include_var = tk.StringVar(value="*.jpg")
-exclude_var = tk.StringVar(value="*.jpg")
-maxage_var = tk.StringVar(value="1d")
-minage_var = tk.StringVar(value="1d")
-maxsize_var = tk.StringVar(value="100M")
-minsize_var = tk.StringVar(value="100M")
-grep_var = tk.StringVar(value="")
-
-
 style = ttk.Style()
+style.theme_use('default') # Try a different theme (e.g.,'winnative', 'clam', 'alt', 'default', 'classic', 'vista', 'xpnative')
 # print(style.theme_names())  # See available themes
-style.theme_use('default')      # Try a different theme (e.g., 'clam', 'alt', 'default', 'classic')
 
 style.configure("Custom.TRadiobutton", font=("Arial", 12, "bold"), foreground="#e6f752", background="#282c34")
 style.map("Custom.TRadiobutton",
@@ -90,13 +75,25 @@ style.configure("TNotebook.Tab",
                     focuscolor="#666666",
                     borderwidth=0                            
                     )
-
-
 style.map('TNotebook.Tab',background=[("selected",'#272727')],
                     highlightbackground =[("active","#333")],                                    
                             lightcolor=[("selected", "#333333")],
                             foreground=[("active","#4f5a69")])
 
+
+# Variables
+command_var = tk.StringVar(value="ls")
+storage_var = tk.StringVar(value="")
+from_var = tk.StringVar(value="")
+to_var = tk.StringVar(value="")
+transfer_var = tk.StringVar(value="4")
+include_var = tk.StringVar(value="*.jpg")
+exclude_var = tk.StringVar(value="*.jpg")
+maxage_var = tk.StringVar(value="1d")
+minage_var = tk.StringVar(value="1d")
+maxsize_var = tk.StringVar(value="100M")
+minsize_var = tk.StringVar(value="100M")
+grep_var = tk.StringVar(value="")
 
 
 # Additional options with display names
