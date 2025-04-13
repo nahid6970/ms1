@@ -155,23 +155,25 @@ def create_control_panel_without_tab_border():
     restart_explorer_button.grid(row=1, column=2, padx=5, pady=5)
     restart_explorer_button.bind("<Button-1>", lambda event: restart_explorer())
 
-
+    # AHK-Scripts Section
+    ROW_3 = tk.Frame(main_tab, bg="#555555")
+    ROW_3.grid(row=3, column=0, sticky="n")
 
     text_grab_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
-    text_grab_button.grid(row=2, column=0, padx=5, pady=5)
+    text_grab_button.grid(row=0, column=0, padx=5, pady=5)
     text_grab_button.bind("<Button-1>", lambda event: (root.destroy(), root.after(500, lambda: run_command(['powershell', '-Command', 'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("#+f")']))))
 
     crosshair_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
-    crosshair_button.grid(row=2, column=1, padx=5, pady=5)
+    crosshair_button.grid(row=0, column=1, padx=5, pady=5)
     crosshair_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\xy\\XY_CroosHair.py", hide=True))
 
-    locker_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#cec2d4", relief="solid", borderwidth=1, font=medium_font)
-    locker_button.grid(row=2, column=2, padx=5, pady=5)
+    locker_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#eb3d30", relief="solid", borderwidth=1, font=medium_font)
+    locker_button.grid(row=0, column=2, padx=5, pady=5)
     locker_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\Locker.py", hide=True))
 
     # AHK-Scripts Section
     BOX_4 = tk.Frame(main_tab, bg="#555555")
-    BOX_4.grid(row=3, column=0, sticky="n")
+    BOX_4.grid(row=4, column=0, sticky="n")
 
     ahk_scripts_label = tk.Label(BOX_4, text="AHK-Scripts", width=20, relief="solid", borderwidth=1, font=default_font)
     ahk_scripts_label.grid(row=3, column=0, padx=5, pady=5)
