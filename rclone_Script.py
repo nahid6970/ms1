@@ -336,17 +336,16 @@ clear_button = tk.Button(BottomFrame, text="Clear", font=("Jetbrainsmono nfp",12
 clear_button.grid(row=10, column=1, pady=10, sticky=tk.W)
 
 
-def run_sync_backup():
-    sync_command = "rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"
-    print("Executing:", sync_command)
-    def run_command():
-        process = subprocess.Popen(sync_command, shell=True)
-        process.wait()
-        print("\033[92mBackup Sync Completed\033[0m")
-    thread = threading.Thread(target=run_command)
-    thread.start()
-msBackups_Backup = tk.Button(quick_commands_frame, text="msBackups \uf40a", font=("Jetbrainsmono nfp",12,"bold"), bg="#a0522d", fg="#ffffff", command=run_sync_backup)
-msBackups_Backup.grid(row=1, column=2, pady=10, padx=10, sticky=tk.W)
+
+# Assuming quick_commands_frame is already created.
+msBackups_Label = tk.Label( quick_commands_frame, text="msBackups \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
+msBackups_Label.grid(row=1, column=2, pady=10, padx=10, sticky=tk.W)
+msBackups_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
+    print("Executing: rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"),
+    subprocess.Popen("rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
+    # print("\033[92mBackup Sync Completed\033[0m")
+)).start())
+
 
 
 root.update_idletasks()
