@@ -124,7 +124,7 @@ def create_control_panel_without_tab_border():
     ROW_3.grid(row=2, column=0, sticky="n")
 
     text_grab_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
-    text_grab_button.grid(row=2, column=0, padx=padx, pady=5)
+    text_grab_button.grid(row=2, column=0, padx=5, pady=5)
     text_grab_button.bind("<Button-1>", lambda event: (root.destroy(), root.after(500, lambda: run_command(['powershell', '-Command', 'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("#+f")']))))
 
     crosshair_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
@@ -140,7 +140,7 @@ def create_control_panel_without_tab_border():
     BOX_4.grid(row=3, column=0, sticky="n")
 
     ahk_scripts_label = tk.Label(BOX_4, text="AHK-Scripts", width=20, relief="solid", borderwidth=1, font=default_font)
-    ahk_scripts_label.grid(row=3, column=0, padx=padx, pady=5)
+    ahk_scripts_label.grid(row=3, column=0, padx=5, pady=5)
 
     ahk_converter_button = tk.Label(BOX_4, text="AhkConverter", width=20, bg="#32ec44", fg="black", font=default_font)
     ahk_converter_button.grid(row=3, column=1, padx=5, pady=5)
@@ -151,7 +151,7 @@ def create_control_panel_without_tab_border():
     uia_v2_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\ms1\\scripts\\ahk\\UIA_v2\\Lib\\UIA.ahk", hide=True)))
 
     komorebi_label = tk.Label(BOX_4, text="Komorebi", width=20, relief="solid", borderwidth=1, font=default_font)
-    komorebi_label.grid(row=4, column=0, padx=padx, pady=5)
+    komorebi_label.grid(row=4, column=0, padx=5, pady=5)
 
     run_komorebi_button = tk.Label(BOX_4, text="", width=20, bg="#32ec44", fg="black", font=default_font)
     run_komorebi_button.grid(row=4, column=1, padx=5, pady=5)
@@ -159,7 +159,7 @@ def create_control_panel_without_tab_border():
 
     # Python Section
     python_label = tk.Label(BOX_4, text="Python", width=20, relief="solid", borderwidth=1, font=default_font)
-    python_label.grid(row=5, column=0, padx=padx, pady=5)
+    python_label.grid(row=5, column=0, padx=5, pady=5)
 
     mypygui_h_button = tk.Label(BOX_4, text="mypygui-H", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_h_button.grid(row=5, column=1, padx=5, pady=5)
@@ -171,7 +171,7 @@ def create_control_panel_without_tab_border():
 
     # Explorer Section
     explorer_label = tk.Label(BOX_4, text="Explorer", width=20, relief="solid", borderwidth=1, font=default_font)
-    explorer_label.grid(row=6, column=0, padx=padx, pady=5)
+    explorer_label.grid(row=6, column=0, padx=5, pady=5)
 
     restart_explorer_button = tk.Label(BOX_4, text="", width=20, bg="#32ec44", fg="black", font=default_font)
     restart_explorer_button.grid(row=6, column=1, padx=5, pady=5)
