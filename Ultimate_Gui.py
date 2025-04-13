@@ -124,6 +124,7 @@ def create_control_panel_without_tab_border():
     ROW_3.grid(row=2, column=0, sticky="n")
 
 
+
     def start_flask_scripts_silently():
         scripts = [
             r"C:\ms1\flask\Browse_PC_Files\Browse_PC_Files.py",
@@ -131,7 +132,6 @@ def create_control_panel_without_tab_border():
             r"C:\ms1\flask\share_text\share_text.py",
             r"C:\ms1\flask\upload_files.py",
         ]
-
         for script in scripts:
             subprocess.Popen(
                 ["python", script],
@@ -139,6 +139,23 @@ def create_control_panel_without_tab_border():
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
+
+    ROW_FOR_Start = tk.Frame(main_tab, bg="#555555")
+    ROW_FOR_Start.grid(row=2, column=0, sticky="n")
+
+    Python_flask_Scripts_Button = tk.Label(ROW_FOR_Start, text="", width=3, bg="#14ff91", fg="#000000", relief="solid", borderwidth=1, font=large_font)
+    Python_flask_Scripts_Button.grid(row=1, column=0, padx=5, pady=5)
+    Python_flask_Scripts_Button.bind("<Button-1>", lambda event: start_flask_scripts_silently())
+
+    Komorebi_Start_Button = tk.Label(ROW_FOR_Start, text="󱂬", width=3, bg="#14ff91", fg="#000000", relief="solid", borderwidth=1, font=large_font)
+    Komorebi_Start_Button.grid(row=1, column=1, padx=5, pady=5)
+    Komorebi_Start_Button.bind("<Button-1>", lambda event: run_command(["komorebi.exe"], hide=True))
+
+    restart_explorer_button = tk.Label(ROW_FOR_Start, text="", width=3, bg="#14ff91", fg="#000000", relief="solid", borderwidth=1, font=large_font)
+    restart_explorer_button.grid(row=1, column=2, padx=5, pady=5)
+    restart_explorer_button.bind("<Button-1>", lambda event: restart_explorer())
+
+
 
     text_grab_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     text_grab_button.grid(row=2, column=0, padx=5, pady=5)
@@ -167,13 +184,6 @@ def create_control_panel_without_tab_border():
     uia_v2_button.grid(row=3, column=2, padx=5, pady=5)
     uia_v2_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\ms1\\scripts\\ahk\\UIA_v2\\Lib\\UIA.ahk", hide=True)))
 
-    komorebi_label = tk.Label(BOX_4, text="Komorebi", width=20, relief="solid", borderwidth=1, font=default_font)
-    komorebi_label.grid(row=4, column=0, padx=5, pady=5)
-
-    run_komorebi_button = tk.Label(BOX_4, text="", width=20, bg="#32ec44", fg="black", font=default_font)
-    run_komorebi_button.grid(row=4, column=1, padx=5, pady=5)
-    run_komorebi_button.bind("<Button-1>", lambda event: run_command(["komorebi.exe"], hide=True))
-
     # Python Section
     python_label = tk.Label(BOX_4, text="Python", width=20, relief="solid", borderwidth=1, font=default_font)
     python_label.grid(row=5, column=0, padx=5, pady=5)
@@ -185,14 +195,6 @@ def create_control_panel_without_tab_border():
     mypygui_s_button = tk.Label(BOX_4, text="mypygui-S", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_s_button.grid(row=5, column=2, padx=5, pady=5)
     mypygui_s_button.bind("<Button-1>", lambda event: start_python_st())
-
-    # Explorer Section
-    explorer_label = tk.Label(BOX_4, text="Explorer", width=20, relief="solid", borderwidth=1, font=default_font)
-    explorer_label.grid(row=6, column=0, padx=5, pady=5)
-
-    restart_explorer_button = tk.Label(BOX_4, text="", width=20, bg="#32ec44", fg="black", font=default_font)
-    restart_explorer_button.grid(row=6, column=1, padx=5, pady=5)
-    restart_explorer_button.bind("<Button-1>", lambda event: restart_explorer())
 
     notebook.add(main_tab, text="Main")
 
