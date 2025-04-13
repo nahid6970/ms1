@@ -96,7 +96,7 @@ def create_control_panel_without_tab_border():
 
     # Komorebic Section
     komorebic_save_button = tk.Label(ROW_1, text="Komorebic Save", width=20, bg="#ffa114", relief="solid", borderwidth=1, font=default_font, fg="black")
-    komorebic_save_button.grid(row=0, column=0, padx=padx, pady=pady)
+    komorebic_save_button.grid(row=0, column=0, padx=5, pady=pady)
     komorebic_save_button.bind("<Button-1>", lambda event: run_command(["komorebic", "quick-save-resize"], wait=True, hide=True))
 
     komorebic_load_button = tk.Label(ROW_1, text="Komorebic Load", width=20, bg="#ffa114", relief="solid", borderwidth=1, font=default_font, fg="black")
@@ -122,6 +122,23 @@ def create_control_panel_without_tab_border():
     # Utility Scripts Section
     ROW_3 = tk.Frame(main_tab, bg="#555555")
     ROW_3.grid(row=2, column=0, sticky="n")
+
+
+    def start_flask_scripts_silently():
+        scripts = [
+            r"C:\ms1\flask\Browse_PC_Files\Browse_PC_Files.py",
+            r"C:\ms1\flask\GameARR\SeperateFiles\GameARR.py",
+            r"C:\ms1\flask\share_text\share_text.py",
+            r"C:\ms1\flask\upload_files.py",
+        ]
+
+        for script in scripts:
+            subprocess.Popen(
+                ["python", script],
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
 
     text_grab_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     text_grab_button.grid(row=2, column=0, padx=5, pady=5)
