@@ -60,58 +60,54 @@ def display_image_found_chart():
     print("\033[94m-------------------------------------\033[0m\n")
 
 def find_image(image_path, confidence=0.7, region=None):
-    """Find a single image or any image inside a folder."""
+    """Find the location of the image on the screen within an optional specified region.
+    region should be a tuple of (x1, y1, x2, y2). If not provided, the function searches the entire screen.
+    """
     global last_found_time, is_searching, last_used_time
     current_time = time.time()
-
+    # Reset timer if the function is not used for 10 seconds
     if current_time - last_used_time > 10:
         last_found_time = None
         is_searching = False
-    last_used_time = current_time
-
+    last_used_time = current_time  # Update the last used time
+    # Convert (x1, y1, x2, y2) region format to (x, y, width, height) for pyautogui
     if region:
         x1, y1, x2, y2 = region
         region = (x1, y1, x2 - x1, y2 - y1)
-
     try:
-        image_paths = []
-        if os.path.isdir(image_path):
-            for filename in os.listdir(image_path):
-                if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
-                    image_paths.append(os.path.join(image_path, filename))
-        else:
-            image_paths = [image_path]
-
-        for img in image_paths:
-            if not is_searching:
-                is_searching = True
-                last_found_time = time.time()
-
-            location = pyautogui.locateOnScreen(img, confidence=confidence, grayscale=True, region=region)
-            if location:
-                image_name = os.path.basename(img)
-                formatted_time = datetime.now().strftime('%I:%M:%S %p')
-                print(f"\033[92m󱑂 {formatted_time} --> Found image: {image_name}\033[0m")
-
-                image_found_count[image_name] = image_found_count.get(image_name, 0) + 1
-
-                with open(output_file_path, 'a') as file:
-                    file.write(f"{formatted_time} --> Found image: {image_name}\n")
-
-                last_found_time = time.time()
-                is_searching = False
-                return location
-
+        # Start counting only when the function is searching for the image
+        if not is_searching:
+            is_searching = True
+            last_found_time = time.time()  # Start the timer when first searching
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True, region=region)
+        if location:
+            image_name = os.path.basename(image_path)
+            # Get current date and time in the desired format
+            formatted_time = datetime.now().strftime('%I:%M:%S %p')
+            print(f"\033[92m󱑂 {formatted_time} --> Found image: {image_name}\033[0m")
+            
+            # Update cumulative count of found images
+            image_found_count[image_name] = image_found_count.get(image_name, 0) + 1
+            
+            # Save the output to the file
+            with open(output_file_path, 'a') as file:
+                file.write(f"{formatted_time} --> Found image: {image_name}\n")
+            
+            # Reset search and timer upon finding the image
+            last_found_time = time.time()
+            is_searching = False  # Stop the search
+            return location
     except Exception as e:
-        image_name = os.path.basename(image_path)
+        image_name = os.path.basename(image_path)  # Get the image name
+        # Get current date and time for error messages
         formatted_time = datetime.now().strftime(' %I:%M:%S %p')
+        # Calculate time since the last found time (only while searching)
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
-
-    if is_searching and time.time() - last_found_time > 50:
-        ntfy_signal_cli()
-        last_found_time = time.time()
-
+    # Check if 120 seconds have passed since the last found time while searching
+    if is_searching and time.time() - last_found_time > 50: # for ads do 120 second
+        ntfy_signal_cli()  # Run the script instead of showing a message
+        last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
 
 
@@ -611,7 +607,13 @@ def Event_Function():
                     # for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
                     # time.sleep(0.05)
 
-                    elif find_image(r"C:\msBackups\shadowfight3\cont_dynamic", confidence=0.8, region=(1380, 792, 1738, 966)): press_keys_with_delays(window, 'c', 1) 
+                    # elif find_image(r"C:\msBackups\shadowfight3\cont_dynamic", confidence=0.8, region=(1380, 792, 1738, 966)): press_keys_with_delays(window, 'c', 1) 
+
+                    [press_keys_with_delays(window, 'c', 1) 
+                    for contimg in glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png") 
+                    if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
+                    time.sleep(0.05)
+
 
                     # if find_image(r"C:\Users\nahid\Desktop\image_108.png", confidence=0.8, region=(683, 79, 809, 151)): #! for using double function for the same picture
                     #      press_global_screen_with_delays((842, 537, 2)),
