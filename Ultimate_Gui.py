@@ -91,90 +91,89 @@ def create_control_panel_without_tab_border():
     # --- Main Tab ---
     main_tab = ttk.Frame(notebook, style="Content.TFrame")
 
+    ROW_1 = tk.Frame(main_tab, bg="#555555")
+    ROW_1.grid(row=0, column=0, sticky="n")
+
     # Komorebic Section
-    komorebic_save_button = tk.Label(main_tab, text="Komorebic Save", width=20, bg="#ffa114", relief="solid", borderwidth=1, font=default_font, fg="black")
+    komorebic_save_button = tk.Label(ROW_1, text="Komorebic Save", width=20, bg="#ffa114", relief="solid", borderwidth=1, font=default_font, fg="black")
     komorebic_save_button.grid(row=0, column=0, padx=padx, pady=pady)
     komorebic_save_button.bind("<Button-1>", lambda event: run_command(["komorebic", "quick-save-resize"], wait=True, hide=True))
 
-    komorebic_load_button = tk.Label(main_tab, text="Komorebic Load", width=20, bg="#ffa114", relief="solid", borderwidth=1, font=default_font, fg="black")
+    komorebic_load_button = tk.Label(ROW_1, text="Komorebic Load", width=20, bg="#ffa114", relief="solid", borderwidth=1, font=default_font, fg="black")
     komorebic_load_button.grid(row=0, column=1, padx=5, pady=pady)
     komorebic_load_button.bind("<Button-1>", lambda event: run_command(["komorebic", "quick-load-resize"], wait=True, hide=True))
 
     # Kill Processes Section
-    kill_python_button = tk.Label(main_tab, text="", width=3, bg="#f30000", fg="#ffffff", relief="solid", borderwidth=1, font=large_font)
-    kill_python_button.grid(row=1, column=0, padx=padx, pady=5)
-    kill_python_button.bind("<Button-1>", lambda event: kill_process("python.exe"))
+    ROW_2 = tk.Frame(main_tab, bg="#555555")
+    ROW_2.grid(row=1, column=0, sticky="n")
 
-    kill_komorebi_button = tk.Label(main_tab, text="󱂬", width=3, bg="#f30000", fg="#ffffff", relief="solid", borderwidth=1, font=large_font)
-    kill_komorebi_button.grid(row=1, column=1, padx=5, pady=5)
-    kill_komorebi_button.bind("<Button-1>", lambda event: kill_process("komorebi.exe"))
+    def add_kill_button(parent, text, proc_name):
+        b = tk.Label(parent, text=text, width=3, bg="#f30000", fg="#ffffff", relief="solid", borderwidth=1, font=large_font)
+        b.pack(side="left", padx=5)
+        b.bind("<Button-1>", lambda e: kill_process(proc_name))
 
-    kill_explorer_button = tk.Label(main_tab, text="", width=3, bg="#f30000", fg="#ffffff", relief="solid", borderwidth=1, font=large_font)
-    kill_explorer_button.grid(row=1, column=2, padx=5, pady=5)
-    kill_explorer_button.bind("<Button-1>", lambda event: kill_process("explorer.exe"))
-
-    kill_cmd_button = tk.Label(main_tab, text="", width=3, bg="#f30000", fg="#ffffff", relief="solid", borderwidth=1, font=large_font)
-    kill_cmd_button.grid(row=1, column=3, padx=5, pady=5)
-    kill_cmd_button.bind("<Button-1>", lambda event: kill_process("cmd.exe"))
-
-    kill_powershell_button = tk.Label(main_tab, text="󰨊", width=3, bg="#f30000", fg="#ffffff", relief="solid", borderwidth=1, font=large_font)
-    kill_powershell_button.grid(row=1, column=4, padx=5, pady=5)
-    kill_powershell_button.bind("<Button-1>", lambda event: kill_process("powershell.exe"))
-
-    kill_pwsh_button = tk.Label(main_tab, text="", width=3, bg="#f30000", fg="#ffffff", relief="solid", borderwidth=1, font=large_font)
-    kill_pwsh_button.grid(row=1, column=5, padx=5, pady=5)
-    kill_pwsh_button.bind("<Button-1>", lambda event: kill_process("pwsh.exe"))
+    add_kill_button(ROW_2, "", "python.exe")
+    add_kill_button(ROW_2, "󱂬", "komorebi.exe")
+    add_kill_button(ROW_2, "", "explorer.exe")
+    add_kill_button(ROW_2, "", "cmd.exe")
+    add_kill_button(ROW_2, "󰨊", "powershell.exe")
+    add_kill_button(ROW_2, "", "pwsh.exe")
 
     # Utility Scripts Section
-    text_grab_button = tk.Label(main_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
+    ROW_3 = tk.Frame(main_tab, bg="#555555")
+    ROW_3.grid(row=2, column=0, sticky="n")
+
+    text_grab_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     text_grab_button.grid(row=2, column=0, padx=padx, pady=5)
     text_grab_button.bind("<Button-1>", lambda event: (root.destroy(), root.after(500, lambda: run_command(['powershell', '-Command', 'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("#+f")']))))
 
-    crosshair_button = tk.Label(main_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
+    crosshair_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     crosshair_button.grid(row=2, column=1, padx=5, pady=5)
     crosshair_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\xy\\XY_CroosHair.py", hide=True))
 
-    locker_button = tk.Label(main_tab, text="", width=2, bg="#31ffc1", fg="#cec2d4", relief="solid", borderwidth=1, font=medium_font)
+    locker_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#cec2d4", relief="solid", borderwidth=1, font=medium_font)
     locker_button.grid(row=2, column=2, padx=5, pady=5)
     locker_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\Locker.py", hide=True))
 
     # AHK-Scripts Section
-    ahk_scripts_label = tk.Label(main_tab, text="AHK-Scripts", width=20, relief="solid", borderwidth=1, font=default_font)
+    BOX_4 = tk.Frame(main_tab, bg="#555555")
+    BOX_4.grid(row=3, column=0, sticky="n")
+
+    ahk_scripts_label = tk.Label(BOX_4, text="AHK-Scripts", width=20, relief="solid", borderwidth=1, font=default_font)
     ahk_scripts_label.grid(row=3, column=0, padx=padx, pady=5)
 
-    ahk_converter_button = tk.Label(main_tab, text="AhkConverter", width=20, bg="#32ec44", fg="black", font=default_font)
+    ahk_converter_button = tk.Label(BOX_4, text="AhkConverter", width=20, bg="#32ec44", fg="black", font=default_font)
     ahk_converter_button.grid(row=3, column=1, padx=5, pady=5)
     ahk_converter_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\msBackups\\Autohotkey\\AHK_converter\\QuickConvertorV2_scintilla.ahk", hide=True)))
 
-    uia_v2_button = tk.Label(main_tab, text="UIA-V2", width=20, bg="#32ec44", fg="black", font=default_font)
+    uia_v2_button = tk.Label(BOX_4, text="UIA-V2", width=20, bg="#32ec44", fg="black", font=default_font)
     uia_v2_button.grid(row=3, column=2, padx=5, pady=5)
     uia_v2_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\ms1\\scripts\\ahk\\UIA_v2\\Lib\\UIA.ahk", hide=True)))
 
-    # Komorebi Section (Again)
-    komorebi_label = tk.Label(main_tab, text="Komorebi", width=20, relief="solid", borderwidth=1, font=default_font)
+    komorebi_label = tk.Label(BOX_4, text="Komorebi", width=20, relief="solid", borderwidth=1, font=default_font)
     komorebi_label.grid(row=4, column=0, padx=padx, pady=5)
 
-    run_komorebi_button = tk.Label(main_tab, text="", width=20, bg="#32ec44", fg="black", font=default_font)
+    run_komorebi_button = tk.Label(BOX_4, text="", width=20, bg="#32ec44", fg="black", font=default_font)
     run_komorebi_button.grid(row=4, column=1, padx=5, pady=5)
     run_komorebi_button.bind("<Button-1>", lambda event: run_command(["komorebi.exe"], hide=True))
 
     # Python Section
-    python_label = tk.Label(main_tab, text="Python", width=20, relief="solid", borderwidth=1, font=default_font)
+    python_label = tk.Label(BOX_4, text="Python", width=20, relief="solid", borderwidth=1, font=default_font)
     python_label.grid(row=5, column=0, padx=padx, pady=5)
 
-    mypygui_h_button = tk.Label(main_tab, text="mypygui-H", width=20, bg="#32ec44", fg="black", font=default_font)
+    mypygui_h_button = tk.Label(BOX_4, text="mypygui-H", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_h_button.grid(row=5, column=1, padx=5, pady=5)
     mypygui_h_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\mypygui.py", hide=True))
 
-    mypygui_s_button = tk.Label(main_tab, text="mypygui-S", width=20, bg="#32ec44", fg="black", font=default_font)
+    mypygui_s_button = tk.Label(BOX_4, text="mypygui-S", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_s_button.grid(row=5, column=2, padx=5, pady=5)
     mypygui_s_button.bind("<Button-1>", lambda event: start_python_st())
 
     # Explorer Section
-    explorer_label = tk.Label(main_tab, text="Explorer", width=20, relief="solid", borderwidth=1, font=default_font)
+    explorer_label = tk.Label(BOX_4, text="Explorer", width=20, relief="solid", borderwidth=1, font=default_font)
     explorer_label.grid(row=6, column=0, padx=padx, pady=5)
 
-    restart_explorer_button = tk.Label(main_tab, text="", width=20, bg="#32ec44", fg="black", font=default_font)
+    restart_explorer_button = tk.Label(BOX_4, text="", width=20, bg="#32ec44", fg="black", font=default_font)
     restart_explorer_button.grid(row=6, column=1, padx=5, pady=5)
     restart_explorer_button.bind("<Button-1>", lambda event: restart_explorer())
 
