@@ -141,7 +141,7 @@ def create_control_panel_without_tab_border():
             )
 
     ROW_FOR_Start = tk.Frame(main_tab, bg="#555555")
-    ROW_FOR_Start.grid(row=2, column=0, sticky="n")
+    ROW_FOR_Start.grid(row=2, column=0, sticky="w", padx=(65,0))
 
     Python_flask_Scripts_Button = tk.Label(ROW_FOR_Start, text="", width=3, bg="#14ff91", fg="#000000", relief="solid", borderwidth=1, font=large_font)
     Python_flask_Scripts_Button.grid(row=1, column=0, padx=5, pady=5)
