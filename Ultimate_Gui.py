@@ -46,9 +46,12 @@ def run_script(path, hide=False):
         subprocess.Popen(['powershell', '-ExecutionPolicy', 'Bypass', '-File', path],
                          startupinfo=startupinfo, creationflags=creationflags)
     elif path.lower().endswith('.ahk'):
-        subprocess.Popen([path], startupinfo=startupinfo, creationflags=creationflags)
+        # Run .ahk using PowerShell
+        subprocess.Popen(['powershell', '-Command', f'Start-Process "{path}"'],
+                         startupinfo=startupinfo, creationflags=creationflags)
     else:
         subprocess.Popen([path], startupinfo=startupinfo, creationflags=creationflags)
+
 
 
 
