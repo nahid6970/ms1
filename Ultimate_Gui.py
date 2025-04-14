@@ -27,7 +27,7 @@ def restart_explorer():
     """Restarts explorer.exe."""
     if os.name == 'nt':
         run_command(['taskkill', '/f', '/im', 'explorer.exe'], wait=True, hide=True)
-        subprocess.Popen(['start', 'explorer.exe'])
+        subprocess.Popen('explorer.exe', shell=True)
     else:
         print("Restarting explorer is specific to Windows.")
 
