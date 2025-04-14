@@ -799,6 +799,11 @@ def SecretFightHandler(button):
                     focus_window(window_title)
                     if any(find_image(image, confidence=actionF[image], region=(214, 914, 375, 1031)) for image in actionF):
                         press_keys_with_delays(window, 'x', 0.5, 'x', 0.5, 'i', 0.5, 'i', 0.5)
+                    elif find_image(r"C:\msBackups\shadowfight3\Secret_Fight\Cont.png", confidence=0.8, region=(214, 914, 375, 1031)):
+                        press_keys_with_delays(window, 'c', 0.5)
+                    elif find_image(r"C:\msBackups\shadowfight3\Secret_Fight\Home.png", confidence=0.8, region=(214, 914, 375, 1031)):
+                        press_keys_with_delays(window, 'f', 2, "num2", 1, "c", 0)
+
                     time.sleep(0.1)
             except KeyboardInterrupt:
                 print("Script stopped by user.")
