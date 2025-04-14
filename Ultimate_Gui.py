@@ -32,15 +32,25 @@ def restart_explorer():
         print("Restarting explorer is specific to Windows.")
 
 def run_script(path, hide=False):
-    """Runs an external script."""
-    if path.lower().endswith(('.py')):
-        run_command(['python', path], hide=hide)
-    elif path.lower().endswith(('.ps1')):
-        run_command(['powershell', '-ExecutionPolicy', 'Bypass', '-File', path], hide=hide)
-    elif path.lower().endswith(('.ahk')):
-        run_command([path], hide=hide) # Assuming AutoHotkey is installed and associated with .ahk files
+    """Runs an external script in a new window using subprocess.Popen."""
+    creationflags = subprocess.CREATE_NEW_CONSOLE if os.name == 'nt' else 0
+    startupinfo = None
+
+    if os.name == 'nt' and hide:
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+    if path.lower().endswith('.py'):
+        subprocess.Popen(['python', path], startupinfo=startupinfo, creationflags=creationflags)
+    elif path.lower().endswith('.ps1'):
+        subprocess.Popen(['powershell', '-ExecutionPolicy', 'Bypass', '-File', path],
+                         startupinfo=startupinfo, creationflags=creationflags)
+    elif path.lower().endswith('.ahk'):
+        subprocess.Popen([path], startupinfo=startupinfo, creationflags=creationflags)
     else:
-        run_command([path], hide=hide)
+        subprocess.Popen([path], startupinfo=startupinfo, creationflags=creationflags)
+
+
 
 def create_control_panel_without_tab_border():
     root = tk.Tk()
