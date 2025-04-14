@@ -34,7 +34,8 @@ RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide"
 
 ;! gui
 !b::Run("C:\ms1\scripts\ahk\version2\gui\Bio.ahk", "", "Hide")
-!u::Run("C:\ms1\scripts\ahk\version2\gui\Ultimate_Gui.ahk", "", "Hide")
+; !u::Run("C:\ms1\scripts\ahk\version2\gui\Ultimate_Gui.ahk", "", "Hide")
+!u::Run("C:\ms1\Ultimate_Gui.py", "", "Hide")
 
 ;! shortcuts
 ^!n::Run("C:\ms1\scripts\ahk\version1\VScode_OpenWith.ahk", "", "Hide")
