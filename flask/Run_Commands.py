@@ -2,7 +2,7 @@ from flask import Flask, request, render_template_string, redirect, url_for, ses
 import subprocess
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'your_secret_key'  # Make sure to change this to something secure
 
 # Grouped command structure: { "Group Label": { "Sub-Label": "command" } }
 COMMAND_GROUPS = {
@@ -15,12 +15,20 @@ COMMAND_GROUPS = {
         "Open Calculator": "start calc"
     },
     "Display Settings": {
-        "Switch to Display 1": "C:/msBackups/Display/DisplaySwitch.exe /internal",
         "Switch to Display 2": "C:/msBackups/Display/DisplaySwitch.exe /external"
     },
     "File Management": {
         "List Files": "dir"
     }
+}
+
+# Admin command to allow port 5006 through the firewall
+ADMIN_COMMANDS = {
+    "Allow Port 5006": (
+        "C:/Users/nahid/scoop/shims/sudo.ps1 -Command "
+        "'New-NetFirewallRule -DisplayName \"Allow_Port_5006\" -Direction Inbound "
+        "-Protocol TCP -LocalPort 5006 -Action Allow -Profile Any'"
+    )
 }
 
 HTML_TEMPLATE = '''
@@ -107,7 +115,6 @@ HTML_TEMPLATE = '''
         }
     </style>
     <script>
-        // Toggle submenu display and update localStorage state
         function toggleSubmenu(id) {
             const el = document.getElementById(id);
             if (el.style.display === 'block') {
@@ -130,7 +137,6 @@ HTML_TEMPLATE = '''
             openSubmenus = openSubmenus.filter(function(item) { return item !== id; });
             localStorage.setItem('openSubmenus', JSON.stringify(openSubmenus));
         }
-        // On page load, restore the state of submenus
         document.addEventListener("DOMContentLoaded", function() {
             let openSubmenus = JSON.parse(localStorage.getItem('openSubmenus') || '[]');
             openSubmenus.forEach(function(id) {
@@ -157,6 +163,10 @@ HTML_TEMPLATE = '''
                         </div>
                     </div>
                 {% endfor %}
+                <hr><h3>🔐 Admin Commands</h3>
+                {% for label in admin_commands %}
+                    <button type="submit" name="admin_command" value="{{ label }}">{{ label }}</button><br><br>
+                {% endfor %}
             </form>
         </div>
         <div class="output">
@@ -171,15 +181,34 @@ HTML_TEMPLATE = '''
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        cmd = request.form['command']
-        try:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            session['output'] = result.stdout + result.stderr
-        except Exception as e:
-            session['output'] = f"Error: {e}"
+        # Regular commands
+        if 'command' in request.form:
+            cmd = request.form['command']
+            try:
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                session['output'] = result.stdout + result.stderr
+            except Exception as e:
+                session['output'] = f"❌ Error: {e}"
+
+        # Admin commands
+        elif 'admin_command' in request.form:
+            cmd_label = request.form['admin_command']
+            if cmd_label in ADMIN_COMMANDS:
+                try:
+                    subprocess.run(
+                        ['powershell', '-Command', ADMIN_COMMANDS[cmd_label]],
+                        shell=True
+                    )
+                    session['output'] = f"✅ Ran admin command: {cmd_label}"
+                except Exception as e:
+                    session['output'] = f"❌ Error: {e}"
+            else:
+                session['output'] = "Unknown admin command"
+        
         return redirect(url_for('index'))
+
     output = session.pop('output', '')
-    return render_template_string(HTML_TEMPLATE, commands=COMMAND_GROUPS, output=output)
+    return render_template_string(HTML_TEMPLATE, commands=COMMAND_GROUPS, admin_commands=ADMIN_COMMANDS.keys(), output=output)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5006)
