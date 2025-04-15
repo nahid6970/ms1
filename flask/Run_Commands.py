@@ -25,9 +25,9 @@ COMMAND_GROUPS = {
 # Admin command to allow port 5006 through the firewall
 ADMIN_COMMANDS = {
     "Allow Port 5006": (
-        "C:/Users/nahid/scoop/shims/sudo.ps1 -Command "
+        "Start-Process powershell -ArgumentList "
         "'New-NetFirewallRule -DisplayName \"Allow_Port_5006\" -Direction Inbound "
-        "-Protocol TCP -LocalPort 5006 -Action Allow -Profile Any'"
+        "-Protocol TCP -LocalPort 5006 -Action Allow -Profile Any' -Verb RunAs"
     )
 }
 
