@@ -60,6 +60,8 @@ HTML_TEMPLATE = '''
             display: flex;
             padding: 20px;
             gap: 30px;
+            background-color: #1e1e1e; /* Dark background */
+            color: #d4d4d4; /* Light text */
         }
         .left, .right {
             flex: 1;
@@ -70,8 +72,8 @@ HTML_TEMPLATE = '''
         .group > button {
             width: 100%;
             padding: 10px;
-            background-color: #444;
-            color: white;
+            background-color: #333; /* Dark button background */
+            color: #f0f0f0; /* Light button text */
             border: none;
             text-align: left;
             cursor: pointer;
@@ -87,14 +89,16 @@ HTML_TEMPLATE = '''
             width: 100%;
             margin: 5px 0;
             padding: 8px;
-            border: 1px solid #ccc;
-            background-color: #eee;
+            border: 1px solid #555; /* Darker border */
+            background-color: #444; /* Darker submenu button */
+            color: #f0f0f0; /* Light submenu text */
             cursor: pointer;
         }
         pre {
-            background-color: #f4f4f4;
+            background-color: #282828; /* Dark pre background */
             padding: 15px;
-            border: 1px solid #ccc;
+            border: 1px solid #555; /* Darker border */
+            color: #d4d4d4; /* Light pre text */
         }
     </style>
 </head>
@@ -170,4 +174,4 @@ def index():
     return render_template_string(HTML_TEMPLATE, command_groups=COMMAND_GROUPS, output=session['output'])
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5006)
+    app.run(host="0.0.0.0", port=5006, debug=True)
