@@ -25,12 +25,10 @@ COMMAND_GROUPS = {
 
 # Admin command to allow port 5006 through the firewall
 ADMIN_COMMANDS = {
-    "Allow Port 5006": (
-        "Start-Process powershell -ArgumentList "
-        "'New-NetFirewallRule -DisplayName \"Allow_Port_5006\" -Direction Inbound "
-        "-Protocol TCP -LocalPort 5006 -Action Allow -Profile Any' -Verb RunAs"
-    )
+    "Allow Port 5006": 'Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "New-NetFirewallRule -DisplayName \'Allow_Port_5006\' -Direction Inbound -Protocol TCP -LocalPort 5006 -Action Allow -Profile Any"'
 }
+
+
 
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
