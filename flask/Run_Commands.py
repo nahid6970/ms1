@@ -2,33 +2,52 @@ from flask import Flask, request, render_template_string, redirect, url_for, ses
 import subprocess
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Make sure to change this to something secure
+app.secret_key = 'some_secret'  # Needed for session
 
-# Grouped command structure: { "Group Label": { "Sub-Label": "command" } }
 COMMAND_GROUPS = {
     "System Commands": {
-        "IP Config": "ipconfig",
-        "System Info": "systeminfo"
+        "IP Config": {
+            "cmd": "ipconfig",
+            "admin": False
+        },
+        "System Info": {
+            "cmd": "systeminfo",
+            "admin": False
+        }
     },
     "Tools": {
-        "Open Notepad": "start notepad",
-        "Open Calculator": "start calc"
+        "Open Notepad": {
+            "cmd": "start notepad",
+            "admin": False
+        },
+        "Open Calculator": {
+            "cmd": "start calc",
+            "admin": False
+        }
     },
-    "Display Settings": {
-        "Switch to Display 1": "C:/msBackups/Display/DisplaySwitch.exe /internal",
-        "Switch to Display 2": "C:/msBackups/Display/DisplaySwitch.exe /external"
+    "Display": {
+        "Switch to Display 1": {
+            "cmd": "C:/msBackups/Display/DisplaySwitch.exe /internal",
+            "admin": False
+        },
+        "Switch to Display 2": {
+            "cmd": "C:/msBackups/Display/DisplaySwitch.exe /external",
+            "admin": False
+        }
     },
     "File Management": {
-        "List Files": "dir"
+        "List Files": {
+            "cmd": "dir",
+            "admin": False
+        }
+    },
+    "Firewall Settings": {
+        "Allow Port 5006": {
+            "cmd": 'Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "New-NetFirewallRule -DisplayName \'Allow_Port_5006\' -Direction Inbound -Protocol TCP -LocalPort 5006 -Action Allow -Profile Any"',
+            "admin": True
+        }
     }
 }
-
-# Admin command to allow port 5006 through the firewall
-ADMIN_COMMANDS = {
-    "Allow Port 5006": 'Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "New-NetFirewallRule -DisplayName \'Allow_Port_5006\' -Direction Inbound -Protocol TCP -LocalPort 5006 -Action Allow -Profile Any"'
-}
-
-
 
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
@@ -38,176 +57,117 @@ HTML_TEMPLATE = '''
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #1e1e2f;
-            color: #f8f8f2;
-            margin: 0;
-            padding: 20px;
-        }
-        h2 {
-            color: #50fa7b;
-            text-align: center;
-        }
-        .container {
             display: flex;
-            max-width: 1000px;
-            margin: 40px auto;
-            gap: 20px;
-        }
-        .commands {
-            flex: 1;
-            background-color: #282a36;
             padding: 20px;
-            border-radius: 8px;
+            gap: 30px;
+        }
+        .left, .right {
+            flex: 1;
         }
         .group {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         .group > button {
             width: 100%;
-            background-color: #6272a4;
+            padding: 10px;
+            background-color: #444;
             color: white;
             border: none;
-            padding: 10px;
-            margin-bottom: 5px;
+            text-align: left;
             cursor: pointer;
             font-weight: bold;
-            border-radius: 5px;
-            text-align: left;
         }
         .submenu {
             display: none;
             margin-top: 5px;
-            margin-left: 10px;
+            padding-left: 10px;
         }
         .submenu button {
-            background-color: #44475a;
+            display: block;
+            width: 100%;
             margin: 5px 0;
             padding: 8px;
-            width: 100%;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            text-align: left;
+            border: 1px solid #ccc;
+            background-color: #eee;
             cursor: pointer;
         }
-        .submenu button:hover {
-            background-color: #7083b8;
-        }
-        .output {
-            flex: 2;
-            background-color: #282a36;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .output h3 {
-            color: #8be9fd;
-        }
         pre {
-            background-color: #1e1e2f;
-            color: #f1fa8c;
+            background-color: #f4f4f4;
             padding: 15px;
-            border-radius: 5px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            max-height: 600px;
-            overflow-y: auto;
+            border: 1px solid #ccc;
         }
     </style>
-    <script>
-        function toggleSubmenu(id) {
-            const el = document.getElementById(id);
-            if (el.style.display === 'block') {
-                el.style.display = 'none';
-                removeFromOpenSubmenus(id);
-            } else {
-                el.style.display = 'block';
-                addToOpenSubmenus(id);
-            }
-        }
-        function addToOpenSubmenus(id) {
-            let openSubmenus = JSON.parse(localStorage.getItem('openSubmenus') || '[]');
-            if (!openSubmenus.includes(id)) {
-                openSubmenus.push(id);
-                localStorage.setItem('openSubmenus', JSON.stringify(openSubmenus));
-            }
-        }
-        function removeFromOpenSubmenus(id) {
-            let openSubmenus = JSON.parse(localStorage.getItem('openSubmenus') || '[]');
-            openSubmenus = openSubmenus.filter(function(item) { return item !== id; });
-            localStorage.setItem('openSubmenus', JSON.stringify(openSubmenus));
-        }
-        document.addEventListener("DOMContentLoaded", function() {
-            let openSubmenus = JSON.parse(localStorage.getItem('openSubmenus') || '[]');
-            openSubmenus.forEach(function(id) {
-                let el = document.getElementById(id);
-                if (el) {
-                    el.style.display = 'block';
-                }
-            });
-        });
-    </script>
 </head>
 <body>
-    <h2>🚀 Windows Command Center</h2>
-    <div class="container">
-        <div class="commands">
-            <form method="post">
-                {% for group, subcmds in commands.items() %}
-                    <div class="group">
-                        <button type="button" onclick="toggleSubmenu('{{ loop.index }}')">{{ group }}</button>
-                        <div class="submenu" id="{{ loop.index }}">
-                            {% for label, cmd in subcmds.items() %}
-                                <button type="submit" name="command" value="{{ cmd }}">{{ label }}</button>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endfor %}
-                <hr><h3>🔐 Admin Commands</h3>
-                {% for label in admin_commands %}
-                    <button type="submit" name="admin_command" value="{{ label }}">{{ label }}</button><br><br>
-                {% endfor %}
-            </form>
-        </div>
-        <div class="output">
-            <h3>🖥 Output:</h3>
-            <pre>{{ output }}</pre>
-        </div>
+    <div class="left">
+        <form method="post">
+            {% for group, commands in command_groups.items() %}
+            <div class="group">
+                <button type="button" onclick="toggleSubmenu('submenu{{ loop.index }}')">{{ group }}</button>
+                <div class="submenu" id="submenu{{ loop.index }}">
+                    {% for label in commands.keys() %}
+                        <button type="submit" name="command" value="{{ label }}">
+                            {{ label }} {% if commands[label].admin %}(Admin){% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </form>
     </div>
+    <div class="right">
+        <h3>Output:</h3>
+        <pre>{{ output }}</pre>
+    </div>
+
+    <script>
+        function toggleSubmenu(id) {
+            var el = document.getElementById(id);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
 </body>
 </html>
 '''
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        # Regular commands
-        if 'command' in request.form:
-            cmd = request.form['command']
-            try:
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-                session['output'] = result.stdout + result.stderr
-            except Exception as e:
-                session['output'] = f"❌ Error: {e}"
+    if 'output' not in session:
+        session['output'] = ""
 
-        # Admin commands
-        elif 'admin_command' in request.form:
-            cmd_label = request.form['admin_command']
-            if cmd_label in ADMIN_COMMANDS:
-                try:
-                    subprocess.run(
-                        ['powershell', '-Command', ADMIN_COMMANDS[cmd_label]],
-                        shell=True
-                    )
-                    session['output'] = f"✅ Ran admin command: {cmd_label}"
-                except Exception as e:
-                    session['output'] = f"❌ Error: {e}"
-            else:
-                session['output'] = "Unknown admin command"
-        
+    if request.method == 'POST':
+        selected_label = request.form['command']
+        output = ""
+        found = False
+
+        for group in COMMAND_GROUPS.values():
+            for label, info in group.items():
+                if label == selected_label:
+                    cmd = info["cmd"]
+                    if info.get("admin"):
+                        try:
+                            subprocess.run(
+                                ['powershell', '-Command', cmd],
+                                shell=True
+                            )
+                            output = f"✅ Ran admin command: {label}"
+                        except Exception as e:
+                            output = f"❌ Admin command error: {e}"
+                    else:
+                        try:
+                            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                            output = result.stdout + result.stderr
+                        except Exception as e:
+                            output = f"❌ Error: {e}"
+                    session['output'] = output
+                    found = True
+                    break
+            if found:
+                break
+
         return redirect(url_for('index'))
 
-    output = session.pop('output', '')
-    return render_template_string(HTML_TEMPLATE, commands=COMMAND_GROUPS, admin_commands=ADMIN_COMMANDS.keys(), output=output)
+    return render_template_string(HTML_TEMPLATE, command_groups=COMMAND_GROUPS, output=session['output'])
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5006, debug=True)
+    app.run(debug=True, port=5006)
