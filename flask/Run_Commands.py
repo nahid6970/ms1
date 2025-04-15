@@ -15,6 +15,7 @@ COMMAND_GROUPS = {
         "Open Calculator": "start calc"
     },
     "Display Settings": {
+        "Switch to Display 1": "C:/msBackups/Display/DisplaySwitch.exe /internal",
         "Switch to Display 2": "C:/msBackups/Display/DisplaySwitch.exe /external"
     },
     "File Management": {
