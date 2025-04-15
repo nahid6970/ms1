@@ -15,6 +15,7 @@ COMMAND_GROUPS = {
         "Open Calculator": "start calc"
     },
     "Display Settings": {
+        "Switch to Display 1": "C:/msBackups/Display/DisplaySwitch.exe /internal",
         "Switch to Display 2": "C:/msBackups/Display/DisplaySwitch.exe /external"
     },
     "File Management": {
@@ -211,4 +212,4 @@ def index():
     return render_template_string(HTML_TEMPLATE, commands=COMMAND_GROUPS, admin_commands=ADMIN_COMMANDS.keys(), output=output)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5006)
+    app.run(host="0.0.0.0", port=5006, debug=True)
