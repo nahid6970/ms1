@@ -4,14 +4,22 @@ import subprocess
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Whitelisted commands
-COMMANDS = {
-    "List Files": "dir",
-    "Show IP Config": "ipconfig",
-    "Open Notepad": "start notepad",
-    "Open Calculator": "start calc",
-    "System Info": "systeminfo",
-    "Display 2": "C:/msBackups/Display/DisplaySwitch.exe /external"
+# Grouped command structure: { "Group Label": { "Sub-Label": "command" } }
+COMMAND_GROUPS = {
+    "System Commands": {
+        "IP Config": "ipconfig",
+        "System Info": "systeminfo"
+    },
+    "Tools": {
+        "Open Notepad": "start notepad",
+        "Open Calculator": "start calc"
+    },
+    "Display Settings": {
+        "Switch to Display 2": "C:/msBackups/Display/DisplaySwitch.exe /external"
+    },
+    "File Management": {
+        "List Files": "dir"
+    }
 }
 
 HTML_TEMPLATE = '''
@@ -24,8 +32,8 @@ HTML_TEMPLATE = '''
             font-family: Arial, sans-serif;
             background-color: #1e1e2f;
             color: #f8f8f2;
-            padding: 20px;
             margin: 0;
+            padding: 20px;
         }
         h2 {
             color: #50fa7b;
@@ -33,7 +41,6 @@ HTML_TEMPLATE = '''
         }
         .container {
             display: flex;
-            justify-content: space-between;
             max-width: 1000px;
             margin: 40px auto;
             gap: 20px;
@@ -44,21 +51,39 @@ HTML_TEMPLATE = '''
             padding: 20px;
             border-radius: 8px;
         }
-        .commands button {
-            display: block;
+        .group {
+            margin-bottom: 10px;
+        }
+        .group > button {
             width: 100%;
-            margin: 10px 0;
-            padding: 12px;
+            background-color: #6272a4;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .submenu {
+            display: none;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+        .submenu button {
             background-color: #44475a;
-            color: #f8f8f2;
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            color: white;
             border: none;
             border-radius: 5px;
+            text-align: left;
             cursor: pointer;
-            font-size: 16px;
-            transition: background 0.2s;
         }
-        .commands button:hover {
-            background-color: #6272a4;
+        .submenu button:hover {
+            background-color: #7083b8;
         }
         .output {
             flex: 2;
@@ -68,7 +93,6 @@ HTML_TEMPLATE = '''
         }
         .output h3 {
             color: #8be9fd;
-            margin-top: 0;
         }
         pre {
             background-color: #1e1e2f;
@@ -76,20 +100,64 @@ HTML_TEMPLATE = '''
             padding: 15px;
             border-radius: 5px;
             white-space: pre-wrap;
-            word-break: break-all;
+            word-break: break-word;
             max-height: 600px;
             overflow-y: auto;
         }
     </style>
+    <script>
+        // Toggle submenu display and update localStorage state
+        function toggleSubmenu(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                removeFromOpenSubmenus(id);
+            } else {
+                el.style.display = 'block';
+                addToOpenSubmenus(id);
+            }
+        }
+        function addToOpenSubmenus(id) {
+            let openSubmenus = JSON.parse(localStorage.getItem('openSubmenus') || '[]');
+            if (!openSubmenus.includes(id)) {
+                openSubmenus.push(id);
+                localStorage.setItem('openSubmenus', JSON.stringify(openSubmenus));
+            }
+        }
+        function removeFromOpenSubmenus(id) {
+            let openSubmenus = JSON.parse(localStorage.getItem('openSubmenus') || '[]');
+            openSubmenus = openSubmenus.filter(function(item) { return item !== id; });
+            localStorage.setItem('openSubmenus', JSON.stringify(openSubmenus));
+        }
+        // On page load, restore the state of submenus
+        document.addEventListener("DOMContentLoaded", function() {
+            let openSubmenus = JSON.parse(localStorage.getItem('openSubmenus') || '[]');
+            openSubmenus.forEach(function(id) {
+                let el = document.getElementById(id);
+                if (el) {
+                    el.style.display = 'block';
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <h2>🚀 Windows Command Center</h2>
     <div class="container">
-        <form method="post" class="commands">
-            {% for label, cmd in commands.items() %}
-                <button type="submit" name="command" value="{{ cmd }}">{{ label }}</button>
-            {% endfor %}
-        </form>
+        <div class="commands">
+            <form method="post">
+                {% for group, subcmds in commands.items() %}
+                    <div class="group">
+                        <button type="button" onclick="toggleSubmenu('{{ loop.index }}')">{{ group }}</button>
+                        <div class="submenu" id="{{ loop.index }}">
+                            {% for label, cmd in subcmds.items() %}
+                                <button type="submit" name="command" value="{{ cmd }}">{{ label }}</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </form>
+        </div>
         <div class="output">
             <h3>🖥 Output:</h3>
             <pre>{{ output }}</pre>
@@ -109,9 +177,8 @@ def index():
         except Exception as e:
             session['output'] = f"Error: {e}"
         return redirect(url_for('index'))
-
     output = session.pop('output', '')
-    return render_template_string(HTML_TEMPLATE, commands=COMMANDS, output=output)
+    return render_template_string(HTML_TEMPLATE, commands=COMMAND_GROUPS, output=output)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5006)
