@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Windows Command Center</title>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* justify-content: center; */
+            background-color: #f0f2f5;
+            text-align: center;
+        }
+        h2 {
+            color: #222;
+            margin-bottom: 20px;
+        }
+        form {
+            width: 100%;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 800px;
+            height: 500px;
+            margin: 0 auto;
+        }
+        .button-container button {
+            flex: 0 0 45%;
+            margin: 10px;
+            padding: 15px 25px;
+            font-size: 1.25rem;
+            font-weight: bolder;
+            background-color: #cad13d;
+            color: rgb(0, 0, 0);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .button-container button:hover {
+            background-color: #005a9e;
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body>
+    <h2>Run a Windows Command</h2>
+    <form method="post">
+        <div class="button-container">
+            {% for label, cmd in commands.items() %}
+                <button type="submit" name="command" value="{{ cmd }}">{{ label }}</button>
+            {% endfor %}
+        </div>
+    </form>
+</body>
+</html>
