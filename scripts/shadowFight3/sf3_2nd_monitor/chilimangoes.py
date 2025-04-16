@@ -1,6 +1,13 @@
+# chilimangoes.py
+
 from ctypes import windll, c_char_p, c_buffer
 from struct import calcsize, pack
 from PIL import Image
+from functools import partial
+
+# This will make ImageGrab.grab capture all monitors, not just the primary
+from PIL import ImageGrab
+ImageGrab.grab = partial(ImageGrab.grab, all_screens=True)
 
 gdi32 = windll.gdi32
 
