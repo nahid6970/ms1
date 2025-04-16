@@ -952,7 +952,8 @@ def start_blinking():
         if blinking:
             time_left_label.config(
                 text="ALARM! Time's up!",
-                fg="#ff0000" if blink_state else "#0000ff"
+                fg="#ff0000" if blink_state else "#0000ff",
+                bg="#0f4fff" if blink_state else "#f53100"
             )
             blink_state = not blink_state
             time_left_label.after(500, blink)
@@ -979,7 +980,7 @@ def alarm_timer(minutes):
 def stop_blinking(event=None):
     global blinking
     blinking = False
-    time_left_label.config(text="Timer", fg="#fc6a35")
+    time_left_label.config(text="Timer", fg="#fc6a35", bg="#1d2027")
 
 # Main click handler for label
 def start_countdown_option(event=None):
