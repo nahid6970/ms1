@@ -47,6 +47,7 @@
 "editor.scrollbar.horizontal": "visible",
 "editor.scrollbar.vertical": "visible",
 "git.openRepositoryInParentFolders": "always",
-"banner-comments.h1": "ANSI Shadow"
+"banner-comments.h1": "ANSI Shadow",
+"python.locator": "js"
 
 }
