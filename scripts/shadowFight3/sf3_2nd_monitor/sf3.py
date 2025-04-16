@@ -14,6 +14,7 @@ pyautogui.size = lambda: chilimangoes.screen_size
 image_path = 'C:\\Users\\nahid\\Desktop\\image_117.png'
 
 # Region of the second monitor (1920x1080 resolution)
+primary_monitor_region = (0, 0, 1920, 1080)  # Primary monitor region
 second_monitor_region = (1920, 0, 1920, 1080)
 
 print("Looking for image on second monitor...")
