@@ -919,11 +919,6 @@ LB_DUD.bind("<Button-1>",None)
 
 
 
-import tkinter as tk
-from tkinter import simpledialog
-import threading
-import time
-import os
 
 # Global variables
 countdown_active = False
@@ -1023,9 +1018,9 @@ time_left_label = tk.Label(
     bg="#1d2027",
     cursor="hand2"
 )
-time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))  # Or grid/place as per your layout
+time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))
 time_left_label.bind("<Button-1>", start_countdown_option)
-time_left_label.bind("<Button-3>", stop_blinking)  # Optional: right-click to stop blinking
+time_left_label.bind("<Button-3>", stop_blinking) 
 
 
 
