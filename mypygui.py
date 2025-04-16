@@ -514,45 +514,6 @@ BAR_WIDTH = 8
 BAR_HEIGHT = 25
 
 
-# Global variable to track if countdown is active
-countdown_active = False
-shutdown_thread = None
-# Function to shutdown the computer
-def shutdown_timer(minutes):
-    global countdown_active
-    countdown_time = minutes * 60  # Convert minutes to seconds
-    for remaining_time in range(countdown_time, 0, -1):
-        if not countdown_active:
-            time_left_label.config(text="Timer")  # Reset label text
-            return  # Exit if countdown is canceled
-        
-        minutes_left = remaining_time // 60
-        seconds_left = remaining_time % 60
-        time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
-        ROOT.update()
-        time.sleep(1)
-    if countdown_active:
-        os.system("shutdown /s /f /t 1")  # Shutdown command for Windows
-        countdown_active = False  # Reset the state after shutdown
-# Function to ask for the time input and start the countdown
-def start_shutdown_timer(event=None):
-    global countdown_active, shutdown_thread
-    # If countdown is active, cancel it
-    if countdown_active:
-        countdown_active = False
-        time_left_label.config(text="Timer")  # Reset label text
-        return
-    # Ask the user for the number of minutes
-    minutes = simpledialog.askinteger("Shutdown Timer", "Enter minutes to shutdown:")
-    if minutes is not None and minutes > 0:
-        countdown_active = True
-        # Start the countdown timer in a separate thread to avoid freezing the GUI
-        shutdown_thread = threading.Thread(target=shutdown_timer, args=(minutes,))
-        shutdown_thread.start()
-        time_left_label.config(text=f"Time left: {minutes:02}:00")
-
-
-
 
 
 
@@ -952,14 +913,131 @@ LB_DUD.bind("<Button-1>",None)
 # CLEAR.pack(side="left",padx=(3,0),pady=(0,0))
 # CLEAR.bind("<Button-1>",lambda event:clear_screen())
 
-time_left_label = tk.Label(ROOT2, text="Timer", font=("JetBrainsMono NFP", 14, "bold"), fg="#fc6a35", bg="#1d2027", cursor="hand2")
-time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))
-time_left_label.bind("<Button-1>", start_shutdown_timer)
 
-ShutReboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
-ShutReboot.pack(side="left",padx=(1,1),pady=(0,0))
-ShutReboot.bind("<Button-1>",force_shutdown)
-ShutReboot.bind("<Button-3>",force_restart)
+
+
+
+
+
+import tkinter as tk
+from tkinter import simpledialog
+import threading
+import time
+import os
+
+# Global variables
+countdown_active = False
+shutdown_thread = None
+blinking = False
+
+# Shutdown timer function
+def shutdown_timer(minutes):
+    global countdown_active
+    countdown_time = minutes * 60
+    for remaining_time in range(countdown_time, 0, -1):
+        if not countdown_active:
+            time_left_label.config(text="Timer")
+            return
+        minutes_left = remaining_time // 60
+        seconds_left = remaining_time % 60
+        time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
+        time_left_label.update()
+        time.sleep(1)
+    if countdown_active:
+        os.system("shutdown /s /f /t 1")
+        countdown_active = False
+
+# Alarm timer blinking function
+def start_blinking():
+    global blinking
+    blinking = True
+    blink_state = True
+    def blink():
+        nonlocal blink_state
+        if blinking:
+            time_left_label.config(
+                text="ALARM! Time's up!",
+                fg="#ff0000" if blink_state else "#0000ff"
+            )
+            blink_state = not blink_state
+            time_left_label.after(500, blink)
+    blink()
+
+# Alarm timer function
+def alarm_timer(minutes):
+    global countdown_active
+    countdown_time = minutes * 60
+    for remaining_time in range(countdown_time, 0, -1):
+        if not countdown_active:
+            time_left_label.config(text="Timer")
+            return
+        minutes_left = remaining_time // 60
+        seconds_left = remaining_time % 60
+        time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
+        time_left_label.update()
+        time.sleep(1)
+    if countdown_active:
+        start_blinking()
+        countdown_active = False
+
+# Stop blinking
+def stop_blinking(event=None):
+    global blinking
+    blinking = False
+    time_left_label.config(text="Timer", fg="#fc6a35")
+
+# Main click handler for label
+def start_countdown_option(event=None):
+    global countdown_active, shutdown_thread
+    choice = simpledialog.askinteger("Select Timer Type", "Choose an option:\n1 - Countdown Alarm\n2 - Countdown Shutdown")
+    if choice == 1:  # Alarm
+        if countdown_active:
+            countdown_active = False
+            time_left_label.config(text="Timer")
+            return
+        minutes = simpledialog.askinteger("Alarm Timer", "Enter minutes for the alarm:")
+        if minutes:
+            countdown_active = True
+            shutdown_thread = threading.Thread(target=alarm_timer, args=(minutes,))
+            shutdown_thread.start()
+            time_left_label.config(text=f"Time left: {minutes:02}:00")
+
+    elif choice == 2:  # Shutdown
+        if countdown_active:
+            countdown_active = False
+            time_left_label.config(text="Timer")
+            return
+        minutes = simpledialog.askinteger("Shutdown Timer", "Enter minutes to shutdown:")
+        if minutes:
+            countdown_active = True
+            shutdown_thread = threading.Thread(target=shutdown_timer, args=(minutes,))
+            shutdown_thread.start()
+            time_left_label.config(text=f"Time left: {minutes:02}:00")
+
+# Add this to your layout wherever your buttons/widgets go
+time_left_label = tk.Label(
+    ROOT2,
+    text="Timer",
+    font=("JetBrainsMono NFP", 14, "bold"),
+    fg="#fc6a35",
+    bg="#1d2027",
+    cursor="hand2"
+)
+time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))  # Or grid/place as per your layout
+time_left_label.bind("<Button-1>", start_countdown_option)
+time_left_label.bind("<Button-3>", stop_blinking)  # Optional: right-click to stop blinking
+
+
+
+
+
+
+
+
+Shut_Reboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
+Shut_Reboot.pack(side="left",padx=(1,1),pady=(0,0))
+Shut_Reboot.bind("<Button-1>",force_shutdown)
+Shut_Reboot.bind("<Button-3>",force_restart)
 
 LB_R=tk.Label(ROOT2 ,text="\uf2f1", bg="#1d2027",fg="#26b2f3",height=0,width =0,relief="flat",highlightthickness=0,highlightbackground="#ffffff",anchor ="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_R.pack(side="left",padx=(1,1 ),pady=(0,0))
