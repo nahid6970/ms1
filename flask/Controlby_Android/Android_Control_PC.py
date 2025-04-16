@@ -4,7 +4,8 @@ import subprocess
 app = Flask(__name__)
 
 COMMANDS = {
-    "List Files": "dir",
+    "Display 1": "C:/msBackups/Display/DisplaySwitch.exe /internal",
+    "Display 2": "C:/msBackups/Display/DisplaySwitch.exe /external",
     "Show IP Config": "ipconfig",
     "Open Notepad": "start notepad",
     "Open Calculator": "start calc",
