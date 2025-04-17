@@ -930,35 +930,39 @@ blinking = False
 def shutdown_timer(minutes):
     global countdown_active
     countdown_time = minutes * 60
-    for remaining_time in range(countdown_time, 0, -1):
+    while countdown_time > 0:
         if not countdown_active:
             time_left_label.config(text="Timer")
             return
-        minutes_left = remaining_time // 60
-        seconds_left = remaining_time % 60
+        minutes_left = int(countdown_time) // 60
+        seconds_left = int(countdown_time) % 60
         time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
         time_left_label.update()
         time.sleep(1)
+        countdown_time -= 1
     if countdown_active:
         os.system("shutdown /s /f /t 1")
         countdown_active = False
+        time_left_label.config(text="Timer")
 
 def alarm_timer(minutes):
     global countdown_active
     countdown_time = minutes * 60
-    for remaining_time in range(countdown_time, 0, -1):
+    while countdown_time > 0:
         if not countdown_active:
             time_left_label.config(text="Timer")
             return
-        minutes_left = remaining_time // 60
-        seconds_left = remaining_time % 60
+        minutes_left = int(countdown_time) // 60
+        seconds_left = int(countdown_time) % 60
         time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
         time_left_label.update()
         time.sleep(1)
+        countdown_time -= 1
     if countdown_active:
         show_big_alarm()
         countdown_active = False
         time_left_label.config(text="Timer")
+
 
 
 # Show blinking alarm in a new window
@@ -1018,7 +1022,7 @@ def get_countdown_input():
 
     def on_submit():
         try:
-            val = int(minutes_entry.get())
+            val = float(minutes_entry.get())
             if val > 0:
                 result["minutes"] = val
                 input_window.destroy()
