@@ -326,11 +326,11 @@ SAVE_FILE = r"C:\Users\nahid\sf3_attack.txt"
 # Mapping keys to descriptions
 key_mapping = {
     "F13": "KOS 2 Tap",
-    "F21": "Butcher",
     "F14": "KOS Fame",
     "F15": "Hound",
+    "F21": "Butcher",
     "F16": "Hound vortex",
-    "F17": "Hound Laggy",
+    "F17": "Laggy",
     "F18": "Heritage Laggy",
     "F19": "Possessed",
     "F20": "Event"
