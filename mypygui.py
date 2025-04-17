@@ -976,6 +976,11 @@ def show_big_alarm():
     alarm_window.attributes("-topmost", True)
     alarm_window.overrideredirect(True) 
     alarm_window.resizable(False, False)
+    width = alarm_window.winfo_width()
+    height = alarm_window.winfo_height()
+    x = (alarm_window.winfo_screenwidth() // 2) - (width // 2)
+    y = (alarm_window.winfo_screenheight() // 2) - (height // 2)
+    alarm_window.geometry(f'{width}x{height}+{x}+{y}')
 
     label = tk.Label(
         alarm_window,
@@ -1011,6 +1016,16 @@ def get_countdown_input():
     input_window.geometry("300x100")
     input_window.grab_set()
 
+    # Center the window on the screen
+    input_window.update_idletasks()
+    w = 300
+    h = 100
+    screen_width = input_window.winfo_screenwidth()
+    screen_height = input_window.winfo_screenheight()
+    x = (screen_width // 2) - (w // 2)
+    y = (screen_height // 2) - (h // 2)
+    input_window.geometry(f"{w}x{h}+{x}+{y}")
+
     label = tk.Label(input_window, text="Enter minutes for the countdown:")
     label.pack(pady=5)
 
@@ -1020,7 +1035,7 @@ def get_countdown_input():
 
     result = {"minutes": None}
 
-    def on_submit():
+    def on_submit(event=None):  # Accept optional event for key binding
         try:
             val = float(minutes_entry.get())
             if val > 0:
@@ -1035,8 +1050,12 @@ def get_countdown_input():
     error_label = tk.Label(input_window, text="", fg="red")
     error_label.pack()
 
+    # Bind Enter key to submit
+    minutes_entry.bind("<Return>", on_submit)
+
     input_window.wait_window()
     return result["minutes"]
+
 
 # Main click handler
 def start_countdown_option(event=None):
