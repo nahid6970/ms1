@@ -615,6 +615,12 @@ def Event_Function():
                     if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
                     time.sleep(0.05)
 
+                    [ntfy_signal_cli()
+                    for Folder_Ntfy in glob.glob(r"C:\msBackups\shadowfight3\notify\*.png") 
+                    if (location := find_image(Folder_Ntfy, confidence=0.8, region=(170,86,1749,970)))]
+                    time.sleep(0.05)
+
+
 
                     # if find_image(r"C:\Users\nahid\Desktop\image_108.png", confidence=0.8, region=(683, 79, 809, 151)): #! for using double function for the same picture
                     #      press_global_screen_with_delays((842, 537, 2)),
