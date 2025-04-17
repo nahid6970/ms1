@@ -920,12 +920,13 @@ LB_DUD.bind("<Button-1>",None)
 
 
 
-# Global variables
+
+# Globals
 countdown_active = False
 shutdown_thread = None
+alarm_window = None
 blinking = False
 
-# Shutdown timer function
 def shutdown_timer(minutes):
     global countdown_active
     countdown_time = minutes * 60
@@ -942,24 +943,6 @@ def shutdown_timer(minutes):
         os.system("shutdown /s /f /t 1")
         countdown_active = False
 
-# Alarm timer blinking function
-def start_blinking():
-    global blinking
-    blinking = True
-    blink_state = True
-    def blink():
-        nonlocal blink_state
-        if blinking:
-            time_left_label.config(
-                text="ALARM! Time's up!",
-                fg="#ff0000" if blink_state else "#0000ff",
-                bg="#0f4fff" if blink_state else "#f53100"
-            )
-            blink_state = not blink_state
-            time_left_label.after(500, blink)
-    blink()
-
-# Alarm timer function
 def alarm_timer(minutes):
     global countdown_active
     countdown_time = minutes * 60
@@ -973,42 +956,111 @@ def alarm_timer(minutes):
         time_left_label.update()
         time.sleep(1)
     if countdown_active:
-        start_blinking()
+        show_big_alarm()
         countdown_active = False
+        time_left_label.config(text="Timer")
 
-# Stop blinking
-def stop_blinking(event=None):
-    global blinking
-    blinking = False
-    time_left_label.config(text="Timer", fg="#fc6a35", bg="#1d2027")
 
-# Main click handler for label
+# Show blinking alarm in a new window
+def show_big_alarm():
+    global alarm_window, blinking
+
+    alarm_window = tk.Toplevel(ROOT)
+    alarm_window.title("ALARM!")
+    alarm_window.geometry("600x300")
+    alarm_window.configure(bg="#1d2027")
+    alarm_window.attributes("-topmost", True)
+    alarm_window.overrideredirect(True) 
+    alarm_window.resizable(False, False)
+
+    label = tk.Label(
+        alarm_window,
+        text="ALARM! Time's up!",
+        font=("JetBrainsMono NFP", 36, "bold"),
+        fg="#ff0000",
+        bg="#1d2027"
+    )
+    label.pack(expand=True)
+
+    blinking = True
+    blink_state = True
+
+    def blink():
+        nonlocal blink_state
+        if blinking:
+            label.config(fg="#ff0000" if blink_state else "#00aaff")
+            blink_state = not blink_state
+            alarm_window.after(500, blink)
+
+    def stop_alarm(event=None):
+        global blinking
+        blinking = False
+        alarm_window.destroy()
+
+    alarm_window.bind("<Button-1>", stop_alarm)
+    blink()
+
+# Custom input for countdown minutes
+def get_countdown_input():
+    input_window = tk.Toplevel(ROOT)
+    input_window.title("Enter Countdown Minutes")
+    input_window.geometry("300x100")
+    input_window.grab_set()
+
+    label = tk.Label(input_window, text="Enter minutes for the countdown:")
+    label.pack(pady=5)
+
+    minutes_entry = tk.Entry(input_window, font=("JetBrainsMono NFP", 14))
+    minutes_entry.pack(pady=5)
+    minutes_entry.focus()
+
+    result = {"minutes": None}
+
+    def on_submit():
+        try:
+            val = int(minutes_entry.get())
+            if val > 0:
+                result["minutes"] = val
+                input_window.destroy()
+        except ValueError:
+            error_label.config(text="Enter a valid number > 0")
+
+    submit_btn = tk.Button(input_window, text="Start", command=on_submit)
+    submit_btn.pack(pady=5)
+
+    error_label = tk.Label(input_window, text="", fg="red")
+    error_label.pack()
+
+    input_window.wait_window()
+    return result["minutes"]
+
+# Main click handler
 def start_countdown_option(event=None):
     global countdown_active, shutdown_thread
     choice = simpledialog.askinteger("Select Timer Type", "Choose an option:\n1 - Countdown Alarm\n2 - Countdown Shutdown")
-    if choice == 1:  # Alarm
+    if choice == 1:
         if countdown_active:
             countdown_active = False
             time_left_label.config(text="Timer")
             return
-        minutes = simpledialog.askinteger("Alarm Timer", "Enter minutes for the alarm:")
+        minutes = get_countdown_input()
         if minutes:
             countdown_active = True
             shutdown_thread = threading.Thread(target=alarm_timer, args=(minutes,))
             shutdown_thread.start()
             time_left_label.config(text=f"Time left: {minutes:02}:00")
-
-    elif choice == 2:  # Shutdown
+    elif choice == 2:
         if countdown_active:
             countdown_active = False
             time_left_label.config(text="Timer")
             return
-        minutes = simpledialog.askinteger("Shutdown Timer", "Enter minutes to shutdown:")
+        minutes = get_countdown_input()
         if minutes:
             countdown_active = True
             shutdown_thread = threading.Thread(target=shutdown_timer, args=(minutes,))
             shutdown_thread.start()
             time_left_label.config(text=f"Time left: {minutes:02}:00")
+
 
 # Add this to your layout wherever your buttons/widgets go
 time_left_label = tk.Label(
@@ -1021,7 +1073,9 @@ time_left_label = tk.Label(
 )
 time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))
 time_left_label.bind("<Button-1>", start_countdown_option)
-time_left_label.bind("<Button-3>", stop_blinking) 
+
+
+
 
 
 

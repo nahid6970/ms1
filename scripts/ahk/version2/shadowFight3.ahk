@@ -29,11 +29,19 @@ F21:: ;! Butcher
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
+        ; ; SendEvent("{i down}")
+        ; SendEvent("{x down}")
+        ; SendEvent("{s down}")
+        ; SendEvent("xjxjxjxjxj")
+        ; SendEvent("{s up}")
+        ; SendEvent("{x up}")
+        ; ; SendEvent("{i up}")
+
         ; SendEvent("{i down}")
         SendEvent("{x down}")
-        SendEvent("{s down}")
-        SendEvent("xjxjxjxjxj")
-        SendEvent("{s up}")
+        SendEvent("{j down}")
+        Sleep(150)
+        SendEvent("{j up}")
         SendEvent("{x up}")
         ; SendEvent("{i up}")
     }
