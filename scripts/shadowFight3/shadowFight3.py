@@ -595,7 +595,8 @@ def Event_Function():
                 while not state["stop_flag"]:
                     if find_image(Home, confidence=0.8): press_key(window, 'f')
                     elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
-                    elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, selected_key, 1, 'c', 1)
+                    # elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, selected_key, 1, 'c', 1)
+                    elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
                     elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
                     elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
                     elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
