@@ -4,9 +4,9 @@ import subprocess
 app = Flask(__name__)
 
 COMMANDS = {
-    "Display 1 KillApps": "taskkill /IM python.exe /IM notepad++.exe /F && C:\\msBackups\\Display\\DisplaySwitch.exe /internal",
     "Display 1": "C:\\msBackups\\Display\\DisplaySwitch.exe /internal",
     "Display 2": "C:\\msBackups\\Display\\DisplaySwitch.exe /external",
+    "Display 1 KillApps": "C:\\ms1\\startup\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /F",
     "Show IP Config": "ipconfig",
     "Open Notepad": "start notepad",
     "Open Calculator": "start calc",
