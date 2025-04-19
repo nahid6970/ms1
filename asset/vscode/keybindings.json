@@ -26,5 +26,10 @@
         "key": "f1",
         "command": "-document.open",
         "when": "editorLangId == 'ahk'"
+    },
+    {
+        "key": "ctrl+shift+b",
+        "command": "-workbench.action.tasks.build",
+        "when": "taskCommandsRegistered"
     }
 ]
