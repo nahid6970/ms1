@@ -713,7 +713,6 @@ function gitter {
         $CommitMessage = "$CurrentDateTime 🚀 $UserInput"
     }
     
-
     # Show what changed
     git status
     # Stage all changes
