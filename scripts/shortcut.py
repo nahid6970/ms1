@@ -6,10 +6,10 @@ import keyboard
 import pygetwindow as gw
 import time
 from idlelib.tooltip import Hovertip
-from functionlist import *
 import pyautogui
 from tkinter import *
 from tkinter.ttk import *
+from Reference import *
 
 def switch_to_frame(frame_to_show, frame_to_hide):
     frame_to_hide.pack_forget()
