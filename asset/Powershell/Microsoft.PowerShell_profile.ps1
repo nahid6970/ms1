@@ -701,15 +701,14 @@ function gitter {
         return
     }
 
-    
     # Get the current date and time
-    $CurrentDateTime = Get-Date -Format "MMMM dd, yyyy, hh:mm tt"
+    $CurrentDateTime = Get-Date -Format "📅 MMMM dd, yyyy, hh:mm tt"
 
     # Prompt for optional commit message
     $UserInput = Read-Host "Enter commit message (press Enter to skip)"
 
     if ([string]::IsNullOrWhiteSpace($UserInput)) {
-        $CommitMessage = "📅 $CurrentDateTime"
+        $CommitMessage = "$CurrentDateTime"
     } else {
         $CommitMessage = "$UserInput $CurrentDateTime"
     }
