@@ -3,95 +3,157 @@ import json
 import re
 import sys
 import hashlib
+from datetime import datetime
+import shutil
 
-EXTENSIONS = (".py", ".ahk", ".ps1", ".bat", ".txt")
-SAVE_FILE = "paths_before.json"
+# ————— CONFIG —————
+SCAN_ALL    = True
+EXTENSIONS  = (".py", ".ahk", ".ps1", ".bat", ".txt")
+SKIP_DIRS   = {'.git', '__pycache__', '.vscode', 'node_modules'}
+SAVE_FILE   = "paths_before.json"
+LOG_FILE    = "path_replacements.log"
+BACKUP_DIR = r"C:\msBackups\bak"
+
+# ——————————————————
+
+def backup_file(original_path):
+    rel = os.path.relpath(original_path)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_name = rel.replace("\\", "_").replace("/", "_")
+    bak_path = os.path.join(BACKUP_DIR, f"{safe_name}_{timestamp}.bak")
+    os.makedirs(os.path.dirname(bak_path), exist_ok=True)
+    shutil.copy2(original_path, bak_path)
+    return bak_path
+
 
 def hash_file(path):
-    """Create a SHA256 hash of the file content"""
     h = hashlib.sha256()
     try:
         with open(path, "rb") as f:
-            while chunk := f.read(8192):
+            for chunk in iter(lambda: f.read(8192), b""):
                 h.update(chunk)
         return h.hexdigest()
-    except Exception as e:
+    except Exception:
         return None
 
 def get_all_files_with_hashes(base_path):
-    result = {}
-    for root, _, files in os.walk(base_path):
-        for file in files:
-            if file.endswith(EXTENSIONS):
-                full_path = os.path.normpath(os.path.join(root, file))
-                file_hash = hash_file(full_path)
-                if file_hash:
-                    result[file_hash] = full_path
-    return result
+    """
+    Walk the tree, skip SKIP_DIRS, and return
+    { file_hash: [full_path1, full_path2, ...], … }
+    """
+    d = {}
+    for root, dirs, files in os.walk(base_path):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        for fn in files:
+            if not SCAN_ALL and not fn.endswith(EXTENSIONS):
+                continue
+            full = os.path.normpath(os.path.join(root, fn))
+            h = hash_file(full)
+            if not h:
+                continue
+            d.setdefault(h, []).append(full)
+    return d
 
 def save_snapshot(base_path):
-    files = get_all_files_with_hashes(base_path)
+    snap = get_all_files_with_hashes(base_path)
     with open(SAVE_FILE, 'w', encoding='utf-8') as f:
-        json.dump(files, f, indent=2)
-    print(f"✅ Snapshot saved with {len(files)} files.")
+        json.dump(snap, f, indent=2)
+    print(f"✅ Snapshot saved: {sum(len(v) for v in snap.values())} files logged.")
 
 def load_snapshot():
     if not os.path.exists(SAVE_FILE):
         print("❌ No snapshot found. Run `scan` first.")
-        return {}
+        sys.exit(1)
     with open(SAVE_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def replace_path_references_in_file(file_path, old_path, new_path):
+def replace_in_file(path, old_p, new_p, log):
     try:
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
+        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+            txt = f.read()
+    except:
+        return
 
-        original = content
-        for variant in {old_path, old_path.replace("\\", "/"), old_path.replace("\\", "\\\\")}:
-            pattern = re.escape(variant)
-            content = re.sub(pattern, new_path.replace("\\", "\\\\"), content)
+    orig = txt
+    entries = []
+    variants = {
+        old_p,
+        old_p.replace("\\", "/"),
+        old_p.replace("/", "\\"),
+        old_p.replace("\\", "\\\\")
+    }
 
-        if content != original:
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write(content)
-            print(f"🔁 Updated path in: {file_path}")
-    except Exception as e:
-        print(f"⚠️ Error updating {file_path}: {e}")
+    for var in variants:
+        if var in txt:
+            rp = (
+                new_p.replace("\\", "\\\\") if "\\\\" in var else
+                new_p.replace("\\", "/") if "/" in var else
+                new_p
+            )
+            pat = re.escape(var)
+            txt = re.sub(pat, lambda m, rp=rp: rp, txt)
+            entries.append(f"    {var} → {rp}")
+
+    if entries and txt != orig:
+        bak_path = backup_file(path)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(txt)
+        print(f"🔁 Updated: {path} (backup: {bak_path})")
+        log.extend([f"{path}"] + entries)
+
 
 def update_references(base_path):
-    old_snapshot = load_snapshot()
-    new_snapshot = get_all_files_with_hashes(base_path)
+    old_snap = load_snapshot()
+    new_snap = get_all_files_with_hashes(base_path)
 
-    renamed_files = []
-    for file_hash, old_path in old_snapshot.items():
-        new_path = new_snapshot.get(file_hash)
-        if new_path and new_path != old_path:
-            renamed_files.append((old_path, new_path))
+    # detect renames/moves
+    mappings = []
+    for h, old_list in old_snap.items():
+        new_list = new_snap.get(h, [])
+        removed = set(old_list) - set(new_list)
+        added   = set(new_list) - set(old_list)
+        for o in removed:
+            for n in added:
+                mappings.append((o, n))
 
-    if not renamed_files:
+    if not mappings:
         print("📦 No renamed/moved files found.")
         return
 
-    print(f"🔍 Detected {len(renamed_files)} renamed/moved files.")
+    print(f"🔍 Found {len(mappings)} moved/renamed files.")
 
-    # Replace references to old paths in all scripts
-    all_files = list(new_snapshot.values())
-    for script_path in all_files:
-        for old_path, new_path in renamed_files:
-            replace_path_references_in_file(script_path, old_path, new_path)
+    # collect all files to search
+    all_files = []
+    for root, dirs, files in os.walk(base_path):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        for fn in files:
+            if SCAN_ALL or fn.endswith(EXTENSIONS):
+                all_files.append(os.path.normpath(os.path.join(root, fn)))
+
+    # apply replacements
+    log_entries = []
+    for file_path in all_files:
+        for old_p, new_p in mappings:
+            replace_in_file(file_path, old_p, new_p, log_entries)
+
+    # write to log
+    if log_entries:
+        with open(LOG_FILE, 'a', encoding='utf-8') as L:
+            L.write(f"\n--- {datetime.now()} ---\n")
+            L.write("\n".join(log_entries) + "\n")
+        print(f"📝 Detailed log → {LOG_FILE}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3 or sys.argv[1] not in ['scan', 'update']:
-        print("Usage:\n  python path_tracker.py scan <folder_path>\n  python path_tracker.py update <folder_path>")
+    if len(sys.argv) != 3 or sys.argv[1] not in ("scan", "update"):
+        print("Usage:\n  python path_tracker.py scan <folder>\n  python path_tracker.py update <folder>")
         sys.exit(1)
 
-    mode, folder = sys.argv[1], sys.argv[2]
-    if not os.path.exists(folder):
-        print("❌ Provided folder does not exist.")
+    cmd, folder = sys.argv[1], sys.argv[2]
+    if not os.path.isdir(folder):
+        print("❌ Folder not found.")
         sys.exit(1)
 
-    if mode == "scan":
+    if cmd == "scan":
         save_snapshot(folder)
-    elif mode == "update":
+    else:
         update_references(folder)
