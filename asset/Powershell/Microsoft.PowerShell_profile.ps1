@@ -710,7 +710,7 @@ function gitter {
     if ([string]::IsNullOrWhiteSpace($UserInput)) {
         $CommitMessage = "$CurrentDateTime"
     } else {
-        $CommitMessage = "$UserInput 📅$CurrentDateTime"
+        $CommitMessage = "$UserInput 📅 $CurrentDateTime"
     }
 
     # Show what changed
