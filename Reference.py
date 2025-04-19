@@ -260,13 +260,13 @@ def start_fzf_c():
 def start_fzf_d():
     subprocess.Popen(["powershell", "-Command", 'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; fzf --preview=\'bat {}\'"'], shell=True)
 
-def start_ack_c():
-    input_text = insert_input()  # Assuming insert_input() is a function that returns the desired input
-    subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {input_text}"'], shell=True)
+# def start_ack_c():
+#     input_text = insert_input()  # Assuming insert_input() is a function that returns the desired input
+#     subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd C:\\ ; ack {input_text}"'], shell=True)
 
-def start_ack_d():
-    input_text = insert_input()  # Assuming insert_input() is a function that returns the desired input
-    subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {input_text}"'], shell=True)
+# def start_ack_d():
+#     input_text = insert_input()  # Assuming insert_input() is a function that returns the desired input
+#     subprocess.Popen(["powershell", "-Command", f'Start-Process powershell -ArgumentList "-NoExit -Command cd D:\\ ; ack {input_text}"'], shell=True)
 
 def start_find_file():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\find\\find_file.ps1"])
