@@ -343,7 +343,7 @@ msBackups_Label.grid(row=1, column=1, pady=10, padx=10, sticky=tk.W)
 msBackups_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
     print("Executing: rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"),
     subprocess.Popen("rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
-    # print("\033[92mBackup Sync Completed\033[0m")
+    print("\033[92mBackup Sync Completed\033[0m")
 )).start())
 
 # Assuming quick_commands_frame is already created.
@@ -352,7 +352,7 @@ Song_Label.grid(row=2, column=1, pady=10, padx=10, sticky=tk.W)
 Song_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
     print("Executing: rclone sync D:\\song\\ gu:\\song\\ -P --check-first --transfers=10 --track-renames --fast-list"),
     subprocess.Popen("rclone sync D:\\song\\ gu:\\song\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
-    # print("\033[92mBackup Sync Completed\033[0m")
+    print("\033[92mBackup Sync Completed\033[0m")
 )).start())
 
 
