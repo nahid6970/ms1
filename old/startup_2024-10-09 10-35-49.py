@@ -9,7 +9,7 @@ class StartupManager(tk.Tk):
         super().__init__()
         self.title("Startup Manager")
         self.items = [
-{"type": "Command","name": "arr_monitor"         ,"command": "Start-Process 'C:\\ms1\\scripts\\arr_monitor.ps1' -WindowStyle Hidden"},
+{"type": "Command","name": "arr_monitor"         ,"command": "Start-Process 'C:\\ms1\\scripts\\arr\\arr_monitor.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "BAZARR"              ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
 {"type": "Command","name": "FLARESOLVER"         ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
 {"type": "Command","name": "GLAZE_WM"            ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"},

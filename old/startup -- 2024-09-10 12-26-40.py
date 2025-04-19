@@ -19,7 +19,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "SCHEDULED"           ,"command": "Start-Process C:\\ms1\\scripts\\scheduled.ps1"},
 {"type": "Command","name": "Open WebUI"          ,"command": "Start-Process open-webui serve"},
 
-{"type": "Command","name": "arr_monitor"         ,"command": "Start-Process 'C:\\ms1\\scripts\\arr_monitor.ps1' -WindowStyle Hidden"},
+{"type": "Command","name": "arr_monitor"         ,"command": "Start-Process 'C:\\ms1\\scripts\\arr\\arr_monitor.ps1' -WindowStyle Hidden"},
 {"type": "Command","name": "BAZARR"              ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
 {"type": "Command","name": "FLARESOLVER"         ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
 {"type": "Command","name": "GLAZE_WM"            ,"command": "Start-Process 'glazewm.exe' -WindowStyle hidden"},

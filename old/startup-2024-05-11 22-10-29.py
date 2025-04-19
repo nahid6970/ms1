@@ -20,7 +20,7 @@ class StartupManager(tk.Tk):
             {"type": "App","name": "Sonarr"      ,"path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"},
 
             {"type": "Command","name": "ahkscript"     ,"command": "Start-Process 'C:\\ms1\\ahkscripts.ahk'"},
-            {"type": "Command","name": "arr_monitor"   ,"command": "Start-Process 'C:\\ms1\\scripts\\arr_monitor.ps1' -WindowStyle Hidden"},
+            {"type": "Command","name": "arr_monitor"   ,"command": "Start-Process 'C:\\ms1\\scripts\\arr\\arr_monitor.ps1' -WindowStyle Hidden"},
             {"type": "Command","name": "bazarr"        ,"command": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
             {"type": "Command","name": "flaresolver"   ,"command": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
             {"type": "Command","name": "monitor_size"  ,"command": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},

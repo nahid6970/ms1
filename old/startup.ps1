@@ -15,7 +15,7 @@ function sync                  {Start-Process "C:\ms1\scripts\sync.ps1" }
 function syncthing             {Start-Process "C:\Users\nahid\scoop\apps\syncthing\current\syncthing.exe" -WindowStyle Hidden }
 function valo_qbit             {Start-Process "C:\ms1\scripts\valorant\valo_qbit.ps1" -WindowStyle Hidden }
 
-function arr_monitor           {Start-Process "C:\ms1\scripts\arr_monitor.ps1" -WindowStyle Hidden }
+function arr_monitor           {Start-Process "C:\ms1\scripts\arr\arr_monitor.ps1" -WindowStyle Hidden }
 function bazarr                {Start-Process -FilePath "C:\ProgramData\Bazarr\WinPython\python-3.10.0\python.exe" -ArgumentList "C:\ProgramData\Bazarr\bazarr.py" -WindowStyle Hidden }
 function flaresolver           {Start-Process "C:\Users\nahid\scoop\apps\flaresolverr\current\flaresolverr.exe" -WindowStyle Hidden }
 function prowlarr              {C:\ProgramData\Prowlarr\bin\Prowlarr.exe }
