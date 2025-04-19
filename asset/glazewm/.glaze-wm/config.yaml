@@ -86,7 +86,7 @@ bar:
 
     - type: "text"
       text: "E" 
-      left_click_command: "exec C:\\ms1\\mypygui_import\\edit_files.py"
+      left_click_command: "exec C:\\ms1\\scripts\\mypygui_import\\edit_files.py"
       background: "#3c97ff"
       foreground: "#000000"
       margin: 1 1

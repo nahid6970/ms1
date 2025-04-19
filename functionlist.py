@@ -265,32 +265,32 @@ def start_find_size():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\find\\find_size.ps1"])
 
 # def start_tools(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\mypygui_import\\tools.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_applist(event):
-#     subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+#     subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True)
 # def edit_applist(event):
-#     subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\applist.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True)
 
 # def start_appstore(event):
-#     subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+#     subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True)
 # def edit_appstore(event):
-#     subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\app_store.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True)
 
 # def start_folder(event):
-#     subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\folder.py"], shell=True)
+#     subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True)
 # def Edit_folder(event):
-#     subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\folder.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True)
 
 # def start_process(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\process.py"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True)
 # def Edit_process(event):
-#     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\process.py"], shell=True)
+#     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True)
 
 # def start_script_list(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
 # def edit_script_list(event):
-#     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\scripts\\mypygui_import\\script_list.py", "-WindowStyle", "Hidden"], shell=True)
 
 
 # def get_appinfo(event):

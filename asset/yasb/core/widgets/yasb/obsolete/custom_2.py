@@ -38,9 +38,9 @@ class AppWidget(BaseWidget):
 
     def _on_mouse_press_event(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            os.system("start C:/ms1/mypygui_import/applist.py")
+            os.system("start C:/ms1/scripts/mypygui_import/applist.py")
         elif event.button() == Qt.MouseButton.RightButton:
-            os.system("start C:/ms1/mypygui_import/app_store.py")
+            os.system("start C:/ms1/scripts/mypygui_import/app_store.py")
 
     def _on_mouse_enter_event(self, event):
         # Change style or perform actions when mouse enters the widget

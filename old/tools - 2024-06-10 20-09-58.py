@@ -160,8 +160,8 @@ def Folder(PYTHON_FRAME):
 
     Process_bt=tk.Label(BOX, text="Process", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
     Process_bt.pack(side="top", anchor="w",padx=(0,0),pady=(0,0))
-    Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\process.py"], shell=True))
-    Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\process.py"], shell=True))
+    Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
+    Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
 
     BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,PYTHON_FRAME))
     BACK.pack(side="top" ,padx=(0,0))

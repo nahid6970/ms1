@@ -71,9 +71,9 @@ class CombinedWidget(BaseWidget):
 
     def _on_Edit_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\mypygui_import\edit_files.py'])
+           subprocess.Popen(['cmd.exe', '/c', 'C:\ms1\scripts\mypygui_import\edit_files.py'])
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\mypygui_import\\edit_files.py:89'])
+           subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\scripts\\mypygui_import\\edit_files.py:89'])
 
 if __name__ == "__main__":
     app = QApplication([])

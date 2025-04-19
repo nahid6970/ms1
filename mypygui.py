@@ -553,8 +553,8 @@ Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\
 
 Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Tools_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\tools.py"], shell=True))
-Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\tools.py"], shell=True))
+Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
+Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
@@ -569,10 +569,10 @@ Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code
 
 AppManagement_bt=CTkLabel(ROOT1, text="\uf0be", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
-AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\app_store.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\app_store.py"], shell=True))
-AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\applist.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\applist.py"], shell=True))
+AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
+AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
+AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True))
+AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True))
 
 Rclone_bt=CTkLabel(ROOT1, text="\uef2c", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#70caf2")
 Rclone_bt.pack(side="left",padx=(10,0),pady=(1,0))
@@ -581,13 +581,13 @@ Rclone_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code 
 
 Folder_bt=CTkLabel(ROOT1, text="\ueaf7", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#ffd900")
 Folder_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\folder.py"], shell=True))
-Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\folder.py"], shell=True))
+Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
+Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
 
 ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a04c", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
-ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
-ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\script_list.py"], shell=True))
+ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
+ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
 
 ShortcutBar1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 ShortcutBar1.pack(side="left",padx=(3,0),pady=(0,0))

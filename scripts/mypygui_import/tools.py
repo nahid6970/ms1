@@ -154,7 +154,7 @@ def Folder(PYTHON_SCRIPT_FRAME):
 ("#204892", "#ffffff", "Rounded Corner",       {"command": "C:\\ms1\\utility\\RoundedCornerOnOff.py"}),
 ("#204892", "#ffffff", "Font",                 {"command": "C:\\ms1\\scripts\\python\\font_style.py"}),
 ("#204892", "#ffffff", "Dictionary",           {"command": "C:\\ms1\\scripts\\python\\dictionary.py"}),
-("#204892", "#ffffff", "Process",              {"command": "cmd /c start C:\\ms1\\mypygui_import\\process.py"}),
+("#204892", "#ffffff", "Process",              {"command": "cmd /c start C:\\ms1\\scripts\\mypygui_import\\process.py"}),
 ("#204892", "#ffffff", "Rock-Paper-Scissor",   {"command": "C:\\ms1\\scripts\\python\\Game_rock_paper_scissor.py"}),
 ("#204892", "#ffffff", "Morse-Code",           {"command": "cmd /c start C:\\ms1\\scripts\\python\\morse.py"}),
     ]
@@ -201,8 +201,8 @@ Folder(PYTHON_SCRIPT_FRAME)
 
 #     Process_bt=tk.Label(BOX, text="Process", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
 #     Process_bt.pack(side="top", anchor="w",padx=(0,0),pady=(0,0))
-#     Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\mypygui_import\\process.py"], shell=True))
-#     Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\mypygui_import\\process.py"], shell=True))
+#     Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
+#     Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
 
 #     BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,PYTHON_FRAME))
 #     BACK.pack(side="top" ,padx=(0,0))
@@ -230,8 +230,8 @@ BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /
 
 Encrypt_lb = tk.Label(ROW_2,text="\uf084", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 50, "bold"))
 Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\utility\\Encryption.py'))
-Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\utility\\Encryption.py'))
+Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\scripts\\Locker.py'))
+Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\scripts\\Locker.py'))
 
 
 
