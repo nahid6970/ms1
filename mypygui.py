@@ -575,7 +575,7 @@ AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /
 AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True))
 AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True))
 
-Rclone_bt=CTkLabel(ROOT1, text="\uef2c", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#70caf2")
+Rclone_bt=CTkLabel(ROOT1, text="\uef2c", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#fcfcfc")
 Rclone_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Rclone_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\rclone_Script.py"], shell=True))
 Rclone_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\rclone_Script.py"], shell=True))
