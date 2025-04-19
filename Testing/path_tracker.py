@@ -10,8 +10,8 @@ from datetime import datetime
 SCAN_ALL    = True
 EXTENSIONS  = (".py", ".ahk", ".ps1", ".bat", ".txt")
 SKIP_DIRS   = {'.git', '__pycache__', '.vscode', 'node_modules'}
-SAVE_FILE   = "paths_before.json"
-LOG_FILE    = "path_replacements.log"
+SAVE_FILE   = r"C:\Users\nahid\script_output\paths_before.json"
+LOG_FILE    = r"C:\Users\nahid\script_output\path_replacements.log"
 BACKUP_DIR  = r"C:\msBackups\bak"
 # ——————————————————
 
