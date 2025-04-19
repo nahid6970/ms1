@@ -708,9 +708,9 @@ function gitter {
     $UserInput = Read-Host "Enter commit message (press Enter to skip)"
 
     if ([string]::IsNullOrWhiteSpace($UserInput)) {
-        $CommitMessage = "$CurrentDateTime"
-    } else {
         $CommitMessage = "🚀 $UserInput $CurrentDateTime"
+    } else {
+        $CommitMessage = "$CurrentDateTime"
     }
 
     # Show what changed
