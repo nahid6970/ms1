@@ -31,25 +31,21 @@ packages=(
     "fzf"
     "git"
     "lsd"
-    "lua-language-server"
     "nano"
     "neovim"
     "oh-my-posh"
     "openssh"
-    "python"
     "rclone"
     "sshpass"
     "termux-api"
-    "termux-tools"
+    "vim"
     "wget"
-    "which" # to fix neovim bug lua language server not supported on this platform
+    "x11-repo" "tigervnc"
+    "xdotool"
     "yazi"
     "zoxide"
     "zsh"
     # "mpv"
-    # "vim"
-    # "x11-repo" "tigervnc"
-    # "xdotool"
 )
 
 # Function to install necessary packages
@@ -140,9 +136,6 @@ nvim_setup() {
     else
         echo -e "${RED}Failed to set up Neovim configuration.${NC}"
     fi
-    curl -o /data/data/com.termux/files/usr/bin/install-in-mason  https://raw.githubusercontent.com/Amirulmuuminin/setup-mason-for-termux/main/install-in-mason
-    chmod +x /data/data/com.termux/files/usr/bin/install-in-mason
-    install-in-mason lua-language-server
 }
 
 # Git push repository function
@@ -459,47 +452,23 @@ welcome_remove() {
     touch .hushlogin
 }
 
-rclone_decrypt() {
-    # remove te ntfy file
-    clear
-    echo "Clone ms1 ...."
-    git clone https://github.com/nahid6970/ms1.git
-    echo "Decreypt rclone conf ...."
-    pip install pycryptodomex
-    python ~/ms3/locker/locker.py --decrypt ~/ms1/asset/rclone/rclone.conf.enc
-
-    SOURCE_CONF_FILE="$HOME/ms1/asset/rclone/rclone.conf"
-    RCLONE_CONFIG_DIR="$HOME/.config/rclone"
-
-    echo -e "Copying rclone.conf"
-    cp "$SOURCE_CONF_FILE" "$RCLONE_CONFIG_DIR/"
-
-}
-
 
 
 
 # Declare a combined array of menu options and function bindings
 menu_items=(
-    " 1:Git Pull [ms3]:                 update_ms3_repo                         :$BLUE"
-    " 2:Copy Files:                     copy_files                              :$BLUE"
-    " 3:Install Necessary Packages:     install_packages    setup_storage_passwd:$BLUE"
-    " 4:Font Setup:                     install_font_with_oh_my_posh            :$BLUE"
-    " 5:Rclone-Dycrypt:                 rclone_decrypt                          :$RED"
-    " 6:Rclone Setup:                   rclone_setup                            :$BLUE"
-    " 7:Song [rs]:                      Restore_Songs                           :$BLUE"
-    " 8:Neovim Setup:                   nvim_setup                              :$BLUE"
-    " 9:Git Push:                       git_push_repo                           :$BLUE"
-    "10:Remove Folder [ms3]:            remove_repo                             :$RED"
-    "11:About:                          about_device                            :$BLUE"
-    "12:Welcome Page:                   welcome_remove                          :$RED"
-    " c:Close:                          Close_script                            :$RED"
-    " e:Exit:                           exit_script                             :$RED"
+    "1:Goto D_1:                       remote_access_goto_d1                   :$CYAN"
+    "2:Goto D_2:                       remote_access_goto_d2                   :$CYAN"
+    "3:Rclone Setup:                   rclone_setup                            :$BLUE"
+    "4:Song [rs]:                      Restore_Songs                           :$BLUE"
+    "5:Notify:                         ntfy_notify                             :$BLUE"
+    "6:Notify Remove:                  ntfy_remove                             :$RED"
+    "c:Close:                          Close_script                            :$RED"
+    "e:Exit:                           exit_script                             :$RED"
 )
 
 # Display the menu and handle user input
 while true; do
-    # Clear the screen to refresh the menu
     echo ""
     echo -e "${YELLOW}Select an option:${NC}"
 
@@ -541,5 +510,5 @@ while true; do
     fi
 
     # Reload the os.sh script to refresh functions and variables
-    source $HOME/ms3/os.sh
+    source $HOME/ms3/osx.sh
 done
