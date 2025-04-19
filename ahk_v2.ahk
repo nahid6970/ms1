@@ -342,3 +342,93 @@ SetTitleMatchMode(2) ; Allow partial matching of window titles
     }
     return
 }
+
+
+^+y:: {
+    ; Copy selected text
+    A_Clipboard := ""
+    Send("^c")
+    ClipWait(1)
+    if !A_Clipboard {
+        MsgBox "Clipboard is empty or no text was selected."
+        return
+    }
+    ; Normalize clipboard content
+    raw := A_Clipboard
+    lines := []
+    maxLen := 0
+    for line in StrSplit(raw, "`n", "`r") {
+        cleanLine := StrReplace(line, "`t", "    ")  ; Replace tabs with 4 spaces
+        cleanLine := Trim(cleanLine)
+        lines.Push(cleanLine)
+        if (StrLen(cleanLine) > maxLen)
+            maxLen := StrLen(cleanLine)
+    }
+    ; Build box border
+    border := "#" . StrRepeat("#", maxLen + 1) . "!"
+    ; Format box
+    output := border . "`r`n"
+    for line in lines {
+        padding := StrRepeat(" ", maxLen + 1 - StrLen(line))
+        output .= line . padding . "#!" . "`r`n"
+    }
+    output .= border
+    ; Paste result
+    A_Clipboard := output
+    Sleep(50)
+    Send("^v")
+}
+StrRepeat(char, count) {
+    result := ""
+    Loop count
+        result .= char
+    return result
+}
+
+
+
+
+^+b:: {
+    ; Copy selected text
+    A_Clipboard := ""
+    Send("^c")
+    ClipWait(1)
+    if !A_Clipboard {
+        MsgBox "Nothing selected!"
+        return
+    }
+
+    ; Split into lines and normalize tabs → spaces
+    rawLines := StrSplit(A_Clipboard, "`n", "`r")
+    maxLen := 0
+
+    for i, line in rawLines {
+        clean := StrReplace(line, "`t", "    ")
+        rawLines[i] := clean
+        if (StrLen(clean) > maxLen)
+            maxLen := StrLen(clean)
+    }
+
+    ; Build top/bottom border (one extra “#” for padding)
+    border := ";!" . StrRepeatf("#", maxLen + 1) . "#"
+
+    ; Assemble boxed output
+    output := border . "`r`n"
+    for line in rawLines {
+        padding := StrRepeatf(" ", maxLen + 1 - StrLen(line))
+        output .= line . padding . ";!#" . "`r`n"
+    }
+    output .= border
+
+    ; Replace selection with box
+    A_Clipboard := output
+    Sleep 50
+    Send("^v")
+}
+
+StrRepeatf(char, count) {
+    result := ""
+    Loop count
+        result .= char
+    return result
+}
