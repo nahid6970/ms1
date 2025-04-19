@@ -701,6 +701,7 @@ function gitter {
         return
     }
 
+    
     # Get the current date and time
     $CurrentDateTime = Get-Date -Format "📅 MMMM dd, yyyy, hh:mm tt"
 
