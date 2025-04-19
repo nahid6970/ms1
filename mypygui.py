@@ -2,7 +2,7 @@
 
 from customtkinter import *
 from datetime import datetime
-from functionlist import *
+from Reference import *
 from PIL import Image, ImageTk
 from pyadl import ADLManager
 from time import strftime

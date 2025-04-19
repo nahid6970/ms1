@@ -125,7 +125,7 @@ pip_install
 Write-Host "################################################" 
 Write-Host "########## Python Functionlist MKLINK ##########" 
 Write-Host "################################################" 
-New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\functionlist.py" -Force #[pwsh]
+New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\python\current\Lib\functionlist.py" -Target "C:\ms1\Reference.py" -Force #[pwsh]
 
 #* Jackett Setup
 Write-Host "###################################" -ForegroundColor Blue
