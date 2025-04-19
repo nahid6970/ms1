@@ -7,7 +7,7 @@ Tray := A_TrayMenu
 Tray.Delete() ; Remove default items
 Tray.Add("Restart Explorer", (*) => RestartExplorer())
 Tray.SetIcon("Restart Explorer", "C:\msBackups\icon\system_icon\shell32\965.ico")
-Tray.Add("Screen Dimmer", (*) => Run("C:\ms1\scripts\ahk\version1\Display\ScreenDimmer.ahk"))
+Tray.Add("Screen Dimmer", (*) => Run("C:\ms1\scripts\Autohtokey\version1\Display\ScreenDimmer.ahk"))
 Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
 Tray.Add() ; Add a separator
 Tray.Add("Exit", (*) => ExitApp()) ; Add Exit button

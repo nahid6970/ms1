@@ -3,7 +3,7 @@ SetBatchLines, -1
 
 ; Class ImageButton by just me
 ; https://www.autohotkey.com/boards/viewtopic.php?t=1103
-#Include C:\ms1\scripts\AHK_BT\V1_4\Class_ImageButton.ahk
+#Include C:\ms1\scripts\Autohtokey\AHK_BT\V1_4\Class_ImageButton.ahk
 ; for v1.5 add UseGDIP.ahk or Include them into Class_ImageButton.ahk
 ; #Include UseGDIP.ahk
 

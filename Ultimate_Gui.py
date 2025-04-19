@@ -197,7 +197,7 @@ def create_control_panel_without_tab_border():
 
     uia_v2_button = tk.Label(BOX_4, text="UIA-V2", width=20, bg="#32ec44", fg="black", font=default_font)
     uia_v2_button.grid(row=3, column=2, padx=5, pady=5)
-    uia_v2_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\ms1\\scripts\\ahk\\UIA_v2\\Lib\\UIA.ahk", hide=True)))
+    uia_v2_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\ms1\\scripts\\Autohtokey\\UIA_v2\\Lib\\UIA.ahk", hide=True)))
 
     # Python Section
     python_label = tk.Label(BOX_4, text="Python", width=20, relief="solid", borderwidth=1, font=default_font)

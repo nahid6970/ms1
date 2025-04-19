@@ -5,8 +5,8 @@
 Persistent
 
 ; include files
-#Include C:\ms1\scripts\ahk\version2\tray.ahk
-#Include C:\ms1\scripts\ahk\version2\shadowFight3.ahk
+#Include C:\ms1\scripts\Autohtokey\version2\tray.ahk
+#Include C:\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
 
 ;! add v1 startups
 ; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
@@ -33,15 +33,15 @@ RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hid
 RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
 
 ;! gui
-!b::Run("C:\ms1\scripts\ahk\version2\gui\Bio.ahk", "", "Hide")
-; !u::Run("C:\ms1\scripts\ahk\version2\gui\Ultimate_Gui.ahk", "", "Hide")
+!b::Run("C:\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
+; !u::Run("C:\ms1\scripts\Autohtokey\version2\gui\Ultimate_Gui.ahk", "", "Hide")
 !u::Run("C:\ms1\Ultimate_Gui.py", "", "Hide")
 
 ;! shortcuts
-^!n::Run("C:\ms1\scripts\ahk\version1\VScode_OpenWith.ahk", "", "Hide")
-!1::Run("C:\ms1\scripts\ahk\version2\display\send_to_2nd.ahk", "", "Hide")
-RAlt & -::Run("C:\ms1\scripts\ahk\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
-RAlt & Space::Run("C:\ms1\scripts\ahk\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
+^!n::Run("C:\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
+!1::Run("C:\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
+RAlt & -::Run("C:\ms1\scripts\Autohtokey\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
+RAlt & Space::Run("C:\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 #x::Run("C:\ms1\mypygui.py", , "Hide")
 !Space::Run("C:\ms1\Run.py", , "Hide")
