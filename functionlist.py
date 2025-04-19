@@ -294,9 +294,9 @@ def start_find_size():
 
 
 # def get_appinfo(event):
-#     subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True)
+#     subprocess.Popen(["cmd /c C:\\ms1\\scripts\\info.py"], shell=True)
 # def edit_appinfo(event):
-#     subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True)
+#     subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\info.py"], shell=True)
 
 
 def force_shutdown(event):
@@ -337,9 +337,9 @@ def start_merge():
     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\ffmpeg\\merge.ps1"])
 
 # def Backup_Restore(event):
-#     subprocess.Popen(["powershell", "start", "C:\\ms1\\utility\\BackupRestore.py"])
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\BackupRestore.py"])
 # def editBackup_Restore(event):
-#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
+#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\scripts\\BackupRestore.py"])
 
 def fzf_search(event):
     subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\ff.ps1"], shell=True)

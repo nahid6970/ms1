@@ -585,8 +585,8 @@ Backup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code 
 
 BackupRestore_bt=tk.Label(ROOT1, text="\udb84\udc38",bg="#1d2027",fg="#3bc7ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 BackupRestore_bt.pack(side="left",padx=(3,0),pady=(0,0))
-BackupRestore_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\utility\\BackupRestore.py"], shell=True))
-BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\BackupRestore.py"],shell=True))
+BackupRestore_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\BackupRestore.py"], shell=True))
+BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\BackupRestore.py"],shell=True))
 
 PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
@@ -595,10 +595,10 @@ PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c c
 
 ColorTool_bt=tk.Label(ROOT1, text="\ue22b",bg="#1d2027",fg="#c588fd",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 ColorTool_bt.pack(side="left",padx=(3,0),pady=(0,0))
-ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_picker.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_picker.py"],shell=True))
-ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
+ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\color\\color_picker.py"], shell=True))
+ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\color\\color_picker.py"],shell=True))
+ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
+ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
 
 Search_bt=tk.Label(ROOT1, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
@@ -607,8 +607,8 @@ Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
 
 LB_get=tk.Label(ROOT1, text="\uf05a",bg="#1d2027",fg="#b9b1f1",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 LB_get.pack(side="left",padx=(3,0),pady=(0,0))
-LB_get.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True))
-LB_get.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True))
+LB_get.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\info.py"], shell=True))
+LB_get.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\info.py"], shell=True))
 # LB_get.bind("<Button-1>",lambda event:get_active_window_info())
 
 bkup=tk.Label(ROOT1,text="\ue621 \udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))

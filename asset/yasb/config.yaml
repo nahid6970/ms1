@@ -599,8 +599,8 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec C:\\ms1\\utility\\color\\color_picker.py"
-  #       on_right: "exec C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"
+  #       on_left: "exec C:\\ms1\\scripts\\color\\color_picker.py"
+  #       on_right: "exec C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
 
   # position:
   #   type: "yasb.position.Position_Widget"

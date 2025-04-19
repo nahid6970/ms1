@@ -613,15 +613,15 @@ PositionXY_CrossHair_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(
 
 ColorTool_bt=tk.Label(ROOT1, text="\ue22b",bg="#1d2027",fg="#c588fd",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 ColorTool_bt.pack(side="left",padx=(3,0),pady=(0,0))
-ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_picker.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_picker.py"],shell=True))
-ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
+ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\color\\color_picker.py"], shell=True))
+ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\color\\color_picker.py"],shell=True))
+ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
+ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
 
 Info_lb=tk.Label(ROOT1, text="\udb80\udefc",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Info_lb.pack(side="left",padx=(3,3),pady=(0,0))
-Info_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\utility\\info.py"], shell=True))
-Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\info.py"], shell=True))
+Info_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\info.py"], shell=True))
+Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\info.py"], shell=True))
 # Info_lb.bind("<Button-1>",lambda event:get_active_window_info())
 
 # wifi_reboot_lb=tk.Label(ROOT1, text="\udb85\udec4",bg="#1d2027",fg="#3ac0ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))

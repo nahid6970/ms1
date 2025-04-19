@@ -236,9 +236,9 @@ class CombinedWidget(BaseWidget):
 
     def _get_info(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'C:\\ms1\\utility\\info.py'])
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'C:\\ms1\\scripts\\info.py'])
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'code', 'C:\\ms1\\utility\\info.py'])
+           subprocess.Popen(['cmd.exe', '/c', 'code', 'C:\\ms1\\scripts\\info.py'])
 
 
     def _Tools_yasb(self, event, label):
@@ -284,14 +284,14 @@ class CombinedWidget(BaseWidget):
         modifiers = QApplication.keyboardModifiers()
         if event.button() == Qt.MouseButton.LeftButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen('cmd /c Code C:/ms1/utility/color/color_picker.py')
+                subprocess.Popen('cmd /c Code C:/ms1/scripts/color/color_picker.py')
             else:
-                subprocess.Popen('cmd /c C:/ms1/utility/color/color_picker.py')
+                subprocess.Popen('cmd /c C:/ms1/scripts/color/color_picker.py')
         elif event.button() == Qt.MouseButton.RightButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen('cmd /c Code C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
+                subprocess.Popen('cmd /c Code C:/ms1/scripts/color/color_pallet_rand_fg_bgFF00.py')
             else:
-                subprocess.Popen('cmd /c C:/ms1/utility/color/color_pallet_rand_fg_bgFF00.py')
+                subprocess.Popen('cmd /c C:/ms1/scripts/color/color_pallet_rand_fg_bgFF00.py')
         elif event.button() == Qt.MouseButton.MiddleButton:
             self.callback_middle()
 

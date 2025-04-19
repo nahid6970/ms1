@@ -151,7 +151,7 @@ BACK.grid(row=0, column=0, columnspan=3, pady=(0, 10))  # Add BACK button at the
 
 def Folder(PYTHON_SCRIPT_FRAME):
     items = [
-("#204892", "#ffffff", "Rounded Corner",       {"command": "C:\\ms1\\utility\\RoundedCornerOnOff.py"}),
+("#204892", "#ffffff", "Rounded Corner",       {"command": "C:\\ms1\\scripts\\RoundedCornerOnOff.py"}),
 ("#204892", "#ffffff", "Font",                 {"command": "C:\\ms1\\scripts\\python\\font_style.py"}),
 ("#204892", "#ffffff", "Dictionary",           {"command": "C:\\ms1\\scripts\\python\\dictionary.py"}),
 ("#204892", "#ffffff", "Process",              {"command": "cmd /c start C:\\ms1\\scripts\\mypygui_import\\process.py"}),
@@ -196,8 +196,8 @@ Folder(PYTHON_SCRIPT_FRAME)
 # def Folder(PYTHON_FRAME):
 #     RoundedCorner_lb = tk.Label(BOX, text="Rounded Corner", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
 #     RoundedCorner_lb.pack(side="top", anchor="w", padx=(0, 0), pady=(0, 0))
-#     RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
-#     RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\utility\\RoundedCornerOnOff.py"'))
+#     RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\scripts\\RoundedCornerOnOff.py"'))
+#     RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\scripts\\RoundedCornerOnOff.py"'))
 
 #     Process_bt=tk.Label(BOX, text="Process", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
 #     Process_bt.pack(side="top", anchor="w",padx=(0,0),pady=(0,0))
@@ -225,8 +225,8 @@ Backup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code 
 
 BackupRestore_bt=tk.Label(ROW_2, text="\udb84\udc38",bg="#1d2027",fg="#3bc7ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",50,"bold"))
 BackupRestore_bt.pack(side="left",padx=(3,0),pady=(0,0))
-BackupRestore_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\utility\\BackupRestore.py"], shell=True))
-BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\utility\\BackupRestore.py"],shell=True))
+BackupRestore_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\BackupRestore.py"], shell=True))
+BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\BackupRestore.py"],shell=True))
 
 Encrypt_lb = tk.Label(ROW_2,text="\uf084", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 50, "bold"))
 Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
