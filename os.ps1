@@ -205,7 +205,7 @@ function Show-MainMenu {
             }
             "mklink" {
                 $submenuListBox.Items.Add("Komorebi")
-                $submenuListBox.Items.Add("Path_Var")
+                $submenuListBox.Items.Add("Reference")
                 $submenuListBox.Items.Add("PowerShell Profile")
                 $submenuListBox.Items.Add("Prowlarr")
                 $submenuListBox.Items.Add("Radarr")
@@ -531,8 +531,8 @@ function Show-MainMenu {
                                          "
             }
             # mklink
-            "Path_Var" {
-                nw_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Path_Var.py' -Target 'C:\ms1\Path_Var.py' -Force #[pwsh]"
+            "Reference" {
+                nw_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\ms1\Reference.py' -Force #[pwsh]"
             }
             # sonarr will take some time to resolve the issue internally just wait
             "Sonarr" {

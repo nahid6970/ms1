@@ -2,9 +2,9 @@
 
 from customtkinter import *
 from datetime import datetime
-from Reference import *
 from PIL import Image, ImageTk
 from pyadl import ADLManager
+from queue import Queue
 from time import strftime
 from tkinter import Label, messagebox
 from tkinter import simpledialog
@@ -23,7 +23,8 @@ import time
 import tkinter as tk
 import win32gui
 import win32process
-from queue import Queue
+
+from Reference import *
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
