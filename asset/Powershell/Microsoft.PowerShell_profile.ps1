@@ -710,8 +710,9 @@ function gitter {
     if ([string]::IsNullOrWhiteSpace($UserInput)) {
         $CommitMessage = "$CurrentDateTime"
     } else {
-        $CommitMessage = "🚀 $UserInput $CurrentDateTime"
+        $CommitMessage = "$CurrentDateTime 🚀 $UserInput"
     }
+    
 
     # Show what changed
     git status
