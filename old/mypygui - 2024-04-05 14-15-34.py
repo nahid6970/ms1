@@ -516,7 +516,7 @@ LB_L.bind      ("<Button-1>", lambda event: toggle_window_size('line'))
 BT_TOPMOST.bind("<Button-1>", lambda event: toggle_checking())
 CLEAR.bind     ("<Button-1>", lambda event: clear_screen())
 LB_1.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"],shell=True))
-LB_K.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
+LB_K.bind      ("<Button-1>", lambda event: subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\shortcut.py", "-WindowStyle", "Hidden"],shell=True))
 bkup.bind      ("<Button-1>", lambda event: subprocess.Popen(["Start", "powershell",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle = 'GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"],shell=True))
 STATUS_MS1.bind("<Button-1>", lambda event: show_git_changes("C:\\ms1"))
 STATUS_MS2.bind("<Button-1>", lambda event: show_git_changes("C:\\ms2"))
@@ -658,9 +658,9 @@ def force_restart():
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
 def open_backup(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\backup.ps1"], shell=True)
 def open_update(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\update.ps1"],  shell=True)
 
 def c_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])

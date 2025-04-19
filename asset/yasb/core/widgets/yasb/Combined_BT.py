@@ -305,24 +305,24 @@ class CombinedWidget(BaseWidget):
 
     def PowerToys_Mouse_Pointer_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_mouse_crosshair')
+           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_mouse_crosshair')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py x_mouse_enable')
+           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py x_mouse_enable')
 
 
     def PowerToys_Text_Extract_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_TextExtract')
+           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_TextExtract')
 
 
     def PowerToys_Screen_Ruler_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_ruler')
+           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_ruler')
 
 
     def PowerToys_Screen_Color_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/HotKeys.py powertoys_color_picker')
+           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_color_picker')
 
 
     def _potplaylist_action(self, event, label):

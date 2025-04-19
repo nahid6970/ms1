@@ -576,7 +576,7 @@ check_window_topmost()
 #!This is for ROW 2
 #! Terminal & SYNC & Ruler
 def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\sync.ps1"])
 def windows_terminal(even=None):
     subprocess.Popen(["wt"])
 def powertoys_ruler(event=None):
@@ -712,9 +712,9 @@ update_cpu_core_bars()
 
 #! Backup & Update
 def open_backup(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\backup.ps1"], shell=True)
 def open_update(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\update.ps1"],  shell=True)
 
 BOX_ROW_MAIN = tk.Frame(MAIN_FRAME, bg="black") ; BOX_ROW_MAIN.pack(pady=(5,0))
 BACKUP_BT = tk.Label(BOX_ROW_MAIN, bg="#21a366", fg="#ffffff", height=1, width=13, relief="flat", highlightthickness=1, highlightbackground="#21a366", padx=3, pady=0, font=("JetBrainsMono NF", 14, "bold"), text="Backup")
@@ -727,7 +727,7 @@ UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0) ; UPDATE_BT.bin
 # def open_backup(event=None):
 #     global last_backup_click_time
 #     last_backup_click_time = datetime.now()  # Update the last clicked time
-#     subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\backup.ps1"], shell=True)
 #     update_last_backup_click_time()
 # def update_last_backup_click_time():
 #     global last_backup_click_time
@@ -768,7 +768,7 @@ UPDATE_BT.pack(side="left", anchor="center", padx=(0,0), pady=0) ; UPDATE_BT.bin
 # def open_update(event=None):
 #     global last_update_click_time
 #     last_update_click_time = datetime.now()
-#     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"], shell=True)
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\update.ps1"], shell=True)
 #     update_last_update_click_time()
 
 # def update_last_update_click_time():

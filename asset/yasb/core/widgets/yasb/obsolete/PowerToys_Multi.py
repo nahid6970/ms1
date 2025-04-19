@@ -94,25 +94,25 @@ class PowerToysWidget(BaseWidget):
 
     def _on_button_1_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\HotKeys.py powertoys_mouse_crosshair'])
+           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\scripts\\HotKeys.py powertoys_mouse_crosshair'])
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c',''])
 
     def _on_button_2_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\HotKeys.py powertoys_TextExtract'])
+           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\scripts\\HotKeys.py powertoys_TextExtract'])
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c',''])
 
     def _on_button_3_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\HotKeys.py powertoys_ruler'])
+           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\scripts\\HotKeys.py powertoys_ruler'])
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c',''])
 
     def _on_button_4_click(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\HotKeys.py powertoys_color_picker'])
+           subprocess.Popen(['cmd.exe', '/c', 'python C:\\ms1\\scripts\\HotKeys.py powertoys_color_picker'])
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c',''])
 

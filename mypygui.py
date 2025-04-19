@@ -543,8 +543,8 @@ OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code 
 
 Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
-Update.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\update.ps1"], shell=True))
-Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\update.ps1"], shell=True))
+Update.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\update.ps1"], shell=True))
+Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\update.ps1"], shell=True))
 
 # Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 # Update.pack(side="left",padx=(0,0),pady=(1,0))
@@ -564,8 +564,8 @@ Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code
 
 # ProcessPRLS_bt=CTkLabel(ROOT1, text="\uf4bc", bg_color="#1d2027",text_color="#f04410", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 # ProcessPRLS_bt.pack(side="left",padx=(10,0),pady=(1,0))
-# ProcessPRLS_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\ProcessPRLS.py"], shell=True))
-# ProcessPRLS_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\ProcessPRLS.py"], shell=True))
+# ProcessPRLS_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
+# ProcessPRLS_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
 
 AppManagement_bt=CTkLabel(ROOT1, text="\uf0be", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
@@ -596,8 +596,8 @@ ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c co
 
 ShortcutBar2=CTkLabel(ROOT1, text="\udb80\udf11", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 ShortcutBar2.pack(side="left",padx=(5,0),pady=(1,0))
-ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\shortcut.py"], shell=True))
-ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\shortcut.py"], shell=True))
+ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\shortcut.py"], shell=True))
+ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\shortcut.py"], shell=True))
 
 PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w", font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
@@ -635,8 +635,8 @@ Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:
 
 # VirtualMonitor_lb = tk.Label(ROOT1,text="2nd", bg="#1d2027", fg="#8ab9ff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 # VirtualMonitor_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# VirtualMonitor_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\2nd_Monitor.py'))
-# VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\2nd_Monitor.py'))
+# VirtualMonitor_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\scripts\\2nd_Monitor.py'))
+# VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\scripts\\2nd_Monitor.py'))
 
 ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
@@ -884,10 +884,10 @@ Upload_lb.bind("<Button-1>",None)
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_CPU.bind("<Button-1>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\ms1\pk.ps1"], shell=True))
-LB_CPU.bind("<Button-3>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\ms1\pk2.ps1"], shell=True))
-LB_CPU.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\pk.ps1"], shell=True))
-LB_CPU.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\pk2.ps1"], shell=True))
+LB_CPU.bind("<Button-1>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\ms1\scripts\pk.ps1"], shell=True))
+LB_CPU.bind("<Button-3>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\ms1\scripts\pk2.ps1"], shell=True))
+LB_CPU.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\pk.ps1"], shell=True))
+LB_CPU.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\pk2.ps1"], shell=True))
 
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#00ff21",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))

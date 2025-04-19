@@ -516,7 +516,7 @@ check_window_topmost()
 #!This is for ROW 2
 #! Terminal & SYNC & Ruler
 def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\sync.ps1"])
 def windows_terminal(even=None):
     subprocess.Popen(["wt"])
 def powertoys_ruler(event=None):
@@ -847,9 +847,9 @@ update_cpu_core_bars()
 
 #! Backup & Update
 def open_backup(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\backup.ps1"], shell=True)
 def open_update(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\update.ps1"],  shell=True)
 
 update_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\update.png"))
 backup_image = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\inkspace\\backup-50x50.png"))

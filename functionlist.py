@@ -237,10 +237,10 @@ class HoverButton(tk.Button):
 #     subprocess.Popen(["powershell", "start-process","code", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_shortcut(event):
-#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\shortcut.py", "-WindowStyle", "Hidden"], shell=True)
+#     subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\shortcut.py", "-WindowStyle", "Hidden"], shell=True)
 
 # def start_backup(event):
-#     subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"], shell=True)
+#     subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\backup.ps1 ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; cd ~}"], shell=True)
 
 
 def start_fzf_c():
@@ -311,14 +311,14 @@ def force_restart(event):
         # subprocess.run(["shutdown", "/r", "/t", "0"])
 
 # def open_backup(event=None):
-#     subprocess.Popen(["powershell", "start", "C:\\ms1\\backup.ps1"], shell=True)
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\backup.ps1"], shell=True)
 # def edit_backup(event=None):
-#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\backup.ps1"], shell=True)
+#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\scripts\\backup.ps1"], shell=True)
 
 # def open_update(event=None):
-#     subprocess.Popen(["powershell", "start", "C:\\ms1\\update.ps1"],  shell=True)
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\update.ps1"],  shell=True)
 # def edit_update(event=None):
-#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\update.ps1"],  shell=True)
+#     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\scripts\\update.ps1"],  shell=True)
 
 def c_size(event=None):
     subprocess.run(["powershell", "Start-Process rclone -ArgumentList 'ncdu c:\\' "])
@@ -342,9 +342,9 @@ def start_merge():
 #     subprocess.Popen(["powershell", "start","code", "C:\\ms1\\utility\\BackupRestore.py"])
 
 def fzf_search(event):
-    subprocess.Popen(["cmd /c start C:\\ms1\\ff.ps1"], shell=True)
+    subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\ff.ps1"], shell=True)
 def edit_fzfSearch(event):
-    subprocess.Popen(["cmd /c code C:\\ms1\\ff.ps1"],shell=True)
+    subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\ff.ps1"],shell=True)
 
 # def launch_LockBox(event=None):
 #     subprocess.Popen('cmd /c  "C:\\Program Files\\My Lockbox\\mylbx.exe"')

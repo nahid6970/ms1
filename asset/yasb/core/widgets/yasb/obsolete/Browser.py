@@ -41,7 +41,7 @@ class Browser(BaseWidget):
             subprocess.Popen("c:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
         elif event.button() == Qt.MouseButton.RightButton:
             subprocess.Popen("c:/Program Files/Google/Chrome/Application/chrome.exe")
-            # os.system("cmd /c python C:\\ms1\\HotKeys.py powertoys_mouse_crosshair")
+            # os.system("cmd /c python C:\\ms1\\scripts\\HotKeys.py powertoys_mouse_crosshair")
     def _on_mouse_enter_event(self, event):
         # Change style or perform actions when mouse enters the widget
         self._is_hovered = True

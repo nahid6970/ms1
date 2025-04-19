@@ -331,7 +331,7 @@ update_cpu_core_bars()
 
 
 def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\sync.ps1"])
 def windows_terminal(even=None):
     subprocess.Popen(["wt"])
 def powertoys_ruler(event=None):

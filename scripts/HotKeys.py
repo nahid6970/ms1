@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
 
 # def rclone_sync():
-#     subprocess.Popen(["powershell", "start", "C:\\ms1\\sync.ps1"])
+#     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\sync.ps1"])
 
 # def windows_terminal():
 #     subprocess.Popen(["wt"])

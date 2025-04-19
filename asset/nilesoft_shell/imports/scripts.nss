@@ -5,7 +5,7 @@ item(title='Restart File Explorer' image=\uE013 cmd-powershell="Stop-Process -Na
 
 	menu(title="Rclone" image=\uE09C)
 	{
-	item(title='sync.ps1' image=\uE218 cmd-pwsh="C:\\ms1\\sync.ps1")
+	item(title='sync.ps1' image=\uE218 cmd-pwsh="C:\\ms1\\scripts\\sync.ps1")
 	item(title='msBackups' image=\uE218 cmd-pwsh='rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=1 --track-renames --fast-list')
 	}
 

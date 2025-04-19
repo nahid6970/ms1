@@ -524,7 +524,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_TextExtract"
+  #       on_left: "exec cmd /c python C:\\ms1\\scripts\\HotKeys.py powertoys_TextExtract"
   #       on_right: "do_nothing"
 
   # PowerToys_Screen_Ruler:
@@ -536,7 +536,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_ruler"
+  #       on_left: "exec cmd /c python C:\\ms1\\scripts\\HotKeys.py powertoys_ruler"
   #       on_right: "do_nothing"
 
   # PowerToys_Color_Picker:
@@ -548,7 +548,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec cmd /c python C:\\ms1\\HotKeys.py powertoys_color_picker"
+  #       on_left: "exec cmd /c python C:\\ms1\\scripts\\HotKeys.py powertoys_color_picker"
   #       on_right: "do_nothing"
 
   # PowerToys:

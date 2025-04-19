@@ -11,11 +11,11 @@ function mypygui               {Start-Process "python.exe" -ArgumentList "C:\ms1
 function powertoys             {if (Test-Path "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe") { Start-Process "C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe" } elseif (Test-Path "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe") { Start-Process "C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe" } else { Write-Warning "PowerToys not found in either expected location." } }
 function rssguard              {Start-Process "C:\Users\nahid\scoop\apps\rssguard\current\rssguard.exe" }
 function rssowl                {Start-Process "C:\RSSOwlnix\RSSOwlnix.exe" -WindowStyle Minimized }
-function sync                  {Start-Process "C:\ms1\sync.ps1" }
+function sync                  {Start-Process "C:\ms1\scripts\sync.ps1" }
 function syncthing             {Start-Process "C:\Users\nahid\scoop\apps\syncthing\current\syncthing.exe" -WindowStyle Hidden }
 function valo_qbit             {Start-Process "C:\ms1\scripts\valorant\valo_qbit.ps1" -WindowStyle Hidden }
 
-function arr_monitor           {Start-Process "C:\ms1\arr_monitor.ps1" -WindowStyle Hidden }
+function arr_monitor           {Start-Process "C:\ms1\scripts\arr_monitor.ps1" -WindowStyle Hidden }
 function bazarr                {Start-Process -FilePath "C:\ProgramData\Bazarr\WinPython\python-3.10.0\python.exe" -ArgumentList "C:\ProgramData\Bazarr\bazarr.py" -WindowStyle Hidden }
 function flaresolver           {Start-Process "C:\Users\nahid\scoop\apps\flaresolverr\current\flaresolverr.exe" -WindowStyle Hidden }
 function prowlarr              {C:\ProgramData\Prowlarr\bin\Prowlarr.exe }
