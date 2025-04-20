@@ -606,6 +606,18 @@ def Event_Function():
                             press_keys_with_delays(window, selected_key, 1, 'c', 1)
 
 
+                    # elif find_image(Tournament_step1, confidence=0.8) or find_image(Alt_BattlePass_Gems, confidence=0.8): #! this one is to get gems from battlepass
+                    #     if find_image(Tournament_step1, confidence=0.8):
+                    #         if selected_key == "num3":
+                    #             press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
+                    #         else:
+                    #             press_keys_with_delays(window, selected_key, 1, 'c', 1)
+                    #     else:
+                    #         # Action when Alt_step1 is found
+                    #         press_keys_with_delays(window, 'g', 1, 'f', 1)  # <-- change this to your desired combo
+
+
+
                     elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
                     elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
                     elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
