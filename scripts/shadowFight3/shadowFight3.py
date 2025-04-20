@@ -722,8 +722,8 @@ def FameFunction(button):
                     # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
                     elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
 
-                    # elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=0.8, region=(1073, 178, 1101, 199)): press_global_screen_with_delays(( 960, 540, 3)) #! need fixing
-                    elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=0.8, region=(804, 176, 1101, 199)): press_global_screen_with_delays(( 960, 540, 3)) #! need fixing
+                    # elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=1, region=(1079, 178, 1095, 196)): press_global_screen_with_delays(( 450, 65, 10)) #! not working duel still ranking lost
+                    # # elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=0.8, region=(804, 176, 1101, 199)): press_global_screen_with_delays(( 960, 540, 3)) #! not working duel still ranking lost
 
                     # elif (find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)) and 
                     #     find_image(default_sbs, confidence=0.8, region=(177, 83, 500, 500))):
