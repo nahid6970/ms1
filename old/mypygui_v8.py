@@ -862,13 +862,11 @@ def open_Winapps_fd():
 def open_programdata_fd():
     subprocess.run(["explorer", "C:\\ProgramData"])
 
-icon_path = "C:\\Users\\nahid\\OneDrive\\backup\\icon\\Dolphin_icon-20x20.png"
-icon_image = ImageTk.PhotoImage(Image.open(icon_path))
 
 def switch_to_tools_frame():
     switch_to_frame(FRAME_FOLDER, MAIN_FRAME)
 
-BT_FOLDER = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame,image=icon_image, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=40, width=300, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#e7d86a", font=("JetBrainsMono NF", 13, "bold"))
+BT_FOLDER = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=0, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#070707", font=("JetBrainsMono NF", 13, "bold"))
 BT_FOLDER.pack(padx=(0,0),pady=(0,0))
 
 FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAME_FOLDER.pack_propagate(True)
@@ -1494,14 +1492,13 @@ def force_restart():
     if confirmed:
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
-shutdown = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\shutdown3.png"))
-restart = ImageTk.PhotoImage(Image.open("C:\\Users\\nahid\\OneDrive\\backup\\icon\\reboot-50x50.png"))
+
 
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
 # force_shutdown_bt = tk.Button(BOX_1, text="Shutdown [F]", command=force_shutdown, height=1, width=15, bg="#ff0000", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 # force_restart_bt  = tk.Button(BOX_1, text="Restart [F]",  command=force_restart,  height=1, width=15, bg="#ff6600", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-force_shutdown_bt = tk.Button(BOX_1, image=shutdown,compound=tk.TOP, text="", command=force_shutdown, height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-force_restart_bt  = tk.Button(BOX_1, image=restart, compound=tk.TOP, text="", command=force_restart,  height=50, width=50, bg="#1d2027", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
+force_shutdown_bt = tk.Button(BOX_1, text="\uf011", command=force_shutdown, height=0, width=0, bg="#1d2027", fg="#ff0101", bd=0, highlightthickness=0, anchor="center", font=("Jetbrainsmono nfp", 20, "bold"))
+force_restart_bt  = tk.Button(BOX_1, text="\uead2", command=force_restart,  height=0, width=0, bg="#1d2027", fg="#00a2ff", bd=0, highlightthickness=0, anchor="center", font=("Jetbrainsmono nfp", 20, "bold"))
 
 force_shutdown_bt.pack(pady=0, side="left", anchor="w", padx=(0,30))
 force_restart_bt.pack (pady=0, side="left", anchor="w", padx=(30,0))
