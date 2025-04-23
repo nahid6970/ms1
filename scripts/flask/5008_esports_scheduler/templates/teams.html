@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Teams</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<style>
+    @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+html,
+body {
+font-family: jetbrainsmono nfp;
+}
+</style>
+<body class="container mt-4">
+  <h2>Add New Team</h2>
+  <form method="POST" class="row g-3 mb-4">
+    <div class="col-md-6"><input name="name" class="form-control" placeholder="Team Name" required></div>
+    <div class="col-md-6"><input name="logo_url" class="form-control" placeholder="Logo URL" required></div>
+    <div class="col-12"><button class="btn btn-primary">Add Team</button></div>
+  </form>
+
+  <h3>Existing Teams</h3>
+  <ul class="list-group">
+    {% for team in teams %}
+      <li class="list-group-item d-flex align-items-center">
+        <img src="{{ team.logo_url }}" width="40" height="40" class="me-2">
+        {{ team.name }}
+        <form method="POST" action="{{ url_for('delete_team', id=team.id) }}" class="ms-3">
+          <button type="submit" class="btn btn-danger btn-sm"><i class="nf nf-md-delete"></i></button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
