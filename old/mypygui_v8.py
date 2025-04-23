@@ -866,7 +866,7 @@ def open_programdata_fd():
 def switch_to_tools_frame():
     switch_to_frame(FRAME_FOLDER, MAIN_FRAME)
 
-BT_FOLDER = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=0, width=30, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#070707", font=("JetBrainsMono NF", 13, "bold"))
+BT_FOLDER = M1_hold_release(MAIN_FRAME, "Folder", switch_to_tools_frame, compound=tk.TOP, bg="#e7d86a", fg="#1D2027", height=0, width=28, anchor="w", relief="flat", highlightthickness=2, highlightbackground="#070707", font=("JetBrainsMono NFP", 14, "bold"))
 BT_FOLDER.pack(padx=(0,0),pady=(0,0))
 
 FRAME_FOLDER = tk.Frame(BORDER_FRAME, bg="#1D2027", width=520, height=800) ; FRAME_FOLDER.pack_propagate(True)
@@ -1474,8 +1474,6 @@ folder_dropdown.grid(row=0, column=1, rowspan=1, padx=5, pady=10)
 script_dropdown.grid(row=1, column=1, rowspan=1, padx=5, pady=10)
 run_button.grid(row=0, column=2, rowspan=2, padx=5, pady=10, sticky="nsew") #! nwse means full filling up down left right spaces so if ns means fullfill up and down portion
 
-
-
 #! ██████╗ ███████╗███████╗████████╗ █████╗ ██████╗ ████████╗       ██╗       ███████╗██╗  ██╗██╗   ██╗████████╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
 #! ██╔══██╗██╔════╝██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝       ██║       ██╔════╝██║  ██║██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗██║    ██║████╗  ██║
 #! ██████╔╝█████╗  ███████╗   ██║   ███████║██████╔╝   ██║       ████████╗    ███████╗███████║██║   ██║   ██║   ██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
@@ -1492,11 +1490,7 @@ def force_restart():
     if confirmed:
         subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
 
-
-
 BOX_1 = tk.Frame(MAIN_FRAME, bg="#1d2027") ; BOX_1.pack(pady=(5,0))
-# force_shutdown_bt = tk.Button(BOX_1, text="Shutdown [F]", command=force_shutdown, height=1, width=15, bg="#ff0000", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
-# force_restart_bt  = tk.Button(BOX_1, text="Restart [F]",  command=force_restart,  height=1, width=15, bg="#ff6600", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 force_shutdown_bt = tk.Button(BOX_1, text="\uf011", command=force_shutdown, height=0, width=0, bg="#1d2027", fg="#ff0101", bd=0, highlightthickness=0, anchor="center", font=("Jetbrainsmono nfp", 20, "bold"))
 force_restart_bt  = tk.Button(BOX_1, text="\uead2", command=force_restart,  height=0, width=0, bg="#1d2027", fg="#00a2ff", bd=0, highlightthickness=0, anchor="center", font=("Jetbrainsmono nfp", 20, "bold"))
 
