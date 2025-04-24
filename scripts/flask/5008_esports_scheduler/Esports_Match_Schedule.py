@@ -91,6 +91,8 @@ def delete_team(id):
     db.session.commit()
     return redirect(url_for('manage_teams'))
 
+from datetime import datetime, timedelta
+
 @app.route('/edit-match/<int:match_id>', methods=['GET', 'POST'])
 def edit_match(match_id):
     match = Match.query.get(match_id)
@@ -100,22 +102,26 @@ def edit_match(match_id):
         team1_id = request.form['team1']
         team2_id = request.form['team2']
         game_link = request.form['game_link']
-        duration = request.form['duration']
+        duration = request.form['duration'].strip()
 
         # Parse the duration
         days, hours, minutes = 0, 0, 0
 
-        if 'd' in duration:
-            days = int(duration.split('d')[0])
-        if 'h' in duration:
-            hours = int(duration.split('d')[-1].split('h')[0])
-        if 'm' in duration:
-            minutes = int(duration.split('h')[-1].split('m')[0])
+        d_match = re.search(r'(\d+)\s*d', duration)
+        h_match = re.search(r'(\d+)\s*h', duration)
+        m_match = re.search(r'(\d+)\s*m', duration)
 
-        # Calculate match time (current time + duration)
+        if d_match:
+            days = int(d_match.group(1))
+        if h_match:
+            hours = int(h_match.group(1))
+        if m_match:
+            minutes = int(m_match.group(1))
+
+        # Calculate new game time from now
         game_time = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes)
 
-        # Update the match details
+        # Update the match
         match.team1_id = team1_id
         match.team2_id = team2_id
         match.game_link = game_link
@@ -124,7 +130,15 @@ def edit_match(match_id):
         db.session.commit()
         return redirect(url_for('index'))
 
-    return render_template('edit_match.html', match=match, teams=teams)
+    # This part runs only for GET (form load)
+    now = datetime.now()
+    remaining = match.game_time - now if match.game_time > now else timedelta(0)
+    days = remaining.days
+    hours = remaining.seconds // 3600
+    minutes = (remaining.seconds % 3600) // 60
+    duration_str = f"{days}d {hours}h {minutes}m"
+
+    return render_template('edit_match.html', match=match, teams=teams, duration=duration_str)
 
 
 if __name__ == '__main__':
