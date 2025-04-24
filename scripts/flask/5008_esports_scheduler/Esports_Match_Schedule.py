@@ -23,11 +23,19 @@ class Match(db.Model):
     team1 = db.relationship('Team', foreign_keys=[team1_id])
     team2 = db.relationship('Team', foreign_keys=[team2_id])
 
-# Routes
+# @app.route('/')
+# def index():
+#     now = datetime.now()
+#     matches = Match.query.filter(Match.game_time >= now).order_by(Match.game_time).all()
+#     return render_template('index.html', matches=matches)
+
 @app.route('/')
 def index():
-    matches = Match.query.order_by(Match.game_time).all()
+    now = datetime.now()
+    threshold = now - timedelta(hours=10)
+    matches = Match.query.filter(Match.game_time >= threshold).order_by(Match.game_time).all()
     return render_template('index.html', matches=matches)
+
 
 from datetime import datetime, timedelta
 
@@ -139,6 +147,12 @@ def edit_match(match_id):
     duration_str = f"{days}d {hours}h {minutes}m"
 
     return render_template('edit_match.html', match=match, teams=teams, duration=duration_str)
+
+@app.route('/history')
+def match_history():
+    now = datetime.now()
+    past_matches = Match.query.filter(Match.game_time < now).order_by(Match.game_time.desc()).all()
+    return render_template('history.html', matches=past_matches)
 
 
 if __name__ == '__main__':

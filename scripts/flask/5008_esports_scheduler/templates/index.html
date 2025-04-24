@@ -4,21 +4,28 @@
   <title>Esports Matches</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
+    @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+    html,
+    body {
+    background-color: #c0c0c0;
+    font-family: jetbrainsmono nfp;
+    }
     .countdown {
       font-size: 1rem;
       font-weight: bold;
       padding: 5px 10px;
       border-radius: 5px;
       background-color: #ff6f61;
-      color: rgb(0, 0, 0);
+      color: rgb(113, 255, 137);
       display: inline-block;
       margin-left: 10px;
-      text-transform: uppercase;
+      text-transform: lowercase;
     }
     .countdown.expired {
-      background-color: #6c757d;
+      background-color: #000000;
     }
     .countdown.live {
+      color: rgb(0, 0, 0);
       background-color: #bad6c1;
     }
   </style>
@@ -29,7 +36,8 @@
         const now = new Date();
         const diff = time - now;
         if (diff <= 0) {
-          el.innerText = "LIVE or EXPIRED";
+          // el.innerText = "LIVE or EXPIRED";
+          el.innerText = "\uf058";
           el.classList.add('expired');
           el.classList.remove('live');
           return;
@@ -52,6 +60,8 @@
   <div class="d-flex justify-content-center gap-2 mb-4">
     <a href="/add-match" class="btn btn-success">Add Match</a>
     <a href="/teams" class="btn btn-secondary">Manage Teams</a>
+    <a href="/history" class="btn btn-info btn-secondary">Match History</a>
+
   </div>
 
   <div class="row justify-content-center">
@@ -79,11 +89,11 @@
             <!-- <small>Countdown: <span class="countdown" data-time="{{ match.game_time.isoformat() }}"></span></small> -->
             <small><span class="countdown" data-time="{{ match.game_time.isoformat() }}"></span></small>
             <div class="d-flex gap-2">
-              <a href="{{ match.game_link }}" target="_blank" class="btn btn-primary btn-sm">Watch</a>
+              <a href="{{ match.game_link }}" target="_blank" class="btn btn-primary btn-sm"><i class="nf nf-md-eye"></i></a>
+              <a href="{{ url_for('edit_match', match_id=match.id) }}" class="btn btn-warning btn-sm"><i class="nf nf-fa-edit"></i></a>
               <form method="POST" action="{{ url_for('delete_match', id=match.id) }}">
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                <button type="submit" class="btn btn-danger btn-sm"><i class="nf nf-md-delete"></i></button>
               </form>
-              <a href="{{ url_for('edit_match', match_id=match.id) }}" class="btn btn-warning btn-sm">Edit</a>
             </div>
           </div>
         </div>
