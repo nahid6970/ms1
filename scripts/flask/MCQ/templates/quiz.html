@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .question-block {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .options-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .option-label {
+            background-color: #e0e0e0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #d0d0d0;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 8px;
+        }
+
+        button {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz</h1>
+    <form method="POST" action="{{ url_for('submit_quiz') }}">
+        {% for q in shuffled_questions %}
+        <div class="question-block">
+            <div class="question-text">
+                {{ q.question.question }}
+                <span style="font-weight: normal; font-size: 14px; color: gray;">
+                    ({{ q.correct_count }}/{{ q.correct_count + q.incorrect_count }} correct)
+                </span>
+            </div>
+            <div class="options-row">
+                {% for option, answer in q.answers %}
+                <label class="option-label">
+                    <input type="radio" name="answer_{{ q.question.id }}" value="{{ option }}" required>
+                    {{ answer }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit">Submit Quiz</button>
+    </form>
+</body>
+</html>
