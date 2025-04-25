@@ -28,6 +28,28 @@
       color: rgb(0, 0, 0);
       background-color: #bad6c1;
     }
+
+    .match-history {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 10px;
+      margin-bottom: 30px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+    }
+    .match-card {
+      min-width: 250px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 8px;
+      background: white;
+    }
+    .match-card small {
+      font-size: 0.8rem;
+      color: gray;
+    }
   </style>
   <script>
     function updateCountdowns() {
@@ -64,8 +86,23 @@
 
   </div>
 
+  <!-- Match History (Past Matches) -->
+  <div>
+    <h4>Recent Match History</h4>
+    <div class="match-history">
+      {% for match in past_matches %}
+        <div class="match-card">
+          <strong>{{ match.team1.name }} vs {{ match.team2.name }}</strong><br>
+          <small>{{ match.game_time.strftime('%Y-%m-%d %H:%M') }}</small><br>
+          <a href="{{ match.game_link }}" target="_blank">Watch</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+    <!-- Upcoming Matches -->
   <div class="row justify-content-center">
-    {% for match in matches %}
+    {% for match in upcoming_matches %}
       <div class="col-md-6 mb-4">
         <div class="card">
           <div class="card-body d-flex justify-content-center align-items-center">

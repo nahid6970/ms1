@@ -1,6 +1,6 @@
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 import re
 
 app = Flask(__name__)
@@ -29,15 +29,20 @@ class Match(db.Model):
 #     matches = Match.query.filter(Match.game_time >= now).order_by(Match.game_time).all()
 #     return render_template('index.html', matches=matches)
 
+# @app.route('/')
+# def index():
+#     now = datetime.now()
+#     threshold = now - timedelta(hours=10)
+#     matches = Match.query.filter(Match.game_time >= threshold).order_by(Match.game_time).all()
+#     return render_template('index.html', matches=matches)
+
 @app.route('/')
 def index():
     now = datetime.now()
-    threshold = now - timedelta(hours=10)
-    matches = Match.query.filter(Match.game_time >= threshold).order_by(Match.game_time).all()
-    return render_template('index.html', matches=matches)
+    upcoming_matches = Match.query.filter(Match.game_time >= now).order_by(Match.game_time).all()
+    past_matches = Match.query.filter(Match.game_time < now).order_by(Match.game_time.desc()).limit(10).all()
+    return render_template('index.html', upcoming_matches=upcoming_matches, past_matches=past_matches)
 
-
-from datetime import datetime, timedelta
 
 @app.route('/add-match', methods=['GET', 'POST'])
 def add_match():
