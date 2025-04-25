@@ -23,7 +23,9 @@ function SearchDirectoriesAndFiles {
         --preview="highlight -O ansi -l {1}" `
         --preview-window=top:30% `
         --bind "enter:execute-silent(code {1})" `
-        --bind "ctrl-o:execute-silent(explorer.exe {2})"
+        --bind "ctrl-o:execute-silent(explorer.exe {2})" `
+        --bind "ctrl-c:execute-silent(cmd /c echo {1} | clip)"
+
 }
 
 
