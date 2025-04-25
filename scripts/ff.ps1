@@ -26,21 +26,19 @@ function OpenContainingFolder {
 
 # Main function
 function SearchDirectoriesAndFiles {
-    $selectedDirectory = $directories
-    if ($selectedDirectory) {
-        Get-ChildItem -Path $selectedDirectory -File -Recurse -ErrorAction SilentlyContinue |
-        Where-Object { $_.FullName -notmatch ($ignoreList -join '|') } |
-        ForEach-Object {
-            "$($_.FullName)`t$($_.DirectoryName)"
-        } | fzf --with-nth=1 --delimiter "`t" --preview "highlight -O ansi -l {1}" --preview-window=top:30% `
-               --bind "ctrl-o:execute-silent(explorer.exe {2})" | ForEach-Object {
-            $selected = ($_ -split "`t")[0]
-            if ($selected) {
-                OpenFileInVSCode $selected
-            }
-        }
-    }
+    # your $directories and $ignoreList definitions…
+    Get-ChildItem -Path $directories -File -Recurse -ErrorAction SilentlyContinue |
+      Where-Object { $_.FullName -notmatch ($ignoreList -join '|') } |
+      ForEach-Object { "$($_.FullName)`t$($_.DirectoryName)" } |
+      fzf `
+        --with-nth=1 `
+        --delimiter="`t" `
+        --preview="highlight -O ansi -l {1}" `
+        --preview-window=top:30% `
+        --bind "enter:execute-silent(code {1})" `
+        --bind "ctrl-o:execute-silent(explorer.exe {2})"
 }
+
 
 # Call main
 SearchDirectoriesAndFiles
