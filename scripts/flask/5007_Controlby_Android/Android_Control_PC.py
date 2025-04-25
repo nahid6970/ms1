@@ -10,7 +10,10 @@ COMMANDS = {
     "Show IP Config": "ipconfig",
     "Open Notepad": "start notepad",
     "Open Calculator": "start calc",
-    "System Info": "systeminfo"
+    "System Info": "systeminfo",
+    "Shutdown": "shutdown /s /t 0",
+    "Restart": "shutdown /r /t 0",
+    "Sign Out": "shutdown /l"
 }
 
 @app.route('/', methods=['GET', 'POST'])

@@ -43,25 +43,29 @@ def add_question():
     return render_template('add_question.html')
 
 
-@app.route('/quiz')
+@app.route("/quiz")
 def quiz():
-    questions = Question.query.all()
+    all_questions = Question.query.all()
+    selected_questions = random.sample(all_questions, min(10, len(all_questions)))
+
+    # Prepare for template: include correct/incorrect counts and shuffled options
     shuffled_questions = []
-    for q in questions:
+    for q in selected_questions:
         options = [
-            ('A', q.answer_a),
-            ('B', q.answer_b),
-            ('C', q.answer_c),
-            ('D', q.answer_d)
+            ("A", q.option_a),
+            ("B", q.option_b),
+            ("C", q.option_c),
+            ("D", q.option_d)
         ]
         random.shuffle(options)
         shuffled_questions.append({
-            'question': q,
-            'answers': options,
-            'correct_count': q.correct_count,
-            'incorrect_count': q.incorrect_count
+            "question": q,
+            "answers": options,
+            "correct_count": q.correct_count or 0,
+            "incorrect_count": q.incorrect_count or 0
         })
-    return render_template('quiz.html', shuffled_questions=shuffled_questions)
+    return render_template("quiz.html", shuffled_questions=shuffled_questions)
+
 
 
 @app.route('/submit', methods=['POST'])
