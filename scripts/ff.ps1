@@ -1,54 +1,46 @@
-#! ──────────────────────────────────────────────────────────────────────────────
-#! Config
-#! ──────────────────────────────────────────────────────────────────────────────
+# Directories to search
 $directories = @(
-    # $HOME
-    # "C:\",
     "C:\ms1",
     "C:\ms2",
     "C:\ms3",
     "D:\",
     "C:\Program Files\WindowsApps",
-    "C:\Users\nahid",
-    ""
-) | Where-Object { $_ -ne "" } # Filter out empty strings
+    "C:\Users\nahid"
+) | Where-Object { $_ -ne "" }
 
-# Ignore list for directories or files
+# Ignore list
 $ignoreList = @(".git", ".pyc")
 
-# Function to open selected file in Visual Studio Code
-# function OpenFileInVSCode {
-#     param (
-#         [string]$filePath
-#     )
-#     Start-Process "code" $filePath
-# }
-
+# Open in VS Code
 function OpenFileInVSCode {
-    param (
-        [string]$filePath
-    )
-    # Surround the file path with double quotes
+    param ([string]$filePath)
     Start-Process "code" "`"$filePath`""
 }
 
-#! ──────────────────────────────────────────────────────────────────────────────
-#! Main
-#! ──────────────────────────────────────────────────────────────────────────────
+# Open in Explorer
+function OpenContainingFolder {
+    param ([string]$filePath)
+    $folderPath = Split-Path -Parent $filePath
+    Start-Process "explorer.exe" "`"$folderPath`""
+}
 
-# Main function to search directories and files using fzf
+# Main function
 function SearchDirectoriesAndFiles {
-    $selectedDirectory = ($directories)
+    $selectedDirectory = $directories
     if ($selectedDirectory) {
-        # Stream files gradually to fzf using a pipeline
         Get-ChildItem -Path $selectedDirectory -File -Recurse -ErrorAction SilentlyContinue |
         Where-Object { $_.FullName -notmatch ($ignoreList -join '|') } |
         ForEach-Object {
-            $_.FullName # Print the file path to console
-        } | fzf -m --preview "highlight -O ansi -l {}" --preview-window=top:30% | ForEach-Object {
-            OpenFileInVSCode $_
+            "$($_.FullName)`t$($_.DirectoryName)"
+        } | fzf --with-nth=1 --delimiter "`t" --preview "highlight -O ansi -l {1}" --preview-window=top:30% `
+               --bind "ctrl-o:execute-silent(explorer.exe {2})" | ForEach-Object {
+            $selected = ($_ -split "`t")[0]
+            if ($selected) {
+                OpenFileInVSCode $selected
+            }
         }
     }
 }
-# Call the main function
+
+# Call main
 SearchDirectoriesAndFiles
