@@ -44,7 +44,7 @@ RAlt & -::Run("C:\ms1\scripts\Autohtokey\version1\text\Replace_Dash_W_Space.ahk"
 RAlt & Space::Run("C:\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 #x::Run("C:\ms1\mypygui.py", , "Hide")
-!Space::Run("C:\ms1\Run.py", , "Hide")
+!Space::Run("C:\ms1\scripts\ff.ps1", , "Show")
 #s::Run("C:\ms1\startup.py", , "Hide")
 ^+m::Run("C:\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 !x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
