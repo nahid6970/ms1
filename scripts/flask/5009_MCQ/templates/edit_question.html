@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Question</title>
+</head>
+<body>
+    <h2>Edit Question</h2>
+    <form method="POST">
+        <label>Question:</label><br>
+        <textarea name="question" rows="2" cols="60">{{ question.question }}</textarea><br><br>
+
+        <label>Answer A:</label><br>
+        <input name="answer_a" value="{{ question.answer_a }}"><br><br>
+
+        <label>Answer B:</label><br>
+        <input name="answer_b" value="{{ question.answer_b }}"><br><br>
+
+        <label>Answer C:</label><br>
+        <input name="answer_c" value="{{ question.answer_c }}"><br><br>
+
+        <label>Answer D:</label><br>
+        <input name="answer_d" value="{{ question.answer_d }}"><br><br>
+
+        <label>Correct Answer (A/B/C/D):</label><br>
+        <input name="correct_answer" value="{{ question.correct_answer }}"><br><br>
+
+        <button type="submit">Update</button>
+        <a href="{{ url_for('quiz') }}">Cancel</a>
+    </form>
+</body>
+</html>
