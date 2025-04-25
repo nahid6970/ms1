@@ -11,19 +11,6 @@ $directories = @(
 # Ignore list
 $ignoreList = @(".git", ".pyc")
 
-# Open in VS Code
-function OpenFileInVSCode {
-    param ([string]$filePath)
-    Start-Process "code" "`"$filePath`""
-}
-
-# Open in Explorer
-function OpenContainingFolder {
-    param ([string]$filePath)
-    $folderPath = Split-Path -Parent $filePath
-    Start-Process "explorer.exe" "`"$folderPath`""
-}
-
 # Main function
 function SearchDirectoriesAndFiles {
     # your $directories and $ignoreList definitions…
