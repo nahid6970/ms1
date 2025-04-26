@@ -27,19 +27,11 @@
             margin-bottom: 10px;
         }
 
-        .options-row {
-            display: flex;
-            gap: 10px;
-        }
-
         .answer {
+            margin: 5px 0;
             padding: 12px 16px;
             border-radius: 8px;
             font-weight: 600;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .correct {
@@ -54,12 +46,20 @@
             border-left: 5px solid #dc3545;
         }
 
+        .highlight {
+            font-weight: bold;
+            font-style: italic;
+        }
+
         .summary {
             text-align: center;
             font-size: 20px;
             margin-bottom: 30px;
         }
 
+        .answer-text {
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -71,28 +71,24 @@
     {% for r in results %}
     <div class="result-block">
         <div class="question">{{ r.question }}</div>
-        
-        <div class="options-row">
-            {% for key, value in r.answers.items() %}
-                {% if key == r.selected and key == r.correct %}
-                    <div class="answer correct">
-                        ✔️ {{ value }}
-                    </div>
-                {% elif key == r.selected and key != r.correct %}
-                    <div class="answer wrong">
-                        ❌ {{ value }}
-                    </div>
-                {% elif key == r.correct %}
-                    <div class="answer correct">
-                        ✔️ {{ value }}
-                    </div>
-                {% else %}
-                    <div class="answer">
-                        {{ value }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
+
+        {% for key, value in r.answers.items() %}
+            {% if key == r.selected and key == r.correct %}
+                <div class="answer correct">
+                    ✔️ {{ value }} <span class="highlight">(Your answer & Correct)</span>
+                </div>
+            {% elif key == r.selected and key != r.correct %}
+                <div class="answer wrong">
+                    ❌ {{ value }} <span class="highlight">(Your answer)</span>
+                </div>
+            {% elif key == r.correct %}
+                <div class="answer correct">
+                    ✔️ {{ value }} <span class="highlight">(Correct Answer)</span>
+                </div>
+            {% else %}
+                <div class="answer answer-text">{{ value }}</div>
+            {% endif %}
+        {% endfor %}
     </div>
     {% endfor %}
 </body>
