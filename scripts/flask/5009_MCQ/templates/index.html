@@ -82,12 +82,17 @@
 
     <h1>Welcome to the MCQ Quiz App</h1>
 
-    <div class="top-bar">
-        <button onclick="showModal()">➕ Add Question</button>
-        <a href="{{ url_for('quiz') }}" class="start-quiz-btn">Start Quiz</a>
-        <span class="question-count">Questions: {{ question_count }}</span>
-    </div>
+    <button onclick="showModal()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s;"> ➕ Add Question </button>
     
+    <a href="{{ url_for('quiz') }}" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; text-align: center; transition: background-color 0.3s;"> ▶️ Start Quiz </a>
+    
+    <style>
+        button:hover, a:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+    </style>
+    
+    <span style="margin-left: 10px; font-weight: bold;">Questions: {{ question_count }}</span>
 
     <!-- Modal -->
     <div id="modal">
