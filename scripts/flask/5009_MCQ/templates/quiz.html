@@ -57,33 +57,32 @@
             text-decoration: underline;
         }
 
-    .options-row {
-        display: flex;
-        flex-direction: column; /* Stack options vertically */
-        gap: 10px; /* space between options */
-        margin-top: 15px;
-    }
+        .options-row {
+            display: flex;
+            flex-direction: column; /* Stack options vertically */
+            gap: 10px; /* space between options */
+            margin-top: 15px;
+        }
 
-    .option-label {
-        background-color: #e0e0e0;
-        padding: 12px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        transition: background-color 0.2s ease;
-        width: 100%; /* Make all options same width */
-        box-sizing: border-box;
-    }
+        .option-label {
+            background-color: #e0e0e0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+            width: 100%; /* Make all options same width */
+            box-sizing: border-box;
+        }
 
-    .option-label:hover {
-        background-color: #d0d0d0;
-    }
+        .option-label:hover {
+            background-color: #d0d0d0;
+        }
 
-    .option-label input[type="radio"] {
-        margin-right: 10px;
-    }
-
+        .option-label input[type="radio"] {
+            margin-right: 10px;
+        }
 
         button {
             display: block;
@@ -105,6 +104,12 @@
 <body>
     <h1>Quiz</h1>
     <form method="POST" action="{{ url_for('submit_quiz') }}">
+        
+        <!-- Hidden inputs for selected question IDs -->
+        {% for id in selected_ids %}
+            <input type="hidden" name="question_ids" value="{{ id }}">
+        {% endfor %}
+
         {% for q in shuffled_questions %}
         <div class="question-block">
             <div class="question-header">
@@ -130,6 +135,7 @@
             </div>
         </div>
         {% endfor %}
+        
         <button type="submit">Submit Quiz</button>
     </form>
 </body>

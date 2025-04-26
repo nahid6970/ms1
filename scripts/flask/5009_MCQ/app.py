@@ -55,9 +55,8 @@ def add_question():
 @app.route("/quiz")
 def quiz():
     all_questions = Question.query.all()
-    selected_questions = random.sample(all_questions, min(10, len(all_questions)))
+    selected_questions = random.sample(all_questions, min(2, len(all_questions)))
 
-    # Prepare for template: include correct/incorrect counts and shuffled options
     shuffled_questions = []
     for q in selected_questions:
         options = [
@@ -73,18 +72,22 @@ def quiz():
             "correct_count": q.correct_count or 0,
             "incorrect_count": q.incorrect_count or 0
         })
-    return render_template("quiz.html", shuffled_questions=shuffled_questions)
+    
+    selected_ids = [q.id for q in selected_questions]  # <- Add this line
+
+    return render_template("quiz.html", shuffled_questions=shuffled_questions, selected_ids=selected_ids)
 
 
 @app.route('/submit', methods=['POST'])
 def submit_quiz():
-    questions = Question.query.all()
+    question_ids = request.form.getlist('question_ids')  # ✅ only selected IDs
+    questions = Question.query.filter(Question.id.in_(question_ids)).all()
+
     results = []
     score = 0
     for question in questions:
         selected = request.form.get(f'answer_{question.id}')
         correct = question.correct_answer
-        # Track stats
         is_correct = selected == correct
         if is_correct:
             question.correct_count += 1
@@ -92,7 +95,7 @@ def submit_quiz():
         else:
             question.incorrect_count += 1
         db.session.commit()
-        # Store result for display
+
         results.append({
             'question': question.question,
             'selected': selected,
@@ -105,6 +108,7 @@ def submit_quiz():
             },
             'is_correct': is_correct
         })
+
     return render_template('result.html', score=score, total=len(questions), results=results)
 
 
