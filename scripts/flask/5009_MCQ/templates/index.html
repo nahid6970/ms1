@@ -4,10 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCQ Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f9f9f9;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        #modalContent {
+            background: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+
+        .close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        label, input {
+            display: block;
+            width: 100%;
+        }
+
+        input {
+            margin-bottom: 10px;
+            padding: 6px;
+        }
+
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4CAF50;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .answer {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #2e7d32;
+        }
+
+        .stats {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
+
     <h1>Welcome to the MCQ Quiz App</h1>
-    <a href="{{ url_for('add_question') }}">Add New Question</a><br><br>
-    <a href="{{ url_for('quiz') }}">Start Quiz</a>
+
+    <div class="top-bar">
+        <button onclick="showModal()">➕ Add Question</button>
+        <a href="{{ url_for('quiz') }}" class="start-quiz-btn">Start Quiz</a>
+        <span class="question-count">Questions: {{ question_count }}</span>
+    </div>
+    
+
+    <!-- Modal -->
+    <div id="modal">
+        <div id="modalContent">
+            <span class="close" onclick="hideModal()">&times;</span>
+            <h2>Add a New Question</h2>
+            <form method="POST" action="{{ url_for('add_question') }}">
+                <label for="question">Question:</label>
+                <input type="text" id="question" name="question" required>
+
+                <label for="answer_a">Answer A:</label>
+                <input type="text" id="answer_a" name="answer_a" required>
+
+                <label for="answer_b">Answer B:</label>
+                <input type="text" id="answer_b" name="answer_b" required>
+
+                <label for="answer_c">Answer C:</label>
+                <input type="text" id="answer_c" name="answer_c" required>
+
+                <label for="answer_d">Answer D:</label>
+                <input type="text" id="answer_d" name="answer_d" required>
+
+                <label for="correct_answer">Correct Answer (A/B/C/D):</label>
+                <input type="text" id="correct_answer" name="correct_answer" required>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showModal() {
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function hideModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+    </script>
+
+    <hr>
+
+    <h2>All MCQs (Study Mode)</h2>
+
+    {% for q in questions %}
+    <div class="card">
+        <div class="question">{{ q.question }}</div>
+        <div class="answer">✔️ Correct Answer:
+            {% if q.correct_answer == 'A' %}
+            {{ q.answer_a }}
+        {% elif q.correct_answer == 'B' %}
+            {{ q.answer_b }}
+        {% elif q.correct_answer == 'C' %}
+            {{ q.answer_c }}
+        {% elif q.correct_answer == 'D' %}
+            {{ q.answer_d }}
+        {% endif %}
+        
+        </div>
+        <div class="stats">
+            You got it right 
+            {{ q.correct_count }}/{{ q.correct_count + q.incorrect_count }} 
+            times ({{ ((q.correct_count / (q.correct_count + q.incorrect_count)) * 100) | round(1) if (q.correct_count + q.incorrect_count) > 0 else 0 }}%)
+        </div>
+        
+    </div>
+    {% endfor %}
+
 </body>
 </html>

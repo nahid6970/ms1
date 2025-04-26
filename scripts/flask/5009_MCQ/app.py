@@ -23,7 +23,15 @@ class Question(db.Model):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    questions = Question.query.all()
+    # Sort questions by success rate
+    def success_rate(q):
+        total = q.correct_count + q.incorrect_count
+        return q.correct_count / total if total > 0 else 0
+    questions = sorted(questions, key=success_rate)
+    question_count = len(questions)  # <-- COUNT questions
+    return render_template('index.html', questions=questions, question_count=question_count)
+
 
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -53,10 +61,10 @@ def quiz():
     shuffled_questions = []
     for q in selected_questions:
         options = [
-            ("A", q.option_a),
-            ("B", q.option_b),
-            ("C", q.option_c),
-            ("D", q.option_d)
+            ("A", q.answer_a),
+            ("B", q.answer_b),
+            ("C", q.answer_c),
+            ("D", q.answer_d)
         ]
         random.shuffle(options)
         shuffled_questions.append({
@@ -66,7 +74,6 @@ def quiz():
             "incorrect_count": q.incorrect_count or 0
         })
     return render_template("quiz.html", shuffled_questions=shuffled_questions)
-
 
 
 @app.route('/submit', methods=['POST'])
