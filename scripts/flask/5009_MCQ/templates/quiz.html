@@ -59,7 +59,7 @@
 
         .options-row {
             display: flex;
-            flex-direction: column; /* Stack options vertically */
+            flex-direction: row; /* show options in same row */
             gap: 10px; /* space between options */
             margin-top: 15px;
         }
@@ -71,9 +71,12 @@
             cursor: pointer;
             display: flex;
             align-items: center;
+            justify-content: center;
             transition: background-color 0.2s ease;
-            width: 100%; /* Make all options same width */
+            flex-grow: 1; /* make options grow equally */
+            text-align: center;
             box-sizing: border-box;
+            height: 60px; /* optional: keep options same height */
         }
 
         .option-label:hover {
@@ -81,7 +84,7 @@
         }
 
         .option-label input[type="radio"] {
-            margin-right: 10px;
+            margin-right: 8px;
         }
 
         button {
