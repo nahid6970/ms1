@@ -58,6 +58,7 @@
             border-left: 5px solid #4CAF50;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: relative;
         }
 
         .question {
@@ -75,6 +76,23 @@
             font-size: 13px;
             color: #666;
             margin-top: 5px;
+        }
+
+        .edit-buttons {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 14px;
+        }
+
+        .edit-buttons a {
+            margin-left: 10px;
+            text-decoration: none;
+            color: #2196F3;
+        }
+
+        .edit-buttons a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -130,25 +148,27 @@
 
     {% for q in questions %}
     <div class="card">
+        <div class="edit-buttons">
+            <a href="{{ url_for('edit_question', id=q.id) }}">✏️ Edit</a>
+            <a href="{{ url_for('delete_question', id=q.id) }}" onclick="return confirm('Are you sure you want to delete this question?')">🗑️ Delete</a>
+        </div>
         <div class="question">{{ q.question }}</div>
         <div class="answer">✔️ Correct Answer:
             {% if q.correct_answer == 'A' %}
-            {{ q.answer_a }}
-        {% elif q.correct_answer == 'B' %}
-            {{ q.answer_b }}
-        {% elif q.correct_answer == 'C' %}
-            {{ q.answer_c }}
-        {% elif q.correct_answer == 'D' %}
-            {{ q.answer_d }}
-        {% endif %}
-        
+                {{ q.answer_a }}
+            {% elif q.correct_answer == 'B' %}
+                {{ q.answer_b }}
+            {% elif q.correct_answer == 'C' %}
+                {{ q.answer_c }}
+            {% elif q.correct_answer == 'D' %}
+                {{ q.answer_d }}
+            {% endif %}
         </div>
         <div class="stats">
             You got it right 
             {{ q.correct_count }}/{{ q.correct_count + q.incorrect_count }} 
             times ({{ ((q.correct_count / (q.correct_count + q.incorrect_count)) * 100) | round(1) if (q.correct_count + q.incorrect_count) > 0 else 0 }}%)
         </div>
-        
     </div>
     {% endfor %}
 
