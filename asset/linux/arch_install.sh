@@ -110,7 +110,7 @@ EOP
 
 echo "✅ paru installed successfully!"
 
-# Ask for Desktop Environment selection BEFORE entering chroot
+# Ask user for Desktop Environment selection
 echo "🎨 Choose your Desktop Environment:"
 echo "1) KDE Plasma"
 echo "2) GNOME"
@@ -118,12 +118,6 @@ echo "3) XFCE"
 echo "4) Sway (Wayland)"
 read -p "Enter number (1-4): " de_choice
 
-# Now enter chroot
-arch-chroot /mnt /bin/bash <<EOF
-
-# [other setup steps like timezone, sudo, etc...]
-
-# Desktop Environment Install (inside chroot)
 case $de_choice in
   1)
     echo "✨ Installing KDE Plasma..."
@@ -143,15 +137,15 @@ case $de_choice in
   4)
     echo "✨ Installing Sway (Wayland)..."
     pacman -Sy --noconfirm sway foot waybar
-    # Sway does not need a display manager
+    # Sway doesn't use display manager, login from tty
     ;;
   *)
     echo "⚠ Invalid choice, skipping Desktop Environment install."
     ;;
 esac
 
-EOF
 
+EOF
 
 echo "✅ Installation complete! You can reboot now."
 echo "⚡ Your user '$username' is ready with sudo access!"
