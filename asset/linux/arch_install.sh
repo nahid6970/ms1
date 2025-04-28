@@ -1,6 +1,120 @@
 #!/bin/bash
 
-# 🎨 Ask for Desktop Environment selection
+set -e  # Exit if any command fails
+
+echo "⚡ Starting Arch Linux installation..."
+
+# # Ask username and password
+# read -p "👤 Enter your new username: " username
+# read -s -p "🔒 Enter your password: " userpass
+# echo ""
+# Automatically set username and password
+username="nahid6970"
+userpass="1823"
+
+
+# 1. Set keyboard layout
+loadkeys us
+
+# 2. Update system clock
+timedatectl set-ntp true
+
+# 3. Install reflector and optimize mirrors
+echo "🌏 Setting fastest mirrors (Bangladesh)..."
+pacman -Sy --noconfirm reflector
+reflector --country Bangladesh --age 12 --sort rate --save /etc/pacman.d/mirrorlist
+
+# 4. Partition the disk (WARNING: this will wipe /dev/sda)
+echo "💾 Partitioning /dev/sda..."
+(
+  echo g    # Create a new empty GPT partition table
+  echo n    # New partition
+  echo      # Partition number 1
+  echo      # First sector (default)
+  echo +300M  # 300MB boot partition
+  echo t    # Change partition type
+  echo 1    # EFI System
+  echo n    # New partition
+  echo      # Partition number 2
+  echo      # First sector (default)
+  echo      # Last sector (use rest of disk)
+  echo w    # Write changes
+) | fdisk /dev/sda
+
+# 5. Format partitions
+echo "🧹 Formatting partitions..."
+mkfs.fat -F32 /dev/sda1
+mkfs.ext4 /dev/sda2
+
+# 6. Mount partitions
+echo "📂 Mounting partitions..."
+mount /dev/sda2 /mnt
+mkdir /mnt/boot
+mount /dev/sda1 /mnt/boot
+
+# 7. Install base system
+echo "📦 Installing base system..."
+pacstrap /mnt base linux linux-firmware vim networkmanager sudo grub efibootmgr
+
+# 8. Generate fstab
+echo "🛠 Generating fstab..."
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# 9. System configuration inside chroot
+echo "🔧 Configuring system inside chroot..."
+
+arch-chroot /mnt /bin/bash <<EOF
+# Set timezone
+ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime
+hwclock --systohc
+
+# Localization
+sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+# Hostname
+echo "myarch" > /etc/hostname
+cat <<HOSTS > /etc/hosts
+127.0.0.1 localhost
+::1       localhost
+127.0.1.1 myarch.localdomain myarch
+HOSTS
+
+# Root password
+echo "root:$userpass" | chpasswd
+
+# Create user
+useradd -m -G wheel -s /bin/bash $username
+echo "$username:$userpass" | chpasswd
+
+# Allow sudo for wheel group
+sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+
+# Enable NetworkManager
+systemctl enable NetworkManager
+
+# Install and configure bootloader
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=Arch
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Install paru (AUR helper)
+echo "🌟 Installing paru AUR helper..."
+
+# Install base-devel and git
+pacman -Sy --noconfirm base-devel git
+
+# Switch to your user (safe install without root)
+sudo -u $username bash <<EOP
+cd ~
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si --noconfirm
+EOP
+
+echo "✅ paru installed successfully!"
+
+# Ask user for Desktop Environment selection
 echo "🎨 Choose your Desktop Environment:"
 echo "1) KDE Plasma"
 echo "2) GNOME"
@@ -8,92 +122,26 @@ echo "3) XFCE"
 echo "4) Sway (Wayland)"
 read -p "Enter number (1-4): " de_choice
 
-case $de_choice in
-    1)
-        DE_PACKAGES="plasma kde-applications"
-        DM_SERVICE="sddm.service"
-        ;;
-    2)
-        DE_PACKAGES="gnome gnome-extra"
-        DM_SERVICE="gdm.service"
-        ;;
-    3)
-        DE_PACKAGES="xfce4 xfce4-goodies"
-        DM_SERVICE="lightdm.service"
-        ;;
-    4)
-        DE_PACKAGES="sway swaybg swaylock"
-        DM_SERVICE=""
-        ;;
-    *)
-        echo "Invalid choice!"
-        exit 1
-        ;;
-esac
 
-# Ask for username and password BEFORE chroot
-echo "👤 Creating user..."
-read -p "Enter your username: " username
-read -sp "Enter your password: " password
-echo
+# echo "✨ Installing KDE Plasma..."
+# pacman -Sy --noconfirm plasma kde-applications sddm
+# systemctl enable sddm
 
-# 🏠 Partition, Mount, and Prepare
-# [Assuming earlier steps for partitioning and mounting are handled]
+echo "✨ Installing GNOME..."
+pacman -Sy --noconfirm gnome gnome-extra gdm
+systemctl enable gdm
 
-# 📥 Chroot and configure
-arch-chroot /mnt /bin/bash <<EOF
-set -e
+# echo "✨ Installing XFCE..."
+# pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+# systemctl enable lightdm
 
-# 🕰️ Timezone
-ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime
-hwclock --systohc
+# echo "✨ Installing Sway (Wayland)..."
+# pacman -Sy --noconfirm sway foot waybar
+# # Sway doesn't use display manager, login from tty
 
-# 🗣️ Locale
-sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
-locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
-# 🏠 Hostname
-echo "archlinux" > /etc/hostname
-echo "127.0.0.1 localhost" >> /etc/hosts
-echo "::1       localhost" >> /etc/hosts
-echo "127.0.1.1 archlinux.localdomain archlinux" >> /etc/hosts
-
-# 🔒 Root password
-echo "root:$password" | chpasswd
-
-# 👤 Create user and set password
-useradd -m -G wheel -s /bin/bash $username
-echo "$username:$password" | chpasswd
-sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
-
-# 🛜 Enable networking
-systemctl enable NetworkManager
-
-# 🖼️ Install Desktop Environment
-if [[ ! -z "$DE_PACKAGES" ]]; then
-    echo "✨ Installing Desktop Environment..."
-    pacman -Sy --noconfirm $DE_PACKAGES
-    if [[ ! -z "$DM_SERVICE" ]]; then
-        echo "⚙️ Enabling Display Manager..."
-        systemctl enable $DM_SERVICE
-    else
-        echo "ℹ️ No Display Manager (Wayland login from TTY)"
-    fi
-fi
-
-# 🚀 Install yay AUR helper
-cd /home/$username
-git clone https://aur.archlinux.org/yay.git
-chown -R $username:$username yay
-cd yay
-sudo -u $username makepkg -si --noconfirm
 
 EOF
 
-# Prompt for password change after installation
-echo "🎉 Installation Complete. Please set your password (if needed)!"
-passwd $username
-
-# Final message
-echo "✅ Arch Linux Installation Completed Successfully!"
+echo "✅ Installation complete! You can reboot now."
+echo "⚡ Your user '$username' is ready with sudo access!"
