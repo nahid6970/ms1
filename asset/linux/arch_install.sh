@@ -61,6 +61,9 @@ install_base_system() {
         echo '::1       localhost' >> /etc/hosts
         echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
 
+        pacman -Sy --noconfirm reflector
+        reflector --country Bangladesh --latest 5 --sort rate --save /etc/pacman.d/mirrorlist
+
         useradd -m -G wheel -s /bin/bash $USERNAME
         echo $USERNAME:$PASSWORD | chpasswd
         echo root:$PASSWORD | chpasswd
