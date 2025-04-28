@@ -121,10 +121,10 @@ echo "✅ paru installed successfully!"
 # pacman -Sy --noconfirm plasma kde-applications sddm
 # systemctl enable sddm
 
-echo "2) GNOME"
-echo "✨ Installing GNOME..."
-pacman -Sy --noconfirm gnome gnome-extra gdm
-systemctl enable gdm
+# echo "2) GNOME"
+# echo "✨ Installing GNOME..."
+# pacman -Sy --noconfirm gnome gnome-extra gdm
+# systemctl enable gdm
 
 # echo "3) XFCE"
 # echo "✨ Installing XFCE..."
