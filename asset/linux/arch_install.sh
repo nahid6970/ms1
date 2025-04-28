@@ -7,7 +7,12 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-
+# --- Global variables ---
+INSTALL_DISK="/dev/sda"   # Change this if needed (example: /dev/vda)
+HOSTNAME="archlinux"      # Default hostname
+AUR_HELPER="yay"          # Default AUR helper (yay or paru)
+USERNAME=""
+PASSWORD=""
 
 # --- Functions ---
 
