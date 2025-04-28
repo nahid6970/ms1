@@ -110,6 +110,7 @@ EOP
 
 echo "✅ paru installed successfully!"
 
+# Ask user for Desktop Environment selection
 echo "🎨 Choose your Desktop Environment:"
 echo "1) KDE Plasma"
 echo "2) GNOME"
@@ -117,43 +118,34 @@ echo "3) XFCE"
 echo "4) Sway (Wayland)"
 read -p "Enter number (1-4): " de_choice
 
-# Set a package based on choice
-if [[ $de_choice == 1 ]]; then
-    DE_PACKAGES="plasma kde-applications sddm"
-    DM_SERVICE="sddm"
-elif [[ $de_choice == 2 ]]; then
-    DE_PACKAGES="gnome gnome-extra gdm"
-    DM_SERVICE="gdm"
-elif [[ $de_choice == 3 ]]; then
-    DE_PACKAGES="xfce4 xfce4-goodies lightdm lightdm-gtk-greeter"
-    DM_SERVICE="lightdm"
-elif [[ $de_choice == 4 ]]; then
-    DE_PACKAGES="sway foot waybar"
-    DM_SERVICE=""  # sway doesn't need login manager
-else
-    echo "⚠ Invalid choice, skipping Desktop install."
-    DE_PACKAGES=""
-    DM_SERVICE=""
-fi
+case $de_choice in
+  1)
+    echo "✨ Installing KDE Plasma..."
+    pacman -Sy --noconfirm plasma kde-applications sddm
+    systemctl enable sddm
+    ;;
+  2)
+    echo "✨ Installing GNOME..."
+    pacman -Sy --noconfirm gnome gnome-extra gdm
+    systemctl enable gdm
+    ;;
+  3)
+    echo "✨ Installing XFCE..."
+    pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+    systemctl enable lightdm
+    ;;
+  4)
+    echo "✨ Installing Sway (Wayland)..."
+    pacman -Sy --noconfirm sway foot waybar
+    # Sway doesn't use display manager, login from tty
+    ;;
+  *)
+    echo "⚠ Invalid choice, skipping Desktop Environment install."
+    ;;
+esac
 
-arch-chroot /mnt /bin/bash <<EOF
-# Update system
-pacman -Syu --noconfirm
 
-# Install Desktop Environment if selected
-if [[ ! -z "$DE_PACKAGES" ]]; then
-    echo "✨ Installing Desktop Environment packages..."
-    pacman -Sy --noconfirm $DE_PACKAGES
-
-    if [[ ! -z "$DM_SERVICE" ]]; then
-        echo "⚙️ Enabling Display Manager service..."
-        systemctl enable $DM_SERVICE
-    else
-        echo "ℹ️ No Display Manager needed (Sway or manual login)"
-    fi
-fi
 EOF
-
 
 echo "✅ Installation complete! You can reboot now."
 echo "⚡ Your user '$username' is ready with sudo access!"
