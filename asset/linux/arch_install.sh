@@ -21,6 +21,22 @@ menu_items=(
 
 # --- Functions ---
 
+# Function to select install disk
+select_install_disk() {
+    clear
+    lsblk
+    echo
+    read -p "Enter the disk to install (example: /dev/sda): " INSTALL_DISK
+    echo
+    read -p "⚠️  WARNING: This will erase all data on $INSTALL_DISK. Are you sure? (yes/no): " confirm
+    if [[ "$confirm" != "yes" ]]; then
+        echo "Installation cancelled."
+        exit 1
+    fi
+}
+
+
+# Function to setup username/password
 setup_user_password() {
     clear
     echo -e "${CYAN}Setting up username and password...${NC}"
@@ -30,10 +46,12 @@ setup_user_password() {
     echo -e "${GREEN}Username and password saved.${NC}"
 }
 
+# Function to install base system
 install_base_system() {
     clear
     echo -e "${CYAN}Installing base system...${NC}"
     timedatectl set-ntp true
+
     parted $INSTALL_DISK mklabel gpt
     parted $INSTALL_DISK mkpart primary fat32 1MiB 512MiB
     parted $INSTALL_DISK set 1 esp on
@@ -47,7 +65,6 @@ install_base_system() {
     mount ${INSTALL_DISK}1 /mnt/boot
 
     pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
-
     genfstab -U /mnt >> /mnt/etc/fstab
 
     arch-chroot /mnt /bin/bash -c "
@@ -57,7 +74,7 @@ install_base_system() {
         locale-gen
         echo 'LANG=en_US.UTF-8' > /etc/locale.conf
         echo $HOSTNAME > /etc/hostname
-        echo '127.0.0.1 localhost' >> /etc/hosts
+        echo '127.0.0.1 localhost' > /etc/hosts
         echo '::1       localhost' >> /etc/hosts
         echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
 
@@ -70,8 +87,10 @@ install_base_system() {
         sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
         systemctl enable NetworkManager
     "
+
     echo -e "${GREEN}Base system installed.${NC}"
 }
+
 
 install_aur_helper() {
     clear
