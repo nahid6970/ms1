@@ -110,7 +110,6 @@ EOP
 
 echo "✅ paru installed successfully!"
 
-# Ask for Desktop Environment
 echo "🎨 Choose your Desktop Environment:"
 echo "1) KDE Plasma"
 echo "2) GNOME"
@@ -118,42 +117,39 @@ echo "3) XFCE"
 echo "4) Sway (Wayland)"
 read -p "Enter number (1-4): " de_choice
 
-# Set the package list based on choice
+# Set a package based on choice
 if [[ $de_choice == 1 ]]; then
-    DESKTOP_PACKAGES="plasma kde-applications sddm"
-    DISPLAY_MANAGER="sddm"
+    DE_PACKAGES="plasma kde-applications sddm"
+    DM_SERVICE="sddm"
 elif [[ $de_choice == 2 ]]; then
-    DESKTOP_PACKAGES="gnome gnome-extra gdm"
-    DISPLAY_MANAGER="gdm"
+    DE_PACKAGES="gnome gnome-extra gdm"
+    DM_SERVICE="gdm"
 elif [[ $de_choice == 3 ]]; then
-    DESKTOP_PACKAGES="xfce4 xfce4-goodies lightdm lightdm-gtk-greeter"
-    DISPLAY_MANAGER="lightdm"
+    DE_PACKAGES="xfce4 xfce4-goodies lightdm lightdm-gtk-greeter"
+    DM_SERVICE="lightdm"
 elif [[ $de_choice == 4 ]]; then
-    DESKTOP_PACKAGES="sway foot waybar"
-    DISPLAY_MANAGER=""  # Sway uses TTY
+    DE_PACKAGES="sway foot waybar"
+    DM_SERVICE=""  # sway doesn't need login manager
 else
-    echo "⚠ Invalid choice. No Desktop Environment will be installed."
-    DESKTOP_PACKAGES=""
-    DISPLAY_MANAGER=""
+    echo "⚠ Invalid choice, skipping Desktop install."
+    DE_PACKAGES=""
+    DM_SERVICE=""
 fi
 
-# Now run arch-chroot
 arch-chroot /mnt /bin/bash <<EOF
-# Inside chroot
-
-# Update mirrors (Bangladesh fastest)
-reflector --country Bangladesh --age 6 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+# Update system
+pacman -Syu --noconfirm
 
 # Install Desktop Environment if selected
-if [ -n "$DESKTOP_PACKAGES" ]; then
-    echo "✨ Installing Desktop Environment: $DESKTOP_PACKAGES"
-    pacman -Sy --noconfirm $DESKTOP_PACKAGES
+if [[ ! -z "$DE_PACKAGES" ]]; then
+    echo "✨ Installing Desktop Environment packages..."
+    pacman -Sy --noconfirm $DE_PACKAGES
 
-    if [ -n "$DISPLAY_MANAGER" ]; then
-        echo "🔌 Enabling Display Manager: $DISPLAY_MANAGER"
-        systemctl enable $DISPLAY_MANAGER
+    if [[ ! -z "$DM_SERVICE" ]]; then
+        echo "⚙️ Enabling Display Manager service..."
+        systemctl enable $DM_SERVICE
     else
-        echo "🖥️ No Display Manager needed for Sway (Wayland)."
+        echo "ℹ️ No Display Manager needed (Sway or manual login)"
     fi
 fi
 
