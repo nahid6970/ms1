@@ -142,13 +142,13 @@ exit_script() {
 
 # Menu Items
 menu_items=(
-    " 1:Setup Username & Password:     setup_user_password         :$CYAN"
-    " 2:Install Base System:            install_base_system         :$BLUE"
-    " 3:Install AUR Helper:             install_aur_helper           :$BLUE"
-    " 4:Install Desktop Environment:   install_desktop_environment  :$GREEN"
-    " 5:Finalize Installation:          finalize_installation       :$MAGENTA"
-    " c:Close:                          Close_script                 :$RED"
-    " e:Exit:                           exit_script                  :$RED"
+    "1:Setup Username & Password:     setup_user_password         :$CYAN"
+    "2:Install Base System:            install_base_system         :$BLUE"
+    "3:Install AUR Helper:             install_aur_helper           :$BLUE"
+    "4:Install Desktop Environment:   install_desktop_environment  :$GREEN"
+    "5:Finalize Installation:          finalize_installation       :$MAGENTA"
+    "c:Close:                          Close_script                 :$RED"
+    "e:Exit:                           exit_script                  :$RED"
 )
 
 # Main Menu Loop
