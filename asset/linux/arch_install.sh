@@ -23,11 +23,6 @@ setup_user_password() {
     read -p "Enter new username: " USERNAME
     read -sp "Enter password for $USERNAME: " PASSWORD
     echo
-    if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-        echo -e "${RED}Username and password cannot be empty. Please try again.${NC}"
-        setup_user_password #restart
-        return
-    fi
     echo -e "${GREEN}Username and password saved.${NC}"
 }
 
@@ -45,7 +40,7 @@ install_base_system() {
     mkfs.ext4 ${INSTALL_DISK}2
 
     mount ${INSTALL_DISK}2 /mnt
-    mkdir -p /mnt/boot # Use -p to create parent directories if they don't exist
+    mkdir /mnt/boot
     mount ${INSTALL_DISK}1 /mnt/boot
 
     pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
@@ -60,9 +55,9 @@ install_base_system() {
         echo 'LANG=en_US.UTF-8' > /etc/locale.conf
         echo $HOSTNAME > /etc/hostname
         echo '127.0.0.1 localhost' >> /etc/hosts
-        echo '::1         localhost' >> /etc/hosts
-        echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
-
+        echo '::1       localhost' >> /etc/hosts
+        echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME'
+        
         useradd -m -G wheel -s /bin/bash $USERNAME
         echo $USERNAME:$PASSWORD | chpasswd
         echo root:$PASSWORD | chpasswd
@@ -78,8 +73,7 @@ install_aur_helper() {
     echo -e "${CYAN}Installing AUR helper ($AUR_HELPER)...${NC}"
     arch-chroot /mnt /bin/bash -c "
         pacman -Sy --noconfirm base-devel git
-        # Use runuser instead of sudo -u
-        runuser -u $USERNAME -G users -c '
+        sudo -u $USERNAME bash -c '
             cd ~
             git clone https://aur.archlinux.org/${AUR_HELPER}.git
             cd ${AUR_HELPER}
@@ -99,11 +93,6 @@ install_desktop_environment() {
     echo "4) Sway (Wayland)"
     read -p "Enter number (1-4): " de_choice
 
-    if ! [[ "$de_choice" =~ ^[1-4]$ ]]; then
-        echo -e "${RED}Invalid option. Please enter a number between 1 and 4.${NC}"
-        install_desktop_environment
-        return
-    fi
     arch-chroot /mnt /bin/bash -c "
         case $de_choice in
             1)
@@ -122,7 +111,7 @@ install_desktop_environment() {
                 pacman -Sy --noconfirm sway foot waybar
                 ;;
             *)
-                echo 'Invalid option' # This should never happen, handled above, but keep for safety
+                echo 'Invalid option'
                 ;;
         esac
     "
@@ -153,13 +142,13 @@ exit_script() {
 
 # Menu Items
 menu_items=(
-    " 1:Setup Username & Password"         "setup_user_password"         "$CYAN"
-    " 2:Install Base System"              "install_base_system"           "$BLUE"
-    " 3:Install AUR Helper"               "install_aur_helper"            "$BLUE"
-    " 4:Install Desktop Environment"      "install_desktop_environment"   "$GREEN"
-    " 5:Finalize Installation"            "finalize_installation"        "$MAGENTA"
-    " c:Close"                          "Close_script"                 "$RED"
-    " e:Exit"                           "exit_script"                  "$RED"
+    " 1:Setup Username & Password:     setup_user_password         :$CYAN"
+    " 2:Install Base System:            install_base_system         :$BLUE"
+    " 3:Install AUR Helper:             install_aur_helper           :$BLUE"
+    " 4:Install Desktop Environment:   install_desktop_environment  :$GREEN"
+    " 5:Finalize Installation:          finalize_installation       :$MAGENTA"
+    " c:Close:                          Close_script                 :$RED"
+    " e:Exit:                           exit_script                  :$RED"
 )
 
 # Main Menu Loop
@@ -168,35 +157,29 @@ while true; do
     echo -e "${YELLOW}🌟 Select an option:${NC}"
 
     for item in "${menu_items[@]}"; do
-        IFS=$'\t' read -r number description function_name color <<< "$item"
+        IFS=":" read -r number description functions color <<< "$item"
         echo -e "${color}$number. $description${NC}"
     done
 
     echo ""
     read -p "Enter choice: " choice
 
-    choice=${choice,,} #convert to lowercase
+    if [ "$choice" == "c" ]; then
+        Close_script
+    elif [ "$choice" == "e" ]; then
+        exit_script
+    fi
 
-    case "$choice" in
-        "c")
-            Close_script
-            ;;
-        "e")
-            exit_script
-            ;;
-        *)
-            found=false
-            for item in "${menu_items[@]}"; do
-                IFS=$'\t' read -r number description function_name color <<< "$item"
-                if [[ "$choice" == "$number" ]]; then
-                    found=true
-                    $function_name
-                    break
-                fi
-            done
-            if ! $found; then
-                echo -e "${RED}Invalid option. Please try again.${NC}"
-            fi
-            ;;
-    esac
+valid_choice=false
+for item in "${menu_items[@]}"; do
+    IFS=":" read -r number description functions color <<< "$item"
+    if [[ "$choice" == "${number// /}" ]]; then
+        valid_choice=true
+        IFS=" " read -r -a function_array <<< "$functions"
+        for function in "${function_array[@]}"; do
+            $function
+        done
+        break
+    fi
 done
+
