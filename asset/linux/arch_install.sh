@@ -1,144 +1,189 @@
 #!/bin/bash
 
-set -e  # Exit if any command fails
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-echo "⚡ Starting Arch Linux installation..."
+# Global Variables
+INSTALL_DISK="/dev/sda"  # Change if needed
+HOSTNAME="archlinux"
+USERNAME=""
+PASSWORD=""
+AUR_HELPER="yay"  # Default aur helper
 
-# # Ask username and password
-# read -p "👤 Enter your new username: " username
-# read -s -p "🔒 Enter your password: " userpass
-# echo ""
-# Automatically set username and password
-username="nahid6970"
-userpass="1823"
+# Function to setup user and password
+setup_user_password() {
+    clear
+    echo -e "${CYAN}Setting up username and password...${NC}"
+    read -p "Enter new username: " USERNAME
+    read -sp "Enter password for $USERNAME: " PASSWORD
+    echo
+    echo -e "${GREEN}Username and password saved.${NC}"
+}
 
+# Function to install base system
+install_base_system() {
+    clear
+    echo -e "${CYAN}Installing base system...${NC}"
+    timedatectl set-ntp true
+    parted $INSTALL_DISK mklabel gpt
+    parted $INSTALL_DISK mkpart primary fat32 1MiB 512MiB
+    parted $INSTALL_DISK set 1 esp on
+    parted $INSTALL_DISK mkpart primary ext4 512MiB 100%
 
-# 1. Set keyboard layout
-loadkeys us
+    mkfs.fat -F32 ${INSTALL_DISK}1
+    mkfs.ext4 ${INSTALL_DISK}2
 
-# 2. Update system clock
-timedatectl set-ntp true
+    mount ${INSTALL_DISK}2 /mnt
+    mkdir /mnt/boot
+    mount ${INSTALL_DISK}1 /mnt/boot
 
-# 3. Install reflector and optimize mirrors
-echo "🌏 Setting fastest mirrors (Bangladesh)..."
-pacman -Sy --noconfirm reflector
-reflector --country Bangladesh --age 12 --sort rate --save /etc/pacman.d/mirrorlist
+    pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
 
-# 4. Partition the disk (WARNING: this will wipe /dev/sda)
-echo "💾 Partitioning /dev/sda..."
-(
-  echo g    # Create a new empty GPT partition table
-  echo n    # New partition
-  echo      # Partition number 1
-  echo      # First sector (default)
-  echo +300M  # 300MB boot partition
-  echo t    # Change partition type
-  echo 1    # EFI System
-  echo n    # New partition
-  echo      # Partition number 2
-  echo      # First sector (default)
-  echo      # Last sector (use rest of disk)
-  echo w    # Write changes
-) | fdisk /dev/sda
+    genfstab -U /mnt >> /mnt/etc/fstab
 
-# 5. Format partitions
-echo "🧹 Formatting partitions..."
-mkfs.fat -F32 /dev/sda1
-mkfs.ext4 /dev/sda2
+    arch-chroot /mnt /bin/bash -c "
+        ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+        hwclock --systohc
+        echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
+        locale-gen
+        echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+        echo $HOSTNAME > /etc/hostname
+        echo '127.0.0.1 localhost' >> /etc/hosts
+        echo '::1       localhost' >> /etc/hosts
+        echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME'
+        
+        useradd -m -G wheel -s /bin/bash $USERNAME
+        echo $USERNAME:$PASSWORD | chpasswd
+        echo root:$PASSWORD | chpasswd
+        sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+        systemctl enable NetworkManager
+    "
+    echo -e "${GREEN}Base system installed.${NC}"
+}
 
-# 6. Mount partitions
-echo "📂 Mounting partitions..."
-mount /dev/sda2 /mnt
-mkdir /mnt/boot
-mount /dev/sda1 /mnt/boot
+# Function to install AUR helper
+install_aur_helper() {
+    clear
+    echo -e "${CYAN}Installing AUR helper ($AUR_HELPER)...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm base-devel git
+        sudo -u $USERNAME bash -c '
+            cd ~
+            git clone https://aur.archlinux.org/${AUR_HELPER}.git
+            cd ${AUR_HELPER}
+            makepkg -si --noconfirm
+        '
+    "
+    echo -e "${GREEN}AUR helper installed.${NC}"
+}
 
-# 7. Install base system
-echo "📦 Installing base system..."
-pacstrap /mnt base linux linux-firmware vim networkmanager sudo grub efibootmgr
+# Function to select and install desktop environment
+install_desktop_environment() {
+    clear
+    echo -e "${CYAN}Choose Desktop Environment:${NC}"
+    echo "1) KDE Plasma"
+    echo "2) GNOME"
+    echo "3) XFCE"
+    echo "4) Sway (Wayland)"
+    read -p "Enter number (1-4): " de_choice
 
-# 8. Generate fstab
-echo "🛠 Generating fstab..."
-genfstab -U /mnt >> /mnt/etc/fstab
+    arch-chroot /mnt /bin/bash -c "
+        case $de_choice in
+            1)
+                pacman -Sy --noconfirm plasma kde-applications sddm
+                systemctl enable sddm
+                ;;
+            2)
+                pacman -Sy --noconfirm gnome gnome-extra gdm
+                systemctl enable gdm
+                ;;
+            3)
+                pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+                systemctl enable lightdm
+                ;;
+            4)
+                pacman -Sy --noconfirm sway foot waybar
+                ;;
+            *)
+                echo 'Invalid option'
+                ;;
+        esac
+    "
+    echo -e "${GREEN}Desktop environment installed.${NC}"
+}
 
-# 9. System configuration inside chroot
-echo "🔧 Configuring system inside chroot..."
+# Function to finalize installation
+finalize_installation() {
+    clear
+    echo -e "${GREEN}Finalizing installation...${NC}"
+    umount -R /mnt
+    echo -e "${MAGENTA}✅ Installation complete! You can reboot now.${NC}"
+}
 
-arch-chroot /mnt /bin/bash <<EOF
-# Set timezone
-ln -sf /usr/share/zoneinfo/Asia/Dhaka /etc/localtime
-hwclock --systohc
+# Function to close script
+Close_script() {
+    clear
+    echo -e "${RED}Closing script...${NC}"
+    exit 0
+}
 
-# Localization
-sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
-locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
+# Function to exit script
+exit_script() {
+    clear
+    echo -e "${RED}Exiting...${NC}"
+    exit 0
+}
 
-# Hostname
-echo "myarch" > /etc/hostname
-cat <<HOSTS > /etc/hosts
-127.0.0.1 localhost
-::1       localhost
-127.0.1.1 myarch.localdomain myarch
-HOSTS
+# Menu Items
+menu_items=(
+    " 1:Setup Username & Password:     setup_user_password         :$CYAN"
+    " 2:Install Base System:            install_base_system         :$BLUE"
+    " 3:Install AUR Helper:             install_aur_helper           :$BLUE"
+    " 4:Install Desktop Environment:   install_desktop_environment  :$GREEN"
+    " 5:Finalize Installation:          finalize_installation       :$MAGENTA"
+    " c:Close:                          Close_script                 :$RED"
+    " e:Exit:                           exit_script                  :$RED"
+)
 
-# Root password
-echo "root:$userpass" | chpasswd
+# Main Menu
+while true; do
+    echo ""
+    echo -e "${YELLOW}🌟 Select an option:${NC}"
 
-# Create user
-useradd -m -G wheel -s /bin/bash $username
-echo "$username:$userpass" | chpasswd
+    for item in "${menu_items[@]}"; do
+        IFS=":" read -r number description functions color <<< "$item"
+        echo -e "${color}$number. $description${NC}"
+    done
 
-# Allow sudo for wheel group
-sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+    echo ""
+    read -p "Enter choice: " choice
 
-# Enable NetworkManager
-systemctl enable NetworkManager
+    if [ "$choice" == "c" ]; then
+        Close_script
+    elif [ "$choice" == "e" ]; then
+        exit_script
+    fi
 
-# Install and configure bootloader
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=Arch
-grub-mkconfig -o /boot/grub/grub.cfg
+    valid_choice=false
+    for item in "${menu_items[@]}"; do
+        IFS=":" read -r number description functions color <<< "$item"
+        if [[ "$choice" == "$number" ]]; then
+            valid_choice=true
+            IFS=" " read -r -a function_array <<< "$functions"
+            for function in "${function_array[@]}"; do
+                $function
+            done
+            break
+        fi
+    done
 
-# Install paru (AUR helper)
-echo "🌟 Installing paru AUR helper..."
-
-# Install base-devel and git
-pacman -Sy --noconfirm base-devel git
-
-# Switch to your user (safe install without root)
-sudo -u $username bash <<EOP
-cd ~
-git clone https://aur.archlinux.org/paru.git
-cd paru
-makepkg -si
-EOP
-
-echo "✅ paru installed successfully!"
-
-
-
-# echo "1) KDE Plasma"
-# echo "✨ Installing KDE Plasma..."
-# pacman -Sy --noconfirm plasma kde-applications sddm
-# systemctl enable sddm
-
-# echo "2) GNOME"
-# echo "✨ Installing GNOME..."
-# pacman -Sy --noconfirm gnome gnome-extra gdm
-# systemctl enable gdm
-
-# echo "3) XFCE"
-# echo "✨ Installing XFCE..."
-# pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
-# systemctl enable lightdm
-
-# echo "4) Sway (Wayland)"
-# echo "✨ Installing Sway (Wayland)..."
-# pacman -Sy --noconfirm sway foot waybar
-# # Sway doesn't use display manager, login from tty
-
-
-
-EOF
-
-echo "✅ Installation complete! You can reboot now."
-echo "⚡ Your user '$username' is ready with sudo access!"
+    if [ "$valid_choice" = false ]; then
+        echo -e "${RED}Invalid option. Please try again.${NC}"
+    fi
+done
