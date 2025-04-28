@@ -1,143 +1,44 @@
 #!/bin/bash
 
-# --- Define colors ---
+# Define colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
-CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# --- Global variables ---
-INSTALL_DISK="/dev/sda"   # Change this if needed (example: /dev/vda)
-HOSTNAME="archlinux"      # Default hostname
-AUR_HELPER="yay"          # Default AUR helper (yay or paru)
-USERNAME=""
-PASSWORD=""
+# Menu items (only numbers now!)
+menu_items=(
+    "1:Install KDE Plasma:install_kde:$BLUE"
+    "2:Install GNOME:install_gnome:$BLUE"
+    "3:Install XFCE:install_xfce:$BLUE"
+    "4:Install Sway (Wayland):install_sway:$BLUE"
+    "5:Exit:exit_script:$RED"
+)
 
-# --- Functions ---
-
-setup_user_password() {
-    clear
-    echo -e "${CYAN}Setting up username and password...${NC}"
-    read -p "Enter new username: " USERNAME
-    read -sp "Enter password for $USERNAME: " PASSWORD
-    echo
-    echo -e "${GREEN}Username and password saved.${NC}"
-}
-
-install_base_system() {
-    clear
-    echo -e "${CYAN}Installing base system...${NC}"
-    timedatectl set-ntp true
-    parted $INSTALL_DISK mklabel gpt
-    parted $INSTALL_DISK mkpart primary fat32 1MiB 512MiB
-    parted $INSTALL_DISK set 1 esp on
-    parted $INSTALL_DISK mkpart primary ext4 512MiB 100%
-
-    mkfs.fat -F32 ${INSTALL_DISK}1
-    mkfs.ext4 ${INSTALL_DISK}2
-
-    mount ${INSTALL_DISK}2 /mnt
-    mkdir /mnt/boot
-    mount ${INSTALL_DISK}1 /mnt/boot
-
-    pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
-
-    genfstab -U /mnt >> /mnt/etc/fstab
-
-    arch-chroot /mnt /bin/bash -c "
-        ln -sf /usr/share/zoneinfo/UTC /etc/localtime
-        hwclock --systohc
-        echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
-        locale-gen
-        echo 'LANG=en_US.UTF-8' > /etc/locale.conf
-        echo $HOSTNAME > /etc/hostname
-        echo '127.0.0.1 localhost' >> /etc/hosts
-        echo '::1       localhost' >> /etc/hosts
-        echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
-
-        pacman -Sy --noconfirm reflector
-        reflector --country Bangladesh --latest 5 --sort rate --save /etc/pacman.d/mirrorlist
-
-
-        useradd -m -G wheel -s /bin/bash $USERNAME
-        echo $USERNAME:$PASSWORD | chpasswd
-        echo root:$PASSWORD | chpasswd
-        sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
-        systemctl enable NetworkManager
-    "
-    echo -e "${GREEN}Base system installed.${NC}"
-}
-
-install_aur_helper() {
-    clear
-    echo -e "${CYAN}Installing AUR helper (${AUR_HELPER})...${NC}"
-    arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm base-devel git
-        sudo -u $USERNAME bash -c '
-            cd ~
-            git clone https://aur.archlinux.org/${AUR_HELPER}.git
-            cd ${AUR_HELPER}
-            makepkg -si --noconfirm
-        '
-    "
-    echo -e "${GREEN}AUR helper installed.${NC}"
-}
-
+# Your functions
 install_kde() {
     echo -e "${GREEN}Installing KDE Plasma...${NC}"
-    arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm plasma sddm konsole dolphin
-        systemctl enable sddm
-    "
-    echo -e "${GREEN}KDE Plasma installation complete.${NC}"
+    # Your install commands here
 }
-
 install_gnome() {
     echo -e "${GREEN}Installing GNOME...${NC}"
-    arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm gnome gnome-tweaks gnome-terminal
-        systemctl enable gdm
-    "
-    echo -e "${GREEN}GNOME installation complete.${NC}"
+    # Your install commands here
 }
-
 install_xfce() {
     echo -e "${GREEN}Installing XFCE...${NC}"
-    arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
-        systemctl enable lightdm
-    "
-    echo -e "${GREEN}XFCE installation complete.${NC}"
+    # Your install commands here
 }
-
 install_sway() {
     echo -e "${GREEN}Installing Sway (Wayland)...${NC}"
-    arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm sway foot
-    "
-    echo -e "${GREEN}Sway installation complete.${NC}"
+    # Your install commands here
 }
-
 exit_script() {
     echo -e "${RED}Exiting...${NC}"
     exit 0
 }
 
-# --- Menu items ---
-menu_items=(
-    "1:Setup Username and Password:setup_user_password:$CYAN"
-    "2:Install Base System:install_base_system:$BLUE"
-    "3:Install AUR Helper:install_aur_helper:$BLUE"
-    "4:Install KDE Plasma:install_kde:$GREEN"
-    "5:Install GNOME:install_gnome:$GREEN"
-    "6:Install XFCE:install_xfce:$GREEN"
-    "7:Install Sway (Wayland):install_sway:$GREEN"
-    "8:Exit:exit_script:$RED"
-)
-
-# --- Menu display ---
+# Show menu
 while true; do
     echo ""
     echo -e "${YELLOW}Select an option:${NC}"
