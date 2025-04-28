@@ -7,18 +7,7 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Menu items (only numbers now!)
-menu_items=(
-    "1:Setup Username and Password:setup_user_password:$CYAN"
-    "2:DISK:select_install_disk:$CYAN"
-    "3:Install Base System:install_base_system:$BLUE"
-    "4:Install AUR Helper:install_aur_helper:$BLUE"
-    "5:Install KDE Plasma:install_kde:$GREEN"
-    "6:Install GNOME:install_gnome:$GREEN"
-    "7:Install XFCE:install_xfce:$GREEN"
-    "8:Install Sway (Wayland):install_sway:$GREEN"
-    "9:Exit:exit_script:$RED"
-)
+
 
 # --- Functions ---
 
@@ -148,32 +137,4 @@ exit_script() {
     exit 0
 }
 
-# --- Menu items ---
-
-
-# Show menu
-while true; do
-    echo ""
-    echo -e "${YELLOW}Select an option:${NC}"
-    for item in "${menu_items[@]}"; do
-        IFS=":" read -r number description function color <<< "$item"
-        echo -e "${color}$number) $description${NC}"
-    done
-
-    echo ""
-    read -p "Enter choice: " choice
-
-    valid_choice=false
-    for item in "${menu_items[@]}"; do
-        IFS=":" read -r number description function color <<< "$item"
-        if [ "$choice" = "$number" ]; then
-            valid_choice=true
-            $function
-            break
-        fi
-    done
-
-    if [ "$valid_choice" = false ]; then
-        echo -e "${RED}Invalid option. Please try again.${NC}"
-    fi
-done
+setup_user_password
