@@ -138,3 +138,6 @@ exit_script() {
 }
 
 setup_user_password
+install_base_system
+install_aur_helper
+install_kde
