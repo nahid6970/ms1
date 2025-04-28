@@ -16,6 +16,16 @@ PASSWORD=""
 
 # --- Functions ---
 
+# Function to setup username/password
+setup_user_password() {
+    clear
+    echo -e "${CYAN}Setting up username and password...${NC}"
+    read -p "Enter new username: " USERNAME
+    read -sp "Enter password for $USERNAME: " PASSWORD
+    echo
+    echo -e "${GREEN}Username and password saved.${NC}"
+}
+
 # Function to select install disk
 select_install_disk() {
     clear
@@ -28,17 +38,6 @@ select_install_disk() {
         echo "Installation cancelled."
         exit 1
     fi
-}
-
-
-# Function to setup username/password
-setup_user_password() {
-    clear
-    echo -e "${CYAN}Setting up username and password...${NC}"
-    read -p "Enter new username: " USERNAME
-    read -sp "Enter password for $USERNAME: " PASSWORD
-    echo
-    echo -e "${GREEN}Username and password saved.${NC}"
 }
 
 # Function to install base system
@@ -103,13 +102,24 @@ install_aur_helper() {
 }
 
 install_kde() {
-    echo -e "${GREEN}Installing KDE Plasma...${NC}"
-    arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm plasma sddm konsole dolphin
-        systemctl enable sddm
-    "
-    echo -e "${GREEN}KDE Plasma installation complete.${NC}"
+    clear
+    echo -e "${CYAN}Do you want to install KDE Plasma? (y/n)${NC}"
+    read -p "Enter your choice: " confirm
+    # If no input is given or if 'y' or 'Enter' is pressed, treat it as 'yes'
+    if [[ -z "$confirm" || "$confirm" =~ ^[Yy]$ ]]; then
+        echo -e "${GREEN}Installing KDE Plasma...${NC}"
+        arch-chroot /mnt /bin/bash -c "
+            pacman -Sy --noconfirm plasma sddm konsole dolphin
+            systemctl enable sddm
+        "
+        echo -e "${GREEN}KDE Plasma installation complete.${NC}"
+    elif [[ "$confirm" =~ ^[Nn]$ ]]; then
+        echo "KDE Plasma installation cancelled."
+    else
+        echo "Invalid input. Please enter 'y' for yes or 'n' for no."
+    fi
 }
+
 
 install_gnome() {
     echo -e "${GREEN}Installing GNOME...${NC}"
