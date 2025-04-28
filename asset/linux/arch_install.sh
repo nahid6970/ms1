@@ -1,37 +1,52 @@
 #!/bin/bash
 
-# Define some color variables
+# Define color variables
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Dummy functions for now
+# Dummy functions
 setup_user_password() {
     echo -e "${GREEN}Setting up username and password...${NC}"
-    # Actual user/password setup commands here
+    # Example commands:
+    read -rp "Enter username: " username
+    useradd -m "$username"
+    passwd "$username"
+    usermod -aG wheel "$username"
+    echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 }
 
 install_base_system() {
     echo -e "${GREEN}Installing base system...${NC}"
-    # Actual base install commands here
+    # pacstrap /mnt base linux linux-firmware etc...
 }
 
 install_aur_helper() {
-    echo -e "${GREEN}Installing AUR helper (yay)...${NC}"
-    # Actual AUR helper install here
+    echo -e "${GREEN}Installing yay (AUR helper)...${NC}"
+    # git clone and install yay
 }
 
 install_desktop_environment() {
     echo -e "${GREEN}Installing Desktop Environment...${NC}"
-    # You can add sub-options here if you want
+    echo "1) KDE Plasma"
+    echo "2) GNOME"
+    echo "3) XFCE"
+    echo "4) Sway (Wayland)"
+    read -rp "Choose Desktop (1-4): " de_choice
+    case "$de_choice" in
+        1) echo "Installing KDE..." ;;
+        2) echo "Installing GNOME..." ;;
+        3) echo "Installing XFCE..." ;;
+        4) echo "Installing Sway..." ;;
+        *) echo -e "${RED}Invalid desktop choice.${NC}" ;;
+    esac
 }
 
 finalize_installation() {
     echo -e "${GREEN}Finalizing installation...${NC}"
-    # Final touches here
+    # generate fstab, etc
 }
 
 exit_script() {
