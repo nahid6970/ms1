@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# curl -fsSL "http://nahid6970.ddns.net" -o os.sh
+# chmod +x os.sh
+# bash os.sh or sh os.sh
+
+
 # Define colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
