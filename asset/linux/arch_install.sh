@@ -10,13 +10,14 @@ NC='\033[0m' # No Color
 # Menu items (only numbers now!)
 menu_items=(
     "1:Setup Username and Password:setup_user_password:$CYAN"
-    "2:Install Base System:install_base_system:$BLUE"
-    "3:Install AUR Helper:install_aur_helper:$BLUE"
-    "4:Install KDE Plasma:install_kde:$GREEN"
-    "5:Install GNOME:install_gnome:$GREEN"
-    "6:Install XFCE:install_xfce:$GREEN"
-    "7:Install Sway (Wayland):install_sway:$GREEN"
-    "8:Exit:exit_script:$RED"
+    "2:DISK:select_install_disk:$CYAN"
+    "3:Install Base System:install_base_system:$BLUE"
+    "4:Install AUR Helper:install_aur_helper:$BLUE"
+    "5:Install KDE Plasma:install_kde:$GREEN"
+    "6:Install GNOME:install_gnome:$GREEN"
+    "7:Install XFCE:install_xfce:$GREEN"
+    "8:Install Sway (Wayland):install_sway:$GREEN"
+    "9:Exit:exit_script:$RED"
 )
 
 # --- Functions ---
