@@ -98,7 +98,7 @@ echo "127.0.1.1 archlinux.localdomain archlinux" >> /etc/hosts
 # 🔒 Root password
 echo "root:$password" | chpasswd
 
-# 👤 Create user
+# 👤 Create user and set password
 useradd -m -G wheel -s /bin/bash $username
 echo "$username:$password" | chpasswd
 sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
