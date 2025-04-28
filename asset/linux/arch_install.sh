@@ -147,8 +147,6 @@ menu_items=(
     " 3:Install AUR Helper:             install_aur_helper           :$BLUE"
     " 4:Install Desktop Environment:   install_desktop_environment  :$GREEN"
     " 5:Finalize Installation:          finalize_installation       :$MAGENTA"
-    " c:Close:                          Close_script                 :$RED"
-    " e:Exit:                           exit_script                  :$RED"
 )
 
 # Main Menu
