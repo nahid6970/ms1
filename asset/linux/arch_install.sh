@@ -114,27 +114,24 @@ EOP
 
 echo "✅ paru installed successfully!"
 
-# Ask user for Desktop Environment selection
-echo "🎨 Choose your Desktop Environment:"
-echo "1) KDE Plasma"
-echo "2) GNOME"
-echo "3) XFCE"
-echo "4) Sway (Wayland)"
-read -p "Enter number (1-4): " de_choice
 
 
+# echo "1) KDE Plasma"
 # echo "✨ Installing KDE Plasma..."
 # pacman -Sy --noconfirm plasma kde-applications sddm
 # systemctl enable sddm
 
+echo "2) GNOME"
 echo "✨ Installing GNOME..."
 pacman -Sy --noconfirm gnome gnome-extra gdm
 systemctl enable gdm
 
+# echo "3) XFCE"
 # echo "✨ Installing XFCE..."
 # pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
 # systemctl enable lightdm
 
+# echo "4) Sway (Wayland)"
 # echo "✨ Installing Sway (Wayland)..."
 # pacman -Sy --noconfirm sway foot waybar
 # # Sway doesn't use display manager, login from tty
