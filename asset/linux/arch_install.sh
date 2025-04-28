@@ -1,55 +1,6 @@
 #!/bin/bash
 
-set -e
-
-# 🛜 Update mirrorlist
-echo "🔄 Setting fastest mirrors..."
-reflector --country Bangladesh --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
-
-# ⚡ Partition Disk (Assumes /dev/sda)
-echo "🖥 Partitioning disk..."
-(
-echo o      # Clear partition table
-echo n      # New partition
-echo p      # Primary
-echo 1      # Partition 1
-echo        # Default first sector
-echo +512M  # Size
-echo t      # Change type
-echo 1      # EFI (if BIOS boot, skip this)
-echo n      # New partition
-echo p
-echo 2
-echo
-echo        # Use rest of the disk
-echo w      # Write
-) | fdisk /dev/sda
-
-# Format partitions
-echo "🧹 Formatting partitions..."
-mkfs.fat -F32 /dev/sda1
-mkfs.ext4 /dev/sda2
-
-# Mount partitions
-mount /dev/sda2 /mnt
-mkdir /mnt/boot
-mount /dev/sda1 /mnt/boot
-
-# 📦 Install base system
-echo "📦 Installing base system..."
-pacstrap /mnt base base-devel linux linux-firmware networkmanager sudo nano bash-completion reflector git
-
-# 🔗 Generate fstab
-echo "🔗 Generating fstab..."
-genfstab -U /mnt >> /mnt/etc/fstab
-
-# Ask for username and password BEFORE chroot
-echo "👤 Creating user..."
-read -p "Enter your username: " username
-read -sp "Enter your password: " password
-echo
-
-# Desktop Environment selection
+# 🎨 Ask for Desktop Environment selection
 echo "🎨 Choose your Desktop Environment:"
 echo "1) KDE Plasma"
 echo "2) GNOME"
@@ -57,24 +8,37 @@ echo "3) XFCE"
 echo "4) Sway (Wayland)"
 read -p "Enter number (1-4): " de_choice
 
-# Set desktop environment packages
-if [[ $de_choice == 1 ]]; then
-    DE_PACKAGES="plasma kde-applications sddm"
-    DM_SERVICE="sddm"
-elif [[ $de_choice == 2 ]]; then
-    DE_PACKAGES="gnome gnome-extra gdm"
-    DM_SERVICE="gdm"
-elif [[ $de_choice == 3 ]]; then
-    DE_PACKAGES="xfce4 xfce4-goodies lightdm lightdm-gtk-greeter"
-    DM_SERVICE="lightdm"
-elif [[ $de_choice == 4 ]]; then
-    DE_PACKAGES="sway foot waybar"
-    DM_SERVICE=""
-else
-    echo "⚠ Invalid choice, no DE will be installed."
-    DE_PACKAGES=""
-    DM_SERVICE=""
-fi
+case $de_choice in
+    1)
+        DE_PACKAGES="plasma kde-applications"
+        DM_SERVICE="sddm.service"
+        ;;
+    2)
+        DE_PACKAGES="gnome gnome-extra"
+        DM_SERVICE="gdm.service"
+        ;;
+    3)
+        DE_PACKAGES="xfce4 xfce4-goodies"
+        DM_SERVICE="lightdm.service"
+        ;;
+    4)
+        DE_PACKAGES="sway swaybg swaylock"
+        DM_SERVICE=""
+        ;;
+    *)
+        echo "Invalid choice!"
+        exit 1
+        ;;
+esac
+
+# Ask for username and password BEFORE chroot
+echo "👤 Creating user..."
+read -p "Enter your username: " username
+read -sp "Enter your password: " password
+echo
+
+# 🏠 Partition, Mount, and Prepare
+# [Assuming earlier steps for partitioning and mounting are handled]
 
 # 📥 Chroot and configure
 arch-chroot /mnt /bin/bash <<EOF
@@ -127,5 +91,9 @@ sudo -u $username makepkg -si --noconfirm
 
 EOF
 
-# ✅ Done
-echo "✅ Installation completed! You can now reboot."
+# Prompt for password change after installation
+echo "🎉 Installation Complete. Please set your password (if needed)!"
+passwd $username
+
+# Final message
+echo "✅ Arch Linux Installation Completed Successfully!"
