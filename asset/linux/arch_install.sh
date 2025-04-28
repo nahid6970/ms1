@@ -1,182 +1,161 @@
 #!/bin/bash
 
-# Colors
+# --- Define colors ---
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Global Variables
-INSTALL_DISK="/dev/sda"   # Change this if needed
-HOSTNAME="archlinux"
+# --- Global variables ---
+INSTALL_DISK="/dev/sda"   # Change this if needed (example: /dev/vda)
+HOSTNAME="archlinux"      # Default hostname
+AUR_HELPER="yay"          # Default AUR helper (yay or paru)
 USERNAME=""
 PASSWORD=""
-TIMEZONE="Asia/Kolkata"    # Change your timezone if needed
-LOCALE="en_US.UTF-8 UTF-8"
 
-# Setup Username and Password
+# --- Functions ---
+
 setup_user_password() {
     clear
-    echo -e "${CYAN}Setting up Username and Password...${NC}"
+    echo -e "${CYAN}Setting up username and password...${NC}"
     read -p "Enter new username: " USERNAME
     read -sp "Enter password for $USERNAME: " PASSWORD
     echo
-    echo -e "${GREEN}✔ Username and password saved.${NC}"
+    echo -e "${GREEN}Username and password saved.${NC}"
 }
 
-# Partition Disk and Install Base System
 install_base_system() {
     clear
-    echo -e "${CYAN}Installing Base System...${NC}"
+    echo -e "${CYAN}Installing base system...${NC}"
     timedatectl set-ntp true
+    parted $INSTALL_DISK mklabel gpt
+    parted $INSTALL_DISK mkpart primary fat32 1MiB 512MiB
+    parted $INSTALL_DISK set 1 esp on
+    parted $INSTALL_DISK mkpart primary ext4 512MiB 100%
 
-    parted $INSTALL_DISK --script mklabel gpt
-    parted $INSTALL_DISK --script mkpart ESP fat32 1MiB 512MiB
-    parted $INSTALL_DISK --script set 1 esp on
-    parted $INSTALL_DISK --script mkpart primary ext4 512MiB 100%
+    mkfs.fat -F32 ${INSTALL_DISK}1
+    mkfs.ext4 ${INSTALL_DISK}2
 
-    mkfs.fat -F32 "${INSTALL_DISK}1"
-    mkfs.ext4 "${INSTALL_DISK}2"
-
-    mount "${INSTALL_DISK}2" /mnt
+    mount ${INSTALL_DISK}2 /mnt
     mkdir /mnt/boot
-    mount "${INSTALL_DISK}1" /mnt/boot
+    mount ${INSTALL_DISK}1 /mnt/boot
 
-    pacstrap /mnt base linux linux-firmware vim nano sudo networkmanager grub efibootmgr git
+    pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
 
     genfstab -U /mnt >> /mnt/etc/fstab
 
-    echo -e "${GREEN}✔ Base System Installed.${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+        hwclock --systohc
+        echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
+        locale-gen
+        echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+        echo $HOSTNAME > /etc/hostname
+        echo '127.0.0.1 localhost' >> /etc/hosts
+        echo '::1       localhost' >> /etc/hosts
+        echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
+
+        useradd -m -G wheel -s /bin/bash $USERNAME
+        echo $USERNAME:$PASSWORD | chpasswd
+        echo root:$PASSWORD | chpasswd
+        sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+        systemctl enable NetworkManager
+    "
+    echo -e "${GREEN}Base system installed.${NC}"
 }
 
-# Configure System
-configure_system() {
+install_aur_helper() {
     clear
-    echo -e "${CYAN}Configuring System...${NC}"
-    arch-chroot /mnt /bin/bash << EOF
-ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
-hwclock --systohc
-
-echo "$LOCALE" > /etc/locale.gen
-locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-
-echo "$HOSTNAME" > /etc/hostname
-cat << HOSTS > /etc/hosts
-127.0.0.1 localhost
-::1       localhost
-127.0.1.1 $HOSTNAME.localdomain $HOSTNAME
-HOSTS
-
-useradd -mG wheel,audio,video,storage,optical -s /bin/bash $USERNAME
-echo "$USERNAME:$PASSWORD" | chpasswd
-echo "root:$PASSWORD" | chpasswd
-
-sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
-
-systemctl enable NetworkManager
-
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=Arch
-grub-mkconfig -o /boot/grub/grub.cfg
-EOF
-    echo -e "${GREEN}✔ System Configured.${NC}"
+    echo -e "${CYAN}Installing AUR helper (${AUR_HELPER})...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm base-devel git
+        sudo -u $USERNAME bash -c '
+            cd ~
+            git clone https://aur.archlinux.org/${AUR_HELPER}.git
+            cd ${AUR_HELPER}
+            makepkg -si --noconfirm
+        '
+    "
+    echo -e "${GREEN}AUR helper installed.${NC}"
 }
 
-# Install Kernel and Microcode
-install_kernel_microcode() {
-    clear
-    echo -e "${CYAN}Installing Kernel and Microcode...${NC}"
-    arch-chroot /mnt pacman -Sy --noconfirm intel-ucode # or amd-ucode if AMD CPU
-    echo -e "${GREEN}✔ Kernel and Microcode Installed.${NC}"
+install_kde() {
+    echo -e "${GREEN}Installing KDE Plasma...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm plasma sddm konsole dolphin
+        systemctl enable sddm
+    "
+    echo -e "${GREEN}KDE Plasma installation complete.${NC}"
 }
 
-# Install Basic Applications
-install_basic_apps() {
-    clear
-    echo -e "${CYAN}Installing Basic Applications...${NC}"
-    arch-chroot /mnt pacman -Sy --noconfirm firefox neofetch htop zip unzip p7zip
-    echo -e "${GREEN}✔ Basic Applications Installed.${NC}"
+install_gnome() {
+    echo -e "${GREEN}Installing GNOME...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm gnome gnome-tweaks gnome-terminal
+        systemctl enable gdm
+    "
+    echo -e "${GREEN}GNOME installation complete.${NC}"
 }
 
-# Enable Services
-enable_services() {
-    clear
-    echo -e "${CYAN}Enabling Essential Services...${NC}"
-    arch-chroot /mnt systemctl enable NetworkManager
-    echo -e "${GREEN}✔ Services Enabled.${NC}"
+install_xfce() {
+    echo -e "${GREEN}Installing XFCE...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+        systemctl enable lightdm
+    "
+    echo -e "${GREEN}XFCE installation complete.${NC}"
 }
 
-# Finalize Installation
-finalize_installation() {
-    clear
-    echo -e "${GREEN}Finalizing Installation...${NC}"
-    umount -R /mnt
-    echo -e "${MAGENTA}✅ Installation Complete! You can reboot now.${NC}"
+install_sway() {
+    echo -e "${GREEN}Installing Sway (Wayland)...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm sway foot
+    "
+    echo -e "${GREEN}Sway installation complete.${NC}"
 }
 
-# Close Script
-close_script() {
-    clear
-    echo -e "${RED}Closing Script...${NC}"
-    exit 0
-}
-
-# Exit Script
 exit_script() {
-    clear
     echo -e "${RED}Exiting...${NC}"
     exit 0
 }
 
-# Menu Items
+# --- Menu items ---
 menu_items=(
-    " 1: Setup Username and Password:   setup_user_password    :$CYAN"
-    " 2: Install Base System:           install_base_system    :$BLUE"
-    " 3: Configure System:              configure_system       :$GREEN"
-    " 4: Install Kernel and Microcode:  install_kernel_microcode:$MAGENTA"
-    " 5: Install Basic Apps:            install_basic_apps     :$BLUE"
-    " 6: Enable Services:               enable_services        :$GREEN"
-    " 7: Finalize Installation:         finalize_installation  :$MAGENTA"
-    " c: Close Script:                  close_script           :$RED"
-    " e: Exit:                          exit_script            :$RED"
+    "1:Setup Username and Password:setup_user_password:$CYAN"
+    "2:Install Base System:install_base_system:$BLUE"
+    "3:Install AUR Helper:install_aur_helper:$BLUE"
+    "4:Install KDE Plasma:install_kde:$GREEN"
+    "5:Install GNOME:install_gnome:$GREEN"
+    "6:Install XFCE:install_xfce:$GREEN"
+    "7:Install Sway (Wayland):install_sway:$GREEN"
+    "8:Exit:exit_script:$RED"
 )
 
-# Main Menu Loop
+# --- Menu display ---
 while true; do
     echo ""
-    echo -e "${YELLOW}🌟 Select an Option:${NC}"
-
+    echo -e "${YELLOW}Select an option:${NC}"
     for item in "${menu_items[@]}"; do
         IFS=":" read -r number description function color <<< "$item"
-        echo -e "${color}$number. $description${NC}"
+        echo -e "${color}$number) $description${NC}"
     done
 
     echo ""
     read -p "Enter choice: " choice
 
-    if [ "$choice" == "c" ]; then
-        close_script
-    elif [ "$choice" == "e" ]; then
-        exit_script
-    fi
-
     valid_choice=false
     for item in "${menu_items[@]}"; do
         IFS=":" read -r number description function color <<< "$item"
-        if [[ "$choice" == "$number" ]]; then
+        if [ "$choice" = "$number" ]; then
             valid_choice=true
-            IFS=" " read -r -a function_array <<< "$function"
-            for func in "${function_array[@]}"; do
-                $func
-            done
+            $function
             break
         fi
     done
 
     if [ "$valid_choice" = false ]; then
-        echo -e "${RED}Invalid Option. Please Try Again.${NC}"
+        echo -e "${RED}Invalid option. Please try again.${NC}"
     fi
 done
