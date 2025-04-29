@@ -356,8 +356,26 @@ Song_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
 )).start())
 
 # Assuming quick_commands_frame is already created.
+software_upload = tk.Label( quick_commands_frame, text="software \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
+software_upload.grid(row=3, column=1, pady=10, padx=10, sticky=tk.W)
+software_upload.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
+    print("Executing: rclone sync D:\\software\\ gu:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list"),
+    subprocess.Popen("rclone sync D:\\software\\ gu:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
+    print("\033[92mBackup Sync Completed\033[0m")
+)).start())
+
+# Assuming quick_commands_frame is already created.
+software_download = tk.Label( quick_commands_frame, text="software \uf409", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
+software_download.grid(row=3, column=2, pady=10, padx=10, sticky=tk.W)
+software_download.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
+    print("Executing: rclone sync gu:\\software\\ D:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list"),
+    subprocess.Popen("rclone sync gu:\\software\\ D:\\software\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
+    print("\033[92mBackup Sync Completed\033[0m")
+)).start())
+
+# Assuming quick_commands_frame is already created.
 Picture_Label = tk.Label( quick_commands_frame, text="Picture \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
-Picture_Label.grid(row=3, column=1, pady=10, padx=10, sticky=tk.W)
+Picture_Label.grid(row=4, column=1, pady=10, padx=10, sticky=tk.W)
 Picture_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
     print("Executing: rclone sync C:\\Users\\nahid\\Pictures o0:\\Pictures -P --check-first --transfers=10 --track-renames --fast-list"),
     subprocess.Popen("rclone sync C:\\Users\\nahid\\Pictures o0:\\Pictures -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
