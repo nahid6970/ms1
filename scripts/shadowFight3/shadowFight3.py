@@ -647,7 +647,13 @@ def Event_Function():
                     if (location := find_image(Folder_Ntfy, confidence=0.8, region=(170,86,1749,970)))]
                     time.sleep(0.05)
 
-
+                    for contimg in glob.glob(r"C:\msBackups\shadowfight3\ads\ads_auto_click\*.png"):
+                        if (location := find_image(contimg, confidence=0.8, region=(166, 83, 1758, 978))):
+                            x, y, w, h = location  # assuming location is (left, top, width, height)
+                            center_x = x + w // 2
+                            center_y = y + h // 2
+                            pyautogui.click(center_x, center_y)
+                            time.sleep(0.05)
 
                     # if find_image(r"C:\Users\nahid\Desktop\image_108.png", confidence=0.8, region=(683, 79, 809, 151)): #! for using double function for the same picture
                     #      press_global_screen_with_delays((842, 537, 2)),
