@@ -105,7 +105,7 @@ def find_image(image_path, confidence=0.7, region=None):
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
-    if is_searching and time.time() - last_found_time > 50: # for ads do 120 second
+    if is_searching and time.time() - last_found_time > 120: # for ads do 120 second
         ntfy_signal_cli()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
@@ -637,10 +637,18 @@ def Event_Function():
 
                     # elif find_image(r"C:\msBackups\shadowfight3\cont_dynamic", confidence=0.8, region=(1380, 792, 1738, 966)): press_keys_with_delays(window, 'c', 1) 
 
-                    [press_keys_with_delays(window, 'c', 1) 
+                    # [press_keys_with_delays(window, 'c', 1)  #! uncomment after event
+                    # for contimg in glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png") 
+                    # if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
+                    # time.sleep(0.05)
+
+                    elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1) #! quit game creepy party
+
+                    [press_keys_with_delays(window, 'v',0,'v',1, 'c', 1)  #! creepy cont ads
                     for contimg in glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png") 
                     if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
                     time.sleep(0.05)
+
 
                     [ntfy_signal_cli()
                     for Folder_Ntfy in glob.glob(r"C:\msBackups\shadowfight3\notify\*.png") 
