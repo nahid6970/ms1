@@ -8,12 +8,31 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Global variables
-INSTALL_DISK="/dev/sda"    # Set the installation disk here (example: /dev/sda)
-HOSTNAME="archlinux"       # Default hostname
+INSTALL_DISK="/dev/sda"       # Set the installation disk here (example: /dev/sda)
+HOSTNAME="archlinux"         # Default hostname
 USERNAME=""
 PASSWORD=""
+ROOT_PASSWORD=""
 
 # Functions
+
+# Function to setup root password
+setup_root_password() {
+    clear
+    echo -e "${CYAN}Setting up root password...${NC}"
+    read -sp "Enter root password: " ROOT_PASSWORD
+    echo
+    read -sp "Confirm root password: " ROOT_PASSWORD_CONFIRM
+    echo
+
+    if [ "$ROOT_PASSWORD" != "$ROOT_PASSWORD_CONFIRM" ]; then
+        echo -e "${RED}Passwords do not match! Please try again.${NC}"
+        setup_root_password
+    else
+        echo -e "${GREEN}Root password saved.${NC}"
+    fi
+}
+
 
 # Function to setup username and password
 setup_user_password() {
@@ -59,18 +78,26 @@ setup_disk() {
     echo -e "${GREEN}Disk setup completed.${NC}"
 }
 
-# Function to set up the fastest mirrors
 setup_mirrors() {
     clear
     echo -e "${CYAN}Selecting the fastest mirrors...${NC}"
-
     # Install reflector if it's not already installed
     pacman -Sy --noconfirm reflector
-
-    # Use reflector to select the fastest mirrors
-    reflector --country Bangladesh --sort rate --latest 5 --save /etc/pacman.d/mirrorlist
-
-    echo -e "${GREEN}Mirrors have been updated.${NC}"
+    # Define XeonBD mirror entries
+    xeonbd_mirrors=$(cat <<EOF
+Server = http://mirror.xeonbd.com/archlinux/\$repo/os/\$arch
+Server = https://mirror.xeonbd.com/archlinux/\$repo/os/\$arch
+EOF
+)
+    # Create a temporary file for the new mirrorlist
+    tmpfile=$(mktemp)
+    # Write the XeonBD mirrors at the top of the temp file
+    echo "$xeonbd_mirrors" > "$tmpfile"
+    # Use reflector to get the 5 fastest mirrors in Bangladesh (excluding XeonBD to avoid duplicates)
+    reflector --country Bangladesh --sort rate --latest 5 >> "$tmpfile"
+    # Move the temp file to the actual mirrorlist location
+    mv "$tmpfile" /etc/pacman.d/mirrorlist
+    echo -e "${GREEN}Mirrors have been updated with XeonBD at the top.${NC}"
 }
 
 # Function to install the base system
@@ -112,6 +139,7 @@ create_user() {
     arch-chroot /mnt /bin/bash -c "
         useradd -m -G wheel,audio,video,storage,optical $USERNAME
         echo '$USERNAME:$PASSWORD' | chpasswd
+        echo 'root:$ROOT_PASSWORD' | chpasswd # Set root password here
         sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
     "
     echo -e "${GREEN}User created successfully.${NC}"
@@ -156,7 +184,7 @@ configure_system() {
         echo 'LANG=en_US.UTF-8' > /etc/locale.conf
         echo '$HOSTNAME' > /etc/hostname
         echo '127.0.0.1 localhost' > /etc/hosts
-        echo '::1       localhost' >> /etc/hosts
+        echo '::1         localhost' >> /etc/hosts
         echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
         
         # Enable essential services
@@ -249,6 +277,7 @@ main() {
         exit 1
     fi
 
+    setup_root_password # Get the root password
     setup_user_password
     setup_disk
     setup_mirrors
@@ -256,10 +285,10 @@ main() {
     prepare_chroot
     configure_system
     create_user
-    install_yay
+    # install_yay
     install_grub
     install_desktop_environment
-    setup_important_script
+    # setup_important_script
     
     # Cleanup
     umount -R /mnt
@@ -267,7 +296,7 @@ main() {
     echo -e "${GREEN}Installation Complete! You can now reboot the system.${NC}"
     echo -e "${YELLOW}Don't forget to:"
     echo -e "1. Remove the installation media"
-    echo -e "2. Login as your new user ($USERNAME)"
+    echo -e "2. Login as your new user ($USERNAME) or root"
     echo -e "3. Set up your system further as needed${NC}"
 }
 
