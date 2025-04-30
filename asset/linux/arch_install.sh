@@ -227,6 +227,20 @@ install_desktop_environment() {
     echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
 
+
+# Function to download the important sh file and update .bashrc
+setup_important_script() {
+    clear
+    echo -e "${CYAN}Downloading and setting up important script...${NC}"
+    # Download the script
+    curl -fsSL https://raw.githubusercontent.com/nahid6970/ms1/refs/heads/main/asset/linux/archos.sh -o /home/$USERNAME/archos.sh
+    # Make the script executable
+    chmod +x /home/$USERNAME/archos.sh
+    # Add the command to .bashrc to run the script using 'os'
+    echo "alias os='/home/$USERNAME/archos.sh'" >> /home/$USERNAME/.bashrc
+    echo -e "${GREEN}Script downloaded and setup completed.${NC}"
+}
+
 # Main function to orchestrate the install
 main() {
     # Verify boot mode
@@ -245,6 +259,7 @@ main() {
     install_yay
     install_grub
     install_desktop_environment
+    setup_important_script
     
     # Cleanup
     umount -R /mnt
