@@ -31,6 +31,20 @@ setup_user_password() {
     echo -e "${GREEN}Username and password saved.${NC}"
 }
 
+# Function to select install disk
+select_install_disk() {
+    clear
+    lsblk
+    echo
+    read -p "Enter the disk to install (example: /dev/sda): " INSTALL_DISK
+    echo
+    read -p "⚠️  WARNING: This will erase all data on $INSTALL_DISK. Are you sure? (yes/no): " confirm
+    if [[ "$confirm" != "yes" ]]; then
+        echo "Installation cancelled."
+        exit 1
+    fi
+}
+
 # Function to install base system
 install_base_system() {
     clear
@@ -85,6 +99,7 @@ install_grub_bootloader() {
     "
     echo -e "${GREEN}GRUB bootloader installation complete.${NC}"
 }
+
 
 install_aur_helper() {
     clear
@@ -153,7 +168,7 @@ exit_script() {
 }
 
 setup_user_password
+select_install_disk
 install_base_system
-install_grub_bootloader
 # install_aur_helper
 # install_kde
