@@ -158,6 +158,7 @@ exit_script() {
 }
 
 setup_user_password
+select_install_disk
 install_base_system
 install_aur_helper
 install_kde
