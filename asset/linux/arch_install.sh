@@ -31,6 +31,16 @@ setup_user_password() {
     echo -e "${GREEN}Username and password saved.${NC}"
 }
 
+install_grub_bootloader() {
+    echo -e "${CYAN}Installing GRUB bootloader...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm grub efibootmgr os-prober
+        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+        grub-mkconfig -o /boot/grub/grub.cfg
+    "
+    echo -e "${GREEN}GRUB bootloader installation complete.${NC}"
+}
+
 # Function to install base system
 install_base_system() {
     clear
@@ -145,5 +155,6 @@ exit_script() {
 
 setup_user_password
 install_base_system
+install_grub_bootloader
 # install_aur_helper
 # install_kde
