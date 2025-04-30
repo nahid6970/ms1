@@ -4,12 +4,12 @@
 # chmod +x os.sh
 # bash os.sh or sh os.sh
 
-
-# Define colors
+# --- Define colors ---
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # --- Global variables ---
@@ -31,18 +31,11 @@ setup_user_password() {
     echo -e "${GREEN}Username and password saved.${NC}"
 }
 
-# Function to select install disk
-select_install_disk() {
-    clear
-    lsblk
-    echo
-    read -p "Enter the disk to install (example: /dev/sda): " INSTALL_DISK
-    echo
-    read -p "⚠️  WARNING: This will erase all data on $INSTALL_DISK. Are you sure? (yes/no): " confirm
-    if [[ "$confirm" != "yes" ]]; then
-        echo "Installation cancelled."
-        exit 1
-    fi
+# Function to mount /dev /proc /sys for chroot
+prepare_chroot() {
+    mount --bind /dev /mnt/dev
+    mount --bind /proc /mnt/proc
+    mount --bind /sys /mnt/sys
 }
 
 # Function to install base system
@@ -65,6 +58,8 @@ install_base_system() {
 
     pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
     genfstab -U /mnt >> /mnt/etc/fstab
+
+    prepare_chroot
 
     arch-chroot /mnt /bin/bash -c "
         ln -sf /usr/share/zoneinfo/UTC /etc/localtime
@@ -90,17 +85,18 @@ install_base_system() {
     echo -e "${GREEN}Base system installed.${NC}"
 }
 
-install_grub_bootloader() {
+# Install GRUB (if needed)
+install_grub() {
     echo -e "${CYAN}Installing GRUB bootloader...${NC}"
     arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm grub efibootmgr os-prober
+        pacman -Sy --noconfirm grub efibootmgr
         grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
         grub-mkconfig -o /boot/grub/grub.cfg
     "
     echo -e "${GREEN}GRUB bootloader installation complete.${NC}"
 }
 
-
+# AUR Helper
 install_aur_helper() {
     clear
     echo -e "${CYAN}Installing AUR helper (${AUR_HELPER})...${NC}"
@@ -116,11 +112,11 @@ install_aur_helper() {
     echo -e "${GREEN}AUR helper installed.${NC}"
 }
 
+# KDE (interactive)
 install_kde() {
     clear
     echo -e "${CYAN}Do you want to install KDE Plasma? (y/n)${NC}"
     read -p "Enter your choice: " confirm
-    # If no input is given or if 'y' or 'Enter' is pressed, treat it as 'yes'
     if [[ -z "$confirm" || "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "${GREEN}Installing KDE Plasma...${NC}"
         arch-chroot /mnt /bin/bash -c "
@@ -131,11 +127,11 @@ install_kde() {
     elif [[ "$confirm" =~ ^[Nn]$ ]]; then
         echo "KDE Plasma installation cancelled."
     else
-        echo "Invalid input. Please enter 'y' for yes or 'n' for no."
+        echo "Invalid input. Please enter 'y' or 'n'."
     fi
 }
 
-
+# GNOME
 install_gnome() {
     echo -e "${GREEN}Installing GNOME...${NC}"
     arch-chroot /mnt /bin/bash -c "
@@ -145,6 +141,7 @@ install_gnome() {
     echo -e "${GREEN}GNOME installation complete.${NC}"
 }
 
+# XFCE
 install_xfce() {
     echo -e "${GREEN}Installing XFCE...${NC}"
     arch-chroot /mnt /bin/bash -c "
@@ -154,6 +151,7 @@ install_xfce() {
     echo -e "${GREEN}XFCE installation complete.${NC}"
 }
 
+# Sway
 install_sway() {
     echo -e "${GREEN}Installing Sway (Wayland)...${NC}"
     arch-chroot /mnt /bin/bash -c "
@@ -162,14 +160,16 @@ install_sway() {
     echo -e "${GREEN}Sway installation complete.${NC}"
 }
 
+# Exit
 exit_script() {
     echo -e "${RED}Exiting...${NC}"
     exit 0
 }
 
+# --- Run the script ---
 setup_user_password
-select_install_disk
 install_base_system
-install_grub_bootloader
+install_grub
 # install_aur_helper
 # install_kde
+# Test 1
