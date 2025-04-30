@@ -1,129 +1,184 @@
 #!/bin/bash
 
-# --- Configuration ---
-hostname="myarch"
-timezone="Asia/Dhaka" # Setting timezone to your current location (Dhaka)
-locale="en_US.UTF-8"
-keymap="us"
-username="nahid"
-password="your_password" # REPLACE WITH A STRONG PASSWORD
-extra_packages="vim git networkmanager wpa_supplicant dialog"
-bootloader="grub" # Options: grub, systemd-boot
-disk="" # Will be determined dynamically
-efi_size="+512M" # Recommended size for EFI partition
-root_size="0"    # Remaining space for root partition
-# --- End Configuration ---
+# Define colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-set -e
+# Global variables
+INSTALL_DISK="/dev/sda"    # Set the installation disk here (example: /dev/sda)
+HOSTNAME="archlinux"       # Default hostname
+AUR_HELPER="yay"           # AUR helper (yay or paru)
+USERNAME=""
+PASSWORD=""
 
-echo "Starting Arch Linux installation - $(date)"
-echo "------------------------------------"
+# Functions
 
-if [[ $EUID -ne 0 ]]; then
-  echo "This script must be run as root. Please use sudo."
-  exit 1
-fi
+# Function to setup username and password
+setup_user_password() {
+    clear
+    echo -e "${CYAN}Setting up username and password...${NC}"
+    read -p "Enter new username: " USERNAME
+    read -sp "Enter password for $USERNAME: " PASSWORD
+    echo
+    echo -e "${GREEN}Username and password saved.${NC}"
+}
 
-# Update system clock
-echo "Updating system clock..."
-timedatectl set-ntp true
+# Function to set up the disk and partitions
+setup_disk() {
+    clear
+    echo -e "${CYAN}Setting up disk partitioning...${NC}"
+    # Create partition table
+    parted $INSTALL_DISK mklabel gpt
+    parted $INSTALL_DISK mkpart primary fat32 1MiB 512MiB
+    parted $INSTALL_DISK set 1 esp on
+    parted $INSTALL_DISK mkpart primary ext4 512MiB 100%
 
-# Identify available disks
-echo "Available disks:"
-lsblk -d
+    # Format partitions
+    mkfs.fat -F32 ${INSTALL_DISK}1
+    mkfs.ext4 ${INSTALL_DISK}2
 
-# Prompt for the target disk
-while [[ -z "$disk" ]]; do
-  read -p "Enter the disk to install Arch Linux on (e.g., /dev/sda): " disk
-  if [[ -b "$disk" ]]; then
-    echo "Selected disk: $disk"
-  else
-    echo "Error: Invalid disk specified. Please try again."
-  fi
-done
+    # Mount partitions
+    mount ${INSTALL_DISK}2 /mnt
+    mkdir /mnt/boot
+    mount ${INSTALL_DISK}1 /mnt/boot
 
-# Partitioning
-# Partitioning
-echo "Partitioning the disk: $disk"
-echo "WARNING: This will erase all existing data on $disk."
-read -p "Are you sure you want to proceed? (y/N): " confirm
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-  echo "Aborting installation."
-  exit 1
-fi
+    echo -e "${GREEN}Disk setup completed.${NC}"
+}
 
-echo "Creating GPT partition table..."
-parted -s "$disk" mklabel gpt
+# Function to install the base system
+install_base_system() {
+    clear
+    echo -e "${CYAN}Installing base system...${NC}"
+    timedatectl set-ntp true
 
-echo "Creating EFI partition (start=0%, size=512MB)..."
-parted -s "$disk" mkpart ESP fat32 0% 512MB
-parted -s "$disk" set 1 esp on
+    pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
 
-echo "Creating root partition (start=512MB, end=100%)..."
-parted -s "$disk" mkpart primary ext4 512MB 100%
+    # Generate fstab
+    genfstab -U /mnt >> /mnt/etc/fstab
 
-efi_part="${disk}1"
-root_part="${disk}2"
+    echo -e "${GREEN}Base system installed.${NC}"
+}
 
-echo "Formatting partitions..."
-mkfs.fat -F32 "$efi_part"
-mkfs.ext4 "$root_part"
+# Function to set up the fastest mirrors
+setup_mirrors() {
+    clear
+    echo -e "${CYAN}Selecting the fastest mirrors...${NC}"
 
-# Mount filesystems
-echo "Mounting filesystems..."
-mount "$root_part" /mnt
-mkdir -p /mnt/boot/efi
-mount "$efi_part" /mnt/boot/efi
+    # Install reflector if it's not already installed
+    pacman -Sy --noconfirm reflector
 
-# Select the fastest mirrors
-echo "Selecting the fastest mirrors..."
-pacman -Sy reflector --noconfirm
-reflector --country Bangladesh --latest 5 --sort rate --save /etc/pacman.d/mirrorlist
+    # Use reflector to select the fastest mirrors (up to 5 of the most recent ones)
+    reflector --country Bangladesh --sort rate --latest 5 --save /etc/pacman.d/mirrorlist
 
-# Install base packages
-echo "Installing base packages..."
-pacstrap /mnt base base-devel linux linux-firmware iputils dhcpcd "$extra_packages"
+    # Alternatively, uncomment the line below to use 6 mirrors
+    # reflector --country Bangladesh --sort rate --latest 6 --save /etc/pacman.d/mirrorlist
 
-# Generate fstab
-echo "Generating fstab..."
-genfstab -U /mnt >> /mnt/etc/fstab
+    # Inform the user that the mirrors have been updated
+    echo -e "${GREEN}Mirrors have been updated.${NC}"
+}
 
-echo "Entering chroot..."
-arch-chroot /mnt bash -c "
-  echo \"$hostname\" > /etc/hostname
-  ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-  hwclock --systohc
-  sed -i 's/#$locale UTF-8/\"$locale UTF-8\"/' /etc/locale.gen
-  locale-gen
-  echo \"LANG=$locale\" > /etc/locale.conf
-  echo \"KEYMAP=$keymap\" > /etc/vconsole.conf
-  echo \"root:$password\" | chpasswd
-  useradd -m -G wheel -s /bin/bash \"$username\"
-  echo \"$username:$password\" | chpasswd
-  sed -i '/# %wheel ALL=(ALL) ALL/s/^# //g' /etc/sudoers
+# Function to prepare chroot environment
+prepare_chroot() {
+    clear
+    echo -e "${CYAN}Preparing chroot environment...${NC}"
 
-  if [ \"$bootloader\" = \"grub\" ]; then
-    pacman -S --noconfirm grub efibootmgr
-    grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi
-    grub-mkconfig -o /boot/grub/grub.cfg
-  elif [ \"$bootloader\" = \"systemd-boot\" ]; then
-    bootctl --path=/boot/efi install
-    echo \"title Arch Linux\" > /boot/efi/loader/entries/arch.conf
-    echo \"linux /vmlinuz-linux\" >> /boot/efi/loader/entries/arch.conf
-    echo \"initrd /initramfs-linux.img\" >> /boot/efi/loader/entries/arch.conf
-    echo \"options root=$(findmnt -no UUID /) rw\" >> /boot/efi/loader/entries/arch.conf
-    echo \"default arch\" > /boot/efi/loader/loader.conf
-  else
-    echo \"Error: Invalid bootloader selected.\"
-  fi
+    # Bind mount /dev, /proc, and /sys to /mnt
+    mount --bind /dev /mnt/dev
+    mount --bind /proc /mnt/proc
+    mount --bind /sys /mnt/sys
+}
 
-  systemctl enable NetworkManager
-"
+# Function to configure the system in chroot
+configure_system() {
+    clear
+    echo -e "${CYAN}Configuring system in chroot...${NC}"
 
-echo "Unmounting filesystems..."
-umount -R /mnt
+    arch-chroot /mnt /bin/bash -c "
+        ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+        hwclock --systohc
+        echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
+        locale-gen
+        echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+        echo $HOSTNAME > /etc/hostname
+        echo '127.0.0.1 localhost' > /etc/hosts
+        echo '::1       localhost' >> /etc/hosts
+        echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
+    "
 
-echo "Installation complete! Reboot your system."
-echo "------------------------------------"
+    echo -e "${GREEN}System configured.${NC}"
+}
 
-# test 3
+# Function to install GRUB bootloader
+install_grub() {
+    clear
+    echo -e "${CYAN}Installing GRUB bootloader...${NC}"
+    
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm grub efibootmgr
+        mkdir -p /boot/EFI
+        mount ${INSTALL_DISK}1 /boot/EFI
+        grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB
+        grub-mkconfig -o /boot/grub/grub.cfg
+    "
+
+    echo -e "${GREEN}GRUB bootloader installed.${NC}"
+}
+
+# Function to install the chosen desktop environment (KDE, GNOME, XFCE)
+install_desktop_environment() {
+    clear
+    echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
+    echo -e "1) KDE Plasma"
+    echo -e "2) GNOME"
+    echo -e "3) XFCE"
+    read -p "Enter the number (1, 2, or 3): " DE_CHOICE
+
+    case $DE_CHOICE in
+        1)
+            echo -e "${GREEN}Installing KDE Plasma...${NC}"
+            arch-chroot /mnt /bin/bash -c "
+                pacman -Sy --noconfirm plasma sddm konsole dolphin
+                systemctl enable sddm
+            "
+            echo -e "${GREEN}KDE Plasma installation complete.${NC}"
+            ;;
+        2)
+            echo -e "${GREEN}Installing GNOME...${NC}"
+            arch-chroot /mnt /bin/bash -c "
+                pacman -Sy --noconfirm gnome gnome-tweaks gnome-terminal
+                systemctl enable gdm
+            "
+            echo -e "${GREEN}GNOME installation complete.${NC}"
+            ;;
+        3)
+            echo -e "${GREEN}Installing XFCE...${NC}"
+            arch-chroot /mnt /bin/bash -c "
+                pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+                systemctl enable lightdm
+            "
+            echo -e "${GREEN}XFCE installation complete.${NC}"
+            ;;
+        *)
+            echo -e "${RED}Invalid choice. No desktop environment installed.${NC}"
+            ;;
+    esac
+}
+
+# Main function to orchestrate the install
+main() {
+    setup_user_password
+    setup_disk
+    setup_mirrors   # Move this before base system installation
+    install_base_system
+    prepare_chroot
+    configure_system
+    install_grub
+    install_desktop_environment
+    echo -e "${GREEN}Installation Complete! Reboot now.${NC}"
+}
+
+# Run the main function
+main
