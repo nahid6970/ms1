@@ -43,6 +43,7 @@ while [[ -z "$disk" ]]; do
 done
 
 # Partitioning
+# Partitioning
 echo "Partitioning the disk: $disk"
 echo "WARNING: This will erase all existing data on $disk."
 read -p "Are you sure you want to proceed? (y/N): " confirm
@@ -54,12 +55,12 @@ fi
 echo "Creating GPT partition table..."
 parted -s "$disk" mklabel gpt
 
-echo "Creating EFI partition ($efi_size)..."
-parted -s "$disk" mkpart ESP fat32 0% "$efi_size"
+echo "Creating EFI partition (start=0%, size=512MB)..."
+parted -s "$disk" mkpart ESP fat32 0% 512MB
 parted -s "$disk" set 1 esp on
 
-echo "Creating root partition (remaining space)..."
-parted -s "$disk" mkpart primary ext4 "$efi_size" 100%
+echo "Creating root partition (start=512MB, end=100%)..."
+parted -s "$disk" mkpart primary ext4 512MB 100%
 
 efi_part="${disk}1"
 root_part="${disk}2"
@@ -125,4 +126,4 @@ umount -R /mnt
 echo "Installation complete! Reboot your system."
 echo "------------------------------------"
 
-# test 1
+# test 2
