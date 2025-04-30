@@ -599,11 +599,17 @@ def Event_Function():
                     # elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, selected_key, 1, 'c', 1)
                     # elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
 
+                    # elif find_image(Tournament_step1, confidence=0.8):
+                    #     if selected_key == "num3":
+                    #         press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
+                    #     else:
+                    #         press_keys_with_delays(window, selected_key, 1, 'c', 1)
+                    #! creepy party
                     elif find_image(Tournament_step1, confidence=0.8):
                         if selected_key == "num3":
                             press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
                         else:
-                            press_keys_with_delays(window, selected_key, 1, 'c', 1)
+                            press_keys_with_delays(window, selected_key, 1, 'c', 1, "y", 1, "c", 1)
 
 
                     # elif find_image(Tournament_step1, confidence=0.8) or find_image(Alt_BattlePass_Gems, confidence=0.8): #! this one is to get gems from battlepass
