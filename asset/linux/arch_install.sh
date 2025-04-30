@@ -10,7 +10,6 @@ NC='\033[0m' # No Color
 # Global variables
 INSTALL_DISK="/dev/sda"    # Set the installation disk here (example: /dev/sda)
 HOSTNAME="archlinux"       # Default hostname
-AUR_HELPER="yay"           # AUR helper (yay or paru)
 USERNAME=""
 PASSWORD=""
 
@@ -23,43 +22,41 @@ setup_user_password() {
     read -p "Enter new username: " USERNAME
     read -sp "Enter password for $USERNAME: " PASSWORD
     echo
-    echo -e "${GREEN}Username and password saved.${NC}"
+    read -sp "Confirm password: " PASSWORD_CONFIRM
+    echo
+    
+    if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
+        echo -e "${RED}Passwords do not match! Please try again.${NC}"
+        setup_user_password
+    else
+        echo -e "${GREEN}Username and password saved.${NC}"
+    fi
 }
 
 # Function to set up the disk and partitions
 setup_disk() {
     clear
     echo -e "${CYAN}Setting up disk partitioning...${NC}"
+    
+    # Unmount any existing partitions
+    umount -R /mnt 2>/dev/null || true
+    
     # Create partition table
-    parted $INSTALL_DISK mklabel gpt
-    parted $INSTALL_DISK mkpart primary fat32 1MiB 512MiB
-    parted $INSTALL_DISK set 1 esp on
-    parted $INSTALL_DISK mkpart primary ext4 512MiB 100%
+    parted -s $INSTALL_DISK mklabel gpt
+    parted -s $INSTALL_DISK mkpart primary fat32 1MiB 512MiB
+    parted -s $INSTALL_DISK set 1 esp on
+    parted -s $INSTALL_DISK mkpart primary ext4 512MiB 100%
 
     # Format partitions
     mkfs.fat -F32 ${INSTALL_DISK}1
-    mkfs.ext4 ${INSTALL_DISK}2
+    mkfs.ext4 -F ${INSTALL_DISK}2
 
     # Mount partitions
     mount ${INSTALL_DISK}2 /mnt
-    mkdir /mnt/boot
+    mkdir -p /mnt/boot
     mount ${INSTALL_DISK}1 /mnt/boot
 
     echo -e "${GREEN}Disk setup completed.${NC}"
-}
-
-# Function to install the base system
-install_base_system() {
-    clear
-    echo -e "${CYAN}Installing base system...${NC}"
-    timedatectl set-ntp true
-
-    pacstrap /mnt base linux linux-firmware nano sudo networkmanager git
-
-    # Generate fstab
-    genfstab -U /mnt >> /mnt/etc/fstab
-
-    echo -e "${GREEN}Base system installed.${NC}"
 }
 
 # Function to set up the fastest mirrors
@@ -70,25 +67,54 @@ setup_mirrors() {
     # Install reflector if it's not already installed
     pacman -Sy --noconfirm reflector
 
-    # Use reflector to select the fastest mirrors (up to 5 of the most recent ones)
+    # Use reflector to select the fastest mirrors
     reflector --country Bangladesh --sort rate --latest 5 --save /etc/pacman.d/mirrorlist
 
-    # Alternatively, uncomment the line below to use 6 mirrors
-    # reflector --country Bangladesh --sort rate --latest 6 --save /etc/pacman.d/mirrorlist
-
-    # Inform the user that the mirrors have been updated
     echo -e "${GREEN}Mirrors have been updated.${NC}"
+}
+
+# Function to install the base system
+install_base_system() {
+    clear
+    echo -e "${CYAN}Installing base system...${NC}"
+    timedatectl set-ntp true
+
+    # Detect CPU for microcode
+    CPU_TYPE=$(grep -m 1 -o 'GenuineIntel\|AuthenticAMD' /proc/cpuinfo)
+    MICROCODE=""
+    if [ "$CPU_TYPE" == "GenuineIntel" ]; then
+        MICROCODE="intel-ucode"
+    elif [ "$CPU_TYPE" == "AuthenticAMD" ]; then
+        MICROCODE="amd-ucode"
+    fi
+
+    pacstrap /mnt base linux linux-firmware $MICROCODE nano sudo networkmanager base-devel git dhcpcd
+
+    # Generate fstab
+    genfstab -U /mnt >> /mnt/etc/fstab
+
+    echo -e "${GREEN}Base system installed.${NC}"
 }
 
 # Function to prepare chroot environment
 prepare_chroot() {
     clear
     echo -e "${CYAN}Preparing chroot environment...${NC}"
-
-    # Bind mount /dev, /proc, and /sys to /mnt
     mount --bind /dev /mnt/dev
     mount --bind /proc /mnt/proc
     mount --bind /sys /mnt/sys
+}
+
+# Function to create user
+create_user() {
+    clear
+    echo -e "${CYAN}Creating user $USERNAME...${NC}"
+    arch-chroot /mnt /bin/bash -c "
+        useradd -m -G wheel,audio,video,storage,optical $USERNAME
+        echo '$USERNAME:$PASSWORD' | chpasswd
+        sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+    "
+    echo -e "${GREEN}User created successfully.${NC}"
 }
 
 # Function to configure the system in chroot
@@ -102,10 +128,17 @@ configure_system() {
         echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen
         locale-gen
         echo 'LANG=en_US.UTF-8' > /etc/locale.conf
-        echo $HOSTNAME > /etc/hostname
+        echo '$HOSTNAME' > /etc/hostname
         echo '127.0.0.1 localhost' > /etc/hosts
         echo '::1       localhost' >> /etc/hosts
         echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
+        
+        # Enable essential services
+        systemctl enable NetworkManager
+        systemctl enable dhcpcd
+        
+        # Regenerate initramfs
+        mkinitcpio -P
     "
 
     echo -e "${GREEN}System configured.${NC}"
@@ -117,41 +150,38 @@ install_grub() {
     echo -e "${CYAN}Installing GRUB bootloader...${NC}"
     
     arch-chroot /mnt /bin/bash -c "
-        pacman -Sy --noconfirm grub efibootmgr
-        mkdir -p /boot/EFI
-        mount ${INSTALL_DISK}1 /boot/EFI
-        grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB
+        pacman -Sy --noconfirm grub efibootmgr os-prober
+        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
         grub-mkconfig -o /boot/grub/grub.cfg
     "
 
     echo -e "${GREEN}GRUB bootloader installed.${NC}"
 }
 
-# Function to install the chosen desktop environment (KDE, GNOME, XFCE)
+# Function to install the chosen desktop environment
 install_desktop_environment() {
     clear
     echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
     echo -e "1) KDE Plasma"
     echo -e "2) GNOME"
     echo -e "3) XFCE"
-    read -p "Enter the number (1, 2, or 3): " DE_CHOICE
+    echo -e "4) None (CLI only)"
+    read -p "Enter the number (1-4): " DE_CHOICE
 
     case $DE_CHOICE in
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
             arch-chroot /mnt /bin/bash -c "
-                pacman -Sy --noconfirm plasma sddm konsole dolphin
+                pacman -Sy --noconfirm plasma sddm konsole dolphin plasma-wayland-session
                 systemctl enable sddm
             "
-            echo -e "${GREEN}KDE Plasma installation complete.${NC}"
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
             arch-chroot /mnt /bin/bash -c "
-                pacman -Sy --noconfirm gnome gnome-tweaks gnome-terminal
+                pacman -Sy --noconfirm gnome gnome-tweaks gnome-terminal gdm
                 systemctl enable gdm
             "
-            echo -e "${GREEN}GNOME installation complete.${NC}"
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
@@ -159,25 +189,44 @@ install_desktop_environment() {
                 pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
                 systemctl enable lightdm
             "
-            echo -e "${GREEN}XFCE installation complete.${NC}"
+            ;;
+        4)
+            echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
             ;;
         *)
             echo -e "${RED}Invalid choice. No desktop environment installed.${NC}"
             ;;
     esac
+    
+    echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
 
 # Main function to orchestrate the install
 main() {
+    # Verify boot mode
+    if [ ! -d /sys/firmware/efi ]; then
+        echo -e "${RED}This script only supports UEFI boot mode.${NC}"
+        exit 1
+    fi
+
     setup_user_password
     setup_disk
-    setup_mirrors   # Move this before base system installation
+    setup_mirrors
     install_base_system
     prepare_chroot
     configure_system
+    create_user
     install_grub
     install_desktop_environment
-    echo -e "${GREEN}Installation Complete! Reboot now.${NC}"
+    
+    # Cleanup
+    umount -R /mnt
+    
+    echo -e "${GREEN}Installation Complete! You can now reboot the system.${NC}"
+    echo -e "${YELLOW}Don't forget to:"
+    echo -e "1. Remove the installation media"
+    echo -e "2. Login as your new user ($USERNAME)"
+    echo -e "3. Set up your system further as needed${NC}"
 }
 
 # Run the main function
