@@ -78,26 +78,15 @@ setup_disk() {
     echo -e "${GREEN}Disk setup completed.${NC}"
 }
 
+# Function to set up the fastest mirrors
 setup_mirrors() {
     clear
     echo -e "${CYAN}Selecting the fastest mirrors...${NC}"
     # Install reflector if it's not already installed
     pacman -Sy --noconfirm reflector
-    # Define XeonBD mirror entries
-    xeonbd_mirrors=$(cat <<EOF
-Server = http://mirror.xeonbd.com/archlinux/\$repo/os/\$arch
-Server = https://mirror.xeonbd.com/archlinux/\$repo/os/\$arch
-EOF
-)
-    # Create a temporary file for the new mirrorlist
-    tmpfile=$(mktemp)
-    # Write the XeonBD mirrors at the top of the temp file
-    echo "$xeonbd_mirrors" > "$tmpfile"
-    # Use reflector to get the 5 fastest mirrors in Bangladesh (excluding XeonBD to avoid duplicates)
-    reflector --country Bangladesh --sort rate --latest 5 >> "$tmpfile"
-    # Move the temp file to the actual mirrorlist location
-    mv "$tmpfile" /etc/pacman.d/mirrorlist
-    echo -e "${GREEN}Mirrors have been updated with XeonBD at the top.${NC}"
+    # Use reflector to select the fastest mirrors
+    reflector --country Bangladesh --sort rate --latest 5 --save /etc/pacman.d/mirrorlist
+    echo -e "${GREEN}Mirrors have been updated.${NC}"
 }
 
 # Function to install the base system
@@ -187,6 +176,10 @@ configure_system() {
         echo '::1         localhost' >> /etc/hosts
         echo '127.0.1.1 $HOSTNAME.localdomain $HOSTNAME' >> /etc/hosts
         
+        # Enable multilib repository
+        sed -i '/^#\\[multilib\\]/s/^#//' /etc/pacman.conf
+        sed -i '/^#Include/aServer = https://mirrors.tuna.tsinghua.edu.cn/archlinux/\$repo/os/\$arch' /etc/pacman.conf
+
         # Enable essential services
         systemctl enable NetworkManager
         systemctl enable dhcpcd
@@ -285,9 +278,9 @@ main() {
     prepare_chroot
     configure_system
     create_user
-    # install_yay
     install_grub
     install_desktop_environment
+    # install_yay
     # setup_important_script
     
     # Cleanup

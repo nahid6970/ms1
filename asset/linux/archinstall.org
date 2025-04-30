@@ -17,7 +17,7 @@ setup rest & install
 
 
 * [Step 4] - change mirrors
-** Do it fast or mirror will change to tpo 20
+** Do it fast or mirror will change to to top 20
 *** vim /etc/pacman.d/mirrorlist
 ** go to bangladesh and click 2dd to delete then exit
 ** it will refresh automatically to 20 mirror list
