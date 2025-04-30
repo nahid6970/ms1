@@ -87,14 +87,17 @@ install_base_system() {
 
 # Install GRUB (if needed)
 install_grub() {
-    echo -e "${CYAN}Installing GRUB bootloader...${NC}"
+    echo -e "${GREEN}Installing GRUB bootloader...${NC}"
     arch-chroot /mnt /bin/bash -c "
         pacman -Sy --noconfirm grub efibootmgr
-        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+        mkdir -p /boot/EFI
+        mount ${INSTALL_DISK}1 /boot/EFI
+        grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB
         grub-mkconfig -o /boot/grub/grub.cfg
     "
     echo -e "${GREEN}GRUB bootloader installation complete.${NC}"
 }
+
 
 # AUR Helper
 install_aur_helper() {
@@ -172,4 +175,5 @@ install_base_system
 install_grub
 # install_aur_helper
 # install_kde
-# Test 1
+# Test 2
+
