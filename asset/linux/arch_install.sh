@@ -117,6 +117,32 @@ create_user() {
     echo -e "${GREEN}User created successfully.${NC}"
 }
 
+# Function to install Yay AUR helper
+install_yay() {
+    clear
+    echo -e "${CYAN}Installing Yay AUR helper...${NC}"
+    
+    # Install dependencies if not already installed
+    arch-chroot /mnt /bin/bash -c "
+        pacman -Sy --noconfirm --needed git base-devel
+    "
+    
+    # Install yay as the user
+    arch-chroot /mnt /bin/bash -c "
+        sudo -u $USERNAME bash -c '
+            cd /home/$USERNAME
+            git clone https://aur.archlinux.org/yay.git
+            cd yay
+            makepkg -si --noconfirm
+            cd ..
+            rm -rf yay
+        '
+    "
+    
+    echo -e "${GREEN}Yay AUR helper installed successfully.${NC}"
+}
+
+
 # Function to configure the system in chroot
 configure_system() {
     clear
@@ -216,6 +242,7 @@ main() {
     prepare_chroot
     configure_system
     create_user
+    install_yay
     install_grub
     install_desktop_environment
     
