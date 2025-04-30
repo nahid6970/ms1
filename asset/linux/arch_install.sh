@@ -78,7 +78,7 @@ mount "$efi_part" /mnt/boot/efi
 # Select the fastest mirrors
 echo "Selecting the fastest mirrors..."
 pacman -Sy reflector --noconfirm
-reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist
+reflector --country Bangladesh --latest 5 --sort rate --save /etc/pacman.d/mirrorlist
 
 # Install base packages
 echo "Installing base packages..."
@@ -126,4 +126,4 @@ umount -R /mnt
 echo "Installation complete! Reboot your system."
 echo "------------------------------------"
 
-# test 2
+# test 3
