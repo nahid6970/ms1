@@ -1,0 +1,59 @@
+{
+  "archinstall-language": "English",
+  "audio_config": {
+    "audio": "pipewire"
+  },
+  "bootloader": "grub",
+  "custom_commands": [],
+  "disk_config": {
+    "config_type": "default_layout",
+    "device_modifications": [
+      {
+        "device": "/dev/sda",
+        "wipe": true
+      }
+    ]
+  },
+  "hostname": "archlinux",
+  "kernels": ["linux"],
+  "locale_config": {
+    "kb_layout": "us",
+    "sys_enc": "UTF-8",
+    "sys_lang": "en_US"
+  },
+  "mirror_config": {
+    "custom_repositories": [],
+    "custom_servers": [],
+    "mirror_regions": {
+      "Bangladesh": [
+        "http://mirror.xeonbd.com/archlinux/$repo/os/$arch",
+        "https://mirror.xeonbd.com/archlinux/$repo/os/$arch"
+      ]
+    },
+    "optional_repositories": ["multilib"]
+  },
+  "network_config": {
+    "type": "nm"
+  },
+  "ntp": true,
+  "packages": ["nano", "vim", "ncdu"],
+  "parallel_downloads": 5,
+  "profile_config": {
+    "profile": null,
+    "gfx_driver": null,
+    "greeter": null
+  },
+  "services": [],
+  "swap": true,
+  "timezone": "Asia/Dhaka",
+  "users": {
+    "root-password": "1823",
+    "user-accounts": [
+      {
+        "username": "nahid",
+        "password": "1823",
+        "superuser": true
+      }
+    ]
+  }
+}
