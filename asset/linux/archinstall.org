@@ -129,3 +129,9 @@ Server = https://mirror.xeonbd.com/archlinux/$repo/os/$arch
 *** sudo pacman -S konsole kate firefox
 *** sudo systemctl enable sddm [enables it at boot]
 *** sudo systemctl enable --now sddm [enables it now]
+
+
+
+to go from user to root or root to user
+su root
+su user [su nahid6970]
