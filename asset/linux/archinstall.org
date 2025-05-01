@@ -138,3 +138,38 @@ su user [su nahid6970]
 
 after installing de run the command for error handling and upgrading existing old packages
 sudo pacman -Syu
+
+Desktop Environments
+
+KDE (wroking fine)
+sudo pacman -S plasma kde-gtk-config dolphin konsole plasma-desktop sddm
+sudo systemctl enable sddm.service
+
+
+GNOME (Not Working / probably for boot issue)
+sudo pacman -S gnome-shell gnome-control-center  nautilus gnome-terminal gnome-settings-daemon gdm
+sudo systemctl enable gdm.service
+
+XFCE
+sudo pacman -S xfce4 xfce4-settings xfce4-terminal thunar lightdm lightdm-gtk-greeter
+sudo systemctl enable lightdm.service
+
+Cinnamon
+sudo pacman -S cinnamon lightdm lightdm-gtk-greeter
+sudo systemctl enable lightdm.service
+
+MATE
+sudo pacman -S mate mate-control-center lightdm lightdm-gtk-greeter
+sudo systemctl enable lightdm.service
+
+LXQt
+sudo pacman -S lxqt sddm openbox
+sudo systemctl enable sddm.service	
+
+LXDE
+sudo pacman -S lxde lightdm lightdm-gtk-greeter
+sudo systemctl enable lightdm.service
+
+Budgie
+sudo pacman -S budgie-desktop gnome-control-center gdm
+sudo systemctl enable gdm.service

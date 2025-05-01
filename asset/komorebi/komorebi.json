@@ -75,6 +75,10 @@
     "matching_strategy": "Equals" },
 
     { "kind": "Exe",
+    "id": "vmware.exe",
+    "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
       "id": "Cloudflare WARP.exe",
       "matching_strategy": "Equals" },
 
