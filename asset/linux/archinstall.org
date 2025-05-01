@@ -135,3 +135,6 @@ Server = https://mirror.xeonbd.com/archlinux/$repo/os/$arch
 to go from user to root or root to user
 su root
 su user [su nahid6970]
+
+after installing de run the command for error handling and upgrading existing old packages
+sudo pacman -Syu
