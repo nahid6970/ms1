@@ -32,7 +32,7 @@ install_packages() {
 
     echo -e "${GREEN}Installing necessary packages...${NC}"
     for pkg in "${packages[@]}"; do
-        if ! pacman -Q $pkg &>/dev/null; then
+        if ! pacman -Q "$pkg" &>/dev/null; then
             echo -e "${GREEN}Installing $pkg...${NC}"
             if yay -S --noconfirm "$pkg"; then
                 echo -e "${GREEN}$pkg installed successfully.${NC}"
