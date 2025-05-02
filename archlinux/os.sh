@@ -77,26 +77,32 @@ install_packages() {
 
 
 # Font Download and Setup
-install_font_with_oh_my_posh() {
+install_jetbrains_mono_font() {
     clear
-    echo -e "\e[34mInstalling JetBrainsMono NFP font using oh-my-posh...\e[0m"
-    oh-my-posh font install
-    FONT_PATH="$HOME/.local/share/fonts/jetbrainsmono-nfp/JetBrainsMonoNerdFontPropo-Regular.ttf"
-    TERMUX_FONT_DIR="$HOME/.termux"
-    # Check if the font is installed
-    if [ -f "$FONT_PATH" ]; then
-        echo -e "\e[32mJetBrainsMono NFP font found. Setting it as the default...\e[0m"
-        # Create .termux directory if it doesn't exist
-        mkdir -p "$TERMUX_FONT_DIR"
-        # Copy the font file to the .termux directory as font.ttf
-        cp "$FONT_PATH" "$TERMUX_FONT_DIR/font.ttf"
-        # Reload Termux settings to apply the font
-        termux-reload-settings
-        echo -e "\e[32mFont has been set as default and Termux settings reloaded.\e[0m"
-    else
-        echo -e "\e[31mJetBrainsMono NFP font not found after installation. Please ensure it is installed at $FONT_PATH\e[0m"
+    echo -e "\e[34mInstalling JetBrainsMono Nerd Font with oh-my-posh...\e[0m"
+
+    # Install oh-my-posh if not already installed
+    if ! command -v oh-my-posh &> /dev/null; then
+        echo -e "\e[33moh-my-posh not found. Installing...\e[0m"
+        sudo pacman -Sy --noconfirm oh-my-posh
     fi
+
+    # Install the font using oh-my-posh
+    oh-my-posh font install JetBrainsMono
+
+    FONT_PATH="$HOME/.local/share/fonts/NerdFonts/JetBrainsMonoNerdFont-Regular.ttf"
+
+    if [ -f "$FONT_PATH" ]; then
+        echo -e "\e[32mJetBrainsMono Nerd Font installed successfully.\e[0m"
+        echo -e "\e[33mYou may need to set this font manually in your terminal emulator settings.\e[0m"
+    else
+        echo -e "\e[31mFont not found at $FONT_PATH. Something went wrong.\e[0m"
+    fi
+
+    # Optional: Refresh font cache
+    fc-cache -fv
 }
+
 
 # Copy .bashrc and termux.properties
 copy_files() {
@@ -336,7 +342,7 @@ menu_items=(
     " 1:Git Pull [ms1]:                 update_ms1_repo                         :$GREEN"
     " 2:Copy Files:                     copy_files                              :$GREEN"
     " 3:Install Necessary Packages:     install_packages    setup_storage_passwd:$GREEN"
-    " 4:Font Setup:                     install_font_with_oh_my_posh            :$GREEN"
+    " 4:Font Setup:                     install_jetbrains_mono_font             :$GREEN"
     " 5:Rclone-Dycrypt:                 rclone_decrypt                          :$RED"
     " 6:Rclone Setup:                   rclone_setup                            :$GREEN"
     " 7:Song [rs]:                      Restore_Songs                           :$GREEN"
