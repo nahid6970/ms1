@@ -4,7 +4,7 @@
 # PS1='\[\e[32m\]\u@\h \[\e[34m\]\w\[\e[0m\] $ '
 
 # if not running interactlively dont do anything
-[[ $- != *i* ]] && return
+# [[ $- != *i* ]] && return
 
 
 # Aliases for convenience

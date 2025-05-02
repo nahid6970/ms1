@@ -136,7 +136,6 @@ copy_files() {
     cp "$BASHRC_SOURCE" "$BASHRC_DEST"
     source "$HOME/.bashrc"
 
-
     echo -e "${CYAN}Files copied and settings reloaded.${NC}"
 }
 
