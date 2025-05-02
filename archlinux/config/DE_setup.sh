@@ -34,7 +34,7 @@ install_desktop_environment() {
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             sudo pacman -S kitty
-            sudo pacman -S hyprland xdg-desktop-portal-hyprland wayland wlroots
+            sudo pacman -S hyprland xdg-desktop-portal-hyprland wayland wlroots sddm
             sudo pacman -S waybar wofi foot xorg-xwayland
             sudo pacman -S hyprpaper hyprlock grim slurp wl-clipboard
             ;;
