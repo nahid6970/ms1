@@ -334,6 +334,16 @@ setup_yay() {
     echo -e "${GREEN}yay has been installed successfully.${NC}"
 }
 
+desktop_environment() {
+    clear
+    echo -e "${CYAN}Desktop Environment...${NC}"
+
+    # Install prerequisites
+    sh /ms1/archlinux/config/DE_setup.sh
+
+}
+
+
 
 
 
@@ -352,6 +362,7 @@ menu_items=(
     "11:About:                          about_device                            :$GREEN"
     "12:Welcome Page:                   welcome_remove                          :$RED"
     "13:YAY Setup:                      setup_yay                               :$GREEN"
+    "13:Desktop Environment:            desktop_environment                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
