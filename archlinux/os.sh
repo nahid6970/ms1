@@ -82,7 +82,7 @@ install_jetbrains_mono_font() {
     clear
     echo -e "\e[34mInstalling JetBrainsMono Nerd Font with oh-my-posh...\e[0m"
 
-    FONT_DIR="$HOME/.local/share/fonts/NerdFonts"
+    FONT_DIR="$HOME/.local/share/fonts/JetBrainsMono-nfp"
     FONT_PATTERN="JetBrainsMonoNerdFont*-Regular.ttf"
 
     # Check if the font is already present
