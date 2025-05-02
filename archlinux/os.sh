@@ -162,13 +162,13 @@ git_push_repo() {
     fi
 }
 
-update_ms3_repo() {
+update_ms1_repo() {
     clear
-    local ms3_folder="$HOME/ms3"
-    if [ -d "$ms3_folder" ]; then
-        echo "Changing directory to $ms3_folder..."
-        cd "$ms3_folder" || {
-            echo "Failed to change directory to $ms3_folder."
+    local ms1_folder="$HOME/ms1"
+    if [ -d "$ms1_folder" ]; then
+        echo "Changing directory to $ms1_folder..."
+        cd "$ms1_folder" || {
+            echo "Failed to change directory to $ms1_folder."
             return 1
         }
         echo "Pulling latest changes from the repository..."
@@ -178,7 +178,7 @@ update_ms3_repo() {
         }
         echo "Repository updated successfully."
     else
-        echo "The folder $ms3_folder does not exist."
+        echo "The folder $ms1_folder does not exist."
         return 1
     fi
 }
@@ -276,133 +276,10 @@ list_large_files() {
 
 
 
-remote_access_goto_d2() {
-    clear
-    local remote_password="1823"
-    local remote_user="nahid"
-    local remote_host="192.168.0.101"
-    local psexec_path="C:/msBackups/PSTools/PsExec64.exe"
-    local displayswitch_path="C:/msBackups/Display/DisplaySwitch.exe"
-    echo -e "Connecting to the remote server to execute DisplaySwitch..."
-    # Run the PsExec command on the Windows remote system
-    sshpass -p "$remote_password" ssh "$remote_user@$remote_host" \
-        "cmd.exe /c '$psexec_path' -i 1 '$displayswitch_path' /external" || {
-        echo -e "${RED}Failed to execute DisplaySwitch on the remote server.${NC}"
-        return 1
-    }
-    echo -e "${GREEN}Remote DisplaySwitch execution completed successfully.${NC}"
-}
-
-
-remote_access_goto_d1() {
-    clear
-    local remote_password="1823"
-    local remote_user="nahid"
-    local remote_host="192.168.0.101"
-    local psexec_path="C:/msBackups/PSTools/PsExec64.exe"
-    local displayswitch_path="C:/msBackups/Display/DisplaySwitch.exe"
-    echo -e "Connecting to the remote server to execute script..."
-    # Run the taskkill commands to kill the processes
-    sshpass -p "$remote_password" ssh "$remote_user@$remote_host" \
-        "taskkill /F /IM dnplayer.exe || echo 'dnplayer.exe not running';
-         taskkill /F /IM python.exe || echo 'python.exe not running';" || {
-        echo -e "${RED}Failed to kill processes on the remote server.${NC}"
-        return 1
-    }
-    echo -e "Processes killed successfully. Now executing DisplaySwitch..."
-    # Run the PsExec command on the Windows remote system to run DisplaySwitch
-    sshpass -p "$remote_password" ssh "$remote_user@$remote_host" \
-        "cmd.exe /c '$psexec_path' -i 1 '$displayswitch_path' /internal" || {
-        echo -e "${RED}Failed to execute DisplaySwitch on the remote server.${NC}"
-        return 1
-    }
-    echo -e "${GREEN}Remote operations completed successfully.${NC}"
-}
-
 about_device() {
     clear
     fastfetch
 }
-
-# ntfy_notify() {
-#     clear
-#     # Initialize counter
-#     not_found_count=0
-#     # Infinite loop to check continuously
-#     while true; do
-#         # Check if "ntfy" exists in the output
-#         if rclone ls g00: | grep -i ntfy; then
-#             # Play the music file using mpv if "ntfy" is found
-#             mpv /storage/emulated/0/song/wwe/ww.mp3
-#         else
-#             # Increment the counter and display the message
-#             not_found_count=$((not_found_count + 1))
-#             echo "No 'ntfy' found in the output. Count: $not_found_count"
-#         fi
-#         # Wait for 30 seconds before checking again
-#         sleep 30
-#     done
-# }
-
-# ntfy_notify() {
-#     clear
-#     # Prevent the device from going into sleep mode
-#     termux-wake-lock
-#     # Initialize counter
-#     not_found_count=0
-#     # Infinite loop to check continuously
-#     while true; do
-#         # Check if "ntfy" exists in the output
-#         if rclone ls g00: | grep -iq "ntfy"; then
-#             # Play the music file using mpv if "ntfy" is found
-#             mpv /storage/emulated/0/song/wwe/ww.mp3 &
-#             # Get the PID of mpv
-#             mpv_pid=$!
-#             # Wait for mpv to finish or be killed
-#             wait $mpv_pid
-#             # Check if the exit status indicates that mpv was closed properly
-#             if [ $? -eq 0 ]; then
-#                 echo "mpv was closed. Exiting function."
-#                 break
-#             fi
-#         else
-#             # Increment the counter and display the message
-#             not_found_count=$((not_found_count + 1))
-#             echo "No 'ntfy' found in the output. Count: $not_found_count"
-#         fi
-#         # Wait for 30 seconds before checking again
-#         sleep 30
-#     done
-#     # Release the wake lock once the script finishes
-#     termux-wake-unlock
-# }
-
-# ntfy_notify() {
-#     clear
-#     # Prevent the device from going into sleep mode
-#     termux-wake-lock
-#     # Initialize counter
-#     not_found_count=0
-#     # Infinite loop to check continuously
-#     while true; do
-#         # Check if "ntfy" exists in the output
-#         if rclone ls g00: | grep -i ntfy; then
-#             # Run the specified command if "ntfy" is found
-#             am start rk.android.app.shortcutmaker/rk.android.app.shortcutmaker.CommonMethods.SplashScreenActivity
-#             # Exit the function after executing the command
-#             echo "Command executed. Exiting function."
-#             break
-#         else
-#             # Increment the counter and display the message
-#             not_found_count=$((not_found_count + 1))
-#             echo "No 'ntfy' found in the output. Count: $not_found_count"
-#         fi
-#         # Wait for 30 seconds before checking again
-#         sleep 30
-#     done
-#     # Release the wake lock once the script finishes
-#     termux-wake-unlock
-# }
 
 
 ntfy_notify() {
@@ -481,7 +358,7 @@ rclone_decrypt() {
 
 # Declare a combined array of menu options and function bindings
 menu_items=(
-    " 1:Git Pull [ms3]:                 update_ms3_repo                         :$BLUE"
+    " 1:Git Pull [ms3]:                 update_ms1_repo                         :$BLUE"
     " 2:Copy Files:                     copy_files                              :$BLUE"
     " 3:Install Necessary Packages:     install_packages    setup_storage_passwd:$BLUE"
     " 4:Font Setup:                     install_font_with_oh_my_posh            :$BLUE"
