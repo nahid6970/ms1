@@ -11,10 +11,26 @@ install_desktop_environment() {
     case $DE_CHOICE in
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
-            # pacman -Sy --noconfirm plasma kde-gtk-config dolphin konsole plasma-desktop sddm
-            sudo pacman -S plasma kde-gtk-config dolphin konsole plasma-desktop sddm
+            sudo pacman -S --noconfirm plasma kde-gtk-config dolphin konsole plasma-desktop sddm
+
+            # Install sugar-candy theme for SDDM
+            echo -e "${GREEN}Installing Sugar Candy theme for SDDM...${NC}"
+            git clone https://github.com/sugar-candy/sddm-sugar-candy.git /tmp/sddm-sugar-candy
+            sudo mkdir -p /usr/share/sddm/themes/sugar-candy
+            sudo cp -r /tmp/sddm-sugar-candy/* /usr/share/sddm/themes/sugar-candy
+            rm -rf /tmp/sddm-sugar-candy
+
+            # Set Sugar Candy as the default SDDM theme
+            sudo sed -i '/^Current=/d' /etc/sddm.conf 2>/dev/null
+            sudo sed -i '/^\[Theme\]/a Current=sugar-candy' /etc/sddm.conf 2>/dev/null || \
+            sudo bash -c 'echo -e "[Theme]\nCurrent=sugar-candy" >> /etc/sddm.conf'
+
+            # Enable SDDM display manager
             sudo systemctl enable sddm
+
+            # Final full system upgrade
             sudo pacman -Syu
+
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
