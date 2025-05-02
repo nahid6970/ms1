@@ -36,7 +36,7 @@
     "type": "nm"
   },
   "ntp": true,
-  "packages": ["nano", "vim", "ncdu", "git"],
+  "packages": ["nano", "vim", "ncdu", "git", "bash-completion"],
   "parallel_downloads": 5,
   "profile_config": {
     "profile": null,

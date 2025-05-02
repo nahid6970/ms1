@@ -1,0 +1,131 @@
+# ~/.bashrc
+
+# Custom PS1 prompt
+# PS1='\[\e[32m\]\u@\h \[\e[34m\]\w\[\e[0m\] $ '
+
+# if not running interactlively dont do anything
+[[ $- != *i* ]] && return
+
+
+# Aliases for convenience
+alias cls='clear'
+alias ls='eza -al --color=always --group-directories-first'
+alias la='ls -a'
+alias ll='ls -la'
+alias os='bash ms3/os.sh'
+alias playwwe='echo "playwwe" && mpv /storage/emulated/0/song/wwe/ww.mp3'
+alias rb='termux-reload-settings'
+alias rm='rm -f -r'
+alias update='pkg update && pkg upgrade -y'
+alias os='bash ~/ms3/os.sh'
+alias osx='bash ~/ms3/osx.sh'
+alias rc="bash ~/ms3/Remote_Control_rclone/rclone_rmote_control.sh"
+alias ro="rclone cat g00:/Remote_Control/output.txt"
+
+
+# Search history with fzf and execute the selected command
+hf() {
+    local cmd
+    # Use `fzf` to interactively search through command history
+    cmd=$(history | awk '{$1=""; print substr($0,2)}' | fzf --height=40% --reverse --prompt="Search History: " --ansi)
+    # If a command is selected, execute it
+    if [ -n "$cmd" ]; then
+        echo "Executing: $cmd"
+        eval "$cmd"
+    fi
+}
+
+# Add this to your .bashrc
+hh() {
+    if [ -z "$1" ]; then
+        echo "Usage: search_history <pattern>"
+        return 1
+    fi
+    # Search the command history for the given pattern
+    history | grep --color=auto -i "$1"
+}
+
+
+
+# Enable bash completion if available (Arch Linux)
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+fi
+
+
+# # Source custom scripts from the ms3/scripts directory
+# SCRIPTS_DIR="$HOME/ms3/scripts"
+# # Check if the scripts directory exists
+# if [ -d "$SCRIPTS_DIR" ]; then
+#     # Source each script file
+#     for script in "$SCRIPTS_DIR"/*.sh; do
+#         [ -r "$script" ] && . "$script"
+#     done
+# fi
+
+# Enable reverse search with Up/Down keys for partially typed commands
+# This will use arrow keys to search through history based on the typed prefix
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+
+# Export paths (if necessary)
+# export PATH="$HOME/bin:$PATH"
+
+# History settings
+# History Managemenst Using .bashrc
+# Enable appending to the history file
+shopt -s histappend
+export HISTCONTROL=ignoreboth:erasedups
+export PROMPT_COMMAND="history -n; history -w; history -c; history -r"
+
+# Function to clean up the history
+cleanup_history() {
+    local tmpfile="$HOME/.bash_history_tmp"
+    # Create a temporary file in the home directory
+    tac "$HISTFILE" | awk '!x[$0]++' > "$tmpfile" &&
+    tac "$tmpfile" > "$HISTFILE"
+    # Remove the temporary file
+    rm "$tmpfile"
+}
+# Call the cleanup function
+cleanup_history
+
+# Ignore some commands from history
+export HISTIGNORE="ls:ll:cd:cd -:pwd:exit:clear"
+
+# Function to clone or update a Git repository
+git_clone() {
+    local repo_url=$1
+    local repo_name=$(basename "$repo_url" .git)
+    # Check if the repository already exists
+    if [ -d "$repo_name/.git" ]; then
+        echo "Repository '$repo_name' already exists. Updating..."
+        cd "$repo_name" || exit
+        git pull
+        cd - || exit
+    else
+        # Clone the repository if it doesn't exist
+        echo "Cloning repository '$repo_name'..."
+        git clone "$repo_url"
+    fi
+}
+
+# # Play music on SSH login in Termux
+# if [[ $SSH_CONNECTION ]]; then
+#     mpv /storage/emulated/0/song/wwe/ww.mp3 &
+# fi
+
+sshd
+
+# echo "Welcome to Termux!"
+# echo "System Info:"
+# uname -a
+# echo "Uptime:"
+# uptime
+# echo "Free Memory:"
+# free -h
+
+
+# Add this to the end of your ~/.bashrc file
+eval "$(oh-my-posh init bash)"
+eval "$(zoxide init bash)"

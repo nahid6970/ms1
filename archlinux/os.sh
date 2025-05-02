@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 # storage="$HOME/storage/shared"
 
 REPO_DIR="$HOME/ms1"
-BASHRC_SOURCE="$REPO_DIR/bashrc"
+BASHRC_SOURCE="$REPO_DIR/archlinux/config/bashrc"
 TERMUX_PROPERTIES_SOURCE="$REPO_DIR/termux.properties"
 BASHRC_DEST="$HOME/.bashrc"
 TERMUX_PROPERTIES_DEST="$HOME/.termux/termux.properties"
@@ -101,7 +101,7 @@ install_font_with_oh_my_posh() {
 # Copy .bashrc and termux.properties
 copy_files() {
     clear
-    echo -e "${CYAN}Copying .bashrc and termux.properties...${NC}"
+    echo -e "${CYAN}Copying .bashrc...${NC}"
     cp "$BASHRC_SOURCE" "$BASHRC_DEST"
     mkdir -p "$(dirname $TERMUX_PROPERTIES_DEST)"
     cp "$TERMUX_PROPERTIES_SOURCE" "$TERMUX_PROPERTIES_DEST"
