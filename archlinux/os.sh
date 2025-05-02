@@ -384,6 +384,10 @@ menu_items=(
     "12:Welcome Page:                   welcome_remove                          :$RED"
     "13:YAY Setup:                      setup_yay                               :$GREEN"
     "14:Desktop Environment:            desktop_environment                     :$GREEN"
+    "15:bottles:                        desktop_environment                     :$GREEN"
+    "16:wine:                           desktop_environment                     :$GREEN"
+    "17:Lutris:                        desktop_environment                     :$GREEN"
+    "18:steam:                          desktop_environment                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
