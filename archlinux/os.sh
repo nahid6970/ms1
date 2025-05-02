@@ -134,11 +134,8 @@ copy_files() {
     clear
     echo -e "${CYAN}Copying .bashrc...${NC}"
     cp "$BASHRC_SOURCE" "$BASHRC_DEST"
+    source "$HOME/.bashrc"
 
-    # Reload the bash settings
-    if [ -f "$BASHRC_DEST" ]; then
-        source "$BASHRC_DEST"
-    fi
 
     echo -e "${CYAN}Files copied and settings reloaded.${NC}"
 }
