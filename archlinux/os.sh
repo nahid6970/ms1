@@ -82,46 +82,48 @@ install_jetbrains_mono_font() {
     clear
     echo -e "\e[34mInstalling JetBrainsMono Nerd Font with oh-my-posh...\e[0m"
 
-    # Check if oh-my-posh is installed
-    if ! command -v oh-my-posh &> /dev/null; then
-        echo -e "\e[33moh-my-posh not found. Installing with yay...\e[0m"
-        if ! command -v yay &> /dev/null; then
-            echo -e "\e[31myay not found. Please install yay first.\e[0m"
-            return 1
+    FONT_DIR="$HOME/.local/share/fonts/NerdFonts"
+    FONT_PATTERN="JetBrainsMonoNerdFont*-Regular.ttf"
+
+    # Check if the font is already present
+    if find "$FONT_DIR" -type f -iname "$FONT_PATTERN" | grep -q .; then
+        echo -e "\e[32mJetBrainsMono Nerd Font already exists. Skipping installation.\e[0m"
+    else
+        # Check and install oh-my-posh if missing
+        if ! command -v oh-my-posh &> /dev/null; then
+            echo -e "\e[33moh-my-posh not found. Installing with yay...\e[0m"
+            if ! command -v yay &> /dev/null; then
+                echo -e "\e[31myay not found. Please install yay first.\e[0m"
+                return 1
+            fi
+            yay -Sy --noconfirm oh-my-posh || {
+                echo -e "\e[31mFailed to install oh-my-posh.\e[0m"
+                return 1
+            }
         fi
-        yay -Sy --noconfirm oh-my-posh || {
-            echo -e "\e[31mFailed to install oh-my-posh.\e[0m"
-            return 1
-        }
+
+        echo -e "\e[34mInstalling JetBrainsMono Nerd Font...\e[0m"
+        oh-my-posh font install JetBrainsMono
     fi
 
-    # Install the JetBrainsMono Nerd Font using oh-my-posh
-    oh-my-posh font install JetBrainsMono
-
-    FONT_DIR="$HOME/.local/share/fonts/NerdFonts"
-    FONT_PATH="$FONT_DIR/JetBrainsMonoNerdFont-Regular.ttf"
-
-    if [ -f "$FONT_PATH" ]; then
-        echo -e "\e[32mJetBrainsMono Nerd Font installed successfully.\e[0m"
-
-        # Fix permissions
-        echo -e "\e[34mSetting font permissions...\e[0m"
+    # Apply permissions to fonts
+    if [ -d "$FONT_DIR" ]; then
+        echo -e "\e[34mSetting font file permissions...\e[0m"
         find "$FONT_DIR" -type d -exec chmod 555 {} \;
         find "$FONT_DIR" -type f -iname "*.ttf" -exec chmod 444 {} \;
-
-        # Refresh font cache if available
-        if command -v fc-cache &> /dev/null; then
-            echo -e "\e[34mUpdating font cache...\e[0m"
-            fc-cache -fv
-        else
-            echo -e "\e[33mfc-cache not found. Install fontconfig if you want to rebuild the cache.\e[0m"
-        fi
-
-        echo -e "\e[33mYou may need to set this font manually in your terminal emulator settings.\e[0m"
-    else
-        echo -e "\e[31mFont not found at $FONT_PATH. Something went wrong.\e[0m"
     fi
+
+    # Refresh font cache
+    if command -v fc-cache &> /dev/null; then
+        echo -e "\e[34mUpdating font cache...\e[0m"
+        fc-cache -fv
+    else
+        echo -e "\e[33mfc-cache not found. Install 'fontconfig' to enable font cache rebuilding.\e[0m"
+    fi
+
+    echo -e "\e[32mDone. You may need to set the font manually in your terminal emulator.\e[0m"
 }
+
 
 
 
