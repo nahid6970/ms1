@@ -52,7 +52,7 @@ cleancache() {
     sudo pacman -Sc
 }
 
-recentpkgs() {
+diddy() {
     grep -i "installed" /var/log/pacman.log | tail -n 20
 }
 
