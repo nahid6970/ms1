@@ -37,8 +37,6 @@ packages=(
     "python"
     "rclone"
     "sshpass"
-    "termux-api"
-    "termux-tools"
     "wget"
     "which" # to fix neovim bug lua language server not supported on this platform
     "yazi"
