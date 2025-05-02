@@ -476,8 +476,20 @@ EOF
 }
 
 sddm_theme() {
-  echo "📦 Installing packages..."
-    yay -S sddm-theme-sugar-candy
+  echo "📦 Installing Sugar Candy theme..."
+  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
+    yay -S --noconfirm sddm-theme-sugar-candy
+  else
+    echo "✅ sddm-theme-sugar-candy is already installed."
+  fi
+
+  echo "📝 Configuring /etc/sddm.conf..."
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[Theme]
+Current=Sugar-Candy
+EOF'
+
+  echo "✅ SDDM theme set to Sugar-Candy."
 }
 
 
