@@ -71,27 +71,31 @@ bind '"\e[B": history-search-forward'
 # Export paths (if necessary)
 # export PATH="$HOME/bin:$PATH"
 
+
 # History settings
 # History Managemenst Using .bashrc
 # Enable appending to the history file
 shopt -s histappend
 export HISTCONTROL=ignoreboth:erasedups
 export PROMPT_COMMAND="history -n; history -w; history -c; history -r"
+# Ignore some commands from history
+export HISTIGNORE="ls:ll:cd:cd -:pwd:exit:clear"
 
-# Function to clean up the history
+# Function to clean up the bash history (remove duplicates, keep order)
 cleanup_history() {
     local tmpfile="$HOME/.bash_history_tmp"
-    # Create a temporary file in the home directory
-    tac "$HISTFILE" | awk '!x[$0]++' > "$tmpfile" &&
-    tac "$tmpfile" > "$HISTFILE"
-    # Remove the temporary file
-    rm "$tmpfile"
+
+    # Use tac to reverse the history, remove duplicates, then reverse back
+    if [ -f "$HISTFILE" ]; then
+        tac "$HISTFILE" | awk '!seen[$0]++' | tac > "$tmpfile" &&
+        mv "$tmpfile" "$HISTFILE"
+    fi
 }
 # Call the cleanup function
 cleanup_history
 
-# Ignore some commands from history
-export HISTIGNORE="ls:ll:cd:cd -:pwd:exit:clear"
+
+
 
 # Function to clone or update a Git repository
 git_clone() {
@@ -115,7 +119,7 @@ git_clone() {
 #     mpv /storage/emulated/0/song/wwe/ww.mp3 &
 # fi
 
-sshd
+# sshd
 
 # echo "Welcome to Termux!"
 # echo "System Info:"
@@ -127,5 +131,5 @@ sshd
 
 
 # Add this to the end of your ~/.bashrc file
-eval "$(oh-my-posh init bash)"
-eval "$(zoxide init bash)"
+# eval "$(oh-my-posh init bash)"
+# eval "$(zoxide init bash)"
