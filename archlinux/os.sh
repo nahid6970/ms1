@@ -371,20 +371,30 @@ check_gpu_drivers() {
     if echo "$GPU_INFO" | grep -qi "AMD"; then
         echo -e "${YELLOW}AMD GPU detected.${NC}"
         
-        if pacman -Q | grep -q "mesa"; then
-            echo -e "${GREEN}Mesa (Open Source AMD driver) is installed.${NC}"
-        else
-            echo -e "${RED}Mesa not found. You likely need: mesa mesa-vulkan-drivers${NC}"
-        fi
+        missing_pkgs=()
 
-        if ! pacman -Q | grep -q "vulkan-radeon"; then
-            echo -e "${RED}Missing Vulkan driver. Consider installing: vulkan-radeon vulkan-icd-loader${NC}"
-        else
-            echo -e "${GREEN}Vulkan support appears to be installed.${NC}"
-        fi
+        for pkg in mesa mesa-vulkan-drivers vulkan-radeon lib32-vulkan-radeon lib32-mesa; do
+            if ! pacman -Q "$pkg" &>/dev/null; then
+                echo -e "${RED}$pkg is missing.${NC}"
+                missing_pkgs+=("$pkg")
+            else
+                echo -e "${GREEN}$pkg is installed.${NC}"
+            fi
+        done
 
+        if [ ${#missing_pkgs[@]} -ne 0 ]; then
+            echo -e "${YELLOW}Some AMD GPU drivers are missing. Install them now? (y/n)${NC}"
+            read -rp "> " answer
+            if [[ "$answer" =~ ^[Yy]$ ]]; then
+                yay -S --noconfirm "${missing_pkgs[@]}"
+            else
+                echo -e "${RED}Skipping driver installation.${NC}"
+            fi
+        else
+            echo -e "${GREEN}All required AMD GPU drivers are installed.${NC}"
+        fi
     else
-        echo -e "${YELLOW}Non-AMD GPU detected. This check is for AMD only.${NC}"
+        echo -e "${YELLOW}Non-AMD GPU detected. Skipping AMD driver check.${NC}"
     fi
 }
 
