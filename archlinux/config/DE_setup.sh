@@ -5,7 +5,8 @@ install_desktop_environment() {
     echo -e "1) KDE Plasma"
     echo -e "2) GNOME"
     echo -e "3) XFCE"
-    echo -e "4) None (CLI only)"
+    echo -e "4) Hyprland (3d ACC + Log in 2/3 times to work)"
+    echo -e "5) None (CLI only)"
     read -p "Enter the number (1-4): " DE_CHOICE
 
     case $DE_CHOICE in
@@ -27,10 +28,10 @@ install_desktop_environment() {
             pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
             systemctl enable lightdm
             ;;
-        4)
+        5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
             ;;
-        5)
+        4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             sudo pacman -S kitty
             sudo pacman -S hyprland xdg-desktop-portal-hyprland wayland wlroots
