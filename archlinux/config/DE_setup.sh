@@ -12,10 +12,10 @@ install_desktop_environment() {
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
             sudo pacman -S --noconfirm plasma kde-gtk-config dolphin konsole plasma-desktop sddm
+            sudo yay -S sddm-theme-sugar-candy
             sudo systemctl enable sddm
             # Final full system upgrade
             sudo pacman -Syu
-
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
