@@ -12,7 +12,7 @@ install_desktop_environment() {
     case $DE_CHOICE in
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
-            sudo pacman -S --noconfirm plasma kde-gtk-config dolphin konsole plasma-desktop sddm
+            sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop sddm
             # sudo yay -S sddm-theme-sugar-candy
             sudo systemctl enable sddm
             # Final full system upgrade
@@ -20,19 +20,20 @@ install_desktop_environment() {
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
-            pacman -Sy --noconfirm gnome gnome-tweaks gnome-terminal gdm
+            pacman -Sy --noconfirm --needed gnome gnome-tweaks gnome-terminal gdm
             systemctl enable gdm
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
-            pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+            pacman -Sy --noconfirm --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
             systemctl enable lightdm
             ;;
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             # Install essential packages
-            sudo pacman -S --needed foot hyprland xdg-desktop-portal-hyprland wayland wlroots gtk3
+            sudo pacman -S --needed foot hyprland xdg-desktop-portal-hyprland wayland wlroots gtk3 sddm
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
+            sudo systemctl enable sddm
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
