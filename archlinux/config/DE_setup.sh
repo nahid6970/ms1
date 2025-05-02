@@ -5,7 +5,7 @@ install_desktop_environment() {
     echo -e "1) KDE Plasma"
     echo -e "2) GNOME"
     echo -e "3) XFCE"
-    echo -e "4) Hyprland (3d ACC + Log in 2/3 times to work)"
+    echo -e "4) Hyprland (3d ACC + Log in 2/3 times to work) kitty/alacritty doesnt work on vms"
     echo -e "5) None (CLI only)"
     read -p "Enter the number (1-4): " DE_CHOICE
 
