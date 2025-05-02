@@ -11,8 +11,7 @@ install_desktop_environment() {
     case $DE_CHOICE in
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
-            # sudo pacman -S --noconfirm plasma kde-gtk-config dolphin konsole plasma-desktop sddm
-            sudo pacman -S --noconfirm sddm
+            sudo pacman -S --noconfirm plasma kde-gtk-config dolphin konsole plasma-desktop sddm
             # sudo yay -S sddm-theme-sugar-candy
             sudo systemctl enable sddm
             # Final full system upgrade
