@@ -477,7 +477,7 @@ EOF
 
 sddm_theme() {
   echo "📦 Installing packages..."
-    sudo yay -S sddm-theme-sugar-candy
+    yay -S sddm-theme-sugar-candy
 }
 
 
