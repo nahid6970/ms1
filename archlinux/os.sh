@@ -345,7 +345,7 @@ menu_items=(
     "10:Remove Folder [ms3]:            remove_repo                             :$RED"
     "11:About:                          about_device                            :$GREEN"
     "12:Welcome Page:                   welcome_remove                          :$RED"
-    "12:YAY Setup:                      setup_yay                               :$GREEN"
+    "13:YAY Setup:                      setup_yay                               :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
