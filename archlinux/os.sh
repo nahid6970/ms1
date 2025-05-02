@@ -363,6 +363,32 @@ desktop_environment() {
     fi
 }
 
+check_gpu_drivers() {
+    echo -e "${GREEN}Detecting GPU and checking AMD drivers...${NC}"
+    
+    GPU_INFO=$(lspci | grep -E "VGA|3D")
+    echo -e "${YELLOW}Detected GPU: ${GPU_INFO}${NC}"
+    
+    if echo "$GPU_INFO" | grep -qi "AMD"; then
+        echo -e "${YELLOW}AMD GPU detected.${NC}"
+        
+        if pacman -Q | grep -q "mesa"; then
+            echo -e "${GREEN}Mesa (Open Source AMD driver) is installed.${NC}"
+        else
+            echo -e "${RED}Mesa not found. You likely need: mesa mesa-vulkan-drivers${NC}"
+        fi
+
+        if ! pacman -Q | grep -q "vulkan-radeon"; then
+            echo -e "${RED}Missing Vulkan driver. Consider installing: vulkan-radeon vulkan-icd-loader${NC}"
+        else
+            echo -e "${GREEN}Vulkan support appears to be installed.${NC}"
+        fi
+
+    else
+        echo -e "${YELLOW}Non-AMD GPU detected. This check is for AMD only.${NC}"
+    fi
+}
+
 
 
 
@@ -378,9 +404,10 @@ menu_items=(
     " 6:YAY Setup:                      setup_yay                               :$GREEN"
     " 7:bottles:                        desktop_environment                     :$GREEN"
     " 8:wine:                           desktop_environment                     :$GREEN"
-    " 9:Lutris:                        desktop_environment                      :$GREEN"
+    " 9:Lutris:                         desktop_environment                     :$GREEN"
     "10:steam:                          desktop_environment                     :$GREEN"
     "11:About:                          about_device                            :$GREEN"
+    "12:GPU Drivers:                    check_gpu_drivers                       :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
