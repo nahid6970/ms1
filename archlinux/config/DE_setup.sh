@@ -29,6 +29,11 @@ install_desktop_environment() {
         4)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
             ;;
+        5)
+            echo -e "${YELLOW}Installing Hyprland (typecraft)...${NC}"
+            sudo pacman -S kitty
+            sudo pacman -S hyprland
+            ;;
         *)
             echo -e "${RED}Invalid choice. No desktop environment installed.${NC}"
             ;;
