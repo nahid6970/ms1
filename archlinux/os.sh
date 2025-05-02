@@ -402,6 +402,9 @@ check_gpu_drivers() {
 
 
 
+# proton for steam games
+# bottles for whatever .exe files you have laying around (including games)
+# lutris if you so happen to have the .exe file of a game they support.
 
 # Declare a combined array of menu options and function bindings
 menu_items=(
