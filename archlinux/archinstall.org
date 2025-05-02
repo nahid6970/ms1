@@ -194,4 +194,4 @@ and setup from there
 termux like os
 yay setup
 
-avoid running yay as root/sudo could cause issue
+avoid running yay as root/sudo could cause issue [security risk as contributed by people]
