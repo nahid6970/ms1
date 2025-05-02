@@ -398,6 +398,82 @@ check_gpu_drivers() {
     fi
 }
 
+setup_hyprland_full() {
+  echo "📦 Installing packages..."
+  sudo pacman -S --needed --noconfirm \
+    hyprland kitty waybar wofi \
+    xorg-xwayland xdg-desktop-portal-hyprland \
+    wlroots qt5-wayland qt6-wayland \
+    hyprpaper hyprlock grim slurp wl-clipboard
+
+  echo "🛠️ Setting up config directory..."
+  mkdir -p ~/.config/hypr
+
+  echo "📄 Writing minimal hyprland.conf..."
+  cat > ~/.config/hypr/hyprland.conf <<EOF
+# Hyprland Minimal Config
+
+# Autostart apps
+exec-once = kitty
+exec-once = waybar
+
+# Keybindings
+bind = SUPER, RETURN, exec, kitty
+bind = SUPER, Q, killactive,
+bind = SUPER, M, exit,
+
+# Display
+monitor = ,preferred,auto,1
+
+# Input
+input {
+  kb_layout = us
+}
+
+# Aesthetics
+general {
+  gaps_in = 5
+  gaps_out = 20
+  border_size = 2
+  col.active_border = rgba(33ccffee)
+  col.inactive_border = rgba(595959aa)
+}
+
+decoration {
+  rounding = 10
+  blur = yes
+  blur_size = 5
+  blur_passes = 2
+}
+
+animations {
+  enabled = yes
+  animation = windows, 1, 7, default
+}
+
+# Wallpaper (optional, comment out if not needed)
+# exec-once = hyprpaper & sleep 0.5 && hyprctl hyprpaper wallpaper "eDP-1,/path/to/wallpaper.jpg"
+EOF
+
+  echo "✅ Created: ~/.config/hypr/hyprland.conf"
+
+  echo "📜 Setting environment variables..."
+  PROFILE_FILE="$HOME/.bash_profile"
+  grep -q XDG_SESSION_TYPE "$PROFILE_FILE" || cat >> "$PROFILE_FILE" <<'EOF'
+
+# Hyprland env
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=Hyprland
+export QT_QPA_PLATFORM=wayland
+export MOZ_ENABLE_WAYLAND=1
+EOF
+
+  echo "✅ Updated: $PROFILE_FILE"
+
+  echo "🎉 Setup complete! Now run:"
+  echo "➡️  source ~/.bash_profile"
+  echo "➡️  Hyprland"
+}
 
 
 
@@ -421,6 +497,7 @@ menu_items=(
     "11:About:                          about_device                            :$GREEN"
     "12:GPU Drivers:                    check_gpu_drivers                       :$GREEN"
     "13:Heroic Games Launcher:          check_gpu_drivers                       :$GREEN"
+    "13:Hyprland             :          setup_hyprland_full                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
