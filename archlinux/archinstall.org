@@ -195,3 +195,5 @@ termux like os
 yay setup
 
 avoid running yay as root/sudo could cause issue [security risk as contributed by people]
+
+hit ctrl+alt+ [f1-f6] to select tty display manager
