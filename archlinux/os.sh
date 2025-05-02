@@ -362,7 +362,7 @@ menu_items=(
     "11:About:                          about_device                            :$GREEN"
     "12:Welcome Page:                   welcome_remove                          :$RED"
     "13:YAY Setup:                      setup_yay                               :$GREEN"
-    "13:Desktop Environment:            desktop_environment                     :$GREEN"
+    "14:Desktop Environment:            desktop_environment                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
