@@ -134,10 +134,11 @@ copy_files() {
     clear
     echo -e "${CYAN}Copying .bashrc...${NC}"
     cp "$BASHRC_SOURCE" "$BASHRC_DEST"
-    source "$HOME/.bashrc"
 
-    echo -e "${CYAN}Files copied and settings reloaded.${NC}"
+    echo -e "${GREEN}.bashrc copied.${NC}"
+    echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
 }
+
 
 
 # Function to remove the repository
