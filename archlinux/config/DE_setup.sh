@@ -34,9 +34,9 @@ install_desktop_environment() {
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             sudo pacman -S kitty
-            sudo pacman -S hyprland xdg-desktop-portal-hyprland wayland wlroots sddm
-            sudo pacman -S waybar wofi foot xorg-xwayland
-            sudo pacman -S hyprpaper hyprlock grim slurp wl-clipboard
+            sudo pacman -S hyprland gtk3
+            sudo pacman -S xorg-xwayland
+
             ;;
         *)
             echo -e "${RED}Invalid choice. No desktop environment installed.${NC}"
