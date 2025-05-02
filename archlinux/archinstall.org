@@ -173,3 +173,15 @@ sudo systemctl enable lightdm.service
 Budgie
 sudo pacman -S budgie-desktop gnome-control-center gdm
 sudo systemctl enable gdm.service
+
+
+
+
+
+start archinstall
+format 
+cfdisk delete all write
+pacman -Sy
+pacman -S git
+git clone https://github.com/nahid6970/ms1.git
+archinstall --config path/to/config --creds path/to/creds
