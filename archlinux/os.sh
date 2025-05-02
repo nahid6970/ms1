@@ -327,7 +327,6 @@ rclone_decrypt() {
 
     echo -e "Copying rclone.conf"
     cp "$SOURCE_CONF_FILE" "$RCLONE_CONFIG_DIR/"
-
 }
 
 
