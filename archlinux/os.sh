@@ -494,6 +494,27 @@ EOF'
 }
 
 
+disable_bell() {
+    echo "Disabling terminal bell..."
+
+    # Set bell-style to none for current user
+    echo 'set bell-style none' >> ~/.inputrc
+    bind -f ~/.inputrc
+
+    # Set bell-style system-wide (optional, needs sudo)
+    if [ "$(id -u)" -eq 0 ]; then
+        echo 'set bell-style none' >> /etc/inputrc
+    else
+        echo "To disable system-wide bell, run:"
+        echo "  echo 'set bell-style none' | sudo tee -a /etc/inputrc"
+    fi
+
+    # Blacklist pcspkr module to disable beep in TTY (needs sudo)
+    echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf > /dev/null
+    sudo rmmod pcspkr 2>/dev/null
+
+    echo "Bell disabled. Reboot or re-login for full effect."
+}
 
 
 # proton for steam games
@@ -515,8 +536,9 @@ menu_items=(
     "11:About:                          about_device                            :$GREEN"
     "12:GPU Drivers:                    check_gpu_drivers                       :$GREEN"
     "13:Heroic Games Launcher:          check_gpu_drivers                       :$GREEN"
-    "14:Hyprland             :          setup_hyprland_full                     :$GREEN"
-    "15:SDDM Theme             :          sddm_theme                     :$GREEN"
+    "14:Hyprland:          setup_hyprland_full                     :$GREEN"
+    "15:SDDM Theme:          sddm_theme                     :$GREEN"
+    "15:Disable:          disable_bell                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
