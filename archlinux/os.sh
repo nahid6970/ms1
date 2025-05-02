@@ -336,12 +336,17 @@ setup_yay() {
 
 desktop_environment() {
     clear
-    echo -e "${CYAN}Desktop Environment...${NC}"
+    echo -e "${CYAN}Setting up Desktop Environment...${NC}"
 
-    # Install prerequisites
-    sh /ms1/archlinux/config/DE_setup.sh
+    DE_SETUP_SCRIPT="/ms1/archlinux/config/DE_setup.sh"
 
+    if [ -f "$DE_SETUP_SCRIPT" ]; then
+        bash "$DE_SETUP_SCRIPT"
+    else
+        echo -e "${RED}Error: $DE_SETUP_SCRIPT not found.${NC}"
+    fi
 }
+
 
 
 
