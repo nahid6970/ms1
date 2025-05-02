@@ -30,10 +30,21 @@ install_desktop_environment() {
             ;;
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
-            sudo pacman -S foot
-            sudo pacman -S hyprland xdg-desktop-portal-hyprland wayland wlroots gtk3
-            sudo pacman -S waybar wofi foot xorg-xwayland
-            sudo pacman -S hyprpaper hyprlock grim slurp wl-clipboard
+            # Install essential packages
+            sudo pacman -S --needed foot hyprland xdg-desktop-portal-hyprland wayland wlroots gtk3
+            sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
+            # Auto-generate default config if missing
+            CONFIG_DIR="$HOME/.config/hypr"
+            CONFIG_FILE="$CONFIG_DIR/hyprland.conf"
+
+            if [ ! -f "$CONFIG_FILE" ]; then
+                echo "Generating default Hyprland config..."
+                mkdir -p "$CONFIG_DIR"
+                cp /etc/xdg/hypr/hyprland.conf "$CONFIG_FILE"
+            fi
+            # Replace terminal from kitty to foot
+            echo "Setting foot as the default terminal in hyprland.conf..."
+            sed -i 's/kitty/foot/g' "$CONFIG_FILE"
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
