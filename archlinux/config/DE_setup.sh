@@ -15,7 +15,7 @@ install_desktop_environment() {
 
             # Install sugar-candy theme for SDDM
             echo -e "${GREEN}Installing Sugar Candy theme for SDDM...${NC}"
-            git clone https://github.com/sugar-candy/sddm-sugar-candy.git /tmp/sddm-sugar-candy
+            git clone https://github.com/Kangie/sddm-sugar-candy.git
             sudo mkdir -p /usr/share/sddm/themes/sugar-candy
             sudo cp -r /tmp/sddm-sugar-candy/* /usr/share/sddm/themes/sugar-candy
             rm -rf /tmp/sddm-sugar-candy
