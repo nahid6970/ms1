@@ -541,5 +541,5 @@ while true; do
     fi
 
     # Reload the os.sh script to refresh functions and variables
-    source $HOME/ms3/os.sh
+    source $HOME/ms1/archlinux/os.sh
 done
