@@ -497,7 +497,7 @@ menu_items=(
     "11:About:                          about_device                            :$GREEN"
     "12:GPU Drivers:                    check_gpu_drivers                       :$GREEN"
     "13:Heroic Games Launcher:          check_gpu_drivers                       :$GREEN"
-    "13:Hyprland             :          setup_hyprland_full                     :$GREEN"
+    "14:Hyprland             :          setup_hyprland_full                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
