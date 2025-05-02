@@ -399,6 +399,7 @@ check_gpu_drivers() {
 }
 
 setup_hyprland_full() {
+    #! for hyprland need to enable 3d accelaration in the virtual io
   echo "📦 Installing packages..."
   sudo pacman -S --needed --noconfirm \
     hyprland kitty waybar wofi \
