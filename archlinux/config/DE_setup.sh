@@ -41,7 +41,7 @@ install_desktop_environment() {
             if [ ! -f "$CONFIG_FILE" ]; then
                 echo "Generating Hyprland config using hyprland..."
                 mkdir -p "$CONFIG_DIR"
-                Hyprland --headless &
+                Hyprland
                 sleep 2
                 pkill Hyprland
             fi
