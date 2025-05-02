@@ -81,28 +81,35 @@ install_jetbrains_mono_font() {
     clear
     echo -e "\e[34mInstalling JetBrainsMono Nerd Font with oh-my-posh...\e[0m"
 
+    # Install oh-my-posh if not already installed
     if ! command -v oh-my-posh &> /dev/null; then
         echo -e "\e[33moh-my-posh not found. Installing...\e[0m"
         yay -Sy --noconfirm oh-my-posh
     fi
 
+    # Install the font using oh-my-posh
     oh-my-posh font install JetBrainsMono
 
-    FONT_DIR="$HOME/.local/share/fonts/NerdFonts"
-    if find "$FONT_DIR" -type f -iname "JetBrainsMono*.ttf" | grep -q .; then
+    FONT_DIR="$HOME/.local/share/fonts/jetbrainsmono-nfp"
+    FONT_PATH="$FONT_DIR/JetBrainsMonoNerdFontPropo-Regular.ttf"
+
+    # Remove all fonts except the regular font
+    find "$FONT_DIR" ! -name 'JetBrainsMonoNerdFontPropo-Regular.ttf' -type f -exec rm -f {} +
+
+    # Check if the font is installed correctly
+    if [ -f "$FONT_PATH" ]; then
         echo -e "\e[32mJetBrainsMono Nerd Font installed successfully.\e[0m"
         echo -e "\e[33mYou may need to set this font manually in your terminal emulator settings.\e[0m"
     else
-        echo -e "\e[31mFont not found in $FONT_DIR. Something went wrong.\e[0m"
+        echo -e "\e[31mFont not found at $FONT_PATH. Something went wrong.\e[0m"
     fi
 
-    if ! command -v fc-cache &> /dev/null; then
-        echo -e "\e[33mfc-cache not found. Installing fontconfig...\e[0m"
-        sudo pacman -Sy --noconfirm fontconfig
-    fi
-
+    # Optional: Refresh font cache
     fc-cache -fv
+
+    echo -e "\e[32mFont cache refreshed.\e[0m"
 }
+
 
 
 
