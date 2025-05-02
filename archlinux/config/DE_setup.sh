@@ -37,14 +37,21 @@ install_desktop_environment() {
             CONFIG_DIR="$HOME/.config/hypr"
             CONFIG_FILE="$CONFIG_DIR/hyprland.conf"
 
+            # Launch Hyprland once in a nested session to generate config (safe in VMs or TTYs)
             if [ ! -f "$CONFIG_FILE" ]; then
-                echo "Generating default Hyprland config..."
+                echo "Generating Hyprland config using hyprland..."
                 mkdir -p "$CONFIG_DIR"
-                cp /etc/xdg/hypr/hyprland.conf "$CONFIG_FILE"
+                Hyprland --headless &
+                sleep 2
+                pkill Hyprland
             fi
-            # Replace terminal from kitty to foot
-            echo "Setting foot as the default terminal in hyprland.conf..."
-            sed -i 's/kitty/foot/g' "$CONFIG_FILE"
+            # Replace kitty with foot if config exists
+            if [ -f "$CONFIG_FILE" ]; then
+                echo "Replacing 'kitty' with 'foot' in config..."
+                sed -i 's/kitty/foot/g' "$CONFIG_FILE"
+            else
+                echo "❌ Could not find hyprland.conf to patch."
+            fi
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
