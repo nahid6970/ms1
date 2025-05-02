@@ -103,9 +103,6 @@ copy_files() {
     clear
     echo -e "${CYAN}Copying .bashrc...${NC}"
     cp "$BASHRC_SOURCE" "$BASHRC_DEST"
-    mkdir -p "$(dirname $TERMUX_PROPERTIES_DEST)"
-    cp "$TERMUX_PROPERTIES_SOURCE" "$TERMUX_PROPERTIES_DEST"
-    termux-reload-settings
     echo -e "${CYAN}Files copied and settings reloaded.${NC}"
 }
 
