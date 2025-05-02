@@ -517,6 +517,30 @@ disable_bell() {
 }
 
 
+hyperland_config() {
+    # Auto-generate default config if missing
+    CONFIG_DIR="$HOME/.config/hypr"
+    CONFIG_FILE="$CONFIG_DIR/hyprland.conf"
+    # Launch Hyprland once in a nested session to generate config (safe in VMs or TTYs)
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo "Generating Hyprland config using hyprland..."
+        mkdir -p "$CONFIG_DIR"
+        Hyprland
+        sleep 2
+        pkill Hyprland
+    fi
+    # Replace kitty with foot if config exists
+    if [ -f "$CONFIG_FILE" ]; then
+        echo "Replacing 'kitty' with 'foot' in config..."
+        sed -i 's/kitty/foot/g' "$CONFIG_FILE"
+    else
+        echo "❌ Could not find hyprland.conf to patch."
+    fi
+}
+
+
+
+
 # proton for steam games
 # bottles for whatever .exe files you have laying around (including games)
 # lutris if you so happen to have the .exe file of a game they support.
@@ -539,6 +563,7 @@ menu_items=(
     "14:Hyprland:          setup_hyprland_full                     :$GREEN"
     "15:SDDM Theme:          sddm_theme                     :$GREEN"
     "16:Disable:          disable_bell                     :$GREEN"
+    "17:Hyprland Config:          hyperland_config                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
