@@ -12,7 +12,7 @@ NC='\033[0m' # No Color
 # Define some variables
 # storage="$HOME/storage/shared"
 
-REPO_DIR="$HOME/ms3"
+REPO_DIR="$HOME/ms1"
 BASHRC_SOURCE="$REPO_DIR/bashrc"
 TERMUX_PROPERTIES_SOURCE="$REPO_DIR/termux.properties"
 BASHRC_DEST="$HOME/.bashrc"
@@ -73,16 +73,6 @@ install_packages() {
             echo -e "${GREEN}$pkg is already installed.${NC}"
         fi
     done
-}
-
-# Function to set up storage and password
-setup_storage_passwd() {
-    echo -e "${GREEN}Setting up storage...${NC}"
-    termux-setup-storage
-    echo -e "${GREEN}Storage setup completed.${NC}"
-    echo -e "${GREEN}Setting up password...${NC}"
-    passwd
-    echo -e "${GREEN}Password setup completed.${NC}"
 }
 
 
@@ -280,45 +270,6 @@ about_device() {
     clear
     fastfetch
 }
-
-
-ntfy_notify() {
-    clear
-    # Prevent the device from going into sleep mode
-    termux-wake-lock
-    # Initialize counter
-    not_found_count=0
-    # Infinite loop to check continuously
-    while true; do
-        # Get current time in 12-hour format with AM/PM
-        current_time=$(date "+%I:%M:%S %p")
-        
-        # Set green color for the time (ANSI escape code)
-        green='\033[0;32m'
-        # Reset color
-        reset='\033[0m'
-        
-        # Check if "ntfy" exists in the output
-        if rclone ls g00: | grep -i ntfy; then
-            # Start the Automate flow
-            am start -a com.llamalab.automate.intent.action.START_FLOW \
-                -d "content://com.llamalab.automate.provider/flows/10/statements/6" \
-                -n com.llamalab.automate/.StartServiceActivity
-            # Exit the function after executing the command
-            echo "Automate flow started. Exiting function."
-            break
-        else
-            # Increment the counter and display the message with colored time
-            not_found_count=$((not_found_count + 1))
-            echo -e "${green}$current_time${reset} No 'ntfy' found. Count: $not_found_count"
-        fi
-        # Wait for 30 seconds before checking again
-        sleep 30
-    done
-    # Release the wake lock once the script finishes
-    termux-wake-unlock
-}
-
 
 
 
