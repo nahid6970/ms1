@@ -28,15 +28,15 @@ install_desktop_environment() {
             pacman -Sy --noconfirm xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
             systemctl enable lightdm
             ;;
-        5)
-            echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
-            ;;
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             sudo pacman -S foot
             sudo pacman -S hyprland xdg-desktop-portal-hyprland wayland wlroots gtk3
             sudo pacman -S waybar wofi foot xorg-xwayland
             sudo pacman -S hyprpaper hyprlock grim slurp wl-clipboard
+            ;;
+        5)
+            echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
             ;;
         *)
             echo -e "${RED}Invalid choice. No desktop environment installed.${NC}"
