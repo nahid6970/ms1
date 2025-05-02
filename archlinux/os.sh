@@ -338,7 +338,7 @@ desktop_environment() {
     clear
     echo -e "${CYAN}Setting up Desktop Environment...${NC}"
 
-    DE_SETUP_SCRIPT="/ms1/archlinux/config/DE_setup.sh"
+    DE_SETUP_SCRIPT="$HOME/ms1/archlinux/config/DE_setup.sh"
 
     if [ -f "$DE_SETUP_SCRIPT" ]; then
         bash "$DE_SETUP_SCRIPT"
