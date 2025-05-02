@@ -475,6 +475,11 @@ EOF
   echo "➡️  Hyprland"
 }
 
+sddm_theme() {
+  echo "📦 Installing packages..."
+    sudo yay -S sddm-theme-sugar-candy
+}
+
 
 
 
@@ -498,6 +503,7 @@ menu_items=(
     "12:GPU Drivers:                    check_gpu_drivers                       :$GREEN"
     "13:Heroic Games Launcher:          check_gpu_drivers                       :$GREEN"
     "14:Hyprland             :          setup_hyprland_full                     :$GREEN"
+    "15:SDDM Theme             :          sddm_theme                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
