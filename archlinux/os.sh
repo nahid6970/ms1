@@ -309,6 +309,26 @@ rclone_decrypt() {
 }
 
 
+setup_yay() {
+    clear
+    echo -e "${CYAN}Installing yay (AUR helper)...${NC}"
+
+    # Install prerequisites
+    sudo pacman -Sy --needed --noconfirm base-devel git
+
+    # Clone yay repository
+    if [ ! -d "/tmp/yay" ]; then
+        git clone https://aur.archlinux.org/yay.git /tmp/yay
+    fi
+
+    # Build and install yay
+    cd /tmp/yay || exit
+    makepkg -si --noconfirm
+
+    echo -e "${GREEN}yay has been installed successfully.${NC}"
+}
+
+
 
 
 # Declare a combined array of menu options and function bindings
@@ -325,6 +345,7 @@ menu_items=(
     "10:Remove Folder [ms3]:            remove_repo                             :$RED"
     "11:About:                          about_device                            :$GREEN"
     "12:Welcome Page:                   welcome_remove                          :$RED"
+    "12:YAY Setup:                      setup_yay                               :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )

@@ -187,5 +187,9 @@ git clone https://github.com/nahid6970/ms1.git
 archinstall --config path/to/config --creds path/to/creds
 
 
+after that clone ms1 again
+sh /ms1/archlinux/os.sh
+and setup from there
+
 termux like os
 yay setup
