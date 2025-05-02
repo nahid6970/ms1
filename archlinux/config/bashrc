@@ -18,7 +18,7 @@ alias update='sudo pacman -Syu'
 alias os='bash ~/ms1/archlinux/os.sh'
 alias rc="bash ~/ms3/Remote_Control_rclone/rclone_rmote_control.sh"
 alias ro="rclone cat g00:/Remote_Control/output.txt"
-alias yoy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S" # search packages using fzf
+alias yoy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S"
 
 
 # Search history with fzf and execute the selected command
@@ -41,6 +41,39 @@ hh() {
     fi
     # Search the command history for the given pattern
     history | grep --color=auto -i "$1"
+}
+
+searchpkg() {
+    pacman -Ss "$1"
+}
+
+cleancache() {
+    sudo pacman -Sc
+}
+
+recentpkgs() {
+    grep -i "installed" /var/log/pacman.log | tail -n 20
+}
+
+orphans() {
+    pacman -Qdt
+}
+
+remove_orphans() {
+    sudo pacman -Rns $(pacman -Qdtq)
+}
+
+reinstall_all() {
+    sudo pacman -Qnq | sudo pacman -S -
+}
+
+edit_mirrors() {
+    sudo nano /etc/pacman.d/mirrorlist
+}
+
+backup_pkgs() {
+    pacman -Qqe > pkglist.txt
+    echo "Saved to pkglist.txt"
 }
 
 
