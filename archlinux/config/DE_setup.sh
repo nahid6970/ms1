@@ -36,7 +36,6 @@ install_desktop_environment() {
             # Auto-generate default config if missing
             CONFIG_DIR="$HOME/.config/hypr"
             CONFIG_FILE="$CONFIG_DIR/hyprland.conf"
-
             # Launch Hyprland once in a nested session to generate config (safe in VMs or TTYs)
             if [ ! -f "$CONFIG_FILE" ]; then
                 echo "Generating Hyprland config using hyprland..."
