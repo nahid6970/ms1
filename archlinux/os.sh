@@ -84,7 +84,7 @@ install_jetbrains_mono_font() {
     # Install oh-my-posh if not already installed
     if ! command -v oh-my-posh &> /dev/null; then
         echo -e "\e[33moh-my-posh not found. Installing...\e[0m"
-        sudo pacman -Sy --noconfirm oh-my-posh
+        sudo yay -Sy --noconfirm oh-my-posh
     fi
 
     # Install the font using oh-my-posh
