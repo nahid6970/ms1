@@ -538,7 +538,7 @@ menu_items=(
     "13:Heroic Games Launcher:          check_gpu_drivers                       :$GREEN"
     "14:Hyprland:          setup_hyprland_full                     :$GREEN"
     "15:SDDM Theme:          sddm_theme                     :$GREEN"
-    "15:Disable:          disable_bell                     :$GREEN"
+    "16:Disable:          disable_bell                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
     " e:Exit:                           exit_script                             :$RED"
 )
