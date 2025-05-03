@@ -520,9 +520,6 @@ hyperland_config() {
     # Copy contents recursively and force overwrite
     cp -rf "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/"* "$HOME/.config/hypr/"
     # Enable Num Lock on startup
-    exec-once = bash -c 'sleep 1 && hyprctl keyword input:kb_options "numlock:on"'
-
-
 }
 
 
