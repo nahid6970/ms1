@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <root>
 	<version major="2" minor="20" revision="5" build="0" />
 	<OfficeMouse Enable="false" />
@@ -21,7 +21,7 @@
 		<Hotkey2 Key="0" Modifier="0" />
 		<Hotkey3 Key="0" Modifier="0" />
 		<Hotkey4 Key="0" Modifier="0" />
-		<Hotkey5 Key="112" Modifier="3" />
+		<Hotkey5 Key="112" Modifier="0" />
 		<Hotkey6 Key="0" Modifier="0" />
 		<Hotkey7 Key="0" Modifier="0" />
 		<Hotkey8 Key="0" Modifier="0" />

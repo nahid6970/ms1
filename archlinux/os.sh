@@ -488,10 +488,14 @@ sddm_theme() {
   sudo bash -c 'cat > /etc/sddm.conf <<EOF
 [Theme]
 Current=Sugar-Candy
+
+[General]
+Numlock=on
 EOF'
 
-  echo "✅ SDDM theme set to Sugar-Candy."
+  echo "✅ SDDM theme set to Sugar-Candy and NumLock enabled."
 }
+
 
 
 disable_bell() {
