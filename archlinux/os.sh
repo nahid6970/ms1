@@ -29,7 +29,7 @@ install_packages() {
         bash bat chafa curl eza fastfetch fzf \
         lsd lua-language-server neovim \
         openssh python rclone sshpass wget \
-        which zoxide yazi zsh stow expac
+        which zoxide yazi zsh stow expac numlockx
 }
 
 list_recent_packages() {
@@ -527,6 +527,42 @@ hyperland_config() {
 
 
 
+enable_numlock_tty() {
+    echo -e "${GREEN}Installing numlockx and enabling Num Lock on TTYs...${NC}"
+
+    # Install numlockx
+    sudo pacman -S --noconfirm --needed numlockx
+
+    # Create the numlock script
+    sudo tee /usr/local/bin/numlock > /dev/null << 'EOF'
+#!/bin/bash
+for tty in /dev/tty{1..6}; do
+    /usr/bin/setleds -D +num < "$tty"
+done
+EOF
+
+    # Make it executable
+    sudo chmod +x /usr/local/bin/numlock
+
+    # Create a systemd service
+    sudo tee /etc/systemd/system/numlock.service > /dev/null << 'EOF'
+[Unit]
+Description=Enable NumLock on all TTYs
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/numlock
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # Enable the service
+    sudo systemctl enable numlock.service
+
+    echo -e "${GREEN}Num Lock will now be enabled on all TTYs at boot.${NC}"
+}
 
 
 
@@ -554,6 +590,7 @@ menu_items=(
     "16:Disable Bell              : disable_bell                :$GREEN"
     "17:Hyprland Config           : hyperland_config            :$GREEN"
     "18:Neovim Config             : nvim_config                 :$GREEN"
+    "19:NUMLOCK ON             : enable_numlock_tty                 :$GREEN"
     " c:Close                     : Close_script                :$RED"
     " e:Exit                      : exit_script                 :$RED"
 )
