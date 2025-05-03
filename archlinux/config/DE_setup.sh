@@ -20,6 +20,7 @@ install_desktop_environment() {
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
             sudo pacman -Sy --noconfirm --needed gnome gnome-tweaks gnome-terminal gdm
+            yay -S --needed extension-manager
             sudo systemctl enable gdm
             sudo pacman -Syu
             ;;
