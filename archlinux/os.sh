@@ -516,20 +516,12 @@ ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/nvim/" "$HOME/.config/nvim"
 
 hyperland_config() {
     # Create destination directory if it doesn't exist
-    mkdir -p "$HOME/.config/hypr"
+    # Kill any running Hyprland session (if allowed)
+    pkill Hyprland
 
+    mkdir -p "$HOME/.config/hypr"
     # Copy contents recursively and force overwrite
     cp -rf "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/"* "$HOME/.config/hypr/"
-
-    # Add 'numlockx on' to hyprland.conf if not already present
-    CONF_FILE="$HOME/.config/hypr/hyprland.conf"
-    if ! grep -q "numlockx on" "$CONF_FILE"; then
-        echo -e "\n# Enable Num Lock on startup\nexec-once = numlockx on" >> "$CONF_FILE"
-    fi
-
-    # Kill any running Hyprland session (if allowed)
-    pkill Hyprland 2>/dev/null
-
     # Start Hyprland (this usually needs to be done from a TTY, not from inside a script)
     Hyprland &
 }
