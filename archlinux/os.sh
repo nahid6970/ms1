@@ -21,7 +21,7 @@ NVIM_CONFIG_DEST="$HOME/.config/nvim"
 # List of packages to install via yay
 packages=(
     "bash" "bat" "chafa" "curl" "eza" "fastfetch" "fzf" "git" "lsd" "lua-language-server" "nano"
-    "neovim" "oh-my-posh" "openssh" "python" "rclone" "sshpass" "wget" "which" "yazi" "zoxide" "zsh"
+    "neovim" "oh-my-posh" "openssh" "python" "rclone" "sshpass" "wget" "which" "yazi" "zoxide" "zsh" "stow"
 )
 
 # Function to install necessary packages using yay
