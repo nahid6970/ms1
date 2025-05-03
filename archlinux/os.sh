@@ -517,8 +517,10 @@ ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/nvim/" "$HOME/.config/nvim"
 hyperland_config() {
     # Create destination directory if it doesn't exist
     mkdir -p "$HOME/.config/hypr"
+    mkdir -p "$HOME/.config/foot"
     # Copy contents recursively and force overwrite
     rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
+    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
     # Enable Num Lock on startup
 }
 
