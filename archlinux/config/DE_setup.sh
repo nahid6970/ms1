@@ -34,6 +34,8 @@ install_desktop_environment() {
             sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wlroots gtk3 sddm
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo systemctl enable sddm
+            cd "$HOME/ms1/archlinux/Hyprland/typecraft/"
+            stow hyprland
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
