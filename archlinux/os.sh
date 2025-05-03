@@ -490,23 +490,7 @@ disable_bell() {
 
 hyperland_config() {
     # Auto-generate default config if missing
-    CONFIG_DIR="$HOME/.config/hypr"
-    CONFIG_FILE="$CONFIG_DIR/hyprland.conf"
-    # Launch Hyprland once in a nested session to generate config (safe in VMs or TTYs)
-    if [ ! -f "$CONFIG_FILE" ]; then
-        echo "Generating Hyprland config using hyprland..."
-        mkdir -p "$CONFIG_DIR"
-        Hyprland
-        sleep 2
-        pkill Hyprland
-    fi
-    # Replace kitty with foot if config exists
-    if [ -f "$CONFIG_FILE" ]; then
-        echo "Replacing 'kitty' with 'foot' in config..."
-        sed -i 's/kitty/foot/g' "$CONFIG_FILE"
-    else
-        echo "❌ Could not find hyprland.conf to patch."
-    fi
+ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/hyprland"/* "$HOME/.config/"
 }
 
 
