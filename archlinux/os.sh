@@ -18,31 +18,18 @@ BASHRC_DEST="$HOME/.bashrc"
 NVIM_INIT_SOURCE="$REPO_DIR/dotfiles/neovim/init.lua"
 NVIM_CONFIG_DEST="$HOME/.config/nvim"
 
-# List of packages to install via yay
-packages=(
-    "bash" "bat" "chafa" "curl" "eza" "fastfetch" "fzf" "git" "lsd" "lua-language-server" "nano"
-    "neovim" "oh-my-posh" "openssh" "python" "rclone" "sshpass" "wget" "which" "yazi" "zoxide" "zsh" "stow"
-)
 
 # Function to install necessary packages using yay
 install_packages() {
     clear
     echo -e "${GREEN}Updating package database...${NC}"
     yay -Sy --noconfirm
-
-    echo -e "${GREEN}Installing necessary packages...${NC}"
-    for pkg in "${packages[@]}"; do
-        if ! pacman -Q "$pkg" &>/dev/null; then
-            echo -e "${GREEN}Installing $pkg...${NC}"
-            if yay -S --noconfirm "$pkg"; then
-                echo -e "${GREEN}$pkg installed successfully.${NC}"
-            else
-                echo -e "${RED}Failed to install $pkg.${NC}"
-            fi
-        else
-            echo -e "${YELLOW}$pkg is already installed.${NC}"
-        fi
-    done
+    echo -e "${GREEN}Installing Necessary Packages...${NC}"
+    yay -S --needed \
+        bash bat chafa curl eza fastfetch fzf \
+        lsd lua-language-server neovim oh-my-posh \
+        openssh python rclone sshpass wget \
+        which zoxide yazi zsh stow
 }
 
 
