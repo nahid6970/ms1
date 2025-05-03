@@ -29,7 +29,7 @@ ff() {
         bash bat chafa curl eza fastfetch fzf \
         lsd lua-language-server neovim \
         openssh python rclone sshpass wget \
-        which zoxide yazi zsh stow
+        which zoxide yazi zsh stow expac
 }
 
 install_packages() {
