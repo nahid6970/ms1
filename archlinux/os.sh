@@ -526,6 +526,16 @@ hyperland_config() {
     # Enable Num Lock on startup
 }
 
+test() {
+    # Create destination directory if it doesn't exist
+    mkdir -p "$HOME/.config/hypr"
+    mkdir -p "$HOME/.config/foot"
+    # Copy contents recursively and force overwrite
+    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
+    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
+    # Enable Num Lock on startup
+}
+
 
 # proton for steam games
 # bottles for whatever .exe files you have laying around (including games)
@@ -553,6 +563,7 @@ menu_items=(
     "18:Neovim Config             : nvim_config                 :$GREEN"
     " c:Close                     : Close_script                :$RED"
     " e:Exit                      : exit_script                 :$RED"
+    " e:Test                      : test                 :$RED"
 )
 
 # Display the menu and handle user input
@@ -570,12 +581,15 @@ while true; do
     echo ""
     read -p "Enter choice: " choice
 
-    # Handle 'c' and 'e' choices for Close and Exit
+    # Handle 'c', 'e', and 't' choices for Close, Exit, and Test
     if [ "$choice" == "c" ]; then
         Close_script
         continue
     elif [ "$choice" == "e" ]; then
         exit_script
+        continue
+    elif [ "$choice" == "t" ]; then
+        test
         continue
     fi
 
