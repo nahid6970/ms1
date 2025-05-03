@@ -23,9 +23,9 @@ NVIM_CONFIG_DEST="$HOME/.config/nvim"
 install_packages() {
     clear
     echo -e "${GREEN}Updating package database...${NC}"
-    pacman -Sy --noconfirm
+    sudo pacman -Sy --noconfirm
     echo -e "${GREEN}Installing Necessary Packages...${NC}"
-    pacman -S --needed \
+    sudo pacman -S --needed \
         bash bat chafa curl eza fastfetch fzf \
         lsd lua-language-server neovim \
         openssh python rclone sshpass wget \
