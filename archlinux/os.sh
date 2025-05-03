@@ -448,7 +448,7 @@ EOF
 sddm_theme() {
   echo "📦 Installing Sugar Candy theme..."
   if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
-    yay -S --noconfirm sddm-theme-sugar-candy
+    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
   else
     echo "✅ sddm-theme-sugar-candy is already installed."
   fi
