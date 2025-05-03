@@ -22,11 +22,13 @@ install_desktop_environment() {
             echo -e "${GREEN}Installing GNOME...${NC}"
             pacman -Sy --noconfirm --needed gnome gnome-tweaks gnome-terminal gdm
             sudo systemctl enable gdm
+            sudo pacman -Syu
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
             pacman -Sy --noconfirm --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
-            systemctl enable lightdm
+            sudo systemctl enable lightdm
+            sudo pacman -Syu
             ;;
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
