@@ -29,7 +29,8 @@ install_packages() {
         bash bat chafa curl eza fastfetch fzf \
         lsd lua-language-server neovim \
         openssh python rclone sshpass wget \
-        which zoxide yazi zsh stow expac numlockx
+        which zoxide yazi zsh stow expac numlockx \
+        rsync firefox
 }
 
 list_recent_packages() {
