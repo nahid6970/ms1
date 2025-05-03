@@ -518,49 +518,9 @@ hyperland_config() {
     # Create destination directory if it doesn't exist
     mkdir -p "$HOME/.config/hypr"
     # Copy contents recursively and force overwrite
-    cp -rf "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/"* "$HOME/.config/hypr/"
+    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
     # Enable Num Lock on startup
 }
-
-
-
-enable_numlock_tty() {
-    echo -e "${GREEN}Installing numlockx and enabling Num Lock on TTYs...${NC}"
-
-    # Install numlockx
-    sudo pacman -S --noconfirm --needed numlockx
-
-    # Create the numlock script
-    sudo tee /usr/local/bin/numlock > /dev/null << 'EOF'
-#!/bin/bash
-for tty in /dev/tty{1..6}; do
-    /usr/bin/setleds -D +num < "$tty"
-done
-EOF
-
-    # Make it executable
-    sudo chmod +x /usr/local/bin/numlock
-
-    # Create a systemd service
-    sudo tee /etc/systemd/system/numlock.service > /dev/null << 'EOF'
-[Unit]
-Description=Enable NumLock on all TTYs
-After=local-fs.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/numlock
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    # Enable the service
-    sudo systemctl enable numlock.service
-
-    echo -e "${GREEN}Num Lock will now be enabled on all TTYs at boot.${NC}"
-}
-
 
 
 # proton for steam games
@@ -587,7 +547,6 @@ menu_items=(
     "16:Disable Bell              : disable_bell                :$GREEN"
     "17:Hyprland Config           : hyperland_config            :$GREEN"
     "18:Neovim Config             : nvim_config                 :$GREEN"
-    "19:NUMLOCK ON             : enable_numlock_tty                 :$GREEN"
     " c:Close                     : Close_script                :$RED"
     " e:Exit                      : exit_script                 :$RED"
 )
