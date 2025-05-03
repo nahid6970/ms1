@@ -526,7 +526,7 @@ hyperland_config() {
     # Enable Num Lock on startup
 }
 
-test() {
+test_test() {
         echo "TEST ✅"
 }
 
@@ -582,8 +582,8 @@ while true; do
     elif [ "$choice" == "e" ]; then
         exit_script
         continue
-    elif [ "$choice" == "t" ]; then
-        test
+    elif [ "$choice" == "x" ]; then
+        test_test
         continue
     fi
 
