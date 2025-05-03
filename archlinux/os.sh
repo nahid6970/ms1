@@ -490,7 +490,7 @@ disable_bell() {
 
 hyperland_config() {
     # Auto-generate default config if missing
-ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/nvim"/* "$HOME/.config/"
+ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/nvim/" "$HOME/.config/nvim"
 }
 
 
