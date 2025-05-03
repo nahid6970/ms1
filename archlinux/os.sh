@@ -515,9 +515,12 @@ ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/nvim/" "$HOME/.config/nvim"
 }
 
 hyperland_config() {
-    # Auto-generate default config if missing
+    # Create destination directory if it doesn't exist
+    mkdir -p "$HOME/.config/hypr"
+    # Copy contents recursively and force overwrite
     cp -rf "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/"* "$HOME/.config/hypr/"
 }
+
 
 
 
