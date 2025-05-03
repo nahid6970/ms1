@@ -480,10 +480,13 @@ set_sddm_theme() {
   local THEME_NAME="$1"
   local PACKAGE_NAME="$2"
 
-  echo "📦 Installing $THEME_NAME theme..."
-
   if ! pacman -Q "$PACKAGE_NAME" &>/dev/null; then
-    yay -S --noconfirm "$PACKAGE_NAME"
+    echo "📦 $PACKAGE_NAME is not installed."
+    read -p "❓ Do you want to install it? [Y/n] " choice
+    case "$choice" in
+      n|N) echo "❌ Skipping theme installation."; return ;;
+      *) yay -S --noconfirm "$PACKAGE_NAME" ;;
+    esac
   else
     echo "✅ $PACKAGE_NAME is already installed."
   fi
