@@ -36,6 +36,7 @@ install_desktop_environment() {
             sudo systemctl enable sddm
             su nahid
             ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/hyprland"/* "$HOME/.config/"
+            ls
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
