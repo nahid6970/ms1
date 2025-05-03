@@ -35,7 +35,7 @@ install_desktop_environment() {
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo systemctl enable sddm
             su nahid
-            cd "$HOME/ms1/archlinux/Hyprland/typecraft/hyprland" && mkdir -p "$HOME/.config" && ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/hyprland"/* "$HOME/.config/"
+            ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/hyprland"/* "$HOME/.config/"
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
