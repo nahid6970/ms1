@@ -20,14 +20,14 @@ install_desktop_environment() {
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
-            pacman -Sy --noconfirm --needed gnome gnome-tweaks gnome-terminal gdm
+            sudo pacman -Sy --noconfirm --needed gnome gnome-tweaks gnome-terminal gdm
             sudo systemctl enable gdm
             sudo pacman -Syu
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
-            pacman -S --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
-            sudo systemctl enable lightdm.service
+            sudo pacman -S --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+            sudo systemctl enable lightdm
             sudo pacman -Syu
             ;;
         4)
