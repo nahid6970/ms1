@@ -30,7 +30,7 @@ install_packages() {
         lsd lua-language-server neovim \
         openssh python rclone sshpass wget \
         which zoxide yazi zsh stow expac numlockx \
-        rsync firefox lynx  Qutebrowser \ #!Browsers: min
+        rsync firefox lynx Qutebrowser min \
 }
 
 list_recent_packages() {
