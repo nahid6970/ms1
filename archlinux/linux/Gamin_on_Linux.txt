@@ -1,8 +1,0 @@
-Lutris
-
-bottle
-
-steam+proton
-
-heroic game launcher
-https://www.youtube.com/watch?v=Oqatqp4fjmM

@@ -5,7 +5,14 @@ wsl --set-default-version 2
 ## localectl set-locale LANG=en_US.UTF-8
 https://www.tecmint.com/fix-failed-to-set-locale-defaulting-to-c-utf-8-in-centos/
 
+Lutris
 
+bottle
+
+steam+proton
+
+heroic game launcher
+https://www.youtube.com/watch?v=Oqatqp4fjmM
 #?   █████╗ ██████╗  ██████╗██╗  ██╗██╗     ██╗███╗   ██╗██╗   ██╗██╗  ██╗
 #?  ██╔══██╗██╔══██╗██╔════╝██║  ██║██║     ██║████╗  ██║██║   ██║╚██╗██╔╝
 #?  ███████║██████╔╝██║     ███████║██║     ██║██╔██╗ ██║██║   ██║ ╚███╔╝ 
