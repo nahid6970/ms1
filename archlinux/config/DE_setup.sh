@@ -26,9 +26,8 @@ install_desktop_environment() {
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
-            pacman -S --needed  xfce4 xfce4-goodies
-            pacman -S --needed  lightdm lightdm-gtk-greeter
-            sudo systemctl enable lightdm
+            pacman -S --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+            sudo systemctl enable lightdm.service
             sudo pacman -Syu
             ;;
         4)
