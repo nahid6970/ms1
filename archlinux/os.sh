@@ -527,7 +527,8 @@ hyperland_config() {
 }
 
 test_test() {
-        echo "TEST ✅"
+    clear
+    echo "TEST ✅"
 }
 
 
