@@ -476,33 +476,25 @@ EOF
   echo "➡️  Hyprland"
 }
 
-set_sddm_theme() {
-  local THEME_NAME="$1"
-  local PACKAGE_NAME="$2"
-
-  if ! pacman -Q "$PACKAGE_NAME" &>/dev/null; then
-    echo "📦 $PACKAGE_NAME is not installed."
-    read -p "❓ Do you want to install it? [Y/n] " choice
-    case "$choice" in
-      n|N) echo "❌ Skipping theme installation."; return ;;
-      *) yay -S --noconfirm "$PACKAGE_NAME" ;;
-    esac
+sddm_theme() {
+  echo "📦 Installing Sugar Candy theme..."
+  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
+    yay -S --noconfirm sddm-theme-sugar-candy
   else
-    echo "✅ $PACKAGE_NAME is already installed."
+    echo "✅ sddm-theme-sugar-candy is already installed."
   fi
 
   echo "📝 Configuring /etc/sddm.conf..."
-  sudo bash -c "cat > /etc/sddm.conf <<EOF
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
 [Theme]
-Current=$THEME_NAME
+Current=Sugar-Candy
 
 [General]
 Numlock=on
-EOF"
+EOF'
 
-  echo "✅ SDDM theme set to $THEME_NAME and NumLock enabled."
+  echo "✅ SDDM theme set to Sugar-Candy and NumLock enabled."
 }
-
 
 
 
@@ -573,7 +565,7 @@ menu_items=(
     "12:GPU Drivers:                    check_gpu_drivers                       :$GREEN"
     "13:Heroic Games Launcher:          check_gpu_drivers                       :$GREEN"
     "14:Hyprland:          setup_hyprland_full                     :$GREEN"
-    "15:SDDM Theme:          set_sddm_theme                     :$GREEN"
+    "15:SDDM Theme:          sddm_theme                     :$GREEN"
     "16:Disable:          disable_bell                     :$GREEN"
     "17:Hyprland Config:          hyperland_config                     :$GREEN"
     " c:Close:                          Close_script                            :$RED"
