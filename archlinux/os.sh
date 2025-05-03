@@ -20,7 +20,7 @@ NVIM_CONFIG_DEST="$HOME/.config/nvim"
 
 
 # Function to install necessary packages using yay
-install_packages() {
+ff() {
     clear
     echo -e "${GREEN}Updating package database...${NC}"
     sudo pacman -Sy --noconfirm
@@ -31,6 +31,12 @@ install_packages() {
         openssh python rclone sshpass wget \
         which zoxide yazi zsh stow
 }
+
+install_packages() {
+    echo -e "${GREEN}Listing recently installed packages...${NC}"
+    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
+}
+
 
 # Function to install JetBrainsMono Nerd Font using oh-my-posh on Arch Linux
 install_jetbrains_mono_font() {
