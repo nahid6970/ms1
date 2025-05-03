@@ -33,6 +33,7 @@ install_desktop_environment() {
             # Install essential packages
             sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wlroots gtk3
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
+            sudo pacman -S --needed qt5-wayland qt6-wayland
             # sudo pacman -S --needed sddm
             # sudo systemctl enable sddm
             ;;
