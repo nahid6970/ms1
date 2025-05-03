@@ -516,7 +516,7 @@ ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/nvim/" "$HOME/.config/nvim"
 
 hyperland_config() {
     # Auto-generate default config if missing
-    cp -force "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr"
+    cp -rf "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/"* "$HOME/.config/hypr/"
 }
 
 
