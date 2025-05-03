@@ -33,7 +33,8 @@ install_desktop_environment() {
             # Install essential packages
             sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wlroots gtk3 sddm
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
-            sudo systemctl enable sddm
+            # sudo pacman -S --needed sddm
+            # sudo systemctl enable sddm
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
