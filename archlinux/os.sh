@@ -25,35 +25,13 @@ install_packages() {
     echo -e "${GREEN}Updating package database...${NC}"
     yay -Sy --noconfirm
     echo -e "${GREEN}Installing Necessary Packages...${NC}"
-    yay -S --needed  stow
+    yay -S --needed \
+        bash bat chafa curl eza fastfetch fzf \
+        lsd lua-language-server neovim oh-my-posh \
+        openssh python rclone sshpass wget \
+        which zoxide yazi zsh stow
 }
 
-
-# Function to install necessary packages
-install_packages() {
-    clear
-    echo -e "${GREEN}Updating package list...${NC}"
-    pkg update -y
-    echo -e "${GREEN}Upgrading installed packages...${NC}"
-    pkg upgrade -y
-    echo -e "${GREEN}Installing necessary packages...${NC}"
-    for pkg in "${packages[@]}"; do
-        # Check if the package is already installed
-        if ! command -v $pkg &> /dev/null; then
-            echo -e "${GREEN}Installing $pkg...${NC}"
-            if pkg install "$pkg" -y; then
-                echo -e "${GREEN}$pkg installed successfully.${NC}"
-            else
-                echo -e "${RED}Failed to install $pkg. Please check your network or package name.${NC}"
-            fi
-        else
-            echo -e "${GREEN}$pkg is already installed.${NC}"
-        fi
-    done
-}
-
-
-# Font Download and Setup
 # Function to install JetBrainsMono Nerd Font using oh-my-posh on Arch Linux
 install_jetbrains_mono_font() {
     clear
