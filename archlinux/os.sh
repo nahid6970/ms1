@@ -528,6 +528,7 @@ hyperland_config() {
 
 test_test() {
     clear
+    flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     echo "TEST ✅"
 }
 
