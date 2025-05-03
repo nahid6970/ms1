@@ -20,7 +20,7 @@ NVIM_CONFIG_DEST="$HOME/.config/nvim"
 
 
 # Function to install necessary packages using yay
-ff() {
+install_packages() {
     clear
     echo -e "${GREEN}Updating package database...${NC}"
     sudo pacman -Sy --noconfirm
@@ -32,7 +32,7 @@ ff() {
         which zoxide yazi zsh stow expac
 }
 
-install_packages() {
+list_recent_packages() {
     echo -e "${GREEN}Listing recently installed packages...${NC}"
     expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
 }
