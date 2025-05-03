@@ -201,6 +201,7 @@ hit ctrl+alt+ [f1-f6] to select tty display manager
 
 Hyprland
 - dont use kitty/alacritty [doesnt work on vms]
-- 3d ACC + Log in 2/3 times to work
+- 3d Acc + Log in 2/3 times to work
 https://www.youtube.com/watch?v=2CP_9-jCV6A setup part 1 [typecraft]
 https://www.youtube.com/watch?v=KA1jv40q9lQ setup part 2 [typecraft]
+https://www.youtube.com/watch?v=omhJMH9lPPc setup part 3 [typecraft]
