@@ -527,13 +527,7 @@ hyperland_config() {
 }
 
 test() {
-    # Create destination directory if it doesn't exist
-    mkdir -p "$HOME/.config/hypr"
-    mkdir -p "$HOME/.config/foot"
-    # Copy contents recursively and force overwrite
-    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
-    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
-    # Enable Num Lock on startup
+        echo "TEST ✅"
 }
 
 
@@ -563,7 +557,7 @@ menu_items=(
     "18:Neovim Config             : nvim_config                 :$GREEN"
     " c:Close                     : Close_script                :$RED"
     " e:Exit                      : exit_script                 :$RED"
-    " e:Test                      : test                 :$RED"
+    " x:Test                      : test                 :$RED"
 )
 
 # Display the menu and handle user input
