@@ -27,7 +27,7 @@ install_packages() {
     echo -e "${GREEN}Installing Necessary Packages...${NC}"
     yay -S --needed \
         bash bat chafa curl eza fastfetch fzf \
-        lsd lua-language-server neovim oh-my-posh \
+        lsd lua-language-server neovim \
         openssh python rclone sshpass wget \
         which zoxide yazi zsh stow
 }
