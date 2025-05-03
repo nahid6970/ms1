@@ -28,28 +28,19 @@ install_desktop_environment() {
             pacman -Sy --noconfirm --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
             systemctl enable lightdm
             ;;
-4)
-    echo -e "${YELLOW}Installing Hyprland...${NC}"
-
-    sudo pacman -S --needed \
-        foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland \
-        wayland wlroots gtk3 sddm
-
-    sudo pacman -S --needed \
-        waybar wofi xorg-xwayland hyprpaper hyprlock \
-        grim slurp wl-clipboard
-
-    sudo systemctl enable sddm
-
-    HYP_DIR="$HOME/ms1/archlinux/Hyprland/typecraft"
-    if [[ -d "$HYP_DIR" ]]; then
-        cd "$HYP_DIR" || exit
-        stow hyprland
-    else
-        echo -e "${RED}Directory $HYP_DIR not found! Skipping stow.${NC}"
-    fi
-    ;;
-
+        4)
+            echo -e "${YELLOW}Installing Hyprland...${NC}"
+            # Install essential packages
+            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wlroots gtk3 sddm
+            sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
+            sudo systemctl enable sddm
+            su nahid
+            cd "$HOME/ms1/archlinux/Hyprland/typecraft/hyprland"
+            stow hyprland
+            ;;
+        5)
+            echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
+            ;;
         *)
             echo -e "${RED}Invalid choice. No desktop environment installed.${NC}"
             ;;
