@@ -615,28 +615,25 @@ EOF
     echo "NumLock has been enabled on TTYs. The systemd service is now active."
 }
 
-enable_numlock_service() {
-  echo -e "${CYAN}🔧 Creating systemd service to enable NumLock at boot...${NC}"
-  sudo bash -c 'cat > /etc/systemd/system/numlock.service <<EOF
-[Unit]
-Description=Enable NumLock on boot
-After=multi-user.target
+enable_early_numlock() {
+  echo -e "${CYAN}📦 Installing mkinitcpio-numlock from AUR...${NC}"
+  yay -S --noconfirm --needed mkinitcpio-numlock
 
-[Service]
-ExecStart=/usr/bin/setleds -D +num
-StandardInput=tty
-RemainAfterExit=yes
-Type=oneshot
+  echo -e "${CYAN}🛠️ Adding 'numlock' hook to /etc/mkinitcpio.conf...${NC}"
+  if grep -q "HOOKS=.*numlock" /etc/mkinitcpio.conf; then
+    echo -e "${YELLOW}⚠️ 'numlock' hook already present in HOOKS. Skipping modification.${NC}"
+  else
+    # Use sed to insert numlock before encrypt or block
+    sudo sed -i -E 's/(HOOKS=.*)(encrypt|block)/\1numlock \2/' /etc/mkinitcpio.conf
+    echo -e "${GREEN}✅ 'numlock' hook added before encrypt/block.${NC}"
+  fi
 
-[Install]
-WantedBy=multi-user.target
-EOF'
+  echo -e "${CYAN}🔄 Regenerating initramfs...${NC}"
+  sudo mkinitcpio -P
 
-  sudo systemctl daemon-reexec
-  sudo systemctl daemon-reload
-  sudo systemctl enable numlock.service
-  echo -e "${GREEN}✅ NumLock will now be enabled at boot time on TTYs.${NC}"
+  echo -e "${GREEN}✅ Early NumLock enabled via initramfs hook.${NC}"
 }
+
 
 
 
@@ -666,7 +663,7 @@ menu_items=(
     "Neovim Config                 : nvim_config                 :$GREEN"
     "TTY Autologin                 : enable_tty_autologin        :$GREEN"
     "TTY Enable Numlock            : enable_numlock_on_tty       :$GREEN"
-    "Enable Numlock Hyprland       : enable_numlock_service :$GREEN"
+    "Enable Numlock       : enable_early_numlock :$GREEN"
 )
 
 # Special hotkey items
