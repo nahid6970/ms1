@@ -1,5 +1,5 @@
 # Function to install the chosen desktop environment
-install_desktop_environment() {
+desktop_environment() {
     clear
     echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
     echo -e "1) KDE Plasma"
@@ -12,37 +12,33 @@ install_desktop_environment() {
     case $DE_CHOICE in
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
-            sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop sddm
-            sudo yay -S sddm-theme-sugar-candy
-            sudo systemctl enable sddm
+            sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop
             sudo pacman -Syu
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
             sudo pacman -Sy --noconfirm --needed gnome gnome-tweaks gnome-terminal gdm
             yay -S --needed extension-manager
-            sudo systemctl enable gdm
             sudo pacman -Syu
             echo -e "${GREEN}Install these extensions +OpenBar +PaperWM${NC}"
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
-            sudo pacman -S --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
-            sudo systemctl enable lightdm
+            sudo pacman -S --needed  xfce4 xfce4-goodies
             sudo pacman -Syu
             ;;
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             # Install essential packages
-            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3 sddm
+            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo pacman -S --needed qt5-wayland qt6-wayland
+            # create directory
             mkdir -p "$HOME/.config/hypr"
             mkdir -p "$HOME/.config/foot"
             # Copy contents recursively and force overwrite
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
-            sudo systemctl enable sddm
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
@@ -55,4 +51,4 @@ install_desktop_environment() {
     echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
 
-install_desktop_environment
+desktop_environment

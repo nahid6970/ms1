@@ -322,7 +322,20 @@ desktop_environment() {
     clear
     echo -e "${CYAN}Setting up Desktop Environment...${NC}"
 
-    DE_SETUP_SCRIPT="$HOME/ms1/archlinux/config/DE_setup.sh"
+    DE_SETUP_SCRIPT="$HOME/ms1/archlinux/config/desktop_environment.sh"
+
+    if [ -f "$DE_SETUP_SCRIPT" ]; then
+        bash "$DE_SETUP_SCRIPT"
+    else
+        echo -e "${RED}Error: $DE_SETUP_SCRIPT not found.${NC}"
+    fi
+}
+
+display_manager() {
+    clear
+    echo -e "${CYAN}Setting up Desktop Environment...${NC}"
+
+    DE_SETUP_SCRIPT="$HOME/ms1/archlinux/config/display_manager.sh"
 
     if [ -f "$DE_SETUP_SCRIPT" ]; then
         bash "$DE_SETUP_SCRIPT"
