@@ -554,7 +554,6 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl restart getty@tty1
 
-    # Add numlock activation to shell profile
     if ! grep -q "setleds" "$HOME/.bash_profile"; then
         echo "setleds +num < /dev/tty1" >> "$HOME/.bash_profile"
     fi
