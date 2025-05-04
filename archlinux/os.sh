@@ -30,9 +30,9 @@ install_packages() {
         lsd lua-language-server neovim \
         openssh python rclone sshpass wget \
         which zoxide yazi zsh stow expac numlockx \
-        rsync firefox
+        rsync 
 }
-        # min Qutebrowser lynx
+        # min Qutebrowser lynx firefox
 
 list_recent_packages() {
     echo -e "${GREEN}Listing recently installed packages...${NC}"
