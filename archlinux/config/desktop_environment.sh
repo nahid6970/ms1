@@ -57,7 +57,7 @@ desktop_environment() {
             sudo systemctl disable gdm lightdm lxdm xdm
             sudo pacman -Syu
             # Ask about theme
-            read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
+            read -rp "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
             if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
                 sddm_theme
             else
