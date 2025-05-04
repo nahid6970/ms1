@@ -614,14 +614,10 @@ EOF
     echo "NumLock has been enabled on TTYs. The systemd service is now active."
 }
 
+#! proton for steam games
+#! bottles for whatever .exe files you have laying around (including games)
+#! lutris if you so happen to have the .exe file of a game they support.
 
-
-
-# proton for steam games
-# bottles for whatever .exe files you have laying around (including games)
-# lutris if you so happen to have the .exe file of a game they support.
-
-# Declare a combined array of menu options and function bindings
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1]            : update_ms1_repo             :$GREEN"
