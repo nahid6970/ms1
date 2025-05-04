@@ -11,9 +11,6 @@ sddm_theme() {
   sudo bash -c 'cat > /etc/sddm.conf <<EOF
 [Theme]
 Current=Sugar-Candy
-
-[General]
-Numlock=on
 EOF'
 
   echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
@@ -96,7 +93,7 @@ desktop_environment() {
             else
                 sddm_numlock  # Assuming sddm_numlock handles the NumLock configuration
             fi
-            
+
             sudo pacman -Syu
             ;;
         5)
