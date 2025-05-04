@@ -13,18 +13,26 @@ desktop_environment() {
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
             sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop
+            sudo pacman -S --noconfirm --needed sddm
+            sudo systemctl enable sddm
+            sudo systemctl disable gdm lightdm lxdm xdm
             sudo pacman -Syu
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
             sudo pacman -Sy --noconfirm --needed gnome gnome-tweaks gnome-terminal gdm
             yay -S --needed extension-manager
+            sudo pacman -Sy --noconfirm --needed gdm
+            sudo systemctl disable sddm gdm lxdm xdm
             sudo pacman -Syu
             echo -e "${GREEN}Install these extensions +OpenBar +PaperWM${NC}"
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
             sudo pacman -S --needed  xfce4 xfce4-goodies
+            sudo pacman -S --needed lightdm lightdm-gtk-greeter
+            sudo systemctl enable lightdm
+            sudo systemctl disable sddm gdm lxdm xdm
             sudo pacman -Syu
             ;;
         4)
@@ -33,6 +41,9 @@ desktop_environment() {
             sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo pacman -S --needed qt5-wayland qt6-wayland
+            sudo pacman -S --noconfirm --needed sddm
+            sudo systemctl enable sddm
+            sudo systemctl disable gdm lightdm lxdm xdm
             # create directory
             mkdir -p "$HOME/.config/hypr"
             mkdir -p "$HOME/.config/foot"
