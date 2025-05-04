@@ -615,15 +615,29 @@ EOF
     echo "NumLock has been enabled on TTYs. The systemd service is now active."
 }
 
-enable_numlock_bash_profile() {
-    echo -e "${CYAN}🔧 Adding 'setleds -D +num' to ~/.bash_profile...${NC}"
-    if ! grep -q "setleds -D +num" ~/.bash_profile; then
-        echo "setleds -D +num" >> ~/.bash_profile
-        echo -e "${GREEN}✅ NumLock will be enabled after login (via .bash_profile).${NC}"
-    else
-        echo -e "${YELLOW}⚠️ Entry already exists in ~/.bash_profile.${NC}"
-    fi
+enable_numlock_service() {
+  echo -e "${CYAN}🔧 Creating systemd service to enable NumLock at boot...${NC}"
+  sudo bash -c 'cat > /etc/systemd/system/numlock.service <<EOF
+[Unit]
+Description=Enable NumLock on boot
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/setleds -D +num
+StandardInput=tty
+RemainAfterExit=yes
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+
+  sudo systemctl daemon-reexec
+  sudo systemctl daemon-reload
+  sudo systemctl enable numlock.service
+  echo -e "${GREEN}✅ NumLock will now be enabled at boot time on TTYs.${NC}"
 }
+
 
 
 #! proton for steam games
@@ -652,7 +666,7 @@ menu_items=(
     "Neovim Config                 : nvim_config                 :$GREEN"
     "TTY Autologin                 : enable_tty_autologin        :$GREEN"
     "TTY Enable Numlock            : enable_numlock_on_tty       :$GREEN"
-    "Enable Numlock by bashprofile : enable_numlock_bash_profile :$GREEN"
+    "Enable Numlock Hyprland       : enable_numlock_service :$GREEN"
 )
 
 # Special hotkey items
