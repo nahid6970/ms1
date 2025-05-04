@@ -601,7 +601,7 @@ while true; do
     # Show menu items with numbers
     for i in "${!menu_items[@]}"; do
         IFS=":" read -r description function color <<< "${menu_items[$i]}"
-        printf "%s%2d) %s%s\n" "$color" "$((i+1))" "$description" "$NC"
+        echo -e "${color}$((i+1))) $description${NC}"
     done
 
     # Show hotkey items
