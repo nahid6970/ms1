@@ -45,10 +45,9 @@ desktop_environment() {
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             # Install essential packages
-            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3
+            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3 sddm
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo pacman -S --needed qt5-wayland qt6-wayland
-            sudo pacman -S --noconfirm --needed sddm
             sudo systemctl enable sddm
             sudo systemctl disable gdm lightdm lxdm xdm
             # create directory
