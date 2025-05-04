@@ -34,6 +34,7 @@ display_manager() {
             echo -e "${GREEN}Installing SDDM...${NC}"
             sudo pacman -S --noconfirm --needed sddm
             sudo systemctl enable sddm
+            sudo systemctl disable gdm lightdm
             sudo pacman -Syu
 
             # Ask about theme
@@ -56,6 +57,7 @@ EOF'
             sudo pacman -Sy --noconfirm --needed gdm
             yay -S --needed extension-manager
             sudo systemctl enable gdm
+            sudo systemctl disable sddm lightdm
             sudo pacman -Syu
             echo -e "${GREEN}Install these extensions: +OpenBar +PaperWM${NC}"
             ;;
@@ -63,6 +65,7 @@ EOF'
             echo -e "${GREEN}Installing LightDM...${NC}"
             sudo pacman -S --needed lightdm lightdm-gtk-greeter
             sudo systemctl enable lightdm
+            sudo systemctl disable sddm gdm
             sudo pacman -Syu
             ;;
         4)
