@@ -94,3 +94,4 @@ EOF'
 
     echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
+display_manager
