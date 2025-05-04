@@ -34,11 +34,15 @@ install_desktop_environment() {
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             # Install essential packages
-            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wlroots gtk3
+            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wlroots gtk3 sddm
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo pacman -S --needed qt5-wayland qt6-wayland
-            # sudo pacman -S --needed sddm
-            # sudo systemctl enable sddm
+            mkdir -p "$HOME/.config/hypr"
+            mkdir -p "$HOME/.config/foot"
+            # Copy contents recursively and force overwrite
+            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
+            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
+            sudo systemctl enable sddm
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
