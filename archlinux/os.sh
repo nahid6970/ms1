@@ -564,77 +564,62 @@ EOF
 # lutris if you so happen to have the .exe file of a game they support.
 
 # Declare a combined array of menu options and function bindings
+# Menu items: description : function : color
 menu_items=(
-    " 1:Git Pull [ms1]            : update_ms1_repo             :$GREEN"
-    " 2:Copy Files                : copy_files                  :$GREEN"
-    " 3:Install Necessary Packages: install_packages            :$GREEN"
-    " 4:Font Setup                : install_jetbrains_mono_font :$GREEN"
-    " 5:Desktop Environment       : desktop_environment         :$GREEN"
-    " 6:YAY Setup                 : setup_yay                   :$GREEN"
-    " 7:bottles                   : desktop_environment         :$GREEN"
-    " 8:wine                      : desktop_environment         :$GREEN"
-    " 9:Lutris                    : desktop_environment         :$GREEN"
-    "10:steam                     : desktop_environment         :$GREEN"
-    "11:About                     : about_device                :$GREEN"
-    "12:GPU Drivers               : check_gpu_drivers           :$GREEN"
-    "13:Heroic Games Launcher     : check_gpu_drivers           :$GREEN"
-    "14:Hyprland                  : setup_hyprland_full         :$GREEN"
-    "15:SDDM Theme                : sddm_theme                  :$GREEN"
-    "16:Disable Bell              : disable_bell                :$GREEN"
-    "17:Hyprland Config           : hyperland_config            :$GREEN"
-    "18:Neovim Config             : nvim_config                 :$GREEN"
-    "19:TTY Autologin             : enable_tty_autologin        :$GREEN"
-    " c:Close                     : Close_script                :$RED"
-    " e:Exit                      : exit_script                 :$RED"
-    " x:Test                      : test                        :$RED"
+    "Git Pull [ms1]            : update_ms1_repo             :$GREEN"
+    "Copy Files                : copy_files                  :$GREEN"
+    "Install Necessary Packages: install_packages            :$GREEN"
+    "Font Setup                : install_jetbrains_mono_font :$GREEN"
+    "Desktop Environment       : desktop_environment         :$GREEN"
+    "YAY Setup                 : setup_yay                   :$GREEN"
+    "bottles                   : desktop_environment         :$GREEN"
+    "wine                      : desktop_environment         :$GREEN"
+    "Lutris                    : desktop_environment         :$GREEN"
+    "steam                     : desktop_environment         :$GREEN"
+    "About                     : about_device                :$GREEN"
+    "GPU Drivers               : check_gpu_drivers           :$GREEN"
+    "Heroic Games Launcher     : check_gpu_drivers           :$GREEN"
+    "Hyprland                  : setup_hyprland_full         :$GREEN"
+    "SDDM Theme                : sddm_theme                  :$GREEN"
+    "Disable Bell              : disable_bell                :$GREEN"
+    "Hyprland Config           : hyperland_config            :$GREEN"
+    "Neovim Config             : nvim_config                 :$GREEN"
+    "TTY Autologin             : enable_tty_autologin        :$GREEN"
 )
 
-# Display the menu and handle user input
+# Special hotkey items
+declare -A hotkeys=(
+    [c]="Close_script"
+    [e]="exit_script"
+    [x]="test_test"
+)
+
 while true; do
-    # Clear the screen to refresh the menu
     echo ""
     echo -e "${YELLOW}Select an option:${NC}"
 
-    # Display menu options dynamically with assigned colors
-    for item in "${menu_items[@]}"; do
-        IFS=":" read -r number description functions color <<< "$item"
-        echo -e "${color}$number. $description${NC}"
+    # Show menu items with numbers
+    for i in "${!menu_items[@]}"; do
+        IFS=":" read -r description function color <<< "${menu_items[$i]}"
+        printf "%s%2d) %s%s\n" "$color" "$((i+1))" "$description" "$NC"
     done
 
+    # Show hotkey items
+    echo -e "$RED c) Close"
+    echo -e " e) Exit"
+    echo -e " x) Test${NC}"
     echo ""
+
     read -p "Enter choice: " choice
 
-    # Handle 'c', 'e', and 't' choices for Close, Exit, and Test
-    if [ "$choice" == "c" ]; then
-        Close_script
-        continue
-    elif [ "$choice" == "e" ]; then
-        exit_script
-        continue
-    elif [ "$choice" == "x" ]; then
-        test_test
-        continue
-    fi
-
-    # Check if the choice is numeric and valid
-    valid_choice=false
-    for item in "${menu_items[@]}"; do
-        IFS=":" read -r number description functions color <<< "$item"
-        if [ "$choice" -eq "$number" ]; then
-            valid_choice=true
-            IFS=" " read -r -a function_array <<< "$functions"
-            for function in "${function_array[@]}"; do
-                $function
-            done
-            break
-        fi
-    done
-
-    # If the choice is invalid, show an error message
-    if [ "$valid_choice" = false ]; then
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#menu_items[@]} )); then
+        IFS=":" read -r _ function _ <<< "${menu_items[$((choice-1))]}"
+        $function
+    elif [[ -n "${hotkeys[$choice]}" ]]; then
+        ${hotkeys[$choice]}
+    else
         echo -e "${RED}Invalid option. Please try again.${NC}"
     fi
 
-    # Reload the os.sh script to refresh functions and variables
-    source $HOME/ms1/archlinux/os.sh
+    source "$HOME/ms1/archlinux/os.sh"
 done
