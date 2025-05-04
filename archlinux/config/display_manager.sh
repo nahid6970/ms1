@@ -1,7 +1,28 @@
+# Function to install SDDM theme
+sddm_theme() {
+  echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
+  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
+    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
+  else
+    echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
+  fi
+
+  echo -e "${CYAN}📝 Configuring /etc/sddm.conf...${NC}"
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[Theme]
+Current=Sugar-Candy
+
+[General]
+Numlock=on
+EOF'
+
+  echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
+}
+
 # Function to install the chosen desktop environment
 display_manager() {
     clear
-    echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
+    echo -e "${CYAN}Which Display Manager would you like to install?${NC}"
     echo -e "1) SDDM"
     echo -e "2) GDM"
     echo -e "3) LightDM"
@@ -12,9 +33,23 @@ display_manager() {
         1)
             echo -e "${GREEN}Installing SDDM...${NC}"
             sudo pacman -S --noconfirm --needed sddm
-            sudo yay -S sddm-theme-sugar-candy
             sudo systemctl enable sddm
             sudo pacman -Syu
+
+            # Ask about theme
+            read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
+            if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
+                sddm_theme
+            else
+                echo -e "${YELLOW}Skipping SDDM theme installation.${NC}"
+                # Write Numlock configuration if theme is skipped
+                echo -e "${CYAN}📝 Configuring /etc/sddm.conf for Numlock...${NC}"
+                sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[General]
+Numlock=on
+EOF'
+                echo -e "${GREEN}✅ NumLock enabled in /etc/sddm.conf.${NC}"
+            fi
             ;;
         2)
             echo -e "${GREEN}Installing gdm...${NC}"
@@ -22,7 +57,7 @@ display_manager() {
             yay -S --needed extension-manager
             sudo systemctl enable gdm
             sudo pacman -Syu
-            echo -e "${GREEN}Install these extensions +OpenBar +PaperWM${NC}"
+            echo -e "${GREEN}Install these extensions: +OpenBar +PaperWM${NC}"
             ;;
         3)
             echo -e "${GREEN}Installing LightDM...${NC}"
@@ -41,4 +76,5 @@ display_manager() {
     echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
 
+# Run it
 display_manager

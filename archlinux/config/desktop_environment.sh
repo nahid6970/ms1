@@ -7,7 +7,7 @@ desktop_environment() {
     echo -e "3) XFCE"
     echo -e "4) Hyprland"
     echo -e "5) None (CLI only)"
-    read -p "Enter the number (1-4): " DE_CHOICE
+    read -p "Enter the number (1-5): " DE_CHOICE
 
     case $DE_CHOICE in
         1)
