@@ -586,88 +586,74 @@ def Event_Function():
             if not window:
                 print(f"Window '{window_title}' not found.")
                 return
-            
+
             selected_description = key_var_eve.get()
             selected_key = next(k for k, v in event_key_mapping.items() if v == selected_description)
             event_save_selected_key(selected_key)
-            
+
+            # Preload static images
+            select_img = r"C:\msBackups\shadowfight3\event\SELECT.png"
+
+            # Preload dynamic folder images
+            cont_images = glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png")
+            notify_images = glob.glob(r"C:\msBackups\shadowfight3\notify\*.png")
+            ads_images = glob.glob(r"C:\msBackups\shadowfight3\ads\ads_auto_click\*.png")
+
+            # Single-image + action list
+            image_action_map = [
+                (later, None, lambda: press_global_screen_with_delays((1113, 728, 1))),
+                (Open_Chest, None, lambda: press_keys_with_delays(window, 'c', 4, 'c', 3, 'g', 1)),
+                (default_ads, (177, 83, 263, 158), lambda: press_global_screen_with_delays((215, 118, 2))),
+                (select_img, (1148, 186, 1445, 503), lambda: press_keys_with_delays(window, '1', 1)),
+            ]
+
             try:
-                while not state["stop_flag"]:
-                    if find_image(Home, confidence=0.8): press_key(window, 'f')
-                    elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
+                while not Event_Function.state["stop_flag"]:
+                    if find_image(Home, confidence=0.8):
+                        press_key(window, 'f')
+                    elif find_image(Resume, confidence=0.8):
+                        press_key(window, 'esc')
+                    elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
 
-                    # elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, selected_key, 1, 'c', 1)
-                    # elif find_image(Tournament_step1, confidence=0.8): press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
+                    # Handle cont_dynamic folder images
+                    for contimg in cont_images:
+                        if (location := find_image(contimg, confidence=0.8, region=contF_Region)):
+                            press_keys_with_delays(window, 'v', 0, 'v', 1, 'c', 0)
+                            break
 
-                    # elif find_image(Tournament_step1, confidence=0.8):
-                    #     if selected_key == "num3":
-                    #         press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
-                    #     else:
-                    #         press_keys_with_delays(window, selected_key, 1, 'c', 1)
-                    #! creepy party
-                    elif find_image(Tournament_step1, confidence=0.8):
+                    # Handle notify folder images
+                    for Folder_Ntfy in notify_images:
+                        if (location := find_image(Folder_Ntfy, confidence=0.8, region=(170, 86, 1749, 970))):
+                            ntfy_signal_cli()
+                            break
+
+                    # Handle ads auto-click folder images
+                    for adimg in ads_images:
+                        if (location := find_image(adimg, confidence=0.8, region=(166, 83, 1758, 978))):
+                            x, y, w, h = location
+                            center_x = x + w // 2
+                            center_y = y + h // 2
+                            pyautogui.click(center_x, center_y)
+                            break
+
+                    # General static image-action handling
+                    for image_path, region, action in image_action_map:
+                        if find_image(image_path, confidence=0.8, region=region):
+                            action()
+                            break
+
+                    # Special logic for Tournament_step1
+                    if find_image(Tournament_step1, confidence=0.8):
                         if selected_key == "num3":
                             press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
                         else:
                             press_keys_with_delays(window, selected_key, 1, 'c', 1, "y", 1, "c", 1)
 
-
-                    # elif find_image(Tournament_step1, confidence=0.8) or find_image(Alt_BattlePass_Gems, confidence=0.8): #! this one is to get gems from battlepass
-                    #     if find_image(Tournament_step1, confidence=0.8):
-                    #         if selected_key == "num3":
-                    #             press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
-                    #         else:
-                    #             press_keys_with_delays(window, selected_key, 1, 'c', 1)
-                    #     else:
-                    #         # Action when Alt_step1 is found
-                    #         press_keys_with_delays(window, 'g', 1, 'f', 1)  # <-- change this to your desired combo
-
-
-
-                    elif find_image(later, confidence=0.8): press_global_screen_with_delays(( 1113, 728, 1)) #! need fixing
-                    elif find_image(Open_Chest, confidence=0.8): press_keys_with_delays(window, 'c',4, 'c',3, 'g',1)
-                    elif find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)): press_global_screen_with_delays((215, 118, 2))
-                    # elif find_image(Select_SelectOption, confidence=0.8, region=(1106, 632, 1509, 748)): press_keys_with_delays(window, 'hxixixix', 1) #! optional
-                    elif find_image(r"C:\msBackups\shadowfight3\event\SELECT.png", confidence=0.8, region=(1148,186,1445,503)): press_keys_with_delays(window, '1', 1) #! optional
-
-                    #! dynamic folder img
-                    # [press_keys_with_delays(window, 'c', 1) 
-                    # for contimg in cont_dynamic if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
-                    # time.sleep(0.05)
-
-                    # elif find_image(r"C:\msBackups\shadowfight3\cont_dynamic", confidence=0.8, region=(1380, 792, 1738, 966)): press_keys_with_delays(window, 'c', 1) 
-
-                    # [press_keys_with_delays(window, 'c', 1)  #! uncomment after event
-                    # for contimg in glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png") 
-                    # if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
-                    # time.sleep(0.05)
-
-                    elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 1) #! quit game creepy party
-
-                    [press_keys_with_delays(window, 'v',0,'v',1, 'c', 1)  #! creepy cont ads
-                    for contimg in glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png") 
-                    if (location := find_image(contimg, confidence=0.8, region=contF_Region))]
                     time.sleep(0.05)
 
+            except KeyboardInterrupt:
+                print("Script stopped by user.")
 
-                    [ntfy_signal_cli()
-                    for Folder_Ntfy in glob.glob(r"C:\msBackups\shadowfight3\notify\*.png") 
-                    if (location := find_image(Folder_Ntfy, confidence=0.8, region=(170,86,1749,970)))]
-                    time.sleep(0.05)
-
-                    for contimg in glob.glob(r"C:\msBackups\shadowfight3\ads\ads_auto_click\*.png"):
-                        if (location := find_image(contimg, confidence=0.8, region=(166, 83, 1758, 978))):
-                            x, y, w, h = location  # assuming location is (left, top, width, height)
-                            center_x = x + w // 2
-                            center_y = y + h // 2
-                            pyautogui.click(center_x, center_y)
-                            time.sleep(0.05)
-
-                    # if find_image(r"C:\Users\nahid\Desktop\image_108.png", confidence=0.8, region=(683, 79, 809, 151)): #! for using double function for the same picture
-                    #      press_global_screen_with_delays((842, 537, 2)),
-                    #      press_keys_with_delays(window, 'c',4)
-
-            except KeyboardInterrupt: print("Script stopped by user.")
         
         # Create and start the thread
         thread = threading.Thread(target=search_and_act)
