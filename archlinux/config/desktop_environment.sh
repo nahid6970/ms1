@@ -1,5 +1,41 @@
+# Function to install SDDM theme
+sddm_theme() {
+  echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
+  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
+    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
+  else
+    echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
+  fi
+
+  echo -e "${CYAN}📝 Configuring /etc/sddm.conf...${NC}"
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[Theme]
+Current=Sugar-Candy
+
+[General]
+Numlock=on
+EOF'
+
+  echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
+}
+
+# Function to configure SDDM with NumLock
+sddm_numlock() {
+  echo -e "${CYAN}📝 Configuring /etc/sddm.conf to enable NumLock...${NC}"
+
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[General]
+Numlock=on
+EOF'
+
+  echo -e "${GREEN}✅ NumLock enabled in /etc/sddm.conf.${NC}"
+}
+
+
+
+
 # Function to install the chosen desktop environment
-install_desktop_environment() {
+desktop_environment() {
     clear
     echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
     echo -e "1) KDE Plasma"
@@ -15,6 +51,15 @@ install_desktop_environment() {
             sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop sddm
             sudo yay -S sddm-theme-sugar-candy
             sudo systemctl enable sddm
+            
+            # Ask about theme
+            read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
+            if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
+                sddm_theme  # Assuming sddm_theme is for theme setup
+            else
+                sddm_numlock  # Assuming sddm_numlock handles the NumLock configuration
+            fi
+
             sudo pacman -Syu
             ;;
         2)
@@ -55,4 +100,4 @@ install_desktop_environment() {
     echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
 
-install_desktop_environment
+desktop_environment
