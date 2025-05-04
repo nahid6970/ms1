@@ -331,7 +331,7 @@ key_mapping = {
     "F21": "Butcher",
     "F16": "Hound vortex",
     "F17": "Laggy",
-    "F18": "Heritage Laggy",
+    "F18": "Stranger",
     "F19": "Possessed",
     "F20": "Event"
 }

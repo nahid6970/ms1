@@ -138,7 +138,7 @@ F17:: ;! Hound Laggy
 }
 
 
-F18:: ;! Heritage Laggy
+F18:: ;! Stranger
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
@@ -146,11 +146,15 @@ F18:: ;! Heritage Laggy
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-        Send("{s down}")
-        Send("{i down}")
-        SendInput("iii")
-        Send("{i up}")
-        Send("{s up}")
+
+
+        SendInput("{j Down}")
+        Sleep(500)
+        SendInput("{j up}")
+        SendInput("i")
+        Sleep(500)
+
+
     }
     return
 }
