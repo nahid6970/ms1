@@ -23,6 +23,7 @@ install_desktop_environment() {
             yay -S --needed extension-manager
             sudo systemctl enable gdm
             sudo pacman -Syu
+            echo -e "${GREEN}Install these extensions +OpenBar +PaperWM${NC}"
             ;;
         3)
             echo -e "${GREEN}Installing XFCE...${NC}"
