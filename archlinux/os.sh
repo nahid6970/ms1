@@ -615,32 +615,44 @@ EOF
     echo "NumLock has been enabled on TTYs. The systemd service is now active."
 }
 
+enable_numlock_bash_profile() {
+    echo -e "${CYAN}🔧 Adding 'setleds -D +num' to ~/.bash_profile...${NC}"
+    if ! grep -q "setleds -D +num" ~/.bash_profile; then
+        echo "setleds -D +num" >> ~/.bash_profile
+        echo -e "${GREEN}✅ NumLock will be enabled after login (via .bash_profile).${NC}"
+    else
+        echo -e "${YELLOW}⚠️ Entry already exists in ~/.bash_profile.${NC}"
+    fi
+}
+
+
 #! proton for steam games
 #! bottles for whatever .exe files you have laying around (including games)
 #! lutris if you so happen to have the .exe file of a game they support.
 
 # Menu items: description : function : color
 menu_items=(
-    "Git Pull [ms1]            : update_ms1_repo             :$GREEN"
-    "Copy Files                : copy_files                  :$GREEN"
-    "Install Necessary Packages: install_packages            :$GREEN"
-    "Desktop Environment       : desktop_environment         :$GREEN"
-    "YAY Setup                 : setup_yay                   :$GREEN"
-    "Font Setup                : install_jetbrains_mono_font :$GREEN"
-    "bottles                   : not_yet_choosen             :$GREEN"
-    "wine                      : not_yet_choosen             :$GREEN"
-    "Lutris                    : not_yet_choosen             :$GREEN"
-    "steam                     : not_yet_choosen             :$GREEN"
-    "About                     : about_device                :$GREEN"
-    "GPU Drivers               : check_gpu_drivers           :$GREEN"
-    "Heroic Games Launcher     : check_gpu_drivers           :$GREEN"
-    "Hyprland                  : setup_hyprland_full         :$GREEN"
-    "SDDM Theme                : sddm_theme                  :$GREEN"
-    "Disable Bell              : disable_bell                :$GREEN"
-    "Hyprland Config           : hyperland_config            :$GREEN"
-    "Neovim Config             : nvim_config                 :$GREEN"
-    "TTY Autologin             : enable_tty_autologin        :$GREEN"
-    "TTY Enable Numlock        : enable_numlock_on_tty       :$GREEN"
+    "Git Pull [ms1]                : update_ms1_repo             :$GREEN"
+    "Copy Files                    : copy_files                  :$GREEN"
+    "Install Necessary Packages    : install_packages            :$GREEN"
+    "Desktop Environment           : desktop_environment         :$GREEN"
+    "YAY Setup                     : setup_yay                   :$GREEN"
+    "Font Setup                    : install_jetbrains_mono_font :$GREEN"
+    "bottles                       : not_yet_choosen             :$GREEN"
+    "wine                          : not_yet_choosen             :$GREEN"
+    "Lutris                        : not_yet_choosen             :$GREEN"
+    "steam                         : not_yet_choosen             :$GREEN"
+    "About                         : about_device                :$GREEN"
+    "GPU Drivers                   : check_gpu_drivers           :$GREEN"
+    "Heroic Games Launcher         : check_gpu_drivers           :$GREEN"
+    "Hyprland                      : setup_hyprland_full         :$GREEN"
+    "SDDM Theme                    : sddm_theme                  :$GREEN"
+    "Disable Bell                  : disable_bell                :$GREEN"
+    "Hyprland Config               : hyperland_config            :$GREEN"
+    "Neovim Config                 : nvim_config                 :$GREEN"
+    "TTY Autologin                 : enable_tty_autologin        :$GREEN"
+    "TTY Enable Numlock            : enable_numlock_on_tty       :$GREEN"
+    "Enable Numlock by bashprofile : enable_numlock_bash_profile :$GREEN"
 )
 
 # Special hotkey items
