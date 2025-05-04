@@ -331,18 +331,6 @@ desktop_environment() {
     fi
 }
 
-display_manager() {
-    clear
-    echo -e "${CYAN}Setting up Desktop Environment...${NC}"
-
-    DE_SETUP_SCRIPT="$HOME/ms1/archlinux/config/display_manager.sh"
-
-    if [ -f "$DE_SETUP_SCRIPT" ]; then
-        bash "$DE_SETUP_SCRIPT"
-    else
-        echo -e "${RED}Error: $DE_SETUP_SCRIPT not found.${NC}"
-    fi
-}
 
 check_gpu_drivers() {
     echo -e "${GREEN}Detecting GPU and checking AMD drivers...${NC}"
@@ -638,7 +626,6 @@ menu_items=(
     "Install Necessary Packages: install_packages            :$GREEN"
     "Font Setup                : install_jetbrains_mono_font :$GREEN"
     "Desktop Environment       : desktop_environment         :$GREEN"
-    "Display Manager           : display_manager             :$GREEN"
     "YAY Setup                 : setup_yay                   :$GREEN"
     "bottles                   : not_yet_choosen             :$GREEN"
     "wine                      : not_yet_choosen             :$GREEN"
