@@ -567,6 +567,7 @@ EOF
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1]            : update_ms1_repo             :$GREEN"
+    "TTY Autologin             : enable_tty_autologin        :$GREEN"
     "Copy Files                : copy_files                  :$GREEN"
     "Install Necessary Packages: install_packages            :$GREEN"
     "Font Setup                : install_jetbrains_mono_font :$GREEN"
@@ -584,7 +585,6 @@ menu_items=(
     "Disable Bell              : disable_bell                :$GREEN"
     "Hyprland Config           : hyperland_config            :$GREEN"
     "Neovim Config             : nvim_config                 :$GREEN"
-    "TTY Autologin             : enable_tty_autologin        :$GREEN"
 )
 
 # Special hotkey items
