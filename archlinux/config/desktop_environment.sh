@@ -88,6 +88,16 @@ desktop_environment() {
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
             sudo systemctl enable sddm
+
+            # Ask about theme
+            read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
+            if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
+                sddm_theme  # Assuming sddm_theme is for theme setup
+            else
+                sddm_numlock  # Assuming sddm_numlock handles the NumLock configuration
+            fi
+            
+            sudo pacman -Syu
             ;;
         5)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
