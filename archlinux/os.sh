@@ -657,7 +657,6 @@ menu_items=(
     "GPU Drivers                   : check_gpu_drivers           :$GREEN"
     "Heroic Games Launcher         : check_gpu_drivers           :$GREEN"
     "Hyprland                      : setup_hyprland_full         :$GREEN"
-    "SDDM Theme                    : sddm_theme                  :$GREEN"
     "Disable Bell                  : disable_bell                :$GREEN"
     "Hyprland Config               : hyperland_config            :$GREEN"
     "Neovim Config                 : nvim_config                 :$GREEN"
