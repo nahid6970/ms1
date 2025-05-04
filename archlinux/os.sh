@@ -554,12 +554,7 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl restart getty@tty1
 
-    if ! grep -q "setleds" "$HOME/.bash_profile"; then
-        echo "setleds +num < /dev/tty1" >> "$HOME/.bash_profile"
-    fi
-
-    echo -e "${GREEN}TTY autologin enabled and NumLock will be turned on.${NC}"
-
+    echo "✅ Auto-login setup complete for user: $user on tty1."
 }
 
 
