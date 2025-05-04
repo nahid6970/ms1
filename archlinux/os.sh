@@ -534,7 +534,7 @@ flatpak() {
     echo "TEST ✅"
 }
 
-test_test() {
+enable_tty_autologin() {
     local user=${1:-$USER}
     local service_dir="/etc/systemd/system/getty@tty1.service.d"
     local override_file="$service_dir/override.conf"
@@ -583,9 +583,10 @@ menu_items=(
     "16:Disable Bell              : disable_bell                :$GREEN"
     "17:Hyprland Config           : hyperland_config            :$GREEN"
     "18:Neovim Config             : nvim_config                 :$GREEN"
+    "19:TTY Autologin             : enable_tty_autologin        :$GREEN"
     " c:Close                     : Close_script                :$RED"
     " e:Exit                      : exit_script                 :$RED"
-    " x:Test                      : test                 :$RED"
+    " x:Test                      : test                        :$RED"
 )
 
 # Display the menu and handle user input
