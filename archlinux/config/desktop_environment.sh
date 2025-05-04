@@ -17,6 +17,13 @@ desktop_environment() {
             sudo systemctl enable sddm
             sudo systemctl disable gdm lightdm lxdm xdm
             sudo pacman -Syu
+            # Ask about theme
+            read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
+            if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
+                sddm_theme
+            else
+                sddm_numlock
+            fi
             ;;
         2)
             echo -e "${GREEN}Installing GNOME...${NC}"
@@ -61,5 +68,46 @@ desktop_environment() {
 
     echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
+
+
+
+
+
+
+# Function to install SDDM theme
+sddm_theme() {
+  echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
+  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
+    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
+  else
+    echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
+  fi
+
+  echo -e "${CYAN}📝 Configuring /etc/sddm.conf...${NC}"
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[Theme]
+Current=Sugar-Candy
+
+[General]
+Numlock=on
+EOF'
+
+  echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
+}
+
+# Function to configure SDDM with NumLock
+sddm_numlock() {
+  echo -e "${CYAN}📝 Configuring /etc/sddm.conf to enable NumLock...${NC}"
+
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[General]
+Numlock=on
+EOF'
+
+  echo -e "${GREEN}✅ NumLock enabled in /etc/sddm.conf.${NC}"
+}
+
+
+
 
 desktop_environment
