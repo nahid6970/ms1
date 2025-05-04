@@ -615,6 +615,41 @@ EOF
     echo "NumLock has been enabled on TTYs. The systemd service is now active."
 }
 
+enable_numlock_hyprland() {
+    echo -e "${CYAN}🔧 Enabling NumLock on boot for Hyprland...${NC}"
+
+    # Make sure kbd is installed for setleds
+    if ! pacman -Q kbd &>/dev/null; then
+        echo -e "${YELLOW}📦 Installing 'kbd' package...${NC}"
+        sudo pacman -S --noconfirm kbd
+    else
+        echo -e "${GREEN}✅ 'kbd' package already installed.${NC}"
+    fi
+
+    # Create the systemd service
+    echo -e "${CYAN}📝 Creating systemd service to enable NumLock...${NC}"
+    sudo bash -c 'cat > /etc/systemd/system/numlock.service <<EOF
+[Unit]
+Description=Turn on NumLock at boot
+Before=graphical.target
+
+[Service]
+ExecStart=/usr/bin/setleds +num < /dev/tty1
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+
+    # Enable the service
+    echo -e "${CYAN}📌 Enabling the systemd service...${NC}"
+    sudo systemctl enable numlock.service
+
+    echo -e "${GREEN}✅ NumLock will now be enabled on boot for Hyprland.${NC}"
+}
+
+
+
 #! proton for steam games
 #! bottles for whatever .exe files you have laying around (including games)
 #! lutris if you so happen to have the .exe file of a game they support.
@@ -641,6 +676,7 @@ menu_items=(
     "Neovim Config             : nvim_config                 :$GREEN"
     "TTY Autologin             : enable_tty_autologin        :$GREEN"
     "TTY Enable Numlock        : enable_numlock_on_tty       :$GREEN"
+    "Hyprland Enable Numlock   : enable_numlock_hyprland     :$GREEN"
 )
 
 # Special hotkey items
