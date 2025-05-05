@@ -8,4 +8,6 @@ if command -v fzf >/dev/null 2>&1; then
             nvim "$file"  # Or any other command you prefer to open the file
         fi
     }
+    # Bind the function to a shortcut, for example Ctrl+F
+    bind -x '"\C-f": ff'
 fi
