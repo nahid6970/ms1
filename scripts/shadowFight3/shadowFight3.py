@@ -1135,8 +1135,8 @@ height = ROOT.winfo_height()
 # x = ROOT.winfo_screenwidth() - width
 # y = (ROOT.winfo_screenheight() // 2) - (height // 2)
 
-x = (ROOT.winfo_screenwidth() // 2) - (width // 2)
-y = 0
+x = (ROOT.winfo_screenwidth() // 2) - (width // 2)-638
+y = 1080-41
 
 ROOT.geometry(f'{width}x{height}+{x}+{y}')
 ROOT.mainloop()
