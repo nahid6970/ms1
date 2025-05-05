@@ -220,3 +220,4 @@ https://www.gnome-look.org/browse?cat=124&ord=latest
 
 dwm tiling + statusbar dt uses
 https://www.youtube.com/watch?v=M9drMlXRfg8
+https://dwm.suckless.org/
