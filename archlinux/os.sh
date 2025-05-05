@@ -634,6 +634,12 @@ enable_early_numlock() {
   echo -e "${GREEN}✅ Early NumLock enabled via initramfs hook.${NC}"
 }
 
+rofi_install_wayland() {
+  echo -e "${CYAN}📦 Installing Rofi wayland version not x11...${NC}"
+    yay -S --needed rofi-lbonn-wayland
+  echo -e "${GREEN}✅ Rofi install succeeded.${NC}"
+}
+
 
 
 
@@ -643,26 +649,27 @@ enable_early_numlock() {
 
 # Menu items: description : function : color
 menu_items=(
-    "Git Pull [ms1]                : update_ms1_repo             :$GREEN"
-    "Copy Files                    : copy_files                  :$GREEN"
-    "Install Necessary Packages    : install_packages            :$GREEN"
-    "Desktop Environment           : desktop_environment         :$GREEN"
-    "YAY Setup                     : setup_yay                   :$GREEN"
-    "Font Setup                    : install_jetbrains_mono_font :$GREEN"
-    "bottles                       : not_yet_choosen             :$GREEN"
-    "wine                          : not_yet_choosen             :$GREEN"
-    "Lutris                        : not_yet_choosen             :$GREEN"
-    "steam                         : not_yet_choosen             :$GREEN"
-    "About                         : about_device                :$GREEN"
-    "GPU Drivers                   : check_gpu_drivers           :$GREEN"
-    "Heroic Games Launcher         : check_gpu_drivers           :$GREEN"
-    "Hyprland                      : setup_hyprland_full         :$GREEN"
-    "Disable Bell                  : disable_bell                :$GREEN"
-    "Hyprland Config               : hyperland_config            :$GREEN"
-    "Neovim Config                 : nvim_config                 :$GREEN"
-    "TTY Autologin                 : enable_tty_autologin        :$GREEN"
-    "TTY Enable Numlock            : enable_numlock_on_tty       :$GREEN"
-    "Enable Numlock       : enable_early_numlock :$GREEN"
+    "Git Pull [ms1]             : update_ms1_repo             :$GREEN"
+    "Copy Files                 : copy_files                  :$GREEN"
+    "Install Necessary Packages : install_packages            :$GREEN"
+    "Desktop Environment        : desktop_environment         :$GREEN"
+    "YAY Setup                  : setup_yay                   :$GREEN"
+    "Font Setup                 : install_jetbrains_mono_font :$GREEN"
+    "bottles                    : not_yet_choosen             :$GREEN"
+    "wine                       : not_yet_choosen             :$GREEN"
+    "Lutris                     : not_yet_choosen             :$GREEN"
+    "steam                      : not_yet_choosen             :$GREEN"
+    "About                      : about_device                :$GREEN"
+    "GPU Drivers                : check_gpu_drivers           :$GREEN"
+    "Heroic Games Launcher      : check_gpu_drivers           :$GREEN"
+    "Hyprland                   : setup_hyprland_full         :$GREEN"
+    "Disable Bell               : disable_bell                :$GREEN"
+    "Hyprland Config            : hyperland_config            :$GREEN"
+    "Neovim Config              : nvim_config                 :$GREEN"
+    "TTY Autologin              : enable_tty_autologin        :$GREEN"
+    "TTY Enable Numlock         : enable_numlock_on_tty       :$GREEN"
+    "Enable Numlock             : enable_early_numlock        :$GREEN"
+    "Rofi for Hyprland          : rofi_install_wayland        :$GREEN"
 )
 
 # Special hotkey items
