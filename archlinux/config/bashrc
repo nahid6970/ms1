@@ -19,7 +19,7 @@ alias so='source .bashrc'
 alias os='bash ~/ms1/archlinux/os.sh'
 alias rc="bash ~/ms3/Remote_Control_rclone/rclone_rmote_control.sh"
 alias ro="rclone cat g00:/Remote_Control/output.txt"
-alias yy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S"
+alias yy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S --needed"
 alias pp="pacman -Slq | fzf --multi --preview 'pacman -Si {1}' | xargs -ro sudo pacman -S --needed"
 
 
