@@ -593,6 +593,8 @@ def Event_Function():
 
             # Preload static images
             select_img = r"C:\msBackups\shadowfight3\event\SELECT.png"
+            googleplay_close = r"C:\msBackups\shadowfight3\ads\googleplay_close.png"
+
 
             # Preload dynamic folder images
             cont_images = glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png")
@@ -602,6 +604,7 @@ def Event_Function():
             # Single-image + action list
             image_action_map = [
                 (later, None, lambda: press_global_screen_with_delays((1113, 728, 1))),
+                (googleplay_close, None, lambda: press_global_screen_with_delays((597, 66, 1))),
                 (Open_Chest, None, lambda: press_keys_with_delays(window, 'c', 4, 'c', 3, 'g', 1)),
                 (default_ads, (177, 83, 263, 158), lambda: press_global_screen_with_delays((215, 118, 2))),
                 (select_img, (1148, 186, 1445, 503), lambda: press_keys_with_delays(window, '1', 1)),

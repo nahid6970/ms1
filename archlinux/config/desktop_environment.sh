@@ -83,9 +83,11 @@ desktop_environment() {
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo pacman -S --needed qt5-wayland qt6-wayland
             mkdir -p "$HOME/.config/hypr"
+            mkdir -p "$HOME/.config/waybar"
             mkdir -p "$HOME/.config/foot"
             # Copy contents recursively and force overwrite
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
+            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/waybar/" "$HOME/.config/waybar/"
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
             sudo systemctl enable sddm
 
