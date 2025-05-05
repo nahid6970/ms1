@@ -85,9 +85,11 @@ desktop_environment() {
             mkdir -p "$HOME/.config/hypr"
             mkdir -p "$HOME/.config/waybar"
             mkdir -p "$HOME/.config/foot"
+            mkdir -p "$HOME/.config/wofi"
             # Copy contents recursively and force overwrite
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/waybar/" "$HOME/.config/waybar/"
+            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/wofi/" "$HOME/.config/wofi/"
             rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
             sudo systemctl enable sddm
 
