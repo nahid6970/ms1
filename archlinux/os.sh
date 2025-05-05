@@ -33,6 +33,15 @@ install_packages() {
         rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
         thefuck
 }
+# Function to install necessary packages using yay
+install_packages_yay() {
+    clear
+    echo -e "${GREEN}Updating package database...${NC}"
+    yay -Sy --noconfirm
+    echo -e "${GREEN}Installing Necessary Packages...${NC}"
+    yay -S --needed \
+        conky
+}
         # min Qutebrowser lynx firefox
 
 list_recent_packages() {
