@@ -651,22 +651,75 @@ rofi_install_wayland() {
   echo -e "${GREEN}✅ run Rofi -show drun to launch.${NC}"
 }
 
-dwm_wm() {
-yay -S --needed dwm st dmenu
+# Function to set up DWM session for SDDM
+setup_dwm_session() {
+    echo -e "${CYAN}📦 Setting up DWM session for SDDM...${NC}"
 
-    echo -e "${CYAN}📝 Creating DWM session entry for display manager...${NC}"
-    sudo bash -c 'cat > /usr/share/xsessions/dwm.desktop <<EOF
+    # Step 1: Create a custom DWM wrapper script
+    local dwm_script="/usr/local/bin/dwm.sh"
+
+    if [ ! -f "$dwm_script" ]; then
+        sudo bash -c 'cat > /usr/local/bin/dwm.sh <<EOF
+#!/bin/bash
+
+# Status bar
+dwmstatus 2>&1 >/dev/null &
+
+# Keyboard layout
+setxkbmap -layout us,gr -option grp:alt_caps_toggle &
+
+# Compositor
+picom -f &
+
+# Wallpaper
+nitrogen --restore &
+
+# Launch DWM
+exec /usr/local/bin/dwm
+EOF'
+        # Make the script executable
+        sudo chmod +x /usr/local/bin/dwm.sh
+        echo -e "${GREEN}✅ DWM wrapper script created at /usr/local/bin/dwm.sh.${NC}"
+    else
+        echo -e "${YELLOW}⚠️ DWM wrapper script already exists, skipping creation.${NC}"
+    fi
+
+    # Step 2: Modify the dwm.desktop file for SDDM session
+    local dwm_desktop_file="/usr/share/xsessions/dwm.desktop"
+
+    if [ ! -f "$dwm_desktop_file" ]; then
+        sudo bash -c 'cat > /usr/share/xsessions/dwm.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=DWM
-Comment=Dynamic Window Manager
-Exec=dwm
+Comment=Log in using the Dynamic Window Manager
+Exec=/usr/local/bin/dwm.sh
+TryExec=/usr/local/bin/dwm.sh
 Icon=dwm
 Type=XSession
 EOF'
+        echo -e "${GREEN}✅ DWM desktop entry created at /usr/share/xsessions/dwm.desktop.${NC}"
+    else
+        echo -e "${YELLOW}⚠️ DWM desktop entry already exists, skipping creation.${NC}"
+    fi
 
-  echo -e "${GREEN}✅ DWM enabled in Setting.${NC}"
+    # Step 3: (Optional) Ensure your .xinitrc is properly set for startx (if needed)
+    local xinitrc_file="$HOME/.xinitrc"
+
+    if [ ! -f "$xinitrc_file" ]; then
+        echo -e "${CYAN}📝 Creating .xinitrc for startx (if necessary)...${NC}"
+        echo 'exec /usr/local/bin/dwm.sh' > "$xinitrc_file"
+        echo -e "${GREEN}✅ .xinitrc created with exec /usr/local/bin/dwm.sh.${NC}"
+    else
+        echo -e "${YELLOW}⚠️ .xinitrc already exists, skipping creation.${NC}"
+    fi
+
+    echo -e "${CYAN}✔️ DWM session setup complete. You should now be able to log in to DWM via SDDM without issues!${NC}"
 }
+
+# Run the function to set up the session
+setup_dwm_session
+
 
 
 
@@ -698,7 +751,7 @@ menu_items=(
     "TTY Enable Numlock         : enable_numlock_on_tty       :$GREEN"
     "Enable Numlock             : enable_early_numlock        :$GREEN"
     "Rofi for Hyprland          : rofi_install_wayland        :$GREEN"
-    "DWM WM                     : dwm_wm                      :$GREEN"
+    "DWM WM                     : setup_dwm_session           :$GREEN"
 )
 
 # Special hotkey items
