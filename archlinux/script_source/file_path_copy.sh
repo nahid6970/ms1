@@ -13,8 +13,8 @@ if command -v fzf >/dev/null 2>&1; then
     }
 
     # Bind the function to a shortcut, for example, Ctrl+F
-    bind -x '"\C-p": fp'
+    bind -x '"\C-p": find_path'
     
     # Bind Alt+C to copy the file path
-    bind -x '"\e[1;5;67": fp'  # Alt+C in some terminal emulators
+    bind -x '"\e[1;5;67": find_path'  # Alt+C in some terminal emulators
 fi
