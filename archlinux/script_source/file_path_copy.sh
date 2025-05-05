@@ -11,10 +11,4 @@ if command -v fzf >/dev/null 2>&1; then
             echo "Copieddddddd: $file"  # Optional: Notify that the path was copied
         fi
     }
-
-    # Bind the function to a shortcut, for example, Ctrl+F
-    bind -x '"\C-f": fp'
-    
-    # Bind Alt+C to copy the file path
-    bind -x '"\e[1;5;67": fp'  # Alt+C in some terminal emulators
 fi
