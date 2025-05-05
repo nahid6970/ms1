@@ -637,7 +637,8 @@ enable_early_numlock() {
 rofi_install_wayland() {
   echo -e "${CYAN}📦 Installing Rofi wayland version not x11...${NC}"
     yay -S --needed rofi-lbonn-wayland
-  echo -e "${GREEN}✅ Rofi install succeeded.${NC}"
+  echo -e "${GREEN}✅ Rofi Installed✅.${NC}"
+  echo -e "${GREEN}✅ run Rofi -show drun to launch.${NC}"
 }
 
 
