@@ -717,12 +717,6 @@ EOF'
     echo -e "${CYAN}✔️ DWM session setup complete. You should now be able to log in to DWM via SDDM without issues!${NC}"
 }
 
-# Run the function to set up the session
-setup_dwm_session
-
-
-
-
 
 #! proton for steam games
 #! bottles for whatever .exe files you have laying around (including games)
