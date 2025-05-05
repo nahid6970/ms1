@@ -5,7 +5,10 @@ if command -v fzf >/dev/null 2>&1; then
         local file
         file=$(find . -type f \( -path '*/.*' -o -print \) 2>/dev/null | fzf)
         if [[ -n $file ]]; then
-            nvim "$file"  # Change 'nvim' to 'micro', 'nano', etc., if you prefer
+            nvim "$file"  # Change to nano, micro, etc. if preferred
         fi
     }
+
+    # Bind Ctrl+F to trigger 'ff' function in interactive shells
+    bind -x '"\C-f":ff'
 fi
