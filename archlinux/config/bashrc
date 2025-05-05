@@ -147,6 +147,10 @@ git_clone() {
     fi
 }
 
+eval $(thefuck --alias)
+# You can use whatever you want as an alias, like for Mondays:
+eval $(thefuck --alias fk)
+
 # # Play music on SSH login in Termux
 # if [[ $SSH_CONNECTION ]]; then
 #     mpv /storage/emulated/0/song/wwe/ww.mp3 &
