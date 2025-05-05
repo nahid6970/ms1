@@ -9,5 +9,5 @@ if command -v fzf >/dev/null 2>&1; then
         fi
     }
     # Bind the function to a shortcut, for example Ctrl+F
-    bind -x '"\C-f": ff'
+    bind -x '"\C-f": find_file'
 fi
