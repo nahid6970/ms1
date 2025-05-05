@@ -49,7 +49,7 @@ desktop_environment() {
         1)
             echo -e "${GREEN}Installing KDE Plasma...${NC}"
             sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop sddm
-            yay -S sddm-theme-sugar-candy
+            yay -S --needed sddm-theme-sugar-candy
             sudo systemctl enable sddm
             
             # Ask about theme
