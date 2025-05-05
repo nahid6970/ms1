@@ -651,62 +651,24 @@ rofi_install_wayland() {
   echo -e "${GREEN}✅ run Rofi -show drun to launch.${NC}"
 }
 
-setup_dwm_sddm() {
-  # Define the wrapper script location
-  local dwm_script="/usr/local/bin/dwm.sh"
+dwm_wm() {
+yay -S --needed dwm st dmenu
 
-  # Create the wrapper script for DWM
-  echo -e "${CYAN}📦 Creating DWM startup script...${NC}"
-  sudo bash -c 'cat > "$dwm_script" <<EOF
-#!/bin/bash
-
-# Start status bar (e.g., dwmstatus, or any other status bar)
-dwmstatus 2>&1 >/dev/null &
-
-# Set keyboard layout (adjust to your needs)
-setxkbmap -layout us,gr -option grp:alt_caps_toggle &
-
-# Start compositor (picom is optional)
-picom -f &
-
-# Restore wallpaper using nitrogen (ensure nitrogen is installed)
-nitrogen --restore &
-
-# Launch DWM
-exec /usr/local/bin/dwm
-EOF'
-
-  # Make the script executable
-  sudo chmod +x "$dwm_script"
-
-  echo -e "${GREEN}✅ DWM startup script created at $dwm_script.${NC}"
-
-  # Modify the dwm.desktop file for SDDM
-  echo -e "${CYAN}📝 Modifying /usr/share/xsessions/dwm.desktop...${NC}"
-  sudo bash -c 'cat > /usr/share/xsessions/dwm.desktop <<EOF
+    echo -e "${CYAN}📝 Creating DWM session entry for display manager...${NC}"
+    sudo bash -c 'cat > /usr/share/xsessions/dwm.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=DWM
-Comment=Log in using the Dynamic Window Manager
-Exec=/usr/local/bin/dwm.sh
-TryExec=/usr/local/bin/dwm.sh
+Comment=Dynamic Window Manager
+Exec=dwm
 Icon=dwm
 Type=XSession
 EOF'
 
-  echo -e "${GREEN}✅ /usr/share/xsessions/dwm.desktop file updated.${NC}"
-
-  # Optional: Update ~/.xinitrc if needed (for startx)
-  if [ -f "$HOME/.xinitrc" ]; then
-    echo -e "${CYAN}📝 Updating ~/.xinitrc...${NC}"
-    echo "exec /usr/local/bin/dwm.sh" >> "$HOME/.xinitrc"
-    echo -e "${GREEN}✅ ~/.xinitrc updated.${NC}"
-  else
-    echo -e "${YELLOW}⚠️ No ~/.xinitrc found. Skipping update.${NC}"
-  fi
-
-  echo -e "${GREEN}✅ DWM setup complete. You can now log into DWM via SDDM!${NC}"
+  echo -e "${GREEN}✅ DWM enabled in Setting.${NC}"
 }
+
+
 
 
 #! proton for steam games
@@ -736,7 +698,7 @@ menu_items=(
     "TTY Enable Numlock         : enable_numlock_on_tty       :$GREEN"
     "Enable Numlock             : enable_early_numlock        :$GREEN"
     "Rofi for Hyprland          : rofi_install_wayland        :$GREEN"
-    "DWM WM                     : setup_dwm_sddm           :$GREEN"
+    "DWM WM                     : dwm_wm                      :$GREEN"
 )
 
 # Special hotkey items
