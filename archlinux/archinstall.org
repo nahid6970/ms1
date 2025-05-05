@@ -208,6 +208,12 @@ https://www.youtube.com/watch?v=KA1jv40q9lQ setup part 2 [typecraft]
 https://www.youtube.com/watch?v=omhJMH9lPPc setup part 3 [typecraft]
 
 
+start app and hide terminal
+appname & exit
+-dont kill terminal just use exit
 
 App Launchers
 https://wiki.hyprland.org/Useful-Utilities/App-Launchers/
+
+conky customization
+https://www.gnome-look.org/browse?cat=124&ord=latest
