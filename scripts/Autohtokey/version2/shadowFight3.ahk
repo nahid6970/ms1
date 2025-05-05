@@ -147,14 +147,7 @@ F18:: ;! Stranger
             break
         }
 
-
-        SendInput("{j Down}")
-        Sleep(500)
-        SendInput("{j up}")
-        SendInput("i")
-        Sleep(500)
-
-
+        SendInput("jijijijijijijijiji")
     }
     return
 }

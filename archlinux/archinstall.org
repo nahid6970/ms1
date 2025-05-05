@@ -217,3 +217,6 @@ https://wiki.hyprland.org/Useful-Utilities/App-Launchers/
 
 conky customization
 https://www.gnome-look.org/browse?cat=124&ord=latest
+
+dwm tiling + statusbar dt uses
+https://www.youtube.com/watch?v=M9drMlXRfg8

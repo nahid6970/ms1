@@ -593,7 +593,7 @@ def Event_Function():
 
             # Preload static images
             select_img = r"C:\msBackups\shadowfight3\event\SELECT.png"
-            googleplay_close = r"C:\msBackups\shadowfight3\ads\googleplay_close.png"
+            # googleplay_close = r"C:\msBackups\shadowfight3\ads\googleplay_close.png"
 
 
             # Preload dynamic folder images
@@ -604,8 +604,8 @@ def Event_Function():
             # Single-image + action list
             image_action_map = [
                 (later, None, lambda: press_global_screen_with_delays((1113, 728, 1))),
-                (googleplay_close, None, lambda: press_global_screen_with_delays((597, 66, 1))),
-                (Open_Chest, None, lambda: press_keys_with_delays(window, 'c', 4, 'c', 3, 'g', 1)),
+                # (googleplay_close, None, lambda: press_global_screen_with_delays((597, 66, 1))),
+                # (Open_Chest, None, lambda: press_keys_with_delays(window, 'c', 4, 'c', 3, 'g', 1)),
                 (default_ads, (177, 83, 263, 158), lambda: press_global_screen_with_delays((215, 118, 2))),
                 (select_img, (1148, 186, 1445, 503), lambda: press_keys_with_delays(window, '1', 1)),
             ]
@@ -616,12 +616,13 @@ def Event_Function():
                         press_key(window, 'f')
                     elif find_image(Resume, confidence=0.8):
                         press_key(window, 'esc')
-                    elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
+
+                    # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
 
                     # Handle cont_dynamic folder images
                     for contimg in cont_images:
                         if (location := find_image(contimg, confidence=0.8, region=contF_Region)):
-                            press_keys_with_delays(window, 'v', 0, 'v', 1, 'c', 0)
+                            press_keys_with_delays(window, 'c', 0)
                             break
 
                     # Handle notify folder images
@@ -630,14 +631,14 @@ def Event_Function():
                             ntfy_signal_cli()
                             break
 
-                    # Handle ads auto-click folder images
-                    for adimg in ads_images:
-                        if (location := find_image(adimg, confidence=0.8, region=(166, 83, 1758, 978))):
-                            x, y, w, h = location
-                            center_x = x + w // 2
-                            center_y = y + h // 2
-                            pyautogui.click(center_x, center_y)
-                            break
+                    # # Handle ads auto-click folder images
+                    # for adimg in ads_images:
+                    #     if (location := find_image(adimg, confidence=0.8, region=(166, 83, 1758, 978))):
+                    #         x, y, w, h = location
+                    #         center_x = x + w // 2
+                    #         center_y = y + h // 2
+                    #         pyautogui.click(center_x, center_y)
+                    #         break
 
                     # General static image-action handling
                     for image_path, region, action in image_action_map:
