@@ -651,6 +651,23 @@ rofi_install_wayland() {
   echo -e "${GREEN}✅ run Rofi -show drun to launch.${NC}"
 }
 
+dwm_wm() {
+yay -S --needed dwm st dmenu
+
+    echo -e "${CYAN}📝 Creating DWM session entry for display manager...${NC}"
+    sudo bash -c 'cat > /usr/share/xsessions/dwm.desktop <<EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=DWM
+Comment=Dynamic Window Manager
+Exec=dwm
+Icon=dwm
+Type=XSession
+EOF'
+
+  echo -e "${GREEN}✅ DWM enabled in Setting.${NC}"
+}
+
 
 
 
@@ -681,6 +698,7 @@ menu_items=(
     "TTY Enable Numlock         : enable_numlock_on_tty       :$GREEN"
     "Enable Numlock             : enable_early_numlock        :$GREEN"
     "Rofi for Hyprland          : rofi_install_wayland        :$GREEN"
+    "DWM WM                     : dwm_wm                      :$GREEN"
 )
 
 # Special hotkey items
