@@ -1,7 +1,7 @@
 # Fuzzy Finder setup
 if command -v fzf >/dev/null 2>&1; then
     # Function to fuzzy find files, including hidden files
-    ffff() {
+    ff() {
         local file
         file=$(find . -type f -name '.*' -o -type f | fzf)
         if [[ -n $file ]]; then
