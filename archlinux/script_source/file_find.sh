@@ -1,14 +1,15 @@
-# Fuzzy Finder setup for Arch Linux
-if command -v fzf >/dev/null 2>&1; then
-    # Function to fuzzy find files, including hidden files
-    ff() {
-        local file
-        file=$(find . -type f \( -path '*/.*' -o -print \) 2>/dev/null | fzf)
-        if [[ -n $file ]]; then
-            nvim "$file"  # Change to nano, micro, etc. if preferred
-        fi
-    }
+#!/bin/bash
 
-    # Bind Ctrl+F to trigger 'ff' function in interactive shells
+# Fuzzy Finder function
+ff() {
+    local file
+    file=$(find . -type f \( -path '*/.*' -o -print \) 2>/dev/null | fzf)
+    if [[ -n $file ]]; then
+        nvim "$file"  # Or nano/micro
+    fi
+}
+
+# Optional: bind Ctrl+F to ff
+if [[ $- == *i* ]]; then
     bind -x '"\C-f":ff'
 fi
