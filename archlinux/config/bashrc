@@ -23,6 +23,14 @@ alias yy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S --ne
 alias pp="pacman -Slq | fzf --multi --preview 'pacman -Si {1}' | xargs -ro sudo pacman -S --needed"
 
 
+SCRIPTS_DIR="$HOME/ms1/archlinux/script_source"
+# Check if the scripts directory exists
+if [ -d "$SCRIPTS_DIR" ]; then
+    # Source each script file
+    for script in "$SCRIPTS_DIR"/*.sh; do
+        [ -r "$script" ] && . "$script"
+    done
+fi
 
 # Search history with fzf and execute the selected command
 hf() {
