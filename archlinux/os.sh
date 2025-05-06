@@ -700,6 +700,8 @@ rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
         echo "source ~/.xprofile" >> ~/.xinitrc
     fi
 
+    source ~/.xinitrc
+
     echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
 }
 
