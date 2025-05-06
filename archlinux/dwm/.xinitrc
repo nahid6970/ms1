@@ -1,2 +1,2 @@
 source ~/.xprofile
-source ~/autostart.sh
+# source ~/autostart.sh

@@ -691,18 +691,12 @@ EOF"
 
 rsync -a --delete "$HOME/ms1/archlinux/dwm/.xinitrc" "$HOME/.xinitrc"
 rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
-rsync -a --delete "$HOME/ms1/archlinux/dwm/autostart.sh" "$HOME/autostart.sh"
+# rsync -a --delete "$HOME/ms1/archlinux/dwm/autostart.sh" "$HOME/autostart.sh"
 
-# Step 5a: Ensure .xprofile is sourced in .xinitrc
-if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
-    echo "source ~/.xprofile" >> ~/.xinitrc
-fi
-
-# Step 5b: Ensure autostart.sh is sourced or run in .xinitrc
-if ! grep -q 'bash ~/autostart.sh' ~/.xinitrc; then
-    echo "bash ~/autostart.sh &" >> ~/.xinitrc
-fi
-
+    # Step 5: Ensure .xprofile is sourced (for some setups)
+    if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
+        echo "source ~/.xprofile" >> ~/.xinitrc
+    fi
 
     echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
 }
