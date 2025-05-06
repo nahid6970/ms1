@@ -745,6 +745,8 @@ dwmblocks_torrinfail(){
 
 distrotube_dwm(){
     cd ~/
+    mkdir -p opt
+    cd opt
     # yay -S --needed dwm-distrotube-git dwmblocks-distrotube-git st-distrotube-git dmenu-distrotube-git #! cant find them in yay even though he said its in the yay aur
     git clone https://gitlab.com/dwt1/st-distrotube.git
     git clone https://gitlab.com/dwt1/dwm-distrotube.git
