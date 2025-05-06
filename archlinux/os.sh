@@ -690,6 +690,11 @@ EOF"
 # git clone https://git.suckless.org/dwm ~/suckless/dwm
 # git clone https://git.suckless.org/st ~/suckless/st
 
+    echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
+}
+
+dwm_config() {
+    echo Configure DWM
 # > "$HOME/.xinitrc"  #! Clears the file
 rsync -a --delete "$HOME/ms1/archlinux/dwm/.xinitrc" "$HOME/.xinitrc"
 rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
@@ -699,12 +704,7 @@ rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
     if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
         echo "source ~/.xprofile" >> ~/.xinitrc
     fi
-    echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
-    
-    source ~/.xinitrc
 }
-
-
 
 
 
@@ -737,7 +737,8 @@ menu_items=(
     "TTY Enable Numlock               : enable_numlock_on_tty       :$GREEN"
     "Enable Numlock                   : enable_early_numlock        :$GREEN"
     "Rofi for Hyprland                : rofi_install_wayland        :$GREEN"
-    "DWM WM                           : dwm_wm                      :$GREEN"
+    "DWM Setup                        : dwm_wm                      :$GREEN"
+    "DWM Config                       : dwm_config                  :$GREEN"
 )
 
 # Special hotkey items
