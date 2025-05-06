@@ -690,6 +690,12 @@ EOF"
 # git clone https://git.suckless.org/dwm ~/suckless/dwm
 # git clone https://git.suckless.org/st ~/suckless/st
 
+sudo yay -S --needed git base-devel lemonbar
+
+git clone https://github.com/torrinfail/dwmblocks
+cd dwmblocks
+sudo make clean install
+
     echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
 }
 
