@@ -693,8 +693,8 @@ EOF"
 yay -S --needed git base-devel lemonbar
 
 git clone https://github.com/torrinfail/dwmblocks
-cd dwmblocks
-sudo make clean install
+# cd dwmblocks
+# sudo make clean install
 
     echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
 }
