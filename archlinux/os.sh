@@ -775,6 +775,7 @@ menu_items=(
     "DWM Setup                        : dwm_wm                      :$GREEN"
     "DWM Config                       : dwm_config                  :$GREEN"
     "DWM ST                       : dwm_statusbar                  :$GREEN"
+    "DWM Distrotube                       : distrotube_dwm                  :$GREEN"
 )
 
 # Special hotkey items
