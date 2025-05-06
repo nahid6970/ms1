@@ -654,19 +654,28 @@ rofi_install_wayland() {
 dwm_wm() {
     yay -S --needed dwm st dmenu
 
-    echo -e "📝 Setting up DWM with SDDM and ensuring proper wallpaper and session initialization..."
+    echo -e "📝 Setting up DWM with SDDM and Hyprland's default wallpaper..."
 
-    # Step 1: Install necessary tools
-    echo -e "📦 Installing required packages..."
-    sudo pacman -S --noconfirm --needed feh
+    # Step 1: Install feh if not already installed
+    if ! command -v feh &>/dev/null; then
+        echo -e "📦 Installing 'feh' to handle wallpapers..."
+        sudo pacman -S --noconfirm feh
+    fi
 
-    # Step 2: Set up wallpaper with feh in .xprofile
-    echo -e "🌄 Setting wallpaper in .xprofile..."
-    echo -e "feh --bg-scale /path/to/your/background.jpg" >> "$HOME/.xprofile"
+    # Step 2: Use Hyprland's default wallpaper if it exists
+    HYPRLAND_WALLPAPER="/usr/share/backgrounds/hyprland/default.jpg"
+    if [ ! -f "$HYPRLAND_WALLPAPER" ]; then
+        echo -e "⚠️ Could not find Hyprland's default wallpaper at $HYPRLAND_WALLPAPER"
+        return 1
+    fi
 
-    # Step 3: Configure /usr/share/xsessions/dwm.desktop for proper session management
-    echo -e "📝 Configuring DWM session in /usr/share/xsessions/dwm.desktop..."
-    sudo bash -c 'cat > /usr/share/xsessions/dwm.desktop <<EOF
+    # Step 3: Write wallpaper setting to .xprofile
+    echo -e "🌄 Setting wallpaper using Hyprland's default image..."
+    grep -qxF "feh --bg-scale $HYPRLAND_WALLPAPER" ~/.xprofile || echo "feh --bg-scale $HYPRLAND_WALLPAPER" >> ~/.xprofile
+
+    # Step 4: Create or update DWM .desktop file for SDDM
+    echo -e "📝 Creating /usr/share/xsessions/dwm.desktop..."
+    sudo bash -c "cat > /usr/share/xsessions/dwm.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=DWM
@@ -674,24 +683,16 @@ Comment=Dynamic Window Manager
 Exec=dwm
 Icon=dwm
 Type=XSession
-EOF'
+EOF"
 
-    # Step 4: Ensure that the autostart programs are sourced from .xprofile
-    echo -e "📝 Ensuring autostart programs are sourced in .xprofile..."
-    echo -e "if [ -f \"\$HOME/.xprofile\" ]; then\n    source \$HOME/.xprofile\nfi" >> "$HOME/.bash_profile"
+    # Step 5: Ensure .xprofile is sourced (some display managers don't auto-source it)
+    if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
+        echo "source ~/.xprofile" >> ~/.xinitrc
+    fi
 
-    # Step 5: Disable SDDM and enable DWM to start automatically
-    echo -e "⚙️ Disabling SDDM and enabling DWM session..."
-    sudo systemctl disable sddm
-    echo -e "exec dwm" >> "$HOME/.xinitrc"
-
-    # Step 6: Restart system to apply the changes
-    echo -e "🔄 Restarting system to apply changes..."
-    sudo reboot
+    echo -e "✅ Setup complete. You can now select 'DWM' in SDDM and see Hyprland's background.\n🚀 Reboot to test."
 }
 
-# Run the setup function
-setup_dwm_with_sddm
 
 
 
