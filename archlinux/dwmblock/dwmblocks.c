@@ -1,10 +1,10 @@
-#include<stdlib.h>
-#include<stdio.h>
-#include<string.h>
-#include<unistd.h>
-#include<signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
 #ifndef NO_X
-#include<X11/Xlib.h>
+#include <X11/Xlib.h>
 #endif
 #ifdef __OpenBSD__
 #define SIGPLUS			SIGUSR1+1
@@ -34,7 +34,7 @@ void setupsignals();
 void sighandler(int signum);
 int getstatus(char *str, char *last);
 void statusloop();
-void termhandler();
+void termhandler(int sig); // Changed termhandler declaration
 void pstdout();
 #ifndef NO_X
 void setroot();
@@ -53,7 +53,7 @@ static void (*writestatus) () = pstdout;
 static char statusbar[LENGTH(blocks)][CMDLENGTH] = {0};
 static char statusstr[2][STATUSLENGTH];
 static int statusContinue = 1;
-static int returnStatus = 0;
+static int returnStatus = 0; //remvoe unused variable warning
 
 //opens process *cmd and stores output in *output
 void getcmd(const Block *block, char *output)
@@ -185,7 +185,7 @@ void sighandler(int signum)
 	writestatus();
 }
 
-void termhandler()
+void termhandler(int sig) //changed
 {
 	statusContinue = 0;
 }
@@ -212,3 +212,4 @@ int main(int argc, char** argv)
 #endif
 	return 0;
 }
+
