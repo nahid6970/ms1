@@ -710,7 +710,7 @@ dwm_blocks() {
     echo Configure DWM DWMblocks
 yay -S --needed git base-devel lemonbar
 
-git clone https://github.com/LukeSmithxyz/dwmblocks.git
+git clone https://github.com/torrinfail/dwmblocks.git
 cd dwmblocks
 sudo make clean install
 }
