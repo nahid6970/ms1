@@ -738,6 +738,10 @@ git clone https://github.com/domsson/succade.git
 }
 
 
+distrotube_dwm(){
+    yay -S --needed dwm-distrotube-git dwmblocks-distrotube-git st-distrotube-git dmenu-distrotube-git
+}
+
 
 
 #! proton for steam games
