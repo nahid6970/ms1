@@ -1,50 +1,47 @@
 # Set wallpaper using feh
 feh --bg-scale "/home/nahid/Pictures/wallpapers/wallpaper1.jpg"
 
-# Date function to get current date and time
+# Date function
 dte() {
     dte="$(date +"%A, %B %d - %I:%M")"
-    echo -e " $dte"
+    echo -e "🗓️  $dte"
 }
 
-# Memory usage function
+# Memory function
 mem() {
-    mem=$(free | awk '/Mem/ {printf "%d MiB/%d MiB\n", $3 / 1024.0, $2 / 1024.0 }')
-    echo -e "Memory: $mem"
+    mem=$(free | awk '/Mem/ {printf "%d MiB/%d MiB", $3 / 1024.0, $2 / 1024.0 }')
+    echo -e "🧠 $mem"
 }
 
-# CPU usage function
+# CPU function
 cpu() {
-    # Read initial CPU stats
     read cpu a b c previdle rest < /proc/stat
     prevtotal=$((a+b+c+previdle))
     sleep 0.5
-    # Read CPU stats again after sleep
     read cpu a b c idle rest < /proc/stat
     total=$((a+b+c+idle))
     cpu_usage=$((100 * ((total - prevtotal) - (idle - previdle)) / (total - prevtotal)))
-    echo -e "CPU: $cpu_usage%"
+    echo -e "⚙️ $cpu_usage%"
 }
 
-# Check for available updates using pacman
+# Updates
 updates() {
     updates=$(checkupdates | wc -l)
-    echo -e "Updates: $updates"
+    echo -e "⬇️ $updates"
 }
 
-# Run the while loop to update the status bar every second
+# Loop
 while true; do
-    # Update the CPU, Memory, and Date every second
+    # Always update these
     status="$(cpu) | $(mem) | $(dte)"
 
-    # Only update the available updates every 10 seconds
+    # Updates every 10s
     if (( $(date +%s) % 10 == 0 )); then
-        updates_info=$(updates)
+        updates_info="$(updates)"
     fi
 
-    # Update the status bar with CPU, Memory, Date, and Updates
+    # Show all
     xsetroot -name "$status | $updates_info"
 
-    # Sleep for 1 second
-    sleep 1s
+    sleep 1
 done &
