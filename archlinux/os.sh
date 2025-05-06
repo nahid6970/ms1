@@ -754,6 +754,12 @@ distrotube_dwm(){
     git clone https://gitlab.com/dwt1/dmenu-distrotube.git
 }
 
+distrotube_dwm_config(){
+    cd ~/ms1/archlinux/dwmblocks_dt_fixed/
+    make
+    sudo make clean install
+    chmod +x scripts/*
+}
 
 
 #! proton for steam games
@@ -786,8 +792,8 @@ menu_items=(
     "Rofi for Hyprland                : rofi_install_wayland        :$GREEN"
     "DWM Setup                        : dwm_wm                      :$GREEN"
     "DWM Config                       : dwm_config                  :$GREEN"
-    "DWM ST                       : dwm_statusbar                  :$GREEN"
-    "DWM Distrotube                       : distrotube_dwm                  :$GREEN"
+    "DWM ST                           : dwm_statusbar               :$GREEN"
+    "DWM Distrotube                   : distrotube_dwm_config       :$GREEN"
 )
 
 # Special hotkey items
