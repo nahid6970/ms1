@@ -1,0 +1,6 @@
+feh --bg-scale "home/nahid/Pictures/wallpapers/wallpaper1.jpg"
+
+while true; do
+    xsetroot -name "$(date)"
+    sleep 1s
+done &

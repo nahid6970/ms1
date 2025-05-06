@@ -697,7 +697,7 @@ EOF"
 # git clone https://git.suckless.org/dwm ~/suckless/dwm
 # git clone https://git.suckless.org/st ~/suckless/st
 
-rsync -a --delete "$HOME/ms1/archlinux/dwm/.xinitrc" "$HOME/.xinitrc"
+rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
 }
 
 
