@@ -28,9 +28,10 @@ cpu() {
 
 # Check for available updates using pacman
 updates() {
-    updates=$(checkupdates | wc -l)
+    updates=$(pacman -Qu 2>/dev/null | wc -l)
     echo -e "Updates: $updates"
 }
+
 
 # Run the while loop to update the status bar every second
 while true; do
