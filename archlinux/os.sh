@@ -709,8 +709,32 @@ rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
 dwm_statusbar() {
     cd ~/
     echo Configure DWM Statusbar
-yay -S --needed git base-devel lemonbar
+yay -S --needed git base-devel lemonbar libinih
 git clone https://github.com/domsson/succade.git
+    # Change into the succade directory
+    cd succade || { echo "Failed to enter succade directory"; return 1; }
+    
+    # Make the build script executable
+    chmod +x ./build
+    
+    # Run the build script
+    ./build
+    
+    # Create the config directory
+    mkdir -p ~/.config/succade
+    
+    # Copy the example config to the proper location
+    cp ./cfg/example1.ini ~/.config/succade/succaderc
+    
+    # Make succade executable
+    chmod +x ./bin/succade
+    
+    # Move succade to a directory in your PATH (e.g., ~/.local/bin/)
+    cp ./bin/succade ~/.local/bin/
+    
+    # Confirm installation success
+    echo "Succade has been successfully installed!"
+
 }
 
 
