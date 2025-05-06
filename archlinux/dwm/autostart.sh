@@ -9,3 +9,4 @@ dte() {
     dte="$(date +"%A, %B %d - %I:%M")"
     echo -e " $dte"
 }
+dte
