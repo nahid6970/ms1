@@ -707,12 +707,10 @@ rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
 }
 
 dwm_statusbar() {
+    cd ~/
     echo Configure DWM Statusbar
 yay -S --needed git base-devel lemonbar
-git clone https://github.com/gh0stkey/lemonbar-manager.git
-cd lemonbar-manager
-chmod +x lemonbar-manager.sh
-
+git clone https://github.com/domsson/succade.git
 }
 
 
