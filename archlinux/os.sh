@@ -690,7 +690,7 @@ EOF"
 # git clone https://git.suckless.org/dwm ~/suckless/dwm
 # git clone https://git.suckless.org/st ~/suckless/st
 
-sudo yay -S --needed git base-devel lemonbar
+yay -S --needed git base-devel lemonbar
 
 git clone https://github.com/torrinfail/dwmblocks
 cd dwmblocks
