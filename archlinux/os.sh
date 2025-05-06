@@ -691,6 +691,11 @@ EOF"
     fi
 
     echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
+
+
+#! there is no config file to edit so have to download config edit and then rebuild
+git clone https://git.suckless.org/dwm ~/suckless/dwm
+git clone https://git.suckless.org/st ~/suckless/st
 }
 
 
