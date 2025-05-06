@@ -5,7 +5,32 @@ dte() {
     echo -e " $dte"
 }
 
+
+# upd(){
+# upd=`checkupdates | wc -l'
+# echo -e "C $upd updates"
+
+mem() {
+    mem=$(free | awk '/Mem/ {printf "%d MiB/%d MiB\n", $3 / 1024.0, $2 / 1024.0 }')
+    echo -e "Memory: $mem"
+}
+
+# CPU usage function
+cpu() {
+    # Read initial CPU stats
+    read cpu a b c previdle rest < /proc/stat
+    prevtotal=$((a+b+c+previdle))
+    sleep 0.5
+    # Read CPU stats again after sleep
+    read cpu a b c idle rest < /proc/stat
+    total=$((a+b+c+idle))
+    cpu_usage=$((100 * ((total - prevtotal) - (idle - previdle)) / (total - prevtotal)))
+    echo -e "CPU: $cpu_usage%"
+}
+
+# Run the while loop to update the status bar every second
 while true; do
-    xsetroot -name "$(dte)"
+    # Update the status bar with CPU, Memory, and Date
+    xsetroot -name "$(cpu) | $(mem) | $(dte)"
     sleep 1s
 done &
