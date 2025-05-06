@@ -654,27 +654,27 @@ rofi_install_wayland() {
 dwm_wm() {
     yay -S --needed dwm st dmenu
 
-    echo -e "📝 Setting up DWM with SDDM and Hyprland's default wallpaper..."
+    echo -e "📝 Setting up DWM with SDDM and custom wallpaper..."
 
     # Step 1: Install feh if not already installed
     if ! command -v feh &>/dev/null; then
-        echo -e "📦 Installing 'feh' to handle wallpapers..."
+        echo -e "📦 Installing 'feh'..."
         sudo pacman -S --noconfirm feh
     fi
 
-    # Step 2: Use Hyprland's default wallpaper if it exists
-    HYPRLAND_WALLPAPER="/usr/share/backgrounds/hyprland/default.jpg"
-    if [ ! -f "$HYPRLAND_WALLPAPER" ]; then
-        echo -e "⚠️ Could not find Hyprland's default wallpaper at $HYPRLAND_WALLPAPER"
-        return 1
-    fi
+    # Step 2: Download wallpaper
+    WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+    mkdir -p "$WALLPAPER_DIR"
+    WALLPAPER_PATH="$WALLPAPER_DIR/wallpaper1.jpg"
+    echo -e "🌐 Downloading wallpaper..."
+    curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
 
-    # Step 3: Write wallpaper setting to .xprofile
-    echo -e "🌄 Setting wallpaper using Hyprland's default image..."
-    grep -qxF "feh --bg-scale $HYPRLAND_WALLPAPER" ~/.xprofile || echo "feh --bg-scale $HYPRLAND_WALLPAPER" >> ~/.xprofile
+    # Step 3: Set wallpaper in .xprofile
+    echo -e "🌄 Setting wallpaper using feh..."
+    grep -qxF "feh --bg-scale \"$WALLPAPER_PATH\"" ~/.xprofile || echo "feh --bg-scale \"$WALLPAPER_PATH\"" >> ~/.xprofile
 
-    # Step 4: Create or update DWM .desktop file for SDDM
-    echo -e "📝 Creating /usr/share/xsessions/dwm.desktop..."
+    # Step 4: Create or update DWM .desktop entry for SDDM
+    echo -e "📝 Writing /usr/share/xsessions/dwm.desktop..."
     sudo bash -c "cat > /usr/share/xsessions/dwm.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
@@ -685,12 +685,12 @@ Icon=dwm
 Type=XSession
 EOF"
 
-    # Step 5: Ensure .xprofile is sourced (some display managers don't auto-source it)
+    # Step 5: Ensure .xprofile is sourced (for some setups)
     if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
         echo "source ~/.xprofile" >> ~/.xinitrc
     fi
 
-    echo -e "✅ Setup complete. You can now select 'DWM' in SDDM and see Hyprland's background.\n🚀 Reboot to test."
+    echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
 }
 
 
