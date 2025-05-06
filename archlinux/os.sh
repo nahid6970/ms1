@@ -706,13 +706,9 @@ rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
     fi
 }
 
-dwm_blocks() {
-    echo Configure DWM DWMblocks
-yay -S --needed git base-devel lemonbar
-
-git clone https://github.com/torrinfail/dwmblocks.git
-cd dwmblocks
-sudo make clean install
+dwm_statusbar() {
+    echo Configure DWM Statusbar
+yay -S --needed git base-devel lemonbar succade
 }
 
 
@@ -748,7 +744,7 @@ menu_items=(
     "Rofi for Hyprland                : rofi_install_wayland        :$GREEN"
     "DWM Setup                        : dwm_wm                      :$GREEN"
     "DWM Config                       : dwm_config                  :$GREEN"
-    "DWM Blocks                       : dwm_blocks                  :$GREEN"
+    "DWM ST                       : dwm_statusbar                  :$GREEN"
 )
 
 # Special hotkey items
