@@ -29,7 +29,7 @@ cpu() {
 # Check for available updates using pacman
 updates() {
     updates=$(pacman -Qu 2>/dev/null | wc -l)
-    echo -e "Updates: $updates"
+    echo -e "Updatesdd: $updates"
 }
 
 
