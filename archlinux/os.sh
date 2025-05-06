@@ -652,9 +652,20 @@ rofi_install_wayland() {
 }
 
 dwm_wm() {
-yay -S --needed dwm st dmenu
+    yay -S --needed dwm st dmenu
 
-    echo -e "${CYAN}📝 Creating DWM session entry for display manager...${NC}"
+    echo -e "📝 Setting up DWM with SDDM and ensuring proper wallpaper and session initialization..."
+
+    # Step 1: Install necessary tools
+    echo -e "📦 Installing required packages..."
+    sudo pacman -S --noconfirm --needed feh
+
+    # Step 2: Set up wallpaper with feh in .xprofile
+    echo -e "🌄 Setting wallpaper in .xprofile..."
+    echo -e "feh --bg-scale /path/to/your/background.jpg" >> "$HOME/.xprofile"
+
+    # Step 3: Configure /usr/share/xsessions/dwm.desktop for proper session management
+    echo -e "📝 Configuring DWM session in /usr/share/xsessions/dwm.desktop..."
     sudo bash -c 'cat > /usr/share/xsessions/dwm.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
@@ -665,8 +676,23 @@ Icon=dwm
 Type=XSession
 EOF'
 
-  echo -e "${GREEN}✅ DWM enabled in Setting.${NC}"
+    # Step 4: Ensure that the autostart programs are sourced from .xprofile
+    echo -e "📝 Ensuring autostart programs are sourced in .xprofile..."
+    echo -e "if [ -f \"\$HOME/.xprofile\" ]; then\n    source \$HOME/.xprofile\nfi" >> "$HOME/.bash_profile"
+
+    # Step 5: Disable SDDM and enable DWM to start automatically
+    echo -e "⚙️ Disabling SDDM and enabling DWM session..."
+    sudo systemctl disable sddm
+    echo -e "exec dwm" >> "$HOME/.xinitrc"
+
+    # Step 6: Restart system to apply the changes
+    echo -e "🔄 Restarting system to apply changes..."
+    sudo reboot
 }
+
+# Run the setup function
+setup_dwm_with_sddm
+
 
 
 
