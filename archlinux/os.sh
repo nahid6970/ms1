@@ -690,12 +690,6 @@ EOF"
 # git clone https://git.suckless.org/dwm ~/suckless/dwm
 # git clone https://git.suckless.org/st ~/suckless/st
 
-yay -S --needed git base-devel lemonbar
-
-git clone https://github.com/torrinfail/dwmblocks
-# cd dwmblocks
-# sudo make clean install
-
     echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
 }
 
@@ -710,6 +704,15 @@ rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
     if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
         echo "source ~/.xprofile" >> ~/.xinitrc
     fi
+}
+
+dwm_blocks() {
+    echo Configure DWM DWMblocks
+yay -S --needed git base-devel lemonbar
+
+git clone https://github.com/torrinfail/dwmblocks
+cd dwmblocks
+sudo make clean install
 }
 
 
@@ -745,6 +748,7 @@ menu_items=(
     "Rofi for Hyprland                : rofi_install_wayland        :$GREEN"
     "DWM Setup                        : dwm_wm                      :$GREEN"
     "DWM Config                       : dwm_config                  :$GREEN"
+    "DWM Blocks                       : dwm_blocks                  :$GREEN"
 )
 
 # Special hotkey items
