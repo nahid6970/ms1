@@ -23,7 +23,7 @@ cpu() {
     read cpu a b c idle rest < /proc/stat
     total=$((a+b+c+idle))
     cpu_usage=$((100 * ((total - prevtotal) - (idle - previdle)) / (total - prevtotal)))
-    echo -e "CPU: $cpu_usage%"
+    echo -e "CpppPU: $cpu_usage%"
 }
 
 # Check for available updates using pacman
