@@ -685,20 +685,19 @@ Icon=dwm
 Type=XSession
 EOF"
 
-    # Step 5: Ensure .xprofile is sourced (for some setups)
-    if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
-        echo "source ~/.xprofile" >> ~/.xinitrc
-    fi
-
-    echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
-
-
 #! there is no config file to edit so have to download config edit and then rebuild
 # git clone https://git.suckless.org/dwm ~/suckless/dwm
 # git clone https://git.suckless.org/st ~/suckless/st
 
 rsync -a --delete "$HOME/ms1/archlinux/dwm/.xinitrc" "$HOME/.xinitrc"
 rsync -a --delete "$HOME/ms1/archlinux/dwm/autostart.sh" "$HOME/autostart.sh"
+
+    # Step 5: Ensure .xprofile is sourced (for some setups)
+    if ! grep -q 'source ~/.xprofile' ~/.xinitrc; then
+        echo "source ~/.xprofile" >> ~/.xinitrc
+    fi
+
+    echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot to apply the wallpaper."
 }
 
 
