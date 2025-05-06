@@ -690,6 +690,7 @@ EOF"
 # git clone https://git.suckless.org/st ~/suckless/st
 
 rsync -a --delete "$HOME/ms1/archlinux/dwm/.xinitrc" "$HOME/.xinitrc"
+rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
 rsync -a --delete "$HOME/ms1/archlinux/dwm/autostart.sh" "$HOME/autostart.sh"
 
     # Step 5: Ensure .xprofile is sourced (for some setups)
