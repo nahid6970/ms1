@@ -738,8 +738,17 @@ git clone https://github.com/domsson/succade.git
 }
 
 
+dwmblocks_torrinfail(){
+    git clone https://github.com/torrinfail/dwmblocks.git #! has a issue in the dwmblocks.c which i fixed in my ms1/archlinux/dwblocks
+    #! so dont use this one
+}
+
 distrotube_dwm(){
-    yay -S --needed dwm-distrotube-git dwmblocks-distrotube-git st-distrotube-git dmenu-distrotube-git
+    # yay -S --needed dwm-distrotube-git dwmblocks-distrotube-git st-distrotube-git dmenu-distrotube-git #! cant find them in yay even though he said its in the yay aur
+    git clone https://gitlab.com/dwt1/st-distrotube.git
+    git clone https://gitlab.com/dwt1/dwm-distrotube.git
+    git clone https://gitlab.com/dwt1/dwmblocks-distrotube.git
+    git clone https://gitlab.com/dwt1/dmenu-distrotube.git
 }
 
 
