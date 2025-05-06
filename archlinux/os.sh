@@ -652,7 +652,7 @@ rofi_install_wayland() {
 }
 
 dwm_wm() {
-    yay -S --needed dwm st dmenu
+    yay -S --needed dwm st dmenu xorg-xsetroot
 
     echo -e "📝 Setting up DWM with SDDM and custom wallpaper..."
 
