@@ -91,6 +91,7 @@ done
 
 
 
+
 # Function to install necessary packages using yay
 install_packages() {
     clear
@@ -909,78 +910,3 @@ distrotube_main_distro_xmonad(){
     sddm_setup
     wallpaper
 }
-
-
-
-#! proton for steam games
-#! bottles for whatever .exe files you have laying around (including games)
-#! lutris if you so happen to have the .exe file of a game they support.
-
-# Menu items: description : function : color
-menu_items=(
-    "Git Pull [ms1]                   : update_ms1_repo               :$GREEN"
-    "Copy Files                       : copy_files                    :$GREEN"
-    "Install Necessary Packages       : install_packages              :$GREEN"
-    "Install Necessary Packages (YAY) : install_packages_yay          :$GREEN"
-    "Desktop Environment              : desktop_environment           :$GREEN"
-    "YAY Setup                        : setup_yay                     :$GREEN"
-    "Font Setup                       : install_jetbrains_mono_font   :$GREEN"
-    "bottles                          : not_yet_choosen               :$GREEN"
-    "wine                             : not_yet_choosen               :$GREEN"
-    "Lutris                           : not_yet_choosen               :$GREEN"
-    "steam                            : not_yet_choosen               :$GREEN"
-    "About                            : about_device                  :$GREEN"
-    "GPU Drivers                      : check_gpu_drivers             :$GREEN"
-    "Heroic Games Launcher            : check_gpu_drivers             :$GREEN"
-    "Hyprland                         : setup_hyprland_full           :$GREEN"
-    "Disable Bell                     : disable_bell                  :$GREEN"
-    "Hyprland Config                  : hyperland_config              :$GREEN"
-    "Neovim Config                    : nvim_config                   :$GREEN"
-    "TTY Autologin                    : enable_tty_autologin          :$GREEN"
-    "TTY Enable Numlock               : enable_numlock_on_tty         :$GREEN"
-    "Enable Numlock                   : enable_early_numlock          :$GREEN"
-    "Rofi for Hyprland                : rofi_install_wayland          :$GREEN"
-    "DWM Setup                        : dwm_wm                        :$GREEN"
-    "DWM Config                       : dwm_config                    :$GREEN"
-    "DWM ST                           : dwm_statusbar                 :$GREEN"
-    "DWM Distrotube                   : distrotube_dwm_config         :$GREEN"
-    "xmonad Distrotube                : distrotube_main_distro_xmonad :$GREEN"
-    "SDDM                             : sddm_setup                    :$GREEN"
-)
-
-# Special hotkey items
-declare -A hotkeys=(
-    [c]="Close_script"
-    [e]="exit_script"
-    [x]="test_test"
-)
-
-while true; do
-    echo ""
-    echo -e "${YELLOW}Select an option:${NC}"
-
-    # Show menu items with numbers
-    for i in "${!menu_items[@]}"; do
-        IFS=":" read -r description function color <<< "${menu_items[$i]}"
-        echo -e "${color}$((i+1))) $description${NC}"
-    done
-
-    # Show hotkey items
-    echo -e "$RED c) Close"
-    echo -e " e) Exit"
-    echo -e " x) Test${NC}"
-    echo ""
-
-    read -p "Enter choice: " choice
-
-    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#menu_items[@]} )); then
-        IFS=":" read -r _ function _ <<< "${menu_items[$((choice-1))]}"
-        $function
-    elif [[ -n "${hotkeys[$choice]}" ]]; then
-        ${hotkeys[$choice]}
-    else
-        echo -e "${RED}Invalid option. Please try again.${NC}"
-    fi
-
-    source "$HOME/ms1/archlinux/os.sh"
-done
