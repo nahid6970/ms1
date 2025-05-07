@@ -240,6 +240,8 @@ myLogHook = return ()
 myStartupHook = do
         spawnOnce "nitrogen --restore &"
         spawnOnce "picom &"
+        safeSpawn "sh" ["~/.config/autostart.h"]
+
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
