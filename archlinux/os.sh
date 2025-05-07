@@ -39,11 +39,11 @@ menu_items=(
     "Hyprland                         : setup_hyprland_full           :$GREEN"
     "Disable Bell                     : disable_bell                  :$GREEN"
     "Hyprland Config                  : hyperland_config              :$GREEN"
+    "Rofi for Hyprland                : rofi_install_wayland          :$GREEN"
     "Neovim Config                    : nvim_config                   :$GREEN"
     "TTY Autologin                    : enable_tty_autologin          :$GREEN"
     "TTY Enable Numlock               : enable_numlock_on_tty         :$GREEN"
     "Enable Numlock                   : enable_early_numlock          :$GREEN"
-    "Rofi for Hyprland                : rofi_install_wayland          :$GREEN"
     "DWM Setup                        : dwm_wm                        :$GREEN"
     "DWM Config                       : dwm_config                    :$GREEN"
     "DWM ST                           : dwm_statusbar                 :$GREEN"
@@ -760,7 +760,8 @@ enable_early_numlock() {
 
 rofi_install_wayland() {
   echo -e "${CYAN}📦 Installing Rofi wayland version not x11...${NC}"
-    yay -S --needed rofi-lbonn-wayland
+    # yay -S --needed rofi-lbonn-wayland
+    sudo pacman -S -needed rofi-wayland
   echo -e "${GREEN}✅ Rofi Installed.${NC}"
   echo -e "${GREEN}✅ run Rofi -show drun to launch.${NC}"
 }
