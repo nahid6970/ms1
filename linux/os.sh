@@ -52,9 +52,9 @@ echo Set All configs
 mkdir -p "$HOME/.config/conky"
 mkdir -p "$HOME/.config/foot"
 mkdir -p "$HOME/.config/wofi"
-rsync -a --delete "$~/ms1/config/foot/" "$~/.config/foot/"
-rsync -a --delete "$~/ms1/config/wofi/" "$~/.config/wofi/"
-rsync -a --delete "$~/ms1/linux/config/conky/" "$~/.config/conky/"
+rsync -a --delete "~/ms1/config/foot/" "~/.config/foot/"
+rsync -a --delete "~/ms1/config/wofi/" "~/.config/wofi/"
+rsync -a --delete "~/ms1/linux/config/conky/" "~/.config/conky/"
 }
 
 Load_Scripts(){
