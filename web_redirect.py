@@ -3,8 +3,8 @@ from threading import Thread
 
 # List of files to serve with their respective ports
 file_routes = [
-    {'path': r'C:\ms1\archlinux\os.sh', 'port': 7710},
-    {'path': r'C:\ms1\startup.py', 'port': 7711},
+    {'path': r'C:\ms1\asset\linux\arch_install.sh', 'port': 7710},
+    {'path': r'C:\ms1\archlinux\os.sh', 'port': 7711},
     {'path': r'C:\ms1\Ultimate_Gui.py', 'port': 7713},
 ]
 
