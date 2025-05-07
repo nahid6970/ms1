@@ -72,26 +72,30 @@ sddm_setup() {
 Numlock=on
 EOF'
     echo -e "${GREEN}✅ NumLock enabled in /etc/sddm.conf.${NC}"
-    return 0
-  fi
-
-  # Configure NumLock + SDDM theme
-  echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
-  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
-    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
   else
-    echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
-  fi
+    # Configure NumLock + SDDM theme
+    echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
+    if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
+      yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
+    else
+      echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
+    fi
 
-  echo -e "${CYAN}📝 Configuring /etc/sddm.conf with theme and NumLock settings...${NC}"
-  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+    echo -e "${CYAN}📝 Configuring /etc/sddm.conf with theme and NumLock settings...${NC}"
+    sudo bash -c 'cat > /etc/sddm.conf <<EOF
 [Theme]
 Current=Sugar-Candy
 
 [General]
 Numlock=on
 EOF'
-  echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
+    echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
+  fi
+
+  # Enable SDDM service
+  echo -e "${CYAN}🚀 Enabling SDDM to start on boot...${NC}"
+  sudo systemctl enable sddm
+  echo -e "${GREEN}✅ SDDM service enabled.${NC}"
 }
 
 
