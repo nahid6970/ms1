@@ -26,11 +26,10 @@ menu_items=(
     "Install Necessary Packages (YAY) : install_packages_yay          :$GREEN"
     "Desktop Environment              : desktop_environment           :$GREEN"
     "YAY Setup                        : setup_yay                     :$GREEN"
-    "Font Setup                       : install_jetbrains_mono_font   :$GREEN"
-    "bottles                          : not_yet_choosen               :$GREEN"
-    "wine                             : not_yet_choosen               :$GREEN"
-    "Lutris                           : not_yet_choosen               :$GREEN"
-    "steam                            : not_yet_choosen               :$GREEN"
+    # "bottles                          : not_yet_choosen               :$GREEN"
+    # "wine                             : not_yet_choosen               :$GREEN"
+    # "Lutris                           : not_yet_choosen               :$GREEN"
+    # "steam                            : not_yet_choosen               :$GREEN"
     "About                            : about_device                  :$GREEN"
     "GPU Drivers                      : check_gpu_drivers             :$GREEN"
     "Heroic Games Launcher            : check_gpu_drivers             :$GREEN"
@@ -111,125 +110,6 @@ list_recent_packages() {
     expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
 }
 
-
-
-# Function to configure SDDM with optional Sugar Candy theme and NumLock
-sddm_setup() {
-  echo -e "${CYAN}🔧 Installing SDDM if not already present...${NC}"
-  sudo pacman -S --needed sddm
-
-  echo -e "${CYAN}🔧 Choose setup option:${NC}"
-  echo -e "1) NumLock only"
-  echo -e "2) NumLock + SDDM Sugar Candy theme"
-  read -rp "Enter your choice (1/2): " choice
-
-  # Check for valid input
-  if [[ "$choice" != "1" && "$choice" != "2" ]]; then
-    echo -e "${RED}❌ Invalid choice. Exiting.${NC}"
-    return 1
-  fi
-
-  # Configure NumLock only
-  if [[ "$choice" == "1" ]]; then
-    echo -e "${CYAN}📝 Configuring /etc/sddm.conf to enable NumLock...${NC}"
-    sudo bash -c 'cat > /etc/sddm.conf <<EOF
-[General]
-Numlock=on
-EOF'
-    echo -e "${GREEN}✅ NumLock enabled in /etc/sddm.conf.${NC}"
-  else
-    # Configure NumLock + SDDM theme
-    echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
-    if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
-      yay -S --noconfirm --needed sddm-theme-sugar-candy
-    else
-      echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
-    fi
-
-    echo -e "${CYAN}📝 Configuring /etc/sddm.conf with theme and NumLock settings...${NC}"
-    sudo bash -c 'cat > /etc/sddm.conf <<EOF
-[Theme]
-Current=Sugar-Candy
-
-[General]
-Numlock=on
-EOF'
-    echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
-  fi
-
-  # Enable SDDM service
-  echo -e "${CYAN}🚀 Enabling SDDM to start on boot...${NC}"
-  sudo systemctl enable sddm
-  echo -e "${GREEN}✅ SDDM service enabled.${NC}"
-}
-
-
-
-wallpaper(){
-    # Step 1: Define wallpaper directory and path
-    WALLPAPER_DIR="$HOME/Pictures/wallpapers"
-    mkdir -p "$WALLPAPER_DIR"
-    WALLPAPER_PATH="$WALLPAPER_DIR/wallpaper1.jpg"
-    
-    # Step 2: Download wallpaper
-    echo -e "🌐 Downloading wallpaper..."
-    curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
-}
-
-
-
-# Function to install JetBrainsMono Nerd Font using oh-my-posh on Arch Linux
-install_jetbrains_mono_font() {
-    clear
-    echo -e "\e[34mInstalling JetBrainsMono Nerd Font with oh-my-posh...\e[0m"
-
-    FONT_DIR="$HOME/.local/share/fonts/jetbrainsmono-nfp/"
-    FONT_PATTERN="JetBrainsMonoNerdFont*-Regular.ttf"
-
-    # Check if the font is already present
-    if find "$FONT_DIR" -type f -iname "$FONT_PATTERN" | grep -q .; then
-        echo -e "\e[32mJetBrainsMono Nerd Font already exists. Skipping installation.\e[0m"
-    else
-        # Check and install oh-my-posh if missing
-        if ! command -v oh-my-posh &> /dev/null; then
-            echo -e "\e[33moh-my-posh not found. Installing with yay...\e[0m"
-            if ! command -v yay &> /dev/null; then
-                echo -e "\e[31myay not found. Please install yay first.\e[0m"
-                return 1
-            fi
-            yay -Sy --noconfirm oh-my-posh || {
-                echo -e "\e[31mFailed to install oh-my-posh.\e[0m"
-                return 1
-            }
-        fi
-
-        echo -e "\e[34mInstalling JetBrainsMono Nerd Font...\e[0m"
-        oh-my-posh font install JetBrainsMono
-    fi
-
-    # Apply permissions to fonts
-    if [ -d "$FONT_DIR" ]; then
-        echo -e "\e[34mSetting font file permissions...\e[0m"
-        find "$FONT_DIR" -type d -exec chmod 555 {} \;
-        find "$FONT_DIR" -type f -iname "*.ttf" -exec chmod 444 {} \;
-    fi
-
-    # Refresh font cache
-    if command -v fc-cache &> /dev/null; then
-        echo -e "\e[34mUpdating font cache...\e[0m"
-        fc-cache -fv
-    else
-        echo -e "\e[33mfc-cache not found. Install 'fontconfig' to enable font cache rebuilding.\e[0m"
-    fi
-
-    echo -e "\e[32mDone. You may need to set the font manually in your terminal emulator.\e[0m"
-}
-
-
-
-
-
-
 # Copy .bashrc and termux.properties
 copy_files() {
     clear
@@ -239,7 +119,6 @@ copy_files() {
     echo -e "${GREEN}.bashrc copied.${NC}"
     echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
 }
-
 
 
 # Function to remove the repository
@@ -504,28 +383,6 @@ check_gpu_drivers() {
     else
         echo -e "${YELLOW}Non-AMD GPU detected. Skipping AMD driver check.${NC}"
     fi
-}
-
-
-
-sddm_theme() {
-  echo "📦 Installing Sugar Candy theme..."
-  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
-    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
-  else
-    echo "✅ sddm-theme-sugar-candy is already installed."
-  fi
-
-  echo "📝 Configuring /etc/sddm.conf..."
-  sudo bash -c 'cat > /etc/sddm.conf <<EOF
-[Theme]
-Current=Sugar-Candy
-
-[General]
-Numlock=on
-EOF'
-
-  echo "✅ SDDM theme set to Sugar-Candy and NumLock enabled."
 }
 
 
