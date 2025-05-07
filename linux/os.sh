@@ -73,7 +73,7 @@ import_scripts() {
                 echo "Importing: $script"
                 source "$script"
             else
-                # echo "Skipping: $script (not readable or not a file)"
+                echo "Skipping: $script (not readable or not a file)"
             fi
         done
         # echo "All scripts imported from $script_dir."
