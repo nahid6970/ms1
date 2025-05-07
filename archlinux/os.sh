@@ -640,9 +640,11 @@ hyperland_config() {
     # Create destination directory if it doesn't exist
     mkdir -p "$HOME/.config/hypr"
     mkdir -p "$HOME/.config/foot"
+    mkdir -p "$HOME/.config/conky"
     # Copy contents recursively and force overwrite
     rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
     rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
+    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/conky/" "$HOME/.config/conky/"
     # Enable Num Lock on startup
 }
 
