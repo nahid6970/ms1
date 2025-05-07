@@ -60,7 +60,11 @@ declare -A hotkeys=(
 )
 
 All_Configs(){
-echo hi
+echo Set All configs
+}
+
+Load_Scripts(){
+echo divide all functions
 }
 
 
