@@ -873,7 +873,7 @@ menu_items=(
     "DWM ST                           : dwm_statusbar                 :$GREEN"
     "DWM Distrotube                   : distrotube_dwm_config         :$GREEN"
     "xmonad Distrotube                : distrotube_main_distro_xmonad :$GREEN"
-    "SDDM                : sddm_setup :$GREEN"
+    "SDDM                             : sddm_setup                    :$GREEN"
 )
 
 # Special hotkey items
