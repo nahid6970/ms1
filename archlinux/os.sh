@@ -53,6 +53,9 @@ list_recent_packages() {
 
 # Function to configure SDDM with optional Sugar Candy theme and NumLock
 sddm_setup() {
+  echo -e "${CYAN}🔧 Installing SDDM if not already present...${NC}"
+  sudo pacman -S --needed sddm
+
   echo -e "${CYAN}🔧 Choose setup option:${NC}"
   echo -e "1) NumLock only"
   echo -e "2) NumLock + SDDM Sugar Candy theme"
@@ -76,7 +79,7 @@ EOF'
     # Configure NumLock + SDDM theme
     echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
     if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
-      yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
+      yay -S --noconfirm --needed sddm-theme-sugar-candy
     else
       echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
     fi
