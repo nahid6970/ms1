@@ -23,7 +23,6 @@ menu_items=(
     "Git Pull [ms1]                   : update_ms1_repo               :$GREEN"
     "Copy Files                       : copy_files                    :$GREEN"
     "Install Necessary Packages       : install_packages              :$GREEN"
-    "Install Necessary Packages (YAY) : install_packages_yay          :$GREEN"
     "Desktop Environment              : desktop_environment           :$GREEN"
     "YAY Setup                        : setup_yay                     :$GREEN"
     # "bottles                          : not_yet_choosen               :$GREEN"
@@ -58,6 +57,8 @@ declare -A hotkeys=(
 
 All_Configs(){
 echo Set All configs
+mkdir -p "$HOME/.config/foot"
+mkdir -p "$HOME/.config/wofi"
 rsync -a --delete "$HOME/ms1/Hyprland/wofi/" "$HOME/.config/wofi/"
 rsync -a --delete "$HOME/ms1/Hyprland/foot/" "$HOME/.config/foot/"
 }
@@ -93,17 +94,6 @@ import_scripts "$HOME/ms1/archlinux/os_imports"
 
 
 
-
-# Function to install necessary packages using yay
-install_packages_yay() {
-    clear
-    echo -e "${GREEN}Updating package database...${NC}"
-    yay -Sy --noconfirm
-    echo -e "${GREEN}Installing Necessary Packages...${NC}"
-    yay -S --needed \
-        conky
-}
-        # min Qutebrowser lynx firefox
 
 list_recent_packages() {
     echo -e "${GREEN}Listing recently installed packages...${NC}"

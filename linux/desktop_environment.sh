@@ -86,8 +86,6 @@ desktop_environment() {
 
             mkdir -p "$HOME/.config/hypr"
             mkdir -p "$HOME/.config/waybar"
-            mkdir -p "$HOME/.config/foot"
-            mkdir -p "$HOME/.config/wofi"
             #! Copy contents recursively and force overwrite
             rsync -a --delete "$HOME/ms1/linux/config/hypr/" "$HOME/.config/hypr/"
             rsync -a --delete "$HOME/ms1/linux/config/waybar/" "$HOME/.config/waybar/"
