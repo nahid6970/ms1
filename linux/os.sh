@@ -76,7 +76,7 @@ import_scripts() {
                 echo "Skipping: $script (not readable or not a file)"
             fi
         done
-        echo "All scripts imported from $script_dir."
+        # echo "All scripts imported from $script_dir."
     else
         echo "Directory not found: $script_dir"
         return 1
