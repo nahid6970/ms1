@@ -90,7 +90,7 @@ import_scripts() {
 }
 
 # Usage example:
-import_scripts "~/ms1/archlinux/os_imports"
+import_scripts "$HOME/ms1/archlinux/os_imports"
 
 
 
