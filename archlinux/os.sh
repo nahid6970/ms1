@@ -50,17 +50,26 @@ list_recent_packages() {
 }
 
 wallpaper(){
-    # Step 2: Download wallpaper
+    # Step 1: Define wallpaper directory and path
     WALLPAPER_DIR="$HOME/Pictures/wallpapers"
     mkdir -p "$WALLPAPER_DIR"
     WALLPAPER_PATH="$WALLPAPER_DIR/wallpaper1.jpg"
+    
+    # Step 2: Download wallpaper
     echo -e "🌐 Downloading wallpaper..."
     curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
+    
+    # Step 3: Check if .xprofile exists, create it if not
+    if [ ! -f "$HOME/.xprofile" ]; then
+        echo -e "📝 Creating .xprofile..."
+        touch "$HOME/.xprofile"
+    fi
 
-    # Step 3: Set wallpaper in .xprofile
+    # Step 4: Set wallpaper in .xprofile
     echo -e "🌄 Setting wallpaper using feh..."
     grep -qxF "feh --bg-scale \"$WALLPAPER_PATH\"" ~/.xprofile || echo "feh --bg-scale \"$WALLPAPER_PATH\"" >> ~/.xprofile
 }
+
 
 # Function to install JetBrainsMono Nerd Font using oh-my-posh on Arch Linux
 install_jetbrains_mono_font() {
