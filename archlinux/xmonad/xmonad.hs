@@ -3,14 +3,14 @@
 import XMonad
 import Data.Monoid
 import System.Exit
-XMonad.Util.SpawnOnce
+
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal      = "gnome-terminal"
+myTerminal      = "gnomre-terminal"
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
@@ -20,14 +20,16 @@ myFocusFollowsMouse = True
 myClickJustFocuses :: Bool
 myClickJustFocuses = False
 
-myBorderWidth   = 10 -- Width of the window border in pixels.
+-- Width of the window border in pixels.
+--
+myBorderWidth   = 1
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
-myModMask       = mod1Mask --LFT ALT
+myModMask       = mod1Mask
 
 -- The default number of workspaces (virtual screens) and their names.
 -- By default we use numeric strings, but any string may be used as a
@@ -174,11 +176,17 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 myLayout = tiled ||| Mirror tiled ||| Full
   where
+     -- default tiling algorithm partitions the screen into two panes
+     tiled   = Tall nmaster delta ratio
 
-     tiled   = Tall nmaster delta ratio -- default tiling algorithm partitions the screen into two panes
-     nmaster = 1                        -- The default number of windows in the master pane
-     ratio   = 1/2                      -- Default proportion of screen occupied by master pane
-     delta   = 3/100                    -- Percent of screen to increment by when resizing panes
+     -- The default number of windows in the master pane
+     nmaster = 1
+
+     -- Default proportion of screen occupied by master pane
+     ratio   = 1/2
+
+     -- Percent of screen to increment by when resizing panes
+     delta   = 3/100
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -228,10 +236,7 @@ myLogHook = return ()
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
--- myStartupHook = return ()
-myStartupHook = do
-        spawnOnce "nitrogen --restore &"
-        spawnOnce "picom &"
+myStartupHook = return ()
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
