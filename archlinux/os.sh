@@ -49,6 +49,53 @@ list_recent_packages() {
     expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
 }
 
+
+
+# Function to configure SDDM with optional Sugar Candy theme and NumLock
+sddm_setup() {
+  echo -e "${CYAN}🔧 Choose setup option:${NC}"
+  echo -e "1) NumLock only"
+  echo -e "2) NumLock + SDDM Sugar Candy theme"
+  read -rp "Enter your choice (1/2): " choice
+
+  # Check for valid input
+  if [[ "$choice" != "1" && "$choice" != "2" ]]; then
+    echo -e "${RED}❌ Invalid choice. Exiting.${NC}"
+    return 1
+  fi
+
+  # Configure NumLock only
+  if [[ "$choice" == "1" ]]; then
+    echo -e "${CYAN}📝 Configuring /etc/sddm.conf to enable NumLock...${NC}"
+    sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[General]
+Numlock=on
+EOF'
+    echo -e "${GREEN}✅ NumLock enabled in /etc/sddm.conf.${NC}"
+    return 0
+  fi
+
+  # Configure NumLock + SDDM theme
+  echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
+  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
+    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
+  else
+    echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
+  fi
+
+  echo -e "${CYAN}📝 Configuring /etc/sddm.conf with theme and NumLock settings...${NC}"
+  sudo bash -c 'cat > /etc/sddm.conf <<EOF
+[Theme]
+Current=Sugar-Candy
+
+[General]
+Numlock=on
+EOF'
+  echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
+}
+
+
+
 wallpaper(){
     # Step 1: Define wallpaper directory and path
     WALLPAPER_DIR="$HOME/Pictures/wallpapers"
@@ -830,6 +877,7 @@ menu_items=(
     "DWM ST                           : dwm_statusbar                 :$GREEN"
     "DWM Distrotube                   : distrotube_dwm_config         :$GREEN"
     "xmonad Distrotube                : distrotube_main_distro_xmonad :$GREEN"
+    "SDDM                : sddm_setup :$GREEN"
 )
 
 # Special hotkey items
