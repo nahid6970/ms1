@@ -36,8 +36,8 @@ menu_items=(
     "About                            : about_device                  :$GREEN"
     "GPU Drivers                      : check_gpu_drivers             :$GREEN"
     "Heroic Games Launcher            : check_gpu_drivers             :$GREEN"
-    "Hyprland                         : setup_hyprland_full           :$GREEN"
     "Disable Bell                     : disable_bell                  :$GREEN"
+    "Hyprland                         : setup_hyprland_full           :$GREEN"
     "Hyprland Config                  : hyperland_config              :$GREEN"
     "Rofi for Hyprland                : rofi_install_wayland          :$GREEN"
     "Neovim Config                    : nvim_config                   :$GREEN"
@@ -67,22 +67,34 @@ Load_Scripts(){
 echo divide all functions
 }
 
+import_scripts() {
+    local script_dir="$1"
 
-
-# Function to install necessary packages using yay
-install_packages() {
-    clear
-    echo -e "${GREEN}Updating package database...${NC}"
-    sudo pacman -Sy --noconfirm
-    echo -e "${GREEN}Installing Necessary Packages...${NC}"
-    sudo pacman -S --needed \
-        bash bat chafa curl eza fastfetch fzf \
-        lsd lua-language-server neovim \
-        openssh python rclone sshpass wget \
-        which zoxide yazi zsh stow expac numlockx \
-        rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
-        thefuck feh screenfetch sed grep jq rofi
+    # Check if the folder exists
+    if [[ -d "$script_dir" ]]; then
+        # Loop through all .sh files in the folder
+        for script in "$script_dir"/*.sh; do
+            # Check if the file exists and is readable
+            if [[ -f "$script" && -r "$script" ]]; then
+                echo "Importing: $script"
+                source "$script"
+            else
+                echo "Skipping: $script (not readable or not a file)"
+            fi
+        done
+        echo "All scripts imported from $script_dir."
+    else
+        echo "Directory not found: $script_dir"
+        return 1
+    fi
 }
+
+# Usage example:
+import_scripts "~/ms1/archlinux/os_imports"
+
+
+
+
 # Function to install necessary packages using yay
 install_packages_yay() {
     clear
