@@ -1,17 +1,28 @@
-from flask import Flask, redirect, send_file
+from flask import Flask, send_file
+from threading import Thread
 
-app = Flask(__name__)
+# List of files to serve with their respective ports
+file_routes = [
+    {'path': r'C:\ms1\archlinux\os.sh', 'port': 7710},
+    {'path': r'C:\ms1\startup.py', 'port': 7711},
+    {'path': r'C:\ms1\Ultimate_Gui.py', 'port': 7713},
+]
 
-# Port 7710: Send local file
-@app.route('/')
-def serve_local_file():
-    return send_file(r'C:\ms1\archlinux\os.sh', as_attachment=True)
+# Function to create a new Flask app for each file
+def create_app(file_path):
+    app = Flask(__name__)
 
-# Run the apps on their respective ports
-if __name__ == '__main__':
-    from threading import Thread
+    @app.route('/')
+    def serve_file():
+        return send_file(file_path, as_attachment=True)
 
-    def run_app(app, port):
-        app.run(host='0.0.0.0', port=port, debug=False)
+    return app
 
-    Thread(target=run_app, args=(app, 7710)).start()
+# Function to run each Flask app on a separate port
+def run_app(app, port):
+    app.run(host='0.0.0.0', port=port, debug=False)
+
+# Start a thread for each file and port
+for route in file_routes:
+    app = create_app(route['path'])
+    Thread(target=run_app, args=(app, route['port'])).start()
