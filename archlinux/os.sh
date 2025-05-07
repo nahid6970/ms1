@@ -60,7 +60,7 @@ wallpaper(){
     curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
     
     # Step 3: Check if autostart.h exists, create it if not
-    AUTOSTART_FILE="$HOME/.config/xmonad/autostart.h"
+    AUTOSTART_FILE="$HOME/.config/autostart.h"
     if [ ! -f "$AUTOSTART_FILE" ]; then
         echo -e "📝 Creating autostart.h..."
         mkdir -p "$(dirname "$AUTOSTART_FILE")"
