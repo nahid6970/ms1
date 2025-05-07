@@ -53,9 +53,9 @@ mkdir -p "$HOME/.config/conky"
 mkdir -p "$HOME/.config/foot"
 mkdir -p "$HOME/.config/wofi"
 
-rclone copy "$HOME/ms1/config/foot/" "$HOME/.config/foot/"
-rclone copy "$HOME/ms1/config/wofi/" "$HOME/.config/wofi/"
-rclone copy "$HOME/ms1/linux/config/conky/" "$HOME/.config/conky/"
+rclone copy "home/ms1/config/foot/" "home/.config/foot/"
+rclone copy "home/ms1/config/wofi/" "home/.config/wofi/"
+rclone copy "home/ms1/linux/config/conky/" "home/.config/conky/"
 
 }
 
