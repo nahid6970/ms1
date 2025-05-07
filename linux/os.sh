@@ -49,13 +49,14 @@ declare -A hotkeys=(
 
 All_Configs(){
 echo Set All configs
-mkdir -p "home/.config/conky"
-mkdir -p "home/.config/foot"
-mkdir -p "home/.config/wofi"
+mkdir -p "/.config/conky"
+mkdir -p "/.config/foot"
+mkdir -p "/.config/wofi"
 
-rclone copy "home/ms1/config/foot/" "home/.config/foot/"
-rclone copy "home/ms1/config/wofi/" "home/.config/wofi/"
-rclone copy "home/ms1/linux/config/conky/" "home/.config/conky/"
+rsync -a --delete "/ms1/config/foot/" "/.config/foot/"
+rsync -a --delete "/ms1/config/wofi/" "/.config/wofi/"
+rsync -a --delete "/ms1/linux/config/conky/" "/.config/conky/"
+
 
 }
 
