@@ -53,9 +53,9 @@ mkdir -p "$HOME/.config/conky"
 mkdir -p "$HOME/.config/foot"
 mkdir -p "$HOME/.config/wofi"
 
-rsync -a --delete "$HOME/ms1/config/foot/" "$HOME/.config/foot/"
-rsync -a --delete "$HOME/ms1/config/wofi/" "$HOME/.config/wofi/"
-rsync -a --delete "$HOME/ms1/linux/config/conky/" "$HOME/.config/conky/"
+rclone copy "$HOME/ms1/config/foot/" "$HOME/.config/foot/"
+rclone copy "$HOME/ms1/config/wofi/" "$HOME/.config/wofi/"
+rclone copy "$HOME/ms1/linux/config/conky/" "$HOME/.config/conky/"
 
 }
 
