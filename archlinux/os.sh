@@ -768,6 +768,7 @@ distrotube_main_distro_xmonad(){
     cd ~/
     mkdir -p .xmonad
     cp ~/ms1/archlinux/xmonad/xmonad.hs ~/.xmonad/
+    curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
 }
 
 
