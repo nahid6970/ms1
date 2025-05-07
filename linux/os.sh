@@ -49,10 +49,12 @@ declare -A hotkeys=(
 
 All_Configs(){
 echo Set All configs
+mkdir -p "$HOME/.config/conky"
 mkdir -p "$HOME/.config/foot"
 mkdir -p "$HOME/.config/wofi"
-rsync -a --delete "$HOME/ms1/config/wofi/" "$HOME/.config/wofi/"
 rsync -a --delete "$HOME/ms1/config/foot/" "$HOME/.config/foot/"
+rsync -a --delete "$HOME/ms1/config/wofi/" "$HOME/.config/wofi/"
+rsync -a --delete "$HOME/ms1/linux/config/conky/" "$HOME/.config/conky/"
 }
 
 Load_Scripts(){
@@ -392,17 +394,6 @@ nvim_config() {
 ln -sf "$HOME/ms1/linux/config/nvim/" "$HOME/.config/nvim"
 }
 
-hyperland_config() {
-    # Create destination directory if it doesn't exist
-    mkdir -p "$HOME/.config/hypr"
-    mkdir -p "$HOME/.config/foot"
-    mkdir -p "$HOME/.config/conky"
-    # Copy contents recursively and force overwrite
-    rsync -a --delete "$HOME/ms1/linux/config/hypr/" "$HOME/.config/hypr/"
-    rsync -a --delete "$HOME/ms1/linux/config/foot/" "$HOME/.config/foot/"
-    rsync -a --delete "$HOME/ms1/linux/config/conky/" "$HOME/.config/conky/"
-    # Enable Num Lock on startup
-}
 
 flatpak() {
     clear
