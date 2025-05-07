@@ -3,9 +3,9 @@
 import XMonad
 import Data.Monoid
 import System.Exit
-XMonad.Util.SpawnOnce
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
+-- XMonad.Util.SpawnOnce
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
