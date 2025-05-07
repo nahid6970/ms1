@@ -4,7 +4,6 @@ import XMonad
 import Data.Monoid
 import System.Exit
 XMonad.Util.SpawnOnce
- XMonad.Util.Run
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
