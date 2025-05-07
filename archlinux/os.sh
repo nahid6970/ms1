@@ -31,7 +31,7 @@ install_packages() {
         openssh python rclone sshpass wget \
         which zoxide yazi zsh stow expac numlockx \
         rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
-        thefuck
+        thefuck feh
 }
 # Function to install necessary packages using yay
 install_packages_yay() {
