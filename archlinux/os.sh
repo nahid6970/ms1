@@ -846,6 +846,7 @@ distrotube_main_distro_xmonad(){
     cd ~/
     mkdir -p .xmonad
     cp ~/ms1/archlinux/xmonad/xmonad.hs ~/.xmonad/
+    sddm_setup
     wallpaper
 }
 
