@@ -388,7 +388,7 @@ disable_bell() {
 
 nvim_config() {
     # Auto-generate default config if missing
-ln -sf "$HOME/ms1/archlinux/Hyprland/typecraft/nvim/" "$HOME/.config/nvim"
+ln -sf "$HOME/ms1/linux/config/nvim/" "$HOME/.config/nvim"
 }
 
 hyperland_config() {
@@ -563,8 +563,8 @@ EOF"
 dwm_config() {
     echo Configure DWM
 # > "$HOME/.xinitrc"  #! Clears the file
-rsync -a --delete "$HOME/ms1/archlinux/dwm/.xinitrc" "$HOME/.xinitrc"
-rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
+rsync -a --delete "$HOME/ms1/config/dwm/dwm/.xinitrc" "$HOME/.xinitrc"
+rsync -a --delete "$HOME/ms1/config/dwm/dwm/.xprofile" "$HOME/.xprofile"
 # rsync -a --delete "$HOME/ms1/archlinux/dwm/autostart.sh" "$HOME/autostart.sh"
 
     # Step 5: Ensure .xprofile is sourced (for some setups)
