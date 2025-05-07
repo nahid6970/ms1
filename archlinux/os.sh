@@ -885,21 +885,17 @@ distrotube_main_distro_xmonad(){
 while true; do
     echo ""
     echo -e "${YELLOW}Select an option:${NC}"
-
     # Show menu items with numbers
     for i in "${!menu_items[@]}"; do
         IFS=":" read -r description function color <<< "${menu_items[$i]}"
         echo -e "${color}$((i+1))) $description${NC}"
     done
-
     # Show hotkey items
     echo -e "$RED c) Close"
     echo -e " e) Exit"
     echo -e " x) Test${NC}"
     echo ""
-
     read -p "Enter choice: " choice
-
     if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#menu_items[@]} )); then
         IFS=":" read -r _ function _ <<< "${menu_items[$((choice-1))]}"
         $function
@@ -908,7 +904,6 @@ while true; do
     else
         echo -e "${RED}Invalid option. Please try again.${NC}"
     fi
-
     source "$HOME/ms1/archlinux/os.sh"
 done
 
