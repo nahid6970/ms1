@@ -654,6 +654,6 @@ while true; do
     else
         echo -e "${RED}Invalid option. Please try again.${NC}"
     fi
-    source "$HOME/ms1/archlinux/os.sh"
+    source "$HOME/ms1/linux/os.sh"
 done
 
