@@ -764,7 +764,7 @@ distrotube_dwm_config(){
 
 distrotube_main_distro_xmonad(){
     #! compton vs picom --for arch select picom [these are compositor for x11]
-    sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xterm dmenu nitrogen picom foot
+    sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xterm dmenu nitrogen picom gnome-terminal
     cd ~/
     mkdir -p .xmonad
     cp ~/ms1/archlinux/xmonad/xmonad.hs ~/.xmonad/
