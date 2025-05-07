@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 # storage="$HOME/storage/shared"
 
 REPO_DIR="$HOME/ms1"
-BASHRC_SOURCE="$REPO_DIR/archlinux/config/bashrc"
+BASHRC_SOURCE="$REPO_DIR/linux/config/bashrc"
 BASHRC_DEST="$HOME/.bashrc"
 NVIM_INIT_SOURCE="$REPO_DIR/dotfiles/neovim/init.lua"
 NVIM_CONFIG_DEST="$HOME/.config/nvim"
@@ -90,7 +90,7 @@ import_scripts() {
 }
 
 # Usage example:
-import_scripts "$HOME/ms1/archlinux/os_imports"
+import_scripts "$HOME/ms1/linux/os_imports"
 
 
 
@@ -329,7 +329,7 @@ desktop_environment() {
     clear
     echo -e "${CYAN}Setting up Desktop Environment...${NC}"
 
-    DE_SETUP_SCRIPT="$HOME/ms1/archlinux/config/desktop_environment.sh"
+    DE_SETUP_SCRIPT="$HOME/ms1/linux/desktop_environment.sh"
 
     if [ -f "$DE_SETUP_SCRIPT" ]; then
         bash "$DE_SETUP_SCRIPT"
@@ -432,9 +432,9 @@ hyperland_config() {
     mkdir -p "$HOME/.config/foot"
     mkdir -p "$HOME/.config/conky"
     # Copy contents recursively and force overwrite
-    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
-    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
-    rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/conky/" "$HOME/.config/conky/"
+    rsync -a --delete "$HOME/ms1/linux/config/hypr/" "$HOME/.config/hypr/"
+    rsync -a --delete "$HOME/ms1/linux/config/foot/" "$HOME/.config/foot/"
+    rsync -a --delete "$HOME/ms1/linux/config/conky/" "$HOME/.config/conky/"
     # Enable Num Lock on startup
 }
 
