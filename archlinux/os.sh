@@ -65,9 +65,22 @@ wallpaper(){
         touch "$HOME/.xprofile"
     fi
 
-    # Step 4: Set wallpaper in .xprofile
+    # Step 4: Check if .xinitrc exists, create it if not, and source .xprofile
+    if [ ! -f "$HOME/.xinitrc" ]; then
+        echo -e "📝 Creating .xinitrc and sourcing .xprofile..."
+        echo "if [ -f \$HOME/.xprofile ]; then . \$HOME/.xprofile; fi" > "$HOME/.xinitrc"
+    else
+        # Add sourcing line if not already present
+        grep -qxF "if [ -f \$HOME/.xprofile ]; then . \$HOME/.xprofile; fi" ~/.xinitrc || \
+        echo "if [ -f \$HOME/.xprofile ]; then . \$HOME/.xprofile; fi" >> ~/.xinitrc
+    fi
+
+    # Step 5: Set wallpaper in .xprofile
     echo -e "🌄 Setting wallpaper using feh..."
-    grep -qxF "feh --bg-scale \"$WALLPAPER_PATH\"" ~/.xprofile || echo "feh --bg-scale \"$WALLPAPER_PATH\"" >> ~/.xprofile
+    grep -qxF "feh --bg-scale \"$WALLPAPER_PATH\"" ~/.xprofile || \
+    echo "feh --bg-scale \"$WALLPAPER_PATH\"" >> ~/.xprofile
+
+    echo -e "✅ Wallpaper setup complete!"
 }
 
 
