@@ -49,9 +49,9 @@ declare -A hotkeys=(
 
 All_Configs(){
 echo Set All configs
-mkdir -p "$HOME/.config/conky"
-mkdir -p "$HOME/.config/foot"
-mkdir -p "$HOME/.config/wofi"
+mkdir -p "home/.config/conky"
+mkdir -p "home/.config/foot"
+mkdir -p "home/.config/wofi"
 
 rclone copy "home/ms1/config/foot/" "home/.config/foot/"
 rclone copy "home/ms1/config/wofi/" "home/.config/wofi/"
