@@ -70,7 +70,7 @@ import_scripts() {
         for script in "$script_dir"/*.sh; do
             # Check if the file exists and is readable
             if [[ -f "$script" && -r "$script" ]]; then
-                echo "Importing: $script"
+                # echo "Importing: $script"
                 source "$script"
             else
                 echo "Skipping: $script (not readable or not a file)"
