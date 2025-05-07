@@ -59,29 +59,19 @@ wallpaper(){
     echo -e "🌐 Downloading wallpaper..."
     curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
     
-    # Step 3: Check if .xprofile exists, create it if not
-    if [ ! -f "$HOME/.xprofile" ]; then
-        echo -e "📝 Creating .xprofile..."
-        touch "$HOME/.xprofile"
+    # Step 3: Check if autostart.h exists, create it if not
+    AUTOSTART_FILE="$HOME/.config/xmonad/autostart.h"
+    if [ ! -f "$AUTOSTART_FILE" ]; then
+        echo -e "📝 Creating autostart.h..."
+        mkdir -p "$(dirname "$AUTOSTART_FILE")"
+        touch "$AUTOSTART_FILE"
     fi
 
-    # Step 4: Check if .xinitrc exists, create it if not, and source .xprofile
-    if [ ! -f "$HOME/.xinitrc" ]; then
-        echo -e "📝 Creating .xinitrc and sourcing .xprofile..."
-        echo "if [ -f \$HOME/.xprofile ]; then . \$HOME/.xprofile; fi" > "$HOME/.xinitrc"
-    else
-        # Add sourcing line if not already present
-        grep -qxF "if [ -f \$HOME/.xprofile ]; then . \$HOME/.xprofile; fi" ~/.xinitrc || \
-        echo "if [ -f \$HOME/.xprofile ]; then . \$HOME/.xprofile; fi" >> ~/.xinitrc
-    fi
-
-    # Step 5: Set wallpaper in .xprofile
+    # Step 4: Set wallpaper in autostart.h
     echo -e "🌄 Setting wallpaper using feh..."
-    grep -qxF "feh --bg-scale \"$WALLPAPER_PATH\"" ~/.xprofile || \
-    echo "feh --bg-scale \"$WALLPAPER_PATH\"" >> ~/.xprofile
-
-    echo -e "✅ Wallpaper setup complete!"
+    grep -qxF "feh --bg-scale \"$WALLPAPER_PATH\"" "$AUTOSTART_FILE" || echo "feh --bg-scale \"$WALLPAPER_PATH\" &" >> "$AUTOSTART_FILE"
 }
+
 
 
 # Function to install JetBrainsMono Nerd Font using oh-my-posh on Arch Linux
