@@ -4,6 +4,7 @@ import XMonad
 import Data.Monoid
 import System.Exit
 XMonad.Util.SpawnOnce
+import XMonad.Util.Run (safeSpawn)
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
@@ -240,6 +241,7 @@ myLogHook = return ()
 myStartupHook = do
         spawnOnce "nitrogen --restore &"
         spawnOnce "picom &"
+        safeSpawn "sh" ["~/.config/autostart.h"]
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
