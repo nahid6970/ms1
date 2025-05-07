@@ -79,6 +79,7 @@ install_packages() {
         rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
         thefuck feh screenfetch sed grep jq rofi
 }
+
 # Function to install necessary packages using yay
 install_packages_yay() {
     clear
