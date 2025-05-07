@@ -88,9 +88,9 @@ desktop_environment() {
             mkdir -p "$HOME/.config/waybar"
             mkdir -p "$HOME/.config/foot"
             mkdir -p "$HOME/.config/wofi"
-            # Copy contents recursively and force overwrite
-            rsync -a --delete "$HOME/ms1/linux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
-            rsync -a --delete "$HOME/ms1/linux/Hyprland/typecraft/waybar/" "$HOME/.config/waybar/"
+            #! Copy contents recursively and force overwrite
+            rsync -a --delete "$HOME/ms1/linux/config/hypr/" "$HOME/.config/hypr/"
+            rsync -a --delete "$HOME/ms1/linux/config/waybar/" "$HOME/.config/waybar/"
             sudo systemctl enable sddm
 
             echo "📜 Setting environment variables..."
