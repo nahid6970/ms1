@@ -228,7 +228,9 @@ myLogHook = return ()
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = return ()
+-- myStartupHook = return ()
+myStartupHook = do
+        spawnOnce "nitrogen --restore &"
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
