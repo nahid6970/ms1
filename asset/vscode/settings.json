@@ -49,6 +49,7 @@
 "git.openRepositoryInParentFolders": "always",
 "banner-comments.h1": "ANSI Shadow",
 "python.locator": "js",
-"python.defaultInterpreterPath": "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe"
+"python.defaultInterpreterPath": "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe",
+"haskell.manageHLS": "GHCup"
 
 }

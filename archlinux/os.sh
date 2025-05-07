@@ -764,6 +764,9 @@ distrotube_dwm_config(){
 
 distrotube_main_distro_xmonad(){
     sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xterm dmenu nitrogen
+    cd ~/
+    mkdir -p .xmonad
+    cp ~/ms1/archlinux/xmonad/xmonad.hs ~/.xmonad/
 }
 
 
