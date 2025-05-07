@@ -240,7 +240,8 @@ myLogHook = return ()
 myStartupHook = do
         spawnOnce "nitrogen --restore &"
         spawnOnce "picom &"
-        safeSpawn "sh" ["~/.config/autostart.h"]
+        spawnOnce "~ms1/archlinux/config/autostart.sh"
+
 
 
 ------------------------------------------------------------------------
