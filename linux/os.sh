@@ -18,8 +18,6 @@ BASHRC_DEST="$HOME/.bashrc"
 NVIM_INIT_SOURCE="$REPO_DIR/dotfiles/neovim/init.lua"
 NVIM_CONFIG_DEST="$HOME/.config/nvim"
 
-
-
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1]                   : update_ms1_repo               :$GREEN"
@@ -61,6 +59,8 @@ declare -A hotkeys=(
 
 All_Configs(){
 echo Set All configs
+rsync -a --delete "$HOME/ms1/Hyprland/wofi/" "$HOME/.config/wofi/"
+rsync -a --delete "$HOME/ms1/Hyprland/foot/" "$HOME/.config/foot/"
 }
 
 Load_Scripts(){
@@ -506,83 +506,7 @@ check_gpu_drivers() {
     fi
 }
 
-setup_hyprland_full() {
-    #! for hyprland need to enable 3d accelaration in the virtual io
-  echo "📦 Installing packages..."
-  sudo pacman -S --needed --noconfirm \
-    hyprland kitty waybar wofi \
-    xorg-xwayland xdg-desktop-portal-hyprland \
-    wlroots qt5-wayland qt6-wayland \
-    hyprpaper hyprlock grim slurp wl-clipboard
 
-  echo "🛠️ Setting up config directory..."
-  mkdir -p ~/.config/hypr
-
-  echo "📄 Writing minimal hyprland.conf..."
-  cat > ~/.config/hypr/hyprland.conf <<EOF
-# Hyprland Minimal Config
-
-# Autostart apps
-exec-once = kitty
-exec-once = waybar
-
-# Keybindings
-bind = SUPER, RETURN, exec, kitty
-bind = SUPER, Q, killactive,
-bind = SUPER, M, exit,
-
-# Display
-monitor = ,preferred,auto,1
-
-# Input
-input {
-  kb_layout = us
-}
-
-# Aesthetics
-general {
-  gaps_in = 5
-  gaps_out = 20
-  border_size = 2
-  col.active_border = rgba(33ccffee)
-  col.inactive_border = rgba(595959aa)
-}
-
-decoration {
-  rounding = 10
-  blur = yes
-  blur_size = 5
-  blur_passes = 2
-}
-
-animations {
-  enabled = yes
-  animation = windows, 1, 7, default
-}
-
-# Wallpaper (optional, comment out if not needed)
-# exec-once = hyprpaper & sleep 0.5 && hyprctl hyprpaper wallpaper "eDP-1,/path/to/wallpaper.jpg"
-EOF
-
-  echo "✅ Created: ~/.config/hypr/hyprland.conf"
-
-  echo "📜 Setting environment variables..."
-  PROFILE_FILE="$HOME/.bash_profile"
-  grep -q XDG_SESSION_TYPE "$PROFILE_FILE" || cat >> "$PROFILE_FILE" <<'EOF'
-
-# Hyprland env
-export XDG_SESSION_TYPE=wayland
-export XDG_CURRENT_DESKTOP=Hyprland
-export QT_QPA_PLATFORM=wayland
-export MOZ_ENABLE_WAYLAND=1
-EOF
-
-  echo "✅ Updated: $PROFILE_FILE"
-
-  echo "🎉 Setup complete! Now run:"
-  echo "➡️  source ~/.bash_profile"
-  echo "➡️  Hyprland"
-}
 
 sddm_theme() {
   echo "📦 Installing Sugar Candy theme..."
@@ -840,33 +764,25 @@ rsync -a --delete "$HOME/ms1/archlinux/dwm/.xprofile" "$HOME/.xprofile"
 dwm_statusbar() {
     cd ~/
     echo Configure DWM Statusbar
-yay -S --needed git base-devel lemonbar libinih
-git clone https://github.com/domsson/succade.git
+    yay -S --needed git base-devel lemonbar libinih
+    git clone https://github.com/domsson/succade.git
     # Change into the succade directory
     cd succade || { echo "Failed to enter succade directory"; return 1; }
-    
     # Make the build script executable
     chmod +x ./build
-    
     # Run the build script
     ./build
-    
     # Create the config directory
     mkdir -p ~/.config/succade
-    
     # Copy the example config to the proper location
     cp ./cfg/example1.ini ~/.config/succade/succaderc
-    
     # Make succade executable
     chmod +x ./bin/succade
-    
     # Move succade to a directory in your PATH (e.g., ~/.local/bin/)
     cp ./bin/succade ~/.local/bin/
-    
     # Confirm installation success
     echo "Succade has been successfully installed!"
-
-}
+} #! failed ?
 
 
 dwmblocks_torrinfail(){
@@ -886,7 +802,7 @@ distrotube_dwm(){
 }
 
 distrotube_dwm_config(){
-    cd ~/ms1/archlinux/dwmblocks_dt_fixed/
+    cd ~/ms1/linux/config/dwm/dwmblocks_dt_fixed/
     make
     sudo make clean install
     chmod +x scripts/*
@@ -898,7 +814,7 @@ distrotube_main_distro_xmonad(){
     sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xmobar xterm dmenu nitrogen picom gnome-terminal
     cd ~/
     mkdir -p .xmonad
-    cp ~/ms1/archlinux/xmonad/xmonad.hs ~/.xmonad/
+    cp ~/ms1/linux/config/xmonad/xmonad.hs ~/.xmonad/
     sddm_setup
     wallpaper
 }

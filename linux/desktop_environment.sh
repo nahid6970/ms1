@@ -78,20 +78,34 @@ desktop_environment() {
             ;;
         4)
             echo -e "${YELLOW}Installing Hyprland...${NC}"
+            #! for hyprland need to enable 3d accelaration in the virtual io
             # Install essential packages
-            sudo pacman -S --needed foot hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3 sddm
+            sudo pacman -S --needed foot kitty hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3 sddm
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
-            sudo pacman -S --needed qt5-wayland qt6-wayland
+            sudo pacman -S --needed qt5-wayland qt6-wayland rofi-wayland
+
             mkdir -p "$HOME/.config/hypr"
             mkdir -p "$HOME/.config/waybar"
             mkdir -p "$HOME/.config/foot"
             mkdir -p "$HOME/.config/wofi"
             # Copy contents recursively and force overwrite
-            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
-            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/waybar/" "$HOME/.config/waybar/"
-            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/wofi/" "$HOME/.config/wofi/"
-            rsync -a --delete "$HOME/ms1/archlinux/Hyprland/typecraft/foot/" "$HOME/.config/foot/"
+            rsync -a --delete "$HOME/ms1/linux/Hyprland/typecraft/hypr/" "$HOME/.config/hypr/"
+            rsync -a --delete "$HOME/ms1/linux/Hyprland/typecraft/waybar/" "$HOME/.config/waybar/"
             sudo systemctl enable sddm
+
+            echo "📜 Setting environment variables..."
+            PROFILE_FILE="$HOME/.bash_profile"
+            grep -q XDG_SESSION_TYPE "$PROFILE_FILE" || cat >> "$PROFILE_FILE" <<'EOF'
+# Hyprland env
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=Hyprland
+export QT_QPA_PLATFORM=wayland
+export MOZ_ENABLE_WAYLAND=1
+EOF
+            echo "✅ Updated: $PROFILE_FILE"
+            echo "🎉 Setup complete! Now run:"
+            echo "➡️  source ~/.bash_profile"
+            echo "➡️  Hyprland"
 
             # Ask about theme
             read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
