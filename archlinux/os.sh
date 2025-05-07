@@ -762,6 +762,12 @@ distrotube_dwm_config(){
 }
 
 
+distrotube_main_distro_xmonad(){
+    sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xterm dmenu nitrogen
+}
+
+
+
 #! proton for steam games
 #! bottles for whatever .exe files you have laying around (including games)
 #! lutris if you so happen to have the .exe file of a game they support.
@@ -794,6 +800,7 @@ menu_items=(
     "DWM Config                       : dwm_config                  :$GREEN"
     "DWM ST                           : dwm_statusbar               :$GREEN"
     "DWM Distrotube                   : distrotube_dwm_config       :$GREEN"
+    "xmonad Distrotube                : distrotube_dwm_config       :$GREEN"
 )
 
 # Special hotkey items
