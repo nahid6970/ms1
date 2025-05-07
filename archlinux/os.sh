@@ -59,6 +59,9 @@ declare -A hotkeys=(
     [x]="test_test"
 )
 
+All_Configs(){
+
+}
 
 
 
@@ -74,7 +77,7 @@ install_packages() {
         openssh python rclone sshpass wget \
         which zoxide yazi zsh stow expac numlockx \
         rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
-        thefuck feh
+        thefuck feh screenfetch sed grep jq
 }
 # Function to install necessary packages using yay
 install_packages_yay() {
