@@ -9,15 +9,6 @@ MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Define some variables
-# storage="$HOME/storage/shared"
-
-REPO_DIR="$HOME/ms1"
-BASHRC_SOURCE="$REPO_DIR/linux/config/bashrc"
-BASHRC_DEST="$HOME/.bashrc"
-NVIM_INIT_SOURCE="$REPO_DIR/dotfiles/neovim/init.lua"
-NVIM_CONFIG_DEST="$HOME/.config/nvim"
-
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1]                   : update_ms1_repo               :$GREEN"
@@ -104,19 +95,10 @@ list_recent_packages() {
 copy_files() {
     clear
     echo -e "${CYAN}Copying .bashrc...${NC}"
-    cp "$BASHRC_SOURCE" "$BASHRC_DEST"
+    cp $HOME/ms1/linux/config/bashrc $HOME/.bashrc
 
     echo -e "${GREEN}.bashrc copied.${NC}"
     echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
-}
-
-
-# Function to remove the repository
-remove_repo() {
-    clear
-    echo -e "${RED}Removing the repository folder ($REPO_DIR)...${NC}"
-    rm -rf "$REPO_DIR"
-    echo -e "${RED}Repository folder removed successfully.${NC}"
 }
 
 # Neovim setup function
@@ -135,23 +117,6 @@ nvim_setup() {
     curl -o /data/data/com.termux/files/usr/bin/install-in-mason  https://raw.githubusercontent.com/Amirulmuuminin/setup-mason-for-termux/main/install-in-mason
     chmod +x /data/data/com.termux/files/usr/bin/install-in-mason
     install-in-mason lua-language-server
-}
-
-# Git push repository function
-git_push_repo() {
-    clear
-    echo -e "${BLUE}Pushing the repository to the remote...${NC}"
-    cd "$REPO_DIR"
-    git add .
-    echo -e "${CYAN}Enter commit message:${NC}"
-    read commit_message
-    git commit -m "$commit_message"
-    git push
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Repository pushed successfully.${NC}"
-    else
-        echo -e "${RED}Failed to push the repository. Please check your Git configuration.${NC}"
-    fi
 }
 
 update_ms1_repo() {
