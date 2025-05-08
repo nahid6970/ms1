@@ -1,39 +1,3 @@
-# Function to install SDDM theme
-sddm_theme() {
-  echo -e "${CYAN}📦 Installing Sugar Candy theme...${NC}"
-  if ! pacman -Q sddm-theme-sugar-candy &>/dev/null; then
-    yay -S --noconfirm --needed sddm sddm-theme-sugar-candy
-  else
-    echo -e "${GREEN}✅ sddm-theme-sugar-candy is already installed.${NC}"
-  fi
-
-  echo -e "${CYAN}📝 Configuring /etc/sddm.conf...${NC}"
-  sudo bash -c 'cat > /etc/sddm.conf <<EOF
-[Theme]
-Current=Sugar-Candy
-
-[General]
-Numlock=on
-EOF'
-
-  echo -e "${GREEN}✅ SDDM theme set to Sugar-Candy and NumLock enabled.${NC}"
-}
-
-# Function to configure SDDM with NumLock
-sddm_numlock() {
-  echo -e "${CYAN}📝 Configuring /etc/sddm.conf to enable NumLock...${NC}"
-
-  sudo bash -c 'cat > /etc/sddm.conf <<EOF
-[General]
-Numlock=on
-EOF'
-
-  echo -e "${GREEN}✅ NumLock enabled in /etc/sddm.conf.${NC}"
-}
-
-
-
-
 # Function to install the chosen desktop environment
 desktop_environment() {
     clear
@@ -87,9 +51,8 @@ desktop_environment() {
             mkdir -p "$HOME/.config/hypr"
             mkdir -p "$HOME/.config/waybar"
             #! Copy contents recursively and force overwrite
-            rsync -a --delete "$HOME/ms1/linux/config/hypr/" "$HOME/.config/hypr/"
-            rsync -a --delete "$HOME/ms1/linux/config/waybar/" "$HOME/.config/waybar/"
-            sudo systemctl enable sddm
+            rsync -a --delete "$HOME/ms1/linux/config/.config/hypr/" "$HOME/.config/hypr/"
+            rsync -a --delete "$HOME/ms1/linux/config/.config/waybar/" "$HOME/.config/waybar/"
 
             echo "📜 Setting environment variables..."
             PROFILE_FILE="$HOME/.bash_profile"
@@ -105,14 +68,6 @@ EOF
             echo "➡️  source ~/.bash_profile"
             echo "➡️  Hyprland"
 
-            # Ask about theme
-            read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
-            if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
-                sddm_theme  # Assuming sddm_theme is for theme setup
-            else
-                sddm_numlock  # Assuming sddm_numlock handles the NumLock configuration
-            fi
-            
             sudo pacman -Syu
             ;;
         5)
