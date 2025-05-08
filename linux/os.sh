@@ -57,7 +57,7 @@ rsync -a --delete "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
 rclone copy "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/conky"
 rclone copy "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/foot"
 rclone copy "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/hypr"
-rclone copy "$HOME/ms1/linux/config/.config/waybar/" "$HOME/.config/waybar/"
+rclone copy "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/waybar"
 rclone copy "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/wofi"
 
 }
