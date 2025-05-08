@@ -54,7 +54,9 @@ mkdir -p "$HOME/.config/conky"
 mkdir -p "$HOME/.config/foot"
 mkdir -p "$HOME/.config/wofi"
 
-rsync -a --delete "$HOME/ms1/linux/config/" "$HOME/"
+rsync -a --delete "$HOME/ms1/linux/config/.config" "$HOME/.config"
+rsync -a --delete "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
+rsync -a --delete "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
 
 }
 
