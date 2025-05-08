@@ -54,10 +54,11 @@ echo Set All configs
 rsync -a --delete "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
 rsync -a --delete "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
 
-rsync -a --delete "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/conky"
-rsync -a --delete "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/foot"
-rsync -a --delete "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/hypr"
-rsync -a --delete "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/wofi"
+rsync -a --delete "$HOME/ms1/linux/config/.config/conky" "$HOME/.config"
+rsync -a --delete "$HOME/ms1/linux/config/.config/foot" "$HOME/.config"
+rsync -a --delete "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config"
+rsync -a --delete "$HOME/ms1/linux/config/.config/waybar/" "$HOME/.config"
+rsync -a --delete "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config"
 
 }
 
