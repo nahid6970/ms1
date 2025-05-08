@@ -44,15 +44,9 @@ desktop_environment() {
             echo -e "${YELLOW}Installing Hyprland...${NC}"
             #! for hyprland need to enable 3d accelaration in the virtual io
             # Install essential packages
-            sudo pacman -S --needed foot kitty hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3 sddm
+            sudo pacman -S --needed foot kitty hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3
             sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
             sudo pacman -S --needed qt5-wayland qt6-wayland rofi-wayland
-
-            mkdir -p "$HOME/.config/hypr"
-            mkdir -p "$HOME/.config/waybar"
-            #! Copy contents recursively and force overwrite
-            rsync -a --delete "$HOME/ms1/linux/config/.config/hypr/" "$HOME/.config/hypr/"
-            rsync -a --delete "$HOME/ms1/linux/config/.config/waybar/" "$HOME/.config/waybar/"
 
             echo "📜 Setting environment variables..."
             PROFILE_FILE="$HOME/.bash_profile"
