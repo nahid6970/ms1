@@ -16,6 +16,7 @@ menu_items=(
     "Config All Necessary PKG   : All_Configs                   :$GREEN"
     "Install Necessary Packages : install_packages              :$GREEN"
     "Desktop Environment        : desktop_environment           :$GREEN"
+    "SDDM Setup                 : sddm_setup                    :$GREEN"
     "YAY Setup                  : setup_yay                     :$GREEN"
     # "bottles                  : not_yet_choosen               :$GREEN"
     # "wine                     : not_yet_choosen               :$GREEN"
