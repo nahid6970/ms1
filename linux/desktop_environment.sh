@@ -1,3 +1,9 @@
+#!/bin/bash
+
+# import list
+source ~/ms1/linux/os_imports/wallpaper.sh
+source ~/ms1/linux/os_imports/sddm.sh
+
 # Function to install the chosen desktop environment
 desktop_environment() {
     clear
@@ -73,8 +79,7 @@ EOF
             echo -e "${YELLOW}Installing Xmonad + Xmobar.${NC}"
             #! compton vs picom --for arch select picom [these are compositor for x11 --compton is for ubuntu]
             sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xmobar xterm dmenu nitrogen picom gnome-terminal
-            cd ~/
-            mkdir -p .xmonad
+            mkdir -p $HOME/.xmonad
             cp ~/ms1/linux/config/xmonad/xmonad.hs ~/.xmonad/
             sddm_setup
             wallpaper
