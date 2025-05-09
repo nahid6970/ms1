@@ -63,7 +63,7 @@
   </script>
 </head>
 <body class="container mt-4">
-  <h1 class="text-center mb-4">Event Schedule</h1>
+  <!-- <h1 class="text-center mb-4">Event Schedule</h1> -->
   <div class="d-flex justify-content-center gap-2 mb-4">
     <a href="/add-event" class="btn btn-success">Add Event</a>
     <a href="/teams" class="btn btn-secondary">Manage Teams</a>
@@ -82,7 +82,7 @@
               <span class="countdown" data-time="{{ event.event_time.isoformat() }}"></span>
             </small>
             <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event.id }}">
-              <i class="nf nf-fa-edit"></i> Edit Countdown
+              <i class="nf nf-fa-edit"></i> Edit
             </button>
           </div>
         </div>
@@ -93,15 +93,14 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="editEventModalLabel{{ event.id }}">Edit Countdown Time for {{ event.team1.name }}</h5>
+            <h5 class="modal-title" id="editEventModalLabel{{ event.id }}">CoC {{ event.team1.name }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form action="{{ url_for('edit_event', event_id=event.id) }}" method="POST">
               <div class="mb-3">
-                <label for="durationInput{{ event.id }}" class="form-label">Set New Countdown (e.g., 1d 2h 30m from now):</label>
+                <label for="durationInput{{ event.id }}" class="form-label">New Countdown:</label>
                 <input type="text" class="form-control" id="durationInput{{ event.id }}" name="duration" value="{{ event.duration_str_for_modal }}" placeholder="0d 0h 0m" required>
-                <small class="form-text text-muted">This will set the event time relative to now.</small>
               </div>
               <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
