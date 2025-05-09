@@ -7,7 +7,7 @@ sddm_setup() {
   echo -e "${RED}🔧 Installing SDDM if not already present...${NC}"
   sudo pacman -S --needed sddm
 
-  echo -e "${CYAN}🔧 Choose setup option:${NC}"
+  echo -e "${GREEN}🔧 Choose setup option:${NC}"
   echo -e "1) NumLock only"
   echo -e "2) NumLock + SDDM Sugar Candy theme"
   read -rp "Enter your choice (1/2): " choice
