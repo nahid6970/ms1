@@ -239,7 +239,7 @@ myLogHook = return ()
 -- myStartupHook = return ()
 myStartupHook = do
     spawnOnce "picom &"
-    spawnOnce "~/ms1/linux/config/autostart.sh &"
+    spawnOnce "bash -c '~/ms1/linux/config/autostart.sh'"
     -- spawnOnce "nitrogen --restore &"
 
 
