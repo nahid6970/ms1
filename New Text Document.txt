@@ -1,0 +1,88 @@
+import subprocess
+import tkinter as tk
+
+# Rclone sync commands with --dry-run
+CMD_SOFTWARE = 'rclone sync D:/software gu:/software --fast-list --dry-run'
+CMD_SONG = 'rclone sync D:/song gu:/song --fast-list --dry-run'
+
+# Keywords indicating differences
+DIFF_KEYWORDS = ["Deleted", "Renamed", "Copied", "Moved", "Transferred"]
+
+def run_rclone_command(command):
+    """
+    Run the rclone command and return the output as a list of lines.
+    """
+    try:
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        return result.stdout.splitlines()
+    except Exception as e:
+        print(f"Error executing command: {e}")
+        return []
+
+def check_difference(output):
+    """
+    Check if the output contains any difference keywords.
+    """
+    # Check if any of the keywords are in the entire output
+    for line in output:
+        if any(keyword in line for keyword in DIFF_KEYWORDS):
+            return True
+    return False
+
+def update_label(label, has_difference, category, output):
+    """
+    Update the label text and color based on difference status.
+    """
+    if has_difference:
+        label.config(text=f"{category} - Differences found!", fg="red")
+        label.bind("<Button-1>", lambda event: show_differences(output, category))
+    else:
+        label.config(text=f"{category} - No differences detected", fg="green")
+        label.unbind("<Button-1>")
+
+def show_differences(output, category):
+    """
+    Show the detailed differences in the terminal.
+    """
+    print(f"\nDifferences found in {category} files (serially):")
+    for idx, line in enumerate(output, 1):
+        print(f"{idx}. {line}")
+    print("End of Differences.\n")
+
+def run_check(label_software, label_song):
+    """
+    Runs the difference check and updates labels.
+    """
+    output_software = run_rclone_command(CMD_SOFTWARE)
+    output_song = run_rclone_command(CMD_SONG)
+
+    difference_software = check_difference(output_software)
+    difference_song = check_difference(output_song)
+
+    update_label(label_software, difference_software, "Software", output_software)
+    update_label(label_song, difference_song, "Song", output_song)
+
+    # Repeat every 10 minutes
+    label_software.after(600000, run_check, label_software, label_song)
+
+def create_gui():
+    """
+    Create the Tkinter GUI.
+    """
+    root = tk.Tk()
+    root.title("Rclone Sync Checker")
+
+    # Labels for software and song
+    label_software = tk.Label(root, text="Software - Checking...", font=("Helvetica", 16))
+    label_software.pack(padx=20, pady=10)
+
+    label_song = tk.Label(root, text="Song - Checking...", font=("Helvetica", 16))
+    label_song.pack(padx=20, pady=10)
+
+    # Start checking when the GUI is loaded
+    run_check(label_software, label_song)
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    create_gui()
