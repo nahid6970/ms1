@@ -9,7 +9,7 @@
     html, body {
       background-color: #c0c0c0;
       font-family: jetbrainsmono nfp; /* Ensure this font is available or fallback */
-      font-size: 1.5rem;
+      font-size: 2rem;
     }
     .countdown {
       font-weight: bold;
@@ -22,7 +22,7 @@
       text-transform: lowercase;
     }
     .countdown.expired {
-      background-color: #000000;
+      background-color: #ffffff;
       color: #ffffff; /* Ensure expired text is visible */
     }
     .countdown.live {
@@ -45,7 +45,7 @@
         const now = new Date();
         const diff = time - now;
         if (diff <= 0) {
-          el.innerText = "\uf058"; // Nerd Font checkmark icon
+          el.innerText = "✔️"; // Nerd Font checkmark icon
           el.classList.add('expired');
           el.classList.remove('live');
           return;
