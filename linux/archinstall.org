@@ -221,3 +221,8 @@ https://www.gnome-look.org/browse?cat=124&ord=latest
 dwm tiling + statusbar dt uses
 https://www.youtube.com/watch?v=M9drMlXRfg8
 https://dwm.suckless.org/
+
+xmonad + xmobar
+https://www.youtube.com/watch?v=3noK4GTmyMw
+https://wiki.haskell.org/Xmonad/Config_archive
+https://www.youtube.com/results?search_query=distrotube+xmonad
