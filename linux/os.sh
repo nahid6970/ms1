@@ -50,12 +50,14 @@ declare -A hotkeys=(
 All_Configs(){
 echo Set All configs
 
-rsync -a --delete "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
 rsync -a --delete "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
+rsync -a --delete "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
+
+rclone copy "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/hypr"
+rclone copy "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad"
 
 rclone copy "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/conky"
 rclone copy "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/foot"
-rclone copy "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/hypr"
 rclone copy "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/waybar"
 rclone copy "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/wofi"
 
