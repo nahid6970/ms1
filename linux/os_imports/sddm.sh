@@ -1,6 +1,9 @@
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+
 # Function to configure SDDM with optional Sugar Candy theme and NumLock
 sddm_setup() {
-  echo -e "${CYAN}🔧 Installing SDDM if not already present...${NC}"
+  echo -e "${RED}🔧 Installing SDDM if not already present...${NC}"
   sudo pacman -S --needed sddm
 
   echo -e "${CYAN}🔧 Choose setup option:${NC}"
