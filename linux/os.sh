@@ -61,6 +61,7 @@ rclone copy "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/foot"
 rclone copy "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/waybar"
 rclone copy "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/wofi"
 
+source $HOME/autostart.sh
 }
 
 Load_Scripts(){
