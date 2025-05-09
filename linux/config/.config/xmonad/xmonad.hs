@@ -238,9 +238,10 @@ myLogHook = return ()
 -- By default, do nothing.
 -- myStartupHook = return ()
 myStartupHook = do
-        spawnOnce "picom &"
-        spawnOnce "~/ms1/archlinux/config/autostart.sh"
-        -- spawnOnce "nitrogen --restore &"
+    spawnOnce "picom &"
+    spawnOnce "~/ms1/archlinux/config/autostart.sh &"
+    -- spawnOnce "nitrogen --restore &"
+
 
 
 
