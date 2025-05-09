@@ -4,7 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 import re
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///c:/msBackups/DataBase/Clash_of_Clans.db'  # Changed DB path for portability
+# Ensure this path is correct for your environment or use a more robust configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///c:/msBackups/DataBase/Clash_of_Clans.db' 
 db = SQLAlchemy(app)
 
 # Models
@@ -13,53 +14,59 @@ class Team(db.Model):
     name = db.Column(db.String(100), nullable=False)
     logo_url = db.Column(db.String(300), nullable=False)
 
-class Event(db.Model):  # Renamed Match to Event
+class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     team1_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
-    # team2_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False) # Removed team2
-    event_link = db.Column(db.String(300), nullable=False) # Renamed game_link
-    event_time = db.Column(db.DateTime, nullable=False) # Renamed game_time
-
+    event_link = db.Column(db.String(300), nullable=False) 
+    event_time = db.Column(db.DateTime, nullable=False)
     team1 = db.relationship('Team', foreign_keys=[team1_id])
-    # team2 = db.relationship('Team', foreign_keys=[team2_id]) # Removed team2
 
 @app.route('/')
 def index():
     now = datetime.now()
-    upcoming_events = Event.query.filter(Event.event_time >= now).order_by(Event.event_time).all() # Renamed variables
-    past_events = Event.query.filter(Event.event_time < now).order_by(Event.event_time.desc()).limit(10).all() # Renamed variables
-    return render_template('event_list.html', upcoming_events=upcoming_events, past_events=past_events) # Renamed template
+    events_from_db = Event.query.order_by(Event.event_time).all()
+    
+    processed_events = []
+    for event_obj in events_from_db:
+        # Calculate current remaining duration string for pre-filling the edit modal
+        if event_obj.event_time > now:
+            remaining = event_obj.event_time - now
+            days = remaining.days
+            hours = remaining.seconds // 3600
+            minutes = (remaining.seconds % 3600) // 60
+            event_obj.duration_str_for_modal = f"{days}d {hours}h {minutes}m"
+        else:
+            # For past events, provide a default value for the modal input
+            event_obj.duration_str_for_modal = "0d 0h 0m" 
+        processed_events.append(event_obj)
+            
+    return render_template('event_list.html', upcoming_events=processed_events)
 
-@app.route('/add-event', methods=['GET', 'POST']) # Renamed route
-def add_event(): # Renamed function
+@app.route('/add-event', methods=['GET', 'POST'])
+def add_event():
     if request.method == 'POST':
         team1_id = request.form['team1']
-        # team2_id = request.form['team2'] # Removed team2
-        event_link = request.form['event_link'] # Renamed variable
+        event_link = request.form['event_link']
         duration = request.form['duration']
-
-        # Parse the duration
         days, hours, minutes = 0, 0, 0
 
-        if 'd' in duration:
-            days = int(duration.split('d')[0])
-        if 'h' in duration:
-            hours = int(duration.split('d')[-1].split('h')[0])
-        if 'm' in duration:
-            minutes = int(duration.split('h')[-1].split('m')[0])
+        # Improved duration parsing
+        d_match = re.search(r'(\d+)\s*d', duration)
+        h_match = re.search(r'(\d+)\s*h', duration)
+        m_match = re.search(r'(\d+)\s*m', duration)
 
-        # Calculate event time (current time + duration)
-        event_time = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes) # Renamed variable
-
-        # Add event to the database
-        event = Event(team1_id=team1_id,  event_link=event_link, event_time=event_time) # Removed team2
+        if d_match: days = int(d_match.group(1))
+        if h_match: hours = int(h_match.group(1))
+        if m_match: minutes = int(m_match.group(1))
+        
+        event_time = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes)
+        event = Event(team1_id=team1_id, event_link=event_link, event_time=event_time)
         db.session.add(event)
         db.session.commit()
         return redirect(url_for('index'))
 
-    # Sort teams alphabetically by name
     teams = Team.query.order_by(Team.name).all()
-    return render_template('event_form.html', teams=teams, action='Add') # Renamed template, added action
+    return render_template('event_form.html', teams=teams, action='Add')
 
 @app.route('/teams', methods=['GET', 'POST'])
 def manage_teams():
@@ -71,11 +78,11 @@ def manage_teams():
         db.session.commit()
         return redirect(url_for('manage_teams'))
     teams = Team.query.order_by(Team.name).all()
-    return render_template('team_manager.html', teams=teams) # Renamed template
+    return render_template('team_manager.html', teams=teams)
 
-@app.route('/delete-event/<int:id>', methods=['POST']) # Renamed route
-def delete_event(id): # Renamed function
-    event = Event.query.get_or_404(id) # Renamed variable
+@app.route('/delete-event/<int:id>', methods=['POST'])
+def delete_event(id):
+    event = Event.query.get_or_404(id)
     db.session.delete(event)
     db.session.commit()
     return redirect(url_for('index'))
@@ -87,58 +94,32 @@ def delete_team(id):
     db.session.commit()
     return redirect(url_for('manage_teams'))
 
-@app.route('/edit-event/<int:event_id>', methods=['GET', 'POST']) # Renamed route, variable, and function
+@app.route('/edit-event/<int:event_id>', methods=['GET', 'POST'])
 def edit_event(event_id):
-    event = Event.query.get(event_id) # Renamed variable
-    teams = Team.query.order_by(Team.name).all()
+    event = Event.query.get_or_404(event_id)
 
     if request.method == 'POST':
-        team1_id = request.form['team1']
-        # team2_id = request.form['team2'] # Removed team2
-        event_link = request.form['event_link'] # Renamed variable
         duration = request.form['duration'].strip()
-
-        # Parse the duration
         days, hours, minutes = 0, 0, 0
 
+        # Parse the duration string (e.g., "1d 2h 30m")
         d_match = re.search(r'(\d+)\s*d', duration)
         h_match = re.search(r'(\d+)\s*h', duration)
         m_match = re.search(r'(\d+)\s*m', duration)
 
-        if d_match:
-            days = int(d_match.group(1))
-        if h_match:
-            hours = int(h_match.group(1))
-        if m_match:
-            minutes = int(m_match.group(1))
+        if d_match: days = int(d_match.group(1))
+        if h_match: hours = int(h_match.group(1))
+        if m_match: minutes = int(m_match.group(1))
 
-        # Calculate new event time from now
-        event_time = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes) # Renamed variable
-
-        # Update the event
-        event.team1_id = team1_id
-        # event.team2_id = team2_id # Removed team2
-        event.event_link = event_link # Renamed variable
-        event.event_time = event_time # Renamed variable
-
+        # Calculate new event_time based on current time + provided duration
+        event.event_time = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes)
+        
         db.session.commit()
         return redirect(url_for('index'))
 
-    # This part runs only for GET (form load)
-    now = datetime.now()
-    remaining = event.event_time - now if event.event_time > now else timedelta(0) # Renamed variable
-    days = remaining.days
-    hours = remaining.seconds // 3600
-    minutes = (remaining.seconds % 3600) // 60
-    duration_str = f"{days}d {hours}h {minutes}m"
-
-    return render_template('event_form.html', event=event, teams=teams, duration=duration_str, action='Edit') # Renamed template, added action
-
-@app.route('/history')
-def event_history(): # Renamed function
-    now = datetime.now()
-    past_events = Event.query.filter(Event.event_time < now).order_by(Event.event_time.desc()).all() # Renamed variables
-    return render_template('event_history.html', events=past_events) # Renamed template
+    # If GET request, redirect to index page. 
+    # The editing UI for countdown is now within the modal on event_list.html.
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     with app.app_context():
