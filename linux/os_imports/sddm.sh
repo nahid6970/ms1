@@ -1,5 +1,6 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+NC='\033[0m' # No Color
 
 # Function to configure SDDM with optional Sugar Candy theme and NumLock
 sddm_setup() {
