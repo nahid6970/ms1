@@ -6,8 +6,10 @@ desktop_environment() {
     echo -e "2) GNOME"
     echo -e "3) XFCE"
     echo -e "4) Hyprland"
-    echo -e "5) None (CLI only)"
-    read -p "Enter the number (1-4): " DE_CHOICE
+    echo -e "5) DWM"
+    echo -e "6) Xmonad+Xmobar"
+    echo -e "7) None (CLI only)"
+    read -p "Enter the number (1-6): " DE_CHOICE
 
     case $DE_CHOICE in
         1)
