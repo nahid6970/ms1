@@ -28,16 +28,21 @@ def index():
     
     processed_events = []
     for event_obj in events_from_db:
-        # Calculate current remaining duration string for pre-filling the edit modal
         if event_obj.event_time > now:
             remaining = event_obj.event_time - now
             days = remaining.days
             hours = remaining.seconds // 3600
             minutes = (remaining.seconds % 3600) // 60
-            event_obj.duration_str_for_modal = f"{days}d {hours}h {minutes}m"
+            
+            # If days, hours, and minutes are all zero (e.g., < 1 minute remaining)
+            if days == 0 and hours == 0 and minutes == 0:
+                event_obj.duration_str_for_modal = ""  # Set to empty string
+            else:
+                event_obj.duration_str_for_modal = f"{days}d {hours}h {minutes}m"
         else:
-            # For past events, provide a default value for the modal input
-            event_obj.duration_str_for_modal = "0d 0h 0m" 
+            # Event is past or exactly at 'now'
+            event_obj.duration_str_for_modal = ""  # Set to empty string
+            
         processed_events.append(event_obj)
             
     return render_template('event_list.html', upcoming_events=processed_events)
@@ -50,7 +55,6 @@ def add_event():
         duration = request.form['duration']
         days, hours, minutes = 0, 0, 0
 
-        # Improved duration parsing
         d_match = re.search(r'(\d+)\s*d', duration)
         h_match = re.search(r'(\d+)\s*h', duration)
         m_match = re.search(r'(\d+)\s*m', duration)
@@ -102,7 +106,6 @@ def edit_event(event_id):
         duration = request.form['duration'].strip()
         days, hours, minutes = 0, 0, 0
 
-        # Parse the duration string (e.g., "1d 2h 30m")
         d_match = re.search(r'(\d+)\s*d', duration)
         h_match = re.search(r'(\d+)\s*h', duration)
         m_match = re.search(r'(\d+)\s*m', duration)
@@ -111,14 +114,11 @@ def edit_event(event_id):
         if h_match: hours = int(h_match.group(1))
         if m_match: minutes = int(m_match.group(1))
 
-        # Calculate new event_time based on current time + provided duration
         event.event_time = datetime.now() + timedelta(days=days, hours=hours, minutes=minutes)
         
         db.session.commit()
         return redirect(url_for('index'))
 
-    # If GET request, redirect to index page. 
-    # The editing UI for countdown is now within the modal on event_list.html.
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
