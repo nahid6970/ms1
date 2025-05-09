@@ -12,10 +12,10 @@ NC='\033[0m' # No Color
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1]             : update_ms1_repo               :$GREEN"
-    "Copy Files                 : copy_files                    :$GREEN"
-    "Config All Necessary PKG   : All_Configs                   :$GREEN"
+    "Copy bashrc                : copy_files                    :$GREEN"
     "Install Necessary Packages : install_packages              :$GREEN"
     "Desktop Environment        : desktop_environment           :$GREEN"
+    "Config All Necessary PKG   : All_Configs                   :$GREEN"
     "SDDM Setup                 : sddm_setup                    :$GREEN"
     "YAY Setup                  : setup_yay                     :$GREEN"
     # "bottles                  : not_yet_choosen               :$GREEN"
