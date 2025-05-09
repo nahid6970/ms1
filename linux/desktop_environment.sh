@@ -67,6 +67,19 @@ EOF
             sudo pacman -Syu
             ;;
         5)
+            echo -e "${YELLOW}Installing DWM.${NC}"
+            ;;
+        6)
+            echo -e "${YELLOW}Installing Xmonad + Xmobar.${NC}"
+            #! compton vs picom --for arch select picom [these are compositor for x11 --compton is for ubuntu]
+            sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xmobar xterm dmenu nitrogen picom gnome-terminal
+            cd ~/
+            mkdir -p .xmonad
+            cp ~/ms1/linux/config/xmonad/xmonad.hs ~/.xmonad/
+            sddm_setup
+            wallpaper
+            ;;
+        7)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
             ;;
         *)
