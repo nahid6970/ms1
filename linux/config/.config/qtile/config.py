@@ -30,7 +30,7 @@ from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 
 mod = "mod4"
-terminal = "kitty"  # Replace with your terminal if different
+terminal = "foot"  # Replace with your terminal if different
 
 keys = [
     # A list of available commands that can be bound to keys can be found
