@@ -49,7 +49,7 @@ case $choice in
         ;;
     7)
         echo "Starting Qtile..."
-        exec startx qtile
+        qtile start -b wayland
         ;;
     *)
         echo "Invalid choice. Please select a number between 1 and 7."
