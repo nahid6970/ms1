@@ -18,6 +18,7 @@ menu_items=(
     "Wayland                    : wayland               :$GREEN"
     "Desktop Environment        : desktop_environment   :$GREEN"
     "Config All Necessary PKG   : All_Configs           :$GREEN"
+    "Wallpaper                  : wallpaper             :$GREEN"
     "SDDM Setup                 : sddm_setup            :$GREEN"
     "YAY Setup                  : setup_yay             :$GREEN"
     # "bottles                  : not_yet_choosen       :$GREEN"
