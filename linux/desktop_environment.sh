@@ -88,8 +88,9 @@ EOF
         7)
             echo -e "${YELLOW}Installing qtile.${NC}"
             sudo pacman -S --needed qtile python-pywlroots
-            sddm_setup
-            wallpaper
+            rclone copy "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config/qtile"
+            # sddm_setup
+            # wallpaper
             ;;
         8)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
