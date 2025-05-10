@@ -869,6 +869,11 @@ Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,100))
 
 # Commands and log file paths
 commands = {
+    "msBackups": {
+        "cmd":  "rclone check C:/msBackups o0:/msBackups --fast-list --size-only",
+        "log":  "C:/test/msBackups_check.log",
+        "label": "\udb85\ude32"
+    },
     "software": {
         "cmd":  "rclone check D:/software gu:/software --fast-list --size-only",
         "log":  "C:/test/software_check.log",
@@ -878,7 +883,7 @@ commands = {
         "cmd":  "rclone check D:/song gu:/song --fast-list --size-only",
         "log":  "C:/test/song_check.log",
         "label": "\uec1b"
-    }
+    },
 }
 
 def show_output(cfg):
@@ -890,9 +895,17 @@ def show_output(cfg):
     except FileNotFoundError:
         print(f"Log file not found for {cfg['label']}!")
 
-def on_label_click(event, cfg):
+# def on_label_click(event, cfg): #! doesnt show on terminal coz its hidden
+#     """Event handler for clicking a label."""
+#     show_output(cfg)
+
+def on_label_click(event, cfg): #! show in notepad++
     """Event handler for clicking a label."""
-    show_output(cfg)
+    try:
+        # Open the log file directly using Popen to show the output
+        subprocess.Popen(["notepad", cfg["log"]])
+    except Exception as e:
+        print(f"Error opening log file for {cfg['label']}: {e}")
 
 def check_and_update(label, cfg):
     """Runs the rclone check in a separate thread to keep the GUI responsive."""

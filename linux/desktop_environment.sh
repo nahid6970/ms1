@@ -13,8 +13,9 @@ desktop_environment() {
     echo -e "3) XFCE"
     echo -e "4) Hyprland"
     echo -e "5) DWM"
-    echo -e "6) Xmonad+Xmobar"
-    echo -e "7) None (CLI only)"
+    echo -e "6) Xmonad + Xmobar"
+    echo -e "7) qtile"
+    echo -e "8) None (CLI only)"
     read -p "Enter the number (1-6): " DE_CHOICE
 
     case $DE_CHOICE in
@@ -85,6 +86,12 @@ EOF
             wallpaper
             ;;
         7)
+            echo -e "${YELLOW}Installing qtile.${NC}"
+            sudo pacman -S --needed qtile python-pywlroots
+            sddm_setup
+            wallpaper
+            ;;
+        8)
             echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
             ;;
         *)
