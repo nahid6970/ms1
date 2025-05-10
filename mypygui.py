@@ -859,11 +859,73 @@ Sonarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,1))
 # Radarr_bt=tk.Label(ROOT1, image=radarr_img, compound=tk.TOP, text="", height=50, width=30, bg="#ffffff", fg="#ffffff", bd=0, highlightthickness=0, anchor="center", font=("calibri", 14, "bold"))
 Radarr_bt=tk.Label(ROOT1, text="\udb83\udfce", height=0, width=0, bg="#000000", fg="#ffdb75", bd=0, highlightthickness=0, anchor="center", font=("Jetbrainsmono nfp", 20, "bold"))
 Radarr_bt.bind("<Button-1>",lambda event:(subprocess.Popen(["explorer","D:\\Downloads\\@Radarr"],shell=True)))
-Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,1))
+Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,100))
 
 # Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 # Changes_Monitor_lb.pack(side="left",padx=(0,0),pady=(0,0))
 # compare_path_file()
+
+
+
+# Commands and log file paths
+commands = {
+    "software": {
+        "cmd":  "rclone check D:/software gu:/software --fast-list --size-only",
+        "log":  "C:/test/software_check.log",
+        "label": "\uf40e"
+    },
+    "song": {
+        "cmd":  "rclone check D:/song gu:/song --fast-list --size-only",
+        "log":  "C:/test/song_check.log",
+        "label": "\uec1b"
+    }
+}
+
+def show_output(cfg):
+    """Prints the output from the log file to the terminal."""
+    try:
+        with open(cfg["log"], "r") as f:
+            print(f"\n--- {cfg['label']} Check Output ---")
+            print(f.read())
+    except FileNotFoundError:
+        print(f"Log file not found for {cfg['label']}!")
+
+def on_label_click(event, cfg):
+    """Event handler for clicking a label."""
+    show_output(cfg)
+
+def check_and_update(label, cfg):
+    """Runs the rclone check in a separate thread to keep the GUI responsive."""
+    def run_check():
+        # Run rclone check and dump to log
+        with open(cfg["log"], "w") as f:
+            subprocess.run(cfg["cmd"], shell=True, stdout=f, stderr=f)
+
+        # Read log and decide label color
+        with open(cfg["log"], "r") as f:
+            content = f.read()
+        if "0 differences found" in content:
+            label.config(text=cfg["label"], fg="#d0f898")
+        else:
+            label.config(text=cfg["label"], fg="red")
+
+        # Schedule the next check in 10 minutes (600000 ms)
+        label.after(600000, lambda: threading.Thread(target=run_check).start())
+
+    # Start the check in a separate thread
+    threading.Thread(target=run_check).start()
+
+def create_gui():
+    for key, cfg in commands.items():
+        lbl = tk.Label(ROOT1, width=0, bg="#1d2027", text=cfg["label"], font=("jetbrainsmono nfp", 16, "bold"), cursor="hand2")
+        lbl.pack(side="left", padx=(5,5))
+        # Bind click event to show the output in the terminal
+        lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))
+        # Start its own loop
+        check_and_update(lbl, cfg)
+create_gui()
+
+
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
 #! ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝

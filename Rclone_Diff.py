@@ -15,12 +15,26 @@ commands = {
     }
 }
 
+def show_output(cfg):
+    """Prints the output from the log file to the terminal."""
+    try:
+        with open(cfg["log"], "r") as f:
+            print(f"\n--- {cfg['label']} Check Output ---")
+            print(f.read())
+    except FileNotFoundError:
+        print(f"Log file not found for {cfg['label']}!")
+
+def on_label_click(event, cfg):
+    """Event handler for clicking a label."""
+    show_output(cfg)
+
 def check_and_update(label, cfg):
-    # run rclone check and dump to log
+    """Runs the rclone check and updates the label color."""
+    # Run rclone check and dump to log
     with open(cfg["log"], "w") as f:
         subprocess.run(cfg["cmd"], shell=True, stdout=f, stderr=f)
 
-    # read log and decide
+    # Read log and decide label color
     with open(cfg["log"], "r") as f:
         content = f.read()
     if "0 differences found" in content:
@@ -28,17 +42,20 @@ def check_and_update(label, cfg):
     else:
         label.config(text=cfg["label"], fg="red")
 
-    # schedule next check in 10 minutes
-    label.after(600_000, check_and_update, label, cfg)
+    # Schedule next check in 10 minutes
+    label.after(600000, check_and_update, label, cfg)
 
 def create_gui():
+    """Creates the main GUI window."""
     root = tk.Tk()
     root.title("File Sync Checker")
 
     for key, cfg in commands.items():
-        lbl = tk.Label(root, text=cfg["label"], font=("Jetbrainsmono nfp", 16))
-        lbl.pack(padx=20, pady=10)
-        # start its own loop
+        lbl = tk.Label(root, text=cfg["label"], font=("jetbrainsmono nfp", 16), cursor="hand2")
+        lbl.pack(padx=20, pady=10, side="left")
+        # Bind click event to show the output in the terminal
+        lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))
+        # Start its own loop
         check_and_update(lbl, cfg)
 
     root.mainloop()
