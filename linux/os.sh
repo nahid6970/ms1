@@ -11,33 +11,35 @@ NC='\033[0m' # No Color
 
 # Menu items: description : function : color
 menu_items=(
-    "Git Pull [ms1]             : update_ms1_repo               :$GREEN"
-    "Copy bashrc                : copy_files                    :$GREEN"
-    "Install Necessary Packages : install_packages              :$GREEN"
-    "Desktop Environment        : desktop_environment           :$GREEN"
-    "Config All Necessary PKG   : All_Configs                   :$GREEN"
-    "SDDM Setup                 : sddm_setup                    :$GREEN"
-    "YAY Setup                  : setup_yay                     :$GREEN"
-    # "bottles                  : not_yet_choosen               :$GREEN"
-    # "wine                     : not_yet_choosen               :$GREEN"
-    # "Lutris                   : not_yet_choosen               :$GREEN"
-    # "steam                    : not_yet_choosen               :$GREEN"
-    "About                      : about_device                  :$GREEN"
-    "GPU Drivers                : check_gpu_drivers             :$GREEN"
-    "Heroic Games Launcher      : check_gpu_drivers             :$GREEN"
-    "Disable Bell               : disable_bell                  :$GREEN"
-    "Hyprland                   : setup_hyprland_full           :$GREEN"
-    "Hyprland Config            : hyperland_config              :$GREEN"
-    "Rofi for Hyprland          : rofi_install_wayland          :$GREEN"
-    "Neovim Config              : nvim_config                   :$GREEN"
-    "TTY Autologin              : enable_tty_autologin          :$GREEN"
-    "TTY Enable Numlock         : enable_numlock_on_tty         :$GREEN"
-    "Enable Numlock             : enable_early_numlock          :$GREEN"
-    "DWM Setup                  : dwm_wm                        :$GREEN"
-    "DWM Config                 : dwm_config                    :$GREEN"
-    "DWM ST                     : dwm_statusbar                 :$GREEN"
-    "DWM Distrotube             : distrotube_dwm_config         :$GREEN"
-    "SDDM                       : sddm_setup                    :$GREEN"
+    "Git Pull [ms1]             : update_ms1_repo       :$GREEN"
+    "Copy bashrc                : copy_files            :$GREEN"
+    "Install Necessary Packages : install_packages      :$GREEN"
+    "X-Org/X11                  : xorg                  :$GREEN"
+    "Wayland                    : wayland               :$GREEN"
+    "Desktop Environment        : desktop_environment   :$GREEN"
+    "Config All Necessary PKG   : All_Configs           :$GREEN"
+    "SDDM Setup                 : sddm_setup            :$GREEN"
+    "YAY Setup                  : setup_yay             :$GREEN"
+    # "bottles                  : not_yet_choosen       :$GREEN"
+    # "wine                     : not_yet_choosen       :$GREEN"
+    # "Lutris                   : not_yet_choosen       :$GREEN"
+    # "steam                    : not_yet_choosen       :$GREEN"
+    "About                      : about_device          :$GREEN"
+    "GPU Drivers                : check_gpu_drivers     :$GREEN"
+    "Heroic Games Launcher      : check_gpu_drivers     :$GREEN"
+    "Disable Bell               : disable_bell          :$GREEN"
+    "Hyprland                   : setup_hyprland_full   :$GREEN"
+    "Hyprland Config            : hyperland_config      :$GREEN"
+    "Rofi for Hyprland          : rofi_install_wayland  :$GREEN"
+    "Neovim Config              : nvim_config           :$GREEN"
+    "TTY Autologin              : enable_tty_autologin  :$GREEN"
+    "TTY Enable Numlock         : enable_numlock_on_tty :$GREEN"
+    "Enable Numlock             : enable_early_numlock  :$GREEN"
+    "DWM Setup                  : dwm_wm                :$GREEN"
+    "DWM Config                 : dwm_config            :$GREEN"
+    "DWM ST                     : dwm_statusbar         :$GREEN"
+    "DWM Distrotube             : distrotube_dwm_config :$GREEN"
+    "SDDM                       : sddm_setup            :$GREEN"
 )
 
 # Special hotkey items
@@ -93,7 +95,14 @@ import_scripts() {
 # Usage example:
 import_scripts "$HOME/ms1/linux/os_imports"
 
+xorg(){
+    sudo pacman -S --needed xorg xorg-xinit xorg-xwayland
+    sudo pacman -S --needed xorg-apps mesa xf86-video-intel xf86-video-amdgpu xf86-input-libinput #! optional but useful
+}
 
+wayland(){
+    sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput libseat libwayland gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
+}
 
 
 list_recent_packages() {
