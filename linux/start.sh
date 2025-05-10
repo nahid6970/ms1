@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# Kill Xorg if it is running (for Xorg-based DEs)
+# Kill any running Xorg or Wayland sessions
 if pgrep Xorg > /dev/null; then
     killall Xorg
 fi
 
-# Kill Wayland compositor if it is running (for Wayland-based DEs)
 if pgrep Hyprland > /dev/null; then
     killall Hyprland
 fi
@@ -37,15 +36,15 @@ case $1 in
         ;;
     dwm)
         echo "Starting DWM..."
-        exec dwm
+        exec startx dwm
         ;;
     xmonad)
         echo "Starting Xmonad..."
-        exec xmonad
+        exec startx xmonad
         ;;
     qtile)
         echo "Starting Qtile..."
-        exec qtile start
+        exec startx qtile
         ;;
     *)
         echo "Invalid choice or desktop environment not installed."
