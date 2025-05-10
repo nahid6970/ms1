@@ -92,6 +92,7 @@ EOF
 
             # qtile start #!xorg/x11
             # qtile start -b wayland #!wayland
+            
             # sddm_setup
             # wallpaper
             ;;
