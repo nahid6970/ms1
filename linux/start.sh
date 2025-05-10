@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Clear any existing desktop session
-killall Xorg
+# killall Xorg
 
 # Start the selected desktop environment
 case $1 in
