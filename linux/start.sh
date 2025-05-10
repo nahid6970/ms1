@@ -9,45 +9,49 @@ if pgrep Hyprland > /dev/null; then
     killall Hyprland
 fi
 
-# Check if an argument is provided
-if [ -z "$1" ]; then
-    echo "Usage: $0 <desktop_environment>"
-    echo "Available options: kde, gnome, xfce, hyprland, dwm, xmonad, qtile"
-    exit 1
-fi
+# Display the menu
+echo "Select a desktop environment:"
+echo "1) KDE Plasma"
+echo "2) GNOME"
+echo "3) XFCE"
+echo "4) Hyprland"
+echo "5) DWM"
+echo "6) Xmonad"
+echo "7) Qtile"
+echo -n "Enter your choice (1-7): "
+read choice
 
 # Start the selected desktop environment
-case $1 in
-    kde)
+case $choice in
+    1)
         echo "Starting KDE Plasma..."
         exec startplasma-x11
         ;;
-    gnome)
+    2)
         echo "Starting GNOME..."
         exec gnome-session
         ;;
-    xfce)
+    3)
         echo "Starting XFCE..."
         exec startxfce4
         ;;
-    hyprland)
+    4)
         echo "Starting Hyprland..."
         exec Hyprland
         ;;
-    dwm)
+    5)
         echo "Starting DWM..."
         exec startx dwm
         ;;
-    xmonad)
+    6)
         echo "Starting Xmonad..."
         exec startx xmonad
         ;;
-    qtile)
+    7)
         echo "Starting Qtile..."
         exec startx qtile
         ;;
     *)
-        echo "Invalid choice or desktop environment not installed."
-        exit 1
+        echo "Invalid choice. Please select a number between 1 and 7."
         ;;
 esac
