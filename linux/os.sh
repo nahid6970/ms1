@@ -101,7 +101,7 @@ xorg(){
 }
 
 wayland(){
-    sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput libseat libwayland gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
+    sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
 }
 
 
