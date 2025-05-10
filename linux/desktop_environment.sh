@@ -87,12 +87,12 @@ EOF
             ;;
         7)
             echo -e "${YELLOW}Installing qtile.${NC}"
-            sudo pacman -S --needed qtile python-pywlroots xorg-xwayland
+            sudo pacman -S --needed qtile python-pywlroots xorg-xwayland kitty dmenu picom network-manager-applet volumeicon
             rclone copy "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config/qtile"
 
             # qtile start #!xorg/x11
             # qtile start -b wayland #!wayland
-            
+
             # sddm_setup
             # wallpaper
             ;;
