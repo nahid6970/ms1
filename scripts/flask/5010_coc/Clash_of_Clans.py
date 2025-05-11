@@ -43,7 +43,7 @@ def index():
 
         processed_events.append(event_obj)
 
-    return render_template('event_list.html', upcoming_events=processed_events)
+    return render_template('index.html', upcoming_events=processed_events)
 
 @app.route('/add-event', methods=['GET', 'POST'])
 def add_event():
