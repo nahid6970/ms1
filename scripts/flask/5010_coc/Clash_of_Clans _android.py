@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import re
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///c:/msBackups/DataBase/Clash_of_Clans.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Clash_of_Clans.db'
 db = SQLAlchemy(app)
 
 # Models
