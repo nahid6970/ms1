@@ -20,6 +20,43 @@ TERMUX_PROPERTIES_DEST="$HOME/.termux/termux.properties"
 NVIM_INIT_SOURCE="$REPO_DIR/dotfiles/neovim/init.lua"
 NVIM_CONFIG_DEST="$HOME/.config/nvim"
 
+
+# Declare a combined array of menu options and function bindings
+menu_items=(
+    "Git Pull [ms3]            : update_ms3_repo                         :$BLUE"
+    "Copy Files                : copy_files                              :$BLUE"
+    "Install Necessary Packages: install_packages    setup_storage_passwd:$BLUE"
+    "Font Setup                : install_font_with_oh_my_posh            :$BLUE"
+    "Rclone-Dycrypt            : rclone_decrypt                          :$RED"
+    "Rclone Setup              : rclone_setup                            :$BLUE"
+    "Song [rs]                 : Restore_Songs                           :$BLUE"
+    "Neovim Setup              : nvim_setup                              :$BLUE"
+    "Git Push                  : git_push_repo                           :$BLUE"
+    "Remove Folder [ms3]       : remove_repo                             :$RED"
+    "About                     : about_device                            :$BLUE"
+    "Welcome Page              : welcome_remove                          :$RED"
+    "Close                     : Close_script                            :$RED"
+    "Exit                      : exit_script                             :$RED"
+)
+
+# Special hotkey items
+declare -A hotkeys=(
+    [c]="Close_script"
+    [e]="exit_script"
+    [x]="test_test"
+)
+
+python_flask(){
+    # pkg install python
+    # pip install flask flask_sqlalchemy
+    cp -r "$HOME/ms1/scripts/5010_coc" "$HOME"
+    python "$HOME/5010_coc/Clash_of_Clans.py" &
+    # Wait for a moment to ensure the server starts
+    sleep 2
+    # Open Chrome with the server URL
+    am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
+}
+
 # Function to install necessary packages
 packages=(
     "bash"
@@ -478,68 +515,27 @@ rclone_decrypt() {
 
 
 
-
-# Declare a combined array of menu options and function bindings
-menu_items=(
-    " 1:Git Pull [ms3]:                 update_ms3_repo                         :$BLUE"
-    " 2:Copy Files:                     copy_files                              :$BLUE"
-    " 3:Install Necessary Packages:     install_packages    setup_storage_passwd:$BLUE"
-    " 4:Font Setup:                     install_font_with_oh_my_posh            :$BLUE"
-    " 5:Rclone-Dycrypt:                 rclone_decrypt                          :$RED"
-    " 6:Rclone Setup:                   rclone_setup                            :$BLUE"
-    " 7:Song [rs]:                      Restore_Songs                           :$BLUE"
-    " 8:Neovim Setup:                   nvim_setup                              :$BLUE"
-    " 9:Git Push:                       git_push_repo                           :$BLUE"
-    "10:Remove Folder [ms3]:            remove_repo                             :$RED"
-    "11:About:                          about_device                            :$BLUE"
-    "12:Welcome Page:                   welcome_remove                          :$RED"
-    " c:Close:                          Close_script                            :$RED"
-    " e:Exit:                           exit_script                             :$RED"
-)
-
-# Display the menu and handle user input
 while true; do
-    # Clear the screen to refresh the menu
     echo ""
     echo -e "${YELLOW}Select an option:${NC}"
-
-    # Display menu options dynamically with assigned colors
-    for item in "${menu_items[@]}"; do
-        IFS=":" read -r number description functions color <<< "$item"
-        echo -e "${color}$number. $description${NC}"
+    # Show menu items with numbers
+    for i in "${!menu_items[@]}"; do
+        IFS=":" read -r description function color <<< "${menu_items[$i]}"
+        echo -e "${color}$((i+1))) $description${NC}"
     done
-
+    # Show hotkey items
+    echo -e "$RED c) Close"
+    echo -e " e) Exit"
+    echo -e " x) Test${NC}"
     echo ""
     read -p "Enter choice: " choice
-
-    # Handle 'c' and 'e' choices for Close and Exit
-    if [ "$choice" == "c" ]; then
-        Close_script
-        continue
-    elif [ "$choice" == "e" ]; then
-        exit_script
-        continue
-    fi
-
-    # Check if the choice is numeric and valid
-    valid_choice=false
-    for item in "${menu_items[@]}"; do
-        IFS=":" read -r number description functions color <<< "$item"
-        if [ "$choice" -eq "$number" ]; then
-            valid_choice=true
-            IFS=" " read -r -a function_array <<< "$functions"
-            for function in "${function_array[@]}"; do
-                $function
-            done
-            break
-        fi
-    done
-
-    # If the choice is invalid, show an error message
-    if [ "$valid_choice" = false ]; then
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#menu_items[@]} )); then
+        IFS=":" read -r _ function _ <<< "${menu_items[$((choice-1))]}"
+        $function
+    elif [[ -n "${hotkeys[$choice]}" ]]; then
+        ${hotkeys[$choice]}
+    else
         echo -e "${RED}Invalid option. Please try again.${NC}"
     fi
-
-    # Reload the os.sh script to refresh functions and variables
-    source $HOME/ms3/os.sh
+    source "$HOME/ms1/termux/os.sh"
 done
