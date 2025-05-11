@@ -50,7 +50,7 @@ declare -A hotkeys=(
 python_flask(){
     # pkg install python
     # pip install flask flask_sqlalchemy
-    cp -r "$HOME/ms1/scripts/5010_coc" "$HOME"
+    cp -r "$HOME/ms1/scripts/flask/5010_coc" "$HOME"
     python "$HOME/5010_coc/Clash_of_Clans.py" &
     # Wait for a moment to ensure the server starts
     sleep 2
