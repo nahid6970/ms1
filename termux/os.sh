@@ -12,9 +12,9 @@ NC='\033[0m' # No Color
 # Define some variables
 # storage="$HOME/storage/shared"
 
-REPO_DIR="$HOME/ms3"
-BASHRC_SOURCE="$REPO_DIR/bashrc"
-TERMUX_PROPERTIES_SOURCE="$REPO_DIR/termux.properties"
+REPO_DIR="$HOME/ms1"
+BASHRC_SOURCE="$REPO_DIR/termux/bashrc"
+TERMUX_PROPERTIES_SOURCE="$REPO_DIR/termux/termux.properties"
 BASHRC_DEST="$HOME/.bashrc"
 TERMUX_PROPERTIES_DEST="$HOME/.termux/termux.properties"
 NVIM_INIT_SOURCE="$REPO_DIR/dotfiles/neovim/init.lua"
@@ -23,7 +23,7 @@ NVIM_CONFIG_DEST="$HOME/.config/nvim"
 
 # Declare a combined array of menu options and function bindings
 menu_items=(
-    "Git Pull [ms3]            : update_ms3_repo                         :$BLUE"
+    "Git Pull [ms1]            : update_ms1_repo                         :$BLUE"
     "Copy Files                : copy_files                              :$BLUE"
     "Install Necessary Packages: install_packages    setup_storage_passwd:$BLUE"
     "Font Setup                : install_font_with_oh_my_posh            :$BLUE"
@@ -199,13 +199,13 @@ git_push_repo() {
     fi
 }
 
-update_ms3_repo() {
+update_ms1_repo() {
     clear
-    local ms3_folder="$HOME/ms3"
-    if [ -d "$ms3_folder" ]; then
-        echo "Changing directory to $ms3_folder..."
-        cd "$ms3_folder" || {
-            echo "Failed to change directory to $ms3_folder."
+    local ms1_folder="$HOME/ms1"
+    if [ -d "$ms1_folder" ]; then
+        echo "Changing directory to $ms1_folder..."
+        cd "$ms1_folder" || {
+            echo "Failed to change directory to $ms1_folder."
             return 1
         }
         echo "Pulling latest changes from the repository..."
@@ -215,7 +215,7 @@ update_ms3_repo() {
         }
         echo "Repository updated successfully."
     else
-        echo "The folder $ms3_folder does not exist."
+        echo "The folder $ms1_folder does not exist."
         return 1
     fi
 }
