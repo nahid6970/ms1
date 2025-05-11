@@ -34,7 +34,8 @@ menu_items=(
     "Git Push                  : git_push_repo                           :$BLUE"
     "Remove Folder [ms3]       : remove_repo                             :$RED"
     "About                     : about_device                            :$BLUE"
-    "Flask CoC                 : python_flask                            :$BLUE"
+    "Flask CoC init            : init_python_flask_CoC                   :$BLUE"
+    "Flask CoC start           : start_python_flask_CoC                  :$BLUE"
     "Welcome Page              : welcome_remove                          :$RED"
     "Close                     : Close_script                            :$RED"
     "Exit                      : exit_script                             :$RED"
@@ -47,10 +48,12 @@ declare -A hotkeys=(
     [x]="test_test"
 )
 
-python_flask(){
-    # pkg install python
-    # pip install flask flask_sqlalchemy
+init_python_flask_CoC(){
+    pkg install python
+    pip install flask flask_sqlalchemy
     cp -r "$HOME/ms1/scripts/flask/5010_coc" "$HOME"
+}
+start_python_flask_CoC(){
     python "$HOME/5010_coc/Clash_of_Clans _android.py" &
     # Wait for a moment to ensure the server starts
     sleep 2
