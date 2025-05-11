@@ -143,16 +143,16 @@ sshd
 start_python_flask_CoC(){
     python "$HOME/5010_coc/Clash_of_Clans_android.py" &
     sleep 2
-    # Launch Chrome in freeform mode using the MIUI freeform activity
-    am start -n com.miui.securitycore/com.miui.freeform.settings.FreeformGuideSettingsActivity \
-        --es "package_name" "com.android.chrome" \
-        --es "class_name" "com.google.android.apps.chrome.Main" \
-        -a android.intent.action.MAIN
+    # Attempt to open Chrome in freeform mode using MIUI's settings
+    am start -n com.miui.securitycore/com.miui.freeform.FreeformActivity \
+        --es package_name "com.android.chrome" \
+        --es class_name "com.google.android.apps.chrome.Main"
     # Open the Flask server URL in Chrome
     sleep 1
     am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
 }
 start_python_flask_CoC
+
 
 
 # Add this to the end of your ~/.bashrc file
