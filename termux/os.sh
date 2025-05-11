@@ -34,6 +34,7 @@ menu_items=(
     "Git Push                  : git_push_repo                           :$BLUE"
     "Remove Folder [ms3]       : remove_repo                             :$RED"
     "About                     : about_device                            :$BLUE"
+    "Flask CoC                 : python_flask                            :$BLUE"
     "Welcome Page              : welcome_remove                          :$RED"
     "Close                     : Close_script                            :$RED"
     "Exit                      : exit_script                             :$RED"
