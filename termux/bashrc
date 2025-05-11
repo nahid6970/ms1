@@ -139,8 +139,9 @@ sshd
 # }
 # start_python_flask_CoC
 
-#! Xxposed EDge Shell Command to Start
-# am start -n com.termux/.app.TermuxActivity && sleep 2 && termux-wake-lock && python "$HOME/5010_coc/Clash_of_Clans_android.py" & sleep 2 && am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
+#! Xxposed EDge Shell Command to Start below first one doesnt work but second one works
+#! am start -n com.termux/.app.TermuxActivity && sleep 2 && termux-wake-lock && python "$HOME/5010_coc/Clash_of_Clans_android.py" & sleep 2 && am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
+# PYTHON_SCRIPT_FULL_PATH="/data/data/com.termux/files/home/5010_coc/Clash_of_Clans_android.py"; TERMUX_INTERNAL_COMMAND_SEQUENCE="termux-wake-lock && python \"${PYTHON_SCRIPT_FULL_PATH}\" &"; am startservice --user 0 -n com.termux/com.termux.app.RunCommandService -a com.termux.RUN_COMMAND --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/sh" --esa com.termux.RUN_COMMAND_ARGUMENTS "-c,${TERMUX_INTERNAL_COMMAND_SEQUENCE}" --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" --ez com.termux.RUN_COMMAND_BACKGROUND "true" && sleep 2 && am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
 
 # Add this to the end of your ~/.bashrc file
 eval "$(oh-my-posh init bash)"
