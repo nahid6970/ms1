@@ -19,7 +19,6 @@ alias rm='rm -f -r'
 alias ro="rclone cat g00:/Remote_Control/output.txt"
 alias update='pkg update && pkg upgrade -y'
 
-
 nvim() {
     chmod +x ~/ms3/switch_termux_properties.sh
     ~/ms3/switch_termux_properties.sh nvim
@@ -131,6 +130,14 @@ sshd
 # echo "Free Memory:"
 # free -h
 
+start_python_flask_CoC(){
+    python "$HOME/5010_coc/Clash_of_Clans_android.py" &
+    # Wait for a moment to ensure the server starts
+    sleep 2
+    # Open Chrome with the server URL
+    am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
+}
+start_python_flask_CoC
 
 # Add this to the end of your ~/.bashrc file
 eval "$(oh-my-posh init bash)"
