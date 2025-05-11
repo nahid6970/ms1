@@ -130,13 +130,24 @@ sshd
 # echo "Free Memory:"
 # free -h
 
+# start_python_flask_CoC(){
+#     python "$HOME/5010_coc/Clash_of_Clans_android.py" &
+#     # Wait for a moment to ensure the server starts
+#     sleep 2
+#     # Open Chrome with the server URL
+#     am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
+# }
+# start_python_flask_CoC
+
 start_python_flask_CoC(){
     python "$HOME/5010_coc/Clash_of_Clans_android.py" &
     sleep 2
     am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" \
-        --activity-options 'windowingMode=5' com.android.chrome
+        -n com.android.chrome/com.google.android.apps.chrome.Main \
+        --activity-clear-task --activity-multiple-task
 }
 start_python_flask_CoC
+
 
 
 # Add this to the end of your ~/.bashrc file
