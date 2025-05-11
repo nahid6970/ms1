@@ -54,7 +54,7 @@ init_python_flask_CoC(){
     cp -r "$HOME/ms1/scripts/flask/5010_coc" "$HOME"
 }
 start_python_flask_CoC(){
-    python "$HOME/5010_coc/Clash_of_Clans _android.py" &
+    python "$HOME/5010_coc/Clash_of_Clans_android.py" &
     # Wait for a moment to ensure the server starts
     sleep 2
     # Open Chrome with the server URL
