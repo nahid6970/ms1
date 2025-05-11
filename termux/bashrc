@@ -139,21 +139,8 @@ sshd
 # }
 # start_python_flask_CoC
 
-
-start_python_flask_CoC(){
-    python "$HOME/5010_coc/Clash_of_Clans_android.py" &
-    sleep 2
-    # Attempt to open Chrome in freeform mode using MIUI's settings
-    am start -n com.miui.securitycore/com.miui.freeform.FreeformActivity \
-        --es package_name "com.android.chrome" \
-        --es class_name "com.google.android.apps.chrome.Main"
-    # Open the Flask server URL in Chrome
-    sleep 1
-    am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
-}
-start_python_flask_CoC
-
-
+#! Xxposed EDge Shell Command to Start
+# am start -n com.termux/.app.TermuxActivity && sleep 2 && termux-wake-lock && python "$HOME/5010_coc/Clash_of_Clans_android.py" & sleep 2 && am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
 
 # Add this to the end of your ~/.bashrc file
 eval "$(oh-my-posh init bash)"
