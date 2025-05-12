@@ -52,7 +52,7 @@ declare -A hotkeys=(
 )
 
 arch_install(){
-    archinstall --config /ms1/linux/user_configuration.json --creds /ms1/linux/user_credentials.json
+    archinstall --config $HOME/ms1/linux/user_configuration.json --creds $HOME/ms1/linux/user_credentials.json
 }
 
 
