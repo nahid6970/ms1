@@ -21,13 +21,8 @@ menu_items=(
     "Wallpaper                  : wallpaper             :$GREEN"
     "SDDM Setup                 : sddm_setup            :$GREEN"
     "YAY Setup                  : setup_yay             :$GREEN"
-    # "bottles                  : not_yet_choosen       :$GREEN"
-    # "wine                     : not_yet_choosen       :$GREEN"
-    # "Lutris                   : not_yet_choosen       :$GREEN"
-    # "steam                    : not_yet_choosen       :$GREEN"
     "About                      : about_device          :$GREEN"
     "GPU Drivers                : check_gpu_drivers     :$GREEN"
-    "Heroic Games Launcher      : check_gpu_drivers     :$GREEN"
     "Disable Bell               : disable_bell          :$GREEN"
     "Hyprland                   : setup_hyprland_full   :$GREEN"
     "Hyprland Config            : hyperland_config      :$GREEN"
@@ -41,6 +36,12 @@ menu_items=(
     "DWM ST                     : dwm_statusbar         :$GREEN"
     "DWM Distrotube             : distrotube_dwm_config :$GREEN"
     "SDDM                       : sddm_setup            :$GREEN"
+    "Arch Install               : arch_install          :$GREEN"
+    # "bottles                  : not_yet_choosen       :$GREEN"
+    # "wine                     : not_yet_choosen       :$GREEN"
+    # "Lutris                   : not_yet_choosen       :$GREEN"
+    # "steam                    : not_yet_choosen       :$GREEN"
+    # "Heroic Games Launcher    : check_gpu_drivers     :$GREEN"
 )
 
 # Special hotkey items
@@ -49,6 +50,11 @@ declare -A hotkeys=(
     [e]="exit_script"
     [x]="test_test"
 )
+
+arch_install(){
+    archinstall --config /ms1/linux/user_configuration.json --creds /ms1/linux/user_credentials.json
+}
+
 
 All_Configs(){
 echo Set All configs
