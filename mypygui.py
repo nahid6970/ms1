@@ -918,7 +918,7 @@ def check_and_update(label, cfg):
         with open(cfg["log"], "r") as f:
             content = f.read()
         if "0 differences found" in content:
-            label.config(text=cfg["label"], fg="#d0f898")
+            label.config(text=cfg["label"], fg="#06de22")
         else:
             label.config(text=cfg["label"], fg="red")
 
