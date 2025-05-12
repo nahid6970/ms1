@@ -52,7 +52,7 @@ declare -A hotkeys=(
 )
 
 arch_install(){
-    archinstall --config $HOME/ms1/linux/user_configuration.json --creds $HOME/ms1/linux/user_credentials.json
+    archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
 }
 
 
@@ -100,7 +100,7 @@ import_scripts() {
 }
 
 # Usage example:
-import_scripts "$HOME/ms1/linux/os_imports"
+import_scripts "$HOME/ms1/linux/import"
 
 xorg(){
     sudo pacman -S --needed xorg xorg-xinit xorg-xwayland
