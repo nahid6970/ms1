@@ -23,22 +23,24 @@ NVIM_CONFIG_DEST="$HOME/.config/nvim"
 
 # Declare a combined array of menu options and function bindings
 menu_items=(
-    "Git Pull [ms1]            : update_ms1_repo                         :$BLUE"
-    "Copy Files                : copy_files                              :$BLUE"
-    "Install Necessary Packages: install_packages    setup_storage_passwd:$BLUE"
-    "Font Setup                : install_font_with_oh_my_posh            :$BLUE"
-    "Rclone-Dycrypt            : rclone_decrypt                          :$RED"
-    "Rclone Setup              : rclone_setup                            :$BLUE"
-    "Song [rs]                 : Restore_Songs                           :$BLUE"
-    "Neovim Setup              : nvim_setup                              :$BLUE"
-    "Git Push                  : git_push_repo                           :$BLUE"
-    "Remove Folder [ms3]       : remove_repo                             :$RED"
-    "About                     : about_device                            :$BLUE"
-    "Flask CoC init            : init_python_flask_CoC                   :$BLUE"
-    "Flask CoC start           : start_python_flask_CoC                  :$BLUE"
-    "Welcome Page              : welcome_remove                          :$RED"
-    "Close                     : Close_script                            :$RED"
-    "Exit                      : exit_script                             :$RED"
+    "Git Pull [ms1]              : update_ms1_repo                         :$BLUE"
+    "Copy Files                  : copy_files                              :$BLUE"
+    "Install Necessary Packages  : install_packages    setup_storage_passwd:$BLUE"
+    "Font Setup                  : install_font_with_oh_my_posh            :$BLUE"
+    "Rclone-Dycrypt              : rclone_decrypt                          :$RED"
+    "Rclone Setup                : rclone_setup                            :$BLUE"
+    "Song [rs]                   : Restore_Songs                           :$BLUE"
+    "Neovim Setup                : nvim_setup                              :$BLUE"
+    "Git Push                    : git_push_repo                           :$BLUE"
+    "Remove Folder [ms3]         : remove_repo                             :$RED"
+    "About                       : about_device                            :$BLUE"
+    "Flask CoC init              : init_python_flask_CoC                   :$BLUE"
+    "Flask CoC start             : start_python_flask_CoC                  :$BLUE"
+    "Database Upload Instantly   : upload_latest_database                  :$BLUE"
+    "Database Download Instantly : download_latest_database                :$BLUE"
+    "Welcome Page                : welcome_remove                          :$RED"
+    "Close                       : Close_script                            :$RED"
+    "Exit                        : exit_script                             :$RED"
 )
 
 # Special hotkey items
@@ -60,6 +62,17 @@ start_python_flask_CoC(){
     # Open Chrome with the server URL
     am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
 }
+
+upload_latest_database(){
+rclone copy $HOME/instance/ o0:/msBackups/DataBase/latest_instant/ -P
+}
+
+download_latest_database(){
+rclone copy o0:/msBackups/DataBase/latest_instant/ $HOME/instance/ -P
+}
+
+
+
 
 # Function to install necessary packages
 packages=(
