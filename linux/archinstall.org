@@ -230,3 +230,9 @@ https://www.youtube.com/results?search_query=distrotube+xmonad
 
 Dunst Adds Desktop Notifications To Your Window Manager
 https://www.youtube.com/watch?v=uf4YcYTnfNE
+
+py3status
+https://github.com/ultrabug/py3status
+
+xmobar
+https://wiki.archlinux.org/title/Xmobar
