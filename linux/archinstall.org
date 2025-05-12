@@ -236,3 +236,6 @@ https://github.com/ultrabug/py3status
 
 xmobar
 https://wiki.archlinux.org/title/Xmobar
+
+eww bar
+https://github.com/elkowar/eww
