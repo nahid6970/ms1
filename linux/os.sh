@@ -18,10 +18,10 @@ menu_items=(
     "Wayland                    : wayland               :$GREEN"
     "Desktop Environment        : desktop_environment   :$GREEN"
     "Config All Necessary PKG   : All_Configs           :$GREEN"
+    "YAY Setup                  : setup_yay             :$GREEN"
     "TTY Setup                  : tty_setup             :$GREEN"
     "Wallpaper                  : wallpaper             :$GREEN"
     "SDDM Setup                 : sddm_setup            :$GREEN"
-    "YAY Setup                  : setup_yay             :$GREEN"
     "About                      : about_device          :$GREEN"
     "GPU Drivers                : check_gpu_drivers     :$GREEN"
     "Hyprland                   : setup_hyprland_full   :$GREEN"
@@ -391,15 +391,6 @@ check_gpu_drivers() {
 nvim_config() {
     # Auto-generate default config if missing
 ln -sf "$HOME/ms1/linux/config/nvim/" "$HOME/.config/nvim"
-}
-
-
-flatpak() {
-    clear
-    sudo pacman -S --needed flatpak
-    flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    yay -S -needed bauh
-    echo "TEST ✅"
 }
 
 
