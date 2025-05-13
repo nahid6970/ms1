@@ -25,11 +25,12 @@ tty_setup() {
     local override_file="$service_dir/override.conf"
     echo "Setting up auto-login for user: $user on tty1..."
     sudo mkdir -p "$service_dir"
-    sudo bash -c "cat > '$override_file'" <<EOF
+    sudo bash -c "cat > '$override_file' <<EOF
 [Service]
 ExecStart=
 ExecStart=-/usr/bin/agetty --autologin $user --noclear %I \$TERM
-EOF
+EOF"
+
     echo "Reloading systemd and restarting getty@tty1..."
     sudo systemctl daemon-reexec
     sudo systemctl daemon-reload
