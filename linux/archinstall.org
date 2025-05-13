@@ -186,7 +186,6 @@ pacman -S git
 git clone https://github.com/nahid6970/ms1.git
 archinstall --config path/to/config --creds path/to/creds
 
-
 after that clone ms1 again
 sh /ms1/archlinux/os.sh
 and setup from there
@@ -207,6 +206,8 @@ https://www.youtube.com/watch?v=2CP_9-jCV6A setup part 1 [typecraft]
 https://www.youtube.com/watch?v=KA1jv40q9lQ setup part 2 [typecraft]
 https://www.youtube.com/watch?v=omhJMH9lPPc setup part 3 [typecraft]
 
+gnome
+https://flathub.org/apps/page.tesk.Refine
 
 start app and hide terminal
 appname & exit
@@ -218,7 +219,7 @@ https://wiki.hyprland.org/Useful-Utilities/App-Launchers/
 conky customization
 https://www.gnome-look.org/browse?cat=124&ord=latest
 
-dwm tiling + statusbar dt uses
+dwm tiling + statusbar
 https://www.youtube.com/watch?v=M9drMlXRfg8
 https://dwm.suckless.org/
 
@@ -239,3 +240,6 @@ https://wiki.archlinux.org/title/Xmobar
 
 eww bar
 https://github.com/elkowar/eww
+
+qtile
+https://qtile.org/
