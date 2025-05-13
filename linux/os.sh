@@ -28,7 +28,7 @@ menu_items=(
     "Hyprland Config            : hyperland_config      :$GREEN"
     "Rofi for Hyprland          : rofi_install_wayland  :$GREEN"
     "Neovim Config              : nvim_config           :$GREEN"
-    "TTY Setup                  : tty_setup             :$GREEN"
+    "TTY Setup                  : mymainscript          :$GREEN"
     "Enable Numlock             : enable_early_numlock  :$GREEN"
     "DWM Setup                  : dwm_wm                :$GREEN"
     "DWM Config                 : dwm_config            :$GREEN"

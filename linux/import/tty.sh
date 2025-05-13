@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mymainscript(){
+
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
@@ -80,3 +82,4 @@ case $choice in
     2) enable_numlock_on_tty ;;
     *) echo "Invalid choice." ;;
 esac
+}
