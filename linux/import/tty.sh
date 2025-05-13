@@ -19,6 +19,7 @@ tty_setup() {
   fi
 
   if [[ "$choice" == "1" ]]; then
+
     local user=${1:-$USER}
     local service_dir="/etc/systemd/system/getty@tty1.service.d"
     local override_file="$service_dir/override.conf"
@@ -34,14 +35,7 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl restart getty@tty1
     echo "✅ Auto-login setup complete for user: $user on tty1."
-
-
-    
   else
-
-
-
-
     # Install numlockx package if not already installed
     if ! command -v numlockx &> /dev/null; then
         echo "Installing numlockx package..."
