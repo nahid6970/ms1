@@ -8,8 +8,8 @@ tty_setup() {
   sudo pacman -S --needed sddm
 
   echo -e "${GREEN}🔧 Choose setup option:${NC}"
-  echo -e "1) NumLock only"
-  echo -e "2) NumLock + SDDM Sugar Candy theme"
+  echo -e "1) Auto Login"
+  echo -e "2) Numlock Enable"
   read -rp "Enter your choice (1/2): " choice
 
   # Check for valid input
@@ -97,8 +97,3 @@ EOF
 
     echo "NumLock has been enabled on TTYs. The systemd service is now active."
 }
-
-
-
-
-
