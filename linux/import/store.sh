@@ -14,7 +14,7 @@ flatpak_store() {
     clear
     sudo pacman -S --needed flatpak
     flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    yay -S -needed bauh
+    yay -S --needed bauh
     echo "Flatpak with bauh Store Installed"
 }
 
