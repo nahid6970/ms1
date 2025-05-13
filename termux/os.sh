@@ -28,7 +28,6 @@ menu_items=(
     "Install Necessary Packages  : install_packages    setup_storage_passwd:$BLUE"
     "Font Setup                  : install_font_with_oh_my_posh            :$BLUE"
     "Rclone-Dycrypt              : rclone_decrypt                          :$RED"
-    "Rclone Setup                : rclone_setup                            :$BLUE"
     "Song [rs]                   : Restore_Songs                           :$BLUE"
     "Neovim Setup                : nvim_setup                              :$BLUE"
     "Git Push                    : git_push_repo                           :$BLUE"
@@ -233,34 +232,6 @@ update_ms1_repo() {
         echo "Repository updated successfully."
     else
         echo "The folder $ms1_folder does not exist."
-        return 1
-    fi
-}
-
-
-
-# Function to create an rclone folder and copy rclone.conf file
-rclone_setup() {
-    clear
-    RCLONE_CONFIG_DIR="$HOME/.config/rclone"
-    SOURCE_CONF_FILE="$HOME/storage/shared/rclone.conf"
-    # Create the rclone folder if it doesn't exist
-    echo -e "Creating rclone configuration directory at $RCLONE_CONFIG_DIR..."
-    mkdir -p "$RCLONE_CONFIG_DIR" || {
-        echo -e "Failed to create rclone directory. Please check permissions."
-        return 1
-    }
-    echo -e "Directory created or already exists: $RCLONE_CONFIG_DIR"
-    # Copy rclone.conf to the new directory
-    echo -e "Copying rclone.conf from $SOURCE_CONF_FILE to $RCLONE_CONFIG_DIR..."
-    if [ -f "$SOURCE_CONF_FILE" ]; then
-        cp "$SOURCE_CONF_FILE" "$RCLONE_CONFIG_DIR/" || {
-            echo -e "Failed to copy rclone.conf. Please check permissions or the file path."
-            return 1
-        }
-        echo -e "rclone.conf copied successfully to $RCLONE_CONFIG_DIR"
-    else
-        echo -e "Source file $SOURCE_CONF_FILE does not exist. Please ensure the file exists."
         return 1
     fi
 }
