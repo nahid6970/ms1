@@ -97,8 +97,6 @@ import_scripts() {
         return 1
     fi
 }
-
-# Usage example:
 import_scripts "$HOME/ms1/linux/import"
 
 xorg(){
