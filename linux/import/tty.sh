@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mymainscript(){
+tty_setup() {
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
@@ -8,7 +8,8 @@ NC='\033[0m' # No Color
 echo -e "${GREEN}🔧 Choose setup option:${NC}"
 echo -e "1) Auto Login"
 echo -e "2) Numlock Enable"
-read -rp "Enter your choice (1/2): " choice
+echo -e "3) Disable Terminal Bell"
+read -rp "Enter your choice (1/2/3): " choice
 
 enable_tty_autologin() {
     local user=${1:-$USER}
@@ -77,9 +78,30 @@ EOF
     echo "NumLock has been enabled on TTYs. The systemd service is now active."
 }
 
+disable_bell() {
+    echo "Disabling terminal bell..."
+
+    echo 'set bell-style none' >> ~/.inputrc
+    bind -f ~/.inputrc
+
+    if [ "$(id -u)" -eq 0 ]; then
+        echo 'set bell-style none' >> /etc/inputrc
+    else
+        echo "To disable system-wide bell, run:"
+        echo "  echo 'set bell-style none' | sudo tee -a /etc/inputrc"
+    fi
+
+    echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf > /dev/null
+    sudo rmmod pcspkr 2>/dev/null
+
+    echo "Bell disabled. Reboot or re-login for full effect."
+}
+
 case $choice in
     1) enable_tty_autologin ;;
     2) enable_numlock_on_tty ;;
+    3) disable_bell ;;
     *) echo "Invalid choice." ;;
 esac
+
 }

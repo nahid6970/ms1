@@ -18,17 +18,16 @@ menu_items=(
     "Wayland                    : wayland               :$GREEN"
     "Desktop Environment        : desktop_environment   :$GREEN"
     "Config All Necessary PKG   : All_Configs           :$GREEN"
+    "TTY Setup                  : tty_setup             :$GREEN"
     "Wallpaper                  : wallpaper             :$GREEN"
     "SDDM Setup                 : sddm_setup            :$GREEN"
     "YAY Setup                  : setup_yay             :$GREEN"
     "About                      : about_device          :$GREEN"
     "GPU Drivers                : check_gpu_drivers     :$GREEN"
-    "Disable Bell               : disable_bell          :$GREEN"
     "Hyprland                   : setup_hyprland_full   :$GREEN"
     "Hyprland Config            : hyperland_config      :$GREEN"
     "Rofi for Hyprland          : rofi_install_wayland  :$GREEN"
     "Neovim Config              : nvim_config           :$GREEN"
-    "TTY Setup                  : mymainscript          :$GREEN"
     "Enable Numlock             : enable_early_numlock  :$GREEN"
     "DWM Setup                  : dwm_wm                :$GREEN"
     "DWM Config                 : dwm_config            :$GREEN"
@@ -365,27 +364,7 @@ check_gpu_drivers() {
 
 
 
-disable_bell() {
-    echo "Disabling terminal bell..."
 
-    # Set bell-style to none for current user
-    echo 'set bell-style none' >> ~/.inputrc
-    bind -f ~/.inputrc
-
-    # Set bell-style system-wide (optional, needs sudo)
-    if [ "$(id -u)" -eq 0 ]; then
-        echo 'set bell-style none' >> /etc/inputrc
-    else
-        echo "To disable system-wide bell, run:"
-        echo "  echo 'set bell-style none' | sudo tee -a /etc/inputrc"
-    fi
-
-    # Blacklist pcspkr module to disable beep in TTY (needs sudo)
-    echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf > /dev/null
-    sudo rmmod pcspkr 2>/dev/null
-
-    echo "Bell disabled. Reboot or re-login for full effect."
-}
 
 
 # hyperland_config() {
