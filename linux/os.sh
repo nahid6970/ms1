@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# import list
+
+
 # Define some color variables
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -76,28 +79,6 @@ Load_Scripts(){
 echo divide all functions
 }
 
-import_scripts() {
-    local script_dir="$1"
-
-    # Check if the folder exists
-    if [[ -d "$script_dir" ]]; then
-        # Loop through all .sh files in the folder
-        for script in "$script_dir"/*.sh; do
-            # Check if the file exists and is readable
-            if [[ -f "$script" && -r "$script" ]]; then
-                # echo "Importing: $script"
-                source "$script"
-            else
-                echo "Skipping: $script (not readable or not a file)"
-            fi
-        done
-        # echo "All scripts imported from $script_dir."
-    else
-        echo "Directory not found: $script_dir"
-        return 1
-    fi
-}
-import_scripts "$HOME/ms1/linux/import"
 
 xorg(){
     sudo pacman -S --needed xorg xorg-xinit xorg-xwayland
