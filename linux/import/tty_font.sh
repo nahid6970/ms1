@@ -2,7 +2,7 @@
 
 # Function to list and preview TTY fonts
 tty_font() {
-    FONT_DIR="/usr/share/consolefonts"
+    FONT_DIR="/usr/share/kbd/consolefonts"
     echo "Available TTY Fonts:"
 
     # Check if the font directory exists
@@ -22,4 +22,3 @@ tty_font() {
         echo "No font selected."
     fi
 }
-
