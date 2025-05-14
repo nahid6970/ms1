@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #! import list
-source ~/ms1/linux/import/*.sh
+for file in ~/ms1/linux/import/*.sh; do [[ -r "$file" ]] && source "$file" || echo "Error sourcing $file" >&2; done
+
 
 # Define some color variables
 RED='\033[0;31m'
