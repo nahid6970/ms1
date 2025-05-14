@@ -23,7 +23,7 @@ steam_cont() {
 
 bottles_cont() {
     clear
-    sudo pacman -S --needed bottles 
+    yay -S --needed bottles 
 }
 
 
