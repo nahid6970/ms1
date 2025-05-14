@@ -74,7 +74,7 @@ cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
-cp -a "$HOME/ms1/linux/config/.config/starship" "$HOME/.config"
+cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config"
 
 # source $HOME/autostart.sh
 }
