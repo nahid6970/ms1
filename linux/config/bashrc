@@ -22,8 +22,11 @@ alias startos='bash ~/ms1/linux/start.sh'
 alias ro="rclone cat g00:/Remote_Control/output.txt"
 alias yy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S --needed"
 alias pp="pacman -Slq | fzf --multi --preview 'pacman -Si {1}' | xargs -ro sudo pacman -S --needed"
-alias appi="(yay -Slq | sed 's/^/[yay] /'; pacman -Slq | sed 's/^/[pacman] /') | fzf --multi --preview 'yay -Si {1#* } || pacman -Si {1#* }' | sed 's/^\[yay\] //' | sed 's/^\[pacman\] //' | xargs -ro sudo pacman -S --needed"
-
+alias appi='(yay -Slq | sed "s/^/[aur] /"; pacman -Slq | sed "s/^/[repo] /") \
+  | fzf --multi --preview '\''if [[ {1} == "[aur]"* ]]; then yay -Si {1#* }; else pacman -Si {1#* }; fi'\'' \
+  | awk '\''{print $1, $2}'\'' > /tmp/pkglist && \
+  if grep -q "[aur]" /tmp/pkglist; then yay -S --needed $(grep "[aur]" /tmp/pkglist | awk '\''{print $2}'\''); fi && \
+  if grep -q "[repo]" /tmp/pkglist; then sudo pacman -S --needed $(grep "[repo]" /tmp/pkglist | awk '\''{print $2}'\''); fi'
 
 
 SCRIPTS_DIR="$HOME/ms1/linux/script_source"
