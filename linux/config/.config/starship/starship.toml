@@ -5,7 +5,7 @@ add_newline = true
 
 # Customize the prompt format
 format = """
-[❯](bold green) [](bold blue) $directory\
+[](bold green) [](bold blue) $directory\
 $git_branch$git_commit\
 $rust$python\
 $nodejs\
