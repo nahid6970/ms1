@@ -1,10 +1,7 @@
 #!/bin/bash
 
 #! import list
-for file in ~/ms1/linux/import/*.sh; do
-    source "$file"
-done
-
+. ~/ms1/linux/import/*.sh
 
 # Define some color variables
 RED='\033[0;31m'
