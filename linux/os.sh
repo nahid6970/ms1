@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # import list
-bash $HOME/ms1/linux/import/*
+source $HOME/ms1/linux/import/*
 
 # Define some color variables
 RED='\033[0;31m'
