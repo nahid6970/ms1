@@ -189,8 +189,6 @@ vimcmd_replace_one_symbol = '[](bold fg:purple)'
 vimcmd_replace_symbol = '[](bold fg:purple)'
 vimcmd_visual_symbol = '[](bold fg:lavender)'
 
-# ~/.config/starship.toml
-
 [cmd_duration]
 min_time = 500
 format = 'underwent [$duration](bold yellow)'
