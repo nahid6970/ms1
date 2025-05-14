@@ -25,6 +25,7 @@ menu_items=(
     "YAY Setup                  : setup_yay             :$GREEN"
     "TTY Setup                  : tty_setup             :$GREEN"
     "Store Setup                : store_setup           :$GREEN"
+    "Container                  : container_setup       :$GREEN"
     "Wallpaper                  : wallpaper             :$GREEN"
     "SDDM Setup                 : sddm_setup            :$GREEN"
     "About                      : about_device          :$GREEN"
