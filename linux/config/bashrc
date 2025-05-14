@@ -194,4 +194,4 @@ eval $(thefuck --alias fk)
 # eval "$(oh-my-posh init bash)"
 # eval "$(zoxide init bash)"
 
-eval "$(starship init bash)"
+eval "$(starship init bash $0)"
