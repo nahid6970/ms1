@@ -73,7 +73,7 @@ format = "[$symbol$version]($style)"
 [cmd_duration]
 format = "[$duration]($style)"
 style = "bold italic white"
-min_time = 5000 # Shows command duration if it exceeds 5000ms
+min_time = 1 # Shows command duration if it exceeds 5000ms
 
 [line_break]
 disabled = false
