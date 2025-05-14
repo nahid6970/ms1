@@ -67,13 +67,13 @@ echo Set All configs
 cp -a "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
 cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
 
-cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/hypr"
+cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad"
 
-cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/conky"
-cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/foot"
-cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/waybar"
-cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/wofi"
+cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/"
+cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/"
+cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/"
+cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/starship" "$HOME/.config"
 
 # source $HOME/autostart.sh
