@@ -22,8 +22,8 @@ alias startos='bash ~/ms1/linux/start.sh'
 alias ro="rclone cat g00:/Remote_Control/output.txt"
 alias yy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S --needed"
 alias pp="pacman -Slq | fzf --multi --preview 'pacman -Si {1}' | xargs -ro sudo pacman -S --needed"
-alias app="((yay -Slq && echo '--- yay ---') || true) ; ((pacman -Slq && echo '--- pacman ---') || true) | fzf --multi --preview 'case $(echo {1} | cut -d \" \" -f 1) in ---*) echo \"\";; *) if yay -Si \"$(echo {1} | cut -d \" \" -f 1)\" > /dev/null 2>&1; then yay -Si \"$(echo {1} | cut -d \" \" -f 1)\"; else pacman -Si \"$(echo {1} | cut -d \" \" -f 1)\"; fi ;; esac' | xargs -ro bash -c 'pkg=$(echo "$1" | cut -d " " -f 1); if [[ "$pkg" != "---"* ]]; then if yay -Si "$pkg" > /dev/null 2>&1; then yay -S --needed "$pkg"; else sudo pacman -S --needed "$pkg"; fi; fi' _"
-alias appi="((yay -Slq | awk '{print $1 \" (yay)\"}') || true) ; ((pacman -Slq | awk '{print $1 \" (pacman)\"}') || true) | fzf --multi --preview 'case $(echo {1} | cut -d \" \" -f 1) in *) if [[ \"$(echo {1} | grep \"(yay)\")\" ]]; then pkg=\"$(echo {1} | sed 's/ (yay)//')\"; yay -Si \"$pkg\"; elif [[ \"$(echo {1} | grep \"(pacman)\")\" ]]; then pkg=\"$(echo {1} | sed 's/ (pacman)//')\"; pacman -Si \"$pkg\"; fi ;; esac' | xargs -ro bash -c 'pkg_info=\"$1\"; source=\"\"; if [[ \"$pkg_info\" == *\"(yay)\"* ]]; then pkg=\"$(echo \"$pkg_info\" | sed \"s/ (yay)//\")\"; source=\"yay\"; elif [[ \"$pkg_info\" == *\"(pacman)\"* ]]; then pkg=\"$(echo \"$pkg_info\" | sed \"s/ (pacman)//\")\"; source=\"pacman\"; fi; if [[ -n \"$source\" ]]; then if [[ \"$source\" == \"yay\" ]]; then yay -S --needed \"$pkg\"; elif [[ \"$source\" == \"pacman\" ]]; then sudo pacman -S --needed \"$pkg\"; fi; fi' _"
+
+
 
 SCRIPTS_DIR="$HOME/ms1/linux/script_source"
 # Check if the scripts directory exists
