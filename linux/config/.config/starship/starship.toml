@@ -193,4 +193,4 @@ vimcmd_visual_symbol = '[](bold fg:lavender)'
 format = "[$duration]($style)"
 style = "bold italic white"
 show_milliseconds = true
-min_time = 0 # Show duration for commands taking 100ms or more
+min_time = 5000 # Show duration for commands taking 100ms or more
