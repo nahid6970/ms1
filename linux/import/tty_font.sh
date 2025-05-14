@@ -4,7 +4,13 @@ function tty_font() {
     echo "Listing available console fonts..."
     fonts=(/usr/share/consolefonts/*.gz)
 
-    # Display font list
+    # Display all available fonts first
+    echo "Available fonts:"
+    for font in "${fonts[@]}"; do
+        echo "- $(basename "$font" .gz)"
+    done
+
+    # Display font list for selection
     PS3="Select a font number: "
     select font in "${fonts[@]}"; do
         if [[ -n "$font" ]]; then
@@ -24,5 +30,3 @@ function tty_font() {
         fi
     done
 }
-
-tty_font
