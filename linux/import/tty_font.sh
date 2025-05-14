@@ -1,32 +1,25 @@
 #!/bin/bash
 
-function tty_font() {
-    echo "Listing available console fonts..."
-    fonts=(/usr/share/consolefonts/*.gz)
+# Function to list and preview TTY fonts
+tty_font() {
+    FONT_DIR="/usr/share/consolefonts"
+    echo "Available TTY Fonts:"
 
-    # Display all available fonts first
-    echo "Available fonts:"
-    for font in "${fonts[@]}"; do
-        echo "- $(basename "$font" .gz)"
-    done
+    # Check if the font directory exists
+    if [ ! -d "$FONT_DIR" ]; then
+        echo "Console font directory not found."
+        return 1
+    fi
 
-    # Display font list for selection
-    PS3="Select a font number: "
-    select font in "${fonts[@]}"; do
-        if [[ -n "$font" ]]; then
-            chosen_font=$(basename "$font" .gz)
-            echo "Selected font: $chosen_font"
+    # Use fzf for interactive font selection
+    selected_font=$(find "$FONT_DIR" -type f -name '*.psf*' | fzf --preview 'setfont {} && echo -e "\033[1;32mPreview: {}\033[0m"' --preview-window=up:5)
 
-            # Test the font using setfont
-            setfont "$chosen_font"
-            read -p "Press Enter to confirm and save this font to /etc/vconsole.conf..."
-
-            # Save to vconsole.conf
-            echo "FONT=$chosen_font" | sudo tee /etc/vconsole.conf
-            echo "Font set and saved."
-            break
-        else
-            echo "Invalid selection. Please try again."
-        fi
-    done
+    # If a font is selected, set it as the current font
+    if [ -n "$selected_font" ]; then
+        sudo setfont "$selected_font"
+        echo "Font changed to: $(basename "$selected_font")"
+    else
+        echo "No font selected."
+    fi
 }
+
