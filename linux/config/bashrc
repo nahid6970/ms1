@@ -22,7 +22,7 @@ alias startos='bash ~/ms1/linux/start.sh'
 alias ro="rclone cat g00:/Remote_Control/output.txt"
 alias yy="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S --needed"
 alias pp="pacman -Slq | fzf --multi --preview 'pacman -Si {1}' | xargs -ro sudo pacman -S --needed"
-alias appi="(yay -Slq | sed 's/^/[yay] /'; pacman -Slq | sed 's/^/[pacman] /') | fzf --multi --preview 'pkg=\$(echo {} | cut -d\" \" -f2); yay -Si \"\$pkg\" || pacman -Si \"\$pkg\"' | while read -r line; do pkg=\$(echo \$line | awk '{print \$2}'); if [[ \$line == [yay]* ]]; then yay -S --needed \"\$pkg\"; else sudo pacman -S --needed \"\$pkg\"; fi; done"
+alias yypp="(command -v yay &>/dev/null && yay -Slq || pacman -Slq) | fzf --multi --preview '(command -v yay &>/dev/null && yay -Si {1} || pacman -Si {1})' | xargs -ro (command -v yay &>/dev/null && echo yay -S --needed || echo sudo pacman -S --needed)"
 
 
 SCRIPTS_DIR="$HOME/ms1/linux/script_source"
