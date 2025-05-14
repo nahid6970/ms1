@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # import list
-source ~/ms1/linux/import/tty.sh
+. ~/ms1/linux/import/*
 
 # Define some color variables
 RED='\033[0;31m'
