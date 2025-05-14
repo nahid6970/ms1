@@ -76,7 +76,7 @@ cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/waybar"
 cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/wofi"
 cp -a "$HOME/ms1/linux/config/.config/starship" "$HOME/.config"
 
-source $HOME/autostart.sh
+# source $HOME/autostart.sh
 }
 
 Load_Scripts(){
