@@ -95,7 +95,7 @@ rclone_decrypt() {
     # remove te ntfy file
     clear
     echo "Decreypt rclone conf ...."
-    pip install pycryptodomex
+    sudo pacman -S --needed python-pycryptodomex
     python ~/ms1/termux/locker/locker.py --decrypt ~/ms1/asset/rclone/rclone.conf.enc
 
     echo -e "Copying rclone.conf"
