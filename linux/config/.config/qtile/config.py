@@ -384,7 +384,7 @@ def init_widgets_list():
                  ## Uncomment for date and time 
                  # format = "⧗  %a, %b %d - %H:%M",
                  ## Uncomment for time only
-                 format = "⧗  %I:%M %p",
+                 format = " %I:%M %p",
                  ),
         widget.Systray(padding = 6),
         widget.Spacer(length = 8),
