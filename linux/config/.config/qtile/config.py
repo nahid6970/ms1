@@ -380,7 +380,7 @@ def init_widgets_list():
         widget.Clock(
                  foreground = colors[8],
                  padding = 8, 
-                 mouse_callbacks = {'Button1': lazy.function('"dunstify "$(date)"')},
+                 mouse_callbacks = {'Button1': lazy.function('dunstify "$(date)", shell=True')},
                 #  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('dunstify "$(date)"')},
                  ## Uncomment for date and time 
                  # format = "⧗  %a, %b %d - %H:%M",
