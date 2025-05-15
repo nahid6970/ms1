@@ -280,7 +280,7 @@ def init_widgets_list():
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn("qtilekeys-yad")},
                  ),
         widget.Prompt(
-                 font = "Ubuntu Mono",
+                 font = "JetBrains Mono",
                  fontsize=14,
                  foreground = colors[1]
         ),
@@ -303,7 +303,7 @@ def init_widgets_list():
                  ),
         widget.TextBox(
                  text = '|',
-                 font = "Ubuntu Mono",
+                 font = "JetBrains Mono",
                  foreground = colors[9],
                  padding = 2,
                  fontsize = 14
@@ -320,7 +320,7 @@ def init_widgets_list():
         ),
         widget.TextBox(
                  text = '|',
-                 font = "Ubuntu Mono",
+                 font = "JetBrains Mono",
                  foreground = colors[9],
                  padding = 2,
                  fontsize = 14
@@ -331,7 +331,7 @@ def init_widgets_list():
                  ),
         widget.TextBox(
                  text = '|',
-                 font = "Ubuntu Mono",
+                 font = "JetBrains Mono",
                  foreground = colors[9],
                  padding = 2,
                  fontsize = 14
