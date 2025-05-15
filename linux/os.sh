@@ -114,18 +114,12 @@ rclone_decrypt() {
 rclone_copy_linuxbin() {
     # remove te ntfy file
     clear
-    # Step 1: Define wallpaper directory and path
-    WALLPAPER_DIR="$HOME/linux_binary/wallpaper"
-    mkdir -p "$WALLPAPER_DIR"
-    WALLPAPER_PATH="$WALLPAPER_DIR/wallpaper1.jpg"
-    
-    # Step 2: Download wallpaper
-    echo -e "🌐 Downloading wallpaper..."
-    curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
-    echo 'Downloading WallPaper Complete'
     
     echo "Copy Linux binary files ...."
     rclone sync o0:/msBackups/linux_binary/ $HOME/linux_binary/ -P --check-first --transfers=10 --track-renames --fast-list
+    
+    curl -L -o "$HOME/linux_binary/wallpaper/wallpaper1.jpg" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
+    echo 'Downloading WallPaper Complete'
 }
 
 list_recent_packages() {
