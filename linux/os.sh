@@ -27,8 +27,6 @@ menu_items=(
     "TTY Setup                        : tty_setup             :$GREEN"
     "Store Setup                      : store_setup           :$GREEN"
     "Container                        : container_setup       :$GREEN"
-    # "Wallpaper                        : wallpaper             :$GREEN"
-    # "SDDM Setup                       : sddm_setup            :$GREEN"
     "About                            : about_device          :$GREEN"
     "GPU Drivers                      : check_gpu_drivers     :$GREEN"
     "Hyprland                         : setup_hyprland_full   :$GREEN"
@@ -69,6 +67,7 @@ cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
 
 cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad"
+cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config"
 
 cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/"
