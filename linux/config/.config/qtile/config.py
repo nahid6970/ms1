@@ -405,10 +405,18 @@ def init_widgets_screen2():
 # For adding transparency to your bar, add (background="#00000000") to the "Screen" line(s)
 # For ex: Screen(top=bar.Bar(widgets=init_widgets_screen2(), background="#00000000", size=24)),
 
+# def init_screens():
+#     return [Screen(top=bar.Bar(widgets=init_widgets_screen1(), margin=[8, 12, 0, 12], size=30)),
+#             Screen(top=bar.Bar(widgets=init_widgets_screen2(), margin=[8, 12, 0, 12], size=30)),
+#             Screen(top=bar.Bar(widgets=init_widgets_screen2(), margin=[8, 12, 0, 12], size=30))]
+
 def init_screens():
-    return [Screen(top=bar.Bar(widgets=init_widgets_screen1(), margin=[8, 12, 0, 12], size=30)),
-            Screen(top=bar.Bar(widgets=init_widgets_screen2(), margin=[8, 12, 0, 12], size=30)),
-            Screen(top=bar.Bar(widgets=init_widgets_screen2(), margin=[8, 12, 0, 12], size=30))]
+    return [Screen(
+        wallpaper='~/.local/share/backgrounds/resto.png',
+        wallpaper_mode='fill',
+        top=bar.Bar(widgets=init_widgets_screen1(), margin=[8, 12, 0, 12], size=30)
+    )]
+
 
 if __name__ in ["config", "__main__"]:
     screens = init_screens()
