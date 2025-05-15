@@ -132,6 +132,7 @@ bind '"\e[B": history-search-forward'
 # History Managemenst Using .bashrc
 # Enable appending to the history file
 shopt -s histappend
+export $(dbus-launch)
 export HISTCONTROL=ignoreboth:erasedups
 export PROMPT_COMMAND="history -n; history -w; history -c; history -r"
 # Ignore some commands from history
