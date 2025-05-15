@@ -377,12 +377,11 @@ def init_widgets_list():
                  padding = 8, 
                  fmt = '  Vol: {}',
                  ),
-
         widget.Clock(
-            foreground = colors[8],
-            padding = 8,
-            mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(f'dunstify "{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}"')},
-            format = " %I:%M %p",
+            foreground=colors[8],
+            padding=8,
+            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('echo "Hello World" >> /tmp/qtile_click.log', shell=True)},
+            format=" %I:%M %p",
         ),
 
         widget.Systray(padding = 6),
