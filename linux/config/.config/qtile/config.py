@@ -504,6 +504,8 @@ wl_input_rules = None
 
 @hook.subscribe.startup_once
 def start_once():
+    subprocess.call(['dbus-launch'])
+
     home = os.path.expanduser('~')
     subprocess.call([home + '/.config/qtile/autostart.sh'])
 
@@ -516,19 +518,3 @@ def start_once():
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
-
-
-import os
-import subprocess
-
-def setup_dbus_env():
-    if "DBUS_SESSION_BUS_ADDRESS" not in os.environ:
-        proc = subprocess.run(['dbus-launch', '--sh-syntax'], capture_output=True, text=True)
-        if proc.returncode == 0:
-            for line in proc.stdout.split(';'):
-                line = line.strip()
-                if '=' in line:
-                    key, val = line.split('=', 1)
-                    os.environ[key] = val.strip('"')
-
-setup_dbus_env()
