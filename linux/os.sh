@@ -528,7 +528,10 @@ while true; do
     read -p "Enter choice: " choice
     if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#menu_items[@]} )); then
         IFS=":" read -r _ function _ <<< "${menu_items[$((choice-1))]}"
-        $function
+        function=$(echo "$function" | xargs)
+        for cmd in $function; do
+            $cmd
+        done
     elif [[ -n "${hotkeys[$choice]}" ]]; then
         ${hotkeys[$choice]}
     else
