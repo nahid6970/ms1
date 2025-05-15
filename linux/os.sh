@@ -80,10 +80,6 @@ cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #!
 # source $HOME/autostart.sh
 }
 
-Load_Scripts(){
-echo divide all functions
-}
-
 
 xorg(){
     sudo pacman -S --needed xorg xorg-xinit xorg-xwayland
