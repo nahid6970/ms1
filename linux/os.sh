@@ -31,6 +31,7 @@ menu_items=(
     "Container 󰹯                      : container_setup       :$GREEN"
     "About                            : about_device          :$GREEN"
     "Rclone-Decrypt                   : rclone_decrypt        :$RED"
+    "Rclone-linux_binary              : rclone_copy_linuxbin  :$RED"
     "GPU Drivers                      : check_gpu_drivers     :$GREEN"
     "Hyprland                         : setup_hyprland_full   :$GREEN"
     "Hyprland Config                  : hyperland_config      :$GREEN"
@@ -101,6 +102,14 @@ rclone_decrypt() {
     echo -e "Copying rclone.conf"
     mkdir -p "$HOME/.config/rclone"
     cp "$HOME/ms1/asset/rclone/rclone.conf" "$HOME/.config/rclone"
+}
+
+rclone_copy_linuxbin() {
+    # remove te ntfy file
+    clear
+    echo "Copy Linux binary files ...."
+
+    rclone sync o0:/msBackups/linux_binary/ $HOME/ -P --check-first --transfers=10 --track-renames --fast-list
 }
 
 list_recent_packages() {
