@@ -24,7 +24,6 @@ menu_items=(
     "Config All Necessary PKG   : All_Configs           :$GREEN"
     "YAY Setup                  : setup_yay             :$GREEN"
     "TTY Setup                  : tty_setup             :$GREEN"
-    "TTY Font                   : tty_font              :$GREEN"
     "Store Setup                : store_setup           :$GREEN"
     "Container                  : container_setup       :$GREEN"
     "Wallpaper                  : wallpaper             :$GREEN"

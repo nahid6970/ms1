@@ -9,7 +9,8 @@ echo -e "${GREEN}🔧 Choose setup option:${NC}"
 echo -e "1) Auto Login"
 echo -e "2) Numlock Enable"
 echo -e "3) Disable Terminal Bell"
-read -rp "Enter your choice (1/2/3): " choice
+echo -e "4) TTY Font"
+read -rp "Enter your choice (1/2/3/4): " choice
 
 enable_tty_autologin() {
     local user=${1:-$USER}
@@ -97,10 +98,34 @@ disable_bell() {
     echo "Bell disabled. Reboot or re-login for full effect."
 }
 
+# Function to list and preview TTY fonts
+tty_font() {
+    FONT_DIR="/usr/share/kbd/consolefonts"
+    echo "Available TTY Fonts:"
+
+    # Check if the font directory exists
+    if [ ! -d "$FONT_DIR" ]; then
+        echo "Console font directory not found."
+        return 1
+    fi
+
+    # Use fzf for interactive font selection
+    selected_font=$(find "$FONT_DIR" -type f -name '*.psf*' | fzf --preview 'setfont {} && echo -e "\033[1;32mPreview: {}\033[0m"' --preview-window=up:5)
+
+    # If a font is selected, set it as the current font
+    if [ -n "$selected_font" ]; then
+        sudo setfont "$selected_font"
+        echo "Font changed to: $(basename "$selected_font")"
+    else
+        echo "No font selected."
+    fi
+}
+
 case $choice in
     1) enable_tty_autologin ;;
     2) enable_numlock_on_tty ;;
     3) disable_bell ;;
+    4) tty_font ;;
     *) echo "Invalid choice." ;;
 esac
 
