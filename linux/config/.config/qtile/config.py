@@ -377,15 +377,14 @@ def init_widgets_list():
                  padding = 8, 
                  fmt = '  Vol: {}',
                  ),
+
         widget.Clock(
-                 foreground = colors[8],
-                 padding = 8, 
-                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('dunstify "$(date)"', shell=True)},
-                 ## Uncomment for date and time 
-                 # format = "⧗  %a, %b %d - %H:%M",
-                 ## Uncomment for time only
-                 format = " %I:%M %p",
-                 ),
+            foreground = colors[8],
+            padding = 8,
+            mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(f'dunstify "{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}"')},
+            format = " %I:%M %p",
+        ),
+
         widget.Systray(padding = 6),
         widget.Spacer(length = 8),
 
