@@ -243,3 +243,6 @@ https://github.com/elkowar/eww
 
 qtile
 https://qtile.org/
+
+gBar
+https://github.com/scorpion-26/gBar
