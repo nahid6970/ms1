@@ -114,6 +114,7 @@ rclone_decrypt() {
 rclone_copy_linuxbin() {
     # remove te ntfy file
     clear
+    mkdir -p "$HOME/linux_binary/wallpaper"
     curl -L -o "$HOME/linux_binary/wallpaper/wallpaper1.jpg" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
     echo 'Downloading WallPaper Complete'
     
