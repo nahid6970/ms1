@@ -2,7 +2,14 @@
 
 #! import list
 for file in ~/ms1/linux/import/*.sh; do [[ -r "$file" ]] && source "$file" || echo "Error sourcing $file" >&2; done
-
+#! C:\ms1\linux\import\compositors.sh
+#! C:\ms1\linux\import\container.sh
+#! C:\ms1\linux\import\install_packages.sh
+#! C:\ms1\linux\import\sddm.sh
+#! C:\ms1\linux\import\StatusBar.sh
+#! C:\ms1\linux\import\store.sh
+#! C:\ms1\linux\import\tty.sh
+#! C:\ms1\linux\import\wallpaper.sh
 
 # Define some color variables
 RED='\033[0;31m'
@@ -107,8 +114,10 @@ rclone_decrypt() {
 rclone_copy_linuxbin() {
     # remove te ntfy file
     clear
+    curl -L -o "$HOME/linux_binary/wallpaper/wallpaper1.jpg" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
+    echo 'Downloading WallPaper Complete'
+    
     echo "Copy Linux binary files ...."
-
     rclone sync o0:/msBackups/linux_binary/ $HOME/linux_binary/ -P --check-first --transfers=10 --track-renames --fast-list
 }
 
