@@ -71,11 +71,11 @@ cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/"
 cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad"
 cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config"
 
-cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/"
+cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\ms1\linux\config\.config\conky\conky_hyprland.conf
 cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\ms1\linux\config\.config\foot\foot.ini
 cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\ms1\linux\config\.config\waybar\config.jsonc
 cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
-cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config"
+cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\ms1\linux\config\.config\starship\starship.toml
 
 # source $HOME/autostart.sh
 }
