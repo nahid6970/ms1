@@ -271,22 +271,6 @@ welcome_remove() {
     touch .hushlogin
 }
 
-rclone_decrypt() {
-    # remove te ntfy file
-    clear
-    echo "Clone ms1 ...."
-    git clone https://github.com/nahid6970/ms1.git
-    echo "Decreypt rclone conf ...."
-    pip install pycryptodomex
-    python ~/ms3/locker/locker.py --decrypt ~/ms1/asset/rclone/rclone.conf.enc
-
-    SOURCE_CONF_FILE="$HOME/ms1/asset/rclone/rclone.conf"
-    RCLONE_CONFIG_DIR="$HOME/.config/rclone"
-
-    echo -e "Copying rclone.conf"
-    cp "$SOURCE_CONF_FILE" "$RCLONE_CONFIG_DIR/"
-}
-
 
 setup_yay() {
     clear
