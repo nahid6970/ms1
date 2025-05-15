@@ -43,5 +43,3 @@ install_bar() {
             ;;
     esac
 }
-
-install_bar
