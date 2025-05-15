@@ -352,7 +352,7 @@ def init_widgets_list():
                  foreground = colors[4],
                  padding = 8, 
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
-                 format = '  Cpu: {load_percent}%',
+                format='  Cpu: {load_percent:2.0f}%',
                  ),
         widget.Memory(
                  foreground = colors[8],
@@ -378,12 +378,11 @@ def init_widgets_list():
                  fmt = '  Vol: {}',
                  ),
         widget.Clock(
-            foreground=colors[8],
-            padding=8,
-            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dbus-launch dunstify "$(date)"', shell=True)},
-            format=" %I:%M %p",
-        ),
-
+                foreground=colors[8],
+                padding=8,
+                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dbus-launch dunstify "$(date)"', shell=True)},
+                format=" %I:%M %p",
+                ),
         widget.Systray(padding = 6),
         widget.Spacer(length = 8),
 
