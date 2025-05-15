@@ -19,6 +19,7 @@ menu_items=(
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper  :$GREEN"
     "Copy bashrc                      : copy_files            :$GREEN"
     "Install Necessary Packages       : install_packages      :$GREEN"
+    "Compositor + Utilities           : compositor_setup      :$GREEN"
     "X-Org/X11                        : xorg                  :$GREEN"
     "Wayland                          : wayland               :$GREEN"
     "Desktop Environment              : desktop_environment   :$GREEN"
