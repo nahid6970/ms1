@@ -380,7 +380,7 @@ def init_widgets_list():
         widget.Clock(
             foreground=colors[8],
             padding=8,
-            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('exec foot', shell=True)},
+            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dbus-launch dunstify "Hello from Qtile!"', shell=True)},
             format=" %I:%M %p",
         ),
 
