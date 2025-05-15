@@ -36,25 +36,6 @@ myTerm = "foot"      # My terminal of choice
 myBrowser = "brave"       # My browser of choice
 # myEmacs = "emacsclient -c -a 'emacs' " # The space at the end is IMPORTANT!
 
-def setup_dbus():
-    if 'DBUS_SESSION_BUS_ADDRESS' not in os.environ:
-        proc = subprocess.Popen(['dbus-launch', '--sh-syntax'], stdout=subprocess.PIPE, text=True)
-        output = proc.communicate()[0]
-        for line in output.splitlines():
-            if line.startswith('DBUS_SESSION_BUS_ADDRESS'):
-                key, value = line.strip(';').split('=', 1)
-                value = value.strip("'\"")
-                os.environ[key] = value
-            elif line.startswith('DBUS_SESSION_BUS_PID'):
-                key, value = line.strip(';').split('=', 1)
-                value = value.strip("'\"")
-                os.environ[key] = value
-        print("D-Bus session started in Qtile environment")
-    else:
-        print("D-Bus session already set")
-
-setup_dbus()
-
 # Allows you to input a name when adding treetab section.
 @lazy.layout.function
 def add_treetab_section(layout):
@@ -528,6 +509,7 @@ wl_input_rules = None
 def start_once():
     home = os.path.expanduser('~')
     subprocess.call([home + '/.config/qtile/autostart.sh'])
+    subprocess.call([home + '/autostart.sh'])
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
