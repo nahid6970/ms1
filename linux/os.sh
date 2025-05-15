@@ -84,6 +84,7 @@ cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\ms1\linux\co
 cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\ms1\linux\config\.config\foot\foot.ini
 cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\ms1\linux\config\.config\waybar\config.jsonc
 cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
+cp -a "$HOME/ms1/linux/config/.config/dnust" "$HOME/.config/" #! C:\ms1\linux\config\.config\dunst\dunstrc
 cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\ms1\linux\config\.config\starship\starship.toml
 
 # source $HOME/autostart.sh

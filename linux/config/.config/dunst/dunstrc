@@ -1,0 +1,61 @@
+[global]
+# Set the font to a clean monospace (change to your favorite)
+font = Monospace 10
+
+# The time (in milliseconds) that notifications stay on screen
+timeout = 5000
+
+# Geometry of the notification window
+# Here it appears top right, 10px from edge
+geometry = "300x50-10+10"
+
+# Set the frame width (border) in pixels
+frame_width = 2
+
+# Set the transparency (0-1, where 0 is fully transparent)
+transparency = 0.85
+
+# Set icon position, either 'left' or 'right'
+icon_position = left
+
+# Specify whether notifications are stacked or replace previous
+# Possible values: replace, stack
+# 'replace' replaces old notifications with new ones; 'stack' shows all
+notification_stack = stack
+
+# Whether to sort notifications by urgency (yes/no)
+sort = yes
+
+# Urgency rules for timeout (ms)
+[urgency_low]
+timeout = 3000
+background = "#222222"
+foreground = "#bbbbbb"
+frame_color = "#444444"
+
+[urgency_normal]
+timeout = 5000
+background = "#282c34"
+foreground = "#eeeeee"
+frame_color = "#61afef"
+
+[urgency_critical]
+timeout = 0      # 0 means never timeout until dismissed
+background = "#ff5555"
+foreground = "#ffffff"
+frame_color = "#ff0000"
+
+[frame_color]
+# Frame color used generally (optional)
+
+[markup]
+# Enable pango markup (allows for bold, italics, color in messages)
+markup = yes
+
+[actions]
+# Enable interactive notification actions
+actions = yes
+
+[mouse]
+# Enable mouse events in notifications
+mouse = yes
