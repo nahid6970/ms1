@@ -7,4 +7,5 @@ wallpaper(){
     # Step 2: Download wallpaper
     echo -e "🌐 Downloading wallpaper..."
     curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
+    echo 'Downloading WallPaper Complete'
 }
