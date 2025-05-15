@@ -19,8 +19,8 @@ menu_items=(
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper  :$GREEN"
     "Copy bashrc                      : copy_files            :$GREEN"
     "Install Necessary Packages       : install_packages      :$GREEN"
-    "Desktop Environment 󰹯            : desktop_environment   :$GREEN"
-    "Compositor + Utilities 󰹯         : compositor_setup      :$GREEN"
+    "Desktop Environment 󰹯            : desktop_environment   :$GREEN" #! C:\ms1\linux\desktop_environment.sh
+    "Compositor + Utilities 󰹯         : compositor_setup      :$GREEN" #! C:\ms1\linux\import\compositors.sh
     "Status Bar 󰹯                     : install_bar           :$GREEN"
     # "X-Org/X11                        : xorg                  :$GREEN"
     # "Wayland                          : wayland               :$GREEN"
