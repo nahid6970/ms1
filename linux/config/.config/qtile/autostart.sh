@@ -6,6 +6,6 @@ if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
     export DBUS_SESSION_BUS_ADDRESS
     export DBUS_SESSION_BUS_PID
 fi
-
+export dbus-launch
 # Add other startup commands below if needed
 # e.g., picom, nm-applet, etc.
