@@ -380,7 +380,7 @@ def init_widgets_list():
         widget.Clock(
                 foreground=colors[8],
                 padding=8,
-                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dbus-launch dunstify -r 9999 -u low "$(date)"', shell=True)},
+                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dbus-launch dunstify "$(date)"', shell=True)},
                 format=" %I:%M %p",
                 ),
         widget.Systray(padding = 6),
