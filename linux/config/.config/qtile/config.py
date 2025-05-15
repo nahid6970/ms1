@@ -412,7 +412,7 @@ def init_widgets_screen2():
 
 def init_screens():
     return [Screen(
-        wallpaper='~/.local/share/backgrounds/resto.png',
+        wallpaper='~/Pictures/wallpapers/wallpaper1.jpg',
         wallpaper_mode='fill',
         top=bar.Bar(widgets=init_widgets_screen1(), margin=[8, 12, 0, 12], size=30)
     )]
