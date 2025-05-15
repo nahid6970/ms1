@@ -359,7 +359,7 @@ def init_widgets_list():
                  padding = 8, 
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
                  format = '{MemUsed: .0f}{mm}',
-                 fmt = '🖥  Mem: {}',
+                 fmt = '  Mem: {}',
                  ),
         widget.DF(
                  update_interval = 60,
@@ -375,7 +375,7 @@ def init_widgets_list():
         widget.Volume(
                  foreground = colors[7],
                  padding = 8, 
-                 fmt = '🕫  Vol: {}',
+                 fmt = '  Vol: {}',
                  ),
         widget.Clock(
                  foreground = colors[8],
