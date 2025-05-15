@@ -380,11 +380,11 @@ def init_widgets_list():
         widget.Clock(
                  foreground = colors[8],
                  padding = 8, 
-                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('notify-date')},
+                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('notify-send "Current Date" "$(date)"')},
                  ## Uncomment for date and time 
-                 # format = "⧗  %a, %b %d - %H:%M",
+                 format = "⧗  %a, %b %d - %H:%M",
                  ## Uncomment for time only
-                 format = " %I:%M %p",
+                #  format = " %I:%M %p",
                  ),
         widget.Systray(padding = 6),
         widget.Spacer(length = 8),
