@@ -67,9 +67,9 @@ echo Set All configs
 cp -a "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
 cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
 
-cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/"
-cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad"
-cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config"
+cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/" #! C:\ms1\linux\config\.config\hypr\hyprland.conf
+cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad" #! C:\ms1\linux\config\.config\xmonad\xmonad.hs
+cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config" #! C:\ms1\linux\config\.config\qtile\config.py
 
 cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\ms1\linux\config\.config\conky\conky_hyprland.conf
 cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\ms1\linux\config\.config\foot\foot.ini
