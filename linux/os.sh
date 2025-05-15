@@ -109,7 +109,7 @@ rclone_copy_linuxbin() {
     clear
     echo "Copy Linux binary files ...."
 
-    rclone sync o0:/msBackups/linux_binary/ $HOME/ -P --check-first --transfers=10 --track-renames --fast-list
+    rclone sync o0:/msBackups/linux_binary/ $HOME/linux_binary/ -P --check-first --transfers=10 --track-renames --fast-list
 }
 
 list_recent_packages() {
