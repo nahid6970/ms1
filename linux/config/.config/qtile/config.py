@@ -263,7 +263,7 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="Ubuntu Bold",
+    font="JetBrains Mono",
     fontsize = 12,
     padding = 0,
     background=colors[0]
