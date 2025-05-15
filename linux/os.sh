@@ -30,6 +30,7 @@ menu_items=(
     "Store Setup 󰹯                    : store_setup           :$GREEN"
     "Container 󰹯                      : container_setup       :$GREEN"
     "About                            : about_device          :$GREEN"
+    "Rclone-Decrypt                   : rclone_decrypt        :$RED"
     "GPU Drivers                      : check_gpu_drivers     :$GREEN"
     "Hyprland                         : setup_hyprland_full   :$GREEN"
     "Hyprland Config                  : hyperland_config      :$GREEN"
@@ -90,6 +91,17 @@ wayland(){
     sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
 }
 
+rclone_decrypt() {
+    # remove te ntfy file
+    clear
+    echo "Decreypt rclone conf ...."
+    pip install pycryptodomex
+    python ~/ms1/termux/locker/locker.py --decrypt ~/ms1/asset/rclone/rclone.conf.enc
+
+    echo -e "Copying rclone.conf"
+    mkdir -p "$HOME/.config/rclone"
+    cp "$HOME/ms1/asset/rclone/rclone.conf" "$HOME/.config/rclone"
+}
 
 list_recent_packages() {
     echo -e "${GREEN}Listing recently installed packages...${NC}"
