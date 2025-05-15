@@ -368,8 +368,8 @@ def init_widgets_list():
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('notify-disk')},
                  partition = '/',
                  #format = '[{p}] {uf}{m} ({r:.0f}%)',
-                 format = ' free',
-                 fmt = '🖴  Disk: {}',
+                 format = '{uf}{m} free',
+                 fmt = '  Disk: {}',
                  visible_on_warn = False,
                  ),
         widget.Volume(
