@@ -143,20 +143,21 @@ keys = [
     Key([mod], "period", lazy.next_screen(), desc='Move focus to next monitor'),
     Key([mod], "comma", lazy.prev_screen(), desc='Move focus to prev monitor'),
     
-    # Emacs programs launched using the key chord SUPER+e followed by 'key'
-    KeyChord([mod],"e", [
-        Key([], "e", lazy.spawn(myEmacs), desc='Emacs Dashboard'),
-        Key([], "a", lazy.spawn(myEmacs + "--eval '(emms-play-directory-tree \"~/Music/\")'"), desc='Emacs EMMS'),
-        Key([], "b", lazy.spawn(myEmacs + "--eval '(ibuffer)'"), desc='Emacs Ibuffer'),
-        Key([], "d", lazy.spawn(myEmacs + "--eval '(dired nil)'"), desc='Emacs Dired'),
-        Key([], "i", lazy.spawn(myEmacs + "--eval '(erc)'"), desc='Emacs ERC'),
-        Key([], "s", lazy.spawn(myEmacs + "--eval '(eshell)'"), desc='Emacs Eshell'),
-        Key([], "v", lazy.spawn(myEmacs + "--eval '(vterm)'"), desc='Emacs Vterm'),
-        Key([], "w", lazy.spawn(myEmacs + "--eval '(eww \"distro.tube\")'"), desc='Emacs EWW'),
-        Key([], "F4", lazy.spawn("killall emacs"),
-                      lazy.spawn("/usr/bin/emacs --daemon"),
-                      desc='Kill/restart the Emacs daemon')
-    ]),
+    # # Emacs programs launched using the key chord SUPER+e followed by 'key'
+    # KeyChord([mod],"e", [
+    #     Key([], "e", lazy.spawn(myEmacs), desc='Emacs Dashboard'),
+    #     Key([], "a", lazy.spawn(myEmacs + "--eval '(emms-play-directory-tree \"~/Music/\")'"), desc='Emacs EMMS'),
+    #     Key([], "b", lazy.spawn(myEmacs + "--eval '(ibuffer)'"), desc='Emacs Ibuffer'),
+    #     Key([], "d", lazy.spawn(myEmacs + "--eval '(dired nil)'"), desc='Emacs Dired'),
+    #     Key([], "i", lazy.spawn(myEmacs + "--eval '(erc)'"), desc='Emacs ERC'),
+    #     Key([], "s", lazy.spawn(myEmacs + "--eval '(eshell)'"), desc='Emacs Eshell'),
+    #     Key([], "v", lazy.spawn(myEmacs + "--eval '(vterm)'"), desc='Emacs Vterm'),
+    #     Key([], "w", lazy.spawn(myEmacs + "--eval '(eww \"distro.tube\")'"), desc='Emacs EWW'),
+    #     Key([], "F4", lazy.spawn("killall emacs"),
+    #                   lazy.spawn("/usr/bin/emacs --daemon"),
+    #                   desc='Kill/restart the Emacs daemon')
+    # ]),
+    
     # Dmenu/rofi scripts launched using the key chord SUPER+p followed by 'key'
     KeyChord([mod], "p", [
         Key([], "h", lazy.spawn("dm-hub -r"), desc='List all dmscripts'),
