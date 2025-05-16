@@ -310,7 +310,7 @@ def init_widgets_list():
                  ),
         widget.LaunchBar(
                  progs = [("", "firefox", "Brave web browser"),
-                          ("󰽒", "alacritty", "Alacritty terminal"),
+                          ("󰽒", "foot", "Alacritty terminal"),
                           ("", "pcmanfm", "PCManFM file manager"),
                           ("", "vlc", "VLC media player")
                          ], 
