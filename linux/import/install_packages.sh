@@ -10,5 +10,6 @@ install_packages() {
         openssh python rclone sshpass wget \
         which zoxide yazi zsh stow expac numlockx \
         rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
-        thefuck feh screenfetch sed grep jq rofi conky
+        thefuck feh screenfetch sed grep jq rofi conky \
+        htop firefox dunst mypy
 }
