@@ -312,7 +312,7 @@ def init_widgets_list():
                  progs = [("", "dbus-launch firefox", "Brave web browser"),
                           ("󰽒", "dbus-launch foot", "Alacritty terminal"),
                           ("", "dbus-launch thunar", "PCManFM file manager"),
-                          ("", "vlc", "VLC media player")
+                          ("", "dbus-launch vlc", "VLC media player")
                          ], 
                 font = "JetBrains Mono",
                  fontsize = 16,
