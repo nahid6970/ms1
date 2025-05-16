@@ -344,6 +344,7 @@ def init_widgets_list():
         widget.GenPollText(
                  update_interval = 300,
                  func = lambda: subprocess.check_output("printf $(uname -r)", shell=True, text=True),
+                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e fastfetch')},
                  foreground = colors[3],
                  padding = 8, 
                  fmt = '❤  {}',
