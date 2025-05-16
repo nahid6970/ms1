@@ -68,7 +68,8 @@ keys = [
     Key(["mod1"], "q", lazy.window.kill(), desc="Kill focused window"),
     Key([mod], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "shift"], "q", lazy.spawn("dm-logout -r"), desc="Logout menu"),
-    Key(["mod1"], "space", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    # Key(["mod1"], "space", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key(["mod1"], "space", lazy.spawn("rofi --show run"), desc="Spawn Wofi application launcher"),
     Key([mod, "shift"], "T", lazy.spawn("conky-toggle"), desc="Conky toggle on/off"),
     
     # Switch between windows
