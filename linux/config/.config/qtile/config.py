@@ -309,7 +309,7 @@ def init_widgets_list():
                  fontsize = 14
                  ),
         widget.LaunchBar(
-                 progs = [("", "dbus-launch firefox", "Brave web browser"),
+                 progs = [("", "dbus-launch firefox http://192.168.0.101:5001", "Firefox web browser"),
                           ("󰽒", "dbus-launch foot", "Alacritty terminal"),
                           ("", "dbus-launch thunar", "PCManFM file manager"),
                           ("", "dbus-launch audacious", "VLC media player")
