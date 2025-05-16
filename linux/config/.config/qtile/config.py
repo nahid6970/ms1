@@ -180,10 +180,10 @@ keys = [
 ]
 
 groups = []
-group_names = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+group_names = ["1", "2", "3", "4", "5", "6"]
 
 # Uncomment only one of the following lines
-group_labels = ["", "", "👁", "", "", "", "✀", "꩜", "", "⎙"]
+group_labels = ["1", "2", "3", "4", "5", "6"]
 #group_labels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 #group_labels = ["DEV", "WWW", "SYS", "DOC", "VBOX", "CHAT", "MUS", "VID", "GFX", "MISC"]
 
