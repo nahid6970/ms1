@@ -11,6 +11,7 @@ install_packages() {
         which zoxide yazi zsh stow expac numlockx \
         rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
         thefuck feh screenfetch sed grep jq rofi conky \
-        htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman
+        htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman \
+        vlc
 
 }
