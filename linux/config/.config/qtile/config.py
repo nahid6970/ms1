@@ -30,6 +30,8 @@ from libqtile import bar, extension, hook, layout, qtile, widget
 from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen
 from libqtile.lazy import lazy
 import colors
+from types import FunctionType
+
 
 mod = "mod4"              # Sets mod key to SUPER/WINDOWS
 myTerm = "foot"      # My terminal of choice
