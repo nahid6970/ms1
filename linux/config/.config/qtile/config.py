@@ -309,10 +309,10 @@ def init_widgets_list():
                  fontsize = 14
                  ),
         widget.LaunchBar(
-                 progs = [("🦁", "brave", "Brave web browser"),
-                          ("", "alacritty", "Alacritty terminal"),
-                          ("📁", "pcmanfm", "PCManFM file manager"),
-                          ("🎸", "vlc", "VLC media player")
+                 progs = [("", "brave", "Brave web browser"),
+                          ("󰽒", "alacritty", "Alacritty terminal"),
+                          ("", "pcmanfm", "PCManFM file manager"),
+                          ("", "vlc", "VLC media player")
                          ], 
                 font = "JetBrains Mono",
                  fontsize = 12,
