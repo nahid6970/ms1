@@ -315,7 +315,7 @@ def init_widgets_list():
                           ("", "vlc", "VLC media player")
                          ], 
                 font = "JetBrains Mono",
-                 fontsize = 12,
+                 fontsize = 16,
                  padding = 12,
                  foreground = colors[3],
         ),
