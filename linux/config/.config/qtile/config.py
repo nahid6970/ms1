@@ -367,7 +367,7 @@ def init_widgets_list():
                  update_interval = 60,
                  foreground = colors[5],
                  padding = 8, 
-                 mouse_callbacks = {'Button1': lazy.start("xset +n")},
+                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn('notify-disk')},
                  partition = '/',
                  #format = '[{p}] {uf}{m} ({r:.0f}%)',
                  format = '{uf}{m} free',
@@ -508,7 +508,6 @@ wl_input_rules = None
 def start_once():
     home = os.path.expanduser('~')
     subprocess.call([home + '/.config/qtile/autostart.sh'])
-    subprocess.Popen(["numlockx", "on"])
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
