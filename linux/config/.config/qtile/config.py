@@ -351,14 +351,6 @@ def init_widgets_list():
                  padding = 8,
                  max_chars = 40
                  ),
-        widget.GenPollText(
-                 update_interval = 300,
-                 func = lambda: subprocess.check_output("printf $(uname -r)", shell=True, text=True),
-                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e bash -c "fastfetch; exec bash"')},
-                 foreground = colors[3],
-                 padding = 8, 
-                 fmt = '❤  {}',
-                 ),
         GitStatusWidget(
             path="~/ms1",
             update_interval=10,
@@ -367,6 +359,14 @@ def init_widgets_list():
             clean_color="00ff00",
             dirty_color="ff0000",
         ),
+        widget.GenPollText(
+                 update_interval = 300,
+                 func = lambda: subprocess.check_output("printf $(uname -r)", shell=True, text=True),
+                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e bash -c "fastfetch; exec bash"')},
+                 foreground = colors[3],
+                 padding = 8, 
+                 fmt = '❤  {}',
+                 ),
         widget.CPU(
                  foreground = colors[4],
                  padding = 8, 
