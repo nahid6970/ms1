@@ -358,6 +358,7 @@ def init_widgets_list():
             dirty_icon="",
             clean_color="00ff00",
             dirty_color="ff0000",
+            padding = 8,
         ),
         widget.GenPollText(
                  update_interval = 300,
