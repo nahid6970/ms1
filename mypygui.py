@@ -942,6 +942,12 @@ def create_gui():
         check_and_update(lbl, cfg)
 create_gui()
 
+
+ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
+ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/ms1/ C:/msBackups/ms1 --exclude ".git/**" --exclude "__pycache__/**" -P' ))
+
+
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
 #! ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝
 #! ██████╔╝██║██║  ███╗███████║   ██║
