@@ -23,15 +23,14 @@ NC='\033[0m' # No Color
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1]                   : update_ms1_repo       :$GREEN"
+    "Copy Config Files                : All_Configs           :$GREEN"
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper  :$GREEN"
-    "Copy bashrc                      : copy_files            :$GREEN"
     "Install Necessary Packages       : install_packages      :$GREEN"
     "Desktop Environment 󰹯            : desktop_environment   :$GREEN" #! C:\ms1\linux\desktop_environment.sh
     "Compositor + Utilities 󰹯         : compositor_setup      :$GREEN" #! C:\ms1\linux\import\compositors.sh
     "Status Bar 󰹯                     : install_bar           :$GREEN"
     # "X-Org/X11                        : xorg                  :$GREEN"
     # "Wayland                          : wayland               :$GREEN"
-    "Config All Necessary PKG         : All_Configs           :$GREEN"
     "YAY Setup                        : setup_yay             :$GREEN"
     "TTY Setup 󰹯                      : tty_setup             :$GREEN"
     "Store Setup 󰹯                    : store_setup           :$GREEN"
@@ -88,6 +87,8 @@ cp -a "$HOME/ms1/linux/config/.config/dunst" "$HOME/.config/" #! C:\ms1\linux\co
 cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\ms1\linux\config\.config\starship\starship.toml
 
 # source $HOME/autostart.sh
+# echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
+source "$HOME/.bashrc"
 }
 
 
@@ -126,16 +127,6 @@ rclone_copy_linuxbin() {
 list_recent_packages() {
     echo -e "${GREEN}Listing recently installed packages...${NC}"
     expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
-}
-
-# Copy .bashrc and termux.properties
-copy_files() {
-    clear
-    echo -e "${CYAN}Copying .bashrc...${NC}"
-    cp $HOME/ms1/linux/config/bashrc $HOME/.bashrc
-
-    echo -e "${GREEN}.bashrc copied.${NC}"
-    echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
 }
 
 # Neovim setup function
