@@ -354,7 +354,7 @@ def init_widgets_list():
         GitStatusWidget(
             path="~/ms1",
             update_interval=10,
-            clean_icon="",
+            clean_icon="",
             dirty_icon="",
             clean_color="00ff00",
             dirty_color="ff0000",
