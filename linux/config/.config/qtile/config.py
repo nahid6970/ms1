@@ -362,12 +362,7 @@ def init_widgets_list():
                  padding = 8, 
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
                  format = '{MemUsed: .0f}{mm}',
-                 fmt = '  Mem: {}',
-                background=colors[0],  # main bg color
-                markup=False,
-                border_color=colors[8],
-                border_width=0,
-
+                 fmt = '<u><b>  Mem: {}</b></u>',
                  ),
         widget.DF(
                  update_interval = 60,
