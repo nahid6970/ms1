@@ -1,5 +1,5 @@
 #!/bin/bash
-numlockx on
+# numlockx on
 
 
 # # Start dbus session if not already running and export env variables
