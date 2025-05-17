@@ -331,6 +331,12 @@ def init_widgets_list():
                  foreground = colors[1],
                  padding = 5
                  ),
+        widget.CurrentLayoutIcon(
+            foreground='#33a3f8',  # Light blue foreground
+            background='#282c34',  # Dark gray background
+            padding=5,
+            scale=0.7  # Adjust size of the icon (optional)
+        ),
         widget.TextBox(
                  text = '|',
                  font = "JetBrains Mono",
