@@ -363,6 +363,7 @@ def init_widgets_list():
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
                  format = '{MemUsed: .0f}{mm}',
                  fmt = '<u><b>  Mem: {}</b></u>',
+                 markup = True
                  ),
         widget.DF(
                  update_interval = 60,
