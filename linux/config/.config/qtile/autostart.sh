@@ -9,3 +9,6 @@
 
 # # Add other startup commands below if needed
 # # e.g., picom, nm-applet, etc.
+
+#!/bin/bash
+foot -e echo "Hello, World!"
