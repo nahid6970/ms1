@@ -1,3 +1,4 @@
+import os
 from libqtile.widget import base
 from libqtile import qtile
 import subprocess
@@ -17,10 +18,11 @@ class GitStatusWidget(base.ThreadPoolText):
         self.add_defaults(GitStatusWidget.defaults)
 
     def poll(self):
+        repo_path = os.path.expanduser(self.path)
         try:
             result = subprocess.run(
                 ['git', 'status', '--porcelain'],
-                cwd=self.path,
+                cwd=repo_path,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
