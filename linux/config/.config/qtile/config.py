@@ -31,6 +31,9 @@ from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen
 from libqtile.lazy import lazy
 import colors
 from git_status import GitStatusWidget
+from os.path import expanduser
+from subprocess import Popen
+
 
 
 mod = "mod4"              # Sets mod key to SUPER/WINDOWS
@@ -525,9 +528,9 @@ auto_minimize = True
 wl_input_rules = None
 
 @hook.subscribe.startup_once
-def start_once():
-    home = os.path.expanduser('~')
-    subprocess.call([home + '/.config/qtile/autostart.sh'])
+def startup():
+    Popen(expanduser("~/.config/qtile/startup.sh"))
+
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
