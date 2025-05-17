@@ -358,14 +358,13 @@ def init_widgets_list():
                 format='  Cpu: {load_percent:2.0f}%',
                  ),
         widget.Memory(
-            foreground='#ff0000',  # bright red foreground
-            background='#000000',  # black background
-            padding=8, 
-            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
-            format='{MemUsed: .0f}{mm}',
-            fmt='<u><b>  Mem: {}</b></u>',
-            markup=True
-        ),
+                 foreground = colors[8],
+                 padding = 8, 
+                 mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
+                 format = '{MemUsed: .0f}{mm}',
+                 fmt = '<u><b>  Mem: {}</b></u>',
+                 markup = True
+                 ),
         widget.DF(
                  update_interval = 60,
                  foreground = colors[5],
