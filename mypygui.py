@@ -649,7 +649,7 @@ ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=
 ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 # ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\SH3\\SH3V2.py'))
 ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\ms1\scripts\shadowFight3\shadowFight3.py'))
-ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\scripts\\shadowFight3\\shadowFight3.py'))
+ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command('code C:\\ms1\\scripts\\shadowFight3\\shadowFight3.py'))
 
 
 #! FFMPEG
