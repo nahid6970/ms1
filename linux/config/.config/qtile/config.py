@@ -30,6 +30,8 @@ from libqtile import bar, extension, hook, layout, qtile, widget
 from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen
 from libqtile.lazy import lazy
 import colors
+from git_status import GitStatusWidget
+
 
 mod = "mod4"              # Sets mod key to SUPER/WINDOWS
 myTerm = "foot"      # My terminal of choice
@@ -357,6 +359,14 @@ def init_widgets_list():
                  padding = 8, 
                  fmt = '❤  {}',
                  ),
+        GitStatusWidget(
+            path="~/ms1",
+            update_interval=10,
+            clean_icon="",
+            dirty_icon="",
+            clean_color="00ff00",
+            dirty_color="ff0000",
+        ),
         widget.CPU(
                  foreground = colors[4],
                  padding = 8, 
