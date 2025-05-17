@@ -75,6 +75,12 @@ def create_custom_border(parent):
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
+def run_command(pwsh_command):
+    """Run a PowerShell command in a new terminal window."""
+    # Using 'start' (Windows shell command) to open a new window
+    # Using pwsh with -NoExit so the window stays open
+    subprocess.Popen(f'start pwsh -NoExit -Command "{pwsh_command}"', shell=True)
+
 class HoverButton(tk.Button):
     def __init__(self, master=None, **kw):
         self.default_color = kw.pop('default_color', "#000000")
@@ -642,10 +648,8 @@ Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:
 ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 # ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\SH3\\SH3V2.py'))
-ShadowFight3_lb.bind("<Button-1>", lambda event=None: subprocess.Popen('cmd /k start powershell -ExecutionPolicy Bypass -NoExit -Command "python C:\\ms1\\scripts\\shadowFight3\\shadowFight3.py"'))
+ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\ms1\scripts\shadowFight3\shadowFight3.py'))
 ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\scripts\\shadowFight3\\shadowFight3.py'))
-
-
 
 
 #! FFMPEG
@@ -937,8 +941,6 @@ def create_gui():
         # Start its own loop
         check_and_update(lbl, cfg)
 create_gui()
-
-
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
 #! ██╔══██╗██║██╔════╝ ██║  ██║╚══██╔══╝
