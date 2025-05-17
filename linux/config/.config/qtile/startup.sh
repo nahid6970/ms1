@@ -1,4 +1,6 @@
-# #!/bin/bash
+#!/bin/bash
+numlockx on
+
 
 # # Start dbus session if not already running and export env variables
 # if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
@@ -11,6 +13,6 @@
 # # e.g., picom, nm-applet, etc.
 
 
-#!/bin/bash
-foot -e sh -c 'echo "Hello, World!"; read'
+
+
 
