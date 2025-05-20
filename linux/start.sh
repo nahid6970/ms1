@@ -49,7 +49,16 @@ case $choice in
         ;;
     7)
         echo "Starting Qtile..."
-        qtile start -b wayland
+
+        # Start a DBus session only if needed
+        if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+            eval "$(dbus-launch --sh-syntax)"
+            export DBUS_SESSION_BUS_ADDRESS
+            export DBUS_SESSION_BUS_PID
+        fi
+
+        export QT_QPA_PLATFORM=wayland
+        exec qtile start -b wayland
         ;;
     *)
         echo "Invalid choice. Please select a number between 1 and 7."
