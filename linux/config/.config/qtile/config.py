@@ -375,7 +375,7 @@ def init_widgets_list():
                  foreground = colors[4],
                  padding = 8, 
                  mouse_callbacks = {'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
-                format='  Cpu: {load_percent:2.0f}%',
+                format=' {load_percent:2.0f}%',
                  ),
         widget.Memory(
             foreground='#33a3f8',  # Light blue foreground
