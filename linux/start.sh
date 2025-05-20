@@ -49,19 +49,9 @@ case $choice in
         ;;
     7)
         echo "Starting Qtile..."
-
-        # Start a new DBus session and export env vars
-        eval "$(dbus-launch --sh-syntax)"
-        export DBUS_SESSION_BUS_ADDRESS
-        export DBUS_SESSION_BUS_PID
-
-        # Start dunst inside the same DBus session
-        XWAYLAND_FORCE=1 dunst &
-
-        export QT_QPA_PLATFORM=wayland
-
-        # Important: start Qtile *inside* the same dbus session
-        exec qtile start -b wayland
+        qtile start -b wayland
         ;;
-
+    *)
+        echo "Invalid choice. Please select a number between 1 and 7."
+        ;;
 esac
