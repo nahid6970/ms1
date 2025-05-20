@@ -12,6 +12,7 @@ install_packages() {
         rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
         thefuck feh screenfetch sed grep jq rofi conky \
         htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman \
-        vlc audacious
+        vlc audacious \
+        foot
 
 }
