@@ -383,7 +383,7 @@ def init_widgets_list():
             padding=8,
             mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(myTerm + ' -e htop')},
             format='{MemUsed: .0f}{mm}',
-            fmt='<span underline="single" underline_color="#ff802c"><b> Mem: {}</b></span>',
+            fmt=' : {}',
             markup=True
         ),
         widget.DF(
