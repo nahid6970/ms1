@@ -13,5 +13,5 @@ install_packages() {
         thefuck feh screenfetch sed grep jq rofi conky \
         htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman \
         vlc audacious \
-        foot starship \
+        foot starship 
 }
