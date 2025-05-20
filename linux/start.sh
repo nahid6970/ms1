@@ -50,11 +50,16 @@ case $choice in
     7)
         echo "Starting Qtile..."
 
-        # Start a DBus session only if needed
+        # Start a DBus session if one isn't running
         if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
             eval "$(dbus-launch --sh-syntax)"
             export DBUS_SESSION_BUS_ADDRESS
             export DBUS_SESSION_BUS_PID
+        fi
+
+        # Start dunst with XWayland support, if not already running
+        if ! pgrep -x dunst > /dev/null; then
+            XWAYLAND_FORCE=1 dunst &
         fi
 
         export QT_QPA_PLATFORM=wayland
