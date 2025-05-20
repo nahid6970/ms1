@@ -50,22 +50,18 @@ case $choice in
     7)
         echo "Starting Qtile..."
 
-        # Start a DBus session if one isn't running
-        if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-            eval "$(dbus-launch --sh-syntax)"
-            export DBUS_SESSION_BUS_ADDRESS
-            export DBUS_SESSION_BUS_PID
-        fi
+        # Start a new DBus session and export env vars
+        eval "$(dbus-launch --sh-syntax)"
+        export DBUS_SESSION_BUS_ADDRESS
+        export DBUS_SESSION_BUS_PID
 
-        # Start dunst with XWayland support, if not already running
-        if ! pgrep -x dunst > /dev/null; then
-            XWAYLAND_FORCE=1 dunst &
-        fi
+        # Start dunst inside the same DBus session
+        XWAYLAND_FORCE=1 dunst &
 
         export QT_QPA_PLATFORM=wayland
+
+        # Important: start Qtile *inside* the same dbus session
         exec qtile start -b wayland
         ;;
-    *)
-        echo "Invalid choice. Please select a number between 1 and 7."
-        ;;
+
 esac
