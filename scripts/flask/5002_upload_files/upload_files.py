@@ -249,20 +249,38 @@ html_template = '''
             text-decoration: underline;
         }
         
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
         .flash {
-            color: var(--primary-color);
             font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
+            margin-bottom: 10px;
             padding: 10px;
-            background-color: #e6ffe6;
             border-radius: 8px;
-            border: 1px solid var(--primary-color);
+            border: 1px solid;
+            text-align: center;
+        }
+        .flash.success {
+            color: var(--primary-color);
+            background-color: #e6ffe6;
+            border-color: var(--primary-color);
         }
         .flash.error {
             color: var(--danger-color);
             background-color: #ffe6e6;
             border-color: var(--danger-color);
+        }
+        .flash.warning {
+            color: #FFA500; /* Orange */
+            background-color: #fffacd; /* LemonChiffon */
+            border-color: #FFD700; /* Gold */
+        }
+        .flash.info {
+            color: #4682B4; /* SteelBlue */
+            background-color: #e0f2f7; /* Light blue */
+            border-color: #B0E0E6; /* PowderBlue */
         }
     </style>
 </head>
@@ -271,11 +289,11 @@ html_template = '''
     <div class="container">
         <h1>Awesome File Share</h1>
 
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flash-messages">
-                    {% for message in messages %}
-                        <li class="flash">{{ message }}</li>
+                    {% for category, message in messages %}
+                        <li class="flash {{ category }}">{{ message }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -416,7 +434,6 @@ def index():
         if 'file' in request.files:
             file = request.files['file']
             if file.filename == '':
-                # This case is less likely with the JS check but good to have
                 flash("No file selected for upload.", "error")
                 return '', 400 
 
@@ -428,7 +445,6 @@ def index():
                     file.save(file_path)
                     flash(f"File '{filename}' uploaded successfully.", "success")
                 else:
-                    # If file exists, send a different status or message if needed
                     flash(f"File '{filename}' already exists on the server.", "warning")
                 return '', 200  # Success
             except Exception as e:
@@ -439,7 +455,6 @@ def index():
             return '', 400
 
     files = os.listdir(app.config['SHARE_FOLDER'])
-    # Sort files alphabetically for a cleaner look
     files.sort() 
     return render_template_string(html_template, files=files)
 
