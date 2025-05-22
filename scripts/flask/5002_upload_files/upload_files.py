@@ -67,6 +67,7 @@ html_template = '''
             height: 120px;
             border-radius: 50%;
             background: conic-gradient(#4CAF50 0%, #ccc 0%);
+            margin-bottom: 20px; /* Added margin for better spacing */
         }
         .progress-percentage {
             position: absolute;
@@ -118,8 +119,8 @@ html_template = '''
     <div class="circular-progress" id="circular-progress">
         <div class="progress-percentage" id="progress-percentage">0%</div>
     </div>
-
-    <div class="file-list">
+    
+    <div id="upload-status"></div> <div class="file-list">
         {% for file in files %}
             <div class="file-item">
                 <a class="download-link" href="/uploads/{{ file }}">{{ file }}</a>
@@ -128,40 +129,61 @@ html_template = '''
     </div>
 
     <script>
-        document.getElementById("upload-form").addEventListener("submit", function(event) {
+        document.getElementById("upload-form").addEventListener("submit", async function(event) {
             event.preventDefault();
 
-            var formData = new FormData();
             var files = document.getElementById("file-input").files;
+            var totalFiles = files.length;
+            var uploadedFilesCount = 0;
+            var uploadStatusDiv = document.getElementById("upload-status");
 
-            for (var i = 0; i < files.length; i++) {
-                formData.append("files", files[i]);
+            for (var i = 0; i < totalFiles; i++) {
+                var file = files[i];
+                var formData = new FormData();
+                formData.append("file", file); // Changed 'files' to 'file' as we are sending one at a time
+
+                await new Promise((resolve, reject) => {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/", true);
+
+                    xhr.upload.onprogress = function(event) {
+                        if (event.lengthComputable) {
+                            var percentComplete = (event.loaded / event.total) * 100;
+                            var progressCircle = document.getElementById("circular-progress");
+                            var progressText = document.getElementById("progress-percentage");
+
+                            // Update circular progress based on overall progress
+                            var overallProgress = ((uploadedFilesCount * 100) + percentComplete) / totalFiles;
+                            progressCircle.style.background = 'conic-gradient(#4CAF50 ' + overallProgress + '%, #ccc ' + overallProgress + '%)';
+                            progressText.innerText = Math.round(overallProgress) + "%";
+
+                            uploadStatusDiv.innerHTML = `<p>Uploading ${file.name}: ${Math.round(percentComplete)}%</p>`;
+                        }
+                    };
+
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            uploadedFilesCount++;
+                            uploadStatusDiv.innerHTML = `<p>${file.name} uploaded successfully!</p>`;
+                            if (uploadedFilesCount === totalFiles) {
+                                window.location.reload(); // Refresh after all files are uploaded
+                            }
+                            resolve();
+                        } else {
+                            uploadStatusDiv.innerHTML = `<p>Error uploading ${file.name}!</p>`;
+                            alert("Error uploading " + file.name + "!");
+                            reject();
+                        }
+                    };
+
+                    xhr.onerror = function() {
+                        uploadStatusDiv.innerHTML = `<p>Network error during upload of ${file.name}.</p>`;
+                        reject();
+                    };
+
+                    xhr.send(formData);
+                });
             }
-
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/", true);
-
-            xhr.upload.onprogress = function(event) {
-                if (event.lengthComputable) {
-                    var percentComplete = (event.loaded / event.total) * 100;
-                    var progressCircle = document.getElementById("circular-progress");
-                    var progressText = document.getElementById("progress-percentage");
-
-                    // Update circular progress
-                    progressCircle.style.background = 'conic-gradient(#4CAF50 ' + percentComplete + '%, #ccc ' + percentComplete + '%)';
-                    progressText.innerText = Math.round(percentComplete) + "%";
-                }
-            };
-
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    window.location.reload(); // Refresh to update the file list after upload
-                } else {
-                    alert("Error uploading file!");
-                }
-            };
-
-            xhr.send(formData);
         });
     </script>
 
@@ -172,27 +194,27 @@ html_template = '''
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        if 'files' in request.files:
-            files = request.files.getlist('files')
-            for file in files:
-                if file.filename == '':
-                    flash("No file selected.")
-                    continue
+        # In the modified client-side, we expect a single 'file' now
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename == '':
+                flash("No file selected.")
+                return '', 400 # Bad request if no file is selected
 
-                # Secure the filename and define the file path
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['SHARE_FOLDER'], filename)
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['SHARE_FOLDER'], filename)
 
-                # Save file only if it doesn't already exist
-                if not os.path.exists(file_path):
-                    file.save(file_path)
-                    flash(f"File '{filename}' uploaded successfully.")
-                else:
-                    flash(f"File '{filename}' already exists.")
+            if not os.path.exists(file_path):
+                file.save(file_path)
+                flash(f"File '{filename}' uploaded successfully.")
+            else:
+                flash(f"File '{filename}' already exists.")
 
             return '', 200  # Return a success response to the client
+        else:
+            flash("No file part in the request.")
+            return '', 400
 
-    # List all files in the sharepoint directory
     files = os.listdir(app.config['SHARE_FOLDER'])
     return render_template_string(html_template, files=files)
 
@@ -202,7 +224,6 @@ def uploaded_file(filename):
 
 @app.route('/clean', methods=["POST"])
 def clean():
-    # Remove all files in the sharepoint directory
     for filename in os.listdir(app.config['SHARE_FOLDER']):
         file_path = os.path.join(app.config['SHARE_FOLDER'], filename)
         try:
