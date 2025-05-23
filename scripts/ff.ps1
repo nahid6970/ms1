@@ -40,7 +40,7 @@ function SearchDirectoriesAndFiles {
             --preview="highlight -O ansi -l {1}" `
             --preview-window=top:30% `
             --bind "enter:execute-silent(code {+1})" `
-            --bind "ctrl-o:execute-silent(explorer.exe {+2})" `
+            --bind "ctrl-o:execute-silent(explorer.exe /select,{+1})" `
             --bind "ctrl-c:execute-silent(cmd /c echo {+1} | clip)" `
             --bind "ctrl-r:execute-silent(powershell -command Start-Process '{+1}')" `
             --bind "f1:execute-silent(cmd /c start cmd /k type `"$tempShortcutFile`" & pause)"
