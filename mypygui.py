@@ -871,77 +871,86 @@ Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,100))
 
 
 
-# Commands and log file paths
+
+# Command config
 commands = {
     "msBackups": {
-        "cmd":  "rclone check C:/msBackups o0:/msBackups --fast-list --size-only",
-        "log":  "C:/test/msBackups_check.log",
+        "cmd": "rclone check src dst --fast-list --size-only",
+        "src": "C:/msBackups",
+        "dst": "o0:/msBackups",
+        "log": "C:/test/msBackups_check.log",
         "label": "\udb85\ude32"
     },
     "software": {
-        "cmd":  "rclone check D:/software gu:/software --fast-list --size-only",
-        "log":  "C:/test/software_check.log",
+        "cmd": "rclone check src dst --fast-list --size-only",
+        "src": "D:/software",
+        "dst": "gu:/software",
+        "log": "C:/test/software_check.log",
         "label": "\uf40e"
     },
     "song": {
-        "cmd":  "rclone check D:/song gu:/song --fast-list --size-only",
-        "log":  "C:/test/song_check.log",
+        "cmd": "rclone check src dst --fast-list --size-only",
+        "src": "D:/song",
+        "dst": "gu:/song",
+        "log": "C:/test/song_check.log",
         "label": "\uec1b"
     },
 }
 
-def show_output(cfg):
-    """Prints the output from the log file to the terminal."""
+# Show log output in Notepad
+def on_label_click(event, cfg):
     try:
-        with open(cfg["log"], "r") as f:
-            print(f"\n--- {cfg['label']} Check Output ---")
-            print(f.read())
-    except FileNotFoundError:
-        print(f"Log file not found for {cfg['label']}!")
-
-# def on_label_click(event, cfg): #! doesnt show on terminal coz its hidden
-#     """Event handler for clicking a label."""
-#     show_output(cfg)
-
-def on_label_click(event, cfg): #! show in notepad++
-    """Event handler for clicking a label."""
-    try:
-        # Open the log file directly using Popen to show the output
         subprocess.Popen(["notepad", cfg["log"]])
     except Exception as e:
         print(f"Error opening log file for {cfg['label']}: {e}")
 
-def check_and_update(label, cfg):
-    """Runs the rclone check in a separate thread to keep the GUI responsive."""
-    def run_check():
-        # Run rclone check and dump to log
-        with open(cfg["log"], "w") as f:
-            subprocess.run(cfg["cmd"], shell=True, stdout=f, stderr=f)
+# Ctrl + Left Click → sync src to dst
+def ctrl_left_click(event, cfg):
+    if event.state & 0x0004:  # Ctrl key mask
+        run_command(f"rclone sync {cfg['src']} {cfg['dst']} -P")
 
-        # Read log and decide label color
+# Ctrl + Right Click → sync dst to src
+def ctrl_right_click(event, cfg):
+    if event.state & 0x0004:  # Ctrl key mask
+        run_command(f"rclone sync {cfg['dst']} {cfg['src']} -P")
+
+# Periodically check using rclone
+def check_and_update(label, cfg):
+    def run_check():
+        actual_cmd = cfg["cmd"].replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        with open(cfg["log"], "w") as f:
+            subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
         with open(cfg["log"], "r") as f:
             content = f.read()
         if "0 differences found" in content:
             label.config(text=cfg["label"], fg="#06de22")
         else:
             label.config(text=cfg["label"], fg="red")
-
-        # Schedule the next check in 10 minutes (600000 ms)
-        label.after(600000, lambda: threading.Thread(target=run_check).start())
-
-    # Start the check in a separate thread
+        label.after(600000, lambda: threading.Thread(target=run_check).start())  # repeat every 10 minutes
     threading.Thread(target=run_check).start()
 
+# GUI setup
 def create_gui():
     for key, cfg in commands.items():
-        lbl = tk.Label(ROOT1, width=0, bg="#1d2027", text=cfg["label"], font=("jetbrainsmono nfp", 16, "bold"), cursor="hand2")
-        lbl.pack(side="left", padx=(5,5))
-        # Bind click event to show the output in the terminal
-        lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))
-        # Start its own loop
-        check_and_update(lbl, cfg)
-create_gui()
+        lbl = tk.Label(
+            ROOT1,
+            width=0,
+            bg="#1d2027",
+            text=cfg["label"],
+            font=("JetBrainsMono NFP", 16, "bold"),
+            cursor="hand2"
+        )
+        lbl.pack(side="left", padx=(5, 5))
 
+        # Event bindings
+        lbl.bind("<Button-1>", lambda event, c=cfg: on_label_click(event, c))           # left click
+        lbl.bind("<Control-Button-1>", lambda event, c=cfg: ctrl_left_click(event, c))  # ctrl + left
+        lbl.bind("<Control-Button-3>", lambda event, c=cfg: ctrl_right_click(event, c)) # ctrl + right
+
+        check_and_update(lbl, cfg)
+
+# Call GUI init
+create_gui()
 
 ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
