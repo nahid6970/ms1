@@ -894,7 +894,7 @@ commands = {
         "dst": "gu:/song",
         "log": "C:/test/song_check.log",
         "label": "\uec1b"
-    },
+    }
 }
 
 # Show log output in Notepad
@@ -907,12 +907,12 @@ def on_label_click(event, cfg):
 # Ctrl + Left Click → sync src to dst
 def ctrl_left_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        run_command(f"rclone sync {cfg['src']} {cfg['dst']} -P")
+        run_command(f"rclone sync {cfg['src']} {cfg['dst']} -P --fast-list")
 
 # Ctrl + Right Click → sync dst to src
 def ctrl_right_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        run_command(f"rclone sync {cfg['dst']} {cfg['src']} -P")
+        run_command(f"rclone sync {cfg['dst']} {cfg['src']} -P --fast-list")
 
 # Periodically check using rclone
 def check_and_update(label, cfg):
