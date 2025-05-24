@@ -246,3 +246,6 @@ https://qtile.org/
 
 gBar
 https://github.com/scorpion-26/gBar
+
+fuzzel app launcher
+https://codeberg.org/dnkl/fuzzel

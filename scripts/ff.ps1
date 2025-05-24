@@ -38,7 +38,10 @@ function SearchDirectoriesAndFiles {
             --with-nth=1 `
             --delimiter="`t" `
             --preview="highlight -O ansi -l {1}" `
-            --preview-window=top:30% `
+            --preview-window '~3' `
+            --border `
+            --layout reverse `
+            --color 'bg:#1e1e2e,bg+:#313244,fg:#cdd6f4,fg+:#f5e0dc,hl:#f38ba8,hl+:#f9e2af,info:#89b4fa,prompt:#a6e3a1,pointer:#f38ba8,marker:#f9e2af,spinner:#94e2d5,header:#89b4fa,preview-bg:#1e1e2e,border:#74c7ec' `
             --bind "enter:execute-silent(code {+1})" `
             --bind "ctrl-o:execute-silent(explorer.exe /select,{+1})" `
             --bind "ctrl-c:execute-silent(cmd /c echo {+1} | clip)" `
