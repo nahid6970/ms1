@@ -6,7 +6,9 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Required for flashing messages
 
 # Folder to store files permanently
-SHARE_FOLDER = 'C:/sharepoint'
+DESKTOP_PATH = os.path.expanduser('~/Desktop')
+SHARE_FOLDER = os.path.join(DESKTOP_PATH, 'ShareFolder')
+
 if not os.path.exists(SHARE_FOLDER):
     os.makedirs(SHARE_FOLDER)
 
