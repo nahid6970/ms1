@@ -894,7 +894,16 @@ commands = {
         "dst": "gu:/song",
         "log": "C:/test/song_check.log",
         "label": "\uec1b"
-    }
+    },
+    "ms1": {
+        "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
+        "src": "C:/ms1/",
+        "dst": "o0:/ms1/",
+        "log": "C:/test/ms1_check.log",
+        "label": "ms1",
+        "left_click_cmd": "rclone sync src dst --exclude \".git/**\" --exclude \"__pycache__/**\" -P --fast-list",
+        "right_click_cmd": "rclone sync dst src -P --fast-list"
+    },
 }
 
 # Show log output in Notepad
@@ -904,15 +913,19 @@ def on_label_click(event, cfg):
     except Exception as e:
         print(f"Error opening log file for {cfg['label']}: {e}")
 
-# Ctrl + Left Click → sync src to dst
 def ctrl_left_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        run_command(f"rclone sync {cfg['src']} {cfg['dst']} -P --fast-list")
+        # Replace placeholders and run the left_click_cmd command
+        cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list")
+        actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        run_command(actual_cmd)
 
-# Ctrl + Right Click → sync dst to src
 def ctrl_right_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
-        run_command(f"rclone sync {cfg['dst']} {cfg['src']} -P --fast-list")
+        # Replace placeholders and run the right_click_cmd command
+        cmd = cfg.get("right_click_cmd", "rclone sync dst src -P --fast-list")
+        actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
+        run_command(actual_cmd)
 
 # Periodically check using rclone
 def check_and_update(label, cfg):
@@ -952,9 +965,9 @@ def create_gui():
 # Call GUI init
 create_gui()
 
-ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
-ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
-ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/ms1/ o0:/ms1/ --exclude ".git/**" --exclude "__pycache__/**" -P --fast-list' ))
+# ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+# ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
+# ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/ms1/ o0:/ms1/ --exclude ".git/**" --exclude "__pycache__/**" -P --fast-list' ))
 
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
