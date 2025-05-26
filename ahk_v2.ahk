@@ -76,6 +76,8 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ::;times::×
 ::;div::÷
 ::;rad::√
+::;union::∪
+::;intersection::∩
 
 
 
