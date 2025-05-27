@@ -64,7 +64,7 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ::;^3::³
 ::;1/2::½
 ::;1/4::¼
-::;deg::°
+::;degree::°
 ::;inf::∞
 ::;+-::±
 ::;int::∫
@@ -78,6 +78,8 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ::;rad::√
 ::;union::∪
 ::;intersection::∩
+::;==::⇒
+::;*::×
 
 
 
