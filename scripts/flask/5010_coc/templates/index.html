@@ -72,30 +72,24 @@
     window.onload = updateCountdowns;
 
 
-  function parseDuration(durationStr) {
-    const d = /(\d+)d/.exec(durationStr);
-    const h = /(\d+)h/.exec(durationStr);
-    const m = /(\d+)m/.exec(durationStr);
 
-    const days = d ? parseInt(d[1]) : 0;
-    const hours = h ? parseInt(h[1]) : 0;
-    const minutes = m ? parseInt(m[1]) : 0;
+  function setAndroidTimer(eventTime) {
+    const now = new Date();
+    const end = new Date(eventTime);
+    const diff = Math.floor((end - now) / 1000); // seconds
 
-    return (days * 24 * 60 * 60) + (hours * 60 * 60) + (minutes * 60);
-  }
-
-  function setAndroidTimer(id, durationStr) {
-    const seconds = parseDuration(durationStr);
-    if (seconds <= 0) {
-      alert("Timer already expired or invalid duration.");
+    if (diff <= 0) {
+      alert("Event already passed!");
       return;
     }
 
-    const message = encodeURIComponent("Clash of Clans Event #" + id);
-    const intentURL = `intent:#Intent;action=android.intent.action.SET_TIMER;S.message=${message};S.duration=${seconds};end;`;
+    const url = `intent://timer/${diff}#Intent;scheme=clock;package=com.google.android.deskclock;end`;
 
-    window.location.href = intentURL;
+    // Try launching the intent
+    window.location.href = url;
   }
+
+
 
   </script>
 </head>
@@ -121,10 +115,11 @@
               data-bs-target="#editEventModal{{ event.id }}">
               Edit
             </button>
-<a class="btn btn-info btn-sm" 
-   href="javascript:void(0);" 
-   onclick="setAndroidTimer({{ event.id }}, '{{ event.duration_str_for_modal }}')">
-   ⏱️ Set Timer
+
+<a class="btn btn-info btn-sm"
+   href="intent://timer/15#Intent;scheme=clock;package=com.google.android.deskclock;end"
+   onclick="setAndroidTimer({{ event.event_time | tojson }}); return false;">
+   ⏱️ Android Timer
 </a>
 
           </div>
