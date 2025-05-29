@@ -70,20 +70,6 @@
     }
     setInterval(updateCountdowns, 60000);
     window.onload = updateCountdowns;
-
-
-      function openNativeClock() {
-    if (typeof AndroidInterface !== "undefined") {
-      AndroidInterface.openTimePicker("inputTimeId");
-    } else {
-      alert("Native clock not supported in browser mode.");
-    }
-  }
-
-  function setTimeFromAndroid(elementId, time) {
-    document.getElementById(elementId).value = time;
-  }
-
   </script>
 </head>
 
@@ -91,10 +77,6 @@
   <div class="d-flex justify-content-center gap-2 mb-4">
     <a href="/add-event" class="btn btn-success">Add Event</a>
     <a href="/teams" class="btn btn-secondary">Manage Teams</a>
-    <button onclick="openNativeClock()">Set Time ⏰</button>
-    <input type="time" id="inputTimeId">
-
-
   </div>
   <div class="row justify-content-center">
     {% for event in upcoming_events %}
