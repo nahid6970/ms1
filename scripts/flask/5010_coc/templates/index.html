@@ -48,43 +48,47 @@
       margin: 5px;
     }
   </style>
-<script>
-  function updateCountdowns() {
-    document.querySelectorAll('.countdown').forEach(el => {
-      const time = new Date(el.dataset.time);
-      const now = new Date();
-      const diff = time - now;
-      if (diff <= 0) {
-        el.innerText = "✔️";
-        el.classList.add('expired');
-        el.classList.remove('live');
-        return;
-      }
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const m = Math.floor((diff / (1000 * 60)) % 60);
-      el.innerText = `${d}d ${h}h ${m}m`;
-      el.classList.add('live');
-      el.classList.remove('expired');
-    });
-  }
-  setInterval(updateCountdowns, 60000);
-  window.onload = updateCountdowns;
+  <script>
+    function updateCountdowns() {
+      document.querySelectorAll('.countdown').forEach(el => {
+        const time = new Date(el.dataset.time);
+        const now = new Date();
+        const diff = time - now;
+        if (diff <= 0) {
+          el.innerText = "✔️";
+          el.classList.add('expired');
+          el.classList.remove('live');
+          return;
+        }
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / (1000 * 60)) % 60);
+        el.innerText = `${d}d ${h}h ${m}m`;
+        el.classList.add('live');
+        el.classList.remove('expired');
+      });
+    }
+    setInterval(updateCountdowns, 60000);
+    window.onload = updateCountdowns;
 
-  // New function to set Android countdown
-  function setAndroidCountdown(teamName, eventTimeISO) {
-    const eventDate = new Date(eventTimeISO);
-    const startTimeMillis = eventDate.getTime();
-    const endTimeMillis = eventDate.getTime() + (60 * 60 * 1000); // Assuming 1 hour for the event for calendar entry
+      document.getElementById('startTimerBtn').addEventListener('click', function() {
+    let minutes = prompt("Enter timer duration in minutes:", "1");
+    if (minutes === null) return;  // Cancel pressed
+    minutes = parseInt(minutes);
+    if (isNaN(minutes) || minutes <= 0) {
+      alert("Please enter a valid positive number");
+      return;
+    }
+    const seconds = minutes * 60;
 
-    const title = `Clash of Clans - ${teamName}`;
-    const description = `Time for ${teamName}'s event!`;
+    // Construct intent URL for Google Clock app
+    const intentUrl = `intent:#Intent;action=android.intent.action.SET_TIMER;S.android.intent.extra.alarm.LENGTH=${seconds};end;`;
 
-    const uri = `content://com.android.calendar/events?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&beginTime=${startTimeMillis}&endTime=${endTimeMillis}&allDay=false`;
+    // Open the intent URL to start the timer
+    window.location.href = intentUrl;
+  });
 
-    window.location.href = uri;
-  }
-</script>
+  </script>
 </head>
 
 <body class="container-fluid mt-4">
@@ -108,9 +112,8 @@
               data-bs-target="#editEventModal{{ event.id }}">
               Edit
             </button>
-              <button type="button" class="btn btn-info mt-3" onclick="setAndroidCountdown('{{ event.team1.name }}', '{{ event.event_time.isoformat() }}')">
-    Set Android Countdown
-  </button>
+            <button id="startTimerBtn" class="btn btn-primary">Start Timer on Android Clock</button>
+
           </div>
         </div>
       </div>
