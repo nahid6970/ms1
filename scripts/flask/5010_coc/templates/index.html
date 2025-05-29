@@ -48,50 +48,43 @@
       margin: 5px;
     }
   </style>
-  <script>
-    function updateCountdowns() {
-      document.querySelectorAll('.countdown').forEach(el => {
-        const time = new Date(el.dataset.time);
-        const now = new Date();
-        const diff = time - now;
-        if (diff <= 0) {
-          el.innerText = "✔️";
-          el.classList.add('expired');
-          el.classList.remove('live');
-          return;
-        }
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((diff / (1000 * 60)) % 60);
-        el.innerText = `${d}d ${h}h ${m}m`;
-        el.classList.add('live');
-        el.classList.remove('expired');
-      });
-    }
-    setInterval(updateCountdowns, 60000);
-    window.onload = updateCountdowns;
-
-
-
-  function setAndroidTimer(eventTime) {
-    const now = new Date();
-    const end = new Date(eventTime);
-    const diff = Math.floor((end - now) / 1000); // seconds
-
-    if (diff <= 0) {
-      alert("Event already passed!");
-      return;
-    }
-
-    const url = `intent://timer/${diff}#Intent;scheme=clock;package=com.google.android.deskclock;end`;
-
-    // Try launching the intent
-    window.location.href = url;
+<script>
+  function updateCountdowns() {
+    document.querySelectorAll('.countdown').forEach(el => {
+      const time = new Date(el.dataset.time);
+      const now = new Date();
+      const diff = time - now;
+      if (diff <= 0) {
+        el.innerText = "✔️";
+        el.classList.add('expired');
+        el.classList.remove('live');
+        return;
+      }
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      el.innerText = `${d}d ${h}h ${m}m`;
+      el.classList.add('live');
+      el.classList.remove('expired');
+    });
   }
+  setInterval(updateCountdowns, 60000);
+  window.onload = updateCountdowns;
 
+  // New function to set Android countdown
+  function setAndroidCountdown(teamName, eventTimeISO) {
+    const eventDate = new Date(eventTimeISO);
+    const startTimeMillis = eventDate.getTime();
+    const endTimeMillis = eventDate.getTime() + (60 * 60 * 1000); // Assuming 1 hour for the event for calendar entry
 
+    const title = `Clash of Clans - ${teamName}`;
+    const description = `Time for ${teamName}'s event!`;
 
-  </script>
+    const uri = `content://com.android.calendar/events?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&beginTime=${startTimeMillis}&endTime=${endTimeMillis}&allDay=false`;
+
+    window.location.href = uri;
+  }
+</script>
 </head>
 
 <body class="container-fluid mt-4">
@@ -115,13 +108,9 @@
               data-bs-target="#editEventModal{{ event.id }}">
               Edit
             </button>
-
-<a class="btn btn-info btn-sm"
-   href="intent://timer/15#Intent;scheme=clock;package=com.google.android.deskclock;end"
-   onclick="setAndroidTimer({{ event.event_time | tojson }}); return false;">
-   ⏱️ Android Timer
-</a>
-
+              <button type="button" class="btn btn-info mt-3" onclick="setAndroidCountdown('{{ event.team1.name }}', '{{ event.event_time.isoformat() }}')">
+    Set Android Countdown
+  </button>
           </div>
         </div>
       </div>
