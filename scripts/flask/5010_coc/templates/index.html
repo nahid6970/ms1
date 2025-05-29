@@ -70,6 +70,33 @@
     }
     setInterval(updateCountdowns, 60000);
     window.onload = updateCountdowns;
+
+
+
+  function setAlarm(durationStr) {
+    // Parse duration string like "1d 2h 3m"
+    const matchD = durationStr.match(/(\d+)\s*d/);
+    const matchH = durationStr.match(/(\d+)\s*h/);
+    const matchM = durationStr.match(/(\d+)\s*m/);
+
+    let totalMinutes = 0;
+    if (matchD) totalMinutes += parseInt(matchD[1]) * 1440;
+    if (matchH) totalMinutes += parseInt(matchH[1]) * 60;
+    if (matchM) totalMinutes += parseInt(matchM[1]);
+
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + totalMinutes);
+
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    // Android intent: only works if supported by Android browser or intent-catcher app
+    const intentUrl = `intent:#Intent;action=android.intent.action.SET_ALARM;S.hours=${hours};S.minutes=${minutes};S.message=CoC Event Alarm;end`;
+
+    window.location.href = intentUrl;
+  }
+
+
   </script>
 </head>
 
@@ -94,6 +121,8 @@
               data-bs-target="#editEventModal{{ event.id }}">
               Edit
             </button>
+            <a class="btn btn-info btn-sm" onclick="setAlarm('{{ event.duration_str_for_modal }}')">Set Alarm</a>
+
           </div>
         </div>
       </div>
