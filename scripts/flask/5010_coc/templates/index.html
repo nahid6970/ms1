@@ -70,24 +70,6 @@
     }
     setInterval(updateCountdowns, 60000);
     window.onload = updateCountdowns;
-
-      document.getElementById('startTimerBtn').addEventListener('click', function() {
-    let minutes = prompt("Enter timer duration in minutes:", "1");
-    if (minutes === null) return;  // Cancel pressed
-    minutes = parseInt(minutes);
-    if (isNaN(minutes) || minutes <= 0) {
-      alert("Please enter a valid positive number");
-      return;
-    }
-    const seconds = minutes * 60;
-
-    // Construct intent URL for Google Clock app
-    const intentUrl = `intent:#Intent;action=android.intent.action.SET_TIMER;S.android.intent.extra.alarm.LENGTH=${seconds};end;`;
-
-    // Open the intent URL to start the timer
-    window.location.href = intentUrl;
-  });
-
   </script>
 </head>
 
@@ -112,7 +94,12 @@
               data-bs-target="#editEventModal{{ event.id }}">
               Edit
             </button>
-            <button id="startTimerBtn" class="btn btn-primary">Start Timer on Android Clock</button>
+
+<a class="btn btn-info btn-sm"
+   href="intent:#Intent;action=android.intent.action.MAIN;component=com.android.deskclock/com.android.deskclock.DeskClockTabActivity;end;">
+   🕒 Open Xiaomi Clock
+</a>
+
 
           </div>
         </div>
