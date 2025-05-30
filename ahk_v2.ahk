@@ -75,11 +75,11 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ::;geq::≥
 ::;times::×
 ::;div::÷
-::;rad::√
-::;union::∪
-::;intersection::∩
+::;cup::∪
+::;cap::∩
 ::;==::⇒
 ::;*::×
+::;note::🗗
 
 
 
