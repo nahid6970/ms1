@@ -341,28 +341,10 @@ def FameFunction(button):
                 while not state["stop_flag"]:
                     focus_window(window_title)
                     # Example logic
-                    if find_image(Resume, confidence=0.8): press_key(window, 'r')
-                    elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
-                    elif find_image(StartFame): press_key(window, 'p')
-                    elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
-                    elif find_image(e_image, region=e_image_region): press_key(window, 'e')
-                    elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
-                    # elif any(find_image(image) for image in continueF): press_key(window, 'c')
-                    # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
-                    elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
+                    if find_image(Home, confidence=0.8, region=(781, 254, 1203, 543)): press_keys_with_delays(window, 'a', 1, 'f', 1)
+                    elif find_image(Return, confidence=0.8, region=(837, 786, 1078, 901)): press_keys_with_delays(window, 'r', 1)
+                    elif find_image(Okay_Star_Bonus, confidence=0.8, region=(832, 726, 1085, 839)): press_keys_with_delays(window, 's', 1)
 
-                    # elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=1, region=(1079, 178, 1095, 196)): press_global_screen_with_delays(( 450, 65, 10)) #! not working duel still ranking lost
-                    # # elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=0.8, region=(804, 176, 1101, 199)): press_global_screen_with_delays(( 960, 540, 3)) #! not working duel still ranking lost
-
-                    # elif (find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)) and 
-                    #     find_image(default_sbs, confidence=0.8, region=(177, 83, 500, 500))):
-                    #     press_global_screen_with_delays((215, 118, 2))
-
-                   
-                   
-                    # elif any(find_image(image) for image in notifyF):
-                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
-                    #     time.sleep(60)
                     time.sleep(2)
             except KeyboardInterrupt: print("Script stopped by user.")
         # Create and start the thread
@@ -378,51 +360,27 @@ def FameFunction(button):
 Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
-#? ██████╗  █████╗ ██╗██████╗ ███████╗
-#? ██╔══██╗██╔══██╗██║██╔══██╗██╔════╝
-#? ██████╔╝███████║██║██║  ██║███████╗
-#? ██╔══██╗██╔══██║██║██║  ██║╚════██║
-#? ██║  ██║██║  ██║██║██████╔╝███████║
-#? ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═════╝ ╚══════╝
-#! Raid Raid Raid Raid
-stop_thread_raid = True
-def raid_items_handler(window):
-    try:
-        while not stop_thread_raid:
-            focus_window(window_title)
-            if find_image(Home, confidence=0.8): press_key(window, 'z')
-            elif find_image(level3, confidence=0.85): press_keys_with_delays(window, 'n',2, "c",1)
-            elif find_image(participate, confidence=0.97): press_key(window, 'c')
-            elif find_image(toraid, confidence=0.97): press_key(window, ' ')
-            elif find_image(fight, confidence=0.97): press_key(window, 'c')
-            elif find_image(claimreward, confidence=0.97): press_key(window, 'c')
-            elif any(find_image(image) for image in continueF): press_key(window, 'c')
-            time.sleep(0.05)
-    except KeyboardInterrupt: print("Script stopped by user.")
-def Raid_Light():
-    global stop_thread_raid
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    raid_items_thread = threading.Thread(target=raid_items_handler, args=(window,))
-    raid_items_thread.daemon = True
-    raid_items_thread.start()
-    raid_items_thread.join()
-def raid_function_light():
-    global stop_thread_raid, raid_light_thread, Raid_Light_BT
-    if raid_light_thread and raid_light_thread.is_alive():
-        stop_thread_raid = True
-        raid_light_thread.join()
-        Raid_Light_BT.config(text="Raid", bg="#5a9bf7", fg="#000000")
-    else:
-        stop_thread_raid = False
-        raid_light_thread = threading.Thread(target=Raid_Light)
-        raid_light_thread.daemon = True
-        raid_light_thread.start()
-        Raid_Light_BT.config(text="Raid", bg="#1d2027", fg="#fc0000")
-Raid_Light_BT = Button(ROOT, text="Raid", bg="#5a9bf7", fg="#000000", width=5, height=0, command=raid_function_light, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-Raid_Light_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
+#* ███████╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
+#* ██╔════╝████╗  ██║██╔══██╗██║████╗  ██║██╔════╝
+#* █████╗  ██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║  ███╗
+#* ██╔══╝  ██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
+#* ███████╗██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
+#* ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
+
+window_title='LDPlayer'
+
+Home=r"C:\msBackups\CoC\Home.png"
+Return=r"C:\msBackups\CoC\return.png"
+Okay_Star_Bonus=r"C:\msBackups\CoC\Okay_StarBonus.png"
+
+
+
+
+
+
+
+
+
 
 
 # Restart function that displays the cumulative summary before restarting
@@ -435,107 +393,6 @@ def restart():
 Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=0, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 # keyboard.add_hotkey("esc", restart)
-
-#* ███████╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
-#* ██╔════╝████╗  ██║██╔══██╗██║████╗  ██║██╔════╝
-#* █████╗  ██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║  ███╗
-#* ██╔══╝  ██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
-#* ███████╗██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
-#* ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
-
-window_title='LDPlayer'
-# mhome = r"C:\msBackups\shadowfight3"
-# Home = rf"{mhome}\Home.png"
-
-# Home Page of the SH3
-Home=r"C:\msBackups\shadowfight3\Home.png"
-
-# # Action Related Images
-void_compass=r"C:\msBackups\shadowfight3\action\void_compass.png"
-eruption=r"C:\msBackups\shadowfight3\action\eruption.png"
-thud=r"C:\msBackups\shadowfight3\action\thud.png"
-collector=r"C:\msBackups\shadowfight3\action\collector.png"
-bolt=r"C:\msBackups\shadowfight3\action\bolt.png"
-uppercut=r"C:\msBackups\shadowfight3\action\uppercut.png"
-Peg_Top=r"C:\msBackups\shadowfight3\action\peg_top.png"
-KOS_Cloud=r"C:\msBackups\shadowfight3\action\Kos_Cloud.png"
-Temporary_Kibo=r"C:\msBackups\shadowfight3\action\temporary_kibo.png"
-Temporary_Serge=r"C:\msBackups\shadowfight3\action\temporary_serge.png"
-#! actionF = [void_compass, eruption, thud, collector]
-actionF = {
-    void_compass: 0.7,
-    eruption: 0.85,
-    KOS_Cloud: 0.85,
-    Temporary_Kibo: 0.85,
-    Temporary_Serge: 0.85,
-    thud: 0.7,
-    collector: 0.7,
-    uppercut: 0.7,
-    Peg_Top: 0.85,
-    # bolt: 1,
-}
-Action_region = (216, 99, 374, 253)  # Replace with your actual coordinates
-
-
-#* Continue Related Images
-cont1 =r"C:\msBackups\shadowfight3\continue\cont1.png"
-cont3 =r"C:\msBackups\shadowfight3\continue\cont3.png"
-cont4 =r"C:\msBackups\shadowfight3\continue\cont4.png"
-
-continueF = [cont1, cont3, cont4]
-contF_Region = (1380, 792, 1738, 966)
-
-#* Others
-SPACE =r"C:\msBackups\shadowfight3\fame\b_space2.png"
-Resume =r"C:\msBackups\shadowfight3\resume.png"
-later =r"C:\msBackups\shadowfight3\later.png"
-
-# Fame Related Images
-e_image      =r"C:\msBackups\shadowfight3\fame\b_tournament.png"
-e_image_region = (196, 656, 384, 845)  # Example coordinates and dimensions
-
-
-StartFame    =r"C:\msBackups\shadowfight3\fame\image_19.png"
-WorldIcon    =r"C:\msBackups\shadowfight3\fame\image_20.png"
-GoBack       =r"C:\msBackups\shadowfight3\fame\image_21.png"
-
-# Raids Related Images
-level3         =r"C:\msBackups\shadowfight3\raids\level3.png"
-participate    =r"C:\msBackups\shadowfight3\raids\participate.png"
-toraid         =r"C:\msBackups\shadowfight3\raids\to_raid.png"
-fight          =r"C:\msBackups\shadowfight3\raids\fightttttt.png"
-claimreward    =r"C:\msBackups\shadowfight3\raids\claim.png"
-
-# DailyMission=r"C:\msBackups\shadowfight3\DailyMission.png"
-
-# Event Related
-Tournament_step1=r"C:\msBackups\shadowfight3\event\Tournament.png"
-back_battlepass=r'C:\msBackups\shadowfight3\back_battlepass.png'
-
-Select_CreepyParty=r"C:\msBackups\shadowfight3\event\Select\CreepyParty.png"
-Select_SelectOption=r"C:\msBackups\shadowfight3\event\Select\Select.png"
-
-Open_Chest=r"C:\msBackups\shadowfight3\chest.png"
-
-# continue for ads
-passed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv.png"
-failed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv_failed.png"
-continueADS = [passed_50sv, failed_50sv]
-
-ads_folder = r"C:\msBackups\shadowfight3\ads\ads_auto_click"
-ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
-
-cont_folder = r"C:\msBackups\shadowfight3\cont_dynamic"
-cont_dynamic = glob.glob(os.path.join(cont_folder, "*.png"))
-
-back_GPlay=r"C:\msBackups\shadowfight3\ads\Back_GooglePlay.png"
-Error_Processing_Video=r"C:\msBackups\shadowfight3\ads\error_Video.png"
-
-skip=r'C:\msBackups\shadowfight3\skip.png'
-
-# Click_Ads=r"C:\msBackups\shadowfight3\ads\Click_ADS.png"
-default_ads=r"C:\msBackups\shadowfight3\event\inside_ads.png"
-
 
 ROOT.update_idletasks()
 width = ROOT.winfo_width()
