@@ -341,9 +341,18 @@ def FameFunction(button):
                 while not state["stop_flag"]:
                     focus_window(window_title)
                     # Example logic
-                    if find_image(Home, confidence=0.8, region=(781, 254, 1203, 543)): press_keys_with_delays(window, 'a', 1, 'f', 1)
-                    elif find_image(Return, confidence=0.8, region=(837, 786, 1078, 901)): press_keys_with_delays(window, 'r', 1)
-                    elif find_image(Okay_Star_Bonus, confidence=0.8, region=(832, 726, 1085, 839)): press_keys_with_delays(window, 's', 1)
+                    if find_image(Fight, confidence=0.8, region=(376, 667, 643, 754)): press_keys_with_delays(window, '1',0,'x',0,      '2',0,'y',0,        '3',0,'z',0,
+                                                                                                                      '4',0,'y',0,'4',0,
+                                                                                                                      '5',0,'x',0,        '6',0,'z',0,
+                                                                                                                      '0',0,'y',0,
+                                                                                                                      )
+                        
+                    elif find_image(Fight2, confidence=0.8, region=(1283, 808, 1410, 980)): press_keys_with_delays(window, '1',0,'x',0,      '2',0,'y',0,        '3',0,'z',0,
+                                                                                                                      '4',0,'y',0,'4',0,
+                                                                                                                      '5',0,'x',0,        '6',0,'z',0,
+                                                                                                                      '0',0,'y',0,
+                                                                                                                      '7',0,'x',0,      '8',0,'z',0,
+                                                                                                                      )
 
                     time.sleep(2)
             except KeyboardInterrupt: print("Script stopped by user.")
@@ -369,9 +378,12 @@ Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 window_title='LDPlayer'
 
-Home=r"C:\msBackups\CoC\Home.png"
+# Home=r"C:\msBackups\CoC\Home.png"
+Home=r"C:\msBackups\CoC\Chat.png"
 Return=r"C:\msBackups\CoC\return.png"
 Okay_Star_Bonus=r"C:\msBackups\CoC\Okay_StarBonus.png"
+Fight=r"C:\msBackups\CoC\Fight.png"
+Fight2=r"C:\msBackups\CoC\Round2.png"
 
 
 
