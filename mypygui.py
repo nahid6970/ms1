@@ -617,6 +617,8 @@ PositionXY_CrossHair_bt=tk.Label(ROOT1, text="\uf05b",bg="#1d2027",fg="#ffffff",
 PositionXY_CrossHair_bt.pack(side="left",padx=(3,0),pady=(0,0))
 PositionXY_CrossHair_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_CroosHair.py"], shell=True))
 PositionXY_CrossHair_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_CroosHair.py"],shell=True))
+PositionXY_CrossHair_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"], shell=True))
+PositionXY_CrossHair_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"],shell=True))
 
 ColorTool_bt=tk.Label(ROOT1, text="\ue22b",bg="#1d2027",fg="#c588fd",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 ColorTool_bt.pack(side="left",padx=(3,0),pady=(0,0))
