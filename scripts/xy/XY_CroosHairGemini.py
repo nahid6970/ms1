@@ -74,11 +74,13 @@ class CrosshairOverlay:
         screen_height = root.winfo_screenheight()
 
         self.vertical_line = tk.Toplevel()
+        # Initial color is green
         self.vertical_line.configure(bg="green")
         self.vertical_line.overrideredirect(True)
         self.vertical_line.attributes("-topmost", True)
 
         self.horizontal_line = tk.Toplevel()
+        # Initial color is green
         self.horizontal_line.configure(bg="green")
         self.horizontal_line.overrideredirect(True)
         self.horizontal_line.attributes("-topmost", True)
@@ -93,11 +95,19 @@ class CrosshairOverlay:
             with mouse.Controller() as m:
                 mouse_x, mouse_y = m.position
 
+            # Determine the crosshair color based on dragging state
+            if self.is_dragging:
+                line_color = "red"
+            else:
+                line_color = "green"
+
             # Update vertical line
             self.vertical_line.geometry(f"2x{screen_height}+{mouse_x}+0")
+            self.vertical_line.configure(bg=line_color) # Set color dynamically
 
             # Update horizontal line
             self.horizontal_line.geometry(f"{screen_width}x2+0+{mouse_y}")
+            self.horizontal_line.configure(bg=line_color) # Set color dynamically
 
             if self.show_coordinates:
                 # Update coordinate label
@@ -161,9 +171,4 @@ class CrosshairOverlay:
 
 if __name__ == "__main__":
     overlay = CrosshairOverlay()
-    # Join both threads to ensure they finish before the main program exits
     overlay.update_thread.join()
-    # The mouse listener is usually blocking, but if it has an on_stop method, you'd call it here.
-    # For pynput, stopping the listener is usually handled by breaking out of the 'with' block,
-    # or by calling listener.stop() if you held a reference to it.
-    # Since it's daemon, it will exit when the main program exits.
