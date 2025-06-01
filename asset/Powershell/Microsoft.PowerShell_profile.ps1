@@ -835,5 +835,28 @@ function sonarr_stop   { Stop-Process -Name sonarr }
 function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Radarr.exe" }
 function radarr_stop   { Stop-Process -Name radarr }
 
+
+function pkill {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name
+    )
+    $processes = Get-Process | Where-Object { $_.Name -like "*$Name*" }
+    if ($processes) {
+        $processes | ForEach-Object {
+            try {
+                Stop-Process -Id $_.Id -Force -ErrorAction Stop
+                Write-Host "Killed: $($_.Name) (PID: $($_.Id))" -ForegroundColor Green
+            } catch {
+                Write-Host "Failed to kill: $($_.Name) (PID: $($_.Id)) - $_" -ForegroundColor Red
+            }
+        }
+    } else {
+        Write-Host "No process found matching '$Name'" -ForegroundColor Yellow
+    }
+}
+
+
+
 oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
