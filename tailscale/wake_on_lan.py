@@ -1,49 +1,34 @@
-from flask import Flask, request, jsonify, render_template_string
-import socket
+from flask import Flask, request, jsonify
+from wakeonlan import send_magic_packet
+import logging
 
 app = Flask(__name__)
 
-# PC details
-TARGET_MAC = 'A8:5E:45:55:AD:30'
-TARGET_IP = '192.168.0.101'
-PORT = 9
+# Configure logging for better debugging
+logging.basicConfig(level=logging.D EBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def send_wol(mac):
-    mac_bytes = bytes.fromhex(mac.replace(':', ''))
-    packet = b'\xff' * 6 + mac_bytes * 16
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        s.sendto(packet, (TARGET_IP, PORT))
+# PC Details
+PC_MAC_ADDRESS = "A8:5E:45:55:AD:30"
+PC_BROADCAST_IP = "192.168.0.255" # Typically the broadcast IP for your subnet
+PC_PORT = 9
 
-# HTML page with a wake button
-HTML_PAGE = '''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Wake PC</title>
-</head>
-<body style="font-family:sans-serif; text-align:center; padding-top:50px;">
-    <h2>Wake PC via Tailscale</h2>
-    <form action="/wake" method="post">
-        <button type="submit" style="padding:10px 20px; font-size:18px;">Wake PC</button>
-    </form>
-    {% if result %}
-    <p style="color:green; font-weight:bold;">{{ result }}</p>
-    {% endif %}
-</body>
-</html>
-'''
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    result = None
-    if request.method == 'POST':
-        try:
-            send_wol(TARGET_MAC)
-            result = "Magic packet sent!"
-        except Exception as e:
-            result = f"Error: {str(e)}"
-    return render_template_string(HTML_PAGE, result=result)
+    return "Welcome to the Wake-on-LAN Flask app! Use /wake to send the magic packet."
+
+@app.route('/wake', methods=['POST'])
+def wake_pc():
+    app.logger.info(f"Received request to wake PC.")
+    try:
+        # Send the magic packet
+        send_magic_packet(PC_MAC_ADDRESS, ip_address=PC_BROADCAST_IP, port=PC_PORT)
+        app.logger.info(f"Magic packet sent to MAC: {PC_MAC_ADDRESS}, IP: {PC_BROADCAST_IP}, Port: {PC_PORT}")
+        return jsonify({"status": "success", "message": f"Magic packet sent to {PC_MAC_ADDRESS}"}), 200
+    except Exception as e:
+        app.logger.error(f"Error sending magic packet: {e}")
+        return jsonify({"status": "error", "message": f"Failed to send magic packet: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5011)
+    # It's crucial to bind to 0.0.0.0 so it's accessible from other devices
+    # within your Tailscale network.
+    app.run(host='0.0.0.0', port=5000, debug=False) # Set debug=False for production
