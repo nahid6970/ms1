@@ -657,45 +657,45 @@ ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command('code C
 
 
 #! FFMPEG
-FFMPEG_bt = CTkButton(ROOT1, text="\uf07cffmpeg",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
-FFMPEG_bt.pack(side="left")
-FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-FR_FFmpeg.pack_propagate(True)
-BoxForFFmpeg = tk.Frame(FR_FFmpeg, bg="#1d2027")
-BoxForFFmpeg.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
-back_ffmpeg=tk.Button(BoxForFFmpeg,text="\ueb6f",width=0,bg="#1D2027",fg="#FFFFFF",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
-back_ffmpeg.pack(side="left" )
-def ffmpeg(FR_FFmpeg):
-    Trim_bt          =tk.Button(BoxForFFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
-    Convert_bt       =tk.Button(BoxForFFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
-    Dimension_bt     =tk.Button(BoxForFFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
-    Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
-    Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
-ffmpeg(FR_FFmpeg)
+# FFMPEG_bt = CTkButton(ROOT1, text="\uf07cffmpeg",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
+# FFMPEG_bt.pack(side="left")
+# FR_FFmpeg = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+# FR_FFmpeg.pack_propagate(True)
+# BoxForFFmpeg = tk.Frame(FR_FFmpeg, bg="#1d2027")
+# BoxForFFmpeg.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
+# back_ffmpeg=tk.Button(BoxForFFmpeg,text="\ueb6f",width=0,bg="#1D2027",fg="#FFFFFF",command=lambda:switch_to_frame (MAIN_FRAME,FR_FFmpeg))
+# back_ffmpeg.pack(side="left" )
+# def ffmpeg(FR_FFmpeg):
+#     Trim_bt          =tk.Button(BoxForFFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
+#     Convert_bt       =tk.Button(BoxForFFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
+#     Dimension_bt     =tk.Button(BoxForFFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
+#     Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
+#     Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
+# ffmpeg(FR_FFmpeg)
 
 #! Find
-Find_bt = CTkButton(ROOT1, text="\uf07cfind",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
-Find_bt.pack(side="left")
-FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-FR_Find.pack_propagate(True)
-BoxForFind = tk.Frame(FR_Find, bg="#1d2027")
-BoxForFind.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
-back_find=tk.Button(BoxForFind,text="\ueb6f",width=0 ,bg="#1D2027", fg="#FFFFFF", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
-back_find.pack(side="left" ,padx=(0,0))
-def find(FR_Find):
-    Search_bt=tk.Label(BoxForFind, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
-    Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
-    Search_bt.bind("<Button-1>",fzf_search)
-    Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
+# Find_bt = CTkButton(ROOT1, text="\uf07cfind",width=0, command=lambda:switch_to_frame(FR_Find , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
+# Find_bt.pack(side="left")
+# FR_Find = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+# FR_Find.pack_propagate(True)
+# BoxForFind = tk.Frame(FR_Find, bg="#1d2027")
+# BoxForFind.pack(side="left", pady=(4,2),padx=(5,1),  anchor="w", fill="x")
+# back_find=tk.Button(BoxForFind,text="\ueb6f",width=0 ,bg="#1D2027", fg="#FFFFFF", command=lambda:switch_to_frame(MAIN_FRAME,FR_Find))
+# back_find.pack(side="left" ,padx=(0,0))
+# def find(FR_Find):
+#     Search_bt=tk.Label(BoxForFind, text="\uf422",bg="#1d2027",fg="#95c64d",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
+#     Search_bt.pack(side="left",padx=(3,0),pady=(0,0))
+#     Search_bt.bind("<Button-1>",fzf_search)
+#     Search_bt.bind("<Control-Button-1>",edit_fzfSearch)
 
-    File_bt    =tk.Button(BoxForFind,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
-    Pattern_bt =tk.Button(BoxForFind,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
-    Size_bt    =tk.Button(BoxForFind,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))
-    FZFC_bt    =tk.Button(BoxForFind,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c       ); FZFC_bt.pack   (side="left" ,padx=(0,0))
-    FZFD_bt    =tk.Button(BoxForFind,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d       ); FZFD_bt.pack   (side="left" ,padx=(0,0))
-    # ackc_bt    =tk.Button(BoxForFind,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c       ); ackc_bt.pack   (side="left" ,padx=(0,0)) #! removed from reference
-    # ackd_bt    =tk.Button(BoxForFind,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0)) #! removed from reference
-find(FR_Find)
+#     File_bt    =tk.Button(BoxForFind,text="File"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_file   ); File_bt.pack   (side="left" ,padx=(0,0))
+#     Pattern_bt =tk.Button(BoxForFind,text="Pattern"    ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_pattern); Pattern_bt.pack(side="left" ,padx=(0,0))
+#     Size_bt    =tk.Button(BoxForFind,text="Size"       ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_find_size   ); Size_bt.pack   (side="left" ,padx=(0,0))
+#     FZFC_bt    =tk.Button(BoxForFind,text="FZF-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_c       ); FZFC_bt.pack   (side="left" ,padx=(0,0))
+#     FZFD_bt    =tk.Button(BoxForFind,text="FZF-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_fzf_d       ); FZFD_bt.pack   (side="left" ,padx=(0,0))
+#     # ackc_bt    =tk.Button(BoxForFind,text="ACK-C"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_c       ); ackc_bt.pack   (side="left" ,padx=(0,0)) #! removed from reference
+#     # ackd_bt    =tk.Button(BoxForFind,text="ACK-D"      ,width=0 ,fg="#FFFFFF", bg="#1D2027", command=start_ack_d       ); ackd_bt.pack   (side="left" ,padx=(0,0)) #! removed from reference
+# find(FR_Find)
 
 # #! Desktop
 # Desktop_bt = CTkButton(ROOT1, text="\uf07cDesktop",width=0, command=lambda:switch_to_frame(FR_Desktop , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0,hover_color="#1dd463", border_width=1, border_color="#FFFFFF", fg_color="#0099ff", text_color="#000000")
@@ -749,53 +749,53 @@ find(FR_Find)
 # Folder(EDIT_FRAME)
 
 #! Function SPACE
-FUNCTION_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
-FUNCTION_FRAME.pack_propagate(True)
-ENTER_FRAME = CTkButton(ROOT1, text="\uf07cF", width=0, command=lambda:switch_to_frame(FUNCTION_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
-ENTER_FRAME.pack(side="left", padx=(1,1))
-BOX = tk.Frame(FUNCTION_FRAME, bg="#1D2027")
-BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
-BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,FUNCTION_FRAME))
-BACK.pack(side="left" ,padx=(0,0))
-def Folder(FUNCTION_FRAME):
-        # Function to simulate key press
-        # def send_f13():
-        #     keyboard.send('f13')
-        # F13=tk.Button(BOX,text="F13",width=0 ,fg="#ffffff", bg="#204892", command=send_f13)
-        # F13.pack(side="left" ,padx=(0,0))
+# FUNCTION_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920)
+# FUNCTION_FRAME.pack_propagate(True)
+# ENTER_FRAME = CTkButton(ROOT1, text="\uf07cF", width=0, command=lambda:switch_to_frame(FUNCTION_FRAME , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
+# ENTER_FRAME.pack(side="left", padx=(1,1))
+# BOX = tk.Frame(FUNCTION_FRAME, bg="#1D2027")
+# BOX.pack(side="top", pady=(4,2),padx=(5,1), anchor="center", fill="x")
+# BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,FUNCTION_FRAME))
+# BACK.pack(side="left" ,padx=(0,0))
+# def Folder(FUNCTION_FRAME):
+#         # Function to simulate key press
+#         # def send_f13():
+#         #     keyboard.send('f13')
+#         # F13=tk.Button(BOX,text="F13",width=0 ,fg="#ffffff", bg="#204892", command=send_f13)
+#         # F13.pack(side="left" ,padx=(0,0))
 
-        # def send_f15():
-        #     keyboard.send('f15')
-        # F15=tk.Button(BOX,text="F15",width=0 ,fg="#ffffff", bg="#204892", command=send_f15)
-        # F15.pack(side="left" ,padx=(0,0))
+#         # def send_f15():
+#         #     keyboard.send('f15')
+#         # F15=tk.Button(BOX,text="F15",width=0 ,fg="#ffffff", bg="#204892", command=send_f15)
+#         # F15.pack(side="left" ,padx=(0,0))
 
-        def powertoys_ruler():
-            keyboard.press_and_release('win+shift+m')
-        TOY_RULER=tk.Button(BOX,text="\uee11",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_ruler)
-        TOY_RULER.pack(side="left" ,padx=(0,0))
+#         def powertoys_ruler():
+#             keyboard.press_and_release('win+shift+m')
+#         TOY_RULER=tk.Button(BOX,text="\uee11",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_ruler)
+#         TOY_RULER.pack(side="left" ,padx=(0,0))
 
-        def powertoys_mousecrosshair():
-            keyboard.press_and_release('win+alt+p')
-        TOY_MCROSSHAIR=tk.Button(BOX,text="\uf245",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_mousecrosshair)
-        TOY_MCROSSHAIR.pack(side="left" ,padx=(0,0))
+#         def powertoys_mousecrosshair():
+#             keyboard.press_and_release('win+alt+p')
+#         TOY_MCROSSHAIR=tk.Button(BOX,text="\uf245",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_mousecrosshair)
+#         TOY_MCROSSHAIR.pack(side="left" ,padx=(0,0))
 
-        def powertoys_TextExtract():
-            keyboard.press_and_release('win+shift+f')
-        TOY_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_TextExtract)
-        TOY_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
+#         def powertoys_TextExtract():
+#             keyboard.press_and_release('win+shift+f')
+#         TOY_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#ffffff", bg="#204892", command=powertoys_TextExtract)
+#         TOY_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
 
-        def capture2text():
-            is_running = any(proc.name() == "Capture2Text.exe" for proc in psutil.process_iter())
-            if not is_running:
-                subprocess.Popen(r"C:\Users\nahid\scoop\apps\Capture2Text\current\Capture2Text.exe")
-                time.sleep(2)  # Wait 2 seconds if the app had to be started
-            else:
-                time.sleep(1)  # Wait 1 second if the app is already running
-            keyboard.press_and_release('win+ctrl+alt+shift+q')
-        CAPTURE2_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#db1725", bg="#204892", command=capture2text)
-        CAPTURE2_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
+#         def capture2text():
+#             is_running = any(proc.name() == "Capture2Text.exe" for proc in psutil.process_iter())
+#             if not is_running:
+#                 subprocess.Popen(r"C:\Users\nahid\scoop\apps\Capture2Text\current\Capture2Text.exe")
+#                 time.sleep(2)  # Wait 2 seconds if the app had to be started
+#             else:
+#                 time.sleep(1)  # Wait 1 second if the app is already running
+#             keyboard.press_and_release('win+ctrl+alt+shift+q')
+#         CAPTURE2_TEXTEXTRACT=tk.Button(BOX,text="\ueb69",width=0 ,fg="#db1725", bg="#204892", command=capture2text)
+#         CAPTURE2_TEXTEXTRACT.pack(side="left" ,padx=(0,0))
 
-Folder(FUNCTION_FRAME)
+# Folder(FUNCTION_FRAME)
 
 #! Worspace_3
 SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
@@ -980,6 +980,47 @@ create_gui()
 #! ██╔══██╗██║██║   ██║██╔══██║   ██║
 #! ██║  ██║██║╚██████╔╝██║  ██║   ██║
 #! ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+
+
+import requests
+import tkinter as tk
+import re
+ANDROID_URL = "http://mi9t:5002"
+LOW_BATTERY_THRESHOLD = 15
+UPDATE_INTERVAL = 60000  # 60 seconds
+
+def fetch_battery_percentage():
+    try:
+        response = requests.get(ANDROID_URL)
+        if response.ok:
+            match = re.search(r'(\d+)\s*%', response.text)
+            if match:
+                return int(match.group(1))
+    except Exception as e:
+        print(f"Error fetching battery: {e}")
+    return None
+
+def update_status_battery_mi9t():
+    percent = fetch_battery_percentage()
+    if percent is not None:
+        Android_mi9t_battery.config(text=f"{percent}%")
+        if percent < LOW_BATTERY_THRESHOLD:
+            Android_mi9t_battery.config(fg="white", bg="red")
+        else:
+            Android_mi9t_battery.config(fg="white", bg="green")
+    else:
+        Android_mi9t_battery.config(
+            text="Error fetching battery",
+            fg="white",
+            bg="gray"
+        )
+    ROOT2.after(UPDATE_INTERVAL, update_status_battery_mi9t)
+
+Android_mi9t_battery = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono nfp", 10, "bold"), width=5)
+Android_mi9t_battery.pack(side="left", padx=(3,10), pady=(0,0))
+# Start updates
+update_status_battery_mi9t()
+
 
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
