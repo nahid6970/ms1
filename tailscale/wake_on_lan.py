@@ -1,34 +1,50 @@
-from flask import Flask, request, jsonify
-from wakeonlan import send_magic_packet
-import logging
+from flask import Flask, render_template_string, redirect, url_for
+import os
 
 app = Flask(__name__)
 
-# Configure logging for better debugging
-logging.basicConfig(level=logging.D EBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
 # PC Details
-PC_MAC_ADDRESS = "A8:5E:45:55:AD:30"
-PC_BROADCAST_IP = "192.168.0.255" # Typically the broadcast IP for your subnet
-PC_PORT = 9
+TARGET_MAC = "A8:5E:45:55:AD:30"
+TARGET_IP = "192.168.0.101"
+TARGET_PORT = 9
 
-@app.route('/')
+# HTML UI
+HTML = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wake PC</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        button { font-size: 24px; padding: 10px 40px; }
+    </style>
+</head>
+<body>
+    <h1>Wake PC</h1>
+    <form method="POST" action="/wake">
+        <button type="submit">💻 Wake PC</button>
+    </form>
+</body>
+</html>
+"""
+
+@app.route("/", methods=["GET"])
 def index():
-    return "Welcome to the Wake-on-LAN Flask app! Use /wake to send the magic packet."
+    return render_template_string(HTML)
 
-@app.route('/wake', methods=['POST'])
-def wake_pc():
-    app.logger.info(f"Received request to wake PC.")
-    try:
-        # Send the magic packet
-        send_magic_packet(PC_MAC_ADDRESS, ip_address=PC_BROADCAST_IP, port=PC_PORT)
-        app.logger.info(f"Magic packet sent to MAC: {PC_MAC_ADDRESS}, IP: {PC_BROADCAST_IP}, Port: {PC_PORT}")
-        return jsonify({"status": "success", "message": f"Magic packet sent to {PC_MAC_ADDRESS}"}), 200
-    except Exception as e:
-        app.logger.error(f"Error sending magic packet: {e}")
-        return jsonify({"status": "error", "message": f"Failed to send magic packet: {str(e)}"}), 500
+@app.route("/wake", methods=["POST"])
+def wake():
+    send_magic_packet(TARGET_MAC)
+    return redirect(url_for('index'))
 
-if __name__ == '__main__':
-    # It's crucial to bind to 0.0.0.0 so it's accessible from other devices
-    # within your Tailscale network.
-    app.run(host='0.0.0.0', port=5000, debug=False) # Set debug=False for production
+def send_magic_packet(mac):
+    # Linux/Mac: use socket directly
+    import socket
+    mac_bytes = bytes.fromhex(mac.replace(':', ''))
+    packet = b'\xff' * 6 + mac_bytes * 16
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    sock.sendto(packet, ('<broadcast>', TARGET_PORT))
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
