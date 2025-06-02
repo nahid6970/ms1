@@ -121,6 +121,9 @@ git_clone() {
 # fi
 
 sshd
+nohup python ~/home/ms1/tailscale/wake_on_lan.py >/dev/null 2>&1 &
+nohup python ~/home/ms1/tailscale/battery.py >/dev/null 2>&1 &
+
 
 # echo "Welcome to Termux!"
 # echo "System Info:"
