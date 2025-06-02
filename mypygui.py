@@ -1003,11 +1003,11 @@ def fetch_battery_percentage():
 def update_status_battery_mi9t():
     percent = fetch_battery_percentage()
     if percent is not None:
-        Android_mi9t_battery.config(text=f"{percent}%")
+        Android_mi9t_battery.config(text=f"mi9t {percent}%")
         if percent < LOW_BATTERY_THRESHOLD:
             Android_mi9t_battery.config(fg="white", bg="red")
         else:
-            Android_mi9t_battery.config(fg="white", bg="green")
+            Android_mi9t_battery.config(fg="black", bg="#abec72")
     else:
         Android_mi9t_battery.config(
             text="Error fetching battery",
@@ -1016,7 +1016,7 @@ def update_status_battery_mi9t():
         )
     ROOT2.after(UPDATE_INTERVAL, update_status_battery_mi9t)
 
-Android_mi9t_battery = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono nfp", 10, "bold"), width=5)
+Android_mi9t_battery = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono nfp", 10, "bold"), width=10)
 Android_mi9t_battery.pack(side="left", padx=(3,10), pady=(0,0))
 # Start updates
 update_status_battery_mi9t()
