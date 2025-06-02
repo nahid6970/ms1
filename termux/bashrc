@@ -122,7 +122,6 @@ git_clone() {
 
 sshd
 # Start the Wake-on-LAN Flask app in the background
-# Check if the process is already running to avoid starting multiple instances
 if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/wake_on_lan.py" > /dev/null; then
     nohup python /data/data/com.termux/files/home/ms1/tailscale/wake_on_lan.py > /dev/null 2>&1 &
     echo "Wake-on-LAN Flask app started in the background."
@@ -132,6 +131,12 @@ fi
 if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/battery.py" > /dev/null; then
     nohup python /data/data/com.termux/files/home/ms1/tailscale/battery.py > /dev/null 2>&1 &
     echo "Battery script started in the background."
+fi
+
+# Start the Device Info script in the background
+if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/device_info.py" > /dev/null; then
+    nohup python /data/data/com.termux/files/home/ms1/tailscale/device_info.py > /dev/null 2>&1 &
+    echo "Device Info script started in the background."
 fi
 
 
