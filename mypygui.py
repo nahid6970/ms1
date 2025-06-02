@@ -1005,7 +1005,7 @@ def update_status_battery_mi9t():
     if percent is not None:
         Android_mi9t_battery.config(text=f"mi9t {percent}%")
         if percent == 100:
-            Android_mi9t_battery.config(fg="white", bg="blue")
+            Android_mi9t_battery.config(fg="black", bg="#58a6ff")
         elif percent < LOW_BATTERY_THRESHOLD:
             Android_mi9t_battery.config(fg="white", bg="red")
         else:
@@ -1017,7 +1017,7 @@ def update_status_battery_mi9t():
             bg="gray"
         )
     ROOT2.after(UPDATE_INTERVAL, update_status_battery_mi9t)
-    
+
 Android_mi9t_battery = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono nfp", 10, "bold"), width=10)
 Android_mi9t_battery.pack(side="left", padx=(3,10), pady=(0,0))
 # Start updates
