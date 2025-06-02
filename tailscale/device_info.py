@@ -1,42 +1,41 @@
 from flask import Flask, jsonify, render_template_string
-import os
-import platform
 import subprocess
-
-droid = None
-try:
-    import androidhelper # Try androidhelper first (Pydroid's preferred)
-    droid = androidhelper.Android()
-except ImportError:
-    try:
-        import sl4a # Fallback to sl4a (older versions or compatibility)
-        droid = sl4a.Android()
-    except ImportError:
-        print("Warning: Neither androidhelper nor sl4a module found. Some device info might be missing.")
+import json
 
 app = Flask(__name__)
 
-# ... (rest of your Flask app code, same as before) ...
-
-# Ensure your get_battery_info function uses 'droid' correctly
 def get_battery_info():
-    if not droid:
-        return {"error": "androidhelper/sl4a module not available. Battery info not accessible."}
     try:
-        result = droid.batteryGetStatus().result
-        # The result object contains various battery properties
-        return {
-            "level": result.get('level'),
-            "health": result.get('health'),
-            "plugged": result.get('plugged'),
-            "status": result.get('status'),
-            "temperature": result.get('temperature', 0) / 10.0, # Temperature is often in tenths of a degree Celsius
-            "voltage": result.get('voltage')
-        }
-    except Exception as e:
-        return {"error": f"Could not get battery info: {e}"}
+        # Run the Termux API command to get battery status
+        result = subprocess.run(['termux-battery-status'], capture_output=True, text=True, check=True)
+        data = json.loads(result.stdout)
 
-# ... (rest of your Flask app code, same as before) ...
+        return {
+            "level": data.get("percentage"),
+            "status": data.get("status"),
+            "temperature": data.get("temperature", 0),
+            "voltage": data.get("voltage"),
+            "plugged": "PLUGGED" if data.get("plugged") else "UNPLUGGED"
+        }
+
+    except subprocess.CalledProcessError as e:
+        return {"error": f"Failed to run termux-battery-status: {e}"}
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse termux-battery-status output"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.route('/')
+def index():
+    return render_template_string('''
+        <h1>Battery Info</h1>
+        <p><a href="/battery">View Battery Info</a></p>
+    ''')
+
+@app.route('/battery')
+def battery():
+    info = get_battery_info()
+    return jsonify(info)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
