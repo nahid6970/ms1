@@ -1,6 +1,8 @@
 import os
 import datetime
 from flask import Flask, render_template, request, redirect, url_for
+import pyperclip
+
 
 app = Flask(__name__)
 
@@ -9,10 +11,17 @@ log_file = "C:/msBackups/Shared_Text.log"
 separator = "-----x-----"
 
 def write_to_log(text):
-    """Write the shared text to the log file with a timestamp."""
+    """Write the shared text to the log file with a timestamp and copy to clipboard."""
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
-    # Normalize Windows-style line endings to Unix-style and remove any trailing newline
     normalized_text = text.replace("\r\n", "\n").rstrip("\n")
+
+    # Copy to clipboard
+    try:
+        pyperclip.copy(normalized_text)
+    except Exception as e:
+        print("Clipboard copy failed:", e)
+
+    # Write to file
     with open(log_file, "a", encoding="utf-8") as file:
         file.write(f"{timestamp}\n{normalized_text}\n{separator}\n")
 
