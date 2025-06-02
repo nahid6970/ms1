@@ -47,4 +47,4 @@ def send_magic_packet(mac):
     sock.sendto(packet, ('<broadcast>', TARGET_PORT))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5003)
