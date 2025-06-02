@@ -139,6 +139,11 @@ if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/device_info
     echo "Device Info script started in the background."
 fi
 
+# Start the Device Info script in the background
+if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/clipboard_send.py" > /dev/null; then
+    nohup python /data/data/com.termux/files/home/ms1/tailscale/clipboard_send.py > /dev/null 2>&1 &
+    echo "clipboard_send script started in the background."
+fi
 
 # echo "Welcome to Termux!"
 # echo "System Info:"
