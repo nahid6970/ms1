@@ -985,10 +985,10 @@ create_gui()
 import requests
 import tkinter as tk
 import re
+
 ANDROID_URL = "http://mi9t:5002"
 LOW_BATTERY_THRESHOLD = 15
 UPDATE_INTERVAL = 60000  # 60 seconds
-
 def fetch_battery_percentage():
     try:
         response = requests.get(ANDROID_URL)
@@ -1004,7 +1004,9 @@ def update_status_battery_mi9t():
     percent = fetch_battery_percentage()
     if percent is not None:
         Android_mi9t_battery.config(text=f"mi9t {percent}%")
-        if percent < LOW_BATTERY_THRESHOLD:
+        if percent == 100:
+            Android_mi9t_battery.config(fg="white", bg="blue")
+        elif percent < LOW_BATTERY_THRESHOLD:
             Android_mi9t_battery.config(fg="white", bg="red")
         else:
             Android_mi9t_battery.config(fg="black", bg="#abec72")
@@ -1015,11 +1017,12 @@ def update_status_battery_mi9t():
             bg="gray"
         )
     ROOT2.after(UPDATE_INTERVAL, update_status_battery_mi9t)
-
+    
 Android_mi9t_battery = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono nfp", 10, "bold"), width=10)
 Android_mi9t_battery.pack(side="left", padx=(3,10), pady=(0,0))
 # Start updates
 update_status_battery_mi9t()
+
 
 
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
