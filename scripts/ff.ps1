@@ -37,7 +37,7 @@ function SearchDirectoriesAndFiles {
             --multi `
             --with-nth=1 `
             --delimiter="`t" `
-            --preview="highlight -O ansi -l {1}" `
+            --preview="bat --style=plain --color=always --line-range :100 {1}" `
             --preview-window '~3' `
             --border `
             --layout reverse `

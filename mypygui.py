@@ -591,27 +591,27 @@ Folder_bt.pack(side="left",padx=(10,0),pady=(1,0))
 Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
 Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
 
-ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a04c", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
-ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
-ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
+# ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a04c", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+# ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
+# ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
+# ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
 
-ShortcutBar1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
-ShortcutBar1.pack(side="left",padx=(3,0),pady=(0,0))
-ShortcutBar1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
-ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
+# ShortcutBar1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
+# ShortcutBar1.pack(side="left",padx=(3,0),pady=(0,0))
+# ShortcutBar1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
+# ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
 
-ShortcutBar2=CTkLabel(ROOT1, text="\udb80\udf11", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
-ShortcutBar2.pack(side="left",padx=(5,0),pady=(1,0))
-ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\shortcut.py"], shell=True))
-ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\shortcut.py"], shell=True))
+# ShortcutBar2=CTkLabel(ROOT1, text="\udb80\udf11", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
+# ShortcutBar2.pack(side="left",padx=(5,0),pady=(1,0))
+# ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\shortcut.py"], shell=True))
+# ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\shortcut.py"], shell=True))
 
-PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w", font=("JetBrainsMono NFP",16,"bold"))
-PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
-PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_FULL.py"], shell=True))
-PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_FULL.py"],shell=True))
-PositionXY_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_APP.py"], shell=True))
-PositionXY_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_APP.py"],shell=True))
+# PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w", font=("JetBrainsMono NFP",16,"bold"))
+# PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
+# PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_FULL.py"], shell=True))
+# PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_FULL.py"],shell=True))
+# PositionXY_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_APP.py"], shell=True))
+# PositionXY_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_APP.py"],shell=True))
 
 PositionXY_CrossHair_bt=tk.Label(ROOT1, text="\uf05b",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_CrossHair_bt.pack(side="left",padx=(3,0),pady=(0,0))
@@ -913,7 +913,8 @@ commands = {
 # Show log output in Notepad
 def on_label_click(event, cfg):
     try:
-        subprocess.Popen(["notepad", cfg["log"]])
+        notepadpp_path = r"C:\Program Files\Notepad++\notepad++.exe"
+        subprocess.Popen([notepadpp_path, cfg["log"]])
     except Exception as e:
         print(f"Error opening log file for {cfg['label']}: {e}")
 
@@ -982,46 +983,46 @@ create_gui()
 #! ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 
 
-import requests
-import tkinter as tk
-import re
+# import requests
+# import tkinter as tk
+# import re
 
-ANDROID_URL = "http://mi9t:5002"
-LOW_BATTERY_THRESHOLD = 15
-UPDATE_INTERVAL = 60000  # 60 seconds
-def fetch_battery_percentage():
-    try:
-        response = requests.get(ANDROID_URL)
-        if response.ok:
-            match = re.search(r'(\d+)\s*%', response.text)
-            if match:
-                return int(match.group(1))
-    except Exception as e:
-        print(f"Error fetching battery: {e}")
-    return None
+# ANDROID_URL = "http://mi9t:5002"
+# LOW_BATTERY_THRESHOLD = 15
+# UPDATE_INTERVAL = 60000  # 60 seconds
+# def fetch_battery_percentage():
+#     try:
+#         response = requests.get(ANDROID_URL)
+#         if response.ok:
+#             match = re.search(r'(\d+)\s*%', response.text)
+#             if match:
+#                 return int(match.group(1))
+#     except Exception as e:
+#         print(f"Error fetching battery: {e}")
+#     return None
 
-def update_status_battery_mi9t():
-    percent = fetch_battery_percentage()
-    if percent is not None:
-        Android_mi9t_battery.config(text=f"mi9t {percent}%")
-        if percent == 100:
-            Android_mi9t_battery.config(fg="black", bg="#58a6ff")
-        elif percent < LOW_BATTERY_THRESHOLD:
-            Android_mi9t_battery.config(fg="white", bg="red")
-        else:
-            Android_mi9t_battery.config(fg="black", bg="#abec72")
-    else:
-        Android_mi9t_battery.config(
-            text="Error fetching battery",
-            fg="white",
-            bg="gray"
-        )
-    ROOT2.after(UPDATE_INTERVAL, update_status_battery_mi9t)
+# def update_status_battery_mi9t():
+#     percent = fetch_battery_percentage()
+#     if percent is not None:
+#         Android_mi9t_battery.config(text=f"mi9t {percent}%")
+#         if percent == 100:
+#             Android_mi9t_battery.config(fg="black", bg="#58a6ff")
+#         elif percent < LOW_BATTERY_THRESHOLD:
+#             Android_mi9t_battery.config(fg="white", bg="red")
+#         else:
+#             Android_mi9t_battery.config(fg="black", bg="#abec72")
+#     else:
+#         Android_mi9t_battery.config(
+#             text="Error fetching battery",
+#             fg="white",
+#             bg="gray"
+#         )
+#     ROOT2.after(UPDATE_INTERVAL, update_status_battery_mi9t)
 
-Android_mi9t_battery = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono nfp", 10, "bold"), width=10)
-Android_mi9t_battery.pack(side="left", padx=(3,10), pady=(0,0))
-# Start updates
-update_status_battery_mi9t()
+# Android_mi9t_battery = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono nfp", 10, "bold"), width=10)
+# Android_mi9t_battery.pack(side="left", padx=(3,10), pady=(0,0))
+# # Start updates
+# update_status_battery_mi9t()
 
 
 
