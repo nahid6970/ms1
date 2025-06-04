@@ -175,6 +175,19 @@ sshd
 # --ez com.termux.RUN_COMMAND_BACKGROUND true && \
 # am start -a android.intent.action.VIEW -d "http://192.168.0.101:5001" com.android.chrome
 
+#* Paste to pc working
+# am start -n com.termux/.HomeActivity && \
+# sleep 3 && \
+# am startservice --user 0 -n com.termux/com.termux.app.RunCommandService \
+# -a com.termux.RUN_COMMAND \
+# --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/python" \
+# --esa com.termux.RUN_COMMAND_ARGUMENTS "/data/data/com.termux/files/home/ms1/tailscale/clipboard_send_once.py" \
+# --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" \
+# --ez com.termux.RUN_COMMAND_BACKGROUND true
+
+# PYTHON_SCRIPT_FULL_PATH="/data/data/com.termux/files/home/ms1/tailscale/clipboard_send_once.py"; TERMUX_INTERNAL_COMMAND_SEQUENCE="termux-wake-lock && python \"${PYTHON_SCRIPT_FULL_PATH}\" &"; am startservice --user 0 -n com.termux/com.termux.app.RunCommandService -a com.termux.RUN_COMMAND --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/sh" --esa com.termux.RUN_COMMAND_ARGUMENTS "-c,${TERMUX_INTERNAL_COMMAND_SEQUENCE}" --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" --ez com.termux.RUN_COMMAND_BACKGROUND "true" && sleep 2 && am start -a android.intent.action.VIEW -d "http://192.168.0.101:5001" com.android.chrome
+
+
 #* Wake on LAN
 # am start -n com.termux/.app.TermuxActivity && sleep 2 && \
 # am startservice --user 0 -n com.termux/com.termux.app.RunCommandService \
