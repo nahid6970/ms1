@@ -1094,7 +1094,7 @@ def shutdown_timer(minutes):
             return
         minutes_left = int(countdown_time) // 60
         seconds_left = int(countdown_time) % 60
-        time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
+        time_left_label.config(text=f"\udb86\udee1:{minutes_left:02}:{seconds_left:02}")
         time_left_label.update()
         time.sleep(1)
         countdown_time -= 1
@@ -1112,7 +1112,7 @@ def alarm_timer(minutes):
             return
         minutes_left = int(countdown_time) // 60
         seconds_left = int(countdown_time) % 60
-        time_left_label.config(text=f"Time left: {minutes_left:02}:{seconds_left:02}")
+        time_left_label.config(text=f"\udb86\udee1:{minutes_left:02}:{seconds_left:02}")
         time_left_label.update()
         time.sleep(1)
         countdown_time -= 1
@@ -1229,7 +1229,7 @@ def start_countdown_option(event=None):
             last_countdown_minutes = minutes
             shutdown_thread = threading.Thread(target=alarm_timer, args=(minutes,))
             shutdown_thread.start()
-            time_left_label.config(text=f"Time left: {minutes:02}:00")
+            time_left_label.config(text=f"\udb86\udee1:{minutes:02}:00")
     elif choice == 2:
         if countdown_active:
             countdown_active = False
@@ -1242,7 +1242,7 @@ def start_countdown_option(event=None):
             last_countdown_minutes = minutes
             shutdown_thread = threading.Thread(target=shutdown_timer, args=(minutes,))
             shutdown_thread.start()
-            time_left_label.config(text=f"Time left: {minutes:02}:00")
+            time_left_label.config(text=f"\udb86\udee1:{minutes:02}:00")
 
 # Function to run the last used countdown
 def run_last_countdown():
@@ -1274,11 +1274,12 @@ def run_last_countdown():
 # Add this to your layout wherever your buttons/widgets go
 time_left_label = tk.Label(
     ROOT2,
-    text="Timer",
-    font=("JetBrainsMono NFP", 14, "bold"),
+    text="\udb86\udee1",
+    font=("JetBrainsMono NFP", 16, "bold"),
     fg="#fc6a35",
     bg="#1d2027",
-    cursor="hand2"
+    cursor="hand2",
+    relief="flat"
 )
 time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))
 time_left_label.bind("<Button-1>", start_countdown_option)
@@ -1286,16 +1287,16 @@ time_left_label.bind("<Button-1>", start_countdown_option)
 # New "Run Last" button
 run_last_button = tk.Button(
     ROOT2,
-    text="Run Last",
-    font=("JetBrainsMono NFP", 12),
+    text="\udb86\udee5",
+    font=("JetBrainsMono NFP", 16),
     command=run_last_countdown,
-    fg="#ffffff",
-    bg="#50fa7b", # A nice green color
+    fg="#50fa7b",
+    bg="#1d2027",
     activeforeground="#ffffff",
     activebackground="#2e7d32",
     relief="flat"
 )
-run_last_button.pack(side="left", padx=(10, 0), pady=(0, 0))
+run_last_button.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 
