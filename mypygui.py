@@ -910,11 +910,20 @@ commands = {
     },
 }
 
-# Show log output in Notepad
+# # Show log output in Notepad
+# def on_label_click(event, cfg):
+#     try:
+#         notepadpp_path = r"C:\Program Files\Notepad++\notepad++.exe"
+#         subprocess.Popen([notepadpp_path, cfg["log"]])
+#     except Exception as e:
+#         print(f"Error opening log file for {cfg['label']}: {e}")
+
+# Show log output in Microsoft Edit in a new PowerShell terminal
 def on_label_click(event, cfg):
     try:
-        notepadpp_path = r"C:\Program Files\Notepad++\notepad++.exe"
-        subprocess.Popen([notepadpp_path, cfg["log"]])
+        subprocess.Popen([
+            "powershell", "-NoExit", "-Command", f'edit "{cfg["log"]}"'
+        ], creationflags=subprocess.CREATE_NEW_CONSOLE)
     except Exception as e:
         print(f"Error opening log file for {cfg['label']}: {e}")
 
