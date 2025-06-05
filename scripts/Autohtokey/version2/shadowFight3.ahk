@@ -446,10 +446,17 @@ F24:: ; Left Side Enemy
 F1:: {
 
     if WinActive("ahk_exe dnplayer.exe") {
-        SendEvent("1x2y3z")
+
+        SendEvent("1x")
         Sleep(100)
+        SendEvent("2y")
+        Sleep(100)
+        SendEvent("3z")
+        Sleep(200)
 
         SendEvent("4y")
+        Sleep(100)
+        SendEvent("y")
         Sleep(100)
         SendEvent("4")
         Sleep(100)
@@ -459,7 +466,7 @@ F1:: {
 
         SendEvent("0y")
         Sleep(100)
-        
+
         SendEvent("7x8z")
     }
 }

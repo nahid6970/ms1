@@ -1076,11 +1076,14 @@ LB_DUD.bind("<Button-1>",None)
 
 
 
-# Globals
+
+
 countdown_active = False
 shutdown_thread = None
 alarm_window = None
 blinking = False
+last_countdown_type = None  # To store the last chosen type (1 for alarm, 2 for shutdown)
+last_countdown_minutes = None  # To store the last entered minutes
 
 def shutdown_timer(minutes):
     global countdown_active
@@ -1118,8 +1121,6 @@ def alarm_timer(minutes):
         countdown_active = False
         time_left_label.config(text="Timer")
 
-
-
 # Show blinking alarm in a new window
 def show_big_alarm():
     global alarm_window, blinking
@@ -1129,7 +1130,7 @@ def show_big_alarm():
     alarm_window.geometry("600x300")
     alarm_window.configure(bg="#1d2027")
     alarm_window.attributes("-topmost", True)
-    alarm_window.overrideredirect(True) 
+    alarm_window.overrideredirect(True)
     alarm_window.resizable(False, False)
     width = alarm_window.winfo_width()
     height = alarm_window.winfo_height()
@@ -1214,7 +1215,7 @@ def get_countdown_input():
 
 # Main click handler
 def start_countdown_option(event=None):
-    global countdown_active, shutdown_thread
+    global countdown_active, shutdown_thread, last_countdown_type, last_countdown_minutes
     choice = simpledialog.askinteger("Select Timer Type", "Choose an option:\n1 - Countdown Alarm\n2 - Countdown Shutdown")
     if choice == 1:
         if countdown_active:
@@ -1224,6 +1225,8 @@ def start_countdown_option(event=None):
         minutes = get_countdown_input()
         if minutes:
             countdown_active = True
+            last_countdown_type = 1
+            last_countdown_minutes = minutes
             shutdown_thread = threading.Thread(target=alarm_timer, args=(minutes,))
             shutdown_thread.start()
             time_left_label.config(text=f"Time left: {minutes:02}:00")
@@ -1235,9 +1238,37 @@ def start_countdown_option(event=None):
         minutes = get_countdown_input()
         if minutes:
             countdown_active = True
+            last_countdown_type = 2
+            last_countdown_minutes = minutes
             shutdown_thread = threading.Thread(target=shutdown_timer, args=(minutes,))
             shutdown_thread.start()
             time_left_label.config(text=f"Time left: {minutes:02}:00")
+
+# Function to run the last used countdown
+def run_last_countdown():
+    global countdown_active, shutdown_thread, last_countdown_type, last_countdown_minutes
+    if last_countdown_type is None or last_countdown_minutes is None:
+        # Optionally, inform the user that no previous countdown exists
+        print("No previous countdown to run.") # Or show a message box
+        return
+
+    if countdown_active:
+        countdown_active = False
+        time_left_label.config(text="Timer")
+        # Give a moment for the current thread to stop if it's running
+        if shutdown_thread and shutdown_thread.is_alive():
+            shutdown_thread.join(timeout=1) # Wait briefly for the thread to terminate
+        time.sleep(0.1) # Small delay to ensure state update
+
+    countdown_active = True
+    if last_countdown_type == 1:
+        shutdown_thread = threading.Thread(target=alarm_timer, args=(last_countdown_minutes,))
+        shutdown_thread.start()
+        time_left_label.config(text=f"Time left: {int(last_countdown_minutes):02}:00 (Last Alarm)")
+    elif last_countdown_type == 2:
+        shutdown_thread = threading.Thread(target=shutdown_timer, args=(last_countdown_minutes,))
+        shutdown_thread.start()
+        time_left_label.config(text=f"Time left: {int(last_countdown_minutes):02}:00 (Last Shutdown)")
 
 
 # Add this to your layout wherever your buttons/widgets go
@@ -1251,6 +1282,20 @@ time_left_label = tk.Label(
 )
 time_left_label.pack(side="left", padx=(10, 0), pady=(0, 0))
 time_left_label.bind("<Button-1>", start_countdown_option)
+
+# New "Run Last" button
+run_last_button = tk.Button(
+    ROOT2,
+    text="Run Last",
+    font=("JetBrainsMono NFP", 12),
+    command=run_last_countdown,
+    fg="#ffffff",
+    bg="#50fa7b", # A nice green color
+    activeforeground="#ffffff",
+    activebackground="#2e7d32",
+    relief="flat"
+)
+run_last_button.pack(side="left", padx=(10, 0), pady=(0, 0))
 
 
 
