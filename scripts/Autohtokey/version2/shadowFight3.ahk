@@ -443,31 +443,59 @@ F24:: ; Left Side Enemy
 
 
 
-F1:: {
+; F1:: { ;* with hero
+
+;     if WinActive("ahk_exe dnplayer.exe") {
+
+;         SendEvent("1x")
+;         Sleep(100)
+;         SendEvent("2y")
+;         Sleep(100)
+;         SendEvent("3z")
+;         Sleep(200)
+
+;         SendEvent("4y")
+;         Sleep(100)
+;         SendEvent("y")
+;         Sleep(100)
+;         SendEvent("4")
+;         Sleep(100)
+
+;         SendEvent("5x6z")
+;         Sleep(100)
+
+;         SendEvent("0y")
+;         Sleep(100)
+
+;         SendEvent("7x8z")
+;     }
+; }
+
+F1:: { ;! no here
 
     if WinActive("ahk_exe dnplayer.exe") {
 
-        SendEvent("1x")
+        SendEvent("0x")
         Sleep(100)
-        SendEvent("2y")
+        SendEvent("1y")
         Sleep(100)
-        SendEvent("3z")
+        SendEvent("2z")
         Sleep(200)
 
-        SendEvent("4y")
+        SendEvent("3y")
         Sleep(100)
         SendEvent("y")
         Sleep(100)
-        SendEvent("4")
+        SendEvent("3")
         Sleep(100)
 
-        SendEvent("5x6z")
+        SendEvent("4x5z")
         Sleep(100)
 
-        SendEvent("0y")
-        Sleep(100)
+        ; SendEvent("0y")
+        ; Sleep(100)
 
-        SendEvent("7x8z")
+        SendEvent("6x7z")
     }
 }
 
