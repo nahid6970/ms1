@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+#include C:\ms1\scripts\Autohtokey\UIA_v2\Lib\UIA.ahk
 
 #HotIf WinActive("ahk_exe dnplayer.exe",)
 
@@ -497,6 +498,8 @@ F1:: { ;! no here
 
         SendEvent("6x7z")
     }
+pythonEl := UIA.ElementFromHandle("Python GUI ahk_exe python.exe")
+pythonEl.ElementFromPath("YYYY0").Click("left")
 }
 
 
