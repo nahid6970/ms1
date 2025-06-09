@@ -472,8 +472,7 @@ F24:: ; Left Side Enemy
 ;     }
 ; }
 
-F1:: { ;! no here
-
+F1:: {
     if WinActive("ahk_exe dnplayer.exe") {
 
         SendEvent("0x")
@@ -500,6 +499,11 @@ F1:: { ;! no here
     }
 pythonEl := UIA.ElementFromHandle("Python GUI ahk_exe python.exe")
 pythonEl.ElementFromPath("YYYY0").Click("left")
+
+; Set to screen coordinates and click at (1672, 65)
+CoordMode "Mouse", "Screen"
+Click 1672, 65
+
 }
 
 
