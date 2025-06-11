@@ -7,6 +7,7 @@ Persistent
 ; include files
 #Include C:\ms1\scripts\Autohtokey\version2\tray.ahk
 #Include C:\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
+#Include C:\ms1\scripts\CoC\Clash_of_Clans.ahk
 
 ;! add v1 startups
 ; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
