@@ -4,6 +4,15 @@
 #[┣─project❯](bold red) $directory$rust$git_branch$git_state$git_status$package$golang$terraform$docker_context$python$docker_context$nodejs
 #[╰─cmd────❯](bold green)
 #"""
+
+# format = """
+# [╭─time────❯](bold bright-blue) $time
+# [├─user────❯](bold green) $username
+# [├─system──❯](bold yellow) $hostname
+# [├─project─❯](bold red) $directory$rust$git_branch$git_state$git_status$package$golang$terraform$docker_context$python$nodejs
+# [╰─cmd─────❯](bold green) 
+# """
+
 [username]
 style_user = "green bold"
 style_root = "red bold"
@@ -13,7 +22,7 @@ show_always = true
 
 [hostname]
 ssh_only = false
-format = 'on [$hostname](bold purple) '
+format = 'on [$hostname](bold blue) '
 trim_at = "."
 disabled = false
 
@@ -32,9 +41,16 @@ style = "bold italic blue"
 
 [cmd_duration]
 min_time = 4
-show_milliseconds = false
+show_milliseconds = true
 disabled = false
 style = "bold italic red"
+
+[time]
+disabled = false
+format = '[🕒 $time]($style) '
+time_format = "%A, %I:%M %P, %B %Y"  # 12-hour format
+utc_time_offset = "local"
+style = "bold bright-white"
 
 [aws]
 symbol = "  "
@@ -88,6 +104,11 @@ bisect = "bisect"
 am = "am"	
 am_or_rebase = "am/rebase"
 
+[git_metrics]
+disabled = false
+added_style = "bold green"
+deleted_style = "bold red"
+
 [golang]
 symbol = " "
 
@@ -122,6 +143,7 @@ symbol = " "
 symbol = " "
 
 [python]
+disabled = true
 symbol = "🐍 "
 #pyenv_version_name = true
 format = 'via [${symbol}python (${version} )(\($virtualenv\) )]($style)'

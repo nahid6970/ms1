@@ -856,7 +856,7 @@ function pkill {
     }
 }
 
-
-
-oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
+$ENV:STARSHIP_CONFIG = "C:\ms1\linux\config\.config\starship\starship.toml"
+Invoke-Expression (& 'C:\Users\nahid\scoop\shims\starship.exe' init powershell --print-full-init | Out-String)
+# oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
