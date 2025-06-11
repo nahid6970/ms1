@@ -27,6 +27,20 @@ Persistent
     Run("C:\msBackups\Display\DisplaySwitch.exe /internal",,"Hide")
 }
 
+^!z:: {
+    send("^!{Numpad2}")
+    Sleep(100)
+    SendText(":")
+    Sleep(100)
+    send("^!{Numpad1}")
+    Sleep(100)
+    SendText(",")
+    Sleep(100)
+    Send("{Enter}")
+}
+
+
+
 
 ;! monitor
 RAlt & Numpad1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
