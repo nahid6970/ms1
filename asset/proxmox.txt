@@ -1,0 +1,11 @@
+Proxmox VE Post Install
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/tools/pve/post-pve-install.sh)"
+disable high availability & everything yes
+- dont update just reboot
+- apt update && apt full-upgrade
+
+
+
+lvremove /dev/pve/date
+lvresize -l +100%FREE /dev/pve/root
+resize2fs /dev/mapper/pve-root
