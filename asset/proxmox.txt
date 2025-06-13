@@ -9,3 +9,6 @@ disable high availability & everything yes
 lvremove /dev/pve/date
 lvresize -l +100%FREE /dev/pve/root
 resize2fs /dev/mapper/pve-root
+
+Install Arch
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/vm/archlinux-vm.sh)"
