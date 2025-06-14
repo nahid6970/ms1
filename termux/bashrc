@@ -197,6 +197,18 @@ sshd
 # --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" \
 # --ez com.termux.RUN_COMMAND_BACKGROUND true &&
 
+#* Wake on LAN background
+PYTHON_SCRIPT_FULL_PATH="/data/data/com.termux/files/home/ms1/tailscale/wake_on_lan.py"
+TERMUX_INTERNAL_COMMAND_SEQUENCE="termux-wake-lock && python \"${PYTHON_SCRIPT_FULL_PATH}\" &"
+
+am startservice --user 0 -n com.termux/com.termux.app.RunCommandService \
+-a com.termux.RUN_COMMAND \
+--es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/sh" \
+--esa com.termux.RUN_COMMAND_ARGUMENTS "-c,${TERMUX_INTERNAL_COMMAND_SEQUENCE}" \
+--es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" \
+--ez com.termux.RUN_COMMAND_BACKGROUND true
+
+
 # Add this to the end of your ~/.bashrc file
 eval "$(oh-my-posh init bash)"
 eval "$(zoxide init bash)"
