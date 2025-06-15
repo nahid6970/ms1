@@ -13,6 +13,13 @@
 # [╰─cmd─────❯](bold green) 
 # """
 
+# format = """
+# [╭─time────❯](bold bright-blue) $time
+# [├─user────❯](bold green) $username
+# [├─system──❯](bold yellow) $hostname
+# [├─project─❯](bold red) $directory$rust$git_branch$git_state$git_status$package$golang$terraform$docker_context$python$nodejs
+# [╰─cmd─────❯](bold green) """
+
 [username]
 style_user = "green bold"
 style_root = "red bold"
@@ -27,8 +34,8 @@ trim_at = "."
 disabled = false
 
 # Replace the "❯" symbol in the prompt with "➜"
-[character]                            # The name of the module we are configuring is "character"
-success_symbol = "[➜](bold green)"     # The "success_symbol" segment is being set to "➜" with the color "bold green"
+[character]
+success_symbol = "[➜](bold green)"
 error_symbol = "[✗](bold red)"
 
 #  
@@ -52,35 +59,35 @@ time_format = "%A, %I:%M %P, %B %Y"  # 12-hour format
 utc_time_offset = "local"
 style = "bold bright-white"
 
-[aws]
-symbol = "  "
+# [aws]
+# symbol = "  "
 
-[conda]
-symbol = " "
+# [conda]
+# symbol = " "
 
-[dart]
-symbol = " "
+# [dart]
+# symbol = " "
 
 #[directory]
 #read_only = " "
 
-[docker_context]
-symbol = " "
-format = "via [$symbol$context]($style) "
-style = "blue bold"
-only_with_files = true
-detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
-detect_folders = []
-disabled = false
+# [docker_context]
+# symbol = " "
+# format = "via [$symbol$context]($style) "
+# style = "blue bold"
+# only_with_files = true
+# detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+# detect_folders = []
+# disabled = false
 
-[elixir]
-symbol = " "
+# [elixir]
+# symbol = " "
 
-[elm]
-symbol = " "
+# [elm]
+# symbol = " "
 
-[git_branch]
-symbol = " "
+# [git_branch]
+# symbol = " "
 
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style) )'
@@ -109,38 +116,38 @@ disabled = false
 added_style = "bold green"
 deleted_style = "bold red"
 
-[golang]
-symbol = " "
+# [golang]
+# symbol = " "
 
-[hg_branch]
-symbol = " "
+# [hg_branch]
+# symbol = " "
 
-[java]
-symbol = " "
+# [java]
+# symbol = " "
 
-[julia]
-symbol = " "
+# [julia]
+# symbol = " "
 
-[haskell]
-symbol = "λ "
+# [haskell]
+# symbol = "λ "
 
-[memory_usage]
-symbol = " "
+# [memory_usage]
+# symbol = " "
 
-[nim]
-symbol = " "
+# [nim]
+# symbol = " "
 
-[nix_shell]
-symbol = " "
+# [nix_shell]
+# symbol = " "
 
-[package]
-symbol = " "
+# [package]
+# symbol = " "
 
-[perl]
-symbol = " "
+# [perl]
+# symbol = " "
 
-[php]
-symbol = " "
+# [php]
+# symbol = " "
 
 [python]
 disabled = true
@@ -153,22 +160,22 @@ python_binary = ["./venv/bin/python", "python", "python3", "python2"]
 detect_extensions = ["py"]
 version_format = "v${raw}"
 
-[ruby]
-symbol = " "
+# [ruby]
+# symbol = " "
 
-[rust]
-symbol = " "
+# [rust]
+# symbol = " "
 
-[scala]
-symbol = " "
+# [scala]
+# symbol = " "
 
-[shlvl]
-symbol = " "
+# [shlvl]
+# symbol = " "
 
-[swift]
-symbol = "ﯣ "
+# [swift]
+# symbol = "ﯣ "
 
-[nodejs]
-format = "via [ Node.js $version](bold green) "
-detect_files = ["package.json", ".node-version"]
-detect_folders = ["node_modules"]
+# [nodejs]
+# format = "via [ Node.js $version](bold green) "
+# detect_files = ["package.json", ".node-version"]
+# detect_folders = ["node_modules"]
