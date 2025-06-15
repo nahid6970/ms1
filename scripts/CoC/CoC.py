@@ -105,7 +105,7 @@ def find_image(image_path, confidence=0.7, region=None):
         elapsed_time = time.time() - last_found_time if last_found_time else 0
         print(f"{formatted_time} --> {int(elapsed_time)} seconds since not found ---> {image_name} {e}")
     # Check if 120 seconds have passed since the last found time while searching
-    if is_searching and time.time() - last_found_time > 120: # for ads do 120 second
+    if is_searching and time.time() - last_found_time > 200: # for ads do 120 second
         ntfy_signal_cli()  # Run the script instead of showing a message
         last_found_time = time.time()  # Reset the last found time to avoid repeated executions
     return None
@@ -609,19 +609,25 @@ def Event_Function():
                 # (default_ads, (177, 83, 263, 158), lambda: press_global_screen_with_delays((215, 118, 2))),
                 # (select_img, (1148, 186, 1445, 503), lambda: press_keys_with_delays(window, '1', 1)),
                 (r"C:\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
+                (r"C:\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
+                (r"C:\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
                 # (r"C:\msBackups\CoC\MainBase\attack.png", (1452, 639, 1759, 804), lambda: press_keys_with_delays(window, '1',1,   'f12',1)),
             ]
 
             try:
                 while not Event_Function.state["stop_flag"]:
                     if find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
-                        press_keys_with_delays(window, '4',1) #! select jump spell
+                        press_keys_with_delays(window, '6',1) #! select jump spell
                         press_global_screen_with_delays((1230,426,1),   (1227,626,1)) #! cast jump spell
 
-                        press_keys_with_delays(window, '1',1,   'f12',1) #! cast troops
+                        press_keys_with_delays(window, '1',1,   'f12',2) #! cast valkery
 
-                        press_keys_with_delays(window, '3',1) #! select rage spell
-                        press_global_screen_with_delays((1230,426,1),   (1227,626,1),   (1086,508,1)) #! cast rage spell
+                        press_keys_with_delays(window, '5',1) #! select rage spell
+                        press_global_screen_with_delays((1230,426,1),   (1227,626,1),   (1086,508,3)) #! cast rage spell
+
+                        press_keys_with_delays(window, '3',1,'p',1,     '2',1, 'p',1,   '4',1, 'p',1,) #! cast heroes
+
+                        press_keys_with_delays(window, '0',1,   'f12',1) #! cast goblin
                         
                     elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
 
