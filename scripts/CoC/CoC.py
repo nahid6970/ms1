@@ -609,12 +609,20 @@ def Event_Function():
                 # (default_ads, (177, 83, 263, 158), lambda: press_global_screen_with_delays((215, 118, 2))),
                 # (select_img, (1148, 186, 1445, 503), lambda: press_keys_with_delays(window, '1', 1)),
                 (r"C:\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
-                (r"C:\msBackups\CoC\MainBase\attack.png", (1452, 639, 1759, 804), lambda: press_keys_with_delays(window, '1',1,   'f12',1)),
+                # (r"C:\msBackups\CoC\MainBase\attack.png", (1452, 639, 1759, 804), lambda: press_keys_with_delays(window, '1',1,   'f12',1)),
             ]
 
             try:
                 while not Event_Function.state["stop_flag"]:
-                    if find_image(Home, confidence=0.8): press_key(window, 'f')
+                    if find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                        press_keys_with_delays(window, '4',1) #! select jump spell
+                        press_global_screen_with_delays((1230,426,1),   (1227,626,1)) #! cast jump spell
+
+                        press_keys_with_delays(window, '1',1,   'f12',1) #! cast troops
+
+                        press_keys_with_delays(window, '3',1) #! select rage spell
+                        press_global_screen_with_delays((1230,426,1),   (1227,626,1),   (1086,508,1)) #! cast rage spell
+                        
                     elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
 
                     # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
