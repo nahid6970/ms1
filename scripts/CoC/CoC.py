@@ -335,8 +335,8 @@ event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mappin
 TROOP_HERO_DEFS = [
     {"label": "Goblin", "var_name": "goblin_key", "default": "0", "type": "troop"},
     {"label": "Valk", "var_name": "valkyrie_key", "default": "1", "type": "troop"},
-    {"label": "Rage", "var_name": "rage_spell_key", "default": "4", "type": "spell"},
     {"label": "Jump", "var_name": "jump_spell_key", "default": "5", "type": "spell"},
+    {"label": "Rage", "var_name": "rage_spell_key", "default": "4", "type": "spell"},
     {"label": "King", "var_name": "king_key", "default": "6", "type": "hero"},
     {"label": "Queen", "var_name": "queen_key", "default": "7", "type": "hero"},
     {"label": "Warden", "var_name": "warden_key", "default": "3", "type": "hero"},
@@ -491,7 +491,7 @@ def create_key_dropdown(label_text, variable, label_fg_color="black", label_bg_c
     frame = tk.Frame(ROOT)
     frame.pack(side="left", padx=3)
     # Use the fg (foreground) and bg (background) options to set label colors
-    tk.Label(frame, text=label_text, width=0, font=("JetBrainsMono NFP", 10), fg=label_fg_color, bg=label_bg_color).pack()
+    tk.Label(frame, text=label_text, width=8, font=("JetBrainsMono NFP", 10), fg=label_fg_color, bg=label_bg_color).pack()
 
     def on_change(event):
         save_troop_keys()
@@ -541,9 +541,6 @@ Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 #* ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
 
 window_title='LDPlayer'
-
-
-
 
 # ending
 
