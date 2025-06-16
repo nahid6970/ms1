@@ -23,13 +23,13 @@ ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
 ROOT.attributes('-topmost', True) 
 ROOT.overrideredirect(True)
-ROOT.configure(bg="#282c34")
+# ROOT.configure(bg="#282c34")
 
-def create_custom_border(parent):
-    BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="#66fd1f")
-    BORDER_FRAME.place(relwidth=1, relheight=1)
-    return BORDER_FRAME
-BORDER_FRAME = create_custom_border(ROOT)
+# def create_custom_border(parent):
+#     BORDER_FRAME = tk.Frame(parent, bg="#ffffff", bd=0, highlightthickness=1, highlightbackground="#6d4dff")
+#     BORDER_FRAME.place(relwidth=1, relheight=1)
+#     return BORDER_FRAME
+# BORDER_FRAME = create_custom_border(ROOT)
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
@@ -136,35 +136,6 @@ def ntfy_signal_cli():
         # Reset the flag when the function finishes
         notification_sent = False
 
-def ntfy_termux_rclone_touch():
-    command = "rclone touch g00:ntfy"
-    try:
-        while True:
-            os.system(f"powershell -Command \"{command}\"")
-            print("Command executed: rclone touch g00:ntfy")
-            time.sleep(30)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
-
-
-WhatsApp_Entry=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
-WhatsApp_Cally=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
-WhatsApp_Cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
-def ntfy_WhatsApp():
-    pyautogui.click(x=1778, y=900)
-    time.sleep(2)
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while True:  # Loop will continue indefinitely unless interrupted by an external condition
-            focus_window(window_title)
-            if find_image(WhatsApp_Entry): press_global_screen_with_delays((294,299,5),(594,908,2))
-            if find_image(WhatsApp_Cally): press_global_screen_with_delays((238,271,60))
-            # elif find_image(WhatsApp_Cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
-            time.sleep(0.1)
-    except KeyboardInterrupt: print("Script stopped by user.")
 
 
 Signal_Entry =r"C:\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
@@ -311,28 +282,7 @@ def close_window(event=None):
     script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
-# Create a style object
-style = ttk.Style()
-style.theme_use("alt")
-# themelist = clam, alt, default, classic, vista, xpnative, winnative
 
-# Configure the Combobox style
-style.configure(
-    "Custom.TCombobox",
-    padding=5,
-    selectbackground="#49ff43",  # Background when selected (fixed)
-    selectforeground="#000000",  # Text color when selected
-    # borderwidth=2,
-    # relief="solid",
-)
-
-# Hover & Selection effects
-style.map(
-    "Custom.TCombobox",
-    background=[("readonly", "#ff6d6d"), ("active", "#ff2323")],
-    fieldbackground=[("readonly", "#49ff43")],
-    foreground=[("readonly", "#000000")], # Text color
-)
 
 
 #* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
@@ -342,7 +292,18 @@ style.map(
 #* ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 #* ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
 
+import tkinter as tk
+from tkinter import ttk
+import json
+import os
+import threading
+import time
+import subprocess
+import sys
+
+
 EVENT_SAVE_FILE = r"C:\Users\nahid\clash_of_clans.txt"
+EVENT_KEYS_FILE = r"C:\Users\nahid\clash_of_clans_keys.json"
 
 # Original event key mapping
 event_key_mapping = {
@@ -369,19 +330,37 @@ troop_key_mapping = {
 
 event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mapping.items()}
 
-EVENT_KEYS_FILE = r"C:\Users\nahid\clash_of_clans_keys.json"
+# --- Centralized Troop/Hero Definitions ---
+# Added 'type' field to categorize for coloring
+TROOP_HERO_DEFS = [
+    {"label": "Goblin", "var_name": "goblin_key", "default": "0", "type": "troop"},
+    {"label": "Valk", "var_name": "valkyrie_key", "default": "1", "type": "troop"},
+    {"label": "Rage", "var_name": "rage_spell_key", "default": "4", "type": "spell"},
+    {"label": "Jump", "var_name": "jump_spell_key", "default": "5", "type": "spell"},
+    {"label": "King", "var_name": "king_key", "default": "6", "type": "hero"},
+    {"label": "Queen", "var_name": "queen_key", "default": "7", "type": "hero"},
+    {"label": "Warden", "var_name": "warden_key", "default": "3", "type": "hero"},
+    {"label": "Minion", "var_name": "MinionPrince_key", "default": "2", "type": "hero"},
+]
+
+# Define colors for each type - now includes 'bg' for background
+COLOR_MAP = {
+    "hero": {"fg": "#FFD700", "bg": "#2F4F4F"},  # Gold text on DarkSlateGray background
+    "troop": {"fg": "#8B4513", "bg": "#DDA0DD"}, # SaddleBrown text on Plum background
+    "spell": {"fg": "#4169E1", "bg": "#D3D3D3"}, # RoyalBlue text on LightGray background
+    "default": {"fg": "#000000", "bg": "#FFFFFF"} # Black text on White background
+}
+
+# Dynamically create StringVar instances for troops/heroes
+troop_vars = {}
+for troop_def in TROOP_HERO_DEFS:
+    troop_vars[troop_def["var_name"]] = tk.StringVar(value=troop_def["default"])
+    globals()[troop_def["var_name"]] = troop_vars[troop_def["var_name"]]
+
 
 def save_troop_keys():
-    data = {
-        "jump": jump_spell_key.get(),
-        "valk": valkyrie_key.get(),
-        "rage": rage_spell_key.get(),
-        "king": king_key.get(),
-        "queen": queen_key.get(),
-        "warden": warden_key.get(),
-        "minion": MinionPrince_key.get(),
-        "goblin": goblin_key.get(),
-    }
+    data = {troop_def["var_name"].replace("_key", ""): troop_vars[troop_def["var_name"]].get()
+            for troop_def in TROOP_HERO_DEFS}
     try:
         with open(EVENT_KEYS_FILE, "w") as f:
             json.dump(data, f)
@@ -393,17 +372,11 @@ def load_troop_keys():
         try:
             with open(EVENT_KEYS_FILE, "r") as f:
                 data = json.load(f)
-                goblin_key.set(data.get("goblin", "0"))
-                valkyrie_key.set(data.get("valk", "1"))
-                rage_spell_key.set(data.get("rage", "4"))
-                jump_spell_key.set(data.get("jump", "5"))
-                king_key.set(data.get("king", "6"))
-                queen_key.set(data.get("queen", "7"))
-                warden_key.set(data.get("warden", "3"))
-                MinionPrince_key.set(data.get("minion", "2"))
+                for troop_def in TROOP_HERO_DEFS:
+                    key_name = troop_def["var_name"].replace("_key", "")
+                    troop_vars[troop_def["var_name"]].set(data.get(key_name, troop_def["default"]))
         except Exception as e:
             print(f"Failed to load troop keys: {e}")
-
 
 def event_save_selected_key(key):
     try:
@@ -458,16 +431,26 @@ def Event_Function():
             try:
                 while not Event_Function.state["stop_flag"]:
                     if find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
-                        press_keys_with_delays(window, jump_spell_key.get(), 1)
+                        # Access troop keys dynamically
+                        press_keys_with_delays(window, troop_vars["jump_spell_key"].get(), 1)
                         press_global_screen_with_delays((1230,426,1), (1227,626,1))
 
-                        press_keys_with_delays(window, warden_key.get(), 1, 'p', 0, MinionPrince_key.get(), 1, 'p', 0, queen_key.get(), 1, 'p', 0, king_key.get(), 1, 'p', 0)
-                        press_keys_with_delays(window, valkyrie_key.get(), 0, 'f12', 3)
+                        press_keys_with_delays(window,
+                                               troop_vars["warden_key"].get(), 1, 'p', 0,
+                                               troop_vars["MinionPrince_key"].get(), 1, 'p', 0,
+                                               troop_vars["queen_key"].get(), 1, 'p', 0,
+                                               troop_vars["king_key"].get(), 1, 'p', 0)
 
-                        press_keys_with_delays(window, rage_spell_key.get(), 1)
+                        press_keys_with_delays(window, troop_vars["valkyrie_key"].get(), 0, 'f12', 3)
+
+                        press_keys_with_delays(window, troop_vars["rage_spell_key"].get(), 1)
                         press_global_screen_with_delays((1230,426,0), (1227,626,3), (1086,508,0))
 
-                        press_keys_with_delays(window, goblin_key.get(), 1, 'f12', 1)
+                        press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
+
+                        if "archer_key" in troop_vars:
+                            press_keys_with_delays(window, troop_vars["archer_key"].get(), 1)
+
 
                     for image_path, region, action in image_action_map:
                         if find_image(image_path, confidence=0.8, region=region):
@@ -502,21 +485,13 @@ event_key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
 event_key_dropdown.set(event_key_mapping[event_last_selected_key])
 event_key_dropdown.bind("<<ComboboxSelected>>", event_update_dropdown_display)
 
-# Troop/Hero dropdown variables
-goblin_key = tk.StringVar(value="0")
-valkyrie_key = tk.StringVar(value="1")
-rage_spell_key = tk.StringVar(value="4")
-jump_spell_key = tk.StringVar(value="5")
-king_key = tk.StringVar(value="6")
-queen_key = tk.StringVar(value="7")
-warden_key = tk.StringVar(value="3")
-MinionPrince_key = tk.StringVar(value="2")
-
-# Create labeled dropdowns
-def create_key_dropdown(label_text, variable, key_name):
+# Create labeled dropdowns using the centralized TROOP_HERO_DEFS
+# Modified create_key_dropdown to accept 'label_fg_color' and 'label_bg_color' arguments
+def create_key_dropdown(label_text, variable, label_fg_color="black", label_bg_color="white"):
     frame = tk.Frame(ROOT)
     frame.pack(side="left", padx=3)
-    tk.Label(frame, text=label_text, font=("JetBrainsMono NFP", 8)).pack()
+    # Use the fg (foreground) and bg (background) options to set label colors
+    tk.Label(frame, text=label_text, width=0, font=("JetBrainsMono NFP", 10), fg=label_fg_color, bg=label_bg_color).pack()
 
     def on_change(event):
         save_troop_keys()
@@ -534,22 +509,16 @@ def create_key_dropdown(label_text, variable, key_name):
     cb.bind("<<ComboboxSelected>>", on_change)
     cb.pack()
 
-create_key_dropdown("Goblin", goblin_key, "goblin")
-create_key_dropdown("Valk", valkyrie_key, "valk")
-create_key_dropdown("Rage", rage_spell_key, "rage")
-create_key_dropdown("Jump", jump_spell_key, "jump")
-create_key_dropdown("King", king_key, "king")
-create_key_dropdown("Queen", queen_key, "queen")
-create_key_dropdown("Warden", warden_key, "warden")
-create_key_dropdown("Prince", MinionPrince_key, "minion")
+# Iterate through TROOP_HERO_DEFS and pass the appropriate colors
+for troop_def in TROOP_HERO_DEFS:
+    colors = COLOR_MAP.get(troop_def.get("type", "default"), COLOR_MAP["default"])
+    create_key_dropdown(troop_def["label"], troop_vars[troop_def["var_name"]],
+                        label_fg_color=colors["fg"], label_bg_color=colors["bg"])
 
 EVENT_BT = tk.Button(ROOT, text="CoC", bg="#ce5129", fg="#000000", width=5, height=0, command=Event_Function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 EVENT_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 
 load_troop_keys()
-
-
-
 
 
 # Restart function that displays the cumulative summary before restarting
