@@ -310,114 +310,6 @@ def close_window(event=None):
     script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
-#!  █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
-#! ██╔══██╗██║  ██║██║ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-#! ███████║███████║█████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
-#! ██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
-#! ██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
-#! ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-# Global flag for stopping the threads
-image_found = False
-action_timer = None
-
-# File path to save the selected key
-SAVE_FILE = r"C:\Users\nahid\sf3_attack.txt"
-
-# Mapping keys to descriptions
-key_mapping = {
-    "F13": "KOS 2 Tap",
-    "F14": "KOS Fame",
-    "F15": "Hound",
-    "F21": "Butcher",
-    "F16": "Hound vortex",
-    "F17": "Laggy",
-    "F18": "Stranger",
-    "F19": "Possessed",
-    "F20": "Event"
-}
-
-# Generate dropdown values like "F13: KOS"
-dropdown_values = {f"{key}: {desc}": key for key, desc in key_mapping.items()}
-
-def save_selected_key(key):
-    """Save the selected key to a file."""
-    try:
-        with open(SAVE_FILE, "w") as file:
-            file.write(key)
-    except Exception as e:
-        print(f"Error saving key: {e}")
-
-def load_selected_key():
-    """Load the last selected key from the file."""
-    if os.path.exists(SAVE_FILE):
-        try:
-            with open(SAVE_FILE, "r") as file:
-                key = file.read().strip()
-                if key in key_mapping:  # Ensure it's a valid option
-                    return key
-        except Exception as e:
-            print(f"Error loading key: {e}")
-    return "F13"  # Default to F13 if no file found
-
-def update_dropdown_display(event=None):
-    """Update the dropdown display to show only the description."""
-    selected_full = key_var.get()  # "F13: KOS"
-    selected_key = dropdown_values[selected_full]  # Extract "F13"
-    key_var.set(key_mapping[selected_key])  # Set only "KOS" in dropdown
-    save_selected_key(selected_key)  # Save selection
-
-def action_main_handler_5():
-    """Toggles the functionality for Light Attack 2."""
-    state = getattr(action_main_handler_5, "state", {"thread": None, "stop_flag": True})
-
-    if state["thread"] and state["thread"].is_alive():
-        # Stop the thread
-        state["stop_flag"] = True
-        state["thread"].join()
-        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")
-    else:
-        # Start the thread
-        state["stop_flag"] = False
-        
-        def search_and_act():
-            window = focus_window(window_title)
-            if not window:
-                print(f"Window '{window_title}' not found.")
-                return
-            
-            selected_description = key_var.get()
-            selected_key = next(k for k, v in key_mapping.items() if v == selected_description)
-            save_selected_key(selected_key)
-            
-            try:
-                while not state["stop_flag"]:
-                    if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
-                        print("Image found in Light Attack 2, resetting action timer.")
-                        action_timer = time.time()
-                        print(f"Triggering AHK with {selected_key} ({selected_description})...")
-                        key_down(window, selected_key); time.sleep(5); key_up(window, selected_key)
-                        print("AHK action completed.")
-                    else:
-                        time.sleep(0.05)
-            except KeyboardInterrupt:
-                print("Script stopped by user.")
-        
-        # Create and start the thread
-        thread = threading.Thread(target=search_and_act)
-        thread.daemon = True
-        thread.start()
-        # Save the thread in the state dictionary
-        state["thread"] = thread
-        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")
-    
-    action_main_handler_5.state = state
-
-# Load last saved key
-last_selected_key = load_selected_key()
-last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
-# Dropdown variable (stores the displayed value like "KOS")
-key_var = tk.StringVar(value=key_mapping[last_selected_key])
-
 # Create a style object
 style = ttk.Style()
 style.theme_use("alt")
@@ -440,17 +332,7 @@ style.map(
     fieldbackground=[("readonly", "#49ff43")],
     foreground=[("readonly", "#000000")], # Text color
 )
-# Custom Combobox widget (direct styling without ttk.Style)
-key_dropdown = ttk.Combobox( ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("JetBrainsMono NFP", 10, "bold"), width=14, state="readonly", style="Custom.TCombobox", justify="center")
-key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
-# Set the default dropdown display to just the description
-key_dropdown.set(key_mapping[last_selected_key])
-# Update variable when selection changes
-key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
 
-# Button to start/stop Light Attack 2
-ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=0, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 #* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
 #* ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
@@ -507,7 +389,7 @@ def Event_Function():
         # Stop the thread
         state["stop_flag"] = True
         state["thread"].join()
-        EVENT_BT.config(text="Event", bg="#ce5129", fg="#000000")
+        EVENT_BT.config(text="CoC", bg="#ce5129", fg="#000000")
     else:
         # Start the thread
         state["stop_flag"] = False
@@ -647,7 +529,7 @@ event_key_dropdown.set(event_key_mapping[event_last_selected_key])
 event_key_dropdown.bind("<<ComboboxSelected>>", event_update_dropdown_display)
 
 # Button to start/stop Light Attack 2
-EVENT_BT = tk.Button(ROOT, text="Event", bg="#ce5129", fg="#000000", width=5, height=0, command=Event_Function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+EVENT_BT = tk.Button(ROOT, text="CoC", bg="#ce5129", fg="#000000", width=5, height=0, command=Event_Function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 EVENT_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 
