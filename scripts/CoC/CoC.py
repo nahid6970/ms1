@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 
 if "python312" not in sys.executable:  # Check if the script is NOT running with Python 3.12
     os.execvp("python312", ["python312"] + sys.argv)  # Restart with python312
@@ -341,10 +342,7 @@ style.map(
 #* ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 #* ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
 
-import json
-
-
-EVENT_SAVE_FILE = r"C:\Users\nahid\sf3_event.txt"
+EVENT_SAVE_FILE = r"C:\Users\nahid\clash_of_clans.txt"
 
 # Original event key mapping
 event_key_mapping = {
@@ -357,6 +355,8 @@ event_key_mapping = {
 # Troop/hero key options
 troop_key_mapping = {
     "null": "❌",
+    "0": "num0",
+    "1": "num1",
     "2": "num2",
     "3": "num3",
     "4": "num4",
@@ -364,19 +364,20 @@ troop_key_mapping = {
     "6": "num6",
     "7": "num7",
     "8": "num8",
-    "9": "num9",
-    "0": "num0"
+    "9": "num9"
 }
 
 event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mapping.items()}
 
-EVENT_KEYS_FILE = r"C:\Users\nahid\sf3_event_keys.json"
+EVENT_KEYS_FILE = r"C:\Users\nahid\clash_of_clans_keys.json"
 
 def save_troop_keys():
     data = {
         "jump": jump_spell_key.get(),
         "valk": valkyrie_key.get(),
         "rage": rage_spell_key.get(),
+        "king": king_key.get(),
+        "queen": queen_key.get(),
         "warden": warden_key.get(),
         "minion": MinionPrince_key.get(),
         "goblin": goblin_key.get(),
@@ -392,12 +393,14 @@ def load_troop_keys():
         try:
             with open(EVENT_KEYS_FILE, "r") as f:
                 data = json.load(f)
-                jump_spell_key.set(data.get("jump", "5"))
+                goblin_key.set(data.get("goblin", "0"))
                 valkyrie_key.set(data.get("valk", "1"))
                 rage_spell_key.set(data.get("rage", "4"))
+                jump_spell_key.set(data.get("jump", "5"))
+                king_key.set(data.get("king", "6"))
+                queen_key.set(data.get("queen", "7"))
                 warden_key.set(data.get("warden", "3"))
                 MinionPrince_key.set(data.get("minion", "2"))
-                goblin_key.set(data.get("goblin", "0"))
         except Exception as e:
             print(f"Failed to load troop keys: {e}")
 
@@ -458,7 +461,7 @@ def Event_Function():
                         press_keys_with_delays(window, jump_spell_key.get(), 1)
                         press_global_screen_with_delays((1230,426,1), (1227,626,1))
 
-                        press_keys_with_delays(window, warden_key.get(), 1, 'p', 0, MinionPrince_key.get(), 1, 'p', 0)
+                        press_keys_with_delays(window, warden_key.get(), 1, 'p', 0, MinionPrince_key.get(), 1, 'p', 0, queen_key.get(), 1, 'p', 0, king_key.get(), 1, 'p', 0)
                         press_keys_with_delays(window, valkyrie_key.get(), 0, 'f12', 3)
 
                         press_keys_with_delays(window, rage_spell_key.get(), 1)
@@ -504,6 +507,8 @@ goblin_key = tk.StringVar(value="0")
 valkyrie_key = tk.StringVar(value="1")
 rage_spell_key = tk.StringVar(value="4")
 jump_spell_key = tk.StringVar(value="5")
+king_key = tk.StringVar(value="6")
+queen_key = tk.StringVar(value="7")
 warden_key = tk.StringVar(value="3")
 MinionPrince_key = tk.StringVar(value="2")
 
