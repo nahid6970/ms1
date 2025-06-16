@@ -487,7 +487,7 @@ event_key_dropdown.bind("<<ComboboxSelected>>", event_update_dropdown_display)
 
 # Create labeled dropdowns using the centralized TROOP_HERO_DEFS
 # Modified create_key_dropdown to accept 'label_fg_color' and 'label_bg_color' arguments
-def create_key_dropdown(label_text, variable, label_fg_color="black", label_bg_color="white"):
+def create_key_dropdown(label_text, variable, label_fg_color="black", label_bg_color="white", label_width=6, dropdown_height=11): # New parameter
     frame = tk.Frame(ROOT)
     frame.pack(side="left", padx=3)
     # Use the fg (foreground) and bg (background) options to set label colors
@@ -502,6 +502,7 @@ def create_key_dropdown(label_text, variable, label_fg_color="black", label_bg_c
         textvariable=variable,
         font=("JetBrainsMono NFP", 9),
         width=3,
+        height=dropdown_height,
         state="readonly",
         justify="center",
         style="EVENT.TCombobox"
