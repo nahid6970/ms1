@@ -430,13 +430,13 @@ def Event_Function():
             try:
                 while not Event_Function.state["stop_flag"]:
                     if find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
-                        press_keys_with_delays(window, '4',1) #! select jump spell
+                        press_keys_with_delays(window, '5',1) #! select jump spell
                         press_global_screen_with_delays((1230,426,1),   (1227,626,1)) #! cast jump spell
 
-                        press_keys_with_delays(window, '2',1,'p',0) #! cast warden
+                        press_keys_with_delays(window, '3',1,'p',0, '2',1,'p',0) #!  warden & MinionPrince
                         press_keys_with_delays(window, '1',0,   'f12',3) #! cast valkery
 
-                        press_keys_with_delays(window, '3',1) #! select rage spell
+                        press_keys_with_delays(window, '4',1) #! select rage spell
                         press_global_screen_with_delays((1230,426,0),   (1227,626,3),   (1086,508,0)) #! cast rage spell
 
                         # press_keys_with_delays(window, '2',1,'p',1,     '2',1, 'p',1,   '4',1, 'p',1,) #! cast heroes
