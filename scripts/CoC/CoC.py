@@ -340,10 +340,13 @@ style.map(
 #* ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║
 #* ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 #* ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
-# File path to save the selected key
+
+import json
+
+
 EVENT_SAVE_FILE = r"C:\Users\nahid\sf3_event.txt"
 
-# Mapping keys to descriptions
+# Original event key mapping
 event_key_mapping = {
     "num1": "T1",
     "num2": "T2",
@@ -351,11 +354,55 @@ event_key_mapping = {
     # "num4": "T4",
 }
 
-# Generate dropdown values like "F13: KOS"
+# Troop/hero key options
+troop_key_mapping = {
+    "null": "❌",
+    "2": "num2",
+    "3": "num3",
+    "4": "num4",
+    "5": "num5",
+    "6": "num6",
+    "7": "num7",
+    "8": "num8",
+    "9": "num9",
+    "0": "num0"
+}
+
 event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mapping.items()}
 
+EVENT_KEYS_FILE = r"C:\Users\nahid\sf3_event_keys.json"
+
+def save_troop_keys():
+    data = {
+        "jump": jump_spell_key.get(),
+        "valk": valkyrie_key.get(),
+        "rage": rage_spell_key.get(),
+        "warden": warden_key.get(),
+        "minion": MinionPrince_key.get(),
+        "goblin": goblin_key.get(),
+    }
+    try:
+        with open(EVENT_KEYS_FILE, "w") as f:
+            json.dump(data, f)
+    except Exception as e:
+        print(f"Failed to save troop keys: {e}")
+
+def load_troop_keys():
+    if os.path.exists(EVENT_KEYS_FILE):
+        try:
+            with open(EVENT_KEYS_FILE, "r") as f:
+                data = json.load(f)
+                jump_spell_key.set(data.get("jump", "5"))
+                valkyrie_key.set(data.get("valk", "1"))
+                rage_spell_key.set(data.get("rage", "4"))
+                warden_key.set(data.get("warden", "3"))
+                MinionPrince_key.set(data.get("minion", "2"))
+                goblin_key.set(data.get("goblin", "0"))
+        except Exception as e:
+            print(f"Failed to load troop keys: {e}")
+
+
 def event_save_selected_key(key):
-    """Save the selected key to a file."""
     try:
         with open(EVENT_SAVE_FILE, "w") as file:
             file.write(key)
@@ -363,37 +410,32 @@ def event_save_selected_key(key):
         print(f"Error saving key: {e}")
 
 def event_load_selected_key():
-    """Load the last selected key from the file."""
     if os.path.exists(EVENT_SAVE_FILE):
         try:
             with open(EVENT_SAVE_FILE, "r") as file:
                 key = file.read().strip()
-                if key in event_key_mapping:  # Ensure it's a valid option
+                if key in event_key_mapping:
                     return key
         except Exception as e:
             print(f"Error loading key: {e}")
     return "num1"
 
 def event_update_dropdown_display(event=None):
-    """Update the dropdown display to show only the description."""
-    selected_full = key_var_eve.get()  # "F13: KOS"
-    selected_key = event_dropdown_values[selected_full]  # Extract "F13"
-    key_var_eve.set(event_key_mapping[selected_key])  # Set only "KOS" in dropdown
-    event_save_selected_key(selected_key)  # Save selection
+    selected_full = key_var_eve.get()
+    selected_key = event_dropdown_values[selected_full]
+    key_var_eve.set(event_key_mapping[selected_key])
+    event_save_selected_key(selected_key)
 
 def Event_Function():
-    """Toggles the functionality for Light Attack 2."""
     state = getattr(Event_Function, "state", {"thread": None, "stop_flag": True})
 
     if state["thread"] and state["thread"].is_alive():
-        # Stop the thread
         state["stop_flag"] = True
         state["thread"].join()
         EVENT_BT.config(text="CoC", bg="#ce5129", fg="#000000")
     else:
-        # Start the thread
         state["stop_flag"] = False
-        
+
         def search_and_act():
             window = focus_window(window_title)
             if not window:
@@ -404,133 +446,103 @@ def Event_Function():
             selected_key = next(k for k, v in event_key_mapping.items() if v == selected_description)
             event_save_selected_key(selected_key)
 
-            # Preload static images
-            select_img = r"C:\msBackups\shadowfight3\event\SELECT.png"
-            # googleplay_close = r"C:\msBackups\shadowfight3\ads\googleplay_close.png"
-
-
-            # Preload dynamic folder images
-            cont_images = glob.glob(r"C:\msBackups\shadowfight3\cont_dynamic\*.png")
-            notify_images = glob.glob(r"C:\msBackups\shadowfight3\notify\*.png")
-            ads_images = glob.glob(r"C:\msBackups\shadowfight3\ads\ads_auto_click\*.png")
-
-            # Single-image + action list
             image_action_map = [
-                # (later, None, lambda: press_global_screen_with_delays((1113, 728, 1))),
-                # # (googleplay_close, None, lambda: press_global_screen_with_delays((597, 66, 1))),
-                # # (Open_Chest, None, lambda: press_keys_with_delays(window, 'c', 4, 'c', 3, 'g', 1)),
-                # (default_ads, (177, 83, 263, 158), lambda: press_global_screen_with_delays((215, 118, 2))),
-                # (select_img, (1148, 186, 1445, 503), lambda: press_keys_with_delays(window, '1', 1)),
                 (r"C:\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
                 (r"C:\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
                 (r"C:\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
-                # (r"C:\msBackups\CoC\MainBase\attack.png", (1452, 639, 1759, 804), lambda: press_keys_with_delays(window, '1',1,   'f12',1)),
             ]
 
             try:
                 while not Event_Function.state["stop_flag"]:
                     if find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
-                        press_keys_with_delays(window, '5',1) #! select jump spell
-                        press_global_screen_with_delays((1230,426,1),   (1227,626,1)) #! cast jump spell
+                        press_keys_with_delays(window, jump_spell_key.get(), 1)
+                        press_global_screen_with_delays((1230,426,1), (1227,626,1))
 
-                        press_keys_with_delays(window, '3',1,'p',0, '2',1,'p',0) #!  warden & MinionPrince
-                        press_keys_with_delays(window, '1',0,   'f12',3) #! cast valkery
+                        press_keys_with_delays(window, warden_key.get(), 1, 'p', 0, MinionPrince_key.get(), 1, 'p', 0)
+                        press_keys_with_delays(window, valkyrie_key.get(), 0, 'f12', 3)
 
-                        press_keys_with_delays(window, '4',1) #! select rage spell
-                        press_global_screen_with_delays((1230,426,0),   (1227,626,3),   (1086,508,0)) #! cast rage spell
+                        press_keys_with_delays(window, rage_spell_key.get(), 1)
+                        press_global_screen_with_delays((1230,426,0), (1227,626,3), (1086,508,0))
 
-                        # press_keys_with_delays(window, '2',1,'p',1,     '2',1, 'p',1,   '4',1, 'p',1,) #! cast heroes
+                        press_keys_with_delays(window, goblin_key.get(), 1, 'f12', 1)
 
-                        press_keys_with_delays(window, '0',1,   'f12',1) #! cast goblin
-                        
-                    # elif find_image(Resume, confidence=0.8): press_key(window, 'esc')
-
-                    # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
-
-                    # # Handle cont_dynamic folder images
-                    # for contimg in cont_images:
-                    #     if (location := find_image(contimg, confidence=0.8, region=contF_Region)):
-                    #         press_keys_with_delays(window, 'c', 0)
-                    #         break
-
-                    # # Handle notify folder images
-                    # for Folder_Ntfy in notify_images:
-                    #     if (location := find_image(Folder_Ntfy, confidence=0.8, region=(170, 86, 1749, 970))):
-                    #         ntfy_signal_cli()
-                    #         break
-
-                    # # Handle ads auto-click folder images
-                    # for adimg in ads_images:
-                    #     if (location := find_image(adimg, confidence=0.8, region=(166, 83, 1758, 978))):
-                    #         x, y, w, h = location
-                    #         center_x = x + w // 2
-                    #         center_y = y + h // 2
-                    #         pyautogui.click(center_x, center_y)
-                    #         break
-
-                    # General static image-action handling
                     for image_path, region, action in image_action_map:
                         if find_image(image_path, confidence=0.8, region=region):
                             action()
                             break
-
-                    # # Special logic for Tournament_step1
-                    # if find_image(Tournament_step1, confidence=0.8):
-                    #     if selected_key == "num3":
-                    #         press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
-                    #     else:
-                    #         press_keys_with_delays(window, selected_key, 1, 'c', 1, "y", 1, "c", 1)
 
                     time.sleep(0.05)
 
             except KeyboardInterrupt:
                 print("Script stopped by user.")
 
-        
-        # Create and start the thread
         thread = threading.Thread(target=search_and_act)
         thread.daemon = True
         thread.start()
-        # Save the thread in the state dictionary
         state["thread"] = thread
         EVENT_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
-    
+
     Event_Function.state = state
 
-# Load last saved key
+# --- GUI SETUP ---
+style = ttk.Style()
+
+# Last selected event key
 event_last_selected_key = event_load_selected_key()
-event_last_selected_value = f"{event_last_selected_key}: {event_key_mapping[event_last_selected_key]}"
-# Dropdown variable (stores the displayed value like "KOS")
 key_var_eve = tk.StringVar(value=event_key_mapping[event_last_selected_key])
 
-# Configure the Combobox style
-style.configure(
-    "EVENT.TCombobox",
-    padding=5,
-    selectbackground="#fa9f49",  # Background when selected (fixed)
-    selectforeground="#000000",  # Text color when selected
-    # borderwidth=2,
-    # relief="solid",
-)
+style.configure("EVENT.TCombobox", padding=5, selectbackground="#fa9f49", selectforeground="#000000")
+style.map("EVENT.TCombobox", background=[("readonly", "#ff6d6d"), ("active", "#ff2323")], fieldbackground=[("readonly", "#fa9f49")], foreground=[("readonly", "#000000")])
 
-# Hover & Selection effects
-style.map(
-    "EVENT.TCombobox",
-    background=[("readonly", "#ff6d6d"), ("active", "#ff2323")],
-    fieldbackground=[("readonly", "#fa9f49")],
-    foreground=[("readonly", "#000000")], # Text color
-)
-# event Combobox widget (direct styling without ttk.Style)
-event_key_dropdown = ttk.Combobox( ROOT, values=list(event_dropdown_values.keys()), textvariable=key_var_eve, font=("JetBrainsMono NFP", 10, "bold"), width=5, state="readonly", style="EVENT.TCombobox", justify="center")
+event_key_dropdown = ttk.Combobox(ROOT, values=list(event_dropdown_values.keys()), textvariable=key_var_eve, font=("JetBrainsMono NFP", 10, "bold"), width=5, state="readonly", style="EVENT.TCombobox", justify="center")
 event_key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
-# Set the default dropdown display to just the description
 event_key_dropdown.set(event_key_mapping[event_last_selected_key])
-# Update variable when selection changes
 event_key_dropdown.bind("<<ComboboxSelected>>", event_update_dropdown_display)
 
-# Button to start/stop Light Attack 2
+# Troop/Hero dropdown variables
+goblin_key = tk.StringVar(value="0")
+valkyrie_key = tk.StringVar(value="1")
+rage_spell_key = tk.StringVar(value="4")
+jump_spell_key = tk.StringVar(value="5")
+warden_key = tk.StringVar(value="3")
+MinionPrince_key = tk.StringVar(value="2")
+
+# Create labeled dropdowns
+def create_key_dropdown(label_text, variable, key_name):
+    frame = tk.Frame(ROOT)
+    frame.pack(side="left", padx=3)
+    tk.Label(frame, text=label_text, font=("JetBrainsMono NFP", 8)).pack()
+
+    def on_change(event):
+        save_troop_keys()
+
+    cb = ttk.Combobox(
+        frame,
+        values=list(troop_key_mapping.keys()),
+        textvariable=variable,
+        font=("JetBrainsMono NFP", 9),
+        width=3,
+        state="readonly",
+        justify="center",
+        style="EVENT.TCombobox"
+    )
+    cb.bind("<<ComboboxSelected>>", on_change)
+    cb.pack()
+
+create_key_dropdown("Goblin", goblin_key, "goblin")
+create_key_dropdown("Valk", valkyrie_key, "valk")
+create_key_dropdown("Rage", rage_spell_key, "rage")
+create_key_dropdown("Jump", jump_spell_key, "jump")
+create_key_dropdown("King", king_key, "king")
+create_key_dropdown("Queen", queen_key, "queen")
+create_key_dropdown("Warden", warden_key, "warden")
+create_key_dropdown("Prince", MinionPrince_key, "minion")
+
 EVENT_BT = tk.Button(ROOT, text="CoC", bg="#ce5129", fg="#000000", width=5, height=0, command=Event_Function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-EVENT_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+EVENT_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
+
+load_troop_keys()
+
 
 
 
