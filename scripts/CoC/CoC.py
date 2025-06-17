@@ -435,10 +435,11 @@ def Event_Function():
                     # gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=1, region=(1411, 116, 1443, 151))
                     # elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=1, region=(1418, 198, 1445, 235))
 
-                    # gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=0.95, region=(1381, 89, 1507, 267))
-                    # elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=0.95, region=(1381, 89, 1507, 267))
+                    gold_found = find_image( r"C:\msBackups\CoC\MainBase\full_gold.png", confidence=0.80, region=(1410, 103, 1455, 245))
+                    elixir_found = find_image( r"C:\msBackups\CoC\MainBase\full_elixir.png", confidence=0.80, region=(1410, 103, 1455, 245))
 
-                    full_storage = find_image( r"C:\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1398, 101, 1439, 256))
+                    # full_storage = find_image( r"C:\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1398, 101, 1439, 256))
+                    
                     train = find_image( r"C:\msBackups\CoC\MainBase\Train.png", confidence=.8, region=(169, 684, 279, 790))
 
                     # if train and not full_storage:
@@ -449,7 +450,7 @@ def Event_Function():
                     #     time.sleep(30)
 
                     if train:
-                        if not full_storage:
+                        if not gold_found or not elixir_found:
                             press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
                         else:
                             run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
