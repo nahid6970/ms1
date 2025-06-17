@@ -468,13 +468,14 @@ def Event_Function():
 
 # --- GUI SETUP ---
 style = ttk.Style()
+style.theme_use('default') # Try a different theme (e.g.,'winnative', 'clam', 'alt', 'default', 'classic', 'vista', 'xpnative')
 
 # Last selected event key
 event_last_selected_key = event_load_selected_key()
 key_var_eve = tk.StringVar(value=event_key_mapping[event_last_selected_key])
 
 style.configure("EVENT.TCombobox", padding=5, selectbackground="#fa9f49", selectforeground="#000000")
-style.map("EVENT.TCombobox", background=[("readonly", "#ff6d6d"), ("active", "#ff2323")], fieldbackground=[("readonly", "#fa9f49")], foreground=[("readonly", "#000000")])
+style.map("EVENT.TCombobox", background=[("readonly", "#7fff6b"), ("active", "#ff2323")], fieldbackground=[("readonly", "#fa9f49")], foreground=[("readonly", "#000000")])
 
 # event_key_dropdown = ttk.Combobox(ROOT, values=list(event_dropdown_values.keys()), textvariable=key_var_eve, font=("JetBrainsMono NFP", 10, "bold"), width=5, state="readonly", style="EVENT.TCombobox", justify="center")
 # event_key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
