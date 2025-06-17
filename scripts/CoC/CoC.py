@@ -19,6 +19,12 @@ import time
 import tkinter as tk
 import win32gui
 
+def run_command(pwsh_command):
+    """Run a PowerShell command in a new terminal window."""
+    # Using 'start' (Windows shell command) to open a new window
+    # Using pwsh with -NoExit so the window stays open
+    subprocess.Popen(f'start pwsh -NoExit -Command "{pwsh_command}"', shell=True)
+
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
 ROOT.attributes('-topmost', True) 
@@ -417,40 +423,56 @@ def Event_Function():
             selected_key = next(k for k, v in event_key_mapping.items() if v == selected_description)
             event_save_selected_key(selected_key)
 
-            image_action_map = [
-                (r"C:\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
-                (r"C:\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
-                (r"C:\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
-            ]
+            # image_action_map = [
+            #     # (r"C:\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
+            #     (r"C:\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
+            #     (r"C:\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
+            # ]
 
             try:
                 while not Event_Function.state["stop_flag"]:
-                    if find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
-                        # Access troop keys dynamically
+                    
+                    gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=1, region=(1411, 116, 1443, 151))
+                    elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=1, region=(1418, 198, 1445, 235))
+                    train = find_image( r"C:\msBackups\CoC\MainBase\Train.png", confidence=.8, region=(169, 684, 279, 790))
+
+
+                    if elixir_found and gold_found:
+                        run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
+                        time.sleep(30)
+                    elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
+                    elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
+
+
+                    elif not elixir_found and not gold_found and train:
+                        press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
+
+                    elif find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+
+                        # Step 3: Execute attack sequence
                         press_keys_with_delays(window, troop_vars["jump_spell_key"].get(), 1)
-                        press_global_screen_with_delays((1230,426,1), (1227,626,1))
+                        press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
 
                         press_keys_with_delays(window,
-                                               troop_vars["warden_key"].get(), 1, 'p', 0,
-                                               troop_vars["MinionPrince_key"].get(), 1, 'p', 0,
-                                               troop_vars["queen_key"].get(), 1, 'p', 0,
-                                               troop_vars["king_key"].get(), 1, 'p', 0)
+                            troop_vars["warden_key"].get(), 1, 'p', 0,
+                            troop_vars["MinionPrince_key"].get(), 1, 'p', 0,
+                            troop_vars["queen_key"].get(), 1, 'p', 0,
+                            troop_vars["king_key"].get(), 1, 'p', 0
+                        )
 
                         press_keys_with_delays(window, troop_vars["valkyrie_key"].get(), 0, 'f12', 3)
 
                         press_keys_with_delays(window, troop_vars["rage_spell_key"].get(), 1)
-                        press_global_screen_with_delays((1230,426,0), (1227,626,3), (1086,508,0))
+                        press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
 
                         press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
 
-                        if "archer_key" in troop_vars: # This check is good practice
-                            press_keys_with_delays(window, troop_vars["archer_key"].get(), 1)
 
 
-                    for image_path, region, action in image_action_map:
-                        if find_image(image_path, confidence=0.8, region=region):
-                            action()
-                            break
+                    # for image_path, region, action in image_action_map:
+                    #     if find_image(image_path, confidence=0.8, region=region):
+                    #         action()
+                    #         break
 
                     time.sleep(0.05)
 
