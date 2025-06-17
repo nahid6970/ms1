@@ -441,12 +441,19 @@ def Event_Function():
                     full_storage = find_image( r"C:\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1398, 101, 1439, 256))
                     train = find_image( r"C:\msBackups\CoC\MainBase\Train.png", confidence=.8, region=(169, 684, 279, 790))
 
-                    if train and not full_storage:
-                        press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
+                    # if train and not full_storage:
+                    #     press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
 
-                    elif full_storage:
-                        run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
-                        time.sleep(30)
+                    # elif full_storage:
+                    #     run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
+                    #     time.sleep(30)
+
+                    if train:
+                        if not full_storage:
+                            press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
+                        else:
+                            run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
+                            time.sleep(30)
 
                     elif find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
                         # Step 3: Execute attack sequence
@@ -464,7 +471,7 @@ def Event_Function():
                         press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
 
                     elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
-                    elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
+                    elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
 
 
                     # for image_path, region, action in image_action_map:
