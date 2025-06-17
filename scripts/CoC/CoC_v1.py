@@ -292,6 +292,16 @@ def close_window(event=None):
 #* ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
 #* ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
 
+import tkinter as tk
+from tkinter import ttk
+import json
+import os
+import threading
+import time
+import subprocess
+import sys
+
+
 EVENT_SAVE_FILE = r"C:\Users\nahid\clash_of_clans.txt"
 EVENT_KEYS_FILE = r"C:\Users\nahid\clash_of_clans_keys.json"
 
@@ -323,14 +333,14 @@ event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mappin
 # --- Centralized Troop/Hero Definitions ---
 # Added 'type' field to categorize for coloring
 TROOP_HERO_DEFS = [
-    {"label": "Goblin", "var_name": "goblin_key"      , "default": "0", "type": "troop"},
-    {"label": "Valk"  , "var_name": "valkyrie_key"    , "default": "1", "type": "troop"},
-    {"label": "Jump"  , "var_name": "jump_spell_key"  , "default": "5", "type": "spell"},
-    {"label": "Rage"  , "var_name": "rage_spell_key"  , "default": "4", "type": "spell"},
-    {"label": "King"  , "var_name": "king_key"        , "default": "6", "type": "hero"} ,
-    {"label": "Queen" , "var_name": "queen_key"       , "default": "7", "type": "hero"} ,
-    {"label": "Warden", "var_name": "warden_key"      , "default": "3", "type": "hero"} ,
-    {"label": "Minion", "var_name": "MinionPrince_key", "default": "2", "type": "troop"},
+    {"label": "Goblin", "var_name": "goblin_key", "default": "0", "type": "troop"},
+    {"label": "Valk", "var_name": "valkyrie_key", "default": "1", "type": "troop"},
+    {"label": "Jump", "var_name": "jump_spell_key", "default": "5", "type": "spell"},
+    {"label": "Rage", "var_name": "rage_spell_key", "default": "4", "type": "spell"},
+    {"label": "King", "var_name": "king_key", "default": "6", "type": "hero"},
+    {"label": "Queen", "var_name": "queen_key", "default": "7", "type": "hero"},
+    {"label": "Warden", "var_name": "warden_key", "default": "3", "type": "hero"},
+    {"label": "Minion", "var_name": "MinionPrince_key", "default": "2", "type": "hero"},
 ]
 
 # Define colors for each type - now includes 'bg' for background
@@ -357,7 +367,6 @@ def save_troop_keys():
     except Exception as e:
         print(f"Failed to save troop keys: {e}")
 
-# Modified load_troop_keys to also update the combobox display
 def load_troop_keys():
     if os.path.exists(EVENT_KEYS_FILE):
         try:
@@ -365,12 +374,7 @@ def load_troop_keys():
                 data = json.load(f)
                 for troop_def in TROOP_HERO_DEFS:
                     key_name = troop_def["var_name"].replace("_key", "")
-                    loaded_key = data.get(key_name, troop_def["default"])
-                    troop_vars[troop_def["var_name"]].set(loaded_key)
-                    # Update the display string in the Combobox
-                    # This relies on the global 'display_vars' dictionary
-                    if troop_def["var_name"] in display_vars:
-                        display_vars[troop_def["var_name"]].set(f"{troop_def['label']}: {loaded_key}")
+                    troop_vars[troop_def["var_name"]].set(data.get(key_name, troop_def["default"]))
         except Exception as e:
             print(f"Failed to load troop keys: {e}")
 
@@ -476,69 +480,46 @@ key_var_eve = tk.StringVar(value=event_key_mapping[event_last_selected_key])
 style.configure("EVENT.TCombobox", padding=5, selectbackground="#fa9f49", selectforeground="#000000")
 style.map("EVENT.TCombobox", background=[("readonly", "#ff6d6d"), ("active", "#ff2323")], fieldbackground=[("readonly", "#fa9f49")], foreground=[("readonly", "#000000")])
 
-# event_key_dropdown = ttk.Combobox(ROOT, values=list(event_dropdown_values.keys()), textvariable=key_var_eve, font=("JetBrainsMono NFP", 10, "bold"), width=5, state="readonly", style="EVENT.TCombobox", justify="center")
-# event_key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
-# event_key_dropdown.set(event_key_mapping[event_last_selected_key])
-# event_key_dropdown.bind("<<ComboboxSelected>>", event_update_dropdown_display)
-
-# --- New: Dictionary to hold the StringVar for the Combobox display text ---
-display_vars = {}
-for troop_def in TROOP_HERO_DEFS:
-    # Initialize with "Label: DefaultKey" format
-    display_vars[troop_def["var_name"]] = tk.StringVar(value=f"{troop_def['label']}: {troop_def['default']}")
+event_key_dropdown = ttk.Combobox(ROOT, values=list(event_dropdown_values.keys()), textvariable=key_var_eve, font=("JetBrainsMono NFP", 10, "bold"), width=5, state="readonly", style="EVENT.TCombobox", justify="center")
+event_key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
+event_key_dropdown.set(event_key_mapping[event_last_selected_key])
+event_key_dropdown.bind("<<ComboboxSelected>>", event_update_dropdown_display)
 
 # Create labeled dropdowns using the centralized TROOP_HERO_DEFS
-# Modified create_key_dropdown to use the new display_variable
-def create_key_dropdown(label_text, value_variable, display_variable, label_fg_color="black", label_bg_color="white", label_width=6, dropdown_height=11):
+# Modified create_key_dropdown to accept 'label_fg_color' and 'label_bg_color' arguments
+def create_key_dropdown(label_text, variable, label_fg_color="black", label_bg_color="white", label_width=6, dropdown_height=11): # New parameter
     frame = tk.Frame(ROOT)
     frame.pack(side="left", padx=3)
-    # tk.Label(frame, text=label_text, font=("JetBrainsMono NFP", 8),
-    #          fg=label_fg_color, bg=label_bg_color, width=label_width).pack()
+    # Use the fg (foreground) and bg (background) options to set label colors
+    tk.Label(frame, text=label_text, width=8, font=("JetBrainsMono NFP", 10), fg=label_fg_color, bg=label_bg_color).pack()
 
     def on_change(event):
-        # Update the hidden value_variable (e.g., goblin_key) with the selected raw key
-        selected_display_text = display_variable.get() # Get "Label: Key"
-        # Extract the raw key from the display text
-        selected_raw_key = selected_display_text.split(": ")[-1]
-        value_variable.set(selected_raw_key)
-
-        # Reconstruct the display string to ensure it's always "Label: Key"
-        # This handles cases where user might manually type if state wasn't readonly
-        display_variable.set(f"{label_text}: {selected_raw_key}")
-
-        save_troop_keys() # Save all keys after a change
+        save_troop_keys()
 
     cb = ttk.Combobox(
         frame,
-        # Values for the dropdown list will be just the raw keys
         values=list(troop_key_mapping.keys()),
-        # The textvariable for the Combobox itself will be the display_variable
-        textvariable=display_variable,
-        font=("JetBrainsMono NFP", 10, "bold"),
-        width=12, # Increased width to accommodate "Label:Key" format
+        textvariable=variable,
+        font=("JetBrainsMono NFP", 9),
+        width=3,
+        height=dropdown_height,
         state="readonly",
         justify="center",
-        style="EVENT.TCombobox",
-        height=dropdown_height
+        style="EVENT.TCombobox"
     )
     cb.bind("<<ComboboxSelected>>", on_change)
     cb.pack()
 
-# Iterate through TROOP_HERO_DEFS and pass the appropriate colors and width
+# Iterate through TROOP_HERO_DEFS and pass the appropriate colors
 for troop_def in TROOP_HERO_DEFS:
     colors = COLOR_MAP.get(troop_def.get("type", "default"), COLOR_MAP["default"])
-    create_key_dropdown(troop_def["label"],
-                        troop_vars[troop_def["var_name"]],    # This holds the actual key (e.g., "6")
-                        display_vars[troop_def["var_name"]],  # This holds the display string (e.g., "King: 6")
-                        label_fg_color=colors["fg"],
-                        label_bg_color=colors["bg"],
-                        label_width=6,
-                        dropdown_height=min(len(troop_key_mapping), 11))
+    create_key_dropdown(troop_def["label"], troop_vars[troop_def["var_name"]],
+                        label_fg_color=colors["fg"], label_bg_color=colors["bg"])
 
 EVENT_BT = tk.Button(ROOT, text="CoC", bg="#ce5129", fg="#000000", width=5, height=0, command=Event_Function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 EVENT_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 
-load_troop_keys() # Load keys and update display after all widgets are created
+load_troop_keys()
 
 
 # Restart function that displays the cumulative summary before restarting
