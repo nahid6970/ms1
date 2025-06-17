@@ -432,40 +432,41 @@ def Event_Function():
             try:
                 while not Event_Function.state["stop_flag"]:
                     
-                    gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=1, region=(1411, 116, 1443, 151))
-                    elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=1, region=(1418, 198, 1445, 235))
+                    # gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=1, region=(1411, 116, 1443, 151))
+                    # elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=1, region=(1418, 198, 1445, 235))
+
+                    # gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=0.95, region=(1381, 89, 1507, 267))
+                    # elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=0.95, region=(1381, 89, 1507, 267))
+
+                    full_storage = find_image( r"C:\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1381, 89, 1507, 267))
                     train = find_image( r"C:\msBackups\CoC\MainBase\Train.png", confidence=.8, region=(169, 684, 279, 790))
 
+                    # if elixir_found and gold_found:
+                    #     run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
+                    #     time.sleep(30)
 
-                    if elixir_found and gold_found:
-                        run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
-                        time.sleep(30)
-                    elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
-                    elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
+                    if find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
 
-
-                    elif not elixir_found and not gold_found and train:
+                    elif not full_storage and train:
                         press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
 
                     elif find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
-
                         # Step 3: Execute attack sequence
                         press_keys_with_delays(window, troop_vars["jump_spell_key"].get(), 1)
                         press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
-
                         press_keys_with_delays(window,
                             troop_vars["warden_key"].get(), 1, 'p', 0,
                             troop_vars["MinionPrince_key"].get(), 1, 'p', 0,
                             troop_vars["queen_key"].get(), 1, 'p', 0,
                             troop_vars["king_key"].get(), 1, 'p', 0
                         )
-
                         press_keys_with_delays(window, troop_vars["valkyrie_key"].get(), 0, 'f12', 3)
-
                         press_keys_with_delays(window, troop_vars["rage_spell_key"].get(), 1)
                         press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
-
                         press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
+
+                    elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
+                    elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
 
 
 
