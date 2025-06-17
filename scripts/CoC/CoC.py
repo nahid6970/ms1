@@ -438,14 +438,12 @@ def Event_Function():
                     # gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=0.95, region=(1381, 89, 1507, 267))
                     # elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=0.95, region=(1381, 89, 1507, 267))
 
-                    full_storage = find_image( r"C:\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1381, 89, 1507, 267))
+                    full_storage = find_image( r"C:\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1398, 101, 1439, 256))
                     train = find_image( r"C:\msBackups\CoC\MainBase\Train.png", confidence=.8, region=(169, 684, 279, 790))
 
-                    # if elixir_found and gold_found:
-                    #     run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
-                    #     time.sleep(30)
-
-                    if find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
+                    if full_storage:
+                        run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
+                        time.sleep(30)
 
                     elif not full_storage and train:
                         press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
@@ -467,7 +465,7 @@ def Event_Function():
 
                     elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
                     elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
-
+                    elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,1))
 
 
                     # for image_path, region, action in image_action_map:
