@@ -18,6 +18,7 @@ import threading
 import time
 import tkinter as tk
 import win32gui
+import keyboard
 
 def run_command(pwsh_command):
     """Run a PowerShell command in a new terminal window."""
@@ -86,7 +87,7 @@ def find_image(image_path, confidence=0.7, region=None):
         if not is_searching:
             is_searching = True
             last_found_time = time.time()  # Start the timer when first searching
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True, region=region)
+        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=False, region=region)
         if location:
             image_name = os.path.basename(image_path)
             # Get current date and time in the desired format
@@ -474,6 +475,11 @@ def Event_Function():
                         press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
                         press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
 
+                    match = find_image(r"C:\msBackups\CoC\MainBase\valk.png", confidence=0.80, region=(167, 815, 1756, 981))
+                    if match:
+                        center_x, center_y = pyautogui.center(match)
+                        press_global_screen_with_delays((center_x, center_y, 1))
+
                     elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
                     elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
 
@@ -578,27 +584,35 @@ EVENT_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 load_troop_keys()
 
 
-# Restart function that displays the cumulative summary before restarting
+
+# def restart():
+#     display_image_found_chart()  # Show the summary of found images
+#     ROOT.destroy()
+#     subprocess.Popen([sys.executable] + sys.argv)
+
 def restart():
     display_image_found_chart()  # Show the summary of found images
-    ROOT.destroy()
+    # Launch a new process running this same script
     subprocess.Popen([sys.executable] + sys.argv)
+    # Optional: give it a little time to start
+    time.sleep(0.5)
+    # Then destroy GUI and exit current process
+    ROOT.destroy()
+    sys.exit()  # ensures current process ends cleanly
+    
+def listen_for_esc():
+    keyboard.wait('esc')
+    restart()
+threading.Thread(target=listen_for_esc, daemon=True).start()
 
 # Button to restart the script
 Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=0, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 # keyboard.add_hotkey("esc", restart)
 
-#* ███████╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗
-#* ██╔════╝████╗  ██║██╔══██╗██║████╗  ██║██╔════╝
-#* █████╗  ██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║  ███╗
-#* ██╔══╝  ██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
-#* ███████╗██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
-#* ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
+
 
 window_title='LDPlayer'
-
-# ending
 
 ROOT.update_idletasks()
 width = ROOT.winfo_width()
