@@ -478,47 +478,50 @@ def Event_Function():
                     elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
                     elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
 
+                    #! GateKeeper in order for other to happen this image first need to be found
+                    elif find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                        # Step 3: Execute attack sequence
+                        press_keys_with_delays(window, '', 1)
+                        # Step 1: Store all matched positions
+                        matches = {
+                            "jump": find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "minion_prince": find_image(r"C:\msBackups\CoC\MainBase\Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "king": find_image(r"C:\msBackups\CoC\MainBase\King.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "valk": find_image(r"C:\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "rage": find_image(r"C:\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.90, region=(167, 815, 1756, 981)),
+                            "goblin": find_image(r"C:\msBackups\CoC\MainBase\goblin.png", confidence=0.80, region=(167, 815, 1756, 981))
+                        }
 
-                    # Step 1: Store all matched positions
-                    matches = {
-                        "jump": find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                        "minion_prince": find_image(r"C:\msBackups\CoC\MainBase\Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                        "king": find_image(r"C:\msBackups\CoC\MainBase\King.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                        "valk": find_image(r"C:\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                        "rage": find_image(r"C:\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                        "goblin": find_image(r"C:\msBackups\CoC\MainBase\goblin.png", confidence=0.80, region=(167, 815, 1756, 981))
-                    }
+                        # Step 2: Execute in preferred order
+                        if matches["jump"]:
+                            center = pyautogui.center(matches["jump"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
 
-                    # Step 2: Execute in preferred order
-                    if matches["jump"]:
-                        center = pyautogui.center(matches["jump"])
-                        press_global_screen_with_delays((center[0], center[1], 1))
-                        press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
+                        if matches["minion_prince"]:
+                            center = pyautogui.center(matches["minion_prince"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
 
-                    if matches["minion_prince"]:
-                        center = pyautogui.center(matches["minion_prince"])
-                        press_global_screen_with_delays((center[0], center[1], 1))
-                        press_keys_with_delays(window, 'p', 1)
+                        if matches["king"]:
+                            center = pyautogui.center(matches["king"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
 
-                    if matches["king"]:
-                        center = pyautogui.center(matches["king"])
-                        press_global_screen_with_delays((center[0], center[1], 1))
-                        press_keys_with_delays(window, 'p', 1)
+                        if matches["valk"]:
+                            center = pyautogui.center(matches["valk"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'f12', 3)
 
-                    if matches["valk"]:
-                        center = pyautogui.center(matches["valk"])
-                        press_global_screen_with_delays((center[0], center[1], 1))
-                        press_keys_with_delays(window, 'f12', 3)
+                        if matches["rage"]:
+                            center = pyautogui.center(matches["rage"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
 
-                    if matches["rage"]:
-                        center = pyautogui.center(matches["rage"])
-                        press_global_screen_with_delays((center[0], center[1], 1))
-                        press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
-
-                    if matches["goblin"]:
-                        center = pyautogui.center(matches["goblin"])
-                        press_global_screen_with_delays((center[0], center[1], 1))
-                        press_keys_with_delays(window, 'f12', 3)
+                        if matches["goblin"]:
+                            center = pyautogui.center(matches["goblin"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'f12', 3)
 
 
 
