@@ -9,11 +9,11 @@ F12:: ;! main base event attack
 { ; V1toV2: Added bracket
     global ; V1toV2: Made function global
     StartTime := A_TickCount
-    while (A_TickCount - StartTime < 2000) {
+    while (A_TickCount - StartTime < 1000) {
         if !WinActive("ahk_exe dnplayer.exe") {
             break
         }
-        SendEvent("ppppppppppppppppp")
+        SendEvent("p")
     }
     return
 }
