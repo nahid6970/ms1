@@ -329,14 +329,14 @@ event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mappin
 # --- Centralized Troop/Hero Definitions ---
 # Added 'type' field to categorize for coloring
 TROOP_HERO_DEFS = [
-    {"label": "Goblin", "var_name": "goblin_key", "default": "0", "type": "troop"},
-    {"label": "Valk", "var_name": "valkyrie_key", "default": "1", "type": "troop"},
-    {"label": "Jump", "var_name": "jump_spell_key", "default": "5", "type": "spell"},
-    {"label": "Rage", "var_name": "rage_spell_key", "default": "4", "type": "spell"},
-    {"label": "King", "var_name": "king_key", "default": "6", "type": "hero"},
-    {"label": "Queen", "var_name": "queen_key", "default": "7", "type": "hero"},
-    {"label": "Warden", "var_name": "warden_key", "default": "3", "type": "hero"},
-    {"label": "M.Prince", "var_name": "MinionPrince_key", "default": "2", "type": "hero"},
+    # {"label": "Goblin", "var_name": "goblin_key", "default": "0", "type": "troop"},
+    # {"label": "Valk", "var_name": "valkyrie_key", "default": "1", "type": "troop"},
+    # {"label": "Jump", "var_name": "jump_spell_key", "default": "5", "type": "spell"},
+    # {"label": "Rage", "var_name": "rage_spell_key", "default": "4", "type": "spell"},
+    # {"label": "King", "var_name": "king_key", "default": "6", "type": "hero"},
+    # {"label": "Queen", "var_name": "queen_key", "default": "7", "type": "hero"},
+    # {"label": "Warden", "var_name": "warden_key", "default": "3", "type": "hero"},
+    # {"label": "M.Prince", "var_name": "MinionPrince_key", "default": "2", "type": "hero"},
 ]
 
 # Define colors for each type - now includes 'bg' for background
