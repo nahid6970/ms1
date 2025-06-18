@@ -486,8 +486,8 @@ def Event_Function():
                         matches = {
                             "jump": find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             
-                            "minion_prince": find_image(r"C:\msBackups\CoC\MainBase\Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
-                            "king": find_image(r"C:\msBackups\CoC\MainBase\King.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "minion_prince": find_image(r"C:\msBackups\CoC\MainBase\hero_Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "king": find_image(r"C:\msBackups\CoC\MainBase\hero_King.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "queen": find_image(r"C:\msBackups\CoC\MainBase\hero_Queen.png", confidence=0.80, region=(167, 815, 1756, 981)),
 
                             "valk": find_image(r"C:\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
