@@ -485,8 +485,11 @@ def Event_Function():
                         # Step 1: Store all matched positions
                         matches = {
                             "jump": find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            
                             "minion_prince": find_image(r"C:\msBackups\CoC\MainBase\Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "king": find_image(r"C:\msBackups\CoC\MainBase\King.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "queen": find_image(r"C:\msBackups\CoC\MainBase\hero_Queen.png", confidence=0.80, region=(167, 815, 1756, 981)),
+
                             "valk": find_image(r"C:\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "rage": find_image(r"C:\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.90, region=(167, 815, 1756, 981)),
                             "goblin": find_image(r"C:\msBackups\CoC\MainBase\goblin.png", confidence=0.80, region=(167, 815, 1756, 981))
@@ -505,6 +508,11 @@ def Event_Function():
 
                         if matches["king"]:
                             center = pyautogui.center(matches["king"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["queen"]:
+                            center = pyautogui.center(matches["queen"])
                             press_global_screen_with_delays((center[0], center[1], 1))
                             press_keys_with_delays(window, 'p', 1)
 
