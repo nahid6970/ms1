@@ -350,51 +350,6 @@ def update_info_labels():
 get_net_speed.upload_speed_last = 0
 get_net_speed.download_speed_last = 0
 
-#! Github status
-
-
-def check_git_status(git_path, queue):
-    if not os.path.exists(git_path):
-        queue.put((git_path, "Invalid path", "#000000"))  # Use default color for invalid path
-        return
-    os.chdir(git_path)
-    git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
-    if "nothing to commit, working tree clean" in git_status.stdout:
-        queue.put((git_path, "✅", "#00ff21"))
-    else:
-        queue.put((git_path, "❌", "#fe1616"))
-
-def show_git_changes(git_path):
-    if not os.path.exists(git_path):
-        print("Invalid path")
-        return
-    os.chdir(git_path)
-    # subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status"])
-    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status && git diff --stat"])
-    # subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git diff --stat && git diff"])
-
-
-def update_status():
-    while True:
-        check_git_status("C:\\ms1", queue)
-        check_git_status("C:\\ms2", queue)
-        check_git_status("C:\\ms3", queue)
-        time.sleep(1)
-
-def update_gui():
-    while True:
-        try:
-            git_path, text, color = queue.get_nowait()
-            if git_path == "C:\\ms1":
-                STATUS_MS1.config(text=text, fg=color)
-            elif git_path == "C:\\ms2":
-                STATUS_MS2.config(text=text, fg=color)
-            elif git_path == "C:\\ms3":
-                STATUS_MS3.config(text=text, fg=color)
-        except:
-            pass
-        time.sleep(0.1)  # Adjust sleep time as needed
-
 
 #! Clear Button
 def clear_screen():
@@ -801,58 +756,100 @@ ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command('code C
 SEPARATOR=tk.Label(ROOT1,text="[",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 
+#! Github status
+# Define your repositories here
+repos = [
+    {"name": "ms1", "path": "C:\\ms1"},
+    {"name": "ms2", "path": "C:\\ms2"},
+    {"name": "ms3", "path": "C:\\ms3"},
+]
+
+status_labels = {}
+
+def check_git_status(git_path, queue):
+    if not os.path.exists(git_path):
+        queue.put((git_path, "Invalid path", "#000000"))
+        return
+    os.chdir(git_path)
+    git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
+    if "nothing to commit, working tree clean" in git_status.stdout:
+        queue.put((git_path, "✅", "#00ff21"))
+    else:
+        queue.put((git_path, "❌", "#fe1616"))
+
+def show_git_changes(git_path):
+    if not os.path.exists(git_path):
+        print("Invalid path")
+        return
+    os.chdir(git_path)
+    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status && git diff --stat"])
+
 def git_backup(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1 ; C:\\ms1\\scripts\\Github\\ms3u.ps1 ; cd ~}"], shell=True)
-bkup=tk.Label(ROOT1,text="\udb80\udea2",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
-bkup.pack(side="left",padx=(0,0),pady=(0,0))
-bkup.bind ("<Button-1>",git_backup)
+    commands = " ; ".join([f"{r['path']}\\scripts\\Github\\{r['name']}u.ps1" for r in repos])
+    subprocess.Popen([
+        "Start", "pwsh", "-NoExit", "-Command",
+        f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; {commands} ; cd ~}}"
+    ], shell=True)
 
-def git_backup_ms1(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; cd C:/ms1/ ; gitter}"], shell=True)
-def git_restore_ms1(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='Git Restore' ; cd C:/ms1/ ; git restore . }"], shell=True)
-STATUS_MS1=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-STATUS_MS1.pack(side="left",padx=(0,0),pady=(0,0))
-STATUS_MS1.bind ("<Button-1>",git_backup_ms1)
-STATUS_MS1.bind("<Button-3>",lambda event:show_git_changes("C:\\ms1"))
-STATUS_MS1.bind ("<Control-Button-3>", git_restore_ms1)
-
-def git_backup_ms2(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; cd C:/ms2/ ; gitter}"], shell=True)
-def git_restore_ms2(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='Git Restore' ; cd C:/ms2/ ; git restore . }"], shell=True)
-STATUS_MS2=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-STATUS_MS2.pack(side="left",padx=(0,0),pady=(0,0))
-STATUS_MS2.bind ("<Button-1>",git_backup_ms2)
-STATUS_MS2.bind("<Button-3>",lambda event:show_git_changes("C:\\ms2"))
-STATUS_MS2.bind ("<Control-Button-3>", git_restore_ms2)
-
-def git_backup_ms3(event):
-    subprocess.Popen(["Start", "pwsh",  "-NoExit", "-Command", "& {$host.UI.RawUI.WindowTitle='GiTSync' ; cd C:/ms3/ ; gitter}"], shell=True)
-STATUS_MS3=tk.Label(ROOT1,bg="#1d2027",fg="#FFFFFF",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",10,"bold"),text="")
-STATUS_MS3.pack(side="left",padx=(0,0),pady=(0,0))
-STATUS_MS3.bind ("<Button-1>",git_backup_ms3)
-STATUS_MS3.bind("<Button-3>",lambda event:show_git_changes("C:\\ms3"))
-
-def delete_git_lock_files():
-    files_to_delete = [
-        r'C:\ms1\.git\index.lock',
-        r'C:\ms2\.git\index.lock',
-        r'C:\ms3\.git\index.lock'
-    ]
-    for file in files_to_delete:
+def delete_git_lock_files(event=None):
+    for repo in repos:
+        lock_file = os.path.join(repo["path"], ".git", "index.lock")
         try:
-            if os.path.exists(file):
-                os.remove(file)
-                print(f"Deleted: {file}")
+            if os.path.exists(lock_file):
+                os.remove(lock_file)
+                print(f"Deleted: {lock_file}")
             else:
-                print(f"File not found: {file}")
+                print(f"File not found: {lock_file}")
         except Exception as e:
-            print(f"Error deleting {file}: {e}")
+            print(f"Error deleting {lock_file}: {e}")
 
-DelGitIgnore=tk.Label(ROOT1,text="\udb82\udde7",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
-DelGitIgnore.pack(side="left",padx=(0,0),pady=(0,0))
-DelGitIgnore.bind ("<Button-1>",delete_git_lock_files())
+def update_status():
+    while True:
+        for repo in repos:
+            check_git_status(repo["path"], queue)
+        time.sleep(1)
+
+def update_gui():
+    while True:
+        try:
+            git_path, text, color = queue.get_nowait()
+            for repo in repos:
+                if git_path == repo["path"]:
+                    status_labels[repo["name"]].config(text=text, fg=color)
+        except:
+            pass
+        time.sleep(0.1)
+
+# Git Backup All Icon
+bkup = tk.Label(ROOT1, text="\udb80\udea2", bg="#1d2027", fg="#009fff", font=("JetBrainsMono NFP", 18, "bold"))
+bkup.pack(side="left")
+bkup.bind("<Button-1>", git_backup)
+
+# Add repo-specific labels and bindings dynamically
+for repo in repos:
+    label = tk.Label(
+        ROOT1, bg="#1d2027", fg="#FFFFFF", font=("JetBrainsMono NFP", 10, "bold"), text=""
+    )
+    label.pack(side="left")
+    label.bind("<Button-1>", lambda e, p=repo["path"]: subprocess.Popen(
+        ["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd {p.replace(os.sep, '/')} ; gitter}}"], shell=True
+    ))
+    label.bind("<Button-3>", lambda e, p=repo["path"]: show_git_changes(p))
+    label.bind("<Control-Button-3>", lambda e, p=repo["path"]: subprocess.Popen(
+        ["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd {p.replace(os.sep, '/')} ; git restore . }}"], shell=True
+    ))
+    status_labels[repo["name"]] = label
+
+# Git Lock File Cleaner Icon
+DelGitIgnore = tk.Label(ROOT1, text="\udb82\udde7", bg="#1d2027", fg="#ffffff", font=("JetBrainsMono NFP", 18, "bold"))
+DelGitIgnore.pack(side="left")
+DelGitIgnore.bind("<Button-1>", delete_git_lock_files)
+
+# Start background threads
+threading.Thread(target=update_status, daemon=True).start()
+threading.Thread(target=update_gui, daemon=True).start()
+
+
 
 SEPARATOR=tk.Label(ROOT1,text="]",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(0,0),pady=(0,0))
