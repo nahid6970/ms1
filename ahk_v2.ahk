@@ -40,7 +40,7 @@ Persistent
 }
 
 
-!Space::Run("C:\ms1\scripts\ff_with_python.py", , "Show")
+!Space::Run("C:\ms1\Run_v2.py", , "Show")
 
 
 ;! monitor
