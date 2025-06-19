@@ -872,7 +872,7 @@ Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,100))
 # Changes_Monitor_lb = tk.Label(ROOT1, text="", bg="#1d2027", fg="#68fc2d")
 # Changes_Monitor_lb.pack(side="left",padx=(0,0),pady=(0,0))
 # compare_path_file()
-
+ 
 
 
 
@@ -906,6 +906,16 @@ commands = {
         "log": "C:/test/ms1_check.log",
         "label": "ms1",
         "left_click_cmd": "rclone sync src dst --exclude \".git/**\" --exclude \"__pycache__/**\" -P --fast-list",
+        "right_click_cmd": "rclone sync dst src -P --fast-list"
+    },
+
+    "Photos": {
+        "cmd": 'rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"',
+        "src": "C:/Users/nahid/Pictures/",
+        "dst": "o0:/Pictures/",
+        "log": "C:/test/Pictures_check.log",
+        "label": "\uf03e",
+        "left_click_cmd": "rclone sync src dst --exclude \".globalTrash/**\" --exclude \".stfolder/**\"  -P --fast-list",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
     },
 }
