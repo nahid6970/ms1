@@ -454,7 +454,7 @@ def Event_Function():
                         elixir_found = find_image(r"C:\msBackups\CoC\MainBase\full_elixir.png", confidence=0.95, region=(1410, 103, 1455, 245))
 
                         if gold_found and elixir_found:
-                            run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
+                            run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "Storage Full" +8801779787186')
                             time.sleep(30)
                         else:
                             press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
