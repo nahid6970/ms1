@@ -453,7 +453,7 @@ def Event_Function():
                         gold_found = find_image(r"C:\msBackups\CoC\MainBase\full_gold.png", confidence=0.95, region=(1410, 103, 1455, 245))
                         elixir_found = find_image(r"C:\msBackups\CoC\MainBase\full_elixir.png", confidence=0.95, region=(1410, 103, 1455, 245))
 
-                        if gold_found and elixir_found:
+                        if gold_found or elixir_found:
                             run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m \""Storage Full"\" +8801779787186')
                             time.sleep(30)
                         else:
@@ -489,6 +489,7 @@ def Event_Function():
                             "minion_prince": find_image(r"C:\msBackups\CoC\MainBase\hero_Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "king": find_image(r"C:\msBackups\CoC\MainBase\hero_King.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "queen": find_image(r"C:\msBackups\CoC\MainBase\hero_Queen.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "warden": find_image(r"C:\msBackups\CoC\MainBase\hero_Warden.png", confidence=0.80, region=(167, 815, 1756, 981)),
 
                             "valk": find_image(r"C:\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "rage": find_image(r"C:\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.90, region=(167, 815, 1756, 981)),
@@ -513,6 +514,11 @@ def Event_Function():
 
                         if matches["queen"]:
                             center = pyautogui.center(matches["queen"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["warden"]:
+                            center = pyautogui.center(matches["warden"])
                             press_global_screen_with_delays((center[0], center[1], 1))
                             press_keys_with_delays(window, 'p', 1)
 
