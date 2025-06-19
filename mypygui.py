@@ -759,23 +759,28 @@ SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 #! Github status
 # Define your repositories here
 repos = [
-    {"name": "ms1", "path": "C:\\ms1"},
-    {"name": "ms2", "path": "C:\\ms2"},
-    {"name": "ms3", "path": "C:\\ms3"},
+    {"name": "ms1", "path": "C:\\ms1", "label": "1"},
+    {"name": "ms2", "path": "C:\\ms2", "label": "2"},
+    {"name": "ms3", "path": "C:\\ms3", "label": "3"},
+    # Add more as needed
 ]
 
 status_labels = {}
 
 def check_git_status(git_path, queue):
     if not os.path.exists(git_path):
-        queue.put((git_path, "Invalid path", "#000000"))
+        queue.put((git_path, "Invalid", "#000000"))
         return
     os.chdir(git_path)
     git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
+    
+    label_text = next((r["label"] for r in repos if r["path"] == git_path), "?")
+    
     if "nothing to commit, working tree clean" in git_status.stdout:
-        queue.put((git_path, "✅", "#00ff21"))
+        queue.put((git_path, label_text, "#00ff21"))  # Green
     else:
-        queue.put((git_path, "❌", "#fe1616"))
+        queue.put((git_path, label_text, "#fe1616"))  # Red
+
 
 def show_git_changes(git_path):
     if not os.path.exists(git_path):
@@ -828,7 +833,8 @@ bkup.bind("<Button-1>", git_backup)
 # Add repo-specific labels and bindings dynamically
 for repo in repos:
     label = tk.Label(
-        ROOT1, bg="#1d2027", fg="#FFFFFF", font=("JetBrainsMono NFP", 10, "bold"), text=""
+        ROOT1, bg="#1d2027", fg="#FFFFFF",
+        font=("JetBrainsMono NFP", 12, "bold"), text=repo["label"]
     )
     label.pack(side="left")
     label.bind("<Button-1>", lambda e, p=repo["path"]: subprocess.Popen(
