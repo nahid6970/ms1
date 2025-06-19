@@ -1357,6 +1357,7 @@ for i in range(psutil.cpu_count()):
     cpu_core_bars.append(core_bar)
 update_cpu_core_bars()
 
+#! For Github Status
 queue = Queue()
 status_thread = threading.Thread(target=update_status, daemon=True)
 gui_thread = threading.Thread(target=update_gui, daemon=True)
