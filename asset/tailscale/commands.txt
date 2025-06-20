@@ -1,0 +1,11 @@
+tailscale set --advertise-routes=192.168.0.0/24
+
+tailscale up --advertise-routes=192.168.0.0/24
+
+tailscale set --accept-routes
+
+tailscale up set --advertise-exit-node
+
+tailscale set --advertise-exit-node
+
+tailscale ping --verbose xiaomi-mi-9t
