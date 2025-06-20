@@ -490,6 +490,7 @@ def Event_Function():
                             "king": find_image(r"C:\msBackups\CoC\MainBase\hero_King.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "queen": find_image(r"C:\msBackups\CoC\MainBase\hero_Queen.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "warden": find_image(r"C:\msBackups\CoC\MainBase\hero_Warden.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "royalchampion": find_image(r"C:\msBackups\CoC\MainBase\hero_RoyalChampion.png", confidence=0.80, region=(167, 815, 1756, 981)),
 
                             "valk": find_image(r"C:\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             "rage": find_image(r"C:\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.90, region=(167, 815, 1756, 981)),
@@ -519,6 +520,11 @@ def Event_Function():
 
                         if matches["warden"]:
                             center = pyautogui.center(matches["warden"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["royalchampion"]:
+                            center = pyautogui.center(matches["royalchampion"])
                             press_global_screen_with_delays((center[0], center[1], 1))
                             press_keys_with_delays(window, 'p', 1)
 
