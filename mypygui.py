@@ -908,7 +908,7 @@ commands = {
         "dst": "o0:/ms1/",
         "log": "C:/test/ms1_check.log",
         "label": "ms1",
-        "left_click_cmd": "rclone sync src dst --exclude \".git/**\" --exclude \"__pycache__/**\" -P --fast-list",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
     },
 
@@ -918,7 +918,7 @@ commands = {
         "dst": "o0:/Pictures/",
         "log": "C:/test/Pictures_check.log",
         "label": "\uf03e",
-        "left_click_cmd": "rclone sync src dst --exclude \".globalTrash/**\" --exclude \".stfolder/**\"  -P --fast-list",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\"",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
     },
 }
