@@ -483,6 +483,14 @@ def Event_Function():
                         # Step 3: Execute attack sequence
                         press_keys_with_delays(window, '', 1)
                         # Step 1: Store all matched positions
+
+                        #! Single match and click since not array so no need to use match
+                        # jump = find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981))
+                        # if jump:
+                        #     center = pyautogui.center(jump)
+                        #     press_global_screen_with_delays((center[0], center[1], 1))
+                        #     press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
+
                         matches = {
                             "jump": find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
                             
@@ -542,9 +550,6 @@ def Event_Function():
                             center = pyautogui.center(matches["goblin"])
                             press_global_screen_with_delays((center[0], center[1], 1))
                             press_keys_with_delays(window, 'f12', 3)
-
-
-
 
 
                     # for image_path, region, action in image_action_map:

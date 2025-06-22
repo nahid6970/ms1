@@ -12,6 +12,7 @@ def search_directories_and_files():
     directories.append("C:\\ms2")
     directories.append("C:\\ms3")
     directories.append("C:\\ms3")
+    directories.append(r"C:\msBackups")
     directories.append(r"C:\Users\nahid\Pictures")
     # directories.append("D:\\")
     # directories.append("C:\\Program Files\\WindowsApps")
