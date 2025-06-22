@@ -855,7 +855,12 @@ DelGitIgnore.bind("<Button-1>", delete_git_lock_files)
 threading.Thread(target=update_status, daemon=True).start()
 threading.Thread(target=update_gui, daemon=True).start()
 
-
+#! For Github Status
+queue = Queue()
+status_thread = threading.Thread(target=update_status, daemon=True)
+gui_thread = threading.Thread(target=update_gui, daemon=True)
+status_thread.start()
+gui_thread.start()
 
 SEPARATOR=tk.Label(ROOT1,text="]",bg="#1d2027",fg="#009fff",height=0,width=0,relief="flat",font=("JetBrainsMono NFP",18,"bold"))
 SEPARATOR.pack(side="left",padx=(0,0),pady=(0,0))
@@ -1363,12 +1368,7 @@ for i in range(psutil.cpu_count()):
     cpu_core_bars.append(core_bar)
 update_cpu_core_bars()
 
-#! For Github Status
-queue = Queue()
-status_thread = threading.Thread(target=update_status, daemon=True)
-gui_thread = threading.Thread(target=update_gui, daemon=True)
-status_thread.start()
-gui_thread.start()
+
 
 update_uptime_label()
 update_info_labels()
