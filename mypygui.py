@@ -1052,6 +1052,47 @@ create_gui()
 # update_status_battery_mi9t()
 
 
+import tkinter as tk
+import subprocess
+import threading
+
+PING_COMMAND = ["tailscale", "ping", "--c", "1", "mi9t"]
+UPDATE_INTERVAL = 60000  # 60 seconds
+
+def ping_mi9t():
+    def run_ping():
+        try:
+            result = subprocess.run(PING_COMMAND, capture_output=True, text=True, timeout=10)
+            output = result.stdout + result.stderr
+
+            if "pong from" in output:
+                update_ui("mi9t ✓", "black", "#abec72")  # green
+            elif "timed out" in output.lower():
+                update_ui("mi9t ✗", "white", "red")  # red
+            else:
+                update_ui("mi9t ?", "white", "gray")  # unknown
+        except Exception as e:
+            update_ui("Error", "white", "gray")
+            print(f"Ping error: {e}")
+        finally:
+            # Schedule the next check
+            ROOT2.after(UPDATE_INTERVAL, ping_mi9t)
+
+    # Start ping in a new thread
+    threading.Thread(target=run_ping, daemon=True).start()
+
+def update_ui(text, fg, bg):
+    Android_mi9t_status.config(text=text, fg=fg, bg=bg)
+
+Android_mi9t_status = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono NFP", 10, "bold"), width=10)
+Android_mi9t_status.pack(side="left", padx=(3,10), pady=(0,0))
+
+# Start the ping checker
+ping_mi9t()
+
+
+
+
 
 cpu_core_frame =CTkFrame(ROOT2,corner_radius=5,bg_color="#1d2027",border_width=1,border_color="#000000", fg_color="#fff")
 cpu_core_frame.pack(side="left",padx=(3,0),pady=(0,0))
