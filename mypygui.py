@@ -962,7 +962,7 @@ def check_and_update(label, cfg):
             subprocess.run(actual_cmd, shell=True, stdout=f, stderr=f)
         with open(cfg["log"], "r") as f:
             content = f.read()
-        if "0 differences found" in content:
+        if not "ERROR" in content:
             label.config(text=cfg["label"], fg="#06de22")
         else:
             label.config(text=cfg["label"], fg="red")
