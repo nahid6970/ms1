@@ -1052,12 +1052,10 @@ create_gui()
 # update_status_battery_mi9t()
 
 
-import tkinter as tk
-import subprocess
-import threading
+
 
 PING_COMMAND = ["tailscale", "ping", "--c", "1", "mi9t"]
-UPDATE_INTERVAL = 60000  # 60 seconds
+UPDATE_INTERVAL_SEC = 600  # 600 seconds = 10 minutes
 
 def ping_mi9t():
     def run_ping():
@@ -1075,8 +1073,8 @@ def ping_mi9t():
             update_ui("Error", "white", "gray")
             print(f"Ping error: {e}")
         finally:
-            # Schedule the next check
-            ROOT2.after(UPDATE_INTERVAL, ping_mi9t)
+            # Schedule the next check in seconds converted to milliseconds
+            ROOT2.after(UPDATE_INTERVAL_SEC * 1000, ping_mi9t)
 
     # Start ping in a new thread
     threading.Thread(target=run_ping, daemon=True).start()
