@@ -14,6 +14,7 @@ myGui.Add("Text", "xm y+5 BackgroundFFD966 c000000 w30 +Center +Border", "↻").
 
 ; Functional buttons
 myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w30 +Center +Border", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(500), Send("#+f"))) ; Text Grab
+myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w30 +Center +Border", "").OnEvent("Click", (*) =>  (myGui.Destroy(), Sleep(500), pasteshit(), Reload()))
 myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w30 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\xy\XY_CroosHair.py",, "Hide"))) ; CrossHair
 myGui.Add("Text", "xm y+5 Background31ffc1 cec2d47 w30 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\Locker.py",, "Hide"))) ; Locker
 
@@ -50,3 +51,18 @@ y := (screenH - h) // 2
 
 ; Move to actual position
 myGui.Move(x, y)
+
+
+
+
+pasteshit() {
+    send("^!{Numpad2}")
+    Sleep(100)
+    SendText(" ➔ ")
+    Sleep(100)
+    send("^!{Numpad1}")
+    Sleep(100)
+    ; SendText(",")
+    Sleep(100)
+    Send("{Enter}")
+}
