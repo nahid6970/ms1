@@ -758,6 +758,7 @@ SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 
 #! Github status
 # Define your repositories here
+queue = Queue()
 repos = [
     {"name": "ms1", "path": "C:\\ms1", "label": "1"},
     {"name": "ms2", "path": "C:\\ms2", "label": "2"},
@@ -856,7 +857,6 @@ threading.Thread(target=update_status, daemon=True).start()
 threading.Thread(target=update_gui, daemon=True).start()
 
 #! For Github Status
-queue = Queue()
 status_thread = threading.Thread(target=update_status, daemon=True)
 gui_thread = threading.Thread(target=update_gui, daemon=True)
 status_thread.start()
