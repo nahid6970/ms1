@@ -13,13 +13,13 @@ myGui.Add("Text", "xm y+5 BackgroundFF5C5C cFFFFFF w30 +Center +Border", "✕").
 myGui.Add("Text", "xm y+5 BackgroundFFD966 c000000 w30 +Center +Border", "↻").OnEvent("Click", (*) => Reload())
 
 ; Functional buttons
-myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w30 +Center +Border", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(500), Send("#+f"))) ; Text Grab
-myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w30 +Center +Border", "").OnEvent("Click", (*) =>  (myGui.Destroy(), Sleep(500), pasteshit(), Reload()))
-myGui.Add("Text", "xm y+5 Background31ffc1 c000000 w30 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\xy\XY_CroosHair.py",, "Hide"))) ; CrossHair
-myGui.Add("Text", "xm y+5 Background31ffc1 cec2d47 w30 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\Locker.py",, "Hide"))) ; Locker
+myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w30 +Center +Border", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(500), Send("#+f"))) ; Text Grab
+myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w30 +Center +Border", "").OnEvent("Click", (*) =>  (myGui.Destroy(), Sleep(500), pasteshit(), Reload()))
+myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w30 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\xy\XY_CroosHair.py",, "Hide"))) ; CrossHair
+myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w30 +Center +Border", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\Locker.py",, "Hide"))) ; Locker
 
 ; Add the Ctrl + WheelDown button (using a down-arrow icon “🔽”)
-myGui.Add("Text" , "xm y+5 Background31ffc1 c000000 w30 +Center +Border" , "🔽" )
+myGui.Add("Text" , "xm y+5 Backgroundffffff c000000 w30 +Center +Border" , "🔽" )
 .OnEvent("Click"
     , (*) => (
         ; Activate your app by its executable name
