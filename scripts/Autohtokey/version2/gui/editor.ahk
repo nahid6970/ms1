@@ -56,6 +56,8 @@ myGui.Move(x, y)
 
 
 pasteshit() {
+    SendText("❓")
+    Sleep(100)
     send("^!{Numpad2}")
     Sleep(100)
     SendText(" ➔ ")

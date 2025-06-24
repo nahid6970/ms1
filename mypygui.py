@@ -1054,18 +1054,18 @@ create_gui()
 
 
 
-PING_COMMAND = ["tailscale", "ping", "--c", "1", "mi9t"]
-UPDATE_INTERVAL_SEC = 600  # 600 seconds = 10 minutes
+UPDATE_INTERVAL_SEC = 60  # 600 seconds = 10 minutes
+PING_COMMAND = ["ping", "-n", "1", "-w", "1000", "192.168.0.103"]  # -n 1 = once, -w 1000 = 1s timeout
 
 def ping_mi9t():
     def run_ping():
         try:
-            result = subprocess.run(PING_COMMAND, capture_output=True, text=True, timeout=10)
+            result = subprocess.run(PING_COMMAND, capture_output=True, text=True, timeout=5)
             output = result.stdout + result.stderr
 
-            if "pong from" in output:
+            if "Reply from" in output:
                 update_ui("mi9t ✓", "black", "#abec72")  # green
-            elif "timed out" in output.lower():
+            elif "Request timed out" in output or "Destination host unreachable" in output:
                 update_ui("mi9t ✗", "white", "red")  # red
             else:
                 update_ui("mi9t ?", "white", "gray")  # unknown
@@ -1073,20 +1073,20 @@ def ping_mi9t():
             update_ui("Error", "white", "gray")
             print(f"Ping error: {e}")
         finally:
-            # Schedule the next check in seconds converted to milliseconds
             ROOT2.after(UPDATE_INTERVAL_SEC * 1000, ping_mi9t)
 
-    # Start ping in a new thread
     threading.Thread(target=run_ping, daemon=True).start()
 
 def update_ui(text, fg, bg):
     Android_mi9t_status.config(text=text, fg=fg, bg=bg)
 
+
 Android_mi9t_status = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono NFP", 10, "bold"), width=10)
 Android_mi9t_status.pack(side="left", padx=(3,10), pady=(0,0))
 
-# Start the ping checker
 ping_mi9t()
+
+
 
 
 

@@ -40,6 +40,8 @@ Persistent
 ; }
 
 ^!z:: {
+    SendText("❓")
+    Sleep(100)
     send("^!{Numpad2}")
     Sleep(100)
     SendText(" ➔ ")
