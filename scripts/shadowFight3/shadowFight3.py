@@ -17,6 +17,7 @@ import threading
 import time
 import tkinter as tk
 import win32gui
+from pathlib import Path
 
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
@@ -44,7 +45,9 @@ last_found_time = None
 is_searching = False
 last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
-output_file_path = r"C:\msBackups\sf3_img.txt"  # Path to save found image output
+
+output_file_path = Path.home() / "script_output" / "sf3_img.txt"
+output_file_path.parent.mkdir(exist_ok=True)  # Create script_output if missing
 
 # Ensure the output directory exists
 os.makedirs(os.path.dirname(output_file_path), exist_ok=True)

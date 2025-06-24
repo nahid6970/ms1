@@ -7,6 +7,7 @@ if "python312" not in sys.executable:  # Check if the script is NOT running with
 # Continue running with Python 3.12
 print(f"Running with: {sys.executable}")
 
+from pathlib import Path
 from datetime import datetime
 from tkinter import Label, Tk, Button, messagebox
 from tkinter import ttk
@@ -52,7 +53,10 @@ last_found_time = None
 is_searching = False
 last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
-output_file_path = r"C:\msBackups\sf3_img.txt"  # Path to save found image output
+
+output_file_path = Path.home() / "script_output" / "coc.txt"
+output_file_path.parent.mkdir(exist_ok=True)  # Create script_output if missing
+
 
 # Ensure the output directory exists
 os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
