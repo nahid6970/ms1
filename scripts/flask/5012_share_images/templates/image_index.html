@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4400/4400968.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Sharing</title>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        input[type="file"] {
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-bottom: 40px; /* Space for buttons */
+        }
+        .image-card img {
+            width: 100%;
+            height: 200px; /* Fixed height for thumbnails */
+            object-fit: cover; /* Cover the area, cropping if necessary */
+            display: block;
+            border-bottom: 1px solid #eee;
+        }
+        .image-info {
+            padding: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        .image-info .timestamp {
+            font-weight: bold;
+            color: #777;
+        }
+        .card-actions {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between; /* Space out buttons */
+        }
+        .card-actions button {
+            flex-grow: 1; /* Make buttons expand */
+            margin: 0 5px; /* Space between buttons */
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .view-btn {
+            background-color: #007BFF;
+        }
+        .view-btn:hover {
+            background-color: #0056b3;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .clean-all-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .clean-all-btn {
+            background-color: #e74c3c;
+        }
+        .clean-all-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+    <script>
+        function confirmDelete(filename) {
+            if (confirm("Are you sure you want to delete this image?")) {
+                document.getElementById('deleteForm_' + filename).submit();
+            }
+        }
+
+        function confirmCleanAll() {
+            if (confirm("Are you sure you want to delete ALL images? This action cannot be undone.")) {
+                document.getElementById('cleanAllForm').submit();
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Share Images Locally</h1>
+
+    <form method="POST" action="/" enctype="multipart/form-data">
+        <label for="file">Choose image to upload:</label><br>
+        <input type="file" name="file" id="file" accept="image/*"><br><br>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <div class="image-gallery">
+        {% for image in images %}
+            <div class="image-card">
+                <a href="{{ url_for('uploaded_file', filename=image.filename) }}" target="_blank">
+                    <img src="{{ url_for('uploaded_file', filename=image.filename) }}" alt="{{ image.filename }}">
+                </a>
+                <div class="image-info">
+                    <div class="timestamp">Uploaded: {{ image.timestamp }}</div>
+                    <div>{{ image.filename }}</div>
+                </div>
+                <div class="card-actions">
+                    <!-- <a href="{{ url_for('uploaded_file', filename=image.filename) }}" target="_blank" class="view-btn button">View</a> -->
+                    <button class="delete-btn" onclick="confirmDelete('{{ image.filename }}')">Delete</button>
+                    <form id="deleteForm_{{ image.filename }}" method="POST" action="/delete_image/{{ image.filename }}" style="display:none;"></form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="clean-all-container">
+        <button type="button" class="clean-all-btn" onclick="confirmCleanAll()">Clean All Images</button>
+        <form id="cleanAllForm" method="POST" action="/clean_all_images" style="display:none;"></form>
+    </div>
+
+</body>
+</html>
