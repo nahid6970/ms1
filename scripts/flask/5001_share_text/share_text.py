@@ -38,18 +38,37 @@ def read_logs():
                 parts = entry.split("\n", 1)
                 if len(parts) == 2:
                     text = parts[1].strip()
-                    # Remove separator from the last entry (most recent)
+                    # Remove separator from the last entry (most recent) if present
                     if i == 0 and text.endswith(separator):
                         text = text[: -len(separator)].strip()
                     logs.append((parts[0], text))
             return logs
     return []
 
+def delete_log_entry(index_to_delete):
+    """Deletes a specific log entry based on its index (0-based, from the most recent)."""
+    if os.path.exists(log_file):
+        with open(log_file, "r", encoding="utf-8") as file:
+            content = file.read().strip()
+        if content:
+            entries = content.split(f"\n{separator}\n")
+            
+            # Since we display logs in reverse order (newest first), we need to adjust the index
+            # to match the original file order (oldest first).
+            original_index = len(entries) - 1 - index_to_delete
+            
+            if 0 <= original_index < len(entries):
+                del entries[original_index]
+                with open(log_file, "w", encoding="utf-8") as file:
+                    file.write(f"\n{separator}\n".join(entries))
+                    if entries: # Ensure a trailing separator if there are still entries
+                        file.write(f"\n{separator}\n")
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        # Get the text from the textarea
+        # Handle text submission
         shared_text = request.form.get("text", "")
         if shared_text:
             write_to_log(shared_text)
@@ -64,6 +83,12 @@ def clean_logs():
     if os.path.exists(log_file):
         with open(log_file, "w", encoding="utf-8") as file:
             file.write("")
+    return redirect(url_for('index'))
+
+@app.route("/delete/<int:index>", methods=["POST"])
+def delete_entry(index):
+    """Route to handle deleting a single log entry."""
+    delete_log_entry(index)
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
