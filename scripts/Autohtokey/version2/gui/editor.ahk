@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0
 
-myGui := Gui("+AlwaysOnTop -Caption", "Control Panel")
+myGui := Gui("+AlwaysOnTop -Caption +ToolWindow -SysMenu +Owner", "Control Panel")
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
 myGui.MarginX := 1
 myGui.MarginY := 1
@@ -9,7 +9,7 @@ myGui.MarginY := 1
 myGui.SetFont("s20 Bold", "Jetbrainsmono nfp")
 
 ; Close (✕) and Reload (↻)
-myGui.Add("Text", "xm y+5 BackgroundFF5C5C cFFFFFF w40 +Center", "✕").OnEvent("Click", (*) => ExitApp())
+myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w40 +Center", "✕").OnEvent("Click", (*) => ExitApp())
 myGui.Add("Text", "xm y+5 BackgroundFFD966 c000000 w40 +Center", "↻").OnEvent("Click", (*) => Reload())
 
 ; Functional buttons
