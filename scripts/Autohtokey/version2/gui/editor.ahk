@@ -9,8 +9,8 @@ myGui.MarginY := 1
 myGui.SetFont("s20 Bold", "Jetbrainsmono nfp")
 
 ; Close (✕) and Reload (↻)
-myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w40 +Center", "✕").OnEvent("Click", (*) => ExitApp())
-myGui.Add("Text", "xm y+5 BackgroundFFD966 c000000 w40 +Center", "↻").OnEvent("Click", (*) => Reload())
+myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w40 +Center", "󰅗").OnEvent("Click", (*) => ExitApp())
+myGui.Add("Text", "xm y+5 Backgroundffffff c1E90FF w40 +Center", "󰜉").OnEvent("Click", (*) => Reload())
 
 ; Functional buttons
 myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "").OnEvent("Click", (*) => (myGui.Destroy(), Sleep(500), Send("#+f"))) ; Text Grab
@@ -18,7 +18,7 @@ myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "").OnEvent(
 myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\xy\XY_CroosHair.py",, "Hide"))) ; CrossHair
 myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w40 +Center", "").OnEvent("Click", (*) => (Run("C:\ms1\scripts\Locker.py",, "Hide"))) ; Locker
 
-myGui.Add("Text" , "xm y+5 Backgroundffffff c000000 w40 +Center" , "󱕐" )
+myGui.Add("Text" , "xm y+5 Backgroundffffff c000000 w40 +Center" , "" )
 .OnEvent("Click"
     , (*) => (
         ; Activate your app by its executable name
