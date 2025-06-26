@@ -4,7 +4,7 @@ import datetime
 import pyperclip
 
 # Log file path
-log_file = r"C:\msBackups\@JOB\copy_pasta.txt"
+log_file = r"C:\msBackups\clipboard.txt"
 separator = "-----x-----"
 
 # Make sure directory exists
