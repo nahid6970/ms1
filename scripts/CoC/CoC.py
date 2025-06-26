@@ -656,6 +656,107 @@ EVENT_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 load_troop_keys()
 
 
+#* ███████╗ █████╗ ███╗   ███╗███████╗
+#* ██╔════╝██╔══██╗████╗ ████║██╔════╝
+#* █████╗  ███████║██╔████╔██║█████╗
+#* ██╔══╝  ██╔══██║██║╚██╔╝██║██╔══╝
+#* ██║     ██║  ██║██║ ╚═╝ ██║███████╗
+#* ╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+# #* Fame Fame Fame Fame
+def FameFunction(button):
+    """Toggles the two-region attack functionality."""
+    # Use a dictionary to manage thread state and reference inside the function
+    state = getattr(FameFunction, "state", {"thread": None, "stop_flag": True})
+
+    if state["thread"] and state["thread"].is_alive():
+        # Stop the thread
+        state["stop_flag"] = True
+        state["thread"].join()
+        button.config(text="Builder", bg="#bda24a", fg="#000000")
+    else:
+        # Start the thread
+        state["stop_flag"] = False
+
+        def AdditionalFunction():
+            window = focus_window(window_title)
+            if not window:
+                print(f"Window '{window_title}' not found.")
+                return
+            try:
+                while not state["stop_flag"]:
+                    focus_window(window_title)
+                    # Example logic
+
+                    if find_image(r"C:\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
+                        press_global_screen_with_delays((1276, 200,1))
+                        press_global_screen_with_delays((1339, 846,1))
+                        press_global_screen_with_delays((268, 875,1),(268, 875,1))
+                        press_global_screen_with_delays((1355, 671,1))
+
+                    if find_image(r"C:\msBackups\CoC\builder\return.png", confidence=0.8, region=(797, 772, 1115, 920)): 
+                        press_global_screen_with_delays((960, 840,1))
+
+                    #! 1st troops
+                    if find_image(r"C:\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
+                        # press_keys_with_delays(window, 'x',1, 'y',1, 'z',1)
+                        press_keys_with_delays(window, 't',4)
+                        press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
+                        press_keys_with_delays(window, '3',1, 'y',1, '3',1)
+                        press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
+                    #! 2nd troops
+                    if find_image(r"C:\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
+                        press_keys_with_delays(window, 't',4)
+                        press_keys_with_delays(window, '6',1, 'x',1, '7',1, 'z',1)
+                        press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
+                        press_keys_with_delays(window, '3',1, 'y',1, '3',1)
+                        press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
+ 
+
+                    # elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
+
+                    # #! GateKeeper in order for other to happen this image first need to be found
+                    # elif find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                    #     # Step 3: Execute attack sequence
+                    #     press_keys_with_delays(window, '', 1)
+                    #     # Step 1: Store all matched positions
+
+                    # if find_image(Resume, confidence=0.8): press_key(window, 'r')
+                    # elif find_image(SPACE, confidence=0.8): press_key(window, ' ')
+                    # elif find_image(StartFame): press_key(window, 'p')
+                    # elif find_image(WorldIcon, confidence=0.8): press_key(window, 'o')
+                    # elif find_image(e_image, region=e_image_region): press_key(window, 'e')
+                    # elif find_image(GoBack, confidence=0.8): press_key(window, 'b')
+                    # # elif any(find_image(image) for image in continueF): press_key(window, 'c')
+                    # # elif any(find_image(image) for image in continueF): press_keys_with_delays(window, 'c', 2,  "e", 0 )
+                    # elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
+
+                    # elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=1, region=(1079, 178, 1095, 196)): press_global_screen_with_delays(( 450, 65, 10)) #! not working duel still ranking lost
+                    # # elif find_image(r"C:\msBackups\shadowfight3\fame\Lost_2nd_Round.png", confidence=0.8, region=(804, 176, 1101, 199)): press_global_screen_with_delays(( 960, 540, 3)) #! not working duel still ranking lost
+
+                    # elif (find_image(default_ads, confidence=0.8, region=(177, 83, 263, 158)) and 
+                    #     find_image(default_sbs, confidence=0.8, region=(177, 83, 500, 500))):
+                    #     press_global_screen_with_delays((215, 118, 2))
+
+                   
+                   
+                    # elif any(find_image(image) for image in notifyF):
+                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                    #     time.sleep(60)
+                    time.sleep(2)
+            except KeyboardInterrupt: print("Script stopped by user.")
+        # Create and start the thread
+        thread = threading.Thread(target=AdditionalFunction)
+        thread.daemon = True
+        thread.start()
+        # Save the thread in the state dictionary
+        state["thread"] = thread
+        button.config(text="Stop", bg="#1d2027", fg="#fc0000")
+    # Save state to the function attribute for persistence
+    FameFunction.state = state
+# Button logic
+Fame_BT = Button( ROOT, text="Builder", bg="#bda24a", fg="#000000", width=10, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+
 
 # def restart():
 #     display_image_found_chart()  # Show the summary of found images
