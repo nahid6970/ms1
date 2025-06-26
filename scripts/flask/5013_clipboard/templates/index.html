@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clipboard Serial Logger</title>
+</head>
+<body>
+    <h1>Clipboard Serial Logger</h1>
+    <form method="POST">
+        <textarea name="text" rows="4" cols="50" placeholder="Paste or type here..."></textarea><br>
+        <button type="submit">Add</button>
+    </form>
+    <form method="POST" action="/paste_all">
+        <button type="submit">📋 Copy All Entries</button>
+    </form>
+    <form method="POST" action="/clean">
+        <button type="submit">🧹 Clean All</button>
+    </form>
+    <h2>History:</h2>
+    <ul>
+        {% for timestamp, text in logs %}
+        <li>
+            <strong>{{ timestamp }}</strong><br>
+            <pre>{{ text }}</pre>
+            <form method="POST" action="/delete/{{ loop.index0 }}">
+                <button type="submit">❌ Delete</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
