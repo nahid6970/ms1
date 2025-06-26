@@ -706,10 +706,10 @@ def FameFunction(button):
                     #! 2nd troops
                     if find_image(r"C:\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
                         press_keys_with_delays(window, 'f',4)
-                        press_keys_with_delays(window, '6',1, 'x',1, '7',1, 'z',1)
-                        press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
+                        press_keys_with_delays(window, '6',0, 'x',0, '7',0, 'z',0)
+                        press_keys_with_delays(window, '0',0, 'x',0, '1',0, 'y',0, '2',0, 'z',0)
                         press_keys_with_delays(window, '3',1, 'y',1, '3',1)
-                        press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
+                        press_keys_with_delays(window, '4',0, 'x',0, '5',0, 'z',0)
 
                     time.sleep(2)
             except KeyboardInterrupt: print("Script stopped by user.")
