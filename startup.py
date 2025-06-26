@@ -36,6 +36,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "Flask - 5008 - Valorant Match"    ,"paths": [r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"] , "Command": "C:\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py"},
 {"type": "Command","name": "Flask - 5009 - MCQ"               ,"paths": [r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"] , "Command": "C:\\ms1\\scripts\\flask\\5009_MCQ\\app.py"},
 {"type": "Command","name": "Flask - 5010 - CoC"               ,"paths": [r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"] , "Command": "C:\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py"},
+{"type": "Command","name": "Clipboard"                        ,"paths": [r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe"] , "Command": "C:\\ms1\\scripts\\clipboard.py"},
 {"type": "Command","name": "Komorebi"                         ,"paths": [r"C:\ms1\scripts\Autohtokey\Command\komorebi.ahk"]},
 {"type": "Command","name": "mypygui"                          ,"paths": [r"C:\ms1\scripts\Autohtokey\Command\mypygui.ahk"]},
 {"type": "Command","name": "Open WebUI"                       ,"paths": [r"C:\ms1\scripts\Autohtokey\Command\openwebui.ahk"]},
