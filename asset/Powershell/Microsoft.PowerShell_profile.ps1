@@ -757,7 +757,21 @@ if (-not (Test-Path $ProfilePath)) {
 
 #* Import List
 # Import-Module scoop-completion
-Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
+
+function killp  {
+    $processName = (Get-Process | Select-Object Name, CPU | Sort-Object CPU -Descending | Format-Table -AutoSize | Out-String | fzf) -split '\s{2,}' | Select-Object -First 1; if ($processName) { Stop-Process -Name $processName -Force; Write-Host "Process $processName terminated." } else { Write-Host "No process selected." }
+}
+
+# function filterfzf {
+#     param(
+#         [string]$Command,
+#         [string]$Text
+#     )
+#     $output = Invoke-Expression "$Command" | Out-String
+#     $filteredOutput = $output -split "`n" | fzf --query="$Text"
+#     Write-Output $filteredOutput
+# }
+
 # Import-Module -Name C:\ms1\asset\Powershell\pwsh_AutinHistory.ps1
 # Import-Module -Name C:\ms1\asset\Powershell\pwsh_Polyfill.ps1
 
@@ -781,26 +795,27 @@ Import-Module -Name C:\ms1\asset\Powershell\pwsh_alias.ps1
 # Set-Alias cdl Pop-Location
 
 
-# File to store the last directory
-$global:LastDirectoryFile = "$env:USERPROFILE\last_directory.txt"
-# Function to save the current directory to a file
-function Save-LastDirectory {
-    Set-Content -Path $global:LastDirectoryFile -Value (Get-Location).Path
-}
-# Load the last directory from the file, if it exists
-if (Test-Path $global:LastDirectoryFile) {
-    $global:LastDirectory = Get-Content -Path $global:LastDirectoryFile
-}
-# Alias to save the current directory to the location stack
-Set-Alias cds Save-LastDirectory
-# Alias to return to the last saved directory from the location stack
-function cdl {
-    if ($global:LastDirectory) {
-        Set-Location -Path $global:LastDirectory
-    } else {
-        Write-Host "No last directory found." -ForegroundColor Yellow
-    }
-}
+# # File to store the last directory
+# $global:LastDirectoryFile = "$env:USERPROFILE\last_directory.txt"
+# # Function to save the current directory to a file
+# function Save-LastDirectory {
+#     Set-Content -Path $global:LastDirectoryFile -Value (Get-Location).Path
+# }
+# # Load the last directory from the file, if it exists
+# if (Test-Path $global:LastDirectoryFile) {
+#     $global:LastDirectory = Get-Content -Path $global:LastDirectoryFile
+# }
+# # Alias to save the current directory to the location stack
+# Set-Alias cds Save-LastDirectory
+# # Alias to return to the last saved directory from the location stack
+
+# function cdl {
+#     if ($global:LastDirectory) {
+#         Set-Location -Path $global:LastDirectory
+#     } else {
+#         Write-Host "No last directory found." -ForegroundColor Yellow
+#     }
+# }
 
 
 # #! Dynamically define functions to avoid IDE references
@@ -818,41 +833,43 @@ New-Item -Path Function:ms3 -Value  { Set-Location c:\ms3\ } -Force | Out-Null
 
 New-Item -Path Function:trim -Value { C:\Users\nahid\OneDrive\Git\ms1\scripts\ffmpeg\trim.ps1 } -Force | Out-Null
 
-function wget_install_fzf { winget search --exact "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget install $_.split()[0] } }
-function wget_uninstall_fzf { winget list  "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget uninstall $_.split()[0] } }
+# function wget_install_fzf { winget search --exact "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget install $_.split()[0] } }
+# function wget_uninstall_fzf { winget list  "" | fzf --multi --preview 'winget show {1}' | ForEach-Object { winget uninstall $_.split()[0] } }
 
-function scoop_install_fzf { winget search  "" | fzf --multi --preview 'scoop info {1}' | ForEach-Object { scoop install $_.split()[0] } }
-function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop show {1}' | ForEach-Object { scoop uninstall $_.split()[0] } }
+# function scoop_install_fzf { winget search  "" | fzf --multi --preview 'scoop info {1}' | ForEach-Object { scoop install $_.split()[0] } }
+# function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop show {1}' | ForEach-Object { scoop uninstall $_.split()[0] } }
 
 Set-Alias trim C:\ms1\scripts\ffmpeg\trim.ps1
 
-function sync { c:\ms1\sync.ps1 }
+# function sync { c:\ms1\sync.ps1 }
 
-function prowlarr_stop { Stop-Process -Name prowlarr }
-function prowlarr      { Start-Process -FilePath "C:\ProgramData\Prowlarr\bin\Prowlarr.exe" }
-function sonarr        { Start-Process -FilePath "C:\ProgramData\Sonarr\bin\Sonarr.exe" }
-function sonarr_stop   { Stop-Process -Name sonarr }
-function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Radarr.exe" }
-function radarr_stop   { Stop-Process -Name radarr }
+# function prowlarr_stop { Stop-Process -Name prowlarr }
+# function prowlarr      { Start-Process -FilePath "C:\ProgramData\Prowlarr\bin\Prowlarr.exe" }
+# function sonarr        { Start-Process -FilePath "C:\ProgramData\Sonarr\bin\Sonarr.exe" }
+# function sonarr_stop   { Stop-Process -Name sonarr }
+# function radarr        { Start-Process -FilePath "C:\ProgramData\Radarr\bin\Radarr.exe" }
+# function radarr_stop   { Stop-Process -Name radarr }
 
 
-# Run in PowerShell remove ( Warning: PowerShell detected that you might be using a screen reader and has disabled PSReadLine for compatibility purposes. If you want to re-enable it, run 'Import-Module PSReadLine'. )
-(Add-Type -PassThru -Name ScreenReaderUtil -Namespace WinApiHelper -MemberDefinition @'
-  const int SPIF_SENDCHANGE = 0x0002;
-  const int SPI_SETSCREENREADER = 0x0047;
+#! Run in PowerShell remove ( Warning: PowerShell detected that you might be using a 
+#! screen reader and has disabled PSReadLine for compatibility purposes. If you want
+#! to re-enable it, run 'Import-Module PSReadLine'. )
+# (Add-Type -PassThru -Name ScreenReaderUtil -Namespace WinApiHelper -MemberDefinition @'
+#   const int SPIF_SENDCHANGE = 0x0002;
+#   const int SPI_SETSCREENREADER = 0x0047;
 
-  [DllImport("user32", SetLastError = true, CharSet = CharSet.Unicode)]
-  private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+#   [DllImport("user32", SetLastError = true, CharSet = CharSet.Unicode)]
+#   private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
 
-  public static void EnableScreenReader(bool enable)
-  {
-    var ok = SystemParametersInfo(SPI_SETSCREENREADER, enable ? 1u : 0u, IntPtr.Zero, SPIF_SENDCHANGE);
-    if (!ok)
-    {
-      throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
-    }
-  }
-'@)::EnableScreenReader($false)
+#   public static void EnableScreenReader(bool enable)
+#   {
+#     var ok = SystemParametersInfo(SPI_SETSCREENREADER, enable ? 1u : 0u, IntPtr.Zero, SPIF_SENDCHANGE);
+#     if (!ok)
+#     {
+#       throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+#     }
+#   }
+# '@)::EnableScreenReader($false)
 
 
 function pkill {
@@ -874,8 +891,10 @@ function pkill {
         Write-Host "No process found matching '$Name'" -ForegroundColor Yellow
     }
 }
+
 # $env:GEMINI_API_KEY = "AIzaSyD3tpmHrTXFJGAvL7N055Qz1b4ZRUX6yJM"
 $ENV:STARSHIP_CONFIG = "C:\ms1\linux\config\.config\starship\starship.toml"
+
 Invoke-Expression (& 'C:\Users\nahid\scoop\shims\starship.exe' init powershell --print-full-init | Out-String)
 # oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
