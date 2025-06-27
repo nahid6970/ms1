@@ -58,9 +58,9 @@ Persistent
 
 
 ;! monitor
-RAlt & 1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
-RAlt & 2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
-RAlt & 3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
+RAlt & Numpad1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
+RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
+RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
 
 ;! gui
 !b::Run("C:\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
