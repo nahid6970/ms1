@@ -12,7 +12,7 @@
   "border_width": 2,
   "border_offset": -1,
 
-  "global_work_area_offset": {"left": -40, "right": -80, "top": -38, "bottom": -75},
+  "global_work_area_offset": {"left": -40, "right": -80, "top": -40, "bottom": -38},
 
   "theme": {
     "palette": "Base16",
