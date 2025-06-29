@@ -1,5 +1,8 @@
+import json
 import sys
 import os
+
+import keyboard
 
 if "python312" not in sys.executable:  # Check if the script is NOT running with Python 3.12
     os.execvp("python312", ["python312"] + sys.argv)  # Restart with python312
@@ -25,6 +28,12 @@ from chilimangoes import grab_screen
 # This will make ImageGrab.grab capture all monitors, not just the primary
 ImageGrab.grab = partial(ImageGrab.grab, all_screens=True)
 
+def run_command(pwsh_command):
+    """Run a PowerShell command in a new terminal window."""
+    # Using 'start' (Windows shell command) to open a new window
+    # Using pwsh with -NoExit so the window stays open
+    subprocess.Popen(f'start pwsh -NoExit -Command "{pwsh_command}"', shell=True)
+
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
 ROOT.attributes('-topmost', True) 
@@ -39,6 +48,7 @@ BORDER_FRAME = create_custom_border(ROOT)
 
 # Disable fail-safe to prevent interruptions
 pyautogui.FAILSAFE = False
+window_title='LDPlayer'
 
 #* ███████╗██╗███╗   ██╗██████╗     ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗
 #* ██╔════╝██║████╗  ██║██╔══██╗    ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═██╗████╗  ██║
@@ -356,201 +366,364 @@ def close_window(event=None):
     script_path = r"C:\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
-#!  █████╗ ██╗  ██╗██╗  ██╗     █████╗ ████████╗████████╗ █████╗  ██████╗██╗  ██╗
-#! ██╔══██╗██║  ██║██║ ██╔╝    ██╔══██╗╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-#! ███████║███████║█████╔╝     ███████║   ██║      ██║   ███████║██║     █████╔╝
-#! ██╔══██║██╔══██║██╔═██╗     ██╔══██║   ██║      ██║   ██╔══██║██║     ██╔═██╗
-#! ██║  ██║██║  ██║██║  ██╗    ██║  ██║   ██║      ██║   ██║  ██║╚██████╗██║  ██╗
-#! ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-# Global flag for stopping the threads
-image_found = False
-action_timer = None
+#* ███████╗██╗   ██╗███████╗███╗   ██╗████████╗
+#* ██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝
+#* █████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║
+#* ██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║
+#* ███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║
+#* ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝
+EVENT_SAVE_FILE = r"C:\Users\nahid\clash_of_clans.txt"
+EVENT_KEYS_FILE = r"C:\Users\nahid\clash_of_clans_keys.json"
 
-# File path to save the selected key
-SAVE_FILE = r"C:\Users\nahid\sf3_attack.txt"
-
-# Mapping keys to descriptions
-key_mapping = {
-    "F13": "KOS 2 Tap",
-    "F14": "KOS Fame",
-    "F15": "Hound",
-    "F21": "Butcher",
-    "F16": "Hound vortex",
-    "F17": "Laggy",
-    "F18": "Stranger",
-    "F19": "Possessed",
-    "F20": "Event"
+# Original event key mapping
+event_key_mapping = {
+    "num1": "T1",
+    "num2": "T2",
+    "num3": "ALT",
+    # "num4": "T4",
 }
 
-# Generate dropdown values like "F13: KOS"
-dropdown_values = {f"{key}: {desc}": key for key, desc in key_mapping.items()}
+# Troop/hero key options
+troop_key_mapping = {
+    "null": "❌",
+    "0": "num0",
+    "1": "num1",
+    "2": "num2",
+    "3": "num3",
+    "4": "num4",
+    "5": "num5",
+    "6": "num6",
+    "7": "num7",
+    "8": "num8",
+    "9": "num9"
+}
 
-def save_selected_key(key):
-    """Save the selected key to a file."""
+event_dropdown_values = {f"{key}: {desc}": key for key, desc in event_key_mapping.items()}
+
+# --- Centralized Troop/Hero Definitions ---
+# Added 'type' field to categorize for coloring
+TROOP_HERO_DEFS = [
+    # {"label": "Goblin", "var_name": "goblin_key", "default": "0", "type": "troop"},
+    # {"label": "Valk", "var_name": "valkyrie_key", "default": "1", "type": "troop"},
+    # {"label": "Jump", "var_name": "jump_spell_key", "default": "5", "type": "spell"},
+    # {"label": "Rage", "var_name": "rage_spell_key", "default": "4", "type": "spell"},
+    # {"label": "King", "var_name": "king_key", "default": "6", "type": "hero"},
+    # {"label": "Queen", "var_name": "queen_key", "default": "7", "type": "hero"},
+    # {"label": "Warden", "var_name": "warden_key", "default": "3", "type": "hero"},
+    # {"label": "M.Prince", "var_name": "MinionPrince_key", "default": "2", "type": "hero"},
+]
+
+# Define colors for each type - now includes 'bg' for background
+COLOR_MAP = {
+    "hero": {"fg": "#FFD700", "bg": "#2F4F4F"},  # Gold text on DarkSlateGray background
+    "troop": {"fg": "#8B4513", "bg": "#DDA0DD"}, # SaddleBrown text on Plum background
+    "spell": {"fg": "#4169E1", "bg": "#D3D3D3"}, # RoyalBlue text on LightGray background
+    "default": {"fg": "#000000", "bg": "#FFFFFF"} # Black text on White background
+}
+
+# Dynamically create StringVar instances for troops/heroes
+troop_vars = {}
+for troop_def in TROOP_HERO_DEFS:
+    troop_vars[troop_def["var_name"]] = tk.StringVar(value=troop_def["default"])
+    globals()[troop_def["var_name"]] = troop_vars[troop_def["var_name"]]
+
+
+def save_troop_keys():
+    data = {troop_def["var_name"].replace("_key", ""): troop_vars[troop_def["var_name"]].get()
+            for troop_def in TROOP_HERO_DEFS}
     try:
-        with open(SAVE_FILE, "w") as file:
+        with open(EVENT_KEYS_FILE, "w") as f:
+            json.dump(data, f)
+    except Exception as e:
+        print(f"Failed to save troop keys: {e}")
+
+# Modified load_troop_keys to also update the combobox display
+def load_troop_keys():
+    if os.path.exists(EVENT_KEYS_FILE):
+        try:
+            with open(EVENT_KEYS_FILE, "r") as f:
+                data = json.load(f)
+                for troop_def in TROOP_HERO_DEFS:
+                    key_name = troop_def["var_name"].replace("_key", "")
+                    loaded_key = data.get(key_name, troop_def["default"])
+                    troop_vars[troop_def["var_name"]].set(loaded_key)
+                    # Update the display string in the Combobox
+                    # This relies on the global 'display_vars' dictionary
+                    if troop_def["var_name"] in display_vars:
+                        display_vars[troop_def["var_name"]].set(f"{troop_def['label']}: {loaded_key}")
+        except Exception as e:
+            print(f"Failed to load troop keys: {e}")
+
+def event_save_selected_key(key):
+    try:
+        with open(EVENT_SAVE_FILE, "w") as file:
             file.write(key)
     except Exception as e:
         print(f"Error saving key: {e}")
 
-def load_selected_key():
-    """Load the last selected key from the file."""
-    if os.path.exists(SAVE_FILE):
+def event_load_selected_key():
+    if os.path.exists(EVENT_SAVE_FILE):
         try:
-            with open(SAVE_FILE, "r") as file:
+            with open(EVENT_SAVE_FILE, "r") as file:
                 key = file.read().strip()
-                if key in key_mapping:  # Ensure it's a valid option
+                if key in event_key_mapping:
                     return key
         except Exception as e:
             print(f"Error loading key: {e}")
-    return "F13"  # Default to F13 if no file found
+    return "num1"
 
-def update_dropdown_display(event=None):
-    """Update the dropdown display to show only the description."""
-    selected_full = key_var.get()  # "F13: KOS"
-    selected_key = dropdown_values[selected_full]  # Extract "F13"
-    key_var.set(key_mapping[selected_key])  # Set only "KOS" in dropdown
-    save_selected_key(selected_key)  # Save selection
+def event_update_dropdown_display(event=None):
+    selected_full = key_var_eve.get()
+    selected_key = event_dropdown_values[selected_full]
+    key_var_eve.set(event_key_mapping[selected_key])
+    event_save_selected_key(selected_key)
 
-def action_main_handler_5():
-    """Toggles the functionality for Light Attack 2."""
-    state = getattr(action_main_handler_5, "state", {"thread": None, "stop_flag": True})
+def Event_Function():
+    state = getattr(Event_Function, "state", {"thread": None, "stop_flag": True})
 
     if state["thread"] and state["thread"].is_alive():
-        # Stop the thread
         state["stop_flag"] = True
         state["thread"].join()
-        ACTION_5_AHK.config(text="AHK", bg="#5a9b5a", fg="#222222")
+        EVENT_BT.config(text="CoC", bg="#ce5129", fg="#000000")
     else:
-        # Start the thread
         state["stop_flag"] = False
-        
+
         def search_and_act():
             window = focus_window(window_title)
             if not window:
                 print(f"Window '{window_title}' not found.")
                 return
-            
-            selected_description = key_var.get()
-            selected_key = next(k for k, v in key_mapping.items() if v == selected_description)
-            save_selected_key(selected_key)
-            
+
+            selected_description = key_var_eve.get()
+            selected_key = next(k for k, v in event_key_mapping.items() if v == selected_description)
+            event_save_selected_key(selected_key)
+
+            # image_action_map = [
+            #     # (r"C:\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
+            #     (r"C:\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
+            #     (r"C:\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
+            # ]
+
             try:
-                while not state["stop_flag"]:
-                    if any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF):
-                        print("Image found in Light Attack 2, resetting action timer.")
-                        action_timer = time.time()
-                        print(f"Triggering AHK with {selected_key} ({selected_description})...")
-                        key_down(window, selected_key); time.sleep(5); key_up(window, selected_key)
-                        print("AHK action completed.")
-                    else:
-                        time.sleep(0.05)
-            except KeyboardInterrupt:
-                print("Script stopped by user.")
-        
-        # Create and start the thread
+                while not Event_Function.state["stop_flag"]:
+                    
+                    # gold_found = find_image( r"C:\msBackups\CoC\MainBase\gold_full.png", confidence=1, region=(1411, 116, 1443, 151))
+                    # elixir_found = find_image( r"C:\msBackups\CoC\MainBase\elixir_full.png", confidence=1, region=(1418, 198, 1445, 235))
+
+
+
+                    # full_storage = find_image( r"C:\msBackups\CoC\MainBase\full_storage.png", confidence=0.85, region=(1398, 101, 1439, 256))
+                    
+
+
+                    # if train and not full_storage:
+                    #     press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
+
+                    # elif full_storage:
+                    #     run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m "example" +8801779787186')
+                    #     time.sleep(30)
+
+                    if find_image(r"C:\msBackups\CoC\MainBase\Train.png", confidence=0.8, region=(169, 684, 279, 790)):
+                        gold_found = find_image(r"C:\msBackups\CoC\MainBase\full_gold.png", confidence=0.95, region=(1410, 103, 1455, 245))
+                        elixir_found = find_image(r"C:\msBackups\CoC\MainBase\full_elixir.png", confidence=0.95, region=(1410, 103, 1455, 245))
+
+                        if gold_found or elixir_found:
+                            run_command('signal-cli --trust-new-identities always -a +8801533876178 send -m \""Storage Full"\" +8801779787186')
+                            time.sleep(30)
+                        else:
+                            press_global_screen_with_delays((265, 878, 1), (1313, 591, 1))
+
+
+                    # elif find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                    #     # Step 3: Execute attack sequence
+                    #     press_keys_with_delays(window, troop_vars["jump_spell_key"].get(), 1)
+                    #     press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
+                    #     press_keys_with_delays(window,
+                    #         troop_vars["warden_key"].get(), 1, 'p', 0,
+                    #         troop_vars["MinionPrince_key"].get(), 1, 'p', 0,
+                    #         troop_vars["queen_key"].get(), 1, 'p', 0,
+                    #         troop_vars["king_key"].get(), 1, 'p', 0
+                    #     )
+                    #     press_keys_with_delays(window, troop_vars["valkyrie_key"].get(), 0, 'f12', 3)
+                    #     press_keys_with_delays(window, troop_vars["rage_spell_key"].get(), 1)
+                    #     press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
+                    #     press_keys_with_delays(window, troop_vars["goblin_key"].get(), 1, 'f12', 1)
+
+                    elif find_image(r"C:\msBackups\CoC\MainBase\okay.png", confidence=0.8, region=(757, 758, 1158, 951)): press_global_screen_with_delays((961, 855,1))
+                    elif find_image(r"C:\msBackups\CoC\MainBase\return.png", confidence=0.8, region=(819, 786, 1087, 920)): press_global_screen_with_delays((961, 855,5))
+
+                    #! GateKeeper in order for other to happen this image first need to be found
+                    elif find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                        # Step 3: Execute attack sequence
+                        press_keys_with_delays(window, '', 1)
+                        # Step 1: Store all matched positions
+
+                        #! Single match and click since not array so no need to use match
+                        # jump = find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981))
+                        # if jump:
+                        #     center = pyautogui.center(jump)
+                        #     press_global_screen_with_delays((center[0], center[1], 1))
+                        #     press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
+
+                        matches = {
+                            "jump": find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            
+                            "minion_prince": find_image(r"C:\msBackups\CoC\MainBase\hero_Minion_prince.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "king": find_image(r"C:\msBackups\CoC\MainBase\hero_King.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "queen": find_image(r"C:\msBackups\CoC\MainBase\hero_Queen.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "warden": find_image(r"C:\msBackups\CoC\MainBase\hero_Warden.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "royalchampion": find_image(r"C:\msBackups\CoC\MainBase\hero_RoyalChampion.png", confidence=0.80, region=(167, 815, 1756, 981)),
+
+                            "valk": find_image(r"C:\msBackups\CoC\MainBase\valkyrie.png", confidence=0.80, region=(167, 815, 1756, 981)),
+                            "rage": find_image(r"C:\msBackups\CoC\MainBase\spell_Rage.png", confidence=0.90, region=(167, 815, 1756, 981)),
+                            "goblin": find_image(r"C:\msBackups\CoC\MainBase\goblin.png", confidence=0.80, region=(167, 815, 1756, 981))
+                        }
+
+                        # Step 2: Execute in preferred order
+                        if matches["jump"]:
+                            center = pyautogui.center(matches["jump"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_global_screen_with_delays((1230, 426, 1), (1227, 626, 1))
+
+                        if matches["minion_prince"]:
+                            center = pyautogui.center(matches["minion_prince"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["king"]:
+                            center = pyautogui.center(matches["king"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["queen"]:
+                            center = pyautogui.center(matches["queen"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["warden"]:
+                            center = pyautogui.center(matches["warden"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["royalchampion"]:
+                            center = pyautogui.center(matches["royalchampion"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'p', 1)
+
+                        if matches["valk"]:
+                            center = pyautogui.center(matches["valk"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'f12', 3)
+
+                        if matches["rage"]:
+                            center = pyautogui.center(matches["rage"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_global_screen_with_delays((1230, 426, 0), (1227, 626, 3), (1086, 508, 0))
+
+                        if matches["goblin"]:
+                            center = pyautogui.center(matches["goblin"])
+                            press_global_screen_with_delays((center[0], center[1], 1))
+                            press_keys_with_delays(window, 'f12', 3)
+
+
+                    # for image_path, region, action in image_action_map:
+                    #     if find_image(image_path, confidence=0.8, region=region):
+                    #         action()
+                    #         break
+
+                    time.sleep(0.05)
+
+            except KeyboardInterrupt: print("Script stopped by user.")
+
         thread = threading.Thread(target=search_and_act)
         thread.daemon = True
         thread.start()
-        # Save the thread in the state dictionary
         state["thread"] = thread
-        ACTION_5_AHK.config(text="Stop", bg="#1d2027", fg="#fc0000")
-    
-    action_main_handler_5.state = state
+        EVENT_BT.config(text="Stop", bg="#1d2027", fg="#fc0000")
 
-# Load last saved key
-last_selected_key = load_selected_key()
-last_selected_value = f"{last_selected_key}: {key_mapping[last_selected_key]}"
-# Dropdown variable (stores the displayed value like "KOS")
-key_var = tk.StringVar(value=key_mapping[last_selected_key])
+    Event_Function.state = state
 
-# Create a style object
+# --- GUI SETUP ---
 style = ttk.Style()
-style.theme_use("alt")
-# themelist = clam, alt, default, classic, vista, xpnative, winnative
+style.theme_use('default')
 
-# Configure the Combobox style
-style.configure(
-    "Custom.TCombobox",
-    padding=5,
-    selectbackground="#49ff43",  # Background when selected (fixed)
-    selectforeground="#000000",  # Text color when selected
-    # borderwidth=2,
-    # relief="solid",
-)
+# Last selected event key
+event_last_selected_key = event_load_selected_key()
+key_var_eve = tk.StringVar(value=event_key_mapping[event_last_selected_key])
 
-# Hover & Selection effects
-style.map(
-    "Custom.TCombobox",
-    background=[("readonly", "#ff6d6d"), ("active", "#ff2323")],
-    fieldbackground=[("readonly", "#49ff43")],
-    foreground=[("readonly", "#000000")], # Text color
-)
-# Custom Combobox widget (direct styling without ttk.Style)
-key_dropdown = ttk.Combobox( ROOT, values=list(dropdown_values.keys()), textvariable=key_var, font=("JetBrainsMono NFP", 10, "bold"), width=14, state="readonly", style="Custom.TCombobox", justify="center")
-key_dropdown.pack(side="left", padx=5, pady=5, anchor="center")
-# Set the default dropdown display to just the description
-key_dropdown.set(key_mapping[last_selected_key])
-# Update variable when selection changes
-key_dropdown.bind("<<ComboboxSelected>>", update_dropdown_display)
+# --- General style for the event dropdown (if you keep it) ---
+style.configure("EVENT.TCombobox", padding=5, selectbackground="#92e0fd", selectforeground="#000000")
+style.map("EVENT.TCombobox", background=[("readonly", "#7fff6b"), ("active", "#ff2323")], fieldbackground=[("readonly", "#92e0fd")], foreground=[("readonly", "#000000")])
 
-# Button to start/stop Light Attack 2
-ACTION_5_AHK = tk.Button(ROOT, text="AHK", bg="#5a9b5a", fg="#222222", width=5, height=0, command=action_main_handler_5, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
-ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
+# --- New: Dictionary to hold the StringVar for the Combobox display text ---
+display_vars = {}
+for troop_def in TROOP_HERO_DEFS:
+    # Initialize with "Label: DefaultKey" format
+    display_vars[troop_def["var_name"]] = tk.StringVar(value=f"{troop_def['label']}: {troop_def['default']}")
 
-#! ██████╗ ██╗    ██╗ █████╗ ██╗   ██╗     █████╗ ██╗  ██╗██╗  ██╗
-#! ╚════██╗██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔══██╗██║  ██║██║ ██╔╝
-#!  █████╔╝██║ █╗ ██║███████║ ╚████╔╝     ███████║███████║█████╔╝
-#! ██╔═══╝ ██║███╗██║██╔══██║  ╚██╔╝      ██╔══██║██╔══██║██╔═██╗
-#! ███████╗╚███╔███╔╝██║  ██║   ██║       ██║  ██║██║  ██║██║  ██╗
-#! ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
-# hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
-hornass =r"C:\msBackups\shadowfight3\testing\guardian_trash.png"
+# Create labeled dropdowns using the centralized TROOP_HERO_DEFS
+# Modified create_key_dropdown to use the new display_variable and accept a style_name
+def create_key_dropdown(label_text, value_variable, display_variable, style_name, label_fg_color="black", label_bg_color="white", label_width=6, dropdown_height=11):
+    frame = tk.Frame(ROOT)
+    frame.pack(side="left", padx=3)
+    # tk.Label(frame, text=label_text, font=("JetBrainsMono NFP", 8),
+    #           fg=label_fg_color, bg=label_bg_color, width=label_width).pack()
 
-def Attack2Way(button):
-    """Toggles the two-region attack functionality."""
-    # Use a dictionary to manage thread state and reference inside the function
-    state = getattr(Attack2Way, "state", {"thread": None, "stop_flag": True})
-    
-    if state["thread"] and state["thread"].is_alive():
-        # Stop the thread
-        state["stop_flag"] = True
-        state["thread"].join()
-        button.config(text="2Way", bg="#5a9b5a", fg="#fff")
-    else:
-        # Start the thread
-        state["stop_flag"] = False
+    def on_change(event):
+        # Update the hidden value_variable (e.g., goblin_key) with the selected raw key
+        selected_display_text = display_variable.get() # Get "Label: Key"
+        # Extract the raw key from the display text
+        selected_raw_key = selected_display_text.split(": ")[-1]
+        value_variable.set(selected_raw_key)
 
-        def AdditionalFunction():
-            window = focus_window(window_title)
-            if not window:
-                print(f"Window '{window_title}' not found.")
-                return
-            try:
-                while not state["stop_flag"]:
-                    focus_window(window_title)
-                    # Example logic
-                    if find_image(hornass, confidence=0.7, region=(219, 140, 291, 210)):
-                        press_key(window, 'F23')
-                    elif find_image(hornass, confidence=0.7, region=(302, 144, 370, 209)):
-                        press_key(window, 'F24')
-                    time.sleep(0.1)
-            except KeyboardInterrupt:
-                print("Script stopped by user.")
+        # Reconstruct the display string to ensure it's always "Label: Key"
+        display_variable.set(f"{label_text}: {selected_raw_key}")
 
-        # Create and start the thread
-        thread = threading.Thread(target=AdditionalFunction)
-        thread.daemon = True
-        thread.start()
+        save_troop_keys() # Save all keys after a change
 
-        # Save the thread in the state dictionary
-        state["thread"] = thread
-        button.config(text="Stop", bg="#1d2027", fg="#fc0000")
-    # Save state to the function attribute for persistence
-    Attack2Way.state = state
-# Button logic
-T2REGION_BT = Button( ROOT, text="2Way", bg="#5a9b5a", fg="#fff", width=5, height=0, command=lambda: Attack2Way(T2REGION_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-T2REGION_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+    cb = ttk.Combobox(
+        frame,
+        values=list(troop_key_mapping.keys()),
+        textvariable=display_variable,
+        font=("Comic Sans MS", 10, "bold"),
+        width=12,
+        state="readonly",
+        justify="center",
+        style=style_name, # Use the passed style_name
+        height=dropdown_height
+    )
+    cb.bind("<<ComboboxSelected>>", on_change)
+    cb.pack()
+
+# --- Define specific styles for each type of dropdown ---
+style.configure("Hero.TCombobox", padding=5, selectbackground="#92e0fd", selectforeground="#000000")
+style.map("Hero.TCombobox", background=[("readonly", "#7fff6b"), ("active", "#ff2323")], fieldbackground=[("readonly", "#92e0fd")], foreground=[("readonly", "#000000")])
+
+style.configure("Troop.TCombobox", padding=5, selectbackground="#ffb780", selectforeground="#000000")
+style.map("Troop.TCombobox", background=[("readonly", "#7fff6b"), ("active", "#ff2323")], fieldbackground=[("readonly", "#ffb780")], foreground=[("readonly", "#000000")])
+
+style.configure("Spell.TCombobox", padding=5, selectbackground="#b79aff", selectforeground="#000000")
+style.map("Spell.TCombobox", background=[("readonly", "#7fff6b"), ("active", "#ff2323")], fieldbackground=[("readonly", "#b79aff")], foreground=[("readonly", "#000000")])
+
+# Iterate through TROOP_HERO_DEFS and pass the appropriate colors and a *unique style name*
+for troop_def in TROOP_HERO_DEFS:
+    colors = COLOR_MAP.get(troop_def.get("type", "default"), COLOR_MAP["default"])
+    # Construct a unique style name based on the 'type'
+    dropdown_style_name = f"{troop_def.get('type', 'default').capitalize()}.TCombobox"
+
+    create_key_dropdown(troop_def["label"],
+                        troop_vars[troop_def["var_name"]],
+                        display_vars[troop_def["var_name"]],
+                        dropdown_style_name, # Pass the specific style name here
+                        label_fg_color=colors["fg"],
+                        label_bg_color=colors["bg"],
+                        label_width=6,
+                        dropdown_height=min(len(troop_key_mapping), 11))
+
+EVENT_BT = tk.Button(ROOT, text="CoC", bg="#ce5129", fg="#000000", width=5, height=0, command=Event_Function, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+EVENT_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
+
+load_troop_keys()
 
 
 #* ███████╗ █████╗ ███╗   ███╗███████╗
@@ -569,7 +742,7 @@ def FameFunction(button):
         # Stop the thread
         state["stop_flag"] = True
         state["thread"].join()
-        button.config(text="Fame", bg="#bda24a", fg="#000000")
+        button.config(text="Builder", bg="#bda24a", fg="#000000")
     else:
         # Start the thread
         state["stop_flag"] = False
@@ -583,6 +756,7 @@ def FameFunction(button):
                 while not state["stop_flag"]:
                     focus_window(window_title)
                     # Example logic
+
                     if find_image(r"C:\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
                         press_global_screen_with_delays((1276, 200,1))
                         press_global_screen_with_delays((1339, 846,1))
@@ -606,6 +780,7 @@ def FameFunction(button):
                         press_keys_with_delays(window, '0',0, 'x',0, '1',0, 'y',0, '2',0, 'z',0)
                         press_keys_with_delays(window, '3',1, 'y',1, '3',1)
                         press_keys_with_delays(window, '4',0, 'x',0, '5',0, 'z',0)
+
                     time.sleep(2)
             except KeyboardInterrupt: print("Script stopped by user.")
         # Create and start the thread
@@ -618,19 +793,27 @@ def FameFunction(button):
     # Save state to the function attribute for persistence
     FameFunction.state = state
 # Button logic
-Fame_BT = Button( ROOT, text="Fame", bg="#bda24a", fg="#000000", width=5, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Fame_BT = Button( ROOT, text="Builder", bg="#bda24a", fg="#000000", width=10, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
-
-
-# Restart function that displays the cumulative summary before restarting
-def restart():
-    display_image_found_chart()  # Show the summary of found images
-    ROOT.destroy()
-    subprocess.Popen([sys.executable] + sys.argv)
 
 # Button to toggle display
 display_button = Button(ROOT, text="M-1", bg="#0078D7", fg="#fff", width=8, height=0, command=toggle_display, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 display_button.pack(side="left", padx=(1, 1), pady=(1, 1))
+
+def restart():
+    display_image_found_chart()  # Show the summary of found images
+    # Launch a new process running this same script
+    subprocess.Popen([sys.executable] + sys.argv)
+    # Optional: give it a little time to start
+    time.sleep(0.5)
+    # Then destroy GUI and exit current process
+    ROOT.destroy()
+    sys.exit()  # ensures current process ends cleanly
+    
+def listen_for_esc():
+    keyboard.wait('esc')
+    restart()
+threading.Thread(target=listen_for_esc, daemon=True).start()
 
 # Button to restart the script
 Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=0, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
@@ -644,109 +827,12 @@ Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 #* ███████╗██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
 #* ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
 
-window_title='LDPlayer'
-# mhome = r"C:\msBackups\shadowfight3"
-# Home = rf"{mhome}\Home.png"
 
-# Home Page of the SH3
-Home=r"C:\msBackups\shadowfight3\Home.png"
-
-# # Action Related Images
-void_compass=r"C:\msBackups\shadowfight3\action\void_compass.png"
-eruption=r"C:\msBackups\shadowfight3\action\eruption.png"
-thud=r"C:\msBackups\shadowfight3\action\thud.png"
-collector=r"C:\msBackups\shadowfight3\action\collector.png"
-bolt=r"C:\msBackups\shadowfight3\action\bolt.png"
-uppercut=r"C:\msBackups\shadowfight3\action\uppercut.png"
-Peg_Top=r"C:\msBackups\shadowfight3\action\peg_top.png"
-KOS_Cloud=r"C:\msBackups\shadowfight3\action\Kos_Cloud.png"
-Temporary_Kibo=r"C:\msBackups\shadowfight3\action\temporary_kibo.png"
-Temporary_Serge=r"C:\msBackups\shadowfight3\action\temporary_serge.png"
-#! actionF = [void_compass, eruption, thud, collector]
-actionF = {
-    void_compass: 0.7,
-    eruption: 0.85,
-    KOS_Cloud: 0.85,
-    Temporary_Kibo: 0.85,
-    Temporary_Serge: 0.85,
-    thud: 0.7,
-    collector: 0.7,
-    uppercut: 0.7,
-    Peg_Top: 0.85,
-    # bolt: 1,
-}
-Action_region = (216, 99, 374, 253)  # Replace with your actual coordinates
-
-
-#* Continue Related Images
-cont1 =r"C:\msBackups\shadowfight3\continue\cont1.png"
-# cont2 =r"C:\msBackups\shadowfight3\continue\cont2.png"
-cont3 =r"C:\msBackups\shadowfight3\continue\cont3.png"
-cont4 =r"C:\msBackups\shadowfight3\continue\cont4.png"
-# cont5 =r"C:\msBackups\shadowfight3\continue\cont5.png"
-continueF = [cont1, cont3, cont4]
-contF_Region = (1380, 792, 1738, 966)
-
-SPACE =r"C:\msBackups\shadowfight3\fame\b_space2.png"
-Resume =r"C:\msBackups\shadowfight3\resume.png"
-later =r"C:\msBackups\shadowfight3\later.png"
-
-# Fame Related Images
-e_image      =r"C:\msBackups\shadowfight3\fame\b_tournament.png"
-e_image_region = (196, 656, 384, 845)  # Example coordinates and dimensions
-
-
-StartFame    =r"C:\msBackups\shadowfight3\fame\image_19.png"
-WorldIcon    =r"C:\msBackups\shadowfight3\fame\image_20.png"
-GoBack       =r"C:\msBackups\shadowfight3\fame\image_21.png"
-
-# Raids Related Images
-level3         =r"C:\msBackups\shadowfight3\raids\level3.png"
-participate    =r"C:\msBackups\shadowfight3\raids\participate.png"
-toraid         =r"C:\msBackups\shadowfight3\raids\to_raid.png"
-fight          =r"C:\msBackups\shadowfight3\raids\fightttttt.png"
-claimreward    =r"C:\msBackups\shadowfight3\raids\claim.png"
-
-# DailyMission=r"C:\msBackups\shadowfight3\DailyMission.png"
-
-# Event Related
-Tournament_step1=r"C:\msBackups\shadowfight3\event\Tournament.png"
-back_battlepass=r'C:\msBackups\shadowfight3\back_battlepass.png'
-
-Select_CreepyParty=r"C:\msBackups\shadowfight3\event\Select\CreepyParty.png"
-Select_SelectOption=r"C:\msBackups\shadowfight3\event\Select\Select.png"
-
-Open_Chest=r"C:\msBackups\shadowfight3\chest.png"
-
-# continue for ads
-passed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv.png"
-failed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv_failed.png"
-continueADS = [passed_50sv, failed_50sv]
-
-ads_folder = r"C:\msBackups\shadowfight3\ads\ads_auto_click"
-ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
-
-cont_folder = r"C:\msBackups\shadowfight3\cont_dynamic"
-cont_dynamic = glob.glob(os.path.join(cont_folder, "*.png"))
-
-back_GPlay=r"C:\msBackups\shadowfight3\ads\Back_GooglePlay.png"
-Error_Processing_Video=r"C:\msBackups\shadowfight3\ads\error_Video.png"
-
-skip=r'C:\msBackups\shadowfight3\skip.png'
-default_ads=r"C:\msBackups\shadowfight3\event\inside_ads.png"
-
-
-
-
-# ending
 
 ROOT.update_idletasks()
 width = ROOT.winfo_width()
 height = ROOT.winfo_height()
-
-
 x = (ROOT.winfo_screenwidth() // 2) - (width // 2)
 y = 0
-
 ROOT.geometry(f'{width}x{height}+{x}+{y}')
 ROOT.mainloop()
