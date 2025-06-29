@@ -53,8 +53,8 @@ last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
 
 # --- Display Selection Logic ---
-display_offsets = {"Display 1": (0, 0), "Display 2": (1920, 0)}
-display_cycle = ["Display 1", "Display 2"]
+display_offsets = {"M-1": (0, 0), "M-2": (1920, 0)}
+display_cycle = ["M-1", "M-2"]
 current_display_index = 0
 
 def toggle_display():
@@ -583,7 +583,7 @@ def FameFunction(button):
                 while not state["stop_flag"]:
                     focus_window(window_title)
                     # Example logic
-                    sf3_icon_test = find_image(r"C:\Users\nahid\Desktop\image_171.png", confidence=0.80, region=(541, 128, 942, 488))
+                    sf3_icon_test = find_image(r"C:\Users\nahid\Desktop\image_172.png", confidence=0.80, region=(1326, 227, 1477, 392))
                     if sf3_icon_test:
                         center = pyautogui.center(sf3_icon_test)
                         press_global_screen_with_delays((center[0], center[1], 1))
@@ -611,7 +611,7 @@ def restart():
     subprocess.Popen([sys.executable] + sys.argv)
 
 # Button to toggle display
-display_button = Button(ROOT, text="Display 1", bg="#0078D7", fg="#fff", width=8, height=0, command=toggle_display, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+display_button = Button(ROOT, text="M-1", bg="#0078D7", fg="#fff", width=8, height=0, command=toggle_display, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
 display_button.pack(side="left", padx=(1, 1), pady=(1, 1))
 
 # Button to restart the script
