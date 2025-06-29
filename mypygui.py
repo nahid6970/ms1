@@ -23,8 +23,11 @@ import time
 import tkinter as tk
 import win32gui
 import win32process
+import win32con
 
 from Reference import *
+from appbar import *
+
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -36,18 +39,18 @@ start_time = time.time()
 # Print ASCII art in the console
 print(r"""
 
-$$\   $$\           $$\       $$\       $$\ $$\   $$\  $$$$$$\
-$$$\  $$ |          $$ |      \__|      $$ |$$$\  $$ |$$  __$$\
-$$$$\ $$ | $$$$$$\  $$$$$$$\  $$\  $$$$$$$ |$$$$\ $$ |$$ /  $$ |
-$$ $$\$$ | \____$$\ $$  __$$\ $$ |$$  __$$ |$$ $$\$$ |$$$$$$$$ |
-$$ \$$$$ | $$$$$$$ |$$ |  $$ |$$ |$$ /  $$ |$$ \$$$$ |$$  __$$ |
-$$ |\$$$ |$$  __$$ |$$ |  $$ |$$ |$$ |  $$ |$$ |\$$$ |$$ |  $$ |
-$$ | \$$ |\$$$$$$$ |$$ |  $$ |$$ |\$$$$$$$ |$$ | \$$ |$$ |  $$ |
+$\   $\           $\       $\       $\ $\   $\  $$$\
+$$\  $ |          $ |      \__|      $ |$$\  $ |$  __$\
+$$\ $ | $$$\  $$$$\  $\  $$$$ |$$\ $ |$ /  $ |
+$ $\$ | \____$\ $  __$\ $ |$  __$ |$ $\$ |$$$$ |
+$ \$$ | $$$$ |$ |  $ |$ |$ /  $ |$ \$$ |$  __$ |
+$ |\$$ |$  __$ |$ |  $ |$ |$ |  $ |$ |\$$ |$ |  $ |
+$ | \$ |\$$$$ |$ |  $ |$ |\$$$$ |$ | \$ |$ |  $ |
 \__|  \__| \_______|\__|  \__|\__| \_______|\__|  \__|\__|  \__|
 
 """)
 
-#! Vaiables to track the position of the mouse when clicking​⁡
+#! Vaiables to track the position of the mouse when clicking
 drag_data = {"x": 0, "y": 0}
 
 def start_drag(event):
@@ -111,20 +114,34 @@ set_console_title("🔥")
 # Create main window
 ROOT = tk.Tk()
 ROOT.title("Python GUI")
-# ROOT.attributes('-topmost', True)  # Set always on top
-# ROOT.geometry("520x800")
 ROOT.configure(bg="#282c34")
-ROOT.overrideredirect(True)  # Remove default borders
+# We don't use overrideredirect because the AppBar registration handles the window style.
+ROOT.overrideredirect(True) 
 
 
 #!############################################################
-# def check_window_topmost():
-#     if not ROOT.attributes('-topmost'):
-#         ROOT.attributes('-topmost', True)
-#     ROOT.after(500, check_window_topmost)
-# # Call the function to check window topmost status periodically
-# check_window_topmost()
+# AppBar Registration
 #!############################################################
+screen_width = ROOT.winfo_screenwidth()
+screen_height = ROOT.winfo_screenheight()
+bar_height = 39
+bar_width = 1920
+
+# Set the initial geometry. The final position will be managed by the AppBar logic.
+x = screen_width // 2 - bar_width // 2
+y = 0
+ROOT.geometry(f"{bar_width}x{bar_height}+{x}+{y}")
+
+# We need to force the window to be created to get its handle (hwnd)
+ROOT.update_idletasks()
+hwnd = win32gui.GetParent(ROOT.winfo_id())
+
+# Register the window as an AppBar
+u_callback_message = win32con.WM_USER + 42
+register_appbar(hwnd, u_callback_message)
+
+# Set the position of the AppBar at the top of the screen
+set_appbar_position(hwnd, ABE_TOP, bar_width, bar_height, screen_width, screen_height)
 
 
 # Create custom border
@@ -137,56 +154,6 @@ BORDER_FRAME = create_custom_border(ROOT)
 
 default_font = ("Jetbrainsmono nfp", 10)
 ROOT.option_add("*Font", default_font)
-
-screen_width = ROOT.winfo_screenwidth()
-screen_height = ROOT.winfo_screenheight()
-
-x = screen_width//2 - 1920//2
-# y = screen_height//2 - 800//2
-# y = screen_height-47-40
-y = 993
-ROOT.geometry(f"1920x39+{x}+{y}") #! overall size of the window
-
-
-# #! Resize Window
-# #* Function to toggle window size
-# def toggle_window_size(size):
-#     global window_state
-#     global x
-#     global y
-#     if size == 'line':
-#         ROOT.geometry('1920x39')
-#         x = screen_width // 2 - 1920 // 2
-#         y = 993
-#         ROOT.configure(bg='red')
-#         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
-#         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
-#     elif size == 'max':
-#         ROOT.geometry('1920x140')
-#         x = screen_width // 2 - 1920 // 2
-#         y = 892
-#         ROOT.configure(bg='#1d2027')
-#         LB_L.config(text='\ueab7', bg="#1d2027", fg="#00FF00", height=1, width=0, font=("JetBrainsMono NF", 16, "bold"))
-#         LB_M.config(text='\uea72', bg="#1d2027", fg="#26b2f3", height=1, width=0, font=("JetBrainsMono NF", 18, "bold"))
-#     ROOT.focus_force()
-#     ROOT.update_idletasks()
-#     ROOT.geometry(f'{ROOT.winfo_width()}x{ROOT.winfo_height()}+{x}+{y}')
-# def on_windows_x_pressed():
-#     global window_size_state
-#     if window_size_state == 'line':
-#         toggle_window_size('max')
-#         window_size_state = 'max'
-#     else:
-#         toggle_window_size('line')
-#         window_size_state = 'line'
-# #* Initial window size state
-# window_size_state = 'line'
-# #* Bind Windows + X to toggle between 'line' and 'max' sizesx
-# #! keyboard.add_hotkey('win+x', on_windows_x_pressed)
-
-# x = screen_width//2 - 753//2
-# y = 0
-# ROOT.geometry(f"+{x}+{y}")
 
 # Create main frame
 MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=1920, height=800)
@@ -227,7 +194,9 @@ def get_active_window_info():
 
 #! Close Window
 def close_window(event=None):
+    unregister_appbar(hwnd)
     ROOT.destroy()
+
 
 # def close_window(event=None):
 #     password = simpledialog.askstring("Password", "Enter the password to close the window:")
