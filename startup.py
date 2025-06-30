@@ -46,6 +46,7 @@ class StartupManager(tk.Tk):
 {"type": "Command","name": "Sync"                             ,"paths": [r"C:\\ms1\\scripts\\sync.ps1"]},
 {"type": "Command","name": "Syncthing"                        ,"paths": [r"C:\ms1\scripts\Autohtokey\Command\syncthing.ahk"]},
 {"type": "Command","name": "Virtual_Monitor"                  ,"paths": [r"C:\ms1\scripts\Autohtokey\Command\virtual_monitor.ahk"]},
+{"type": "Command","name": "Disable Defender"                 ,"paths": [r"C:\ms1\scripts\disable_defender.ps1"]},
 
 # {"type": "Command","name": "arr_monitor"      ,"paths": "Start-Process 'C:/ms1/scripts/arr/arr_monitor.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "NetworkCondition" ,"paths": "Start-Process 'C:\\ms1\\scripts\\NetworkCondition.ps1' -WindowStyle Hidden"},
