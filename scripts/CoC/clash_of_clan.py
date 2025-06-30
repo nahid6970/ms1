@@ -744,7 +744,7 @@ def FameFunction(button):
                         press_keys_with_delays(window, 'f',4)
                         press_keys_with_delays(window, '7',0, 'x',0, 'z',0,     'x',0, 'z',0, 'y',0) #!pekka Phase2
                         press_keys_with_delays(window, '0',0, 'y',0) #!hero
-                        press_keys_with_delays(window, '4',1, 'y',1, '4',1) #!bomber
+                        press_keys_with_delays(window, '4',0, 'y',0, '4',1) #!bomber
                         press_keys_with_delays(window, '5',0, 'x',0, '6',0, 'z',0) #!cart
 
                     # matches = {
