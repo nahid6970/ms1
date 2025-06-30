@@ -160,8 +160,6 @@ def find_image(image_path, confidence=0.7, region=None):
     return None
 
 
-
-
 # Flag to track if the notification has been sent
 notification_sent = False
 def ntfy_signal_cli():
@@ -185,55 +183,6 @@ def ntfy_signal_cli():
     finally:
         # Reset the flag when the function finishes
         notification_sent = False
-
-def ntfy_termux_rclone_touch():
-    command = "rclone touch g00:ntfy"
-    try:
-        while True:
-            os.system(f"powershell -Command \"{command}\"")
-            print("Command executed: rclone touch g00:ntfy")
-            time.sleep(30)
-    except KeyboardInterrupt:
-        print("Script stopped by user.")
-
-
-WhatsApp_Entry=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
-WhatsApp_Cally=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
-WhatsApp_Cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
-def ntfy_WhatsApp():
-    pyautogui.click(x=1778, y=900)
-    time.sleep(2)
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while True:  # Loop will continue indefinitely unless interrupted by an external condition
-            focus_window(window_title)
-            if find_image(WhatsApp_Entry): press_global_screen_with_delays((294,299,5),(594,908,2))
-            if find_image(WhatsApp_Cally): press_global_screen_with_delays((238,271,60))
-            # elif find_image(WhatsApp_Cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
-            time.sleep(0.1)
-    except KeyboardInterrupt: print("Script stopped by user.")
-
-
-Signal_Entry =r"C:\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
-Signal_Cally =r"C:\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
-def ntfy_Signal():
-    pyautogui.click(x=1778, y=900)
-    time.sleep(2)
-    window = focus_window(window_title)
-    if not window:
-        print(f"Window '{window_title}' not found.")
-        return
-    try:
-        while True:  # Loop will continue indefinitely unless interrupted by an external condition
-            focus_window(window_title)
-            if find_image(Signal_Entry, region=(233,241, 367,387)): press_global_screen_with_delays((294,299,3),(414,270,2))
-            if find_image(Signal_Cally, region=(1500,115, 1755,211)): press_global_screen_with_delays((1656,170,2),(1297,588,60))
-            # elif find_image(cancel, confidence=0.8): press_keys_with_delays(window, "c", 1)
-            time.sleep(0.1)
-    except KeyboardInterrupt: print("Script stopped by user.")
 
 
 # focus_window
@@ -558,7 +507,7 @@ def Event_Function():
                         press_keys_with_delays(window, '', 1)
                         # Step 1: Store all matched positions
 
-                        #! Single match and click since not array so no need to use match
+                        #! Single match and click ; since not array so no need to use match
                         # jump = find_image(r"C:\msBackups\CoC\MainBase\spell_Jump.png", confidence=0.80, region=(167, 815, 1756, 981))
                         # if jump:
                         #     center = pyautogui.center(jump)
@@ -758,28 +707,75 @@ def FameFunction(button):
                     # Example logic
 
                     if find_image(r"C:\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
-                        press_global_screen_with_delays((1276, 200,1))
-                        press_global_screen_with_delays((1339, 846,1))
                         press_global_screen_with_delays((268, 875,1),(268, 875,1))
                         press_global_screen_with_delays((1355, 671,1))
 
                     if find_image(r"C:\msBackups\CoC\builder\return.png", confidence=0.8, region=(797, 772, 1115, 920)): 
-                        press_global_screen_with_delays((960, 840,1))
+                        press_global_screen_with_delays((960, 840,5))
+                        press_global_screen_with_delays((1276, 200,1))
+                        press_global_screen_with_delays((1339, 846,1))
 
-                    #! 1st troops
+                    # #! 1st troops without Heroes
+                    # if find_image(r"C:\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
+                    #     # press_keys_with_delays(window, 'x',1, 'y',1, 'z',1)
+                    #     press_keys_with_delays(window, 't',4)
+                    #     press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
+                    #     press_keys_with_delays(window, '3',1, 'y',1, '3',1)
+                    #     press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
+                    # #! 2nd troops without Heroes
+                    # if find_image(r"C:\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
+                    #     press_keys_with_delays(window, 'f',4)
+                    #     press_keys_with_delays(window, '6',0, 'x',0, '7',0, 'z',0)
+                    #     press_keys_with_delays(window, '0',0, 'x',0, '1',0, 'y',0, '2',0, 'z',0)
+                    #     press_keys_with_delays(window, '3',1, 'y',1, '3',1)
+                    #     press_keys_with_delays(window, '4',0, 'x',0, '5',0, 'z',0)
+
+                    #! 1st troops with Heroes
                     if find_image(r"C:\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
                         # press_keys_with_delays(window, 'x',1, 'y',1, 'z',1)
                         press_keys_with_delays(window, 't',4)
-                        press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
-                        press_keys_with_delays(window, '3',1, 'y',1, '3',1)
-                        press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
-                    #! 2nd troops
-                    if find_image(r"C:\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
+                        press_keys_with_delays(window, '0',1, 'y',0) #!hero
+                        press_keys_with_delays(window, '1',0, 'x',0, 'y',0, 'z',0) #!pekka
+                        press_keys_with_delays(window, '4',0, 'y',0, '4',0) #!bomber
+                        press_keys_with_delays(window, '5',0, 'x',0, 'z',0) #!cart
+                    #! 2nd troops with Heroes
+                    if find_image(r"C:\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1159, 815, 1411, 980)): 
                         press_keys_with_delays(window, 'f',4)
-                        press_keys_with_delays(window, '6',0, 'x',0, '7',0, 'z',0)
-                        press_keys_with_delays(window, '0',0, 'x',0, '1',0, 'y',0, '2',0, 'z',0)
-                        press_keys_with_delays(window, '3',1, 'y',1, '3',1)
-                        press_keys_with_delays(window, '4',0, 'x',0, '5',0, 'z',0)
+                        press_keys_with_delays(window, '7',0, 'x',0, 'z',0,     'x',0, 'z',0, 'y',0) #!pekka Phase2
+                        press_keys_with_delays(window, '0',0, 'y',0) #!hero
+                        press_keys_with_delays(window, '4',1, 'y',1, '4',1) #!bomber
+                        press_keys_with_delays(window, '5',0, 'x',0, '6',0, 'z',0) #!cart
+
+                    # matches = {
+                    #     "hero_1": find_image(r"C:\msBackups\CoC\builder\hero_1.png", confidence=0.80, region=(165, 815, 1660, 983)),
+                    #     "pekka": find_image(r"C:\msBackups\CoC\builder\troop_pekka.png", confidence=0.80, region=(165, 815, 1660, 983)),
+                    #     "bomber": find_image(r"C:\msBackups\CoC\builder\troop_bomb.png", confidence=0.80, region=(165, 815, 1660, 983)),
+                    #     "cart": find_image(r"C:\msBackups\CoC\builder\troop_cart.png", confidence=0.80, region=(165, 815, 1660, 983)),
+                    # }
+                    # press_keys_with_delays(window, 't',4)
+
+                    # # Step 2: Execute in preferred order
+                    # if matches["hero_1"]:
+                    #     center = pyautogui.center(matches["hero_1"])
+                    #     press_global_screen_with_delays((center[0], center[1], 1))
+                    #     press_keys_with_delays(window, 'y',0)
+
+                    # if matches["pekka"]:
+                    #     center = pyautogui.center(matches["pekka"])
+                    #     press_global_screen_with_delays((center[0], center[1], 1))
+                    #     press_keys_with_delays(window, 'x',0, 'y',0, 'z',0,)
+                    #     press_keys_with_delays(window, 'x',0, 'z',0,)
+
+                    # if matches["bomber"]:
+                    #     center = pyautogui.center(matches["bomber"])
+                    #     press_global_screen_with_delays((center[0], center[1], 1))
+                    #     press_keys_with_delays(window, 'y',0)
+                    #     press_global_screen_with_delays((center[0], center[1], 1))
+
+                    # if matches["cart"]:
+                    #     center = pyautogui.center(matches["cart"])
+                    #     press_global_screen_with_delays((center[0], center[1], 1))
+                    #     press_keys_with_delays(window, 'x',0, 'z',0)
 
                     time.sleep(2)
             except KeyboardInterrupt: print("Script stopped by user.")
