@@ -707,13 +707,14 @@ def FameFunction(button):
                     # Example logic
 
                     if find_image(r"C:\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
-                        press_global_screen_with_delays((268, 875,1),(268, 875,1))
+                        press_global_screen_with_delays((268, 875,1))
                         press_global_screen_with_delays((1355, 671,1))
 
                     if find_image(r"C:\msBackups\CoC\builder\return.png", confidence=0.8, region=(797, 772, 1115, 920)): 
                         press_global_screen_with_delays((960, 840,5))
                         press_global_screen_with_delays((1276, 200,1))
                         press_global_screen_with_delays((1339, 846,1))
+                        press_global_screen_with_delays((1594, 622,1))
 
                     # #! 1st troops without Heroes
                     # if find_image(r"C:\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
