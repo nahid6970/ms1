@@ -1,6 +1,7 @@
 import http.server
 import socketserver
 import requests
+import subprocess
 import json
 
 PORT = 8000
@@ -17,46 +18,70 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        if self.path.startswith("/api"):
+        if self.path == "/api/stop_model":
+            self._handle_stop_model()
+        elif self.path.startswith("/api"):
             self._proxy_request()
         else:
             self.send_response(404)
             self.end_headers()
 
+    def _handle_stop_model(self):
+        try:
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            body = json.loads(post_data)
+            model_name = body.get("model")
+
+            if not model_name:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'Model name is required')
+                return
+
+            result = subprocess.run(
+                ["ollama", "stop", model_name],
+                capture_output=True,
+                text=True
+            )
+
+            self.send_response(200 if result.returncode == 0 else 500)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "returncode": result.returncode
+            }).encode())
+
+        except Exception as e:
+            self.send_error(500, f"Error stopping model: {e}")
+
     def _proxy_request(self):
         try:
             api_url = f"{OLLAMA_HOST}{self.path}"
-            
-            # Copy request headers from the client
             headers = {h: self.headers[h] for h in self.headers}
-            headers['Host'] = 'localhost:11434' # Set the correct host for Ollama
+            headers['Host'] = 'localhost:11434'
 
             if self.command == 'POST':
                 content_length = int(self.headers['Content-Length'])
                 post_data = self.rfile.read(content_length)
                 response = requests.post(api_url, data=post_data, headers=headers, stream=True)
-            else: # GET
+            else:
                 response = requests.get(api_url, headers=headers, stream=True)
 
-            # Send response status code
             self.send_response(response.status_code)
-
-            # Send headers
             for key, value in response.headers.items():
-                # Skip headers that can cause issues with proxying
                 if key.lower() not in ('transfer-encoding', 'content-encoding'):
                     self.send_header(key, value)
             self.end_headers()
 
-            # Stream the response back to the client
             for chunk in response.iter_content(chunk_size=8192):
                 self.wfile.write(chunk)
 
         except Exception as e:
             self.send_error(500, f"Proxy Error: {e}")
 
-
 with socketserver.TCPServer(("", PORT), OllamaProxyHandler) as httpd:
-    print(f"Serving at port {PORT}")
-    print(f"Open http://localhost:{PORT} in your browser.")
+    print(f"Serving at http://localhost:{PORT}")
     httpd.serve_forever()

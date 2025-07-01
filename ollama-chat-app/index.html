@@ -8,10 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     @import url("https://www.nerdfonts.com/assets/css/webfont.css");
-    body {
-      background-color: #f8f9fa;
-    }
-
+    body { background-color: #f8f9fa; }
     #chat-window {
       height: 400px;
       overflow-y: auto;
@@ -19,19 +16,9 @@
       padding: 1rem;
       background-color: white;
     }
-
-    .message {
-      margin-bottom: 1rem;
-    }
-
-    .user-message {
-      text-align: right;
-    }
-
-    .assistant-message .card-body {
-      background-color: #e9ecef;
-    }
-
+    .message { margin-bottom: 1rem; }
+    .user-message { text-align: right; }
+    .assistant-message .card-body { background-color: #e9ecef; }
     pre {
       background-color: #2d2d2d;
       color: #e0e0e0;
@@ -42,11 +29,7 @@
       white-space: pre-wrap;
       position: relative;
     }
-
-    code {
-      display: block;
-    }
-
+    code { display: block; }
     .copy-button {
       position: absolute;
       top: 6px;
@@ -55,26 +38,21 @@
       padding: 3px 8px;
       z-index: 10;
     }
-
     .header-select-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-
     .header-select-group label {
       margin-bottom: 0;
       font-weight: 500;
     }
-
     @media (max-width: 576px) {
       .header-select-group {
         flex-direction: column;
         align-items: flex-start;
       }
     }
-
-    /* Textarea behavior */
     #message-input {
       resize: none;
       overflow: hidden;
@@ -82,8 +60,6 @@
       max-height: 7.5em;
       line-height: 1.5em;
     }
-
-    /* Button styling */
     .input-group > button {
       height: 38px;
       max-height: 38px;
@@ -91,12 +67,10 @@
       flex-shrink: 0;
       border-radius: 2%;
     }
-
     .input-group > textarea {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-
     .input-group > button:first-of-type {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
@@ -140,7 +114,6 @@
     let controller = null;
     let conversationHistory = [];
 
-    // Auto-grow textarea
     function autoGrowTextarea(el) {
       el.style.height = "auto";
       const maxHeight = parseFloat(getComputedStyle(el).maxHeight);
@@ -150,7 +123,6 @@
     messageInput.addEventListener("input", () => autoGrowTextarea(messageInput));
     window.addEventListener("load", () => autoGrowTextarea(messageInput));
 
-    // Copy button for code blocks
     chatWindow.addEventListener("click", (e) => {
       if (e.target.classList.contains("copy-button")) {
         const codeBlock = e.target.nextElementSibling;
@@ -166,12 +138,41 @@
       }
     });
 
-    stopButton.addEventListener("click", () => {
-      if (controller) {
-        controller.abort();
-        stopButton.disabled = true;
+    async function stopCurrentModel() {
+      const selectedModel = modelSelect.value;
+      if (!selectedModel) return;
+      await fetch("/api/chat", {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({
+          model      : selectedModel,
+          keep_alive : 0,
+          messages   : []
+        })
+      });
+    }
+
+    stopButton.addEventListener("click", async () => {
+      if (controller) controller.abort();
+
+      const selectedModel = modelSelect.value;
+      if (!selectedModel) return;
+
+      try {
+        const response = await fetch("/api/stop_model", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model: selectedModel })
+        });
+        const result = await response.json();
+        console.log("Model stopped:", result);
+      } catch (err) {
+        console.error("Couldn't stop model:", err);
       }
+
+      stopButton.disabled = true;
     });
+
 
     async function fetchModels() {
       try {
@@ -193,7 +194,6 @@
       const html = marked.parse(text);
       const wrapper = document.createElement("div");
       wrapper.innerHTML = html;
-
       wrapper.querySelectorAll("pre > code").forEach((codeBlock) => {
         const pre = codeBlock.parentElement;
         if (!pre.querySelector(".copy-button")) {
@@ -203,17 +203,14 @@
           pre.insertBefore(copyBtn, codeBlock);
         }
       });
-
       return wrapper.innerHTML;
     }
 
     function displayMessage(sender, message) {
       const messageElement = document.createElement("div");
       messageElement.classList.add("message", sender === "user" ? "user-message" : "assistant-message");
-
       const card = document.createElement("div");
       card.classList.add("card", "d-inline-block");
-
       const cardBody = document.createElement("div");
       cardBody.classList.add("card-body");
 
@@ -230,7 +227,6 @@
       return cardBody;
     }
 
-    // Enter sends message; Shift+Enter adds newline
     messageInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -287,14 +283,9 @@
               const parsed = JSON.parse(line);
               assistantResponse += parsed.message.content;
 
-              const shouldScroll =
-                chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
-
+              const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
               assistantMessageElement.innerHTML = formatMessageText(assistantResponse);
-
-              if (shouldScroll) {
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-              }
+              if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;
             }
           });
         }
