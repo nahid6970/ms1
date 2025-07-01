@@ -208,7 +208,7 @@
       return wrapper.innerHTML;
     }
 
-    function displayMessage(sender, message, index) {
+    function displayMessage(sender, message, index, modelName) {
       const messageElement = document.createElement("div");
       messageElement.classList.add("message", sender === "user" ? "user-message" : "assistant-message");
       if (index !== undefined) {
@@ -230,7 +230,17 @@
       cardBody.classList.add("card-body");
 
       if (sender === "assistant") {
-        cardBody.innerHTML = formatMessageText(message);
+        if (modelName) {
+            const modelNameElement = document.createElement('div');
+            modelNameElement.style.fontWeight = 'bold';
+            modelNameElement.style.marginBottom = '0.5rem';
+            modelNameElement.textContent = `Model: ${modelName}`;
+            cardBody.appendChild(modelNameElement);
+        }
+        const messageTextElement = document.createElement('div');
+        messageTextElement.className = 'message-text';
+        messageTextElement.innerHTML = formatMessageText(message);
+        cardBody.appendChild(messageTextElement);
       } else {
         cardBody.textContent = message;
       }
@@ -330,7 +340,8 @@
             return;
         }
 
-        const assistantMessageElement = displayMessage("assistant", "", history.length);
+        const assistantMessageElement = displayMessage("assistant", "", history.length, selectedModel);
+        const assistantMessageTextElement = assistantMessageElement.querySelector('.message-text');
         let assistantResponse = "";
 
         try {
@@ -364,7 +375,7 @@
                         assistantResponse += parsed.message.content;
 
                         const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
-                        assistantMessageElement.innerHTML = formatMessageText(assistantResponse);
+                        assistantMessageTextElement.innerHTML = formatMessageText(assistantResponse);
                         if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;
                     }
                 });
