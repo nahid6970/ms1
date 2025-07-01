@@ -271,8 +271,14 @@
         reloadButton.className = "btn btn-sm btn-outline-secondary reload-button";
         reloadButton.onclick = () => reloadResponse(index);
 
+        const continueButton = document.createElement("button");
+        continueButton.innerHTML = '<i class="nf nf-md-play"></i>';
+        continueButton.className = "btn btn-sm btn-outline-secondary continue-button ms-2";
+        continueButton.onclick = () => continueResponse(index);
+
         footer.appendChild(stats);
         footer.appendChild(reloadButton);
+        footer.appendChild(continueButton);
         messageElement.appendChild(footer);
       }
 
@@ -328,6 +334,14 @@
         messageContent.style.display = 'flex';
     }
 
+    async function continueResponse(index) {
+      if (index === undefined || index < 1) return;
+
+      // Simulate typing "continue" and submitting
+      messageInput.value = "continue";
+      chatForm.requestSubmit();
+    }
+
     async function reloadResponse(index) {
       if (index === undefined || index < 1) return;
 
@@ -372,88 +386,7 @@
     }
 
 
-    async function sendChatRequest(history) {
-        const selectedModel = modelSelect.value;
-        if (!selectedModel) {
-            alert("Please select a model first.");
-            return;
-        }
-
-        const assistantMessageElement = displayMessage("assistant", "", history.length, selectedModel);
-        const assistantMessageTextElement = assistantMessageElement.querySelector('.message-text');
-        let assistantResponse = "";
-        let finalData;
-
-        try {
-            controller = new AbortController();
-            stopButton.disabled = false;
-
-            const response = await fetch("/api/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: selectedModel,
-                    messages: history,
-                    stream: true,
-                }),
-                signal: controller.signal,
-            });
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value);
-                const lines = chunk.split("\n");
-
-                lines.forEach((line) => {
-                    if (line) {
-                        const parsed = JSON.parse(line);
-                        if (parsed.done) {
-                            finalData = parsed;
-                        } else if (parsed.message && parsed.message.content) {
-                            assistantResponse += parsed.message.content;
-                        }
-
-                        const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
-                        assistantMessageTextElement.innerHTML = formatMessageText(assistantResponse);
-                        if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;
-                    }
-                });
-            }
-
-            history.push({ role: "assistant", content: assistantResponse });
-            const messageElement = assistantMessageElement.closest('.message');
-            messageElement.dataset.index = history.length - 1;
-
-            if (finalData) {
-                const durationInSeconds = (finalData.total_duration / 1e9).toFixed(2);
-                const tokens = finalData.eval_count;
-                const statsElement = messageElement.querySelector('.text-muted');
-                if (statsElement) {
-                    statsElement.textContent = `Generated in ${durationInSeconds}s / ${tokens} tokens`;
-                }
-            }
-
-        } catch (error) {
-            if (error.name === "AbortError") {
-                console.log("Streaming stopped by user.");
-                history.push({ role: "assistant", content: assistantResponse });
-                 if(assistantMessageElement.closest('.message')) {
-                    assistantMessageElement.closest('.message').dataset.index = history.length - 1;
-                }
-            } else {
-                console.error("Error during chat:", error);
-                assistantMessageElement.innerText = "Error communicating with Ollama.";
-            }
-        } finally {
-            stopButton.disabled = true;
-            controller = null;
-        }
-    }
+    async function sendChatRequest(history, isContinuation = false) {        const selectedModel = modelSelect.value;        if (!selectedModel) {            alert("Please select a model first.");            return;        }        let assistantMessageElement;        let assistantMessageTextElement;        let assistantResponse;        let lastMessageIndex;        if (isContinuation) {            lastMessageIndex = history.length - 1;            assistantMessageElement = document.querySelector(`.message[data-index='${lastMessageIndex}']`);            if (!assistantMessageElement) {                console.error("Could not find the message element to continue.");                return;            }            assistantMessageTextElement = assistantMessageElement.querySelector('.message-text');            assistantResponse = conversationHistory[lastMessageIndex].content;        } else {            const cardBody = displayMessage("assistant", "", history.length, selectedModel);            assistantMessageElement = cardBody.closest('.message');            assistantMessageTextElement = cardBody.querySelector('.message-text');            assistantResponse = "";        }        let finalData;        try {            controller = new AbortController();            stopButton.disabled = false;            const response = await fetch("/api/chat", {                method: "POST",                headers: { "Content-Type": "application/json" },                body: JSON.stringify({                    model: selectedModel,                    messages: history,                    stream: true,                }),                signal: controller.signal,            });            const reader = response.body.getReader();            const decoder = new TextDecoder();            while (true) {                const { done, value } = await reader.read();                if (done) break;                const chunk = decoder.decode(value);                const lines = chunk.split("\n");                for (const line of lines) {                    if (line) {                        const parsed = JSON.parse(line);                        if (parsed.done) {                            finalData = parsed;                        } else if (parsed.message && parsed.message.content) {                            assistantResponse += parsed.message.content;                        }                        const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;                        assistantMessageTextElement.innerHTML = formatMessageText(assistantResponse);                        if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;                    }                }            }            if (isContinuation) {                conversationHistory[lastMessageIndex].content = assistantResponse;            } else {                history.push({ role: "assistant", content: assistantResponse });                assistantMessageElement.dataset.index = history.length - 1;            }            if (finalData) {                const durationInSeconds = (finalData.total_duration / 1e9).toFixed(2);                const tokens = finalData.eval_count;                const statsElement = assistantMessageElement.querySelector('.text-muted');                if (statsElement) {                    statsElement.textContent = `Generated in ${durationInSeconds}s / ${tokens} tokens`;                }            }        } catch (error) {            if (error.name === "AbortError") {                console.log("Streaming stopped by user.");                if (isContinuation) {                    conversationHistory[lastMessageIndex].content = assistantResponse;                } else {                    history.push({ role: "assistant", content: assistantResponse });                    if (assistantMessageElement) {                       assistantMessageElement.dataset.index = history.length - 1;                    }                }            } else {                console.error("Error during chat:", error);                assistantMessageTextElement.innerHTML = "Error communicating with Ollama.";            }        } finally {            stopButton.disabled = true;            controller = null;        }    }
 
     messageInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
