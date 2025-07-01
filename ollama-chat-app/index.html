@@ -257,6 +257,25 @@
       }
 
       messageElement.appendChild(messageContent);
+
+      if (sender === "assistant") {
+        const footer = document.createElement('div');
+        footer.className = 'd-flex justify-content-start align-items-center mt-2';
+
+        const stats = document.createElement('span');
+        stats.className = 'text-muted me-2';
+        stats.style.fontSize = '0.8rem';
+
+        const reloadButton = document.createElement("button");
+        reloadButton.innerHTML = '<i class="nf nf-md-reload"></i>';
+        reloadButton.className = "btn btn-sm btn-outline-secondary reload-button";
+        reloadButton.onclick = () => reloadResponse(index);
+
+        footer.appendChild(stats);
+        footer.appendChild(reloadButton);
+        messageElement.appendChild(footer);
+      }
+
       chatWindow.appendChild(messageElement);
       chatWindow.scrollTop = chatWindow.scrollHeight;
       return cardBody;
@@ -309,6 +328,26 @@
         messageContent.style.display = 'flex';
     }
 
+    async function reloadResponse(index) {
+      if (index === undefined || index < 1) return;
+
+      const userMessageToResend = conversationHistory[index - 1];
+      
+      conversationHistory.splice(index - 1);
+
+      const messages = document.querySelectorAll('.message');
+      messages.forEach(msg => {
+          const msgIndex = parseInt(msg.dataset.index, 10);
+          if (msgIndex >= index - 1) {
+              msg.remove();
+          }
+      });
+
+      conversationHistory.push(userMessageToResend);
+      displayMessage("user", userMessageToResend.content, conversationHistory.length - 1);
+      await sendChatRequest(conversationHistory);
+    }
+
     async function saveMessage(index, newContent) {
         if (newContent.trim() === "") return;
 
@@ -343,6 +382,7 @@
         const assistantMessageElement = displayMessage("assistant", "", history.length, selectedModel);
         const assistantMessageTextElement = assistantMessageElement.querySelector('.message-text');
         let assistantResponse = "";
+        let finalData;
 
         try {
             controller = new AbortController();
@@ -372,7 +412,11 @@
                 lines.forEach((line) => {
                     if (line) {
                         const parsed = JSON.parse(line);
-                        assistantResponse += parsed.message.content;
+                        if (parsed.done) {
+                            finalData = parsed;
+                        } else if (parsed.message && parsed.message.content) {
+                            assistantResponse += parsed.message.content;
+                        }
 
                         const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
                         assistantMessageTextElement.innerHTML = formatMessageText(assistantResponse);
@@ -382,7 +426,17 @@
             }
 
             history.push({ role: "assistant", content: assistantResponse });
-            assistantMessageElement.closest('.message').dataset.index = history.length - 1;
+            const messageElement = assistantMessageElement.closest('.message');
+            messageElement.dataset.index = history.length - 1;
+
+            if (finalData) {
+                const durationInSeconds = (finalData.total_duration / 1e9).toFixed(2);
+                const tokens = finalData.eval_count;
+                const statsElement = messageElement.querySelector('.text-muted');
+                if (statsElement) {
+                    statsElement.textContent = `Generated in ${durationInSeconds}s / ${tokens} tokens`;
+                }
+            }
 
         } catch (error) {
             if (error.name === "AbortError") {
