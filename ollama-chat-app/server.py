@@ -61,7 +61,7 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
         try:
             api_url = f"{OLLAMA_HOST}{self.path}"
             headers = {h: self.headers[h] for h in self.headers}
-            headers['Host'] = 'localhost:11434'
+            # headers['Host'] = 'localhost:11434' #! it tells to only respone to my pc
 
             if self.command == 'POST':
                 content_length = int(self.headers['Content-Length'])
