@@ -654,6 +654,11 @@ Stop-Process -Name "dnplayer"
 Stop-Process -Name "chrome"
 }
 
+function chat {
+  cd "C:\ms1\ollama-chat-app"
+  python server.py
+}
+
 function yy { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
 function nay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
 

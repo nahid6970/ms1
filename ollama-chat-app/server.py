@@ -1,3 +1,4 @@
+import os
 import http.server
 import socketserver
 import requests
@@ -6,6 +7,8 @@ import json
 
 PORT = 8000
 OLLAMA_HOST = "http://localhost:11434"
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
