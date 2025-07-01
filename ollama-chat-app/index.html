@@ -1,153 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ollama Web UI</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        #chat-window {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            padding: 1rem;
-            background-color: white;
-        }
-        .message {
-            margin-bottom: 1rem;
-        }
-        .user-message {
-            text-align: right;
-        }
-        .assistant-message .card-body {
-            background-color: #e9ecef;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ollama Web UI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    #chat-window {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #dee2e6;
+      padding: 1rem;
+      background-color: white;
+    }
+
+    .message {
+      margin-bottom: 1rem;
+    }
+
+    .user-message {
+      text-align: right;
+    }
+
+    .assistant-message .card-body {
+      background-color: #e9ecef;
+    }
+
+    pre {
+      background-color: #2d2d2d;
+      color: #e0e0e0;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: JetBrains Mono, monospace;
+      white-space: pre-wrap;
+      position: relative;
+    }
+
+    code {
+      display: block;
+    }
+
+    .copy-button {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      z-index: 10;
+    }
+  </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="card">
-            <div class="card-header">
-                <h1 class="text-center">Ollama Web UI</h1>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="model-select" class="form-label">Choose a model:</label>
-                    <select id="model-select" class="form-select"></select>
-                </div>
-                <div id="chat-window" class="mb-3"></div>
-                <form id="chat-form">
-                    <div class="input-group">
-                        <input type="text" id="message-input" class="form-control" placeholder="Type your message..." required>
-                        <button type="submit" class="btn btn-primary">Send</button>
-                    </div>
-                </form>
-            </div>
+  <div class="container mt-5">
+    <div class="card">
+      <div class="card-header">
+        <h1 class="text-center">Ollama Web UI</h1>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="model-select" class="form-label">Choose a model:</label>
+          <select id="model-select" class="form-select"></select>
         </div>
+        <div id="chat-window" class="mb-3"></div>
+        <form id="chat-form">
+          <div class="input-group">
+            <input type="text" id="message-input" class="form-control" placeholder="Type your message..." required>
+            <button type="submit" class="btn btn-primary">Send</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const modelSelect = document.getElementById('model-select');
-        const chatWindow = document.getElementById('chat-window');
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
-        let conversationHistory = [];
+<script>
+    const modelSelect = document.getElementById('model-select');
+    const chatWindow = document.getElementById('chat-window');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    let conversationHistory = [];
 
-        async function fetchModels() {
-            try {
-                                const response = await fetch('/api/tags');
-                const data = await response.json();
-                data.models.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model.name;
-                    option.textContent = model.name;
-                    modelSelect.appendChild(option);
+    // Event delegation for copy buttons
+    chatWindow.addEventListener('click', (e) => {
+        if (e.target.classList.contains('copy-button')) {
+            const codeBlock = e.target.nextElementSibling;
+            navigator.clipboard.writeText(codeBlock.textContent)
+                .then(() => {
+                    e.target.textContent = 'Copied!';
+                    setTimeout(() => e.target.textContent = 'Copy', 1500);
+                })
+                .catch(() => {
+                    e.target.textContent = 'Failed';
+                    setTimeout(() => e.target.textContent = 'Copy', 1500);
                 });
-            } catch (error) {
-                console.error('Error fetching models:', error);
-                alert('Could not fetch models. Make sure Ollama is running.');
-            }
         }
+    });
 
-        function displayMessage(sender, message) {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'assistant-message');
-            
-            const card = document.createElement('div');
-            card.classList.add('card', 'd-inline-block');
-            const cardBody = document.createElement('div');
-            cardBody.classList.add('card-body');
-            cardBody.innerText = message;
-            
-            card.appendChild(cardBody);
-            messageElement.appendChild(card);
-            chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-            return cardBody;
+    async function fetchModels() {
+      try {
+        const response = await fetch('/api/tags');
+        const data = await response.json();
+        data.models.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model.name;
+          option.textContent = model.name;
+          modelSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error fetching models:', error);
+        alert('Could not fetch models. Make sure Ollama is running.');
+      }
+    }
+
+    function formatMessageText(text) {
+      const html = marked.parse(text);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = html;
+
+      // Add copy buttons to all code blocks
+      wrapper.querySelectorAll('pre > code').forEach(codeBlock => {
+        const pre = codeBlock.parentElement;
+        if (!pre.querySelector('.copy-button')) {
+          const copyBtn = document.createElement('button');
+          copyBtn.textContent = 'Copy';
+          copyBtn.className = 'copy-button btn btn-sm btn-secondary';
+          pre.insertBefore(copyBtn, codeBlock);
         }
+      });
 
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const message = messageInput.value.trim();
-            if (!message) return;
+      return wrapper.innerHTML;
+    }
 
-            const selectedModel = modelSelect.value;
-            if (!selectedModel) {
-                alert('Please select a model first.');
-                return;
-            }
+    function displayMessage(sender, message) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'assistant-message');
 
-            conversationHistory.push({ role: 'user', content: message });
-            displayMessage('user', message);
-            messageInput.value = '';
-            
-            const assistantMessageElement = displayMessage('assistant', '');
-            let assistantResponse = '';
+      const card = document.createElement('div');
+      card.classList.add('card', 'd-inline-block');
 
-            try {
-                                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: selectedModel,
-                        messages: conversationHistory,
-                        stream: true,
-                    }),
-                });
+      const cardBody = document.createElement('div');
+      cardBody.classList.add('card-body');
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
+      if (sender === 'assistant') {
+        cardBody.innerHTML = formatMessageText(message);
+      } else {
+        cardBody.textContent = message;
+      }
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
+      card.appendChild(cardBody);
+      messageElement.appendChild(card);
+      chatWindow.appendChild(messageElement);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+      return cardBody;
+    }
 
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
-                    
-                    lines.forEach(line => {
-                        if (line) {
-                            const parsed = JSON.parse(line);
-                            assistantResponse += parsed.message.content;
-                            assistantMessageElement.innerText = assistantResponse;
-                            chatWindow.scrollTop = chatWindow.scrollHeight;
-                        }
-                    });
-                }
-                conversationHistory.push({ role: 'assistant', content: assistantResponse });
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
 
-            } catch (error) {
-                console.error('Error during chat:', error);
-                assistantMessageElement.innerText = 'Error communicating with Ollama.';
-            }
+      const selectedModel = modelSelect.value;
+      if (!selectedModel) {
+        alert('Please select a model first.');
+        return;
+      }
+
+      conversationHistory.push({ role: 'user', content: message });
+      displayMessage('user', message);
+      messageInput.value = '';
+
+      const assistantMessageElement = displayMessage('assistant', '');
+      let assistantResponse = '';
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: conversationHistory,
+            stream: true,
+          }),
         });
 
-        fetchModels();
-    </script>
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+
+          lines.forEach(line => {
+            if (line) {
+              const parsed = JSON.parse(line);
+              assistantResponse += parsed.message.content;
+              assistantMessageElement.innerHTML = formatMessageText(assistantResponse);
+              chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+          });
+        }
+
+        conversationHistory.push({ role: 'assistant', content: assistantResponse });
+
+      } catch (error) {
+        console.error('Error during chat:', error);
+        assistantMessageElement.innerText = 'Error communicating with Ollama.';
+      }
+    });
+
+    fetchModels();
+</script>
 </body>
 </html>
