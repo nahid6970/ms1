@@ -124,16 +124,18 @@
     window.addEventListener("load", () => autoGrowTextarea(messageInput));
 
     chatWindow.addEventListener("click", (e) => {
-      if (e.target.classList.contains("copy-button")) {
-        const codeBlock = e.target.nextElementSibling;
+      const copyButton = e.target.closest(".copy-button");
+      if (copyButton) {
+        const pre = copyButton.parentElement;
+        const codeBlock = pre.querySelector("code");
         navigator.clipboard.writeText(codeBlock.textContent)
           .then(() => {
-            e.target.textContent = "Copied!";
-            setTimeout(() => (e.target.textContent = "Copy"), 1500);
+            copyButton.textContent = "Copied!";
+            setTimeout(() => (copyButton.textContent = "Copy"), 1500);
           })
           .catch(() => {
-            e.target.textContent = "Failed";
-            setTimeout(() => (e.target.textContent = "Copy"), 1500);
+            copyButton.textContent = "Failed";
+            setTimeout(() => (copyButton.textContent = "Copy"), 1500);
           });
       }
     });
@@ -206,11 +208,24 @@
       return wrapper.innerHTML;
     }
 
-    function displayMessage(sender, message) {
+    function displayMessage(sender, message, index) {
       const messageElement = document.createElement("div");
       messageElement.classList.add("message", sender === "user" ? "user-message" : "assistant-message");
+      if (index !== undefined) {
+          messageElement.dataset.index = index;
+      }
+
+      const messageContent = document.createElement('div');
+      const contentClasses = ['d-flex', 'align-items-center'];
+      if (sender === 'user') {
+        contentClasses.push('justify-content-end');
+      }
+      messageContent.classList.add(...contentClasses);
+
+
       const card = document.createElement("div");
       card.classList.add("card", "d-inline-block");
+
       const cardBody = document.createElement("div");
       cardBody.classList.add("card-body");
 
@@ -221,10 +236,158 @@
       }
 
       card.appendChild(cardBody);
-      messageElement.appendChild(card);
+      messageContent.appendChild(card);
+
+      if (sender === "user") {
+        const editButton = document.createElement("button");
+        editButton.innerHTML = '<i class="nf nf-md-pencil"></i>';
+        editButton.className = "btn btn-sm btn-outline-secondary edit-button ms-2";
+        editButton.onclick = () => editMessage(index);
+        messageContent.appendChild(editButton);
+      }
+
+      messageElement.appendChild(messageContent);
       chatWindow.appendChild(messageElement);
       chatWindow.scrollTop = chatWindow.scrollHeight;
       return cardBody;
+    }
+
+    function editMessage(index) {
+      const messageElement = document.querySelector(`.message[data-index='${index}']`);
+      const originalContent = conversationHistory[index].content;
+
+      const editContainer = document.createElement('div');
+      editContainer.className = 'edit-container mt-2';
+
+      const textarea = document.createElement('textarea');
+      textarea.className = 'form-control';
+      textarea.value = originalContent;
+      textarea.rows = 3;
+      autoGrowTextarea(textarea);
+      textarea.addEventListener("input", () => autoGrowTextarea(textarea));
+
+
+      const saveButton = document.createElement('button');
+      saveButton.textContent = 'Save & Submit';
+      saveButton.className = 'btn btn-sm btn-primary mt-2';
+      saveButton.onclick = () => saveMessage(index, textarea.value);
+
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'Cancel';
+      cancelButton.className = 'btn btn-sm btn-secondary mt-2 ms-2';
+      cancelButton.onclick = () => cancelEdit(index);
+
+      editContainer.appendChild(textarea);
+      editContainer.appendChild(saveButton);
+      editContainer.appendChild(cancelButton);
+
+      const messageContent = messageElement.querySelector('.d-flex');
+      messageContent.style.display = 'none';
+
+      messageElement.appendChild(editContainer);
+      textarea.focus();
+    }
+
+    function cancelEdit(index) {
+        const messageElement = document.querySelector(`.message[data-index='${index}']`);
+        const editContainer = messageElement.querySelector('.edit-container');
+        if (editContainer) {
+            editContainer.remove();
+        }
+
+        const messageContent = messageElement.querySelector('.d-flex');
+        messageContent.style.display = 'flex';
+    }
+
+    async function saveMessage(index, newContent) {
+        if (newContent.trim() === "") return;
+
+        conversationHistory[index].content = newContent;
+        conversationHistory.splice(index + 1);
+
+        const messages = document.querySelectorAll('.message');
+        messages.forEach(msg => {
+            const msgIndex = parseInt(msg.dataset.index, 10);
+            if (msgIndex > index) {
+                msg.remove();
+            }
+        });
+
+        const messageElement = document.querySelector(`.message[data-index='${index}']`);
+        const cardBody = messageElement.querySelector('.card-body');
+        cardBody.textContent = newContent;
+
+        cancelEdit(index);
+
+        await sendChatRequest(conversationHistory);
+    }
+
+
+    async function sendChatRequest(history) {
+        const selectedModel = modelSelect.value;
+        if (!selectedModel) {
+            alert("Please select a model first.");
+            return;
+        }
+
+        const assistantMessageElement = displayMessage("assistant", "", history.length);
+        let assistantResponse = "";
+
+        try {
+            controller = new AbortController();
+            stopButton.disabled = false;
+
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: selectedModel,
+                    messages: history,
+                    stream: true,
+                }),
+                signal: controller.signal,
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split("\n");
+
+                lines.forEach((line) => {
+                    if (line) {
+                        const parsed = JSON.parse(line);
+                        assistantResponse += parsed.message.content;
+
+                        const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
+                        assistantMessageElement.innerHTML = formatMessageText(assistantResponse);
+                        if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;
+                    }
+                });
+            }
+
+            history.push({ role: "assistant", content: assistantResponse });
+            assistantMessageElement.closest('.message').dataset.index = history.length - 1;
+
+        } catch (error) {
+            if (error.name === "AbortError") {
+                console.log("Streaming stopped by user.");
+                history.push({ role: "assistant", content: assistantResponse });
+                 if(assistantMessageElement.closest('.message')) {
+                    assistantMessageElement.closest('.message').dataset.index = history.length - 1;
+                }
+            } else {
+                console.error("Error during chat:", error);
+                assistantMessageElement.innerText = "Error communicating with Ollama.";
+            }
+        } finally {
+            stopButton.disabled = true;
+            controller = null;
+        }
     }
 
     messageInput.addEventListener("keydown", (e) => {
@@ -239,73 +402,16 @@
       const message = messageInput.value.trim();
       if (!message) return;
 
-      const selectedModel = modelSelect.value;
-      if (!selectedModel) {
-        alert("Please select a model first.");
-        return;
-      }
-
       conversationHistory.push({ role: "user", content: message });
-      displayMessage("user", message);
+      displayMessage("user", message, conversationHistory.length - 1);
       messageInput.value = "";
       autoGrowTextarea(messageInput);
 
-      const assistantMessageElement = displayMessage("assistant", "");
-      let assistantResponse = "";
-
-      try {
-        controller = new AbortController();
-        stopButton.disabled = false;
-
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: selectedModel,
-            messages: conversationHistory,
-            stream: true,
-          }),
-          signal: controller.signal,
-        });
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          lines.forEach((line) => {
-            if (line) {
-              const parsed = JSON.parse(line);
-              assistantResponse += parsed.message.content;
-
-              const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
-              assistantMessageElement.innerHTML = formatMessageText(assistantResponse);
-              if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;
-            }
-          });
-        }
-
-        conversationHistory.push({ role: "assistant", content: assistantResponse });
-      } catch (error) {
-        if (error.name === "AbortError") {
-          console.log("Streaming stopped by user.");
-          conversationHistory.push({ role: "assistant", content: assistantResponse });
-        } else {
-          console.error("Error during chat:", error);
-          assistantMessageElement.innerText = "Error communicating with Ollama.";
-        }
-      } finally {
-        stopButton.disabled = true;
-        controller = null;
-      }
+      await sendChatRequest(conversationHistory);
     });
 
     fetchModels();
+  </script>
   </script>
 </body>
 </html>
