@@ -89,6 +89,16 @@
       </div>
       <div class="card-body">
         <div id="chat-window" class="mb-3"></div>
+        <div class="card mb-3">
+          <div class="card-header">Web Crawling</div>
+          <div class="card-body">
+            <div class="input-group mb-3">
+              <input type="text" id="crawl-url-input" class="form-control" placeholder="Enter URL to crawl">
+              <button class="btn btn-outline-secondary" type="button" id="crawl-button">Crawl</button>
+            </div>
+            <div id="crawled-content" class="form-control" style="height: 200px; overflow-y: auto; white-space: pre-wrap; background-color: #e9ecef;"></div>
+          </div>
+        </div>
         <form id="chat-form">
           <div class="input-group align-items-start">
             <div class="flex-grow-1 me-2">
@@ -409,7 +419,36 @@
     });
 
     fetchModels();
-  </script>
+
+    const crawlUrlInput = document.getElementById("crawl-url-input");
+    const crawlButton = document.getElementById("crawl-button");
+    const crawledContentDiv = document.getElementById("crawled-content");
+
+    crawlButton.addEventListener("click", async () => {
+      const url = crawlUrlInput.value.trim();
+      if (!url) {
+        alert("Please enter a URL to crawl.");
+        return;
+      }
+
+      crawledContentDiv.textContent = "Crawling...";
+      try {
+        const response = await fetch("/api/crawl", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          crawledContentDiv.textContent = data.content;
+        } else {
+          crawledContentDiv.textContent = `Error: ${data.error || response.statusText}`;
+        }
+      } catch (error) {
+        crawledContentDiv.textContent = `Error: ${error.message}`;
+        console.error("Error crawling URL:", error);
+      }
+    });
   </script>
 </body>
 </html>
