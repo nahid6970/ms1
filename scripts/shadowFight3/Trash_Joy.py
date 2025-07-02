@@ -332,7 +332,7 @@ def FameFunction(button):
         # Stop the thread
         state["stop_flag"] = True
         state["thread"].join()
-        button.config(text="Builder", bg="#bda24a", fg="#000000")
+        button.config(text="Tapjoy-precat!", bg="#bda24a", fg="#000000")
     else:
         # Start the thread
         state["stop_flag"] = False
@@ -368,7 +368,7 @@ def FameFunction(button):
     # Save state to the function attribute for persistence
     FameFunction.state = state
 # Button logic
-Fame_BT = Button( ROOT, text="Builder", bg="#bda24a", fg="#000000", width=10, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
+Fame_BT = Button( ROOT, text="Tapjoy-precat!", bg="#bda24a", fg="#000000", width=10, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
 Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 
 # Button to toggle display
