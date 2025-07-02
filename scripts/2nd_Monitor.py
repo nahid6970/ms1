@@ -90,7 +90,7 @@ def capture_loop(stop_event):
                 # No secondary monitor found, display a message
                 img = Image.new('RGB', (192, 108), (0, 0, 0))
                 draw = ImageDraw.Draw(img)
-                draw.text((80, 30), "\uf2d4", font=font, fill=(255, 255, 255))
+                draw.text((80, 30), "󰶐", font=font, fill=(255, 255, 255))
                 
                 img_tk = ImageTk.PhotoImage(img)
                 label.config(image=img_tk, text="")
