@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Crawler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        pre {
+            white-space: pre-wrap; /* Ensures text wraps while preserving whitespace */
+            word-wrap: break-word; /* Breaks long words */
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Web Crawler</h1>
+        <form method="POST">
+            <label for="url">Enter Website URL:</label><br>
+            <input type="text" id="url" name="url" placeholder="e.g., https://www.example.com" required>
+            <input type="submit" value="Crawl">
+        </form>
+
+        {% if crawled_info %}
+            <div class="results">
+                <h2>Crawled Information:</h2>
+                {% if crawled_info.status == "success" %}
+                    <h3>Page Content:</h3>
+                    {% if crawled_info.content %}
+                        <pre>{{ crawled_info.content }}</pre>
+                    {% else %}
+                        <p>No content found on this page.</p>
+                    {% endif %}
+                {% else %}
+                    <p class="error">Error crawling: {{ crawled_info.error }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
