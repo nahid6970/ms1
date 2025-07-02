@@ -35,75 +35,64 @@ def get_secondary_monitor_bbox():
             return monitor.x, monitor.y, monitor.width, monitor.height
     return None
 
-def capture_secondary_monitor(stop_event):
-    bbox = get_secondary_monitor_bbox()
-    if not bbox:
-        print("Secondary monitor not found.")
-        return
-
+def capture_loop(stop_event):
     with mss.mss() as sct:
-        monitor = {
-            "top": bbox[1],
-            "left": bbox[0],
-            "width": bbox[2],
-            "height": bbox[3]
-        }
-
         while not stop_event.is_set():
-            sct_img = sct.grab(monitor)
+            bbox = get_secondary_monitor_bbox()
+            if bbox:
+                monitor = {
+                    "top": bbox[1],
+                    "left": bbox[0],
+                    "width": bbox[2],
+                    "height": bbox[3]
+                }
+                sct_img = sct.grab(monitor)
 
-            # Convert the image to PIL format
-            img = Image.frombytes('RGB', (sct_img.width, sct_img.height), sct_img.rgb)
+                # Convert the image to PIL format
+                img = Image.frombytes('RGB', (sct_img.width, sct_img.height), sct_img.rgb)
 
-            # Get cursor position
-            cursor_x, cursor_y = win32api.GetCursorPos()
+                # Get cursor position
+                cursor_x, cursor_y = win32api.GetCursorPos()
 
-            # Check if the cursor is on the secondary monitor
-            if bbox[0] <= cursor_x < bbox[0] + bbox[2] and bbox[1] <= cursor_y < bbox[1] + bbox[3]:
-                cursor_x -= bbox[0]
-                cursor_y -= bbox[1]
+                # Check if the cursor is on the secondary monitor
+                if bbox[0] <= cursor_x < bbox[0] + bbox[2] and bbox[1] <= cursor_y < bbox[1] + bbox[3]:
+                    cursor_x -= bbox[0]
+                    cursor_y -= bbox[1]
 
-                # Draw the cursor on the image
+                    # Draw the cursor on the image
+                    draw = ImageDraw.Draw(img)
+                    cursor_size = 10  # Size of the cursor to draw
+                    cursor_color = (0, 255, 0)  # Green color for visibility
+                    draw.line((cursor_x, cursor_y - cursor_size, cursor_x, cursor_y + cursor_size), fill=cursor_color, width=5)
+                    draw.line((cursor_x - cursor_size, cursor_y, cursor_x + cursor_size, cursor_y), fill=cursor_color, width=5)
+
+                # Resize the screenshot to fit the display window
+                resized_screenshot = img.resize((int(img.width // 10), int(img.height // 10)))
+
+                # Update the image on the Tkinter label
+                img_tk = ImageTk.PhotoImage(resized_screenshot)
+                label.config(image=img_tk, text="")
+                label.image = img_tk
+
+                # Update the window
+                root.update_idletasks()
+                root.update()
+
+                # Capture every 100 milliseconds
+                time.sleep(0.1)
+            else:
+                # No secondary monitor found, display a message
+                img = Image.new('RGB', (192, 108), (0, 0, 0))
                 draw = ImageDraw.Draw(img)
-                cursor_size = 10  # Size of the cursor to draw
-                cursor_color = (0, 255, 0)  # Green color for visibility
-                draw.line((cursor_x, cursor_y - cursor_size, cursor_x, cursor_y + cursor_size), fill=cursor_color, width=5)
-                draw.line((cursor_x - cursor_size, cursor_y, cursor_x + cursor_size, cursor_y), fill=cursor_color, width=5)
-
-            # Resize the screenshot to fit the display window
-            resized_screenshot = img.resize((int(img.width // 10), int(img.height // 10)))
-
-            # Update the image on the Tkinter label
-            img_tk = ImageTk.PhotoImage(resized_screenshot)
-            label.config(image=img_tk)
-            label.image = img_tk
-
-            # Update the window
-            root.update_idletasks()
-            root.update()
-
-            # Capture every 100 milliseconds
-            time.sleep(0.1)
-
-def monitor_secondary_display(stop_event):
-    current_status = False
-
-    while not stop_event.is_set():
-        secondary_bbox = get_secondary_monitor_bbox()
-        if secondary_bbox:
-            if not current_status:
-                print("Secondary monitor detected. Starting capture.")
-                stop_event.clear()  # Make sure the stop event is cleared before starting
-                capture_thread = threading.Thread(target=capture_secondary_monitor, args=(stop_event,))
-                capture_thread.start()
-                current_status = True
-        else:
-            if current_status:
-                print("Secondary monitor disconnected. Stopping capture.")
-                stop_event.set()  # Stop the current capture
-                current_status = False
-
-        time.sleep(2)  # Check every 2 seconds
+                draw.text((60, 45), "No Display", fill=(255, 255, 255))
+                
+                img_tk = ImageTk.PhotoImage(img)
+                label.config(image=img_tk, text="")
+                label.image = img_tk
+                
+                root.update_idletasks()
+                root.update()
+                time.sleep(1)
 
 def close_window():
     stop_event.set()  # Stop all threads before closing the window
@@ -139,8 +128,8 @@ label.pack()
 stop_event = threading.Event()
 
 # Start monitoring for the secondary monitor in a separate thread
-monitor_thread = threading.Thread(target=monitor_secondary_display, args=(stop_event,))
-monitor_thread.daemon = True
-monitor_thread.start()
+capture_thread = threading.Thread(target=capture_loop, args=(stop_event,))
+capture_thread.daemon = True
+capture_thread.start()
 
 root.mainloop()
