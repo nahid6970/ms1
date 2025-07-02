@@ -2,10 +2,16 @@ import tkinter as tk
 import threading
 import time
 import mss
-from PIL import Image, ImageTk, ImageDraw
+from PIL import Image, ImageTk, ImageDraw, ImageFont
 from screeninfo import get_monitors
 import win32api
 import keyboard
+
+try:
+    font = ImageFont.truetype("C:/Windows/Fonts/JetBrainsMonoNerdFont-Regular.ttf", 40) # Adjust path and size as needed
+except IOError:
+    font = ImageFont.load_default()
+    print("JetBrainsMono NFP font not found, using default font.")
 
 drag_data = {"x": 0, "y": 0}
 
@@ -84,7 +90,7 @@ def capture_loop(stop_event):
                 # No secondary monitor found, display a message
                 img = Image.new('RGB', (192, 108), (0, 0, 0))
                 draw = ImageDraw.Draw(img)
-                draw.text((70, 45), "No Display", fill=(255, 255, 255))
+                draw.text((80, 30), "\uf2d4", font=font, fill=(255, 255, 255))
                 
                 img_tk = ImageTk.PhotoImage(img)
                 label.config(image=img_tk, text="")
