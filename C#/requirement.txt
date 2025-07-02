@@ -1,0 +1,2 @@
+install dotnet desktop runtime
+dotnet run [run this on the project folder]

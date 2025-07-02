@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Script Manager</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 250px;
+      padding: 10px;
+    }
+    h2 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .script-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .script-item label {
+      margin-left: 8px;
+      flex-grow: 1;
+    }
+    /* Basic checkbox styling */
+    .script-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Script Manager</h2>
+  <div id="scriptList">
+    <!-- Scripts will be loaded here by popup.js -->
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
