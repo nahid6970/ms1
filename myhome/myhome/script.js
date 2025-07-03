@@ -51,12 +51,6 @@ function convertMarkdownTables() {
 window.addEventListener('load', convertMarkdownTables); 
  
 
-
-
-
-
-
-
 /* // Get all the spans
 const spans = document.querySelectorAll('span');
 
@@ -75,14 +69,26 @@ spans.forEach(span => {
 }); */
 
 
+// Popup functionality
+document.addEventListener('DOMContentLoaded', () => {
+  const openPopupBtn = document.getElementById('open-add-link-popup');
+  const popup = document.getElementById('add-link-popup');
+  const closeBtn = document.querySelector('.popup-content .close-button');
 
+  if (openPopupBtn && popup && closeBtn) {
+    openPopupBtn.addEventListener('click', () => {
+      popup.style.display = 'flex';
+    });
 
+    closeBtn.addEventListener('click', () => {
+      popup.style.display = 'none';
+    });
 
-
-
-
-
-
-
-
-
+    // Close the popup if the user clicks outside of it
+    window.addEventListener('click', (event) => {
+      if (event.target === popup) {
+        popup.style.display = 'none';
+      }
+    });
+  }
+});
