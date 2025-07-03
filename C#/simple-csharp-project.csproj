@@ -6,6 +6,7 @@
     <RootNamespace>simple_csharp_project</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <OutputPath>C:\dotnet\</OutputPath>
   </PropertyGroup>
 
 </Project>
