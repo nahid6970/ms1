@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
           const addLinkPopup = document.getElementById('add-link-popup');
           addLinkPopup.classList.remove('hidden'); // Remove hidden class
-          addLinkPopup.style.display = 'flex';
         });
         addLinkItemContainer.appendChild(addLinkSpan);
         groupContentDiv.appendChild(addLinkItemContainer);
@@ -168,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
-    editLinkPopup.style.display = 'block';
+    editLinkPopup.classList.remove('hidden');
   }
 
   if (editLinkForm) {

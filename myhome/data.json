@@ -73,30 +73,6 @@
     "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg"
   },
   {
-    "name": "GitHub",
-    "url": "https://github.com/",
-    "icon_class": "nf nf-cod-github",
-    "color": "aliceblue"
-  },
-  {
-    "name": "Google Keep",
-    "url": "https://keep.google.com/",
-    "icon_class": "nf nf-md-google_keep",
-    "color": "#fbbc04"
-  },
-  {
-    "name": "Microsoft OneNote",
-    "url": "https://www.onenote.com/",
-    "icon_class": "nf nf-md-microsoft_onenote",
-    "color": "#b259e6"
-  },
-  {
-    "name": "Nerd Fonts Cheat Sheet",
-    "url": "https://www.nerdfonts.com/cheat-sheet",
-    "icon_class": "nf nf-md-format_font",
-    "color": "#69e8ff"
-  },
-  {
     "name": "asdas",
     "group": "10",
     "url": "http://asdasdas.com",
