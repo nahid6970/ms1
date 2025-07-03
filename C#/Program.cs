@@ -210,7 +210,7 @@ namespace simple_csharp_project
                     new MenuItem("Policies", () => PowerShellRunner.Execute("powershell.exe", "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; Set-ExecutionPolicy RemoteSigned; Install-Module -Name Microsoft.WinGet.Client -Force -AllowClobber", false)),
                     new MenuItem("Install Scoop Packages", () => PowerShellRunner.Execute("powershell.exe", "scoop install ack adb bat capture2text ditto ffmpeg highlight kitty neovim putty rssguard rufus ventoy winaero-tweaker yt-dlp", false)),
                     new MenuItem("Install Pwsh Modules", () => PowerShellRunner.Execute("pwsh.exe", "Install-Module -Name BurntToast -Scope CurrentUser", true)),
-                    new MenuItem("Font Setup", () => PowerShellRunner.Execute("powershell.exe", "oh-my-posh font install", false)),
+                    new MenuItem("Font Setup", () => PowerShellRunner.Execute("powershell.exe", "oh-my-posh font install", true)),
                     new MenuItem("pip Packages", () => PowerShellRunner.Execute("pwsh.exe", "$su = 'C:\\Users\\nahid\\scoop\\shims\\sudo.ps1'; & $su C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe -m pip install -r C:\\ms1\\asset\\pip\\pip_required.txt", false)),
                     new MenuItem("Update Packages", () => PowerShellRunner.Execute("pwsh.exe", "scoop status; scoop update; scoop update *; scoop export | Out-File -FilePath C:\\Users\\nahid\\OneDrive\\backup\\installed_apps\\list_scoop.txt; scoop cleanup *; winget upgrade --all; winget export C:\\Users\\nahid\\OneDrive\\backup\\installed_apps\\list_winget.txt | Out-File -FilePath C:\\Users\\nahid\\OneDrive\\backup\\installed_apps\\ex_wingetlist.txt", false))
                 }),
@@ -218,7 +218,21 @@ namespace simple_csharp_project
                 {
                     new MenuItem("jackett + qbittorrent", () => PowerShellRunner.Execute("powershell.exe", "Write-Host 'Step 1: open qbittorrent -> view -> search engine -> Go To search engine tab -> search plugin -> check for updates'; Write-Host 'Step 2: Start Jackett and add the necessary indexes'; Write-Host 'Step 3: Copy jacket api from webui to jackett.json'; Start-Process 'C:\\Users\\nahid\\AppData\\Local\\qBittorrent\\nova3\\engines'", false)),
                     new MenuItem("Ldplayer", () => PowerShellRunner.Execute("powershell.exe", "Remove-Item 'C:\\Users\\nahid\\AppData\\Roaming\\XuanZhi9\\cache\\*' -Recurse; New-NetFirewallRule -DisplayName '@Block_Ld9BoxHeadless_OutInbound' -Direction Outbound -Program 'C:\\LDPlayer\\LDPlayer9\\dnplayer.exe' -Action Block -Enabled True", true)),
-                    new MenuItem("Neovim_1.conf", () => PowerShellRunner.Execute("pwsh.exe", "Remove-Item -Force -Recurse -Verbose C:\\Users\\nahid\\AppData\\Local\\nvim; Remove-Item -Force -Recurse -Verbose C:\\Users\\nahid\\AppData\\Local\\nvim-data; New-Item -ItemType SymbolicLink -Path C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua -Target C:\\ms1\\asset\\linux\\neovim\\init.lua -Force", false)),
+                    new MenuItem(
+                        "Neovim_1.conf",
+                        () => PowerShellRunner.Execute(
+                            "pwsh.exe",
+                            @"
+                                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim;
+                                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data;
+                                New-Item -ItemType SymbolicLink `
+                                        -Path C:\Users\nahid\AppData\Local\nvim\init.lua `
+                                        -Target C:\ms1\asset\linux\neovim\init.lua `
+                                        -Force
+                            ",
+                            true
+                        )
+                    ),
                     new MenuItem("Neovim_2.conf", () => PowerShellRunner.Execute("pwsh.exe", "Remove-Item -Force -Recurse -Verbose C:\\Users\\nahid\\AppData\\Local\\nvim; Remove-Item -Force -Recurse -Verbose C:\\Users\\nahid\\AppData\\Local\\nvim-data; New-Item -ItemType SymbolicLink -Path C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua -Target C:\\ms1\\asset\\linux\\neovim\\init2.lua -Force", false)),
                     new MenuItem("Notepad++ Theme Setup", () => PowerShellRunner.Execute("powershell.exe", "cd C:\\Users\\nahid; git clone https://github.com/dracula/notepad-plus-plus.git; Start-Process \"C:\\Users\\nahid\\notepad-plus-plus\"; Start-Process \"$env:AppData\\Notepad++\\themes\"; Write-Host 'Copy Dracula.xml to the themes folder and restart Notepad++'", false)),
                     new MenuItem("PotPlayer Register", () => PowerShellRunner.Execute("pwsh.exe", "Start-Process 'C:\\ms1\\asset\\potplayer\\PotPlayerMini64.reg' -Verbose", false))
