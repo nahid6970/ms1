@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home</title>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="wilih=device-wilih, initial-scale=1">
+  <link rel="stylesheet" href="myhome/myhome.css" ;>
+
+</head>
+
+<body>
+  <div class="flex-container2">
+
+  <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+  </div>
+
+  <hr>
+  <h3>Add New Link</h3>
+  <form id="add-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 300px;">
+    <input type="text" id="link-name" placeholder="Name" required>
+    <input type="url" id="link-url" placeholder="URL" required>
+    <input type="text" id="link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+    <input type="text" id="link-color" placeholder="Color (e.g., #f46613 or red)">
+    <input type="url" id="link-img-src" placeholder="Image URL (if no icon)">
+    <input type="text" id="link-text" placeholder="Text (if no icon/image)">
+    <input type="text" id="link-background-color" placeholder="Background Color">
+    <input type="text" id="link-border-radius" placeholder="Border Radius">
+    <input type="text" id="link-title" placeholder="Title (for tooltip)">
+    <button type="submit">Add Link</button>
+  </form>
+
+
+
+
+  <script src="myhome/links_handler.js"></script>
+
+
+  </div>
+</body>
+
+</html>

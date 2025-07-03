@@ -1,0 +1,99 @@
+[
+  {
+    "name": "Google Mail",
+    "url": "https://mail.google.com/",
+    "icon_class": "nf nf-cod-mail",
+    "color": "#f46613"
+  },
+  {
+    "name": "Facebook",
+    "url": "https://www.facebook.com/",
+    "icon_class": "nf nf-dev-facebook",
+    "color": "#1399f4"
+  },
+  {
+    "name": "Messenger",
+    "url": "https://www.messenger.com/",
+    "icon_class": "nf nf-fa-facebook_messenger",
+    "color": "#3675ff"
+  },
+  {
+    "name": "YouTube",
+    "url": "https://www.youtube.com/",
+    "icon_class": "nf nf-fa-youtube",
+    "color": "#ff0000"
+  },
+  {
+    "name": "Discord",
+    "url": "https://discord.com/channels/@me",
+    "icon_class": "nf nf-fa-discord",
+    "color": "#5765f2"
+  },
+  {
+    "name": "Google Translate",
+    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate",
+    "icon_class": "nf nf-md-google_translate",
+    "color": "#ffffff"
+  },
+  {
+    "name": "VLR.gg",
+    "url": "https://www.vlr.gg/",
+    "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png"
+  },
+  {
+    "name": "Google Account",
+    "url": "https://myaccount.google.com/",
+    "icon_class": "nf nf-dev-google",
+    "color": "#ffffff"
+  },
+  {
+    "name": "Tailscale",
+    "url": "https://login.tailscale.com/admin/machines",
+    "icon_class": "nf nf-md-dots_hexagon",
+    "color": "#4b70cc"
+  },
+  {
+    "name": "mi9t",
+    "url": "http://mi9t:5002",
+    "icon_class": "nf nf-fa-battery_2",
+    "color": "#ff2e2e",
+    "title": "mi9t"
+  },
+  {
+    "name": "ChatGpt",
+    "url": "https://chat.openai.com/",
+    "text": "ChatGpt",
+    "color": "#1a7f64",
+    "background_color": "rgb(31, 31, 31)",
+    "border_radius": "5px"
+  },
+  {
+    "name": "Google Bard",
+    "url": "https://bard.google.com/",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg"
+  },
+  {
+    "name": "GitHub",
+    "url": "https://github.com/",
+    "icon_class": "nf nf-cod-github",
+    "color": "aliceblue"
+  },
+  {
+    "name": "Google Keep",
+    "url": "https://keep.google.com/",
+    "icon_class": "nf nf-md-google_keep",
+    "color": "#fbbc04"
+  },
+  {
+    "name": "Microsoft OneNote",
+    "url": "https://www.onenote.com/",
+    "icon_class": "nf nf-md-microsoft_onenote",
+    "color": "#b259e6"
+  },
+  {
+    "name": "Nerd Fonts Cheat Sheet",
+    "url": "https://www.nerdfonts.com/cheat-sheet",
+    "icon_class": "nf nf-md-format_font",
+    "color": "#69e8ff"
+  }
+]
