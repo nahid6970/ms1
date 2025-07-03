@@ -38,6 +38,27 @@
     </div>
   </div>
 
+  <div id="edit-link-popup" class="popup-container" style="display: none;">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Link</h3>
+      <form id="edit-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 350px;">
+        <input type="hidden" id="edit-link-index">
+        <input type="text" id="edit-link-name" placeholder="Name" required>
+        <input type="text" id="edit-link-group" placeholder="Group (optional)">
+        <input type="url" id="edit-link-url" placeholder="URL" required>
+        <input type="text" id="edit-link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+        <input type="text" id="edit-link-color" placeholder="Color (e.g., #f46613 or red)">
+        <input type="url" id="edit-link-img-src" placeholder="Image URL (if no icon)">
+        <input type="text" id="edit-link-text" placeholder="Text (if no icon/image)">
+        <input type="text" id="edit-link-background-color" placeholder="Background Color">
+        <input type="text" id="edit-link-border-radius" placeholder="Border Radius">
+        <input type="text" id="edit-link-title" placeholder="Title (for tooltip)">
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
 
 
 

@@ -45,6 +45,18 @@ document.addEventListener('DOMContentLoaded', function() {
           }
 
           span.innerHTML = linkContent;
+          const editButton = document.createElement('button');
+          editButton.textContent = 'Edit';
+          editButton.className = 'edit-button';
+          editButton.onclick = () => openEditLinkPopup(link, index);
+          span.appendChild(editButton);
+
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Delete';
+          deleteButton.className = 'delete-button';
+          deleteButton.onclick = () => deleteLink(index);
+          span.appendChild(deleteButton);
+
           // Apply font-size for text-based links if not image/icon
           if (!link.icon_class && !link.img_src) {
             span.style.fontSize = '40px';
@@ -105,6 +117,94 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Error adding link.');
       }
     });
+  }
+
+  // Edit Link functionality
+  const editLinkPopup = document.getElementById('edit-link-popup');
+  const editLinkForm = document.getElementById('edit-link-form');
+  const editLinkIndexInput = document.getElementById('edit-link-index');
+
+  function openEditLinkPopup(link, index) {
+    editLinkIndexInput.value = index;
+    document.getElementById('edit-link-name').value = link.name || '';
+    document.getElementById('edit-link-group').value = link.group || '';
+    document.getElementById('edit-link-url').value = link.url || '';
+    document.getElementById('edit-link-icon-class').value = link.icon_class || '';
+    document.getElementById('edit-link-color').value = link.color || '';
+    document.getElementById('edit-link-img-src').value = link.img_src || '';
+    document.getElementById('edit-link-text').value = link.text || '';
+    document.getElementById('edit-link-background-color').value = link.background_color || '';
+    document.getElementById('edit-link-border-radius').value = link.border_radius || '';
+    document.getElementById('edit-link-title').value = link.title || '';
+    editLinkPopup.style.display = 'block';
+  }
+
+  if (editLinkForm) {
+    editLinkForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const linkId = editLinkIndexInput.value;
+      const updatedLink = {
+        name: document.getElementById('edit-link-name').value,
+        group: document.getElementById('edit-link-group').value || undefined,
+        url: document.getElementById('edit-link-url').value,
+        icon_class: document.getElementById('edit-link-icon-class').value || undefined,
+        color: document.getElementById('edit-link-color').value || undefined,
+        img_src: document.getElementById('edit-link-img-src').value || undefined,
+        text: document.getElementById('edit-link-text').value || undefined,
+        background_color: document.getElementById('edit-link-background-color').value || undefined,
+        border_radius: document.getElementById('edit-link-border-radius').value || undefined,
+        title: document.getElementById('edit-link-title').value || undefined,
+      };
+
+      Object.keys(updatedLink).forEach(key => {
+        if (updatedLink[key] === '') {
+          delete updatedLink[key];
+        }
+      });
+
+      try {
+        const response = await fetch(`/api/links/${linkId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedLink),
+        });
+
+        if (response.ok) {
+          alert('Link updated successfully!');
+          editLinkPopup.style.display = 'none';
+          fetchAndDisplayLinks();
+        } else {
+          alert('Failed to update link.');
+        }
+      } catch (error) {
+        console.error('Error updating link:', error);
+        alert('Error updating link.');
+      }
+    });
+  }
+
+  // Delete Link functionality
+  async function deleteLink(linkId) {
+    if (confirm('Are you sure you want to delete this link?')) {
+      try {
+        const response = await fetch(`/api/links/${linkId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          alert('Link deleted successfully!');
+          fetchAndDisplayLinks();
+        } else {
+          alert('Failed to delete link.');
+        }
+      } catch (error) {
+        console.error('Error deleting link:', error);
+        alert('Error deleting link.');
+      }
+    }
   }
 
   // Initial fetch and display of links

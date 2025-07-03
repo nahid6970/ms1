@@ -91,4 +91,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  const editPopup = document.getElementById('edit-link-popup');
+  const closeEditBtn = editPopup ? editPopup.querySelector('.close-button') : null;
+
+  if (editPopup && closeEditBtn) {
+    closeEditBtn.addEventListener('click', () => {
+      editPopup.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target === editPopup) {
+        editPopup.style.display = 'none';
+      }
+    });
+  }
 });

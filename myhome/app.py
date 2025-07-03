@@ -39,5 +39,24 @@ def add_link():
     write_data(links)
     return jsonify({'message': 'Link added successfully'}), 201
 
+@app.route('/api/links/<int:link_id>', methods=['PUT'])
+def edit_link(link_id):
+    updated_link = request.json
+    links = read_data()
+    if 0 <= link_id < len(links):
+        links[link_id] = updated_link
+        write_data(links)
+        return jsonify({'message': 'Link updated successfully'})
+    return jsonify({'message': 'Link not found'}), 404
+
+@app.route('/api/links/<int:link_id>', methods=['DELETE'])
+def delete_link(link_id):
+    links = read_data()
+    if 0 <= link_id < len(links):
+        deleted_link = links.pop(link_id)
+        write_data(links)
+        return jsonify({'message': 'Link deleted successfully', 'deleted_link': deleted_link})
+    return jsonify({'message': 'Link not found'}), 404
+
 if __name__ == '__main__':
     app.run(debug=True)
