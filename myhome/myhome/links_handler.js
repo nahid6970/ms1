@@ -8,25 +8,52 @@ document.addEventListener('DOMContentLoaded', function() {
       const response = await fetch('/api/links');
       const links = await response.json();
       linksContainer.innerHTML = ''; // Clear existing links
+
+      const groupedLinks = {};
       links.forEach(link => {
-        const span = document.createElement('span');
-        let linkContent;
-
-        if (link.icon_class) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i>${link.text ? link.text : ''}</a>`;
-        } else if (link.img_src) {
-          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
-        } else {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+        const groupName = link.group || 'Ungrouped';
+        if (!groupedLinks[groupName]) {
+          groupedLinks[groupName] = [];
         }
-
-        span.innerHTML = linkContent;
-        // Apply font-size for text-based links if not image/icon
-        if (!link.icon_class && !link.img_src) {
-          span.style.fontSize = '40px';
-        }
-        linksContainer.appendChild(span);
+        groupedLinks[groupName].push(link);
       });
+
+      for (const groupName in groupedLinks) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'link-group';
+
+        const groupTitle = document.createElement('h3');
+        groupTitle.textContent = groupName;
+        groupDiv.appendChild(groupTitle);
+
+        const groupContentDiv = document.createElement('div');
+        groupContentDiv.className = 'link-group-content';
+        groupContentDiv.style.display = 'flex';
+        groupContentDiv.style.flexWrap = 'wrap';
+        groupContentDiv.style.justifyContent = 'left';
+
+        groupedLinks[groupName].forEach(link => {
+          const span = document.createElement('span');
+          let linkContent;
+
+          if (link.icon_class) {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i>${link.text ? link.text : ''}</a>`;
+          } else if (link.img_src) {
+            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+          } else {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+          }
+
+          span.innerHTML = linkContent;
+          // Apply font-size for text-based links if not image/icon
+          if (!link.icon_class && !link.img_src) {
+            span.style.fontSize = '40px';
+          }
+          groupContentDiv.appendChild(span);
+        });
+        groupDiv.appendChild(groupContentDiv);
+        linksContainer.appendChild(groupDiv);
+      }
     } catch (error) {
       console.error('Error fetching links:', error);
     }
@@ -39,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const newLink = {
         name: document.getElementById('link-name').value,
+        group: document.getElementById('link-group').value || undefined,
         url: document.getElementById('link-url').value,
         icon_class: document.getElementById('link-icon-class').value || undefined,
         color: document.getElementById('link-color').value || undefined,
