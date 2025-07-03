@@ -8,8 +8,8 @@
   {
     "name": "Facebook",
     "url": "https://www.facebook.com/",
-    "icon_class": "nf nf-dev-facebook",
-    "color": "#1399f4"
+    "color": "#1399f4",
+    "img_src": "https://img.icons8.com/win10/512/whatsapp.png"
   },
   {
     "name": "Messenger",
@@ -76,6 +76,7 @@
     "name": "asdas",
     "group": "10",
     "url": "http://asdasdas.com",
-    "icon_class": "nf nf-custom-css"
+    "icon_class": "nf nf-custom-css",
+    "color": "#ffffff"
   }
 ]

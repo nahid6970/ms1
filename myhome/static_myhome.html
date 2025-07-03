@@ -356,7 +356,7 @@ input:checked + .slider:before {
   <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
   </div>
 
-  <div id="add-link-popup" class="popup-container" style="display: none;">
+  <div id="add-link-popup" class="popup-container hidden">
     <div class="popup-content">
       <span class="close-button">&times;</span>
       <h3>Add New Link</h3>
@@ -376,7 +376,7 @@ input:checked + .slider:before {
     </div>
   </div>
 
-  <div id="edit-link-popup" class="popup-container" style="display: none;">
+  <div id="edit-link-popup" class="popup-container hidden">
     <div class="popup-content">
       <span class="close-button">&times;</span>
       <h3>Edit Link</h3>
@@ -477,34 +477,11 @@ input:checked + .slider:before {
     "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg"
   },
   {
-    "name": "GitHub",
-    "url": "https://github.com/",
-    "icon_class": "nf nf-cod-github",
-    "color": "aliceblue"
-  },
-  {
-    "name": "Google Keep",
-    "url": "https://keep.google.com/",
-    "icon_class": "nf nf-md-google_keep",
-    "color": "#fbbc04"
-  },
-  {
-    "name": "Microsoft OneNote",
-    "url": "https://www.onenote.com/",
-    "icon_class": "nf nf-md-microsoft_onenote",
-    "color": "#b259e6"
-  },
-  {
-    "name": "Nerd Fonts Cheat Sheet",
-    "url": "https://www.nerdfonts.com/cheat-sheet",
-    "icon_class": "nf nf-md-format_font",
-    "color": "#69e8ff"
-  },
-  {
     "name": "asdas",
     "group": "10",
     "url": "http://asdasdas.com",
-    "icon_class": "nf nf-custom-css"
+    "icon_class": "nf nf-custom-css",
+    "color": "#ffffff"
   }
 ];
     </script>
@@ -600,7 +577,6 @@ input:checked + .slider:before {
           document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
           const addLinkPopup = document.getElementById('add-link-popup');
           addLinkPopup.classList.remove('hidden'); // Remove hidden class
-          addLinkPopup.style.display = 'flex';
         });
         addLinkItemContainer.appendChild(addLinkSpan);
         groupContentDiv.appendChild(addLinkItemContainer);
@@ -678,7 +654,7 @@ input:checked + .slider:before {
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
-    editLinkPopup.style.display = 'block';
+    editLinkPopup.classList.remove('hidden');
   }
 
   if (editLinkForm) {
