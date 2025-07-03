@@ -323,50 +323,80 @@ def close_window(event=None):
 #* ██║     ██║  ██║██║ ╚═╝ ██║███████╗
 #* ╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
 # #* Fame Fame Fame Fame
+# Fame toggle function
 def FameFunction(button):
-    """Toggles the two-region attack functionality."""
-    # Use a dictionary to manage thread state and reference inside the function
+    """Toggles the two-region color-clicking functionality."""
     state = getattr(FameFunction, "state", {"thread": None, "stop_flag": True})
 
     if state["thread"] and state["thread"].is_alive():
-        # Stop the thread
         state["stop_flag"] = True
         state["thread"].join()
         button.config(text="Tapjoy-precat!", bg="#bda24a", fg="#000000")
     else:
-        # Start the thread
         state["stop_flag"] = False
 
-        def AdditionalFunction():
+        def AdditionalFunction(local_state):
+            region = (550, 135, 1345, 931)
+            target_colors = [(0xaa, 0xaa, 0xaa), (0xdc, 0xdc, 0xdc)]  # #aaaaaa, #dcdcdc
+            step = 4
+            delay = 0.01
+
             window = focus_window(window_title)
             if not window:
                 print(f"Window '{window_title}' not found.")
                 return
+
+            x1, y1, x2, y2 = region
+            w, h = x2 - x1, y2 - y1
+
             try:
-                while not state["stop_flag"]:
-                    focus_window(window_title)
-                    # Example logic
+                while not local_state["stop_flag"]:
+                    img = pyautogui.screenshot(region=region)
+                    px = img.load()
 
-                    #! Single match and click ; since not array so no need to use match
-                    match_this = find_image(r"C:\msBackups\tap_joy\precats\MatchThis.png", confidence=0.80, region=(1169, 111, 1646, 353))
-                    if match_this:
-                        center = pyautogui.center(match_this)
-                        press_global_screen_with_delays((1220, 308, .5))
+                    found = False
+                    for y in range(0, h, step):
+                        for x in range(0, w, step):
+                            if px[x, y][:3] in target_colors:
+                                abs_x, abs_y = x1 + x, y1 + y
+                                press_global_screen_with_delays((abs_x, abs_y, delay))
+                                found = True
+                                break
+                        if found:
+                            break
 
-                    time.sleep(0.1)
-            except KeyboardInterrupt: print("Script stopped by user.")
-        # Create and start the thread
-        thread = threading.Thread(target=AdditionalFunction)
+                    if not found:
+                        time.sleep(0.05)  # nothing found, avoid CPU overload
+
+                    if keyboard.is_pressed('esc') or local_state["stop_flag"]:
+                        break
+
+            except KeyboardInterrupt:
+                print("Stopped by user.")
+
+
+
+        thread = threading.Thread(target=lambda: AdditionalFunction(state))
         thread.daemon = True
         thread.start()
-        # Save the thread in the state dictionary
         state["thread"] = thread
         button.config(text="Stop", bg="#1d2027", fg="#fc0000")
-    # Save state to the function attribute for persistence
+
     FameFunction.state = state
-# Button logic
-Fame_BT = Button( ROOT, text="Tapjoy-precat!", bg="#bda24a", fg="#000000", width=0, height=0, command=lambda: FameFunction(Fame_BT), font=("Jetbrainsmono nfp", 10, "bold"), relief="flat" )
-Fame_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
+
+
+Fame_BT = Button(
+    ROOT,
+    text="Tapjoy-precat!",
+    bg="#bda24a",
+    fg="#000000",
+    width=0,
+    height=0,
+    command=lambda: FameFunction(Fame_BT),
+    font=("Jetbrainsmono nfp", 10, "bold"),
+    relief="flat"
+)
+Fame_BT.pack(side="left", padx=10, pady=10)
 
 # Button to toggle display
 display_button = Button(ROOT, text="M-1", bg="#0078D7", fg="#fff", width=8, height=0, command=toggle_display, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
