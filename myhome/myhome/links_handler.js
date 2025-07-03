@@ -213,6 +213,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initial fetch and display of links
   fetchAndDisplayLinks();
+
+  // Edit Mode Toggle functionality
+  const editModeToggle = document.getElementById('edit-mode-toggle');
+  const flexContainer2 = document.querySelector('.flex-container2');
+
+  if (editModeToggle && flexContainer2) {
+    editModeToggle.addEventListener('change', function() {
+      if (this.checked) {
+        flexContainer2.classList.add('edit-mode');
+      } else {
+        flexContainer2.classList.remove('edit-mode');
+      }
+    });
+  }
 });
 
 // Functions from original index.js
