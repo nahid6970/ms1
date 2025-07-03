@@ -71,39 +71,32 @@ spans.forEach(span => {
 
 // Popup functionality
 document.addEventListener('DOMContentLoaded', () => {
-  const openPopupBtn = document.getElementById('open-add-link-popup');
-  const popup = document.getElementById('add-link-popup');
-  const closeBtn = document.querySelector('.popup-content .close-button');
+  const addLinkPopup = document.getElementById('add-link-popup');
+  const editLinkPopup = document.getElementById('edit-link-popup');
 
-  if (openPopupBtn && popup && closeBtn) {
-    openPopupBtn.addEventListener('click', () => {
-      popup.style.display = 'flex';
-    });
-
-    closeBtn.addEventListener('click', () => {
-      popup.style.display = 'none';
-    });
-
-    // Close the popup if the user clicks outside of it
-    window.addEventListener('click', (event) => {
-      if (event.target === popup) {
-        popup.style.display = 'none';
-      }
+  // Close buttons for addLinkPopup
+  const addCloseButton = addLinkPopup ? addLinkPopup.querySelector('.close-button') : null;
+  if (addCloseButton) {
+    addCloseButton.addEventListener('click', () => {
+      addLinkPopup.classList.add('hidden');
     });
   }
 
-  const editPopup = document.getElementById('edit-link-popup');
-  const closeEditBtn = editPopup ? editPopup.querySelector('.close-button') : null;
-
-  if (editPopup && closeEditBtn) {
-    closeEditBtn.addEventListener('click', () => {
-      editPopup.style.display = 'none';
-    });
-
-    window.addEventListener('click', (event) => {
-      if (event.target === editPopup) {
-        editPopup.style.display = 'none';
-      }
+  // Close buttons for editLinkPopup
+  const editCloseButton = editLinkPopup ? editLinkPopup.querySelector('.close-button') : null;
+  if (editCloseButton) {
+    editCloseButton.addEventListener('click', () => {
+      editLinkPopup.classList.add('hidden');
     });
   }
+
+  // Close popups when clicking outside
+  window.addEventListener('click', (event) => {
+    if (event.target === addLinkPopup) {
+      addLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editLinkPopup) {
+      editLinkPopup.classList.add('hidden');
+    }
+  });
 });

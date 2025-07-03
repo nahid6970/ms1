@@ -80,7 +80,6 @@ vertical-align: middle;
 border-radius: 10px;
 }
 
-/* Style for spans */
 .link-item-container {
   display: flex;
   flex-direction: column;
@@ -117,6 +116,10 @@ border-radius: 10px;
   display: flex;
   justify-content: center;
   margin-top: 5px; /* Space between link and buttons */
+}
+
+.add-link-item:hover {
+  background-color: #4CAF50; /* Green color on hover */
 }
 
 .toggle-container span {
@@ -242,6 +245,10 @@ input:checked + .slider:before {
   border-radius: 0 !important;
   /* Ensure it's not affected by parent container */
   pointer-events: auto;
+}
+
+.hidden {
+  display: none !important;
 }
 
 

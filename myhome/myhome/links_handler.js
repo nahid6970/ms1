@@ -75,6 +75,24 @@ document.addEventListener('DOMContentLoaded', function() {
           groupContentDiv.appendChild(element);
         });
 
+        // Add button for adding new links to this group
+        const addLinkItemContainer = document.createElement('div');
+        addLinkItemContainer.className = 'link-item-container add-link-item';
+
+        const addLinkSpan = document.createElement('span');
+        addLinkSpan.textContent = '+';
+        addLinkSpan.style.cursor = 'pointer';
+        addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+        addLinkSpan.style.fontSize = '40px';
+        addLinkSpan.style.alignContent = 'center';
+
+        addLinkSpan.addEventListener('click', () => {
+          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+          document.getElementById('add-link-popup').style.display = 'flex';
+        });
+        addLinkItemContainer.appendChild(addLinkSpan);
+        groupContentDiv.appendChild(addLinkItemContainer);
+
         groupDiv.appendChild(groupContentDiv);
         linksContainer.appendChild(groupDiv);
       }
