@@ -9,16 +9,47 @@ document.addEventListener('DOMContentLoaded', function() {
       const links = await response.json();
       linksContainer.innerHTML = ''; // Clear existing links
 
-      const groupedLinks = {};
-      links.forEach(link => {
+      const groupedElements = {}; // Store HTML elements grouped by name
+
+      links.forEach((link, index) => { // Use the index from the original links array
         const groupName = link.group || 'Ungrouped';
-        if (!groupedLinks[groupName]) {
-          groupedLinks[groupName] = [];
+        if (!groupedElements[groupName]) {
+          groupedElements[groupName] = [];
         }
-        groupedLinks[groupName].push(link);
+
+        const span = document.createElement('span');
+        let linkContent;
+
+        if (link.icon_class) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i>${link.text ? link.text : ''}</a>`;
+        } else if (link.img_src) {
+          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+        } else {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+        }
+
+        span.innerHTML = linkContent;
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
+        span.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => deleteLink(index); // Pass original index
+        span.appendChild(deleteButton);
+
+        if (!link.icon_class && !link.img_src) {
+          span.style.fontSize = '40px';
+        }
+        groupedElements[groupName].push(span);
       });
 
-      for (const groupName in groupedLinks) {
+      // Now append the grouped elements to the container
+      for (const groupName in groupedElements) {
         const groupDiv = document.createElement('div');
         groupDiv.className = 'link-group';
 
@@ -32,37 +63,10 @@ document.addEventListener('DOMContentLoaded', function() {
         groupContentDiv.style.flexWrap = 'wrap';
         groupContentDiv.style.justifyContent = 'left';
 
-        groupedLinks[groupName].forEach(link => {
-          const span = document.createElement('span');
-          let linkContent;
-
-          if (link.icon_class) {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i>${link.text ? link.text : ''}</a>`;
-          } else if (link.img_src) {
-            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
-          } else {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
-          }
-
-          span.innerHTML = linkContent;
-          const editButton = document.createElement('button');
-          editButton.textContent = 'Edit';
-          editButton.className = 'edit-button';
-          editButton.onclick = () => openEditLinkPopup(link, index);
-          span.appendChild(editButton);
-
-          const deleteButton = document.createElement('button');
-          deleteButton.textContent = 'Delete';
-          deleteButton.className = 'delete-button';
-          deleteButton.onclick = () => deleteLink(index);
-          span.appendChild(deleteButton);
-
-          // Apply font-size for text-based links if not image/icon
-          if (!link.icon_class && !link.img_src) {
-            span.style.fontSize = '40px';
-          }
-          groupContentDiv.appendChild(span);
+        groupedElements[groupName].forEach(element => {
+          groupContentDiv.appendChild(element);
         });
+
         groupDiv.appendChild(groupContentDiv);
         linksContainer.appendChild(groupDiv);
       }
