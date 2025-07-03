@@ -80,26 +80,42 @@ border-radius: 10px;
 }
 
 /* Style for spans */
-span {
-display: inline-block;
-padding: 5px 5px;
-background-color: #474747;
-border-radius: 5px;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-transition: transform 0.3s ease;
-margin: 2px;
-width: fit-content;
-height: 60px;
-font-family: jetbrainsmono nfp;
-font-size: 40px;
-align-content: center;
+.link-item-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the link and buttons horizontally */
+  margin: 5px; /* Add some margin around each item */
+  padding: 5px;
+  background-color: #474747;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
-/* Hover effect */
-span:hover {
-  transform: scale(1);
+.link-item-container:hover {
+  transform: scale(1.02);
   background-color: #000000;
   transition: .3s;
+}
+
+.link-item-container span {
+  /* Styles for the link itself within the container */
+  display: block; /* Make the span take full width */
+  padding: 5px 5px;
+  width: fit-content;
+  height: 60px;
+  font-family: jetbrainsmono nfp;
+  font-size: 40px;
+  align-content: center;
+  background-color: transparent; /* Remove background from the span itself */
+  box-shadow: none;
+  margin: 0; /* Remove margin from the span */
+}
+
+.link-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px; /* Space between link and buttons */
 }
 
 .toggle-container span {

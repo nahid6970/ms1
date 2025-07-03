@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
           groupedElements[groupName] = [];
         }
 
+        const linkItemContainer = document.createElement('div');
+        linkItemContainer.className = 'link-item-container';
+
         const span = document.createElement('span');
         let linkContent;
 
@@ -29,23 +32,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         span.innerHTML = linkContent;
+        if (!link.icon_class && !link.img_src) {
+          span.style.fontSize = '40px';
+        }
+        linkItemContainer.appendChild(span);
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'link-buttons';
 
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.className = 'edit-button';
         editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
-        span.appendChild(editButton);
+        buttonContainer.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteLink(index); // Pass original index
-        span.appendChild(deleteButton);
+        buttonContainer.appendChild(deleteButton);
 
-        if (!link.icon_class && !link.img_src) {
-          span.style.fontSize = '40px';
-        }
-        groupedElements[groupName].push(span);
+        linkItemContainer.appendChild(buttonContainer);
+        groupedElements[groupName].push(linkItemContainer);
       });
 
       // Now append the grouped elements to the container
