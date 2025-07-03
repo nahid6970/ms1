@@ -95,5 +95,11 @@
     "url": "https://www.nerdfonts.com/cheat-sheet",
     "icon_class": "nf nf-md-format_font",
     "color": "#69e8ff"
+  },
+  {
+    "name": "asdas",
+    "group": "asdasdasdasdasd",
+    "url": "http://asdasdas.com",
+    "icon_class": "nf nf-custom-css"
   }
 ]

@@ -88,7 +88,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         addLinkSpan.addEventListener('click', () => {
           document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-          document.getElementById('add-link-popup').style.display = 'flex';
+          const addLinkPopup = document.getElementById('add-link-popup');
+          addLinkPopup.classList.remove('hidden'); // Remove hidden class
+          addLinkPopup.style.display = 'flex';
         });
         addLinkItemContainer.appendChild(addLinkSpan);
         groupContentDiv.appendChild(addLinkItemContainer);
