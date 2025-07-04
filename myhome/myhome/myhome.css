@@ -128,6 +128,10 @@ border-radius: 10px;
   margin-top: 5px; /* Space between link and buttons */
 }
 
+.add-link-item {
+  max-height: fit-content;
+  align-self: center;
+}
 .add-link-item:hover {
   background-color: #4CAF50; /* Green color on hover */
 }
