@@ -70,8 +70,8 @@ def example_app_setup_2():
     return _get_action_output_message("Executing Example App Setup 2...")
 
 def install_gnome():
-    # This will use the live output display
-    return None  # Signal that this should use live output
+    # This function is handled by live output, so we don't need to return anything
+    pass
 
 def execute_command_with_live_output(stdscr, command, title="Command Output"):
     """Execute a command and display live output in a popup window."""
@@ -362,24 +362,24 @@ def main(stdscr):
                     active_pane = "submenu"
                     submenu_selected_row = 0
                 elif selected_item["type"] == "action":
-                    action_func = ACTION_FUNCTIONS.get(selected_item["action"])
-                    if action_func:
-                        if selected_item["action"] == "go_back":
-                            go_back(stdscr)
-                        elif selected_item["action"] == "exit_program":
-                            exit_program(stdscr)
-                        else:
-                            # Check if this action should use live output
-                            if selected_item["action"] in LIVE_COMMANDS:
-                                execute_command_with_live_output(
-                                    stdscr, 
-                                    LIVE_COMMANDS[selected_item["action"]],
-                                    f"Executing: {selected_item['name']}"
-                                )
-                            else:
-                                output_message = action_func()
-                                if output_message:
-                                    display_output_window(stdscr, output_message)
+                    if selected_item["action"] == "go_back":
+                        go_back(stdscr)
+                    elif selected_item["action"] == "exit_program":
+                        exit_program(stdscr)
+                    elif selected_item["action"] in LIVE_COMMANDS:
+                        # Execute command with live output
+                        execute_command_with_live_output(
+                            stdscr, 
+                            LIVE_COMMANDS[selected_item["action"]],
+                            f"Executing: {selected_item['name']}"
+                        )
+                    else:
+                        # Execute regular action
+                        action_func = ACTION_FUNCTIONS.get(selected_item["action"])
+                        if action_func:
+                            output_message = action_func()
+                            if output_message:
+                                display_output_window(stdscr, output_message)
             elif active_pane == "submenu":
                 selected_main_item = main_menu_items_list[main_selected_row]
                 if selected_main_item["type"] == "menu":
@@ -389,27 +389,27 @@ def main(stdscr):
                     selected_submenu_item = submenu_items_list[submenu_selected_row]
 
                     if selected_submenu_item["type"] == "action":
-                        action_func = ACTION_FUNCTIONS.get(selected_submenu_item["action"])
-                        if action_func:
-                            if selected_submenu_item["action"] == "go_back":
-                                go_back(stdscr)
-                            elif selected_submenu_item["action"] == "exit_program":
-                                exit_program(stdscr)
-                            else:
-                                # Check if this action should use live output
-                                if selected_submenu_item["action"] in LIVE_COMMANDS:
-                                    execute_command_with_live_output(
-                                        stdscr, 
-                                        LIVE_COMMANDS[selected_submenu_item["action"]],
-                                        f"Executing: {selected_submenu_item['name']}"
-                                    )
-                                else:
-                                    output_message = action_func()
-                                    if output_message:
-                                        display_output_window(stdscr, output_message)
-                                # After action, return to submenu view
-                                active_pane = "submenu"
-                                submenu_selected_row = 0 # Reset submenu selection
+                        if selected_submenu_item["action"] == "go_back":
+                            go_back(stdscr)
+                        elif selected_submenu_item["action"] == "exit_program":
+                            exit_program(stdscr)
+                        elif selected_submenu_item["action"] in LIVE_COMMANDS:
+                            # Execute command with live output
+                            execute_command_with_live_output(
+                                stdscr, 
+                                LIVE_COMMANDS[selected_submenu_item["action"]],
+                                f"Executing: {selected_submenu_item['name']}"
+                            )
+                        else:
+                            # Execute regular action
+                            action_func = ACTION_FUNCTIONS.get(selected_submenu_item["action"])
+                            if action_func:
+                                output_message = action_func()
+                                if output_message:
+                                    display_output_window(stdscr, output_message)
+                        # After action, return to submenu view
+                        active_pane = "submenu"
+                        submenu_selected_row = 0 # Reset submenu selection
         elif key == ord('q') or key == ord('0'):
             if active_pane == "submenu":
                 go_back(stdscr)
