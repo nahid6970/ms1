@@ -3,14 +3,17 @@
     "name": "Google Mail",
     "url": "https://mail.google.com/",
     "icon_class": "nf nf-cod-mail",
-    "color": "#f46613"
+    "color": "#f46613",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/022/613/021/non_2x/google-mail-gmail-icon-logo-symbol-free-png.png",
+    "default_type": "img"
   },
   {
     "name": "Facebook",
     "url": "https://www.facebook.com/",
+    "icon_class": "nf nf-dev-facebook",
     "color": "#1399f4",
-    "img_src": "https://img.icons8.com/win10/512/whatsapp.png",
-    "default_type": "img"
+    "img_src": "https://img.icons8.com/ios11/512/facebook-new.png",
+    "default_type": "nerd-font"
   },
   {
     "name": "Messenger",
@@ -62,22 +65,16 @@
     "name": "ChatGpt",
     "url": "https://chat.openai.com/",
     "icon_class": "nf-dev-intellij",
-    "color": "#1a7f64",
     "img_src": "https://img.icons8.com/win10/512/whatsapp.png",
     "text": "ChatGpt",
     "default_type": "nerd-font",
-    "background_color": "black",
-    "border_radius": "5px",
-    "li_bg_color": "red",
-    "li_hover_color": "green"
+    "border_radius": "5px"
   },
   {
     "name": "Google Bard",
     "url": "https://bard.google.com/",
     "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
-    "default_type": "img",
-    "li_bg_color": "red",
-    "li_hover_color": "yellow"
+    "default_type": "img"
   },
   {
     "name": "asdas",
