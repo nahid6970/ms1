@@ -19,6 +19,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const listItem = document.createElement('li');
         listItem.className = 'link-item';
+        if (link.li_bg_color) {
+          listItem.style.backgroundColor = link.li_bg_color;
+        }
+        if (link.li_hover_color) {
+          listItem.addEventListener('mouseover', () => {
+            listItem.style.backgroundColor = link.li_hover_color;
+          });
+          listItem.addEventListener('mouseout', () => {
+            listItem.style.backgroundColor = link.li_bg_color || '';
+          });
+        }
 
         let linkContent;
 
@@ -113,6 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
         background_color: document.getElementById('link-background-color').value || undefined,
         border_radius: document.getElementById('link-border-radius').value || undefined,
         title: document.getElementById('link-title').value || undefined,
+        li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
+        li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
       };
 
       // Clean up empty strings for optional fields
@@ -162,6 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
+    document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
+    document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
     editLinkPopup.classList.remove('hidden');
   }
 
@@ -182,6 +197,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 background_color: document.getElementById('edit-link-background-color').value || undefined,
                 border_radius: document.getElementById('edit-link-border-radius').value || undefined,
                 title: document.getElementById('edit-link-title').value || undefined,
+                li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
+                li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
             };
 
             Object.keys(updatedLink).forEach(key => {

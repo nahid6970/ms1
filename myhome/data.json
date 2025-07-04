@@ -64,13 +64,17 @@
     "url": "https://chat.openai.com/",
     "color": "#1a7f64",
     "text": "ChatGpt",
-    "background_color": "red",
-    "border_radius": "5px"
+    "background_color": "black",
+    "border_radius": "5px",
+    "li_bg_color": "red",
+    "li_hover_color": "green"
   },
   {
     "name": "Google Bard",
     "url": "https://bard.google.com/",
-    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg"
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "li_bg_color": "red",
+    "li_hover_color": "yellow"
   },
   {
     "name": "asdas",
