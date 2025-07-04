@@ -1,0 +1,31 @@
+<Window x:Class="MiniToys.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MiniToys"
+        mc:Ignorable="d"
+        Title="MiniToys" Height="450" Width="800"
+        Closing="Window_Closing">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel: Main Menu -->
+        <Border Grid.Column="0" BorderBrush="LightGray" BorderThickness="0,0,1,0">
+            <StackPanel>
+                <TextBlock Text="Main Menu" FontWeight="Bold" Margin="10" FontSize="16"/>
+                <ListBox x:Name="MainMenuListBox" SelectionChanged="MainMenuListBox_SelectionChanged">
+                    <ListBoxItem Content="General"/>
+                    <ListBoxItem Content="Appearance"/>
+                    <ListBoxItem Content="About"/>
+                </ListBox>
+            </StackPanel>
+        </Border>
+
+        <!-- Right Panel: Submenu Content -->
+        <ContentControl Grid.Column="1" x:Name="SubMenuContentControl" Margin="10"/>
+    </Grid>
+</Window>

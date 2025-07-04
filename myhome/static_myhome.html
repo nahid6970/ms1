@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home</title>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="wilih=device-wilih, initial-scale=1">
+  <style>/* Import the JetBrains Mono font */
+@import url("https://www.nerdfonts.com/assets/css/webfont.css");
+
+/* Thin scrollbar with custom styles for html and body */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #31343a;
+  font-family: Calibri;
+  scrollbar-width: thin;
+  scrollbar-color: #ff0000 #000000; /* black background and red thumb */
+}
+
+/* WebKit browsers (Chrome, Safari) */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 1px; /* Set the width of the scrollbar */
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background-color: #ff000f; /* Color of the thumb (red) */
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background-color: #000000; /* Color of the track (black) */
+}
+
+/* For html part 2 ############################################################*/
+.flex-container2 {
+display: flex;
+flex-direction: row;
+background-color: #31343a;
+gap: 3px;
+flex-wrap: wrap;
+text-align: left;
+line-height: auto;
+align-items: flex-start;
+font-size: auto;
+color: rgb(255, 255, 255);
+padding: 1cm;
+border-radius: 1cm;
+position: relative; /* Added for positioning context */
+}
+
+.flex-container2 > div {
+font-weight: normal;
+flex-grow: 1;
+border-radius: 0px;
+width: max-content;
+margin: 1px;
+text-align: left;
+width: 500px;
+}
+
+p {
+text-align: justify;
+line-height: 1.5;
+height: auto;
+color: #4a90e2;
+font-family: Arial, sans-serif;
+font-size: 16px;
+}
+
+a:link {color: #b5ac97;background-color: transparent;text-decoration: none;}
+a:visited {color: #bbd853;background-color: transparent;text-decoration: none;}
+a:hover {color: red;background-color: transparent;text-decoration: none;}
+a:active {color: yellow;background-color: transparent;text-decoration: underline;}
+
+img {
+border: 1px solid transparent;
+vertical-align: middle;
+border-radius: 10px;
+}
+
+.link-group-content {
+  list-style: none; /* Remove default list bullets */
+  padding: 10px; /* Remove default padding */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+  background-color: #252525;
+  border-radius: 10px;
+}
+
+.link-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the link and buttons horizontally */
+  margin: 5px; /* Add some margin around each item */
+  padding: 5px;
+  background-color: #474747;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.link-item:hover {
+  transform: scale(1.02);
+  background-color: #000000;
+  transition: .3s;
+}
+
+.link-item a {
+  /* Styles for the link itself within the container */
+  display: block; /* Make the span take full width */
+  padding: 5px 5px;
+  width: fit-content;
+  height: 60px;
+  font-family: jetbrainsmono nfp;
+  font-size: 40px;
+  align-content: center;
+  background-color: transparent; /* Remove background from the span itself */
+  box-shadow: none;
+  margin: 0; /* Remove margin from the span */
+}
+
+.link-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px; /* Space between link and buttons */
+}
+
+.add-link-item {
+  max-height: fit-content;
+  align-self: center;
+}
+.add-link-item:hover {
+  background-color: #4CAF50; /* Green color on hover */
+}
+
+.toggle-container span {
+  /* Reset properties for the toggle label span */
+  display: inline;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  transition: none;
+  margin: 0;
+  width: auto;
+  height: auto;
+  font-family: Calibri; /* Or your preferred default font */
+  font-size: 16px; /* Or your preferred default font size */
+  align-content: center;
+}
+
+.toggle-container span:hover {
+  transform: none;
+  background-color: transparent;
+}
+
+.toggle-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  transform: none;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.edit-button, .delete-button {
+  display: none; /* Hidden by default */
+  font-family: jetbrainsmono nfp;
+}
+
+.edit-mode .edit-button,
+.edit-mode .delete-button {
+  display: inline-block; /* Show when edit mode is active */
+}
+
+/* Popup styles - Enhanced centering */
+.popup-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999 !important;
+  display: flex;
+  justify-content: center !important;
+  align-items: center !important;
+  /* Override any parent flex properties */
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  /* Ensure it's not affected by parent container */
+  pointer-events: auto;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+.popup-content {
+  background-color: #31343a;
+  padding: 20px;
+  border-radius: 8px;  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+  max-width: fit-content;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.popup-content .close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #fff;
+  background-color: #ff2d2d;
+  height: 50px;
+}
+
+.link-group h3 {
+  color: #ffffff;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #555;
+  padding-bottom: 5px;
+}
+
+.edit-button, .delete-button {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.delete-button {
+  background-color: #f44336; /* Red */
+}
+
+.edit-button:hover {
+  background-color: #45a049;
+}
+
+.delete-button:hover {
+  background-color: #da190b;
+}
+
+.popup-container input[type="text"],
+.popup-container input[type="url"],
+.popup-container input[type="color"] {
+  flex-grow: 1; /* Allow inputs to grow within a flex container */
+  min-width: 120px; /* Ensure a minimum width */
+  padding: 8px;
+  margin-bottom: 0; /* Remove individual margin-bottom, use gap on parent */
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: #555;
+  color: white;
+}
+
+.popup-container button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.popup-container button[type="submit"]:hover {
+  background-color: #0056b3;
+}</style>
+
+</head>
+
+<body>
+  <div class="flex-container2">
+
+    <div class="toggle-container" style="margin-left: 25px;">
+      <label class="switch">
+        <input type="checkbox" id="edit-mode-toggle">
+        <span class="slider round"></span>
+      </label>
+      <span style="color: white; margin-left: 10px;">Modify</span>
+    </div>
+
+  <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
+  </div>
+
+  <div id="add-link-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Add New Link</h3>
+      <form id="add-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="text" id="link-name" placeholder="Name" required>
+        <input type="text" id="link-group" placeholder="Group (optional)">
+        <input type="url" id="link-url" placeholder="URL" required>
+        <label for="link-default-type">Default Type:</label>
+        <select id="link-default-type">
+          <option value="nerd-font">nerd-font</option>
+          <option value="img">img</option>
+          <option value="text">text</option>
+        </select>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-text" placeholder="Text (if no icon/image)">
+          <input type="url" id="link-img-src" placeholder="Image URL (if no icon)">
+          <input type="text" id="link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-color" placeholder="Color (e.g., #f46613 or red)">
+          <input type="text" id="link-background-color" placeholder="Background Color">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-li-bg-color" placeholder="List Item BG Color">
+          <input type="text" id="link-li-hover-color" placeholder="List Item Hover Color">
+        </div>
+        <input type="text" id="link-border-radius" placeholder="Border Radius">
+        <input type="text" id="link-title" placeholder="Title (for tooltip)">
+        <button type="submit">Add Link</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="edit-link-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Link</h3>
+      <form id="edit-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="hidden" id="edit-link-index">
+        <input type="text" id="edit-link-name" placeholder="Name" required>
+        <input type="text" id="edit-link-group" placeholder="Group (optional)">
+        <input type="url" id="edit-link-url" placeholder="URL" required>
+        <label for="edit-link-default-type">Default Type:</label>
+        <select id="edit-link-default-type">
+          <option value="nerd-font">nerd-font</option>
+          <option value="img">img</option>
+          <option value="text">text</option>
+        </select>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-text" placeholder="Text (if no icon/image)">
+          <input type="url" id="edit-link-img-src" placeholder="Image URL (if no icon)">
+          <input type="text" id="edit-link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-color" placeholder="Color (e.g., #f46613 or red)">
+          <input type="text" id="edit-link-background-color" placeholder="Background Color">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-li-bg-color" placeholder="List Item BG Color">
+          <input type="text" id="edit-link-li-hover-color" placeholder="List Item Hover Color">
+        </div>
+        <input type="text" id="edit-link-border-radius" placeholder="Border Radius">
+        <input type="text" id="edit-link-title" placeholder="Title (for tooltip)">
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+
+
+
+  
+    <script>
+        window.EMBEDDED_LINKS_DATA = [
+  {
+    "name": "Google Mail",
+    "url": "https://mail.google.com/",
+    "icon_class": "nf nf-cod-mail",
+    "color": "#f46613",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/022/613/021/non_2x/google-mail-gmail-icon-logo-symbol-free-png.png",
+    "default_type": "img"
+  },
+  {
+    "name": "Facebook",
+    "url": "https://www.facebook.com/",
+    "icon_class": "nf nf-dev-facebook",
+    "color": "#1399f4",
+    "img_src": "https://img.icons8.com/ios11/512/facebook-new.png",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "Messenger",
+    "url": "https://www.messenger.com/",
+    "icon_class": "nf nf-fa-facebook_messenger",
+    "color": "#3675ff",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "YouTube",
+    "url": "https://www.youtube.com/",
+    "icon_class": "nf nf-fa-youtube",
+    "color": "#ff0000",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "Discord",
+    "url": "https://discord.com/channels/@me",
+    "icon_class": "nf-fa-discord",
+    "color": "#5765f2",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "Google Translate",
+    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate",
+    "icon_class": "nf nf-md-google_translate",
+    "color": "#ffffff"
+  },
+  {
+    "name": "VLR.gg",
+    "url": "https://www.vlr.gg/",
+    "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png",
+    "default_type": "img"
+  },
+  {
+    "name": "Tailscale",
+    "url": "https://login.tailscale.com/admin/machines",
+    "icon_class": "nf nf-md-dots_hexagon",
+    "color": "#4b70cc"
+  },
+  {
+    "name": "mi9t",
+    "url": "http://mi9t:5002",
+    "icon_class": "nf nf-fa-battery_2",
+    "color": "#ff2e2e",
+    "title": "mi9t"
+  },
+  {
+    "name": "ChatGpt",
+    "url": "https://chat.openai.com/",
+    "icon_class": "nf-dev-intellij",
+    "img_src": "https://img.icons8.com/win10/512/whatsapp.png",
+    "text": "ChatGpt",
+    "default_type": "nerd-font",
+    "border_radius": "5px"
+  },
+  {
+    "name": "Google Bard",
+    "url": "https://bard.google.com/",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "default_type": "img"
+  },
+  {
+    "name": "asdas",
+    "group": "10",
+    "url": "http://asdasdas.com",
+    "icon_class": "nf nf-custom-css",
+    "color": "#ffffff"
+  }
+];
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+  const linksContainer = document.getElementById('links-container');
+  const addLinkForm = document.getElementById('add-link-form');
+
+  // Function to fetch and display links
+  async function fetchAndDisplayLinks() {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      linksContainer.innerHTML = ''; // Clear existing links
+
+      const groupedElements = {}; // Store HTML elements grouped by name
+
+      links.forEach((link, index) => { // Use the index from the original links array
+        const groupName = link.group || 'Ungrouped';
+        if (!groupedElements[groupName]) {
+          groupedElements[groupName] = [];
+        }
+
+        const listItem = document.createElement('li');
+        listItem.className = 'link-item';
+        if (link.li_bg_color) {
+          listItem.style.backgroundColor = link.li_bg_color;
+        }
+        if (link.li_hover_color) {
+          listItem.addEventListener('mouseover', () => {
+            listItem.style.backgroundColor = link.li_hover_color;
+          });
+          listItem.addEventListener('mouseout', () => {
+            listItem.style.backgroundColor = link.li_bg_color || '';
+          });
+        }
+
+        let linkContent;
+
+        if (link.default_type === 'nerd-font' && link.icon_class) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+        } else if (link.default_type === 'img' && link.img_src) {
+          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+        } else if (link.default_type === 'text' && link.text) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
+        } else {
+          // Fallback if default_type is not set or doesn't match available content
+          if (link.icon_class) {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          } else if (link.img_src) {
+            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+          } else {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+          }
+        }
+
+        listItem.innerHTML = linkContent;
+        // Apply font size if it's a text-based link (either default_type text or fallback to name)
+        if (link.default_type === 'text' || link.default_type === 'nerd-font' || (!link.default_type && (link.icon_class || (!link.icon_class && !link.img_src)))) {
+          listItem.style.fontSize = '40px';
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'link-buttons';
+
+        const editButton = document.createElement('button');
+        editButton.textContent = '';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
+        buttonContainer.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => deleteLink(index); // Pass original index
+        buttonContainer.appendChild(deleteButton);
+
+        listItem.appendChild(buttonContainer);
+        groupedElements[groupName].push(listItem);
+      });
+
+      // Now append the grouped elements to the container
+      for (const groupName in groupedElements) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'link-group';
+
+        const groupTitle = document.createElement('h3');
+        groupTitle.textContent = groupName;
+        groupDiv.appendChild(groupTitle);
+
+        const groupList = document.createElement('ul');
+        groupList.className = 'link-group-content';
+
+        groupedElements[groupName].forEach(element => {
+          groupList.appendChild(element);
+        });
+
+        // Add button for adding new links to this group
+        const addLinkItem = document.createElement('li');
+        addLinkItem.className = 'link-item add-link-item';
+
+        const addLinkSpan = document.createElement('span');
+        addLinkSpan.textContent = '+';
+        addLinkSpan.style.cursor = 'pointer';
+        addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+        addLinkSpan.style.fontSize = '25px';
+        addLinkSpan.style.alignContent = 'center';
+
+        addLinkSpan.addEventListener('click', () => {
+          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+          const addLinkPopup = document.getElementById('add-link-popup');
+          addLinkPopup.classList.remove('hidden'); // Remove hidden class
+        });
+        addLinkItem.appendChild(addLinkSpan);
+        groupList.appendChild(addLinkItem);
+
+        groupDiv.appendChild(groupList);
+        linksContainer.appendChild(groupDiv);
+      }
+    } catch (error) {
+      console.error('Error fetching links:', error);
+    }
+  }
+
+  // Handle form submission for adding new links
+  if (addLinkForm) {
+    addLinkForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const newLink = {
+        name: document.getElementById('link-name').value,
+        group: document.getElementById('link-group').value || undefined,
+        url: document.getElementById('link-url').value,
+        icon_class: document.getElementById('link-icon-class').value || undefined,
+        color: document.getElementById('link-color').value || undefined,
+        img_src: document.getElementById('link-img-src').value || undefined,
+        text: document.getElementById('link-text').value || undefined,
+        default_type: document.getElementById('link-default-type').value || undefined,
+        background_color: document.getElementById('link-background-color').value || undefined,
+        border_radius: document.getElementById('link-border-radius').value || undefined,
+        title: document.getElementById('link-title').value || undefined,
+        li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
+        li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
+      };
+
+      // Clean up empty strings for optional fields
+      Object.keys(newLink).forEach(key => {
+        if (newLink[key] === '') {
+          delete newLink[key];
+        }
+      });
+
+      try {
+        const response = await fetch('/api/add_link', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newLink),
+        });
+
+        if (response.ok) {
+          alert('Link added successfully!');
+          addLinkForm.reset(); // Clear form
+          fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA); // Refresh links
+        } else {
+          alert('Failed to add link.');
+        }
+      } catch (error) {
+        console.error('Error adding link:', error);
+        alert('Error adding link.');
+      }
+    });
+  }
+
+  // Edit Link functionality
+  const editLinkPopup = document.getElementById('edit-link-popup');
+  const editLinkForm = document.getElementById('edit-link-form');
+  const editLinkIndexInput = document.getElementById('edit-link-index');
+
+  function openEditLinkPopup(link, index) {
+    editLinkIndexInput.value = index;
+    document.getElementById('edit-link-name').value = link.name || '';
+    document.getElementById('edit-link-group').value = link.group || '';
+    document.getElementById('edit-link-url').value = link.url || '';
+    document.getElementById('edit-link-icon-class').value = link.icon_class || '';
+    document.getElementById('edit-link-color').value = link.color || '';
+    document.getElementById('edit-link-img-src').value = link.img_src || '';
+    document.getElementById('edit-link-text').value = link.text || '';
+    document.getElementById('edit-link-default-type').value = link.default_type || 'nerd-font';
+    document.getElementById('edit-link-background-color').value = link.background_color || '';
+    document.getElementById('edit-link-border-radius').value = link.border_radius || '';
+    document.getElementById('edit-link-title').value = link.title || '';
+    document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
+    document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
+    editLinkPopup.classList.remove('hidden');
+  }
+
+  if (editLinkForm) {
+    if (!editLinkForm.hasAttribute('data-listener-attached')) {
+        editLinkForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const linkId = editLinkIndexInput.value;
+            const updatedLink = {
+                name: document.getElementById('edit-link-name').value,
+                group: document.getElementById('edit-link-group').value || undefined,
+                url: document.getElementById('edit-link-url').value,
+                icon_class: document.getElementById('edit-link-icon-class').value || undefined,
+                color: document.getElementById('edit-link-color').value || undefined,
+                img_src: document.getElementById('edit-link-img-src').value || undefined,
+                text: document.getElementById('edit-link-text').value || undefined,
+                default_type: document.getElementById('edit-link-default-type').value || undefined,
+                background_color: document.getElementById('edit-link-background-color').value || undefined,
+                border_radius: document.getElementById('edit-link-border-radius').value || undefined,
+                title: document.getElementById('edit-link-title').value || undefined,
+                li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
+                li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
+            };
+
+            Object.keys(updatedLink).forEach(key => {
+                if (updatedLink[key] === '') {
+                    delete updatedLink[key];
+                }
+            });
+
+            try {
+                const response = await fetch(`/api/links/${linkId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedLink),
+                });
+
+                if (response.ok) {
+                    alert('Link updated successfully!');
+                    editLinkPopup.classList.add('hidden');
+                    fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+                } else {
+                    alert('Failed to update link.');
+                }
+            } catch (error) {
+                console.error('Error updating link:', error);
+                alert('Error updating link.');
+            }
+        });
+        editLinkForm.setAttribute('data-listener-attached', 'true');
+    }
+  }
+
+  // Delete Link functionality
+  async function deleteLink(linkId) {
+    if (confirm('Are you sure you want to delete this link?')) {
+      try {
+        const response = await fetch(`/api/links/${linkId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          alert('Link deleted successfully!');
+          fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+        } else {
+          alert('Failed to delete link.');
+        }
+      } catch (error) {
+        console.error('Error deleting link:', error);
+        alert('Error deleting link.');
+      }
+    }
+  }
+
+  // Initial fetch and display of links
+  fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+
+  // Edit Mode Toggle functionality
+  const editModeToggle = document.getElementById('edit-mode-toggle');
+  const flexContainer2 = document.querySelector('.flex-container2');
+
+  if (editModeToggle && flexContainer2) {
+    editModeToggle.addEventListener('change', function() {
+      if (this.checked) {
+        flexContainer2.classList.add('edit-mode');
+      } else {
+        flexContainer2.classList.remove('edit-mode');
+      }
+    });
+  }
+});
+
+// Functions from original index.js
+function updateSearchEngine() {
+  var selectedEngine = document.getElementById('search-engine').value;
+  document.getElementById('current-search-engine').textContent = selectedEngine;
+}
+
+function checkEnter(event) {
+  if (event.key === 'Enter') {
+    search();
+  }
+}
+
+function search() {
+  var query = document.getElementById('searchQuery').value;
+  var selectedEngine = document.getElementById('search-engine').value;
+
+  if (query) {
+    window.location.href = 'https://' + selectedEngine + '.com/search?q=' + encodeURIComponent(query);
+  }
+}
+
+function updateDateTime() {
+  const now = new Date();
+  const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+  document.getElementById('currentDate').innerText = now.toLocaleDateString('en-US', optionsDate);
+  document.getElementById('currentTime').innerText = now.toLocaleTimeString('en-US', optionsTime);
+}
+
+// Update the date and time on page load
+updateDateTime();
+
+// Update the time every second
+setInterval(updateDateTime, 1000);
+    </script>
+    <script>
+        /* For Showing Markdown Table in HTML properly but lines also show */
+ function parseMarkdownTable(markdown) {
+  const rows = markdown.trim().split('\n');
+  const headers = rows[1].split('|').map(header => header.trim()).filter(Boolean);
+  const data = rows.slice(2, -1).map(row => row.split('|').map(cell => cell.trim()).filter(Boolean));
+
+  return { headers, data };
+}
+
+function renderTable(headers, data) {
+  const tableElement = document.createElement('table');
+  const theadElement = document.createElement('thead');
+  const tbodyElement = document.createElement('tbody');
+
+  const headerRow = document.createElement('tr');
+  headers.forEach(header => {
+      const thElement = document.createElement('th');
+      thElement.textContent = header;
+      headerRow.appendChild(thElement);
+  });
+
+  theadElement.appendChild(headerRow);
+
+  data.forEach(rowData => {
+      const rowElement = document.createElement('tr');
+      rowData.forEach(cellData => {
+          const tdElement = document.createElement('td');
+          tdElement.textContent = cellData;
+          rowElement.appendChild(tdElement);
+      });
+      tbodyElement.appendChild(rowElement);
+  });
+
+  tableElement.appendChild(theadElement);
+  tableElement.appendChild(tbodyElement);
+
+  return tableElement;
+}
+
+function convertMarkdownTables() {
+  const elements = document.querySelectorAll('[id^="markdown-table-"]');
+  elements.forEach(element => {
+      const markdownContent = element.innerHTML;
+      const { headers, data } = parseMarkdownTable(markdownContent);
+      const tableElement = renderTable(headers, data);
+      element.innerHTML = ''; // Clear the original content
+      element.appendChild(tableElement);
+  });
+}
+// Call the function to convert Markdown tables on page load
+window.addEventListener('load', convertMarkdownTables); 
+ 
+
+/* // Get all the spans
+const spans = document.querySelectorAll('span');
+
+// Find the span with the maximum width
+let maxWidth = 0;
+spans.forEach(span => {
+  const width = span.offsetWidth;
+  if (width > maxWidth) {
+    maxWidth = width;
+  }
+});
+
+// Set the width of all spans to the maximum width
+spans.forEach(span => {
+  span.style.width = `${maxWidth}px`;
+}); */
+
+
+// Popup functionality
+document.addEventListener('DOMContentLoaded', () => {
+  const addLinkPopup = document.getElementById('add-link-popup');
+  const editLinkPopup = document.getElementById('edit-link-popup');
+
+  // Close buttons for addLinkPopup
+  const addCloseButton = addLinkPopup ? addLinkPopup.querySelector('.close-button') : null;
+  if (addCloseButton) {
+    addCloseButton.addEventListener('click', () => {
+      addLinkPopup.classList.add('hidden');
+    });
+  }
+
+  // Close buttons for editLinkPopup
+  const editCloseButton = editLinkPopup ? editLinkPopup.querySelector('.close-button') : null;
+  if (editCloseButton) {
+    editCloseButton.addEventListener('click', () => {
+      editLinkPopup.classList.add('hidden');
+    });
+  }
+
+  // Close popups when clicking outside
+  window.addEventListener('click', (event) => {
+    if (event.target === addLinkPopup) {
+      addLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editLinkPopup) {
+      editLinkPopup.classList.add('hidden');
+    }
+  });
+});
+    </script>
+    
+  
+
+
+  </div>
+</body>
+
+</html>
