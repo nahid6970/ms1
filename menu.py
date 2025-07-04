@@ -15,11 +15,6 @@ MENUS = {
         "items": {
             "1": {"name": "Initial Setup", "type": "menu", "submenu": "initial_setup"},
             "2": {"name": "Application Setup", "type": "menu", "submenu": "application_setup"},
-            "3": {"name": "Clone Projects", "type": "menu", "submenu": "clone_projects"},
-            "4": {"name": "Backup & Restore", "type": "menu", "submenu": "backup_restore"},
-            "5": {"name": "Port Management", "type": "menu", "submenu": "port_management"},
-            "6": {"name": "Symbolic Links (mklink equivalents)", "type": "menu", "submenu": "symbolic_links"},
-            "7": {"name": "Github Projects (Windows-specific)", "type": "action", "action": "show_github_info"},
             "0": {"name": "Exit", "type": "action", "action": "exit_program"},
         }
     },
