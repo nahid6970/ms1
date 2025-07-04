@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addLinkSpan.textContent = '+';
         addLinkSpan.style.cursor = 'pointer';
         addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-        addLinkSpan.style.fontSize = '40px';
+        addLinkSpan.style.fontSize = '25px';
         addLinkSpan.style.alignContent = 'center';
 
         addLinkSpan.addEventListener('click', () => {
