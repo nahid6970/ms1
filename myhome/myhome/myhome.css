@@ -232,6 +232,7 @@ input:checked + .slider:before {
 
 .edit-button, .delete-button {
   display: none; /* Hidden by default */
+  font-family: jetbrainsmono nfp;
 }
 
 .edit-mode .edit-button,

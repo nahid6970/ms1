@@ -60,13 +60,13 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonContainer.className = 'link-buttons';
 
         const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
+        editButton.textContent = '';
         editButton.className = 'edit-button';
         editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
         buttonContainer.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
+        deleteButton.textContent = '';
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteLink(index); // Pass original index
         buttonContainer.appendChild(deleteButton);
