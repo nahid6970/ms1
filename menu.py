@@ -132,7 +132,7 @@ def example_symlink_1(stdscr):
     show_message(stdscr, "Executing Example Symlink 1...")
 
 def example_symlink_2(stdscr):
-    show_message(stdscr, "Executing Example Symlink 2...
+    show_message(stdscr, "Executing Example Symlink 2...")
 
 def show_github_info(stdscr):
     stdscr.clear()
@@ -143,7 +143,7 @@ def show_github_info(stdscr):
     stdscr.addstr(0, main_pane_width, MENUS["github_info"]["name"], curses.color_pair(2) | curses.A_BOLD)
     stdscr.addstr(1, main_pane_width, "=" * len(MENUS["github_info"]["name"]), curses.color_pair(2))
     for i, line in enumerate(content):
-        stdscr.addstr(i + 3, main_pane_width, line, curses.color_pair(1))
+        stdscr.addstr(i + 3, main_pane_width, line, curses.color_pair(0))
     stdscr.refresh()
     stdscr.getch()
 
@@ -271,7 +271,7 @@ def main(stdscr):
                     submenu_key = selected_main_item["submenu"]
                     submenu_data = MENUS[submenu_key]
                     submenu_items_list = list(submenu_data["items"].values())
-                    submenu_selected_row = (submenu_selected_row + 1) % submenu_items_list.len()
+                    submenu_selected_row = (submenu_selected_row + 1) % len(submenu_items_list)
         elif key == curses.KEY_RIGHT:
             if active_pane == "main":
                 selected_main_item = main_menu_items_list[main_selected_row]
