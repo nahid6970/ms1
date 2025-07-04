@@ -1,6 +1,8 @@
 import curses
 import os
 import subprocess
+import threading
+import time
 
 # Define the menu structure
 # Each menu item has:
@@ -39,8 +41,6 @@ MENUS = {
         "name": "Desktop Environments",
         "items": {
             "1": {"name": "Install Gnome", "type": "action", "action": "install_gnome"},
-            "2": {"name": "Install KDE", "type": "action", "action": "install_kde"},
-            "3": {"name": "Install Qtile", "type": "action", "action": "install_qtile"},
             "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
         }
     }
@@ -57,8 +57,6 @@ menu_history = [] # Stack to keep track of menu navigation
 def _get_action_output_message(message):
     return message
 
-
-
 def example_initial_setup_1():
     return _get_action_output_message("Executing Example Initial Setup 1...")
 
@@ -72,31 +70,134 @@ def example_app_setup_2():
     return _get_action_output_message("Executing Example App Setup 2...")
 
 def install_gnome():
-    try:
-        result = subprocess.run(['sudo', 'pacman', '-S', 'gnome', 'gnome-shell', 'gdm'], capture_output=True, text=True, check=True)
-        return _get_action_output_message(f"Gnome installation successful:\n{result.stdout}")
-    except subprocess.CalledProcessError as e:
-        return _get_action_output_message(f"Gnome installation failed:\n{e.stderr}")
-    except FileNotFoundError:        return _get_action_output_message("Error: pacman command not found. Are you on Arch Linux?")
+    # This will use the live output display
+    return None  # Signal that this should use live output
 
-def install_kde():    
-    try:        
-        result = subprocess.run(['sudo', 'pacman', '-S', 'plasma', 'sddm'], capture_output=True, text=True, check=True)
-        return _get_action_output_message(f"KDE installation successful:\n{result.stdout}")
-    except subprocess.CalledProcessError as e:
-        return _get_action_output_message(f"KDE installation failed:\n{e.stderr}")
-    except FileNotFoundError:        return _get_action_output_message("Error: pacman command not found. Are you on Arch Linux?")
+def execute_command_with_live_output(stdscr, command, title="Command Output"):
+    """Execute a command and display live output in a popup window."""
+    h, w = stdscr.getmaxyx()
+    # Calculate position for the pop-up window
+    popup_h = min(20, h - 4)  # Larger window for live output
+    popup_w = min(80, w - 4)
+    popup_y = (h - popup_h) // 2
+    popup_x = (w - popup_w) // 2
 
-def install_qtile():
-    try:
-        result = subprocess.run(['sudo', 'pacman', '-S', 'qtile', 'xorg', 'xorg-xinit'], capture_output=True, text=True, check=True)
-        return _get_action_output_message(f"Qtile installation successful:\n{result.stdout}")
-    except subprocess.CalledProcessError as e:
-        return _get_action_output_message(f"Qtile installation failed:\n{e.stderr}")
-    except FileNotFoundError:
-        return _get_action_output_message("Error: pacman command not found. Are you on Arch Linux?")
+    popup_win = curses.newwin(popup_h, popup_w, popup_y, popup_x)
+    popup_win.box()
+    popup_win.addstr(1, 2, title)
+    popup_win.addstr(2, 2, "=" * (len(title)))
+    popup_win.addstr(popup_h - 1, 2, "Press ESC to close when done...")
+    popup_win.refresh()
+
+    # Create a scrollable content area
+    content_win = curses.newwin(popup_h - 5, popup_w - 4, popup_y + 3, popup_x + 2)
+    content_win.scrollok(True)
+    content_win.idlok(True)
+    
+    output_lines = []
+    command_finished = False
+    process = None
+    
+    def run_command():
+        nonlocal command_finished, process
+        try:
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    output_lines.append(line.rstrip())
+            
+            process.wait()
+            if process.returncode == 0:
+                output_lines.append("\n=== Command completed successfully ===")
+            else:
+                output_lines.append(f"\n=== Command failed with exit code {process.returncode} ===")
+        except Exception as e:
+            output_lines.append(f"\nError: {str(e)}")
+        finally:
+            command_finished = True
+    
+    # Start command in background thread
+    thread = threading.Thread(target=run_command)
+    thread.daemon = True
+    thread.start()
+    
+    # Display loop
+    scroll_pos = 0
+    while True:
+        # Clear content window
+        content_win.clear()
+        
+        # Display output lines
+        display_lines = output_lines[scroll_pos:scroll_pos + popup_h - 5]
+        for i, line in enumerate(display_lines):
+            if i < popup_h - 5:
+                # Truncate line if too long
+                display_line = line[:popup_w - 6] if len(line) > popup_w - 6 else line
+                try:
+                    content_win.addstr(i, 0, display_line)
+                except curses.error:
+                    pass  # Ignore errors from writing to window edges
+        
+        # Auto-scroll to bottom if new content is added
+        if len(output_lines) > popup_h - 5:
+            scroll_pos = max(0, len(output_lines) - (popup_h - 5))
+        
+        content_win.refresh()
+        popup_win.refresh()
+        
+        # Handle input
+        stdscr.timeout(100)  # Check for input every 100ms
+        key = stdscr.getch()
+        
+        if key == 27:  # ESC key
+            if command_finished:
+                break
+            else:
+                # Ask for confirmation to terminate
+                confirm_win = curses.newwin(5, 40, popup_y + popup_h//2, popup_x + popup_w//2 - 20)
+                confirm_win.box()
+                confirm_win.addstr(1, 2, "Command still running!")
+                confirm_win.addstr(2, 2, "Press ESC again to terminate,")
+                confirm_win.addstr(3, 2, "or any other key to continue")
+                confirm_win.refresh()
+                
+                confirm_key = stdscr.getch()
+                if confirm_key == 27:  # ESC again
+                    if process and process.poll() is None:
+                        process.terminate()
+                        output_lines.append("\n=== Command terminated by user ===")
+                    break
+                
+                del confirm_win
+        elif key == curses.KEY_UP:
+            scroll_pos = max(0, scroll_pos - 1)
+        elif key == curses.KEY_DOWN:
+            scroll_pos = min(len(output_lines) - 1, scroll_pos + 1)
+        elif key == curses.KEY_PPAGE:  # Page Up
+            scroll_pos = max(0, scroll_pos - (popup_h - 5))
+        elif key == curses.KEY_NPAGE:  # Page Down
+            scroll_pos = min(len(output_lines) - 1, scroll_pos + (popup_h - 5))
+        
+        # If command is finished and we haven't shown the completion message yet
+        if command_finished and thread.is_alive():
+            thread.join(timeout=0.1)
+    
+    # Clean up
+    del content_win
+    del popup_win
+    stdscr.clear()
+    stdscr.refresh()
 
 def display_output_window(stdscr, message):
+    """Display static output in a popup window."""
     h, w = stdscr.getmaxyx()
     # Calculate position for the pop-up window
     popup_h = min(10, h - 4) # Max 10 lines, or screen height - 4
@@ -157,10 +258,13 @@ ACTION_FUNCTIONS = {
     "example_app_setup_1": example_app_setup_1,
     "example_app_setup_2": example_app_setup_2,
     "install_gnome": install_gnome,
-    "install_kde": install_kde,
-    "install_qtile": install_qtile,
     "go_back": go_back,
     "exit_program": exit_program,
+}
+
+# Commands that should use live output
+LIVE_COMMANDS = {
+    "install_gnome": ['sudo', 'pacman', '-S', 'gnome', 'gnome-shell', 'gdm'],
 }
 
 def draw_menu_pane(stdscr, menu_data, selected_row, start_y, start_x, is_active_pane):
@@ -217,7 +321,6 @@ def main(stdscr):
             submenu_data = MENUS[submenu_key]
             draw_menu_pane(stdscr, submenu_data, submenu_selected_row, 0, main_pane_width, active_pane == "submenu")
         
-
         stdscr.refresh()
 
         key = stdscr.getch()
@@ -266,9 +369,17 @@ def main(stdscr):
                         elif selected_item["action"] == "exit_program":
                             exit_program(stdscr)
                         else:
-                            output_message = action_func()
-                            if output_message:
-                                display_output_window(stdscr, output_message)
+                            # Check if this action should use live output
+                            if selected_item["action"] in LIVE_COMMANDS:
+                                execute_command_with_live_output(
+                                    stdscr, 
+                                    LIVE_COMMANDS[selected_item["action"]],
+                                    f"Executing: {selected_item['name']}"
+                                )
+                            else:
+                                output_message = action_func()
+                                if output_message:
+                                    display_output_window(stdscr, output_message)
             elif active_pane == "submenu":
                 selected_main_item = main_menu_items_list[main_selected_row]
                 if selected_main_item["type"] == "menu":
@@ -285,9 +396,17 @@ def main(stdscr):
                             elif selected_submenu_item["action"] == "exit_program":
                                 exit_program(stdscr)
                             else:
-                                output_message = action_func()
-                                if output_message:
-                                    display_output_window(stdscr, output_message)
+                                # Check if this action should use live output
+                                if selected_submenu_item["action"] in LIVE_COMMANDS:
+                                    execute_command_with_live_output(
+                                        stdscr, 
+                                        LIVE_COMMANDS[selected_submenu_item["action"]],
+                                        f"Executing: {selected_submenu_item['name']}"
+                                    )
+                                else:
+                                    output_message = action_func()
+                                    if output_message:
+                                        display_output_window(stdscr, output_message)
                                 # After action, return to submenu view
                                 active_pane = "submenu"
                                 submenu_selected_row = 0 # Reset submenu selection
