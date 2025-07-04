@@ -171,50 +171,53 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if (editLinkForm) {
-    editLinkForm.addEventListener('submit', async function(event) {
-      event.preventDefault();
+    if (!editLinkForm.hasAttribute('data-listener-attached')) {
+        editLinkForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
 
-      const linkId = editLinkIndexInput.value;
-      const updatedLink = {
-        name: document.getElementById('edit-link-name').value,
-        group: document.getElementById('edit-link-group').value || undefined,
-        url: document.getElementById('edit-link-url').value,
-        icon_class: document.getElementById('edit-link-icon-class').value || undefined,
-        color: document.getElementById('edit-link-color').value || undefined,
-        img_src: document.getElementById('edit-link-img-src').value || undefined,
-        text: document.getElementById('edit-link-text').value || undefined,
-        background_color: document.getElementById('edit-link-background-color').value || undefined,
-        border_radius: document.getElementById('edit-link-border-radius').value || undefined,
-        title: document.getElementById('edit-link-title').value || undefined,
-      };
+            const linkId = editLinkIndexInput.value;
+            const updatedLink = {
+                name: document.getElementById('edit-link-name').value,
+                group: document.getElementById('edit-link-group').value || undefined,
+                url: document.getElementById('edit-link-url').value,
+                icon_class: document.getElementById('edit-link-icon-class').value || undefined,
+                color: document.getElementById('edit-link-color').value || undefined,
+                img_src: document.getElementById('edit-link-img-src').value || undefined,
+                text: document.getElementById('edit-link-text').value || undefined,
+                background_color: document.getElementById('edit-link-background-color').value || undefined,
+                border_radius: document.getElementById('edit-link-border-radius').value || undefined,
+                title: document.getElementById('edit-link-title').value || undefined,
+            };
 
-      Object.keys(updatedLink).forEach(key => {
-        if (updatedLink[key] === '') {
-          delete updatedLink[key];
-        }
-      });
+            Object.keys(updatedLink).forEach(key => {
+                if (updatedLink[key] === '') {
+                    delete updatedLink[key];
+                }
+            });
 
-      try {
-        const response = await fetch(`/api/links/${linkId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedLink),
+            try {
+                const response = await fetch(`/api/links/${linkId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedLink),
+                });
+
+                if (response.ok) {
+                    alert('Link updated successfully!');
+                    editLinkPopup.classList.add('hidden');
+                    fetchAndDisplayLinks();
+                } else {
+                    alert('Failed to update link.');
+                }
+            } catch (error) {
+                console.error('Error updating link:', error);
+                alert('Error updating link.');
+            }
         });
-
-        if (response.ok) {
-          alert('Link updated successfully!');
-          editLinkPopup.style.display = 'none';
-          fetchAndDisplayLinks();
-        } else {
-          alert('Failed to update link.');
-        }
-      } catch (error) {
-        console.error('Error updating link:', error);
-        alert('Error updating link.');
-      }
-    });
+        editLinkForm.setAttribute('data-listener-attached', 'true');
+    }
   }
 
   // Delete Link functionality
