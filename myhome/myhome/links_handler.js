@@ -17,10 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
           groupedElements[groupName] = [];
         }
 
-        const linkItemContainer = document.createElement('div');
-        linkItemContainer.className = 'link-item-container';
+        const listItem = document.createElement('li');
+        listItem.className = 'link-item';
 
-        const span = document.createElement('span');
         let linkContent;
 
         if (link.icon_class) {
@@ -31,11 +30,10 @@ document.addEventListener('DOMContentLoaded', function() {
           linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
         }
 
-        span.innerHTML = linkContent;
+        listItem.innerHTML = linkContent;
         if (!link.icon_class && !link.img_src) {
-          span.style.fontSize = '40px';
+          listItem.style.fontSize = '40px';
         }
-        linkItemContainer.appendChild(span);
 
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'link-buttons';
@@ -52,8 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteButton.onclick = () => deleteLink(index); // Pass original index
         buttonContainer.appendChild(deleteButton);
 
-        linkItemContainer.appendChild(buttonContainer);
-        groupedElements[groupName].push(linkItemContainer);
+        listItem.appendChild(buttonContainer);
+        groupedElements[groupName].push(listItem);
       });
 
       // Now append the grouped elements to the container
@@ -65,19 +63,16 @@ document.addEventListener('DOMContentLoaded', function() {
         groupTitle.textContent = groupName;
         groupDiv.appendChild(groupTitle);
 
-        const groupContentDiv = document.createElement('div');
-        groupContentDiv.className = 'link-group-content';
-        groupContentDiv.style.display = 'flex';
-        groupContentDiv.style.flexWrap = 'wrap';
-        groupContentDiv.style.justifyContent = 'left';
+        const groupList = document.createElement('ul');
+        groupList.className = 'link-group-content';
 
         groupedElements[groupName].forEach(element => {
-          groupContentDiv.appendChild(element);
+          groupList.appendChild(element);
         });
 
         // Add button for adding new links to this group
-        const addLinkItemContainer = document.createElement('div');
-        addLinkItemContainer.className = 'link-item-container add-link-item';
+        const addLinkItem = document.createElement('li');
+        addLinkItem.className = 'link-item add-link-item';
 
         const addLinkSpan = document.createElement('span');
         addLinkSpan.textContent = '+';
@@ -91,10 +86,10 @@ document.addEventListener('DOMContentLoaded', function() {
           const addLinkPopup = document.getElementById('add-link-popup');
           addLinkPopup.classList.remove('hidden'); // Remove hidden class
         });
-        addLinkItemContainer.appendChild(addLinkSpan);
-        groupContentDiv.appendChild(addLinkItemContainer);
+        addLinkItem.appendChild(addLinkSpan);
+        groupList.appendChild(addLinkItem);
 
-        groupDiv.appendChild(groupContentDiv);
+        groupDiv.appendChild(groupList);
         linksContainer.appendChild(groupDiv);
       }
     } catch (error) {
