@@ -137,8 +137,11 @@ def example_symlink_2(stdscr):
 def show_github_info(stdscr):
     stdscr.clear()
     content = MENUS["github_info"]["content"]
+    # Display github info on the right side, where the submenu would be
+    h, w = stdscr.getmaxyx()
+    main_pane_width = w // 2
     for i, line in enumerate(content):
-        stdscr.addstr(i, 0, line)
+        stdscr.addstr(i, main_pane_width, line)
     stdscr.refresh()
     stdscr.getch()
 
@@ -221,23 +224,22 @@ def main(stdscr):
         main_menu_data = MENUS["main"]
         main_menu_items_list = list(main_menu_data["items"].values())
 
-        # Draw Main Menu (Right Pane)
-        draw_menu_pane(stdscr, main_menu_data, main_selected_row, 0, main_pane_width, active_pane == "main")
+        # Draw Main Menu (Left Pane)
+        draw_menu_pane(stdscr, main_menu_data, main_selected_row, 0, 0, active_pane == "main")
 
-        # Determine and draw Submenu (Left Pane)
+        # Determine and draw Submenu (Right Pane)
         selected_main_item = main_menu_items_list[main_selected_row]
         if selected_main_item["type"] == "menu":
             submenu_key = selected_main_item["submenu"]
             submenu_data = MENUS[submenu_key]
-            draw_menu_pane(stdscr, submenu_data, submenu_selected_row, 0, 0, active_pane == "submenu")
+            draw_menu_pane(stdscr, submenu_data, submenu_selected_row, 0, main_pane_width, active_pane == "submenu")
+        # Special handling for github_info to display its content directly on the right pane
         elif selected_main_item["type"] == "action" and selected_main_item["action"] == "show_github_info":
-            # Special handling for github_info to display its content directly
             github_info_data = MENUS["github_info"]
-            stdscr.addstr(0, 0, github_info_data["name"], curses.A_BOLD)
-            stdscr.addstr(1, 0, "=" * len(github_info_data["name"]))
+            stdscr.addstr(0, main_pane_width, github_info_data["name"], curses.A_BOLD)
+            stdscr.addstr(1, main_pane_width, "=" * len(github_info_data["name"]))
             for i, line in enumerate(github_info_data["content"]):
-                stdscr.addstr(i + 3, 0, line)
-
+                stdscr.addstr(i + 3, main_pane_width, line)
 
         stdscr.refresh()
 
