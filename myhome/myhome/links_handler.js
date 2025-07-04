@@ -33,16 +33,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let linkContent;
 
-        if (link.icon_class) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i>${link.text ? link.text : ''}</a>`;
-        } else if (link.img_src) {
+        if (link.default_type === 'nf-con' && link.icon_class) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+        } else if (link.default_type === 'img' && link.img_src) {
           linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+        } else if (link.default_type === 'text' && link.text) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
         } else {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+          // Fallback if default_type is not set or doesn't match available content
+          if (link.icon_class) {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          } else if (link.img_src) {
+            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+          } else {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+          }
         }
 
         listItem.innerHTML = linkContent;
-        if (!link.icon_class && !link.img_src) {
+        // Apply font size if it's a text-based link (either default_type text or fallback to name)
+        if (link.default_type === 'text' || link.default_type === 'nf-con' || (!link.default_type && (link.icon_class || (!link.icon_class && !link.img_src)))) {
           listItem.style.fontSize = '40px';
         }
 
@@ -121,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
         color: document.getElementById('link-color').value || undefined,
         img_src: document.getElementById('link-img-src').value || undefined,
         text: document.getElementById('link-text').value || undefined,
+        default_type: document.getElementById('link-default-type').value || undefined,
         background_color: document.getElementById('link-background-color').value || undefined,
         border_radius: document.getElementById('link-border-radius').value || undefined,
         title: document.getElementById('link-title').value || undefined,
@@ -172,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('edit-link-color').value = link.color || '';
     document.getElementById('edit-link-img-src').value = link.img_src || '';
     document.getElementById('edit-link-text').value = link.text || '';
+    document.getElementById('edit-link-default-type').value = link.default_type || 'nf-con';
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
@@ -194,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 color: document.getElementById('edit-link-color').value || undefined,
                 img_src: document.getElementById('edit-link-img-src').value || undefined,
                 text: document.getElementById('edit-link-text').value || undefined,
+                default_type: document.getElementById('edit-link-default-type').value || undefined,
                 background_color: document.getElementById('edit-link-background-color').value || undefined,
                 border_radius: document.getElementById('edit-link-border-radius').value || undefined,
                 title: document.getElementById('edit-link-title').value || undefined,

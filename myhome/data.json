@@ -62,8 +62,11 @@
   {
     "name": "ChatGpt",
     "url": "https://chat.openai.com/",
+    "icon_class": "nf-dev-intellij",
     "color": "#1a7f64",
+    "img_src": "https://img.icons8.com/win10/512/whatsapp.png",
     "text": "ChatGpt",
+    "default_type": "text",
     "background_color": "black",
     "border_radius": "5px",
     "li_bg_color": "red",
