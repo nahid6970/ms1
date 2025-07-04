@@ -72,13 +72,29 @@ def example_app_setup_2():
     return _get_action_output_message("Executing Example App Setup 2...")
 
 def install_gnome():
-    return _get_action_output_message("Installing Gnome...")
+    try:
+        result = subprocess.run(['sudo', 'pacman', '-S', 'gnome', 'gnome-shell', 'gdm'], capture_output=True, text=True, check=True)
+        return _get_action_output_message(f"Gnome installation successful:\n{result.stdout}")
+    except subprocess.CalledProcessError as e:
+        return _get_action_output_message(f"Gnome installation failed:\n{e.stderr}")
+    except FileNotFoundError:        return _get_action_output_message("Error: pacman command not found. Are you on Arch Linux?")
 
-def install_kde():
-    return _get_action_output_message("Installing KDE...")
+def install_kde():    
+    try:        
+        result = subprocess.run(['sudo', 'pacman', '-S', 'plasma', 'sddm'], capture_output=True, text=True, check=True)
+        return _get_action_output_message(f"KDE installation successful:\n{result.stdout}")
+    except subprocess.CalledProcessError as e:
+        return _get_action_output_message(f"KDE installation failed:\n{e.stderr}")
+    except FileNotFoundError:        return _get_action_output_message("Error: pacman command not found. Are you on Arch Linux?")
 
 def install_qtile():
-    return _get_action_output_message("Installing Qtile...")
+    try:
+        result = subprocess.run(['sudo', 'pacman', '-S', 'qtile', 'xorg', 'xorg-xinit'], capture_output=True, text=True, check=True)
+        return _get_action_output_message(f"Qtile installation successful:\n{result.stdout}")
+    except subprocess.CalledProcessError as e:
+        return _get_action_output_message(f"Qtile installation failed:\n{e.stderr}")
+    except FileNotFoundError:
+        return _get_action_output_message("Error: pacman command not found. Are you on Arch Linux?")
 
 def display_output_window(stdscr, message):
     h, w = stdscr.getmaxyx()
