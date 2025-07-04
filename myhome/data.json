@@ -9,7 +9,8 @@
     "name": "Facebook",
     "url": "https://www.facebook.com/",
     "color": "#1399f4",
-    "img_src": "https://img.icons8.com/win10/512/whatsapp.png"
+    "img_src": "https://img.icons8.com/win10/512/whatsapp.png",
+    "default_type": "img"
   },
   {
     "name": "Messenger",
@@ -38,7 +39,8 @@
   {
     "name": "VLR.gg",
     "url": "https://www.vlr.gg/",
-    "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png"
+    "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png",
+    "default_type": "img"
   },
   {
     "name": "Google Account",
