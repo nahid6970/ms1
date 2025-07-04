@@ -318,10 +318,12 @@ input:checked + .slider:before {
 }
 
 .popup-container input[type="text"],
-.popup-container input[type="url"] {
-  width: 100%;
+.popup-container input[type="url"],
+.popup-container input[type="color"] {
+  flex-grow: 1; /* Allow inputs to grow within a flex container */
+  min-width: 120px; /* Ensure a minimum width */
   padding: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 0; /* Remove individual margin-bottom, use gap on parent */
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #555;
