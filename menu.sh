@@ -2,6 +2,8 @@
 
 # Global variable to track the current menu state
 current_menu="main"
+# Menu stack for navigation (to go back)
+declare -a menu_stack
 
 # Function to get the main menu string
 get_main_menu_string() {
@@ -113,34 +115,12 @@ These are placeholder examples for Windows-specific projects.
 EOF
 }
 
-# Function to display content side-by-side
-display_side_by_side() {
-    local left_content="$1"
-    local right_content="$2"
-
+# Function to display a menu (full screen)
+display_menu() {
     clear
-
-    # Read contents into arrays of lines
-    IFS=$'\n' read -d '' -ra left_lines <<< "$left_content"
-    IFS=$'\n' read -d '' -ra right_lines <<< "$right_content"
-
-    local max_left_width=0
-    for line in "${left_lines[@]}"; do
-        if (( ${#line} > max_left_width )); then
-            max_left_width=${#line}
-        fi
-    done
-
-    local num_lines=$(( ${#left_lines[@]} > ${#right_lines[@]} ? ${#left_lines[@]} : ${#right_lines[@]} ))
-
-    for (( i=0; i<num_lines; i++ )); do
-        local left_line="${left_lines[i]:-}"
-        local right_line="${right_lines[i]:-}"
-
-        printf "%-${max_left_width}s" "$left_line"
-        printf "   " # Separator
-        printf "%s\n" "$right_line"
-    done
+    local menu_content="$1"
+    echo "$menu_content"
+    echo "Enter your choice: "
 }
 
 # Function to execute actions for Initial Setup submenu
@@ -156,8 +136,8 @@ execute_initial_setup_action() {
             read -p "Press Enter to continue..."
             ;;
         *)
-            echo "Invalid choice. Please try again."
-            read -p "Press Enter to continue..."
+            echo "Invalid choice. Press any key to continue."
+            read -n 1
             ;;
     esac
 }
@@ -175,8 +155,8 @@ execute_application_setup_action() {
             read -p "Press Enter to continue..."
             ;;
         *)
-            echo "Invalid choice. Please try again."
-            read -p "Press Enter to continue..."
+            echo "Invalid choice. Press any key to continue."
+            read -n 1
             ;;
     esac
 }
@@ -194,8 +174,8 @@ execute_clone_projects_action() {
             read -p "Press Enter to continue..."
             ;;
         *)
-            echo "Invalid choice. Please try again."
-            read -p "Press Enter to continue..."
+            echo "Invalid choice. Press any key to continue."
+            read -n 1
             ;;
     esac
 }
@@ -213,8 +193,8 @@ execute_backup_restore_action() {
             read -p "Press Enter to continue..."
             ;;
         *)
-            echo "Invalid choice. Please try again."
-            read -p "Press Enter to continue..."
+            echo "Invalid choice. Press any key to continue."
+            read -n 1
             ;;
     esac
 }
@@ -232,8 +212,8 @@ execute_port_management_action() {
             read -p "Press Enter to continue..."
             ;;
         *)
-            echo "Invalid choice. Please try again."
-            read -p "Press Enter to continue..."
+            echo "Invalid choice. Press any key to continue."
+            read -n 1
             ;;
     esac
 }
@@ -251,101 +231,96 @@ execute_symbolic_links_action() {
             read -p "Press Enter to continue..."
             ;;
         *)
-            echo "Invalid choice. Please try again."
-            read -p "Press Enter to continue..."
+            echo "Invalid choice. Press any key to continue."
+            read -n 1
             ;;
     esac
 }
 
 # Main loop for dynamic menu navigation
 while true; do
-    main_menu_str=$(get_main_menu_string)
-    submenu_str=""
-
     case $current_menu in
         "main")
-            clear
-            echo "$main_menu_str"
-            read -p "Enter your choice: " choice
+            display_menu "$(get_main_menu_string)"
+            read -n 1 choice
             case $choice in
-                1) current_menu="initial_setup" ;;
-                2) current_menu="application_setup" ;;
-                3) current_menu="clone_projects" ;;
-                4) current_menu="backup_restore" ;;
-                5) current_menu="port_management" ;;
-                6) current_menu="symbolic_links" ;;
+                1) menu_stack+=("main"); current_menu="initial_setup" ;;
+                2) menu_stack+=("main"); current_menu="application_setup" ;;
+                3) menu_stack+=("main"); current_menu="clone_projects" ;;
+                4) menu_stack+=("main"); current_menu="backup_restore" ;;
+                5) menu_stack+=("main"); current_menu="port_management" ;;
+                6) menu_stack+=("main"); current_menu="symbolic_links" ;;
                 7)
-                    submenu_str=$(get_github_projects_info_string)
-                    display_side_by_side "$main_menu_str" "$submenu_str"
-                    read -p "Press Enter to return to Main Menu..."
-                    current_menu="main"
+                    display_menu "$(get_github_projects_info_string)"
+                    echo "Press any key to return to Main Menu..."
+                    read -n 1
                     ;;
                 0)
                     echo "Exiting. Goodbye!"
                     exit 0
                     ;;
                 *)
-                    echo "Invalid choice. Please try again."
-                    read -p "Press Enter to continue..."
+                    echo "Invalid choice. Press any key to continue."
+                    read -n 1
                     ;;
             esac
             ;;
         "initial_setup")
-            submenu_str=$(get_initial_setup_menu_string)
-            display_side_by_side "$main_menu_str" "$submenu_str"
-            read -p "Enter your choice: " choice
+            display_menu "$(get_initial_setup_menu_string)"
+            read -n 1 choice
             if [[ "$choice" == "0" ]]; then
-                current_menu="main"
+                current_menu="${menu_stack[@]: -1}"
+                unset 'menu_stack[${#menu_stack[@]}-1]'
             else
                 execute_initial_setup_action "$choice"
             fi
             ;;
         "application_setup")
-            submenu_str=$(get_application_setup_menu_string)
-            display_side_by_side "$main_menu_str" "$submenu_str"
-            read -p "Enter your choice: " choice
+            display_menu "$(get_application_setup_menu_string)"
+            read -n 1 choice
             if [[ "$choice" == "0" ]]; then
-                current_menu="main"
+                current_menu="${menu_stack[@]: -1}"
+                unset 'menu_stack[${#menu_stack[@]}-1]'
             else
                 execute_application_setup_action "$choice"
             fi
             ;;
         "clone_projects")
-            submenu_str=$(get_clone_projects_menu_string)
-            display_side_by_side "$main_menu_str" "$submenu_str"
-            read -p "Enter your choice: " choice
+            display_menu "$(get_clone_projects_menu_string)"
+            read -n 1 choice
             if [[ "$choice" == "0" ]]; then
-                current_menu="main"
+                current_menu="${menu_stack[@]: -1}"
+                unset 'menu_stack[${#menu_stack[@]}-1]'
             else
                 execute_clone_projects_action "$choice"
             fi
             ;;
         "backup_restore")
-            submenu_str=$(get_backup_restore_menu_string)
-            display_side_by_side "$main_menu_str" "$submenu_str"
-            read -p "Enter your choice: " choice
+            display_menu "$(get_backup_restore_menu_string)"
+            read -n 1 choice
             if [[ "$choice" == "0" ]]; then
-                current_menu="main"
+                current_menu="${menu_stack[@]: -1}"
+                unset 'menu_stack[${#menu_stack[@]}-1]'
             else
                 execute_backup_restore_action "$choice"
             fi
             ;;
         "port_management")
-            submenu_str=$(get_port_management_menu_string)
-            display_side_by_side "$main_menu_str" "$submenu_str"
-            read -p "Enter your choice: " choice
+            display_menu "$(get_port_management_menu_string)"
+            read -n 1 choice
             if [[ "$choice" == "0" ]]; then
-                current_menu="main"
+                current_menu="${menu_stack[@]: -1}"
+                unset 'menu_stack[${#menu_stack[@]}-1]'
             else
                 execute_port_management_action "$choice"
             fi
             ;;
         "symbolic_links")
-            submenu_str=$(get_symbolic_links_menu_string)
-            display_side_by_side "$main_menu_str" "$submenu_str"
-            read -p "Enter your choice: " choice
+            display_menu "$(get_symbolic_links_menu_string)"
+            read -n 1 choice
             if [[ "$choice" == "0" ]]; then
-                current_menu="main"
+                current_menu="${menu_stack[@]: -1}"
+                unset 'menu_stack[${#menu_stack[@]}-1]'
             else
                 execute_symbolic_links_action "$choice"
             fi
