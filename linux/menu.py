@@ -15,6 +15,7 @@ MENUS = {
         "items": {
             "1": {"name": "Initial Setup", "type": "menu", "submenu": "initial_setup"},
             "2": {"name": "Application Setup", "type": "menu", "submenu": "application_setup"},
+            "3": {"name": "Desktop Environments", "type": "menu", "submenu": "desktop_environments"},
             "0": {"name": "Exit", "type": "action", "action": "exit_program"},
         }
     },
@@ -33,6 +34,15 @@ MENUS = {
             "2": {"name": "Example App Setup 2", "type": "action", "action": "example_app_setup_2"},
             "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
         }
+    },
+    "desktop_environments": {
+        "name": "Desktop Environments",
+        "items": {
+            "1": {"name": "Install Gnome", "type": "action", "action": "install_gnome"},
+            "2": {"name": "Install KDE", "type": "action", "action": "install_kde"},
+            "3": {"name": "Install Qtile", "type": "action", "action": "install_qtile"},
+            "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
+        }
     }
 }
 
@@ -47,6 +57,8 @@ menu_history = [] # Stack to keep track of menu navigation
 def _get_action_output_message(message):
     return message
 
+
+
 def example_initial_setup_1():
     return _get_action_output_message("Executing Example Initial Setup 1...")
 
@@ -59,7 +71,14 @@ def example_app_setup_1():
 def example_app_setup_2():
     return _get_action_output_message("Executing Example App Setup 2...")
 
+def install_gnome():
+    return _get_action_output_message("Installing Gnome...")
 
+def install_kde():
+    return _get_action_output_message("Installing KDE...")
+
+def install_qtile():
+    return _get_action_output_message("Installing Qtile...")
 
 def display_output_window(stdscr, message):
     h, w = stdscr.getmaxyx()
@@ -121,6 +140,9 @@ ACTION_FUNCTIONS = {
     "example_initial_setup_2": example_initial_setup_2,
     "example_app_setup_1": example_app_setup_1,
     "example_app_setup_2": example_app_setup_2,
+    "install_gnome": install_gnome,
+    "install_kde": install_kde,
+    "install_qtile": install_qtile,
     "go_back": go_back,
     "exit_program": exit_program,
 }
