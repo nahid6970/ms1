@@ -38,48 +38,6 @@ MENUS = {
             "2": {"name": "Example App Setup 2", "type": "action", "action": "example_app_setup_2"},
             "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
         }
-    },
-    "clone_projects": {
-        "name": "Clone Projects Menu",
-        "items": {
-            "1": {"name": "Example Clone Project 1", "type": "action", "action": "example_clone_project_1"},
-            "2": {"name": "Example Clone Project 2", "type": "action", "action": "example_clone_project_2"},
-            "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
-        }
-    },
-    "backup_restore": {
-        "name": "Backup & Restore Menu",
-        "items": {
-            "1": {"name": "Example Backup 1", "type": "action", "action": "example_backup_1"},
-            "2": {"name": "Example Restore 1", "type": "action", "action": "example_restore_1"},
-            "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
-        }
-    },
-    "port_management": {
-        "name": "Port Management Menu",
-        "items": {
-            "1": {"name": "Example Port 1", "type": "action", "action": "example_port_1"},
-            "2": {"name": "Example Port 2", "type": "action", "action": "example_port_2"},
-            "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
-        }
-    },
-    "symbolic_links": {
-        "name": "Symbolic Links Menu",
-        "items": {
-            "1": {"name": "Example Symlink 1", "type": "action", "action": "example_symlink_1"},
-            "2": {"name": "Example Symlink 2", "type": "action", "action": "example_symlink_2"},
-            "0": {"name": "Back to Main Menu", "type": "action", "action": "go_back"},
-        }
-    },
-    "github_info": { # This is not a navigable menu, but content to display
-        "name": "Github Projects Menu",
-        "content": [
-            "These are placeholder examples for Windows-specific projects.",
-            "  - Example Project A",
-            "  - Example Project B",
-            "",
-            "Press any key to return to Main Menu...",
-        ]
     }
 }
 
