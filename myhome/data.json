@@ -62,9 +62,9 @@
   {
     "name": "ChatGpt",
     "url": "https://chat.openai.com/",
-    "text": "ChatGpt",
     "color": "#1a7f64",
-    "background_color": "rgb(31, 31, 31)",
+    "text": "ChatGpt",
+    "background_color": "red",
     "border_radius": "5px"
   },
   {

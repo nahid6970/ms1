@@ -82,10 +82,12 @@ border-radius: 10px;
 
 .link-group-content {
   list-style: none; /* Remove default list bullets */
-  padding: 0; /* Remove default padding */
+  padding: 10px; /* Remove default padding */
   display: flex;
   flex-wrap: wrap;
   justify-content: left;
+  background-color: #252525;
+  border-radius: 10px;
 }
 
 .link-item {
