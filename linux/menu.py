@@ -44,59 +44,60 @@ active_pane = "main" # "main" or "submenu"
 menu_history = [] # Stack to keep track of menu navigation
 
 # --- Action Functions ---
-def show_message(stdscr, message):
-    stdscr.clear()
-    stdscr.addstr(0, 0, message)
-    stdscr.addstr(2, 0, "Press any key to continue...")
-    stdscr.refresh()
-    stdscr.getch()
+def _get_action_output_message(message):
+    return message
 
-def example_initial_setup_1(stdscr):
-    show_message(stdscr, "Executing Example Initial Setup 1...")
+def example_initial_setup_1():
+    return _get_action_output_message("Executing Example Initial Setup 1...")
 
-def example_initial_setup_2(stdscr):
-    show_message(stdscr, "Executing Example Initial Setup 2...")
+def example_initial_setup_2():
+    return _get_action_output_message("Executing Example Initial Setup 2...")
 
-def example_app_setup_1(stdscr):
-    show_message(stdscr, "Executing Example App Setup 1...")
+def example_app_setup_1():
+    return _get_action_output_message("Executing Example App Setup 1...")
 
-def example_app_setup_2(stdscr):
-    show_message(stdscr, "Executing Example App Setup 2...")
+def example_app_setup_2():
+    return _get_action_output_message("Executing Example App Setup 2...")
 
-def example_clone_project_1(stdscr):
-    show_message(stdscr, "Executing Example Clone Project 1...")
 
-def example_clone_project_2(stdscr):
-    show_message(stdscr, "Executing Example Clone Project 2...")
 
-def example_backup_1(stdscr):
-    show_message(stdscr, "Executing Example Backup 1...")
-
-def example_restore_1(stdscr):
-    show_message(stdscr, "Executing Example Restore 1...")
-
-def example_port_1(stdscr):
-    show_message(stdscr, "Executing Example Port 1...")
-
-def example_port_2(stdscr):
-    show_message(stdscr, "Executing Example Port 2...")
-
-def example_symlink_1(stdscr):
-    show_message(stdscr, "Executing Example Symlink 1...")
-
-def example_symlink_2(stdscr):
-    show_message(stdscr, "Executing Example Symlink 2...")
-
-def show_github_info(stdscr):
-    stdscr.clear()
-    content = MENUS["github_info"]["content"]
-    # Display github info on the right side, where the submenu would be
+def display_output_window(stdscr, message):
     h, w = stdscr.getmaxyx()
-    main_pane_width = w // 2
-    for i, line in enumerate(content):
-        stdscr.addstr(i, main_pane_width, line)
+    # Calculate position for the pop-up window
+    popup_h = min(10, h - 4) # Max 10 lines, or screen height - 4
+    popup_w = min(60, w - 4) # Max 60 chars, or screen width - 4
+    popup_y = (h - popup_h) // 2
+    popup_x = (w - popup_w) // 2
+
+    popup_win = curses.newwin(popup_h, popup_w, popup_y, popup_x)
+    popup_win.box()
+    popup_win.addstr(1, 1, "Action Output:")
+    popup_win.addstr(2, 1, "-" * (popup_w - 2))
+
+    # Display message, wrapping if necessary
+    message_lines = []
+    for line in message.split('\n'):
+        while len(line) > popup_w - 4:
+            message_lines.append(line[:popup_w - 4])
+            line = line[popup_w - 4:]
+        message_lines.append(line)
+
+    for i, line in enumerate(message_lines):
+        if i + 3 < popup_h - 1: # Ensure message fits within window
+            popup_win.addstr(i + 3, 1, line)
+        else:
+            popup_win.addstr(popup_h - 2, 1, "... (message truncated)")
+            break
+
+    popup_win.addstr(popup_h - 1, 1, "Press ESC to continue...")
+    popup_win.refresh()
+
+    while True:
+        key = stdscr.getch()
+        if key == 27: # ESC key
+            break
+    stdscr.clear() # Clear the screen after closing popup
     stdscr.refresh()
-    stdscr.getch()
 
 def go_back(stdscr):
     global current_menu_key, active_pane, main_selected_row, submenu_selected_row
@@ -120,15 +121,6 @@ ACTION_FUNCTIONS = {
     "example_initial_setup_2": example_initial_setup_2,
     "example_app_setup_1": example_app_setup_1,
     "example_app_setup_2": example_app_setup_2,
-    "example_clone_project_1": example_clone_project_1,
-    "example_clone_project_2": example_clone_project_2,
-    "example_backup_1": example_backup_1,
-    "example_restore_1": example_restore_1,
-    "example_port_1": example_port_1,
-    "example_port_2": example_port_2,
-    "example_symlink_1": example_symlink_1,
-    "example_symlink_2": example_symlink_2,
-    "show_github_info": show_github_info,
     "go_back": go_back,
     "exit_program": exit_program,
 }
@@ -186,13 +178,7 @@ def main(stdscr):
             submenu_key = selected_main_item["submenu"]
             submenu_data = MENUS[submenu_key]
             draw_menu_pane(stdscr, submenu_data, submenu_selected_row, 0, main_pane_width, active_pane == "submenu")
-        # Special handling for github_info to display its content directly on the right pane
-        elif selected_main_item["type"] == "action" and selected_main_item["action"] == "show_github_info":
-            github_info_data = MENUS["github_info"]
-            stdscr.addstr(0, main_pane_width, github_info_data["name"], curses.A_BOLD)
-            stdscr.addstr(1, main_pane_width, "=" * len(github_info_data["name"]))
-            for i, line in enumerate(github_info_data["content"]):
-                stdscr.addstr(i + 3, main_pane_width, line)
+        
 
         stdscr.refresh()
 
@@ -237,7 +223,14 @@ def main(stdscr):
                 elif selected_item["type"] == "action":
                     action_func = ACTION_FUNCTIONS.get(selected_item["action"])
                     if action_func:
-                        action_func(stdscr)
+                        if selected_item["action"] == "go_back":
+                            go_back(stdscr)
+                        elif selected_item["action"] == "exit_program":
+                            exit_program(stdscr)
+                        else:
+                            output_message = action_func()
+                            if output_message:
+                                display_output_window(stdscr, output_message)
             elif active_pane == "submenu":
                 selected_main_item = main_menu_items_list[main_selected_row]
                 if selected_main_item["type"] == "menu":
@@ -254,7 +247,9 @@ def main(stdscr):
                             elif selected_submenu_item["action"] == "exit_program":
                                 exit_program(stdscr)
                             else:
-                                action_func(stdscr)
+                                output_message = action_func()
+                                if output_message:
+                                    display_output_window(stdscr, output_message)
                                 # After action, return to submenu view
                                 active_pane = "submenu"
                                 submenu_selected_row = 0 # Reset submenu selection
