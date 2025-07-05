@@ -208,12 +208,6 @@ class ArchUtil:
             print(f"\n{description}")
             print(f"Command: {command}")
             
-            response = input("\nProceed? (y/N): ").strip().lower()
-            if response != 'y':
-                print("Operation cancelled.")
-                input("Press Enter to continue...")
-                return
-            
             # Execute command
             result = subprocess.run(command, shell=True)
             
