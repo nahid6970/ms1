@@ -531,6 +531,11 @@ wl_input_rules = None
     
 
 
+@hook.subscribe.startup_once
+def start_wayland_apps():
+    subprocess.Popen(['mako'])
+
+
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
 # mailing lists, GitHub issues, and other WM documentation that suggest setting
