@@ -529,7 +529,7 @@ wl_input_rules = None
 
 @hook.subscribe.startup_once
 def startup():
-    Popen(expanduser("~/.config/qtile/startup.sh"))
+    Popen(os.path.join(os.path.dirname(__file__), "startup.sh"))
 
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
