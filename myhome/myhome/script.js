@@ -73,6 +73,7 @@ spans.forEach(span => {
 document.addEventListener('DOMContentLoaded', () => {
   const addLinkPopup = document.getElementById('add-link-popup');
   const editLinkPopup = document.getElementById('edit-link-popup');
+  const editGroupPopup = document.getElementById('edit-group-popup');
 
   // Close buttons for addLinkPopup
   const addCloseButton = addLinkPopup ? addLinkPopup.querySelector('.close-button') : null;
@@ -90,6 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Close buttons for editGroupPopup
+  const editGroupCloseButton = editGroupPopup ? editGroupPopup.querySelector('.close-button') : null;
+  if (editGroupCloseButton) {
+    editGroupCloseButton.addEventListener('click', () => {
+      editGroupPopup.classList.add('hidden');
+    });
+  }
+
   // Close popups when clicking outside
   window.addEventListener('click', (event) => {
     if (event.target === addLinkPopup) {
@@ -97,6 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (event.target === editLinkPopup) {
       editLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editGroupPopup) {
+      editGroupPopup.classList.add('hidden');
     }
   });
 });

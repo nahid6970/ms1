@@ -24,6 +24,19 @@
   <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
   </div>
 
+<div id="edit-group-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Group Name</h3>
+      <form id="edit-group-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="hidden" id="edit-group-original-name">
+        <label for="edit-group-name">Group Name:</label>
+        <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
+        <button type="submit">Update Group Name</button>
+      </form>
+    </div>
+  </div>
+
   <div id="add-link-popup" class="popup-container hidden">
     <div class="popup-content">
       <span class="close-button">&times;</span>

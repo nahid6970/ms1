@@ -60,13 +60,13 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonContainer.className = 'link-buttons';
 
         const editButton = document.createElement('button');
-        editButton.textContent = '';
+        editButton.textContent = '';
         editButton.className = 'edit-button';
         editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
         buttonContainer.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = '';
+        deleteButton.textContent = '';
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteLink(index); // Pass original index
         buttonContainer.appendChild(deleteButton);
@@ -80,9 +80,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupDiv = document.createElement('div');
         groupDiv.className = 'link-group';
 
+        const groupHeaderContainer = document.createElement('div');
+        groupHeaderContainer.className = 'group-header-container';
+
         const groupTitle = document.createElement('h3');
         groupTitle.textContent = groupName;
-        groupDiv.appendChild(groupTitle);
+        groupTitle.className = 'group-title';
+        groupHeaderContainer.appendChild(groupTitle);
+
+        // Add edit group button (only visible in edit mode)
+        const editGroupButton = document.createElement('button');
+        editGroupButton.textContent = '✏️';
+        editGroupButton.className = 'edit-group-button';
+        editGroupButton.onclick = () => openEditGroupPopup(groupName);
+        groupHeaderContainer.appendChild(editGroupButton);
+
+        groupDiv.appendChild(groupHeaderContainer);
 
         const groupList = document.createElement('ul');
         groupList.className = 'link-group-content';
@@ -115,6 +128,55 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } catch (error) {
       console.error('Error fetching links:', error);
+    }
+  }
+
+  // Function to open edit group popup
+  function openEditGroupPopup(currentGroupName) {
+    const editGroupPopup = document.getElementById('edit-group-popup');
+    const editGroupNameInput = document.getElementById('edit-group-name');
+    const editGroupOriginalName = document.getElementById('edit-group-original-name');
+    
+    editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
+    editGroupOriginalName.value = currentGroupName;
+    editGroupPopup.classList.remove('hidden');
+  }
+
+  // Function to update group name for all links in that group
+  async function updateGroupName(originalGroupName, newGroupName) {
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      // Find all links in the original group and update them
+      const updatePromises = links.map(async (link, index) => {
+        const linkGroupName = link.group || 'Ungrouped';
+        if (linkGroupName === originalGroupName) {
+          const updatedLink = { ...link };
+          updatedLink.group = newGroupName === '' ? undefined : newGroupName;
+          
+          // Clean up empty strings
+          Object.keys(updatedLink).forEach(key => {
+            if (updatedLink[key] === '') {
+              delete updatedLink[key];
+            }
+          });
+          
+          return fetch(`/api/links/${index}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedLink),
+          });
+        }
+      });
+      
+      await Promise.all(updatePromises.filter(Boolean));
+      return true;
+    } catch (error) {
+      console.error('Error updating group name:', error);
+      return false;
     }
   }
 
@@ -242,6 +304,41 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         editLinkForm.setAttribute('data-listener-attached', 'true');
+    }
+  }
+
+  // Edit Group functionality
+  const editGroupForm = document.getElementById('edit-group-form');
+  if (editGroupForm) {
+    if (!editGroupForm.hasAttribute('data-listener-attached')) {
+      editGroupForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const originalGroupName = document.getElementById('edit-group-original-name').value;
+        const newGroupName = document.getElementById('edit-group-name').value;
+
+        if (originalGroupName === newGroupName || 
+            (originalGroupName === 'Ungrouped' && newGroupName === '')) {
+          alert('No changes made to group name.');
+          document.getElementById('edit-group-popup').classList.add('hidden');
+          return;
+        }
+
+        try {
+          const success = await updateGroupName(originalGroupName, newGroupName);
+          if (success) {
+            alert('Group name updated successfully!');
+            document.getElementById('edit-group-popup').classList.add('hidden');
+            fetchAndDisplayLinks();
+          } else {
+            alert('Failed to update group name.');
+          }
+        } catch (error) {
+          console.error('Error updating group name:', error);
+          alert('Error updating group name.');
+        }
+      });
+      editGroupForm.setAttribute('data-listener-attached', 'true');
     }
   }
 
