@@ -296,7 +296,11 @@ input:checked + .slider:before {
   cursor: pointer;
   color: #fff;
   background-color: #ff2d2d;
-  height: 50px;
+  height: 25px;
+  width: 25px;
+  text-align: center;
+  border-radius: 15%;
+  padding-bottom: 30px;
 }
 
 .link-group h3 {
@@ -355,6 +359,78 @@ input:checked + .slider:before {
 
 .popup-container button[type="submit"]:hover {
   background-color: #0056b3;
+}
+
+
+/* Group header container for title and edit button */
+.group-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.group-title {
+  flex-grow: 1;
+  margin: 0;
+  padding-right: 10px;
+}
+
+/* Edit group button styling */
+.edit-group-button {
+  display: none; /* Hidden by default */
+  background-color: #ffffff;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.edit-group-button:hover {
+  background-color: #45a049;
+}
+
+/* Show edit group button in edit mode */
+.edit-mode .edit-group-button {
+  display: inline-block;
+}
+
+/* Additional styling for the edit group popup */
+#edit-group-popup .popup-content {
+  min-width: 400px;
+}
+
+#edit-group-popup input[type="text"] {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: #555;
+  color: white;
+}
+
+#edit-group-popup label {
+  color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#edit-group-popup button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+#edit-group-popup button[type="submit"]:hover {
+  background-color: #0056b3;
 }</style>
 
 </head>
@@ -371,6 +447,19 @@ input:checked + .slider:before {
     </div>
 
   <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
+  </div>
+
+<div id="edit-group-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Group Name</h3>
+      <form id="edit-group-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="hidden" id="edit-group-original-name">
+        <label for="edit-group-name">Group Name:</label>
+        <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
+        <button type="submit">Update Group Name</button>
+      </form>
+    </div>
   </div>
 
   <div id="add-link-popup" class="popup-container hidden">
@@ -511,26 +600,18 @@ input:checked + .slider:before {
     "title": "mi9t"
   },
   {
-    "name": "ChatGpt",
-    "url": "https://chat.openai.com/",
-    "icon_class": "nf-dev-intellij",
-    "img_src": "https://img.icons8.com/win10/512/whatsapp.png",
-    "text": "ChatGpt",
-    "default_type": "nerd-font",
-    "border_radius": "5px"
-  },
-  {
     "name": "Google Bard",
     "url": "https://bard.google.com/",
     "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
     "default_type": "img"
   },
   {
-    "name": "asdas",
-    "group": "10",
-    "url": "http://asdasdas.com",
+    "color": "#ffffff",
+    "group": "LoL",
     "icon_class": "nf nf-custom-css",
-    "color": "#ffffff"
+    "name": "asdas",
+    "url": "http://asdasdas.com",
+    "default_type": "nerd-font"
   }
 ];
     </script>
@@ -596,13 +677,13 @@ input:checked + .slider:before {
         buttonContainer.className = 'link-buttons';
 
         const editButton = document.createElement('button');
-        editButton.textContent = '';
+        editButton.textContent = '';
         editButton.className = 'edit-button';
         editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
         buttonContainer.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = '';
+        deleteButton.textContent = '';
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteLink(index); // Pass original index
         buttonContainer.appendChild(deleteButton);
@@ -616,9 +697,22 @@ input:checked + .slider:before {
         const groupDiv = document.createElement('div');
         groupDiv.className = 'link-group';
 
+        const groupHeaderContainer = document.createElement('div');
+        groupHeaderContainer.className = 'group-header-container';
+
         const groupTitle = document.createElement('h3');
         groupTitle.textContent = groupName;
-        groupDiv.appendChild(groupTitle);
+        groupTitle.className = 'group-title';
+        groupHeaderContainer.appendChild(groupTitle);
+
+        // Add edit group button (only visible in edit mode)
+        const editGroupButton = document.createElement('button');
+        editGroupButton.textContent = '';
+        editGroupButton.className = 'edit-group-button';
+        editGroupButton.onclick = () => openEditGroupPopup(groupName);
+        groupHeaderContainer.appendChild(editGroupButton);
+
+        groupDiv.appendChild(groupHeaderContainer);
 
         const groupList = document.createElement('ul');
         groupList.className = 'link-group-content';
@@ -651,6 +745,54 @@ input:checked + .slider:before {
       }
     } catch (error) {
       console.error('Error fetching links:', error);
+    }
+  }
+
+  // Function to open edit group popup
+  function openEditGroupPopup(currentGroupName) {
+    const editGroupPopup = document.getElementById('edit-group-popup');
+    const editGroupNameInput = document.getElementById('edit-group-name');
+    const editGroupOriginalName = document.getElementById('edit-group-original-name');
+    
+    editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
+    editGroupOriginalName.value = currentGroupName;
+    editGroupPopup.classList.remove('hidden');
+  }
+
+  // Function to update group name for all links in that group
+  async function updateGroupName(originalGroupName, newGroupName) {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      
+      // Find all links in the original group and update them
+      const updatePromises = links.map(async (link, index) => {
+        const linkGroupName = link.group || 'Ungrouped';
+        if (linkGroupName === originalGroupName) {
+          const updatedLink = { ...link };
+          updatedLink.group = newGroupName === '' ? undefined : newGroupName;
+          
+          // Clean up empty strings
+          Object.keys(updatedLink).forEach(key => {
+            if (updatedLink[key] === '') {
+              delete updatedLink[key];
+            }
+          });
+          
+          return fetch(`/api/links/${index}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedLink),
+          });
+        }
+      });
+      
+      await Promise.all(updatePromises.filter(Boolean));
+      return true;
+    } catch (error) {
+      console.error('Error updating group name:', error);
+      return false;
     }
   }
 
@@ -778,6 +920,41 @@ input:checked + .slider:before {
             }
         });
         editLinkForm.setAttribute('data-listener-attached', 'true');
+    }
+  }
+
+  // Edit Group functionality
+  const editGroupForm = document.getElementById('edit-group-form');
+  if (editGroupForm) {
+    if (!editGroupForm.hasAttribute('data-listener-attached')) {
+      editGroupForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const originalGroupName = document.getElementById('edit-group-original-name').value;
+        const newGroupName = document.getElementById('edit-group-name').value;
+
+        if (originalGroupName === newGroupName || 
+            (originalGroupName === 'Ungrouped' && newGroupName === '')) {
+          alert('No changes made to group name.');
+          document.getElementById('edit-group-popup').classList.add('hidden');
+          return;
+        }
+
+        try {
+          const success = await updateGroupName(originalGroupName, newGroupName);
+          if (success) {
+            alert('Group name updated successfully!');
+            document.getElementById('edit-group-popup').classList.add('hidden');
+            fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+          } else {
+            alert('Failed to update group name.');
+          }
+        } catch (error) {
+          console.error('Error updating group name:', error);
+          alert('Error updating group name.');
+        }
+      });
+      editGroupForm.setAttribute('data-listener-attached', 'true');
     }
   }
 
@@ -931,6 +1108,7 @@ spans.forEach(span => {
 document.addEventListener('DOMContentLoaded', () => {
   const addLinkPopup = document.getElementById('add-link-popup');
   const editLinkPopup = document.getElementById('edit-link-popup');
+  const editGroupPopup = document.getElementById('edit-group-popup');
 
   // Close buttons for addLinkPopup
   const addCloseButton = addLinkPopup ? addLinkPopup.querySelector('.close-button') : null;
@@ -948,6 +1126,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Close buttons for editGroupPopup
+  const editGroupCloseButton = editGroupPopup ? editGroupPopup.querySelector('.close-button') : null;
+  if (editGroupCloseButton) {
+    editGroupCloseButton.addEventListener('click', () => {
+      editGroupPopup.classList.add('hidden');
+    });
+  }
+
   // Close popups when clicking outside
   window.addEventListener('click', (event) => {
     if (event.target === addLinkPopup) {
@@ -955,6 +1141,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (event.target === editLinkPopup) {
       editLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editGroupPopup) {
+      editGroupPopup.classList.add('hidden');
     }
   });
 });
