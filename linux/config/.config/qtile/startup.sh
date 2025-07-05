@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "startup.sh executed!" > ~/qtile_startup_log.txt
 # numlockx on
 
 
@@ -11,8 +12,3 @@ fi
 
 # # Add other startup commands below if needed
 # # e.g., picom, nm-applet, etc.
-
-
-
-
-
