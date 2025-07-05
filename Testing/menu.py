@@ -209,6 +209,9 @@ class ArchUtil:
         # Save current state
         curses.def_prog_mode()
         curses.endwin()
+
+        # Clear the screen before executing the command
+        os.system('cls' if os.name == 'nt' else 'clear')
         
         try:
             print(f"\n{description}")
