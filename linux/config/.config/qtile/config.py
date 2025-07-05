@@ -529,6 +529,10 @@ wl_input_rules = None
 
 @hook.subscribe.startup_once
 def start_dbus_session():
+    # Test to see if this hook is being called
+    with open(os.path.expanduser("~/qtile_dbus_hook_test.txt"), "w") as f:
+        f.write("D-Bus startup hook executed!")
+
     if "DBUS_SESSION_BUS_ADDRESS" not in os.environ:
         try:
             # Execute dbus-launch and capture its output
