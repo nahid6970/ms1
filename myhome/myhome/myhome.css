@@ -371,7 +371,7 @@ input:checked + .slider:before {
 /* Edit group button styling */
 .edit-group-button {
   display: none; /* Hidden by default */
-  background-color: #4CAF50;
+  background-color: #ffffff;
   color: white;
   border: none;
   padding: 5px 8px;

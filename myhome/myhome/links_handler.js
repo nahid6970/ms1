@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add edit group button (only visible in edit mode)
         const editGroupButton = document.createElement('button');
-        editGroupButton.textContent = '✏️';
+        editGroupButton.textContent = '';
         editGroupButton.className = 'edit-group-button';
         editGroupButton.onclick = () => openEditGroupPopup(groupName);
         groupHeaderContainer.appendChild(editGroupButton);
