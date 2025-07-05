@@ -405,7 +405,7 @@ def init_widgets_list():
         widget.Clock(
                 foreground=colors[8],
                 padding=8,
-                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dunstify -t 5000 -u normal "$(date)"', shell=True)},
+                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('mako-dunstify -t 5000 -u normal "$(date)"', shell=True)},
                 format=" %I:%M %p",
                 ),
         widget.Systray(padding = 6),
@@ -527,37 +527,7 @@ auto_minimize = True
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = None
 
-@hook.subscribe.startup_once
-def start_dbus_session():
-    # Test to see if this hook is being called
-    with open(os.path.expanduser("~/qtile_dbus_hook_test.txt"), "w") as f:
-        f.write("D-Bus startup hook executed!")
 
-    if "DBUS_SESSION_BUS_ADDRESS" not in os.environ:
-        try:
-            # Execute dbus-launch and capture its output
-            # The --sh-syntax option makes it output shell-compatible assignments
-            dbus_output = subprocess.check_output(["dbus-launch", "--sh-syntax", "--exit-with-session"], text=True)
-
-            # Parse the output and set environment variables
-            for line in dbus_output.splitlines():
-                if line.startswith("DBUS_SESSION_BUS_ADDRESS="):
-                    # Extract the address, removing quotes and semicolon
-                    address = line.split("=")[1].strip("';")
-                    os.environ["DBUS_SESSION_BUS_ADDRESS"] = address
-                elif line.startswith("DBUS_SESSION_BUS_PID="):
-                    # Extract the PID, removing quotes and semicolon
-                    pid = line.split("=")[1].strip("';")
-                    os.environ["DBUS_SESSION_BUS_PID"] = pid
-            print(f"D-Bus session started. DBUS_SESSION_BUS_ADDRESS: {os.environ.get('DBUS_SESSION_BUS_ADDRESS')}")
-            print(f"D-Bus session started. DBUS_SESSION_BUS_PID: {os.environ.get('DBUS_SESSION_BUS_PID')}")
-        except subprocess.CalledProcessError as e:
-            # Log any errors if dbus-launch fails
-            print(f"Error starting D-Bus session: {e}")
-            print(f"dbus-launch stderr: {e.stderr}")
-        except FileNotFoundError:
-            # Log if dbus-launch is not found
-            print("dbus-launch not found. Please ensure it's installed and in your PATH.")
     
 
 
