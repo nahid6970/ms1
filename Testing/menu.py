@@ -21,7 +21,7 @@ class ArchUtil:
         
         # Initialize colors
         curses.start_color()
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)  # Selected
+        curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)   # Selected
         curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)   # Title
         curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Success
         curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)    # Error
@@ -117,7 +117,7 @@ class ArchUtil:
                 break
                 
             if i == self.current_selection:
-                win.addstr(y, 2, f"► {item}", curses.color_pair(1) | curses.A_BOLD)
+                win.addstr(y, 2, f"  {item}", curses.color_pair(1) | curses.A_BOLD)
             else:
                 win.addstr(y, 2, f"  {item}")
         
@@ -158,7 +158,7 @@ class ArchUtil:
                 break
                 
             if self.in_submenu and i == self.current_submenu_selection:
-                win.addstr(y, 2, f"► {item}", curses.color_pair(1) | curses.A_BOLD)
+                win.addstr(y, 2, f"  {item}", curses.color_pair(1) | curses.A_BOLD)
             else:
                 win.addstr(y, 2, f"  {item}")
         
