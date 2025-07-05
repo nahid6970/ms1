@@ -405,6 +405,7 @@ class ArchUtil:
             
             # Create windows
             left_win = curses.newwin(menu_height, left_width, 0, 0)
+            left_win.keypad(True)
             right_win = curses.newwin(menu_height, right_width, 0, left_width)
             status_win = curses.newwin(2, max_x, max_y - 2, 0)
             
@@ -415,7 +416,7 @@ class ArchUtil:
             
             # Handle input
             try:
-                key = self.stdscr.getch()
+                key = left_win.getch()
                 
                 if key == ord('q') or key == 27:  # q or ESC
                     break
