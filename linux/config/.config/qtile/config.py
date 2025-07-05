@@ -549,9 +549,12 @@ def start_dbus_session():
                     # Extract the PID, removing quotes and semicolon
                     pid = line.split("=")[1].strip("';")
                     os.environ["DBUS_SESSION_BUS_PID"] = pid
+            print(f"D-Bus session started. DBUS_SESSION_BUS_ADDRESS: {os.environ.get('DBUS_SESSION_BUS_ADDRESS')}")
+            print(f"D-Bus session started. DBUS_SESSION_BUS_PID: {os.environ.get('DBUS_SESSION_BUS_PID')}")
         except subprocess.CalledProcessError as e:
             # Log any errors if dbus-launch fails
             print(f"Error starting D-Bus session: {e}")
+            print(f"dbus-launch stderr: {e.stderr}")
         except FileNotFoundError:
             # Log if dbus-launch is not found
             print("dbus-launch not found. Please ensure it's installed and in your PATH.")
