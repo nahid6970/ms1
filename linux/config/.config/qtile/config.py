@@ -403,11 +403,11 @@ def init_widgets_list():
                  fmt = '  Vol: {}',
                  ),
         widget.Clock(
-                foreground=colors[8],
-                padding=8,
-                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dbus-launch dunstify -t 5000 -u normal "$(date)"', shell=True)},
-                format=" %I:%M %p",
-                ),
+            foreground=colors[8],
+            padding=8,
+            mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dunstify -t 5000 -u normal "$(date)"')},
+            format=" %I:%M %p",
+        ),
         widget.Systray(padding = 6),
         widget.Spacer(length = 8),
 
