@@ -528,8 +528,30 @@ auto_minimize = True
 wl_input_rules = None
 
 @hook.subscribe.startup_once
-def startup():
-    Popen(os.path.join(os.path.dirname(__file__), "startup.sh"))
+def start_dbus_session():
+    if "DBUS_SESSION_BUS_ADDRESS" not in os.environ:
+        try:
+            # Execute dbus-launch and capture its output
+            # The --sh-syntax option makes it output shell-compatible assignments
+            dbus_output = subprocess.check_output(["dbus-launch", "--sh-syntax", "--exit-with-session"], text=True)
+
+            # Parse the output and set environment variables
+            for line in dbus_output.splitlines():
+                if line.startswith("DBUS_SESSION_BUS_ADDRESS="):
+                    # Extract the address, removing quotes and semicolon
+                    address = line.split("=")[1].strip("';")
+                    os.environ["DBUS_SESSION_BUS_ADDRESS"] = address
+                elif line.startswith("DBUS_SESSION_BUS_PID="):
+                    # Extract the PID, removing quotes and semicolon
+                    pid = line.split("=")[1].strip("';")
+                    os.environ["DBUS_SESSION_BUS_PID"] = pid
+        except subprocess.CalledProcessError as e:
+            # Log any errors if dbus-launch fails
+            print(f"Error starting D-Bus session: {e}")
+        except FileNotFoundError:
+            # Log if dbus-launch is not found
+            print("dbus-launch not found. Please ensure it's installed and in your PATH.")
+    
 
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
