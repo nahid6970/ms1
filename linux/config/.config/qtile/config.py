@@ -405,7 +405,7 @@ def init_widgets_list():
         widget.Clock(
                 foreground=colors[8],
                 padding=8,
-                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('mako-dunstify -t 5000 -u normal "$(date)"', shell=True)},
+                mouse_callbacks={'Button1': lambda: qtile.cmd_spawn('dbus-launch dunstify -t 5000 -u normal "$(date)"', shell=True)},
                 format=" %I:%M %p",
                 ),
         widget.Systray(padding = 6),
@@ -527,13 +527,9 @@ auto_minimize = True
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = None
 
-
-    
-
-
 @hook.subscribe.startup_once
-def start_wayland_apps():
-    subprocess.Popen(['mako'])
+def startup():
+    Popen(expanduser("~/.config/qtile/startup.sh"))
 
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
