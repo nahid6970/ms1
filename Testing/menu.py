@@ -31,68 +31,75 @@ class ArchUtil:
         # Hide cursor
         curses.curs_set(0)
         
-        # Menu structure
-        self.main_menu = [
-            "System Information",
-            "Package Management", 
-            "System Maintenance",
-            "AUR Helper",
-            "Development Tools",
-            "Quit"
+        # Unified menu structure
+        self.menu_data = [
+            {
+                "title": "System Information",
+                "description": "View detailed system information and monitoring",
+                "submenu": [
+                    {"title": "Show System Info", "action": ("uname -a && lsb_release -a 2>/dev/null || cat /etc/os-release && free -h && df -h", "Showing system information")},
+                    {"title": "Hardware Info", "action": ("lshw -short 2>/dev/null || lscpu && lsmem", "Showing hardware information")},
+                    {"title": "Network Info", "action": ("ip addr show && ss -tuln", "Showing network information")},
+                    {"title": "Process Monitor", "action": ("htop || top", "Opening process monitor")},
+                    {"title": "Disk Usage", "action": ("df -h && du -sh /home/* 2>/dev/null", "Showing disk usage")},
+                ]
+            },
+            {
+                "title": "Package Management",
+                "description": "Manage Arch packages with pacman",
+                "submenu": [
+                    {"title": "Update System", "action": ("sudo pacman -Syu", "Updating system packages")},
+                    {"title": "Install Package", "action": self.install_package},
+                    {"title": "Remove Package", "action": self.remove_package},
+                    {"title": "Search Packages", "action": self.search_packages},
+                    {"title": "List Installed", "action": ("pacman -Q | less", "Listing installed packages")},
+                    {"title": "Clean Cache", "action": ("sudo pacman -Sc", "Cleaning package cache")},
+                    {"title": "Package Info", "action": self.package_info},
+                ]
+            },
+            {
+                "title": "System Maintenance",
+                "description": "System cleanup and maintenance tasks",
+                "submenu": [
+                    {"title": "Update Mirrors", "action": ("sudo reflector --verbose --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", "Updating mirrors")},
+                    {"title": "Clean System Logs", "action": ("sudo journalctl --vacuum-time=7d", "Cleaning system logs")},
+                    {"title": "Check Filesystem", "action": ("sudo fsck -f /", "Checking filesystem")},
+                    {"title": "Update Locate DB", "action": ("sudo updatedb", "Updating locate database")},
+                    {"title": "Rebuild Initramfs", "action": ("sudo mkinitcpio -P", "Rebuilding initramfs")},
+                    {"title": "Check Services", "action": ("systemctl --failed && systemctl list-unit-files --state=enabled", "Checking services")},
+                    {"title": "Manage Startup Services", "action": ("sudo systemctl list-unit-files --type=service", "Managing startup services")},
+                ]
+            },
+            {
+                "title": "AUR Helper",
+                "description": "Manage AUR packages with yay helper",
+                "submenu": [
+                    {"title": "Install yay", "action": ("cd /tmp && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si", "Installing yay AUR helper")},
+                    {"title": "Update AUR Packages", "action": ("yay -Syu", "Updating AUR packages")},
+                    {"title": "Install AUR Package", "action": self.install_aur_package},
+                    {"title": "Search AUR", "action": self.search_aur},
+                    {"title": "Remove AUR Package", "action": self.remove_aur_package},
+                    {"title": "List AUR Packages", "action": ("yay -Qm", "Listing AUR packages")},
+                ]
+            },
+            {
+                "title": "Development Tools",
+                "description": "Install common development tools and environments",
+                "submenu": [
+                    {"title": "Install Git", "action": ("sudo pacman -S git", "Installing Git")},
+                    {"title": "Install VSCode", "action": ("yay -S visual-studio-code-bin", "Installing Visual Studio Code")},
+                    {"title": "Install Docker", "action": ("sudo pacman -S docker docker-compose", "Installing Docker")},
+                    {"title": "Install Node.js", "action": ("sudo pacman -S nodejs npm", "Installing Node.js and npm")},
+                    {"title": "Install Python Tools", "action": ("sudo pacman -S python-pip python-virtualenv", "Installing Python tools")},
+                    {"title": "Install Build Tools", "action": ("sudo pacman -S base-devel", "Installing build tools")},
+                ]
+            },
+            {
+                "title": "Quit",
+                "description": "Exit ArchUtil",
+                "action": "quit"
+            }
         ]
-        
-        self.submenus = {
-            "System Information": [
-                "Show System Info",
-                "Hardware Info",
-                "Network Info",
-                "Process Monitor",
-                "Disk Usage"
-            ],
-            "Package Management": [
-                "Update System",
-                "Install Package",
-                "Remove Package", 
-                "Search Packages",
-                "List Installed",
-                "Clean Cache",
-                "Package Info"
-            ],
-            "System Maintenance": [
-                "Update Mirrors",
-                "Clean System Logs",
-                "Check Filesystem",
-                "Update Locate DB",
-                "Rebuild Initramfs",
-                "Check Services",
-                "Manage Startup Services"
-            ],
-            "AUR Helper": [
-                "Install yay",
-                "Update AUR Packages",
-                "Install AUR Package",
-                "Search AUR",
-                "Remove AUR Package",
-                "List AUR Packages"
-            ],
-            "Development Tools": [
-                "Install Git",
-                "Install VSCode",
-                "Install Docker",
-                "Install Node.js",
-                "Install Python Tools",
-                "Install Build Tools"
-            ]
-        }
-        
-        self.menu_descriptions = {
-            "System Information": "View detailed system information and monitoring",
-            "Package Management": "Manage Arch packages with pacman",
-            "System Maintenance": "System cleanup and maintenance tasks",
-            "AUR Helper": "Manage AUR packages with yay helper",
-            "Development Tools": "Install common development tools and environments",
-            "Quit": "Exit ArchUtil"
-        }
     
     def get_terminal_size(self):
         """Get terminal dimensions"""
@@ -111,15 +118,15 @@ class ArchUtil:
         
         height, width = win.getmaxyx()
         
-        for i, item in enumerate(self.main_menu):
+        for i, item in enumerate(self.menu_data):
             y = 2 + i
             if y >= height - 1:
                 break
                 
             if i == self.current_selection:
-                win.addstr(y, 2, f">> {item}", curses.color_pair(1) | curses.A_BOLD)
+                win.addstr(y, 2, f">> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
             else:
-                win.addstr(y, 2, f"  {item}")
+                win.addstr(y, 2, f"  {item['title']}")
         
         # Add navigation help
         help_y = height - 3
@@ -132,24 +139,24 @@ class ArchUtil:
         """Draw the submenu on the right side"""
         win.clear()
         
-        if self.current_selection >= len(self.main_menu):
+        if self.current_selection >= len(self.menu_data):
             return
             
-        main_item = self.main_menu[self.current_selection]
+        main_item = self.menu_data[self.current_selection]
         
-        if main_item == "Quit":
+        if main_item.get("action") == "quit":
             self.draw_border(win, "Quit")
             win.addstr(2, 2, "Press Enter to quit", curses.color_pair(4))
             win.refresh()
             return
         
-        if main_item not in self.submenus:
+        submenu_items = main_item.get("submenu", [])
+        if not submenu_items:
             return
             
-        self.draw_border(win, main_item)
+        self.draw_border(win, main_item['title'])
         
         height, width = win.getmaxyx()
-        submenu_items = self.submenus[main_item]
         
         # Draw submenu items
         for i, item in enumerate(submenu_items):
@@ -158,18 +165,17 @@ class ArchUtil:
                 break
                 
             if self.in_submenu and i == self.current_submenu_selection:
-                win.addstr(y, 2, f">> {item}", curses.color_pair(1) | curses.A_BOLD)
+                win.addstr(y, 2, f">> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
             else:
-                win.addstr(y, 2, f"  {item}")
+                win.addstr(y, 2, f"  {item['title']}")
         
         # Add description
-        if main_item in self.menu_descriptions:
-            desc_y = height - 4
-            desc = self.menu_descriptions[main_item]
-            # Word wrap description
-            if len(desc) > width - 4:
-                desc = desc[:width-7] + "..."
-            win.addstr(desc_y, 2, desc, curses.color_pair(6))
+        desc_y = height - 4
+        desc = main_item.get("description", "")
+        # Word wrap description
+        if len(desc) > width - 4:
+            desc = desc[:width-7] + "..."
+        win.addstr(desc_y, 2, desc, curses.color_pair(6))
         
         # Add navigation help
         help_y = height - 2
@@ -228,67 +234,16 @@ class ArchUtil:
     
     def handle_submenu_action(self):
         """Handle submenu item selection"""
-        if self.current_selection >= len(self.main_menu):
+        main_item = self.menu_data[self.current_selection]
+        submenu = main_item.get("submenu", [])
+        
+        if not submenu or self.current_submenu_selection >= len(submenu):
             return
             
-        main_item = self.main_menu[self.current_selection]
+        selected_item = submenu[self.current_submenu_selection]
+        action = selected_item.get("action")
         
-        if main_item not in self.submenus:
-            return
-            
-        submenu_items = self.submenus[main_item]
-        
-        if self.current_submenu_selection >= len(submenu_items):
-            return
-            
-        selected_item = submenu_items[self.current_submenu_selection]
-        
-        # Define actions for each submenu item
-        actions = {
-            # System Information
-            "Show System Info": ("uname -a && lsb_release -a 2>/dev/null || cat /etc/os-release && free -h && df -h", "Showing system information"),
-            "Hardware Info": ("lshw -short 2>/dev/null || lscpu && lsmem", "Showing hardware information"),
-            "Network Info": ("ip addr show && ss -tuln", "Showing network information"),
-            "Process Monitor": ("htop || top", "Opening process monitor"),
-            "Disk Usage": ("df -h && du -sh /home/* 2>/dev/null", "Showing disk usage"),
-            
-            # Package Management
-            "Update System": ("sudo pacman -Syu", "Updating system packages"),
-            "Install Package": self.install_package,
-            "Remove Package": self.remove_package,
-            "Search Packages": self.search_packages,
-            "List Installed": ("pacman -Q | less", "Listing installed packages"),
-            "Clean Cache": ("sudo pacman -Sc", "Cleaning package cache"),
-            "Package Info": self.package_info,
-            
-            # System Maintenance
-            "Update Mirrors": ("sudo reflector --verbose --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", "Updating mirrors"),
-            "Clean System Logs": ("sudo journalctl --vacuum-time=7d", "Cleaning system logs"),
-            "Check Filesystem": ("sudo fsck -f /", "Checking filesystem"),
-            "Update Locate DB": ("sudo updatedb", "Updating locate database"),
-            "Rebuild Initramfs": ("sudo mkinitcpio -P", "Rebuilding initramfs"),
-            "Check Services": ("systemctl --failed && systemctl list-unit-files --state=enabled", "Checking services"),
-            "Manage Startup Services": ("sudo systemctl list-unit-files --type=service", "Managing startup services"),
-            
-            # AUR Helper
-            "Install yay": ("cd /tmp && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si", "Installing yay AUR helper"),
-            "Update AUR Packages": ("yay -Syu", "Updating AUR packages"),
-            "Install AUR Package": self.install_aur_package,
-            "Search AUR": self.search_aur,
-            "Remove AUR Package": self.remove_aur_package,
-            "List AUR Packages": ("yay -Qm", "Listing AUR packages"),
-            
-            # Development Tools
-            "Install Git": ("sudo pacman -S git", "Installing Git"),
-            "Install VSCode": ("yay -S visual-studio-code-bin", "Installing Visual Studio Code"),
-            "Install Docker": ("sudo pacman -S docker docker-compose", "Installing Docker"),
-            "Install Node.js": ("sudo pacman -S nodejs npm", "Installing Node.js and npm"),
-            "Install Python Tools": ("sudo pacman -S python-pip python-virtualenv", "Installing Python tools"),
-            "Install Build Tools": ("sudo pacman -S base-devel", "Installing build tools")
-        }
-        
-        if selected_item in actions:
-            action = actions[selected_item]
+        if action:
             if callable(action):
                 action()
             else:
@@ -421,30 +376,31 @@ class ArchUtil:
                         self.current_selection = max(0, self.current_selection - 1)
                 elif key == curses.KEY_DOWN:
                     if self.in_submenu:
-                        main_item = self.main_menu[self.current_selection]
-                        if main_item in self.submenus:
-                            max_sub = len(self.submenus[main_item]) - 1
+                        main_item = self.menu_data[self.current_selection]
+                        submenu = main_item.get("submenu", [])
+                        if submenu:
+                            max_sub = len(submenu) - 1
                             self.current_submenu_selection = min(max_sub, self.current_submenu_selection + 1)
                     else:
-                        self.current_selection = min(len(self.main_menu) - 1, self.current_selection + 1)
+                        self.current_selection = min(len(self.menu_data) - 1, self.current_selection + 1)
                 elif key == curses.KEY_RIGHT:
                     if not self.in_submenu:
-                        main_item = self.main_menu[self.current_selection]
-                        if main_item in self.submenus:
+                        main_item = self.menu_data[self.current_selection]
+                        if main_item.get("submenu"):
                             self.in_submenu = True
                             self.current_submenu_selection = 0
                 elif key == curses.KEY_LEFT:
                     if self.in_submenu:
                         self.in_submenu = False
                 elif key == ord('\n') or key == curses.KEY_ENTER or key == 10:  # Enter
-                    if self.main_menu[self.current_selection] == "Quit":
+                    main_item = self.menu_data[self.current_selection]
+                    if main_item.get("action") == "quit":
                         break
                     elif self.in_submenu:
                         self.handle_submenu_action()
                     else:
                         # Enter submenu
-                        main_item = self.main_menu[self.current_selection]
-                        if main_item in self.submenus:
+                        if main_item.get("submenu"):
                             self.in_submenu = True
                             self.current_submenu_selection = 0
                 
