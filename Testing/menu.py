@@ -2,6 +2,7 @@
 """
 ArchUtil - A LinUtil-inspired dynamic TUI menu system for Arch Linux
 Features arrow key navigation with live submenu preview
+Fixed version with better font/display handling
 """
 
 import curses
@@ -11,6 +12,7 @@ import subprocess
 from typing import Dict, List, Callable, Optional, Tuple
 import threading
 import time
+import locale
 
 class ArchUtil:
     def __init__(self, stdscr):
@@ -19,17 +21,31 @@ class ArchUtil:
         self.current_submenu_selection = 0
         self.in_submenu = False
         
+        # Set locale for proper Unicode support
+        try:
+            locale.setlocale(locale.LC_ALL, '')
+        except:
+            pass
+        
         # Initialize colors
         curses.start_color()
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)   # Selected
-        curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)   # Title
-        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Success
-        curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)    # Error
-        curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK) # Warning
-        curses.init_pair(6, curses.COLOR_BLUE, curses.COLOR_BLACK)   # Info
+        curses.use_default_colors()  # Use terminal's default colors
+        curses.init_pair(1, curses.COLOR_GREEN, -1)   # Selected (transparent bg)
+        curses.init_pair(2, curses.COLOR_CYAN, -1)    # Title
+        curses.init_pair(3, curses.COLOR_GREEN, -1)   # Success
+        curses.init_pair(4, curses.COLOR_RED, -1)     # Error
+        curses.init_pair(5, curses.COLOR_YELLOW, -1)  # Warning
+        curses.init_pair(6, curses.COLOR_BLUE, -1)    # Info
+        curses.init_pair(7, curses.COLOR_WHITE, -1)   # Normal text
         
         # Hide cursor
         curses.curs_set(0)
+        
+        # Enable mouse (optional)
+        try:
+            curses.mousemask(curses.ALL_MOUSE_EVENTS)
+        except:
+            pass
         
         # Unified menu structure
         self.menu_data = [
@@ -138,11 +154,32 @@ class ArchUtil:
         """Get terminal dimensions"""
         return self.stdscr.getmaxyx()
     
+    def safe_addstr(self, win, y, x, text, attr=0):
+        """Safely add string to window with bounds checking"""
+        try:
+            max_y, max_x = win.getmaxyx()
+            if y >= max_y or x >= max_x:
+                return
+            
+            # Truncate text if it would exceed window bounds
+            available_width = max_x - x - 1
+            if len(text) > available_width:
+                text = text[:available_width-3] + "..."
+            
+            win.addstr(y, x, text, attr)
+        except curses.error:
+            # Ignore curses errors (usually related to writing at boundaries)
+            pass
+    
     def draw_border(self, win, title=""):
         """Draw border around window with optional title"""
-        win.box()
-        if title:
-            win.addstr(0, 2, f" {title} ", curses.color_pair(2) | curses.A_BOLD)
+        try:
+            win.box()
+            if title:
+                # Use ASCII characters for better compatibility
+                self.safe_addstr(win, 0, 2, f"[ {title} ]", curses.color_pair(2) | curses.A_BOLD)
+        except curses.error:
+            pass
     
     def draw_main_menu(self, win):
         """Draw the main menu on the left side"""
@@ -155,16 +192,17 @@ class ArchUtil:
             y = 2 + i
             if y >= height - 1:
                 break
-                
+            
+            # Use simple ASCII characters for arrows
             if i == self.current_selection:
-                win.addstr(y, 2, f">> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
+                self.safe_addstr(win, y, 2, f"> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
             else:
-                win.addstr(y, 2, f"  {item['title']}")
+                self.safe_addstr(win, y, 2, f"  {item['title']}", curses.color_pair(7))
         
-        # Add navigation help
-        help_y = height - 3
-        win.addstr(help_y, 2, "↑↓: Navigate", curses.color_pair(6))
-        win.addstr(help_y + 1, 2, "→: Enter | q: Quit", curses.color_pair(6))
+        # Add navigation help with ASCII characters
+        help_y = max(2, height - 3)
+        self.safe_addstr(win, help_y, 2, "Up/Down: Navigate", curses.color_pair(6))
+        self.safe_addstr(win, help_y + 1, 2, "Right: Enter | q: Quit", curses.color_pair(6))
         
         win.refresh()
     
@@ -185,7 +223,7 @@ class ArchUtil:
         action = main_item.get("action")
 
         if action == "quit":
-            win.addstr(2, 2, "Press Enter to quit", curses.color_pair(4))
+            self.safe_addstr(win, 2, 2, "Press Enter to quit", curses.color_pair(4))
         elif submenu_items:
             # Draw submenu items
             for i, item in enumerate(submenu_items):
@@ -194,27 +232,24 @@ class ArchUtil:
                     break
                 
                 if self.in_submenu and i == self.current_submenu_selection:
-                    win.addstr(y, 2, f">> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
+                    self.safe_addstr(win, y, 2, f"> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
                 else:
-                    win.addstr(y, 2, f"  {item['title']}")
+                    self.safe_addstr(win, y, 2, f"  {item['title']}", curses.color_pair(7))
         
-        # Always add description if available, unless it's a quit action (handled above)
+        # Always add description if available, unless it's a quit action
         if action != "quit":
-            desc_y = height - 4
+            desc_y = max(2, height - 4)
             desc = main_item.get("description", "")
-            # Word wrap description
-            if len(desc) > width - 4:
-                desc = desc[:width-7] + "..."
-            win.addstr(desc_y, 2, desc, curses.color_pair(6))
+            self.safe_addstr(win, desc_y, 2, desc, curses.color_pair(6))
         
         # Add navigation help
-        help_y = height - 2
+        help_y = max(2, height - 2)
         if self.in_submenu:
-            win.addstr(help_y, 2, "↑↓: Navigate | ←: Back | Enter: Execute", curses.color_pair(6))
-        elif action and not submenu_items: # If it's an action item without a submenu
-            win.addstr(help_y, 2, "Enter: Execute | ←: Back", curses.color_pair(6))
+            self.safe_addstr(win, help_y, 2, "Up/Down: Navigate | Left: Back | Enter: Execute", curses.color_pair(6))
+        elif action and not submenu_items:
+            self.safe_addstr(win, help_y, 2, "Enter: Execute | Left: Back", curses.color_pair(6))
         else:
-            win.addstr(help_y, 2, "→: Enter submenu", curses.color_pair(6))
+            self.safe_addstr(win, help_y, 2, "Right: Enter submenu", curses.color_pair(6))
         
         win.refresh()
     
@@ -224,13 +259,13 @@ class ArchUtil:
         height, width = win.getmaxyx()
         
         status_text = "ArchUtil v1.0 - Arch Linux System Utility"
-        win.addstr(0, 2, status_text, curses.color_pair(2) | curses.A_BOLD)
+        self.safe_addstr(win, 0, 2, status_text, curses.color_pair(2) | curses.A_BOLD)
         
         # Add system info
         try:
             load_avg = os.getloadavg()
             load_text = f"Load: {load_avg[0]:.2f}"
-            win.addstr(0, width - len(load_text) - 2, load_text, curses.color_pair(6))
+            self.safe_addstr(win, 0, width - len(load_text) - 2, load_text, curses.color_pair(6))
         except:
             pass
         
@@ -259,9 +294,9 @@ class ArchUtil:
             result = subprocess.run(command, shell=True)
             
             if result.returncode == 0:
-                print(f"\n{GREEN}✓ Success: {description}{RESET}")
+                print(f"\n{GREEN}Success: {description}{RESET}")
             else:
-                print(f"\n{RED}✗ Command failed with exit code: {result.returncode}{RESET}")
+                print(f"\n{RED}Command failed with exit code: {result.returncode}{RESET}")
             
             input("\nPress Enter to continue...")
             
@@ -292,7 +327,7 @@ class ArchUtil:
                 self.execute_command(command, description)
     
     def necessarypkgs(self):
-        """Install a package with user input"""
+        """Install necessary packages"""
         curses.def_prog_mode()
         curses.endwin()
         
@@ -409,11 +444,14 @@ class ArchUtil:
             # Clear the screen
             os.system('cls' if os.name == 'nt' else 'clear')
             print(f"\n{BLUE}Updating ms1 repository...{RESET}")
+            
             # Get the current script directory
             script_dir = os.path.dirname(os.path.abspath(__file__))
+            
             # Try to find git repository root
             git_root = None
             current_dir = script_dir
+            
             # Search up the directory tree for .git folder
             while current_dir != os.path.dirname(current_dir):  # Stop at filesystem root
                 if os.path.exists(os.path.join(current_dir, '.git')):
@@ -469,16 +507,14 @@ class ArchUtil:
                 input("Press Enter to continue...")
                 return
             
-            # Pull changes - let git handle the output formatting
+            # Pull changes
             print("Pulling changes...")
             result = subprocess.run(['git', 'pull'], text=True)
             
             if result.returncode == 0:
-                print(f"\n{GREEN}✓ Git pull completed successfully{RESET}")
+                print(f"\n{GREEN}Git pull completed successfully{RESET}")
             else:
-                print(f"\n{RED}✗ Git pull failed with exit code: {result.returncode}{RESET}")
-                if "merge conflict" in (result.stderr or "").lower():
-                    print(f"{YELLOW}You have merge conflicts. Please resolve them manually.{RESET}")
+                print(f"\n{RED}Git pull failed with exit code: {result.returncode}{RESET}")
             
             input("\nPress Enter to continue...")
             
@@ -495,37 +531,45 @@ class ArchUtil:
     def run(self):
         """Main application loop"""
         while True:
-            # Get terminal size
-            max_y, max_x = self.get_terminal_size()
-            
-            # Calculate window sizes
-            left_width = max_x // 2
-            right_width = max_x - left_width
-            menu_height = max_y - 2
-            
-            # Create windows
-            left_win = curses.newwin(menu_height, left_width, 0, 0)
-            left_win.keypad(True)
-            right_win = curses.newwin(menu_height, right_width, 0, left_width)
-            status_win = curses.newwin(2, max_x, max_y - 2, 0)
-            
-            # Draw interface
-            self.draw_main_menu(left_win)
-            self.draw_submenu(right_win)
-            self.draw_status_bar(status_win)
-            
-            # Handle input
             try:
+                # Get terminal size
+                max_y, max_x = self.get_terminal_size()
+                
+                # Ensure minimum terminal size
+                if max_y < 10 or max_x < 40:
+                    self.stdscr.clear()
+                    self.safe_addstr(self.stdscr, 0, 0, "Terminal too small! Minimum: 40x10", curses.color_pair(4))
+                    self.stdscr.refresh()
+                    time.sleep(0.1)
+                    continue
+                
+                # Calculate window sizes
+                left_width = max_x // 2
+                right_width = max_x - left_width
+                menu_height = max_y - 2
+                
+                # Create windows
+                left_win = curses.newwin(menu_height, left_width, 0, 0)
+                left_win.keypad(True)
+                right_win = curses.newwin(menu_height, right_width, 0, left_width)
+                status_win = curses.newwin(2, max_x, max_y - 2, 0)
+                
+                # Draw interface
+                self.draw_main_menu(left_win)
+                self.draw_submenu(right_win)
+                self.draw_status_bar(status_win)
+                
+                # Handle input
                 key = left_win.getch()
                 
                 if key == ord('q') or key == 27:  # q or ESC
                     break
-                elif key == curses.KEY_UP:
+                elif key == curses.KEY_UP or key == ord('k'):
                     if self.in_submenu:
                         self.current_submenu_selection = max(0, self.current_submenu_selection - 1)
                     else:
                         self.current_selection = max(0, self.current_selection - 1)
-                elif key == curses.KEY_DOWN:
+                elif key == curses.KEY_DOWN or key == ord('j'):
                     if self.in_submenu:
                         main_item = self.menu_data[self.current_selection]
                         submenu = main_item.get("submenu", [])
@@ -534,13 +578,13 @@ class ArchUtil:
                             self.current_submenu_selection = min(max_sub, self.current_submenu_selection + 1)
                     else:
                         self.current_selection = min(len(self.menu_data) - 1, self.current_selection + 1)
-                elif key == curses.KEY_RIGHT:
+                elif key == curses.KEY_RIGHT or key == ord('l'):
                     if not self.in_submenu:
                         main_item = self.menu_data[self.current_selection]
                         if main_item.get("submenu"):
                             self.in_submenu = True
                             self.current_submenu_selection = 0
-                elif key == curses.KEY_LEFT:
+                elif key == curses.KEY_LEFT or key == ord('h'):
                     if self.in_submenu:
                         self.in_submenu = False
                 elif key == ord('\n') or key == curses.KEY_ENTER or key == 10:  # Enter
@@ -560,18 +604,38 @@ class ArchUtil:
                 
             except KeyboardInterrupt:
                 break
+            except curses.error:
+                # Handle curses errors gracefully
+                time.sleep(0.1)
+                continue
 
 def main():
     """Main entry point"""
     def app(stdscr):
+        # Setup terminal
+        stdscr.clear()
+        stdscr.refresh()
+        
+        # Check if terminal supports colors
+        if not curses.has_colors():
+            stdscr.addstr(0, 0, "Terminal does not support colors!")
+            stdscr.refresh()
+            stdscr.getch()
+            return
+        
         archutil = ArchUtil(stdscr)
         archutil.run()
     
     try:
+        # Set environment variables for better Unicode support
+        os.environ['NCURSES_NO_UTF8_ACS'] = '1'
         curses.wrapper(app)
     except KeyboardInterrupt:
         print("\nExiting ArchUtil...")
         sys.exit(0)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
