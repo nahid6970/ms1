@@ -45,7 +45,7 @@ class ArchUtil:
                     {"title": "Show System Info", "action": ("systeminfo", "Showing system information")},
                     {"title": "Hardware Info", "action": ("lshw -short 2>/dev/null || lscpu && lsmem", "Showing hardware information")},
                     {"title": "Network Info", "action": ("ipconfig", "Showing network information")},
-                    {"title": "Process Monitor", "action": ("htop || top", "Opening process monitor")},
+                    {"title": "Process Monitor", "action": ("cmd /c pwsh -Command Get-Process", "Opening process monitor")},
                     {"title": "Disk Usage", "action": ("df -h && du -sh /home/* 2>/dev/null", "Showing disk usage")},
                 ]
             },

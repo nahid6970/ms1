@@ -1,0 +1,2 @@
+cmd /k → runs the command and keeps the window open.
+cmd /c → runs the command and closes the window when done.
