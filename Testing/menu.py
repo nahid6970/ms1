@@ -401,7 +401,7 @@ class ArchUtil:
         try:
             ms1_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
             if os.path.isdir(ms1_folder):
-                self.execute_command(f"cd {ms1_folder} && git pull", "Updating ms1 repository")
+                self.execute_command(f"cd C:\ms1 && git pull", "Updating ms1 repository")
             else:
                 print(f"The folder {ms1_folder} does not exist.")
                 input("Press Enter to continue...")
