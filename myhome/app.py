@@ -31,6 +31,12 @@ def get_links():
     links = read_data()
     return jsonify(links)
 
+@app.route('/api/links', methods=['PUT'])
+def update_all_links():
+    new_links = request.json
+    write_data(new_links)
+    return jsonify({'message': 'Links updated successfully'})
+
 @app.route('/api/add_link', methods=['POST'])
 def add_link():
     new_link = request.json

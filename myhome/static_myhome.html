@@ -1,12 +1,360 @@
-document.addEventListener('DOMContentLoaded', function() {
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home</title>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="myhome/myhome.css">
+</head>
+
+<body>
+  <div class="flex-container2">
+
+    <div class="toggle-container" style="margin-left: 25px;">
+      <label class="switch">
+        <input type="checkbox" id="edit-mode-toggle">
+        <span class="slider round"></span>
+      </label>
+      <span style="color: white; margin-left: 10px;">Modify</span>
+    </div>
+
+    <!-- Updated styling for better edit mode control -->
+    <style>
+      .dragging {
+        opacity: 0.5;
+      }
+      
+      .reorder-buttons {
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        margin-left: 5px;
+      }
+      .edit-mode .reorder-buttons {
+        display: flex;
+      }
+      .reorder-btn {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 2px 6px;
+        cursor: pointer;
+        font-size: 12px;
+        border-radius: 3px;
+      }
+      .reorder-btn:hover {
+        background: #555;
+      }
+      
+      /* Group reorder buttons - only visible in edit mode */
+      .group-reorder-buttons {
+        display: none;
+        gap: 5px;
+        margin-left: 10px;
+      }
+      .edit-mode .group-reorder-buttons {
+        display: flex;
+      }
+      
+      .link-item {
+        cursor: move;
+      }
+
+    </style>
+
+  <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
+  </div>
+
+<div id="edit-group-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Group Name</h3>
+      <form id="edit-group-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="hidden" id="edit-group-original-name">
+        <label for="edit-group-name">Group Name:</label>
+        <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
+        <button type="submit">Update Group Name</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="add-link-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Add New Link</h3>
+      <form id="add-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="text" id="link-name" placeholder="Name" required>
+        <input type="text" id="link-group" placeholder="Group (optional)">
+        <input type="url" id="link-url" placeholder="URL" required>
+        <label for="link-default-type">Default Type:</label>
+        <select id="link-default-type">
+          <option value="nerd-font">nerd-font</option>
+          <option value="img">img</option>
+          <option value="text">text</option>
+        </select>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-text" placeholder="Text (if no icon/image)">
+          <input type="url" id="link-img-src" placeholder="Image URL (if no icon)">
+          <input type="text" id="link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-color" placeholder="Color (e.g., #f46613 or red)">
+          <input type="text" id="link-background-color" placeholder="Background Color">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-li-bg-color" placeholder="List Item BG Color">
+          <input type="text" id="link-li-hover-color" placeholder="List Item Hover Color">
+        </div>
+        <input type="text" id="link-border-radius" placeholder="Border Radius">
+        <input type="text" id="link-title" placeholder="Title (for tooltip)">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label for="link-hidden">
+            <input type="checkbox" id="link-hidden">
+            Hide this item
+          </label>
+        </div>
+        <button type="submit">Add Link</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="edit-link-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Link</h3>
+      <form id="edit-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="hidden" id="edit-link-index">
+        <input type="text" id="edit-link-name" placeholder="Name" required>
+        <input type="text" id="edit-link-group" placeholder="Group (optional)">
+        <input type="url" id="edit-link-url" placeholder="URL" required>
+        <label for="edit-link-default-type">Default Type:</label>
+        <select id="edit-link-default-type">
+          <option value="nerd-font">nerd-font</option>
+          <option value="img">img</option>
+          <option value="text">text</option>
+        </select>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-text" placeholder="Text (if no icon/image)">
+          <input type="url" id="edit-link-img-src" placeholder="Image URL (if no icon)">
+          <input type="text" id="edit-link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-color" placeholder="Color (e.g., #f46613 or red)">
+          <input type="text" id="edit-link-background-color" placeholder="Background Color">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-li-bg-color" placeholder="List Item BG Color">
+          <input type="text" id="edit-link-li-hover-color" placeholder="List Item Hover Color">
+        </div>
+        <input type="text" id="edit-link-border-radius" placeholder="Border Radius">
+        <input type="text" id="edit-link-title" placeholder="Title (for tooltip)">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label for="edit-link-hidden">
+            <input type="checkbox" id="edit-link-hidden">
+            Hide this item
+          </label>
+        </div>
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+
+
+
+  
+    <script>
+        window.EMBEDDED_LINKS_DATA = [
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
+    "name": "Sonarr",
+    "url": "http://192.168.0.101:8989/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
+    "name": "Radarr",
+    "url": "http://192.168.0.101:7878/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
+    "name": "Prowlarr",
+    "url": "http://192.168.0.101:9696/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:6767/images/logo64.png",
+    "name": "Bazarr",
+    "url": "http://192.168.0.101:6767/series"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://127.0.0.1:9117/jacket_medium.png",
+    "name": "JackettAPI ",
+    "url": "http://127.0.0.1:9117/UI/Dashboard"
+  },
+  {
+    "color": "#009fff",
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-fa-wifi",
+    "name": "WIFI",
+    "url": "http://192.168.0.1/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
+    "name": "Syncthing",
+    "url": "http://127.0.0.1:8384/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-linux-tor",
+    "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
+    "name": "qBittorrent",
+    "url": "http://192.168.0.101:8080/"
+  },
+  {
+    "color": "#f46613",
+    "default_type": "img",
+    "icon_class": "nf nf-cod-mail",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/022/613/021/non_2x/google-mail-gmail-icon-logo-symbol-free-png.png",
+    "name": "Google Mail",
+    "url": "https://mail.google.com/"
+  },
+  {
+    "color": "#1399f4",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-dev-facebook",
+    "img_src": "https://img.icons8.com/ios11/512/facebook-new.png",
+    "name": "Facebook",
+    "url": "https://www.facebook.com/"
+  },
+  {
+    "color": "#3675ff",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-facebook_messenger",
+    "name": "Messenger",
+    "url": "https://www.messenger.com/"
+  },
+  {
+    "color": "#ff0000",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-youtube",
+    "name": "YouTube",
+    "url": "https://www.youtube.com/"
+  },
+  {
+    "color": "#5765f2",
+    "default_type": "nerd-font",
+    "icon_class": "nf-fa-discord",
+    "name": "Discord",
+    "url": "https://discord.com/channels/@me"
+  },
+  {
+    "color": "#ffffff",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-google_translate",
+    "name": "Google Translate",
+    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate"
+  },
+  {
+    "default_type": "img",
+    "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png",
+    "name": "VLR.gg",
+    "url": "https://www.vlr.gg/"
+  },
+  {
+    "color": "#4b70cc",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-dots_hexagon",
+    "name": "Tailscale",
+    "url": "https://login.tailscale.com/admin/machines"
+  },
+  {
+    "color": "#ff2e2e",
+    "default_type": "nerd-font",
+    "hidden": true,
+    "icon_class": "nf nf-fa-battery_2",
+    "name": "mi9t",
+    "title": "mi9t",
+    "url": "http://mi9t:5002"
+  },
+  {
+    "default_type": "img",
+    "group": "AI",
+    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
+    "name": "DeepSeek",
+    "url": "https://chat.deepseek.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "AI",
+    "img_src": "https://img.icons8.com/fluent/512/claude-ai.png",
+    "li_hover_color": "#d97757",
+    "name": "Claude",
+    "url": "https://claude.ai/new"
+  },
+  {
+    "default_type": "img",
+    "group": "AI",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "AI",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "name": "Google Bard",
+    "url": "https://bard.google.com/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "name": "ShareTXT",
+    "url": "http://192.168.0.101:5001/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "name": "ShareFile",
+    "url": "http://192.168.0.101:5002/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "name": "Browse",
+    "url": "http://192.168.0.101:5003/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "name": "GameARR",
+    "url": "http://192.168.0.101:5005/"
+  }
+];
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
   const linksContainer = document.getElementById('links-container');
   const addLinkForm = document.getElementById('add-link-form');
 
   // Function to fetch and display links
   async function fetchAndDisplayLinks() {
     try {
-      const response = await fetch('/api/links');
-      const links = await response.json();
+      const links = window.EMBEDDED_LINKS_DATA;
       linksContainer.innerHTML = ''; // Clear existing links
 
       const groupedElements = {}; // Store HTML elements grouped by name
@@ -226,8 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to update group name for all links in that group
   async function updateGroupName(originalGroupName, newGroupName) {
     try {
-      const response = await fetch('/api/links');
-      const links = await response.json();
+      const links = window.EMBEDDED_LINKS_DATA;
       
       // Find all links in the original group and update them
       const updatePromises = links.map(async (link, index) => {
@@ -302,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (response.ok) {
           alert('Link added successfully!');
           addLinkForm.reset(); // Clear form
-          fetchAndDisplayLinks(); // Refresh links
+          fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA); // Refresh links
         } else {
           alert('Failed to add link.');
         }
@@ -379,7 +726,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     alert('Link updated successfully!');
                     editLinkPopup.classList.add('hidden');
-                    fetchAndDisplayLinks();
+                    fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
                 } else {
                     alert('Failed to update link.');
                 }
@@ -414,7 +761,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (success) {
             alert('Group name updated successfully!');
             document.getElementById('edit-group-popup').classList.add('hidden');
-            fetchAndDisplayLinks();
+            fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
           } else {
             alert('Failed to update group name.');
           }
@@ -437,7 +784,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (response.ok) {
           alert('Link deleted successfully!');
-          fetchAndDisplayLinks();
+          fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
         } else {
           alert('Failed to delete link.');
         }
@@ -449,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Initial fetch and display of links
-  fetchAndDisplayLinks();
+  fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
 
   // Edit Mode Toggle functionality
   const editModeToggle = document.getElementById('edit-mode-toggle');
@@ -463,7 +810,7 @@ document.addEventListener('DOMContentLoaded', function() {
         flexContainer2.classList.remove('edit-mode');
       }
       // Refresh the display when edit mode is toggled to show/hide items
-      fetchAndDisplayLinks();
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
     });
   }
 
@@ -508,8 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Move link up or down within the same group
   async function moveLink(linkIndex, direction) {
     try {
-      const response = await fetch('/api/links');
-      const links = await response.json();
+      const links = window.EMBEDDED_LINKS_DATA;
       
       const currentLink = links[linkIndex];
       const currentGroup = currentLink.group || 'Ungrouped';
@@ -539,8 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Move entire group up or down
   async function moveGroup(groupName, direction) {
     try {
-      const response = await fetch('/api/links');
-      const links = await response.json();
+      const links = window.EMBEDDED_LINKS_DATA;
       
       // Get all unique group names in their current order
       const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
@@ -579,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify(newLinks),
       });
       
-      fetchAndDisplayLinks();
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
       
     } catch (error) {
       console.error('Error moving group:', error);
@@ -589,8 +934,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Swap two links by their indices
   async function swapLinks(index1, index2) {
     try {
-      const response = await fetch('/api/links');
-      const links = await response.json();
+      const links = window.EMBEDDED_LINKS_DATA;
       
       // Swap the links
       [links[index1], links[index2]] = [links[index2], links[index1]];
@@ -612,7 +956,7 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify(links[index2]),
       });
       
-      fetchAndDisplayLinks();
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
       
     } catch (error) {
       console.error('Error swapping links:', error);
@@ -622,8 +966,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Swap all links between two groups
   async function swapGroups(group1Name, group2Name) {
     try {
-      const response = await fetch('/api/links');
-      const links = await response.json();
+      const links = window.EMBEDDED_LINKS_DATA;
       
       const group1Indices = [];
       const group2Indices = [];
@@ -664,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify(newLinks),
       });
       
-      fetchAndDisplayLinks();
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
       
     } catch (error) {
       console.error('Error swapping groups:', error);
@@ -706,3 +1049,128 @@ updateDateTime();
 
 // Update the time every second
 setInterval(updateDateTime, 1000);
+    </script>
+    <script>
+        /* For Showing Markdown Table in HTML properly but lines also show */
+ function parseMarkdownTable(markdown) {
+  const rows = markdown.trim().split('\n');
+  const headers = rows[1].split('|').map(header => header.trim()).filter(Boolean);
+  const data = rows.slice(2, -1).map(row => row.split('|').map(cell => cell.trim()).filter(Boolean));
+
+  return { headers, data };
+}
+
+function renderTable(headers, data) {
+  const tableElement = document.createElement('table');
+  const theadElement = document.createElement('thead');
+  const tbodyElement = document.createElement('tbody');
+
+  const headerRow = document.createElement('tr');
+  headers.forEach(header => {
+      const thElement = document.createElement('th');
+      thElement.textContent = header;
+      headerRow.appendChild(thElement);
+  });
+
+  theadElement.appendChild(headerRow);
+
+  data.forEach(rowData => {
+      const rowElement = document.createElement('tr');
+      rowData.forEach(cellData => {
+          const tdElement = document.createElement('td');
+          tdElement.textContent = cellData;
+          rowElement.appendChild(tdElement);
+      });
+      tbodyElement.appendChild(rowElement);
+  });
+
+  tableElement.appendChild(theadElement);
+  tableElement.appendChild(tbodyElement);
+
+  return tableElement;
+}
+
+function convertMarkdownTables() {
+  const elements = document.querySelectorAll('[id^="markdown-table-"]');
+  elements.forEach(element => {
+      const markdownContent = element.innerHTML;
+      const { headers, data } = parseMarkdownTable(markdownContent);
+      const tableElement = renderTable(headers, data);
+      element.innerHTML = ''; // Clear the original content
+      element.appendChild(tableElement);
+  });
+}
+// Call the function to convert Markdown tables on page load
+window.addEventListener('load', convertMarkdownTables); 
+ 
+
+/* // Get all the spans
+const spans = document.querySelectorAll('span');
+
+// Find the span with the maximum width
+let maxWidth = 0;
+spans.forEach(span => {
+  const width = span.offsetWidth;
+  if (width > maxWidth) {
+    maxWidth = width;
+  }
+});
+
+// Set the width of all spans to the maximum width
+spans.forEach(span => {
+  span.style.width = `${maxWidth}px`;
+}); */
+
+
+// Popup functionality
+document.addEventListener('DOMContentLoaded', () => {
+  const addLinkPopup = document.getElementById('add-link-popup');
+  const editLinkPopup = document.getElementById('edit-link-popup');
+  const editGroupPopup = document.getElementById('edit-group-popup');
+
+  // Close buttons for addLinkPopup
+  const addCloseButton = addLinkPopup ? addLinkPopup.querySelector('.close-button') : null;
+  if (addCloseButton) {
+    addCloseButton.addEventListener('click', () => {
+      addLinkPopup.classList.add('hidden');
+    });
+  }
+
+  // Close buttons for editLinkPopup
+  const editCloseButton = editLinkPopup ? editLinkPopup.querySelector('.close-button') : null;
+  if (editCloseButton) {
+    editCloseButton.addEventListener('click', () => {
+      editLinkPopup.classList.add('hidden');
+    });
+  }
+
+  // Close buttons for editGroupPopup
+  const editGroupCloseButton = editGroupPopup ? editGroupPopup.querySelector('.close-button') : null;
+  if (editGroupCloseButton) {
+    editGroupCloseButton.addEventListener('click', () => {
+      editGroupPopup.classList.add('hidden');
+    });
+  }
+
+  // Close popups when clicking outside
+  window.addEventListener('click', (event) => {
+    if (event.target === addLinkPopup) {
+      addLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editLinkPopup) {
+      editLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editGroupPopup) {
+      editGroupPopup.classList.add('hidden');
+    }
+  });
+});
+    </script>
+    
+  
+
+
+  </div>
+</body>
+
+</html>
