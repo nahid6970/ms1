@@ -473,20 +473,43 @@ class ArchUtil:
                 input("Press Enter to continue...")
                 return
             
-            # Pull changes
+            # Check if there are changes to pull
+            print("Checking for updates...")
+            result = subprocess.run(['git', 'rev-list', '--count', 'HEAD..@{u}'], 
+                                capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                commits_behind = result.stdout.strip()
+                if commits_behind == '0':
+                    print(f"\n{GREEN}✓ Repository is already up to date{RESET}")
+                    input("\nPress Enter to continue...")
+                    return
+                else:
+                    print(f"Found {commits_behind} new commit(s) to pull")
+            
+            # Pull changes with detailed statistics
             print("Pulling changes...")
-            result = subprocess.run(['git', 'pull'], capture_output=True, text=True)
+            result = subprocess.run(['git', 'pull', '--stat'], capture_output=True, text=True)
             
             if result.returncode == 0:
                 print(f"\n{GREEN}✓ Successfully updated ms1 repository{RESET}")
                 if result.stdout.strip():
-                    print("Output:")
+                    print("\nChanges:")
                     print(result.stdout)
+                    
+                # Show additional statistics if available
+                stat_result = subprocess.run(['git', 'diff', '--stat', 'HEAD@{1}..HEAD'], 
+                                        capture_output=True, text=True)
+                if stat_result.returncode == 0 and stat_result.stdout.strip():
+                    print(f"\n{BLUE}Detailed Statistics:{RESET}")
+                    print(stat_result.stdout)
             else:
                 print(f"\n{RED}✗ Git pull failed{RESET}")
                 print(f"Error: {result.stderr}")
                 if "merge conflict" in result.stderr.lower():
                     print(f"{YELLOW}You have merge conflicts. Please resolve them manually.{RESET}")
+                elif "up to date" in result.stdout.lower():
+                    print(f"{GREEN}Repository is already up to date{RESET}")
             
             input("\nPress Enter to continue...")
             
