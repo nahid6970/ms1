@@ -72,25 +72,104 @@
     "name": "ChatGPT",
     "group": "AI",
     "url": "https://chatgpt.com/",
-    "default_type": "text"
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "default_type": "img"
   },
   {
     "name": "Claude",
     "group": "AI",
     "url": "https://claude.ai/new",
-    "default_type": "nerd-font",
+    "img_src": "https://img.icons8.com/fluent/512/claude-ai.png",
+    "default_type": "img",
     "li_hover_color": "#d97757"
   },
   {
     "name": "Sonarr",
     "group": "Local (Apps)",
     "url": "http://192.168.0.101:8989/",
-    "default_type": "nerd-font"
+    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
+    "default_type": "img"
   },
   {
     "name": "ShareTXT",
     "group": "Local (Flask)",
     "url": "http://192.168.0.101:5001/",
     "default_type": "nerd-font"
+  },
+  {
+    "name": "ShareFile",
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5002/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "Browse",
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5003/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "GameARR",
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5005/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "Radarr",
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:7878/",
+    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
+    "default_type": "img"
+  },
+  {
+    "name": "Prowlarr",
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:9696/",
+    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
+    "default_type": "img"
+  },
+  {
+    "name": "Bazarr",
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:6767/series",
+    "img_src": "http://192.168.0.101:6767/images/logo64.png",
+    "default_type": "img"
+  },
+  {
+    "name": "JackettAPI ",
+    "group": "Local (Apps)",
+    "url": "http://127.0.0.1:9117/UI/Dashboard",
+    "img_src": "http://127.0.0.1:9117/jacket_medium.png",
+    "default_type": "img"
+  },
+  {
+    "name": "qBittorrent",
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:8080/",
+    "icon_class": "nf nf-linux-tor",
+    "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "Syncthing",
+    "group": "Local (Apps)",
+    "url": "http://127.0.0.1:8384/",
+    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
+    "default_type": "img"
+  },
+  {
+    "name": "WIFI",
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.1/",
+    "icon_class": "nf nf-fa-wifi",
+    "color": "#009fff",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "DeepSeek",
+    "group": "AI",
+    "url": "https://chat.deepseek.com/",
+    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
+    "default_type": "img"
   }
 ]
