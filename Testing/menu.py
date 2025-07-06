@@ -50,6 +50,7 @@ class ArchUtil:
                 "submenu": [
                     {"title": "Update System", "action": ("sudo pacman -Syu", "Updating system packages")},
                     {"title": "Install Package", "action": self.install_package},
+                    {"title": "Install Necessary Packages", "action": self.necessarypkgs},
                     {"title": "Remove Package", "action": self.remove_package},
                     {"title": "Search Packages", "action": self.search_packages},
                     {"title": "List Installed", "action": ("pacman -Q | less", "Listing installed packages")},
@@ -237,25 +238,31 @@ class ArchUtil:
         curses.def_prog_mode()
         curses.endwin()
 
+        # ANSI escape codes for colors
+        BLUE = '\033[94m'
+        GREEN = '\033[92m'
+        RED = '\033[91m'
+        RESET = '\033[0m'
+
         # Clear the screen before executing the command
         os.system('cls' if os.name == 'nt' else 'clear')
         
         try:
-            print(f"\n{description}")
+            print(f"\n{BLUE}{description}{RESET}")
             print(f"Command: {command}")
             
             # Execute command
             result = subprocess.run(command, shell=True)
             
             if result.returncode == 0:
-                print(f"\n✓ Success: {description}")
+                print(f"\n{GREEN}✓ Success: {description}{RESET}")
             else:
-                print(f"\n✗ Command failed with exit code: {result.returncode}")
+                print(f"\n{RED}✗ Command failed with exit code: {result.returncode}{RESET}")
             
             input("\nPress Enter to continue...")
             
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"{RED}Error: {e}{RESET}")
             input("Press Enter to continue...")
         finally:
             # Restore curses mode
@@ -280,6 +287,17 @@ class ArchUtil:
                 command, description = action
                 self.execute_command(command, description)
     
+    def necessarypkgs(self):
+        """Install a package with user input"""
+        curses.def_prog_mode()
+        curses.endwin()
+        
+        try:
+            self.execute_command(f"sudo pacman -S vim nano tmux", f"Installing vim, nano, tmux")
+        finally:
+            curses.reset_prog_mode()
+            curses.curs_set(0)
+
     def install_package(self):
         """Install a package with user input"""
         curses.def_prog_mode()
