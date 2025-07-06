@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
       linksContainer.innerHTML = ''; // Clear existing links
 
       const groupedElements = {}; // Store HTML elements grouped by name
+      const groupedLinks = {}; // Store original links grouped by name
 
       links.forEach((link, index) => { // Use the index from the original links array
         // Skip hidden items unless in edit mode
@@ -20,10 +21,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupName = link.group || 'Ungrouped';
         if (!groupedElements[groupName]) {
           groupedElements[groupName] = [];
+          groupedLinks[groupName] = [];
         }
 
         const listItem = document.createElement('li');
         listItem.className = 'link-item';
+        listItem.draggable = true;
+        listItem.dataset.linkIndex = index;
+        
+        // Add drag event listeners
+        listItem.addEventListener('dragstart', handleDragStart);
+        listItem.addEventListener('dragover', handleDragOver);
+        listItem.addEventListener('drop', handleDrop);
+        listItem.addEventListener('dragend', handleDragEnd);
         
         // Add visual indicator for hidden items in edit mode
         if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
@@ -72,6 +82,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'link-buttons';
 
+        // Add reorder buttons
+        const reorderButtonsContainer = document.createElement('div');
+        reorderButtonsContainer.className = 'reorder-buttons';
+        
+        const upButton = document.createElement('button');
+        upButton.textContent = '↑';
+        upButton.className = 'reorder-btn';
+        upButton.onclick = (e) => {
+          e.stopPropagation();
+          moveLink(index, -1);
+        };
+        reorderButtonsContainer.appendChild(upButton);
+        
+        const downButton = document.createElement('button');
+        downButton.textContent = '↓';
+        downButton.className = 'reorder-btn';
+        downButton.onclick = (e) => {
+          e.stopPropagation();
+          moveLink(index, 1);
+        };
+        reorderButtonsContainer.appendChild(downButton);
+        
+        buttonContainer.appendChild(reorderButtonsContainer);
+
         const editButton = document.createElement('button');
         editButton.textContent = '';
         editButton.className = 'edit-button';
@@ -86,10 +120,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         listItem.appendChild(buttonContainer);
         groupedElements[groupName].push(listItem);
+        groupedLinks[groupName].push({link, index});
       });
 
       // Now append the grouped elements to the container
-      for (const groupName in groupedElements) {
+      const groupNames = Object.keys(groupedElements);
+      for (let i = 0; i < groupNames.length; i++) {
+        const groupName = groupNames[i];
         // Skip empty groups (when all items are hidden)
         if (groupedElements[groupName].length === 0) {
           continue;
@@ -97,6 +134,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const groupDiv = document.createElement('div');
         groupDiv.className = 'link-group';
+        groupDiv.draggable = true;
+        groupDiv.dataset.groupName = groupName;
+        
+        // Add drag event listeners for groups
+        groupDiv.addEventListener('dragstart', handleGroupDragStart);
+        groupDiv.addEventListener('dragover', handleGroupDragOver);
+        groupDiv.addEventListener('drop', handleGroupDrop);
+        groupDiv.addEventListener('dragend', handleGroupDragEnd);
 
         const groupHeaderContainer = document.createElement('div');
         groupHeaderContainer.className = 'group-header-container';
@@ -105,6 +150,30 @@ document.addEventListener('DOMContentLoaded', function() {
         groupTitle.textContent = groupName;
         groupTitle.className = 'group-title';
         groupHeaderContainer.appendChild(groupTitle);
+
+        // Add group reorder buttons
+        const groupReorderButtons = document.createElement('div');
+        groupReorderButtons.className = 'group-reorder-buttons';
+        
+        const groupUpButton = document.createElement('button');
+        groupUpButton.textContent = '↑';
+        groupUpButton.className = 'reorder-btn';
+        groupUpButton.onclick = (e) => {
+          e.stopPropagation();
+          moveGroup(groupName, -1);
+        };
+        groupReorderButtons.appendChild(groupUpButton);
+        
+        const groupDownButton = document.createElement('button');
+        groupDownButton.textContent = '↓';
+        groupDownButton.className = 'reorder-btn';
+        groupDownButton.onclick = (e) => {
+          e.stopPropagation();
+          moveGroup(groupName, 1);
+        };
+        groupReorderButtons.appendChild(groupDownButton);
+        
+        groupHeaderContainer.appendChild(groupReorderButtons);
 
         // Add edit group button (only visible in edit mode)
         const editGroupButton = document.createElement('button');
@@ -402,6 +471,241 @@ document.addEventListener('DOMContentLoaded', function() {
       // Refresh the display when edit mode is toggled to show/hide items
       fetchAndDisplayLinks();
     });
+  }
+
+  // Drag and Drop functionality for links
+  let draggedElement = null;
+  let draggedIndex = null;
+
+  function handleDragStart(e) {
+    draggedElement = this;
+    draggedIndex = parseInt(this.dataset.linkIndex);
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+  }
+
+  function handleDragOver(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  function handleDrop(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    
+    if (draggedElement !== this) {
+      const targetIndex = parseInt(this.dataset.linkIndex);
+      swapLinks(draggedIndex, targetIndex);
+    }
+    return false;
+  }
+
+  function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    draggedElement = null;
+    draggedIndex = null;
+  }
+
+  // Drag and Drop functionality for groups
+  let draggedGroup = null;
+
+  function handleGroupDragStart(e) {
+    draggedGroup = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+  }
+
+  function handleGroupDragOver(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    this.classList.add('drag-over');
+    return false;
+  }
+
+  function handleGroupDrop(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    
+    this.classList.remove('drag-over');
+    
+    if (draggedGroup !== this) {
+      const draggedGroupName = draggedGroup.dataset.groupName;
+      const targetGroupName = this.dataset.groupName;
+      swapGroups(draggedGroupName, targetGroupName);
+    }
+    return false;
+  }
+
+  function handleGroupDragEnd(e) {
+    this.classList.remove('dragging');
+    // Remove drag-over class from all groups
+    document.querySelectorAll('.link-group').forEach(group => {
+      group.classList.remove('drag-over');
+    });
+    draggedGroup = null;
+  }
+
+  // Move link up or down within the same group
+  async function moveLink(linkIndex, direction) {
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      const currentLink = links[linkIndex];
+      const currentGroup = currentLink.group || 'Ungrouped';
+      
+      // Find all links in the same group
+      const groupLinks = links.map((link, index) => ({link, index}))
+                              .filter(item => (item.link.group || 'Ungrouped') === currentGroup);
+      
+      // Find current position within the group
+      const currentGroupIndex = groupLinks.findIndex(item => item.index === linkIndex);
+      const targetGroupIndex = currentGroupIndex + direction;
+      
+      // Check bounds
+      if (targetGroupIndex < 0 || targetGroupIndex >= groupLinks.length) {
+        return;
+      }
+      
+      // Swap with target
+      const targetLinkIndex = groupLinks[targetGroupIndex].index;
+      await swapLinks(linkIndex, targetLinkIndex);
+      
+    } catch (error) {
+      console.error('Error moving link:', error);
+    }
+  }
+
+  // Move entire group up or down
+  async function moveGroup(groupName, direction) {
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      // Get all unique group names in order
+      const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
+      const currentIndex = groupNames.indexOf(groupName);
+      const targetIndex = currentIndex + direction;
+      
+      // Check bounds
+      if (targetIndex < 0 || targetIndex >= groupNames.length) {
+        return;
+      }
+      
+      const targetGroupName = groupNames[targetIndex];
+      await swapGroups(groupName, targetGroupName);
+      
+    } catch (error) {
+      console.error('Error moving group:', error);
+    }
+  }
+
+  // Swap two links by their indices
+  async function swapLinks(index1, index2) {
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      // Swap the links
+      [links[index1], links[index2]] = [links[index2], links[index1]];
+      
+      // Update both links
+      await fetch(`/api/links/${index1}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(links[index1]),
+      });
+      
+      await fetch(`/api/links/${index2}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(links[index2]),
+      });
+      
+      fetchAndDisplayLinks();
+      
+    } catch (error) {
+      console.error('Error swapping links:', error);
+    }
+  }
+
+  // Swap all links between two groups
+  async function swapGroups(group1Name, group2Name) {
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      // Find all links in both groups
+      const group1Links = [];
+      const group2Links = [];
+      const otherLinks = [];
+      
+      links.forEach((link, index) => {
+        const linkGroup = link.group || 'Ungrouped';
+        if (linkGroup === group1Name) {
+          group1Links.push({link, index});
+        } else if (linkGroup === group2Name) {
+          group2Links.push({link, index});
+        } else {
+          otherLinks.push({link, index});
+        }
+      });
+      
+      // Create new order: other links first, then swapped groups
+      const newOrder = [...otherLinks];
+      
+      // Find where the first group should be inserted
+      const group1FirstIndex = Math.min(...group1Links.map(item => item.index));
+      const group2FirstIndex = Math.min(...group2Links.map(item => item.index));
+      
+      if (group1FirstIndex < group2FirstIndex) {
+        // Group 1 comes first, so insert group 2 at group 1's position
+        const insertIndex = newOrder.findIndex(item => item.index > group1FirstIndex);
+        if (insertIndex === -1) {
+          newOrder.push(...group2Links, ...group1Links);
+        } else {
+          newOrder.splice(insertIndex, 0, ...group2Links, ...group1Links);
+        }
+      } else {
+        // Group 2 comes first, so insert group 1 at group 2's position
+        const insertIndex = newOrder.findIndex(item => item.index > group2FirstIndex);
+        if (insertIndex === -1) {
+          newOrder.push(...group1Links, ...group2Links);
+        } else {
+          newOrder.splice(insertIndex, 0, ...group1Links, ...group2Links);
+        }
+      }
+      
+      // Update all links with new order
+      const updatePromises = newOrder.map(async (item, newIndex) => {
+        return fetch(`/api/links/${item.index}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(item.link),
+        });
+      });
+      
+      await Promise.all(updatePromises);
+      fetchAndDisplayLinks();
+      
+    } catch (error) {
+      console.error('Error swapping groups:', error);
+    }
   }
 });
 

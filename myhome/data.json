@@ -78,12 +78,12 @@
     "default_type": "img"
   },
   {
-    "name": "Claude",
-    "group": "AI",
-    "url": "https://claude.ai/new",
-    "img_src": "https://img.icons8.com/fluent/512/claude-ai.png",
     "default_type": "img",
-    "li_hover_color": "#d97757"
+    "group": "AI",
+    "img_src": "https://img.icons8.com/fluent/512/claude-ai.png",
+    "li_hover_color": "#d97757",
+    "name": "Claude",
+    "url": "https://claude.ai/new"
   },
   {
     "name": "Sonarr",
@@ -168,10 +168,10 @@
     "default_type": "nerd-font"
   },
   {
-    "name": "DeepSeek",
+    "default_type": "img",
     "group": "AI",
-    "url": "https://chat.deepseek.com/",
     "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
-    "default_type": "img"
+    "name": "DeepSeek",
+    "url": "https://chat.deepseek.com/"
   }
 ]
