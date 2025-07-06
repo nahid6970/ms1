@@ -229,31 +229,34 @@ document.addEventListener('DOMContentLoaded', function() {
       const response = await fetch('/api/links');
       const links = await response.json();
       
-      // Find all links in the original group and update them
-      const updatePromises = links.map(async (link, index) => {
+      // Create a new array with the updated group names
+      const newLinks = links.map(link => {
         const linkGroupName = link.group || 'Ungrouped';
         if (linkGroupName === originalGroupName) {
           const updatedLink = { ...link };
-          updatedLink.group = newGroupName === '' ? undefined : newGroupName;
-          
-          // Clean up empty strings
-          Object.keys(updatedLink).forEach(key => {
-            if (updatedLink[key] === '') {
-              delete updatedLink[key];
-            }
-          });
-          
-          return fetch(`/api/links/${index}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedLink),
-          });
+          if (newGroupName && newGroupName !== '') {
+            updatedLink.group = newGroupName;
+          } else {
+            delete updatedLink.group; // For "Ungrouped"
+          }
+          return updatedLink;
         }
+        return link;
       });
-      
-      await Promise.all(updatePromises.filter(Boolean));
+
+      // Update the entire list on the server
+      const updateResponse = await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newLinks),
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update links on the server.');
+      }
+
       return true;
     } catch (error) {
       console.error('Error updating group name:', error);
