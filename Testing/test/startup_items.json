@@ -1,0 +1,314 @@
+[
+  {
+    "type": "Command",
+    "name": "ahk_v2",
+    "paths": [
+      "C:\\ms1\\ahk_v2.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "ollama-chat",
+    "paths": [
+      "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    ],
+    "Command": "C:\\ms1\\ollama-chat-app\\server.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5001 - Text",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5001_share_text\\share_text.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5002 - Share File",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5003 - Drive",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5005 - GameARR",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5005_GameARR\\GameARR.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5006 - Run Commands",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5006_Run_Commands\\Run_Commands.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5007 - ControlBy Android",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5007_Controlby_Android\\Android_Control_PC.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5008 - Valorant Match",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5009 - MCQ",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5009_MCQ\\app.py"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5010 - CoC",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py"
+  },
+  {
+    "type": "Command",
+    "name": "Clipboard",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\scripts\\clipboard.py"
+  },
+  {
+    "type": "Command",
+    "name": "Komorebi",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\komorebi.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "mypygui",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\mypygui.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Open WebUI",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\openwebui.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Remote Control",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\remote_control.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Square-Corner",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\square_corner.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "SSHD",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\sshd.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Sync",
+    "paths": [
+      "C:\\ms1\\scripts\\sync.ps1"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Syncthing",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\syncthing.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Virtual_Monitor",
+    "paths": [
+      "C:\\ms1\\scripts\\Autohtokey\\Command\\virtual_monitor.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Disable Defender",
+    "paths": [
+      "C:\\ms1\\scripts\\disable_defender.ps1"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "AMDNoiseSuppression",
+    "paths": [
+      "C:\\WINDOWS\\system32\\AMD\\ANR\\AMDNoiseSuppression.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "BijoyBayanno",
+    "paths": [
+      "C:\\Program Files (x86)\\Ananda Computers\\BijoyBayanno\\BijoyBayanno.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Capture2Text",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Cloudflare WARP",
+    "paths": [
+      "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "DesktopCoral",
+    "paths": [
+      "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Ditto",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Flow.Launcher",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\FlowLauncher\\app-1.19.4\\Flow.Launcher.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Free Download Manager",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Softdeluxe\\Free Download Manager\\fdm.exe"
+    ],
+    "Command": "--hidden"
+  },
+  {
+    "type": "App",
+    "name": "Ollama",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Prowlarr",
+    "paths": [
+      "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "name": "qBittorrent",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\qBittorrent\\qbittorrent.exe"
+    ],
+    "Command": "\"--profile=\" \"--configuration=\""
+  },
+  {
+    "type": "App",
+    "name": "Radarr",
+    "paths": [
+      "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "RssGuard",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Sonarr",
+    "paths": [
+      "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Text-Grab",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\text-grab\\current\\Text-Grab.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "GoogleChromeAutoLaunch_2ABF856BE97FD219EC4C9BF1EB18E55A",
+    "paths": [
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    ],
+    "Command": "--no-startup-window /prefetch:5"
+  },
+  {
+    "type": "App",
+    "name": "MicrosoftEdgeAutoLaunch_A85A975CFCA9AFD77D01E7227175D0CA",
+    "paths": [
+      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "Command": "--no-startup-window --win-session-start"
+  }
+]
