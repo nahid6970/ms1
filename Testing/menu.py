@@ -408,9 +408,7 @@ class ArchUtil:
         try:
             # Clear the screen
             os.system('cls' if os.name == 'nt' else 'clear')
-            
             print(f"\n{BLUE}Updating ms1 repository...{RESET}")
-            
             # Get the current script directory
             script_dir = os.path.dirname(os.path.abspath(__file__))
             
