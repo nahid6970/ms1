@@ -34,6 +34,11 @@ class ArchUtil:
         # Unified menu structure
         self.menu_data = [
             {
+                "title": "Git Update",
+                "description": "Update the ms1 repository",
+                "action": self.update_ms1_repo
+            },
+            {
                 "title": "System Information",
                 "description": "View detailed system information and monitoring",
                 "submenu": [
@@ -385,6 +390,22 @@ class ArchUtil:
             package = input("Enter AUR package name: ").strip()
             if package:
                 self.execute_command(f"yay -R {package}", f"Removing AUR package {package}")
+        finally:
+            curses.reset_prog_mode()
+            curses.curs_set(0)
+
+    def update_ms1_repo(self):
+        """Update the ms1 repository"""
+        curses.def_prog_mode()
+        curses.endwin()
+
+        try:
+            ms1_folder = os.path.expanduser("~/ms1")
+            if os.path.isdir(ms1_folder):
+                self.execute_command(f"cd {ms1_folder} && git pull", "Updating ms1 repository")
+            else:
+                print(f"The folder {ms1_folder} does not exist.")
+                input("Press Enter to continue...")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
