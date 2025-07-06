@@ -1,81 +1,76 @@
 [
   {
-    "name": "Google Mail",
-    "url": "https://mail.google.com/",
-    "icon_class": "nf nf-cod-mail",
     "color": "#f46613",
+    "default_type": "img",
+    "icon_class": "nf nf-cod-mail",
     "img_src": "https://static.vecteezy.com/system/resources/previews/022/613/021/non_2x/google-mail-gmail-icon-logo-symbol-free-png.png",
-    "default_type": "img"
+    "name": "Google Mail",
+    "url": "https://mail.google.com/"
   },
   {
-    "name": "Facebook",
-    "url": "https://www.facebook.com/",
-    "icon_class": "nf nf-dev-facebook",
     "color": "#1399f4",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-dev-facebook",
     "img_src": "https://img.icons8.com/ios11/512/facebook-new.png",
-    "default_type": "nerd-font"
+    "name": "Facebook",
+    "url": "https://www.facebook.com/"
   },
   {
-    "name": "Messenger",
-    "url": "https://www.messenger.com/",
-    "icon_class": "nf nf-fa-facebook_messenger",
     "color": "#3675ff",
-    "default_type": "nerd-font"
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-facebook_messenger",
+    "name": "Messenger",
+    "url": "https://www.messenger.com/"
   },
   {
-    "name": "YouTube",
-    "url": "https://www.youtube.com/",
-    "icon_class": "nf nf-fa-youtube",
     "color": "#ff0000",
-    "default_type": "nerd-font"
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-youtube",
+    "name": "YouTube",
+    "url": "https://www.youtube.com/"
   },
   {
-    "name": "Discord",
-    "url": "https://discord.com/channels/@me",
-    "icon_class": "nf-fa-discord",
     "color": "#5765f2",
-    "default_type": "nerd-font"
+    "default_type": "nerd-font",
+    "icon_class": "nf-fa-discord",
+    "name": "Discord",
+    "url": "https://discord.com/channels/@me"
   },
   {
-    "name": "Google Translate",
-    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate",
+    "color": "#ffffff",
+    "default_type": "nerd-font",
     "icon_class": "nf nf-md-google_translate",
-    "color": "#ffffff"
+    "name": "Google Translate",
+    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate"
   },
   {
-    "name": "VLR.gg",
-    "url": "https://www.vlr.gg/",
+    "default_type": "img",
     "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png",
-    "default_type": "img"
+    "name": "VLR.gg",
+    "url": "https://www.vlr.gg/"
   },
   {
-    "name": "Tailscale",
-    "url": "https://login.tailscale.com/admin/machines",
+    "color": "#4b70cc",
+    "default_type": "nerd-font",
     "icon_class": "nf nf-md-dots_hexagon",
-    "color": "#4b70cc"
+    "name": "Tailscale",
+    "url": "https://login.tailscale.com/admin/machines"
   },
   {
-    "name": "mi9t",
-    "url": "http://mi9t:5002",
-    "icon_class": "nf nf-fa-battery_2",
     "color": "#ff2e2e",
     "default_type": "nerd-font",
+    "hidden": true,
+    "icon_class": "nf nf-fa-battery_2",
+    "name": "mi9t",
     "title": "mi9t",
-    "hidden": true
+    "url": "http://mi9t:5002"
   },
   {
-    "name": "Google Bard",
+    "default_type": "img",
     "group": "AI",
-    "url": "https://bard.google.com/",
-    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
-    "default_type": "img"
-  },
-  {
-    "name": "ChatGPT",
-    "group": "AI",
-    "url": "https://chatgpt.com/",
-    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
-    "default_type": "img"
+    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
+    "name": "DeepSeek",
+    "url": "https://chat.deepseek.com/"
   },
   {
     "default_type": "img",
@@ -86,92 +81,99 @@
     "url": "https://claude.ai/new"
   },
   {
-    "name": "Sonarr",
+    "default_type": "img",
+    "group": "AI",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/"
+  },
+  {
+    "default_type": "img",
     "group": "Local (Apps)",
-    "url": "http://192.168.0.101:8989/",
     "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
-    "default_type": "img"
+    "name": "Sonarr",
+    "url": "http://192.168.0.101:8989/"
   },
   {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
     "name": "ShareTXT",
-    "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5001/",
-    "default_type": "nerd-font"
+    "url": "http://192.168.0.101:5001/"
   },
   {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
     "name": "ShareFile",
-    "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5002/",
-    "default_type": "nerd-font"
+    "url": "http://192.168.0.101:5002/"
   },
   {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
     "name": "Browse",
-    "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5003/",
-    "default_type": "nerd-font"
+    "url": "http://192.168.0.101:5003/"
   },
   {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
     "name": "GameARR",
-    "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5005/",
-    "default_type": "nerd-font"
+    "url": "http://192.168.0.101:5005/"
   },
   {
-    "name": "Radarr",
+    "default_type": "img",
     "group": "Local (Apps)",
-    "url": "http://192.168.0.101:7878/",
     "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
-    "default_type": "img"
+    "name": "Radarr",
+    "url": "http://192.168.0.101:7878/"
   },
   {
-    "name": "Prowlarr",
+    "default_type": "img",
     "group": "Local (Apps)",
-    "url": "http://192.168.0.101:9696/",
     "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
-    "default_type": "img"
+    "name": "Prowlarr",
+    "url": "http://192.168.0.101:9696/"
   },
   {
-    "name": "Bazarr",
+    "default_type": "img",
     "group": "Local (Apps)",
-    "url": "http://192.168.0.101:6767/series",
     "img_src": "http://192.168.0.101:6767/images/logo64.png",
-    "default_type": "img"
+    "name": "Bazarr",
+    "url": "http://192.168.0.101:6767/series"
   },
   {
-    "name": "JackettAPI ",
+    "default_type": "img",
     "group": "Local (Apps)",
-    "url": "http://127.0.0.1:9117/UI/Dashboard",
     "img_src": "http://127.0.0.1:9117/jacket_medium.png",
-    "default_type": "img"
+    "name": "JackettAPI ",
+    "url": "http://127.0.0.1:9117/UI/Dashboard"
   },
   {
-    "name": "qBittorrent",
+    "default_type": "nerd-font",
     "group": "Local (Apps)",
-    "url": "http://192.168.0.101:8080/",
     "icon_class": "nf nf-linux-tor",
     "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
-    "default_type": "nerd-font"
+    "name": "qBittorrent",
+    "url": "http://192.168.0.101:8080/"
   },
   {
-    "name": "Syncthing",
+    "default_type": "img",
     "group": "Local (Apps)",
-    "url": "http://127.0.0.1:8384/",
     "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
-    "default_type": "img"
+    "name": "Syncthing",
+    "url": "http://127.0.0.1:8384/"
   },
   {
-    "name": "WIFI",
-    "group": "Local (Apps)",
-    "url": "http://192.168.0.1/",
-    "icon_class": "nf nf-fa-wifi",
     "color": "#009fff",
-    "default_type": "nerd-font"
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-fa-wifi",
+    "name": "WIFI",
+    "url": "http://192.168.0.1/"
   },
   {
     "default_type": "img",
     "group": "AI",
-    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
-    "name": "DeepSeek",
-    "url": "https://chat.deepseek.com/"
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "name": "Google Bard",
+    "url": "https://bard.google.com/"
   }
 ]

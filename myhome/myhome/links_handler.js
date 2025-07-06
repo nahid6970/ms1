@@ -134,14 +134,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const groupDiv = document.createElement('div');
         groupDiv.className = 'link-group';
-        groupDiv.draggable = true;
+        // Remove draggable attribute - we'll handle reordering with buttons only
         groupDiv.dataset.groupName = groupName;
-        
-        // Add drag event listeners for groups
-        groupDiv.addEventListener('dragstart', handleGroupDragStart);
-        groupDiv.addEventListener('dragover', handleGroupDragOver);
-        groupDiv.addEventListener('drop', handleGroupDrop);
-        groupDiv.addEventListener('dragend', handleGroupDragEnd);
 
         const groupHeaderContainer = document.createElement('div');
         groupHeaderContainer.className = 'group-header-container';
@@ -509,49 +503,6 @@ document.addEventListener('DOMContentLoaded', function() {
     this.classList.remove('dragging');
     draggedElement = null;
     draggedIndex = null;
-  }
-
-  // Drag and Drop functionality for groups
-  let draggedGroup = null;
-
-  function handleGroupDragStart(e) {
-    draggedGroup = this;
-    this.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.outerHTML);
-  }
-
-  function handleGroupDragOver(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    this.classList.add('drag-over');
-    return false;
-  }
-
-  function handleGroupDrop(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
-    
-    this.classList.remove('drag-over');
-    
-    if (draggedGroup !== this) {
-      const draggedGroupName = draggedGroup.dataset.groupName;
-      const targetGroupName = this.dataset.groupName;
-      swapGroups(draggedGroupName, targetGroupName);
-    }
-    return false;
-  }
-
-  function handleGroupDragEnd(e) {
-    this.classList.remove('dragging');
-    // Remove drag-over class from all groups
-    document.querySelectorAll('.link-group').forEach(group => {
-      group.classList.remove('drag-over');
-    });
-    draggedGroup = null;
   }
 
   // Move link up or down within the same group

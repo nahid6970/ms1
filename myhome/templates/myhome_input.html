@@ -5,9 +5,8 @@
   <title>Home</title>
   <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
   <meta charset="utf-8">
-  <meta name="viewport" content="wilih=device-wilih, initial-scale=1">
-  <link rel="stylesheet" href="myhome/myhome.css" ;>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="myhome/myhome.css">
 </head>
 
 <body>
@@ -21,16 +20,12 @@
       <span style="color: white; margin-left: 10px;">Modify</span>
     </div>
 
-    <!-- Add some basic styling for drag and drop -->
+    <!-- Updated styling for better edit mode control -->
     <style>
       .dragging {
         opacity: 0.5;
-        transform: rotate(5deg);
       }
-      .drag-over {
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 2px dashed #fff;
-      }
+      
       .reorder-buttons {
         display: none;
         flex-direction: column;
@@ -52,6 +47,8 @@
       .reorder-btn:hover {
         background: #555;
       }
+      
+      /* Group reorder buttons - only visible in edit mode */
       .group-reorder-buttons {
         display: none;
         gap: 5px;
@@ -60,12 +57,11 @@
       .edit-mode .group-reorder-buttons {
         display: flex;
       }
+      
       .link-item {
         cursor: move;
       }
-      .link-group {
-        cursor: move;
-      }
+
     </style>
 
   <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
