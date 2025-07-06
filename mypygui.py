@@ -520,8 +520,8 @@ Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\startup.py"], shell=True))
-Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\startup.py"], shell=True))
+Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c C:\ms1\startup\startup.py"], shell=True))
+Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\ms1\startup\startup.py"], shell=True))
 
 
 # ProcessPRLS_bt=CTkLabel(ROOT1, text="\uf4bc", bg_color="#1d2027",text_color="#f04410", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
