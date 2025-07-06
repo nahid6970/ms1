@@ -8,8 +8,9 @@ and terminates the selected processes.
 """
 
 import subprocess
-import time
 import sys
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 try:
     import psutil
@@ -18,49 +19,49 @@ except ImportError:
     print("Please install it using: pip install psutil", file=sys.stderr)
     sys.exit(1)
 
-def get_processes_with_cpu():
+def get_process_info(proc):
     """
-    Gets a list of processes with their PID, name, CPU usage, and command line.
-    CPU usage is calculated over a short interval for accuracy.
+    Get process information in a thread-safe manner.
     """
-    procs = []
-    # First pass to initialize cpu_percent
-    for p in psutil.process_iter(['pid', 'name']):
-        try:
-            p.cpu_percent()
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
+    try:
+        # Get all info in one call to minimize system calls
+        info = proc.as_dict(attrs=['pid', 'name', 'cmdline', 'memory_percent'])
+        
+        # If cmdline is empty, use an empty string
+        cmdline = ' '.join(info['cmdline']) if info['cmdline'] else ''
+        
+        return {
+            'pid': info['pid'],
+            'name': info['name'],
+            'memory': info['memory_percent'] or 0.0,
+            'cmdline': cmdline
+        }
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        return None
 
-    # Wait for a short interval to get a meaningful CPU reading
-    time.sleep(0.2)
-
-    for p in psutil.process_iter(['pid', 'name', 'cpu_percent', 'cmdline']):
-        try:
-            cpu_percent = p.cpu_percent()
-            # If cmdline is empty, use an empty string
-            cmdline = ' '.join(p.info['cmdline']) if p.info['cmdline'] else ''
-            
-            procs.append({
-                'pid': p.info['pid'],
-                'name': p.info['name'],
-                'cpu': cpu_percent,
-                'cmdline': cmdline
-            })
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            # Process might have terminated or access is denied
-            continue
+def get_processes_fast():
+    """
+    Gets a list of processes with their PID, name, memory usage, and command line.
+    Uses memory usage instead of CPU for faster loading and multithreading for performance.
+    """
+    processes = list(psutil.process_iter())
     
-    # Sort by CPU usage in descending order
-    return sorted(procs, key=lambda x: x['cpu'], reverse=True)
+    # Use ThreadPoolExecutor to process multiple processes concurrently
+    with ThreadPoolExecutor(max_workers=min(32, len(processes))) as executor:
+        results = list(executor.map(get_process_info, processes))
+    
+    # Filter out None results and sort by memory usage
+    procs = [p for p in results if p is not None]
+    return sorted(procs, key=lambda x: x['memory'], reverse=True)
 
 def run_fzf_selection(procs):
     """
     Formats the process list, runs fzf for user selection, and returns selected PIDs.
     """
     # Define header and format each process line for fzf
-    header = f"{'PID':<10}{'Name':<30}{'CPU%':<10}{'CommandLine'}"
+    header = f"{'PID':<10}{'Name':<30}{'Memory%':<10}{'CommandLine'}"
     proc_lines = [
-        f"{p['pid']:<10}{p['name']:<30}{p['cpu']:<10.2f}{p['cmdline']:.120}" # Truncate long command lines
+        f"{p['pid']:<10}{p['name']:<30}{p['memory']:<10.2f}{p['cmdline']:.120}" # Truncate long command lines
         for p in procs
     ]
     
@@ -73,7 +74,8 @@ def run_fzf_selection(procs):
             '-m', 
             '--header-lines=1', # Treat the first line as a header
             '--preview', 'echo {}', 
-            '--preview-window=up:1'
+            '--preview-window=up:1',
+            '--height=80%'  # Limit height for better performance
         ]
         fzf_proc = subprocess.Popen(
             fzf_command,
@@ -134,8 +136,8 @@ def terminate_processes(pids):
             print(f"Failed to terminate process with PID {pid}: {e}", file=sys.stderr)
 
 if __name__ == "__main__":
-    print("Gathering process information, please wait...")
-    processes = get_processes_with_cpu()
+    print("Gathering process information...")
+    processes = get_processes_fast()
     
     if not processes:
         print("Could not retrieve any running processes.")
