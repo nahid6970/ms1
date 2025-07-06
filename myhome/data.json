@@ -1,63 +1,5 @@
 [
   {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
-    "name": "Sonarr",
-    "url": "http://192.168.0.101:8989/"
-  },
-  {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
-    "name": "Radarr",
-    "url": "http://192.168.0.101:7878/"
-  },
-  {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
-    "name": "Prowlarr",
-    "url": "http://192.168.0.101:9696/"
-  },
-  {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://192.168.0.101:6767/images/logo64.png",
-    "name": "Bazarr",
-    "url": "http://192.168.0.101:6767/series"
-  },
-  {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://127.0.0.1:9117/jacket_medium.png",
-    "name": "JackettAPI ",
-    "url": "http://127.0.0.1:9117/UI/Dashboard"
-  },
-  {
-    "color": "#009fff",
-    "default_type": "nerd-font",
-    "group": "Local (Apps)",
-    "icon_class": "nf nf-fa-wifi",
-    "name": "WIFI",
-    "url": "http://192.168.0.1/"
-  },
-  {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
-    "name": "Syncthing",
-    "url": "http://127.0.0.1:8384/"
-  },
-  {
-    "default_type": "nerd-font",
-    "group": "Local (Apps)",
-    "icon_class": "nf nf-linux-tor",
-    "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
-    "name": "qBittorrent",
-    "url": "http://192.168.0.101:8080/"
-  },
-  {
     "color": "#f46613",
     "default_type": "img",
     "icon_class": "nf nf-cod-mail",
@@ -122,6 +64,64 @@
     "name": "mi9t",
     "title": "mi9t",
     "url": "http://mi9t:5002"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
+    "name": "Sonarr",
+    "url": "http://192.168.0.101:8989/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
+    "name": "Radarr",
+    "url": "http://192.168.0.101:7878/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
+    "name": "Prowlarr",
+    "url": "http://192.168.0.101:9696/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:6767/images/logo64.png",
+    "name": "Bazarr",
+    "url": "http://192.168.0.101:6767/series"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://127.0.0.1:9117/jacket_medium.png",
+    "name": "JackettAPI ",
+    "url": "http://127.0.0.1:9117/UI/Dashboard"
+  },
+  {
+    "color": "#009fff",
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-fa-wifi",
+    "name": "WIFI",
+    "url": "http://192.168.0.1/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
+    "name": "Syncthing",
+    "url": "http://127.0.0.1:8384/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-linux-tor",
+    "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
+    "name": "qBittorrent",
+    "url": "http://192.168.0.101:8080/"
   },
   {
     "default_type": "img",
