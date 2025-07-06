@@ -34,6 +34,11 @@ class ArchUtil:
         # Unified menu structure
         self.menu_data = [
             {
+                "title": "Git Update",
+                "description": "Update the ms1 repository",
+                "action": self.update_ms1_repo
+            },
+            {
                 "title": "System Information",
                 "description": "View detailed system information and monitoring",
                 "submenu": [
@@ -123,11 +128,6 @@ class ArchUtil:
                 ]
             },
             {
-                "title": "Git Update",
-                "description": "Update the ms1 repository",
-                "action": self.update_ms1_repo
-            },
-            {
                 "title": "Quit",
                 "description": "Exit ArchUtil",
                 "action": "quit"
@@ -177,43 +177,42 @@ class ArchUtil:
             
         main_item = self.menu_data[self.current_selection]
         
-        if main_item.get("action") == "quit":
-            self.draw_border(win, "Quit")
-            win.addstr(2, 2, "Press Enter to quit", curses.color_pair(4))
-            win.refresh()
-            return
-        
-        submenu_items = main_item.get("submenu", [])
-        if not submenu_items:
-            return
-            
         self.draw_border(win, main_item['title'])
         
         height, width = win.getmaxyx()
         
-        # Draw submenu items
-        for i, item in enumerate(submenu_items):
-            y = 2 + i
-            if y >= height - 5:
-                break
+        submenu_items = main_item.get("submenu", [])
+        action = main_item.get("action")
+
+        if action == "quit":
+            win.addstr(2, 2, "Press Enter to quit", curses.color_pair(4))
+        elif submenu_items:
+            # Draw submenu items
+            for i, item in enumerate(submenu_items):
+                y = 2 + i
+                if y >= height - 5:
+                    break
                 
-            if self.in_submenu and i == self.current_submenu_selection:
-                win.addstr(y, 2, f">> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
-            else:
-                win.addstr(y, 2, f"  {item['title']}")
+                if self.in_submenu and i == self.current_submenu_selection:
+                    win.addstr(y, 2, f">> {item['title']}", curses.color_pair(1) | curses.A_BOLD)
+                else:
+                    win.addstr(y, 2, f"  {item['title']}")
         
-        # Add description
-        desc_y = height - 4
-        desc = main_item.get("description", "")
-        # Word wrap description
-        if len(desc) > width - 4:
-            desc = desc[:width-7] + "..."
-        win.addstr(desc_y, 2, desc, curses.color_pair(6))
+        # Always add description if available, unless it's a quit action (handled above)
+        if action != "quit":
+            desc_y = height - 4
+            desc = main_item.get("description", "")
+            # Word wrap description
+            if len(desc) > width - 4:
+                desc = desc[:width-7] + "..."
+            win.addstr(desc_y, 2, desc, curses.color_pair(6))
         
         # Add navigation help
         help_y = height - 2
         if self.in_submenu:
             win.addstr(help_y, 2, "↑↓: Navigate | ←: Back | Enter: Execute", curses.color_pair(6))
+        elif action and not submenu_items: # If it's an action item without a submenu
+            win.addstr(help_y, 2, "Enter: Execute | ←: Back", curses.color_pair(6))
         else:
             win.addstr(help_y, 2, "→: Enter submenu", curses.color_pair(6))
         
@@ -400,7 +399,7 @@ class ArchUtil:
         curses.endwin()
 
         try:
-            ms1_folder = os.path.expanduser("~/ms1")
+            ms1_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
             if os.path.isdir(ms1_folder):
                 self.execute_command(f"cd {ms1_folder} && git pull", "Updating ms1 repository")
             else:
@@ -468,8 +467,11 @@ class ArchUtil:
                     elif self.in_submenu:
                         self.handle_submenu_action()
                     else:
-                        # Enter submenu
-                        if main_item.get("submenu"):
+                        # Check if the main item has a direct action
+                        if callable(main_item.get("action")):
+                            main_item["action"]()
+                        # Enter submenu if available
+                        elif main_item.get("submenu"):
                             self.in_submenu = True
                             self.current_submenu_selection = 0
                 
