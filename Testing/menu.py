@@ -248,8 +248,9 @@ class ArchUtil:
         RED = '\033[91m'
         RESET = '\033[0m'
 
-        # Clear the screen before executing the command
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # Clear the screen using curses before exiting curses mode
+        self.stdscr.clear()
+        self.stdscr.refresh()
         
         try:
             print(f"\n{BLUE}{description}{RESET}")
