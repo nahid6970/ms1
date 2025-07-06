@@ -63,16 +63,34 @@
   },
   {
     "name": "Google Bard",
+    "group": "AI",
     "url": "https://bard.google.com/",
     "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
     "default_type": "img"
   },
   {
-    "color": "#ffffff",
-    "group": "LoL",
-    "icon_class": "nf nf-custom-css",
-    "name": "asdas",
-    "url": "http://asdasdas.com",
+    "name": "ChatGPT",
+    "group": "AI",
+    "url": "https://chatgpt.com/",
+    "default_type": "text"
+  },
+  {
+    "name": "Claude",
+    "group": "AI",
+    "url": "https://claude.ai/new",
+    "default_type": "nerd-font",
+    "li_hover_color": "#d97757"
+  },
+  {
+    "name": "Sonarr",
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:8989/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "ShareTXT",
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5001/",
     "default_type": "nerd-font"
   }
 ]
