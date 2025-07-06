@@ -7,20 +7,6 @@
         "execution_method": "direct"
     },
     {
-        "type": "App",
-        "name": "qBittorrent",
-        "path": "C:\\Program Files\\qBittorrent\\qbittorrent.exe",
-        "args": "\"\\--profile=\"\" \"--configuration=\"\"",
-        "execution_method": "direct"
-    },
-    {
-        "type": "App",
-        "name": "qBittorrent",
-        "path": "C:\\Program Files\\qBittorrent\\qbittorrent.exe",
-        "args": "\"\\--profile=\"\" \"--configuration=\"\"",
-        "execution_method": "direct"
-    },
-    {
         "type": "Command",
         "name": "Flask - 5002 - Share File",
         "path": "C:\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py",

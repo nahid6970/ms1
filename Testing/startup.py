@@ -132,6 +132,9 @@ class StartupManager(tk.Tk):
         edit_button = tk.Button(frame, text="\u270E", font=("Jetbrainsmono nfp", 12, "bold"), bg="#2e2f3e", fg="white", command=lambda i=item, idx=item_index: self.open_edit_item_window(i, idx))
         edit_button.pack(side=tk.LEFT, padx=5)
 
+        delete_button = tk.Button(frame, text="\u274C", font=("Jetbrainsmono nfp", 12, "bold"), bg="#2e2f3e", fg="red", command=lambda idx=item_index: self.delete_item(idx))
+        delete_button.pack(side=tk.LEFT, padx=5)
+
         self.update_label_color(name_label, checked)
 
     def get_full_command(self, item):
@@ -155,7 +158,7 @@ class StartupManager(tk.Tk):
 
     def is_checked(self, item):
         try:
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, winreg.KEY_READ) as reg_key:
                 winreg.QueryValueEx(reg_key, item["name"])
                 return True
         except FileNotFoundError:
@@ -164,7 +167,7 @@ class StartupManager(tk.Tk):
             return False
 
     def toggle_startup(self, item, frame):
-        reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+        reg_path = r"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
         name_label = frame.winfo_children()[1]
         icon_label = frame.winfo_children()[0]
         try:
@@ -180,7 +183,7 @@ class StartupManager(tk.Tk):
                 self.update_label_color(name_label, True)
                 icon_label.config(text="\uf205", fg="#9ef959")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to modify {item['name']}: {e}")
+            messagebox.showerror("Error", f"Failed to modify {item['name']} in startup: {e}")
 
     def update_label_color(self, label, checked):
         label.config(fg="#63dbff" if checked else "red")
@@ -207,6 +210,13 @@ class StartupManager(tk.Tk):
         with open(self.json_path, 'w') as f:
             json.dump(self.items, f, indent=4)
         self.refresh_items()
+
+    def delete_item(self, item_index):
+        if messagebox.askyesno("Delete Item", "Are you sure you want to delete this item?"):
+            del self.items[item_index]
+            with open(self.json_path, 'w') as f:
+                json.dump(self.items, f, indent=4)
+            self.refresh_items()
 
     def refresh_items(self):
         self.items = self.filter_existing_items(self.load_items())
