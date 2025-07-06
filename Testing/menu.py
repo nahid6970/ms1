@@ -408,26 +408,34 @@ class ArchUtil:
         try:
             # Clear the screen
             os.system('cls' if os.name == 'nt' else 'clear')
+            
             print(f"\n{BLUE}Updating ms1 repository...{RESET}")
+            
             # Get the current script directory
             script_dir = os.path.dirname(os.path.abspath(__file__))
+            
             # Try to find git repository root
             git_root = None
             current_dir = script_dir
+            
             # Search up the directory tree for .git folder
             while current_dir != os.path.dirname(current_dir):  # Stop at filesystem root
                 if os.path.exists(os.path.join(current_dir, '.git')):
                     git_root = current_dir
                     break
                 current_dir = os.path.dirname(current_dir)
+            
             if not git_root:
                 print(f"{RED}Error: Not inside a git repository{RESET}")
                 print(f"Current directory: {script_dir}")
                 input("Press Enter to continue...")
                 return
+            
             print(f"Found git repository at: {git_root}")
+            
             # Change to git repository directory
             os.chdir(git_root)
+            
             # Check if we're in a git repository
             result = subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], 
                                 capture_output=True, text=True)
@@ -435,6 +443,7 @@ class ArchUtil:
                 print(f"{RED}Error: Not a valid git repository{RESET}")
                 input("Press Enter to continue...")
                 return
+            
             # Check for uncommitted changes
             result = subprocess.run(['git', 'status', '--porcelain'], 
                                 capture_output=True, text=True)
@@ -446,6 +455,7 @@ class ArchUtil:
                     print("Operation cancelled.")
                     input("Press Enter to continue...")
                     return
+            
             # Get current branch
             result = subprocess.run(['git', 'branch', '--show-current'], 
                                 capture_output=True, text=True)
@@ -454,6 +464,7 @@ class ArchUtil:
                 print(f"Current branch: {current_branch}")
             else:
                 print(f"{YELLOW}Warning: Could not determine current branch{RESET}")
+            
             # Fetch latest changes
             print("Fetching latest changes...")
             result = subprocess.run(['git', 'fetch'], capture_output=True, text=True)
@@ -461,40 +472,20 @@ class ArchUtil:
                 print(f"{RED}Error fetching changes: {result.stderr}{RESET}")
                 input("Press Enter to continue...")
                 return
-            # Check if there are changes to pull
-            print("Checking for updates...")
-            result = subprocess.run(['git', 'rev-list', '--count', 'HEAD..@{u}'], 
-                                capture_output=True, text=True)
-            if result.returncode == 0:
-                commits_behind = result.stdout.strip()
-                if commits_behind == '0':
-                    print(f"\n{GREEN}✓ Repository is already up to date{RESET}")
-                    input("\nPress Enter to continue...")
-                    return
-                else:
-                    print(f"Found {commits_behind} new commit(s) to pull")
-            # Pull changes with detailed statistics
+            
+            # Pull changes - let git handle the output formatting
             print("Pulling changes...")
-            result = subprocess.run(['git', 'pull', '--stat'], capture_output=True, text=True)
+            result = subprocess.run(['git', 'pull'], text=True)
+            
             if result.returncode == 0:
-                print(f"\n{GREEN}✓ Successfully updated ms1 repository{RESET}")
-                if result.stdout.strip():
-                    print("\nChanges:")
-                    print(result.stdout)
-                # Show additional statistics if available
-                stat_result = subprocess.run(['git', 'diff', '--stat', 'HEAD@{1}..HEAD'], 
-                                        capture_output=True, text=True)
-                if stat_result.returncode == 0 and stat_result.stdout.strip():
-                    print(f"\n{BLUE}Detailed Statistics:{RESET}")
-                    print(stat_result.stdout)
+                print(f"\n{GREEN}✓ Git pull completed successfully{RESET}")
             else:
-                print(f"\n{RED}✗ Git pull failed{RESET}")
-                print(f"Error: {result.stderr}")
-                if "merge conflict" in result.stderr.lower():
+                print(f"\n{RED}✗ Git pull failed with exit code: {result.returncode}{RESET}")
+                if "merge conflict" in (result.stderr or "").lower():
                     print(f"{YELLOW}You have merge conflicts. Please resolve them manually.{RESET}")
-                elif "up to date" in result.stdout.lower():
-                    print(f"{GREEN}Repository is already up to date{RESET}")
+            
             input("\nPress Enter to continue...")
+            
         except FileNotFoundError:
             print(f"{RED}Error: Git is not installed or not in PATH{RESET}")
             input("Press Enter to continue...")
