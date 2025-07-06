@@ -461,12 +461,15 @@ class ArchUtil:
                 elif key == curses.KEY_LEFT:
                     if self.in_submenu:
                         self.in_submenu = False
-                elif key == ord('\n') or key == curses.KEY_ENTER or key == 10:  # Enter
+                elif key == ord('
+') or key == curses.KEY_ENTER or key == 10:  # Enter
                     main_item = self.menu_data[self.current_selection]
                     if main_item.get("action") == "quit":
                         break
                     elif self.in_submenu:
                         self.handle_submenu_action()
+                    elif main_item.get("action") and callable(main_item.get("action")):
+                        main_item["action"]()
                     else:
                         # Enter submenu
                         if main_item.get("submenu"):
