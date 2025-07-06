@@ -124,7 +124,7 @@ class StartupManager(tk.Tk):
         self.title("Startup Manager - PowerShell")
         self.configure(bg="#2e2f3e")
         
-        self.json_file = "startup_items.json"
+        self.json_file = os.path.join(os.path.dirname(__file__), "startup_items.json")
         self.items = self.filter_existing_items(self.load_items())  # Load and filter items
         
         self.create_widgets()
@@ -324,7 +324,14 @@ class StartupManager(tk.Tk):
         command = item.get("Command", "")
         
         # Format the full command as it would appear in the registry
-        if command:
+        full_command = ""
+        if path.lower().endswith(".py"):
+            # If it's a Python script, prepend 'python'
+            if command:
+                full_command = f'python "{path}" {command}'
+            else:
+                full_command = f'python "{path}"'
+        elif command:
             full_command = f'"{path}" {command}'
         else:
             # Ensure the path is enclosed in quotes for safety
