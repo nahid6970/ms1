@@ -50,27 +50,18 @@
     "url": "https://www.vlr.gg/"
   },
   {
-    "color": "#4b70cc",
-    "default_type": "nerd-font",
-    "icon_class": "nf nf-md-dots_hexagon",
-    "name": "Tailscale",
-    "url": "https://login.tailscale.com/admin/machines"
-  },
-  {
-    "color": "#ff2e2e",
-    "default_type": "nerd-font",
-    "hidden": true,
-    "icon_class": "nf nf-fa-battery_2",
-    "name": "mi9t",
-    "title": "mi9t",
-    "url": "http://mi9t:5002"
-  },
-  {
     "default_type": "img",
     "group": "Chat-BOT",
     "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
     "name": "ChatGPT",
     "url": "https://chatgpt.com/"
+  },
+  {
+    "color": "#4b70cc",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-dots_hexagon",
+    "name": "Tailscale",
+    "url": "https://login.tailscale.com/admin/machines"
   },
   {
     "default_type": "img",
@@ -83,16 +74,25 @@
   {
     "default_type": "img",
     "group": "Chat-BOT",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "name": "Google Bard",
+    "url": "https://bard.google.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
     "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
     "name": "DeepSeek",
     "url": "https://chat.deepseek.com/"
   },
   {
-    "default_type": "img",
-    "group": "Chat-BOT",
-    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
-    "name": "Google Bard",
-    "url": "https://bard.google.com/"
+    "color": "#ff2e2e",
+    "default_type": "nerd-font",
+    "hidden": true,
+    "icon_class": "nf nf-fa-battery_2",
+    "name": "mi9t",
+    "title": "mi9t",
+    "url": "http://mi9t:5002"
   },
   {
     "default_type": "img",

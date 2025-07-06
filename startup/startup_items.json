@@ -317,6 +317,7 @@
     "paths": [
       "C:/Users/nahid/scoop/apps/python312/current/pythonw.exe"
     ],
-    "Command": "C:\\ms1\\myhome\\app.py"
+    "Command": "C:\\ms1\\test_project\\myhome\\app.py",
+    "ExecutableType": "other"
   }
 ]
