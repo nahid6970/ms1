@@ -238,46 +238,58 @@ class ArchUtil:
     
     def execute_command(self, command: str, description: str = "", cwd: Optional[str] = None):
         """Execute a command in a new window"""
-        # Save current state
-        curses.def_prog_mode()
+        # End curses mode to return to the normal terminal
         curses.endwin()
 
-        # ANSI escape codes for colors
+        # ANSI escape codes for colors (for standard terminal output)
         BLUE = '\033[94m'
         GREEN = '\033[92m'
         RED = '\033[91m'
         RESET = '\033[0m'
 
-        # Clear the screen using curses before exiting curses mode
-        self.stdscr.clear()
-        self.stdscr.refresh()
-        
         try:
-            print(f"\n{BLUE}{description}{RESET}")
-            print(f"Command: {command}")
+            print(f"
+{BLUE}{description}{RESET}
+")
+            print(f"Command: {command}
+")
             
             # Execute command
-            result = subprocess.run(command, shell=True, cwd=cwd, capture_output=True, text=True)
+            result = subprocess.run(command, shell=True, cwd=cwd, capture_output=True, text=True, check=True)
             
             if result.stdout:
-                print(f"\n{result.stdout}")
+                print(f"
+{result.stdout}
+")
             if result.stderr:
-                print(f"\n{RED}{result.stderr}{RESET}")
+                print(f"
+{RED}{result.stderr}{RESET}
+")
 
             if result.returncode == 0:
-                print(f"\n{GREEN}✓ Success: {description}{RESET}")
+                print(f"
+{GREEN}✓ Success: {description}{RESET}
+")
             else:
-                print(f"\n{RED}✗ Command failed with exit code: {result.returncode}{RESET}")
+                print(f"
+{RED}✗ Command failed with exit code: {result.returncode}{RESET}
+")
             
             input("\nPress Enter to continue...")
             
+        except subprocess.CalledProcessError as e:
+            print(f"\n{RED}✗ Command failed with exit code: {e.returncode}{RESET}\n")
+            if e.stdout:
+                print(f"\n{e.stdout}\n")
+            if e.stderr:
+                print(f"\n{RED}{e.stderr}{RESET}\n")
+            input("\nPress Enter to continue...")
         except Exception as e:
             print(f"{RED}Error: {e}{RESET}")
             input("Press Enter to continue...")
         finally:
-            # Restore curses mode
-            curses.reset_prog_mode()
-            curses.curs_set(0)
+            # Restore curses mode and refresh the screen
+            curses.doupdate()
     
     def handle_submenu_action(self):
         """Handle submenu item selection"""
