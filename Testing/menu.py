@@ -236,7 +236,7 @@ class ArchUtil:
         
         win.refresh()
     
-    def execute_command(self, command: str, description: str = ""):
+    def execute_command(self, command: str, description: str = "", cwd: Optional[str] = None):
         """Execute a command in a new window"""
         # Save current state
         curses.def_prog_mode()
@@ -256,8 +256,13 @@ class ArchUtil:
             print(f"Command: {command}")
             
             # Execute command
-            result = subprocess.run(command, shell=True)
+            result = subprocess.run(command, shell=True, cwd=cwd, capture_output=True, text=True)
             
+            if result.stdout:
+                print(f"\n{result.stdout}")
+            if result.stderr:
+                print(f"\n{RED}{result.stderr}{RESET}")
+
             if result.returncode == 0:
                 print(f"\n{GREEN}✓ Success: {description}{RESET}")
             else:
@@ -401,9 +406,10 @@ class ArchUtil:
         try:
             ms1_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
             if os.path.isdir(ms1_folder):
-                self.execute_command(f"cd C:\ms1 && git pull", "Updating ms1 repository")
+                print(f"Attempting to update repository in: {ms1_folder}")
+                self.execute_command("git pull", "Updating ms1 repository", cwd=ms1_folder)
             else:
-                print(f"The folder {ms1_folder} does not exist.")
+                print(f"The folder {ms1_folder} does not exist or is not a directory.")
                 input("Press Enter to continue...")
         finally:
             curses.reset_prog_mode()
