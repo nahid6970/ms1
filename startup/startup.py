@@ -56,14 +56,21 @@ class ItemDialog(tk.Toplevel):
         browse_btn = tk.Button(path_frame, text="Browse", command=self.browse_file, bg="#4a4b5a", fg="white", font=("Arial", 8))
         browse_btn.pack(side=tk.RIGHT, padx=(5, 0))
         
+        # Executable Type
+        tk.Label(self, text="Executable Type:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
+        self.executable_type_var = tk.StringVar(value="other")
+        executable_type_combo = ttk.Combobox(self, textvariable=self.executable_type_var, values=["pythonw", "pwsh", "cmd", "powershell", "other"], state="readonly", width=47)
+        executable_type_combo.grid(row=3, column=1, padx=10, pady=5)
+        executable_type_combo.bind("<<ComboboxSelected>>", self.on_executable_type_selected)
+
         # Command/Arguments
-        tk.Label(self, text="Arguments:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
+        tk.Label(self, text="Arguments:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=4, column=0, sticky="w", padx=10, pady=5)
         self.command_entry = tk.Entry(self, width=50, font=("Arial", 10))
-        self.command_entry.grid(row=3, column=1, padx=10, pady=5)
+        self.command_entry.grid(row=4, column=1, padx=10, pady=5)
         
         # Buttons
         button_frame = tk.Frame(self, bg="#2e2f3e")
-        button_frame.grid(row=4, column=0, columnspan=2, pady=20)
+        button_frame.grid(row=5, column=0, columnspan=2, pady=20)
         
         tk.Button(button_frame, text="Save", command=self.save_item, bg="#4a4b5a", fg="white", font=("Arial", 10), width=10).pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="Cancel", command=self.cancel, bg="#4a4b5a", fg="white", font=("Arial", 10), width=10).pack(side=tk.LEFT, padx=5)
@@ -71,23 +78,44 @@ class ItemDialog(tk.Toplevel):
     def browse_file(self):
         filename = filedialog.askopenfilename(
             title="Select executable file",
-            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
-        )
+            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")])
         if filename:
             self.path_entry.delete(0, tk.END)
             self.path_entry.insert(0, filename)
     
+    def on_executable_type_selected(self, event):
+        selected_type = self.executable_type_var.get()
+        if selected_type == "pythonw":
+            self.path_entry.delete(0, tk.END)
+            self.path_entry.insert(0, r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe")
+        elif selected_type == "pwsh":
+            self.path_entry.delete(0, tk.END)
+            self.path_entry.insert(0, "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+        elif selected_type == "cmd":
+            self.path_entry.delete(0, tk.END)
+            self.path_entry.insert(0, "C:\Windows\System32\cmd.exe")
+        elif selected_type == "powershell":
+            self.path_entry.delete(0, tk.END)
+            self.path_entry.insert(0, "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+        else:
+            self.path_entry.delete(0, tk.END)
+            # Clear the path if "other" is selected, or keep it as is if it's already a valid path
+            if not os.path.exists(self.path_entry.get()):
+                self.path_entry.insert(0, "")
+
     def load_item_data(self):
         self.name_entry.insert(0, self.item["name"])
         self.type_var.set(self.item["type"])
         self.path_entry.insert(0, self.item["paths"][0])
         self.command_entry.insert(0, self.item.get("Command", ""))
+        self.executable_type_var.set(self.item.get("ExecutableType", "other"))
     
     def save_item(self):
         name = self.name_entry.get().strip()
         item_type = self.type_var.get()
         path = self.path_entry.get().strip()
         command = self.command_entry.get().strip()
+        executable_type = self.executable_type_var.get()
         
         if not name or not path:
             messagebox.showerror("Error", "Name and Path are required!")
@@ -101,7 +129,8 @@ class ItemDialog(tk.Toplevel):
             "name": name,
             "type": item_type,
             "paths": [path],
-            "Command": command
+            "Command": command,
+            "ExecutableType": executable_type
         }
         
         self.destroy()
@@ -169,6 +198,7 @@ class StartupManager(tk.Tk):
                         "name": item["name"],
                         "paths": [path],  # Use a list for compatibility
                         "Command": item.get("Command", ""),  # Include the Command field
+                        "ExecutableType": item.get("ExecutableType", "other"), # Include the ExecutableType field
                     })
                     break  # Stop after the first valid path
         return filtered_items
@@ -319,26 +349,25 @@ class StartupManager(tk.Tk):
         self.create_items_display()
 
     def launch_command(self, item):
-        # Retrieve the first path and the command if it exists
+        # Retrieve the first path, the command, and the executable type
         path = item["paths"][0]
         command = item.get("Command", "")
+        executable_type = item.get("ExecutableType", "other")
         
-        # Format the full command as it would appear in the registry
         full_command = ""
-        if path.lower().endswith(".py"):
-            # If it's a Python script, prepend 'python'
-            if command:
-                full_command = f'python "{path}" {command}'
-            else:
-                full_command = f'python "{path}"'
-        elif command:
+        if executable_type == "pythonw":
             full_command = f'"{path}" {command}'
-        else:
-            # Ensure the path is enclosed in quotes for safety
-            if not path.startswith('"') and not path.endswith('"'):
-                full_command = f'"{path}"'
+        elif executable_type == "pwsh":
+            full_command = f'"{path}" -Command {command}'
+        elif executable_type == "cmd":
+            full_command = f'"{path}" /c {command}'
+        elif executable_type == "powershell":
+            full_command = f'"{path}" -Command {command}'
+        else: # other
+            if command:
+                full_command = f'"{path}" {command}'
             else:
-                full_command = path
+                full_command = f'"{path}"'
         try:
             # Execute the command using os.system
             os.system(f'start "" {full_command}')
@@ -375,15 +404,24 @@ class StartupManager(tk.Tk):
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
                     path = item["paths"][0]  # Use the first path in the list
                     command = item.get("Command", "")  # Get the command or an empty string
-                    # Combine the path and command
-                    if command:
-                        path = f'"{path}" {command}'  # Append the command after the quoted path
-                    else:
-                        # Enclose the path in quotes if it's not already enclosed
-                        if not path.startswith('"') and not path.endswith('"'):
-                            path = f'"{path}"'
+                    executable_type = item.get("ExecutableType", "other")
+
+                    # Combine the path and command based on executable type
+                    if executable_type == "pythonw":
+                        full_command = f'"{path}" {command}'
+                    elif executable_type == "pwsh":
+                        full_command = f'"{path}" -Command {command}'
+                    elif executable_type == "cmd":
+                        full_command = f'"{path}" /c {command}'
+                    elif executable_type == "powershell":
+                        full_command = f'"{path}" -Command {command}'
+                    else: # other
+                        if command:
+                            full_command = f'"{path}" {command}'
+                        else:
+                            full_command = f'"{path}"'
                     
-                    winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, path)
+                    winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full_command)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to modify {item['name']} in startup: {e}")
 
