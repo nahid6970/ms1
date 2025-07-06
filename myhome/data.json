@@ -59,7 +59,9 @@
     "url": "http://mi9t:5002",
     "icon_class": "nf nf-fa-battery_2",
     "color": "#ff2e2e",
-    "title": "mi9t"
+    "default_type": "nerd-font",
+    "title": "mi9t",
+    "hidden": true
   },
   {
     "name": "Google Bard",

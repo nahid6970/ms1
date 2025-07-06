@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
       const groupedElements = {}; // Store HTML elements grouped by name
 
       links.forEach((link, index) => { // Use the index from the original links array
+        // Skip hidden items unless in edit mode
+        if (link.hidden && !document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+          return;
+        }
+
         const groupName = link.group || 'Ungrouped';
         if (!groupedElements[groupName]) {
           groupedElements[groupName] = [];
@@ -19,6 +24,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const listItem = document.createElement('li');
         listItem.className = 'link-item';
+        
+        // Add visual indicator for hidden items in edit mode
+        if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+          listItem.classList.add('hidden-item');
+          listItem.style.opacity = '0.5';
+          listItem.style.border = '2px dashed #666';
+        }
+        
         if (link.li_bg_color) {
           listItem.style.backgroundColor = link.li_bg_color;
         }
@@ -77,6 +90,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Now append the grouped elements to the container
       for (const groupName in groupedElements) {
+        // Skip empty groups (when all items are hidden)
+        if (groupedElements[groupName].length === 0) {
+          continue;
+        }
+
         const groupDiv = document.createElement('div');
         groupDiv.className = 'link-group';
 
@@ -199,11 +217,12 @@ document.addEventListener('DOMContentLoaded', function() {
         title: document.getElementById('link-title').value || undefined,
         li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
         li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
+        hidden: document.getElementById('link-hidden').checked || undefined,
       };
 
-      // Clean up empty strings for optional fields
+      // Clean up empty strings and false values for optional fields
       Object.keys(newLink).forEach(key => {
-        if (newLink[key] === '') {
+        if (newLink[key] === '' || newLink[key] === false) {
           delete newLink[key];
         }
       });
@@ -251,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('edit-link-title').value = link.title || '';
     document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
     document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
+    document.getElementById('edit-link-hidden').checked = link.hidden || false;
     editLinkPopup.classList.remove('hidden');
   }
 
@@ -274,10 +294,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 title: document.getElementById('edit-link-title').value || undefined,
                 li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
                 li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
+                hidden: document.getElementById('edit-link-hidden').checked || undefined,
             };
 
+            // Clean up empty strings and false values for optional fields
             Object.keys(updatedLink).forEach(key => {
-                if (updatedLink[key] === '') {
+                if (updatedLink[key] === '' || updatedLink[key] === false) {
                     delete updatedLink[key];
                 }
             });
@@ -377,6 +399,8 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         flexContainer2.classList.remove('edit-mode');
       }
+      // Refresh the display when edit mode is toggled to show/hide items
+      fetchAndDisplayLinks();
     });
   }
 });
