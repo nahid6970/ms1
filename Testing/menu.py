@@ -411,11 +411,9 @@ class ArchUtil:
             print(f"\n{BLUE}Updating ms1 repository...{RESET}")
             # Get the current script directory
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            
             # Try to find git repository root
             git_root = None
             current_dir = script_dir
-            
             # Search up the directory tree for .git folder
             while current_dir != os.path.dirname(current_dir):  # Stop at filesystem root
                 if os.path.exists(os.path.join(current_dir, '.git')):
