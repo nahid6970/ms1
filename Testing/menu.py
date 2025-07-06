@@ -95,6 +95,33 @@ class ArchUtil:
                 ]
             },
             {
+                "title": "Desktop Environments",
+                "description": "Install and manage desktop environments",
+                "submenu": [
+                    {"title": "Install KDE Plasma", "action": ("sudo pacman -S plasma-meta konsole", "Installing KDE Plasma")},
+                    {"title": "Install Qtile", "action": ("sudo pacman -S qtile", "Installing Qtile")},
+                    {"title": "Install Hyprland", "action": ("yay -S hyprland", "Installing Hyprland")},
+                ]
+            },
+            {
+                "title": "Display Server Setup",
+                "description": "Configure X11 and Wayland",
+                "submenu": [
+                    {"title": "Setup X11", "action": ("sudo pacman -S xorg-server xorg-xinit", "Installing and setting up X11")},
+                    {"title": "Setup Wayland", "action": ("sudo pacman -S wayland weston", "Installing and setting up Wayland")},
+                ]
+            },
+            {
+                "title": "Start Desktop",
+                "description": "Launch a desktop environment",
+                "submenu": [
+                    {"title": "Start KDE (X11)", "action": ("startx /usr/bin/startplasma-x11", "Starting KDE Plasma on X11")},
+                    {"title": "Start KDE (Wayland)", "action": ("startplasma-wayland", "Starting KDE Plasma on Wayland")},
+                    {"title": "Start Qtile", "action": ("startx /usr/bin/qtile", "Starting Qtile")},
+                    {"title": "Start Hyprland", "action": ("Hyprland", "Starting Hyprland")},
+                ]
+            },
+            {
                 "title": "Quit",
                 "description": "Exit ArchUtil",
                 "action": "quit"
