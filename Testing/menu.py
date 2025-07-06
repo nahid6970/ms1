@@ -398,13 +398,104 @@ class ArchUtil:
         curses.def_prog_mode()
         curses.endwin()
 
+        # ANSI escape codes for colors
+        BLUE = '\033[94m'
+        GREEN = '\033[92m'
+        RED = '\033[91m'
+        YELLOW = '\033[93m'
+        RESET = '\033[0m'
+
         try:
-            ms1_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-            if os.path.isdir(ms1_folder):
-                self.execute_command(f"cd {ms1_folder} && git pull", "Updating ms1 repository")
-            else:
-                print(f"The folder {ms1_folder} does not exist.")
+            # Clear the screen
+            os.system('cls' if os.name == 'nt' else 'clear')
+            
+            print(f"\n{BLUE}Updating ms1 repository...{RESET}")
+            
+            # Get the current script directory
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Try to find git repository root
+            git_root = None
+            current_dir = script_dir
+            
+            # Search up the directory tree for .git folder
+            while current_dir != os.path.dirname(current_dir):  # Stop at filesystem root
+                if os.path.exists(os.path.join(current_dir, '.git')):
+                    git_root = current_dir
+                    break
+                current_dir = os.path.dirname(current_dir)
+            
+            if not git_root:
+                print(f"{RED}Error: Not inside a git repository{RESET}")
+                print(f"Current directory: {script_dir}")
                 input("Press Enter to continue...")
+                return
+            
+            print(f"Found git repository at: {git_root}")
+            
+            # Change to git repository directory
+            os.chdir(git_root)
+            
+            # Check if we're in a git repository
+            result = subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], 
+                                capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"{RED}Error: Not a valid git repository{RESET}")
+                input("Press Enter to continue...")
+                return
+            
+            # Check for uncommitted changes
+            result = subprocess.run(['git', 'status', '--porcelain'], 
+                                capture_output=True, text=True)
+            if result.stdout.strip():
+                print(f"{YELLOW}Warning: You have uncommitted changes:{RESET}")
+                print(result.stdout)
+                response = input("Continue with git pull? This might cause conflicts. (y/N): ")
+                if response.lower() not in ['y', 'yes']:
+                    print("Operation cancelled.")
+                    input("Press Enter to continue...")
+                    return
+            
+            # Get current branch
+            result = subprocess.run(['git', 'branch', '--show-current'], 
+                                capture_output=True, text=True)
+            if result.returncode == 0:
+                current_branch = result.stdout.strip()
+                print(f"Current branch: {current_branch}")
+            else:
+                print(f"{YELLOW}Warning: Could not determine current branch{RESET}")
+            
+            # Fetch latest changes
+            print("Fetching latest changes...")
+            result = subprocess.run(['git', 'fetch'], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"{RED}Error fetching changes: {result.stderr}{RESET}")
+                input("Press Enter to continue...")
+                return
+            
+            # Pull changes
+            print("Pulling changes...")
+            result = subprocess.run(['git', 'pull'], capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print(f"\n{GREEN}✓ Successfully updated ms1 repository{RESET}")
+                if result.stdout.strip():
+                    print("Output:")
+                    print(result.stdout)
+            else:
+                print(f"\n{RED}✗ Git pull failed{RESET}")
+                print(f"Error: {result.stderr}")
+                if "merge conflict" in result.stderr.lower():
+                    print(f"{YELLOW}You have merge conflicts. Please resolve them manually.{RESET}")
+            
+            input("\nPress Enter to continue...")
+            
+        except FileNotFoundError:
+            print(f"{RED}Error: Git is not installed or not in PATH{RESET}")
+            input("Press Enter to continue...")
+        except Exception as e:
+            print(f"{RED}Error: {e}{RESET}")
+            input("Press Enter to continue...")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
