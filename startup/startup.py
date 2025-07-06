@@ -3,6 +3,8 @@ from tkinter import messagebox, filedialog, simpledialog, ttk
 import os
 import winreg
 import json
+import threading
+import time
 
 def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
@@ -155,6 +157,8 @@ class StartupManager(tk.Tk):
         
         self.json_file = os.path.join(os.path.dirname(__file__), "startup_items.json")
         self.items = self.filter_existing_items(self.load_items())  # Load and filter items
+        self.item_widgets = {}  # Store references to item widgets for smooth updates
+        self.is_refreshing = False  # Flag to prevent multiple simultaneous refreshes
         
         self.create_widgets()
         self.center_window()
@@ -215,8 +219,14 @@ class StartupManager(tk.Tk):
         tk.Button(button_frame, text="Add New Item", command=self.add_new_item, 
                  bg="#4a4b5a", fg="white", font=("Arial", 10), width=15).pack(side=tk.LEFT, padx=5)
         
-        tk.Button(button_frame, text="Refresh", command=self.refresh_items, 
-                 bg="#4a4b5a", fg="white", font=("Arial", 10), width=15).pack(side=tk.LEFT, padx=5)
+        self.refresh_btn = tk.Button(button_frame, text="Refresh", command=self.smooth_refresh, 
+                                    bg="#4a4b5a", fg="white", font=("Arial", 10), width=15)
+        self.refresh_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Status label for feedback
+        self.status_label = tk.Label(button_frame, text="Ready", bg="#2e2f3e", fg="#9ef959", 
+                                    font=("Arial", 9))
+        self.status_label.pack(side=tk.RIGHT, padx=5)
         
         # Items frame
         self.items_frame = tk.Frame(main_frame, bg="#2e2f3e")
@@ -224,10 +234,142 @@ class StartupManager(tk.Tk):
         
         self.create_items_display()
 
+    def show_status(self, message, color="#9ef959", duration=2000):
+        """Show status message with optional color and duration"""
+        self.status_label.config(text=message, fg=color)
+        if duration > 0:
+            self.after(duration, lambda: self.status_label.config(text="Ready", fg="#9ef959"))
+
+    def smooth_refresh(self):
+        """Perform smooth refresh with visual feedback"""
+        if self.is_refreshing:
+            return
+        
+        self.is_refreshing = True
+        self.refresh_btn.config(state="disabled", text="Refreshing...")
+        self.show_status("Refreshing items...", "#63dbff", 0)
+        
+        # Use threading to prevent UI freezing
+        def refresh_thread():
+            try:
+                # Small delay to show feedback
+                time.sleep(0.1)
+                
+                # Update items data
+                new_items = self.filter_existing_items(self.load_items())
+                
+                # Schedule UI update on main thread
+                self.after(0, lambda: self.complete_refresh(new_items))
+                
+            except Exception as e:
+                self.after(0, lambda: self.handle_refresh_error(e))
+        
+        # Start refresh in background thread
+        threading.Thread(target=refresh_thread, daemon=True).start()
+
+    def complete_refresh(self, new_items):
+        """Complete the refresh process on the main thread"""
+        try:
+            # Check if items have actually changed
+            if self.items_have_changed(new_items):
+                self.items = new_items
+                self.fade_and_rebuild()
+                self.show_status("Items refreshed successfully!", "#9ef959")
+            else:
+                # Just update the visual states without rebuilding
+                self.update_item_states()
+                self.show_status("Items are up to date", "#63dbff")
+                
+        except Exception as e:
+            self.handle_refresh_error(e)
+        finally:
+            self.is_refreshing = False
+            self.refresh_btn.config(state="normal", text="Refresh")
+
+    def handle_refresh_error(self, error):
+        """Handle refresh errors"""
+        self.show_status(f"Refresh failed: {str(error)}", "#ff6b6b")
+        self.is_refreshing = False
+        self.refresh_btn.config(state="normal", text="Refresh")
+
+    def items_have_changed(self, new_items):
+        """Check if items have actually changed"""
+        if len(self.items) != len(new_items):
+            return True
+        
+        # Compare items by name and paths
+        current_items_set = {(item["name"], tuple(item["paths"])) for item in self.items}
+        new_items_set = {(item["name"], tuple(item["paths"])) for item in new_items}
+        
+        return current_items_set != new_items_set
+
+    def fade_and_rebuild(self):
+        """Fade out and rebuild the items display"""
+        # Fade out effect
+        self.animate_fade_out(self.items_frame, callback=self.rebuild_items_display)
+
+    def animate_fade_out(self, widget, steps=5, callback=None):
+        """Simple fade out animation by adjusting widget state"""
+        def fade_step(step):
+            if step > 0:
+                # Gradually reduce opacity by disabling widgets
+                for child in widget.winfo_children():
+                    if hasattr(child, 'configure'):
+                        try:
+                            child.configure(state='disabled')
+                        except:
+                            pass
+                self.after(30, lambda: fade_step(step - 1))
+            else:
+                if callback:
+                    callback()
+
+        fade_step(steps)
+
+    def rebuild_items_display(self):
+        """Rebuild the items display with fade in effect"""
+        self.create_items_display()
+        self.animate_fade_in(self.items_frame)
+
+    def animate_fade_in(self, widget, steps=5):
+        """Simple fade in animation by re-enabling widgets"""
+        def fade_step(step):
+            if step < steps:
+                # Gradually restore widgets
+                for child in widget.winfo_children():
+                    if hasattr(child, 'configure'):
+                        try:
+                            child.configure(state='normal')
+                        except:
+                            pass
+                self.after(30, lambda: fade_step(step + 1))
+
+        fade_step(0)
+
+    def update_item_states(self):
+        """Update only the visual states of existing items without rebuilding"""
+        for item_name, widgets in self.item_widgets.items():
+            # Find the current item data
+            current_item = next((item for item in self.items if item["name"] == item_name), None)
+            if current_item:
+                icon_label = widgets.get('icon')
+                name_label = widgets.get('name')
+                
+                if icon_label and name_label:
+                    checked = self.is_checked(current_item)
+                    
+                    # Update icon
+                    icon_label.config(text="\uf205" if checked else "\uf204",
+                                    fg="#9ef959" if checked else "gray")
+                    
+                    # Update name color
+                    self.update_label_color(name_label, checked)
+
     def create_items_display(self):
-        # Clear existing widgets
+        # Clear existing widgets and widget references
         for widget in self.items_frame.winfo_children():
             widget.destroy()
+        self.item_widgets.clear()
         
         self.items_frame.grid_columnconfigure(0, weight=1)
         self.items_frame.grid_columnconfigure(2, weight=1)
@@ -269,7 +411,7 @@ class StartupManager(tk.Tk):
         icon_label = tk.Label(left_frame, text="\uf205" if checked else "\uf204", 
                              font=("Jetbrainsmono nfp", 12, "bold"), 
                              fg="#9ef959" if checked else "gray", bg="#2e2f3e")
-        icon_label.bind("<Button-1>", lambda event, item=item: self.toggle_startup_and_refresh(item))
+        icon_label.bind("<Button-1>", lambda event, item=item: self.toggle_startup_smooth(item))
         icon_label.pack(side=tk.LEFT, padx=0)
 
         name_label = tk.Label(left_frame, text=item["name"], font=("Jetbrainsmono nfp", 10), bg="#2e2f3e")
@@ -277,6 +419,13 @@ class StartupManager(tk.Tk):
         name_label.pack(side=tk.LEFT, padx=(5, 0))
         
         self.update_label_color(name_label, checked)
+        
+        # Store widget references for smooth updates
+        self.item_widgets[item["name"]] = {
+            'icon': icon_label,
+            'name': name_label,
+            'frame': frame
+        }
         
         # Right side - edit and delete buttons
         right_frame = tk.Frame(frame, bg="#2e2f3e")
@@ -289,6 +438,58 @@ class StartupManager(tk.Tk):
         delete_btn = tk.Button(right_frame, text="Delete", command=lambda: self.delete_item(item),
                               bg="#d32f2f", fg="white", font=("Arial", 8), width=6)
         delete_btn.pack(side=tk.LEFT, padx=2)
+
+    def toggle_startup_smooth(self, item):
+        """Toggle startup with smooth visual feedback"""
+        # Show immediate feedback
+        widgets = self.item_widgets.get(item["name"], {})
+        icon_label = widgets.get('icon')
+        name_label = widgets.get('name')
+        
+        if icon_label:
+            # Show loading state
+            icon_label.config(text="⟳", fg="#63dbff")
+            self.show_status(f"Updating {item['name']}...", "#63dbff", 0)
+        
+        # Perform the toggle operation
+        def toggle_operation():
+            try:
+                self.toggle_startup(item)
+                # Update UI on main thread
+                self.after(0, lambda: self.complete_toggle_update(item, True))
+            except Exception as e:
+                self.after(0, lambda: self.complete_toggle_update(item, False, str(e)))
+        
+        # Run in background thread
+        threading.Thread(target=toggle_operation, daemon=True).start()
+
+    def complete_toggle_update(self, item, success, error_msg=None):
+        """Complete the toggle update on the main thread"""
+        widgets = self.item_widgets.get(item["name"], {})
+        icon_label = widgets.get('icon')
+        name_label = widgets.get('name')
+        
+        if success:
+            # Update the visual state
+            checked = self.is_checked(item)
+            
+            if icon_label:
+                icon_label.config(text="\uf205" if checked else "\uf204",
+                                fg="#9ef959" if checked else "gray")
+            
+            if name_label:
+                self.update_label_color(name_label, checked)
+            
+            status_msg = f"{item['name']} {'enabled' if checked else 'disabled'}"
+            self.show_status(status_msg, "#9ef959")
+        else:
+            # Restore original state and show error
+            if icon_label:
+                checked = self.is_checked(item)
+                icon_label.config(text="\uf205" if checked else "\uf204",
+                                fg="#9ef959" if checked else "gray")
+            
+            self.show_status(f"Failed to update {item['name']}: {error_msg}", "#ff6b6b")
 
     def add_new_item(self):
         dialog = ItemDialog(self)
@@ -305,9 +506,9 @@ class StartupManager(tk.Tk):
             all_items.append(dialog.result)
             self.save_items(all_items)
             
-            # Refresh the display
-            self.refresh_items()
-            messagebox.showinfo("Success", "Item added successfully!")
+            # Smooth refresh
+            self.smooth_refresh()
+            self.show_status("Item added successfully!", "#9ef959")
 
     def edit_item(self, item):
         dialog = ItemDialog(self, item)
@@ -322,8 +523,8 @@ class StartupManager(tk.Tk):
                     break
             
             self.save_items(all_items)
-            self.refresh_items()
-            messagebox.showinfo("Success", "Item updated successfully!")
+            self.smooth_refresh()
+            self.show_status("Item updated successfully!", "#9ef959")
 
     def delete_item(self, item):
         if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete '{item['name']}'?"):
@@ -336,17 +537,12 @@ class StartupManager(tk.Tk):
             all_items = [stored_item for stored_item in all_items if stored_item["name"] != item["name"]]
             self.save_items(all_items)
             
-            self.refresh_items()
-            messagebox.showinfo("Success", "Item deleted successfully!")
+            self.smooth_refresh()
+            self.show_status("Item deleted successfully!", "#9ef959")
 
     def refresh_items(self):
-        self.items = self.filter_existing_items(self.load_items())
-        self.create_items_display()
-
-    def toggle_startup_and_refresh(self, item):
-        self.toggle_startup(item)
-        # Refresh the display to update colors
-        self.create_items_display()
+        """Legacy refresh method - now calls smooth_refresh"""
+        self.smooth_refresh()
 
     def launch_command(self, item):
         # Retrieve the first path, the command, and the executable type
@@ -371,8 +567,10 @@ class StartupManager(tk.Tk):
         try:
             # Execute the command using os.system
             os.system(f'start "" {full_command}')
+            self.show_status(f"Launched {item['name']}", "#9ef959")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch {item['name']}: {e}")
+            self.show_status(f"Failed to launch {item['name']}", "#ff6b6b")
 
     def is_checked(self, item):
         try:
