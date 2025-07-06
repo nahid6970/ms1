@@ -38,7 +38,7 @@
         "type": "App",
         "name": "qBittorrent",
         "path": "C:\\Program Files\\qBittorrent\\qbittorrent.exe",
-        "args": "\"\\--profile=\"\" \"--configuration=\"\"",
+        "args": "",
         "execution_method": "direct"
     },
     {

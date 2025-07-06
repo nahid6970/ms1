@@ -54,8 +54,10 @@ class ItemEditorWindow(tk.Toplevel):
             "execution_method": self.entries["Execution Method"].get()
         }
 
-        if not all(new_item_data.values()):
-            messagebox.showerror("Error", "All fields are required.")
+        # Validate required fields, allowing empty args
+        required_fields = ["type", "name", "path", "execution_method"]
+        if not all(new_item_data[field] for field in required_fields):
+            messagebox.showerror("Error", "All fields except Arguments are required.")
             return
 
         self.parent.save_item_to_json(new_item_data, self.item_index)
