@@ -68,9 +68,9 @@
   {
     "default_type": "img",
     "group": "Chat-BOT",
-    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
-    "name": "DeepSeek",
-    "url": "https://chat.deepseek.com/"
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/"
   },
   {
     "default_type": "img",
@@ -83,9 +83,9 @@
   {
     "default_type": "img",
     "group": "Chat-BOT",
-    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
-    "name": "ChatGPT",
-    "url": "https://chatgpt.com/"
+    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
+    "name": "DeepSeek",
+    "url": "https://chat.deepseek.com/"
   },
   {
     "default_type": "img",
@@ -130,14 +130,6 @@
     "url": "http://127.0.0.1:9117/UI/Dashboard"
   },
   {
-    "color": "#009fff",
-    "default_type": "nerd-font",
-    "group": "Local (Apps)",
-    "icon_class": "nf nf-fa-wifi",
-    "name": "WIFI",
-    "url": "http://192.168.0.1/"
-  },
-  {
     "default_type": "img",
     "group": "Local (Apps)",
     "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
@@ -151,6 +143,14 @@
     "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
     "name": "qBittorrent",
     "url": "http://192.168.0.101:8080/"
+  },
+  {
+    "color": "#009fff",
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-fa-wifi",
+    "name": "WIFI",
+    "url": "http://192.168.0.1/"
   },
   {
     "default_type": "nerd-font",
