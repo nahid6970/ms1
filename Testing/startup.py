@@ -4,13 +4,17 @@ import os
 import winreg
 import json
 
-class AddItemWindow(tk.Toplevel):
-    def __init__(self, parent):
+class ItemEditorWindow(tk.Toplevel):
+    def __init__(self, parent, item=None, item_index=None):
         super().__init__(parent)
-        self.title("Add New Startup Item")
-        self.configure(bg="#2e2f3e")
         self.parent = parent
+        self.item = item
+        self.item_index = item_index
+        self.title(f"{'Edit' if item else 'Add'} Startup Item")
+        self.configure(bg="#2e2f3e")
         self.create_widgets()
+        if self.item:
+            self.populate_fields()
 
     def create_widgets(self):
         labels = ["Name", "Path", "Arguments", "Type", "Execution Method"]
@@ -34,8 +38,15 @@ class AddItemWindow(tk.Toplevel):
         save_button = tk.Button(self, text="Save", command=self.save_item, bg="#4a4b5a", fg="white")
         save_button.grid(row=len(labels), column=0, columnspan=2, pady=10)
 
+    def populate_fields(self):
+        self.entries["Name"].insert(0, self.item.get("name", ""))
+        self.entries["Path"].insert(0, self.item.get("path", ""))
+        self.entries["Arguments"].insert(0, self.item.get("args", ""))
+        self.entries["Type"].set(self.item.get("type", ""))
+        self.entries["Execution Method"].set(self.item.get("execution_method", ""))
+
     def save_item(self):
-        new_item = {
+        new_item_data = {
             "type": self.entries["Type"].get(),
             "name": self.entries["Name"].get(),
             "path": self.entries["Path"].get(),
@@ -43,13 +54,12 @@ class AddItemWindow(tk.Toplevel):
             "execution_method": self.entries["Execution Method"].get()
         }
 
-        if not all(new_item.values()):
+        if not all(new_item_data.values()):
             messagebox.showerror("Error", "All fields are required.")
             return
 
-        self.parent.add_item_to_json(new_item)
+        self.parent.save_item_to_json(new_item_data, self.item_index)
         self.destroy()
-
 
 class StartupManager(tk.Tk):
     def __init__(self):
@@ -85,8 +95,8 @@ class StartupManager(tk.Tk):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(2, weight=1)
 
-        commands = [item for item in self.items if item["type"] == "Command"]
-        apps = [item for item in self.items if item["type"] == "App"]
+        commands = [(i, item) for i, item in enumerate(self.items) if item["type"] == "Command"]
+        apps = [(i, item) for i, item in enumerate(self.items) if item["type"] == "App"]
 
         self.create_section("Commands", commands, column=0)
         separator = tk.Frame(self, width=2, bg="#4a4b5a")
@@ -96,15 +106,14 @@ class StartupManager(tk.Tk):
         add_button = tk.Button(self, text="Add Item", command=self.open_add_item_window, bg="#4a4b5a", fg="white")
         add_button.grid(row=max(len(commands), len(apps)) + 2, column=0, columnspan=3, pady=10)
 
-
-    def create_section(self, section_name, items, column):
+    def create_section(self, section_name, items_with_indices, column):
         separator = tk.Label(self, text=section_name, font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
         separator.grid(row=0, column=column, pady=5, sticky="ew", columnspan=1)
 
-        for i, item in enumerate(items):
-            self.create_item_widget(item, i + 1, column)
+        for i, (item_index, item) in enumerate(items_with_indices):
+            self.create_item_widget(item, item_index, i + 1, column)
 
-    def create_item_widget(self, item, row, col):
+    def create_item_widget(self, item, item_index, row, col):
         frame = tk.Frame(self, bg="#2e2f3e")
         frame.grid(row=row, column=col, padx=5, pady=5, sticky="w")
 
@@ -120,6 +129,9 @@ class StartupManager(tk.Tk):
         name_label.bind("<Button-1>", lambda e, i=item: self.launch_command(i))
         name_label.pack(side=tk.LEFT)
 
+        edit_button = tk.Button(frame, text="\u270E", font=("Jetbrainsmono nfp", 12, "bold"), bg="#2e2f3e", fg="white", command=lambda i=item, idx=item_index: self.open_edit_item_window(i, idx))
+        edit_button.pack(side=tk.LEFT, padx=5)
+
         self.update_label_color(name_label, checked)
 
     def get_full_command(self, item):
@@ -128,11 +140,11 @@ class StartupManager(tk.Tk):
         method = item.get("execution_method", "direct")
 
         if method == "pythonw":
-            return "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe" "{path}" "{args}"
+            return f'"C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe" "{path}" {args}'
         elif method == "powershell":
-            return "powershell.exe -File" "{path}" "{args}"
+            return f'powershell.exe -File "{path}" {args}'
         else: # direct
-            return "{path}" "{args}"
+            return f'"{path}" {args}'
 
     def launch_command(self, item):
         full_command = self.get_full_command(item)
@@ -168,7 +180,7 @@ class StartupManager(tk.Tk):
                 self.update_label_color(name_label, True)
                 icon_label.config(text="\uf205", fg="#9ef959")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to modify {item['name']} in startup: {e}")
+            messagebox.showerror("Error", f"Failed to modify {item['name']}: {e}")
 
     def update_label_color(self, label, checked):
         label.config(fg="#63dbff" if checked else "red")
@@ -182,10 +194,16 @@ class StartupManager(tk.Tk):
         self.geometry(f'{width}x{height}+{x}+{y}')
 
     def open_add_item_window(self):
-        AddItemWindow(self)
+        ItemEditorWindow(self)
 
-    def add_item_to_json(self, new_item):
-        self.items.append(new_item)
+    def open_edit_item_window(self, item, item_index):
+        ItemEditorWindow(self, item=item, item_index=item_index)
+
+    def save_item_to_json(self, new_item_data, item_index=None):
+        if item_index is not None:
+            self.items[item_index] = new_item_data
+        else:
+            self.items.append(new_item_data)
         with open(self.json_path, 'w') as f:
             json.dump(self.items, f, indent=4)
         self.refresh_items()
@@ -194,8 +212,6 @@ class StartupManager(tk.Tk):
         self.items = self.filter_existing_items(self.load_items())
         self.create_widgets()
 
-
 if __name__ == "__main__":
     app = StartupManager()
     app.mainloop()
-
