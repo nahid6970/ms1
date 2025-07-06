@@ -233,8 +233,8 @@ class StartupManager(tk.Tk):
         self.items_frame.grid_columnconfigure(2, weight=1)
         
         # Separate commands and apps
-        commands = [item for item in self.items if item["type"] == "Command"]
-        apps = [item for item in self.items if item["type"] == "App"]
+        commands = sorted([item for item in self.items if item["type"] == "Command"], key=lambda x: x["name"].lower())
+        apps = sorted([item for item in self.items if item["type"] == "App"], key=lambda x: x["name"].lower())
         
         # Commands Section
         self.create_section("Commands", commands, column=0)
