@@ -90,13 +90,13 @@ class ItemDialog(tk.Toplevel):
             self.path_entry.insert(0, r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe")
         elif selected_type == "pwsh":
             self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+            self.path_entry.insert(0, r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
         elif selected_type == "cmd":
             self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, "C:\Windows\System32\cmd.exe")
+            self.path_entry.insert(0, r"C:\Windows\System32\cmd.exe")
         elif selected_type == "powershell":
             self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+            self.path_entry.insert(0, r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
         else:
             self.path_entry.delete(0, tk.END)
             # Clear the path if "other" is selected, or keep it as is if it's already a valid path
