@@ -310,5 +310,13 @@
       "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
     ],
     "Command": "--no-startup-window --win-session-start"
+  },
+  {
+    "name": "Flask - 5000 - myhome",
+    "type": "Command",
+    "paths": [
+      "C:/Users/nahid/scoop/apps/python312/current/pythonw.exe"
+    ],
+    "Command": "C:\\ms1\\myhome\\app.py"
   }
 ]
