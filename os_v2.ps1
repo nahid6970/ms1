@@ -385,7 +385,7 @@ function Show-MainMenu {
 
     # Close button
     $closeBtn = New-Object System.Windows.Controls.Button
-    $closeBtn.Content = "✕"
+    $closeBtn.Content = "X"
     $closeBtn.Width = 30
     $closeBtn.Height = 30
     $closeBtn.HorizontalAlignment = "Right"
