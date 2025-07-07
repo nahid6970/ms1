@@ -71,7 +71,7 @@ class ArchUtil:
                             # "scoop install ventoy && "
                             # "scoop install winaero-tweaker && "
                             "scoop install yt-dlp",
-                            "Installing necessary Scoop packages"
+                            "Installing Scoop packages Successful"
                         )
                     },
                     {"title": "Remove Package", "action": self.remove_package},
@@ -99,8 +99,6 @@ class ArchUtil:
                 "description": "Install common development tools and environments",
                 "submenu": [
                     {"title": "Install Git", "action": ("sudo pacman -S git", "Installing Git")},
-                    {"title": "Install VSCode", "action": ("yay -S visual-studio-code-bin", "Installing Visual Studio Code")},
-                    {"title": "Install Docker", "action": ("sudo pacman -S docker docker-compose", "Installing Docker")},
                     {"title": "Install Node.js", "action": ("sudo pacman -S nodejs npm", "Installing Node.js and npm")},
                     {"title": "Install Python Tools", "action": ("sudo pacman -S python-pip python-virtualenv", "Installing Python tools")},
                     {"title": "Install Build Tools", "action": ("sudo pacman -S base-devel", "Installing build tools")},
