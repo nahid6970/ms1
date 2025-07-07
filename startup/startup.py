@@ -208,52 +208,20 @@ class StartupManager(tk.Tk):
         return filtered_items
 
     def copy_registry_paths(self):
-        """Copy registry paths of enabled startup apps to clipboard"""
+        """Copy main registry path to clipboard"""
         try:
-            enabled_items = []
-            reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-            
-            # Get all enabled startup items
-            for item in self.items:
-                if self.is_checked(item):
-                    enabled_items.append(item)
-            
-            if not enabled_items:
-                self.show_status("No enabled startup items found", "#ff6b6b")
-                return
-            
-            # Build the registry paths text
-            registry_info = []
-            registry_info.append("Registry Path: HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run")
-            registry_info.append("=" * 80)
-            registry_info.append("")
-            
-            try:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_READ) as reg_key:
-                    for item in enabled_items:
-                        try:
-                            value, _ = winreg.QueryValueEx(reg_key, item["name"])
-                            registry_info.append(f"Name: {item['name']}")
-                            registry_info.append(f"Value: {value}")
-                            registry_info.append(f"Type: {item['type']}")
-                            registry_info.append("-" * 40)
-                        except FileNotFoundError:
-                            # Item is not actually in registry, skip it
-                            continue
-            except Exception as e:
-                self.show_status(f"Error reading registry: {e}", "#ff6b6b")
-                return
+            # Main registry path for startup items
+            registry_path = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
             
             # Copy to clipboard
-            registry_text = "\n".join(registry_info)
             self.clipboard_clear()
-            self.clipboard_append(registry_text)
+            self.clipboard_append(registry_path)
             self.update()  # Ensure clipboard is updated
             
-            self.show_status(f"Copied {len(enabled_items)} registry paths to clipboard", "#9ef959")
+            self.show_status("Registry path copied to clipboard", "#9ef959")
             
         except Exception as e:
-            self.show_status(f"Failed to copy registry paths: {e}", "#ff6b6b")
+            self.show_status(f"Failed to copy registry path: {e}", "#ff6b6b")
 
     def create_widgets(self):
         # Main frame
@@ -272,7 +240,7 @@ class StartupManager(tk.Tk):
         self.refresh_btn.pack(side=tk.LEFT, padx=5)
         
         # Add Copy Registry Paths button
-        copy_btn = tk.Button(button_frame, text="Copy Registry Paths", command=self.copy_registry_paths, 
+        copy_btn = tk.Button(button_frame, text="Copy Registry Path", command=self.copy_registry_paths, 
                            bg="#4a4b5a", fg="white", font=("Arial", 10), width=18)
         copy_btn.pack(side=tk.LEFT, padx=5)
         
