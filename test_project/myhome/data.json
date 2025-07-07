@@ -30,11 +30,11 @@
     "url": "https://www.youtube.com/"
   },
   {
-    "color": "#5765f2",
-    "default_type": "nerd-font",
-    "icon_class": "nf-fa-discord",
     "name": "Discord",
-    "url": "https://discord.com/channels/@me"
+    "url": "https://discord.com/channels/@me",
+    "icon_class": "nf nf-fa-discord",
+    "color": "#5765f2",
+    "default_type": "nerd-font"
   },
   {
     "color": "#ffffff",
@@ -86,13 +86,10 @@
     "url": "https://chat.deepseek.com/"
   },
   {
-    "color": "#ff2e2e",
-    "default_type": "nerd-font",
-    "hidden": true,
-    "icon_class": "nf nf-fa-battery_2",
-    "name": "mi9t",
-    "title": "mi9t",
-    "url": "http://mi9t:5002"
+    "default_type": "img",
+    "img_src": "https://d2qr50rz2oof04.cloudfront.net/assets/img/logo/logo-bug.png",
+    "name": "noip",
+    "url": "https://my.noip.com/dynamic-dns"
   },
   {
     "default_type": "img",
@@ -222,5 +219,14 @@
     "url": "https://store.rg-adguard.net/",
     "img_src": "https://store.rg-adguard.net/img/Store.png",
     "default_type": "img"
+  },
+  {
+    "color": "#ff2e2e",
+    "default_type": "nerd-font",
+    "hidden": true,
+    "icon_class": "nf nf-fa-battery_2",
+    "name": "mi9t",
+    "title": "mi9t",
+    "url": "http://mi9t:5002"
   }
 ]
