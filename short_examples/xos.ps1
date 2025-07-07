@@ -83,7 +83,7 @@ $su = "C:\Users\nahid\scoop\shims\sudo.ps1"
 
 # Define the menu structure
 $menu = [ordered]@{
-    "Application Setup" = [ordered]@{
+    "Application Setup" = @{
         "jackett + qbittorrent" = {
             nw_pwsh -Command '
                 # cd C:\Users\nahid
@@ -119,7 +119,7 @@ $menu = [ordered]@{
             "
         }
     }
-    "Github Projects" = [ordered]@{
+    "Github Projects" = @{
         "Microsoft Activation Scripts (MAS)" = {
             nw_powershell_asadmin -Command "irm https://get.activated.win | iex"
         }
@@ -221,7 +221,7 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         $selectedMainMenu = $mainMenuListBox.SelectedItem
         $selectedSubMenu = $submenuListBox.SelectedItem
-        if ($selectedMainMenu -and $selectedSubMenu -and $menu.Contains($selectedMainMenu) -and $menu[$selectedMainMenu].Contains($selectedSubMenu)) {
+        if ($selectedMainMenu -and $selectedSubMenu -and $menu[$selectedMainMenu] -and $menu[$selectedMainMenu].ContainsKey($selectedSubMenu)) {
             . ($menu[$selectedMainMenu][$selectedSubMenu])
         }
     })
