@@ -160,23 +160,58 @@ $menu = [ordered]@{
                 Write-Host 'Packages installed successfully' --ForegroundColor Green
             }
         }
-        "Install Pwsh Modules" = {
-            nw_pwsh_asadmin -Command {
-                Install-Module -Name BurntToast -Scope CurrentUser -Verbose
-            }
-
-        }
         "Font Setup" = {
             nw_powershell -Command {
                 oh-my-posh font install
             }
-
+        }
+        "Install Pwsh Modules" = {
+            nw_pwsh_asadmin -Command {
+                Install-Module -Name BurntToast -Scope CurrentUser -Verbose
+            }
         }
         "pip Packages" = {
+            nw_pwsh -Command {
+                # needed
+                    # pip install uv
+                    # pip install customtkinter
+                    # pip install pyautogui
+                    # pip install pillow
+                    # pip install pyadl
+                    # pip install keyboard
+                    # pip install psutil
+                    # pip install Flask
+                    # pip install pycryptodomex
+                    # pip install opencv-python
+                    # pip install pynput
+                    # pip install mss # for 2nd display
+                    # pip install screeninfo # for 2nd display
+                # not sure if needed
+                    # pip install cryptography
+                    # pip install importlib
+                    # pip install PyDictionary
+                    # pip install pywin32
+                    # pip install screeninfo
+                    # pip install winshell
 
+                C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
+            }
         }
-        "Update Packages " = {
-
+        "Update Packages" = {
+            nw_pwsh -Command {
+                scoop status
+                scoop update
+                Write-Host 'Scoop Status & Bucked Updated'
+                scoop update *
+                scoop export > C:\Users\nahid\OneDrive\backup\installed_apps\list_scoop.txt
+                Write-Host 'scoop updated'
+                scoop cleanup *
+                Write-Host 'Scoop Cleanedup'
+                winget upgrade --all
+                winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+                Write-Host 'Winget Upgraded' -ForegroundColor Green
+                Write-Host 'Packages updated successfully' -ForegroundColor Green
+            }
         }
     }
     "Application Setup" = [ordered]@{
