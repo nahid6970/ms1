@@ -83,6 +83,72 @@ $su = "C:\Users\nahid\scoop\shims\sudo.ps1"
 
 # Define the menu structure
 $menu = [ordered]@{
+    "Initial Setup" = [ordered]@{
+        "PKG Manager & Must Apps" = {
+                nw_powershell -Command "
+                    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+                        Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
+                    } else {
+                        Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
+                    }
+
+                    'Change cache Path'
+                    scoop config cache_path D:\@install\scoop\cache
+
+                    scoop install git
+
+                    'Add Buckets'
+                    scoop bucket add nonportable
+                  # scoop bucket add main
+                    scoop bucket add extras
+                    scoop bucket add versions
+                    scoop bucket add games
+
+                    scoop install sudo
+                    scoop install python312
+                    scoop install oh-my-posh
+                    scoop install fzf
+                    scoop install komorebi
+                    scoop install rclone
+                    scoop install ditto
+                    scoop install text-grab
+                    scoop install yt-dlp
+                    scoop install ffmpeg
+                    scoop install highlight
+                    scoop install zoxide
+
+                    winget upgrade --source msstore
+                    winget upgrade --source winget
+                    Write-Host 'winget Source updated successfully!' -ForegroundColor Green
+                    winget upgrade --all
+                    winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+                    Write-Host 'Winget Upgraded ☑️'
+                    Write-Host 'Packages updated successfully' -ForegroundColor Green
+
+                    winget install Microsoft.PowerShell
+                    winget install Notepad++.Notepad++
+                    winget install 9NQ8Q8J78637 # ahk (probably need to check)
+                                         "
+        }
+        "Policies" = {
+            
+        }
+        "Install Scoop Packages" = {
+            
+        }
+        "Install Pwsh Modules" = {
+            
+        }
+        "Font Setup" = {
+            
+        }
+        "pip Packages" = {
+            
+        }
+        "Update Packages " = {
+            
+        }
+    }
     "Application Setup" = [ordered]@{
         "jackett + qbittorrent" = {
             nw_pwsh -Command '

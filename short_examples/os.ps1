@@ -52,21 +52,21 @@ function Show-NewWindow {
 # Function to run a command in a new PowerShell window
 function nw_powershell {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process powershell -ArgumentList "-NoExit", "-Command", $Command
 }
 
 function nw_powershell_asadmin {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
 }
 
 function nw_pwsh_asadmin {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process pwsh -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
 }
@@ -74,7 +74,7 @@ function nw_pwsh_asadmin {
 
 function nw_pwsh {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
@@ -83,60 +83,60 @@ $su = "C:\Users\nahid\scoop\shims\sudo.ps1"
 
 # Define the menu structure
 $menu = [ordered]@{
-    "Application Setup" = @{
+    "Application Setup" = [ordered]@{
         "jackett + qbittorrent" = {
-            nw_pwsh -Command '
+            nw_pwsh -Command {
                 # cd C:\Users\nahid
                 Write-Host -ForegroundColor Green "Step 1: open qbittorrent -> view -> search engine -> Go To search engine tab -> search plugin -> check for updates -> now nova3 folder will be added"
                 Write-Host -ForegroundColor Green "Step 2: Start Jackett and add the necessary indexes to th list"
                 Write-Host -ForegroundColor Green "Step 3: Copy jacket api from webui to jackett.json"
                 Start-Process "C:\Users\nahid\AppData\Local\qBittorrent\nova3\engines"
-            '
+            }
         }
         "Ldplayer" = {
-            nw_pwsh_asadmin -Command "
+            nw_pwsh_asadmin -Command {
                 Remove-Item 'C:\Users\nahid\AppData\Roaming\XuanZhi9\cache\*' -Recurse
                 New-NetFirewallRule -DisplayName '@Block_Ld9BoxHeadless_OutInbound' -Direction Outbound -Program 'C:\LDPlayer\LDPlayer9\dnplayer.exe' -Action Block -Enabled True
-            "
+            }
         }
         "Neovim_1.conf" = {
-            nw_pwsh -Command "
+            nw_pwsh_asadmin -Command {
                 Write-Host 'Setting up Neovim...'
-                $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
-                $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
-            "
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
+            }
         }
         "Notepad++ Theme Setup" = {
-            nw_pwsh -Command '
-                cd C:\Users\nahid
+            nw_pwsh -Command {
+                Set-Location C:\Users\nahid
                 Write-Host -ForegroundColor Blue "Dracula Theme"
-            '
+            }
         }
         "PotPlayer Register" = {
-            nw_pwsh -Command "
+            nw_pwsh -Command {
                 Start-Process 'C:\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
-            "
+            }
         }
     }
-    "Github Projects" = @{
+    "Github Projects" = [ordered]@{
         "Microsoft Activation Scripts (MAS)" = {
-            nw_powershell_asadmin -Command "irm https://get.activated.win | iex"
+            nw_powershell_asadmin -Command {Invoke-RestMethod https://get.activated.win | Invoke-Expression}
         }
         "ChrisTitus WinUtility" = {
-            nw_powershell_asadmin -Command "iwr -useb https://christitus.com/win | iex"
+            nw_powershell_asadmin -Command {Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression}
         }
         "WIMUtil" = {
-            nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | iex"
+            nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | Invoke-Expression}
         }
         "AppControl Manager" = {
-            nw_pwsh_asadmin -Command "(irm 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'AppControl'|iex"
+            nw_pwsh_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'AppControl'|Invoke-Expression}
         }
         "Harden Windows Security Using GUI" = {
-            nw_powershell_asadmin -Command "(irm 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|iex"
+            nw_powershell_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|Invoke-Expression}
         }
         "Winhance" = {
-            nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | iex"
+            nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | Invoke-Expression}
         }
     }
 }
@@ -221,7 +221,7 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         $selectedMainMenu = $mainMenuListBox.SelectedItem
         $selectedSubMenu = $submenuListBox.SelectedItem
-        if ($selectedMainMenu -and $selectedSubMenu -and $menu[$selectedMainMenu] -and $menu[$selectedMainMenu].ContainsKey($selectedSubMenu)) {
+        if ($selectedMainMenu -and $selectedSubMenu -and $menu.Contains($selectedMainMenu) -and $menu[$selectedMainMenu].Contains($selectedSubMenu)) {
             . ($menu[$selectedMainMenu][$selectedSubMenu])
         }
     })
