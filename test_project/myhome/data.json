@@ -127,11 +127,13 @@
     "url": "http://127.0.0.1:9117/UI/Dashboard"
   },
   {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
     "name": "Syncthing",
-    "url": "http://127.0.0.1:8384/"
+    "group": "Local (Apps)",
+    "url": "http://127.0.0.1:8384/",
+    "icon_class": "nf nf-md-folder_sync",
+    "color": "#20acd7",
+    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
+    "default_type": "nerd-font"
   },
   {
     "default_type": "nerd-font",
@@ -150,28 +152,32 @@
     "url": "http://192.168.0.1/"
   },
   {
-    "default_type": "nerd-font",
-    "group": "Local (Flask)",
     "name": "ShareTXT",
-    "url": "http://192.168.0.101:5001/"
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5001/",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/4400/4400968.png",
+    "default_type": "img"
   },
   {
-    "default_type": "nerd-font",
-    "group": "Local (Flask)",
     "name": "ShareFile",
-    "url": "http://192.168.0.101:5002/"
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5002/",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2840/2840124.png",
+    "default_type": "img"
   },
   {
-    "default_type": "nerd-font",
-    "group": "Local (Flask)",
     "name": "Browse",
-    "url": "http://192.168.0.101:5003/"
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5003/",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2250/2250195.png",
+    "default_type": "img"
   },
   {
-    "default_type": "nerd-font",
-    "group": "Local (Flask)",
     "name": "GameARR",
-    "url": "http://192.168.0.101:5005/"
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5005/",
+    "default_type": "nerd-font",
+    "hidden": true
   },
   {
     "default_type": "img",
@@ -221,6 +227,61 @@
     "default_type": "img"
   },
   {
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-sticker_emoji",
+    "name": "nerdfonts",
+    "url": "https://www.nerdfonts.com/cheat-sheet"
+  },
+  {
+    "name": "erecruitment",
+    "group": "JobCircular",
+    "url": "https://erecruitment.bb.org.bd/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "bepza",
+    "group": "JobCircular",
+    "url": "https://www.bepza.gov.bd/career",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "dnc",
+    "group": "JobCircular",
+    "url": "http://dnc.teletalk.com.bd/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "bpsc",
+    "group": "JobCircular",
+    "url": "http://bpsc.teletalk.com.bd/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "brdb",
+    "group": "JobCircular",
+    "url": "http://brdb.teletalk.com.bd/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "ndr",
+    "group": "JobCircular",
+    "url": "http://ndr.teletalk.com.bd/",
+    "default_type": "nerd-font"
+  },
+  {
+    "name": "github",
+    "url": "https://github.com/nahid6970",
+    "icon_class": "nf nf-fa-github_square",
+    "default_type": "nerd-font"
+  },
+  {
+    "color": "#fbbc04",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-google_keep",
+    "name": "Keep",
+    "url": "https://keep.google.com/"
+  },
+  {
     "color": "#ff2e2e",
     "default_type": "nerd-font",
     "hidden": true,
@@ -228,5 +289,12 @@
     "name": "mi9t",
     "title": "mi9t",
     "url": "http://mi9t:5002"
+  },
+  {
+    "name": "OneNote",
+    "url": "https://www.onenote.com/",
+    "icon_class": "nf nf-md-microsoft_onenote",
+    "color": "#b259e6",
+    "default_type": "nerd-font"
   }
 ]
