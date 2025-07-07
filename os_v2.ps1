@@ -131,7 +131,12 @@ $menu = [ordered]@{
             }
         }
         "Policies" = {
-
+            nw_powershell_asadmin {
+                Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+                Set-ExecutionPolicy RemoteSigned
+                Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+                Install-Module -Name Microsoft.WinGet.Client -Force -AllowClobber
+            }
         }
         "Install Scoop Packages" = {
 
