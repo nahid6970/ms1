@@ -79,7 +79,7 @@ function nw_pwsh {
     Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
 
-$su = "C:\Users\nahid\scoop\shims\sudo.ps1"
+# $su = "C:\Users\nahid\scoop\shims\sudo.ps1"
 
 # Define the menu structure
 $menu = [ordered]@{
