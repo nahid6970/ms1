@@ -11,40 +11,81 @@ function Show-NewWindow {
     # Create a new window
     $newWindow = New-Object System.Windows.Window
     $newWindow.Title = $Title
-    $newWindow.Width = 400
-    $newWindow.Height = 200
-    $newWindow.Background = [System.Windows.Media.Brushes]::SlateGray
+    $newWindow.Width = 450
+    $newWindow.Height = 250
+    $newWindow.Background = [System.Windows.Media.Brushes]::Transparent
     $newWindow.WindowStartupLocation = "CenterScreen"
+    $newWindow.WindowStyle = "None"
+    $newWindow.AllowsTransparency = $true
+    
+    # Create main border with rounded corners and shadow effect
+    $mainBorder = New-Object System.Windows.Controls.Border
+    $mainBorder.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(45, 45, 48))
+    $mainBorder.CornerRadius = "12"
+    $mainBorder.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $mainBorder.BorderThickness = "1"
+    $mainBorder.Margin = "10"
+    
+    # Drop shadow effect
+    $dropShadow = New-Object System.Windows.Media.Effects.DropShadowEffect
+    $dropShadow.Color = [System.Windows.Media.Colors]::Black
+    $dropShadow.ShadowDepth = 5
+    $dropShadow.BlurRadius = 15
+    $dropShadow.Opacity = 0.3
+    $mainBorder.Effect = $dropShadow
+    
+    $newWindow.Content = $mainBorder
     
     $stackPanel = New-Object System.Windows.Controls.StackPanel
-    $stackPanel.Margin = "20"
-    $newWindow.Content = $stackPanel
+    $stackPanel.Margin = "30"
+    $mainBorder.Child = $stackPanel
 
+    # Title with gradient effect
     $titleTextBlock = New-Object System.Windows.Controls.TextBlock
     $titleTextBlock.Text = $Title
-    $titleTextBlock.FontSize = 20
+    $titleTextBlock.FontSize = 22
     $titleTextBlock.FontWeight = "Bold"
-    $titleTextBlock.Foreground = [System.Windows.Media.Brushes]::White
+    $titleTextBlock.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(100, 181, 246))
     $titleTextBlock.HorizontalAlignment = "Center"
+    $titleTextBlock.Margin = "0,0,0,15"
     $stackPanel.Children.Add($titleTextBlock)
 
+    # Message text
     $messageTextBlock = New-Object System.Windows.Controls.TextBlock
     $messageTextBlock.Text = $Message
     $messageTextBlock.FontSize = 14
-    $messageTextBlock.Foreground = [System.Windows.Media.Brushes]::LightYellow
+    $messageTextBlock.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(220, 220, 220))
     $messageTextBlock.HorizontalAlignment = "Center"
-    $messageTextBlock.Margin = "0,10,0,0"
+    $messageTextBlock.TextWrapping = "Wrap"
+    $messageTextBlock.Margin = "0,0,0,20"
     $stackPanel.Children.Add($messageTextBlock)
 
+    # Close button with hover effects
     $closeButton = New-Object System.Windows.Controls.Button
     $closeButton.Content = "Close"
-    $closeButton.Width = 80
+    $closeButton.Width = 100
+    $closeButton.Height = 35
     $closeButton.HorizontalAlignment = "Center"
-    $closeButton.Background = [System.Windows.Media.Brushes]::LightSlateGray
+    $closeButton.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 175, 80))
     $closeButton.Foreground = [System.Windows.Media.Brushes]::White
-    $closeButton.Margin = "0,20,0,0"
+    $closeButton.BorderThickness = "0"
+    $closeButton.FontWeight = "Bold"
+    $closeButton.FontSize = 12
+    
+    # Button styling
+    $closeButton.Template = New-Object System.Windows.Controls.ControlTemplate
+    $closeButton.Style = New-Object System.Windows.Style
+    $closeButton.Style.TargetType = [System.Windows.Controls.Button]
+    
     $closeButton.Add_Click({ $newWindow.Close() })
     $stackPanel.Children.Add($closeButton)
+
+    # Make window draggable
+    $mainBorder.Add_MouseLeftButtonDown({
+        if ($_.LeftButton -eq [System.Windows.Input.MouseButtonState]::Pressed) {
+            $newWindow.DragMove()
+        }
+    })
 
     $newWindow.ShowDialog() | Out-Null
 }
@@ -71,7 +112,6 @@ function nw_pwsh_asadmin {
     Start-Process pwsh -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
 }
 
-
 function nw_pwsh {
     param (
         [scriptblock]$Command
@@ -79,11 +119,9 @@ function nw_pwsh {
     Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
 
-# $su = "C:\Users\nahid\scoop\shims\sudo.ps1"
-
 # Define the menu structure
 $menu = [ordered]@{
-    "Initial Setup" = [ordered]@{
+    "[+] Initial Setup" = [ordered]@{
         "PKG Manager & Must Apps" = {
             nw_pwsh -Command {
                 if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
@@ -215,7 +253,7 @@ $menu = [ordered]@{
             }
         }
     }
-    "Application Setup" = [ordered]@{
+    "[+] Application Setup" = [ordered]@{
         "jackett + qbittorrent" = {
             nw_pwsh -Command {
                 # cd C:\Users\nahid
@@ -251,23 +289,23 @@ $menu = [ordered]@{
             }
         }
     }
-    "Github Projects" = [ordered]@{
-        "Microsoft Activation Scripts (MAS)" = {
+    "[+] Github Projects" = [ordered]@{
+        "[*] Microsoft Activation Scripts (MAS)" = {
             nw_powershell_asadmin -Command {Invoke-RestMethod https://get.activated.win | Invoke-Expression}
         }
-        "ChrisTitus WinUtility" = {
+        "[+] ChrisTitus WinUtility" = {
             nw_powershell_asadmin -Command {Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression}
         }
-        "WIMUtil" = {
+        "[#] WIMUtil" = {
             nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | Invoke-Expression}
         }
-        "AppControl Manager" = {
+        "[!] AppControl Manager" = {
             nw_pwsh_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'AppControl'|Invoke-Expression}
         }
-        "Harden Windows Security Using GUI" = {
+        "[&] Harden Windows Security Using GUI" = {
             nw_powershell_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|Invoke-Expression}
         }
-        "Winhance" = {
+        "[~] Winhance" = {
             nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | Invoke-Expression}
         }
     }
@@ -276,87 +314,231 @@ $menu = [ordered]@{
 # Main Menu and Submenu in a side-by-side view
 function Show-MainMenu {
     $window = New-Object System.Windows.Window
-    $window.Title = "OS_v2"
-    $window.Width = 600
-    $window.Height = 500
-    $window.Background = [System.Windows.Media.Brushes]::DarkSlateGray
+    $window.Title = "OS Tools v2.0"
+    $window.Width = 800
+    $window.Height = 600
+    $window.Background = [System.Windows.Media.Brushes]::Transparent
     $window.WindowStartupLocation = "CenterScreen"
+    $window.WindowStyle = "None"
+    $window.AllowsTransparency = $true
+    
+    # Main container with rounded corners and gradient background
+    $mainBorder = New-Object System.Windows.Controls.Border
+    $mainBorder.CornerRadius = "15"
+    $mainBorder.BorderThickness = "2"
+    $mainBorder.Margin = "10"
+    
+    # Gradient background
+    $gradientBrush = New-Object System.Windows.Media.LinearGradientBrush
+    $gradientBrush.StartPoint = "0,0"
+    $gradientBrush.EndPoint = "1,1"
+    $gradientBrush.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(30, 30, 30), 0.0)))
+    $gradientBrush.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(45, 45, 48), 1.0)))
+    $mainBorder.Background = $gradientBrush
+    
+    # Border gradient
+    $borderGradient = New-Object System.Windows.Media.LinearGradientBrush
+    $borderGradient.StartPoint = "0,0"
+    $borderGradient.EndPoint = "1,1"
+    $borderGradient.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(100, 181, 246), 0.0)))
+    $borderGradient.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(156, 39, 176), 1.0)))
+    $mainBorder.BorderBrush = $borderGradient
+    
+    # Drop shadow effect
+    $dropShadow = New-Object System.Windows.Media.Effects.DropShadowEffect
+    $dropShadow.Color = [System.Windows.Media.Colors]::Black
+    $dropShadow.ShadowDepth = 8
+    $dropShadow.BlurRadius = 20
+    $dropShadow.Opacity = 0.4
+    $mainBorder.Effect = $dropShadow
+    
+    $window.Content = $mainBorder
 
-    # Grid Layout for side-by-side view
-    $grid = New-Object System.Windows.Controls.Grid
-    $grid.ShowGridLines = $false
-    $window.Content = $grid
+    # Main container
+    $mainContainer = New-Object System.Windows.Controls.DockPanel
+    $mainContainer.Margin = "20"
+    $mainBorder.Child = $mainContainer
 
-    # Define two columns (one for main menu, one for submenu)
+    # Title bar
+    $titleBar = New-Object System.Windows.Controls.Border
+    $titleBar.Height = 60
+    $titleBar.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(25, 25, 25))
+    $titleBar.CornerRadius = "10,10,0,0"
+    $titleBar.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $titleBar.BorderThickness = "0,0,0,1"
+    [System.Windows.Controls.DockPanel]::SetDock($titleBar, "Top")
+    $mainContainer.Children.Add($titleBar)
+
+    # Title content
+    $titleContent = New-Object System.Windows.Controls.Grid
+    $titleBar.Child = $titleContent
+
+    # App title
+    $appTitle = New-Object System.Windows.Controls.TextBlock
+    $appTitle.Text = "[OS Tools v2.0]"
+    $appTitle.FontSize = 24
+    $appTitle.FontWeight = "Bold"
+    $appTitle.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(100, 181, 246))
+    $appTitle.HorizontalAlignment = "Center"
+    $appTitle.VerticalAlignment = "Center"
+    $titleContent.Children.Add($appTitle)
+
+    # Close button
+    $closeBtn = New-Object System.Windows.Controls.Button
+    $closeBtn.Content = "✕"
+    $closeBtn.Width = 30
+    $closeBtn.Height = 30
+    $closeBtn.HorizontalAlignment = "Right"
+    $closeBtn.VerticalAlignment = "Center"
+    $closeBtn.Margin = "0,0,10,0"
+    $closeBtn.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(244, 67, 54))
+    $closeBtn.Foreground = [System.Windows.Media.Brushes]::White
+    $closeBtn.BorderThickness = "0"
+    $closeBtn.FontWeight = "Bold"
+    $closeBtn.Add_Click({ $window.Close() })
+    $titleContent.Children.Add($closeBtn)
+
+    # Content Grid Layout for side-by-side view
+    $contentGrid = New-Object System.Windows.Controls.Grid
+    $contentGrid.Margin = "10"
+    $mainContainer.Children.Add($contentGrid)
+
+    # Define two columns
     $column1 = New-Object System.Windows.Controls.ColumnDefinition
     $column1.Width = "2*"
     $column2 = New-Object System.Windows.Controls.ColumnDefinition
     $column2.Width = "3*"
-    $grid.ColumnDefinitions.Add($column1)
-    $grid.ColumnDefinitions.Add($column2)
+    $contentGrid.ColumnDefinitions.Add($column1)
+    $contentGrid.ColumnDefinitions.Add($column2)
 
     # Main Menu (Left Panel)
+    $mainMenuBorder = New-Object System.Windows.Controls.Border
+    $mainMenuBorder.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(35, 35, 35))
+    $mainMenuBorder.CornerRadius = "10"
+    $mainMenuBorder.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $mainMenuBorder.BorderThickness = "1"
+    $mainMenuBorder.Margin = "5"
+    [System.Windows.Controls.Grid]::SetColumn($mainMenuBorder, 0)
+    $contentGrid.Children.Add($mainMenuBorder)
+
     $mainMenuPanel = New-Object System.Windows.Controls.StackPanel
-    $mainMenuPanel.Margin = "10"
-    [System.Windows.Controls.Grid]::SetColumn($mainMenuPanel, 0)
-    $grid.Children.Add($mainMenuPanel)
+    $mainMenuPanel.Margin = "15"
+    $mainMenuBorder.Child = $mainMenuPanel
 
     $mainMenuTitle = New-Object System.Windows.Controls.TextBlock
-    $mainMenuTitle.Text = "Main Menu"
+    $mainMenuTitle.Text = ">> Categories"
     $mainMenuTitle.FontSize = 18
     $mainMenuTitle.FontWeight = "Bold"
-    $mainMenuTitle.Foreground = [System.Windows.Media.Brushes]::White
+    $mainMenuTitle.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(156, 39, 176))
     $mainMenuTitle.HorizontalAlignment = "Center"
+    $mainMenuTitle.Margin = "0,0,0,15"
     $mainMenuPanel.Children.Add($mainMenuTitle)
 
     # ListBox for main menu options
     $mainMenuListBox = New-Object System.Windows.Controls.ListBox
-    $mainMenuListBox.Background = [System.Windows.Media.Brushes]::White
-    $mainMenuListBox.Foreground = [System.Windows.Media.Brushes]::Black
+    $mainMenuListBox.Background = [System.Windows.Media.Brushes]::Transparent
+    $mainMenuListBox.BorderThickness = "0"
+    $mainMenuListBox.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(220, 220, 220))
     $mainMenuListBox.FontSize = 14
-    $mainMenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
+    $mainMenuListBox.FontWeight = "Medium"
+    $mainMenuListBox.SelectionMode = "Single"
 
-    $menu.Keys | ForEach-Object { $mainMenuListBox.Items.Add($_) }
+    $menu.Keys | ForEach-Object { 
+        $item = New-Object System.Windows.Controls.ListBoxItem
+        $item.Content = $_
+        $item.Padding = "10,8"
+        $item.Margin = "0,2"
+        $mainMenuListBox.Items.Add($item)
+    }
     $mainMenuPanel.Children.Add($mainMenuListBox)
 
     # Submenu (Right Panel)
+    $submenuBorder = New-Object System.Windows.Controls.Border
+    $submenuBorder.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(40, 40, 40))
+    $submenuBorder.CornerRadius = "10"
+    $submenuBorder.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $submenuBorder.BorderThickness = "1"
+    $submenuBorder.Margin = "5"
+    [System.Windows.Controls.Grid]::SetColumn($submenuBorder, 1)
+    $contentGrid.Children.Add($submenuBorder)
+
     $submenuPanel = New-Object System.Windows.Controls.StackPanel
-    $submenuPanel.Margin = "10"
-    [System.Windows.Controls.Grid]::SetColumn($submenuPanel, 1)
-    $grid.Children.Add($submenuPanel)
+    $submenuPanel.Margin = "15"
+    $submenuBorder.Child = $submenuPanel
 
     $submenuTitle = New-Object System.Windows.Controls.TextBlock
-    $submenuTitle.Text = "Submenu"
+    $submenuTitle.Text = ">> Tools"
     $submenuTitle.FontSize = 18
     $submenuTitle.FontWeight = "Bold"
-    $submenuTitle.Foreground = [System.Windows.Media.Brushes]::White
+    $submenuTitle.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 175, 80))
     $submenuTitle.HorizontalAlignment = "Center"
+    $submenuTitle.Margin = "0,0,0,15"
     $submenuPanel.Children.Add($submenuTitle)
 
     $submenuListBox = New-Object System.Windows.Controls.ListBox
-    $submenuListBox.Background = [System.Windows.Media.Brushes]::Black
-    $submenuListBox.Foreground = [System.Windows.Media.Brushes]::White
+    $submenuListBox.Background = [System.Windows.Media.Brushes]::Transparent
+    $submenuListBox.BorderThickness = "0"
+    $submenuListBox.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(220, 220, 220))
     $submenuListBox.FontSize = 14
-    $submenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
+    $submenuListBox.SelectionMode = "Single"
     $submenuPanel.Children.Add($submenuListBox)
+
+    # Status bar
+    $statusBar = New-Object System.Windows.Controls.TextBlock
+    $statusBar.Text = ">> Double-click an item to execute - Right-click for options"
+    $statusBar.FontSize = 12
+    $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
+    $statusBar.HorizontalAlignment = "Center"
+    $statusBar.Margin = "0,10,0,0"
+    $submenuPanel.Children.Add($statusBar)
 
     # Event handler to populate submenu based on main menu selection
     $mainMenuListBox.Add_SelectionChanged({
         $submenuListBox.Items.Clear()
-        $selectedMainMenu = $mainMenuListBox.SelectedItem
-        if ($selectedMainMenu -and $menu.Contains($selectedMainMenu)) {
-            $menu[$selectedMainMenu].Keys | ForEach-Object { $submenuListBox.Items.Add($_) }
+        $selectedItem = $mainMenuListBox.SelectedItem
+        if ($selectedItem) {
+            $selectedMainMenu = $selectedItem.Content
+            if ($selectedMainMenu -and $menu.Contains($selectedMainMenu)) {
+                $menu[$selectedMainMenu].Keys | ForEach-Object { 
+                    $subItem = New-Object System.Windows.Controls.ListBoxItem
+                    $subItem.Content = $_
+                    $subItem.Padding = "10,8"
+                    $subItem.Margin = "0,2"
+                    $submenuListBox.Items.Add($subItem)
+                }
+            }
         }
     })
 
     # Event handler for double-click on submenu to run command
     $submenuListBox.Add_MouseDoubleClick({
-        $selectedMainMenu = $mainMenuListBox.SelectedItem
-        $selectedSubMenu = $submenuListBox.SelectedItem
-        if ($selectedMainMenu -and $selectedSubMenu -and $menu.Contains($selectedMainMenu) -and $menu[$selectedMainMenu].Contains($selectedSubMenu)) {
-            . ($menu[$selectedMainMenu][$selectedSubMenu])
+        $selectedMainItem = $mainMenuListBox.SelectedItem
+        $selectedSubItem = $submenuListBox.SelectedItem
+        if ($selectedMainItem -and $selectedSubItem) {
+            $selectedMainMenu = $selectedMainItem.Content
+            $selectedSubMenu = $selectedSubItem.Content
+            if ($selectedMainMenu -and $selectedSubMenu -and $menu.Contains($selectedMainMenu) -and $menu[$selectedMainMenu].Contains($selectedSubMenu)) {
+                $statusBar.Text = ">> Executing: $selectedSubMenu"
+                $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 175, 80))
+                . ($menu[$selectedMainMenu][$selectedSubMenu])
+                Start-Sleep -Milliseconds 2000
+                $statusBar.Text = ">> Double-click an item to execute - Right-click for options"
+                $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
+            }
         }
     })
+
+    # Make window draggable
+    $titleBar.Add_MouseLeftButtonDown({
+        if ($_.LeftButton -eq [System.Windows.Input.MouseButtonState]::Pressed) {
+            $window.DragMove()
+        }
+    })
+
+    # Auto-select first item
+    if ($mainMenuListBox.Items.Count -gt 0) {
+        $mainMenuListBox.SelectedIndex = 0
+    }
 
     # Show the main window
     $window.ShowDialog() | Out-Null
