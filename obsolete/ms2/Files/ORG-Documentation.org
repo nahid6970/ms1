@@ -1,0 +1,50 @@
+
+* ORG Documentation
+** Org Functionality
+#+BEGIN_SRC 
+| ORG Functionality  | Sign                            | Example                                | Details / Usage                  |
+|--------------------+---------------------------------+----------------------------------------+----------------------------------|
+| <A                 |                                 |                                        | #+ASCII:                         |
+| <a                 |                                 |                                        | #+BEGIN_ASCII #+END_ASCII        |
+| <c                 |                                 |                                        | #+BEGIN_CENTER #+END_CENTER      |
+| <e                 |                                 |                                        | #+BEGIN_EXAMPLE #+END_EXAMPLE    |
+| <h                 |                                 |                                        | #+BEGIN_HTML #+END_HTML          |
+| <H                 |                                 |                                        | #+HTML:                          |
+| <I                 |                                 | #+INCLUDE: "path\to\file" :lines "0-5" | #+INCLUDE:                       |
+| <i                 | #+INDEX:                        |                                        |                                  |
+| <l                 |                                 |                                        | #+BEGIN_LaTeX #+END_LaTeX        |
+| <L                 | #+LaTeX:                        |                                        |                                  |
+| <q                 |                                 |                                        | #+BEGIN_QUOTE #+END_QUOTE        |
+| <s                 |                                 |                                        | #+BEGIN_SRC #+END_SRC            |
+| <v                 |                                 |                                        | #+BEGIN_VERBATIM #+END_VERBATIM  |
+| <v                 |                                 |                                        | #+BEGIN_VERSE #+END_VERSE        |
+| Bold               | **                              | **Hello World**                        | ** before and after text         |
+| Check / Uncheck    | - [ ]                           | - [ ] Not Done                         |                                  |
+| Check / Uncheck    | - [X]                           | - [X] Done                             |                                  |
+| Code               | = or ~                          | =Hello World=                          | = or ~ befor and after text      |
+| Display Math Mode: | $$                              | $$E=mc^2$$                             | middle                           |
+| Hide Word          | \                               | \This                                  | \ before the word                |
+| Horizontal Rule    | -----                           | -----                                  | ----- in a line without any text |
+| Inline Math Mode:  | $                               | $E=mc^2$                               | left side                        |
+| Italicize          | /                               | /Hello World/                          | / before and after text          |
+| Strikethrough      | +                               | +Hello World+                          | + before and after text          |
+| Underline          | _                               | _Hello World_                          | _ before and after text          |
+| Span               | [[]]                            | [[text]]                               |                                  |
+| Span               | \{}{}                           | \textcolor{red}{Text}                  |                                  |
+| Span               | \( \)                           | \( Text \)                             |                                  |
+| Superscript        | ^                               | ^Superscript                           |                                  |
+| Subscript          | _                               | _Subscript                             |                                  |
+| Hyperlink          | [[URL][description]]            |                                        |                                  |
+| image src          | [[file:path/to/image.png]]      |                                        |                                  |
+| Custom ID          | [[#custom-id][Link to Section]] |                                        |                                  |
+| Caption            | #+CAPTION:                      |                                        |                                  |
+| FootNote           | [[fn:number]]                   |                                        |                                  |
+
+#+END_SRC
+
+
+
+
+
+
+

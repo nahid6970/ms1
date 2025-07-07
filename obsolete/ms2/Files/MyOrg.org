@@ -1,0 +1,679 @@
+#+OPTIONS: author:nil date:nil title:nil
+#+HTML_HEAD: <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style//org.css">
+#+BEGIN_HTML
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+#+END_HTML
+
+#+HTML: <details><summary>Org-Documentation</summary>
+#+INCLUDE: "C:\ms2\Files\ORG-Documentation.org"
+#+HTML: </details>
+
+
+* Windows Shell Directory
+- shell:appsfolder
+- shell:startup
+
+
+* Android 📱
+** Application 📱
+#+BEGIN_HTML
+<!--1111WARP              --> <span> <a href="https://play.google.com/store/apps/details?id=com.cloudflare.onedotonedotonedotone         ">1111WARP              </a></span>
+<!--1DM                   --> <span> <a href="https://play.google.com/store/apps/details?id=idm.internet.download.manager                ">1DM                   </a></span>
+<!--AIMP                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.aimp.player&hl=en&gl=US                  ">AIMP                  </a></span>
+<!--App Ops               --> <span> <a href="https://play.google.com/store/apps/details?id=rikka.appops&hl=en_US                        ">App Ops               </a></span>
+<!--Audiorelay            --> <span> <a href="https://audiorelay.net                                                                     ">Audiorelay            </a></span>
+<!--Authenticator         --> <span> <a href="https://authenticatorpro.jmh.me                                                            ">Authenticator         </a></span>
+<!--Automate              --> <span> <a href="https://play.google.com/store/apps/details?id=com.llamalab.automate&hl=en&gl=US            ">Automate              </a></span>
+<!--BCSProstuti           --> <span> <a href="https://play.google.com/store/apps/details?id=com.bcsprostuti.tanim.bcsprostuti&hl=en&gl=US">BCSProstuti           </a></span>
+<!--Bing AI               --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.bing                           ">Bing AI               </a></span>
+<!--Chat AI               --> <span> <a href="https://play.google.com/store/apps/details?id=com.openai.chatgpt                           ">Chat AI               </a></span>
+<!--Daraz                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.daraz.android                            ">Daraz                 </a></span>
+<!--Discord               --> <span> <a href="https://play.google.com/store/apps/details?id=com.discord                                  ">Discord               </a></span>
+<!--droid ify             --> <span> <a href="https://github.com/Droid-ify/client/releases                                               ">droid ify             </a></span>
+<!--Droidfs               --> <span> <a href="https://github.com/hardcore-sushi/DroidFS/releases                                         ">Droidfs               </a></span>
+<!--Excel                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.office.excel                   ">Excel                 </a></span>
+<!--Facebook              --> <span> <a href="https://play.google.com/store/apps/details?id=com.facebook.katana                          ">Facebook              </a></span>
+<!--Feeder                --> <span> <a href="https://play.google.com/store/apps/details?id=com.nononsenseapps.feeder.play               ">Feeder                </a></span>
+<!--Formulia              --> <span> <a href="https://play.google.com/store/apps/details?id=m4.enginary&hl=en&gl=US                      ">Formulia              </a></span>
+<!--Game Guardian         --> <span> <a href="https://gameguardian.net/forum/files/file/2-gameguardian                                   ">Game Guardian         </a></span>
+<!--Github                --> <span> <a href="https://play.google.com/store/apps/details?id=com.github.android                           ">Github                </a></span>
+<!--Google Drive          --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs&hl=en&gl=US     ">Google Drive          </a></span>
+<!--Google Photos         --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.photos               ">Google Photos         </a></span>
+<!--InviZible             --> <span> <a href="https://play.google.com/store/apps/details?id=pan.alexander.tordnscrypt.gp                 ">InviZible             </a></span>
+<!--jobcircular           --> <span> <a href="https://play.google.com/store/apps/details?id=com.careerguidebd.jobcircular                ">jobcircular           </a></span>
+<!--Keep                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.android.keep                      ">Keep                  </a></span>
+<!--Kiwi                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.kiwibrowser.browser                      ">Kiwi                  </a></span>
+<!--Kotatsu               --> <span> <a href="https://github.com/KotatsuApp/Kotatsu/releases                                             ">Kotatsu               </a></span>
+<!--LSPosed               --> <span> <a href="https://github.com/LSPosed/LSPosed                                                         ">LSPosed               </a></span>
+<!--MacroDroid            --> <span> <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid&hl=en&gl=US&pli=1    ">MacroDroid            </a></span>
+<!--Magisk                --> <span> <a href="https://github.com/topjohnwu/Magisk                                                        ">Magisk                </a></span>
+<!--Magnet                --> <span> <a href="https://play.google.com/store/apps/details?id=app.magnetx.magnetx                          ">Magnet                </a></span>
+<!--Material FIles        --> <span> <a href="https://play.google.com/store/apps/details?id=me.zhanghai.android.files                    ">Material FIles        </a></span>
+<!--MEGA                  --> <span> <a href="https://play.google.com/store/apps/details?id=mega.privacy.android.app                     ">MEGA                  </a></span>
+<!--Microsoft 365         --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.office.officehubrow            ">Microsoft 365         </a></span>
+<!--MyGP                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.portonics.mygp                           ">MyGP                  </a></span>
+<!--MyTeletalk            --> <span> <a href="https://play.google.com/store/apps/details?id=teletalk.teletalkcustomerapp                 ">MyTeletalk            </a></span>
+<!--Nagad                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.konasl.nagad                             ">Nagad                 </a></span>
+<!--NewPipe               --> <span> <a href="https://github.com/TeamNewPipe/NewPipe/releases                                            ">NewPipe               </a></span>
+<!--Nextplayer            --> <span> <a href="https://github.com/anilbeesetti/nextplayer/releases                                        ">Nextplayer            </a></span>
+<!--NOVA Video Player     --> <span> <a href="https://play.google.com/store/apps/details?id=org.courville.nova&hl=en&gl=US               ">NOVA Video Player     </a></span>
+<!--OneDrive              --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.skydrive&hl=en&gl=US           ">OneDrive              </a></span>
+<!--OneNote               --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.office.onenote                 ">OneNote               </a></span>
+<!--Perplexity            --> <span> <a href="https://play.google.com/store/apps/details?id=ai.perplexity.app.android                    ">Perplexity            </a></span>
+<!--Quran                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.quranapp.android                         ">Quran                 </a></span>
+<!--Rclone                --> <span> <a href="https://github.com/x0b/rcx/releases/tag/v1.12.2                                            ">Rclone                </a></span>
+<!--RemoteDesktop         --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.chromeremotedesktop               ">RemoteDesktop         </a></span>
+<!--Seal                  --> <span> <a href="https://github.com/JunkFood02/Seal/releases                                                ">Seal                  </a></span>
+<!--Shizuku               --> <span> <a href="https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api                   ">Shizuku               </a></span>
+<!--Shortcut Maker        --> <span> <a href="https://play.google.com/store/apps/details?id=rk.android.app.shortcutmaker                 ">Shortcut Maker        </a></span>
+<!--Showly OSS            --> <span> <a href="https://github.com/1RandomDev/showly-oss/releases                                          ">Showly OSS            </a></span>
+<!--Tailwind CSS          --> <span> <a href="https://play.google.com/store/apps/details?id=net.golbarg.tailwind                         ">Tailwind CSS          </a></span>
+<!--Telegram              --> <span> <a href="https://play.google.com/store/apps/details?id=org.telegram.messenger                       ">Telegram              </a></span>
+<!--Termux                --> <span> <a href="https://github.com/termux/termux-app/releases                                              ">Termux                </a></span>
+<!--Tooly                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.yousx.thetoolsapp                        ">Tooly                 </a></span>
+<!--Ultimate Job Solutions--> <span> <a href="https://play.google.com/store/apps/details?id=com.aisolutionsbd.jobsolutions&hl=en&gl=US   ">Ultimate Job Solutions</a></span>
+<!--Warden                --> <span> <a href="https://www.apkmirror.com/apk/aurora-oss/warden">Warden</a></span>
+<!--Whatsapp              --> <span> <a href="https://play.google.com/store/apps/details?id=com.whatsapp">Whatsapp</a></span>
+<!--YTDLnis               --> <span> <a href="https://github.com/deniscerri/ytdlnis/releases">YTDLnis</a></span>
+<!--nzb360_Sonarr_Radarr_SAB--><span><a href="https://play.google.com/store/apps/details?id=com.kevinforeman.nzb360&hl=en&gl=US">nzb360_Sonarr_Radarr_SAB</a></span>
+#+END_HTML
+- [[https://www.youtube.com/watch?v=BWgh6pH72Fc&t=470s][Encrypt & Decrypt Device]]
+
+** Termux
+*** Termux Commands
+- [[https://www.learntermux.tech/2020/01/basic-commands-in-termux.html?m=1][Learn Termux]]
+- [[https://wiki.termux.com/wiki/Touch_Keyboard][Termux Keyboard]]
+- alias alias_name='command' 
+- unalias 
+- termux-setup-storage 
+- cd storage/shared/ 
+- pkg update -y && pkg upgrade -y 
+- pkg in 
+- apt update -y && apt upgrade -y 
+- pkg install rclone python tealdeer tsu -y 
+- git clone https://github.com/h4ck3r0/Termux-os && cd Termux-os && bash os.sh
+
+*** Termux rclone
+- rclone copy storage/shared/rclone.conf /data/data/com.termux/files/home/.config/rclone/
+- rclone sync gu:/song/ storage/shared/song/ -P --track-renames --ignore-existing --fast-list
+
+* How to 🤔
+** Align by RegEx
+- remove all unnecessary spaces 
+- Pressing Ctrl+F -> enter \s+. -> is a regular expression -> any number of whitespace characters.
+- to use align by regix on any other sign use \ first then the symber for others \ not necessary
+- works only on first one
+
+** Align-column
+- go to command pallet
+- use this sign colon : and enter
+- ,<>
+- works on all matched item
+
+* PWSH Command List
+** Most Useful and Summarized
+- Get-Process | Where-Object { $_.Name -like "*name*" }
+- Start-Process name -verb Runas
+- Stop-Process -Name name
+- Start-Sleep -seconds 5
+- winget list | Select-String -Pattern 'name'
+- curl ifconfig.me # Public IPv4 address
+- iex (Invoke-RestMethod -Uri "https://raw.githubusercontent.com/nahid6970/ms2/main/ytc.ps1")
+- $env:USERNAME #to find username
+- scp twrp-3.7.0_9-0-davinci.img nahid@192.168.1.101:/D:/  #[openssh copy files from android to pc]
+- netplwiz #winaero auto login check email password
+
+** Extra
+- Set-ExecutionPo1icy -ExecutionPo1icy Bypass -Scope Process
+- pwsh.exe -command "command" /or/ pwsh.exe -c command
+- pwsh -c pause | command [not to close window ]
+- Copy-Item -Path "path" -Destination "path" -Force
+- powershell.exe -ExecutionPolicy Unrestricted -NoLogo -File "$(FULL_CURRENT_PATH)" -NoExit
+- Measure-Command {pwsh-command} #(time takes to run command)
+
+** Port Related
+- Get-NetTCPConnection
+- Get-NetTCPConnection | where Localport -eq 7878 | select Localport,OwningProcess
+
+** Get-Process
+- Get-Process | Where-Object { $_.Name -like "$partialName" }
+- Get-Process [[-Name] <string[]>] [-Module] [-FileVersionInfo] []
+- Get-Process [[-Name] <string[]>] -IncludeUserName []
+- Get-Process -Id <int[]> [-Module] [-FileVersionInfo] []
+- Get-Process -Id <int[]> -IncludeUserName []
+- Get-Process -InputObject <Process[]> [-Module] [-FileVersionInfo] []
+- Get-Process -InputObject <Process[]> -IncludeUserName []
+
+** Start-Process
+- Start-Process pwsh -Verb runAs
+- Start-Process appname -Verb runAs
+- Start-Process [-FilePath] [[-ArgumentList] <string[]>] [-Credential ] [-WorkingDirectory ] [-LoadUserProfile] [-NoNewWindow] [-PassThru] [-RedirectStandardError ] [-RedirectStandardInput ] [-RedirectStandardOutput ] [-WindowStyle ] [-Wait] [-UseNewEnvironment] [-WhatIf] [-Confirm] []
+- Start-Process [-FilePath] [[-ArgumentList] <string[]>] [-WorkingDirectory ] [-PassThru] [-Verb ] [-WindowStyle ] [-Wait] [-WhatIf] [-Confirm] []
+
+** Stop-Process
+- Stop-Process -Name AutoHotkeyU64
+- Stop-Process [-Id] <int[]> [-PassThru] [-Force] [-WhatIf] [-Confirm] []
+- Stop-Process -Name <string[]> [-PassThru] [-Force] [-WhatIf] [-Confirm] []
+- Stop-Process [-InputObject] <Process[]> [-PassThru] [-Force] [-WhatIf] [-Confirm] []
+
+** mklink
+- mklink "fake" "main" #[cmd]
+- New-Item -ItemType HardLink -Path "fake" -Target "main" #[pwsh]
+- New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force #[pwsh]
+
+** Functions
+- function Copy-WithProgressBar {param($Source,$Destination)$fileSize=(Get-Item $Source).length;$bytesCopied=0;$progress=0;$reader=[System.IO.File]::OpenRead($Source);$writer=[System.IO.File]::OpenWrite($Destination);$bufferSize=4096;$buffer=New-Object byte[] $bufferSize;while($bytesRead=$reader.Read($buffer,0,$bufferSize)){$writer.Write($buffer,0,$bytesRead);$bytesCopied+=$bytesRead;$progress=$bytesCopied/$fileSize*100;Write-Progress -PercentComplete $progress -Activity "Copying $Source to $Destination"}$reader.Close();$writer.Close()}
+
+
+* Others
+- rclone config paths
+- Location-Related
+- C:\Users\nahid\AppData\Roaming\Microsoft\Windows\SendTo
+- Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+
+* Initial Setup 🎯
+- Jackett
+  - C:\Users\nahid\AppData\Local\qBittorrent\nova3\engines\jackett.json
+- Ditto
+  - setup shortcuts for ctrl+alt+1/2/3 for past
+- OH.MY.POSH
+  - oh-my-posh font install --victoria --firecode --terminus --meslo --hack
+  - oh-my-posh init pwsh --config 'path in scoop folder' | Invoke-Expression #pwsh profile
+- Tailwind
+  - install node.js using scoop
+  - open the folder using vscode
+  - cd to the directory
+  - npm init
+  - npm install -D tailwindcss
+  - npx tailwindcss init --full
+  - always cd to that folder and
+  - always keep below command running
+  - npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch
+
+
+
+* Mklink ⤨
+- rclone-config 
+  - Start-Process "C:\Users\nahid\scoop\apps\rclone\current\" -Confirm
+  - New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rclone\current\rclone.conf" -Target "D:\@git\ms1\mklink\rclone.conf" -Confirm 
+
+- Powershell-Profile 
+  - Start-Process "C:\Users\nahid\OneDrive\Documents\PowerShell\" -Confirm
+  - =New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" -Target "D:\@git\ms1\mklink\PowerShell.Profile.txt" -Confirm=
+
+- Windows-Terminal-Preview
+  - =Start-Process "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\" -Confirm=
+  - =New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json" -Target "D:\@git\ms1\mklink\WindowsTerminal.Profile.json" -Confirm=
+
+- Neovim
+  - mkdir C:\Users\nahid\AppData\Local\nvim -Confirm
+  - Start-Process "C:\Users\nahid\AppData\Local\nvim" -Confirm
+  - =New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Local\nvim\init.lua" -Target "D:\@git\ms1\mklink\nvim_init.lua" -Confirm=
+
+
+
+
+* Package Manager
+** Scoop
+- iex (new-object net.webclient).downloadstring('https://get.scoop.sh') 
+- =scoop config cache_Path D:\@install\scoop\cache=
+*** Scoop Add Buckets
+- Usage: scoop bucket add|list|known|rm [<args>] 
+- scoop bucket add main 
+- scoop bucket add extras 
+- scoop bucket add versions 
+- scoop bucket add nonportable 
+- scoop bucket add games 
+*** Scoop Commands
+- Set-Alias -Name fake -Value real 
+- del .\scoop -Force
+- scoop update
+- scoop update *
+- scoop cleanup *
+- scoop status
+- scoop list | foreach { scoop update $_.Name }
+- scoop cache rm * #To clear everything in your cache
+- scoop export > D:\@git\ms1\asset\scoop\scoop-apps.txt #(backup scoop apps settings)
+- scoop import D:\@git\ms1\asset\scoop\scoop-apps.txt #(restore settings)
+
+** Winget
+| Winget    | Commands Details                            |
+|-----------+---------------------------------------------|
+| install   | Installs the given package                  |
+| show      | Shows information about a package           |
+| source    | Manage sources of packages                  |
+| search    | Find and show basic info of packages        |
+| list      | Display installed packages                  |
+| upgrade   | Shows and performs available upgrades       |
+| uninstall | Uninstalls the given package                |
+| hash      | Helper to hash installer files              |
+| validate  | Validates a manifest file                   |
+| settings  | Open settings or set administrator settings |
+| features  | Shows the status of experimental features   |
+| export    | Exports a list of the installed packages    |
+| import    | Installs all the packages in a file         |
+| pin       | Manage package pins                         |
+
+** Git Command List
+| cd to local file where u can see the .git folder dont have to go to |
+| that folders                                                        |
+| git init #initialize a folder as git repository                     |
+| git add .                                                           |
+| git commit -m "Your commit message here"                            |
+| git pull origin main && git push origin main                        |
+| git add . && git commit -m "comment" && git pull origin main && git |
+| push origin main                                                    |
+| #dont-work-for-pull                                                 |
+| git pull                                                            |
+
+* PC
+** Software 🖥️
+|                | Name                          | Src or Command                                             |
+|----------------+-------------------------------+------------------------------------------------------------|
+| .Driver        | .NET 6.0                      | https://dotnet.microsoft.com/en-us/download                |
+|                | ACK                           | scoop install ack                                          |
+|                | adb                           | scoop install adb                                          |
+|                | Alacritty                     | scoop install Alacritty                                    |
+|                | aria2                         | scoop install aria2                                        |
+|                | AudioRelay                    | winget install AudioRelay                                  |
+|                | AutoHotKey                    | scoop install autohotkey1.1<br>autohotkey                  |
+| Game           | Cheat.Engine                  | choco install cheatengine -y                               |
+|                | Chrome_Remote_Desktop         | winget install ChromeRemoteDesktop                         |
+|                | clangd                        | scoop install clangd                                       |
+|                | cmake                         | scoop install cmake                                        |
+| .Driver        | DirectX                       | winget install Microsoft.DirectX                           |
+|                | Ditto                         | scoop install Ditto                                        |
+|                | FDM                           | scoop install freedownloadmanager                          |
+|                | ffmpeg                        | scoop install ffmpeg                                       |
+|                | FFmpeg_Batch_AV_Converter     | scoop install ffmpeg-batch                                 |
+|                | Foxit_Reader                  | scoop install foxit-reader                                 |
+|                | gcc                           | scoop install gcc                                          |
+| Developer_Tool | Git                           | scoop install git                                          |
+|                | Github_Desktop                | scoop install github                                       |
+|                | Google_Chrome                 | https://www.google.com/chrome/                             |
+|                | IDM                           | winget install IDM                                         |
+|                | imagemagick                   | scoop install imagemagick                                  |
+| Server         | Jackett                       | scoop install jackett                                      |
+| Server         | Jellyfin Media Player         | https://github.com/jellyfin/jellyfin-media-player/releases |
+| Server         | Jellyfin Server               | https://repo.jellyfin.org/releases/server/windows/stable/  |
+|                | kate                          | scoop install kate                                         |
+|                | keypirinha                    | scoop install keypirinha                                   |
+|                | lazygit                       | scoop install lazygit                                      |
+|                | libreoffice                   | scoop install libreoffice                                  |
+|                | Lite_XL                       | scoop install lite-xl                                      |
+| Share          | localsend                     | scoop install localsend                                    |
+|                | make                          | scoop install make                                         |
+|                | Microsoft_PC_Manager          | https://pcmanager.microsoft.com/en-us                      |
+|                | MS-Office                     | MS-OFFICE                                                  |
+| Zip            | NanaZip                       | winget install M2Team.NanaZip                              |
+| Editor         | Nano                          | scoop install nano                                         |
+| Share          | NearbyShare                   | winget install Google.NearbyShare                          |
+| Editor         | NeoVim                        | scoop install NeoVim                                       |
+| Developer_Tool | Node.js                       | scoop install nodejs                                       |
+| Editor         | Notepad++                     | scoop install notepadplusplus                              |
+|                | Oh_My_Posh                    | scoop install oh-my-posh                                   |
+| Cloud_Storage  | OneDrive                      | winget install Microsoft.OneDrive                          |
+|                | Oracle.JavaRuntimeEnvironment | winget install Oracle.JavaRuntimeEnvironment               |
+|                | Pandoc                        | scoop install Pandoc                                       |
+|                | perl                          | scoop install perl                                         |
+|                | Phantomjs                     | scoop install phantomjs<br>phantomjs19                     |
+| Media          | Potplayer                     | scoop install potplayer                                    |
+| Tool           | Powertoys                     | scoop install powertoys                                    |
+| Developer_Tool | Pwsh                          | https://github.com/PowerShell/PowerShell/releases          |
+| Developer_Tool | Python                        | scoop install python<br>python-alpha<br>python-beta        |
+|                | qBittorrent                   | winget install qBittorrent.qBittorrent                     |
+|                | Radarr                        | https://radarr.video/                                      |
+|                | Rclone                        | scoop install rclone<br>rclone-beta                        |
+|                | Ruffle_Nightly                | scoop install ruffle-nightly                               |
+|                | Rufus                         | scoop install rufus                                        |
+|                | scoop-completion              | scoop install scoop-completion                             |
+|                | scoop-search                  | scoop install scoop-search                                 |
+|                | scrcpy                        | scoop install scrcpy                                       |
+|                | Shell                         | scoop install nilesoft-shell                               |
+|                | simplewall                    | scoop install simplewall                                   |
+|                | Sonarr                        | https://sonarr.tv/                                         |
+|                | Syncthing                     | https://syncthing.net/downloads/                           |
+|                | Sysinternals                  | scoop install sysinternals                                 |
+|                | tldr                          | scoop install tldr                                         |
+|                | trafficmonitor                | scoop install trafficmonitor<br>trafficmonitor-lite        |
+|                | vcredist                      | scoop install vcredist2022<br>vcredist<br>vcredist-aio     |
+|                | ventoy                        | scoop install ventoy                                       |
+|                | VScode                        | scoop install vscode                                       |
+|                | wget                          | scoop install wget                                         |
+|                | winaero_tweaker               | scoop install winaero-tweaker                              |
+|                | Windows_Terminal              | Microsoft.WindowsTerminal.Preview                          |
+|                | winget                        | scoop install winget                                       |
+|                | Wise.Program.Uninstaller      | WiseCleaner.WiseProgramUninstaller                         |
+|                | wiztree                       | scoop install wiztree                                      |
+|                | WSA_System_Control            | infinitepower18.WSASystemControl                           |
+|                | yt_dlp                        | scoop install yt-dlp                                       |
+|                | Lidarr                        | https://lidarr.audio/                                      |
+|                | Prowlarr                      | https://prowlarr.com/                                      |
+
+
+
+** Additional Software
+- [AudioRelay](https://audiorelay.net/downloads) 
+- [AutoHotkey](https://www.autohotkey.com/) 
+- [DirectX](https://www.microsoft.com/en-US/download/details.aspx?id=35) 
+- [Jackett](https://github.com/Jackett/Jackett/releases) 
+- [qBittorrent](https://www.qbittorrent.org/download) 
+- [Chrome-remote-Desktop](https://remotedesktop.google.com/home) 
+- [Nilesoft Shell](https://nilesoft.org/) 
+- [Microsoft Visual C++](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+- [Wise.Program.Uninstaller](https://www.wisecleaner.com/wise-program-uninstaller.html) 
+- Alacritty https://github.com/alacritty/alacritty/releases 
+- neovim
+  - https://dotfyle.com/plugins/kyazdani42/nvim-tree.lua 
+  - https://github.com/nvim-lua/kickstart.nvim 
+  - https://neovim.io/ 
+  - https://www.youtube.com/watch?v=stqUbv-5u2s 
+- Google.NearbyShare [[https://www.android.com/better-together/nearby-share-app/][Link]]
+- Nano https://github.com/scopatz/nanorc 
+- vscode extensions
+| VScode-Align by RegEx  | janjoerke.align-by-regex                  |
+| vscode-aligncoulmn     | jca02266.align-columns                    |
+| VScode-HTML.Preview    | george-alisson.html-preview-vscode        |
+| VScode-Inline.Fold     | moalamri.inline-fold                      |
+| VSCode-Neovim          | asvetliakov.vscode-neovim                 |
+| VScode-Nilesoft.Shell  | code-nature.nilesoft-shell-file-formatter |
+| VScode-PowerShell      | ms-vscode.powershell                      |
+| VScode-Table.Formatter | shuworks.vscode-table-formatter           |
+
+
+
+
+
+
+* Key Binding ⌨️
+** PWSH
+| PWSH Keybinding | Objective                    |
+|-----------------+------------------------------|
+| Ctrl+Space      | Auto Completion Scoop/Winget |
+| Ctrl+Space      | Scoop-Completion             |
+| F2              | Suggestions                  |
+
+** VScode
+| Functionality | Vscode Keybinding   | Objective                                               | Editor.Code.Command                                  |
+|---------------+---------------------+---------------------------------------------------------+------------------------------------------------------|
+| Align         | Alt+Shift+;         | Align Multi Coulmns By Separator                        |                                                      |
+| Align         | Alt+Shift+R         | Align By Regex                                          |                                                      |
+| Bookmark      | Ctrl+B Ctrl+B       | Bookmark Line                                           |                                                      |
+| Bookmark      | Ctrl+B Ctrl+L       | List All Bookmark Lines                                 |                                                      |
+| Comment       | Alt+Shift+A         | Comment                                                 |                                                      |
+| Comment       | Ctrl+K Ctrl+C       | Comment                                                 |                                                      |
+| Copy          | Alt+Shift+Up/Down   | Copy The Same Line                                      |                                                      |
+| Delete        | ctrl+num1 ctrl+num1 | --Delete Duplicate lines                                | editor.action.removeDuplicateLines                   |
+| Delete        | Ctrl+Shift+K        | --Delete lines                                          | editor.action.deleteLines                            |
+| File (New)    | Ctrl+N              | New File                                                | workbench.action.files.newUntitledFile               |
+| File (Recent) | Ctrl+R              | Show Recent Files                                       |                                                      |
+| Fold / Unfold | Ctrl+F Ctrl+A       | Fold All                                                |                                                      |
+| Fold / Unfold | Ctrl+F Ctrl+U       | Unfold All                                              |                                                      |
+| GoTo          | Ctrl+K Ctrl+S       | Keyboard Shortcuts                                      |                                                      |
+| Line          | Alt+J               | --Join Lines                                            | editor.action.joinLines                              |
+| MiniMap       | alt+m               | --minimap toogle                                        | editor.action.toggleMinimap                          |
+| Neovim        | Ctrl+Alt+Shift+M    | Disable Neovim                                          |                                                      |
+| Neovim        | Ctrl+Alt+Shift+N    | Enable Neovim                                           |                                                      |
+| Preview       | Alt+L Alt+O         | Live Server                                             |                                                      |
+| Preview       | Ctrl+Shift+V        | Preview                                                 |                                                      |
+| Selection     | Alt+Shift+M1        | For Coulmns Select First Point & Alt+Shift & Last Point |                                                      |
+| Selection     | Alt+Shift+Right     | Select All Text Between Quates                          |                                                      |
+| Selection     | Ctrl+Alt+Up/Down    | Add Cursor Above/Below                                  |                                                      |
+| Selection     | Ctrl+F2             | Select All Similar Words Simultaneously                 |                                                      |
+| Sort          | Alt+Shift+S         | --Sort Lines Ascending                                  | editor.action.sortLinesAscending                     |
+| Split         |                     | --duplicates all tabs view                              | workbench.action.duplicateActiveEditorGroup ⬅️⬆️⬇️➡️ |
+| Split         |                     | --split and mirror current window                       | workbench.action.splitEditor ⬅️⬆️⬇️➡️                |
+| Split         |                     | --splits into empty window                              | workbench.action.newGroup ⬅️⬆️⬇️➡️                   |
+| Table         | Ctrl+Q Ctrl+F       | Format As Table Org Mode                                |                                                      |
+| Table         | Ctrl+T Ctrl+T       | Table Format Properly                                   |                                                      |
+| Terminal      | Ctrl+Shift+~        | Terminal.New                                            |                                                      |
+| Terminal      | Ctrl+Shift+5        | Terminal.Split                                          |                                                      |
+| Selection     | ctrl+D              | select next match                                       |                                                      |
+
+
+- **emmet
+- **org related keybinding
+
+** Windows-Terminal
+| Windows Terminal Keybinding | Objective                             |
+|-----------------------------+---------------------------------------|
+| Alt+Shift+Plus              | Split Screen (Vertically)             |
+| Ctrl+Shift+W                | Split-Screen (Close)                  |
+| Alt+Shift+Minus             | Split-Screen (Horizontally)           |
+| Alt+Shift+Arrow             | Split-Screen (Increase/Decrease Size) |
+| Ctrl+Shift+M                | Toogle Mark Mode                      |
+
+** AutoHotKey
+| AutoHotKey Keybinding | Objective                          |
+|-----------------------+------------------------------------|
+| Ctrl+Alt+N            | Notepad++ (Open Selecteditem With) |
+| Ctrl+Alt+N            | Notepad++ (Open Selecteditem With) |
+
+** NeoVim / Vim
+*** Vim Shortcuts
+| Related-Function | Keybinding / Shortcut             | Objective                                                       |    |
+|------------------+-----------------------------------+-----------------------------------------------------------------+----|
+| **Command-list   | ctrl+w                            | commandlist                                                     |    |
+| *Operator        | !                                 | Filter through external program                                 |    |
+| *Operator        | &#65308;                          | Indent left or shift left                                       |    |
+| *Operator        | &#65310;                          | Indent right or shift right                                     |    |
+| *Operator        | =                                 | Autoindent or filter through 'equalprg' or C-indenting if empty |    |
+| *Operator        | ~                                 | swap case (only if 'tildeop' is set)                            |    |
+| *Operator        | c                                 | Change (delete then insert)                                     |    |
+| *Operator        | d                                 | Delete                                                          |    |
+| *Operator        | g?                                | ROT13 encoding                                                  |    |
+| *Operator        | g@                                | call function set with the 'operatorfunc' option                |    |
+| *Operator        | g~                                | Swap case                                                       |    |
+| *Operator        | gq                                | text formatting                                                 |    |
+| *Operator        | gu                                | Lowercase                                                       |    |
+| *Operator        | gU                                | Uppercase                                                       |    |
+| *Operator        | gw                                | text formatting with no cursor movement                         |    |
+| *Operator        | Operator                          | Ojective                                                        |    |
+| *Operator        | y                                 | Yank (copy)                                                     |    |
+| *Operator        | zf                                | define a fold                                                   |    |
+| +Prefix          | [                                 | +prefix                                                         |    |
+| +Prefix          | ]                                 | +prefix                                                         |    |
+| +Prefix          | a                                 | +around                                                         |    |
+| +Prefix          | i                                 | +inside                                                         |    |
+| Copy             | :%y                               | Copy the entire file                                            |    |
+| Copy             | y                                 | Copy the current line                                           |    |
+| Copy             | yip                               | Copy the current paragraph                                      |    |
+| Copy             | ys                                | Copy the current sentence                                       |    |
+| Copy             | yw                                | Copy the current word                                           |    |
+| Customization    | :colorscheme                      | list of all installed color schemes in Vim                      |    |
+| Delete           | #dd {normal}                      | to delete #lines.                                               |    |
+| Delete           | d#w {normal}                      | to delete the #UPPER CASE words                                 |    |
+| Delete           | d$ {normal}                       | To delete from the cursor to the end of a line type             |    |
+| Delete           | dd                                | delete-line                                                     |    |
+| Delete           | de {normal}                       | delete to the end of the current word.                          |    |
+| Delete           | dw {normal}                       | to delete a word.                                               |    |
+| Delete           | x                                 | delete the character under the cursor.                          |    |
+| Editing          | :old                              | switch to the previously edited file                            |    |
+| Escape           | esc or ctrl+:                     | normal-mode                                                     |    |
+| Explorer         | :Ex                               | explorer                                                        |    |
+| Explorer         | :NvimTreeClose                    |                                                                 |    |
+| Explorer         | :NvimTreeOpen                     |                                                                 |    |
+| Find             | /                                 | find text                                                       |    |
+| Find             | space+s+f                         | find files                                                      |    |
+| Goto             | {                                 | Previous empty line                                             |    |
+| Goto             | }                                 | Next empty line                                                 |    |
+| Goto             | #{down or up}                     | to go to that number lines                                      |    |
+| Goto             | #{left or right}                  | to go to that number ch                                         |    |
+| Goto             | #e                                | to move the cursor to the end of the #word forward.             |    |
+| Goto             | #G                                | To go to #line                                                  |    |
+| Goto             | #w                                | to move the cursor #words forward                               |    |
+| Goto             | %                                 | Matching character: '()', '{}', '[]'                            |    |
+| Goto             | ^                                 | Start of line (non-blank)                                       |    |
+| Goto             | $                                 | move to the end of line                                         |    |
+| Goto             | 0 {normal}                        | to move to the start of the line                                |    |
+| Goto             | b                                 | Previous word                                                   |    |
+| Goto             | e                                 | Next end of word                                                |    |
+| Goto             | f                                 | Move to next char                                               |    |
+| Goto             | F                                 | Move to previous char                                           |    |
+| Goto             | G {normal}                        | go to last line                                                 |    |
+| Goto             | gg                                | To go to the first line of the file                             |    |
+| Goto             | H                                 | home line of window (top)                                       |    |
+| Goto             | h                                 | Left                                                            |    |
+| Goto             | hjkl left-downup-right            | works as arrow key                                              |    |
+| Goto             | j                                 | Down                                                            |    |
+| Goto             | k                                 | Up                                                              |    |
+| Goto             | L                                 | Last Line of window                                             |    |
+| Goto             | l                                 | Right                                                           |    |
+| Goto             | M                                 | Middle line of window                                           |    |
+| Goto             | t                                 | Move before next char                                           |    |
+| Goto             | T                                 | Move before previous char                                       |    |
+| Goto             | w                                 | Next word                                                       |    |
+| Help             | :help nvim                        | Help                                                            |    |
+| Help             | :help visual-multi                |                                                                 |    |
+| Help             | :help vm-some-topic               |                                                                 |    |
+| Help             | :Tutor                            |                                                                 |    |
+| Help             | F1                                | quick help                                                      |    |
+| History          | q:                                | edit command history                                            |    |
+| Insert           | A {normal}                        | append /insert text after the cursor                            |    |
+| Insert           | i                                 | insert text before the cursor                                   |    |
+| Merge            | J                                 | mzJ`2 ***                                                       | ** |
+| Merge            | shift+j                           | next lines will automerge with current lines                    |    |
+| PackageManager   | :Lazy                             | Lazy Package Manager                                            |    |
+| PackageManager   | :Mason                            | Mason Package Manager                                           |    |
+| PackageManager   | :PackerSync                       | to sync packer package                                          |    |
+| Paste            | p {normal}                        | to put previously deleted text after the cursor.                |    |
+| Quit             | :q or :q!                         | quit/close-extra-window                                         |    |
+| Quit             | Ctrl+W                            | to quit the buffer.                                             |    |
+| Reload           | :so                               | Source a file like save & reload                                |    |
+| Replace          | :%s/<x>,(?=\s)/<y>/g              | Replace 'x' if followed by comma and space with 'y'             |    |
+| Replace          | :%s/<x>/<y>                       | Replace first occurance                                         |    |
+| Replace          | :%s/<x>/<y>/g                     | Replace all first occurance                                     |    |
+| Replace          | =:1,10s/\(.\{-}\zs<x>\){2}/<y>/g= | Replace second occurrence of 'x' with Text                      |    |
+| Replace          | :1,10s/<x>/<y>/g                  | Replace <x> with <y> in lines 1 to 10                           |    |
+| Replace          | s                                 | replace the chars of the word                                   |    |
+| Replace          | S                                 | replace the line where mouse is                                 |    |
+| Save             | :w!                               | override and save                                               |    |
+| Save             | :wq                               | save and quit                                                   |    |
+| Select-All       | :%y or ggVG                       | To select all text in Neovim, you can use the                   |    |
+| Split            | :new                              |                                                                 |    |
+| Split            | :split                            |                                                                 |    |
+| Split            | :split or :sp                     | Splits the current window horizontally.                         |    |
+| Split            | :vnew                             |                                                                 |    |
+| Split            | :vnew                             | Opens a new vertical window.                                    |    |
+| Split            | :vsplit or :vs                    | Splits the current window vertically.                           |    |
+| Split            | ctrl+w+s                          | hprizontal split                                                |    |
+| Split            | ctrl+w+v                          | vertical split or :vsplit                                       |    |
+| Suggestion       | Tab {normal}                      | in normal mode enter command and auto complete                  |    |
+| Swap             | ctrl+x                            | swap window                                                     |    |
+| Synonymous       | <cr>                              | Enter                                                           |    |
+| Undo / Redo      | ctrl+r                            | Redo                                                            |    |
+| Undo / Redo      | U {normal}                        | to fix a whole line.                                            |    |
+| Undo / Redo      | u {normal}                        | to undo the last commands,                                      |    |
+| Utility          | :Telescope builtin                | ** ** **                                                        |    |
+| Utility          | :Telescope keymaps                | keymaps                                                         |    |
+| Visual-Mode      | ctrl+v                            | move around coulmns                                             | ** |
+| Visual-Mode      | vg                                | start selecting text                                            |    |
+| Zoom             | ctrl +/-                          | zoomin/out                                                      |    |
+
+*** Nvim-netrw
+| Key   | Objective                                                    |
+|-------+--------------------------------------------------------------|
+| F1    | Causes Netrw to issue help                                   |
+| cr    | Netrw will enter the directory or read the file              |
+| del   | Netrw will attempt to remove the file/directory              |
+| c-h   | Edit file hiding list                                        |
+| c-l   | Causes Netrw to refresh the directory listing                |
+| c-r   | Browse using a gvim server                                   |
+| c-tab | Shrink/expand a netrw/explore window                         |
+| a     | Cycles between normal display, hiding and g:netrw_list_hide) |
+| cd    | Make browsing directory the current directory                |
+| C     | Setting the editing window                                   |
+| d     | Make a directory                                             |
+| D     | Attempt to remove the file(s)/directory(ies)                 |
+| gb    | Go to previous bookmarked directory                          |
+| gd    | Force treatment as directory                                 |
+| gf    | Force treatment as file                                      |
+| gh    | Quick hide/unhide of dot-files                               |
+| gn    | Make top of tree the directory below the cursor              |
+| gp    | Change local-only file permissions                           |
+| i     | Cycle between thin, long, wide, and tree listings            |
+| I     | Toggle the displaying of the banner                          |
+| mb    | Bookmark current directory                                   |
+| mc    | Copy marked files to marked-file target directory            |
+| md    | Apply diff to marked files (up to 3)                         |
+| me    | Place marked files on arg list and edit them                 |
+| mf    | Mark a file                                                  |
+| mF    | Unmark files                                                 |
+| mg    | Apply vimgrep to marked files                                |
+| mh    | Toggle marked file suffices' presence on hiding list         |
+| mm    | Move marked files to marked-file target directory            |
+| mp    | Print marked files                                           |
+| mr    | Mark files using a shell-style regexp                        |
+| mt    | Current browsing directory becomes markfile target           |
+| mT    | Apply ctags to marked files                                  |
+| mu    | Unmark all marked files                                      |
+| mv    | Apply arbitrary vim   command to marked files                |
+| mx    | Apply arbitrary shell command to marked files                |
+| mX    | Apply arbitrary shell command to marked files en bloc        |
+| mz    | Compress/decompress marked files                             |
+| o     | Enter the file/directory in new window hz split              |
+| O     | Obtain a file specified by cursor                            |
+| p     | Preview the file                                             |
+| P     | Browse in the previously used window                         |
+| qb    | List bookmarked directories and history                      |
+| qf    | Display information on file                                  |
+| qF    | Mark files using a quickfix list                             |
+| qL    | Mark files using a location-list                             |
+| r     | Reverse sorting order                                        |
+| R     | Rename the designated file(s)/directory(ies)                 |
+| s     | Select sorting style: by name, time, or file size            |
+| S     | Specify suffix priority for name-sorting                     |
+| t     | Enter the file/directory under the cursor in a new tab       |
+| u     | Change to recently-visited directory                         |
+| U     | Change to subsequently-visited directory                     |
+| v     | Enter the file/directory in new window in vertical split     |
+| x     | View file with an associated program                         |
+| X     | Execute filename under cursor via system()                   |
+| %     | Open a new file in netrw's current directory                 |
+
+*** Notes:
+- Neovim tutorial https://www.youtube.com/watch?v=w7i4amO_zaE  
+- CHEATSHEET https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/editing-like-magic-with-vim-operators/
+- Vim cheatsheet https://devhints.io/vim
+
+For matching brackets and sign if the matching sign not found will delete the next matcing items.
+
+/_**Vim-Visual-Multi**_/
+It's called vim-visual-multi in analogy with visual-block, but the plugin works mostly from normal
+mode.
+
+/_**Basic Usage:**_/
+select words with Ctrl-N (like Ctrl-d in Sublime Text/VS Code) create cursors vertically with Ctrl-Down/Ctrl-Up
+select one character at a time with Shift-Arrows press n/N to get next/previous occurrence press [/] to select
+next/previous cursor press q to skip current and get next occurrence press Q to remove current cursor/selection
+start insert mode with i,a,I,A Two main modes:
+
+in cursor mode commands work as they would in normal mode in extend mode commands work as they would in visual mode
+press Tab to switch between «cursor» and «extend» mode Most vim commands work as expected (motions, r to replace 
+characters, ~ to change case, etc).
+
+Additionally you can: run macros/ex/normal commands at cursors align cursors transpose selections add patterns with 
+regex, or from visual mode And more... of course, you can enter insert mode and autocomplete will work.
+
+
+/_**BOOKMARK.NVIM:**_/
+move the cursor to the line of the file that needs to be bookmarked. press \\z in normal mode, and input a description 
+in the pop-up shortcut window. Press enter in insert mode to add, or press esc in normal mode to cancel adding bookmarks.
+press <tab> <tab> to open or close the bookmark list window. move the cursor in the bookmark list window, press enter to 
+jump to the file line where the bookmark is located. press <space> <space> in the bookmark list window to switch sorting 
+rules. press dd in the bookmark list to delete a bookmark. use :telescope bookmarks to stop seeing highlights
+
+
+
+
+
+
+
+
+
+
+
+

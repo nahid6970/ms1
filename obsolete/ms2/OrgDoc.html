@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MyOrg</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="style//org.css">
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#org-documentation" id="toc-org-documentation">ORG
+Documentation</a>
+<ul>
+<li><a href="#org-functionality" id="toc-org-functionality">Org
+Functionality</a></li>
+</ul></li>
+<li><a href="#windows-shell-directory"
+id="toc-windows-shell-directory">Windows Shell Directory</a></li>
+<li><a href="#android" id="toc-android">Android 📱</a>
+<ul>
+<li><a href="#application" id="toc-application">Application 📱</a></li>
+<li><a href="#termux" id="toc-termux">Termux</a>
+<ul>
+<li><a href="#termux-commands" id="toc-termux-commands">Termux
+Commands</a></li>
+<li><a href="#termux-rclone" id="toc-termux-rclone">Termux
+rclone</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#how-to" id="toc-how-to">How to 🤔</a>
+<ul>
+<li><a href="#align-by-regex" id="toc-align-by-regex">Align by
+RegEx</a></li>
+<li><a href="#align-column" id="toc-align-column">Align-column</a></li>
+</ul></li>
+<li><a href="#pwsh-command-list" id="toc-pwsh-command-list">PWSH Command
+List</a>
+<ul>
+<li><a href="#most-useful-and-summarized"
+id="toc-most-useful-and-summarized">Most Useful and Summarized</a></li>
+<li><a href="#extra" id="toc-extra">Extra</a></li>
+<li><a href="#port-related" id="toc-port-related">Port Related</a></li>
+<li><a href="#get-process" id="toc-get-process">Get-Process</a></li>
+<li><a href="#start-process"
+id="toc-start-process">Start-Process</a></li>
+<li><a href="#stop-process" id="toc-stop-process">Stop-Process</a></li>
+<li><a href="#mklink" id="toc-mklink">mklink</a></li>
+<li><a href="#functions" id="toc-functions">Functions</a></li>
+</ul></li>
+<li><a href="#others" id="toc-others">Others</a></li>
+<li><a href="#initial-setup" id="toc-initial-setup">Initial Setup
+🎯</a></li>
+<li><a href="#mklink-1" id="toc-mklink-1">Mklink ⤨</a></li>
+<li><a href="#package-manager" id="toc-package-manager">Package
+Manager</a>
+<ul>
+<li><a href="#scoop" id="toc-scoop">Scoop</a>
+<ul>
+<li><a href="#scoop-add-buckets" id="toc-scoop-add-buckets">Scoop Add
+Buckets</a></li>
+<li><a href="#scoop-commands" id="toc-scoop-commands">Scoop
+Commands</a></li>
+</ul></li>
+<li><a href="#winget" id="toc-winget">Winget</a></li>
+<li><a href="#git-command-list" id="toc-git-command-list">Git Command
+List</a></li>
+</ul></li>
+<li><a href="#pc" id="toc-pc">PC</a>
+<ul>
+<li><a href="#software" id="toc-software">Software 🖥️</a></li>
+<li><a href="#additional-software"
+id="toc-additional-software">Additional Software</a></li>
+</ul></li>
+<li><a href="#key-binding" id="toc-key-binding">Key Binding ⌨️</a>
+<ul>
+<li><a href="#pwsh" id="toc-pwsh">PWSH</a></li>
+<li><a href="#vscode" id="toc-vscode">VScode</a></li>
+<li><a href="#windows-terminal"
+id="toc-windows-terminal">Windows-Terminal</a></li>
+<li><a href="#autohotkey" id="toc-autohotkey">AutoHotKey</a></li>
+<li><a href="#neovim-vim" id="toc-neovim-vim">NeoVim / Vim</a>
+<ul>
+<li><a href="#vim-shortcuts" id="toc-vim-shortcuts">Vim
+Shortcuts</a></li>
+<li><a href="#nvim-netrw" id="toc-nvim-netrw">Nvim-netrw</a></li>
+<li><a href="#notes" id="toc-notes">Notes:</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<details><summary>Org-Documentation</summary>
+<h1 id="org-documentation">ORG Documentation</h1>
+<h2 id="org-functionality">Org Functionality</h2>
+<pre><code>| ORG Functionality  | Sign                            | Example                                | Details / Usage                  |
+|--------------------+---------------------------------+----------------------------------------+----------------------------------|
+| &lt;A                 |                                 |                                        | #+ASCII:                         |
+| &lt;a                 |                                 |                                        | #+BEGIN_ASCII #+END_ASCII        |
+| &lt;c                 |                                 |                                        | #+BEGIN_CENTER #+END_CENTER      |
+| &lt;e                 |                                 |                                        | #+BEGIN_EXAMPLE #+END_EXAMPLE    |
+| &lt;h                 |                                 |                                        | #+BEGIN_HTML #+END_HTML          |
+| &lt;H                 |                                 |                                        | #+HTML:                          |
+| &lt;I                 |                                 | #+INCLUDE: &quot;path\to\file&quot; :lines &quot;0-5&quot; | #+INCLUDE:                       |
+| &lt;i                 | #+INDEX:                        |                                        |                                  |
+| &lt;l                 |                                 |                                        | #+BEGIN_LaTeX #+END_LaTeX        |
+| &lt;L                 | #+LaTeX:                        |                                        |                                  |
+| &lt;q                 |                                 |                                        | #+BEGIN_QUOTE #+END_QUOTE        |
+| &lt;s                 |                                 |                                        | #+BEGIN_SRC #+END_SRC            |
+| &lt;v                 |                                 |                                        | #+BEGIN_VERBATIM #+END_VERBATIM  |
+| &lt;v                 |                                 |                                        | #+BEGIN_VERSE #+END_VERSE        |
+| Bold               | **                              | **Hello World**                        | ** before and after text         |
+| Check / Uncheck    | - [ ]                           | - [ ] Not Done                         |                                  |
+| Check / Uncheck    | - [X]                           | - [X] Done                             |                                  |
+| Code               | = or ~                          | =Hello World=                          | = or ~ befor and after text      |
+| Display Math Mode: | $$                              | $$E=mc^2$$                             | middle                           |
+| Hide Word          | \                               | \This                                  | \ before the word                |
+| Horizontal Rule    | -----                           | -----                                  | ----- in a line without any text |
+| Inline Math Mode:  | $                               | $E=mc^2$                               | left side                        |
+| Italicize          | /                               | /Hello World/                          | / before and after text          |
+| Strikethrough      | +                               | +Hello World+                          | + before and after text          |
+| Underline          | _                               | _Hello World_                          | _ before and after text          |
+| Span               | [[]]                            | [[text]]                               |                                  |
+| Span               | \{}{}                           | \textcolor{red}{Text}                  |                                  |
+| Span               | \( \)                           | \( Text \)                             |                                  |
+| Superscript        | ^                               | ^Superscript                           |                                  |
+| Subscript          | _                               | _Subscript                             |                                  |
+| Hyperlink          | [[URL][description]]            |                                        |                                  |
+| image src          | [[file:path/to/image.png]]      |                                        |                                  |
+| Custom ID          | [[#custom-id][Link to Section]] |                                        |                                  |
+| Caption            | #+CAPTION:                      |                                        |                                  |
+| FootNote           | [[fn:number]]                   |                                        |                                  |
+
+</code></pre>
+</details>
+<h1 id="windows-shell-directory">Windows Shell Directory</h1>
+<ul>
+<li>shell:appsfolder</li>
+<li>shell:startup</li>
+</ul>
+<h1 id="android">Android 📱</h1>
+<h2 id="application">Application 📱</h2>
+<!--1111WARP              --> <span> <a href="https://play.google.com/store/apps/details?id=com.cloudflare.onedotonedotonedotone         ">1111WARP              </a></span>
+<!--1DM                   --> <span> <a href="https://play.google.com/store/apps/details?id=idm.internet.download.manager                ">1DM                   </a></span>
+<!--AIMP                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.aimp.player&hl=en&gl=US                  ">AIMP                  </a></span>
+<!--App Ops               --> <span> <a href="https://play.google.com/store/apps/details?id=rikka.appops&hl=en_US                        ">App Ops               </a></span>
+<!--Audiorelay            --> <span> <a href="https://audiorelay.net                                                                     ">Audiorelay            </a></span>
+<!--Authenticator         --> <span> <a href="https://authenticatorpro.jmh.me                                                            ">Authenticator         </a></span>
+<!--Automate              --> <span> <a href="https://play.google.com/store/apps/details?id=com.llamalab.automate&hl=en&gl=US            ">Automate              </a></span>
+<!--BCSProstuti           --> <span> <a href="https://play.google.com/store/apps/details?id=com.bcsprostuti.tanim.bcsprostuti&hl=en&gl=US">BCSProstuti           </a></span>
+<!--Bing AI               --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.bing                           ">Bing AI               </a></span>
+<!--Chat AI               --> <span> <a href="https://play.google.com/store/apps/details?id=com.openai.chatgpt                           ">Chat AI               </a></span>
+<!--Daraz                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.daraz.android                            ">Daraz                 </a></span>
+<!--Discord               --> <span> <a href="https://play.google.com/store/apps/details?id=com.discord                                  ">Discord               </a></span>
+<!--droid ify             --> <span> <a href="https://github.com/Droid-ify/client/releases                                               ">droid ify             </a></span>
+<!--Droidfs               --> <span> <a href="https://github.com/hardcore-sushi/DroidFS/releases                                         ">Droidfs               </a></span>
+<!--Excel                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.office.excel                   ">Excel                 </a></span>
+<!--Facebook              --> <span> <a href="https://play.google.com/store/apps/details?id=com.facebook.katana                          ">Facebook              </a></span>
+<!--Feeder                --> <span> <a href="https://play.google.com/store/apps/details?id=com.nononsenseapps.feeder.play               ">Feeder                </a></span>
+<!--Formulia              --> <span> <a href="https://play.google.com/store/apps/details?id=m4.enginary&hl=en&gl=US                      ">Formulia              </a></span>
+<!--Game Guardian         --> <span> <a href="https://gameguardian.net/forum/files/file/2-gameguardian                                   ">Game Guardian         </a></span>
+<!--Github                --> <span> <a href="https://play.google.com/store/apps/details?id=com.github.android                           ">Github                </a></span>
+<!--Google Drive          --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs&hl=en&gl=US     ">Google Drive          </a></span>
+<!--Google Photos         --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.photos               ">Google Photos         </a></span>
+<!--InviZible             --> <span> <a href="https://play.google.com/store/apps/details?id=pan.alexander.tordnscrypt.gp                 ">InviZible             </a></span>
+<!--jobcircular           --> <span> <a href="https://play.google.com/store/apps/details?id=com.careerguidebd.jobcircular                ">jobcircular           </a></span>
+<!--Keep                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.android.keep                      ">Keep                  </a></span>
+<!--Kiwi                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.kiwibrowser.browser                      ">Kiwi                  </a></span>
+<!--Kotatsu               --> <span> <a href="https://github.com/KotatsuApp/Kotatsu/releases                                             ">Kotatsu               </a></span>
+<!--LSPosed               --> <span> <a href="https://github.com/LSPosed/LSPosed                                                         ">LSPosed               </a></span>
+<!--MacroDroid            --> <span> <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid&hl=en&gl=US&pli=1    ">MacroDroid            </a></span>
+<!--Magisk                --> <span> <a href="https://github.com/topjohnwu/Magisk                                                        ">Magisk                </a></span>
+<!--Magnet                --> <span> <a href="https://play.google.com/store/apps/details?id=app.magnetx.magnetx                          ">Magnet                </a></span>
+<!--Material FIles        --> <span> <a href="https://play.google.com/store/apps/details?id=me.zhanghai.android.files                    ">Material FIles        </a></span>
+<!--MEGA                  --> <span> <a href="https://play.google.com/store/apps/details?id=mega.privacy.android.app                     ">MEGA                  </a></span>
+<!--Microsoft 365         --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.office.officehubrow            ">Microsoft 365         </a></span>
+<!--MyGP                  --> <span> <a href="https://play.google.com/store/apps/details?id=com.portonics.mygp                           ">MyGP                  </a></span>
+<!--MyTeletalk            --> <span> <a href="https://play.google.com/store/apps/details?id=teletalk.teletalkcustomerapp                 ">MyTeletalk            </a></span>
+<!--Nagad                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.konasl.nagad                             ">Nagad                 </a></span>
+<!--NewPipe               --> <span> <a href="https://github.com/TeamNewPipe/NewPipe/releases                                            ">NewPipe               </a></span>
+<!--Nextplayer            --> <span> <a href="https://github.com/anilbeesetti/nextplayer/releases                                        ">Nextplayer            </a></span>
+<!--NOVA Video Player     --> <span> <a href="https://play.google.com/store/apps/details?id=org.courville.nova&hl=en&gl=US               ">NOVA Video Player     </a></span>
+<!--OneDrive              --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.skydrive&hl=en&gl=US           ">OneDrive              </a></span>
+<!--OneNote               --> <span> <a href="https://play.google.com/store/apps/details?id=com.microsoft.office.onenote                 ">OneNote               </a></span>
+<!--Perplexity            --> <span> <a href="https://play.google.com/store/apps/details?id=ai.perplexity.app.android                    ">Perplexity            </a></span>
+<!--Quran                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.quranapp.android                         ">Quran                 </a></span>
+<!--Rclone                --> <span> <a href="https://github.com/x0b/rcx/releases/tag/v1.12.2                                            ">Rclone                </a></span>
+<!--RemoteDesktop         --> <span> <a href="https://play.google.com/store/apps/details?id=com.google.chromeremotedesktop               ">RemoteDesktop         </a></span>
+<!--Seal                  --> <span> <a href="https://github.com/JunkFood02/Seal/releases                                                ">Seal                  </a></span>
+<!--Shizuku               --> <span> <a href="https://play.google.com/store/apps/details?id=moe.shizuku.privileged.api                   ">Shizuku               </a></span>
+<!--Shortcut Maker        --> <span> <a href="https://play.google.com/store/apps/details?id=rk.android.app.shortcutmaker                 ">Shortcut Maker        </a></span>
+<!--Showly OSS            --> <span> <a href="https://github.com/1RandomDev/showly-oss/releases                                          ">Showly OSS            </a></span>
+<!--Tailwind CSS          --> <span> <a href="https://play.google.com/store/apps/details?id=net.golbarg.tailwind                         ">Tailwind CSS          </a></span>
+<!--Telegram              --> <span> <a href="https://play.google.com/store/apps/details?id=org.telegram.messenger                       ">Telegram              </a></span>
+<!--Termux                --> <span> <a href="https://github.com/termux/termux-app/releases                                              ">Termux                </a></span>
+<!--Tooly                 --> <span> <a href="https://play.google.com/store/apps/details?id=com.yousx.thetoolsapp                        ">Tooly                 </a></span>
+<!--Ultimate Job Solutions--> <span> <a href="https://play.google.com/store/apps/details?id=com.aisolutionsbd.jobsolutions&hl=en&gl=US   ">Ultimate Job Solutions</a></span>
+<!--Warden                --> <span> <a href="https://www.apkmirror.com/apk/aurora-oss/warden">Warden</a></span>
+<!--Whatsapp              --> <span> <a href="https://play.google.com/store/apps/details?id=com.whatsapp">Whatsapp</a></span>
+<!--YTDLnis               --> <span> <a href="https://github.com/deniscerri/ytdlnis/releases">YTDLnis</a></span>
+<!--nzb360_Sonarr_Radarr_SAB--><span><a href="https://play.google.com/store/apps/details?id=com.kevinforeman.nzb360&hl=en&gl=US">nzb360_Sonarr_Radarr_SAB</a></span>
+
+<ul>
+<li><a
+href="https://www.youtube.com/watch?v=BWgh6pH72Fc&amp;t=470s">Encrypt
+&amp; Decrypt Device</a></li>
+</ul>
+<h2 id="termux">Termux</h2>
+<h3 id="termux-commands">Termux Commands</h3>
+<ul>
+<li><a
+href="https://www.learntermux.tech/2020/01/basic-commands-in-termux.html?m=1">Learn
+Termux</a></li>
+<li><a href="https://wiki.termux.com/wiki/Touch_Keyboard">Termux
+Keyboard</a></li>
+<li>alias alias<sub>name</sub>='command'</li>
+<li>unalias</li>
+<li>termux-setup-storage</li>
+<li>cd storage/shared/</li>
+<li>pkg update -y &amp;&amp; pkg upgrade -y</li>
+<li>pkg in</li>
+<li>apt update -y &amp;&amp; apt upgrade -y</li>
+<li>pkg install rclone python tealdeer tsu -y</li>
+<li>git clone <a
+href="https://github.com/h4ck3r0/Termux-os">https://github.com/h4ck3r0/Termux-os</a>
+&amp;&amp; cd Termux-os &amp;&amp; bash os.sh</li>
+</ul>
+<h3 id="termux-rclone">Termux rclone</h3>
+<ul>
+<li>rclone copy storage/shared/rclone.conf
+<em>data/data/com.termux/files/home</em>.config/rclone/</li>
+<li>rclone sync gu:/song/ storage/shared/song/ -P –track-renames
+–ignore-existing –fast-list</li>
+</ul>
+<h1 id="how-to">How to 🤔</h1>
+<h2 id="align-by-regex">Align by RegEx</h2>
+<ul>
+<li>remove all unnecessary spaces</li>
+<li>Pressing Ctrl+F -&gt; enter +. -&gt; is a regular expression -&gt;
+any number of whitespace characters.</li>
+<li>to use align by regix on any other sign use \ first then the symber
+for others \ not necessary</li>
+<li>works only on first one</li>
+</ul>
+<h2 id="align-column">Align-column</h2>
+<ul>
+<li>go to command pallet</li>
+<li>use this sign colon : and enter</li>
+<li>,&lt;&gt;</li>
+<li>works on all matched item</li>
+</ul>
+<h1 id="pwsh-command-list">PWSH Command List</h1>
+<h2 id="most-useful-and-summarized">Most Useful and Summarized</h2>
+<ul>
+<li>Get-Process | Where-Object { $_.Name -like "<strong>name</strong>"
+}</li>
+<li>Start-Process name -verb Runas</li>
+<li>Stop-Process -Name name</li>
+<li>Start-Sleep -seconds 5</li>
+<li>winget list | Select-String -Pattern 'name'</li>
+<li>curl ifconfig.me # Public IPv4 address</li>
+<li>iex (Invoke-RestMethod -Uri "<a
+href="https://raw.githubusercontent.com/nahid6970/ms2/main/ytc.ps1">https://raw.githubusercontent.com/nahid6970/ms2/main/ytc.ps1</a>")</li>
+<li>$env:USERNAME #to find username</li>
+<li>scp twrp-3.7.0<sub>9</sub>-0-davinci.img nahid@192.168.1.101:/D:/
+#[openssh copy files from android to pc]</li>
+<li>netplwiz #winaero auto login check email password</li>
+</ul>
+<h2 id="extra">Extra</h2>
+<ul>
+<li>Set-ExecutionPo1icy -ExecutionPo1icy Bypass -Scope Process</li>
+<li>pwsh.exe -command "command" <em>or</em> pwsh.exe -c command</li>
+<li>pwsh -c pause | command [not to close window ]</li>
+<li>Copy-Item -Path "path" -Destination "path" -Force</li>
+<li>powershell.exe -ExecutionPolicy Unrestricted -NoLogo -File
+"$(FULL<sub>CURRENTPATH</sub>)" -NoExit</li>
+<li>Measure-Command {pwsh-command} #(time takes to run command)</li>
+</ul>
+<h2 id="port-related">Port Related</h2>
+<ul>
+<li>Get-NetTCPConnection</li>
+<li>Get-NetTCPConnection | where Localport -eq 7878 | select
+Localport,OwningProcess</li>
+</ul>
+<h2 id="get-process">Get-Process</h2>
+<ul>
+<li>Get-Process | Where-Object { $_.Name -like "$partialName" }</li>
+<li>Get-Process [[-Name] &lt;string[]&gt;] [-Module] [-FileVersionInfo]
+[]</li>
+<li>Get-Process [[-Name] &lt;string[]&gt;] -IncludeUserName []</li>
+<li>Get-Process -Id &lt;int[]&gt; [-Module] [-FileVersionInfo] []</li>
+<li>Get-Process -Id &lt;int[]&gt; -IncludeUserName []</li>
+<li>Get-Process -InputObject &lt;Process[]&gt; [-Module]
+[-FileVersionInfo] []</li>
+<li>Get-Process -InputObject &lt;Process[]&gt; -IncludeUserName []</li>
+</ul>
+<h2 id="start-process">Start-Process</h2>
+<ul>
+<li>Start-Process pwsh -Verb runAs</li>
+<li>Start-Process appname -Verb runAs</li>
+<li>Start-Process [-FilePath] [[-ArgumentList] &lt;string[]&gt;]
+[-Credential ] [-WorkingDirectory ] [-LoadUserProfile] [-NoNewWindow]
+[-PassThru] [-RedirectStandardError ] [-RedirectStandardInput ]
+[-RedirectStandardOutput ] [-WindowStyle ] [-Wait] [-UseNewEnvironment]
+[-WhatIf] [-Confirm] []</li>
+<li>Start-Process [-FilePath] [[-ArgumentList] &lt;string[]&gt;]
+[-WorkingDirectory ] [-PassThru] [-Verb ] [-WindowStyle ] [-Wait]
+[-WhatIf] [-Confirm] []</li>
+</ul>
+<h2 id="stop-process">Stop-Process</h2>
+<ul>
+<li>Stop-Process -Name AutoHotkeyU64</li>
+<li>Stop-Process [-Id] &lt;int[]&gt; [-PassThru] [-Force] [-WhatIf]
+[-Confirm] []</li>
+<li>Stop-Process -Name &lt;string[]&gt; [-PassThru] [-Force] [-WhatIf]
+[-Confirm] []</li>
+<li>Stop-Process [-InputObject] &lt;Process[]&gt; [-PassThru] [-Force]
+[-WhatIf] [-Confirm] []</li>
+</ul>
+<h2 id="mklink">mklink</h2>
+<ul>
+<li>mklink "fake" "main" #[cmd]</li>
+<li>New-Item -ItemType HardLink -Path "fake" -Target "main" #[pwsh]</li>
+<li>New-Item -ItemType SymbolicLink -Path "fake" -Target "main" -Force
+#[pwsh]</li>
+</ul>
+<h2 id="functions">Functions</h2>
+<ul>
+<li>function Copy-WithProgressBar
+{param($Source,$Destination)$fileSize=(Get-Item
+$Source).length;$bytesCopied=0;$progress=0;$reader=[System.IO.File]::OpenRead($Source);$writer=[System.IO.File]::OpenWrite($Destination);$bufferSize=4096;$buffer=New-Object
+byte[]
+$bufferSize;while($bytesRead=$reader.Read($buffer,0,$bufferSize)){$writer.Write($buffer,0,$bytesRead);$bytesCopied+=$bytesRead;$progress=$bytesCopied/$fileSize*100;Write-Progress
+-PercentComplete $progress -Activity "Copying $Source to
+$Destination"}$reader.Close();$writer.Close()}</li>
+</ul>
+<h1 id="others">Others</h1>
+<ul>
+<li>rclone config paths</li>
+<li>Location-Related</li>
+<li>C:</li>
+<li>Computer<sub>LOCALMACHINE</sub></li>
+</ul>
+<h1 id="initial-setup">Initial Setup 🎯</h1>
+<ul>
+<li>Jackett
+<ul>
+<li>C:.json</li>
+</ul></li>
+<li>Ditto
+<ul>
+<li>setup shortcuts for ctrl+alt+1/2/3 for past</li>
+</ul></li>
+<li>OH.MY.POSH
+<ul>
+<li>oh-my-posh font install –victoria –firecode –terminus –meslo
+–hack</li>
+<li>oh-my-posh init pwsh –config 'path in scoop folder' |
+Invoke-Expression #pwsh profile</li>
+</ul></li>
+<li>Tailwind
+<ul>
+<li>install node.js using scoop</li>
+<li>open the folder using vscode</li>
+<li>cd to the directory</li>
+<li>npm init</li>
+<li>npm install -D tailwindcss</li>
+<li>npx tailwindcss init –full</li>
+<li>always cd to that folder and</li>
+<li>always keep below command running</li>
+<li>npx tailwindcss -i ./src/input.css -o ./dist/output.css –watch</li>
+</ul></li>
+</ul>
+<h1 id="mklink-1">Mklink ⤨</h1>
+<ul>
+<li>rclone-config
+<ul>
+<li>Start-Process "C:\" -Confirm</li>
+<li>New-Item -ItemType SymbolicLink -Path "C:.conf" -Target
+"D:\@git.conf" -Confirm</li>
+</ul></li>
+<li>Powershell-Profile
+<ul>
+<li>Start-Process "C:\" -Confirm</li>
+<li><code
+class="verbatim">New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" -Target "D:\@git\ms1\mklink\PowerShell.Profile.txt" -Confirm</code></li>
+</ul></li>
+<li>Windows-Terminal-Preview
+<ul>
+<li><code
+class="verbatim">Start-Process "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\" -Confirm</code></li>
+<li><code
+class="verbatim">New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json" -Target "D:\@git\ms1\mklink\WindowsTerminal.Profile.json" -Confirm</code></li>
+</ul></li>
+<li>Neovim
+<ul>
+<li>mkdir C: -Confirm</li>
+<li>Start-Process "C:" -Confirm</li>
+<li><code
+class="verbatim">New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Local\nvim\init.lua" -Target "D:\@git\ms1\mklink\nvim_init.lua" -Confirm</code></li>
+</ul></li>
+</ul>
+<h1 id="package-manager">Package Manager</h1>
+<h2 id="scoop">Scoop</h2>
+<ul>
+<li>iex (new-object net.webclient).downloadstring('<a
+href="https://get.scoop.sh">https://get.scoop.sh</a>')</li>
+<li><code
+class="verbatim">scoop config cache_Path D:\@install\scoop\cache</code></li>
+</ul>
+<h3 id="scoop-add-buckets">Scoop Add Buckets</h3>
+<ul>
+<li>Usage: scoop bucket add|list|known|rm [&lt;args&gt;]</li>
+<li>scoop bucket add main</li>
+<li>scoop bucket add extras</li>
+<li>scoop bucket add versions</li>
+<li>scoop bucket add nonportable</li>
+<li>scoop bucket add games</li>
+</ul>
+<h3 id="scoop-commands">Scoop Commands</h3>
+<ul>
+<li>Set-Alias -Name fake -Value real</li>
+<li>del . -Force</li>
+<li>scoop update</li>
+<li>scoop update *</li>
+<li>scoop cleanup *</li>
+<li>scoop status</li>
+<li>scoop list | foreach { scoop update $_.Name }</li>
+<li>scoop cache rm * #To clear everything in your cache</li>
+<li>scoop export &gt; D:\@git-apps.txt #(backup scoop apps
+settings)</li>
+<li>scoop import D:\@git-apps.txt #(restore settings)</li>
+</ul>
+<h2 id="winget">Winget</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Winget</th>
+<th>Commands Details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>install</td>
+<td>Installs the given package</td>
+</tr>
+<tr class="even">
+<td>show</td>
+<td>Shows information about a package</td>
+</tr>
+<tr class="odd">
+<td>source</td>
+<td>Manage sources of packages</td>
+</tr>
+<tr class="even">
+<td>search</td>
+<td>Find and show basic info of packages</td>
+</tr>
+<tr class="odd">
+<td>list</td>
+<td>Display installed packages</td>
+</tr>
+<tr class="even">
+<td>upgrade</td>
+<td>Shows and performs available upgrades</td>
+</tr>
+<tr class="odd">
+<td>uninstall</td>
+<td>Uninstalls the given package</td>
+</tr>
+<tr class="even">
+<td>hash</td>
+<td>Helper to hash installer files</td>
+</tr>
+<tr class="odd">
+<td>validate</td>
+<td>Validates a manifest file</td>
+</tr>
+<tr class="even">
+<td>settings</td>
+<td>Open settings or set administrator settings</td>
+</tr>
+<tr class="odd">
+<td>features</td>
+<td>Shows the status of experimental features</td>
+</tr>
+<tr class="even">
+<td>export</td>
+<td>Exports a list of the installed packages</td>
+</tr>
+<tr class="odd">
+<td>import</td>
+<td>Installs all the packages in a file</td>
+</tr>
+<tr class="even">
+<td>pin</td>
+<td>Manage package pins</td>
+</tr>
+</tbody>
+</table>
+<h2 id="git-command-list">Git Command List</h2>
+<table>
+<tbody>
+<tr class="odd">
+<td>cd to local file where u can see the .git folder dont have to go
+to</td>
+</tr>
+<tr class="even">
+<td>that folders</td>
+</tr>
+<tr class="odd">
+<td>git init #initialize a folder as git repository</td>
+</tr>
+<tr class="even">
+<td>git add .</td>
+</tr>
+<tr class="odd">
+<td>git commit -m "Your commit message here"</td>
+</tr>
+<tr class="even">
+<td>git pull origin main &amp;&amp; git push origin main</td>
+</tr>
+<tr class="odd">
+<td>git add . &amp;&amp; git commit -m "comment" &amp;&amp; git pull
+origin main &amp;&amp; git</td>
+</tr>
+<tr class="even">
+<td>push origin main</td>
+</tr>
+<tr class="odd">
+<td>#dont-work-for-pull</td>
+</tr>
+<tr class="even">
+<td>git pull</td>
+</tr>
+</tbody>
+</table>
+<h1 id="pc">PC</h1>
+<h2 id="software">Software 🖥️</h2>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Name</th>
+<th>Src or Command</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>.Driver</td>
+<td>.NET 6.0</td>
+<td><a
+href="https://dotnet.microsoft.com/en-us/download">https://dotnet.microsoft.com/en-us/download</a></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>ACK</td>
+<td>scoop install ack</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>adb</td>
+<td>scoop install adb</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Alacritty</td>
+<td>scoop install Alacritty</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>aria2</td>
+<td>scoop install aria2</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>AudioRelay</td>
+<td>winget install AudioRelay</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>AutoHotKey</td>
+<td>scoop install autohotkey1.1&lt;br&gt;autohotkey</td>
+</tr>
+<tr class="even">
+<td>Game</td>
+<td>Cheat.Engine</td>
+<td>choco install cheatengine -y</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Chrome<sub>RemoteDesktop</sub></td>
+<td>winget install ChromeRemoteDesktop</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>clangd</td>
+<td>scoop install clangd</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>cmake</td>
+<td>scoop install cmake</td>
+</tr>
+<tr class="even">
+<td>.Driver</td>
+<td>DirectX</td>
+<td>winget install Microsoft.DirectX</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Ditto</td>
+<td>scoop install Ditto</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>FDM</td>
+<td>scoop install freedownloadmanager</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>ffmpeg</td>
+<td>scoop install ffmpeg</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>FFmpeg<sub>BatchAVConverter</sub></td>
+<td>scoop install ffmpeg-batch</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Foxit<sub>Reader</sub></td>
+<td>scoop install foxit-reader</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>gcc</td>
+<td>scoop install gcc</td>
+</tr>
+<tr class="odd">
+<td>Developer<sub>Tool</sub></td>
+<td>Git</td>
+<td>scoop install git</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Github<sub>Desktop</sub></td>
+<td>scoop install github</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Google<sub>Chrome</sub></td>
+<td><a
+href="https://www.google.com/chrome/">https://www.google.com/chrome/</a></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>IDM</td>
+<td>winget install IDM</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>imagemagick</td>
+<td>scoop install imagemagick</td>
+</tr>
+<tr class="even">
+<td>Server</td>
+<td>Jackett</td>
+<td>scoop install jackett</td>
+</tr>
+<tr class="odd">
+<td>Server</td>
+<td>Jellyfin Media Player</td>
+<td><a
+href="https://github.com/jellyfin/jellyfin-media-player/releases">https://github.com/jellyfin/jellyfin-media-player/releases</a></td>
+</tr>
+<tr class="even">
+<td>Server</td>
+<td>Jellyfin Server</td>
+<td><a
+href="https://repo.jellyfin.org/releases/server/windows/stable/">https://repo.jellyfin.org/releases/server/windows/stable/</a></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>kate</td>
+<td>scoop install kate</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>keypirinha</td>
+<td>scoop install keypirinha</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>lazygit</td>
+<td>scoop install lazygit</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>libreoffice</td>
+<td>scoop install libreoffice</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Lite<sub>XL</sub></td>
+<td>scoop install lite-xl</td>
+</tr>
+<tr class="even">
+<td>Share</td>
+<td>localsend</td>
+<td>scoop install localsend</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>make</td>
+<td>scoop install make</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Microsoft<sub>PCManager</sub></td>
+<td><a
+href="https://pcmanager.microsoft.com/en-us">https://pcmanager.microsoft.com/en-us</a></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>MS-Office</td>
+<td>MS-OFFICE</td>
+</tr>
+<tr class="even">
+<td>Zip</td>
+<td>NanaZip</td>
+<td>winget install M2Team.NanaZip</td>
+</tr>
+<tr class="odd">
+<td>Editor</td>
+<td>Nano</td>
+<td>scoop install nano</td>
+</tr>
+<tr class="even">
+<td>Share</td>
+<td>NearbyShare</td>
+<td>winget install Google.NearbyShare</td>
+</tr>
+<tr class="odd">
+<td>Editor</td>
+<td>NeoVim</td>
+<td>scoop install NeoVim</td>
+</tr>
+<tr class="even">
+<td>Developer<sub>Tool</sub></td>
+<td>Node.js</td>
+<td>scoop install nodejs</td>
+</tr>
+<tr class="odd">
+<td>Editor</td>
+<td>Notepad++</td>
+<td>scoop install notepadplusplus</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Oh<sub>MyPosh</sub></td>
+<td>scoop install oh-my-posh</td>
+</tr>
+<tr class="odd">
+<td>Cloud<sub>Storage</sub></td>
+<td>OneDrive</td>
+<td>winget install Microsoft.OneDrive</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Oracle.JavaRuntimeEnvironment</td>
+<td>winget install Oracle.JavaRuntimeEnvironment</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Pandoc</td>
+<td>scoop install Pandoc</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>perl</td>
+<td>scoop install perl</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Phantomjs</td>
+<td>scoop install phantomjs&lt;br&gt;phantomjs19</td>
+</tr>
+<tr class="even">
+<td>Media</td>
+<td>Potplayer</td>
+<td>scoop install potplayer</td>
+</tr>
+<tr class="odd">
+<td>Tool</td>
+<td>Powertoys</td>
+<td>scoop install powertoys</td>
+</tr>
+<tr class="even">
+<td>Developer<sub>Tool</sub></td>
+<td>Pwsh</td>
+<td><a
+href="https://github.com/PowerShell/PowerShell/releases">https://github.com/PowerShell/PowerShell/releases</a></td>
+</tr>
+<tr class="odd">
+<td>Developer<sub>Tool</sub></td>
+<td>Python</td>
+<td>scoop install python&lt;br&gt;python-alpha&lt;br&gt;python-beta</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>qBittorrent</td>
+<td>winget install qBittorrent.qBittorrent</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Radarr</td>
+<td><a href="https://radarr.video/">https://radarr.video/</a></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Rclone</td>
+<td>scoop install rclone&lt;br&gt;rclone-beta</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Ruffle<sub>Nightly</sub></td>
+<td>scoop install ruffle-nightly</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Rufus</td>
+<td>scoop install rufus</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>scoop-completion</td>
+<td>scoop install scoop-completion</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>scoop-search</td>
+<td>scoop install scoop-search</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>scrcpy</td>
+<td>scoop install scrcpy</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Shell</td>
+<td>scoop install nilesoft-shell</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>simplewall</td>
+<td>scoop install simplewall</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Sonarr</td>
+<td><a href="https://sonarr.tv/">https://sonarr.tv/</a></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Syncthing</td>
+<td><a
+href="https://syncthing.net/downloads/">https://syncthing.net/downloads/</a></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Sysinternals</td>
+<td>scoop install sysinternals</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>tldr</td>
+<td>scoop install tldr</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>trafficmonitor</td>
+<td>scoop install trafficmonitor&lt;br&gt;trafficmonitor-lite</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>vcredist</td>
+<td>scoop install
+vcredist2022&lt;br&gt;vcredist&lt;br&gt;vcredist-aio</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>ventoy</td>
+<td>scoop install ventoy</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>VScode</td>
+<td>scoop install vscode</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>wget</td>
+<td>scoop install wget</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>winaero<sub>tweaker</sub></td>
+<td>scoop install winaero-tweaker</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Windows<sub>Terminal</sub></td>
+<td>Microsoft.WindowsTerminal.Preview</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>winget</td>
+<td>scoop install winget</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Wise.Program.Uninstaller</td>
+<td>WiseCleaner.WiseProgramUninstaller</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>wiztree</td>
+<td>scoop install wiztree</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>WSA<sub>SystemControl</sub></td>
+<td>infinitepower18.WSASystemControl</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>yt<sub>dlp</sub></td>
+<td>scoop install yt-dlp</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Lidarr</td>
+<td><a href="https://lidarr.audio/">https://lidarr.audio/</a></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Prowlarr</td>
+<td><a href="https://prowlarr.com/">https://prowlarr.com/</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="additional-software">Additional Software</h2>
+<ul>
+<li>[AudioRelay](<a
+href="https://audiorelay.net/downloads">https://audiorelay.net/downloads</a>)</li>
+<li>[AutoHotkey](<a
+href="https://www.autohotkey.com/">https://www.autohotkey.com/</a>)</li>
+<li>[DirectX](<a
+href="https://www.microsoft.com/en-US/download/details.aspx?id=35">https://www.microsoft.com/en-US/download/details.aspx?id=35</a>)</li>
+<li>[Jackett](<a
+href="https://github.com/Jackett/Jackett/releases">https://github.com/Jackett/Jackett/releases</a>)</li>
+<li>[qBittorrent](<a
+href="https://www.qbittorrent.org/download">https://www.qbittorrent.org/download</a>)</li>
+<li>[Chrome-remote-Desktop](<a
+href="https://remotedesktop.google.com/home">https://remotedesktop.google.com/home</a>)</li>
+<li>[Nilesoft Shell](<a
+href="https://nilesoft.org/">https://nilesoft.org/</a>)</li>
+<li>[Microsoft Visual C++](<a
+href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170">https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170</a>)</li>
+<li>[Wise.Program.Uninstaller](<a
+href="https://www.wisecleaner.com/wise-program-uninstaller.html">https://www.wisecleaner.com/wise-program-uninstaller.html</a>)</li>
+<li>Alacritty <a
+href="https://github.com/alacritty/alacritty/releases">https://github.com/alacritty/alacritty/releases</a></li>
+<li>neovim
+<ul>
+<li><a
+href="https://dotfyle.com/plugins/kyazdani42/nvim-tree.lua">https://dotfyle.com/plugins/kyazdani42/nvim-tree.lua</a></li>
+<li><a
+href="https://github.com/nvim-lua/kickstart.nvim">https://github.com/nvim-lua/kickstart.nvim</a></li>
+<li><a href="https://neovim.io/">https://neovim.io/</a></li>
+<li><a
+href="https://www.youtube.com/watch?v=stqUbv-5u2s">https://www.youtube.com/watch?v=stqUbv-5u2s</a></li>
+</ul></li>
+<li>Google.NearbyShare <a
+href="https://www.android.com/better-together/nearby-share-app/">Link</a></li>
+<li>Nano <a
+href="https://github.com/scopatz/nanorc">https://github.com/scopatz/nanorc</a></li>
+<li>vscode extensions</li>
+</ul>
+<table>
+<tbody>
+<tr class="odd">
+<td>VScode-Align by RegEx</td>
+<td>janjoerke.align-by-regex</td>
+</tr>
+<tr class="even">
+<td>vscode-aligncoulmn</td>
+<td>jca02266.align-columns</td>
+</tr>
+<tr class="odd">
+<td>VScode-HTML.Preview</td>
+<td>george-alisson.html-preview-vscode</td>
+</tr>
+<tr class="even">
+<td>VScode-Inline.Fold</td>
+<td>moalamri.inline-fold</td>
+</tr>
+<tr class="odd">
+<td>VSCode-Neovim</td>
+<td>asvetliakov.vscode-neovim</td>
+</tr>
+<tr class="even">
+<td>VScode-Nilesoft.Shell</td>
+<td>code-nature.nilesoft-shell-file-formatter</td>
+</tr>
+<tr class="odd">
+<td>VScode-PowerShell</td>
+<td>ms-vscode.powershell</td>
+</tr>
+<tr class="even">
+<td>VScode-Table.Formatter</td>
+<td>shuworks.vscode-table-formatter</td>
+</tr>
+</tbody>
+</table>
+<h1 id="key-binding">Key Binding ⌨️</h1>
+<h2 id="pwsh">PWSH</h2>
+<table>
+<thead>
+<tr class="header">
+<th>PWSH Keybinding</th>
+<th>Objective</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Ctrl+Space</td>
+<td>Auto Completion Scoop/Winget</td>
+</tr>
+<tr class="even">
+<td>Ctrl+Space</td>
+<td>Scoop-Completion</td>
+</tr>
+<tr class="odd">
+<td>F2</td>
+<td>Suggestions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vscode">VScode</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Functionality</th>
+<th>Vscode Keybinding</th>
+<th>Objective</th>
+<th>Editor.Code.Command</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Align</td>
+<td>Alt+Shift+;</td>
+<td>Align Multi Coulmns By Separator</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Align</td>
+<td>Alt+Shift+R</td>
+<td>Align By Regex</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Bookmark</td>
+<td>Ctrl+B Ctrl+B</td>
+<td>Bookmark Line</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Bookmark</td>
+<td>Ctrl+B Ctrl+L</td>
+<td>List All Bookmark Lines</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Comment</td>
+<td>Alt+Shift+A</td>
+<td>Comment</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Comment</td>
+<td>Ctrl+K Ctrl+C</td>
+<td>Comment</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Copy</td>
+<td>Alt+Shift+Up/Down</td>
+<td>Copy The Same Line</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Delete</td>
+<td>ctrl+num1 ctrl+num1</td>
+<td>–Delete Duplicate lines</td>
+<td>editor.action.removeDuplicateLines</td>
+</tr>
+<tr class="odd">
+<td>Delete</td>
+<td>Ctrl+Shift+K</td>
+<td>–Delete lines</td>
+<td>editor.action.deleteLines</td>
+</tr>
+<tr class="even">
+<td>File (New)</td>
+<td>Ctrl+N</td>
+<td>New File</td>
+<td>workbench.action.files.newUntitledFile</td>
+</tr>
+<tr class="odd">
+<td>File (Recent)</td>
+<td>Ctrl+R</td>
+<td>Show Recent Files</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Fold / Unfold</td>
+<td>Ctrl+F Ctrl+A</td>
+<td>Fold All</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Fold / Unfold</td>
+<td>Ctrl+F Ctrl+U</td>
+<td>Unfold All</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>GoTo</td>
+<td>Ctrl+K Ctrl+S</td>
+<td>Keyboard Shortcuts</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Line</td>
+<td>Alt+J</td>
+<td>–Join Lines</td>
+<td>editor.action.joinLines</td>
+</tr>
+<tr class="even">
+<td>MiniMap</td>
+<td>alt+m</td>
+<td>–minimap toogle</td>
+<td>editor.action.toggleMinimap</td>
+</tr>
+<tr class="odd">
+<td>Neovim</td>
+<td>Ctrl+Alt+Shift+M</td>
+<td>Disable Neovim</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Neovim</td>
+<td>Ctrl+Alt+Shift+N</td>
+<td>Enable Neovim</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Preview</td>
+<td>Alt+L Alt+O</td>
+<td>Live Server</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Preview</td>
+<td>Ctrl+Shift+V</td>
+<td>Preview</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Selection</td>
+<td>Alt+Shift+M1</td>
+<td>For Coulmns Select First Point &amp; Alt+Shift &amp; Last Point</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Selection</td>
+<td>Alt+Shift+Right</td>
+<td>Select All Text Between Quates</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Selection</td>
+<td>Ctrl+Alt+Up/Down</td>
+<td>Add Cursor Above/Below</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Selection</td>
+<td>Ctrl+F2</td>
+<td>Select All Similar Words Simultaneously</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Sort</td>
+<td>Alt+Shift+S</td>
+<td>–Sort Lines Ascending</td>
+<td>editor.action.sortLinesAscending</td>
+</tr>
+<tr class="even">
+<td>Split</td>
+<td></td>
+<td>–duplicates all tabs view</td>
+<td>workbench.action.duplicateActiveEditorGroup ⬅️⬆️⬇️➡️</td>
+</tr>
+<tr class="odd">
+<td>Split</td>
+<td></td>
+<td>–split and mirror current window</td>
+<td>workbench.action.splitEditor ⬅️⬆️⬇️➡️</td>
+</tr>
+<tr class="even">
+<td>Split</td>
+<td></td>
+<td>–splits into empty window</td>
+<td>workbench.action.newGroup ⬅️⬆️⬇️➡️</td>
+</tr>
+<tr class="odd">
+<td>Table</td>
+<td>Ctrl+Q Ctrl+F</td>
+<td>Format As Table Org Mode</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Table</td>
+<td>Ctrl+T Ctrl+T</td>
+<td>Table Format Properly</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Terminal</td>
+<td>Ctrl+Shift+~</td>
+<td>Terminal.New</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Terminal</td>
+<td>Ctrl+Shift+5</td>
+<td>Terminal.Split</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Selection</td>
+<td>ctrl+D</td>
+<td>select next match</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>**emmet</li>
+<li>**org related keybinding</li>
+</ul>
+<h2 id="windows-terminal">Windows-Terminal</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Windows Terminal Keybinding</th>
+<th>Objective</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Alt+Shift+Plus</td>
+<td>Split Screen (Vertically)</td>
+</tr>
+<tr class="even">
+<td>Ctrl+Shift+W</td>
+<td>Split-Screen (Close)</td>
+</tr>
+<tr class="odd">
+<td>Alt+Shift+Minus</td>
+<td>Split-Screen (Horizontally)</td>
+</tr>
+<tr class="even">
+<td>Alt+Shift+Arrow</td>
+<td>Split-Screen (Increase/Decrease Size)</td>
+</tr>
+<tr class="odd">
+<td>Ctrl+Shift+M</td>
+<td>Toogle Mark Mode</td>
+</tr>
+</tbody>
+</table>
+<h2 id="autohotkey">AutoHotKey</h2>
+<table>
+<thead>
+<tr class="header">
+<th>AutoHotKey Keybinding</th>
+<th>Objective</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Ctrl+Alt+N</td>
+<td>Notepad++ (Open Selecteditem With)</td>
+</tr>
+<tr class="even">
+<td>Ctrl+Alt+N</td>
+<td>Notepad++ (Open Selecteditem With)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="neovim-vim">NeoVim / Vim</h2>
+<h3 id="vim-shortcuts">Vim Shortcuts</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Related-Function</th>
+<th>Keybinding / Shortcut</th>
+<th>Objective</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>**Command-list</td>
+<td>ctrl+w</td>
+<td>commandlist</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>!</td>
+<td>Filter through external program</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>&amp;#65308;</td>
+<td>Indent left or shift left</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>&amp;#65310;</td>
+<td>Indent right or shift right</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>=</td>
+<td>Autoindent or filter through 'equalprg' or C-indenting if empty</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>~</td>
+<td>swap case (only if 'tildeop' is set)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>c</td>
+<td>Change (delete then insert)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>d</td>
+<td>Delete</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>g?</td>
+<td>ROT13 encoding</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>g@</td>
+<td>call function set with the 'operatorfunc' option</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>g~</td>
+<td>Swap case</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>gq</td>
+<td>text formatting</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>gu</td>
+<td>Lowercase</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>gU</td>
+<td>Uppercase</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>gw</td>
+<td>text formatting with no cursor movement</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>Operator</td>
+<td>Ojective</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>*Operator</td>
+<td>y</td>
+<td>Yank (copy)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>*Operator</td>
+<td>zf</td>
+<td>define a fold</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>+Prefix</td>
+<td>[</td>
+<td>+prefix</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>+Prefix</td>
+<td>]</td>
+<td>+prefix</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>+Prefix</td>
+<td>a</td>
+<td>+around</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>+Prefix</td>
+<td>i</td>
+<td>+inside</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Copy</td>
+<td>:%y</td>
+<td>Copy the entire file</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Copy</td>
+<td>y</td>
+<td>Copy the current line</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Copy</td>
+<td>yip</td>
+<td>Copy the current paragraph</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Copy</td>
+<td>ys</td>
+<td>Copy the current sentence</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Copy</td>
+<td>yw</td>
+<td>Copy the current word</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Customization</td>
+<td>:colorscheme</td>
+<td>list of all installed color schemes in Vim</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Delete</td>
+<td>#dd {normal}</td>
+<td>to delete #lines.</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Delete</td>
+<td>d#w {normal}</td>
+<td>to delete the #UPPER CASE words</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Delete</td>
+<td>d$ {normal}</td>
+<td>To delete from the cursor to the end of a line type</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Delete</td>
+<td>dd</td>
+<td>delete-line</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Delete</td>
+<td>de {normal}</td>
+<td>delete to the end of the current word.</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Delete</td>
+<td>dw {normal}</td>
+<td>to delete a word.</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Delete</td>
+<td>x</td>
+<td>delete the character under the cursor.</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Editing</td>
+<td>:old</td>
+<td>switch to the previously edited file</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Escape</td>
+<td>esc or ctrl+:</td>
+<td>normal-mode</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Explorer</td>
+<td>:Ex</td>
+<td>explorer</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Explorer</td>
+<td>:NvimTreeClose</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Explorer</td>
+<td>:NvimTreeOpen</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Find</td>
+<td>/</td>
+<td>find text</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Find</td>
+<td>space+s+f</td>
+<td>find files</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>{</td>
+<td>Previous empty line</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>}</td>
+<td>Next empty line</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>#{down or up}</td>
+<td>to go to that number lines</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>#{left or right}</td>
+<td>to go to that number ch</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>#e</td>
+<td>to move the cursor to the end of the #word forward.</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>#G</td>
+<td>To go to #line</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>#w</td>
+<td>to move the cursor #words forward</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>%</td>
+<td>Matching character: '()', '{}', '[]'</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>^</td>
+<td>Start of line (non-blank)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>$</td>
+<td>move to the end of line</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>0 {normal}</td>
+<td>to move to the start of the line</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>b</td>
+<td>Previous word</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>e</td>
+<td>Next end of word</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>f</td>
+<td>Move to next char</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>F</td>
+<td>Move to previous char</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>G {normal}</td>
+<td>go to last line</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>gg</td>
+<td>To go to the first line of the file</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>H</td>
+<td>home line of window (top)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>h</td>
+<td>Left</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>hjkl left-downup-right</td>
+<td>works as arrow key</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>j</td>
+<td>Down</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>k</td>
+<td>Up</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>L</td>
+<td>Last Line of window</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>l</td>
+<td>Right</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>M</td>
+<td>Middle line of window</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>t</td>
+<td>Move before next char</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Goto</td>
+<td>T</td>
+<td>Move before previous char</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Goto</td>
+<td>w</td>
+<td>Next word</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Help</td>
+<td>:help nvim</td>
+<td>Help</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Help</td>
+<td>:help visual-multi</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Help</td>
+<td>:help vm-some-topic</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Help</td>
+<td>:Tutor</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Help</td>
+<td>F1</td>
+<td>quick help</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>History</td>
+<td>q:</td>
+<td>edit command history</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Insert</td>
+<td>A {normal}</td>
+<td>append /insert text after the cursor</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Insert</td>
+<td>i</td>
+<td>insert text before the cursor</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Merge</td>
+<td>J</td>
+<td>mzJ`2 <strong>*</strong></td>
+<td>**</td>
+</tr>
+<tr class="even">
+<td>Merge</td>
+<td>shift+j</td>
+<td>next lines will automerge with current lines</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>PackageManager</td>
+<td>:Lazy</td>
+<td>Lazy Package Manager</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>PackageManager</td>
+<td>:Mason</td>
+<td>Mason Package Manager</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>PackageManager</td>
+<td>:PackerSync</td>
+<td>to sync packer package</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Paste</td>
+<td>p {normal}</td>
+<td>to put previously deleted text after the cursor.</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Quit</td>
+<td>:q or :q!</td>
+<td>quit/close-extra-window</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Quit</td>
+<td>Ctrl+W</td>
+<td>to quit the buffer.</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Reload</td>
+<td>:so</td>
+<td>Source a file like save &amp; reload</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Replace</td>
+<td>:%s/&lt;x&gt;,(?=)/&lt;y&gt;/g</td>
+<td>Replace 'x' if followed by comma and space with 'y'</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Replace</td>
+<td>:%s/&lt;x&gt;/&lt;y&gt;</td>
+<td>Replace first occurance</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Replace</td>
+<td>:%s/&lt;x&gt;/&lt;y&gt;/g</td>
+<td>Replace all first occurance</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Replace</td>
+<td><code
+class="verbatim">:1,10s/\(.\{-}\zs&lt;x&gt;\){2}/&lt;y&gt;/g</code></td>
+<td>Replace second occurrence of 'x' with Text</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Replace</td>
+<td>:1,10s/&lt;x&gt;/&lt;y&gt;/g</td>
+<td>Replace &lt;x&gt; with &lt;y&gt; in lines 1 to 10</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Replace</td>
+<td>s</td>
+<td>replace the chars of the word</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Replace</td>
+<td>S</td>
+<td>replace the line where mouse is</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Save</td>
+<td>:w!</td>
+<td>override and save</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Save</td>
+<td>:wq</td>
+<td>save and quit</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Select-All</td>
+<td>:%y or ggVG</td>
+<td>To select all text in Neovim, you can use the</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Split</td>
+<td>:new</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Split</td>
+<td>:split</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Split</td>
+<td>:split or :sp</td>
+<td>Splits the current window horizontally.</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Split</td>
+<td>:vnew</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Split</td>
+<td>:vnew</td>
+<td>Opens a new vertical window.</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Split</td>
+<td>:vsplit or :vs</td>
+<td>Splits the current window vertically.</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Split</td>
+<td>ctrl+w+s</td>
+<td>hprizontal split</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Split</td>
+<td>ctrl+w+v</td>
+<td>vertical split or :vsplit</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Suggestion</td>
+<td>Tab {normal}</td>
+<td>in normal mode enter command and auto complete</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Swap</td>
+<td>ctrl+x</td>
+<td>swap window</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Synonymous</td>
+<td>&lt;cr&gt;</td>
+<td>Enter</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Undo / Redo</td>
+<td>ctrl+r</td>
+<td>Redo</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Undo / Redo</td>
+<td>U {normal}</td>
+<td>to fix a whole line.</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Undo / Redo</td>
+<td>u {normal}</td>
+<td>to undo the last commands,</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Utility</td>
+<td>:Telescope builtin</td>
+<td>** ** **</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Utility</td>
+<td>:Telescope keymaps</td>
+<td>keymaps</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Visual-Mode</td>
+<td>ctrl+v</td>
+<td>move around coulmns</td>
+<td>**</td>
+</tr>
+<tr class="odd">
+<td>Visual-Mode</td>
+<td>vg</td>
+<td>start selecting text</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Zoom</td>
+<td>ctrl +/-</td>
+<td>zoomin/out</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="nvim-netrw">Nvim-netrw</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Key</th>
+<th>Objective</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1</td>
+<td>Causes Netrw to issue help</td>
+</tr>
+<tr class="even">
+<td>cr</td>
+<td>Netrw will enter the directory or read the file</td>
+</tr>
+<tr class="odd">
+<td>del</td>
+<td>Netrw will attempt to remove the file/directory</td>
+</tr>
+<tr class="even">
+<td>c-h</td>
+<td>Edit file hiding list</td>
+</tr>
+<tr class="odd">
+<td>c-l</td>
+<td>Causes Netrw to refresh the directory listing</td>
+</tr>
+<tr class="even">
+<td>c-r</td>
+<td>Browse using a gvim server</td>
+</tr>
+<tr class="odd">
+<td>c-tab</td>
+<td>Shrink/expand a netrw/explore window</td>
+</tr>
+<tr class="even">
+<td>a</td>
+<td>Cycles between normal display, hiding and
+g:netrw<sub>listhide</sub>)</td>
+</tr>
+<tr class="odd">
+<td>cd</td>
+<td>Make browsing directory the current directory</td>
+</tr>
+<tr class="even">
+<td>C</td>
+<td>Setting the editing window</td>
+</tr>
+<tr class="odd">
+<td>d</td>
+<td>Make a directory</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>Attempt to remove the file(s)/directory(ies)</td>
+</tr>
+<tr class="odd">
+<td>gb</td>
+<td>Go to previous bookmarked directory</td>
+</tr>
+<tr class="even">
+<td>gd</td>
+<td>Force treatment as directory</td>
+</tr>
+<tr class="odd">
+<td>gf</td>
+<td>Force treatment as file</td>
+</tr>
+<tr class="even">
+<td>gh</td>
+<td>Quick hide/unhide of dot-files</td>
+</tr>
+<tr class="odd">
+<td>gn</td>
+<td>Make top of tree the directory below the cursor</td>
+</tr>
+<tr class="even">
+<td>gp</td>
+<td>Change local-only file permissions</td>
+</tr>
+<tr class="odd">
+<td>i</td>
+<td>Cycle between thin, long, wide, and tree listings</td>
+</tr>
+<tr class="even">
+<td>I</td>
+<td>Toggle the displaying of the banner</td>
+</tr>
+<tr class="odd">
+<td>mb</td>
+<td>Bookmark current directory</td>
+</tr>
+<tr class="even">
+<td>mc</td>
+<td>Copy marked files to marked-file target directory</td>
+</tr>
+<tr class="odd">
+<td>md</td>
+<td>Apply diff to marked files (up to 3)</td>
+</tr>
+<tr class="even">
+<td>me</td>
+<td>Place marked files on arg list and edit them</td>
+</tr>
+<tr class="odd">
+<td>mf</td>
+<td>Mark a file</td>
+</tr>
+<tr class="even">
+<td>mF</td>
+<td>Unmark files</td>
+</tr>
+<tr class="odd">
+<td>mg</td>
+<td>Apply vimgrep to marked files</td>
+</tr>
+<tr class="even">
+<td>mh</td>
+<td>Toggle marked file suffices' presence on hiding list</td>
+</tr>
+<tr class="odd">
+<td>mm</td>
+<td>Move marked files to marked-file target directory</td>
+</tr>
+<tr class="even">
+<td>mp</td>
+<td>Print marked files</td>
+</tr>
+<tr class="odd">
+<td>mr</td>
+<td>Mark files using a shell-style regexp</td>
+</tr>
+<tr class="even">
+<td>mt</td>
+<td>Current browsing directory becomes markfile target</td>
+</tr>
+<tr class="odd">
+<td>mT</td>
+<td>Apply ctags to marked files</td>
+</tr>
+<tr class="even">
+<td>mu</td>
+<td>Unmark all marked files</td>
+</tr>
+<tr class="odd">
+<td>mv</td>
+<td>Apply arbitrary vim command to marked files</td>
+</tr>
+<tr class="even">
+<td>mx</td>
+<td>Apply arbitrary shell command to marked files</td>
+</tr>
+<tr class="odd">
+<td>mX</td>
+<td>Apply arbitrary shell command to marked files en bloc</td>
+</tr>
+<tr class="even">
+<td>mz</td>
+<td>Compress/decompress marked files</td>
+</tr>
+<tr class="odd">
+<td>o</td>
+<td>Enter the file/directory in new window hz split</td>
+</tr>
+<tr class="even">
+<td>O</td>
+<td>Obtain a file specified by cursor</td>
+</tr>
+<tr class="odd">
+<td>p</td>
+<td>Preview the file</td>
+</tr>
+<tr class="even">
+<td>P</td>
+<td>Browse in the previously used window</td>
+</tr>
+<tr class="odd">
+<td>qb</td>
+<td>List bookmarked directories and history</td>
+</tr>
+<tr class="even">
+<td>qf</td>
+<td>Display information on file</td>
+</tr>
+<tr class="odd">
+<td>qF</td>
+<td>Mark files using a quickfix list</td>
+</tr>
+<tr class="even">
+<td>qL</td>
+<td>Mark files using a location-list</td>
+</tr>
+<tr class="odd">
+<td>r</td>
+<td>Reverse sorting order</td>
+</tr>
+<tr class="even">
+<td>R</td>
+<td>Rename the designated file(s)/directory(ies)</td>
+</tr>
+<tr class="odd">
+<td>s</td>
+<td>Select sorting style: by name, time, or file size</td>
+</tr>
+<tr class="even">
+<td>S</td>
+<td>Specify suffix priority for name-sorting</td>
+</tr>
+<tr class="odd">
+<td>t</td>
+<td>Enter the file/directory under the cursor in a new tab</td>
+</tr>
+<tr class="even">
+<td>u</td>
+<td>Change to recently-visited directory</td>
+</tr>
+<tr class="odd">
+<td>U</td>
+<td>Change to subsequently-visited directory</td>
+</tr>
+<tr class="even">
+<td>v</td>
+<td>Enter the file/directory in new window in vertical split</td>
+</tr>
+<tr class="odd">
+<td>x</td>
+<td>View file with an associated program</td>
+</tr>
+<tr class="even">
+<td>X</td>
+<td>Execute filename under cursor via system()</td>
+</tr>
+<tr class="odd">
+<td>%</td>
+<td>Open a new file in netrw's current directory</td>
+</tr>
+</tbody>
+</table>
+<h3 id="notes">Notes:</h3>
+<ul>
+<li>Neovim tutorial <a
+href="https://www.youtube.com/watch?v=w7i4amO_zaE">https://www.youtube.com/watch?v=w7i4amO_zaE</a></li>
+<li>CHEATSHEET <a
+href="https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/editing-like-magic-with-vim-operators/">https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/editing-like-magic-with-vim-operators/</a></li>
+<li>Vim cheatsheet <a
+href="https://devhints.io/vim">https://devhints.io/vim</a></li>
+</ul>
+<p>For matching brackets and sign if the matching sign not found will
+delete the next matcing items.</p>
+<p><em><u><strong><strong>Vim-Visual-Multi</strong></strong></u></em>
+It's called vim-visual-multi in analogy with visual-block, but the
+plugin works mostly from normal mode.</p>
+<p><em><u><strong><strong>Basic Usage:</strong></strong></u></em> select
+words with Ctrl-N (like Ctrl-d in Sublime Text/VS Code) create cursors
+vertically with Ctrl-Down/Ctrl-Up select one character at a time with
+Shift-Arrows press n/N to get next/previous occurrence press [/] to
+select next/previous cursor press q to skip current and get next
+occurrence press Q to remove current cursor/selection start insert mode
+with i,a,I,A Two main modes:</p>
+<p>in cursor mode commands work as they would in normal mode in extend
+mode commands work as they would in visual mode press Tab to switch
+between «cursor» and «extend» mode Most vim commands work as expected
+(motions, r to replace characters, ~ to change case, etc).</p>
+<p>Additionally you can: run macros/ex/normal commands at cursors align
+cursors transpose selections add patterns with regex, or from visual
+mode And more… of course, you can enter insert mode and autocomplete
+will work.</p>
+<p><em><u><strong><strong>BOOKMARK.NVIM:</strong></strong></u></em> move
+the cursor to the line of the file that needs to be bookmarked. press \
+in normal mode, and input a description in the pop-up shortcut window.
+Press enter in insert mode to add, or press esc in normal mode to cancel
+adding bookmarks. press &lt;tab&gt; &lt;tab&gt; to open or close the
+bookmark list window. move the cursor in the bookmark list window, press
+enter to jump to the file line where the bookmark is located. press
+&lt;space&gt; &lt;space&gt; in the bookmark list window to switch
+sorting rules. press dd in the bookmark list to delete a bookmark. use
+:telescope bookmarks to stop seeing highlights</p>
+</body>
+</html>

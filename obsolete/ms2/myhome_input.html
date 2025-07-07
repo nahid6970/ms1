@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home</title>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="wilih=device-wilih, initial-scale=1">
+  <link rel="stylesheet" href="myhome/myhome.css" ;>
+
+</head>
+
+<body>
+  <div class="flex-container2">
+
+    <!--? ████████╗██╗███╗   ███╗███████╗       ██╗       ██████╗  █████╗ ████████╗███████╗ -->
+    <!--? ╚══██╔══╝██║████╗ ████║██╔════╝       ██║       ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝ -->
+    <!--?    ██║   ██║██╔████╔██║█████╗      ████████╗    ██║  ██║███████║   ██║   █████╗   -->
+    <!--?    ██║   ██║██║╚██╔╝██║██╔══╝      ██╔═██╔═╝    ██║  ██║██╔══██║   ██║   ██╔══╝   -->
+    <!--?    ██║   ██║██║ ╚═╝ ██║███████╗    ██████║      ██████╔╝██║  ██║   ██║   ███████╗ -->
+    <!--?    ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝    ╚═════╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ -->
+
+    <!-- <div class="date-time" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+      <div id="currentDate"></div>
+      <div id="currentTime"></div>
+    </div> -->
+
+    <!--?  ██████╗  ██████╗  ██████╗  ██████╗ ██╗     ███████╗    ███████╗███████╗ █████╗ ██████╗  ██████╗██╗  ██╗ -->
+    <!--? ██╔════╝ ██╔═══██╗██╔═══██╗██╔════╝ ██║     ██╔════╝    ██╔════╝██╔════╝██╔══██╗██╔══██╗██╔════╝██║  ██║ -->
+    <!--? ██║  ███╗██║   ██║██║   ██║██║  ███╗██║     █████╗      ███████╗█████╗  ███████║██████╔╝██║     ███████║ -->
+    <!--? ██║   ██║██║   ██║██║   ██║██║   ██║██║     ██╔══╝      ╚════██║██╔══╝  ██╔══██║██╔══██╗██║     ██╔══██║ -->
+    <!--? ╚██████╔╝╚██████╔╝╚██████╔╝╚██████╔╝███████╗███████╗    ███████║███████╗██║  ██║██║  ██║╚██████╗██║  ██║ -->
+    <!--?  ╚═════╝  ╚═════╝  ╚═════╝  ╚═════╝ ╚══════╝╚══════╝    ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ -->
+
+    <!-- <div class="search-container">
+      <select id="search-engine" onchange="updateSearchEngine()">
+        <option value="google">Google</option>
+        <option value="yahoo">Yahoo</option>
+        <option value="bing">Bing</option>
+      </select>
+      <input type="text" id="searchQuery" placeholder="Search..." onkeydown="checkEnter(event)"
+        style="text-align: center;">
+      <button onclick="search()">🔍</button>
+    </div> -->
+
+
+<!--* ████████╗ ██████╗ ██████╗     ███████╗██╗████████╗███████╗███████╗ -->
+<!--* ╚══██╔══╝██╔═══██╗██╔══██╗    ██╔════╝██║╚══██╔══╝██╔════╝██╔════╝ -->
+<!--*    ██║   ██║   ██║██████╔╝    ███████╗██║   ██║   █████╗  ███████╗ -->
+<!--*    ██║   ██║   ██║██╔═══╝     ╚════██║██║   ██║   ██╔══╝  ╚════██║ -->
+<!--*    ██║   ╚██████╔╝██║         ███████║██║   ██║   ███████╗███████║ -->
+<!--*    ╚═╝    ╚═════╝ ╚═╝         ╚══════╝╚═╝   ╚═╝   ╚══════╝╚══════╝ -->
+
+  <div style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+  <span><a href="https://mail.google.com/" style="text-decoration: none; color: #f46613;"><i class="nf nf-cod-mail"></i></a></span>
+  <span><a href="https://www.facebook.com/" style="text-decoration: none; color: #1399f4;"><i class="nf nf-dev-facebook"></i></a></span>
+  <span><a href="https://www.messenger.com/" style="text-decoration: none; color: #3675ff;"><i class="nf nf-fa-facebook_messenger"></i></a></span>
+  <span><a href="https://www.youtube.com/" style="text-decoration: none; color: #ff0000;"><i class="nf nf-fa-youtube"></i></a></span>
+  <span><a href="https://discord.com/channels/@me" style="text-decoration: none; color: #5765f2;"><i class="nf nf-fa-discord"></i></a></span>
+  <span><a href="https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate" style="text-decoration: none; color: #ffffff;"><i class="nf nf-md-google_translate"></i></a></span>
+  <span><a href="https://www.vlr.gg/"><img src="https://www.vlr.gg/img/vlr/logo_tw.png" width="50" height="40"></a></span>
+  <span><a href="https://myaccount.google.com/" style="color: #ffffff;"><i class="nf nf-dev-google"></i></a></span>
+  <span><a href="https://login.tailscale.com/admin/machines" style="color: #4b70cc;"><i class="nf nf-md-dots_hexagon"></i></a></span>
+  <span><a href="http://mi9t:5002" style="color: #ff2e2e;" title="mi9t"><i class="nf nf-fa-battery_2"></i></a></span>
+  </div>
+
+    <!--* ██╗    ██╗███████╗██████╗     ██████╗ ███████╗██╗   ██╗ -->
+    <!--* ██║    ██║██╔════╝██╔══██╗    ██╔══██╗██╔════╝██║   ██║ -->
+    <!--* ██║ █╗ ██║█████╗  ██████╔╝    ██║  ██║█████╗  ██║   ██║ -->
+    <!--* ██║███╗██║██╔══╝  ██╔══██╗    ██║  ██║██╔══╝  ╚██╗ ██╔╝ -->
+    <!--* ╚███╔███╔╝███████╗██████╔╝    ██████╔╝███████╗ ╚████╔╝  -->
+    <!--*  ╚══╝╚══╝ ╚══════╝╚═════╝     ╚═════╝ ╚══════╝  ╚═══╝   -->
+
+    <div style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+      <span style="font-size: 40px;"><a href="https://chat.openai.com/" style="text-decoration: none; color: #1a7f64; background-color: rgb(31, 31, 31); border-radius: 5px;">ChatGpt</a></span>
+      <span style="font-size: 40px;"><a href="https://bard.google.com/"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg" width="50" height="50"></a></span>
+      <span style="font-size: 40px;"><a href="https://github.com/" style="text-decoration: none; color: aliceblue;"><i class="nf nf-cod-github"></i></a></span>
+      <span style="font-size: 40px;"> <a href="https://keep.google.com/" style="text-decoration: none; color: #fbbc04;"><i class="nf nf-md-google_keep"></i></a></span>
+      <!-- <span style="font-size: 40px; background-color: white;"> <a href="https://www.onenote.com/" style="text-decoration: none; color: #7321a6;">󰝇</a></span> -->
+      <span style="font-size: 40px;"> <a href="https://www.onenote.com/" style="text-decoration: none; color: #b259e6;"><i class="nf nf-md-microsoft_onenote"></i></a></span>
+      <span style="font-size: 40px;"> <a href="https://www.nerdfonts.com/cheat-sheet" style="text-decoration: none; color: #69e8ff;"><i class="nf nf-md-format_font"></i></a></span>
+    </div>
+
+
+    <!--* ██╗      ██████╗  ██████╗ █████╗ ██╗         ██╗  ██╗ ██████╗ ███████╗████████╗ -->
+    <!--* ██║     ██╔═══██╗██╔════╝██╔══██╗██║         ██║  ██║██╔═══██╗██╔════╝╚══██╔══╝ -->
+    <!--* ██║     ██║   ██║██║     ███████║██║         ███████║██║   ██║███████╗   ██║    -->
+    <!--* ██║     ██║   ██║██║     ██╔══██║██║         ██╔══██║██║   ██║╚════██║   ██║    -->
+    <!--* ███████╗╚██████╔╝╚██████╗██║  ██║███████╗    ██║  ██║╚██████╔╝███████║   ██║    -->
+    <!--* ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝    -->
+
+
+    <div style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+    <!-- Synthing --> <span> <a href="http://192.168.0.101:5001"><i class="nf nf-fa-file_text"></i></a> </span>
+    <!-- Synthing --> <span> <a href="http://192.168.0.101:5002"><i class="nf nf-fa-share_alt"></i></a> </span>
+    <!-- Synthing --> <span> <a href="http://192.168.0.101:5003"><i class="nf nf-fa-hard_drive"></i></a> </span>
+    <!-- Synthing --> <span> <a href="http://192.168.0.101:5005"><i class="nf nf-md-gamepad_circle"></i></a> </span>
+    <!-- Synthing --> <span> <a href="http://192.168.0.101:5008"><i class="nf nf-md-triangle_small_down"></i></a> </span>
+    <!-- Synthing --> <span> <a href="http://192.168.0.101:5009"><i class="nf nf-cod-question"></i></a> </span>
+    </div>
+
+    <div style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+      <span><a href="http://192.168.0.101:8989/"><img src="https://res.cloudinary.com/razordarkamg/image/upload/v1621212884/SonarrV3_pufacd.png" height="50" width="50" alt=""></a></span>
+      <span class="radarr"><a href="http://192.168.0.101:7878/"><img src="https://static-00.iconduck.com/assets.00/radarr-icon-1845x2048-97le6lim.png" height="50" width="50" alt=""></a></span>
+      <span class="prowlarr"><a href="http://192.168.0.101:9696/"><img src="https://static-00.iconduck.com/assets.00/prowlarr-icon-1024x1024-vyf0hy1t.png" height="50" width="50" alt=""></a></span>
+      <!-- Bazarr --> <span><a href="http://192.168.0.101:6767/"><i class="nf nf-md-subtitles"></i></a></span>
+      <!-- Jackett --> <span><a href="http://192.168.0.101:9117/UI/Dashboard"><i class="nf nf-fae-shirt"></i></a></span>
+      <!-- qBittorrent --> <span><a href="http://192.168.0.101:8080/"><i class="nf nf-linux-tor"></i></a></span>
+      <!-- Whisparr <span ><a href ="http://192.168.0.101:6969/"><img src ="https://whisparr.com/logo/256.png"width="50" height="50" alt ="Whisparr"></a></span> -->
+      <!-- Synthing --> <span> <a href="http://127.0.0.1:8384/"><i class="nf nf-md-folder_sync"></i></a></span>
+      <!-- Flaresolver <span ><a href ="http://192.168.0.101:8191/"><img src ="https://static-00.iconduck.com/assets.00/cloudflare-icon-2048x2048-wks6nchu.png"width="50" height="50" alt ="FlareSolverr"></a></span> -->
+      <!-- FreshRSS <span ><a href ="https://feeds.flossboxin.org.in/p/i/"><img src ="https://avatars.githubusercontent.com/u/9414285?s=280&v=4"width="50" height="50" alt="FreshRSS"></a></span> -->
+      <!-- Synthing --> <span> <a href="http://192.168.0.1/">🛜</a> </span>
+    </div>
+
+
+
+    <div style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+      <!-- romsfun --> <span> <a href="https://romsfun.com/"><img src="https://romsfun.com/wp-content/uploads/2023/08/LOGO.png" alt=""></a> </span>
+      <!-- archive --> <span style="background-color: #ffffff;"> <a href="https://archive.org/"><img src="https://archive.org/offshoot_assets/assets/ia-logo-2c2c2c.03bd7e88c8814d63d0fc..svg" height="50" width="50" alt=""></a> </span>
+      <!-- fitgirl --> <span style="background-color: #ffffff;"> <a href="https://fitgirl-repacks.site/"><img src="http://fitgirl-repacks.site/wp-content/uploads/2016/08/cropped-icon-192x192.jpg" height="50" width="50" alt=""></a> </span>
+      <!-- dodi --> <span style="background-color: #000000;"> <a href="https://dodi-repacks.site/">DODI</a> </span>
+      <!-- scoop --> <span> <a href="https://scoop.sh/#/"><img src="https://avatars.githubusercontent.com/u/16618068?s=30" height="50" width="50" alt=""></a> </span>
+      <!-- winget --> <span> <a href="https://winget.run/"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MC40OTIiIGhlaWdodD0iNDUuOTg2IiB2aWV3Qm94PSIwIDAgNDAuNDkyIDQ1Ljk4NiI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTgzNS4xMzEgLTcyLjEzNikiPjxsaW5lIHkyPSIyMS41NDciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgOTUuMjExKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxOC45NiIgeTI9IjExLjAyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkyPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgMTA2LjA2NykiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5Mj0iMjEuODc2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NzQuMjU1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkxPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgNzMuNSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5MT0iMTAuNjkxIiB4Mj0iMTguNzk1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSA3My41KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgyPSIxOC43OTUiIHkyPSIxMS4wMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODM2LjUgODQuMTkxKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSIyMS44NzYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgzNi41IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguNzk1IiB5MT0iMTAuNjkxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDYuMDY3KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSI1LjA5OSIgeDI9IjguNzM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDAuOTY4KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkyPSIxMS42NzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg0NS4yMzggODkuMjkpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjEwLjA1NyIgeTI9IjUuNzU3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NDUuMjM4IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTE9IjUuNzU3IiB4Mj0iMTAuMjIyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjExLjY3OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY1LjUxNyA4OS4yOSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4Mj0iMTAuMjIyIiB5Mj0iNi4wODYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgODMuMjA0KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxMC4wNTciIHkyPSI2LjA4NiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODQ1LjIzOCA4My4yMDQpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjkuNzA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDczLjUpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjguNzM4IiB5Mj0iNS4wOTkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg2NS41MTcgMTAwLjk2OCkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+" height="50" width="50" alt=""></a> </span>
+      <span style="font-size: 40px;"> <a href="https://apps.evozi.com/apk-downloader/"><img src="https://apps.evozi.com/apk-downloader/assets/img/mini_icon.png" width="50" height="50" alt=""></a></span>
+      <span style="font-size: 40px;"> <a href="https://store.rg-adguard.net/"><img src="https://store.rg-adguard.net/img/Store.png" width="50" height="50" alt=""></a></span>
+
+    </div>
+
+    <!--*  ██╗███████╗██╗      █████╗ ███╗   ███╗██╗ ██████╗  -->
+    <!--*  ██║██╔════╝██║     ██╔══██╗████╗ ████║██║██╔════╝  -->
+    <!--*  ██║███████╗██║     ███████║██╔████╔██║██║██║       -->
+    <!--*  ██║╚════██║██║     ██╔══██║██║╚██╔╝██║██║██║       -->
+    <!--*  ██║███████║███████╗██║  ██║██║ ╚═╝ ██║██║╚██████╗  -->
+    <!--*  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝ ╚═════╝  -->
+
+    <div style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+      <!-- alquaran --> <span><a href="https://www.alqurans.com/sura.php"
+          style="text-decoration: none; color: #00a65a;"><i class="nf nf-fa-book_quran"></i></a></span>
+    </div>
+
+    <!--!      ██╗ ██████╗ ██████╗  -->
+    <!--!      ██║██╔═══██╗██╔══██╗ -->
+    <!--!      ██║██║   ██║██████╔╝ -->
+    <!--! ██   ██║██║   ██║██╔══██╗ -->
+    <!--! ╚█████╔╝╚██████╔╝██████╔╝ -->
+    <!--!  ╚════╝  ╚═════╝ ╚═════╝  -->
+
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px;">
+      <span style="height: fit-content;">
+        <a href="https://erecruitment.bb.org.bd/"><i class="nf nf-oct-dot_fill" style="color: #ff0000;"></i>eRecruitment</a>
+      </span>
+      <span style="height: fit-content;">
+        <a href="https://www.bepza.gov.bd/career"><i class="nf nf-oct-dot_fill" style="color: #ff0000;"></i>BEPZA</a>
+      </span>
+      <span style="height: fit-content;">
+        <a href="http://dnc.teletalk.com.bd/"><i class="nf nf-oct-dot_fill" style="color: #ff0000;"></i>DNC</a>
+      </span>
+      <span style="height: fit-content;">
+        <a href="http://bpsc.teletalk.com.bd/"><i class="nf nf-oct-dot_fill" style="color: #ff0000;"></i>BPSC</a>
+      </span>
+      <span style="height: fit-content;">
+        <a href="http://brdb.teletalk.com.bd/"><i class="nf nf-oct-dot_fill" style="color: #ff0000;"></i>BRDB</a>
+      </span>
+      <span style="height: fit-content;">
+        <a href="http://ndr.teletalk.com.bd/"><i class="nf nf-oct-dot_fill" style="color: #ff0000;"></i>NDR</a>
+      </span>
+    </div>
+    
+
+
+    <!--* ███████╗ ██████╗ ██╗     ██████╗ ███████╗██████╗ -->
+    <!--* ██╔════╝██╔═══██╗██║     ██╔══██╗██╔════╝██╔══██╗ -->
+    <!--* █████╗  ██║   ██║██║     ██║  ██║█████╗  ██████╔╝ -->
+    <!--* ██╔══╝  ██║   ██║██║     ██║  ██║██╔══╝  ██╔══██╗ -->
+    <!--* ██║     ╚██████╔╝███████╗██████╔╝███████╗██║  ██║ -->
+    <!--* ╚═╝      ╚═════╝ ╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝ -->
+
+    <div class="container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+
+      <div><summary>PC Apps</summary> <details> <!-- import C:\ms2\import_myhome\PC.org --></details></div>
+      <div> <summary>Android Apps</summary><details> <!-- import C:\ms2\import_myhome\Android.org --> </details> </div>
+
+      <!-- import C:\ms2\import_myhome\VSCode_Extension.html -->
+
+    </div>
+
+
+    <!--? ██╗███╗   ██╗██╗████████╗██╗ █████╗ ██╗         ███████╗███████╗████████╗██╗   ██╗██████╗   -->
+    <!--? ██║████╗  ██║██║╚══██╔══╝██║██╔══██╗██║         ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗  -->
+    <!--? ██║██╔██╗ ██║██║   ██║   ██║███████║██║         ███████╗█████╗     ██║   ██║   ██║██████╔╝  -->
+    <!--? ██║██║╚██╗██║██║   ██║   ██║██╔══██║██║         ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝   -->
+    <!--? ██║██║ ╚████║██║   ██║   ██║██║  ██║███████╗    ███████║███████╗   ██║   ╚██████╔╝██║       -->
+    <!--? ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚═╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝       -->
+
+    <div class="box2">
+      <details>
+        <summary>Initial Setup 🎯</summary>
+        <list>
+          - Antivirus exception list D:\@git and C:\Users\nahid\OneDrive\backup and D:\software
+          - Delete empty powershell profile from C:\Users\nahid\OneDrive\Documents\WindowsPowerShell or
+          C:\Users\nahid\Documents , incase initial setup error for script running
+          - Jackett setup C:\Users\nahid\AppData\Local\qBittorrent\nova3\engines\jackett.json
+          - Ditto setup shortcuts for ctrl+alt+1/2/3 for past
+          - For startup issues use these tools
+          - Taskmanager startup app & path check
+          - Autoruns
+          - oh-my-posh font install
+          - oh-my-posh font install --victoria --firecode --terminus --meslo --hack --3270 --Helvetica
+          - oh-my-posh init pwsh --config 'path in scoop folder' | Invoke-Expression #pwsh profile
+        </list>
+      </details>
+    </div>
+
+    <!--
+ ██╗  ██╗███╗   ███╗███████╗
+ ██║ ██╔╝████╗ ████║██╔════╝
+ █████╔╝ ██╔████╔██║███████╗
+ ██╔═██╗ ██║╚██╔╝██║╚════██║
+ ██║  ██╗██║ ╚═╝ ██║███████║
+ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝
+-->
+
+    <div class="box2">
+      <details>
+        <summary>KMS</summary>
+
+        <a
+          href="https://raw.githubusercontent.com/nahid6970/static/main/Online_KMS_Activation.cmd">Online_KMS_Activation.cmd</a>
+        <br>
+        <a href="https://raw.githubusercontent.com/nahid6970/static/main/office-win%20act.cmd">office-win
+          act.cmd(old)</a>
+
+      </details>
+    </div>
+
+    <!--
+ ██╗  ██╗ ██████╗ ██╗    ██╗    ████████╗ ██████╗     ██████╗ 
+ ██║  ██║██╔═══██╗██║    ██║    ╚══██╔══╝██╔═══██╗    ╚════██╗
+ ███████║██║   ██║██║ █╗ ██║       ██║   ██║   ██║      ▄███╔╝
+ ██╔══██║██║   ██║██║███╗██║       ██║   ██║   ██║      ▀▀══╝ 
+ ██║  ██║╚██████╔╝╚███╔███╔╝       ██║   ╚██████╔╝      ██╗   
+ ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝        ╚═╝    ╚═════╝       ╚═╝   
+-->
+
+    <div class="box2">
+      <details>
+        <summary>How to 🤔</summary>
+        <list>
+
+          <h1>Align by RegEx</h1>
+          - remove all unnecessary spaces
+          - Pressing Ctrl+F -> enter \s+. -> is a regular expression -> any number of whitespace characters.
+          - to use align by regix on any other sign use \ first then the symber for others \ not necessary
+          - works only on first one
+
+          <h1>align-columns</h1>
+          - go to command pallet
+          - use this sign colon : and enter
+          - ,<>
+            - works on all matched item
+
+        </list>
+      </details>
+    </div>
+
+    <!--
+  █████╗ ███╗   ██╗██████╗ ██████╗  ██████╗ ██╗██████╗     ██╗  ██╗███████╗██╗     ██████╗ 
+ ██╔══██╗████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██║██╔══██╗    ██║  ██║██╔════╝██║     ██╔══██╗
+ ███████║██╔██╗ ██║██║  ██║██████╔╝██║   ██║██║██║  ██║    ███████║█████╗  ██║     ██████╔╝
+ ██╔══██║██║╚██╗██║██║  ██║██╔══██╗██║   ██║██║██║  ██║    ██╔══██║██╔══╝  ██║     ██╔═══╝ 
+ ██║  ██║██║ ╚████║██████╔╝██║  ██║╚██████╔╝██║██████╔╝    ██║  ██║███████╗███████╗██║     
+ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝╚═════╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     
+-->
+
+    <div class="box2">
+      <details>
+        <summary>Android Help 📱</summary>
+        <list>
+
+          <li><a href="https://www.youtube.com/watch?v=BWgh6pH72Fc&t=470s">Encrypt & Decrypt Device</a> </li>
+
+          <h1 class="h25">Termux Commands</h1>
+
+          - <a href="https://www.learntermux.tech/2020/01/basic-commands-in-termux.html?m=1">Learn_Termux</a>
+          - <a href="https://wiki.termux.com/wiki/Touch_Keyboard"></a> termux pc keyboard mapping
+          - alias alias_name='command'
+          - unalias
+          - termux-setup-storage
+          - cd storage/shared/
+          - pkg update -y && pkg upgrade -y
+          - pkg in
+          - apt update -y && apt upgrade -y
+          - pkg install rclone python tealdeer tsu -y
+          - git clone https://github.com/h4ck3r0/Termux-os && cd Termux-os && bash os.sh
+          - git clone https://github.com/nahid6970/ms3 && cd ms3 && bash os.sh
+          - rm ms3 -r -f
+
+          <h1 class="h25">Termux rclone </h1>
+          - rclone copy storage/shared/rclone.conf /data/data/com.termux/files/home/.config/rclone/
+          - rclone sync gu:/song/ storage/shared/song/ -P --track-renames --ignore-existing --fast-list
+
+          <h1 class="h25">Termux Python GUI </h1>
+          - pkg install python-tkinter
+          - https://www.reddit.com/r/termux/comments/f23lsr/tkinter_gui_issue_tclerror_no_display_name_and_no/
+          - https://wiki.termux.com/wiki/Graphical_Environment
+
+        </list>
+      </details>
+    </div>
+
+    <!--
+ ██████╗  █████╗  ██████╗██╗  ██╗ █████╗  ██████╗ ███████╗    ███╗   ███╗ █████╗ ███╗   ██╗ █████╗  ██████╗ ███████╗██████╗ 
+ ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔════╝ ██╔════╝    ████╗ ████║██╔══██╗████╗  ██║██╔══██╗██╔════╝ ██╔════╝██╔══██╗
+ ██████╔╝███████║██║     █████╔╝ ███████║██║  ███╗█████╗      ██╔████╔██║███████║██╔██╗ ██║███████║██║  ███╗█████╗  ██████╔╝
+ ██╔═══╝ ██╔══██║██║     ██╔═██╗ ██╔══██║██║   ██║██╔══╝      ██║╚██╔╝██║██╔══██║██║╚██╗██║██╔══██║██║   ██║██╔══╝  ██╔══██╗
+ ██║     ██║  ██║╚██████╗██║  ██╗██║  ██║╚██████╔╝███████╗    ██║ ╚═╝ ██║██║  ██║██║ ╚████║██║  ██║╚██████╔╝███████╗██║  ██║
+ ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝
+-->
+
+    <div class="box2">
+      <details>
+        <summary>Package Manager</summary>
+
+        <details>
+          <summary class="h25">SCOOP</summary>
+          <list>
+
+            <h2>Scoop Setup</h2>
+            - iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
+            - scoop config cache_Path D:\@install\scoop\cache
+            <h2>Scoop Add Buckets</h2>
+            - Usage: scoop bucket add|list|known|rm [<args>]
+              - scoop bucket add main
+              - scoop bucket add extras
+              - scoop bucket add versions
+              - scoop bucket add nonportable
+              - scoop bucket add games
+              - scoop bucket add nirsoft
+              <h2>Scoop Commands</h2>
+              - Set-Alias -Name fake -Value real
+              - del .\scoop -Force
+              - scoop update
+              - scoop update *
+              - scoop cleanup *
+              - scoop status
+              - scoop list | foreach { scoop update $_.Name }
+              - scoop cache rm * #To clear everything in your cache
+              - scoop export > D:\@git\ms1\asset\scoop\scoop-apps.txt #(backup scoop apps settings)
+              - scoop import D:\@git\ms1\asset\scoop\scoop-apps.txt #(restore settings)
+
+          </list>
+        </details>
+
+        <details>
+          <summary class="h25">WINGET</summary>
+          <div id="markdown-table-1">
+
+            ***
+            | install | Installs the given package |
+            | show | Shows information about a package |
+            | source | Manage sources of packages |
+            | search | Find and show basic info of packages |
+            | list | Display installed packages |
+            | upgrade | Shows and performs available upgrades |
+            | uninstall | Uninstalls the given package |
+            | hash | Helper to hash installer files |
+            | validate | Validates a manifest file |
+            | settings | Open settings or set administrator settings |
+            | features | Shows the status of experimental features |
+            | export | Exports a list of the installed packages |
+            | import | Installs all the packages in a file |
+            | pin | Manage package pins |
+            ***
+
+          </div>
+        </details>
+        <details>
+          <summary class="h25">GIT</summary>
+          <list>
+
+            - git #shows all command list
+            - cd to local file where u can see the .git folder dont have to go to that folders
+            - git init #initialize a folder as git repository
+            - git add . # Stage all changes
+            - git commit -m "Your commit message here"
+            - git pull origin main && git push origin main
+            - git add . && git commit -m "comment" && git pull origin main && git push origin main
+            - #dont-work-for-pull
+            - git pull
+
+          </list>
+        </details>
+        <details>
+          <summary class="h25">Chocolatey</summary>
+          <list>
+
+            - Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol =
+            [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object
+            System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+            - C:\ProgramData\chocolatey
+
+          </list>
+        </details>
+      </details>
+    </div>
+
+    <!-- 
+ ██████╗  ██████╗    ███████╗ ██████╗ ███████╗████████╗██╗    ██╗ █████╗ ██████╗ ███████╗
+ ██╔══██╗██╔════╝    ██╔════╝██╔═══██╗██╔════╝╚══██╔══╝██║    ██║██╔══██╗██╔══██╗██╔════╝
+ ██████╔╝██║         ███████╗██║   ██║█████╗     ██║   ██║ █╗ ██║███████║██████╔╝█████╗  
+ ██╔═══╝ ██║         ╚════██║██║   ██║██╔══╝     ██║   ██║███╗██║██╔══██║██╔══██╗██╔══╝  
+ ██║     ╚██████╗    ███████║╚██████╔╝██║        ██║   ╚███╔███╔╝██║  ██║██║  ██║███████╗
+ ╚═╝      ╚═════╝    ╚══════╝ ╚═════╝ ╚═╝        ╚═╝    ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+-->
+
+    <div class="box2">
+      <details>
+        <summary>PC Software 🖥️</summary>
+
+        <details>
+          <summary>extra</summary>
+          <list>
+
+            <h3>neovim </h3>
+            - https://dotfyle.com/plugins/kyazdani42/nvim-tree.lua
+            - https://github.com/nvim-lua/kickstart.nvim
+            - https://neovim.io/
+            - https://www.youtube.com/watch?v=stqUbv-5u2s
+
+            <h3>Google.NearbyShare </h3>
+            - https://www.android.com/better-together/nearby-share-app/
+
+            <h3>Nano </h3>
+            - https://github.com/scopatz/nanorc
+          </list>
+        </details>
+      </details>
+    </div>
+
+    <!--
+ ██╗  ██╗███████╗██╗   ██╗    ██████╗ ██╗███╗   ██╗██████╗ ██╗███╗   ██╗ ██████╗ 
+ ██║ ██╔╝██╔════╝╚██╗ ██╔╝    ██╔══██╗██║████╗  ██║██╔══██╗██║████╗  ██║██╔════╝ 
+ █████╔╝ █████╗   ╚████╔╝     ██████╔╝██║██╔██╗ ██║██║  ██║██║██╔██╗ ██║██║  ███╗
+ ██╔═██╗ ██╔══╝    ╚██╔╝      ██╔══██╗██║██║╚██╗██║██║  ██║██║██║╚██╗██║██║   ██║
+ ██║  ██╗███████╗   ██║       ██████╔╝██║██║ ╚████║██████╔╝██║██║ ╚████║╚██████╔╝
+ ╚═╝  ╚═╝╚══════╝   ╚═╝       ╚═════╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
+-->
+
+    <details>
+      <summary class="h25"></summary>
+      <h1>NVIM/NeoVim</h1>
+      <list>
+        - <a href="https://www.youtube.com/watch?v=w7i4amO_zaE">Neovim Tutorial (YT)</a>
+        - <a
+          href="https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/editing-like-magic-with-vim-operators/">EDITING
+          LIKE MAGIC WITH VIM OPERATORS</a>
+        - <a href=" https://devhints.io/vim">Vim cheatsheet</a></list>
+
+      <details>
+        <summary class="h25">More Nvim</summary>
+        <h1>more nvm</h1>
+        <pre>
+
+Notes:
+
+vim-visual-multi
+It's called vim-visual-multi in analogy with visual-block, but the plugin works mostly from normal
+mode.
+
+Basic usage:
+select words with Ctrl-N (like Ctrl-d in Sublime Text/VS Code)
+create cursors vertically with Ctrl-Down/Ctrl-Up
+select one character at a time with Shift-Arrows
+press n/N to get next/previous occurrence
+press [/] to select next/previous cursor
+press q to skip current and get next occurrence
+press Q to remove current cursor/selection
+start insert mode with i,a,I,A
+Two main modes:
+
+in cursor mode commands work as they would in normal mode
+in extend mode commands work as they would in visual mode
+press Tab to switch between «cursor» and «extend» mode
+Most vim commands work as expected (motions, r to replace characters, ~ to change case, etc).
+Additionally you can:
+
+run macros/ex/normal commands at cursors
+align cursors
+transpose selections
+add patterns with regex, or from visual mode
+And more... of course, you can enter insert mode and autocomplete will work.
+
+{asdasdasdasdad}
+
+BOOKMARK.NVIM
+move the cursor to the line of the file that needs to be bookmarked.
+press \\z in normal mode, and input a description in the pop-up shortcut window.
+press enter in insert mode to add, or press esc in normal mode to cancel adding bookmarks.
+press [tab]
+- [tab] to open or close the bookmark list window.
+move the cursor in the bookmark list window, press enter to jump to the file line where the
+bookmark is located.
+press [space]
+- [space] in the bookmark list window to switch sorting rules.
+press dd in the bookmark list to delete a bookmark.
+use :telescope bookmarks to stop seeing highlights
+:help visual-multi
+:help vm-some-topic
+lineux key to windows key
+[cr] -------Enter
+</pre>
+      </details>
+    </details>
+  </div>
+
+
+
+  <script src="myhome/script.js"></script>
+  <script src="myhome/list.js"></script>
+  <script src="myhome/index.js"></script>
+  <script src="myhome/folder.js"></script>
+  <!-- <script src="myhome/open_newtab.js"></script> -->
+
+
+  </div>
+</body>
+
+</html>

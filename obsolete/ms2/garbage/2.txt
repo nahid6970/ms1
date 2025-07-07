@@ -1,0 +1,20 @@
+<div class="box2"> <details> <summary>Mklink &#10541;</summary><list>
+
+<h1 class="h25">rclone-config </h1>
+- Start-Process "C:\Users\nahid\scoop\apps\rclone\current\" -Confirm
+- New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rclone\current\rclone.conf" -Target "D:\@git\ms1\mklink\rclone.conf" -Confirm 
+
+<h1 class="h25">Powershell-Profile </h1>
+- Start-Process "C:\Users\nahid\OneDrive\Documents\PowerShell\" -Confirm
+- New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" -Target "D:\@git\ms1\mklink\PowerShell.Profile.txt" -Confirm
+
+<h1 class="h25">Windows-Terminal-Preview</h1>
+- Start-Process "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\" -Confirm
+- New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json" -Target "D:\@git\ms1\mklink\WindowsTerminal.Profile.json" -Confirm
+
+<h1 class="h25">nvim</h1>
+- mkdir C:\Users\nahid\AppData\Local\nvim -Confirm
+- Start-Process "C:\Users\nahid\AppData\Local\nvim" -Confirm
+- New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\AppData\Local\nvim\init.lua" -Target "D:\@git\ms1\mklink\nvim_init.lua" -Confirm
+
+</list></details> </div>

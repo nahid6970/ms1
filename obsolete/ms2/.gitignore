@@ -1,0 +1,5 @@
+/asset/ignore
+*.exe
+*.msi
+*.rar
+*.zip

@@ -1,0 +1,144 @@
+/* Global styles */
+body {
+background-color: #31343a;
+font-family: Calibri;
+}
+
+.flex-container {
+display: flex;
+flex-direction: row;
+background-color: #31343a;
+gap: 3px;
+flex-wrap: wrap;
+text-align: left;
+line-height: auto;
+align-items: flex-start;
+font-size: auto;
+}
+
+.flex-container > div {
+background-image: linear-gradient(10deg, #1d1e22, #1d1e22);
+font-weight: bold;
+flex-grow: 1;
+border-radius: 0px;
+width: 300px;
+/* width: max-content; */
+color: rgb(216, 42, 42);
+margin: 1px;
+text-align: left;
+border-bottom-right-radius: 0cm;
+
+}
+
+.box {
+    width: 100%;
+    height: 450px;
+    background-color: #a4bb24;
+    display: row;
+    padding: 10px;
+    border: 0px solid rgb(2, 56, 2);
+    cursor: pointer;
+    -webkit-user-select: none; /* Safari 3.1+ */
+    -moz-user-select: none; /* Firefox 2+ */
+    -ms-user-select: none; /* IE 10+ */
+    user-select: none;
+    overflow: auto; /* Add this line to enable scrolling */
+    white-space: nowrap; /* Prevent text wrapping */
+
+    overflow-y: auto; /* Use 'auto' to show vertical scrollbar only */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+
+
+    /* Custom scrollbar */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: red black; /* Firefox */
+}
+
+
+/* Webkit (Chrome, Safari, etc.) scrollbar customization */
+.box::-webkit-scrollbar {
+    width: 6px; /* Set the width of the scrollbar */
+}
+
+.box::-webkit-scrollbar-thumb {
+    background-color: red; /* Set the color of the thumb (the draggable part) */
+}
+
+.box::-webkit-scrollbar-track {
+    background-color: black; /* Set the color of the track (the non-draggable part) */
+}
+
+.break {
+flex-basis: 100%;
+height: 45px;
+display: none;
+}
+
+a:link {color: #b5ac97;background-color: transparent;text-decoration: none;}
+a:visited {color: #bbd853;background-color: transparent;text-decoration: none;}
+a:hover {color: red;background-color: transparent;text-decoration: none;}
+a:active {color: yellow;background-color: transparent;text-decoration: underline;}
+
+h3 {
+color: #5fc4fd;
+background-color: #363633;
+text-align:center ;
+margin-top: 0ch ;
+}
+
+
+/* p {text-align: left;height: 15px;color: purple;} */
+p {
+text-align: justify; /* Change to justify for a cleaner look */
+line-height: 1.5; /* Increase line height for better readability */
+height: auto; /* Remove fixed height for dynamic sizing */
+color: #4a90e2; /* Change to a nice blue color */
+font-family: Arial, sans-serif; /* Choose a widely supported font */
+font-size: 16px; /* Set an appropriate font size */
+}
+
+img {
+border: 1px solid transparent;
+vertical-align: middle;
+height: 20px;
+width: 20px;
+}
+
+dt{
+padding: 1.5px;
+}
+
+summary {
+color: #129e5d;
+list-style: none;
+font-size: 20px;
+text-align: center;
+background-color: #333530;
+padding: 0%;
+border-radius: 1cqb;
+cursor: pointer; /* Set cursor to hand pointer */
+}
+
+details {
+max-width: 250px;
+background-color: #1a354b;
+}
+
+
+/* Lists */
+/* ul, #myUL {
+list-style-type: ""; 
+margin: 0;
+padding: 0;
+}
+
+*/
+/* li {
+list-style: circle;
+} */
+
+
+
+/* .active {
+display: block;
+} */

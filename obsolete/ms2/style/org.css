@@ -1,0 +1,316 @@
+body {
+background-color: rgb(40, 44, 52);
+font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+max-width: 100%;
+/*   margin: 0 auto 0 12%; */
+color: aliceblue;
+padding-left: 200px;
+}
+
+p {
+text-align: justify; /* Change to justify for a cleaner look */
+line-height: 1.5; /* Increase line height for better readability */
+height: auto; /* Remove fixed height for dynamic sizing */
+max-width: 800px;
+color: #4a90e2; /* Change to a nice blue color */
+font-family: Arial, sans-serif; /* Choose a widely supported font */
+font-size: 16px; /* Set an appropriate font size */
+}
+
+h1 {
+color: rgb(36, 147, 255);
+/* margin-left: 15%; */
+}
+
+h2 {
+color: rgb(26, 119, 26);
+}
+
+h3 {
+color:rgb(188, 120, 221);
+}
+
+summary {
+display: inline-block;
+vertical-align: top;
+font-weight: bold;
+padding: 5px 5px;
+background-color: #ffffff;
+color: #000000;
+border-radius: 0px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+transition: transform 0.3s ease;
+margin: 2px;
+width: 160px;
+}
+
+/* Hover effect */
+summary:hover {
+transform: scale(1.05);
+background-color: #000000;
+color: white;
+}
+
+details {
+width: fit-content;
+border: 1px solid whitesmoke;
+}
+
+span {
+display: inline-block;
+vertical-align: top;
+padding: 5px 5px;
+background-color: #474747;
+border-radius: 5px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+transition: transform 0.3s ease;
+margin: 2px;
+width: 160px;
+}
+
+/* Hover effect */
+span:hover {
+transform: scale(1.05);
+background-color: #000000;
+}
+
+/* Style for links inside spans */
+span a {
+text-decoration: none;
+color: #333;
+font-weight: bold;
+}
+
+/* Hover effect for links */
+span a:hover {
+text-decoration: underline;
+}
+
+/* Change hyperlink text color */
+a:link {color: #b5ac97;background-color: transparent;text-decoration: none;}
+a:visited {color: #bbd853;background-color: transparent;text-decoration: none;}
+a:hover {color: red;background-color: transparent;text-decoration: none;}
+a:active {color: yellow;background-color: transparent;text-decoration: underline;}
+
+.scoop {
+display: inline-block;
+padding: 5px 5px;
+background-color: #6b667b ;
+border-radius: 5px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+transition: transform 0.3s ease;
+margin: 2px;
+width: 160px;
+}
+
+.winget {
+display: inline-block;
+padding: 5px 5px;
+background-color: #005da7 ;
+border-radius: 5px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+transition: transform 0.3s ease;
+margin: 2px;
+width: 160px;
+}
+
+.choco {
+display: inline-block;
+padding: 5px 5px;
+background-color: #884b2e ;
+border-radius: 5px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+transition: transform 0.3s ease;
+margin: 2px;
+width: 160px;
+}
+
+.home {
+display: inline-block;
+padding: 5px 5px;
+background-color: #43a72f ;
+border-radius: 5px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+transition: transform 0.3s ease;
+margin: 2px;
+width: 160px;
+}
+
+.folder {
+background-color: yellow;
+color: rgb(116, 116, 116);
+}
+
+.yt {
+background-color: red;
+}
+
+
+/* Customize Table of Contents (TOC) */
+/* Style the TOC container */
+#TOC {
+background-color: #282c34;
+padding: 2px;
+border: 2px solid #050505;
+border-radius: 5px;
+max-width: 180px;
+position: fixed;
+top: 10%;
+left: 0%;
+height: 70%;
+overflow-y: auto;
+}
+
+/* Style the list items in the TOC */
+#TOC ul {
+list-style-type: none;
+padding: 0;
+}
+
+/* Style TOC entries */
+#TOC ul li {
+margin-bottom: 5px;
+}
+
+/* Style First-level headings in the TOC */
+#TOC ul li a {
+text-decoration: none;
+color: rgb(36, 147, 255);
+display: block;
+padding: px 0;
+margin-left: 10px;
+font-weight: bold;
+}
+
+/* Style second-level headings in the TOC */
+#TOC ul ul li a {
+font-size: 16px; /* Decrease the font size for second-level headings */
+color: rgb(26, 119, 26);
+}
+
+/* Style third-level headings in the TOC */
+#TOC ul ul ul li a {
+font-size: 14px; /* Adjust the font size for third-level headings */
+color: rgb(188, 120, 221);
+}
+
+/* Adjust position of subheadings */
+#TOC ul ul li {
+margin-left: 15px;
+list-style-type: none;
+}
+
+/* Firefox */
+#TOC::-webkit-scrollbar {
+width: 3px;
+}
+
+#TOC::-webkit-scrollbar-thumb {
+background-color: #ff0000; /* Handle color */
+}
+
+#TOC::-webkit-scrollbar-track {
+background-color: #000000; /* Track color */
+}
+
+
+
+/* Table Related */
+table {
+border-collapse: inherit;
+width: auto;
+/*   border: 1px solid #ddd; */
+}
+
+th, td {
+text-align: left;
+padding: 3px;
+}
+
+th {
+text-align: center;
+background-color: #ffffff;
+color: #000000;
+} 
+
+tr:nth-child(even) {
+background-color: #454c5a;
+}
+
+tr:nth-child(odd) {
+background-color: #3b414b;
+}
+
+
+
+
+
+
+
+
+
+@media screen and ( max-width: 900px ) {
+body {
+background-color: rgb(40, 44, 52);
+max-width: 100%;
+/*   margin: 0 auto 0 12%; */
+color: aliceblue;
+padding-left: 0px;
+}
+h1 { font-size: px;}
+h2 {font-size: px;}
+h2 {font-size: px;}
+
+#TOC {
+visibility: hidden;
+background-color: #282c34;
+padding: 2px;
+border: 2px solid #ff5500;
+border-radius: 5px;
+max-width: 15%;
+position: fixed;
+top: 0%;
+left: 0%;
+height: 70%;
+overflow-y: auto;
+}
+
+/* Style the list items in the TOC */
+#TOC ul {
+list-style-type: none;
+padding: 0;
+}
+
+/* Style TOC entries */
+#TOC ul li {
+margin-bottom: 5px;
+}
+
+/* Style First-level headings in the TOC */
+#TOC ul li a {
+text-decoration: none;
+color: rgb(36, 147, 255);
+display: block;
+padding: px 0;
+margin-left: 10px;
+font-weight: bold;
+}
+
+
+/* Style second-level headings in the TOC */
+#TOC ul ul li a {
+font-size: 16px; /* Decrease the font size for second-level headings */
+color: rgb(26, 119, 26);
+}
+
+/* Style third-level headings in the TOC */
+#TOC ul ul ul li a {
+font-size: 14px; /* Adjust the font size for third-level headings */
+color: rgb(244, 67, 54);
+}
+
+/* Adjust position of subheadings */
+#TOC ul ul li {
+margin-left: 15px;
+}
+}
