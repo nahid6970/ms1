@@ -86,52 +86,52 @@ $menu = [ordered]@{
     "Initial Setup" = [ordered]@{
         "PKG Manager & Must Apps" = {
             nw_pwsh -Command {
-                    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-                        Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
-                    } else {
-                        Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
-                    }
+                if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+                    Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
+                } else {
+                    Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
+                }
 
-                    Write-Host "Change cache Path" -ForegroundColor Green
-                    scoop config cache_path D:\@install\scoop\cache
+                Write-Host "Change cache Path" -ForegroundColor Green
+                scoop config cache_path D:\@install\scoop\cache
 
-                    scoop install git
+                scoop install git
 
-                    Write-Host "Add Buckets" -ForegroundColor Green
-                    scoop bucket add nonportable
-                  # scoop bucket add main
-                    scoop bucket add extras
-                    scoop bucket add versions
-                    scoop bucket add games
+                Write-Host "Add Buckets" -ForegroundColor Green
+                scoop bucket add nonportable
+                # scoop bucket add main
+                scoop bucket add extras
+                scoop bucket add versions
+                scoop bucket add games
 
-                    scoop install sudo
-                    scoop install python312
-                    scoop install oh-my-posh
-                    scoop install fzf
-                    scoop install komorebi
-                    scoop install rclone
-                    scoop install ditto
-                    scoop install text-grab
-                    scoop install yt-dlp
-                    scoop install ffmpeg
-                    scoop install highlight
-                    scoop install zoxide
+                scoop install sudo
+                scoop install python312
+                scoop install oh-my-posh
+                scoop install fzf
+                scoop install komorebi
+                scoop install rclone
+                scoop install ditto
+                scoop install text-grab
+                scoop install yt-dlp
+                scoop install ffmpeg
+                scoop install highlight
+                scoop install zoxide
 
-                    winget upgrade --source msstore
-                    winget upgrade --source winget
-                    Write-Host "winget Source updated successfully!" -ForegroundColor Green
-                    winget upgrade --all
-                    winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
-                    Write-Host "Winget Upgraded ✅"
-                    Write-Host "Packages updated successfully" -ForegroundColor Green
+                winget upgrade --source msstore
+                winget upgrade --source winget
+                Write-Host "winget Source updated successfully!" -ForegroundColor Green
+                winget upgrade --all
+                winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+                Write-Host "Winget Upgraded ✅"
+                Write-Host "Packages updated successfully" -ForegroundColor Green
 
-                    winget install Microsoft.PowerShell
-                    winget install Notepad++.Notepad++
-                    winget install 9NQ8Q8J78637 # ahk (probably need to check)
+                winget install Microsoft.PowerShell
+                winget install Notepad++.Notepad++
+                winget install 9NQ8Q8J78637 # ahk (probably need to check)
             }
         }
         "Policies" = {
-            nw_powershell_asadmin {
+            nw_powershell_asadmin -Command {
                 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
                 Set-ExecutionPolicy RemoteSigned
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -139,12 +139,37 @@ $menu = [ordered]@{
             }
         }
         "Install Scoop Packages" = {
-
+            nw_powershell -Command {
+                # scoop install scoop-completion
+                # scoop install scoop-search
+                scoop install ack
+                scoop install adb
+                scoop install bat
+                scoop install capture2text
+                scoop install ditto
+                scoop install ffmpeg
+                scoop install highlight
+                scoop install kitty
+                scoop install neovim
+                scoop install putty
+                scoop install rssguard
+                scoop install rufus
+                scoop install ventoy
+                scoop install winaero-tweaker
+                scoop install yt-dlp
+                Write-Host 'Packages installed successfully' --ForegroundColor Green
+            }
         }
         "Install Pwsh Modules" = {
+            nw_pwsh_asadmin -Command {
+                Install-Module -Name BurntToast -Scope CurrentUser -Verbose
+            }
 
         }
         "Font Setup" = {
+            nw_powershell -Command {
+                oh-my-posh font install
+            }
 
         }
         "pip Packages" = {
