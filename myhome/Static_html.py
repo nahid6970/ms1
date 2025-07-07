@@ -68,10 +68,10 @@ def create_static_html():
 
 
     # Write the static HTML file
-    with open(os.path.join(base_dir, 'static_myhome.html'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(base_dir, 'myhome.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    print("Static HTML file 'static_myhome.html' created successfully.")
+    print("Static HTML file 'myhome.html' created successfully.")
 
 if __name__ == '__main__':
     create_static_html()
