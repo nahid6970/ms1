@@ -82,7 +82,7 @@ function nw_pwsh {
 $su = "C:\Users\nahid\scoop\shims\sudo.ps1"
 
 # Define the menu structure
-$menu = @{
+$menu = [ordered]@{
     "Application Setup" = @{
         "jackett + qbittorrent" = {
             nw_pwsh -Command '
@@ -212,7 +212,7 @@ function Show-MainMenu {
     $mainMenuListBox.Add_SelectionChanged({
         $submenuListBox.Items.Clear()
         $selectedMainMenu = $mainMenuListBox.SelectedItem
-        if ($selectedMainMenu -and $menu.ContainsKey($selectedMainMenu)) {
+        if ($selectedMainMenu -and $menu.Contains($selectedMainMenu)) {
             $menu[$selectedMainMenu].Keys | ForEach-Object { $submenuListBox.Items.Add($_) }
         }
     })
@@ -221,7 +221,7 @@ function Show-MainMenu {
     $submenuListBox.Add_MouseDoubleClick({
         $selectedMainMenu = $mainMenuListBox.SelectedItem
         $selectedSubMenu = $submenuListBox.SelectedItem
-        if ($selectedMainMenu -and $selectedSubMenu -and $menu[$selectedMainMenu].ContainsKey($selectedSubMenu)) {
+        if ($selectedMainMenu -and $selectedSubMenu -and $menu[$selectedMainMenu] -and $menu[$selectedMainMenu].ContainsKey($selectedSubMenu)) {
             . ($menu[$selectedMainMenu][$selectedSubMenu])
         }
     })
