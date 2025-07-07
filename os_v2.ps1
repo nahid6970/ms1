@@ -172,29 +172,30 @@ $menu = [ordered]@{
         }
         "pip Packages" = {
             nw_pwsh -Command {
-                # needed
-                    # pip install uv
-                    # pip install customtkinter
-                    # pip install pyautogui
-                    # pip install pillow
-                    # pip install pyadl
-                    # pip install keyboard
-                    # pip install psutil
-                    # pip install Flask
-                    # pip install pycryptodomex
-                    # pip install opencv-python
-                    # pip install pynput
-                    # pip install mss # for 2nd display
-                    # pip install screeninfo # for 2nd display
-                # not sure if needed
-                    # pip install cryptography
-                    # pip install importlib
-                    # pip install PyDictionary
-                    # pip install pywin32
-                    # pip install screeninfo
-                    # pip install winshell
+                #! needed
+                    pip install uv
+                    uv tool install customtkinter
+                    uv tool install pyautogui
+                    uv tool install pillow
+                    uv tool install pyadl
+                    uv tool install keyboard
+                    uv tool install psutil
+                    uv tool install Flask
+                    uv tool install pycryptodomex
+                    uv tool install opencv-python
+                    uv tool install pynput
+                    uv tool install mss # for 2nd display
+                    uv tool install screeninfo # for 2nd display
+                #! not sure if needed
+                    uv tool install cryptography
+                    uv tool install importlib
+                    uv tool install PyDictionary
+                    uv tool install pywin32
+                    uv tool install screeninfo
+                    uv tool install winshell
 
-                C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
+                    uv tool update-shell
+                # C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
             }
         }
         "Update Packages" = {
