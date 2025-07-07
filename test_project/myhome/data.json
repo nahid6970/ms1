@@ -1,5 +1,41 @@
 [
   {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "erecruitment",
+    "url": "https://erecruitment.bb.org.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "bepza",
+    "url": "https://www.bepza.gov.bd/career"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "dnc",
+    "url": "http://dnc.teletalk.com.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "bpsc",
+    "url": "http://bpsc.teletalk.com.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "brdb",
+    "url": "http://brdb.teletalk.com.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "ndr",
+    "url": "http://ndr.teletalk.com.bd/"
+  },
+  {
     "color": "#f46613",
     "default_type": "img",
     "icon_class": "nf nf-cod-mail",
@@ -30,11 +66,11 @@
     "url": "https://www.youtube.com/"
   },
   {
-    "name": "Discord",
-    "url": "https://discord.com/channels/@me",
-    "icon_class": "nf nf-fa-discord",
     "color": "#5765f2",
-    "default_type": "nerd-font"
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-discord",
+    "name": "Discord",
+    "url": "https://discord.com/channels/@me"
   },
   {
     "color": "#ffffff",
@@ -50,18 +86,59 @@
     "url": "https://www.vlr.gg/"
   },
   {
-    "default_type": "img",
-    "group": "Chat-BOT",
-    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
-    "name": "ChatGPT",
-    "url": "https://chatgpt.com/"
-  },
-  {
     "color": "#4b70cc",
     "default_type": "nerd-font",
     "icon_class": "nf nf-md-dots_hexagon",
     "name": "Tailscale",
     "url": "https://login.tailscale.com/admin/machines"
+  },
+  {
+    "default_type": "img",
+    "img_src": "https://d2qr50rz2oof04.cloudfront.net/assets/img/logo/logo-bug.png",
+    "name": "noip",
+    "url": "https://my.noip.com/dynamic-dns"
+  },
+  {
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-sticker_emoji",
+    "name": "nerdfonts",
+    "url": "https://www.nerdfonts.com/cheat-sheet"
+  },
+  {
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-github_square",
+    "name": "github",
+    "url": "https://github.com/nahid6970"
+  },
+  {
+    "color": "#fbbc04",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-google_keep",
+    "name": "Keep",
+    "url": "https://keep.google.com/"
+  },
+  {
+    "color": "#ff2e2e",
+    "default_type": "nerd-font",
+    "hidden": true,
+    "icon_class": "nf nf-fa-battery_2",
+    "name": "mi9t",
+    "title": "mi9t",
+    "url": "http://mi9t:5002"
+  },
+  {
+    "color": "#b259e6",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-microsoft_onenote",
+    "name": "OneNote",
+    "url": "https://www.onenote.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/"
   },
   {
     "default_type": "img",
@@ -84,12 +161,6 @@
     "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
     "name": "DeepSeek",
     "url": "https://chat.deepseek.com/"
-  },
-  {
-    "default_type": "img",
-    "img_src": "https://d2qr50rz2oof04.cloudfront.net/assets/img/logo/logo-bug.png",
-    "name": "noip",
-    "url": "https://my.noip.com/dynamic-dns"
   },
   {
     "default_type": "img",
@@ -127,13 +198,13 @@
     "url": "http://127.0.0.1:9117/UI/Dashboard"
   },
   {
-    "name": "Syncthing",
-    "group": "Local (Apps)",
-    "url": "http://127.0.0.1:8384/",
-    "icon_class": "nf nf-md-folder_sync",
     "color": "#20acd7",
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-md-folder_sync",
     "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
-    "default_type": "nerd-font"
+    "name": "Syncthing",
+    "url": "http://127.0.0.1:8384/"
   },
   {
     "default_type": "nerd-font",
@@ -152,32 +223,32 @@
     "url": "http://192.168.0.1/"
   },
   {
-    "name": "ShareTXT",
+    "default_type": "img",
     "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5001/",
     "img_src": "https://cdn-icons-png.flaticon.com/512/4400/4400968.png",
-    "default_type": "img"
+    "name": "ShareTXT",
+    "url": "http://192.168.0.101:5001/"
   },
   {
-    "name": "ShareFile",
+    "default_type": "img",
     "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5002/",
     "img_src": "https://cdn-icons-png.flaticon.com/512/2840/2840124.png",
-    "default_type": "img"
+    "name": "ShareFile",
+    "url": "http://192.168.0.101:5002/"
   },
   {
-    "name": "Browse",
+    "default_type": "img",
     "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5003/",
     "img_src": "https://cdn-icons-png.flaticon.com/512/2250/2250195.png",
-    "default_type": "img"
+    "name": "Browse",
+    "url": "http://192.168.0.101:5003/"
   },
   {
-    "name": "GameARR",
-    "group": "Local (Flask)",
-    "url": "http://192.168.0.101:5005/",
     "default_type": "nerd-font",
-    "hidden": true
+    "group": "Local (Flask)",
+    "hidden": true,
+    "name": "GameARR",
+    "url": "http://192.168.0.101:5005/"
   },
   {
     "default_type": "img",
@@ -206,95 +277,24 @@
     "url": "https://scoop.sh/#/"
   },
   {
-    "name": "Winget",
+    "default_type": "img",
     "group": "Download PKG",
-    "url": "https://winget.run/",
     "img_src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MC40OTIiIGhlaWdodD0iNDUuOTg2IiB2aWV3Qm94PSIwIDAgNDAuNDkyIDQ1Ljk4NiI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTgzNS4xMzEgLTcyLjEzNikiPjxsaW5lIHkyPSIyMS41NDciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgOTUuMjExKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxOC45NiIgeTI9IjExLjAyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkyPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgMTA2LjA2NykiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5Mj0iMjEuODc2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NzQuMjU1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkxPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgNzMuNSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5MT0iMTAuNjkxIiB4Mj0iMTguNzk1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSA3My41KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgyPSIxOC43OTUiIHkyPSIxMS4wMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODM2LjUgODQuMTkxKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSIyMS44NzYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgzNi41IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguNzk1IiB5MT0iMTAuNjkxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDYuMDY3KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSI1LjA5OSIgeDI9IjguNzM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDAuOTY4KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkyPSIxMS42NzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg0NS4yMzggODkuMjkpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjEwLjA1NyIgeTI9IjUuNzU3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NDUuMjM4IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTE9IjUuNzU3IiB4Mj0iMTAuMjIyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjExLjY3OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY1LjUxNyA4OS4yOSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4Mj0iMTAuMjIyIiB5Mj0iNi4wODYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgODMuMjA0KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxMC4wNTciIHkyPSI2LjA4NiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODQ1LjIzOCA4My4yMDQpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjkuNzA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDczLjUpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjguNzM4IiB5Mj0iNS4wOTkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg2NS41MTcgMTAwLjk2OCkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+",
-    "default_type": "img"
+    "name": "Winget",
+    "url": "https://winget.run/"
   },
   {
-    "name": "evozi",
+    "default_type": "img",
     "group": "Download PKG",
-    "url": "https://apps.evozi.com/apk-downloader/",
     "img_src": "https://apps.evozi.com/apk-downloader/assets/img/mini_icon.png",
-    "default_type": "img"
+    "name": "evozi",
+    "url": "https://apps.evozi.com/apk-downloader/"
   },
   {
-    "name": "MS-Store",
+    "default_type": "img",
     "group": "Download PKG",
-    "url": "https://store.rg-adguard.net/",
     "img_src": "https://store.rg-adguard.net/img/Store.png",
-    "default_type": "img"
-  },
-  {
-    "default_type": "nerd-font",
-    "icon_class": "nf nf-md-sticker_emoji",
-    "name": "nerdfonts",
-    "url": "https://www.nerdfonts.com/cheat-sheet"
-  },
-  {
-    "name": "erecruitment",
-    "group": "JobCircular",
-    "url": "https://erecruitment.bb.org.bd/",
-    "default_type": "nerd-font"
-  },
-  {
-    "name": "bepza",
-    "group": "JobCircular",
-    "url": "https://www.bepza.gov.bd/career",
-    "default_type": "nerd-font"
-  },
-  {
-    "name": "dnc",
-    "group": "JobCircular",
-    "url": "http://dnc.teletalk.com.bd/",
-    "default_type": "nerd-font"
-  },
-  {
-    "name": "bpsc",
-    "group": "JobCircular",
-    "url": "http://bpsc.teletalk.com.bd/",
-    "default_type": "nerd-font"
-  },
-  {
-    "name": "brdb",
-    "group": "JobCircular",
-    "url": "http://brdb.teletalk.com.bd/",
-    "default_type": "nerd-font"
-  },
-  {
-    "name": "ndr",
-    "group": "JobCircular",
-    "url": "http://ndr.teletalk.com.bd/",
-    "default_type": "nerd-font"
-  },
-  {
-    "name": "github",
-    "url": "https://github.com/nahid6970",
-    "icon_class": "nf nf-fa-github_square",
-    "default_type": "nerd-font"
-  },
-  {
-    "color": "#fbbc04",
-    "default_type": "nerd-font",
-    "icon_class": "nf nf-md-google_keep",
-    "name": "Keep",
-    "url": "https://keep.google.com/"
-  },
-  {
-    "color": "#ff2e2e",
-    "default_type": "nerd-font",
-    "hidden": true,
-    "icon_class": "nf nf-fa-battery_2",
-    "name": "mi9t",
-    "title": "mi9t",
-    "url": "http://mi9t:5002"
-  },
-  {
-    "name": "OneNote",
-    "url": "https://www.onenote.com/",
-    "icon_class": "nf nf-md-microsoft_onenote",
-    "color": "#b259e6",
-    "default_type": "nerd-font"
+    "name": "MS-Store",
+    "url": "https://store.rg-adguard.net/"
   }
 ]
