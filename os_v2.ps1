@@ -290,22 +290,22 @@ $menu = [ordered]@{
         }
     }
     "[+] Github Projects" = [ordered]@{
-        "[*] Microsoft Activation Scripts (MAS)" = {
+        "Microsoft Activation Scripts (MAS)" = {
             nw_powershell_asadmin -Command {Invoke-RestMethod https://get.activated.win | Invoke-Expression}
         }
-        "[+] ChrisTitus WinUtility" = {
+        "ChrisTitus WinUtility" = {
             nw_powershell_asadmin -Command {Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression}
         }
-        "[#] WIMUtil" = {
+        "WIMUtil" = {
             nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | Invoke-Expression}
         }
-        "[!] AppControl Manager" = {
+        "AppControl Manager" = {
             nw_pwsh_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'AppControl'|Invoke-Expression}
         }
-        "[&] Harden Windows Security Using GUI" = {
+        "Harden Windows Security Using GUI" = {
             nw_powershell_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|Invoke-Expression}
         }
-        "[~] Winhance" = {
+        "Winhance" = {
             nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | Invoke-Expression}
         }
     }
@@ -446,7 +446,7 @@ function Show-MainMenu {
     $menu.Keys | ForEach-Object { 
         $item = New-Object System.Windows.Controls.ListBoxItem
         $item.Content = $_
-        $item.Padding = "10,8"
+        $item.Padding = "10,5"
         $item.Margin = "0,2"
         $mainMenuListBox.Items.Add($item)
     }
@@ -502,7 +502,7 @@ function Show-MainMenu {
                 $menu[$selectedMainMenu].Keys | ForEach-Object { 
                     $subItem = New-Object System.Windows.Controls.ListBoxItem
                     $subItem.Content = $_
-                    $subItem.Padding = "10,8"
+                    $subItem.Padding = "10,3"
                     $subItem.Margin = "0,2"
                     $submenuListBox.Items.Add($subItem)
                 }
