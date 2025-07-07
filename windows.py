@@ -54,8 +54,26 @@ class ArchUtil:
                 "description": "Manage Arch packages with pacman",
                 "submenu": [
                     {"title": "Update System", "action": ("sudo pacman -Syu", "Updating system packages")},
-                    {"title": "Install Package", "action": self.install_package},
-                    {"title": "Install Necessary Packages", "action": self.necessarypkgs},
+                    {"title": "Install Necessary Packages",
+                        "action": (
+                            "scoop install ack && "
+                            "scoop install adb && "
+                            "scoop install bat && "
+                            "scoop install capture2text && "
+                            "scoop install ditto && "
+                            "scoop install ffmpeg && "
+                            "scoop install highlight && "
+                            "scoop install kitty && "
+                            "scoop install neovim && "
+                            "scoop install putty && "
+                            "scoop install rssguard && "
+                            "scoop install rufus && "
+                            # "scoop install ventoy && "
+                            # "scoop install winaero-tweaker && "
+                            "scoop install yt-dlp",
+                            "Installing necessary Scoop packages"
+                        )
+                    },
                     {"title": "Remove Package", "action": self.remove_package},
                     {"title": "Search Packages", "action": self.search_packages},
                     {"title": "List Installed", "action": ("pacman -Q | less", "Listing installed packages")},
@@ -77,18 +95,6 @@ class ArchUtil:
                 ]
             },
             {
-                "title": "AUR Helper",
-                "description": "Manage AUR packages with yay helper",
-                "submenu": [
-                    {"title": "Install yay", "action": ("cd /tmp && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si", "Installing yay AUR helper")},
-                    {"title": "Update AUR Packages", "action": ("yay -Syu", "Updating AUR packages")},
-                    {"title": "Install AUR Package", "action": self.install_aur_package},
-                    {"title": "Search AUR", "action": self.search_aur},
-                    {"title": "Remove AUR Package", "action": self.remove_aur_package},
-                    {"title": "List AUR Packages", "action": ("yay -Qm", "Listing AUR packages")},
-                ]
-            },
-            {
                 "title": "Development Tools",
                 "description": "Install common development tools and environments",
                 "submenu": [
@@ -98,33 +104,6 @@ class ArchUtil:
                     {"title": "Install Node.js", "action": ("sudo pacman -S nodejs npm", "Installing Node.js and npm")},
                     {"title": "Install Python Tools", "action": ("sudo pacman -S python-pip python-virtualenv", "Installing Python tools")},
                     {"title": "Install Build Tools", "action": ("sudo pacman -S base-devel", "Installing build tools")},
-                ]
-            },
-            {
-                "title": "Desktop Environments",
-                "description": "Install and manage desktop environments",
-                "submenu": [
-                    {"title": "Install KDE Plasma", "action": ("sudo pacman -S plasma-meta konsole", "Installing KDE Plasma")},
-                    {"title": "Install Qtile", "action": ("sudo pacman -S qtile", "Installing Qtile")},
-                    {"title": "Install Hyprland", "action": ("yay -S hyprland", "Installing Hyprland")},
-                ]
-            },
-            {
-                "title": "Display Server Setup",
-                "description": "Configure X11 and Wayland",
-                "submenu": [
-                    {"title": "Setup X11", "action": ("sudo pacman -S xorg-server xorg-xinit", "Installing and setting up X11")},
-                    {"title": "Setup Wayland", "action": ("sudo pacman -S wayland weston", "Installing and setting up Wayland")},
-                ]
-            },
-            {
-                "title": "Start Desktop",
-                "description": "Launch a desktop environment",
-                "submenu": [
-                    {"title": "Start KDE (X11)", "action": ("startx /usr/bin/startplasma-x11", "Starting KDE Plasma on X11")},
-                    {"title": "Start KDE (Wayland)", "action": ("startplasma-wayland", "Starting KDE Plasma on Wayland")},
-                    {"title": "Start Qtile", "action": ("startx /usr/bin/qtile", "Starting Qtile")},
-                    {"title": "Start Hyprland", "action": ("Hyprland", "Starting Hyprland")},
                 ]
             },
             {
