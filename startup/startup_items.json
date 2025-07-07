@@ -248,12 +248,13 @@
     "Command": ""
   },
   {
-    "type": "App",
     "name": "Prowlarr",
+    "type": "App",
     "paths": [
       "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "ExecutableType": "other"
   },
   {
     "name": "qBittorrent",

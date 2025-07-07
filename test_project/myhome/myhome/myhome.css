@@ -424,3 +424,20 @@ input:checked + .slider:before {
 #edit-group-popup button[type="submit"]:hover {
   background-color: #0056b3;
 }
+
+
+/* items modified to make it look good */
+ul.link-group-content {
+  margin-top: -17px;
+}
+div.group-header-container {
+  margin-top: -27px;
+}
+
+html body {
+  margin-top: 20px;
+}
+
+div.toggle-container {
+  margin-top: -16px;
+}
