@@ -92,12 +92,12 @@ $menu = [ordered]@{
                         Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
                     }
 
-                    'Change cache Path'
+                    Write-Host "Change cache Path" -ForegroundColor Green
                     scoop config cache_path D:\@install\scoop\cache
 
                     scoop install git
 
-                    'Add Buckets'
+                    Write-Host "Add Buckets" -ForegroundColor Green
                     scoop bucket add nonportable
                   # scoop bucket add main
                     scoop bucket add extras
@@ -122,7 +122,7 @@ $menu = [ordered]@{
                     Write-Host "winget Source updated successfully!" -ForegroundColor Green
                     winget upgrade --all
                     winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
-                    Write-Host "Winget Upgraded ☑️"
+                    Write-Host "Winget Upgraded ✅"
                     Write-Host "Packages updated successfully" -ForegroundColor Green
 
                     winget install Microsoft.PowerShell
