@@ -166,24 +166,31 @@ skip_install() {
 desktop_environment() {
     source ~/ms1/linux/os_imports/wallpaper.sh
     source ~/ms1/linux/os_imports/sddm.sh
-    
-    clear
-    echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
-    
-    for i in "${!desktop_environments[@]}"; do
-        IFS=":" read -r description function color <<< "${desktop_environments[$i]}"
-        echo -e "${color}$((i+1))) $description${NC}"
+
+    while true; do
+        clear
+        echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
+
+        for i in "${!desktop_environments[@]}"; do
+            IFS=":" read -r description function color <<< "${desktop_environments[$i]}"
+            echo -e "${color}$((i+1))) $description${NC}"
+        done
+        echo -e "${RED}q) Quit to main menu${NC}"
+
+        read -p "Enter the number: " DE_CHOICE
+
+        if [[ "$DE_CHOICE" == "q" ]]; then
+            break
+        elif [[ "$DE_CHOICE" =~ ^[0-9]+$ ]] && (( DE_CHOICE >= 1 && DE_CHOICE <= ${#desktop_environments[@]} )); then
+            IFS=":" read -r _ function _ <<< "${desktop_environments[$((DE_CHOICE-1))]}"
+            function=$(echo "$function" | xargs)
+            $function
+            read -p "Press Enter to continue..."
+        else
+            echo -e "${RED}Invalid choice. Please try again.${NC}"
+            read -p "Press Enter to continue..."
+        fi
     done
-
-    read -p "Enter the number: " DE_CHOICE
-
-    if [[ "$DE_CHOICE" =~ ^[0-9]+$ ]] && (( DE_CHOICE >= 1 && DE_CHOICE <= ${#desktop_environments[@]} )); then
-        IFS=":" read -r _ function _ <<< "${desktop_environments[$((DE_CHOICE-1))]}"
-        function=$(echo "$function" | xargs)
-        $function
-    else
-        echo -e "${RED}Invalid choice. No desktop environment installed.${NC}"
-    fi
 
     echo -e "${GREEN}Desktop environment installation complete.${NC}"
 }
