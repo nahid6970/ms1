@@ -1,8 +1,3 @@
-# Before u Start
-# 'UNblock with right click context menu'
-# 'Open store and update AppManager'
-# 'run powrshell as admin'
-
 Set-Location c:\
 Add-Type -AssemblyName PresentationFramework
 
@@ -16,40 +11,81 @@ function Show-NewWindow {
     # Create a new window
     $newWindow = New-Object System.Windows.Window
     $newWindow.Title = $Title
-    $newWindow.Width = 400
-    $newWindow.Height = 200
-    $newWindow.Background = [System.Windows.Media.Brushes]::SlateGray
+    $newWindow.Width = 450
+    $newWindow.Height = 250
+    $newWindow.Background = [System.Windows.Media.Brushes]::Transparent
     $newWindow.WindowStartupLocation = "CenterScreen"
+    $newWindow.WindowStyle = "None"
+    $newWindow.AllowsTransparency = $true
+    
+    # Create main border with rounded corners and shadow effect
+    $mainBorder = New-Object System.Windows.Controls.Border
+    $mainBorder.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(45, 45, 48))
+    $mainBorder.CornerRadius = "12"
+    $mainBorder.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $mainBorder.BorderThickness = "1"
+    $mainBorder.Margin = "10"
+    
+    # Drop shadow effect
+    $dropShadow = New-Object System.Windows.Media.Effects.DropShadowEffect
+    $dropShadow.Color = [System.Windows.Media.Colors]::Black
+    $dropShadow.ShadowDepth = 5
+    $dropShadow.BlurRadius = 15
+    $dropShadow.Opacity = 0.3
+    $mainBorder.Effect = $dropShadow
+    
+    $newWindow.Content = $mainBorder
     
     $stackPanel = New-Object System.Windows.Controls.StackPanel
-    $stackPanel.Margin = "20"
-    $newWindow.Content = $stackPanel
+    $stackPanel.Margin = "30"
+    $mainBorder.Child = $stackPanel
 
+    # Title with gradient effect
     $titleTextBlock = New-Object System.Windows.Controls.TextBlock
     $titleTextBlock.Text = $Title
-    $titleTextBlock.FontSize = 20
+    $titleTextBlock.FontSize = 22
     $titleTextBlock.FontWeight = "Bold"
-    $titleTextBlock.Foreground = [System.Windows.Media.Brushes]::White
+    $titleTextBlock.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(100, 181, 246))
     $titleTextBlock.HorizontalAlignment = "Center"
+    $titleTextBlock.Margin = "0,0,0,15"
     $stackPanel.Children.Add($titleTextBlock)
 
+    # Message text
     $messageTextBlock = New-Object System.Windows.Controls.TextBlock
     $messageTextBlock.Text = $Message
     $messageTextBlock.FontSize = 14
-    $messageTextBlock.Foreground = [System.Windows.Media.Brushes]::LightYellow
+    $messageTextBlock.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(220, 220, 220))
     $messageTextBlock.HorizontalAlignment = "Center"
-    $messageTextBlock.Margin = "0,10,0,0"
+    $messageTextBlock.TextWrapping = "Wrap"
+    $messageTextBlock.Margin = "0,0,0,20"
     $stackPanel.Children.Add($messageTextBlock)
 
+    # Close button with hover effects
     $closeButton = New-Object System.Windows.Controls.Button
     $closeButton.Content = "Close"
-    $closeButton.Width = 80
+    $closeButton.Width = 100
+    $closeButton.Height = 35
     $closeButton.HorizontalAlignment = "Center"
-    $closeButton.Background = [System.Windows.Media.Brushes]::LightSlateGray
+    $closeButton.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 175, 80))
     $closeButton.Foreground = [System.Windows.Media.Brushes]::White
-    $closeButton.Margin = "0,20,0,0"
+    $closeButton.BorderThickness = "0"
+    $closeButton.FontWeight = "Bold"
+    $closeButton.FontSize = 12
+    
+    # Button styling
+    $closeButton.Template = New-Object System.Windows.Controls.ControlTemplate
+    $closeButton.Style = New-Object System.Windows.Style
+    $closeButton.Style.TargetType = [System.Windows.Controls.Button]
+    
     $closeButton.Add_Click({ $newWindow.Close() })
     $stackPanel.Children.Add($closeButton)
+
+    # Make window draggable
+    $mainBorder.Add_MouseLeftButtonDown({
+        if ($_.LeftButton -eq [System.Windows.Input.MouseButtonState]::Pressed) {
+            $newWindow.DragMove()
+        }
+    })
 
     $newWindow.ShowDialog() | Out-Null
 }
@@ -57,373 +93,201 @@ function Show-NewWindow {
 # Function to run a command in a new PowerShell window
 function nw_powershell {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process powershell -ArgumentList "-NoExit", "-Command", $Command
 }
 
 function nw_powershell_asadmin {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
 }
 
 function nw_pwsh_asadmin {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process pwsh -Verb RunAs -ArgumentList "-NoExit", "-Command", $Command
 }
 
-
 function nw_pwsh {
     param (
-        [string]$Command
+        [scriptblock]$Command
     )
     Start-Process pwsh -ArgumentList "-NoExit", "-Command", $Command
 }
 
-$su = "C:\Users\nahid\scoop\shims\sudo.ps1"
+# Define the menu structure
+$menu = [ordered]@{
+    "[+] Initial Setup" = [ordered]@{
+        "PKG Manager & Must Apps" = {
+            nw_pwsh -Command {
+                if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+                    Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
+                } else {
+                    Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
+                }
 
-# Main Menu and Submenu in a side-by-side view
-function Show-MainMenu {
-    $window = New-Object System.Windows.Window
-    $window.Title = "OS_v2"
-    $window.Width = 600
-    $window.Height = 500
-    $window.Background = [System.Windows.Media.Brushes]::DarkSlateGray
-    $window.WindowStartupLocation = "CenterScreen"
+                Write-Host "Change cache Path" -ForegroundColor Green
+                scoop config cache_path D:\@install\scoop\cache
 
-    # Grid Layout for side-by-side view
-    $grid = New-Object System.Windows.Controls.Grid
-    $grid.ShowGridLines = $false
-    $window.Content = $grid
+                scoop install git
 
-    # Define two columns (one for main menu, one for submenu)
-    $column1 = New-Object System.Windows.Controls.ColumnDefinition
-    $column1.Width = "2*"
-    $column2 = New-Object System.Windows.Controls.ColumnDefinition
-    $column2.Width = "3*"
-    $grid.ColumnDefinitions.Add($column1)
-    $grid.ColumnDefinitions.Add($column2)
+                Write-Host "Add Buckets" -ForegroundColor Green
+                scoop bucket add nonportable
+                # scoop bucket add main
+                scoop bucket add extras
+                scoop bucket add versions
+                scoop bucket add games
 
-    # Main Menu (Left Panel)
-    $mainMenuPanel = New-Object System.Windows.Controls.StackPanel
-    $mainMenuPanel.Margin = "10"
-    [System.Windows.Controls.Grid]::SetColumn($mainMenuPanel, 0)
-    $grid.Children.Add($mainMenuPanel)
+                scoop install sudo
+                scoop install python312
+                scoop install oh-my-posh
+                scoop install fzf
+                scoop install komorebi
+                scoop install rclone
+                scoop install ditto
+                scoop install text-grab
+                scoop install yt-dlp
+                scoop install ffmpeg
+                scoop install highlight
+                scoop install zoxide
 
-    $mainMenuTitle = New-Object System.Windows.Controls.TextBlock
-    $mainMenuTitle.Text = "Main Menu"
-    $mainMenuTitle.FontSize = 18
-    $mainMenuTitle.FontWeight = "Bold"
-    $mainMenuTitle.Foreground = [System.Windows.Media.Brushes]::White
-    $mainMenuTitle.HorizontalAlignment = "Center"
-    $mainMenuPanel.Children.Add($mainMenuTitle)
+                winget upgrade --source msstore
+                winget upgrade --source winget
+                Write-Host "winget Source updated successfully!" -ForegroundColor Green
+                winget upgrade --all
+                winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+                Write-Host "Winget Upgraded ✅"
+                Write-Host "Packages updated successfully" -ForegroundColor Green
 
-    # ListBox for main menu options
-    $mainMenuListBox = New-Object System.Windows.Controls.ListBox
-    $mainMenuListBox.Background = [System.Windows.Media.Brushes]::White
-    $mainMenuListBox.Foreground = [System.Windows.Media.Brushes]::Black
-    $mainMenuListBox.FontSize = 14
-    $mainMenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
-    #* ███████╗██╗██████╗ ███████╗████████╗
-    #* ██╔════╝██║██╔══██╗██╔════╝╚══██╔══╝
-    #* █████╗  ██║██████╔╝███████╗   ██║
-    #* ██╔══╝  ██║██╔══██╗╚════██║   ██║
-    #* ██║     ██║██║  ██║███████║   ██║
-    #* ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝
-    $mainMenuListBox.Items.Add("Initial Setup")
-    $mainMenuListBox.Items.Add("Application Setup")
-    $mainMenuListBox.Items.Add("Clone Projects")
-    $mainMenuListBox.Items.Add("Backup & Restore")
-    $mainMenuListBox.Items.Add("Port")
-    $mainMenuListBox.Items.Add("mklink")
-    $mainMenuListBox.Items.Add("Github Projects")
-    $mainMenuPanel.Children.Add($mainMenuListBox)
-
-    # Submenu (Right Panel)
-    $submenuPanel = New-Object System.Windows.Controls.StackPanel
-    $submenuPanel.Margin = "10"
-    [System.Windows.Controls.Grid]::SetColumn($submenuPanel, 1)
-    $grid.Children.Add($submenuPanel)
-
-    $submenuTitle = New-Object System.Windows.Controls.TextBlock
-    $submenuTitle.Text = "Submenu"
-    $submenuTitle.FontSize = 18
-    $submenuTitle.FontWeight = "Bold"
-    $submenuTitle.Foreground = [System.Windows.Media.Brushes]::White
-    $submenuTitle.HorizontalAlignment = "Center"
-    $submenuPanel.Children.Add($submenuTitle)
-
-    $submenuListBox = New-Object System.Windows.Controls.ListBox
-    $submenuListBox.Background = [System.Windows.Media.Brushes]::Black
-    $submenuListBox.Foreground = [System.Windows.Media.Brushes]::White
-    $submenuListBox.FontSize = 14
-    $submenuListBox.FontFamily = New-Object System.Windows.Media.FontFamily("JetBrainsMono NFP")
-    $submenuPanel.Children.Add($submenuListBox)
-
-    #* ███████╗██╗   ██╗██████╗ ███╗   ███╗███████╗███╗   ██╗██╗   ██╗
-    #* ██╔════╝██║   ██║██╔══██╗████╗ ████║██╔════╝████╗  ██║██║   ██║
-    #* ███████╗██║   ██║██████╔╝██╔████╔██║█████╗  ██╔██╗ ██║██║   ██║
-    #* ╚════██║██║   ██║██╔══██╗██║╚██╔╝██║██╔══╝  ██║╚██╗██║██║   ██║
-    #* ███████║╚██████╔╝██████╔╝██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝
-    #* ╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝
-    # Event handler to populate submenu based on main menu selection
-    $mainMenuListBox.Add_SelectionChanged({
-        $submenuListBox.Items.Clear()
-
-        switch ($mainMenuListBox.SelectedItem) {
-            "Initial Setup" {
-                $submenuListBox.Items.Add("PKG Manager & Must Apps")
-                $submenuListBox.Items.Add("Policies")
-                $submenuListBox.Items.Add("Install Scoop Packages")
-                $submenuListBox.Items.Add("Install Pwsh Modules")
-                $submenuListBox.Items.Add("Font Setup")
-                $submenuListBox.Items.Add("pip Packages")
-                $submenuListBox.Items.Add("Update Packages ")
+                winget install Microsoft.PowerShell
+                winget install Notepad++.Notepad++
+                winget install 9NQ8Q8J78637 # ahk (probably need to check)
             }
-            "Application Setup" {
-                $submenuListBox.Items.Add("jackett + qbittorrent")
-                $submenuListBox.Items.Add("Ldplayer")
-                $submenuListBox.Items.Add("Neovim_1.conf")
-                $submenuListBox.Items.Add("Neovim_2.conf")
-                $submenuListBox.Items.Add("Notepad++ Theme Setup")
-                $submenuListBox.Items.Add("PotPlayer Register")
-            }
-            "Clone Projects" {
-                $submenuListBox.Items.Add("clone ms1")
-                $submenuListBox.Items.Add("clone ms2")
-                $submenuListBox.Items.Add("clone ms3")
-            }
-            "Port" {
-                $submenuListBox.Items.Add("22 [SSH]") # ssh
-                $submenuListBox.Items.Add("5000")
-                $submenuListBox.Items.Add("5001")
-                $submenuListBox.Items.Add("5002")
-            }
-            "mklink" {
-                $submenuListBox.Items.Add("Komorebi")
-                $submenuListBox.Items.Add("Reference")
-                $submenuListBox.Items.Add("PowerShell Profile")
-                $submenuListBox.Items.Add("Prowlarr")
-                $submenuListBox.Items.Add("Radarr")
-                $submenuListBox.Items.Add("RssGuard")
-                $submenuListBox.Items.Add("Sonarr")
-                $submenuListBox.Items.Add("Terminal Profile")
-                $submenuListBox.Items.Add("VSCode")
-            }
-            "Github Projects" {
-                $submenuListBox.Items.Add("Microsoft Activation Scripts (MAS)")
-                $submenuListBox.Items.Add("ChrisTitus WinUtility")
-                $submenuListBox.Items.Add("WIMUtil")
-                $submenuListBox.Items.Add("AppControl Manager")
-                $submenuListBox.Items.Add("Harden Windows Security Using GUI")
-                $submenuListBox.Items.Add("Winhance")
-            }
-            "Backup & Restore" {
-                $submenuListBox.Items.Add("decrypt rclone.conf & move")
-                $submenuListBox.Items.Add("------------------*------------------")
-                $submenuListBox.Items.Add("msBackups [rs]")
-                $submenuListBox.Items.Add("msBackups [bk]")
-                $submenuListBox.Items.Add("------------------*------------------")
-                $submenuListBox.Items.Add("nilesoft nss [bk]")
-                $submenuListBox.Items.Add("------------------*------------------")
-                $submenuListBox.Items.Add("song [rclone] [bk]")
-            }
-
         }
-    })
-
-    #* ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
-    #* ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝
-    #* █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗
-    #* ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║
-    #* ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
-    #* ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
-
-    # Event handler for double-click on submenu to open pop-up window or run command
-    $submenuListBox.Add_MouseDoubleClick({
-        switch ($submenuListBox.SelectedItem) {
-            # package
-            "ChrisTitus WinUtility" {
-                nw_powershell_asadmin -Command "iwr -useb https://christitus.com/win | iex"
-            }
-            "Microsoft Activation Scripts (MAS)" {
-                nw_powershell_asadmin -Command "irm https://get.activated.win | iex"
-            }
-
-            "WIMUtil" {
-                nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | iex"
-            }
-            
-            "Harden Windows Security Using GUI" {
-                nw_powershell_asadmin -Command "(irm 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|iex"
-            }
-            
-            "Winhance" {
-                nw_powershell_asadmin -Command "irm 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | iex"
-            }
-
-            "AppControl Manager" {
-                nw_pwsh_asadmin -Command "(irm 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'AppControl'|iex"
-            }
-
-            "Policies" {
-                nw_powershell -Command "
+        "Policies" = {
+            nw_powershell_asadmin -Command {
                 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
                 Set-ExecutionPolicy RemoteSigned
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
                 Install-Module -Name Microsoft.WinGet.Client -Force -AllowClobber
-                                         "
             }
-
-            "PKG Manager & Must Apps" {
-                nw_powershell -Command "
-                    if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-                        Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
-                    } else {
-                        Write-Host 'Scoop is already installed. Skipping installation.' -ForegroundColor Yellow
-                    }
-
-                    'Change cache Path'
-                    scoop config cache_path D:\@install\scoop\cache
-
-                    scoop install git
-
-                    'Add Buckets'
-                    scoop bucket add nonportable
-                  # scoop bucket add main
-                    scoop bucket add extras
-                    scoop bucket add versions
-                    scoop bucket add games
-
-                    scoop install sudo
-                    scoop install python312
-                    scoop install oh-my-posh
-                    scoop install fzf
-                    scoop install komorebi
-                    scoop install rclone
-                    scoop install ditto
-                    scoop install text-grab
-                    scoop install yt-dlp
-                    scoop install ffmpeg
-                    scoop install highlight
-                    scoop install zoxide
-
-                    winget upgrade --source msstore
-                    winget upgrade --source winget
-                    Write-Host 'winget Source updated successfully!' -ForegroundColor Green
-                    winget upgrade --all
-                    winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
-                    Write-Host 'Winget Upgraded ☑️'
-                    Write-Host 'Packages updated successfully' -ForegroundColor Green
-
-                    winget install Microsoft.PowerShell
-                    winget install Notepad++.Notepad++
-                    winget install 9NQ8Q8J78637 # ahk (probably need to check)
-                                         "
+        }
+        "Install Scoop Packages" = {
+            nw_powershell -Command {
+                # scoop install scoop-completion
+                # scoop install scoop-search
+                scoop install ack
+                scoop install adb
+                scoop install bat
+                scoop install capture2text
+                scoop install ditto
+                scoop install ffmpeg
+                scoop install highlight
+                scoop install kitty
+                scoop install neovim
+                scoop install putty
+                scoop install rssguard
+                scoop install rufus
+                scoop install ventoy
+                scoop install winaero-tweaker
+                scoop install yt-dlp
+                Write-Host 'Packages installed successfully' --ForegroundColor Green
             }
-
-            "Install Scoop Packages" {
-                nw_powershell -Command "
-                    # scoop install scoop-completion
-                    # scoop install scoop-search
-                    scoop install ack
-                    scoop install adb
-                    scoop install bat
-                    scoop install capture2text
-                    scoop install ditto
-                    scoop install ffmpeg
-                    scoop install highlight
-                    scoop install kitty
-                    scoop install neovim
-                    scoop install putty
-                    scoop install rssguard
-                    scoop install rufus
-                    scoop install ventoy
-                    scoop install winaero-tweaker
-                    scoop install yt-dlp
-                    Write-Host 'Packages installed successfully' --ForegroundColor Green
-                                        "
+        }
+        "Font Setup" = {
+            nw_powershell -Command {
+                oh-my-posh font install
             }
-
-            "Pip Packages" {
-                nw_pwsh -Command "
-            # needed
-                    # pip install customtkinter
-                    # pip install pyautogui
-                    # pip install pillow
-                    # pip install pyadl
-                    # pip install keyboard
-                    # pip install psutil
-                    # pip install Flask
-                    # pip install pycryptodomex
-                    # pip install opencv-python
-                    # pip install pynput
-                    # pip install mss # for 2nd display
-                    # pip install screeninfo # for 2nd display
-            # not sure if needed
-                    # pip install cryptography
-                    # pip install importlib
-                    # pip install PyDictionary
-                    # pip install pywin32
-                    # pip install screeninfo
-                    # pip install winshell
-
-                    $su C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
-                                         "
+        }
+        "Install Pwsh Modules" = {
+            nw_pwsh_asadmin -Command {
+                Install-Module -Name BurntToast -Scope CurrentUser -Verbose
             }
+        }
+        "pip Packages" = {
+            nw_pwsh -Command {
+                #! needed
+                    pip install uv
+                    uv tool install customtkinter
+                    uv tool install pyautogui
+                    uv tool install pillow
+                    uv tool install pyadl
+                    uv tool install keyboard
+                    uv tool install psutil
+                    uv tool install Flask
+                    uv tool install pycryptodomex
+                    uv tool install opencv-python
+                    uv tool install pynput
+                    uv tool install mss # for 2nd display
+                    uv tool install screeninfo # for 2nd display
+                #! not sure if needed
+                    uv tool install cryptography
+                    uv tool install importlib
+                    uv tool install PyDictionary
+                    uv tool install pywin32
+                    uv tool install screeninfo
+                    uv tool install winshell
 
-            "Update Packages " {
-                nw_pwsh -Command "scoop status
-                                     scoop update
-                                     Write-Host 'Scoop Status & Bucked Updated ☑️'
-                                     scoop update *
-                                     scoop export > C:\Users\nahid\OneDrive\backup\installed_apps\list_scoop.txt
-                                     Write-Host 'scoop updated ☑️'
-                                     scoop cleanup *
-                                     Write-Host 'Scoop Cleanedup ☑️'
-                                     winget upgrade --all
-                                     winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
-                                     Write-Host 'Winget Upgraded ☑️'
-                                     Write-Host 'Packages updated successfully' -ForegroundColor Green"
+                    uv tool update-shell
+                # C:\Users\nahid\scoop\apps\python312\current\python.exe -m pip install -r C:\ms1\asset\pip\pip_required.txt
             }
-
-            "Font Setup" {
-                nw_powershell -Command "
-                    $su oh-my-posh font install
-                                               "
+        }
+        "Update Packages" = {
+            nw_pwsh -Command {
+                scoop status
+                scoop update
+                Write-Host 'Scoop Status & Bucked Updated'
+                scoop update *
+                scoop export > C:\Users\nahid\OneDrive\backup\installed_apps\list_scoop.txt
+                Write-Host 'scoop updated'
+                scoop cleanup *
+                Write-Host 'Scoop Cleanedup'
+                winget upgrade --all
+                winget export C:\Users\nahid\OneDrive\backup\installed_apps\list_winget.txt > C:\Users\nahid\OneDrive\backup\installed_apps\ex_wingetlist.txt
+                Write-Host 'Winget Upgraded' -ForegroundColor Green
+                Write-Host 'Packages updated successfully' -ForegroundColor Green
             }
-
-            "Install Pwsh Modules" {
-                nw_pwsh_asadmin -Command "
-                    Install-Module -Name BurntToast -Scope CurrentUser
-                                               "
+        }
+    }
+    "[+] Application Setup" = [ordered]@{
+        "jackett + qbittorrent" = {
+            nw_pwsh -Command {
+                # cd C:\Users\nahid
+                Write-Host -ForegroundColor Green "Step 1: open qbittorrent -> view -> search engine -> Go To search engine tab -> search plugin -> check for updates -> now nova3 folder will be added"
+                Write-Host -ForegroundColor Green "Step 2: Start Jackett and add the necessary indexes to th list"
+                Write-Host -ForegroundColor Green "Step 3: Copy jacket api from webui to jackett.json"
+                Start-Process "C:\Users\nahid\AppData\Local\qBittorrent\nova3\engines"
             }
-
-            # neovim
-            "Neovim_1.conf" {
-                nw_pwsh -Command "
+        }
+        "Ldplayer" = {
+            nw_pwsh_asadmin -Command {
+                Remove-Item 'C:\Users\nahid\AppData\Roaming\XuanZhi9\cache\*' -Recurse
+                New-NetFirewallRule -DisplayName '@Block_Ld9BoxHeadless_OutInbound' -Direction Outbound -Program 'C:\LDPlayer\LDPlayer9\dnplayer.exe' -Action Block -Enabled True
+            }
+        }
+        "Neovim_1.conf" = {
+            nw_pwsh_asadmin -Command {
                 Write-Host 'Setting up Neovim...'
-                $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
-                $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
-                "
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
             }
-            "Neovim_2.conf" {
-                nw_pwsh -Command "
+        }
+        "Neovim_2.conf" = {
+            nw_pwsh_asadmin -Command {
                 Write-Host 'Setting up Neovim...'
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
                 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init2.lua -Force
-                "
             }
-
-            "Notepad++ Theme Setup" {
-                nw_pwsh -Command '
-                cd C:\Users\nahid
+        }
+        "Notepad++ Theme Setup" = {
+            nw_pwsh -Command {
+                Set-Location C:\Users\nahid
 
                 Write-Host -ForegroundColor Blue "Dracula Theme"
                 git clone https://github.com/dracula/notepad-plus-plus.git
@@ -438,166 +302,367 @@ function Show-MainMenu {
                 Write-Host -ForegroundColor Green step1: Copy Example.xml from github folder to %AppData%\Notepad++\themes
                 Write-Host -ForegroundColor Green step2: Restart Notepad++
                 Write-Host -ForegroundColor Green step3: Dracula will be available in Settings > Style Configurator
-                '
             }
-
-            "RssGuard" {
-                nw_pwsh_asadmin -Command '
+        }
+        "PotPlayer Register" = {
+            nw_pwsh -Command {
+                Start-Process 'C:\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
+            }
+        }
+    }
+    "[+] Github Projects" = [ordered]@{
+        "Microsoft Activation Scripts (MAS)" = {
+            nw_powershell_asadmin -Command {Invoke-RestMethod https://get.activated.win | Invoke-Expression}
+        }
+        "ChrisTitus WinUtility" = {
+            nw_powershell_asadmin -Command {Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression}
+        }
+        "WIMUtil" = {
+            nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1' | Invoke-Expression}
+        }
+        "AppControl Manager" = {
+            nw_pwsh_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'AppControl'|Invoke-Expression}
+        }
+        "Harden Windows Security Using GUI" = {
+            nw_powershell_asadmin -Command {(Invoke-RestMethod 'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1')+'P'|Invoke-Expression}
+        }
+        "Winhance" = {
+            nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | Invoke-Expression}
+        }
+    }
+    "[+] Port" = [ordered]@{
+        "22 [SSH]" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_22' -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -Profile Any
+            }
+        }
+        "5000" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+            }
+        }
+        "5001" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
+            }
+        }
+        "5002" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+    }
+    "[+] mklink" = [ordered]@{
+        "Komorebi" = {
+            nw_pwsh_asadmin -Command {
+	            Write-Host "initially after creating with  quickstart have to run komorebi with the default profile then we can mklink" -ForegroundColor Green
+                Write-Host "it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in" -ForegroundColor Green
+                Komorebic quickstart
+                Remove-Item 'C:\Users\nahid\komorebi.json'
+                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
+            }
+        }
+        "Reference" = {
+            nw_pwsh_asadmin -Command {
+                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\ms1\Reference.py' -Force #[pwsh]
+            }
+        }
+        "PowerShell Profile" = {
+            nw_pwsh_asadmin -Command {
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
+            }
+        }
+        "Prowlarr" = {
+            nw_pwsh_asadmin -Command {
+                Winget install TeamProwlarr.Prowlarr
+                # Stop-Process -Name 'Prowlarr' -Verbose
+                # Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
+                # Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
+                Write-Host "Do it with manual Restore!" -ForegroundColor Green
+                Start-Process 'C:\msBackups\ARR_timely'
+            }
+        }
+        "Radarr" = {
+            nw_pwsh_asadmin -Command {
+                Winget install TeamRadarr.Radarr
+                # Stop-Process -Name 'Radarr' -Verbose
+                # Stop-Process -Name 'Radarr.Console' -Verbose
+                # Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\msBackups\@mklink\radarr\radarr.db -Force -Verbose
+                # Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
+                Write-Host "Do it with manual Restore!" -ForegroundColor Green
+                Start-Process 'C:\msBackups\ARR_timely'
+            }
+        }
+        "RssGuard" = {
+            nw_pwsh_asadmin -Command {
                 scoop install rssguard
                 Stop-Process -Name "rssguard"
                 Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Recurse
                 Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Recurse
                 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\msBackups\@mklink\rssguard\config" -Force
                 New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\msBackups\@mklink\rssguard\database" -Force
-                '
             }
+        }
+        "Sonarr" = {
+            nw_pwsh_asadmin -Command {
+                Winget install TeamSonarr.Sonarr
+                # Stop-Process -Name 'Sonarr' -Verbose
+                # Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
+                # Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
+                Write-Host "Do it with manual Restore!" -ForegroundColor Green
+                Start-Process 'C:\msBackups\ARR_timely'
+            }
+        }
+        "Terminal Profile" = {
+            nw_pwsh_asadmin -Command {
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\ms1\asset\terminal\settings.json -Force
+            }
+        }
+        "VSCode" = {
+            nw_pwsh_asadmin -Command {
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\asset\vscode\keybindings.json -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\asset\vscode\settings.json -Force
+            }
+        }
+        "example" = {
+            nw_pwsh_asadmin -Command {
 
-            "Ldplayer" {
-                nw_pwsh_asadmin -Command "
-                Remove-Item 'C:\Users\nahid\AppData\Roaming\XuanZhi9\cache\*' -Recurse
-                New-NetFirewallRule -DisplayName '@Block_Ld9BoxHeadless_OutInbound' -Direction Outbound -Program 'C:\LDPlayer\LDPlayer9\dnplayer.exe' -Action Block -Enabled True
-                "
             }
+        }
+    }
+}
 
-            "jackett + qbittorrent" {
-                nw_pwsh -Command '
-                # cd C:\Users\nahid
-                Write-Host -ForegroundColor Green Step 1: open qbittorrent -> view -> search engine -> Go To search engine tab -> search plugin -> check for updates -> now nova3 folder will be added
-                Write-Host -ForegroundColor Green Step 2: Start Jackett and add the necessary indexes to th list
-                Write-Host -ForegroundColor Green Step 3: Copy jacket api from webui to jackett.json
-                Start-Process "C:\Users\nahid\AppData\Local\qBittorrent\nova3\engines"
-                '
-            }
+# Main Menu and Submenu in a side-by-side view
+function Show-MainMenu {
+    $window = New-Object System.Windows.Window
+    $window.Title = "OS Tools v2.0"
+    $window.Width = 800
+    $window.Height = 600
+    $window.Background = [System.Windows.Media.Brushes]::Transparent
+    $window.WindowStartupLocation = "CenterScreen"
+    $window.WindowStyle = "None"
+    $window.AllowsTransparency = $true
+    
+    # Main container with rounded corners and gradient background
+    $mainBorder = New-Object System.Windows.Controls.Border
+    $mainBorder.CornerRadius = "15"
+    $mainBorder.BorderThickness = "2"
+    $mainBorder.Margin = "10"
+    
+    # Gradient background
+    $gradientBrush = New-Object System.Windows.Media.LinearGradientBrush
+    $gradientBrush.StartPoint = "0,0"
+    $gradientBrush.EndPoint = "1,1"
+    $gradientBrush.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(30, 30, 30), 0.0)))
+    $gradientBrush.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(45, 45, 48), 1.0)))
+    $mainBorder.Background = $gradientBrush
+    
+    # Border gradient
+    $borderGradient = New-Object System.Windows.Media.LinearGradientBrush
+    $borderGradient.StartPoint = "0,0"
+    $borderGradient.EndPoint = "1,1"
+    $borderGradient.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(100, 181, 246), 0.0)))
+    $borderGradient.GradientStops.Add((New-Object System.Windows.Media.GradientStop([System.Windows.Media.Color]::FromRgb(156, 39, 176), 1.0)))
+    $mainBorder.BorderBrush = $borderGradient
+    
+    # Drop shadow effect
+    $dropShadow = New-Object System.Windows.Media.Effects.DropShadowEffect
+    $dropShadow.Color = [System.Windows.Media.Colors]::Black
+    $dropShadow.ShadowDepth = 8
+    $dropShadow.BlurRadius = 20
+    $dropShadow.Opacity = 0.4
+    $mainBorder.Effect = $dropShadow
+    
+    $window.Content = $mainBorder
 
-            # git
-            "clone ms1" {
-                nw_powershell -Command "
-                Write-Host Cloning ms1 to c:\
-                cd c:\
-                git clone https://github.com/nahid6970/ms1
-                Write-Host Cloned ms1 successfully! -ForegroundColor Green
-                                         "
-            }
-            "clone ms2" {
-                nw_powershell -Command "
-                    Write-Host Cloning ms2 to c:\ 
-                    cd c:\
-                    git clone https://github.com/nahid6970/ms2
-                    Write-Host Cloned ms2 successfully! -ForegroundColor Green
-                                         "
-            }
-            "clone ms3" {
-                nw_powershell -Command "
-                Write-Host Cloning ms3 to c:\
-                cd c:\
-                git clone https://github.com/nahid6970/ms3
-                Write-Host Cloned ms3 successfully! -ForegroundColor Green
-                                         "
-            }
+    # Main container
+    $mainContainer = New-Object System.Windows.Controls.DockPanel
+    $mainContainer.Margin = "20"
+    $mainBorder.Child = $mainContainer
 
-            "nilesoft nss [bk]" {
-                nw_powershell -Command "
-                    # cd c:\
-                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\shell.nss'  -Destination 'C:\ms1\asset\nilesoft_shell\shell.nss' -Force -Verbose
-                    Copy-Item -Path 'C:\Program Files\Nilesoft Shell\imports'  -Destination 'C:\ms1\asset\nilesoft_shell\' -Recurse -Force -Verbose
-                                         "
-            }
+    # Title bar
+    $titleBar = New-Object System.Windows.Controls.Border
+    $titleBar.Height = 60
+    $titleBar.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(25, 25, 25))
+    $titleBar.CornerRadius = "10,10,0,0"
+    $titleBar.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $titleBar.BorderThickness = "0,0,0,1"
+    [System.Windows.Controls.DockPanel]::SetDock($titleBar, "Top")
+    $mainContainer.Children.Add($titleBar)
 
-            "song [rclone] [bk]" {
-                nw_pwsh -Command "
-                    rclone sync D:/song/ gu:/song/ -P --check-first --transfers=1 --track-renames --fast-list #--dry-run
-                                         "
-            }
+    # Title content
+    $titleContent = New-Object System.Windows.Controls.Grid
+    $titleBar.Child = $titleContent
 
-            # port
-            "5000" {
-                nw_pwsh -Command "
-                    $su New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
-                                         "
-            }
-            "5001" {
-                nw_pwsh -Command "
-                $su New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
-                                         "
-            }
-            "5002" {
-                nw_pwsh -Command "
-                    $su New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
-                                         "
-            }
-            "22 [SSH]" {
-                nw_pwsh -Command "
-                    $su New-NetFirewallRule -DisplayName 'Allow_Port_22' -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -Profile Any
-                                         "
-            }
-            # mklink
-            "Reference" {
-                nw_pwsh -Command "$su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\ms1\Reference.py' -Force #[pwsh]"
-            }
-            # sonarr will take some time to resolve the issue internally just wait
-            "Sonarr" {
-                nw_pwsh -Command "
-                    Winget install TeamSonarr.Sonarr
-                    # $su Stop-Process -Name 'Sonarr' -Verbose
-                    # Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
-                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
-                    # Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
-                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
-                                         "
-            }
-            "Radarr" {
-                nw_pwsh -Command "
-                    Winget install TeamRadarr.Radarr
-                    # $su Stop-Process -Name 'Radarr' -Verbose
-                    # $su Stop-Process -Name 'Radarr.Console' -Verbose
-                    # Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
-                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\msBackups\@mklink\radarr\radarr.db -Force -Verbose
-                    # Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
-                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
-                                         "
-            }
-            "Prowlarr" {
-                nw_pwsh -Command "
-                    Winget install TeamProwlarr.Prowlarr
-                    # $su Stop-Process -Name 'Prowlarr' -Verbose
-                    # Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
-                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
-                    # Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
-                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
-                                         "
-            }
-	# initially after creating with  quickstart have to run komorebi with the default profile then we can mklink
-    # it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in
-            "Komorebi" {
-                nw_pwsh -Command "
-                    Komorebic quickstart
-                    Remove-Item 'C:\Users\nahid\komorebi.json'
-                    $su New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
-                                         "
-            }
-            "VSCode" {
-                nw_pwsh -Command "
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\asset\vscode\keybindings.json -Force
-                    New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\asset\vscode\settings.json -Force
-                                         "
-            }
-            "PowerShell Profile" {
-                nw_pwsh -Command "
-                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
-                                         "
-            }
-            "Terminal Profile" {
-                nw_pwsh -Command "
-                    $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\ms1\asset\terminal\settings.json -Force
-                                         "
-            }
-            "PotPlayer Register" {
-                nw_pwsh -Command "
-                    Start-Process 'C:\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
-                                         "
+    # App title
+    $appTitle = New-Object System.Windows.Controls.TextBlock
+    $appTitle.Text = "[OS Tools v2.0]"
+    $appTitle.FontSize = 24
+    $appTitle.FontWeight = "Bold"
+    $appTitle.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(100, 181, 246))
+    $appTitle.HorizontalAlignment = "Center"
+    $appTitle.VerticalAlignment = "Center"
+    $titleContent.Children.Add($appTitle)
+
+    # Close button
+    $closeBtn = New-Object System.Windows.Controls.Button
+    $closeBtn.Content = "X"
+    $closeBtn.Width = 30
+    $closeBtn.Height = 30
+    $closeBtn.HorizontalAlignment = "Right"
+    $closeBtn.VerticalAlignment = "Center"
+    $closeBtn.Margin = "0,0,10,0"
+    $closeBtn.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(244, 67, 54))
+    $closeBtn.Foreground = [System.Windows.Media.Brushes]::White
+    $closeBtn.BorderThickness = "0"
+    $closeBtn.FontWeight = "Bold"
+    $closeBtn.Add_Click({ $window.Close() })
+    $titleContent.Children.Add($closeBtn)
+
+    # Content Grid Layout for side-by-side view
+    $contentGrid = New-Object System.Windows.Controls.Grid
+    $contentGrid.Margin = "10"
+    $mainContainer.Children.Add($contentGrid)
+
+    # Define two columns
+    $column1 = New-Object System.Windows.Controls.ColumnDefinition
+    $column1.Width = "2*"
+    $column2 = New-Object System.Windows.Controls.ColumnDefinition
+    $column2.Width = "3*"
+    $contentGrid.ColumnDefinitions.Add($column1)
+    $contentGrid.ColumnDefinitions.Add($column2)
+
+    # Main Menu (Left Panel)
+    $mainMenuBorder = New-Object System.Windows.Controls.Border
+    $mainMenuBorder.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(35, 35, 35))
+    $mainMenuBorder.CornerRadius = "10"
+    $mainMenuBorder.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $mainMenuBorder.BorderThickness = "1"
+    $mainMenuBorder.Margin = "5"
+    [System.Windows.Controls.Grid]::SetColumn($mainMenuBorder, 0)
+    $contentGrid.Children.Add($mainMenuBorder)
+
+    $mainMenuPanel = New-Object System.Windows.Controls.StackPanel
+    $mainMenuPanel.Margin = "15"
+    $mainMenuBorder.Child = $mainMenuPanel
+
+    $mainMenuTitle = New-Object System.Windows.Controls.TextBlock
+    $mainMenuTitle.Text = ">> Categories"
+    $mainMenuTitle.FontSize = 18
+    $mainMenuTitle.FontWeight = "Bold"
+    $mainMenuTitle.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(156, 39, 176))
+    $mainMenuTitle.HorizontalAlignment = "Center"
+    $mainMenuTitle.Margin = "0,0,0,15"
+    $mainMenuPanel.Children.Add($mainMenuTitle)
+
+    # ListBox for main menu options
+    $mainMenuListBox = New-Object System.Windows.Controls.ListBox
+    $mainMenuListBox.Background = [System.Windows.Media.Brushes]::Transparent
+    $mainMenuListBox.BorderThickness = "0"
+    $mainMenuListBox.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(220, 220, 220))
+    $mainMenuListBox.FontSize = 14
+    $mainMenuListBox.FontWeight = "Medium"
+    $mainMenuListBox.SelectionMode = "Single"
+
+    $menu.Keys | ForEach-Object { 
+        $item = New-Object System.Windows.Controls.ListBoxItem
+        $item.Content = $_
+        $item.Padding = "10,5"
+        $item.Margin = "0,2"
+        $mainMenuListBox.Items.Add($item)
+    }
+    $mainMenuPanel.Children.Add($mainMenuListBox)
+
+    # Submenu (Right Panel)
+    $submenuBorder = New-Object System.Windows.Controls.Border
+    $submenuBorder.Background = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(40, 40, 40))
+    $submenuBorder.CornerRadius = "10"
+    $submenuBorder.BorderBrush = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 76, 80))
+    $submenuBorder.BorderThickness = "1"
+    $submenuBorder.Margin = "5"
+    [System.Windows.Controls.Grid]::SetColumn($submenuBorder, 1)
+    $contentGrid.Children.Add($submenuBorder)
+
+    $submenuPanel = New-Object System.Windows.Controls.StackPanel
+    $submenuPanel.Margin = "15"
+    $submenuBorder.Child = $submenuPanel
+
+    $submenuTitle = New-Object System.Windows.Controls.TextBlock
+    $submenuTitle.Text = ">> Tools"
+    $submenuTitle.FontSize = 18
+    $submenuTitle.FontWeight = "Bold"
+    $submenuTitle.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 175, 80))
+    $submenuTitle.HorizontalAlignment = "Center"
+    $submenuTitle.Margin = "0,0,0,15"
+    $submenuPanel.Children.Add($submenuTitle)
+
+    $submenuListBox = New-Object System.Windows.Controls.ListBox
+    $submenuListBox.Background = [System.Windows.Media.Brushes]::Transparent
+    $submenuListBox.BorderThickness = "0"
+    $submenuListBox.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(220, 220, 220))
+    $submenuListBox.FontSize = 14
+    $submenuListBox.SelectionMode = "Single"
+    $submenuPanel.Children.Add($submenuListBox)
+
+    # Status bar
+    $statusBar = New-Object System.Windows.Controls.TextBlock
+    $statusBar.Text = "~~~~~~~~~~~~"
+    $statusBar.FontSize = 12
+    $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
+    $statusBar.HorizontalAlignment = "Center"
+    $statusBar.Margin = "0,10,0,0"
+    $submenuPanel.Children.Add($statusBar)
+
+    # Event handler to populate submenu based on main menu selection
+    $mainMenuListBox.Add_SelectionChanged({
+        $submenuListBox.Items.Clear()
+        $selectedItem = $mainMenuListBox.SelectedItem
+        if ($selectedItem) {
+            $selectedMainMenu = $selectedItem.Content
+            if ($selectedMainMenu -and $menu.Contains($selectedMainMenu)) {
+                $menu[$selectedMainMenu].Keys | ForEach-Object { 
+                    $subItem = New-Object System.Windows.Controls.ListBoxItem
+                    $subItem.Content = $_
+                    $subItem.Padding = "10,3"
+                    $subItem.Margin = "0,2"
+                    $submenuListBox.Items.Add($subItem)
+                }
             }
         }
     })
+
+    # Event handler for double-click on submenu to run command
+    $submenuListBox.Add_MouseDoubleClick({
+        $selectedMainItem = $mainMenuListBox.SelectedItem
+        $selectedSubItem = $submenuListBox.SelectedItem
+        if ($selectedMainItem -and $selectedSubItem) {
+            $selectedMainMenu = $selectedMainItem.Content
+            $selectedSubMenu = $selectedSubItem.Content
+            if ($selectedMainMenu -and $selectedSubMenu -and $menu.Contains($selectedMainMenu) -and $menu[$selectedMainMenu].Contains($selectedSubMenu)) {
+                $statusBar.Text = ">> Executing: $selectedSubMenu"
+                $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 175, 80))
+                . ($menu[$selectedMainMenu][$selectedSubMenu])
+                Start-Sleep -Milliseconds 2000
+                $statusBar.Text = ">> Double-click an item to execute - Right-click for options"
+                $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
+            }
+        }
+    })
+
+    # Make window draggable
+    $titleBar.Add_MouseLeftButtonDown({
+        if ($_.LeftButton -eq [System.Windows.Input.MouseButtonState]::Pressed) {
+            $window.DragMove()
+        }
+    })
+
+    # Auto-select first item
+    if ($mainMenuListBox.Items.Count -gt 0) {
+        $mainMenuListBox.SelectedIndex = 0
+    }
 
     # Show the main window
     $window.ShowDialog() | Out-Null

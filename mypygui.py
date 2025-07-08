@@ -500,8 +500,8 @@ uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 
 OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
-OS_LB.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\ms1\windows.py"], shell=True))
-OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\ms1\windows.py'))
+OS_LB.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\ms1\os.ps1"], shell=True))
+OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\ms1\os.ps1'))
 
 Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
