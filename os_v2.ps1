@@ -352,6 +352,62 @@ $menu = [ordered]@{
             }
         }
     }
+    "[+] mklink" = [ordered]@{
+        "Komorebi" = {
+            nw_pwsh_asadmin -Command {
+	            Write-Host "initially after creating with  quickstart have to run komorebi with the default profile then we can mklink" -ForegroundColor Green
+                Write-Host "it will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in" -ForegroundColor Green
+                Komorebic quickstart
+                Remove-Item 'C:\Users\nahid\komorebi.json'
+                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\komorebi.json' -Target 'C:\ms1\asset\komorebi\komorebi.json' -Force #[pwsh]
+            }
+        }
+        "Reference" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+            }
+        }
+        "PowerShell Profile" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
+            }
+        }
+        "Prowlarr" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+        "Radarr" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+        "RssGuard" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+        "Sonarr" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+        "Terminal Profile" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+        "VSCode" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+        "example" = {
+            nw_pwsh_asadmin -Command {
+
+            }
+        }
+    }
 }
 
 # Main Menu and Submenu in a side-by-side view
