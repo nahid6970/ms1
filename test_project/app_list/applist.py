@@ -3,16 +3,9 @@ import subprocess
 import tkinter as tk
 from tkinter import Canvas, Scrollbar
 from tkinter import ttk
+import customtkinter
 import os
 import ctypes
-from Reference import *
-
-# import sys
-# sys.path.append('C:/ms1/')
-# from functionlist import *
-
-
-
 
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
@@ -277,9 +270,11 @@ def save_applications(apps):
 
 applications = load_applications()
 
-#!this is for winget direct silent install --accept-package-agreements
+customtkinter.set_appearance_mode("System")  # Modes: "System" (default), "Dark", "Light"
+customtkinter.set_default_color_theme("blue")  # Themes: "blue" (default), "dark-blue", "green"
+
 # Create canvas and scrollbar
-canvas = Canvas(MAIN_FRAME, bg="#1d2027", highlightthickness=0)
+canvas = tk.Canvas(MAIN_FRAME, bg="#1d2027", highlightthickness=0)
 canvas.pack(side="left", fill="both", expand=True)
 
 #! scrollbar Start
@@ -292,29 +287,8 @@ def on_mousewheel(event):
 
 canvas.bind_all("<MouseWheel>", on_mousewheel)
 
-# Create a vertical scrollbar
-# scrollbar = ttk.Scrollbar(MAIN_FRAME, orient="vertical", style="Custom.Vertical.TScrollbar", )
-# scrollbar.pack(side="right", fill="y")
-# canvas.configure(yscrollcommand=scrollbar.set)
-
-
-
-scrollbar = ttk.Scrollbar(MAIN_FRAME, orient="vertical", style="Custom.Vertical.TScrollbar")
+scrollbar = customtkinter.CTkScrollbar(MAIN_FRAME, orientation="vertical", command=canvas.yview)
 scrollbar.pack(side="right", fill="y")
-# Configure the style of the scrollbar
-style = ttk.Style()
-style.theme_use("default")
-# Set the background color of the scrollbar to red
-style.configure("Custom.Vertical.TScrollbar", background="#FF0000", troughcolor="#25072c")
-# Set the thickness of the outside bar to 10 pixels
-style.map("Custom.Vertical.TScrollbar",
-    background=[("active", "#72a9ec")],  # Changed from blue to red
-)
-# Set the thickness of the inside bar to 25 pixels
-style.map("Custom.Vertical.TScrollbar",
-    troughcolor=[("active", "#25072c")],  # Changed from blue to red
-    width=[("active", 10)]
-)
 canvas.configure(yscrollcommand=scrollbar.set)
 
 #! scrollbar End
