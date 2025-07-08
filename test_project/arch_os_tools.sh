@@ -1,49 +1,58 @@
 #!/bin/bash
 
-# Check if dialog is installed
-if ! command -v dialog &> /dev/null; then
-    echo "The 'dialog' utility is not installed. Please install it to run this script."
-    echo "You can install it with: sudo pacman -S dialog"
+# Check if zenity is installed
+if ! command -v zenity &> /dev/null; then
+    echo "The 'zenity' utility is not installed. Please install it to run this script."
+    # Attempt to offer installation for common package managers
+    if command -v pacman &> /dev/null; then
+        echo "You can install it with: sudo pacman -S zenity"
+    elif command -v apt-get &> /dev/null; then
+        echo "You can install it with: sudo apt-get install zenity"
+    elif command -v dnf &> /dev/null; then
+        echo "You can install it with: sudo dnf install zenity"
+    fi
     exit 1
 fi
 
 # Function to display a message box after a command
 function show_result {
-    dialog --title "Command Output" --msgbox "$1" 20 70
+    zenity --info --title="Command Output" --text="$1" --width=500 --height=300
 }
 
 # Main menu loop
 while true; do
-    main_choice=$(dialog --clear --backtitle "Arch Linux Tools" \
-        --title "Main Menu" \
-        --menu "Select a category:" 15 50 3 \
+    main_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+        --title="Main Menu" --text="Select a category:" \
+        --column="ID" --column="Category" \
         1 "System Management" \
         2 "Package Management" \
         3 "System Information" \
-        0 "Exit" \
-        2>&1 >/dev/tty)
+        0 "Exit")
 
-    clear
+    # Exit if the user closes the dialog or clicks cancel
+    if [ -z "$main_choice" ]; then
+        break
+    fi
+
     case $main_choice in
         1)
             while true; do
-                sys_choice=$(dialog --clear --backtitle "Arch Linux Tools" \
-                    --title "System Management" \
-                    --menu "Select a command:" 15 50 4 \
+                sys_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+                    --title="System Management" --text="Select a command:" \
+                    --column="ID" --column="Action" \
                     1 "Update System (pacman -Syu)" \
                     2 "Clean Package Cache (pacman -Scc)" \
                     3 "List Orphaned Packages" \
-                    0 "Back to Main Menu" \
-                    2>&1 >/dev/tty)
+                    0 "Back to Main Menu")
 
-                clear
+                if [ -z "$sys_choice" ]; then break; fi
                 case $sys_choice in
                     1)
-                        sudo pacman -Syu
+                        gnome-terminal -- sudo pacman -Syu
                         show_result "System update process finished."
                         ;;
                     2)
-                        sudo pacman -Scc
+                        sudo pacman -Scc --noconfirm
                         show_result "Package cache cleaned."
                         ;;
                     3)
@@ -51,7 +60,7 @@ while true; do
                         if [ -z "$orphans" ]; then
                             show_result "No orphaned packages found."
                         else
-                            show_result "Orphaned Packages:\n\n$orphans"
+                            zenity --text-info --title="Orphaned Packages" --filename=<(echo "$orphans")
                         fi
                         ;;
                     0)
@@ -62,33 +71,32 @@ while true; do
             ;;
         2)
             while true; do
-                pkg_choice=$(dialog --clear --backtitle "Arch Linux Tools" \
-                    --title "Package Management" \
-                    --menu "Select a command:" 15 60 4 \
+                pkg_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+                    --title="Package Management" --text="Select a command:" \
+                    --column="ID" --column="Action" \
                     1 "Install AUR Helper (yay)" \
                     2 "List Explicitly Installed Packages" \
                     3 "Find package providing a file" \
-                    0 "Back to Main Menu" \
-                    2>&1 >/dev/tty)
+                    0 "Back to Main Menu")
 
-                clear
+                if [ -z "$pkg_choice" ]; then break; fi
                 case $pkg_choice in
                     1)
                         if ! command -v yay &> /dev/null; then
-                            git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
-                            show_result "Yay has been installed."
+                            zenity --question --text="Yay is not installed. Do you want to clone and build it now?" && \
+                            gnome-terminal -- bash -c "git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si; exec bash"
                         else
                             show_result "Yay is already installed."
                         fi
                         ;;
                     2)
                         packages=$(pacman -Qe)
-                        dialog --title "Explicitly Installed Packages" --msgbox "$packages" 20 70
+                        zenity --text-info --title="Explicitly Installed Packages" --filename=<(echo "$packages")
                         ;;
                     3)
-                        file_path=$(dialog --title "Input" --inputbox "Enter the full path to the file:" 8 60 2>&1 >/dev/tty)
+                        file_path=$(zenity --entry --title="Input" --text="Enter the full path to the file:")
                         if [ -n "$file_path" ]; then
-                            owner=$(sudo pacman -Qo "$file_path")
+                            owner=$(sudo pacman -Qo "$file_path" 2>&1)
                             show_result "$owner"
                         fi
                         ;;
@@ -100,33 +108,31 @@ while true; do
             ;;
         3)
             while true; do
-                info_choice=$(dialog --clear --backtitle "Arch Linux Tools" \
-                    --title "System Information" \
-                    --menu "Select a command:" 15 50 4 \
+                info_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+                    --title="System Information" --text="Select a command:" \
+                    --column="ID" --column="Action" \
                     1 "Show System Info (neofetch)" \
                     2 "Show Disk Usage (df -h)" \
                     3 "Show Running Processes (htop)" \
-                    0 "Back to Main Menu" \
-                    2>&1 >/dev/tty)
+                    0 "Back to Main Menu")
 
-                clear
+                if [ -z "$info_choice" ]; then break; fi
                 case $info_choice in
                     1)
                         if ! command -v neofetch &> /dev/null; then
-                            sudo pacman -S neofetch
+                            zenity --question --text="neofetch is not installed. Install it?" && sudo pacman -S neofetch
                         fi
-                        neofetch
-                        read -p "Press Enter to continue..."
+                        gnome-terminal -- bash -c "neofetch; exec bash"
                         ;;
                     2)
-                        df -h
-                        read -p "Press Enter to continue..."
+                        usage=$(df -h)
+                        zenity --text-info --title="Disk Usage" --filename=<(echo "$usage")
                         ;;
                     3)
                         if ! command -v htop &> /dev/null; then
-                            sudo pacman -S htop
+                            zenity --question --text="htop is not installed. Install it?" && sudo pacman -S htop
                         fi
-                        htop
+                        gnome-terminal -- htop
                         ;;
                     0)
                         break
