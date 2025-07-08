@@ -146,8 +146,7 @@ desktop_environments=(
 )
 # Function to install the chosen desktop environment
 desktop_environment() {
-    source ~/ms1/linux/os_imports/wallpaper.sh
-    source ~/ms1/linux/os_imports/sddm.sh
+
     display_submenu "Which desktop environment would you like to install?" "desktop_environments"
 }
 
