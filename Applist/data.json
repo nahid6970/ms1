@@ -175,6 +175,13 @@
         "winget_path": ""
     },
     {
+        "name": "FastFetch",
+        "scoop_name": "fastfetch",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\fastfetch\\current\\fastfetch.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "ffmpeg",
         "scoop_name": "ffmpeg",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ffmpeg\\current\\bin\\ffmpeg.exe",
@@ -287,6 +294,13 @@
         "winget_path": "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath\\java.exe"
     },
     {
+        "name": "JellyFin",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Jellyfin.Server",
+        "winget_path": ""
+    },
+    {
         "name": "komorebi",
         "scoop_name": "komorebi",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\komorebi\\current\\komorebi.exe",
@@ -308,6 +322,13 @@
         "winget_path": ""
     },
     {
+        "name": "LM Studio",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "LMStudio.LMStudio",
+        "winget_path": ""
+    },
+    {
         "name": "localsend",
         "scoop_name": "localsend",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\localsend\\current\\localsend_app.exe",
@@ -320,6 +341,13 @@
         "scoop_path": "",
         "winget_name": "Meld.Meld",
         "winget_path": "C:\\Program Files\\Meld\\Meld.exe"
+    },
+    {
+        "name": "MinGW",
+        "scoop_name": "mingw-msvcrt",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\mingw-msvcrt\\current\\bin\\mingw32-make.exe",
+        "winget_name": "",
+        "winget_path": ""
     },
     {
         "name": "Nilesoft Shell",
@@ -355,6 +383,13 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\oh-my-posh\\current\\oh-my-posh.exe",
         "winget_name": "JanDeDobbeleer.OhMyPosh",
         "winget_path": ""
+    },
+    {
+        "name": "Ollama",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Ollama.Ollama",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"
     },
     {
         "name": "pandoc",
@@ -509,5 +544,173 @@
         "scoop_path": "",
         "winget_name": "TeamSonarr.Sonarr",
         "winget_path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"
+    },
+    {
+        "name": "Steam",
+        "scoop_name": "steam",
+        "scoop_path": "",
+        "winget_name": "Valve.Steam",
+        "winget_path": "C:\\Program Files (x86)\\Steam\\steam.exe"
+    },
+    {
+        "name": "Syncthing",
+        "scoop_name": "syncthing",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe",
+        "winget_name": "Syncthing.Syncthing",
+        "winget_path": ""
+    },
+    {
+        "name": "TigerVNC",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "TigerVNCproject.TigerVNC",
+        "winget_path": "C:\\Program Files\\TightVNC\\tvnserver.exe"
+    },
+    {
+        "name": "tldr",
+        "scoop_name": "tldr",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\tldr\\current\\tldr.exe",
+        "winget_name": "tldr-pages.tlrc",
+        "winget_path": ""
+    },
+    {
+        "name": "VCredist-aio",
+        "scoop_name": "vcredist-aio",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\vcredist-aio\\current\\VisualCppRedist_AIO_x86_x64.exe",
+        "winget_name": "abbodi1406.vcredist",
+        "winget_path": ""
+    },
+    {
+        "name": "Ventoy",
+        "scoop_name": "ventoy",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ventoy\\current\\altexe\\Ventoy2Disk_X64.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "VirtualBox",
+        "scoop_name": "virtualbox-with-extension-pack-np",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\virtualbox-with-extension-pack-np\\current\\VirtualBox.exe",
+        "winget_name": "Oracle.VirtualBox",
+        "winget_path": ""
+    },
+    {
+        "name": "VSCode",
+        "scoop_name": "vscode",
+        "scoop_path": "",
+        "winget_name": "Microsoft.VisualStudioCode",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+    },
+    {
+        "name": "VSCodium",
+        "scoop_name": "vscodium",
+        "scoop_path": "",
+        "winget_name": "VSCodium",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\VSCodium\\VSCodium.exe"
+    },
+    {
+        "name": "WhatsApp",
+        "scoop_name": "whatsapp",
+        "scoop_path": "",
+        "winget_name": "9NKSQGP7F2NH",
+        "winget_path": "C:\\Program Files\\WindowsApps\\5319275A.WhatsAppDesktop_2.2407.10.0_x64__cv1g1gvanyjgm\\WhatsApp.exe"
+    },
+    {
+        "name": "whkd",
+        "scoop_name": "whkd",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\whkd\\current\\whkd.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "WinaeroTweaker",
+        "scoop_name": "winaero-tweaker",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\winaero-tweaker\\current\\WinaeroTweaker.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "windirstat",
+        "scoop_name": "windirstat",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\windirstat\\current\\windirstat.exe",
+        "winget_name": "WinDirStat.WinDirStat",
+        "winget_path": ""
+    },
+    {
+        "name": "winfsp",
+        "scoop_name": "winfsp-np",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\winfsp-np\\current\\setup.msi_",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "winget",
+        "scoop_name": "winget",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\winget\\current\\winget.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "WinToy",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "wintoy",
+        "winget_path": "C:\\Program Files\\WindowsApps\\11413PtruceanBogdan.Wintoys_1.3.0.0_x64__ankwhmsh70gj6\\Wintoys.exe"
+    },
+    {
+        "name": "Wise Program Uninstaller",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "WiseCleaner.WiseProgramUninstaller",
+        "winget_path": "C:\\Program Files (x86)\\Wise\\Wise Program Uninstaller\\WiseProgramUninstaller.exe"
+    },
+    {
+        "name": "WizTree",
+        "scoop_name": "WizTree",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\wiztree\\current\\WizTree64.exe",
+        "winget_name": "AntibodySoftware.WizTree",
+        "winget_path": ""
+    },
+    {
+        "name": "Workspace Utilities",
+        "scoop_name": "workspaceutilities",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\workspaceutilities\\current\\WorkspaceUtilities.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "WSA-pacman",
+        "scoop_name": "wsa-pacman",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\wsa-pacman\\current\\WSA-pacman.exe",
+        "winget_name": "alesimula.wsa_pacman",
+        "winget_path": ""
+    },
+    {
+        "name": "X-Mouse Button Control",
+        "scoop_name": "xmousebuttoncontrol",
+        "scoop_path": "",
+        "winget_name": "Highresolution.X-MouseButtonControl",
+        "winget_path": "C:\\Program Files\\Highresolution Enterprises\\X-Mouse Button Control\\XMouseButtonControl.exe"
+    },
+    {
+        "name": "yt-dlp",
+        "scoop_name": "yt-dlp",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\yt-dlp\\current\\yt-dlp.exe",
+        "winget_name": "yt-dlp.yt-dlp",
+        "winget_path": ""
+    },
+    {
+        "name": "Zoxide",
+        "scoop_name": "zoxide",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Sudo",
+        "scoop_name": "sudo",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\sudo\\current\\sudo.ps1",
+        "winget_name": "",
+        "winget_path": ""
     }
 ]
