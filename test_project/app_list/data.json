@@ -1,0 +1,23 @@
+[
+    {
+        "name": "DotNet_6",
+        "scoop_name": "ScoopName",
+        "scoop_path": "",
+        "winget_name": "Microsoft.DotNet.DesktopRuntime.6",
+        "winget_path": "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.29\\createdump.exe"
+    },
+    {
+        "name": "Ack [Find]",
+        "scoop_name": "ack",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ack\\current\\ack.bat",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Alacritty",
+        "scoop_name": "alacritty",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\alacritty\\current\\alacritty.exe",
+        "winget_name": "Alacritty.Alacritty",
+        "winget_path": "C:\\Program Files\\Alacritty\\alacritty.exe"
+    }
+]
