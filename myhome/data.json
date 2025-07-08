@@ -296,5 +296,11 @@
     "img_src": "https://store.rg-adguard.net/img/Store.png",
     "name": "MS-Store",
     "url": "https://store.rg-adguard.net/"
+  },
+  {
+    "name": "Command",
+    "group": "Local (Flask)",
+    "url": "http://192.168.0.101:5007/",
+    "default_type": "nerd-font"
   }
 ]
