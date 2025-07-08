@@ -299,17 +299,17 @@ install_packages() {
 # ██║╚██╗██║██║   ██║██║╚██╔╝██║██╔═██╗ ██╔══╝    ╚██╔╝      ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
 # ██║ ╚████║╚██████╔╝██║ ╚═╝ ██║██║  ██╗███████╗   ██║       ███████║███████╗   ██║   ╚██████╔╝██║
 # ╚═╝  ╚═══╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝       ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
-tty_numlock_setup=(
+tty_setup=(
     "Auto Login            :enable_tty_autologin  :$GREEN"
     "Numlock Enable        :enable_numlock_on_tty :$GREEN"
     "Disable Terminal Bell :disable_bell          :$GREEN"
     "TTY Font              :tty_font              :$GREEN"
 )
 # Function to install the chosen desktop environment
-desktop_environment() {
+tty_numlock_setup() {
     source ~/ms1/linux/os_imports/wallpaper.sh
     source ~/ms1/linux/os_imports/sddm.sh
-    display_submenu "Setup TTy & NumLock?" "tty_numlock_setup"
+    display_submenu "Setup TTy & NumLock?" "tty_setup"
 }
 
 enable_tty_autologin() {
