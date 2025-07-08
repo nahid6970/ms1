@@ -63,21 +63,86 @@ declare -A hotkeys=(
     [x]="test_test"
 )
 
+All_Configs(){
+echo Set All configs
+
+cp -a "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
+cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
+
+cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/" #! C:\ms1\linux\config\.config\hypr\hyprland.conf
+cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad" #! C:\ms1\linux\config\.config\xmonad\xmonad.hs
+cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config" #! C:\ms1\linux\config\.config\qtile\config.py
+
+cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\ms1\linux\config\.config\conky\conky_hyprland.conf
+cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\ms1\linux\config\.config\foot\foot.ini
+cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\ms1\linux\config\.config\waybar\config.jsonc
+cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
+cp -a "$HOME/ms1/linux/config/.config/dunst" "$HOME/.config/" #! C:\ms1\linux\config\.config\dunst\dunstrc
+cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\ms1\linux\config\.config\starship\starship.toml
+
+# source $HOME/autostart.sh
+# echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
+source "$HOME/.bashrc"
+}
+
+
 arch_install(){
     archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
 }
 
+# Generic function to display a submenu
+# $1: Menu title (string)
+# $2: Name of the menu items array (string)
+display_submenu() {
+    local title="$1"
+    local -n items_array="$2" # Use nameref to get the array
 
+    while true; do
+        clear
+        echo -e "${CYAN}${title}${NC}"
 
+        for i in "${!items_array[@]}"; do
+            IFS=":" read -r description function color <<< "${items_array[$i]}"
+            echo -e "${color}$((i+1))) $description${NC}"
+        done
+        echo -e "${RED}q) Quit to main menu${NC}"
+
+        read -p "Enter choice: " choice
+
+        if [[ "$choice" == "q" ]]; then
+            break
+        elif [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#items_array[@]} )); then
+            IFS=":" read -r _ function _ <<< "${items_array[$((choice-1))]}"
+            function=$(echo "$function" | xargs)
+            # Check if function exists before calling
+            if declare -f "$function" > /dev/null; then
+                $function
+            else
+                echo -e "${RED}Error: Function '$function' not found.${NC}"
+            fi
+            read -p "Press Enter to continue..."
+        else
+            echo -e "${RED}Invalid option. Please try again.${NC}"
+            read -p "Press Enter to continue..."
+        fi
+    done
+}
+
+# ██████╗ ██╗███████╗██████╗ ██╗      █████╗ ██╗   ██╗    ███████╗███╗   ██╗██╗   ██╗██╗██████╗  ██████╗ ███╗   ██╗███╗   ███╗███████╗███╗   ██╗████████╗
+# ██╔══██╗██║██╔════╝██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝    ██╔════╝████╗  ██║██║   ██║██║██╔══██╗██╔═══██╗████╗  ██║████╗ ████║██╔════╝████╗  ██║╚══██╔══╝
+# ██║  ██║██║███████╗██████╔╝██║     ███████║ ╚████╔╝     █████╗  ██╔██╗ ██║██║   ██║██║██████╔╝██║   ██║██╔██╗ ██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║
+# ██║  ██║██║╚════██║██╔═══╝ ██║     ██╔══██║  ╚██╔╝      ██╔══╝  ██║╚██╗██║╚██╗ ██╔╝██║██╔══██╗██║   ██║██║╚██╗██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║
+# ██████╔╝██║███████║██║     ███████╗██║  ██║   ██║       ███████╗██║ ╚████║ ╚████╔╝ ██║██║  ██║╚██████╔╝██║ ╚████║██║ ╚═╝ ██║███████╗██║ ╚████║   ██║
+# ╚═════╝ ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚══════╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝
 desktop_environments=(
-    "KDE Plasma:install_kde:$GREEN"
-    "GNOME:install_gnome:$GREEN"
-    "XFCE:install_xfce:$GREEN"
-    "Hyprland:install_hyprland:$GREEN"
-    "DWM:install_dwm:$GREEN"
-    "Xmonad + Xmobar:install_xmonad:$GREEN"
-    "qtile:install_qtile:$GREEN"
-    "None (CLI only):skip_install:$YELLOW"
+    "KDE Plasma     :install_kde     :$GREEN"
+    "GNOME          :install_gnome   :$GREEN"
+    "XFCE           :install_xfce    :$GREEN"
+    "Hyprland       :install_hyprland:$GREEN"
+    "DWM            :install_dwm     :$GREEN"
+    "Xmonad + Xmobar:install_xmonad  :$GREEN"
+    "qtile          :install_qtile   :$GREEN"
+    "None (CLI only):skip_install    :$YELLOW"
 )
 
 install_kde() {
@@ -85,7 +150,6 @@ install_kde() {
     sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop sddm
     yay -S --needed sddm-theme-sugar-candy
     sudo systemctl enable sddm
-
     # Ask about theme
     read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
     if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
@@ -93,7 +157,6 @@ install_kde() {
     else
         sddm_numlock
     fi
-
     sudo pacman -Syu
 }
 
@@ -162,44 +225,6 @@ skip_install() {
     echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
 }
 
-# Generic function to display a submenu
-# $1: Menu title (string)
-# $2: Name of the menu items array (string)
-display_submenu() {
-    local title="$1"
-    local -n items_array="$2" # Use nameref to get the array
-
-    while true; do
-        clear
-        echo -e "${CYAN}${title}${NC}"
-
-        for i in "${!items_array[@]}"; do
-            IFS=":" read -r description function color <<< "${items_array[$i]}"
-            echo -e "${color}$((i+1))) $description${NC}"
-        done
-        echo -e "${RED}q) Quit to main menu${NC}"
-
-        read -p "Enter choice: " choice
-
-        if [[ "$choice" == "q" ]]; then
-            break
-        elif [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#items_array[@]} )); then
-            IFS=":" read -r _ function _ <<< "${items_array[$((choice-1))]}"
-            function=$(echo "$function" | xargs)
-            # Check if function exists before calling
-            if declare -f "$function" > /dev/null; then
-                $function
-            else
-                echo -e "${RED}Error: Function '$function' not found.${NC}"
-            fi
-            read -p "Press Enter to continue..."
-        else
-            echo -e "${RED}Invalid option. Please try again.${NC}"
-            read -p "Press Enter to continue..."
-        fi
-    done
-}
-
 # Function to install the chosen desktop environment
 desktop_environment() {
     source ~/ms1/linux/os_imports/wallpaper.sh
@@ -209,39 +234,26 @@ desktop_environment() {
 
 
 
-
-All_Configs(){
-echo Set All configs
-
-cp -a "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
-cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
-
-cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/" #! C:\ms1\linux\config\.config\hypr\hyprland.conf
-cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad" #! C:\ms1\linux\config\.config\xmonad\xmonad.hs
-cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config" #! C:\ms1\linux\config\.config\qtile\config.py
-
-cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\ms1\linux\config\.config\conky\conky_hyprland.conf
-cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\ms1\linux\config\.config\foot\foot.ini
-cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\ms1\linux\config\.config\waybar\config.jsonc
-cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
-cp -a "$HOME/ms1/linux/config/.config/dunst" "$HOME/.config/" #! C:\ms1\linux\config\.config\dunst\dunstrc
-cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\ms1\linux\config\.config\starship\starship.toml
-
-# source $HOME/autostart.sh
-# echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
-source "$HOME/.bashrc"
-}
-
-
+# ██████╗ ██╗███████╗██████╗ ██╗      █████╗ ██╗   ██╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗     ██████╗ ██████╗  ██████╗ ████████╗ ██████╗  ██████╗ ██████╗ ██╗     ███████╗
+# ██╔══██╗██║██╔════╝██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝    ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗    ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗██║     ██╔════╝
+# ██║  ██║██║███████╗██████╔╝██║     ███████║ ╚████╔╝     ███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝    ██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║     ███████╗
+# ██║  ██║██║╚════██║██╔═══╝ ██║     ██╔══██║  ╚██╔╝      ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗    ██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║     ╚════██║
+# ██████╔╝██║███████║██║     ███████╗██║  ██║   ██║       ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║    ██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝╚██████╗╚██████╔╝███████╗███████║
+# ╚═════╝ ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝
 xorg(){
     sudo pacman -S --needed xorg xorg-xinit xorg-xwayland
     sudo pacman -S --needed xorg-apps mesa xf86-video-intel xf86-video-amdgpu xf86-input-libinput #! optional but useful
 }
-
 wayland(){
     sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
 }
 
+# ██████╗  █████╗  ██████╗██╗  ██╗ █████╗  ██████╗ ███████╗███████╗
+# ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔════╝ ██╔════╝██╔════╝
+# ██████╔╝███████║██║     █████╔╝ ███████║██║  ███╗█████╗  ███████╗
+# ██╔═══╝ ██╔══██║██║     ██╔═██╗ ██╔══██║██║   ██║██╔══╝  ╚════██║
+# ██║     ██║  ██║╚██████╗██║  ██╗██║  ██║╚██████╔╝███████╗███████║
+# ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
 package_install_items=(
     "Install Base Packages:install_base_packages:$GREEN"
     "Install Fonts:install_fonts:$GREEN"
@@ -251,7 +263,13 @@ package_install_items=(
 
 install_base_packages() {
     echo -e "${GREEN}Installing Base Packages...${NC}"
-    sudo pacman -S --needed bash bat chafa curl eza fastfetch fzf lsd lua-language-server neovim openssh python rclone sshpass wget which zoxide yazi zsh stow expac numlockx rsync thefuck feh screenfetch sed grep jq rofi conky htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman foot starship
+    sudo pacman -S --needed bash bat chafa curl eza fastfetch fzf \
+                            lsd lua-language-server neovim openssh \
+                            python rclone sshpass wget which zoxide yazi zsh \
+                            stow expac numlockx rsync thefuck feh screenfetch \
+                            sed grep jq rofi conky htop firefox dunst mypy \
+                            pcmanfm thunar thunar-archive-plugin thunar-volman \
+                            foot starship
 }
 
 install_fonts() {
