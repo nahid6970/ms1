@@ -218,6 +218,7 @@ install_xmonad() {
 install_qtile() {
     echo -e "${YELLOW}Installing qtile.${NC}"
     sudo pacman -S --needed qtile python-pywlroots xorg-xwayland kitty dmenu picom network-manager-applet volumeicon mypy
+    sudo pacman -S --needed rofi-wayland
     yay -S --needed qtile-extras
 }
 
