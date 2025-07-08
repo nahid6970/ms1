@@ -98,6 +98,55 @@
         "winget_path": "C:\\Program Files\\BCUninstaller\\BCUninstaller.exe"
     },
     {
+        "name": "Capture2Text",
+        "scoop_name": "Capture2Text",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Cheat Engine [7.4]",
+        "scoop_name": "cheat-engine",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\cheat-engine\\current\\Cheat Engine.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "clink [Terminal]",
+        "scoop_name": "clink",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\clink\\current\\clink_x64.exe",
+        "winget_name": "chrisant996.Clink",
+        "winget_path": ""
+    },
+    {
+        "name": "Cmder [Terminal]",
+        "scoop_name": "Cmder",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\cmder\\current\\Cmder.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "CPU-Z",
+        "scoop_name": "cpu-z",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\cpu-z\\current\\cpuz_x64.exe",
+        "winget_name": "CPUID.CPU-Z",
+        "winget_path": ""
+    },
+    {
+        "name": "Crystal DiskInfo",
+        "scoop_name": "crystaldiskinfo",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\crystaldiskinfo\\current\\DiskInfo64.exe",
+        "winget_name": "CrystalDewWorld.CrystalDiskInfo",
+        "winget_path": ""
+    },
+    {
+        "name": "Ditto",
+        "scoop_name": "ditto",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe",
+        "winget_name": "Ditto.Ditto",
+        "winget_path": ""
+    },
+    {
         "name": "DotNet_6",
         "scoop_name": "ScoopName",
         "scoop_path": "",
@@ -105,10 +154,45 @@
         "winget_path": "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.29\\createdump.exe"
     },
     {
-        "name": "Capture2Text",
-        "scoop_name": "Capture2Text",
-        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe",
-        "winget_name": "",
+        "name": "DotNet_8",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Microsoft.DotNet.DesktopRuntime.8",
+        "winget_path": "C:\\Program Files\\dotnet\\dotnet.exe"
+    },
+    {
+        "name": "ExplorerPatcher",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "ExplorerPatcher",
         "winget_path": ""
+    },
+    {
+        "name": "eza [ls]",
+        "scoop_name": "eza",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\eza\\current\\eza.exe",
+        "winget_name": "eza-community.eza",
+        "winget_path": ""
+    },
+    {
+        "name": "ffmpeg",
+        "scoop_name": "ffmpeg",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ffmpeg\\current\\bin\\ffmpeg.exe",
+        "winget_name": "Gyan.FFmpeg",
+        "winget_path": ""
+    },
+    {
+        "name": "FFmpeg-Batch",
+        "scoop_name": "ffmpeg-batch",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ffmpeg-batch\\current\\FFBatch.exe",
+        "winget_name": "eibol.FFmpegBatchAVConverter",
+        "winget_path": ""
+    },
+    {
+        "name": "FileConverter",
+        "scoop_name": "file-converter-np",
+        "scoop_path": "",
+        "winget_name": "AdrienAllard.FileConverter",
+        "winget_path": "C:\\Program Files\\File Converter\\FileConverter.exe"
     }
 ]

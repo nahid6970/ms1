@@ -178,17 +178,6 @@ def show_options(options):
 
 # Define applications and their information
 applications = [
-{"name":"Cheat Engine [7.4]"       ,"scoop_name":"cheat-engine"                      ,"scoop_path":CheatEngine_scoop_path    ,"winget_name":""                                       ,"winget_path":r""}                         ,
-{"name":"clink [Terminal]"         ,"scoop_name":"clink"                             ,"scoop_path":clink_scoop_path          ,"winget_name":"chrisant996.Clink"                      ,"winget_path":r""}                         ,
-{"name":"Cmder [Terminal]"         ,"scoop_name":"Cmder"                             ,"scoop_path":Cmder_scoop_path          ,"winget_name":""                                       ,"winget_path":r""}                         ,
-{"name":"CPU-Z"                    ,"scoop_name":"cpu-z"                             ,"scoop_path":CPUZ_scoop_path           ,"winget_name":"CPUID.CPU-Z"                            ,"winget_path":r""}                         ,
-{"name":"Crystal DiskInfo"         ,"scoop_name":"crystaldiskinfo"                   ,"scoop_path":CrystalDiskInfo_scoop_path,"winget_name":"CrystalDewWorld.CrystalDiskInfo"        ,"winget_path":r""}                         ,
-{"name":"Ditto"                    ,"scoop_name":"ditto"                             ,"scoop_path":Ditto_scoop_path          ,"winget_name":"Ditto.Ditto"                            ,"winget_path":r""}                         ,
-{"name":"DotNet_8"                 ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"Microsoft.DotNet.DesktopRuntime.8"      ,"winget_path":DotNet8_wp}                  ,
-{"name":"ExplorerPatcher"          ,"scoop_name":"ScoopName"                         ,"scoop_path":r''                       ,"winget_name":"ExplorerPatcher"                        ,"winget_path":r""}                         ,
-{"name":"eza [ls]"                 ,"scoop_name":"eza"                               ,"scoop_path":eza_sp                    ,"winget_name":"eza-community.eza"                      ,"winget_path":r""}                         ,
-{"name":"FFmpeg-Batch"             ,"scoop_name":"ffmpeg-batch"                      ,"scoop_path":FFmpegBatch_sp            ,"winget_name":"eibol.FFmpegBatchAVConverter"           ,"winget_path":r""}                         ,
-{"name":"ffmpeg"                   ,"scoop_name":"ffmpeg"                            ,"scoop_path":ffmpeg_sp                 ,"winget_name":"Gyan.FFmpeg"                            ,"winget_path":r""}                         ,
 {"name":"FileConverter"            ,"scoop_name":"file-converter-np"                 ,"scoop_path":r''                       ,"winget_name":"AdrienAllard.FileConverter"             ,"winget_path":FileConverter_wp }           ,
 {"name":"filezilla-server"         ,"scoop_name":"filezilla-server"                  ,"scoop_path":filezillaServer_sp        ,"winget_name":""                                       ,"winget_path":r""}                         ,
 {"name":"flaresolverr"             ,"scoop_name":"flaresolverr"                      ,"scoop_path":flaresolverr_sp           ,"winget_name":""                                       ,"winget_path":r""}                         ,
