@@ -209,6 +209,46 @@ def show_options(options):
         btn = tk.Button(frame, text=option["text"], command=option["command"], background=bg_color, foreground=fg_color, padx=10, pady=5, borderwidth=2, relief="raised")
         btn.pack(side="left", padx=5, pady=5, anchor="center")
 
+def edit_application(app_to_edit):
+    edit_window = tk.Toplevel(ROOT)
+    edit_window.title("Edit Application")
+    edit_window.geometry("400x300")
+    edit_window.configure(bg="#282c34")
+
+    labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:"]
+    entries = {}
+
+    for i, text in enumerate(labels):
+        tk.Label(edit_window, text=text, bg="#282c34", fg="#fff").grid(row=i, column=0, padx=5, pady=5, sticky="w")
+        entry = tk.Entry(edit_window, width=40)
+        entry.grid(row=i, column=1, padx=5, pady=5, sticky="ew")
+        entries[text.replace(":", "").replace(" ", "_").lower()] = entry
+
+    # Pre-fill entries with current app data
+    entries["app_name"].insert(0, app_to_edit["name"])
+    entries["scoop_name"].insert(0, app_to_edit["scoop_name"])
+    entries["scoop_path"].insert(0, app_to_edit["scoop_path"])
+    entries["winget_name"].insert(0, app_to_edit["winget_name"])
+    entries["winget_path"].insert(0, app_to_edit["winget_path"])
+
+    def save_edited_app():
+        app_to_edit["name"] = entries["app_name"].get()
+        app_to_edit["scoop_name"] = entries["scoop_name"].get()
+        app_to_edit["scoop_path"] = entries["scoop_path"].get()
+        app_to_edit["winget_name"] = entries["winget_name"].get()
+        app_to_edit["winget_path"] = entries["winget_path"].get()
+        save_applications(applications)
+        edit_window.destroy()
+        refresh_app_list()
+
+    tk.Button(edit_window, text="Save Changes", command=save_edited_app, bg="#4CAF50", fg="white").grid(row=len(labels), columnspan=2, pady=10)
+
+def delete_application(app_to_delete):
+    global applications
+    applications = [app for app in applications if app != app_to_delete]
+    save_applications(applications)
+    refresh_app_list()
+
 import json
 
 DATA_FILE = "C:/ms1/test_project/app_list/data.json"
@@ -310,11 +350,15 @@ def refresh_app_list():
         ins_bt = tk.Button(app_frame, text=f"n", foreground="#00FF00", background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
         unins_bt = tk.Button(app_frame, text=f"n", foreground="#FF0000",  background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
         open_bt = tk.Button(app_frame, text=f"n", foreground="#eac353", background="#1d2027", font=("webdings", 5), relief="flat", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: open_file_location(name, scoop, winget, var, cb))
+        edit_bt = tk.Button(app_frame, text="✎", foreground="#007bff", background="#1d2027", font=("Arial", 10), relief="flat", command=lambda app=app: edit_application(app))
+        delete_bt = tk.Button(app_frame, text="🗑", foreground="#dc3545", background="#1d2027", font=("Arial", 10), relief="flat", command=lambda app=app: delete_application(app))
 
         chkbox_bt.grid(row=0, column=0, padx=(0,0), pady=(0,0))
         ins_bt.grid(row=0, column=1, padx=(0,0), pady=(0,0))
         unins_bt.grid(row=0, column=2, padx=(0,0), pady=(0,0))
         open_bt.grid(row=0, column=3, padx=(0, 0), pady=(0, 0))
+        edit_bt.grid(row=0, column=4, padx=(0, 0), pady=(0, 0))
+        delete_bt.grid(row=0, column=5, padx=(0, 0), pady=(0, 0))
 
         check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
     
