@@ -144,6 +144,12 @@ desktop_environments=(
     "qtile          :install_qtile   :$GREEN"
     "None (CLI only):skip_install    :$YELLOW"
 )
+# Function to install the chosen desktop environment
+desktop_environment() {
+    source ~/ms1/linux/os_imports/wallpaper.sh
+    source ~/ms1/linux/os_imports/sddm.sh
+    display_submenu "Which desktop environment would you like to install?" "desktop_environments"
+}
 
 install_kde() {
     echo -e "${GREEN}Installing KDE Plasma...${NC}"
@@ -225,15 +231,6 @@ install_qtile() {
 skip_install() {
     echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
 }
-
-# Function to install the chosen desktop environment
-desktop_environment() {
-    source ~/ms1/linux/os_imports/wallpaper.sh
-    source ~/ms1/linux/os_imports/sddm.sh
-    display_submenu "Which desktop environment would you like to install?" "desktop_environments"
-}
-
-
 
 # ██████╗ ██╗███████╗██████╗ ██╗      █████╗ ██╗   ██╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗     ██████╗ ██████╗  ██████╗ ████████╗ ██████╗  ██████╗ ██████╗ ██╗     ███████╗
 # ██╔══██╗██║██╔════╝██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝    ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗    ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗██║     ██╔════╝
