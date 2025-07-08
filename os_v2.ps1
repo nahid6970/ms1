@@ -330,6 +330,28 @@ $menu = [ordered]@{
             nw_powershell_asadmin -Command {Invoke-RestMethod 'https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1' | Invoke-Expression}
         }
     }
+    "[+] Port" = [ordered]@{
+        "22 [SSH]" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_22' -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -Profile Any
+            }
+        }
+        "5000" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+            }
+        }
+        "5001" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
+            }
+        }
+        "5002" = {
+            nw_pwsh_asadmin -Command {
+                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+            }
+        }
+    }
 }
 
 # Main Menu and Submenu in a side-by-side view
