@@ -609,7 +609,7 @@ function Show-MainMenu {
 
     # Status bar
     $statusBar = New-Object System.Windows.Controls.TextBlock
-    $statusBar.Text = "~~~~~~~~~~~~"
+    $statusBar.Text = "~~~~~~~~~~~~~~~~~~~"
     $statusBar.FontSize = 12
     $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
     $statusBar.HorizontalAlignment = "Center"
@@ -646,7 +646,7 @@ function Show-MainMenu {
                 $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(76, 175, 80))
                 . ($menu[$selectedMainMenu][$selectedSubMenu])
                 Start-Sleep -Milliseconds 2000
-                $statusBar.Text = ">> Double-click an item to execute - Right-click for options"
+                $statusBar.Text = "~~~~~~~~~~~~~~~~~~~"
                 $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
             }
         }
