@@ -1,5 +1,5 @@
 [
-     { 
+    {
         "name": "Ack [Find]",
         "scoop_name": "ack",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ack\\current\\ack.bat",
@@ -7,11 +7,95 @@
         "winget_path": ""
     },
     {
-        "name": "Alacritty",
+        "name": "Adb",
+        "scoop_name": "adb",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\adb\\current\\platform-tools\\adb.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Alacritty [Terminal]",
         "scoop_name": "alacritty",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\alacritty\\current\\alacritty.exe",
         "winget_name": "Alacritty.Alacritty",
         "winget_path": "C:\\Program Files\\Alacritty\\alacritty.exe"
+    },
+    {
+        "name": "Aria2",
+        "scoop_name": "aria2",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\aria2\\current\\aria2c.exe",
+        "winget_name": "aria2.aria2",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links\\aria2c.exe"
+    },
+    {
+        "name": "AudioRelay",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "AsaphaHalifa.AudioRelay",
+        "winget_path": "C:\\Program Files (x86)\\AudioRelay\\AudioRelay.exe"
+    },
+    {
+        "name": "AutoHotkey v1",
+        "scoop_name": "autohotkey1.1",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\autohotkey1.1\\current\\AutoHotkeyU64.exe",
+        "winget_name": "9NQ8Q8J78637",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WindowsApps\\AutoHotkeyU64.exe"
+    },
+    {
+        "name": "AutoHotkey v2",
+        "scoop_name": "autohotkey",
+        "scoop_path": "",
+        "winget_name": "AutoHotkey.AutoHotkey",
+        "winget_path": "C:\\Program Files\\AutoHotkey\\UX\\AutoHotkeyUX.exe"
+    },
+    {
+        "name": "Autoruns",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Microsoft.Sysinternals.Autoruns",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Microsoft.Sysinternals.Autoruns_Microsoft.Winget.Source_8wekyb3d8bbwe\\autoruns.exe"
+    },
+    {
+        "name": "BareGrep [Find]",
+        "scoop_name": "baregrep",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\baregrep\\current\\baregrep.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Bat [Text-View]",
+        "scoop_name": "bat",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\bat\\current\\bat.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Bazarr",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Morpheus.Bazarr",
+        "winget_path": "C:\\Bazarr\\bazarr.py"
+    },
+    {
+        "name": "Bitwarden",
+        "scoop_name": "bitwarden",
+        "scoop_path": "",
+        "winget_name": "Bitwarden.Bitwarden",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Bitwarden\\Bitwarden.exe"
+    },
+    {
+        "name": "btop [Sys-Monitor]",
+        "scoop_name": "btop",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\btop\\current\\btop.exe",
+        "winget_name": "aristocratos.btop4win",
+        "winget_path": ""
+    },
+    {
+        "name": "Bulk Crap Uninstaller",
+        "scoop_name": "bulk-crap-uninstaller",
+        "scoop_path": "",
+        "winget_name": "BCUninstaller",
+        "winget_path": "C:\\Program Files\\BCUninstaller\\BCUninstaller.exe"
     },
     {
         "name": "DotNet_6",
@@ -19,5 +103,12 @@
         "scoop_path": "",
         "winget_name": "Microsoft.DotNet.DesktopRuntime.6",
         "winget_path": "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.29\\createdump.exe"
+    },
+    {
+        "name": "Capture2Text",
+        "scoop_name": "Capture2Text",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe",
+        "winget_name": "",
+        "winget_path": ""
     }
 ]
