@@ -89,9 +89,13 @@ LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(0,0))
 # search_label = tk.Label(Page1, text="Search:", bg="#1d2027", fg="#fff", font=("calibri", 12, "bold"))
 # search_label.pack(side="top", anchor="center", padx=(20, 0), pady=(10, 0))
 
+# Create a frame for search and add button
+search_controls_frame = tk.Frame(MAIN_FRAME, bg="#1d2027")
+search_controls_frame.pack(side="top", anchor="center", pady=(0, 10))
+
 # Create the search entry
-search_entry = tk.Entry(MAIN_FRAME, font=("calibri", 12), bg="#FFFFFF", fg="#000000", insertbackground="#F00")
-search_entry.pack(side="top", anchor="center", padx=(20, 0), pady=(0, 10))
+search_entry = tk.Entry(search_controls_frame, font=("calibri", 12), bg="#FFFFFF", fg="#000000", insertbackground="#F00")
+search_entry.grid(row=0, column=0, padx=(20, 5), pady=(0, 0))
 
 def add_app_window():
     add_window = tk.Toplevel(ROOT)
@@ -123,8 +127,8 @@ def add_app_window():
 
     tk.Button(add_window, text="Save App", command=save_new_app, bg="#4CAF50", fg="white").grid(row=len(labels), columnspan=2, pady=10)
 
-add_app_button = tk.Button(MAIN_FRAME, text="Add New App", command=add_app_window, bg="#007bff", fg="white")
-add_app_button.pack(side="top", anchor="center", pady=(10, 0))
+add_app_button = tk.Button(search_controls_frame, text="+", command=add_app_window, bg="#007bff", fg="white", width=2)
+add_app_button.grid(row=0, column=1, padx=(0, 20), pady=(0, 0))
 
 def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
     scoop_installed = os.path.exists(scoop_path)
@@ -366,7 +370,7 @@ def refresh_app_list():
         # Frame for action buttons (initially hidden)
         actions_frame = tk.Frame(app_frame, bg="#1d2027")
 
-        chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
+        chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
         chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
         chkbox_bt.bind("<Button-1>", lambda event, a_frame=actions_frame: toggle_actions(a_frame))
 
