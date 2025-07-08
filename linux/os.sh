@@ -67,14 +67,12 @@ arch_install(){
     archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
 }
 
-#!/bin/bash
 
-# import list
-source ~/ms1/linux/os_imports/wallpaper.sh
-source ~/ms1/linux/os_imports/sddm.sh
 
 # Function to install the chosen desktop environment
 desktop_environment() {
+    source ~/ms1/linux/os_imports/wallpaper.sh
+    source ~/ms1/linux/os_imports/sddm.sh
     clear
     echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
     echo -e "1) KDE Plasma"
