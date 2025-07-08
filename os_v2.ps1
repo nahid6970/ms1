@@ -385,27 +385,46 @@ $menu = [ordered]@{
         }
         "Radarr" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                Winget install TeamRadarr.Radarr
+                # Stop-Process -Name 'Radarr' -Verbose
+                # Stop-Process -Name 'Radarr.Console' -Verbose
+                # Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\msBackups\@mklink\radarr\radarr.db -Force -Verbose
+                # Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
+                Write-Host "Do it with manual Restore!" -ForegroundColor Green
+                Start-Process 'C:\msBackups\ARR_timely'
             }
         }
         "RssGuard" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                scoop install rssguard
+                Stop-Process -Name "rssguard"
+                Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Recurse
+                Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Recurse
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\msBackups\@mklink\rssguard\config" -Force
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\msBackups\@mklink\rssguard\database" -Force
             }
         }
         "Sonarr" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                Winget install TeamSonarr.Sonarr
+                # Stop-Process -Name 'Sonarr' -Verbose
+                # Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
+                # Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
+                Write-Host "Do it with manual Restore!" -ForegroundColor Green
+                Start-Process 'C:\msBackups\ARR_timely'
             }
         }
         "Terminal Profile" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json -Target C:\ms1\asset\terminal\settings.json -Force
             }
         }
         "VSCode" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\keybindings.json -Target C:\ms1\asset\vscode\keybindings.json -Force
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Roaming\Code\User\settings.json -Target C:\ms1\asset\vscode\settings.json -Force
             }
         }
         "example" = {
