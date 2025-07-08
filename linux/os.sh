@@ -162,37 +162,49 @@ skip_install() {
     echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
 }
 
-# Function to install the chosen desktop environment
-desktop_environment() {
-    source ~/ms1/linux/os_imports/wallpaper.sh
-    source ~/ms1/linux/os_imports/sddm.sh
+# Generic function to display a submenu
+# $1: Menu title (string)
+# $2: Name of the menu items array (string)
+display_submenu() {
+    local title="$1"
+    local -n items_array="$2" # Use nameref to get the array
 
     while true; do
         clear
-        echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
+        echo -e "${CYAN}${title}${NC}"
 
-        for i in "${!desktop_environments[@]}"; do
-            IFS=":" read -r description function color <<< "${desktop_environments[$i]}"
+        for i in "${!items_array[@]}"; do
+            IFS=":" read -r description function color <<< "${items_array[$i]}"
             echo -e "${color}$((i+1))) $description${NC}"
         done
         echo -e "${RED}q) Quit to main menu${NC}"
 
-        read -p "Enter the number: " DE_CHOICE
+        read -p "Enter choice: " choice
 
-        if [[ "$DE_CHOICE" == "q" ]]; then
+        if [[ "$choice" == "q" ]]; then
             break
-        elif [[ "$DE_CHOICE" =~ ^[0-9]+$ ]] && (( DE_CHOICE >= 1 && DE_CHOICE <= ${#desktop_environments[@]} )); then
-            IFS=":" read -r _ function _ <<< "${desktop_environments[$((DE_CHOICE-1))]}"
+        elif [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#items_array[@]} )); then
+            IFS=":" read -r _ function _ <<< "${items_array[$((choice-1))]}"
             function=$(echo "$function" | xargs)
-            $function
+            # Check if function exists before calling
+            if declare -f "$function" > /dev/null; then
+                $function
+            else
+                echo -e "${RED}Error: Function '$function' not found.${NC}"
+            fi
             read -p "Press Enter to continue..."
         else
-            echo -e "${RED}Invalid choice. Please try again.${NC}"
+            echo -e "${RED}Invalid option. Please try again.${NC}"
             read -p "Press Enter to continue..."
         fi
     done
+}
 
-    echo -e "${GREEN}Desktop environment installation complete.${NC}"
+# Function to install the chosen desktop environment
+desktop_environment() {
+    source ~/ms1/linux/os_imports/wallpaper.sh
+    source ~/ms1/linux/os_imports/sddm.sh
+    display_submenu "Which desktop environment would you like to install?" "desktop_environments"
 }
 
 
@@ -230,22 +242,39 @@ wayland(){
     sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
 }
 
+package_install_items=(
+    "Install Base Packages:install_base_packages:$GREEN"
+    "Install Fonts:install_fonts:$GREEN"
+    "Install Utilities:install_utilities:$GREEN"
+    "Install Media Packages:install_media_packages:$GREEN"
+)
+
+install_base_packages() {
+    echo -e "${GREEN}Installing Base Packages...${NC}"
+    sudo pacman -S --needed bash bat chafa curl eza fastfetch fzf lsd lua-language-server neovim openssh python rclone sshpass wget which zoxide yazi zsh stow expac numlockx rsync thefuck feh screenfetch sed grep jq rofi conky htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman foot starship
+}
+
+install_fonts() {
+    echo -e "${GREEN}Installing Fonts...${NC}"
+    sudo pacman -S --needed ttf-jetbrains-mono-nerd ttf-jetbrains-mono
+}
+
+install_utilities() {
+    echo -e "${GREEN}Installing Utilities...${NC}"
+    sudo pacman -S --needed rsync
+}
+
+install_media_packages() {
+    echo -e "${GREEN}Installing Media Packages...${NC}"
+    sudo pacman -S --needed vlc audacious
+}
+
 # Function to install necessary packages using yay
 install_packages() {
     clear
     echo -e "${GREEN}Updating package database...${NC}"
     sudo pacman -Sy --noconfirm
-    echo -e "${GREEN}Installing Necessary Packages...${NC}"
-    sudo pacman -S --needed \
-        bash bat chafa curl eza fastfetch fzf \
-        lsd lua-language-server neovim \
-        openssh python rclone sshpass wget \
-        which zoxide yazi zsh stow expac numlockx \
-        rsync ttf-jetbrains-mono-nerd ttf-jetbrains-mono \
-        thefuck feh screenfetch sed grep jq rofi conky \
-        htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman \
-        vlc audacious \
-        foot starship 
+    display_submenu "Install Packages Submenu" "package_install_items"
 }
 
 
