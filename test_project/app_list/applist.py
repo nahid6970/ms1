@@ -216,7 +216,10 @@ DATA_FILE = "C:/ms1/test_project/app_list/data.json"
 def load_applications():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
-            return json.load(f)
+            apps = json.load(f)
+            # Sort applications by name
+            apps.sort(key=lambda x: x.get("name", "").lower())
+            return apps
     return []
 
 def save_applications(apps):
