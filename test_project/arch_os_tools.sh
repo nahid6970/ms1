@@ -21,7 +21,7 @@ function show_result {
 
 # Main menu loop
 while true; do
-    main_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+    main_choice=$(zenity --list \
         --title="Main Menu" --text="Select a category:" \
         --column="ID" --column="Category" \
         1 "System Management" \
@@ -37,7 +37,7 @@ while true; do
     case $main_choice in
         1)
             while true; do
-                sys_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+                sys_choice=$(zenity --list \
                     --title="System Management" --text="Select a command:" \
                     --column="ID" --column="Action" \
                     1 "Update System (pacman -Syu)" \
@@ -71,7 +71,7 @@ while true; do
             ;;
         2)
             while true; do
-                pkg_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+                pkg_choice=$(zenity --list \
                     --title="Package Management" --text="Select a command:" \
                     --column="ID" --column="Action" \
                     1 "Install AUR Helper (yay)" \
@@ -108,7 +108,7 @@ while true; do
             ;;
         3)
             while true; do
-                info_choice=$(zenity --list --clear --backtitle="Arch Linux Tools" \
+                info_choice=$(zenity --list \
                     --title="System Information" --text="Select a command:" \
                     --column="ID" --column="Action" \
                     1 "Show System Info (neofetch)" \
