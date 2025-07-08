@@ -244,7 +244,7 @@ def delete_application(app_to_delete):
 
 import json
 
-DATA_FILE = "C:/ms1/test_project/app_list/data.json"
+DATA_FILE = "C:/ms1/Applist/data.json"
 
 def load_applications():
     if os.path.exists(DATA_FILE):

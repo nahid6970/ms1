@@ -418,5 +418,96 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe",
         "winget_name": "",
         "winget_path": ""
+    },
+    {
+        "name": "qBittorrent",
+        "scoop_name": "qbittorrent",
+        "scoop_path": "",
+        "winget_name": "qBittorrent.qBittorrent",
+        "winget_path": "C:\\Program Files\\qBittorrent\\qbittorrent.exe"
+    },
+    {
+        "name": "Radarr",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "TeamRadarr.Radarr",
+        "winget_path": "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"
+    },
+    {
+        "name": "Rclone",
+        "scoop_name": "rclone",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\rclone\\current\\rclone.exe",
+        "winget_name": "Rclone.Rclone",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links\\rclone.exe"
+    },
+    {
+        "name": "ReIcon",
+        "scoop_name": "ReIcon",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\reicon\\current\\ReIcon.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "ripgrep [rg]",
+        "scoop_name": "ripgrep",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ripgrep\\current\\rg.exe",
+        "winget_name": "BurntSushi.ripgrep.MSVC",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-14.1.0-x86_64-pc-windows-msvc\\rg.exe"
+    },
+    {
+        "name": "Rss Guard",
+        "scoop_name": "rssguard",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe",
+        "winget_name": "martinrotter.RSSGuard",
+        "winget_path": ""
+    },
+    {
+        "name": "Ruffle",
+        "scoop_name": "ruffle-nightly",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ruffle-nightly\\current\\ruffle.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "Rufus",
+        "scoop_name": "rufus",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\rufus\\current\\rufus.exe",
+        "winget_name": "Rufus.Rufus",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links\\rufus.exe"
+    },
+    {
+        "name": "scoop-completion",
+        "scoop_name": "scoop-completion",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\scoop-completion\\current\\scoop-completion.psm1",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "scoop-search",
+        "scoop_name": "scoop-search",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\scoop-search\\current\\scoop-search.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "scrcpy",
+        "scoop_name": "scrcpy",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\scrcpy\\current\\scrcpy.exe",
+        "winget_name": "Genymobile.scrcpy",
+        "winget_path": ""
+    },
+    {
+        "name": "scrcpy+",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Frontesque.scrcpy+",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\scrcpy-plus\\scrcpy+.exe"
+    },
+    {
+        "name": "Sonarr",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "TeamSonarr.Sonarr",
+        "winget_path": "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"
     }
 ]
