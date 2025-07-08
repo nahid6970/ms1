@@ -364,17 +364,23 @@ $menu = [ordered]@{
         }
         "Reference" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+                New-Item -ItemType SymbolicLink -Path 'C:\Users\nahid\scoop\apps\python312\current\Lib\Reference.py' -Target 'C:\ms1\Reference.py' -Force #[pwsh]
             }
         }
         "PowerShell Profile" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\Documents\PowerShell\Microsoft.PowerShell_profile.ps1 -Target C:\ms1\asset\Powershell\Microsoft.PowerShell_profile.ps1 -Force
             }
         }
         "Prowlarr" = {
             nw_pwsh_asadmin -Command {
-                New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any
+                Winget install TeamProwlarr.Prowlarr
+                # Stop-Process -Name 'Prowlarr' -Verbose
+                # Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
+                # Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
+                Write-Host "Do it with manual Restore!" -ForegroundColor Green
+                Start-Process 'C:\msBackups\ARR_timely'
             }
         }
         "Radarr" = {
