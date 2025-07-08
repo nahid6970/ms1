@@ -22,7 +22,7 @@ NC='\033[0m' # No Color
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1] + Copy Config     : update_ms1_repo All_Configs :$GREEN"
-    "Copy Config Files                : All_Configs                 :$GREEN"
+    # "Copy Config Files                : All_Configs                 :$GREEN"
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper        :$GREEN"
     "Install Necessary Packages       : install_packages            :$GREEN"
     "Desktop Environment              : desktop_environment         :$GREEN" #! C:\ms1\linux\desktop_environment.sh
