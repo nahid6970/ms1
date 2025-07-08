@@ -38,15 +38,15 @@ menu_items=(
     "Rclone-Decrypt                   : rclone_decrypt              :$RED"
     "Rclone-linux_binary              : rclone_copy_linuxbin        :$RED"
     "GPU Drivers                      : check_gpu_drivers           :$GREEN"
-    "Hyprland                         : setup_hyprland_full         :$GREEN"
-    "Hyprland Config                  : hyperland_config            :$GREEN"
-    "Rofi for Hyprland                : rofi_install_wayland        :$GREEN"
+    # "Hyprland                         : setup_hyprland_full         :$GREEN"
+    # "Hyprland Config                  : hyperland_config            :$GREEN"
+    # "Rofi for Hyprland                : rofi_install_wayland        :$GREEN"
     "Neovim Config                    : nvim_config                 :$GREEN"
     "Enable Numlock                   : enable_early_numlock        :$GREEN"
-    "DWM Setup                        : dwm_wm                      :$GREEN"
-    "DWM Config                       : dwm_config                  :$GREEN"
-    "DWM ST                           : dwm_statusbar               :$GREEN"
-    "DWM Distrotube                   : distrotube_dwm_config       :$GREEN"
+    # "DWM Setup                        : dwm_wm                      :$GREEN"
+    # "DWM Config                       : dwm_config                  :$GREEN"
+    # "DWM ST                           : dwm_statusbar               :$GREEN"
+    # "DWM Distrotube                   : distrotube_dwm_config       :$GREEN"
     "SDDM                             : sddm_setup                  :$GREEN"
     "Arch Install                     : arch_install                :$GREEN"
     # "bottles                        : not_yet_choosen             :$GREEN"
@@ -255,9 +255,9 @@ wayland(){
 # ██║     ██║  ██║╚██████╗██║  ██╗██║  ██║╚██████╔╝███████╗███████║
 # ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
 package_install_items=(
-    "Install Base Packages:install_base_packages:$GREEN"
-    "Install Fonts:install_fonts:$GREEN"
-    "Install Utilities:install_utilities:$GREEN"
+    "Install Base Packages :install_base_packages :$GREEN"
+    "Install Fonts         :install_fonts         :$GREEN"
+    "Install Utilities     :install_utilities     :$GREEN"
     "Install Media Packages:install_media_packages:$GREEN"
 )
 
@@ -295,7 +295,12 @@ install_packages() {
     display_submenu "Install Packages Submenu" "package_install_items"
 }
 
-
+# ██████╗  ██████╗██╗      ██████╗ ███╗   ██╗███████╗
+# ██╔══██╗██╔════╝██║     ██╔═══██╗████╗  ██║██╔════╝
+# ██████╔╝██║     ██║     ██║   ██║██╔██╗ ██║█████╗
+# ██╔══██╗██║     ██║     ██║   ██║██║╚██╗██║██╔══╝
+# ██║  ██║╚██████╗███████╗╚██████╔╝██║ ╚████║███████╗
+# ╚═╝  ╚═╝ ╚═════╝╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 rclone_decrypt() {
     # remove te ntfy file
     clear
@@ -318,52 +323,6 @@ rclone_copy_linuxbin() {
     curl -L -o "$HOME/linux_binary/wallpaper/wallpaper1.jpg" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
     echo 'Downloading WallPaper Complete'
 }
-
-list_recent_packages() {
-    echo -e "${GREEN}Listing recently installed packages...${NC}"
-    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
-}
-
-# Neovim setup function
-nvim_setup() {
-    clear
-    echo -e "${BLUE}Setting up Neovim configuration...${NC}"
-    # Create the Neovim config directory if it doesn't exist
-    mkdir -p "$NVIM_CONFIG_DEST"
-    # Copy the init.lua file to the Neovim config directory
-    cp "$NVIM_INIT_SOURCE" "$NVIM_CONFIG_DEST/init.lua"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Neovim configuration setup successfully.${NC}"
-    else
-        echo -e "${RED}Failed to set up Neovim configuration.${NC}"
-    fi
-    curl -o /data/data/com.termux/files/usr/bin/install-in-mason  https://raw.githubusercontent.com/Amirulmuuminin/setup-mason-for-termux/main/install-in-mason
-    chmod +x /data/data/com.termux/files/usr/bin/install-in-mason
-    install-in-mason lua-language-server
-}
-
-update_ms1_repo() {
-    clear
-    local ms1_folder="$HOME/ms1"
-    if [ -d "$ms1_folder" ]; then
-        echo "Changing directory to $ms1_folder..."
-        cd "$ms1_folder" || {
-            echo "Failed to change directory to $ms1_folder."
-            return 1
-        }
-        echo "Pulling latest changes from the repository..."
-        git pull || {
-            echo "Failed to pull changes. Please check your repository setup."
-            return 1
-        }
-        echo "Repository updated successfully."
-    else
-        echo "The folder $ms1_folder does not exist."
-        return 1
-    fi
-}
-
-
 
 # Function to create an rclone folder and copy rclone.conf file
 rclone_setup() {
@@ -391,7 +350,6 @@ rclone_setup() {
     fi
 }
 
-
 # Function to restore songs from the web using rclone
 Restore_Songs() {
     clear
@@ -406,22 +364,61 @@ Restore_Songs() {
     echo -e "Songs restored successfully from $REMOTE to $DEST_DIR"
 }
 
-
-# Function to handle exit
-Close_script() {
+#  █████╗ ██╗   ██╗██████╗     ███████╗███████╗████████╗██╗   ██╗██████╗
+# ██╔══██╗██║   ██║██╔══██╗    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
+# ███████║██║   ██║██████╔╝    ███████╗█████╗     ██║   ██║   ██║██████╔╝
+# ██╔══██║██║   ██║██╔══██╗    ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
+# ██║  ██║╚██████╔╝██║  ██║    ███████║███████╗   ██║   ╚██████╔╝██║
+# ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝    ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
+setup_yay() {
     clear
-    echo -e "${GREEN}Exiting the script. Goodbye!${NC}"
-    exit 0
+    echo -e "${CYAN}Installing yay (AUR helper)...${NC}"
+    # Install prerequisites
+    sudo pacman -Sy --needed --noconfirm base-devel git
+    # Clone yay repository
+    if [ ! -d "/tmp/yay" ]; then
+        git clone https://aur.archlinux.org/yay.git /tmp/yay
+    fi
+    # Build and install yay
+    cd /tmp/yay || exit
+    makepkg -si --noconfirm
+    echo -e "${GREEN}yay has been installed successfully.${NC}"
 }
 
-exit_script() {
-    # Stop the Termux service
-    am startservice -a com.termux.service_stop com.termux/.app.TermuxService
-    # Exit the current shell session
-    exit
+#  █████╗ ██████╗ ██████╗ ██╗     ██╗ ██████╗ █████╗ ████████╗██╗ ██████╗ ███╗   ██╗    ███████╗███████╗████████╗██╗   ██╗██████╗
+# ██╔══██╗██╔══██╗██╔══██╗██║     ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔═══██╗████╗  ██║    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
+# ███████║██████╔╝██████╔╝██║     ██║██║     ███████║   ██║   ██║██║   ██║██╔██╗ ██║    ███████╗█████╗     ██║   ██║   ██║██████╔╝
+# ██╔══██║██╔═══╝ ██╔═══╝ ██║     ██║██║     ██╔══██║   ██║   ██║██║   ██║██║╚██╗██║    ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
+# ██║  ██║██║     ██║     ███████╗██║╚██████╗██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║    ███████║███████╗   ██║   ╚██████╔╝██║
+# ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
+# Neovim setup function
+nvim_setup() {
+    clear
+    echo -e "${BLUE}Setting up Neovim configuration...${NC}"
+    # Create the Neovim config directory if it doesn't exist
+    mkdir -p "$NVIM_CONFIG_DEST"
+    # Copy the init.lua file to the Neovim config directory
+    cp "$NVIM_INIT_SOURCE" "$NVIM_CONFIG_DEST/init.lua"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Neovim configuration setup successfully.${NC}"
+    else
+        echo -e "${RED}Failed to set up Neovim configuration.${NC}"
+    fi
+    curl -o /data/data/com.termux/files/usr/bin/install-in-mason  https://raw.githubusercontent.com/Amirulmuuminin/setup-mason-for-termux/main/install-in-mason
+    chmod +x /data/data/com.termux/files/usr/bin/install-in-mason
+    install-in-mason lua-language-server
 }
 
-
+# ████████╗ ██████╗  ██████╗ ██╗     ███████╗
+# ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
+#    ██║   ██║   ██║██║   ██║██║     ███████╗
+#    ██║   ██║   ██║██║   ██║██║     ╚════██║
+#    ██║   ╚██████╔╝╚██████╔╝███████╗███████║
+#    ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
+list_recent_packages() {
+    echo -e "${GREEN}Listing recently installed packages...${NC}"
+    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
+}
 
 quick_file_search() {
     clear
@@ -454,62 +451,16 @@ list_large_files() {
     find "$target_dir" -type f -exec du -h {} + | sort -rh | head -n 10
 }
 
-
-
+# ██╗███╗   ██╗███████╗ ██████╗
+# ██║████╗  ██║██╔════╝██╔═══██╗
+# ██║██╔██╗ ██║█████╗  ██║   ██║
+# ██║██║╚██╗██║██╔══╝  ██║   ██║
+# ██║██║ ╚████║██║     ╚██████╔╝
+# ╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝
 about_device() {
     clear
     fastfetch
 }
-
-
-
-ntfy_remove() {
-    # remove te ntfy file
-    clear
-    echo "Deleting g00:ntfy file ...."
-    rclone delete g00:ntfy
-}
-
-welcome_remove() {
-    # remove te ntfy file
-    clear
-    echo "Removing Welcome Page ...."
-    touch .hushlogin
-}
-
-
-setup_yay() {
-    clear
-    echo -e "${CYAN}Installing yay (AUR helper)...${NC}"
-
-    # Install prerequisites
-    sudo pacman -Sy --needed --noconfirm base-devel git
-
-    # Clone yay repository
-    if [ ! -d "/tmp/yay" ]; then
-        git clone https://aur.archlinux.org/yay.git /tmp/yay
-    fi
-
-    # Build and install yay
-    cd /tmp/yay || exit
-    makepkg -si --noconfirm
-
-    echo -e "${GREEN}yay has been installed successfully.${NC}"
-}
-
-# desktop_environment() {
-#     clear
-#     echo -e "${CYAN}Setting up Desktop Environment...${NC}"
-
-#     DE_SETUP_SCRIPT="$HOME/ms1/linux/desktop_environment.sh"
-
-#     if [ -f "$DE_SETUP_SCRIPT" ]; then
-#         bash "$DE_SETUP_SCRIPT"
-#     else
-#         echo -e "${RED}Error: $DE_SETUP_SCRIPT not found.${NC}"
-#     fi
-# }
-
 
 check_gpu_drivers() {
     echo -e "${GREEN}Detecting GPU and checking AMD drivers...${NC}"
@@ -547,10 +498,74 @@ check_gpu_drivers() {
     fi
 }
 
+#!  ██████╗ ██╗████████╗
+#! ██╔════╝ ██║╚══██╔══╝
+#! ██║  ███╗██║   ██║
+#! ██║   ██║██║   ██║
+#! ╚██████╔╝██║   ██║
+#!  ╚═════╝ ╚═╝   ╚═╝
+update_ms1_repo() {
+    clear
+    local ms1_folder="$HOME/ms1"
+    if [ -d "$ms1_folder" ]; then
+        echo "Changing directory to $ms1_folder..."
+        cd "$ms1_folder" || {
+            echo "Failed to change directory to $ms1_folder."
+            return 1
+        }
+        echo "Pulling latest changes from the repository..."
+        git pull || {
+            echo "Failed to pull changes. Please check your repository setup."
+            return 1
+        }
+        echo "Repository updated successfully."
+    else
+        echo "The folder $ms1_folder does not exist."
+        return 1
+    fi
+}
 
+# ██████╗ ███████╗███████╗███████╗██████╗ ███████╗███╗   ██╗ ██████╗███████╗
+# ██╔══██╗██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝████╗  ██║██╔════╝██╔════╝
+# ██████╔╝█████╗  █████╗  █████╗  ██████╔╝█████╗  ██╔██╗ ██║██║     █████╗
+# ██╔══██╗██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗██╔══╝  ██║╚██╗██║██║     ██╔══╝
+# ██║  ██║███████╗██║     ███████╗██║  ██║███████╗██║ ╚████║╚██████╗███████╗
+# ╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝╚══════╝
+# Function to handle exit
+Close_script() {
+    clear
+    echo -e "${GREEN}Exiting the script. Goodbye!${NC}"
+    exit 0
+}
 
+exit_script() {
+    # Stop the Termux service
+    am startservice -a com.termux.service_stop com.termux/.app.TermuxService
+    # Exit the current shell session
+    exit
+}
 
+#  ██████╗ ██████╗ ███████╗ ██████╗ ██╗     ███████╗████████╗███████╗
+# ██╔═══██╗██╔══██╗██╔════╝██╔═══██╗██║     ██╔════╝╚══██╔══╝██╔════╝
+# ██║   ██║██████╔╝███████╗██║   ██║██║     █████╗     ██║   █████╗
+# ██║   ██║██╔══██╗╚════██║██║   ██║██║     ██╔══╝     ██║   ██╔══╝
+# ╚██████╔╝██████╔╝███████║╚██████╔╝███████╗███████╗   ██║   ███████╗
+#  ╚═════╝ ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝   ╚══════╝
 
+ntfy_remove() {
+    # remove te ntfy file
+    clear
+    echo "Deleting g00:ntfy file ...."
+    rclone delete g00:ntfy
+}
+
+# for termux
+welcome_remove() {
+    # remove te ntfy file
+    clear
+    echo "Removing Welcome Page ...."
+    touch .hushlogin
+}
 
 # hyperland_config() {
 #     # Auto-generate default config if missing
@@ -577,8 +592,6 @@ nvim_config() {
     # Auto-generate default config if missing
 ln -sf "$HOME/ms1/linux/config/nvim/" "$HOME/.config/nvim"
 }
-
-
 
 enable_early_numlock() {
   echo -e "${CYAN}📦 Installing mkinitcpio-numlock from AUR...${NC}"
