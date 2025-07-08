@@ -306,5 +306,33 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\less\\current\\less.exe",
         "winget_name": "jftuga.less",
         "winget_path": ""
+    },
+    {
+        "name": "localsend",
+        "scoop_name": "localsend",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\localsend\\current\\localsend_app.exe",
+        "winget_name": "LocalSend.LocalSend",
+        "winget_path": ""
+    },
+    {
+        "name": "Meld",
+        "scoop_name": "meld",
+        "scoop_path": "",
+        "winget_name": "Meld.Meld",
+        "winget_path": "C:\\Program Files\\Meld\\Meld.exe"
+    },
+    {
+        "name": "Nilesoft Shell",
+        "scoop_name": "nilesoft-shell",
+        "scoop_path": "",
+        "winget_name": "nilesoft.shell",
+        "winget_path": ""
+    },
+    {
+        "name": "node.js / npm",
+        "scoop_name": "nodejs",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\nodejs\\current\\node.exe",
+        "winget_name": "OpenJS.NodeJS",
+        "winget_path": ""
     }
 ]

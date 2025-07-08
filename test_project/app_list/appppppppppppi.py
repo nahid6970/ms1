@@ -178,10 +178,6 @@ def show_options(options):
 
 # Define applications and their information
 applications = [
-{"name":"localsend"                ,"scoop_name":"localsend"                         ,"scoop_path":localsend_sp              ,"winget_name":"LocalSend.LocalSend"                    ,"winget_path":""}                          ,
-{"name":"Meld"                     ,"scoop_name":"meld"                              ,"scoop_path":r''                       ,"winget_name":"Meld.Meld"                              ,"winget_path":meld_wp}                     ,
-{"name":"Nilesoft Shell"           ,"scoop_name":"nilesoft-shell"                    ,"scoop_path":r''                       ,"winget_name":"nilesoft.shell"                         ,"winget_path":r""}                         ,
-{"name":"node"                     ,"scoop_name":"nodejs"                            ,"scoop_path":node_sp                   ,"winget_name":"OpenJS.NodeJS"                          ,"winget_path":""}                          ,
 {"name":"notepad++"                ,"scoop_name":"notepadplusplus"                   ,"scoop_path":notepadplusplus_sp        ,"winget_name":"Notepad++.Notepad++"                    ,"winget_path":notepadplusplus_winget_path} ,
 {"name":"OBS Studio"               ,"scoop_name":"obs-studio"                        ,"scoop_path":r''                       ,"winget_name":"OBSProject.OBSStudio"                   ,"winget_path":obsstudio_wp }               ,
 {"name":"oh-my-posh"               ,"scoop_name":"oh-my-posh"                        ,"scoop_path":ohmyposh_sp               ,"winget_name":"JanDeDobbeleer.OhMyPosh"                ,"winget_path":""}                          ,
