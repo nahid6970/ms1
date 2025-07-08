@@ -483,14 +483,14 @@ function Show-MainMenu {
     $submenuListBox.SelectionMode = "Single"
     $submenuPanel.Children.Add($submenuListBox)
 
-    # Status bar
-    $statusBar = New-Object System.Windows.Controls.TextBlock
-    $statusBar.Text = ">> Double-click an item to execute - Right-click for options"
-    $statusBar.FontSize = 12
-    $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
-    $statusBar.HorizontalAlignment = "Center"
-    $statusBar.Margin = "0,10,0,0"
-    $submenuPanel.Children.Add($statusBar)
+    # # Status bar
+    # $statusBar = New-Object System.Windows.Controls.TextBlock
+    # $statusBar.Text = ">> Double-click an item to execute - Right-click for options"
+    # $statusBar.FontSize = 12
+    # $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
+    # $statusBar.HorizontalAlignment = "Center"
+    # $statusBar.Margin = "0,10,0,0"
+    # $submenuPanel.Children.Add($statusBar)
 
     # Event handler to populate submenu based on main menu selection
     $mainMenuListBox.Add_SelectionChanged({
