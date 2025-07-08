@@ -178,23 +178,6 @@ def show_options(options):
 
 # Define applications and their information
 applications = [
-{"name":"FileConverter"            ,"scoop_name":"file-converter-np"                 ,"scoop_path":r''                       ,"winget_name":"AdrienAllard.FileConverter"             ,"winget_path":FileConverter_wp }           ,
-{"name":"filezilla-server"         ,"scoop_name":"filezilla-server"                  ,"scoop_path":filezillaServer_sp        ,"winget_name":""                                       ,"winget_path":r""}                         ,
-{"name":"flaresolverr"             ,"scoop_name":"flaresolverr"                      ,"scoop_path":flaresolverr_sp           ,"winget_name":""                                       ,"winget_path":r""}                         ,
-{"name":"FreeDownloadManager"      ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"SoftDeluxe.FreeDownloadManager"         ,"winget_path":FreeDownloadManager_wp}      ,
-{"name":"fzf"                      ,"scoop_name":"fzf"                               ,"scoop_path":fzf_sp                    ,"winget_name":"junegunn.fzf"                           ,"winget_path":r""}                         ,
-{"name":"git"                      ,"scoop_name":"git"                               ,"scoop_path":git_sp                    ,"winget_name":"Git.Git"                                ,"winget_path":""}                          ,
-{"name":"GitHubDesktop"            ,"scoop_name":"github"                            ,"scoop_path":GitHubDesktop_sp          ,"winget_name":"GitHub.GitHubDesktop"                   ,"winget_path":""}                          ,
-{"name":"GlazeWM"                  ,"scoop_name":"glazewm"                           ,"scoop_path":GlazeWM_scoop_path        ,"winget_name":"GlazeWM"                                ,"winget_path":r""}                         ,
-{"name":"grep [Find]"              ,"scoop_name":"grep"                              ,"scoop_path":grep_sp                   ,"winget_name":""                                       ,"winget_path":""}                          ,
-{"name":"highlight [Text-View]"    ,"scoop_name":"highlight"                         ,"scoop_path":highlight_sp              ,"winget_name":""                                       ,"winget_path":""}                          ,
-{"name":"imagemagick"              ,"scoop_name":"imagemagick"                       ,"scoop_path":imagemagick_sp            ,"winget_name":"ImageMagick.ImageMagick"                ,"winget_path":""}                          ,
-{"name":"Inkscape"                 ,"scoop_name":"inkscape"                          ,"scoop_path":r''                       ,"winget_name":"Inkscape.Inkscape"                      ,"winget_path":Inkscape_wp}                 ,
-{"name":"Jackett"                  ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"Jackett.Jackett"                        ,"winget_path":Jackett_wp}                  ,
-{"name":"Java Runtime Environment" ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"Oracle.JavaRuntimeEnvironment"          ,"winget_path":JavaRuntimeEnvironment_wp}   ,
-{"name":"komorebi"                 ,"scoop_name":"komorebi"                          ,"scoop_path":komorebi_scoop_path       ,"winget_name":"WingetName"                             ,"winget_path":r""}                         ,
-{"name":"lazygit"                  ,"scoop_name":"lazygit"                           ,"scoop_path":lazygit_sp                ,"winget_name":"JesseDuffield.lazygit"                  ,"winget_path":""}                          ,
-{"name":"less [Text-View]"         ,"scoop_name":"less"                              ,"scoop_path":less_sp                   ,"winget_name":"jftuga.less"                            ,"winget_path":""}                          ,
 {"name":"localsend"                ,"scoop_name":"localsend"                         ,"scoop_path":localsend_sp              ,"winget_name":"LocalSend.LocalSend"                    ,"winget_path":""}                          ,
 {"name":"Meld"                     ,"scoop_name":"meld"                              ,"scoop_path":r''                       ,"winget_name":"Meld.Meld"                              ,"winget_path":meld_wp}                     ,
 {"name":"Nilesoft Shell"           ,"scoop_name":"nilesoft-shell"                    ,"scoop_path":r''                       ,"winget_name":"nilesoft.shell"                         ,"winget_path":r""}                         ,

@@ -194,5 +194,117 @@
         "scoop_path": "",
         "winget_name": "AdrienAllard.FileConverter",
         "winget_path": "C:\\Program Files\\File Converter\\FileConverter.exe"
+    },
+    {
+        "name": "filezilla-server",
+        "scoop_name": "filezilla-server",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\filezilla-server\\current\\filezilla-server.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "flaresolverr",
+        "scoop_name": "flaresolverr",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "FreeDownloadManager",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "SoftDeluxe.FreeDownloadManager",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Softdeluxe\\Free Download Manager\\fdm.exe"
+    },
+    {
+        "name": "FzF",
+        "scoop_name": "fzf",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\fzf\\current\\fzf.exe",
+        "winget_name": "junegunn.fzf",
+        "winget_path": ""
+    },
+    {
+        "name": "git",
+        "scoop_name": "git",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd\\git.exe",
+        "winget_name": "Git.Git",
+        "winget_path": ""
+    },
+    {
+        "name": "Github-Desktop",
+        "scoop_name": "github",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\github\\current\\GitHubDesktop.exe",
+        "winget_name": "GitHub.GitHubDesktop",
+        "winget_path": ""
+    },
+    {
+        "name": "GlazeWM",
+        "scoop_name": "glazewm",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\glazewm\\current\\GlazeWM.exe",
+        "winget_name": "GlazeWM",
+        "winget_path": ""
+    },
+    {
+        "name": "grep [Find]",
+        "scoop_name": "grep",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\grep\\current\\grep.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "highlight [Text-View]",
+        "scoop_name": "highlight",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\highlight\\current\\highlight.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "imagemagick",
+        "scoop_name": "imagemagick",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\imagemagick\\current\\magick.exe",
+        "winget_name": "ImageMagick.ImageMagick",
+        "winget_path": ""
+    },
+    {
+        "name": "Inkscape",
+        "scoop_name": "inkscape",
+        "scoop_path": "",
+        "winget_name": "Inkscape.Inkscape",
+        "winget_path": "C:\\Program Files\\Inkscape\\bin\\inkscape.exe"
+    },
+    {
+        "name": "Jackett",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Jackett.Jackett",
+        "winget_path": "C:\\ProgramData\\Jackett\\JackettTray.exe"
+    },
+    {
+        "name": "Java Runtime Environment",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Oracle.JavaRuntimeEnvironment",
+        "winget_path": "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath\\java.exe"
+    },
+    {
+        "name": "komorebi",
+        "scoop_name": "komorebi",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\komorebi\\current\\komorebi.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "lazygit",
+        "scoop_name": "lazygit",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\lazygit\\current\\lazygit.exe",
+        "winget_name": "JesseDuffield.lazygit",
+        "winget_path": ""
+    },
+    {
+        "name": "less [Text-View]",
+        "scoop_name": "less",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\less\\current\\less.exe",
+        "winget_name": "jftuga.less",
+        "winget_path": ""
     }
 ]
