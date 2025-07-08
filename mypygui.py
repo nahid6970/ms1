@@ -533,8 +533,8 @@ AppManagement_bt=CTkLabel(ROOT1, text="\uf0be", bg_color="#1d2027",text_color="#
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
 AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
 AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
-AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\applist.py"], shell=True))
+AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen([r"cmd /c start C:\ms1\Applist\applist.py"], shell=True))
+AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen([r"cmd /c code C:\ms1\Applist\applist.py"], shell=True))
 
 Rclone_bt=CTkLabel(ROOT1, text="\uef2c", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#fcfcfc")
 Rclone_bt.pack(side="left",padx=(10,0),pady=(1,0))
