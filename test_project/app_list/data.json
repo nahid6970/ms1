@@ -1,6 +1,6 @@
 [
-    {
-        "name": "Ack",
+     { 
+        "name": "Ack [Find]",
         "scoop_name": "ack",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ack\\current\\ack.bat",
         "winget_name": "",

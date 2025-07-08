@@ -279,34 +279,39 @@ canvas.pack(side="left", fill="both", expand=True)
 
 #! scrollbar Start
 def on_mousewheel(event):
-    # Check if the mouse is over the canvas area
-    if event.widget == canvas or event.widget in [child for child in canvas.winfo_children()]:
-        # Get current scroll position
-        current_top = canvas.canvasy(0)
-        scroll_region = canvas.cget('scrollregion')
+    # Get current scroll position
+    current_top = canvas.canvasy(0)
+    scroll_region = canvas.cget('scrollregion')
+    
+    if scroll_region:
+        # Parse scroll region to get bounds
+        x1, y1, x2, y2 = map(float, scroll_region.split())
         
-        if scroll_region:
-            # Parse scroll region to get bounds
-            x1, y1, x2, y2 = map(float, scroll_region.split())
-            
-            # Calculate scroll amount
-            scroll_amount = -1 * (event.delta // 120)
-            
-            # Prevent scrolling above the top of content
-            if current_top <= y1 and scroll_amount < 0:
-                canvas.yview_moveto(0.0)
-                return "break"
-            
-            # Prevent scrolling below the bottom of content
-            canvas_height = canvas.winfo_height()
-            if current_top + canvas_height >= y2 and scroll_amount > 0:
-                return "break"
-            
-            canvas.yview_scroll(scroll_amount, "units")
-        return "break"
+        # Calculate scroll amount
+        scroll_amount = -1 * (event.delta // 120)
+        
+        # Prevent scrolling above the top of content
+        if current_top <= y1 and scroll_amount < 0:
+            canvas.yview_moveto(0.0)
+            return "break"
+        
+        # Prevent scrolling below the bottom of content
+        canvas_height = canvas.winfo_height()
+        if current_top + canvas_height >= y2 and scroll_amount > 0:
+            return "break"
+        
+        canvas.yview_scroll(scroll_amount, "units")
+    return "break"
 
-# Bind mousewheel to canvas and its contents
-canvas.bind_all("<MouseWheel>", on_mousewheel)
+# Bind mousewheel to the main frame and canvas
+def bind_mousewheel_to_widget(widget):
+    widget.bind("<MouseWheel>", on_mousewheel)
+    for child in widget.winfo_children():
+        bind_mousewheel_to_widget(child)
+
+# Initial binding
+MAIN_FRAME.bind("<MouseWheel>", on_mousewheel)
+canvas.bind("<MouseWheel>", on_mousewheel)
 
 scrollbar = customtkinter.CTkScrollbar(MAIN_FRAME, orientation="vertical", command=canvas.yview)
 scrollbar.pack(side="right", fill="y")
@@ -371,6 +376,9 @@ def refresh_app_list():
     
     # Update scroll region after all widgets are created
     ROOT.after(1, update_scroll_region)
+    
+    # Bind mousewheel to all new widgets
+    ROOT.after(10, lambda: bind_mousewheel_to_widget(frame))
 
 # Initial display of applications
 refresh_app_list()
