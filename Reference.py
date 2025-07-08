@@ -118,7 +118,6 @@ PotPlayer_wp               =r"C:\Program Files\DAUM\PotPlayer\PotPlayerMini64.ex
 PowerShell_wp              =r"C:\Program Files\PowerShell\7\pwsh.exe"
 PowerToys_sp               =r'C:\Users\nahid\scoop\apps\PowerToys\current\PowerToys.exe'
 PowerToys_wp               =r"C:\Users\nahid\AppData\Local\PowerToys\PowerToys.exe"
-ProcessExplorer_wp         =r"C:\Users\nahid\AppData\Local\Microsoft\WinGet\Packages\Microsoft.Sysinternals.ProcessExplorer_Microsoft.Winget.Source_8wekyb3d8bbwe\process-explorer.exe"
 Prowlarr_wp                =r"C:\ProgramData\Prowlarr\bin\Prowlarr.exe"
 python_sp                  =r'C:\Users\nahid\scoop\apps\python\current\python.exe'
 qBittorrent_wp             =r"C:\Program Files\qBittorrent\qbittorrent.exe"

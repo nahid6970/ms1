@@ -334,5 +334,89 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\nodejs\\current\\node.exe",
         "winget_name": "OpenJS.NodeJS",
         "winget_path": ""
+    },
+    {
+        "name": "notepad++",
+        "scoop_name": "notepadplusplus",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\notepadplusplus\\current\\notepad++.exe",
+        "winget_name": "Notepad++.Notepad++",
+        "winget_path": "C:\\Program Files\\Notepad++\\notepad++.exe"
+    },
+    {
+        "name": "OBS Studio",
+        "scoop_name": "obs-studio",
+        "scoop_path": "",
+        "winget_name": "OBSProject.OBSStudio",
+        "winget_path": "C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe"
+    },
+    {
+        "name": "oh-my-posh",
+        "scoop_name": "oh-my-posh",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\oh-my-posh\\current\\oh-my-posh.exe",
+        "winget_name": "JanDeDobbeleer.OhMyPosh",
+        "winget_path": ""
+    },
+    {
+        "name": "pandoc",
+        "scoop_name": "pandoc",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\pandoc\\current\\pandoc.exe",
+        "winget_name": "JohnMacFarlane.Pandoc",
+        "winget_path": ""
+    },
+    {
+        "name": "perl [Language]",
+        "scoop_name": "perl",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\perl\\current\\perl\\bin\\perl.exe",
+        "winget_name": "StrawberryPerl.StrawberryPerl",
+        "winget_path": ""
+    },
+    {
+        "name": "php [Language]",
+        "scoop_name": "php",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\php\\current\\php.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "PotPlayer",
+        "scoop_name": "potplayer",
+        "scoop_path": "",
+        "winget_name": "Daum.PotPlayer",
+        "winget_path": "C:\\Program Files\\DAUM\\PotPlayer\\PotPlayerMini64.exe"
+    },
+    {
+        "name": "PowerShell",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Microsoft.PowerShell",
+        "winget_path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+    },
+    {
+        "name": "PowerToys",
+        "scoop_name": "powertoys",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\PowerToys\\current\\PowerToys.exe",
+        "winget_name": "Microsoft.PowerToys",
+        "winget_path": "C:\\Program Files\\PowerToys\\PowerToys.exe"
+    },
+    {
+        "name": "ProcessExplorer",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "Microsoft.Sysinternals.ProcessExplorer",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Microsoft.Sysinternals.ProcessExplorer_Microsoft.Winget.Source_8wekyb3d8bbwe\\process-explorer.exe"
+    },
+    {
+        "name": "Prowlarr",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "TeamProwlarr.Prowlarr",
+        "winget_path": "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"
+    },
+    {
+        "name": "Python312",
+        "scoop_name": "python",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe",
+        "winget_name": "",
+        "winget_path": ""
     }
 ]

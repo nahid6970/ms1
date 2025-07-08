@@ -178,16 +178,6 @@ def show_options(options):
 
 # Define applications and their information
 applications = [
-{"name":"notepad++"                ,"scoop_name":"notepadplusplus"                   ,"scoop_path":notepadplusplus_sp        ,"winget_name":"Notepad++.Notepad++"                    ,"winget_path":notepadplusplus_winget_path} ,
-{"name":"OBS Studio"               ,"scoop_name":"obs-studio"                        ,"scoop_path":r''                       ,"winget_name":"OBSProject.OBSStudio"                   ,"winget_path":obsstudio_wp }               ,
-{"name":"oh-my-posh"               ,"scoop_name":"oh-my-posh"                        ,"scoop_path":ohmyposh_sp               ,"winget_name":"JanDeDobbeleer.OhMyPosh"                ,"winget_path":""}                          ,
-{"name":"pandoc"                   ,"scoop_name":"pandoc"                            ,"scoop_path":pandoc_sp                 ,"winget_name":"JohnMacFarlane.Pandoc"                  ,"winget_path":""}                          ,
-{"name":"perl [Language]"          ,"scoop_name":"perl"                              ,"scoop_path":perl_sp                   ,"winget_name":"StrawberryPerl.StrawberryPerl"          ,"winget_path":""}                          ,
-{"name":"php [Language]"           ,"scoop_name":"php"                               ,"scoop_path":php_sp                    ,"winget_name":""                                       ,"winget_path":""}                          ,
-{"name":"PotPlayer"                ,"scoop_name":"potplayer"                         ,"scoop_path":r''                       ,"winget_name":"Daum.PotPlayer"                         ,"winget_path":PotPlayer_wp}                ,
-{"name":"PowerShell"               ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"Microsoft.PowerShell"                   ,"winget_path":PowerShell_wp}               ,
-{"name":"PowerToys"                ,"scoop_name":"powertoys"                         ,"scoop_path":PowerToys_sp              ,"winget_name":"Microsoft.PowerToys"                    ,"winget_path":PowerToys_wp}                ,
-{"name":"ProcessExplorer"          ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"Microsoft.Sysinternals.ProcessExplorer" ,"winget_path":ProcessExplorer_wp}          ,
 {"name":"Prowlarr"                 ,"scoop_name":""                                  ,"scoop_path":r''                       ,"winget_name":"TeamProwlarr.Prowlarr"                  ,"winget_path":Prowlarr_wp}                 ,
 {"name":"Python"                   ,"scoop_name":"python"                            ,"scoop_path":python_sp                 ,"winget_name":"Python.Python.3.12"                     ,"winget_path":""}                          ,
 {"name":"qBittorrent"              ,"scoop_name":"qbittorrent"                       ,"scoop_path":r''                       ,"winget_name":"qBittorrent.qBittorrent"                ,"winget_path":qBittorrent_wp}              ,
