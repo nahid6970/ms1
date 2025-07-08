@@ -335,6 +335,13 @@ def update_scroll_region():
     if canvas_width > frame_width:
         canvas.itemconfig(canvas_window, width=canvas_width)
 
+def toggle_actions(a_frame):
+    if a_frame.winfo_viewable():
+        a_frame.grid_remove()
+    else:
+        a_frame.grid(row=1, column=0, pady=5, sticky="ew")
+    ROOT.after(10, update_scroll_region)
+
 def refresh_app_list():
     global applications
     applications = load_applications()
@@ -356,21 +363,30 @@ def refresh_app_list():
         winget_path = app["winget_path"]
         chkbx_var = app["chkbx_var"]
 
+        # Frame for action buttons (initially hidden)
+        actions_frame = tk.Frame(app_frame, bg="#1d2027")
+
         chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), foreground="green", background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat")
         chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-        chk_bt = tk.Button(app_frame, text=f"Check", foreground="green", background="#1d2027", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
-        ins_bt = tk.Button(app_frame, text="\uf192", foreground="#00FF00", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-        unins_bt = tk.Button(app_frame, text="\uf192", foreground="#FF0000",  background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
-        open_bt = tk.Button(app_frame, text="\uf192", foreground="#eac353", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: open_file_location(name, scoop, winget, var, cb))
-        edit_bt = tk.Button(app_frame, text="\uf044", foreground="#007bff", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: edit_application(app))
-        delete_bt = tk.Button(app_frame, text="\uf192", foreground="#dc3545", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: delete_application(app))
+        chkbox_bt.bind("<Button-1>", lambda event, a_frame=actions_frame: toggle_actions(a_frame))
 
-        chkbox_bt.grid(row=0, column=0, padx=(0,0), pady=(0,0))
-        ins_bt.grid(row=0, column=1, padx=(0,0), pady=(0,0))
-        unins_bt.grid(row=0, column=2, padx=(0,0), pady=(0,0))
-        open_bt.grid(row=0, column=3, padx=(0, 0), pady=(0, 0))
-        edit_bt.grid(row=0, column=4, padx=(0, 0), pady=(0, 0))
-        delete_bt.grid(row=0, column=5, padx=(0, 0), pady=(0, 0))
+        ins_bt = tk.Button(actions_frame, text="\uf192", foreground="#00FF00", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+        unins_bt = tk.Button(actions_frame, text="\uf192", foreground="#FF0000",  background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+        open_bt = tk.Button(actions_frame, text="\uf192", foreground="#eac353", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: open_file_location(name, scoop, winget, var, cb))
+        edit_bt = tk.Button(actions_frame, text="\uf044", foreground="#007bff", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: edit_application(app))
+        delete_bt = tk.Button(actions_frame, text="\uf192", foreground="#dc3545", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: delete_application(app))
+
+        # Layout for buttons inside the actions_frame
+        actions_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
+        ins_bt.grid(row=0, column=0)
+        unins_bt.grid(row=0, column=1)
+        open_bt.grid(row=0, column=2)
+        edit_bt.grid(row=0, column=3)
+        delete_bt.grid(row=0, column=4)
+
+        # Layout for the main app entry
+        chkbox_bt.grid(row=0, column=0, sticky="ew")
+        actions_frame.grid_remove()  # Hide by default
 
         check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
     
