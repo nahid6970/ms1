@@ -277,10 +277,31 @@ $menu = [ordered]@{
                 New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
             }
         }
+        "Neovim_2.conf" = {
+            nw_pwsh_asadmin -Command {
+                Write-Host 'Setting up Neovim...'
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
+                Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
+                New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init2.lua -Force
+            }
+        }
         "Notepad++ Theme Setup" = {
             nw_pwsh -Command {
                 Set-Location C:\Users\nahid
+
                 Write-Host -ForegroundColor Blue "Dracula Theme"
+                git clone https://github.com/dracula/notepad-plus-plus.git
+                Start-Process "C:\Users\nahid\notepad-plus-plus"
+
+                # Write-Host -ForegroundColor Blue "Material Theme"
+                # git clone https://github.com/Codextor/npp-material-theme.git
+                # Start-Process "C:\Users\nahid\npp-material-theme"
+
+                Start-Process "$env:AppData\Notepad++\themes"
+                
+                Write-Host -ForegroundColor Green step1: Copy Example.xml from github folder to %AppData%\Notepad++\themes
+                Write-Host -ForegroundColor Green step2: Restart Notepad++
+                Write-Host -ForegroundColor Green step3: Dracula will be available in Settings > Style Configurator
             }
         }
         "PotPlayer Register" = {
@@ -483,14 +504,14 @@ function Show-MainMenu {
     $submenuListBox.SelectionMode = "Single"
     $submenuPanel.Children.Add($submenuListBox)
 
-    # # Status bar
-    # $statusBar = New-Object System.Windows.Controls.TextBlock
-    # $statusBar.Text = ">> Double-click an item to execute - Right-click for options"
-    # $statusBar.FontSize = 12
-    # $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
-    # $statusBar.HorizontalAlignment = "Center"
-    # $statusBar.Margin = "0,10,0,0"
-    # $submenuPanel.Children.Add($statusBar)
+    # Status bar
+    $statusBar = New-Object System.Windows.Controls.TextBlock
+    $statusBar.Text = "~~~~~~~~~~~~"
+    $statusBar.FontSize = 12
+    $statusBar.Foreground = New-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Color]::FromRgb(158, 158, 158))
+    $statusBar.HorizontalAlignment = "Center"
+    $statusBar.Margin = "0,10,0,0"
+    $submenuPanel.Children.Add($statusBar)
 
     # Event handler to populate submenu based on main menu selection
     $mainMenuListBox.Add_SelectionChanged({
