@@ -73,6 +73,7 @@ arch_install(){
 desktop_environment() {
     source ~/ms1/linux/os_imports/wallpaper.sh
     source ~/ms1/linux/os_imports/sddm.sh
+    
     clear
     echo -e "${CYAN}Which desktop environment would you like to install?${NC}"
     echo -e "1) KDE Plasma"
@@ -429,18 +430,18 @@ setup_yay() {
     echo -e "${GREEN}yay has been installed successfully.${NC}"
 }
 
-desktop_environment() {
-    clear
-    echo -e "${CYAN}Setting up Desktop Environment...${NC}"
+# desktop_environment() {
+#     clear
+#     echo -e "${CYAN}Setting up Desktop Environment...${NC}"
 
-    DE_SETUP_SCRIPT="$HOME/ms1/linux/desktop_environment.sh"
+#     DE_SETUP_SCRIPT="$HOME/ms1/linux/desktop_environment.sh"
 
-    if [ -f "$DE_SETUP_SCRIPT" ]; then
-        bash "$DE_SETUP_SCRIPT"
-    else
-        echo -e "${RED}Error: $DE_SETUP_SCRIPT not found.${NC}"
-    fi
-}
+#     if [ -f "$DE_SETUP_SCRIPT" ]; then
+#         bash "$DE_SETUP_SCRIPT"
+#     else
+#         echo -e "${RED}Error: $DE_SETUP_SCRIPT not found.${NC}"
+#     fi
+# }
 
 
 check_gpu_drivers() {
