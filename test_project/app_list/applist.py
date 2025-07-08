@@ -279,12 +279,33 @@ canvas.pack(side="left", fill="both", expand=True)
 
 #! scrollbar Start
 def on_mousewheel(event):
-    # Check if the mouse is over the scrollbar
-    if event.widget == scrollbar:
-        canvas.yview_scroll(-5 * (event.delta // 120), "units")  # Increase scroll speed
-    else:
-        canvas.yview_scroll(-1 * (event.delta // 120), "units")
+    # Check if the mouse is over the canvas area
+    if event.widget == canvas or event.widget in [child for child in canvas.winfo_children()]:
+        # Get current scroll position
+        current_top = canvas.canvasy(0)
+        scroll_region = canvas.cget('scrollregion')
+        
+        if scroll_region:
+            # Parse scroll region to get bounds
+            x1, y1, x2, y2 = map(float, scroll_region.split())
+            
+            # Calculate scroll amount
+            scroll_amount = -1 * (event.delta // 120)
+            
+            # Prevent scrolling above the top of content
+            if current_top <= y1 and scroll_amount < 0:
+                canvas.yview_moveto(0.0)
+                return "break"
+            
+            # Prevent scrolling below the bottom of content
+            canvas_height = canvas.winfo_height()
+            if current_top + canvas_height >= y2 and scroll_amount > 0:
+                return "break"
+            
+            canvas.yview_scroll(scroll_amount, "units")
+        return "break"
 
+# Bind mousewheel to canvas and its contents
 canvas.bind_all("<MouseWheel>", on_mousewheel)
 
 scrollbar = customtkinter.CTkScrollbar(MAIN_FRAME, orientation="vertical", command=canvas.yview)
@@ -295,7 +316,19 @@ canvas.configure(yscrollcommand=scrollbar.set)
 
 # Create a frame inside the canvas
 frame = tk.Frame(canvas, bg="#1d2027")
-canvas.create_window((0, 0), window=frame, anchor="nw")
+canvas_window = canvas.create_window((0, 0), window=frame, anchor="nw")
+
+# Function to update scroll region and canvas window
+def update_scroll_region():
+    # Update the scroll region
+    canvas.update_idletasks()
+    canvas.configure(scrollregion=canvas.bbox("all"))
+    
+    # Make sure the frame fills the canvas width
+    canvas_width = canvas.winfo_width()
+    frame_width = frame.winfo_reqwidth()
+    if canvas_width > frame_width:
+        canvas.itemconfig(canvas_window, width=canvas_width)
 
 def refresh_app_list():
     global applications
@@ -336,8 +369,8 @@ def refresh_app_list():
 
         check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
     
-    frame.update_idletasks()
-    canvas.config(scrollregion=canvas.bbox("all"))
+    # Update scroll region after all widgets are created
+    ROOT.after(1, update_scroll_region)
 
 # Initial display of applications
 refresh_app_list()
@@ -351,9 +384,18 @@ def filter_apps(event=None):
             app_frame.grid()
         else:
             app_frame.grid_remove()
+    
+    # Update scroll region after filtering
+    ROOT.after(1, update_scroll_region)
 
 # Bind the filtering function to the KeyRelease event of the search entry
 search_entry.bind("<KeyRelease>", filter_apps)
+
+# Handle canvas resize
+def on_canvas_configure(event):
+    canvas.itemconfig(canvas_window, width=event.width)
+
+canvas.bind("<Configure>", on_canvas_configure)
 
 #! Ending
 MAIN_FRAME.pack()
