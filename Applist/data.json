@@ -553,6 +553,13 @@
         "winget_path": "C:\\Program Files (x86)\\Steam\\steam.exe"
     },
     {
+        "name": "Sudo",
+        "scoop_name": "sudo",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\sudo\\current\\sudo.ps1",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "Syncthing",
         "scoop_name": "syncthing",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\syncthing\\current\\syncthing.exe",
@@ -707,9 +714,9 @@
         "winget_path": ""
     },
     {
-        "name": "Sudo",
-        "scoop_name": "sudo",
-        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\sudo\\current\\sudo.ps1",
+        "name": "WezTerm",
+        "scoop_name": "wezterm",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\wezterm\\current\\wezterm.exe",
         "winget_name": "",
         "winget_path": ""
     }

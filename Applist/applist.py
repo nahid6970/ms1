@@ -343,7 +343,7 @@ def toggle_actions(a_frame):
     if a_frame.winfo_viewable():
         a_frame.grid_remove()
     else:
-        a_frame.grid(row=1, column=0, pady=5, padx=(32,0), sticky="w")
+        a_frame.grid(row=1, column=0, pady=(0,5), padx=(32,0), sticky="w")
     ROOT.after(10, update_scroll_region)
 
 def refresh_app_list():
