@@ -531,6 +531,7 @@ container_function=(
     "Steam   :steam_cont    :$GREEN"
     "Lutris  :lutris_cont   :$GREEN"
     "Bottles :bottles_cont  :$GREEN"
+    "Wine    :install_wine  :$GREEN"
 )
 # Function to install the chosen desktop environment
 Container_setup() {
@@ -545,6 +546,16 @@ lutris_cont() {
 }
 bottles_cont() {
     yay -S --needed bottles 
+}
+install_wine() {
+  echo "Installing Wine and related tools..."
+  # Install Wine and extras
+  sudo pacman -S --needed wine wine-mono wine-gecko winetricks lib32-mesa lib32-mpg123 lib32-openal
+  echo "Creating default Wine prefix (~/.wine)..."
+  WINEPREFIX="$HOME/.wine" wineboot --init
+  echo "Running winetricks to install common components..."
+  winetricks -q corefonts vcrun2019
+  echo "Wine installation and setup complete."
 }
 
 # ██████╗  ██████╗██╗      ██████╗ ███╗   ██╗███████╗
