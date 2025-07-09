@@ -33,7 +33,7 @@ menu_items=(
     "YAY Setup                        : setup_yay                   :$GREEN"
     "TTY Setup                        : tty_numlock_setup           :$GREEN"
     "Store Setup                      : store_setup                 :$GREEN"
-    "Container                        : container_setup             :$GREEN"
+    "Container                        : Container_setup             :$GREEN"
     "About                            : about_device                :$GREEN"
     "Rclone-Decrypt                   : rclone_decrypt              :$RED"
     "Rclone-linux_binary              : rclone_copy_linuxbin        :$RED"
@@ -419,6 +419,37 @@ tty_font() {
     else
         echo "No font selected."
     fi
+}
+
+#*  ██████╗ ██████╗ ███╗   ██╗████████╗ █████╗ ██╗███╗   ██╗███████╗██████╗
+#* ██╔════╝██╔═══██╗████╗  ██║╚══██╔══╝██╔══██╗██║████╗  ██║██╔════╝██╔══██╗
+#* ██║     ██║   ██║██╔██╗ ██║   ██║   ███████║██║██╔██╗ ██║█████╗  ██████╔╝
+#* ██║     ██║   ██║██║╚██╗██║   ██║   ██╔══██║██║██║╚██╗██║██╔══╝  ██╔══██╗
+#* ╚██████╗╚██████╔╝██║ ╚████║   ██║   ██║  ██║██║██║ ╚████║███████╗██║  ██║
+#*  ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝
+container_function=(
+    "Steam   :enable_tty_autologin  :$GREEN"
+    "Lutris  :enable_tty_autologin  :$GREEN"
+    "Bottles :enable_tty_autologin  :$GREEN"
+)
+# Function to install the chosen desktop environment
+Container_setup() {
+    display_submenu "Setup Container?" "container_function"
+}
+
+lutris_cont() {
+    clear
+    sudo pacman -S --needed lutris
+}
+
+steam_cont() {
+    clear
+    sudo pacman -S --needed steam
+}
+
+bottles_cont() {
+    clear
+    yay -S --needed bottles 
 }
 
 # ██████╗  ██████╗██╗      ██████╗ ███╗   ██╗███████╗
