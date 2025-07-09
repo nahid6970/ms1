@@ -616,6 +616,13 @@
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\VSCodium\\VSCodium.exe"
     },
     {
+        "name": "WezTerm",
+        "scoop_name": "wezterm",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\wezterm\\current\\wezterm.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "WhatsApp",
         "scoop_name": "whatsapp",
         "scoop_path": "",
@@ -714,10 +721,10 @@
         "winget_path": ""
     },
     {
-        "name": "WezTerm",
-        "scoop_name": "wezterm",
-        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\wezterm\\current\\wezterm.exe",
-        "winget_name": "",
-        "winget_path": ""
+        "name": "DesktopOK",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "SoftwareOK.DesktopOK",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Roaming\\DesktopOK\\DesktopOK_x64.exe"
     }
 ]
