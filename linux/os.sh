@@ -437,9 +437,12 @@ Container_setup() {
     display_submenu "Setup Container?" "container_function"
 }
 
-lutris_cont() { sudo pacman -S --needed lutris }
-steam_cont() { sudo pacman -S --needed steam }
-bottles_cont() { yay -S --needed bottles }
+lutris_cont() { 
+    sudo pacman -S --needed lutris }
+steam_cont() { 
+    sudo pacman -S --needed steam }
+bottles_cont() { 
+    yay -S --needed bottles }
 
 # ██████╗  ██████╗██╗      ██████╗ ███╗   ██╗███████╗
 # ██╔══██╗██╔════╝██║     ██╔═══██╗████╗  ██║██╔════╝
