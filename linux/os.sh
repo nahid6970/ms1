@@ -27,7 +27,7 @@ menu_items=(
     "Install Necessary Packages       : install_packages            :$GREEN"
     "Desktop Environment              : desktop_environment         :$GREEN" #! C:\ms1\linux\desktop_environment.sh
     "Compositor + Utilities           : compositor_setup            :$GREEN" #! C:\ms1\linux\import\compositors.sh
-    "Status Bar                       : install_bar                 :$GREEN"
+    "Status Bar                       : statusbar_setup             :$GREEN"
     # "X-Org/X11                      : xorg                        :$GREEN"
     # "Wayland                        : wayland                     :$GREEN"
     "YAY Setup                        : setup_yay                   :$GREEN"
