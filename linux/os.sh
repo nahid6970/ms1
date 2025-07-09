@@ -259,7 +259,7 @@ sway_cont() {
 
 wayfire_cont() {
     clear
-    sudo pacman -S --needed wayfire wcm wf-shell
+    yay -S --needed wayfire wcm wf-shell
 }
 
 hyprland_cont() {
