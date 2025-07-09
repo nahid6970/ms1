@@ -232,6 +232,66 @@ skip_install() {
     echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
 }
 
+#  ██████╗ ██████╗ ███╗   ███╗██████╗  ██████╗ ███████╗██╗████████╗ ██████╗ ██████╗
+# ██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔═══██╗██╔════╝██║╚══██╔══╝██╔═══██╗██╔══██╗
+# ██║     ██║   ██║██╔████╔██║██████╔╝██║   ██║███████╗██║   ██║   ██║   ██║██████╔╝
+# ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║   ██║╚════██║██║   ██║   ██║   ██║██╔══██╗
+# ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ╚██████╔╝███████║██║   ██║   ╚██████╔╝██║  ██║
+#  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝      ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
+compositor_func=(
+    "1) Sway - A tiling Wayland compositor and drop-in replacement for i3.                       :sway_cont     :$GREEN"
+    "2) Wayfire - A 3D Wayland compositor with Compiz-like effects.                              :wayfire_cont  :$GREEN"
+    "3) Hyprland - A dynamic tiling Wayland compositor with modern features.                     :hyprland_cont :$GREEN"
+    "4) Weston - The reference Wayland compositor, primarily for testing.                        :weston_cont   :$GREEN"
+    "5) river - A dynamic tiling compositor inspired by dwm.                                     :river_cont    :$GREEN"
+    "6) Xorg - The legacy display server, required for many traditional X11 applications.        :xorg_cont     :$GREEN"
+    "7) Picom (Xorg/X11) - A compositor for X11, providing shadows, transparency, and animations.:picom_cont    :$GREEN"
+    "8) Extra tools - Useful Wayland utilities (wlr-randr, grim, slurp).                         :extras_cont   :$GREEN"
+)
+compositor_setup() {
+    display_submenu "Setup Setup Compositor?" "compositor_func"
+}
+
+sway_cont() {
+    clear
+    sudo pacman -S --needed sway waybar
+}
+
+wayfire_cont() {
+    clear
+    sudo pacman -S --needed wayfire wcm wf-shell
+}
+
+hyprland_cont() {
+    clear
+    yay -S --needed hyprland hyprpaper waybar-hyprland
+}
+
+weston_cont() {
+    clear
+    sudo pacman -S --needed weston
+}
+
+river_cont() {
+    clear
+    sudo pacman -S --needed river
+}
+
+xorg_cont() {
+    clear
+    sudo pacman -S --needed xorg-server xorg-xinit xorg-xwayland xorg-apps
+}
+
+picom_cont() {
+    clear
+    sudo pacman -S --needed picom
+}
+
+extras_cont() {
+    clear
+    sudo pacman -S --needed wlr-randr grim slurp
+}
+
 # ██████╗ ██╗███████╗██████╗ ██╗      █████╗ ██╗   ██╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗     ██████╗ ██████╗  ██████╗ ████████╗ ██████╗  ██████╗ ██████╗ ██╗     ███████╗
 # ██╔══██╗██║██╔════╝██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝    ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗    ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗██║     ██╔════╝
 # ██║  ██║██║███████╗██████╔╝██║     ███████║ ╚████╔╝     ███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝    ██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║     ███████╗
