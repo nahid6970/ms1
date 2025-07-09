@@ -319,6 +319,7 @@
       let match;
       const extractedCodes = [];
       
+      // First, extract all code blocks from the text
       while ((match = codeRegex.exec(text)) !== null) {
         const language = match[1] || 'text';
         const code = match[2];
@@ -332,18 +333,30 @@
           placeholder.remove();
         }
         
+        // Get all existing code blocks
+        const existingBlocks = Array.from(codeWindow.querySelectorAll('.code-block'));
+        
+        // Only add new code blocks that don't already exist
         extractedCodes.forEach(({ language, code }) => {
-          const codeBlockElement = document.createElement("div");
-          codeBlockElement.className = "code-block";
+          const isDuplicate = existingBlocks.some(block => {
+            const blockLanguage = block.querySelector('.code-language').textContent;
+            const blockCode = block.querySelector('code').textContent;
+            return blockLanguage === language && blockCode === code;
+          });
           
-          codeBlockElement.innerHTML = `
-            <div class="code-language">${language}</div>
-            <button class="copy-button btn btn-sm">Copy</button>
-            <code>${escapeHtml(code)}</code>
-          `;
-          
-          codeWindow.appendChild(codeBlockElement);
-          codeBlocks.push({ language, code });
+          if (!isDuplicate) {
+            const codeBlockElement = document.createElement("div");
+            codeBlockElement.className = "code-block";
+            
+            codeBlockElement.innerHTML = `
+              <div class="code-language">${language}</div>
+              <button class="copy-button btn btn-sm">Copy</button>
+              <code>${escapeHtml(code)}</code>
+            `;
+            
+            codeWindow.appendChild(codeBlockElement);
+            codeBlocks.push({ language, code });
+          }
         });
         
         codeWindow.scrollTop = codeWindow.scrollHeight;
