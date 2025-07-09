@@ -427,22 +427,7 @@ tty_font() {
 #* ██║     ██║   ██║██║╚██╗██║   ██║   ██╔══██║██║██║╚██╗██║██╔══╝  ██╔══██╗
 #* ╚██████╗╚██████╔╝██║ ╚████║   ██║   ██║  ██║██║██║ ╚████║███████╗██║  ██║
 #*  ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝
-container_function=(
-    "Steam   :enable_tty_autologin  :$GREEN"
-    "Lutris  :enable_tty_autologin  :$GREEN"
-    "Bottles :enable_tty_autologin  :$GREEN"
-)
-# Function to install the chosen desktop environment
-Container_setup() {
-    display_submenu "Setup Container?" "container_function"
-}
 
-lutris_cont() { 
-    sudo pacman -S --needed lutris }
-steam_cont() { 
-    sudo pacman -S --needed steam }
-bottles_cont() { 
-    yay -S --needed bottles }
 
 # ██████╗  ██████╗██╗      ██████╗ ███╗   ██╗███████╗
 # ██╔══██╗██╔════╝██║     ██╔═══██╗████╗  ██║██╔════╝
