@@ -163,6 +163,45 @@
   padding: 0.25rem 0.5rem;
   z-index: 10;
 }
+
+.shrink-button {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 4rem; /* Position left of the copy button */
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ccc;
+}
+
+.shrink-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.code-block.collapsed {
+  max-height: 150px;
+  overflow: hidden;
+}
+
+.code-block.collapsed::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, transparent, #2d2d2d);
+}
+
+.code-block.collapsed .shrink-button i::before {
+  content: "⇣"; /* Down arrow when expanded */
+}
+
+.code-block:not(.collapsed) .shrink-button i::before {
+  content: "⇡"; /* Up arrow when collapsed */
+}
   </style>
 </head>
 <body>
@@ -351,8 +390,15 @@
             codeBlockElement.innerHTML = `
               <div class="code-language">${language}</div>
               <button class="copy-button btn btn-sm">Copy</button>
+              <button class="shrink-button btn btn-sm"><i></i></button>
               <code>${escapeHtml(code)}</code>
             `;
+            
+            // Add click handler for shrink button
+            const shrinkBtn = codeBlockElement.querySelector('.shrink-button');
+            shrinkBtn.addEventListener('click', () => {
+              codeBlockElement.classList.toggle('collapsed');
+            });
             
             codeWindow.appendChild(codeBlockElement);
             codeBlocks.push({ language, code });
