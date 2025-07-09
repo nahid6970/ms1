@@ -253,42 +253,34 @@ compositor_setup() {
 }
 
 sway_cont() {
-    clear
     sudo pacman -S --needed sway waybar
 }
 
 wayfire_cont() {
-    clear
     yay -S --needed wayfire wcm wf-shell
 }
 
 hyprland_cont() {
-    clear
     yay -S --needed hyprland hyprpaper waybar-hyprland
 }
 
 weston_cont() {
-    clear
     sudo pacman -S --needed weston
 }
 
 river_cont() {
-    clear
     sudo pacman -S --needed river
 }
 
 xorg_cont() {
-    clear
     sudo pacman -S --needed xorg-server xorg-xinit xorg-xwayland xorg-apps
 }
 
 picom_cont() {
-    clear
     sudo pacman -S --needed picom
 }
 
 extras_cont() {
-    clear
     sudo pacman -S --needed wlr-randr grim slurp
 }
 
