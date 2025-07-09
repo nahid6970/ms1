@@ -302,5 +302,13 @@
     "group": "Local (Flask)",
     "url": "http://192.168.0.101:5007/",
     "default_type": "nerd-font"
+  },
+  {
+    "name": "ollama-chat",
+    "group": "Local (Apps)",
+    "url": "http://localhost:8000/",
+    "img_src": "https://ollama.com/public/ollama.png",
+    "default_type": "img",
+    "li_bg_color": "white"
   }
 ]

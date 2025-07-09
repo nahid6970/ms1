@@ -8,12 +8,13 @@
     "Command": ""
   },
   {
+    "name": "ollama-chat (8000)",
     "type": "Command",
-    "name": "ollama-chat",
     "paths": [
-      "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+      "C:\\Windows\\System32\\cmd.exe"
     ],
-    "Command": "C:\\ms1\\ollama-chat-app\\server.py"
+    "Command": "C:\\ms1\\test_project\\ollama-chat-app\\server.py",
+    "ExecutableType": "cmd"
   },
   {
     "type": "Command",
