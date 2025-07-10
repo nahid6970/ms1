@@ -89,7 +89,7 @@ display_submenu() {
             echo -e "${color}$((i+1))) $description${NC}"
         done
         echo -e "${RED}q) Quit to main menu${NC}"
-                clear
+        
         read -p "Enter choice: " choice
 
         if [[ "$choice" == "q" ]]; then
