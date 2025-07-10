@@ -89,7 +89,7 @@ display_submenu() {
             echo -e "${color}$((i+1))) $description${NC}"
         done
         echo -e "${RED}q) Quit to main menu${NC}"
-        
+
         read -p "Enter choice: " choice
 
         if [[ "$choice" == "q" ]]; then
@@ -741,12 +741,9 @@ list_large_files() {
     find "$target_dir" -type f -exec du -h {} + | sort -rh | head -n 10
 }
 
-# ██╗███╗   ██╗███████╗ ██████╗
-# ██║████╗  ██║██╔════╝██╔═══██╗
-# ██║██╔██╗ ██║█████╗  ██║   ██║
-# ██║██║╚██╗██║██╔══╝  ██║   ██║
-# ██║██║ ╚████║██║     ╚██████╔╝
-# ╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝
+#! ---------------------------------------------
+#! System Info & Diagnostics
+#! ---------------------------------------------
 about_device() {
     clear
     fastfetch
