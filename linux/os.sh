@@ -431,12 +431,11 @@ install_tint2() {
   sudo pacman -S --needed tint2
 }
 
-#* ███╗   ██╗██╗   ██╗███╗   ███╗██╗  ██╗███████╗██╗   ██╗    ███████╗███████╗████████╗██╗   ██╗██████╗
-#* ████╗  ██║██║   ██║████╗ ████║██║ ██╔╝██╔════╝╚██╗ ██╔╝    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
-#* ██╔██╗ ██║██║   ██║██╔████╔██║█████╔╝ █████╗   ╚████╔╝     ███████╗█████╗     ██║   ██║   ██║██████╔╝
-#* ██║╚██╗██║██║   ██║██║╚██╔╝██║██╔═██╗ ██╔══╝    ╚██╔╝      ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
-#* ██║ ╚████║╚██████╔╝██║ ╚═╝ ██║██║  ██╗███████╗   ██║       ███████║███████╗   ██║   ╚██████╔╝██║
-#* ╚═╝  ╚═══╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝       ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
+#! ===============================================================
+#!
+#!                         TTY & CONSOLE
+#!
+#! ===============================================================
 tty_setup=(
     "Auto Login            :enable_tty_autologin  :$GREEN"
     "Numlock Enable        :enable_numlock_on_tty :$GREEN"
@@ -699,48 +698,6 @@ nvim_setup() {
     install-in-mason lua-language-server
 }
 
-# ████████╗ ██████╗  ██████╗ ██╗     ███████╗
-# ╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔════╝
-#    ██║   ██║   ██║██║   ██║██║     ███████╗
-#    ██║   ██║   ██║██║   ██║██║     ╚════██║
-#    ██║   ╚██████╔╝╚██████╔╝███████╗███████║
-#    ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
-list_recent_packages() {
-    echo -e "${GREEN}Listing recently installed packages...${NC}"
-    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
-}
-
-quick_file_search() {
-    clear
-    local file_name=$1
-    local search_dir=${2:-$PWD}
-    if [ -z "$file_name" ]; then
-        echo "Usage: quick_file_search <file_name> [directory]"
-        return 1
-    fi
-    echo "Searching for $file_name in $search_dir..."
-    find "$search_dir" -type f -name "$file_name"
-}
-
-network_speed_test() {
-    clear
-    echo "Testing network speed..."
-    if command -v speedtest &> /dev/null; then
-        speedtest
-    else
-        echo "speedtest-cli not installed. Installing now..."
-        sudo apt install -y speedtest-cli
-        speedtest
-    fi
-}
-
-list_large_files() {
-    clear
-    local target_dir=${1:-$PWD}
-    echo "Finding large files in $target_dir..."
-    find "$target_dir" -type f -exec du -h {} + | sort -rh | head -n 10
-}
-
 #! ---------------------------------------------
 #! System Info & Diagnostics
 #! ---------------------------------------------
@@ -785,14 +742,45 @@ check_gpu_drivers() {
     fi
 }
 
+list_recent_packages() {
+    echo -e "${GREEN}Listing recently installed packages...${NC}"
+    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
+}
 
-# ██████╗ ███████╗███████╗███████╗██████╗ ███████╗███╗   ██╗ ██████╗███████╗
-# ██╔══██╗██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝████╗  ██║██╔════╝██╔════╝
-# ██████╔╝█████╗  █████╗  █████╗  ██████╔╝█████╗  ██╔██╗ ██║██║     █████╗
-# ██╔══██╗██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗██╔══╝  ██║╚██╗██║██║     ██╔══╝
-# ██║  ██║███████╗██║     ███████╗██║  ██║███████╗██║ ╚████║╚██████╗███████╗
-# ╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝╚══════╝
-# Function to handle exit
+quick_file_search() {
+    clear
+    local file_name=$1
+    local search_dir=${2:-$PWD}
+    if [ -z "$file_name" ]; then
+        echo "Usage: quick_file_search <file_name> [directory]"
+        return 1
+    fi
+    echo "Searching for $file_name in $search_dir..."
+    find "$search_dir" -type f -name "$file_name"
+}
+
+network_speed_test() {
+    clear
+    echo "Testing network speed..."
+    if command -v speedtest &> /dev/null; then
+        speedtest
+    else
+        echo "speedtest-cli not installed. Installing now..."
+        sudo apt install -y speedtest-cli
+        speedtest
+    fi
+}
+
+list_large_files() {
+    clear
+    local target_dir=${1:-$PWD}
+    echo "Finding large files in $target_dir..."
+    find "$target_dir" -type f -exec du -h {} + | sort -rh | head -n 10
+}
+
+# ---------------------------------------------------------
+# Script Control
+# ---------------------------------------------------------
 Close_script() {
     clear
     echo -e "${GREEN}Exiting the script. Goodbye!${NC}"
