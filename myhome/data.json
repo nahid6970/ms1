@@ -301,6 +301,7 @@
     "name": "Command",
     "group": "Local (Flask)",
     "url": "http://192.168.0.101:5007/",
+    "icon_class": "nf nf-oct-command_palette",
     "default_type": "nerd-font"
   },
   {
@@ -310,5 +311,12 @@
     "img_src": "https://ollama.com/public/ollama.png",
     "default_type": "img",
     "li_bg_color": "white"
+  },
+  {
+    "name": "myhome",
+    "group": "Local (Flask)",
+    "url": "https://nahid6970.github.io/ms1/myhome/myhome",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/4021/4021539.png",
+    "default_type": "img"
   }
 ]
