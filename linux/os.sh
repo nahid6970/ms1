@@ -210,7 +210,7 @@ xorg(){
 #     sudo pacman -S --needed xorg-server xorg-xinit xorg-xwayland xorg-apps mesa xf86-video-intel xf86-video-amdgpu xf86-input-libinput; 
 # }
 wayland(){
-    sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
+    sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots0.19 libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
 }
 
 #! ---------------------------------------------------------------
