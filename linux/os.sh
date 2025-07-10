@@ -278,7 +278,6 @@ wm_compositor_menu() {
 
 install_hyprland() {
     echo -e "${YELLOW}Installing Hyprland...${NC}"
-    install_wayland # Ensure Wayland core is installed
     sudo pacman -S --needed foot kitty hyprland xdg-desktop-portal-hyprland
     sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
     sudo pacman -S --needed qt5-wayland qt6-wayland rofi-wayland
