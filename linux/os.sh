@@ -510,12 +510,11 @@ tty_font() {
     fi
 }
 
-#*  ██████╗ ██████╗ ███╗   ██╗████████╗ █████╗ ██╗███╗   ██╗███████╗██████╗
-#* ██╔════╝██╔═══██╗████╗  ██║╚══██╔══╝██╔══██╗██║████╗  ██║██╔════╝██╔══██╗
-#* ██║     ██║   ██║██╔██╗ ██║   ██║   ███████║██║██╔██╗ ██║█████╗  ██████╔╝
-#* ██║     ██║   ██║██║╚██╗██║   ██║   ██╔══██║██║██║╚██╗██║██╔══╝  ██╔══██╗
-#* ╚██████╗╚██████╔╝██║ ╚████║   ██║   ██║  ██║██║██║ ╚████║███████╗██║  ██║
-#*  ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝
+#* ===============================================================
+#*
+#*                       APPLICATIONS & CONTAINERS
+#*
+#* ===============================================================
 container_function=(
     "Steam     :steam_cont       :$GREEN"
     "Lutris    :lutris_cont      :$GREEN"
@@ -525,54 +524,34 @@ container_function=(
 )
 # Function to install the chosen desktop environment
 Container_setup() {
-    display_submenu "Setup Container?" "container_function"
+    display_submenu "Setup Container" "container_function"
 }
 
-steam_cont() {
-    sudo pacman -S --needed steam
-}
-lutris_cont() {
-    sudo pacman -S --needed lutris
-}
-bottles_cont() {
-    yay -S --needed bottles 
-}
+steam_cont() { sudo pacman -S --needed steam; }
+lutris_cont() { sudo pacman -S --needed lutris; }
+bottles_cont() { yay -S --needed bottles; }
+
 install_wine() {
-  echo "Installing Wine and related tools..."
-  # Install Wine and extras
+  echo "Installing Wine (32-bit prefix)..."
   sudo pacman -S --needed wine wine-mono wine-gecko winetricks lib32-mesa lib32-mpg123 lib32-openal
-  echo "Creating default Wine prefix (~/.wine)..."
   WINEPREFIX="$HOME/.wine" wineboot --init
-  echo "Running winetricks to install common components..."
   winetricks -q corefonts vcrun2019
   echo "Wine installation and setup complete."
 }
-install_wine_64() {
-  # Check if wine is installed
-  if ! command -v wine &>/dev/null; then
-    echo "Wine is not installed. Installing Wine and required components..."
-    sudo pacman -S --needed wine wine-mono wine-gecko winetricks lib32-mesa lib32-mpg123 lib32-openal
-  else
-    echo "Wine is already installed."
-  fi
 
-  # Set 64-bit prefix path
+install_wine_64() {
+  if ! command -v wine &>/dev/null; then
+    echo "Wine is not installed. Installing..."
+    sudo pacman -S --needed wine wine-mono wine-gecko winetricks lib32-mesa lib32-mpg123 lib32-openal
+  fi
   export WINEARCH=win64
   export WINEPREFIX="$HOME/.wine64"
-
-  # Create the prefix if it doesn't exist
   if [ ! -d "$WINEPREFIX" ]; then
     echo "Creating 64-bit Wine prefix at $WINEPREFIX..."
     wineboot --init
-  else
-    echo "64-bit Wine prefix already exists at $WINEPREFIX"
   fi
-  # Install common winetricks packages (optional)
   if command -v winetricks &>/dev/null; then
-    echo "Installing corefonts and vcrun2019 via winetricks..."
     winetricks -q corefonts vcrun2019
-  else
-    echo "winetricks is not available, skipping optional setup."
   fi
   echo "Wine 64-bit setup complete."
 }
