@@ -37,7 +37,6 @@ menu_items=(
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper        :$GREEN"
     "Install Necessary Packages       : install_packages            :$GREEN"
     "Display & Graphics Setup         : display_setup_menu          :$CYAN"
-    "Status Bar                       : statusbar_setup             :$GREEN"
     "YAY Setup                        : setup_yay                   :$GREEN"
     "TTY Setup                        : tty_numlock_setup           :$GREEN"
     "Store Setup                      : store_setup                 :$GREEN"

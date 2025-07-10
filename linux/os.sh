@@ -397,8 +397,8 @@ statusbar_func=(
     "Dzen2 - Lightweight, scriptable X11 bar                                :install_dzen2    :$GREEN"
     "Tint2 - Lightweight panel and taskbar for X11                          :install_tint2    :$GREEN"
 )
-statusbar_setup() {
-    display_submenu "Setup Statusbar?" "statusbar_func"
+statusbar_menu() {
+    display_submenu "Setup Statusbar" "statusbar_func"
 }
 
 install_waybar() {
