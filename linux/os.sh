@@ -22,15 +22,10 @@ NC='\033[0m' # No Color
 # Menu items: description : function : color
 menu_items=(
     "Git Pull [ms1] + Copy Config     : update_ms1_repo All_Configs :$GREEN"
-    # "Copy Config Files                : All_Configs                 :$GREEN"
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper        :$GREEN"
     "Install Necessary Packages       : install_packages            :$GREEN"
     "Display & Graphics Setup         : display_setup_menu          :$CYAN"
-    # "Desktop Environment              : desktop_environment         :$GREEN"
-    # "Compositor + Utilities           : compositor_setup            :$GREEN"
     "Status Bar                       : statusbar_setup             :$GREEN"
-    # "X-Org/X11                      : xorg                        :$GREEN"
-    # "Wayland                        : wayland                     :$GREEN"
     "YAY Setup                        : setup_yay                   :$GREEN"
     "TTY Setup                        : tty_numlock_setup           :$GREEN"
     "Store Setup                      : store_setup                 :$GREEN"
@@ -50,10 +45,7 @@ menu_items=(
     # "DWM Distrotube                   : distrotube_dwm_config       :$GREEN"
     "SDDM                             : sddm_setup                  :$GREEN"
     "Arch Install                     : arch_install                :$GREEN"
-    # "bottles                        : not_yet_choosen             :$GREEN"
     # "wine                           : not_yet_choosen             :$GREEN"
-    # "Lutris                         : not_yet_choosen             :$GREEN"
-    # "steam                          : not_yet_choosen             :$GREEN"
     # "Heroic Games Launcher          : check_gpu_drivers           :$GREEN"
 )
 
