@@ -359,7 +359,7 @@ install_packages() {
 
 install_base_packages() {
     echo -e "${GREEN}Installing Base Packages...${NC}"
-    sudo pacman -S --needed bash bat chafa curl eza fastfetch fzf lsd lua-language-server neovim openssh python rclone sshpass wget which zoxide yazi zsh stow expac numlockx rsync thefuck feh screenfetch sed grep jq rofi conky htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman foot starship
+    sudo pacman -S --needed bash bat chafa curl eza fastfetch fzf lsd lua-language-server neovim openssh python rclone sshpass wget which zoxide yazi zsh stow expac numlockx rsync thefuck feh screenfetch sed grep jq rofi conky htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman foot starship python-pip
 }
 
 install_fonts() {
