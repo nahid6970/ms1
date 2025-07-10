@@ -64,33 +64,15 @@ declare -A hotkeys=(
     [x]="test_test"
 )
 
-All_Configs(){
-echo Set All configs
+#* ==========================================================
+#*
+#*                           CORE & SYSTEM FUNCTIONS
+#*
+#* ==========================================================
 
-cp -a "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
-cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
-
-cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/" #! C:\ms1\linux\config\.config\hypr\hyprland.conf
-cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad" #! C:\ms1\linux\config\.config\xmonad\xmonad.hs
-cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config" #! C:\ms1\linux\config\.config\qtile\config.py
-
-cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\ms1\linux\config\.config\conky\conky_hyprland.conf
-cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\ms1\linux\config\.config\foot\foot.ini
-cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\ms1\linux\config\.config\waybar\config.jsonc
-cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
-cp -a "$HOME/ms1/linux/config/.config/dunst" "$HOME/.config/" #! C:\ms1\linux\config\.config\dunst\dunstrc
-cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\ms1\linux\config\.config\starship\starship.toml
-
-# source $HOME/autostart.sh
-# echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
-source "$HOME/.bashrc"
-}
-
-
-arch_install(){
-    archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
-}
-
+#! ---------------------------------------------------------
+#! Core Menu Logic
+#! ---------------------------------------------------------
 # Generic function to display a submenu
 # $1: Menu title (string)
 # $2: Name of the menu items array (string)
@@ -127,6 +109,73 @@ display_submenu() {
             read -p "Press Enter to continue..."
         fi
     done
+}
+
+#! ---------------------------------------------------------
+#! System Configuration & Setup
+#! ---------------------------------------------------------
+
+All_Configs(){
+echo Set All configs
+
+cp -a "$HOME/ms1/linux/config/bashrc" "$HOME/.bashrc"
+cp -a "$HOME/ms1/linux/config/autostart.sh" "$HOME/autostart.sh"
+
+cp -a "$HOME/ms1/linux/config/.config/hypr" "$HOME/.config/" #! C:\ms1\linux\config\.config\hypr\hyprland.conf
+cp -a "$HOME/ms1/linux/config/.config/xmonad" "$HOME/.xmonad" #! C:\ms1\linux\config\.config\xmonad\xmonad.hs
+cp -a "$HOME/ms1/linux/config/.config/qtile" "$HOME/.config" #! C:\ms1\linux\config\.config\qtile\config.py
+
+cp -a "$HOME/ms1/linux/config/.config/conky" "$HOME/.config/" #! C:\ms1\linux\config\.config\conky\conky_hyprland.conf
+cp -a "$HOME/ms1/linux/config/.config/foot" "$HOME/.config/" #! C:\ms1\linux\config\.config\foot\foot.ini
+cp -a "$HOME/ms1/linux/config/.config/waybar" "$HOME/.config/" #! C:\ms1\linux\config\.config\waybar\config.jsonc
+cp -a "$HOME/ms1/linux/config/.config/wofi" "$HOME/.config/"
+cp -a "$HOME/ms1/linux/config/.config/dunst" "$HOME/.config/" #! C:\ms1\linux\config\.config\dunst\dunstrc
+cp -a "$HOME/ms1/linux/config/.config/starship/starship.toml" "$HOME/.config" #! C:\ms1\linux\config\.config\starship\starship.toml
+
+# source $HOME/autostart.sh
+# echo -e "${RED}Please run 'source ~/.bashrc' to apply changes to your current shell.${NC}"
+source "$HOME/.bashrc"
+}
+
+
+arch_install(){
+    archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
+}
+
+setup_yay() {
+    clear
+    echo -e "${CYAN}Installing yay (AUR helper)...${NC}"
+    # Install prerequisites
+    sudo pacman -Sy --needed --noconfirm base-devel git
+    # Clone yay repository
+    if [ ! -d "/tmp/yay" ]; then
+        git clone https://aur.archlinux.org/yay.git /tmp/yay
+    fi
+    # Build and install yay
+    cd /tmp/yay || exit
+    makepkg -si --noconfirm
+    echo -e "${GREEN}yay has been installed successfully.${NC}"
+}
+
+update_ms1_repo() {
+    clear
+    local ms1_folder="$HOME/ms1"
+    if [ -d "$ms1_folder" ]; then
+        echo "Changing directory to $ms1_folder..."
+        cd "$ms1_folder" || {
+            echo "Failed to change directory to $ms1_folder."
+            return 1
+        }
+        echo "Pulling latest changes from the repository..."
+        git pull || {
+            echo "Failed to pull changes. Please check your repository setup."
+            return 1
+        }
+        echo "Repository updated successfully."
+    else
+        echo "The folder $ms1_folder does not exist."
+        return 1
+    fi
 }
 
 
@@ -628,33 +677,10 @@ Restore_Songs() {
     echo -e "Songs restored successfully from $REMOTE to $DEST_DIR"
 }
 
-#  █████╗ ██╗   ██╗██████╗     ███████╗███████╗████████╗██╗   ██╗██████╗
-# ██╔══██╗██║   ██║██╔══██╗    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
-# ███████║██║   ██║██████╔╝    ███████╗█████╗     ██║   ██║   ██║██████╔╝
-# ██╔══██║██║   ██║██╔══██╗    ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
-# ██║  ██║╚██████╔╝██║  ██║    ███████║███████╗   ██║   ╚██████╔╝██║
-# ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝    ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
-setup_yay() {
-    clear
-    echo -e "${CYAN}Installing yay (AUR helper)...${NC}"
-    # Install prerequisites
-    sudo pacman -Sy --needed --noconfirm base-devel git
-    # Clone yay repository
-    if [ ! -d "/tmp/yay" ]; then
-        git clone https://aur.archlinux.org/yay.git /tmp/yay
-    fi
-    # Build and install yay
-    cd /tmp/yay || exit
-    makepkg -si --noconfirm
-    echo -e "${GREEN}yay has been installed successfully.${NC}"
-}
 
-#  █████╗ ██████╗ ██████╗ ██╗     ██╗ ██████╗ █████╗ ████████╗██╗ ██████╗ ███╗   ██╗    ███████╗███████╗████████╗██╗   ██╗██████╗
-# ██╔══██╗██╔══██╗██╔══██╗██║     ██║██╔════╝██╔══██╗╚══██╔══╝██║██╔═══██╗████╗  ██║    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
-# ███████║██████╔╝██████╔╝██║     ██║██║     ███████║   ██║   ██║██║   ██║██╔██╗ ██║    ███████╗█████╗     ██║   ██║   ██║██████╔╝
-# ██╔══██║██╔═══╝ ██╔═══╝ ██║     ██║██║     ██╔══██║   ██║   ██║██║   ██║██║╚██╗██║    ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
-# ██║  ██║██║     ██║     ███████╗██║╚██████╗██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║    ███████║███████╗   ██║   ╚██████╔╝██║
-# ╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
+#! ----------------------------------------------------------
+#! Development & Editors
+#! ----------------------------------------------------------
 # Neovim setup function
 nvim_setup() {
     clear
@@ -762,32 +788,6 @@ check_gpu_drivers() {
     fi
 }
 
-#!  ██████╗ ██╗████████╗
-#! ██╔════╝ ██║╚══██╔══╝
-#! ██║  ███╗██║   ██║
-#! ██║   ██║██║   ██║
-#! ╚██████╔╝██║   ██║
-#!  ╚═════╝ ╚═╝   ╚═╝
-update_ms1_repo() {
-    clear
-    local ms1_folder="$HOME/ms1"
-    if [ -d "$ms1_folder" ]; then
-        echo "Changing directory to $ms1_folder..."
-        cd "$ms1_folder" || {
-            echo "Failed to change directory to $ms1_folder."
-            return 1
-        }
-        echo "Pulling latest changes from the repository..."
-        git pull || {
-            echo "Failed to pull changes. Please check your repository setup."
-            return 1
-        }
-        echo "Repository updated successfully."
-    else
-        echo "The folder $ms1_folder does not exist."
-        return 1
-    fi
-}
 
 # ██████╗ ███████╗███████╗███████╗██████╗ ███████╗███╗   ██╗ ██████╗███████╗
 # ██╔══██╗██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝████╗  ██║██╔════╝██╔════╝
@@ -987,6 +987,11 @@ distrotube_dwm_config(){
 }
 
 
+#* ==============================================================
+#*
+#*                       MAIN EXECUTION
+#*
+#* ==============================================================
 
 while true; do
     echo ""
@@ -1015,4 +1020,3 @@ while true; do
     fi
     source "$HOME/ms1/linux/os.sh"
 done
-
