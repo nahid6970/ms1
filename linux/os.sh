@@ -25,8 +25,9 @@ menu_items=(
     # "Copy Config Files                : All_Configs                 :$GREEN"
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper        :$GREEN"
     "Install Necessary Packages       : install_packages            :$GREEN"
-    "Desktop Environment              : desktop_environment         :$GREEN" #! C:\ms1\linux\desktop_environment.sh
-    "Compositor + Utilities           : compositor_setup            :$GREEN" #! C:\ms1\linux\import\compositors.sh
+    "Display & Graphics Setup         : display_setup_menu          :$GREEN"
+    # "Desktop Environment              : desktop_environment         :$GREEN"
+    # "Compositor + Utilities           : compositor_setup            :$GREEN"
     "Status Bar                       : statusbar_setup             :$GREEN"
     # "X-Org/X11                      : xorg                        :$GREEN"
     # "Wayland                        : wayland                     :$GREEN"
@@ -128,27 +129,61 @@ display_submenu() {
     done
 }
 
-# ██████╗ ██╗███████╗██████╗ ██╗      █████╗ ██╗   ██╗    ███████╗███╗   ██╗██╗   ██╗██╗██████╗  ██████╗ ███╗   ██╗███╗   ███╗███████╗███╗   ██╗████████╗
-# ██╔══██╗██║██╔════╝██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝    ██╔════╝████╗  ██║██║   ██║██║██╔══██╗██╔═══██╗████╗  ██║████╗ ████║██╔════╝████╗  ██║╚══██╔══╝
-# ██║  ██║██║███████╗██████╔╝██║     ███████║ ╚████╔╝     █████╗  ██╔██╗ ██║██║   ██║██║██████╔╝██║   ██║██╔██╗ ██║██╔████╔██║█████╗  ██╔██╗ ██║   ██║
-# ██║  ██║██║╚════██║██╔═══╝ ██║     ██╔══██║  ╚██╔╝      ██╔══╝  ██║╚██╗██║╚██╗ ██╔╝██║██╔══██╗██║   ██║██║╚██╗██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║
-# ██████╔╝██║███████║██║     ███████╗██║  ██║   ██║       ███████╗██║ ╚████║ ╚████╔╝ ██║██║  ██║╚██████╔╝██║ ╚████║██║ ╚═╝ ██║███████╗██║ ╚████║   ██║
-# ╚═════╝ ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚══════╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝
-desktop_environments=(
+
+#* ===================================================================
+#*
+#*                       DESKTOP & UI CONFIGURATION
+#*
+#* ===================================================================
+#! -----------------------------------------------------------
+#! Main Display & Graphics Menu
+#! -----------------------------------------------------------
+display_menu_items=(
+    "Display Server (X11/Wayland)    :display_server_menu   :$GREEN"
+    "Desktop Environment             :desktop_environment_menu :$GREEN"
+    "Window Manager / Compositor     :wm_compositor_menu    :$GREEN"
+    "Status Bar                      :statusbar_menu        :$GREEN"
+)
+
+display_setup_menu() {
+    display_submenu "Display & Graphics Setup" "display_menu_items"
+}
+
+#! ---------------------------------------------------------
+#! Display Servers
+#! ---------------------------------------------------------
+display_server_menu_items=(
+    "Install Xorg (X11)                :xorg      :$GREEN"
+    "Install Wayland Core Components   :wayland   :$GREEN"
+)
+
+display_server_menu() {
+    display_submenu "Select a Display Server" "display_server_menu_items"
+}
+xorg(){
+    sudo pacman -S --needed xorg xorg-xinit xorg-xwayland
+    sudo pacman -S --needed xorg-apps mesa xf86-video-intel xf86-video-amdgpu xf86-input-libinput #! optional but useful
+}
+# install_xorg() { 
+#     echo -e "${GREEN}Installing Xorg Server...${NC}"
+#     sudo pacman -S --needed xorg-server xorg-xinit xorg-xwayland xorg-apps mesa xf86-video-intel xf86-video-amdgpu xf86-input-libinput; 
+# }
+wayland(){
+    sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
+}
+
+#! ---------------------------------------------------------------
+#! Desktop Environments
+#! ---------------------------------------------------------------
+desktop_environment_menu_items=(
     "KDE Plasma     :install_kde     :$GREEN"
     "GNOME          :install_gnome   :$GREEN"
     "XFCE           :install_xfce    :$GREEN"
-    "Hyprland       :install_hyprland:$GREEN"
-    "DWM            :install_dwm     :$GREEN"
-    "Xmonad + Xmobar:install_xmonad  :$GREEN"
-    "qtile          :install_qtile   :$GREEN"
     "None (CLI only):skip_install    :$YELLOW"
 )
-# Function to install the chosen desktop environment
-desktop_environment() {
-    source ~/ms1/linux/os_imports/wallpaper.sh
-    source ~/ms1/linux/os_imports/sddm.sh
-    display_submenu "Which desktop environment would you like to install?" "desktop_environments"
+
+desktop_environment_menu() {
+    display_submenu "Select a Desktop Environment" "desktop_environment_menu_items"
 }
 
 install_kde() {
@@ -156,13 +191,8 @@ install_kde() {
     sudo pacman -S --noconfirm --needed plasma kde-gtk-config dolphin konsole plasma-desktop sddm
     yay -S --needed sddm-theme-sugar-candy
     sudo systemctl enable sddm
-    # Ask about theme
     read -p "Do you want to install and set up the Sugar Candy SDDM theme? (y/n): " THEME_CHOICE
-    if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then
-        sddm_theme
-    else
-        sddm_numlock
-    fi
+    if [[ "$THEME_CHOICE" =~ ^[Yy]$ ]]; then sddm_theme; else sddm_numlock; fi
     sudo pacman -Syu
 }
 
@@ -177,149 +207,119 @@ install_gnome() {
 
 install_xfce() {
     echo -e "${GREEN}Installing XFCE...${NC}"
-    sudo pacman -S --needed  xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
+    sudo pacman -S --needed xfce4 xfce4-goodies lightdm lightdm-gtk-greeter
     sudo systemctl enable lightdm
     sudo pacman -Syu
 }
 
+skip_install() {
+    echo -e "${YELLOW}Skipping installation.${NC}"
+}
+
+#! --------------------------------------------------------------
+#! Window Managers & Compositors
+#! --------------------------------------------------------------
+wm_compositor_menu_items=(
+    "Hyprland (Wayland) :install_hyprland :$GREEN"
+    "DWM (X11)          :install_dwm      :$GREEN"
+    "Xmonad (X11)       :install_xmonad   :$GREEN"
+    "qtile (X11/Wayland):install_qtile    :$GREEN"
+    "Sway (Wayland)     :install_sway     :$GREEN"
+    "Wayfire (Wayland)  :install_wayfire  :$GREEN"
+    "river (Wayland)    :install_river    :$GREEN"
+    "Weston (Wayland)   :install_weston   :$GREEN"
+    "Picom (X11)        :install_picom    :$GREEN"
+)
+
+wm_compositor_menu() {
+    display_submenu "Select a Window Manager / Compositor" "wm_compositor_menu_items"
+}
+
 install_hyprland() {
     echo -e "${YELLOW}Installing Hyprland...${NC}"
-    #! for hyprland need to enable 3d accelaration in the virtual io
-    # Install essential packages
-    sudo pacman -S --needed foot kitty hyprland xdg-desktop-portal xdg-desktop-portal-hyprland wayland wayland-utils wlroots gtk3
+    install_wayland # Ensure Wayland core is installed
+    sudo pacman -S --needed foot kitty hyprland xdg-desktop-portal-hyprland
     sudo pacman -S --needed waybar wofi xorg-xwayland hyprpaper hyprlock grim slurp wl-clipboard
     sudo pacman -S --needed qt5-wayland qt6-wayland rofi-wayland
-
-    echo "📜 Setting environment variables..."
+    echo "📜 Setting environment variables in .bash_profile..."
     PROFILE_FILE="$HOME/.bash_profile"
     grep -q XDG_SESSION_TYPE "$PROFILE_FILE" || cat >> "$PROFILE_FILE" <<'EOF'
-# Hyprland env
 export XDG_SESSION_TYPE=wayland
 export XDG_CURRENT_DESKTOP=Hyprland
 export QT_QPA_PLATFORM=wayland
 export MOZ_ENABLE_WAYLAND=1
 EOF
-    echo "✅ Updated: $PROFILE_FILE"
-    echo "🎉 Setup complete! Now run:"
-    echo "➡️  source ~/.bash_profile"
-    echo "➡️  Hyprland"
-
+    echo "🎉 Setup complete! Run 'source ~/.bash_profile' and then 'Hyprland'."
     sudo pacman -Syu
 }
 
 install_dwm() {
-    echo -e "${YELLOW}Installing DWM.${NC}"
+    echo -e "${YELLOW}Installing DWM...${NC}"
+    install_xorg # Ensure Xorg is installed
+    yay -S --needed dwm st dmenu xorg-xsetroot sddm
+    sudo systemctl enable sddm
+    echo -e "📝 Setting up DWM with SDDM and custom wallpaper..."
+    if ! command -v feh &>/dev/null; then sudo pacman -S --noconfirm feh; fi
+    WALLPAPER_DIR="$HOME/Pictures/wallpapers" && mkdir -p "$WALLPAPER_DIR"
+    WALLPAPER_PATH="$WALLPAPER_DIR/wallpaper1.jpg"
+    curl -L -o "$WALLPAPER_PATH" "https://www.skyweaver.net/images/media/wallpapers/wallpaper1.jpg"
+    grep -qxF "feh --bg-scale \"$WALLPAPER_PATH\"" ~/.xprofile || echo "feh --bg-scale \"$WALLPAPER_PATH\"" >> ~/.xprofile
+    sudo bash -c "cat > /usr/share/xsessions/dwm.desktop <<EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=DWM
+Comment=Dynamic Window Manager
+Exec=dwm
+Icon=dwm
+Type=XSession
+EOF"
+    echo -e "✅ Setup complete! Select 'DWM' in SDDM and reboot."
 }
 
 install_xmonad() {
-    echo -e "${YELLOW}Installing Xmonad + Xmobar.${NC}"
-    #! compton vs picom --for arch select picom [these are compositor for x11 --compton is for ubuntu]
+    echo -e "${YELLOW}Installing Xmonad + Xmobar...${NC}"
+    install_xorg # Ensure Xorg is installed
     sudo pacman -S --needed xmonad xmonad-utils xmonad-contrib xmobar xterm dmenu nitrogen picom gnome-terminal
-    mkdir -p $HOME/.xmonad
+    mkdir -p "$HOME/.xmonad"
     cp ~/ms1/linux/config/xmonad/xmonad.hs ~/.xmonad/
     sddm_setup
     wallpaper
 }
 
 install_qtile() {
-    echo -e "${YELLOW}Installing qtile.${NC}"
+    echo -e "${YELLOW}Installing qtile...${NC}"
     sudo pacman -S --needed qtile python-pywlroots xorg-xwayland kitty dmenu picom network-manager-applet volumeicon mypy
     sudo pacman -S --needed rofi-wayland
     yay -S --needed qtile-extras
 }
 
-skip_install() {
-    echo -e "${YELLOW}Skipping desktop environment installation.${NC}"
-}
+install_sway() { sudo pacman -S --needed sway waybar; }
+install_wayfire() { yay -S --needed wayfire wcm wf-shell; }
+install_weston() { sudo pacman -S --needed weston; }
+install_river() { sudo pacman -S --needed river; }
+install_picom() { sudo pacman -S --needed picom; }
 
-#*  ██████╗ ██████╗ ███╗   ███╗██████╗  ██████╗ ███████╗██╗████████╗ ██████╗ ██████╗
-#* ██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔═══██╗██╔════╝██║╚══██╔══╝██╔═══██╗██╔══██╗
-#* ██║     ██║   ██║██╔████╔██║██████╔╝██║   ██║███████╗██║   ██║   ██║   ██║██████╔╝
-#* ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║   ██║╚════██║██║   ██║   ██║   ██║██╔══██╗
-#* ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ╚██████╔╝███████║██║   ██║   ╚██████╔╝██║  ██║
-#*  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝      ╚═════╝ ╚══════╝╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
-compositor_func=(
-    "Sway - A tiling Wayland compositor and drop-in replacement for i3.                       :sway_cont     :$GREEN"
-    "Wayfire - A 3D Wayland compositor with Compiz-like effects.                              :wayfire_cont  :$GREEN"
-    "Hyprland - A dynamic tiling Wayland compositor with modern features.                     :hyprland_cont :$GREEN"
-    "Weston - The reference Wayland compositor, primarily for testing.                        :weston_cont   :$GREEN"
-    "river - A dynamic tiling compositor inspired by dwm.                                     :river_cont    :$GREEN"
-    "Xorg - The legacy display server, required for many traditional X11 applications.        :xorg_cont     :$GREEN"
-    "Picom (Xorg/X11) - A compositor for X11, providing shadows, transparency, and animations.:picom_cont    :$GREEN"
-    "Extra tools - Useful Wayland utilities (wlr-randr, grim, slurp).                         :extras_cont   :$GREEN"
-)
-compositor_setup() {
-    display_submenu "Setup Setup Compositor?" "compositor_func"
-}
-
-sway_cont() {
-    sudo pacman -S --needed sway waybar
-}
-
-wayfire_cont() {
-    yay -S --needed wayfire wcm wf-shell
-}
-
-hyprland_cont() {
-    yay -S --needed hyprland hyprpaper waybar-hyprland
-}
-
-weston_cont() {
-    sudo pacman -S --needed weston
-}
-
-river_cont() {
-    sudo pacman -S --needed river
-}
-
-xorg_cont() {
-    sudo pacman -S --needed xorg-server xorg-xinit xorg-xwayland xorg-apps
-}
-
-picom_cont() {
-    sudo pacman -S --needed picom
-}
-
-extras_cont() {
-    sudo pacman -S --needed wlr-randr grim slurp
-}
-
-#* ██████╗ ██╗███████╗██████╗ ██╗      █████╗ ██╗   ██╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗     ██████╗ ██████╗  ██████╗ ████████╗ ██████╗  ██████╗ ██████╗ ██╗     ███████╗
-#* ██╔══██╗██║██╔════╝██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝    ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗    ██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔═══██╗██╔════╝██╔═══██╗██║     ██╔════╝
-#* ██║  ██║██║███████╗██████╔╝██║     ███████║ ╚████╔╝     ███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝    ██████╔╝██████╔╝██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║     ███████╗
-#* ██║  ██║██║╚════██║██╔═══╝ ██║     ██╔══██║  ╚██╔╝      ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗    ██╔═══╝ ██╔══██╗██║   ██║   ██║   ██║   ██║██║     ██║   ██║██║     ╚════██║
-#* ██████╔╝██║███████║██║     ███████╗██║  ██║   ██║       ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║    ██║     ██║  ██║╚██████╔╝   ██║   ╚██████╔╝╚██████╗╚██████╔╝███████╗███████║
-#* ╚═════╝ ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝       ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝
-xorg(){
-    sudo pacman -S --needed xorg xorg-xinit xorg-xwayland
-    sudo pacman -S --needed xorg-apps mesa xf86-video-intel xf86-video-amdgpu xf86-input-libinput #! optional but useful
-}
-wayland(){
-    sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland waybar wofi grim slurp wl-clipboard swaylock
-}
-
-#* ██████╗  █████╗  ██████╗██╗  ██╗ █████╗  ██████╗ ███████╗███████╗
-#* ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔════╝ ██╔════╝██╔════╝
-#* ██████╔╝███████║██║     █████╔╝ ███████║██║  ███╗█████╗  ███████╗
-#* ██╔═══╝ ██╔══██║██║     ██╔═██╗ ██╔══██║██║   ██║██╔══╝  ╚════██║
-#* ██║     ██║  ██║╚██████╗██║  ██╗██║  ██║╚██████╔╝███████╗███████║
-#* ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
+#! =================================================================
+#!
+#!                        PACKAGE MANAGEMENT
+#!
+#! =================================================================
 package_install_items=(
     "Install Base Packages :install_base_packages :$GREEN"
     "Install Fonts         :install_fonts         :$GREEN"
     "Install Utilities     :install_utilities     :$GREEN"
     "Install Media Packages:install_media_packages:$GREEN"
 )
+install_packages() {
+    clear
+    echo -e "${GREEN}Updating package database...${NC}"
+    sudo pacman -Sy --noconfirm
+    display_submenu "Install Packages Submenu" "package_install_items"
+}
 
 install_base_packages() {
     echo -e "${GREEN}Installing Base Packages...${NC}"
-    sudo pacman -S --needed bash bat chafa curl eza fastfetch fzf \
-                            lsd lua-language-server neovim openssh \
-                            python rclone sshpass wget which zoxide yazi zsh \
-                            stow expac numlockx rsync thefuck feh screenfetch \
-                            sed grep jq rofi conky htop firefox dunst mypy \
-                            pcmanfm thunar thunar-archive-plugin thunar-volman \
-                            foot starship
+    sudo pacman -S --needed bash bat chafa curl eza fastfetch fzf lsd lua-language-server neovim openssh python rclone sshpass wget which zoxide yazi zsh stow expac numlockx rsync thefuck feh screenfetch sed grep jq rofi conky htop firefox dunst mypy pcmanfm thunar thunar-archive-plugin thunar-volman foot starship
 }
 
 install_fonts() {
@@ -337,20 +337,9 @@ install_media_packages() {
     sudo pacman -S --needed vlc audacious
 }
 
-# Function to install necessary packages using yay
-install_packages() {
-    clear
-    echo -e "${GREEN}Updating package database...${NC}"
-    sudo pacman -Sy --noconfirm
-    display_submenu "Install Packages Submenu" "package_install_items"
-}
-
-#* ███████╗████████╗ █████╗ ████████╗██╗   ██╗███████╗      ██████╗  █████╗ ██████╗
-#* ██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝██║   ██║██╔════╝      ██╔══██╗██╔══██╗██╔══██╗
-#* ███████╗   ██║   ███████║   ██║   ██║   ██║███████╗█████╗██████╔╝███████║██████╔╝
-#* ╚════██║   ██║   ██╔══██║   ██║   ██║   ██║╚════██║╚════╝██╔══██╗██╔══██║██╔══██╗
-#* ███████║   ██║   ██║  ██║   ██║   ╚██████╔╝███████║      ██████╔╝██║  ██║██║  ██║
-#* ╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚══════╝      ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+#! ---------------------------------------------------------------
+#! Status Bars
+#! ---------------------------------------------------------------
 statusbar_func=(
     "Waybar - Highly customizable bar for Wayland compositors               :install_waybar   :$GREEN"
     "Polybar - Popular, feature-rich bar for X11 and Wayland (via XWayland) :install_polybar  :$GREEN"

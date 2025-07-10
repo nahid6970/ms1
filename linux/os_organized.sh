@@ -157,15 +157,15 @@ update_ms1_repo() {
     fi
 }
 
-# ==============================================================================
-#
-#                       DESKTOP & UI CONFIGURATION
-#
-# ==============================================================================
+#* ===================================================================
+#*
+#*                       DESKTOP & UI CONFIGURATION
+#*
+#* ===================================================================
 
-# ------------------------------------------------------------------------------
-# Main Display & Graphics Menu
-# ------------------------------------------------------------------------------
+#! -----------------------------------------------------------
+#! Main Display & Graphics Menu
+#! -----------------------------------------------------------
 
 display_menu_items=(
     "Display Server (X11/Wayland)    :display_server_menu   :$GREEN"
@@ -178,9 +178,9 @@ display_setup_menu() {
     display_submenu "Display & Graphics Setup" "display_menu_items"
 }
 
-# ------------------------------------------------------------------------------
-# Display Servers
-# ------------------------------------------------------------------------------
+#! ------------------------------------------------------
+#! Display Servers
+#! ------------------------------------------------------
 
 display_server_menu_items=(
     "Install Xorg (X11)                :install_xorg      :$GREEN"
@@ -201,9 +201,9 @@ install_wayland(){
     sudo pacman -S --needed wayland wayland-protocols wayland-utils xdg-desktop-portal xdg-desktop-portal-wlr wlroots libinput gtk3 qt5-wayland xorg-xwayland
 }
 
-# ------------------------------------------------------------------------------
-# Desktop Environments
-# ------------------------------------------------------------------------------
+#! -------------------------------------------------------------------
+#! Desktop Environments
+#! -------------------------------------------------------------------
 
 desktop_environment_menu_items=(
     "KDE Plasma     :install_kde     :$GREEN"
@@ -246,9 +246,9 @@ skip_install() {
     echo -e "${YELLOW}Skipping installation.${NC}"
 }
 
-# ------------------------------------------------------------------------------
-# Window Managers & Compositors
-# ------------------------------------------------------------------------------
+#! ------------------------------------------------------------------
+#! Window Managers & Compositors
+#! ------------------------------------------------------------------
 
 wm_compositor_menu_items=(
     "Hyprland (Wayland) :install_hyprland :$GREEN"
@@ -330,9 +330,9 @@ install_weston() { sudo pacman -S --needed weston; }
 install_river() { sudo pacman -S --needed river; }
 install_picom() { sudo pacman -S --needed picom; }
 
-# ------------------------------------------------------------------------------
-# Status Bars
-# ------------------------------------------------------------------------------
+#! ---------------------------------------------------------------
+#! Status Bars
+#! ---------------------------------------------------------------
 statusbar_menu_items=(
     "Waybar - Highly customizable bar for Wayland           :install_waybar   :$GREEN"
     "Polybar - Popular, feature-rich bar for X11            :install_polybar  :$GREEN"
@@ -352,11 +352,11 @@ install_xmobar() { sudo pacman -S --needed xmobar; }
 install_dzen2() { sudo pacman -S --needed dzen; }
 install_tint2() { sudo pacman -S --needed tint2; }
 
-# ==============================================================================
+# ====================================================================
 #
 #                           PACKAGE MANAGEMENT
 #
-# ==============================================================================
+# ====================================================================
 
 package_install_items=(
     "Install Base Packages :install_base_packages :$GREEN"
