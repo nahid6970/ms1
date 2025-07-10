@@ -25,7 +25,7 @@ menu_items=(
     # "Copy Config Files                : All_Configs                 :$GREEN"
     "Initial Setup (sddm + wallpaper) : sddm_setup wallpaper        :$GREEN"
     "Install Necessary Packages       : install_packages            :$GREEN"
-    "Display & Graphics Setup         : display_setup_menu          :$GREEN"
+    "Display & Graphics Setup         : display_setup_menu          :$CYAN"
     # "Desktop Environment              : desktop_environment         :$GREEN"
     # "Compositor + Utilities           : compositor_setup            :$GREEN"
     "Status Bar                       : statusbar_setup             :$GREEN"
