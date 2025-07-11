@@ -1,5 +1,13 @@
 #!/bin/bash
 
+#* example for adding items to menu
+# Display_function_example=(
+#     "Example1            :Function1  :$GREEN"
+# )
+# mainmenufunction() {
+#     display_submenu "Title Example" "Display_function_example"
+# }
+
 # ==============================================================================
 #
 #                           Arch Linux Setup Script
@@ -41,7 +49,7 @@ menu_items=(
     "TTY Setup                        : tty_numlock_setup           :$GREEN"
     "Store Setup                      : store_setup                 :$GREEN"
     "Container                        : Container_setup             :$GREEN"
-    "About                            : about_device                :$GREEN"
+    "System Info & Diagnostics        : System_Info_Diagnostics     :$GREEN"
     "Rclone-Decrypt                   : rclone_decrypt              :$RED"
     "Rclone-linux_binary              : rclone_copy_linuxbin        :$RED"
     "GPU Drivers                      : check_gpu_drivers           :$GREEN"
@@ -351,17 +359,18 @@ install_xmobar() { sudo pacman -S --needed xmobar; }
 install_dzen2() { sudo pacman -S --needed dzen; }
 install_tint2() { sudo pacman -S --needed tint2; }
 
-# ====================================================================
-#
-#                           PACKAGE MANAGEMENT
-#
-# ====================================================================
+#* ===============================================================
+#*
+#*                           PACKAGE MANAGEMENT
+#*
+#* ===============================================================
 
 package_install_items=(
     "Install Base Packages :install_base_packages :$GREEN"
     "Install Fonts         :install_fonts         :$GREEN"
     "Install Utilities     :install_utilities     :$GREEN"
     "Install Media Packages:install_media_packages:$GREEN"
+    "List Recent PKGs      :list_recent_packages  :$GREEN"
 )
 install_packages() {
     clear
@@ -390,6 +399,10 @@ install_media_packages() {
     sudo pacman -S --needed vlc audacious
 }
 
+list_recent_packages() {
+    echo -e "${GREEN}Listing recently installed packages...${NC}"
+    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
+}
 # ===============================================================
 #
 #                           TTY & CONSOLE
@@ -644,9 +657,18 @@ distrotube_dwm_config(){
     echo "DT DWM blocks installed."
 }
 
-# ---------------------------------------------
-# System Info & Diagnostics
-# ---------------------------------------------
+#! ---------------------------------------------
+#! System Info & Diagnostics
+#! ---------------------------------------------
+
+Display_function_example=(
+    "About              :about_device      :$GREEN"
+    "Check GPU Drivers  :check_gpu_drivers :$GREEN"
+    "Network Speed Test  :network_speed_test :$GREEN"
+)
+System_Info_Diagnostics() {
+    display_submenu "Title Example" "Display_function_example"
+}
 
 
 lact() { sudo pacman -S lact; } #!gpu control application for amd
@@ -678,11 +700,6 @@ check_gpu_drivers() {
     else
         echo -e "${YELLOW}Non-AMD GPU detected. Skipping AMD driver check.${NC}"
     fi
-}
-
-list_recent_packages() {
-    echo -e "${GREEN}Listing recently installed packages...${NC}"
-    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
 }
 
 network_speed_test() {
