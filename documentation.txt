@@ -1,2 +1,5 @@
 cmd /k → runs the command and keeps the window open.
 cmd /c → runs the command and closes the window when done.
+
+
+AMD X3D processors gets more boost on optimized operating systems like cachyOS. And btw for best optimization in cachyos you should use native steam package, proton-cachyos and "game-performance %command%" launch options.
