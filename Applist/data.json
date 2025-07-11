@@ -140,6 +140,13 @@
         "winget_path": ""
     },
     {
+        "name": "DesktopOK",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "SoftwareOK.DesktopOK",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Roaming\\DesktopOK\\DesktopOK_x64.exe"
+    },
+    {
         "name": "Ditto",
         "scoop_name": "ditto",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe",
@@ -511,6 +518,13 @@
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links\\rufus.exe"
     },
     {
+        "name": "RustDesk",
+        "scoop_name": "rustdesk",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\rustdesk\\current\\RustDesk.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "scoop-completion",
         "scoop_name": "scoop-completion",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\scoop-completion\\current\\scoop-completion.psm1",
@@ -719,12 +733,5 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
         "winget_path": ""
-    },
-    {
-        "name": "DesktopOK",
-        "scoop_name": "",
-        "scoop_path": "",
-        "winget_name": "SoftwareOK.DesktopOK",
-        "winget_path": "C:\\Users\\nahid\\AppData\\Roaming\\DesktopOK\\DesktopOK_x64.exe"
     }
 ]

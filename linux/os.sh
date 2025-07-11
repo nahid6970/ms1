@@ -560,6 +560,7 @@ container_function=(
     "Bottles   :bottles_cont     :$GREEN"
     "Wine      :install_wine     :$GREEN"
     "Wine64    :install_wine_64  :$GREEN"
+    "distroshell    :distroshell  :$GREEN"
 )
 # Function to install the chosen desktop environment
 Container_setup() {
@@ -569,6 +570,7 @@ Container_setup() {
 steam_cont() { sudo pacman -S --needed steam; }
 lutris_cont() { sudo pacman -S --needed lutris; }
 bottles_cont() { yay -S --needed bottles; }
+distroshell() {  }
 
 install_wine() {
   echo "Installing Wine (32-bit prefix)..."
