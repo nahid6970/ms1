@@ -30,7 +30,7 @@ menu_items=(
     "TTY Setup                        : tty_numlock_setup           :$GREEN"
     "Store Setup                      : store_setup                 :$GREEN"
     "Container                        : Container_setup             :$GREEN"
-    "About                            : about_device                :$GREEN"
+    "System Info & Diagnostics        : System_Info_Diagnostics     :$GREEN"
     "Rclone-Decrypt                   : rclone_decrypt              :$RED"
     "Rclone-linux_binary              : rclone_copy_linuxbin        :$RED"
     "GPU Drivers                      : check_gpu_drivers           :$GREEN"
@@ -349,6 +349,7 @@ package_install_items=(
     "Install Fonts         :install_fonts         :$GREEN"
     "Install Utilities     :install_utilities     :$GREEN"
     "Install Media Packages:install_media_packages:$GREEN"
+    "List Recent PKGs      :list_recent_packages  :$GREEN"
 )
 install_packages() {
     clear
@@ -377,6 +378,10 @@ install_media_packages() {
     sudo pacman -S --needed vlc audacious
 }
 
+list_recent_packages() {
+    echo -e "${GREEN}Listing recently installed packages...${NC}"
+    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
+}
 #! ---------------------------------------------------------------
 #! Status Bars
 #! ---------------------------------------------------------------
@@ -694,6 +699,19 @@ nvim_setup() {
 #! ---------------------------------------------
 #! System Info & Diagnostics
 #! ---------------------------------------------
+Display_function_example=(
+    "About                    :about_device        :$GREEN"
+    "Check GPU Drivers        :check_gpu_drivers   :$GREEN"
+    "Network Speed Test       :network_speed_test  :$GREEN"
+    "Monitor & Overclock GPU  :lact                :$GREEN"
+)
+System_Info_Diagnostics() {
+    display_submenu "Title Example" "Display_function_example"
+}
+
+
+lact() { sudo pacman -S lact; } #!gpu control application for amd
+
 about_device() {
     clear
     fastfetch
@@ -733,11 +751,6 @@ check_gpu_drivers() {
     else
         echo -e "${YELLOW}Non-AMD GPU detected. Skipping AMD driver check.${NC}"
     fi
-}
-
-list_recent_packages() {
-    echo -e "${GREEN}Listing recently installed packages...${NC}"
-    expac --timefmt='%Y-%m-%d %H:%M:%S' '%l\t%n' | sort -r
 }
 
 quick_file_search() {
