@@ -620,6 +620,11 @@ def Event_Function():
                         press_key(window, 'f')
                     elif find_image(Resume, confidence=0.8):
                         press_key(window, 'esc')
+                    jump = find_image(r"C:\msBackups\shadowfight3\booster.png", confidence=0.80, region=(1266, 824, 1715, 959))
+                    if jump:
+                        center = pyautogui.center(jump)
+                        press_global_screen_with_delays((center[0], center[1], 5))
+                        press_keys_with_delays(window, 'g', 1)
 
                     # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
 
