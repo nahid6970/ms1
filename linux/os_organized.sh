@@ -648,6 +648,9 @@ distrotube_dwm_config(){
 # System Info & Diagnostics
 # ---------------------------------------------
 
+
+lact() { sudo pacman -S lact; } #!gpu control application for amd
+
 about_device() {
     clear
     fastfetch
