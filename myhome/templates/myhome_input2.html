@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home</title>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Import the JetBrains Mono font */
+    @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+
+    /* Thin scrollbar with custom styles for html and body */
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #31343a;
+      font-family: Calibri;
+      scrollbar-width: thin;
+      scrollbar-color: #ff0000 #000000;
+    }
+
+    /* WebKit browsers (Chrome, Safari) */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      width: 1px;
+    }
+
+    html::-webkit-scrollbar-thumb,
+    body::-webkit-scrollbar-thumb {
+      background-color: #ff000f;
+    }
+
+    html::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track {
+      background-color: #000000;
+    }
+
+    .flex-container2 {
+      display: flex;
+      flex-direction: row;
+      background-color: #31343a;
+      gap: 3px;
+      flex-wrap: wrap;
+      text-align: left;
+      line-height: auto;
+      align-items: flex-start;
+      font-size: auto;
+      color: rgb(255, 255, 255);
+      padding: 1cm;
+      border-radius: 1cm;
+      position: relative;
+    }
+
+    .flex-container2 > div {
+      font-weight: normal;
+      flex-grow: 1;
+      border-radius: 0px;
+      width: max-content;
+      margin: 1px;
+      text-align: left;
+      width: 500px;
+    }
+
+    p {
+      text-align: justify;
+      line-height: 1.5;
+      height: auto;
+      color: #4a90e2;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+    }
+
+    a:link {color: #b5ac97;background-color: transparent;text-decoration: none;}
+    a:visited {color: #bbd853;background-color: transparent;text-decoration: none;}
+    a:hover {color: red;background-color: transparent;text-decoration: none;}
+    a:active {color: yellow;background-color: transparent;text-decoration: underline;}
+
+    img {
+      border: 1px solid transparent;
+      vertical-align: middle;
+      border-radius: 10px;
+    }
+
+    /* Folder view styles */
+    .folders-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      justify-content: flex-start;
+    }
+
+    .folder-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      background-color: #474747;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 120px;
+      max-width: 150px;
+      position: relative;
+    }
+
+    .folder-item:hover {
+      background-color: #555555;
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .folder-icon {
+      font-size: 48px;
+      color: #ffd700;
+      margin-bottom: 10px;
+      font-family: jetbrainsmono nfp;
+    }
+
+    .folder-name {
+      color: white;
+      font-size: 14px;
+      text-align: center;
+      word-wrap: break-word;
+      max-width: 100%;
+    }
+
+    .folder-count {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+
+    .add-folder-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      background-color: #4CAF50;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 120px;
+      max-width: 150px;
+      border: 2px dashed #66BB6A;
+    }
+
+    .add-folder-item:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+    }
+
+    .add-folder-icon {
+      font-size: 48px;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .toggle-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .toggle-container span {
+      display: inline;
+      padding: 0;
+      background-color: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      transition: none;
+      margin: 0;
+      width: auto;
+      height: auto;
+      font-family: Calibri;
+      font-size: 16px;
+      align-content: center;
+      color: white;
+      margin-left: 10px;
+    }
+
+    /* The switch - the box around the slider */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    /* Folder management buttons */
+    .folder-buttons {
+      display: none;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .edit-mode .folder-buttons {
+      display: flex;
+    }
+
+    .folder-edit-btn, .folder-delete-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 3px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .folder-delete-btn {
+      background-color: #f44336;
+    }
+
+    .folder-edit-btn:hover {
+      background-color: #45a049;
+    }
+
+    .folder-delete-btn:hover {
+      background-color: #da190b;
+    }
+
+    /* Popup styles */
+    .popup-container {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 9999 !important;
+      display: flex;
+      justify-content: center !important;
+      align-items: center !important;
+      pointer-events: auto;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .popup-content {
+      background-color: #31343a;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .popup-content .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #fff;
+      background-color: #ff2d2d;
+      height: 30px;
+      width: 30px;
+      text-align: center;
+      border-radius: 50%;
+      line-height: 30px;
+    }
+
+    .popup-content h3 {
+      color: white;
+      margin-top: 0;
+      margin-bottom: 20px;
+      padding-right: 40px;
+    }
+
+    /* Folder content styles */
+    .folder-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 20px 0;
+    }
+
+    .link-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 5px;
+      padding: 10px;
+      background-color: #474747;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      min-width: 80px;
+      position: relative;
+    }
+
+    .link-item:hover {
+      background-color: #555555;
+      transform: translateY(-2px);
+    }
+
+    .link-item a {
+      display: block;
+      padding: 5px;
+      font-family: jetbrainsmono nfp;
+      font-size: 32px;
+      color: inherit;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .link-buttons {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .edit-button, .delete-button {
+      display: none;
+      background-color: #4CAF50;
+      color: white;
+      padding: 3px 6px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-button {
+      background-color: #f44336;
+    }
+
+    .edit-mode .edit-button,
+    .edit-mode .delete-button {
+      display: inline-block;
+    }
+
+    .edit-button:hover {
+      background-color: #45a049;
+    }
+
+    .delete-button:hover {
+      background-color: #da190b;
+    }
+
+    .add-link-to-folder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      background-color: #4CAF50;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 80px;
+      border: 2px dashed #66BB6A;
+    }
+
+    .add-link-to-folder:hover {
+      background-color: #45a049;
+    }
+
+    .add-link-to-folder span {
+      font-size: 24px;
+      color: white;
+    }
+
+    /* Form styles */
+    .popup-container input[type="text"],
+    .popup-container input[type="url"],
+    .popup-container select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      background-color: #555;
+      color: white;
+    }
+
+    .popup-container button[type="submit"] {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    .popup-container button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-row > * {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .dragging {
+      opacity: 0.5;
+    }
+
+    html body {
+      margin-top: 20px;
+    }
+
+    div.toggle-container {
+      margin-top: -16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="flex-container2">
+    <div class="toggle-container" style="margin-left: 25px;">
+      <label class="switch">
+        <input type="checkbox" id="edit-mode-toggle">
+        <span class="slider round"></span>
+      </label>
+      <span>Modify</span>
+    </div>
+
+    <div id="folders-container" class="folders-container">
+    </div>
+
+    <!-- Folder content popup -->
+    <div id="folder-content-popup" class="popup-container hidden">
+      <div class="popup-content">
+        <span class="close-button">&times;</span>
+        <h3 id="folder-title">Folder Contents</h3>
+        <div id="folder-content" class="folder-content">
+        </div>
+      </div>
+    </div>
+
+    <!-- Add link popup -->
+    <div id="add-link-popup" class="popup-container hidden">
+      <div class="popup-content">
+        <span class="close-button">&times;</span>
+        <h3>Add New Link</h3>
+        <form id="add-link-form">
+          <input type="text" id="link-name" placeholder="Name" required>
+          <input type="text" id="link-group" placeholder="Group (optional)">
+          <input type="url" id="link-url" placeholder="URL" required>
+          <label for="link-default-type">Default Type:</label>
+          <select id="link-default-type">
+            <option value="nerd-font">nerd-font</option>
+            <option value="img">img</option>
+            <option value="text">text</option>
+          </select>
+          <div class="form-row">
+            <input type="text" id="link-text" placeholder="Text (if no icon/image)">
+            <input type="url" id="link-img-src" placeholder="Image URL (if no icon)">
+            <input type="text" id="link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+          </div>
+          <div class="form-row">
+            <input type="text" id="link-color" placeholder="Color (e.g., #f46613 or red)">
+            <input type="text" id="link-background-color" placeholder="Background Color">
+          </div>
+          <div class="form-row">
+            <input type="text" id="link-li-bg-color" placeholder="List Item BG Color">
+            <input type="text" id="link-li-hover-color" placeholder="List Item Hover Color">
+          </div>
+          <input type="text" id="link-border-radius" placeholder="Border Radius">
+          <input type="text" id="link-title" placeholder="Title (for tooltip)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <label for="link-hidden">
+              <input type="checkbox" id="link-hidden">
+              Hide this item
+            </label>
+          </div>
+          <button type="submit">Add Link</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit link popup -->
+    <div id="edit-link-popup" class="popup-container hidden">
+      <div class="popup-content">
+        <span class="close-button">&times;</span>
+        <h3>Edit Link</h3>
+        <form id="edit-link-form">
+          <input type="hidden" id="edit-link-index">
+          <input type="text" id="edit-link-name" placeholder="Name" required>
+          <input type="text" id="edit-link-group" placeholder="Group (optional)">
+          <input type="url" id="edit-link-url" placeholder="URL" required>
+          <label for="edit-link-default-type">Default Type:</label>
+          <select id="edit-link-default-type">
+            <option value="nerd-font">nerd-font</option>
+            <option value="img">img</option>
+            <option value="text">text</option>
+          </select>
+          <div class="form-row">
+            <input type="text" id="edit-link-text" placeholder="Text (if no icon/image)">
+            <input type="url" id="edit-link-img-src" placeholder="Image URL (if no icon)">
+            <input type="text" id="edit-link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+          </div>
+          <div class="form-row">
+            <input type="text" id="edit-link-color" placeholder="Color (e.g., #f46613 or red)">
+            <input type="text" id="edit-link-background-color" placeholder="Background Color">
+          </div>
+          <div class="form-row">
+            <input type="text" id="edit-link-li-bg-color" placeholder="List Item BG Color">
+            <input type="text" id="edit-link-li-hover-color" placeholder="List Item Hover Color">
+          </div>
+          <input type="text" id="edit-link-border-radius" placeholder="Border Radius">
+          <input type="text" id="edit-link-title" placeholder="Title (for tooltip)">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <label for="edit-link-hidden">
+              <input type="checkbox" id="edit-link-hidden">
+              Hide this item
+            </label>
+          </div>
+          <button type="submit">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit folder popup -->
+    <div id="edit-folder-popup" class="popup-container hidden">
+      <div class="popup-content">
+        <span class="close-button">&times;</span>
+        <h3>Edit Folder Name</h3>
+        <form id="edit-folder-form">
+          <input type="hidden" id="edit-folder-original-name">
+          <label for="edit-folder-name">Folder Name:</label>
+          <input type="text" id="edit-folder-name" placeholder="Enter folder name" required>
+          <button type="submit">Update Folder Name</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mock data for demonstration
+    let mockLinks = [
+      { name: "Gmail", group: "Email", url: "https://gmail.com", icon_class: "nf nf-cod-mail", color: "#EA4335", default_type: "nerd-font" },
+      { name: "Outlook", group: "Email", url: "https://outlook.com", icon_class: "nf nf-cod-mail", color: "#0078D4", default_type: "nerd-font" },
+      { name: "GitHub", group: "Development", url: "https://github.com", icon_class: "nf nf-dev-github", color: "#333", default_type: "nerd-font" },
+      { name: "VS Code", group: "Development", url: "https://vscode.dev", icon_class: "nf nf-dev-visualstudio", color: "#007ACC", default_type: "nerd-font" },
+      { name: "YouTube", group: "Entertainment", url: "https://youtube.com", icon_class: "nf nf-fa-youtube", color: "#FF0000", default_type: "nerd-font" },
+      { name: "Netflix", group: "Entertainment", url: "https://netflix.com", icon_class: "nf nf-fa-film", color: "#E50914", default_type: "nerd-font" },
+      { name: "Google", group: "Search", url: "https://google.com", icon_class: "nf nf-fa-google", color: "#4285F4", default_type: "nerd-font" },
+      { name: "Stack Overflow", group: "Development", url: "https://stackoverflow.com", icon_class: "nf nf-dev-stackoverflow", color: "#FE7A16", default_type: "nerd-font" }
+    ];
+
+    let currentFolderName = '';
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const foldersContainer = document.getElementById('folders-container');
+      const editModeToggle = document.getElementById('edit-mode-toggle');
+      const flexContainer2 = document.querySelector('.flex-container2');
+
+      // Mock API functions
+      async function fetchLinks() {
+        return mockLinks;
+      }
+
+      async function addLink(link) {
+        mockLinks.push(link);
+        return true;
+      }
+
+      async function updateLink(index, updatedLink) {
+        if (index >= 0 && index < mockLinks.length) {
+          mockLinks[index] = updatedLink;
+          return true;
+        }
+        return false;
+      }
+
+      async function deleteLink(index) {
+        if (index >= 0 && index < mockLinks.length) {
+          mockLinks.splice(index, 1);
+          return true;
+        }
+        return false;
+      }
+
+      async function updateGroupName(originalGroupName, newGroupName) {
+        mockLinks = mockLinks.map(link => {
+          const linkGroupName = link.group || 'Ungrouped';
+          if (linkGroupName === originalGroupName) {
+            const updatedLink = { ...link };
+            if (newGroupName && newGroupName !== '') {
+              updatedLink.group = newGroupName;
+            } else {
+              delete updatedLink.group;
+            }
+            return updatedLink;
+          }
+          return link;
+        });
+        return true;
+      }
+
+      // Function to display folders
+      async function displayFolders() {
+        try {
+          const links = await fetchLinks();
+          foldersContainer.innerHTML = '';
+
+          // Group links by folder
+          const groupedLinks = {};
+          links.forEach((link, index) => {
+            // Skip hidden items unless in edit mode
+            if (link.hidden && !flexContainer2.classList.contains('edit-mode')) {
+              return;
+            }
+
+            const groupName = link.group || 'Ungrouped';
+            if (!groupedLinks[groupName]) {
+              groupedLinks[groupName] = [];
+            }
+            groupedLinks[groupName].push({link, index});
+          });
+
+          // Create folder elements
+          Object.keys(groupedLinks).forEach(groupName => {
+            if (groupedLinks[groupName].length === 0) return;
+
+            const folderDiv = document.createElement('div');
+            folderDiv.className = 'folder-item';
+            folderDiv.dataset.folderName = groupName;
+
+            const folderIcon = document.createElement('div');
+            folderIcon.className = 'folder-icon';
+            folderIcon.innerHTML = '📁';
+
+            const folderName = document.createElement('div');
+            folderName.className = 'folder-name';
+            folderName.textContent = groupName;
+
+            const folderCount = document.createElement('div');
+            folderCount.className = 'folder-count';
+            folderCount.textContent = `${groupedLinks[groupName].length} items`;
+
+            // Folder management buttons
+            const folderButtons = document.createElement('div');
+            folderButtons.className = 'folder-buttons';
+
+            const editButton = document.createElement('button');
+            editButton.className = 'folder-edit-btn';
+            editButton.innerHTML = '✏️';
+            editButton.onclick = (e) => {
+              e.stopPropagation();
+              openEditFolderPopup(groupName);
+            };
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'folder-delete-btn';
+            deleteButton.innerHTML = '🗑️';
+            deleteButton.onclick = (e) => {
+              e.stopPropagation();
+              deleteFolder(groupName);
+            };
+
+            folderButtons.appendChild(editButton);
+            folderButtons.appendChild(deleteButton);
+
+            folderDiv.appendChild(folderButtons);
+            folderDiv.appendChild(folderIcon);
+            folderDiv.appendChild(folderName);
+            folderDiv.appendChild(folderCount);
+
+            // Click event to open folder
+            folderDiv.onclick = () => openFolder(groupName, groupedLinks[groupName]);
+
+            foldersContainer.appendChild(folderDiv);
+          });
+
+          // Add "Add New Folder" button
+          const addFolderDiv = document.createElement('div');
+          addFolderDiv.className = 'add-folder-item';
+
+          const addIcon = document.createElement('div');
+          addIcon.className = 'add-folder-icon';
+          addIcon.innerHTML = '➕';
+
+          const addText = document.createElement('div');
+          addText.className = 'folder-name';
+          addText.textContent = 'Add Link';
+
+          addFolderDiv.appendChild(addIcon);
+          addFolderDiv.appendChild(addText);
+
+          addFolderDiv.onclick = () => {
+            document.getElementById('link-group').value = '';
+            document.getElementById('add-link-popup').classList.remove('hidden');
+          };
+
+          foldersContainer.appendChild(addFolderDiv);
+
+        } catch (error) {
+          console.error('Error displaying folders:', error);
+        }
+      }
+
+      // Function to open folder content popup
+      function openFolder(folderName, folderLinks) {
+        currentFolderName = folderName;
+        const popup = document.getElementById('folder-content-popup');
+        const title = document.getElementById('folder-title');
+        const content = document.getElementById('folder-content');
+
+        title.textContent = `${folderName} (${folderLinks.length} items)`;
+        content.innerHTML = '';
+
+        // Add links to folder content
+        folderLinks.forEach(({link, index}) => {
+          const linkDiv = document.createElement('div');
+          linkDiv.className = 'link-item';
+          linkDiv.dataset.linkIndex = index;
+
+          // Add visual indicator for hidden items in edit mode
+          if (link.hidden && flexContainer2.classList.contains('edit-mode')) {
+            linkDiv.style.opacity = '0.5';
+            linkDiv.style.border = '2px dashed #666';
+          }
+
+          let linkContent;
+          if (link.default_type === 'nerd-font' && link.icon_class) {
+            linkContent = `<a href="${link.url}" target="_blank" style="color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          } else if (link.default_type === 'img' && link.img_src) {
+            linkContent = `<a href="${link.url}" target="_blank"><img src="${link.img_src}" width="32" height="32"></a>`;
+          } else if (link.default_type === 'text' && link.text) {
+            linkContent = `<a href="${link.url}" target="_blank" style="color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
+          } else {
+            linkContent = `<a href="${link.url}" target="_blank" style="color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+          }
+
+          linkDiv.innerHTML = linkContent;
+
+          const buttonContainer = document.createElement('div');
+          buttonContainer.className = 'link-buttons';
+
+          const editButton = document.createElement('button');
+          editButton.textContent = '✏️';
+          editButton.className = 'edit-button';
+          editButton.onclick = () => openEditLinkPopup(link, index);
+          buttonContainer.appendChild(editButton);
+
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = '🗑️';
+          deleteButton.className = 'delete-button';
+          deleteButton.onclick = () => deleteLinkFromFolder(index);
+          buttonContainer.appendChild(deleteButton);
+
+          linkDiv.appendChild(buttonContainer);
+          content.appendChild(linkDiv);
+        });
+
+        // Add "Add Link to Folder" button
+        const addLinkDiv = document.createElement('div');
+        addLinkDiv.className = 'add-link-to-folder';
+
+        const addSpan = document.createElement('span');
+        addSpan.textContent = '+';
+        addLinkDiv.appendChild(addSpan);
+
+        addLinkDiv.onclick = () => {
+          document.getElementById('link-group').value = folderName === 'Ungrouped' ? '' : folderName;
+          document.getElementById('add-link-popup').classList.remove('hidden');
+        };
+
+        content.appendChild(addLinkDiv);
+        popup.classList.remove('hidden');
+      }
+
+      // Function to open edit folder popup
+      function openEditFolderPopup(folderName) {
+        const popup = document.getElementById('edit-folder-popup');
+        const nameInput = document.getElementById('edit-folder-name');
+        const originalName = document.getElementById('edit-folder-original-name');
+
+        nameInput.value = folderName === 'Ungrouped' ? '' : folderName;
+        originalName.value = folderName;
+        popup.classList.remove('hidden');
+      }
+
+      // Function to delete folder
+      async function deleteFolder(folderName) {
+        if (confirm(`Are you sure you want to delete the folder "${folderName}"? This will not delete the links, but move them to Ungrouped.`)) {
+          await updateGroupName(folderName, '');
+          displayFolders();
+        }
+      }
+
+      // Handle edit folder form submission
+      document.getElementById('edit-folder-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const originalName = document.getElementById('edit-folder-original-name').value;
+        const newName = document.getElementById('edit-folder-name').value;
+        await updateGroupName(originalName, newName);
+        document.getElementById('edit-folder-popup').classList.add('hidden');
+        displayFolders();
+      });
+
+      // Handle add link form submission
+      document.getElementById('add-link-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const newLink = {
+          name: document.getElementById('link-name').value,
+          group: document.getElementById('link-group').value,
+          url: document.getElementById('link-url').value,
+          default_type: document.getElementById('link-default-type').value,
+          text: document.getElementById('link-text').value,
+          img_src: document.getElementById('link-img-src').value,
+          icon_class: document.getElementById('link-icon-class').value,
+          color: document.getElementById('link-color').value,
+          background_color: document.getElementById('link-background-color').value,
+          li_bg_color: document.getElementById('link-li-bg-color').value,
+          li_hover_color: document.getElementById('link-li-hover-color').value,
+          border_radius: document.getElementById('link-border-radius').value,
+          title: document.getElementById('link-title').value,
+          hidden: document.getElementById('link-hidden').checked
+        };
+        await addLink(newLink);
+        document.getElementById('add-link-popup').classList.add('hidden');
+        this.reset();
+        displayFolders();
+        if (currentFolderName) {
+          const links = await fetchLinks();
+          const groupedLinks = {};
+          links.forEach((link, index) => {
+            const groupName = link.group || 'Ungrouped';
+            if (!groupedLinks[groupName]) {
+              groupedLinks[groupName] = [];
+            }
+            groupedLinks[groupName].push({link, index});
+          });
+          openFolder(currentFolderName, groupedLinks[currentFolderName]);
+        }
+      });
+
+      // Function to open edit link popup
+      function openEditLinkPopup(link, index) {
+        const popup = document.getElementById('edit-link-popup');
+        document.getElementById('edit-link-index').value = index;
+        document.getElementById('edit-link-name').value = link.name || '';
+        document.getElementById('edit-link-group').value = link.group || '';
+        document.getElementById('edit-link-url').value = link.url || '';
+        document.getElementById('edit-link-default-type').value = link.default_type || 'nerd-font';
+        document.getElementById('edit-link-text').value = link.text || '';
+        document.getElementById('edit-link-img-src').value = link.img_src || '';
+        document.getElementById('edit-link-icon-class').value = link.icon_class || '';
+        document.getElementById('edit-link-color').value = link.color || '';
+        document.getElementById('edit-link-background-color').value = link.background_color || '';
+        document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
+        document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
+        document.getElementById('edit-link-border-radius').value = link.border_radius || '';
+        document.getElementById('edit-link-title').value = link.title || '';
+        document.getElementById('edit-link-hidden').checked = link.hidden || false;
+        popup.classList.remove('hidden');
+      }
+
+      // Handle edit link form submission
+      document.getElementById('edit-link-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('edit-link-index').value, 10);
+        const updatedLink = {
+          name: document.getElementById('edit-link-name').value,
+          group: document.getElementById('edit-link-group').value,
+          url: document.getElementById('edit-link-url').value,
+          default_type: document.getElementById('edit-link-default-type').value,
+          text: document.getElementById('edit-link-text').value,
+          img_src: document.getElementById('edit-link-img-src').value,
+          icon_class: document.getElementById('edit-link-icon-class').value,
+          color: document.getElementById('edit-link-color').value,
+          background_color: document.getElementById('edit-link-background-color').value,
+          li_bg_color: document.getElementById('edit-link-li-bg-color').value,
+          li_hover_color: document.getElementById('edit-link-li-hover-color').value,
+          border_radius: document.getElementById('edit-link-border-radius').value,
+          title: document.getElementById('edit-link-title').value,
+          hidden: document.getElementById('edit-link-hidden').checked
+        };
+        await updateLink(index, updatedLink);
+        document.getElementById('edit-link-popup').classList.add('hidden');
+        displayFolders();
+        if (currentFolderName) {
+          const links = await fetchLinks();
+          const groupedLinks = {};
+          links.forEach((link, index) => {
+            const groupName = link.group || 'Ungrouped';
+            if (!groupedLinks[groupName]) {
+              groupedLinks[groupName] = [];
+            }
+            groupedLinks[groupName].push({link, index});
+          });
+          openFolder(currentFolderName, groupedLinks[currentFolderName]);
+        }
+      });
+
+      // Function to delete a link
+      async function deleteLinkFromFolder(index) {
+        if (confirm('Are you sure you want to delete this link?')) {
+          await deleteLink(index);
+          displayFolders();
+          if (currentFolderName) {
+            const links = await fetchLinks();
+            const groupedLinks = {};
+            links.forEach((link, index) => {
+              const groupName = link.group || 'Ungrouped';
+              if (!groupedLinks[groupName]) {
+                groupedLinks[groupName] = [];
+              }
+              groupedLinks[groupName].push({link, index});
+            });
+            openFolder(currentFolderName, groupedLinks[currentFolderName]);
+          }
+        }
+      }
+
+      // Toggle edit mode
+      editModeToggle.addEventListener('change', function() {
+        flexContainer2.classList.toggle('edit-mode');
+        displayFolders(); // Refresh to show/hide elements based on mode
+      });
+
+      // Close popups
+      document.querySelectorAll('.close-button').forEach(button => {
+        button.onclick = function() {
+          this.closest('.popup-container').classList.add('hidden');
+        }
+      });
+
+      // Initial display
+      displayFolders();
+    });
+  </script>
+</body>
+
+</html>
