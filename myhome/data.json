@@ -1,5 +1,6 @@
 [
   {
+    "name": "Chat-BOT",
     "display_type": "normal",
     "links": [
       {
@@ -31,10 +32,10 @@
         "name": "DeepSeek",
         "url": "https://chat.deepseek.com/"
       }
-    ],
-    "name": "Chat-BOT"
+    ]
   },
   {
+    "name": "Download PKG",
     "display_type": "normal",
     "links": [
       {
@@ -84,10 +85,10 @@
         "name": "MS-Store",
         "url": "https://store.rg-adguard.net/"
       }
-    ],
-    "name": "Download PKG"
+    ]
   },
   {
+    "name": "Local (Flask)",
     "display_type": "normal",
     "links": [
       {
@@ -132,10 +133,10 @@
         "name": "myhome",
         "url": "https://nahid6970.github.io/ms1/myhome/myhome"
       }
-    ],
-    "name": "Local (Flask)"
+    ]
   },
   {
+    "name": "Local (Apps)",
     "display_type": "normal",
     "links": [
       {
@@ -206,10 +207,10 @@
         "name": "ollama-chat",
         "url": "http://localhost:8000/"
       }
-    ],
-    "name": "Local (Apps)"
+    ]
   },
   {
+    "name": "Ungrouped",
     "display_type": "normal",
     "links": [
       {
@@ -311,10 +312,10 @@
         "name": "nerdfonts",
         "url": "https://www.nerdfonts.com/cheat-sheet"
       }
-    ],
-    "name": "Ungrouped"
+    ]
   },
   {
+    "name": "JobCircularss",
     "display_type": "website-list",
     "links": [
       {
@@ -353,7 +354,6 @@
         "name": "ndr",
         "url": "http://ndr.teletalk.com.bd/"
       }
-    ],
-    "name": "JobCircularss"
+    ]
   }
 ]
