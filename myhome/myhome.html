@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Home</title>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="myhome/myhome.css">
+</head>
+
+<body>
+  <div class="flex-container2">
+
+    <div class="toggle-container" style="margin-left: 25px;">
+      <label class="switch">
+        <input type="checkbox" id="edit-mode-toggle">
+        <span class="slider round"></span>
+      </label>
+      <span style="color: white; margin-left: 10px;">Modify</span>
+    </div>
+
+    <!-- Updated styling for better edit mode control -->
+    <style>
+      .dragging {
+        opacity: 0.5;
+      }
+      
+      .reorder-buttons {
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        margin-left: 5px;
+      }
+      .edit-mode .reorder-buttons {
+        display: none;
+      }
+      .reorder-btn {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 2px 6px;
+        cursor: pointer;
+        font-size: 12px;
+        border-radius: 3px;
+      }
+      .reorder-btn:hover {
+        background: #555;
+      }
+      
+      /* Group reorder buttons - only visible in edit mode */
+      .group-reorder-buttons {
+        display: none;
+        gap: 5px;
+        margin-left: 10px;
+      }
+      .edit-mode .group-reorder-buttons {
+        display: flex;
+      }
+      
+      .link-item {
+        cursor: move;
+      }
+
+    </style>
+
+  <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
+  </div>
+
+<div id="edit-group-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Group Name</h3>
+      <form id="edit-group-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="hidden" id="edit-group-original-name">
+        <label for="edit-group-name">Group Name:</label>
+        <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
+        <button type="submit">Update Group Name</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="add-link-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Add New Link</h3>
+      <form id="add-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="text" id="link-name" placeholder="Name" required>
+        <input type="text" id="link-group" placeholder="Group (optional)">
+        <input type="url" id="link-url" placeholder="URL" required>
+        <label for="link-default-type">Default Type:</label>
+        <select id="link-default-type">
+          <option value="nerd-font">nerd-font</option>
+          <option value="img">img</option>
+          <option value="text">text</option>
+        </select>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-text" placeholder="Text (if no icon/image)">
+          <input type="url" id="link-img-src" placeholder="Image URL (if no icon)">
+          <input type="text" id="link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-color" placeholder="Color (e.g., #f46613 or red)">
+          <input type="text" id="link-background-color" placeholder="Background Color">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="link-li-bg-color" placeholder="List Item BG Color">
+          <input type="text" id="link-li-hover-color" placeholder="List Item Hover Color">
+        </div>
+        <input type="text" id="link-border-radius" placeholder="Border Radius">
+        <input type="text" id="link-title" placeholder="Title (for tooltip)">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label for="link-hidden">
+            <input type="checkbox" id="link-hidden">
+            Hide this item
+          </label>
+        </div>
+        <button type="submit">Add Link</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="edit-link-popup" class="popup-container hidden">
+    <div class="popup-content">
+      <span class="close-button">&times;</span>
+      <h3>Edit Link</h3>
+      <form id="edit-link-form" style="display: flex; flex-direction: column; gap: 10px; width: 400px;">
+        <input type="hidden" id="edit-link-index">
+        <input type="text" id="edit-link-name" placeholder="Name" required>
+        <input type="text" id="edit-link-group" placeholder="Group (optional)">
+        <input type="url" id="edit-link-url" placeholder="URL" required>
+        <label for="edit-link-default-type">Default Type:</label>
+        <select id="edit-link-default-type">
+          <option value="nerd-font">nerd-font</option>
+          <option value="img">img</option>
+          <option value="text">text</option>
+        </select>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-text" placeholder="Text (if no icon/image)">
+          <input type="url" id="edit-link-img-src" placeholder="Image URL (if no icon)">
+          <input type="text" id="edit-link-icon-class" placeholder="Icon Class (e.g., nf nf-cod-mail)">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-color" placeholder="Color (e.g., #f46613 or red)">
+          <input type="text" id="edit-link-background-color" placeholder="Background Color">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="edit-link-li-bg-color" placeholder="List Item BG Color">
+          <input type="text" id="edit-link-li-hover-color" placeholder="List Item Hover Color">
+        </div>
+        <input type="text" id="edit-link-border-radius" placeholder="Border Radius">
+        <input type="text" id="edit-link-title" placeholder="Title (for tooltip)">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label for="edit-link-hidden">
+            <input type="checkbox" id="edit-link-hidden">
+            Hide this item
+          </label>
+        </div>
+        <button type="submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+
+
+
+  
+    <script>
+        window.EMBEDDED_LINKS_DATA = [
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "erecruitment",
+    "url": "https://erecruitment.bb.org.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "bepza",
+    "url": "https://www.bepza.gov.bd/career"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "dnc",
+    "url": "http://dnc.teletalk.com.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "bpsc",
+    "url": "http://bpsc.teletalk.com.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "brdb",
+    "url": "http://brdb.teletalk.com.bd/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "JobCircular",
+    "name": "ndr",
+    "url": "http://ndr.teletalk.com.bd/"
+  },
+  {
+    "color": "#f46613",
+    "default_type": "img",
+    "icon_class": "nf nf-cod-mail",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/022/613/021/non_2x/google-mail-gmail-icon-logo-symbol-free-png.png",
+    "name": "Google Mail",
+    "url": "https://mail.google.com/"
+  },
+  {
+    "color": "#1399f4",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-dev-facebook",
+    "img_src": "https://img.icons8.com/ios11/512/facebook-new.png",
+    "name": "Facebook",
+    "url": "https://www.facebook.com/"
+  },
+  {
+    "color": "#3675ff",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-facebook_messenger",
+    "name": "Messenger",
+    "url": "https://www.messenger.com/"
+  },
+  {
+    "color": "#ff0000",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-youtube",
+    "name": "YouTube",
+    "url": "https://www.youtube.com/"
+  },
+  {
+    "color": "#5765f2",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-discord",
+    "name": "Discord",
+    "url": "https://discord.com/channels/@me"
+  },
+  {
+    "color": "#ffffff",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-google_translate",
+    "name": "Google Translate",
+    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate"
+  },
+  {
+    "default_type": "img",
+    "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png",
+    "name": "VLR.gg",
+    "url": "https://www.vlr.gg/"
+  },
+  {
+    "color": "#4b70cc",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-dots_hexagon",
+    "name": "Tailscale",
+    "url": "https://login.tailscale.com/admin/machines"
+  },
+  {
+    "default_type": "img",
+    "img_src": "https://d2qr50rz2oof04.cloudfront.net/assets/img/logo/logo-bug.png",
+    "name": "noip",
+    "url": "https://my.noip.com/dynamic-dns"
+  },
+  {
+    "color": "#b259e6",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-microsoft_onenote",
+    "name": "OneNote",
+    "url": "https://www.onenote.com/"
+  },
+  {
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-fa-github_square",
+    "name": "github",
+    "url": "https://github.com/nahid6970"
+  },
+  {
+    "color": "#fbbc04",
+    "default_type": "nerd-font",
+    "icon_class": "nf nf-md-google_keep",
+    "name": "Keep",
+    "url": "https://keep.google.com/"
+  },
+  {
+    "color": "#ff2e2e",
+    "default_type": "nerd-font",
+    "hidden": true,
+    "icon_class": "nf nf-fa-battery_2",
+    "name": "mi9t",
+    "title": "mi9t",
+    "url": "http://mi9t:5002"
+  },
+  {
+    "name": "nerdfonts",
+    "url": "https://www.nerdfonts.com/cheat-sheet",
+    "icon_class": "nf nf-seti-font",
+    "color": "#69e8ff",
+    "default_type": "nerd-font"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "https://img.icons8.com/fluent/512/claude-ai.png",
+    "li_hover_color": "#d97757",
+    "name": "Claude",
+    "url": "https://claude.ai/new"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "name": "Google Bard",
+    "url": "https://bard.google.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
+    "name": "DeepSeek",
+    "url": "https://chat.deepseek.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
+    "name": "Sonarr",
+    "url": "http://192.168.0.101:8989/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
+    "name": "Radarr",
+    "url": "http://192.168.0.101:7878/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
+    "name": "Prowlarr",
+    "url": "http://192.168.0.101:9696/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:6767/images/logo64.png",
+    "name": "Bazarr",
+    "url": "http://192.168.0.101:6767/series"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "http://127.0.0.1:9117/jacket_medium.png",
+    "name": "JackettAPI ",
+    "url": "http://127.0.0.1:9117/UI/Dashboard"
+  },
+  {
+    "color": "#20acd7",
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-md-folder_sync",
+    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
+    "name": "Syncthing",
+    "url": "http://127.0.0.1:8384/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-linux-tor",
+    "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
+    "name": "qBittorrent",
+    "url": "http://192.168.0.101:8080/"
+  },
+  {
+    "color": "#009fff",
+    "default_type": "nerd-font",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-fa-wifi",
+    "name": "WIFI",
+    "url": "http://192.168.0.1/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/4400/4400968.png",
+    "name": "ShareTXT",
+    "url": "http://192.168.0.101:5001/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2840/2840124.png",
+    "name": "ShareFile",
+    "url": "http://192.168.0.101:5002/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2250/2250195.png",
+    "name": "Browse",
+    "url": "http://192.168.0.101:5003/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "hidden": true,
+    "name": "GameARR",
+    "url": "http://192.168.0.101:5005/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "http://fitgirl-repacks.site/wp-content/uploads/2016/08/cropped-icon-192x192.jpg",
+    "name": "Fitgirl",
+    "url": "https://fitgirl-repacks.site/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Download PKG",
+    "name": "romsfun",
+    "url": "https://romsfun.com/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Download PKG",
+    "name": "DODI",
+    "url": "https://dodi-repacks.site/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "https://avatars.githubusercontent.com/u/16618068?s=30",
+    "name": "Scoop",
+    "url": "https://scoop.sh/#/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MC40OTIiIGhlaWdodD0iNDUuOTg2IiB2aWV3Qm94PSIwIDAgNDAuNDkyIDQ1Ljk4NiI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTgzNS4xMzEgLTcyLjEzNikiPjxsaW5lIHkyPSIyMS41NDciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgOTUuMjExKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxOC45NiIgeTI9IjExLjAyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkyPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgMTA2LjA2NykiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5Mj0iMjEuODc2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NzQuMjU1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkxPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgNzMuNSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5MT0iMTAuNjkxIiB4Mj0iMTguNzk1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSA3My41KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgyPSIxOC43OTUiIHkyPSIxMS4wMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODM2LjUgODQuMTkxKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSIyMS44NzYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgzNi41IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguNzk1IiB5MT0iMTAuNjkxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDYuMDY3KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSI1LjA5OSIgeDI9IjguNzM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDAuOTY4KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkyPSIxMS42NzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg0NS4yMzggODkuMjkpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjEwLjA1NyIgeTI9IjUuNzU3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NDUuMjM4IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTE9IjUuNzU3IiB4Mj0iMTAuMjIyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjExLjY3OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY1LjUxNyA4OS4yOSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4Mj0iMTAuMjIyIiB5Mj0iNi4wODYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgODMuMjA0KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxMC4wNTciIHkyPSI2LjA4NiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODQ1LjIzOCA4My4yMDQpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjkuNzA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDczLjUpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjguNzM4IiB5Mj0iNS4wOTkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg2NS41MTcgMTAwLjk2OCkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+",
+    "name": "Winget",
+    "url": "https://winget.run/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "https://apps.evozi.com/apk-downloader/assets/img/mini_icon.png",
+    "name": "evozi",
+    "url": "https://apps.evozi.com/apk-downloader/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "https://store.rg-adguard.net/img/Store.png",
+    "name": "MS-Store",
+    "url": "https://store.rg-adguard.net/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "icon_class": "nf nf-oct-command_palette",
+    "name": "Command",
+    "url": "http://192.168.0.101:5007/"
+  },
+  {
+    "name": "ollama-chat",
+    "group": "Local (Apps)",
+    "url": "http://localhost:8000/",
+    "img_src": "https://ollama.com/public/ollama.png",
+    "default_type": "img",
+    "li_bg_color": "white"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/4021/4021539.png",
+    "name": "myhome",
+    "url": "https://nahid6970.github.io/ms1/myhome/myhome"
+  }
+];
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+  const linksContainer = document.getElementById('links-container');
+  const addLinkForm = document.getElementById('add-link-form');
+
+  // Function to fetch and display links
+  async function fetchAndDisplayLinks() {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      linksContainer.innerHTML = ''; // Clear existing links
+
+      const groupedElements = {}; // Store HTML elements grouped by name
+      const groupedLinks = {}; // Store original links grouped by name
+
+      links.forEach((link, index) => { // Use the index from the original links array
+        // Skip hidden items unless in edit mode
+        if (link.hidden && !document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+          return;
+        }
+
+        const groupName = link.group || 'Ungrouped';
+        if (!groupedElements[groupName]) {
+          groupedElements[groupName] = [];
+          groupedLinks[groupName] = [];
+        }
+
+        const listItem = document.createElement('li');
+        listItem.className = 'link-item';
+        listItem.draggable = true;
+        listItem.dataset.linkIndex = index;
+        
+        // Add drag event listeners
+        listItem.addEventListener('dragstart', handleDragStart);
+        listItem.addEventListener('dragover', handleDragOver);
+        listItem.addEventListener('drop', handleDrop);
+        listItem.addEventListener('dragend', handleDragEnd);
+        
+        // Add visual indicator for hidden items in edit mode
+        if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+          listItem.classList.add('hidden-item');
+          listItem.style.opacity = '0.5';
+          listItem.style.border = '2px dashed #666';
+        }
+        
+        if (link.li_bg_color) {
+          listItem.style.backgroundColor = link.li_bg_color;
+        }
+        if (link.li_hover_color) {
+          listItem.addEventListener('mouseover', () => {
+            listItem.style.backgroundColor = link.li_hover_color;
+          });
+          listItem.addEventListener('mouseout', () => {
+            listItem.style.backgroundColor = link.li_bg_color || '';
+          });
+        }
+
+        let linkContent;
+
+        if (link.default_type === 'nerd-font' && link.icon_class) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+        } else if (link.default_type === 'img' && link.img_src) {
+          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+        } else if (link.default_type === 'text' && link.text) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
+        } else {
+          // Fallback if default_type is not set or doesn't match available content
+          if (link.icon_class) {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          } else if (link.img_src) {
+            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+          } else {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+          }
+        }
+
+        listItem.innerHTML = linkContent;
+        // Apply font size if it's a text-based link (either default_type text or fallback to name)
+        if (link.default_type === 'text' || link.default_type === 'nerd-font' || (!link.default_type && (link.icon_class || (!link.icon_class && !link.img_src)))) {
+          listItem.style.fontSize = '40px';
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'link-buttons';
+
+        // Add reorder buttons
+        const reorderButtonsContainer = document.createElement('div');
+        reorderButtonsContainer.className = 'reorder-buttons';
+        
+        const upButton = document.createElement('button');
+        upButton.textContent = '↑';
+        upButton.className = 'reorder-btn';
+        upButton.onclick = (e) => {
+          e.stopPropagation();
+          moveLink(index, -1);
+        };
+        reorderButtonsContainer.appendChild(upButton);
+        
+        const downButton = document.createElement('button');
+        downButton.textContent = '↓';
+        downButton.className = 'reorder-btn';
+        downButton.onclick = (e) => {
+          e.stopPropagation();
+          moveLink(index, 1);
+        };
+        reorderButtonsContainer.appendChild(downButton);
+        
+        buttonContainer.appendChild(reorderButtonsContainer);
+
+        const editButton = document.createElement('button');
+        editButton.textContent = '';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
+        buttonContainer.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => deleteLink(index); // Pass original index
+        buttonContainer.appendChild(deleteButton);
+
+        listItem.appendChild(buttonContainer);
+        groupedElements[groupName].push(listItem);
+        groupedLinks[groupName].push({link, index});
+      });
+
+      // Now append the grouped elements to the container
+      const groupNames = Object.keys(groupedElements);
+      for (let i = 0; i < groupNames.length; i++) {
+        const groupName = groupNames[i];
+        // Skip empty groups (when all items are hidden)
+        if (groupedElements[groupName].length === 0) {
+          continue;
+        }
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'link-group';
+        // Remove draggable attribute - we'll handle reordering with buttons only
+        groupDiv.dataset.groupName = groupName;
+
+        const groupHeaderContainer = document.createElement('div');
+        groupHeaderContainer.className = 'group-header-container';
+
+        const groupTitle = document.createElement('h3');
+        groupTitle.textContent = groupName;
+        groupTitle.className = 'group-title';
+        groupHeaderContainer.appendChild(groupTitle);
+
+        // Add group reorder buttons
+        const groupReorderButtons = document.createElement('div');
+        groupReorderButtons.className = 'group-reorder-buttons';
+        
+        const groupUpButton = document.createElement('button');
+        groupUpButton.textContent = '↑';
+        groupUpButton.className = 'reorder-btn';
+        groupUpButton.onclick = (e) => {
+          e.stopPropagation();
+          moveGroup(groupName, -1);
+        };
+        groupReorderButtons.appendChild(groupUpButton);
+        
+        const groupDownButton = document.createElement('button');
+        groupDownButton.textContent = '↓';
+        groupDownButton.className = 'reorder-btn';
+        groupDownButton.onclick = (e) => {
+          e.stopPropagation();
+          moveGroup(groupName, 1);
+        };
+        groupReorderButtons.appendChild(groupDownButton);
+        
+        groupHeaderContainer.appendChild(groupReorderButtons);
+
+        // Add edit group button (only visible in edit mode)
+        const editGroupButton = document.createElement('button');
+        editGroupButton.textContent = '';
+        editGroupButton.className = 'edit-group-button';
+        editGroupButton.onclick = () => openEditGroupPopup(groupName);
+        groupHeaderContainer.appendChild(editGroupButton);
+
+        groupDiv.appendChild(groupHeaderContainer);
+
+        const groupList = document.createElement('ul');
+        groupList.className = 'link-group-content';
+
+        groupedElements[groupName].forEach(element => {
+          groupList.appendChild(element);
+        });
+
+        // Add button for adding new links to this group
+        const addLinkItem = document.createElement('li');
+        addLinkItem.className = 'link-item add-link-item';
+
+        const addLinkSpan = document.createElement('span');
+        addLinkSpan.textContent = '+';
+        addLinkSpan.style.cursor = 'pointer';
+        addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+        addLinkSpan.style.fontSize = '25px';
+        addLinkSpan.style.alignContent = 'center';
+
+        addLinkSpan.addEventListener('click', () => {
+          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+          const addLinkPopup = document.getElementById('add-link-popup');
+          addLinkPopup.classList.remove('hidden'); // Remove hidden class
+        });
+        addLinkItem.appendChild(addLinkSpan);
+        groupList.appendChild(addLinkItem);
+
+        groupDiv.appendChild(groupList);
+        linksContainer.appendChild(groupDiv);
+      }
+    } catch (error) {
+      console.error('Error fetching links:', error);
+    }
+  }
+
+  // Function to open edit group popup
+  function openEditGroupPopup(currentGroupName) {
+    const editGroupPopup = document.getElementById('edit-group-popup');
+    const editGroupNameInput = document.getElementById('edit-group-name');
+    const editGroupOriginalName = document.getElementById('edit-group-original-name');
+    
+    editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
+    editGroupOriginalName.value = currentGroupName;
+    editGroupPopup.classList.remove('hidden');
+  }
+
+  // Function to update group name for all links in that group
+  async function updateGroupName(originalGroupName, newGroupName) {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      
+      // Create a new array with the updated group names
+      const newLinks = links.map(link => {
+        const linkGroupName = link.group || 'Ungrouped';
+        if (linkGroupName === originalGroupName) {
+          const updatedLink = { ...link };
+          if (newGroupName && newGroupName !== '') {
+            updatedLink.group = newGroupName;
+          } else {
+            delete updatedLink.group; // For "Ungrouped"
+          }
+          return updatedLink;
+        }
+        return link;
+      });
+
+      // Update the entire list on the server
+      const updateResponse = await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newLinks),
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update links on the server.');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating group name:', error);
+      return false;
+    }
+  }
+
+  // Handle form submission for adding new links
+  if (addLinkForm) {
+    addLinkForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const newLink = {
+        name: document.getElementById('link-name').value,
+        group: document.getElementById('link-group').value || undefined,
+        url: document.getElementById('link-url').value,
+        icon_class: document.getElementById('link-icon-class').value || undefined,
+        color: document.getElementById('link-color').value || undefined,
+        img_src: document.getElementById('link-img-src').value || undefined,
+        text: document.getElementById('link-text').value || undefined,
+        default_type: document.getElementById('link-default-type').value || undefined,
+        background_color: document.getElementById('link-background-color').value || undefined,
+        border_radius: document.getElementById('link-border-radius').value || undefined,
+        title: document.getElementById('link-title').value || undefined,
+        li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
+        li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
+        hidden: document.getElementById('link-hidden').checked || undefined,
+      };
+
+      // Clean up empty strings and false values for optional fields
+      Object.keys(newLink).forEach(key => {
+        if (newLink[key] === '' || newLink[key] === false) {
+          delete newLink[key];
+        }
+      });
+
+      try {
+        const response = await fetch('/api/add_link', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newLink),
+        });
+
+        if (response.ok) {
+          alert('Link added successfully!');
+          addLinkForm.reset(); // Clear form
+          fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA); // Refresh links
+        } else {
+          alert('Failed to add link.');
+        }
+      } catch (error) {
+        console.error('Error adding link:', error);
+        alert('Error adding link.');
+      }
+    });
+  }
+
+  // Edit Link functionality
+  const editLinkPopup = document.getElementById('edit-link-popup');
+  const editLinkForm = document.getElementById('edit-link-form');
+  const editLinkIndexInput = document.getElementById('edit-link-index');
+
+  function openEditLinkPopup(link, index) {
+    editLinkIndexInput.value = index;
+    document.getElementById('edit-link-name').value = link.name || '';
+    document.getElementById('edit-link-group').value = link.group || '';
+    document.getElementById('edit-link-url').value = link.url || '';
+    document.getElementById('edit-link-icon-class').value = link.icon_class || '';
+    document.getElementById('edit-link-color').value = link.color || '';
+    document.getElementById('edit-link-img-src').value = link.img_src || '';
+    document.getElementById('edit-link-text').value = link.text || '';
+    document.getElementById('edit-link-default-type').value = link.default_type || 'nerd-font';
+    document.getElementById('edit-link-background-color').value = link.background_color || '';
+    document.getElementById('edit-link-border-radius').value = link.border_radius || '';
+    document.getElementById('edit-link-title').value = link.title || '';
+    document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
+    document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
+    document.getElementById('edit-link-hidden').checked = link.hidden || false;
+    editLinkPopup.classList.remove('hidden');
+  }
+
+  if (editLinkForm) {
+    if (!editLinkForm.hasAttribute('data-listener-attached')) {
+        editLinkForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const linkId = editLinkIndexInput.value;
+            const updatedLink = {
+                name: document.getElementById('edit-link-name').value,
+                group: document.getElementById('edit-link-group').value || undefined,
+                url: document.getElementById('edit-link-url').value,
+                icon_class: document.getElementById('edit-link-icon-class').value || undefined,
+                color: document.getElementById('edit-link-color').value || undefined,
+                img_src: document.getElementById('edit-link-img-src').value || undefined,
+                text: document.getElementById('edit-link-text').value || undefined,
+                default_type: document.getElementById('edit-link-default-type').value || undefined,
+                background_color: document.getElementById('edit-link-background-color').value || undefined,
+                border_radius: document.getElementById('edit-link-border-radius').value || undefined,
+                title: document.getElementById('edit-link-title').value || undefined,
+                li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
+                li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
+                hidden: document.getElementById('edit-link-hidden').checked || undefined,
+            };
+
+            // Clean up empty strings and false values for optional fields
+            Object.keys(updatedLink).forEach(key => {
+                if (updatedLink[key] === '' || updatedLink[key] === false) {
+                    delete updatedLink[key];
+                }
+            });
+
+            try {
+                const response = await fetch(`/api/links/${linkId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedLink),
+                });
+
+                if (response.ok) {
+                    alert('Link updated successfully!');
+                    editLinkPopup.classList.add('hidden');
+                    fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+                } else {
+                    alert('Failed to update link.');
+                }
+            } catch (error) {
+                console.error('Error updating link:', error);
+                alert('Error updating link.');
+            }
+        });
+        editLinkForm.setAttribute('data-listener-attached', 'true');
+    }
+  }
+
+  // Edit Group functionality
+  const editGroupForm = document.getElementById('edit-group-form');
+  if (editGroupForm) {
+    if (!editGroupForm.hasAttribute('data-listener-attached')) {
+      editGroupForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const originalGroupName = document.getElementById('edit-group-original-name').value;
+        const newGroupName = document.getElementById('edit-group-name').value;
+
+        if (originalGroupName === newGroupName || 
+            (originalGroupName === 'Ungrouped' && newGroupName === '')) {
+          alert('No changes made to group name.');
+          document.getElementById('edit-group-popup').classList.add('hidden');
+          return;
+        }
+
+        try {
+          const success = await updateGroupName(originalGroupName, newGroupName);
+          if (success) {
+            alert('Group name updated successfully!');
+            document.getElementById('edit-group-popup').classList.add('hidden');
+            fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+          } else {
+            alert('Failed to update group name.');
+          }
+        } catch (error) {
+          console.error('Error updating group name:', error);
+          alert('Error updating group name.');
+        }
+      });
+      editGroupForm.setAttribute('data-listener-attached', 'true');
+    }
+  }
+
+  // Delete Link functionality
+  async function deleteLink(linkId) {
+    if (confirm('Are you sure you want to delete this link?')) {
+      try {
+        const response = await fetch(`/api/links/${linkId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          alert('Link deleted successfully!');
+          fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+        } else {
+          alert('Failed to delete link.');
+        }
+      } catch (error) {
+        console.error('Error deleting link:', error);
+        alert('Error deleting link.');
+      }
+    }
+  }
+
+  // Initial fetch and display of links
+  fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+
+  // Edit Mode Toggle functionality
+  const editModeToggle = document.getElementById('edit-mode-toggle');
+  const flexContainer2 = document.querySelector('.flex-container2');
+
+  if (editModeToggle && flexContainer2) {
+    editModeToggle.addEventListener('change', function() {
+      if (this.checked) {
+        flexContainer2.classList.add('edit-mode');
+      } else {
+        flexContainer2.classList.remove('edit-mode');
+      }
+      // Refresh the display when edit mode is toggled to show/hide items
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+    });
+  }
+
+  // Drag and Drop functionality for links
+  let draggedElement = null;
+  let draggedIndex = null;
+
+  function handleDragStart(e) {
+    draggedElement = this;
+    draggedIndex = parseInt(this.dataset.linkIndex);
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+  }
+
+  function handleDragOver(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  function handleDrop(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    
+    if (draggedElement !== this) {
+      const targetIndex = parseInt(this.dataset.linkIndex);
+      swapLinks(draggedIndex, targetIndex);
+    }
+    return false;
+  }
+
+  function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    draggedElement = null;
+    draggedIndex = null;
+  }
+
+  // Move link up or down within the same group
+  async function moveLink(linkIndex, direction) {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      
+      const currentLink = links[linkIndex];
+      const currentGroup = currentLink.group || 'Ungrouped';
+      
+      // Find all links in the same group
+      const groupLinks = links.map((link, index) => ({link, index}))
+                              .filter(item => (item.link.group || 'Ungrouped') === currentGroup);
+      
+      // Find current position within the group
+      const currentGroupIndex = groupLinks.findIndex(item => item.index === linkIndex);
+      const targetGroupIndex = currentGroupIndex + direction;
+      
+      // Check bounds
+      if (targetGroupIndex < 0 || targetGroupIndex >= groupLinks.length) {
+        return;
+      }
+      
+      // Swap with target
+      const targetLinkIndex = groupLinks[targetGroupIndex].index;
+      await swapLinks(linkIndex, targetLinkIndex);
+      
+    } catch (error) {
+      console.error('Error moving link:', error);
+    }
+  }
+
+  // Move entire group up or down
+  async function moveGroup(groupName, direction) {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      
+      // Get all unique group names in their current order
+      const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
+      const currentIndex = groupNames.indexOf(groupName);
+      const targetIndex = currentIndex + direction;
+      
+      // Check bounds
+      if (targetIndex < 0 || targetIndex >= groupNames.length) {
+        return;
+      }
+      
+      // Swap the group names
+      [groupNames[currentIndex], groupNames[targetIndex]] = [groupNames[targetIndex], groupNames[currentIndex]];
+      
+      // Rebuild the links array based on the new group order
+      const newLinks = [];
+      const linksByGroup = links.reduce((acc, link) => {
+        const group = link.group || 'Ungrouped';
+        if (!acc[group]) {
+          acc[group] = [];
+        }
+        acc[group].push(link);
+        return acc;
+      }, {});
+      
+      groupNames.forEach(group => {
+        newLinks.push(...(linksByGroup[group] || []));
+      });
+      
+      // Update the entire list of links on the server
+      await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newLinks),
+      });
+      
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+      
+    } catch (error) {
+      console.error('Error moving group:', error);
+    }
+  }
+
+  // Swap two links by their indices
+  async function swapLinks(index1, index2) {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      
+      // Swap the links
+      [links[index1], links[index2]] = [links[index2], links[index1]];
+      
+      // Update both links
+      await fetch(`/api/links/${index1}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(links[index1]),
+      });
+      
+      await fetch(`/api/links/${index2}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(links[index2]),
+      });
+      
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+      
+    } catch (error) {
+      console.error('Error swapping links:', error);
+    }
+  }
+
+  // Swap all links between two groups
+  async function swapGroups(group1Name, group2Name) {
+    try {
+      const links = window.EMBEDDED_LINKS_DATA;
+      
+      const group1Indices = [];
+      const group2Indices = [];
+      
+      links.forEach((link, index) => {
+        const linkGroup = link.group || 'Ungrouped';
+        if (linkGroup === group1Name) {
+          group1Indices.push(index);
+        } else if (linkGroup === group2Name) {
+          group2Indices.push(index);
+        }
+      });
+      
+      // Create a new links array with the groups swapped
+      const newLinks = [...links];
+      
+      group1Indices.forEach((linkIndex, i) => {
+        const correspondingGroup2Index = group2Indices[i];
+        
+        // Swap the group property of the links
+        const group1Link = { ...newLinks[linkIndex] };
+        const group2Link = { ...newLinks[correspondingGroup2Index] };
+        
+        const tempGroup = group1Link.group;
+        group1Link.group = group2Link.group;
+        group2Link.group = tempGroup;
+        
+        newLinks[linkIndex] = group1Link;
+        newLinks[correspondingGroup2Index] = group2Link;
+      });
+      
+      // Update the entire list of links on the server
+      await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newLinks),
+      });
+      
+      fetchAndDisplayLinks(window.EMBEDDED_LINKS_DATA);
+      
+    } catch (error) {
+      console.error('Error swapping groups:', error);
+    }
+  }
+});
+
+// Functions from original index.js
+function updateSearchEngine() {
+  var selectedEngine = document.getElementById('search-engine').value;
+  document.getElementById('current-search-engine').textContent = selectedEngine;
+}
+
+function checkEnter(event) {
+  if (event.key === 'Enter') {
+    search();
+  }
+}
+
+function search() {
+  var query = document.getElementById('searchQuery').value;
+  var selectedEngine = document.getElementById('search-engine').value;
+
+  if (query) {
+    window.location.href = 'https://' + selectedEngine + '.com/search?q=' + encodeURIComponent(query);
+  }
+}
+
+function updateDateTime() {
+  const now = new Date();
+  const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+  document.getElementById('currentDate').innerText = now.toLocaleDateString('en-US', optionsDate);
+  document.getElementById('currentTime').innerText = now.toLocaleTimeString('en-US', optionsTime);
+}
+
+// Update the date and time on page load
+updateDateTime();
+
+// Update the time every second
+setInterval(updateDateTime, 1000);
+    </script>
+    <script>
+        /* For Showing Markdown Table in HTML properly but lines also show */
+ function parseMarkdownTable(markdown) {
+  const rows = markdown.trim().split('\n');
+  const headers = rows[1].split('|').map(header => header.trim()).filter(Boolean);
+  const data = rows.slice(2, -1).map(row => row.split('|').map(cell => cell.trim()).filter(Boolean));
+
+  return { headers, data };
+}
+
+function renderTable(headers, data) {
+  const tableElement = document.createElement('table');
+  const theadElement = document.createElement('thead');
+  const tbodyElement = document.createElement('tbody');
+
+  const headerRow = document.createElement('tr');
+  headers.forEach(header => {
+      const thElement = document.createElement('th');
+      thElement.textContent = header;
+      headerRow.appendChild(thElement);
+  });
+
+  theadElement.appendChild(headerRow);
+
+  data.forEach(rowData => {
+      const rowElement = document.createElement('tr');
+      rowData.forEach(cellData => {
+          const tdElement = document.createElement('td');
+          tdElement.textContent = cellData;
+          rowElement.appendChild(tdElement);
+      });
+      tbodyElement.appendChild(rowElement);
+  });
+
+  tableElement.appendChild(theadElement);
+  tableElement.appendChild(tbodyElement);
+
+  return tableElement;
+}
+
+function convertMarkdownTables() {
+  const elements = document.querySelectorAll('[id^="markdown-table-"]');
+  elements.forEach(element => {
+      const markdownContent = element.innerHTML;
+      const { headers, data } = parseMarkdownTable(markdownContent);
+      const tableElement = renderTable(headers, data);
+      element.innerHTML = ''; // Clear the original content
+      element.appendChild(tableElement);
+  });
+}
+// Call the function to convert Markdown tables on page load
+window.addEventListener('load', convertMarkdownTables); 
+ 
+
+/* // Get all the spans
+const spans = document.querySelectorAll('span');
+
+// Find the span with the maximum width
+let maxWidth = 0;
+spans.forEach(span => {
+  const width = span.offsetWidth;
+  if (width > maxWidth) {
+    maxWidth = width;
+  }
+});
+
+// Set the width of all spans to the maximum width
+spans.forEach(span => {
+  span.style.width = `${maxWidth}px`;
+}); */
+
+
+// Popup functionality
+document.addEventListener('DOMContentLoaded', () => {
+  const addLinkPopup = document.getElementById('add-link-popup');
+  const editLinkPopup = document.getElementById('edit-link-popup');
+  const editGroupPopup = document.getElementById('edit-group-popup');
+
+  // Close buttons for addLinkPopup
+  const addCloseButton = addLinkPopup ? addLinkPopup.querySelector('.close-button') : null;
+  if (addCloseButton) {
+    addCloseButton.addEventListener('click', () => {
+      addLinkPopup.classList.add('hidden');
+    });
+  }
+
+  // Close buttons for editLinkPopup
+  const editCloseButton = editLinkPopup ? editLinkPopup.querySelector('.close-button') : null;
+  if (editCloseButton) {
+    editCloseButton.addEventListener('click', () => {
+      editLinkPopup.classList.add('hidden');
+    });
+  }
+
+  // Close buttons for editGroupPopup
+  const editGroupCloseButton = editGroupPopup ? editGroupPopup.querySelector('.close-button') : null;
+  if (editGroupCloseButton) {
+    editGroupCloseButton.addEventListener('click', () => {
+      editGroupPopup.classList.add('hidden');
+    });
+  }
+
+  // Close popups when clicking outside
+  window.addEventListener('click', (event) => {
+    if (event.target === addLinkPopup) {
+      addLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editLinkPopup) {
+      editLinkPopup.classList.add('hidden');
+    }
+    if (event.target === editGroupPopup) {
+      editGroupPopup.classList.add('hidden');
+    }
+  });
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'F1') {
+    event.preventDefault();
+    const toggle = document.getElementById('edit-mode-toggle');
+    toggle.checked = !toggle.checked;
+    const changeEvent = new Event('change');
+    toggle.dispatchEvent(changeEvent);
+  }
+});
+    </script>
+    
+  
+
+
+  </div>
+</body>
+
+</html>

@@ -319,5 +319,12 @@
     "img_src": "https://cdn-icons-png.flaticon.com/512/4021/4021539.png",
     "name": "myhome",
     "url": "https://nahid6970.github.io/ms1/myhome/myhome"
+  },
+  {
+    "name": "Kimi k2",
+    "group": "Chat-BOT",
+    "url": "https://www.kimi.com/",
+    "img_src": "https://statics.moonshot.cn/kimi-blog/assets/logo-CvjirWOb.svg",
+    "default_type": "img"
   }
 ]
