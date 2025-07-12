@@ -112,3 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'F1') {
+    event.preventDefault();
+    const toggle = document.getElementById('edit-mode-toggle');
+    toggle.checked = !toggle.checked;
+    const changeEvent = new Event('change');
+    toggle.dispatchEvent(changeEvent);
+  }
+});
