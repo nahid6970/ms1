@@ -99,10 +99,11 @@
     "url": "https://my.noip.com/dynamic-dns"
   },
   {
+    "color": "#b259e6",
     "default_type": "nerd-font",
-    "icon_class": "nf nf-md-sticker_emoji",
-    "name": "nerdfonts",
-    "url": "https://www.nerdfonts.com/cheat-sheet"
+    "icon_class": "nf nf-md-microsoft_onenote",
+    "name": "OneNote",
+    "url": "https://www.onenote.com/"
   },
   {
     "default_type": "nerd-font",
@@ -127,11 +128,11 @@
     "url": "http://mi9t:5002"
   },
   {
-    "color": "#b259e6",
-    "default_type": "nerd-font",
-    "icon_class": "nf nf-md-microsoft_onenote",
-    "name": "OneNote",
-    "url": "https://www.onenote.com/"
+    "name": "nerdfonts",
+    "url": "https://www.nerdfonts.com/cheat-sheet",
+    "icon_class": "nf nf-seti-font",
+    "color": "#69e8ff",
+    "default_type": "nerd-font"
   },
   {
     "default_type": "img",
