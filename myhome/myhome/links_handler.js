@@ -5,21 +5,143 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to fetch and display links
   async function fetchAndDisplayLinks() {
     try {
-      const response = await fetch('/api/groups');
-      const groups = await response.json();
+      const response = await fetch('/api/links');
+      const links = await response.json();
       linksContainer.innerHTML = ''; // Clear existing links
 
-      groups.forEach(group => {
+      const groupedElements = {}; // Store HTML elements grouped by name
+      const groupedLinks = {}; // Store original links grouped by name
+
+      links.forEach((link, index) => { // Use the index from the original links array
+        // Skip hidden items unless in edit mode
+        if (link.hidden && !document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+          return;
+        }
+
+        const groupName = link.group || 'Ungrouped';
+        if (!groupedElements[groupName]) {
+          groupedElements[groupName] = [];
+          groupedLinks[groupName] = [];
+        }
+
+        const listItem = document.createElement('li');
+        listItem.className = 'link-item';
+        listItem.draggable = true;
+        listItem.dataset.linkIndex = index;
+        
+        // Add drag event listeners
+        listItem.addEventListener('dragstart', handleDragStart);
+        listItem.addEventListener('dragover', handleDragOver);
+        listItem.addEventListener('drop', handleDrop);
+        listItem.addEventListener('dragend', handleDragEnd);
+        
+        // Add visual indicator for hidden items in edit mode
+        if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+          listItem.classList.add('hidden-item');
+          listItem.style.opacity = '0.5';
+          listItem.style.border = '2px dashed #666';
+        }
+        
+        if (link.li_bg_color) {
+          listItem.style.backgroundColor = link.li_bg_color;
+        }
+        if (link.li_hover_color) {
+          listItem.addEventListener('mouseover', () => {
+            listItem.style.backgroundColor = link.li_hover_color;
+          });
+          listItem.addEventListener('mouseout', () => {
+            listItem.style.backgroundColor = link.li_bg_color || '';
+          });
+        }
+
+        let linkContent;
+
+        if (link.default_type === 'nerd-font' && link.icon_class) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+        } else if (link.default_type === 'img' && link.img_src) {
+          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+        } else if (link.default_type === 'text' && link.text) {
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
+        } else {
+          // Fallback if default_type is not set or doesn't match available content
+          if (link.icon_class) {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          } else if (link.img_src) {
+            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+          } else {
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+          }
+        }
+
+        listItem.innerHTML = linkContent;
+        // Apply font size if it's a text-based link (either default_type text or fallback to name)
+        if (link.default_type === 'text' || link.default_type === 'nerd-font' || (!link.default_type && (link.icon_class || (!link.icon_class && !link.img_src)))) {
+          listItem.style.fontSize = '40px';
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'link-buttons';
+
+        // Add reorder buttons
+        const reorderButtonsContainer = document.createElement('div');
+        reorderButtonsContainer.className = 'reorder-buttons';
+        
+        const upButton = document.createElement('button');
+        upButton.textContent = '↑';
+        upButton.className = 'reorder-btn';
+        upButton.onclick = (e) => {
+          e.stopPropagation();
+          moveLink(index, -1);
+        };
+        reorderButtonsContainer.appendChild(upButton);
+        
+        const downButton = document.createElement('button');
+        downButton.textContent = '↓';
+        downButton.className = 'reorder-btn';
+        downButton.onclick = (e) => {
+          e.stopPropagation();
+          moveLink(index, 1);
+        };
+        reorderButtonsContainer.appendChild(downButton);
+        
+        buttonContainer.appendChild(reorderButtonsContainer);
+
+        const editButton = document.createElement('button');
+        editButton.textContent = '';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
+        buttonContainer.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => deleteLink(index); // Pass original index
+        buttonContainer.appendChild(deleteButton);
+
+        listItem.appendChild(buttonContainer);
+        groupedElements[groupName].push(listItem);
+        groupedLinks[groupName].push({link, index});
+      });
+
+      // Now append the grouped elements to the container
+      const groupNames = Object.keys(groupedElements);
+      for (let i = 0; i < groupNames.length; i++) {
+        const groupName = groupNames[i];
+        // Skip empty groups (when all items are hidden)
+        if (groupedElements[groupName].length === 0) {
+          continue;
+        }
+
         const groupDiv = document.createElement('div');
         groupDiv.className = 'link-group';
-        groupDiv.dataset.groupName = group.name;
-        groupDiv.dataset.displayType = group.display_type || 'normal'; // Store display type
+        // Remove draggable attribute - we'll handle reordering with buttons only
+        groupDiv.dataset.groupName = groupName;
 
         const groupHeaderContainer = document.createElement('div');
         groupHeaderContainer.className = 'group-header-container';
 
         const groupTitle = document.createElement('h3');
-        groupTitle.textContent = group.name;
+        groupTitle.textContent = groupName;
         groupTitle.className = 'group-title';
         groupHeaderContainer.appendChild(groupTitle);
 
@@ -32,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         groupUpButton.className = 'reorder-btn';
         groupUpButton.onclick = (e) => {
           e.stopPropagation();
-          moveGroup(group.name, -1);
+          moveGroup(groupName, -1);
         };
         groupReorderButtons.appendChild(groupUpButton);
         
@@ -41,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
         groupDownButton.className = 'reorder-btn';
         groupDownButton.onclick = (e) => {
           e.stopPropagation();
-          moveGroup(group.name, 1);
+          moveGroup(groupName, 1);
         };
         groupReorderButtons.appendChild(groupDownButton);
         
@@ -51,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const editGroupButton = document.createElement('button');
         editGroupButton.textContent = '';
         editGroupButton.className = 'edit-group-button';
-        editGroupButton.onclick = () => openEditGroupPopup(group.name, group.display_type);
+        editGroupButton.onclick = () => openEditGroupPopup(groupName);
         groupHeaderContainer.appendChild(editGroupButton);
 
         groupDiv.appendChild(groupHeaderContainer);
@@ -59,118 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupList = document.createElement('ul');
         groupList.className = 'link-group-content';
 
-        // Apply display type specific styling
-        if (group.display_type === 'website-list') {
-          groupList.classList.add('website-list-layout');
-        } else {
-          groupList.classList.add('normal-layout');
-        }
-
-        group.links.forEach((link, index) => {
-          // Skip hidden items unless in edit mode
-          if (link.hidden && !document.querySelector('.flex-container2').classList.contains('edit-mode')) {
-            return;
-          }
-
-          const listItem = document.createElement('li');
-          listItem.className = 'link-item';
-          listItem.draggable = true;
-          // We need a global index for links for drag/drop and edit/delete
-          // This will be handled by the backend when fetching links flat
-          // For now, we'll use a temporary index within the group
-          listItem.dataset.linkIndex = `${group.name}-${index}`;
-          
-          // Add drag event listeners
-          listItem.addEventListener('dragstart', handleDragStart);
-          listItem.addEventListener('dragover', handleDragOver);
-          listItem.addEventListener('drop', handleDrop);
-          listItem.addEventListener('dragend', handleDragEnd);
-          
-          // Add visual indicator for hidden items in edit mode
-          if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
-            listItem.classList.add('hidden-item');
-            listItem.style.opacity = '0.5';
-            listItem.style.border = '2px dashed #666';
-          }
-          
-          if (link.li_bg_color) {
-            listItem.style.backgroundColor = link.li_bg_color;
-          }
-          if (link.li_hover_color) {
-            listItem.addEventListener('mouseover', () => {
-              listItem.style.backgroundColor = link.li_hover_color;
-            });
-            listItem.addEventListener('mouseout', () => {
-              listItem.style.backgroundColor = link.li_bg_color || '';
-            });
-          }
-
-          let linkContent;
-
-          if (link.default_type === 'nerd-font' && link.icon_class) {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
-          } else if (link.default_type === 'img' && link.img_src) {
-            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
-          } else if (link.default_type === 'text' && link.text) {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
-          } else {
-            // Fallback if default_type is not set or doesn't match available content
-            if (link.icon_class) {
-              linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
-            } else if (link.img_src) {
-              linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
-            } else {
-              linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
-            }
-          }
-
-          listItem.innerHTML = linkContent;
-          // Apply font size if it's a text-based link (either default_type text or fallback to name)
-          if (link.default_type === 'text' || link.default_type === 'nerd-font' || (!link.default_type && (link.icon_class || (!link.icon_class && !link.img_src)))) {
-            listItem.style.fontSize = '40px';
-          }
-
-          const buttonContainer = document.createElement('div');
-          buttonContainer.className = 'link-buttons';
-
-          // Add reorder buttons
-          const reorderButtonsContainer = document.createElement('div');
-          reorderButtonsContainer.className = 'reorder-buttons';
-          
-          const upButton = document.createElement('button');
-          upButton.textContent = '↑';
-          upButton.className = 'reorder-btn';
-          upButton.onclick = (e) => {
-            e.stopPropagation();
-            moveLink(link.group || 'Ungrouped', index, -1);
-          };
-          reorderButtonsContainer.appendChild(upButton);
-          
-          const downButton = document.createElement('button');
-          downButton.textContent = '↓';
-          downButton.className = 'reorder-btn';
-          downButton.onclick = (e) => {
-            e.stopPropagation();
-            moveLink(link.group || 'Ungrouped', index, 1);
-          };
-          reorderButtonsContainer.appendChild(downButton);
-          
-          buttonContainer.appendChild(reorderButtonsContainer);
-
-          const editButton = document.createElement('button');
-          editButton.textContent = '';
-          editButton.className = 'edit-button';
-          editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
-          buttonContainer.appendChild(editButton);
-
-          const deleteButton = document.createElement('button');
-          deleteButton.textContent = '';
-          deleteButton.className = 'delete-button';
-          deleteButton.onclick = () => deleteLink(link.group || 'Ungrouped', index); // Pass original index
-          buttonContainer.appendChild(deleteButton);
-
-          listItem.appendChild(buttonContainer);
-          groupList.appendChild(listItem);
+        groupedElements[groupName].forEach(element => {
+          groupList.appendChild(element);
         });
 
         // Add button for adding new links to this group
@@ -185,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addLinkSpan.style.alignContent = 'center';
 
         addLinkSpan.addEventListener('click', () => {
-          document.getElementById('link-group').value = group.name === 'Ungrouped' ? '' : group.name;
+          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
           const addLinkPopup = document.getElementById('add-link-popup');
           addLinkPopup.classList.remove('hidden'); // Remove hidden class
         });
@@ -194,46 +206,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
         groupDiv.appendChild(groupList);
         linksContainer.appendChild(groupDiv);
-      });
+      }
     } catch (error) {
-      console.error('Error fetching groups:', error);
+      console.error('Error fetching links:', error);
     }
   }
 
   // Function to open edit group popup
-  function openEditGroupPopup(currentGroupName, currentDisplayType) {
+  function openEditGroupPopup(currentGroupName) {
     const editGroupPopup = document.getElementById('edit-group-popup');
     const editGroupNameInput = document.getElementById('edit-group-name');
     const editGroupOriginalName = document.getElementById('edit-group-original-name');
-    const editGroupDisplayType = document.getElementById('edit-group-display-type');
     
     editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
     editGroupOriginalName.value = currentGroupName;
-    editGroupDisplayType.value = currentDisplayType || 'normal';
     editGroupPopup.classList.remove('hidden');
   }
 
-  // Function to update group name and display type
-  async function updateGroup(originalGroupName, newGroupName, newDisplayType) {
+  // Function to update group name for all links in that group
+  async function updateGroupName(originalGroupName, newGroupName) {
     try {
-      const response = await fetch(`/api/groups/${originalGroupName}`, {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      // Create a new array with the updated group names
+      const newLinks = links.map(link => {
+        const linkGroupName = link.group || 'Ungrouped';
+        if (linkGroupName === originalGroupName) {
+          const updatedLink = { ...link };
+          if (newGroupName && newGroupName !== '') {
+            updatedLink.group = newGroupName;
+          } else {
+            delete updatedLink.group; // For "Ungrouped"
+          }
+          return updatedLink;
+        }
+        return link;
+      });
+
+      // Update the entire list on the server
+      const updateResponse = await fetch('/api/links', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          new_name: newGroupName,
-          display_type: newDisplayType
-        }),
+        body: JSON.stringify(newLinks),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update group on the server.');
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update links on the server.');
       }
 
       return true;
     } catch (error) {
-      console.error('Error updating group:', error);
+      console.error('Error updating group name:', error);
       return false;
     }
   }
@@ -378,66 +404,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const originalGroupName = document.getElementById('edit-group-original-name').value;
         const newGroupName = document.getElementById('edit-group-name').value;
-        const newDisplayType = document.getElementById('edit-group-display-type').value;
 
-        if (originalGroupName === newGroupName && newDisplayType === (await getGroupDisplayType(originalGroupName))) {
-          alert('No changes made to group.');
+        if (originalGroupName === newGroupName || 
+            (originalGroupName === 'Ungrouped' && newGroupName === '')) {
+          alert('No changes made to group name.');
           document.getElementById('edit-group-popup').classList.add('hidden');
           return;
         }
 
         try {
-          const success = await updateGroup(originalGroupName, newGroupName, newDisplayType);
+          const success = await updateGroupName(originalGroupName, newGroupName);
           if (success) {
-            alert('Group updated successfully!');
+            alert('Group name updated successfully!');
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();
           } else {
-            alert('Failed to update group.');
+            alert('Failed to update group name.');
           }
         } catch (error) {
-          console.error('Error updating group:', error);
-          alert('Error updating group.');
+          console.error('Error updating group name:', error);
+          alert('Error updating group name.');
         }
       });
       editGroupForm.setAttribute('data-listener-attached', 'true');
     }
   }
 
-  // Helper to get current group display type (for comparison)
-  async function getGroupDisplayType(groupName) {
-    try {
-      const response = await fetch('/api/groups');
-      const groups = await response.json();
-      const group = groups.find(g => g.name === groupName);
-      return group ? group.display_type : 'normal';
-    } catch (error) {
-      console.error('Error fetching group display type:', error);
-      return 'normal';
-    }
-  }
-
   // Delete Link functionality
-  async function deleteLink(groupName, linkIndexInGroup) {
+  async function deleteLink(linkId) {
     if (confirm('Are you sure you want to delete this link?')) {
       try {
-        const response = await fetch('/api/groups');
-        const groups = await response.json();
-        
-        const targetGroup = groups.find(g => g.name === groupName);
-        if (!targetGroup) {
-          alert('Group not found.');
-          return;
-        }
-
-        const globalLinkIndex = groups.slice(0, groups.indexOf(targetGroup))
-                                      .reduce((acc, g) => acc + g.links.length, 0) + linkIndexInGroup;
-
-        const deleteResponse = await fetch(`/api/links/${globalLinkIndex}`, {
+        const response = await fetch(`/api/links/${linkId}`, {
           method: 'DELETE',
         });
 
-        if (deleteResponse.ok) {
+        if (response.ok) {
           alert('Link deleted successfully!');
           fetchAndDisplayLinks();
         } else {
@@ -475,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function handleDragStart(e) {
     draggedElement = this;
-    draggedIndex = this.dataset.linkIndex; // Store as string "groupName-index"
+    draggedIndex = parseInt(this.dataset.linkIndex);
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.outerHTML);
@@ -489,38 +490,14 @@ document.addEventListener('DOMContentLoaded', function() {
     return false;
   }
 
-  async function handleDrop(e) {
+  function handleDrop(e) {
     if (e.stopPropagation) {
       e.stopPropagation();
     }
     
     if (draggedElement !== this) {
-      const [draggedGroup, draggedLinkIndexInGroup] = draggedIndex.split('-');
-      const [targetGroup, targetLinkIndexInGroup] = this.dataset.linkIndex.split('-');
-
-      // Fetch all groups to get the global indices
-      const response = await fetch('/api/groups');
-      const groups = await response.json();
-
-      let globalDraggedIndex = -1;
-      let globalTargetIndex = -1;
-      let currentGlobalIndex = 0;
-
-      for (const group of groups) {
-        for (let i = 0; i < group.links.length; i++) {
-          if (group.name === draggedGroup && i === parseInt(draggedLinkIndexInGroup)) {
-            globalDraggedIndex = currentGlobalIndex;
-          }
-          if (group.name === targetGroup && i === parseInt(targetLinkIndexInGroup)) {
-            globalTargetIndex = currentGlobalIndex;
-          }
-          currentGlobalIndex++;
-        }
-      }
-      
-      if (globalDraggedIndex !== -1 && globalTargetIndex !== -1) {
-        swapLinks(globalDraggedIndex, globalTargetIndex);
-      }
+      const targetIndex = parseInt(this.dataset.linkIndex);
+      swapLinks(draggedIndex, targetIndex);
     }
     return false;
   }
@@ -532,43 +509,30 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Move link up or down within the same group
-  async function moveLink(groupName, linkIndexInGroup, direction) {
+  async function moveLink(linkIndex, direction) {
     try {
-      const response = await fetch('/api/groups');
-      const groups = await response.json();
+      const response = await fetch('/api/links');
+      const links = await response.json();
       
-      const targetGroup = groups.find(g => g.name === groupName);
-      if (!targetGroup) {
-        alert('Group not found.');
-        return;
-      }
-
-      const linksInGroup = targetGroup.links;
-      const targetIndexInGroup = linkIndexInGroup + direction;
+      const currentLink = links[linkIndex];
+      const currentGroup = currentLink.group || 'Ungrouped';
+      
+      // Find all links in the same group
+      const groupLinks = links.map((link, index) => ({link, index}))
+                              .filter(item => (item.link.group || 'Ungrouped') === currentGroup);
+      
+      // Find current position within the group
+      const currentGroupIndex = groupLinks.findIndex(item => item.index === linkIndex);
+      const targetGroupIndex = currentGroupIndex + direction;
       
       // Check bounds
-      if (targetIndexInGroup < 0 || targetIndexInGroup >= linksInGroup.length) {
+      if (targetGroupIndex < 0 || targetGroupIndex >= groupLinks.length) {
         return;
       }
       
-      // Calculate global indices for the swap
-      let globalIndex1 = 0;
-      let globalIndex2 = 0;
-      let currentGlobalIndex = 0;
-
-      for (const group of groups) {
-        for (let i = 0; i < group.links.length; i++) {
-          if (group.name === groupName && i === linkIndexInGroup) {
-            globalIndex1 = currentGlobalIndex;
-          }
-          if (group.name === groupName && i === targetIndexInGroup) {
-            globalIndex2 = currentGlobalIndex;
-          }
-          currentGlobalIndex++;
-        }
-      }
-
-      await swapLinks(globalIndex1, globalIndex2);
+      // Swap with target
+      const targetLinkIndex = groupLinks[targetGroupIndex].index;
+      await swapLinks(linkIndex, targetLinkIndex);
       
     } catch (error) {
       console.error('Error moving link:', error);
@@ -578,27 +542,44 @@ document.addEventListener('DOMContentLoaded', function() {
   // Move entire group up or down
   async function moveGroup(groupName, direction) {
     try {
-      const response = await fetch('/api/groups');
-      const groups = await response.json();
+      const response = await fetch('/api/links');
+      const links = await response.json();
       
-      const currentIndex = groups.findIndex(g => g.name === groupName);
+      // Get all unique group names in their current order
+      const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
+      const currentIndex = groupNames.indexOf(groupName);
       const targetIndex = currentIndex + direction;
       
       // Check bounds
-      if (targetIndex < 0 || targetIndex >= groups.length) {
+      if (targetIndex < 0 || targetIndex >= groupNames.length) {
         return;
       }
       
-      // Swap the groups in the array
-      [groups[currentIndex], groups[targetIndex]] = [groups[targetIndex], groups[currentIndex]];
+      // Swap the group names
+      [groupNames[currentIndex], groupNames[targetIndex]] = [groupNames[targetIndex], groupNames[currentIndex]];
       
-      // Update the entire list of groups on the server
-      await fetch('/api/groups', {
+      // Rebuild the links array based on the new group order
+      const newLinks = [];
+      const linksByGroup = links.reduce((acc, link) => {
+        const group = link.group || 'Ungrouped';
+        if (!acc[group]) {
+          acc[group] = [];
+        }
+        acc[group].push(link);
+        return acc;
+      }, {});
+      
+      groupNames.forEach(group => {
+        newLinks.push(...(linksByGroup[group] || []));
+      });
+      
+      // Update the entire list of links on the server
+      await fetch('/api/links', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(groups),
+        body: JSON.stringify(newLinks),
       });
       
       fetchAndDisplayLinks();
@@ -611,19 +592,27 @@ document.addEventListener('DOMContentLoaded', function() {
   // Swap two links by their indices
   async function swapLinks(index1, index2) {
     try {
-      const response = await fetch('/api/links'); // Fetch flat links for easy swapping
+      const response = await fetch('/api/links');
       const links = await response.json();
       
       // Swap the links
       [links[index1], links[index2]] = [links[index2], links[index1]];
       
-      // Update the entire list of links on the server
-      await fetch('/api/links', {
+      // Update both links
+      await fetch(`/api/links/${index1}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(links),
+        body: JSON.stringify(links[index1]),
+      });
+      
+      await fetch(`/api/links/${index2}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(links[index2]),
       });
       
       fetchAndDisplayLinks();
@@ -633,10 +622,56 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Swap all links between two groups (This function is likely no longer needed with group reordering)
+  // Swap all links between two groups
   async function swapGroups(group1Name, group2Name) {
-    console.warn('swapGroups function is deprecated and may not work as expected with new data structure.');
-    // This function would need to be re-evaluated if group content swapping is still desired.
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      const group1Indices = [];
+      const group2Indices = [];
+      
+      links.forEach((link, index) => {
+        const linkGroup = link.group || 'Ungrouped';
+        if (linkGroup === group1Name) {
+          group1Indices.push(index);
+        } else if (linkGroup === group2Name) {
+          group2Indices.push(index);
+        }
+      });
+      
+      // Create a new links array with the groups swapped
+      const newLinks = [...links];
+      
+      group1Indices.forEach((linkIndex, i) => {
+        const correspondingGroup2Index = group2Indices[i];
+        
+        // Swap the group property of the links
+        const group1Link = { ...newLinks[linkIndex] };
+        const group2Link = { ...newLinks[correspondingGroup2Index] };
+        
+        const tempGroup = group1Link.group;
+        group1Link.group = group2Link.group;
+        group2Link.group = tempGroup;
+        
+        newLinks[linkIndex] = group1Link;
+        newLinks[correspondingGroup2Index] = group2Link;
+      });
+      
+      // Update the entire list of links on the server
+      await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newLinks),
+      });
+      
+      fetchAndDisplayLinks();
+      
+    } catch (error) {
+      console.error('Error swapping groups:', error);
+    }
   }
 });
 

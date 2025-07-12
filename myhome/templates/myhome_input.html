@@ -64,7 +64,7 @@
 
     </style>
 
-  <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left;">
+  <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
   </div>
 
 <div id="edit-group-popup" class="popup-container hidden">
@@ -75,11 +75,6 @@
         <input type="hidden" id="edit-group-original-name">
         <label for="edit-group-name">Group Name:</label>
         <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
-        <label for="edit-group-display-type">Group Display Type:</label>
-        <select id="edit-group-display-type">
-          <option value="normal">Normal</option>
-          <option value="website-list">Website Link List</option>
-        </select>
         <button type="submit">Update Group Name</button>
       </form>
     </div>
