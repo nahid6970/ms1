@@ -38,7 +38,7 @@ body::-webkit-scrollbar-track {
 display: flex;
 flex-direction: row;
 background-color: #31343a;
-gap: 3px;
+gap: 20px; /* Increased gap for more space between groups */
 flex-wrap: wrap;
 text-align: left;
 line-height: auto;
@@ -52,12 +52,12 @@ position: relative; /* Added for positioning context */
 
 .flex-container2 > div {
 font-weight: normal;
-flex-grow: 1;
 border-radius: 0px;
-width: max-content;
-margin: 1px;
+margin: 1px; /* Reset margin to 1px */
 text-align: left;
-width: 500px;
+flex-grow: 0;
+flex-shrink: 1;
+width: fit-content;
 }
 
 p {
@@ -299,8 +299,6 @@ input:checked + .slider:before {
   color: #ffffff;
   margin-top: 20px;
   margin-bottom: 10px;
-  border-bottom: 1px solid #555;
-  padding-bottom: 5px;
 }
 
 .edit-button, .delete-button {
@@ -358,12 +356,11 @@ input:checked + .slider:before {
 .group-header-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: baseline;
   margin-bottom: 10px;
 }
 
 .group-title {
-  flex-grow: 1;
   margin: 0;
   padding-right: 10px;
 }
@@ -429,6 +426,7 @@ input:checked + .slider:before {
 /* items modified to make it look good */
 ul.link-group-content {
   margin-top: -17px;
+  margin-right: 27px;
 }
 div.group-header-container {
   margin-top: -27px;
@@ -440,4 +438,39 @@ html body {
 
 div.toggle-container {
   margin-top: -16px;
+}
+
+/* Website List Layout */
+.website-list-layout {
+  flex-wrap: nowrap;
+  flex-direction: column;
+  justify-content: flex-start; /* Align items to the start of the cross axis */
+}
+
+.website-list-layout .link-item {
+  width: auto; /* Allow items to take natural width */
+  margin: 2px 0; /* Adjust vertical margin */
+  padding: 5px 10px; /* Adjust padding */
+  flex-direction: row; /* Arrange content in a row */
+  justify-content: flex-start; /* Align content to the start */
+  align-items: center; /* Center items vertically */
+}
+
+.website-list-layout .link-item a {
+  font-size: 16px; /* Smaller font size for list */
+  height: auto; /* Allow height to adjust to content */
+  padding: 2px 5px; /* Adjust padding */
+  display: flex;
+  align-items: center;
+}
+
+.website-list-layout .link-item a img {
+  width: 20px; /* Smaller image size for list */
+  height: 20px;
+  margin-right: 5px; /* Space between image and text */
+}
+
+.website-list-layout .link-item .link-buttons {
+  margin-top: 0; /* Remove top margin */
+  margin-left: auto; /* Push buttons to the right */
 }
