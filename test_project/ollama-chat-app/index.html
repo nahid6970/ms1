@@ -245,6 +245,7 @@
             <div class="d-flex flex-column gap-2">
               <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
               <button type="button" id="stop-button" class="btn btn-danger" disabled><i class="nf nf-cod-debug_stop"></i></button>
+              <button type="button" id="stop-all-button" class="btn btn-warning"><i class="nf nf-oct-stop"></i> Stop All</button>
             </div>
           </div>
         </form>
@@ -259,6 +260,7 @@
     const chatForm = document.getElementById("chat-form");
     const messageInput = document.getElementById("message-input");
     const stopButton = document.getElementById("stop-button");
+    const stopAllButton = document.getElementById("stop-all-button");
     const clearCodeButton = document.getElementById("clear-code");
 
     let controller = null;
@@ -335,6 +337,23 @@
       }
 
       stopButton.disabled = true;
+    });
+
+    stopAllButton.addEventListener("click", async () => {
+      if (controller) controller.abort();
+
+      try {
+        const response = await fetch("/api/stop_all_models", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        const result = await response.json();
+        console.log("All models stopped:", result);
+        alert("All models have been stopped.");
+      } catch (err) {
+        console.error("Couldn't stop all models:", err);
+        alert("Failed to stop all models.");
+      }
     });
 
     async function fetchModels() {
