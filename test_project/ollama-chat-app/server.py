@@ -24,8 +24,6 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/api/stop_model":
             self._handle_stop_model()
-        elif self.path == "/api/crawl":
-            self._handle_crawl_request()
         elif self.path.startswith("/api"):
             self._proxy_request()
         else:
@@ -88,30 +86,7 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, f"Proxy Error: {e}")
 
-    def _handle_crawl_request(self):
-        try:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            body = json.loads(post_data)
-            url = body.get("url")
-
-            if not url:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(b'URL is required')
-                return
-
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            text_content = soup.get_text(separator=' ', strip=True)
-
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"content": text_content}).encode())
-
-        except Exception as e:
-            self.send_error(500, f"Crawl Error: {e}")
+    
 
 with socketserver.TCPServer(("", PORT), OllamaProxyHandler) as httpd:
     print(f"Serving at http://localhost:{PORT}")

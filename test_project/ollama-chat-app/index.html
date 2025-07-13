@@ -719,41 +719,6 @@
       e.preventDefault();
       let message = messageInput.value.trim();
 
-      const crawlPrefix = "@crawl/";
-      if (message.startsWith(crawlPrefix)) {
-        const parts = message.substring(crawlPrefix.length).split(" ");
-        const url = parts[0];
-        const prompt = parts.slice(1).join(" ");
-
-        if (!url) {
-          alert("Please provide a URL after @crawl/");
-          return;
-        }
-
-        displayMessage("user", message, conversationHistory.length);
-        messageInput.value = "";
-        autoGrowTextarea(messageInput);
-
-        try {
-          const response = await fetch("/api/crawl", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: url }),
-          });
-          const data = await response.json();
-
-          if (response.ok) {
-            const crawledContent = data.content;
-            message = `Content from ${url}:\n\n${crawledContent}\n\n${prompt}`;
-          } else {
-            message = `Error crawling ${url}: ${data.error || response.statusText}\n\n${prompt}`;
-          }
-        } catch (error) {
-          message = `Error crawling ${url}: ${error.message}\n\n${prompt}`;
-          console.error("Error crawling URL:", error);
-        }
-      }
-
       if (!message) return;
 
       conversationHistory.push({ role: "user", content: message });
