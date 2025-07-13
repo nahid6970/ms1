@@ -244,7 +244,6 @@
             </div>
             <div class="d-flex flex-column gap-2">
               <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
-              <button type="button" id="stop-button" class="btn btn-danger" disabled><i class="nf nf-cod-debug_stop"></i></button>
               <button type="button" id="stop-all-button" class="btn btn-warning"><i class="nf nf-oct-stop"></i> Stop All</button>
             </div>
           </div>
@@ -259,7 +258,6 @@
     const codeWindow = document.getElementById("code-window");
     const chatForm = document.getElementById("chat-form");
     const messageInput = document.getElementById("message-input");
-    const stopButton = document.getElementById("stop-button");
     const stopAllButton = document.getElementById("stop-all-button");
     const clearCodeButton = document.getElementById("clear-code");
 
@@ -317,27 +315,6 @@
         })
       });
     }
-
-    stopButton.addEventListener("click", async () => {
-      if (controller) controller.abort();
-
-      const selectedModel = modelSelect.value;
-      if (!selectedModel) return;
-
-      try {
-        const response = await fetch("/api/stop_model", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: selectedModel })
-        });
-        const result = await response.json();
-        console.log("Model stopped:", result);
-      } catch (err) {
-        console.error("Couldn't stop model:", err);
-      }
-
-      stopButton.disabled = true;
-    });
 
     stopAllButton.addEventListener("click", async () => {
       if (controller) controller.abort();
@@ -652,7 +629,6 @@
       let finalData;
       try {
         controller = new AbortController();
-        stopButton.disabled = false;
         
         const response = await fetch("/api/chat", {
           method: "POST",
@@ -726,7 +702,6 @@
           assistantMessageTextElement.innerHTML = "Error communicating with Ollama.";
         }
       } finally {
-        stopButton.disabled = true;
         controller = null;
       }
     }
