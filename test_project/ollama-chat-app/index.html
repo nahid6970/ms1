@@ -245,7 +245,6 @@
             <div class="d-flex flex-column gap-2">
               <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
               <button type="button" id="stop-button" class="btn btn-danger" disabled><i class="nf nf-cod-debug_stop"></i></button>
-              <button type="button" id="stop-all-button" class="btn btn-warning"><i class="nf nf-oct-stop"></i> Stop All</button>
             </div>
           </div>
         </form>
@@ -260,7 +259,6 @@
     const chatForm = document.getElementById("chat-form");
     const messageInput = document.getElementById("message-input");
     const stopButton = document.getElementById("stop-button");
-    const stopAllButton = document.getElementById("stop-all-button");
     const clearCodeButton = document.getElementById("clear-code");
 
     let controller = null;
@@ -337,27 +335,6 @@
       }
 
       stopButton.disabled = true;
-    });
-
-    stopAllButton.addEventListener("click", async () => {
-      if (controller) controller.abort();
-      console.log("Sending request to stop all models...");
-      try {
-        const response = await fetch("/api/stop_all_models", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-        const result = await response.json();
-        console.log("Response from server:", result);
-        if (response.ok) {
-          alert("All models have been stopped.");
-        } else {
-          alert("Failed to stop all models. Check console for details.");
-        }
-      } catch (err) {
-        console.error("Couldn't stop all models:", err);
-        alert("Failed to stop all models. Check console for details.");
-      }
     });
 
     async function fetchModels() {
@@ -741,6 +718,41 @@
     chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       let message = messageInput.value.trim();
+
+      const crawlPrefix = "@crawl/";
+      if (message.startsWith(crawlPrefix)) {
+        const parts = message.substring(crawlPrefix.length).split(" ");
+        const url = parts[0];
+        const prompt = parts.slice(1).join(" ");
+
+        if (!url) {
+          alert("Please provide a URL after @crawl/");
+          return;
+        }
+
+        displayMessage("user", message, conversationHistory.length);
+        messageInput.value = "";
+        autoGrowTextarea(messageInput);
+
+        try {
+          const response = await fetch("/api/crawl", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: url }),
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            const crawledContent = data.content;
+            message = `Content from ${url}:\n\n${crawledContent}\n\n${prompt}`;
+          } else {
+            message = `Error crawling ${url}: ${data.error || response.statusText}\n\n${prompt}`;
+          }
+        } catch (error) {
+          message = `Error crawling ${url}: ${error.message}\n\n${prompt}`;
+          console.error("Error crawling URL:", error);
+        }
+      }
 
       if (!message) return;
 
