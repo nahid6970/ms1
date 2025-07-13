@@ -341,18 +341,22 @@
 
     stopAllButton.addEventListener("click", async () => {
       if (controller) controller.abort();
-
+      console.log("Sending request to stop all models...");
       try {
         const response = await fetch("/api/stop_all_models", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
         const result = await response.json();
-        console.log("All models stopped:", result);
-        alert("All models have been stopped.");
+        console.log("Response from server:", result);
+        if (response.ok) {
+          alert("All models have been stopped.");
+        } else {
+          alert("Failed to stop all models. Check console for details.");
+        }
       } catch (err) {
         console.error("Couldn't stop all models:", err);
-        alert("Failed to stop all models.");
+        alert("Failed to stop all models. Check console for details.");
       }
     });
 
