@@ -195,11 +195,11 @@
   background: linear-gradient(to bottom, transparent, #2d2d2d);
 }
 
-.code-block.collapsed .shrink-button i::before {
+.code-block.collapsed .shrink-button::before {
   content: "⇣"; /* Down arrow when expanded */
 }
 
-.code-block:not(.collapsed) .shrink-button i::before {
+.code-block:not(.collapsed) .shrink-button::before {
   content: "⇡"; /* Up arrow when collapsed */
 }
   </style>
@@ -292,7 +292,7 @@
         const code = codeBlock.querySelector("code");
         navigator.clipboard.writeText(code.textContent)
           .then(() => {
-            copyButton.textContent = "Copied!";
+            copyButton.textContent = "✔️";
             setTimeout(() => (copyButton.textContent = "Copy"), 1500);
           })
           .catch(() => {
@@ -390,7 +390,7 @@
             codeBlockElement.innerHTML = `
               <div class="code-language">${language}</div>
               <button class="copy-button btn btn-sm">Copy</button>
-              <button class="shrink-button btn btn-sm"><i></i></button>
+              <button class="shrink-button btn btn-sm"></button>
               <code>${escapeHtml(code)}</code>
             `;
             
