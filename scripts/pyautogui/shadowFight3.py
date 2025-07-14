@@ -1,6 +1,8 @@
 import sys
 import os
 
+import keyboard
+
 if "python312" not in sys.executable:  # Check if the script is NOT running with Python 3.12
     os.execvp("python312", ["python312"] + sys.argv)  # Restart with python312
 # Continue running with Python 3.12
@@ -18,6 +20,12 @@ import time
 import tkinter as tk
 import win32gui
 from pathlib import Path
+from functools import partial
+from PIL import ImageGrab
+from chilimangoes import grab_screen
+
+# This will make ImageGrab.grab capture all monitors, not just the primary
+ImageGrab.grab = partial(ImageGrab.grab, all_screens=True)
 
 ROOT = tk.Tk()
 ROOT.title("Utility Buttons")
@@ -41,10 +49,22 @@ pyautogui.FAILSAFE = False
 #* ██║     ██║██║ ╚████║██████╔╝    ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║
 #* ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 # Initialize variables
+# Initialize variables
 last_found_time = None
 is_searching = False
 last_used_time = time.time()  # Tracks when the function was last called
 image_found_count = {}  # Dictionary to store cumulative counts of found images
+
+# --- Display Selection Logic ---
+display_offsets = {"M-1": (0, 0), "M-2": (1920, 0)}
+display_cycle = ["M-1", "M-2"]
+current_display_index = 0
+
+def toggle_display():
+    global current_display_index
+    current_display_index = (current_display_index + 1) % len(display_cycle)
+    display_name = display_cycle[current_display_index]
+    display_button.config(text=display_name)
 
 output_file_path = Path.home() / "script_output" / "sf3_img.txt"
 output_file_path.parent.mkdir(exist_ok=True)  # Create script_output if missing
@@ -63,26 +83,37 @@ def display_image_found_chart():
     print("\033[94m-------------------------------------\033[0m\n")
 
 def find_image(image_path, confidence=0.7, region=None):
-    """Find the location of the image on the screen within an optional specified region.
-    region should be a tuple of (x1, y1, x2, y2). If not provided, the function searches the entire screen.
-    """
-    global last_found_time, is_searching, last_used_time
+    """Find the location of the image on the screen within an optional specified region."""
+    global last_found_time, is_searching, last_used_time, current_display_index, display_cycle, display_offsets
     current_time = time.time()
     # Reset timer if the function is not used for 10 seconds
     if current_time - last_used_time > 10:
         last_found_time = None
         is_searching = False
     last_used_time = current_time  # Update the last used time
-    # Convert (x1, y1, x2, y2) region format to (x, y, width, height) for pyautogui
+
+    display_name = display_cycle[current_display_index]
+    offset_x, offset_y = display_offsets[display_name]
+
+    search_region_pyautogui = None
     if region:
         x1, y1, x2, y2 = region
-        region = (x1, y1, x2 - x1, y2 - y1)
+        search_region_pyautogui = (x1 + offset_x, y1 + offset_y, x2 - x1, y2 - y1)
+    else:
+        # No region, search entire selected monitor
+        search_region_pyautogui = (offset_x, offset_y, 1920, 1080)
+
     try:
         # Start counting only when the function is searching for the image
         if not is_searching:
             is_searching = True
             last_found_time = time.time()  # Start the timer when first searching
-        location = pyautogui.locateOnScreen(image_path, confidence=confidence, grayscale=True, region=region)
+        
+        screenshot = grab_screen()
+        if screenshot is None:
+            return None
+        location = pyautogui.locate(image_path, screenshot, confidence=confidence, grayscale=True, region=search_region_pyautogui)
+
         if location:
             image_name = os.path.basename(image_path)
             # Get current date and time in the desired format
@@ -99,7 +130,15 @@ def find_image(image_path, confidence=0.7, region=None):
             # Reset search and timer upon finding the image
             last_found_time = time.time()
             is_searching = False  # Stop the search
-            return location
+            
+            # Adjust the found location to be relative to the selected monitor
+            relative_location = (
+                location.left - offset_x,
+                location.top - offset_y,
+                location.width,
+                location.height
+            )
+            return relative_location
     except Exception as e:
         image_name = os.path.basename(image_path)  # Get the image name
         # Get current date and time for error messages
@@ -989,11 +1028,24 @@ Loss_BT.pack(side="left",padx=(1, 1), pady=(1, 1))
 
 
 
-# Restart function that displays the cumulative summary before restarting
+# Button to toggle display
+display_button = Button(ROOT, text="M-1", bg="#0078D7", fg="#fff", width=8, height=0, command=toggle_display, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
+display_button.pack(side="left", padx=(1, 1), pady=(1, 1))
+
 def restart():
     display_image_found_chart()  # Show the summary of found images
-    ROOT.destroy()
+    # Launch a new process running this same script
     subprocess.Popen([sys.executable] + sys.argv)
+    # Optional: give it a little time to start
+    time.sleep(0.5)
+    # Then destroy GUI and exit current process
+    ROOT.destroy()
+    sys.exit()  # ensures current process ends cleanly
+    
+def listen_for_esc():
+    keyboard.wait('esc')
+    restart()
+threading.Thread(target=listen_for_esc, daemon=True).start()
 
 # Button to restart the script
 Restart_BT = Button(ROOT, text="RE", bg="#443e3e", fg="#fff", width=5, height=0, command=restart, font=("Jetbrainsmono nfp", 10, "bold"), relief="flat")
