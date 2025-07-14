@@ -7,7 +7,7 @@ Persistent
 ;! v2 startups
 #Include C:\ms1\scripts\Autohtokey\version2\tray.ahk
 #Include C:\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
-#Include C:\ms1\scripts\CoC\Clash_of_Clans.ahk
+#Include C:\ms1\scripts\pyautogui\Clash_of_Clans.ahk
 #Include C:\ms1\scripts\Autohtokey\math.ahk
 
 ;! v1 startups
