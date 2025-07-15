@@ -168,6 +168,13 @@
         "winget_path": "C:\\Program Files\\dotnet\\dotnet.exe"
     },
     {
+        "name": "emacs",
+        "scoop_name": "emacs",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\emacs\\current\\bin\\emacs.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "ExplorerPatcher",
         "scoop_name": "",
         "scoop_path": "",
@@ -185,6 +192,13 @@
         "name": "FastFetch",
         "scoop_name": "fastfetch",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\fastfetch\\current\\fastfetch.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
+        "name": "fd [find alternative]",
+        "scoop_name": "fd",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\fd\\current\\fd.exe",
         "winget_name": "",
         "winget_path": ""
     },
