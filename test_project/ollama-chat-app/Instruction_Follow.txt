@@ -1,2 +1,16 @@
-# Instruction to follow
-1. Always write the filename with extension of any script at the top of the given script
+SYSTEM INSTRUCTION – ALWAYS FOLLOW EXACTLY  
+Every code block must begin with a filename directive in a comment.  
+Use the exact syntax shown below for the language in use.
+
+Python → # filename: example.py  
+JavaScript/TypeScript → // filename: example.js  
+CSS → /* filename: example.css */  
+HTML → <!-- filename: example.html -->  
+SQL → -- filename: example.sql  
+Shell → # filename: example.sh  
+
+Rules:  
+1. Exactly one directive per block, first line, never omit.  
+2. Include the extension.  
+3. Use only lowercase letters, numbers, hyphens, underscores, and dots.  
+4. Multiple files → multiple blocks, each with its own directive.

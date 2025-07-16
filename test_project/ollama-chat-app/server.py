@@ -62,6 +62,8 @@ class CodeExtractor:
     # -----------------------------------------------------------------------
     # 2a. Read filename directive from first line
     # -----------------------------------------------------------------------
+    # filename: fixed_extractor.py
+
     def extract_filename_from_code(self, code: str, language: str) -> str | None:
         lines = [ln.strip() for ln in code.splitlines() if ln.strip()]
         if not lines:
@@ -81,13 +83,25 @@ class CodeExtractor:
             'dockerfile': ('#',), 'makefile': ('#',), 'markdown': ('<!--',),
             'md': ('<!--',), 'text': ('#',), 'txt': ('#',)
         }
+        
         prefixes = comment_styles.get(language.lower(), ('#',))
+        
         for prefix in prefixes:
             if first.startswith(prefix):
+                # Extract the content between the comment markers
                 directive = first[len(prefix):].strip()
+                
+                # Handle different comment closing styles
+                if prefix == '<!--' and directive.endswith('-->'):
+                    directive = directive[:-3].strip()
+                elif prefix == '/*' and directive.endswith('*/'):
+                    directive = directive[:-2].strip()
+                
+                # Look for filename directive
                 m = re.fullmatch(r'filename:\s*([^\s]+)', directive, re.IGNORECASE)
                 if m:
                     return m.group(1).strip()
+        
         return None
 
     # -----------------------------------------------------------------------

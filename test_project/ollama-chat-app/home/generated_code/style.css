@@ -1,0 +1,97 @@
+/* filename: style.css */
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav li {
+    display: inline;
+    margin: 0 10px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+}
+
+main {
+    padding: 20px;
+}
+
+.hero {
+    background-color: #fff;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.feature {
+    width: 300px;
+    margin: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+}
+
+.feature img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.about, .services, .contact {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.about h2 {
+    color: #333;
+}
+
+.services ul {
+    list-style: disc;
+    padding-left: 20px;
+}
+
+.contact p a {
+    color: #007bff;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
