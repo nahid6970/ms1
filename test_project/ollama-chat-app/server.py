@@ -24,6 +24,8 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/api/stop_model":
             self._handle_stop_model()
+        elif self.path == "/api/stop_all_models":
+            self._handle_stop_all_models()
         elif self.path.startswith("/api"):
             self._proxy_request()
         else:
@@ -60,6 +62,40 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
 
         except Exception as e:
             self.send_error(500, f"Error stopping model: {e}")
+
+    def _handle_stop_all_models(self):
+        try:
+            # Get all available models
+            response = requests.get(f"{OLLAMA_HOST}/api/tags")
+            response.raise_for_status()
+            models = response.json().get("models", [])
+
+            stopped_models = []
+            errors = []
+
+            for model in models:
+                model_name = model.get("name")
+                if model_name:
+                    stop_result = subprocess.run(
+                        ["ollama", "stop", model_name],
+                        capture_output=True,
+                        text=True
+                    )
+                    if stop_result.returncode == 0:
+                        stopped_models.append(model_name)
+                    else:
+                        errors.append(f"Attempted to stop {model_name}: {stop_result.stderr.strip()}")
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "stopped": stopped_models,
+                "errors": errors
+            }).encode())
+
+        except Exception as e:
+            self.send_error(500, f"Error stopping all models: {e}")
 
     def _proxy_request(self):
         try:

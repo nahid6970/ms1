@@ -319,19 +319,15 @@
     stopButton.addEventListener("click", async () => {
       if (controller) controller.abort();
 
-      const selectedModel = modelSelect.value;
-      if (!selectedModel) return;
-
       try {
-        const response = await fetch("/api/stop_model", {
+        const response = await fetch("/api/stop_all_models", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: selectedModel })
         });
         const result = await response.json();
-        console.log("Model stopped:", result);
+        console.log("All models stopped:", result);
       } catch (err) {
-        console.error("Couldn't stop model:", err);
+        console.error("Couldn't stop all models:", err);
       }
 
       stopButton.disabled = true;
