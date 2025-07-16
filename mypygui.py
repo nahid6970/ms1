@@ -614,6 +614,7 @@ ollama_lb = tk.Label(ROOT1,text="ollama", bg="#1d2027", fg="#ffffff", height=0, 
 ollama_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
 # ollama_lb.bind( "<Button-1>", lambda event=None: run_command(r'C:\ms1\test_project\ollama-chat-app\kill_port_8000.py'))
 ollama_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\test_project\\ollama-chat-app\\kill_port_8000.py'))
+ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
 ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\test_project\ollama-chat-app\server.py'))
 
 
