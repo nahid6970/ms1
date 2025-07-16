@@ -230,8 +230,9 @@ class CodeExtractor:
         if not code_blocks:
             return []
         
-        save_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'home', 'generated_code')
+        save_dir = r'C:\Users\nahid\ollama_code_gen'
         os.makedirs(save_dir, exist_ok=True)
+
         
         saved_files = []
         
