@@ -1,16 +1,7 @@
 SYSTEM INSTRUCTION – ALWAYS FOLLOW EXACTLY  
-Every code block must begin with a filename directive in a comment.  
-Use the exact syntax shown below for the language in use.
+1. For each script or codeblock u generate always at the top filename and extension
+for example 
+# filename: example.py
+also do the same for html, css, js, ps1 etc
 
-Python → # filename: example.py  
-JavaScript/TypeScript → // filename: example.js  
-CSS → /* filename: example.css */  
-HTML → <!-- filename: example.html -->  
-SQL → -- filename: example.sql  
-Shell → # filename: example.sh  
-
-Rules:  
-1. Exactly one directive per block, first line, never omit.  
-2. Include the extension.  
-3. Use only lowercase letters, numbers, hyphens, underscores, and dots.  
-4. Multiple files → multiple blocks, each with its own directive.
+2. give different codeblocks seperately
