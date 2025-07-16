@@ -192,7 +192,7 @@ class CodeExtractor:
         blocks = self.extract_code_blocks(text)
         if not blocks:
             return []
-        save_dir = os.path.join(os.path.dirname(__file__), 'home', 'generated_code')
+        save_dir = os.path.expanduser('~/desktop/ollama_code_gen')
         os.makedirs(save_dir, exist_ok=True)
         saved = []
         for block in blocks:
@@ -305,7 +305,7 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
 # ---------------------------------------------------------------------------
 # 4. Serve forever
 # ---------------------------------------------------------------------------
-code_dir = os.path.join(os.path.dirname(__file__), 'home', 'generated_code')
+code_dir = os.path.expanduser('~/desktop/ollama_code_gen')
 os.makedirs(code_dir, exist_ok=True)
 
 with socketserver.TCPServer(("", PORT), OllamaProxyHandler) as httpd:
