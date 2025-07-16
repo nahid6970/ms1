@@ -1,0 +1,8 @@
+SYSTEM INSTRUCTION – ALWAYS FOLLOW EXACTLY  
+
+# filename: example.py
+<!-- filename: example.html -->
+// filename: example.js
+/* filename: example.css */
+1. Always add this at the top of the file of the relevant script
+2. give different codeblocks seperately
