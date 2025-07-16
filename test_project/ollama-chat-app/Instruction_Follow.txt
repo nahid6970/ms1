@@ -1,0 +1,2 @@
+# Instruction to follow
+1. Always write the filename with extension of any script at the top of the given script
