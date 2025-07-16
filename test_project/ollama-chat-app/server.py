@@ -1,15 +1,18 @@
 import os
+import sys
 import http.server
 import socketserver
 import requests
 import subprocess
 import json
+import threading
 from bs4 import BeautifulSoup
 
 PORT = 8000
 OLLAMA_HOST = "http://localhost:11434"
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -26,6 +29,8 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
             self._handle_stop_model()
         elif self.path == "/api/stop_all_models":
             self._handle_stop_all_models()
+        elif self.path == "/api/restart_server":
+            self._handle_restart_server()  # <-- NEW
         elif self.path.startswith("/api"):
             self._proxy_request()
         else:
@@ -65,43 +70,94 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
 
     def _handle_stop_all_models(self):
         try:
-            # Get all available models
-            response = requests.get(f"{OLLAMA_HOST}/api/tags")
-            response.raise_for_status()
-            models = response.json().get("models", [])
-
-            stopped_models = []
-            errors = []
-
-            for model in models:
-                model_name = model.get("name")
-                if model_name:
-                    stop_result = subprocess.run(
-                        ["ollama", "stop", model_name],
-                        capture_output=True,
-                        text=True
-                    )
-                    if stop_result.returncode == 0:
-                        stopped_models.append(model_name)
-                    else:
-                        errors.append(f"Attempted to stop {model_name}: {stop_result.stderr.strip()}")
+            result = subprocess.run(
+                ["powershell", "-File", "ollama_stop_models.ps1"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({
-                "stopped": stopped_models,
-                "errors": errors
+                "message": "Successfully executed ollama_stop_models.ps1",
+                "stdout": result.stdout,
+                "stderr": result.stderr
             }).encode())
 
+        except subprocess.CalledProcessError as e:
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "error": f"Error executing PowerShell script: {e}",
+                "stdout": e.stdout,
+                "stderr": e.stderr
+            }).encode())
         except Exception as e:
-            self.send_error(500, f"Error stopping all models: {e}")
+            self.send_error(500, f"An unexpected error occurred: {e}")
+
+    def _handle_restart_server(self):
+        """
+        Stop every running model and then restart this script.
+        The parent exits immediately so the port becomes free.
+        """
+        try:
+            # 1) Stop all models first
+            subprocess.run(
+                ["powershell", "-File", "ollama_stop_models.ps1"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+        except subprocess.CalledProcessError as e:
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "error": "Could not stop models – aborting restart",
+                "stdout": e.stdout,
+                "stderr": e.stderr
+            }).encode())
+            return
+        except Exception as e:
+            self.send_error(500, f"Unexpected error while stopping models: {e}")
+            return
+
+        # 2) Spawn a detached child that will re-launch the server
+        try:
+            py = sys.executable
+            script = os.path.abspath(__file__)
+
+            DETACHED_PROCESS = 0x00000008
+            CREATE_NEW_PROCESS_GROUP = 0x00000200
+            subprocess.Popen(
+                [py, script],
+                cwd=os.getcwd(),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
+                creationflags=CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS
+            )
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "message": "Server will restart in ~1 second"
+            }).encode())
+
+            # 3) Parent exits so the port is free
+            threading.Thread(target=lambda: os._exit(0), daemon=True).start()
+
+        except Exception as e:
+            self.send_error(500, f"Could not spawn restart process: {e}")
 
     def _proxy_request(self):
         try:
             api_url = f"{OLLAMA_HOST}{self.path}"
             headers = {h: self.headers[h] for h in self.headers}
-            # headers['Host'] = 'localhost:11434' #! it tells to only respone to my pc
 
             if self.command == 'POST':
                 content_length = int(self.headers['Content-Length'])
@@ -122,7 +178,6 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, f"Proxy Error: {e}")
 
-    
 
 with socketserver.TCPServer(("", PORT), OllamaProxyHandler) as httpd:
     print(f"Serving at http://localhost:{PORT}")
