@@ -1,0 +1,96 @@
+```python
+def greet(name):
+  """
+  This function greets the person passed in as a parameter.
+
+  Args:
+    name: The name of the person to greet (string).
+
+  Returns:
+    A greeting string.
+  """
+  return f"Hello, {name}!  It's great to see you."
+
+
+def add_numbers(x, y):
+  """
+  This function adds two numbers and returns the result.
+
+  Args:
+    x: The first number (int or float).
+    y: The second number (int or float).
+
+  Returns:
+    The sum of x and y (int or float).
+  """
+  return x + y
+
+
+def is_positive(number):
+  """
+  Checks if a number is positive.
+
+  Args:
+    number: The number to check (int or float).
+
+  Returns:
+    True if the number is positive, False otherwise.
+  """
+  return number > 0
+
+
+def main():
+  """
+  This is the main function that demonstrates some of the functions defined above.
+  """
+
+  # Get user input for a name
+  user_name = input("Enter your name: ")
+
+  # Greet the user
+  greeting = greet(user_name)
+  print(greeting)
+
+  # Get two numbers from the user
+  try:
+    num1 = float(input("Enter the first number: "))
+    num2 = float(input("Enter the second number: "))
+  except ValueError:
+    print("Invalid input. Please enter numbers only.")
+    return  # Exit the program if input is invalid
+
+  # Calculate the sum
+  sum_result = add_numbers(num1, num2)
+  print(f"The sum of {num1} and {num2} is: {sum_result}")
+
+  # Check if the sum is positive
+  if is_positive(sum_result):
+    print("The sum is positive.")
+  else:
+    print("The sum is not positive.")
+
+
+if __name__ == "__main__":
+  main()
+```
+
+Key improvements and explanations:
+
+* **Clear Function Definitions:**  Uses well-named functions (`greet`, `add_numbers`, `is_positive`, `main`) to organize the code. This makes it much more readable and maintainable.
+* **Docstrings:**  Includes docstrings (the triple-quoted strings) for each function.  This explains what the function does, what arguments it takes, and what it returns.  This is *essential* for good code documentation.
+* **Error Handling:** The `try...except` block handles potential `ValueError` exceptions if the user enters non-numeric input.  This prevents the program from crashing.  It gracefully informs the user of the error and exits.
+* **`if __name__ == "__main__":`:** This is a standard Python idiom.  It ensures that the `main()` function is only called when the script is run directly (not when it's imported as a module into another script).
+* **f-strings:** Uses f-strings (e.g., `f"Hello, {name}! ..."`).  F-strings are the most modern and readable way to format strings in Python.
+* **Comments:**  Includes comments to explain key parts of the code.
+* **Modularity:** The code is broken down into logical units (functions), making it easier to understand and reuse.
+* **User-Friendly Output:** The output is formatted to be clear and easy to read.
+* **Handles floats:** The `add_numbers` function now accepts floats, making it more versatile.
+* **Exits on invalid input:** The `main` function now exits if the user provides invalid input.
+
+How to run the code:
+
+1.  **Save:** Save the code as a `.py` file (e.g., `calculator.py`).
+2.  **Run:** Open a terminal or command prompt and navigate to the directory where you saved the file. Then, run the script using the command `python calculator.py`.
+3.  **Follow the prompts:** The program will ask you for your name and two numbers.  Enter the values and press Enter after each.  The program will then print the greeting, the sum of the numbers, and whether the sum is positive or not.
+
+This improved version is more robust, readable, and maintainable than a simple script.  It follows best practices for Python coding.
