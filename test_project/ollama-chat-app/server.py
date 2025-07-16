@@ -76,9 +76,36 @@ class CodeExtractor:
         
         return code_blocks
     
+    def find_explicit_filename(self, language: str, context: str) -> str | None:
+        """
+        Look for 'something.extension' in the context where
+        extension matches the language we are about to save.
+        Returns the exact filename if found, else None.
+        """
+        ext = self.get_file_extension(language)          # '.css', '.py', …
+        if ext == '.txt':
+            return None                                  # unknown extensions ignored
+
+        # 1) Whole-word file name:  style.css, main.py, etc.
+        pattern = rf'\b([\w-]+{re.escape(ext)})\b'
+        match = re.search(pattern, context, re.IGNORECASE)
+        if match:
+            return match.group(1)
+
+        # 2) Full path:  /css/style.css  -> style.css
+        pattern_path = rf'[/\\]([\w-]+{re.escape(ext)})(?:\s|$)'
+        match = re.search(pattern_path, context, re.IGNORECASE)
+        if match:
+            return match.group(1)
+
+        return None
+
     def generate_filename(self, code, language, context=""):
         """Generate a meaningful filename based on code content and context"""
-        # Try to extract meaningful names from code
+        explicit = self.find_explicit_filename(language, context)
+        if explicit:
+            return explicit.rsplit('.', 1)[0]  # strip extension; rest of code adds it again
+        
         filename_hints = []
         
         # Language-specific filename extraction
@@ -114,35 +141,81 @@ class CodeExtractor:
             title_match = re.search(r'<title>(.*?)</title>', code, re.IGNORECASE)
             if title_match:
                 title = re.sub(r'[^\w\s-]', '', title_match.group(1).strip())
-                filename_hints.append(title.lower().replace(' ', '_'))
+                clean_title = title.lower().replace(' ', '_')
+                if clean_title and clean_title != 'document':
+                    filename_hints.append(clean_title)
+            
+            # Look for main page identifiers
+            if 'hero' in code.lower():
+                filename_hints.append('landing')
+            elif 'about' in code.lower():
+                filename_hints.append('about')
+            elif 'contact' in code.lower():
+                filename_hints.append('contact')
         
         elif language in ['css', 'scss', 'sass']:
             # Look for main selectors or components
-            selector_match = re.search(r'\.([a-zA-Z][\w-]*)', code)
-            if selector_match:
-                filename_hints.append(selector_match.group(1).lower())
+            body_match = re.search(r'body\s*{', code)
+            header_match = re.search(r'header\s*{', code)
+            nav_match = re.search(r'nav\s*{', code)
+            hero_match = re.search(r'\.hero', code)
+            
+            if hero_match:
+                filename_hints.append('styles')
+            elif body_match or header_match:
+                filename_hints.append('main')
+            elif nav_match:
+                filename_hints.append('navigation')
         
-        # Extract context from the conversation or prompt
+        # Enhanced context extraction
         if context:
-            # Look for meaningful words in context
-            context_words = re.findall(r'\b[a-zA-Z]{3,}\b', context.lower())
-            # Filter out common words
-            common_words = {'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her', 'was', 'one', 'our', 'had', 'but', 'words', 'use', 'each', 'which', 'their', 'time', 'will', 'about', 'write', 'would', 'there', 'into', 'could', 'state', 'only', 'new', 'year', 'some', 'take', 'come', 'these', 'know', 'see', 'him', 'two', 'how', 'its', 'who', 'did', 'yes', 'his', 'been', 'or', 'when', 'much', 'no', 'may', 'what', 'them', 'where', 'much', 'sign', 'the', 'every', 'does', 'got', 'united', 'left', 'try', 'good', 'this', 'right', 'move', 'way', 'she', 'they', 'not', 'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two', 'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us'}
-            meaningful_words = [word for word in context_words if word not in common_words and len(word) > 3]
-            filename_hints.extend(meaningful_words[:2])  # Take first 2 meaningful words
+            # Look for specific project-related keywords
+            project_keywords = ['website', 'portfolio', 'landing', 'dashboard', 'blog', 'shop', 'store', 'app', 'game', 'calculator', 'todo', 'form', 'login', 'profile', 'admin', 'home', 'about', 'contact', 'gallery', 'menu', 'navbar', 'footer', 'header', 'main', 'index']
+            
+            context_lower = context.lower()
+            for keyword in project_keywords:
+                if keyword in context_lower:
+                    filename_hints.append(keyword)
+                    break
+            
+            # Look for action words that might indicate file purpose
+            action_words = ['create', 'build', 'make', 'design', 'develop']
+            for action in action_words:
+                if action in context_lower:
+                    # Look for what comes after the action word
+                    pattern = fr'{action}\s+(?:a\s+)?(\w+)'
+                    match = re.search(pattern, context_lower)
+                    if match and match.group(1) not in ['basic', 'simple', 'website', 'page']:
+                        filename_hints.append(match.group(1))
         
-        # Generate filename
+        # Generate filename with priority to code content over context
         if filename_hints:
-            base_name = '_'.join(filename_hints[:3])  # Use max 3 parts
+            # Remove duplicates while preserving order
+            unique_hints = []
+            for hint in filename_hints:
+                if hint not in unique_hints:
+                    unique_hints.append(hint)
+            
+            base_name = '_'.join(unique_hints[:2])  # Use max 2 parts for cleaner names
             base_name = re.sub(r'[^\w\s-]', '', base_name)  # Remove special chars
             base_name = re.sub(r'\s+', '_', base_name)  # Replace spaces with underscores
         else:
-            # Fallback to generic names based on language
-            base_name = f"{language}_code" if language != 'text' else "code"
+            # Fallback to standard names based on language
+            standard_names = {
+                'html': 'index',
+                'css': 'styles',
+                'js': 'script',
+                'javascript': 'script',
+                'python': 'main',
+                'java': 'Main',
+                'c': 'main',
+                'cpp': 'main'
+            }
+            base_name = standard_names.get(language, language)
         
         # Ensure filename is not too long
-        if len(base_name) > 30:
-            base_name = base_name[:30]
+        if len(base_name) > 25:
+            base_name = base_name[:25]
         
         return base_name
     
@@ -160,58 +233,56 @@ class CodeExtractor:
         save_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'home', 'generated_code')
         os.makedirs(save_dir, exist_ok=True)
         
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         saved_files = []
         
-        # If multiple blocks of same language, add counter
-        language_counters = {}
+        # Group blocks by language to handle naming better
+        language_groups = {}
+        for block in code_blocks:
+            lang = block['language']
+            if lang not in language_groups:
+                language_groups[lang] = []
+            language_groups[lang].append(block)
         
-        for i, block in enumerate(code_blocks):
-            language = block['language']
-            code = block['code']
-            
-            # Count occurrences of each language
-            if language in language_counters:
-                language_counters[language] += 1
-            else:
-                language_counters[language] = 1
-            
-            # Generate filename
-            base_name = self.generate_filename(code, language, context)
-            extension = self.get_file_extension(language)
-            
-            # Add counter if multiple files of same language
-            if language_counters[language] > 1:
-                filename = f"{base_name}_{language_counters[language]}_{timestamp}{extension}"
-            else:
-                filename = f"{base_name}_{timestamp}{extension}"
-            
-            # Ensure filename is unique
-            file_path = os.path.join(save_dir, filename)
-            counter = 1
-            while os.path.exists(file_path):
-                name_without_ext = filename.rsplit('.', 1)[0]
-                ext = filename.rsplit('.', 1)[1] if '.' in filename else ''
-                filename = f"{name_without_ext}_v{counter}.{ext}" if ext else f"{name_without_ext}_v{counter}"
+        for language, blocks in language_groups.items():
+            for i, block in enumerate(blocks):
+                code = block['code']
+                
+                # Generate filename
+                base_name = self.generate_filename(code, language, context)
+                extension = self.get_file_extension(language)
+                
+                # Add number suffix only if multiple blocks of same language
+                if len(blocks) > 1:
+                    filename = f"{base_name}_{i+1}{extension}"
+                else:
+                    filename = f"{base_name}{extension}"
+                
+                # Ensure filename is unique (in case of conflicts)
                 file_path = os.path.join(save_dir, filename)
-                counter += 1
-            
-            # Save the file
-            try:
-                with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write(code)
+                counter = 1
+                while os.path.exists(file_path):
+                    name_without_ext = filename.rsplit('.', 1)[0]
+                    ext = '.' + filename.rsplit('.', 1)[1] if '.' in filename else ''
+                    filename = f"{name_without_ext}_v{counter}{ext}"
+                    file_path = os.path.join(save_dir, filename)
+                    counter += 1
                 
-                saved_files.append({
-                    'filename': filename,
-                    'path': file_path,
-                    'language': language,
-                    'size': len(code)
-                })
+                # Save the file
+                try:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(code)
+                    
+                    saved_files.append({
+                        'filename': filename,
+                        'path': file_path,
+                        'language': language,
+                        'size': len(code)
+                    })
+                    
+                    print(f"Saved {language} code to {file_path}")
                 
-                print(f"Saved {language} code to {file_path}")
-            
-            except Exception as e:
-                print(f"Error saving {filename}: {e}")
+                except Exception as e:
+                    print(f"Error saving {filename}: {e}")
         
         return saved_files
 
