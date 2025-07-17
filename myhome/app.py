@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'data.json')
+DATA_FILE = 'C:\msBackups\DataBase\myhome\data.json'
 
 # Helper function to read data from JSON file
 def read_data():
