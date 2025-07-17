@@ -20,11 +20,11 @@ def write_data(data):
 
 @app.route('/')
 def index():
-    return render_template('myhome_input.html')
+    return render_template('index.html')
 
-@app.route('/myhome/<path:filename>')
+@app.route('/static/<path:filename>')
 def serve_myhome_static(filename):
-    return send_from_directory('myhome', filename)
+    return send_from_directory('static', filename)
 
 @app.route('/api/links', methods=['GET'])
 def get_links():
