@@ -198,18 +198,24 @@
     "url": "https://kiro.dev/"
   },
   {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
     "name": "Sonarr",
-    "url": "http://192.168.0.101:8989/"
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:8989/",
+    "icon_class": "nf nf-md-television_classic",
+    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
+    "text": "Sonarr",
+    "default_type": "nerd-font",
+    "font_size": "35px"
   },
   {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
     "name": "Radarr",
-    "url": "http://192.168.0.101:7878/"
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:7878/",
+    "icon_class": "nf-md-movie_roll",
+    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
+    "text": "Radarr",
+    "default_type": "nerd-font",
+    "font_size": "35px"
   },
   {
     "default_type": "img",
