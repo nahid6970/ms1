@@ -298,8 +298,6 @@ document.addEventListener('DOMContentLoaded', function() {
         group: document.getElementById('link-group').value || undefined,
         url: document.getElementById('link-url').value,
         icon_class: document.getElementById('link-icon-class').value || undefined,
-        width: document.getElementById('link-width').value || undefined,
-        height: document.getElementById('link-height').value || undefined,
         color: document.getElementById('link-color').value || undefined,
         img_src: document.getElementById('link-img-src').value || undefined,
         text: document.getElementById('link-text').value || undefined,

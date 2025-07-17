@@ -35,11 +35,12 @@
     "url": "http://brdb.teletalk.com.bd/"
   },
   {
-    "name": "ndr",
+    "default_type": "nerd-font",
     "group": "JobCircular",
-    "url": "http://ndr.teletalk.com.bd/",
+    "name": "ndr",
     "text": "ndr",
-    "default_type": "nerd-font"
+    "url": "http://ndr.teletalk.com.bd/",
+    "display_style": "flex"
   },
   {
     "color": "#f46613",
