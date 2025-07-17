@@ -92,6 +92,8 @@ border-radius: 10px;
 .link-group-content[style*="display: list-item"] {
   flex-wrap: nowrap;
   justify-content: flex-start;
+  width: fit-content;
+  padding-right: 18px;
 }
 
 .link-group-content[style*="display: list-item"] .link-item {

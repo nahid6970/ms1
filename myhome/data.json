@@ -36,11 +36,11 @@
   },
   {
     "default_type": "nerd-font",
-    "display_style": "flex",
     "group": "JobCircular",
     "name": "ndr",
     "text": "ndr",
-    "url": "http://ndr.teletalk.com.bd/"
+    "url": "http://ndr.teletalk.com.bd/",
+    "display_style": "flex"
   },
   {
     "color": "#f46613",
