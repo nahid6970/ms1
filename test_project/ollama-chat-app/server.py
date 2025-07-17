@@ -16,13 +16,13 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # ---------------------------------------------------------------------------
 # 1. Load the instruction file once at startup
 # ---------------------------------------------------------------------------
-INSTRUCTION_FILE = os.path.join(os.path.dirname(__file__), "Instruction_Follow.txt")
+INSTRUCTION_FILE = os.path.join(os.path.dirname(__file__), "instruction.txt")
 SYSTEM_MESSAGE = ""
 if os.path.isfile(INSTRUCTION_FILE):
     with open(INSTRUCTION_FILE, encoding="utf-8") as f:
         SYSTEM_MESSAGE = f.read().strip()
 else:
-    print("Warning: Instruction_Follow.txt not found; no system prompt injected.")
+    print("Warning: instruction.txt not found; no system prompt injected.")
 
 # ---------------------------------------------------------------------------
 # 2. CodeExtractor with filename-from-first-line support
