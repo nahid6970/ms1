@@ -371,6 +371,13 @@
         "winget_path": ""
     },
     {
+        "name": "msys2",
+        "scoop_name": "msys2",
+        "scoop_path": "",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "Nilesoft Shell",
         "scoop_name": "nilesoft-shell",
         "scoop_path": "",
@@ -595,6 +602,13 @@
         "winget_path": ""
     },
     {
+        "name": "ThioJoe.SvgThumbnailExtension",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "ThioJoe.SvgThumbnailExtension",
+        "winget_path": "C:\\Program Files\\ThioJoe\\SVG Thumbnail Extension\\win_svg_thumbs_x64.dll"
+    },
+    {
         "name": "TigerVNC",
         "scoop_name": "",
         "scoop_path": "",
@@ -745,13 +759,6 @@
         "name": "Zoxide",
         "scoop_name": "zoxide",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
-        "winget_name": "",
-        "winget_path": ""
-    },
-    {
-        "name": "msys2",
-        "scoop_name": "msys2",
-        "scoop_path": "",
         "winget_name": "",
         "winget_path": ""
     }
