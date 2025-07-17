@@ -123,7 +123,7 @@ border-radius: 10px;
 .link-item a {
   /* Styles for the link itself within the container */
   display: block; /* Make the span take full width */
-  padding: 5px 5px;
+  padding: 10px 5px;
   width: fit-content;
   height: fit-content;
   font-family: jetbrainsmono nfp;
@@ -308,7 +308,6 @@ input:checked + .slider:before {
 
 .link-group h3 {
   color: #ffffff;
-  margin-top: 20px;
   margin-bottom: 10px;
   border-bottom: 1px solid #555;
   padding-bottom: 5px;
@@ -370,7 +369,7 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .group-title {
@@ -439,10 +438,10 @@ input:checked + .slider:before {
 
 /* items modified to make it look good */
 ul.link-group-content {
-  margin-top: -17px;
+  margin-top: 0;
 }
 div.group-header-container {
-  margin-top: -27px;
+  margin-top: 0;
 }
 
 html body {
