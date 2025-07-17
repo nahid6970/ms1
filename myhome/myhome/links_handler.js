@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
   const linksContainer = document.getElementById('links-container');
   const addLinkForm = document.getElementById('add-link-form');
+  let links = []; // Declare links here so it's accessible globally
 
   // Function to fetch and display links
   async function fetchAndDisplayLinks() {
     try {
       const response = await fetch('/api/links');
-      const links = await response.json();
+      links = await response.json(); // Assign to the global links variable
       linksContainer.innerHTML = ''; // Clear existing links
 
       const groupedElements = {}; // Store HTML elements grouped by name
@@ -57,26 +58,27 @@ document.addEventListener('DOMContentLoaded', function() {
         let linkContent;
 
         if (link.default_type === 'nerd-font' && link.icon_class) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
         } else if (link.default_type === 'img' && link.img_src) {
           linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
         } else if (link.default_type === 'text' && link.text) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
         } else {
           // Fallback if default_type is not set or doesn't match available content
           if (link.icon_class) {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
           } else if (link.img_src) {
             linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
           } else {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
           }
         }
 
         listItem.innerHTML = linkContent;
         // Apply font size if it's a text-based link (either default_type text or fallback to name)
         if (link.default_type === 'text' || link.default_type === 'nerd-font' || (!link.default_type && (link.icon_class || (!link.icon_class && !link.img_src)))) {
-          listItem.style.fontSize = '40px';
+          // Font size is now applied directly to the <a> tag, so this line is no longer needed here.
+          // listItem.style.fontSize = link.font_size || '40px';
         }
 
         const buttonContainer = document.createElement('div');
@@ -180,6 +182,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const groupList = document.createElement('ul');
         groupList.className = 'link-group-content';
+        // Set display style based on the first link in the group, or default to flex
+        const firstLinkInGroup = groupedLinks[groupName][0];
+        if (firstLinkInGroup && firstLinkInGroup.link.display_style) {
+          groupList.style.display = firstLinkInGroup.link.display_style;
+        } else {
+          groupList.style.display = 'flex'; // Default display style
+        }
 
         groupedElements[groupName].forEach(element => {
           groupList.appendChild(element);
@@ -217,19 +226,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const editGroupPopup = document.getElementById('edit-group-popup');
     const editGroupNameInput = document.getElementById('edit-group-name');
     const editGroupOriginalName = document.getElementById('edit-group-original-name');
-    
+    const editGroupDisplaySelect = document.getElementById('edit-group-display');
+
     editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
     editGroupOriginalName.value = currentGroupName;
+
+    // Find a link in the current group to get its display_style
+    const linksInGroup = links.filter(link => (link.group || 'Ungrouped') === currentGroupName);
+    if (linksInGroup.length > 0) {
+      editGroupDisplaySelect.value = linksInGroup[0].display_style || 'flex';
+    } else {
+      editGroupDisplaySelect.value = 'flex'; // Default if no links in group
+    }
+
     editGroupPopup.classList.remove('hidden');
   }
 
   // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName) {
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
       
-      // Create a new array with the updated group names
+      // Create a new array with the updated group names and display styles
       const newLinks = links.map(link => {
         const linkGroupName = link.group || 'Ungrouped';
         if (linkGroupName === originalGroupName) {
@@ -239,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             delete updatedLink.group; // For "Ungrouped"
           }
+          updatedLink.display_style = newDisplayStyle;
           return updatedLink;
         }
         return link;
@@ -280,6 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
         default_type: document.getElementById('link-default-type').value || undefined,
         background_color: document.getElementById('link-background-color').value || undefined,
         border_radius: document.getElementById('link-border-radius').value || undefined,
+        font_size: document.getElementById('link-font-size').value || undefined,
         title: document.getElementById('link-title').value || undefined,
         li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
         li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
@@ -334,6 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
+    document.getElementById('edit-link-font-size').value = link.font_size || '';
     document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
     document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
     document.getElementById('edit-link-hidden').checked = link.hidden || false;
@@ -358,6 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 background_color: document.getElementById('edit-link-background-color').value || undefined,
                 border_radius: document.getElementById('edit-link-border-radius').value || undefined,
                 title: document.getElementById('edit-link-title').value || undefined,
+                font_size: document.getElementById('edit-link-font-size').value || undefined,
                 li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
                 li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
                 hidden: document.getElementById('edit-link-hidden').checked || undefined,
@@ -404,16 +427,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const originalGroupName = document.getElementById('edit-group-original-name').value;
         const newGroupName = document.getElementById('edit-group-name').value;
+        const newDisplayStyle = document.getElementById('edit-group-display').value;
 
-        if (originalGroupName === newGroupName || 
+        if (originalGroupName === newGroupName && 
             (originalGroupName === 'Ungrouped' && newGroupName === '')) {
-          alert('No changes made to group name.');
+          alert('No changes made to group name or display style.');
           document.getElementById('edit-group-popup').classList.add('hidden');
           return;
         }
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle);
           if (success) {
             alert('Group name updated successfully!');
             document.getElementById('edit-group-popup').classList.add('hidden');

@@ -83,11 +83,20 @@ border-radius: 10px;
 .link-group-content {
   list-style: none; /* Remove default list bullets */
   padding: 10px; /* Remove default padding */
-  display: flex;
   flex-wrap: wrap;
   justify-content: left;
   background-color: #252525;
   border-radius: 10px;
+}
+
+.link-group-content[style*="display: list-item"] {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.link-group-content[style*="display: list-item"] .link-item {
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 .link-item {
@@ -115,7 +124,6 @@ border-radius: 10px;
   width: fit-content;
   height: 60px;
   font-family: jetbrainsmono nfp;
-  font-size: 40px;
   align-content: center;
   background-color: transparent; /* Remove background from the span itself */
   box-shadow: none;

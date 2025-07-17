@@ -75,6 +75,11 @@
         <input type="hidden" id="edit-group-original-name">
         <label for="edit-group-name">Group Name:</label>
         <input type="text" id="edit-group-name" placeholder="Enter group name (leave empty for 'Ungrouped')" required>
+        <label for="edit-group-display">Display Style:</label>
+        <select id="edit-group-display">
+          <option value="flex">Flex</option>
+          <option value="list-item">List Item</option>
+        </select>
         <button type="submit">Update Group Name</button>
       </form>
     </div>
@@ -103,6 +108,7 @@
           <input type="text" id="link-color" placeholder="Color (e.g., #f46613 or red)">
           <input type="text" id="link-background-color" placeholder="Background Color">
         </div>
+        <input type="text" id="link-font-size" placeholder="Font Size (e.g., 16px)">
         <div style="display: flex; gap: 10px;">
           <input type="text" id="link-li-bg-color" placeholder="List Item BG Color">
           <input type="text" id="link-li-hover-color" placeholder="List Item Hover Color">
@@ -144,6 +150,7 @@
           <input type="text" id="edit-link-color" placeholder="Color (e.g., #f46613 or red)">
           <input type="text" id="edit-link-background-color" placeholder="Background Color">
         </div>
+        <input type="text" id="edit-link-font-size" placeholder="Font Size (e.g., 16px)">
         <div style="display: flex; gap: 10px;">
           <input type="text" id="edit-link-li-bg-color" placeholder="List Item BG Color">
           <input type="text" id="edit-link-li-hover-color" placeholder="List Item Hover Color">

@@ -1,43 +1,51 @@
 [
   {
     "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "JobCircular",
     "name": "erecruitment",
     "url": "https://erecruitment.bb.org.bd/"
   },
   {
     "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "JobCircular",
     "name": "bepza",
     "url": "https://www.bepza.gov.bd/career"
   },
   {
     "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "JobCircular",
     "name": "dnc",
     "url": "http://dnc.teletalk.com.bd/"
   },
   {
     "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "JobCircular",
     "name": "bpsc",
     "url": "http://bpsc.teletalk.com.bd/"
   },
   {
     "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "JobCircular",
     "name": "brdb",
     "url": "http://brdb.teletalk.com.bd/"
   },
   {
     "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "JobCircular",
     "name": "ndr",
+    "text": "ndr",
     "url": "http://ndr.teletalk.com.bd/"
   },
   {
     "color": "#f46613",
-    "default_type": "img",
+    "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-cod-mail",
     "img_src": "https://static.vecteezy.com/system/resources/previews/022/613/021/non_2x/google-mail-gmail-icon-logo-symbol-free-png.png",
     "name": "Google Mail",
@@ -46,6 +54,7 @@
   {
     "color": "#1399f4",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-dev-facebook",
     "img_src": "https://img.icons8.com/ios11/512/facebook-new.png",
     "name": "Facebook",
@@ -54,6 +63,7 @@
   {
     "color": "#3675ff",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-fa-facebook_messenger",
     "name": "Messenger",
     "url": "https://www.messenger.com/"
@@ -61,6 +71,7 @@
   {
     "color": "#ff0000",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-fa-youtube",
     "name": "YouTube",
     "url": "https://www.youtube.com/"
@@ -68,6 +79,7 @@
   {
     "color": "#5765f2",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-fa-discord",
     "name": "Discord",
     "url": "https://discord.com/channels/@me"
@@ -75,6 +87,7 @@
   {
     "color": "#ffffff",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-md-google_translate",
     "name": "Google Translate",
     "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate"
@@ -88,6 +101,7 @@
   {
     "color": "#4b70cc",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-md-dots_hexagon",
     "name": "Tailscale",
     "url": "https://login.tailscale.com/admin/machines"
@@ -101,12 +115,14 @@
   {
     "color": "#b259e6",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-md-microsoft_onenote",
     "name": "OneNote",
     "url": "https://www.onenote.com/"
   },
   {
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-fa-github_square",
     "name": "github",
     "url": "https://github.com/nahid6970"
@@ -114,6 +130,7 @@
   {
     "color": "#fbbc04",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "icon_class": "nf nf-md-google_keep",
     "name": "Keep",
     "url": "https://keep.google.com/"
@@ -121,6 +138,7 @@
   {
     "color": "#ff2e2e",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "hidden": true,
     "icon_class": "nf nf-fa-battery_2",
     "name": "mi9t",
@@ -128,11 +146,12 @@
     "url": "http://mi9t:5002"
   },
   {
-    "name": "nerdfonts",
-    "url": "https://www.nerdfonts.com/cheat-sheet",
-    "icon_class": "nf nf-seti-font",
     "color": "#69e8ff",
-    "default_type": "nerd-font"
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-seti-font",
+    "name": "nerdfonts",
+    "url": "https://www.nerdfonts.com/cheat-sheet"
   },
   {
     "default_type": "img",
@@ -162,6 +181,21 @@
     "li_hover_color": "#d97757",
     "name": "Claude",
     "url": "https://claude.ai/new"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "name": "Google Bard",
+    "url": "https://bard.google.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "https://www.techspot.com/images2/downloads/topdownload/2025/07/2025-07-14-ts3_thumbs-d25.png",
+    "li_bg_color": "white",
+    "name": "KIRO",
+    "url": "https://kiro.dev/"
   },
   {
     "default_type": "img",
@@ -225,6 +259,14 @@
   },
   {
     "default_type": "img",
+    "group": "Local (Apps)",
+    "img_src": "https://ollama.com/public/ollama.png",
+    "li_bg_color": "white",
+    "name": "ollama-chat",
+    "url": "http://localhost:8000/"
+  },
+  {
+    "default_type": "img",
     "group": "Local (Flask)",
     "img_src": "https://cdn-icons-png.flaticon.com/512/4400/4400968.png",
     "name": "ShareTXT",
@@ -250,6 +292,20 @@
     "hidden": true,
     "name": "GameARR",
     "url": "http://192.168.0.101:5005/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "icon_class": "nf nf-oct-command_palette",
+    "name": "Command",
+    "url": "http://192.168.0.101:5007/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/4021/4021539.png",
+    "name": "myhome",
+    "url": "https://nahid6970.github.io/ms1/myhome/myhome"
   },
   {
     "default_type": "img",
@@ -297,42 +353,5 @@
     "img_src": "https://store.rg-adguard.net/img/Store.png",
     "name": "MS-Store",
     "url": "https://store.rg-adguard.net/"
-  },
-  {
-    "default_type": "nerd-font",
-    "group": "Local (Flask)",
-    "icon_class": "nf nf-oct-command_palette",
-    "name": "Command",
-    "url": "http://192.168.0.101:5007/"
-  },
-  {
-    "name": "ollama-chat",
-    "group": "Local (Apps)",
-    "url": "http://localhost:8000/",
-    "img_src": "https://ollama.com/public/ollama.png",
-    "default_type": "img",
-    "li_bg_color": "white"
-  },
-  {
-    "default_type": "img",
-    "group": "Local (Flask)",
-    "img_src": "https://cdn-icons-png.flaticon.com/512/4021/4021539.png",
-    "name": "myhome",
-    "url": "https://nahid6970.github.io/ms1/myhome/myhome"
-  },
-  {
-    "default_type": "img",
-    "group": "Chat-BOT",
-    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
-    "name": "Google Bard",
-    "url": "https://bard.google.com/"
-  },
-  {
-    "name": "KIRO",
-    "group": "Chat-BOT",
-    "url": "https://kiro.dev/",
-    "img_src": "https://www.techspot.com/images2/downloads/topdownload/2025/07/2025-07-14-ts3_thumbs-d25.png",
-    "default_type": "img",
-    "li_bg_color": "white"
   }
 ]
