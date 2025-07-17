@@ -159,12 +159,11 @@
     "default_type": "img"
   },
   {
-    "default_type": "img",
-    "display_style": "flex",
-    "group": "Chat-BOT",
-    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
     "name": "ChatGPT",
-    "url": "https://chatgpt.com/"
+    "group": "Chat-BOT",
+    "url": "https://chatgpt.com/",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "default_type": "img"
   },
   {
     "default_type": "img",
