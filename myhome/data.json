@@ -220,11 +220,13 @@
     "url": "http://192.168.0.101:7878/"
   },
   {
-    "default_type": "img",
-    "group": "Local (Apps)",
-    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
     "name": "Prowlarr",
-    "url": "http://192.168.0.101:9696/"
+    "group": "Local (Apps)",
+    "url": "http://192.168.0.101:9696/",
+    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
+    "width": "50",
+    "height": "50",
+    "default_type": "img"
   },
   {
     "default_type": "img",
