@@ -60,7 +60,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link.default_type === 'nerd-font' && link.icon_class) {
           linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
         } else if (link.default_type === 'img' && link.img_src) {
-          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+          const width = link.width || '50';
+          const height = link.height || '50';
+          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
         } else if (link.default_type === 'text' && link.text) {
           linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
         } else {
@@ -68,7 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
           if (link.icon_class) {
             linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
           } else if (link.img_src) {
-            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="50" height="50"></a>`;
+            const width = link.width || '50';
+            const height = link.height || '50';
+            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
           } else {
             linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
           }
@@ -294,6 +298,8 @@ document.addEventListener('DOMContentLoaded', function() {
         group: document.getElementById('link-group').value || undefined,
         url: document.getElementById('link-url').value,
         icon_class: document.getElementById('link-icon-class').value || undefined,
+        width: document.getElementById('link-width').value || undefined,
+        height: document.getElementById('link-height').value || undefined,
         color: document.getElementById('link-color').value || undefined,
         img_src: document.getElementById('link-img-src').value || undefined,
         text: document.getElementById('link-text').value || undefined,
@@ -350,6 +356,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('edit-link-icon-class').value = link.icon_class || '';
     document.getElementById('edit-link-color').value = link.color || '';
     document.getElementById('edit-link-img-src').value = link.img_src || '';
+    document.getElementById('edit-link-width').value = link.width || '';
+    document.getElementById('edit-link-height').value = link.height || '';
     document.getElementById('edit-link-text').value = link.text || '';
     document.getElementById('edit-link-default-type').value = link.default_type || 'nerd-font';
     document.getElementById('edit-link-background-color').value = link.background_color || '';
@@ -375,6 +383,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon_class: document.getElementById('edit-link-icon-class').value || undefined,
                 color: document.getElementById('edit-link-color').value || undefined,
                 img_src: document.getElementById('edit-link-img-src').value || undefined,
+                width: document.getElementById('edit-link-width').value || undefined,
+                height: document.getElementById('edit-link-height').value || undefined,
                 text: document.getElementById('edit-link-text').value || undefined,
                 default_type: document.getElementById('edit-link-default-type').value || undefined,
                 background_color: document.getElementById('edit-link-background-color').value || undefined,

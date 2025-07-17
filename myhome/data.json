@@ -152,12 +152,11 @@
     "url": "https://www.nerdfonts.com/cheat-sheet"
   },
   {
-    "default_type": "img",
-    "display_style": "flex",
-    "group": "Chat-BOT",
-    "img_src": "https://statics.moonshot.cn/kimi-blog/assets/logo-CvjirWOb.svg",
     "name": "Kimi k2",
-    "url": "https://www.kimi.com/"
+    "group": "Chat-BOT",
+    "url": "https://www.kimi.com/",
+    "img_src": "https://statics.moonshot.cn/kimi-blog/assets/logo-CvjirWOb.svg",
+    "default_type": "img"
   },
   {
     "default_type": "img",
