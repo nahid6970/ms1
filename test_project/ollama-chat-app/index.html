@@ -103,6 +103,23 @@
     .code-block.collapsed::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to bottom, transparent, #2d2d2d); }
     .code-block.collapsed .shrink-button::before { content: "⇣"; }
     .code-block:not(.collapsed) .shrink-button::before { content: "⇡"; }
+  /* Centered compact input row */
+.input-row-center {
+  max-width: 50%;
+  margin: 0 auto;
+  display: flex;
+  gap: .5rem;
+}
+/* Let the textarea fill the available space */
+.input-row-center textarea {
+  flex: 1 1 auto;
+}
+@media (max-width: 992px) {
+  /* … existing rules … */
+  .input-row-center {
+    max-width: 100%;   /* full width on small screens */
+  }
+}
   </style>
 </head>
 <body>
@@ -135,14 +152,12 @@
           </div>
         </div>
 
-        <form id="chat-form">
-          <div class="input-group align-items-start">
-            <div class="flex-grow-1 me-2">
-              <textarea id="message-input" class="form-control" placeholder="Type your message..." rows="3" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
-          </div>
-        </form>
+<form id="chat-form">
+  <div class="input-row-center">
+    <textarea id="message-input" class="form-control" placeholder="Type your message..." rows="3" required></textarea>
+    <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
+  </div>
+</form>
       </div>
     </div>
   </div>
