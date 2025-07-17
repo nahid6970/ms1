@@ -1,10 +1,9 @@
 [
   {
-    "default_type": "nerd-font",
-    "display_style": "flex",
-    "group": "JobCircular",
     "name": "erecruitment",
-    "url": "https://erecruitment.bb.org.bd/"
+    "group": "JobCircular",
+    "url": "https://erecruitment.bb.org.bd/",
+    "default_type": "nerd-font"
   },
   {
     "default_type": "nerd-font",
@@ -35,12 +34,11 @@
     "url": "http://brdb.teletalk.com.bd/"
   },
   {
-    "default_type": "nerd-font",
-    "group": "JobCircular",
     "name": "ndr",
-    "text": "ndr",
+    "group": "JobCircular",
     "url": "http://ndr.teletalk.com.bd/",
-    "display_style": "flex"
+    "text": "ndr",
+    "default_type": "nerd-font"
   },
   {
     "color": "#f46613",
@@ -155,6 +153,7 @@
   },
   {
     "default_type": "img",
+    "display_style": "flex",
     "group": "Chat-BOT",
     "img_src": "https://statics.moonshot.cn/kimi-blog/assets/logo-CvjirWOb.svg",
     "name": "Kimi k2",
@@ -162,6 +161,7 @@
   },
   {
     "default_type": "img",
+    "display_style": "flex",
     "group": "Chat-BOT",
     "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
     "name": "ChatGPT",
@@ -169,6 +169,7 @@
   },
   {
     "default_type": "img",
+    "display_style": "flex",
     "group": "Chat-BOT",
     "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
     "name": "DeepSeek",
@@ -176,6 +177,7 @@
   },
   {
     "default_type": "img",
+    "display_style": "flex",
     "group": "Chat-BOT",
     "img_src": "https://img.icons8.com/fluent/512/claude-ai.png",
     "li_hover_color": "#d97757",
@@ -184,6 +186,7 @@
   },
   {
     "default_type": "img",
+    "display_style": "flex",
     "group": "Chat-BOT",
     "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
     "name": "Google Bard",
@@ -191,6 +194,7 @@
   },
   {
     "default_type": "img",
+    "display_style": "flex",
     "group": "Chat-BOT",
     "img_src": "https://www.techspot.com/images2/downloads/topdownload/2025/07/2025-07-14-ts3_thumbs-d25.png",
     "li_bg_color": "white",
@@ -298,7 +302,6 @@
   {
     "default_type": "nerd-font",
     "group": "Local (Flask)",
-    "hidden": true,
     "name": "GameARR",
     "url": "http://192.168.0.101:5005/"
   },
