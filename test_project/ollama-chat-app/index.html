@@ -34,6 +34,63 @@
     .copy-button:hover { background-color: rgba(255,255,255,0.2); }
     .header-select-group { display: flex; align-items: center; gap: 0.5rem; }
     .header-select-group label { margin-bottom: 0; font-weight: 500; }
+    
+    /* Enhanced styling for code block notification */
+    .code-block-notification {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+      border-left: 4px solid #4c63d2;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slideIn 0.3s ease-out;
+    }
+    .code-block-notification.static {
+      animation: none;
+    }
+    .code-block-notification::before {
+      content: "📝";
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+    
+    .code-block-notification strong {
+      color: #ffd700;
+      font-weight: 600;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* Alternative dark theme notification */
+    .code-block-notification.dark {
+      background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+      border-left-color: #68d391;
+      box-shadow: 0 2px 8px rgba(104, 211, 145, 0.2);
+    }
+    
+    .code-block-notification.dark::before {
+      content: "⚡";
+    }
+    
+    .code-block-notification.dark strong {
+      color: #68d391;
+    }
+    
     @media (max-width: 992px) { .main-container { flex-direction: column; } .chat-panel, .code-panel { min-height: 300px; } .header-select-group { flex-direction: column; align-items: flex-start; } }
     #message-input { resize: none; overflow: hidden; min-height: 1.5em; max-height: 7.5em; line-height: 1.5em; }
     .input-group > button { height: 38px; max-height: 38px; align-self: center; flex-shrink: 0; border-radius: 2%; }
@@ -191,9 +248,10 @@
     }
 
     function formatMessageText(text) {
-      const textWithoutCode = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language) =>
-        `\n[Code block (${language || 'text'}) moved to code panel]\n`
-      );
+      const textWithoutCode = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language) => {
+        // Create a styled notification without animation during streaming
+        return `<div class="code-block-notification static">Code block <strong>(${language || 'text'})</strong> moved to code panel</div>`;
+      });
       return marked.parse(textWithoutCode);
     }
 
