@@ -1,9 +1,10 @@
 [
   {
-    "name": "erecruitment",
+    "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "JobCircular",
-    "url": "https://erecruitment.bb.org.bd/",
-    "default_type": "nerd-font"
+    "name": "erecruitment",
+    "url": "https://erecruitment.bb.org.bd/"
   },
   {
     "default_type": "nerd-font",
@@ -152,18 +153,18 @@
     "url": "https://www.nerdfonts.com/cheat-sheet"
   },
   {
-    "name": "Kimi k2",
+    "default_type": "img",
     "group": "Chat-BOT",
-    "url": "https://www.kimi.com/",
     "img_src": "https://statics.moonshot.cn/kimi-blog/assets/logo-CvjirWOb.svg",
-    "default_type": "img"
+    "name": "Kimi k2",
+    "url": "https://www.kimi.com/"
   },
   {
-    "name": "ChatGPT",
+    "default_type": "img",
     "group": "Chat-BOT",
-    "url": "https://chatgpt.com/",
     "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
-    "default_type": "img"
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/"
   },
   {
     "default_type": "img",
@@ -220,13 +221,13 @@
     "url": "http://192.168.0.101:7878/"
   },
   {
-    "name": "Prowlarr",
+    "default_type": "img",
     "group": "Local (Apps)",
-    "url": "http://192.168.0.101:9696/",
-    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
-    "width": "50",
     "height": "50",
-    "default_type": "img"
+    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
+    "name": "Prowlarr",
+    "url": "http://192.168.0.101:9696/",
+    "width": "50"
   },
   {
     "default_type": "img",

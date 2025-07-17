@@ -413,7 +413,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.ok) {
-                    alert('Link updated successfully!');
                     editLinkPopup.classList.add('hidden');
                     fetchAndDisplayLinks();
                 } else {
@@ -449,7 +448,6 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
           const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle);
           if (success) {
-            alert('Group name updated successfully!');
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();
           } else {
