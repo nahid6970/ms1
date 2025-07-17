@@ -122,7 +122,7 @@ border-radius: 10px;
   display: block; /* Make the span take full width */
   padding: 5px 5px;
   width: fit-content;
-  height: 60px;
+  height: fit-content;
   font-family: jetbrainsmono nfp;
   align-content: center;
   background-color: transparent; /* Remove background from the span itself */

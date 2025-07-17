@@ -235,6 +235,7 @@
   {
     "color": "#20acd7",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "group": "Local (Apps)",
     "icon_class": "nf nf-md-folder_sync",
     "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
@@ -243,6 +244,7 @@
   },
   {
     "default_type": "nerd-font",
+    "font_size": "35px",
     "group": "Local (Apps)",
     "icon_class": "nf nf-linux-tor",
     "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
@@ -252,6 +254,7 @@
   {
     "color": "#009fff",
     "default_type": "nerd-font",
+    "font_size": "35px",
     "group": "Local (Apps)",
     "icon_class": "nf nf-fa-wifi",
     "name": "WIFI",
