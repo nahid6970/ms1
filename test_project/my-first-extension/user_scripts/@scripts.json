@@ -1,0 +1,16 @@
+{
+  "scripts": [
+    "sample_script.js",
+    "disable_youtube.js",
+    "dark_mode_toggle.js",
+    "text_highlighter.js",
+    "youtube_ad_skipper.js"
+  ],
+  "descriptions": {
+    "sample_script.js": "Sample Script - Test script with alert",
+    "disable_youtube.js": "Disable YouTube - Redirects to Google",
+    "dark_mode_toggle.js": "Dark Mode - Inverts page colors",
+    "text_highlighter.js": "Text Highlighter - Highlight selected text",
+    "youtube_ad_skipper.js": "YouTube Ad Skipper - Skip/speed up ads"
+  }
+}
