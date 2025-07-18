@@ -381,8 +381,9 @@ class SF3AutomationTool:
         if event_selection and image_selection:
             event_name = self.event_listbox.get(event_selection[0])
             image_index = image_selection[0]
+            image_name = self.image_listbox.get(image_index)
             
-            if messagebox.askyesno("Delete Image", "Delete selected image?"):
+            if messagebox.askyesno("Delete Image", f"Delete image '{image_name}'?"):
                 del self.events_data[event_name]["images"][image_index]
                 self.populate_image_list(event_name)
                 self.save_config()
@@ -399,7 +400,7 @@ class SF3AutomationTool:
             
             # Load image data into form
             self.load_image_data(image_data)
-            
+
     def save_image_config(self):
         """Save current image configuration"""
         event_selection = self.event_listbox.curselection()
@@ -417,16 +418,24 @@ class SF3AutomationTool:
             
             # Update display
             self.populate_image_list(event_name)
+            self.image_listbox.selection_set(image_index)
             self.save_config()
             
             messagebox.showinfo("Success", "Image configuration saved!")
             
-    def get_image_data_from_form(self):
+    def get_image_data_from_form(self, event_name, image_index):
         """Get image data from current form"""
-        # Get region
+        # Get a copy of the original image data to modify
+        image_data = self.events_data[event_name]["images"][image_index].copy()
+
+        # Update fields from the form
+        image_data['path'] = self.image_path_var.get()
+        image_data['confidence'] = self.confidence_var.get()
+
         region = None
         if any(var.get() for var in self.region_vars):
             region = [var.get() for var in self.region_vars]
+        image_data['region'] = region
             
         # Get action data based on type
         action_type = self.action_type_var.get()
@@ -452,14 +461,10 @@ class SF3AutomationTool:
                 "function": self.function_name_var.get(),
                 "params": self.function_params_var.get()
             })
-            
-        return {
-            "name": "Current Image",  # This should be set properly
-            "path": self.image_path_var.get(),
-            "confidence": self.confidence_var.get(),
-            "region": region,
-            "action": action_data
-        }
+        
+        image_data['action'] = action_data
+                
+        return image_data
         
     def load_image_data(self, image_data):
         """Load image data into form"""
@@ -745,43 +750,6 @@ class SF3AutomationTool:
                 with open(self.config_file, 'r') as f:
                     self.events_data = json.load(f)
                 print(f"Configuration loaded from {self.config_file}")
-            else:
-                # Create default configuration
-                self.events_data = {
-                    "Daily_Rewards": {
-                        "enabled": True,
-                        "images": [
-                            {
-                                "name": "Collect_Button",
-                                "path": "",
-                                "confidence": 0.8,
-                                "region": None,
-                                "action": {
-                                    "type": "mouse_click",
-                                    "x": 500,
-                                    "y": 300,
-                                    "delay": 1.0
-                                }
-                            }
-                        ]
-                    },
-                    "Battle_Automation": {
-                        "enabled": True,
-                        "images": [
-                            {
-                                "name": "Fight_Button",
-                                "path": "",
-                                "confidence": 0.8,
-                                "region": None,
-                                "action": {
-                                    "type": "key_press",
-                                    "key": "space",
-                                    "delay": 0.5
-                                }
-                            }
-                        ]
-                    }
-                }
         except Exception as e:
             print(f"Error loading config: {e}")
             self.events_data = {}
