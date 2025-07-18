@@ -612,10 +612,14 @@ ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command(r'code 
 
 ollama_lb = tk.Label(ROOT1,text="ollama", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ollama_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# ollama_lb.bind( "<Button-1>", lambda event=None: run_command(r'C:\ms1\test_project\ollama-chat-app\kill_port_8000.py'))
 ollama_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\test_project\\ollama-chat-app\\kill_port_8000.py'))
 ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
 ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\test_project\ollama-chat-app\server.py'))
+
+path_replace = tk.Label(ROOT1,text="PathR", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
+path_replace.pack(side="left", padx=(0, 0), pady=(0, 0))
+path_replace.bind("<Button-1>",lambda event=None:subprocess.Popen(r'cmd /c C:\ms1\path_tracker.py'))
+path_replace.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\path_tracker.py'))
 
 
 
@@ -1062,37 +1066,37 @@ create_gui()
 
 
 
-UPDATE_INTERVAL_SEC = 60  # 600 seconds = 10 minutes
-PING_COMMAND = ["ping", "-n", "1", "-w", "1000", "192.168.0.103"]  # -n 1 = once, -w 1000 = 1s timeout
+# UPDATE_INTERVAL_SEC = 60  # 600 seconds = 10 minutes
+# PING_COMMAND = ["ping", "-n", "1", "-w", "1000", "192.168.0.103"]  # -n 1 = once, -w 1000 = 1s timeout
 
-def ping_mi9t():
-    def run_ping():
-        try:
-            result = subprocess.run(PING_COMMAND, capture_output=True, text=True, timeout=5)
-            output = result.stdout + result.stderr
+# def ping_mi9t():
+#     def run_ping():
+#         try:
+#             result = subprocess.run(PING_COMMAND, capture_output=True, text=True, timeout=5)
+#             output = result.stdout + result.stderr
 
-            if "Reply from" in output:
-                update_ui("mi9t ✓", "black", "#abec72")  # green
-            elif "Request timed out" in output or "Destination host unreachable" in output:
-                update_ui("mi9t ✗", "white", "red")  # red
-            else:
-                update_ui("mi9t ?", "white", "gray")  # unknown
-        except Exception as e:
-            update_ui("Error", "white", "gray")
-            print(f"Ping error: {e}")
-        finally:
-            ROOT2.after(UPDATE_INTERVAL_SEC * 1000, ping_mi9t)
+#             if "Reply from" in output:
+#                 update_ui("mi9t ✓", "black", "#abec72")  # green
+#             elif "Request timed out" in output or "Destination host unreachable" in output:
+#                 update_ui("mi9t ✗", "white", "red")  # red
+#             else:
+#                 update_ui("mi9t ?", "white", "gray")  # unknown
+#         except Exception as e:
+#             update_ui("Error", "white", "gray")
+#             print(f"Ping error: {e}")
+#         finally:
+#             ROOT2.after(UPDATE_INTERVAL_SEC * 1000, ping_mi9t)
 
-    threading.Thread(target=run_ping, daemon=True).start()
+#     threading.Thread(target=run_ping, daemon=True).start()
 
-def update_ui(text, fg, bg):
-    Android_mi9t_status.config(text=text, fg=fg, bg=bg)
+# def update_ui(text, fg, bg):
+#     Android_mi9t_status.config(text=text, fg=fg, bg=bg)
 
 
-Android_mi9t_status = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono NFP", 10, "bold"), width=10)
-Android_mi9t_status.pack(side="left", padx=(3,10), pady=(0,0))
+# Android_mi9t_status = tk.Label(ROOT2, text="Loading...", font=("Jetbrainsmono NFP", 10, "bold"), width=10)
+# Android_mi9t_status.pack(side="left", padx=(3,10), pady=(0,0))
 
-ping_mi9t()
+# ping_mi9t()
 
 
 
