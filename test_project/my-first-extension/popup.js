@@ -2,77 +2,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const scriptListDiv = document.getElementById('scriptList');
   const statusText = document.getElementById('statusText');
 
-  // Function to discover scripts dynamically
-  async function discoverScripts() {
+
+
+  // Get all scripts from user_scripts folder
+  async function getAvailableScripts() {
     const scripts = [];
     
     try {
-      // Get all files in the user_scripts directory
+      // Try to get directory listing
       const response = await fetch(chrome.runtime.getURL('user_scripts/'));
       const text = await response.text();
       
-      // Parse the directory listing (this approach works for packed extensions)
-      // For unpacked extensions, we'll use a different approach
+      // Parse directory listing to find .js files
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, 'text/html');
       const links = doc.querySelectorAll('a[href$=".js"]');
       
       links.forEach(link => {
-        const scriptPath = `user_scripts/${link.href.split('/').pop()}`;
-        scripts.push(scriptPath);
+        const fileName = link.href.split('/').pop();
+        scripts.push(`user_scripts/${fileName}`);
       });
+      
+      return scripts;
     } catch (error) {
-      console.log('Directory listing not available, using fallback method');
+      console.log('Directory listing not available, using alternative method');
       
-      // Fallback: Try to load common script files
-      const commonScripts = [
-        'sample_script.js',
-        'disable_youtube.js',
-        'dark_mode_toggle.js',
-        'text_highlighter.js',
-        'youtube_ad_skipper.js',
-        'auto_clicker.js',
-        'page_monitor.js',
-        'form_filler.js',
-        'link_preview.js',
-        'scroll_enhancer.js',
-        'password_generator.js',
-        'tab_manager.js',
-        'image_lazy_loader.js',
-        'notification_blocker.js',
-        'theme_switcher.js'
-      ];
-      
-      // Check which scripts actually exist
-      for (const script of commonScripts) {
-        try {
-          const scriptPath = `user_scripts/${script}`;
-          await fetch(chrome.runtime.getURL(scriptPath));
-          scripts.push(scriptPath);
-        } catch (e) {
-          // Script doesn't exist, skip it
-        }
+      // Alternative: Use chrome.runtime.getPackageDirectoryEntry (for unpacked extensions)
+      if (chrome.runtime.getPackageDirectoryEntry) {
+        return new Promise((resolve) => {
+          chrome.runtime.getPackageDirectoryEntry((root) => {
+            root.getDirectory('user_scripts', {}, (dirEntry) => {
+              const reader = dirEntry.createReader();
+              reader.readEntries((entries) => {
+                const jsFiles = entries
+                  .filter(entry => entry.isFile && entry.name.endsWith('.js'))
+                  .map(entry => `user_scripts/${entry.name}`);
+                resolve(jsFiles);
+              });
+            }, () => resolve([]));
+          });
+        });
       }
+      
+      // Final fallback: Return empty array
+      return [];
     }
-    
-    return scripts;
-  }
-
-  // Enhanced script discovery using manifest and file system
-  async function getAvailableScripts() {
-    const scripts = [];
-    
-    // Method 1: Read from a scripts manifest file if it exists
-    try {
-      const response = await fetch(chrome.runtime.getURL('user_scripts/@scripts.json'));
-      const scriptsManifest = await response.json();
-      return scriptsManifest.scripts.map(script => `user_scripts/${script}`);
-    } catch (error) {
-      console.log('No scripts.json found, using auto-discovery');
-    }
-    
-    // Method 2: Try to discover scripts automatically
-    return await discoverScripts();
   }
 
   // Generate user-friendly names and descriptions
