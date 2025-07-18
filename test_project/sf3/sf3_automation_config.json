@@ -4,5 +4,20 @@
   },
   "ls": {
     "images": []
+  },
+  "LS": {
+    "images": [
+      {
+        "name": "ss",
+        "path": "",
+        "confidence": 0.8,
+        "region": null,
+        "action": {
+          "type": "key_press",
+          "key": "space",
+          "delay": 0.1
+        }
+      }
+    ]
   }
 }
