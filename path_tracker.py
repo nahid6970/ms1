@@ -50,13 +50,19 @@ class PathTrackerGUI:
         
         folder_frame = ttk.Frame(main_frame)
         folder_frame.grid(row=1, column=1, columnspan=2, sticky=(tk.W, tk.E), pady=5)
-        folder_frame.columnconfigure(0, weight=1)
+        folder_frame.columnconfigure(1, weight=1)
+        
+        # Quick select dropdown
+        self.quick_folders = ["c:/ms1/", "c:/msBackups/"]
+        quick_select = ttk.Combobox(folder_frame, values=self.quick_folders, width=15, state="readonly")
+        quick_select.grid(row=0, column=0, padx=(0, 5))
+        quick_select.bind('<<ComboboxSelected>>', self.on_quick_select)
         
         self.folder_entry = ttk.Entry(folder_frame, textvariable=self.selected_folder, width=50)
-        self.folder_entry.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 5))
+        self.folder_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
         
         browse_btn = ttk.Button(folder_frame, text="Browse", command=self.browse_folder)
-        browse_btn.grid(row=0, column=1)
+        browse_btn.grid(row=0, column=2)
         
         # Configuration frame
         config_frame = ttk.LabelFrame(main_frame, text="Configuration", padding="10")
@@ -114,6 +120,11 @@ class PathTrackerGUI:
         if folder:
             self.selected_folder.set(folder)
             
+    def on_quick_select(self, event):
+        selected = event.widget.get()
+        self.selected_folder.set(selected)
+        self.log_message(f"📁 Quick selected: {selected}")
+        
     def log_message(self, message):
         self.log_text.insert(tk.END, f"[{datetime.now().strftime('%H:%M:%S')}] {message}\n")
         self.log_text.see(tk.END)
