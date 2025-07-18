@@ -142,7 +142,7 @@ class CodeExtractor:
                     hints.append(title)
         elif language in {'css', 'scss', 'sass'}:
             if re.search(r'\.hero', code):
-                hints.append('styles')
+                hints.append('style')
             elif re.search(r'body\s*{', code):
                 hints.append('main')
 
@@ -160,8 +160,13 @@ class CodeExtractor:
             return base
 
         # Fallback
-        std = {'html': 'index', 'css': 'styles', 'js': 'script', 'python': 'main',
-               'java': 'Main', 'c': 'main', 'cpp': 'main'}
+        std = {'html': 'index', 
+                'css': 'style', 
+                'js': 'script', 
+                'python': 'main',
+                'java': 'Main',
+                'c': 'main',
+                'cpp': 'main'}
         return std.get(language, language)
 
     def is_valid_filename(self, name: str) -> bool:
