@@ -1,41 +1,192 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Script Manager</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      width: 250px;
-      padding: 10px;
-    }
-    h2 {
-      font-size: 1.2em;
-      margin-bottom: 10px;
-    }
-    .script-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .script-item label {
-      margin-left: 8px;
-      flex-grow: 1;
-    }
-    /* Basic checkbox styling */
-    .script-item input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      margin-right: 5px;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Script Manager</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
+        body {
+            width: 350px;
+            min-height: 400px;
+            margin: 0;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .header-icon {
+            font-size: 18px;
+            color: #569cd6;
+        }
+        
+        .header-title {
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        .script-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #2d2d30;
+            border-radius: 4px;
+            border-left: 3px solid #007acc;
+            transition: all 0.2s ease;
+        }
+        
+        .script-item:hover {
+            background: #323233;
+        }
+        
+        .script-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .script-icon {
+            font-size: 14px;
+            color: #4ec9b0;
+        }
+        
+        .script-details {
+            flex: 1;
+        }
+        
+        .script-name {
+            font-weight: 500;
+            color: #d4d4d4;
+            margin-bottom: 2px;
+        }
+        
+        .script-path {
+            font-size: 10px;
+            color: #808080;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            min-width: 45px;
+        }
+        
+        .toggle-btn.active {
+            background: #16825d;
+            color: #ffffff;
+        }
+        
+        .toggle-btn.inactive {
+            background: #3c3c3c;
+            color: #cccccc;
+        }
+        
+        .toggle-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+        
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #333;
+            font-size: 11px;
+            color: #808080;
+        }
+        
+        .status-icon {
+            font-size: 12px;
+            color: #4ec9b0;
+        }
+        
+        .no-scripts {
+            text-align: center;
+            color: #808080;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .script-item.enabled {
+            border-left-color: #16825d;
+        }
+        
+        .script-item.disabled {
+            border-left-color: #666;
+        }
+        
+        .refresh-btn {
+            width: 100%;
+            padding: 8px;
+            background: #0e639c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #1177bb;
+            transform: translateY(-1px);
+        }
+        
+        .debug-info {
+            background: #2d2d30;
+            padding: 8px;
+            margin-top: 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #808080;
+        }
+    </style>
 </head>
 <body>
-  <h2>Script Manager</h2>
-  <div id="scriptList">
-    <!-- Scripts will be loaded here by popup.js -->
-  </div>
-  <script src="popup.js"></script>
+    <div class="header">
+        <div class="header-icon">⚡</div>
+        <div class="header-title">Script Manager</div>
+    </div>
+    
+    <div id="scriptList">
+        <!-- Scripts will be loaded here by popup.js -->
+    </div>
+    
+    <div class="status-bar">
+        <div class="status-icon">●</div>
+        <span id="statusText">Loading...</span>
+    </div>
+    
+    <script src="popup.js"></script>
 </body>
 </html>
