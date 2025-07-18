@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'user_scripts/disable_youtube.js',
     'user_scripts/dark_mode_toggle.js',
     'user_scripts/text_highlighter.js',
+    'user_scripts/youtube_ad_skipper.js',  // Added the YouTube ad skipper
     // Add more script paths here, e.g., 'user_scripts/my_new_script.js'
   ];
 
