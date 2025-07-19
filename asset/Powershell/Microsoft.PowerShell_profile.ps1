@@ -689,13 +689,6 @@ function su {
 
 
 
-function gitpush {
-git add .
-git commit -m "XX"
-git push
-}
-
-
 function gitter {
     # Navigate to the current directory
     Set-Location -Path $PWD
@@ -706,18 +699,15 @@ function gitter {
         return
     }
 
-    # Get the current date and time
-    $CurrentDateTime = Get-Date -Format "📅 MMMM dd, yyyy, hh:mm tt"
-
     # Prompt for optional commit message
-    $UserInput = Read-Host "Enter commit message (press Enter to skip)"
+    $UserInput = Read-Host "Enter commit message (press Enter to use 'Auto-commit')"
 
     if ([string]::IsNullOrWhiteSpace($UserInput)) {
-        $CommitMessage = "$CurrentDateTime"
+        $CommitMessage = "Auto-commit"
     } else {
-        $CommitMessage = "$CurrentDateTime 🚀 $UserInput"
+        $CommitMessage = $UserInput
     }
-    
+
     # Show what changed
     git status
     # Stage all changes
