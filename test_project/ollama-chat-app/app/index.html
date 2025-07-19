@@ -442,7 +442,7 @@
           reader.onerror = () => reject(reader.error);
           
           // Define file extensions that should NOT show content
-          const hideContentExtensions = ['.py', '.ps1', '.html'];
+          const hideContentExtensions = ['.py', '.ps1', '.html', '.txt'];
           const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
           
           if (hideContentExtensions.includes(fileExtension)) {

@@ -1,0 +1,42 @@
+{
+  "events": {
+    "ffffffff": {
+      "images": [
+        {
+          "name": "adasdas",
+          "path": "C:/Users/nahid/Pictures/Camera/020250329_104931_lmc_8.4.jpg",
+          "confidence": 0.6,
+          "region": [
+            10,
+            10,
+            100,
+            100
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "f",
+            "delay": 0.1
+          }
+        }
+      ],
+      "enabled": true
+    },
+    "SS": {
+      "images": [
+        {
+          "name": "RR",
+          "path": "C:/Users/nahid/Pictures/Camera/020250329_104931_lmc_8.4.jpg",
+          "confidence": 0.8,
+          "region": null,
+          "action": {
+            "type": "key_press",
+            "key": "f",
+            "delay": 0.1
+          }
+        }
+      ],
+      "enabled": true
+    }
+  },
+  "target_window": "LDPlayer"
+}
