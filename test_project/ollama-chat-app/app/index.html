@@ -402,10 +402,47 @@
       const temperatureValue = document.getElementById('temperature-value');
       const topPSlider = document.getElementById('top-p-slider');
       const topPValue = document.getElementById('top-p-value');
+
+      // Load saved settings from localStorage
+      const savedMaxTokens = localStorage.getItem('maxTokens');
+      if (savedMaxTokens) {
+        maxTokensSlider.value = savedMaxTokens;
+        maxTokensValue.textContent = savedMaxTokens;
+      }
+
+      const savedContextWindow = localStorage.getItem('contextWindow');
+      if (savedContextWindow) {
+        contextWindowSlider.value = savedContextWindow;
+        contextWindowValue.textContent = savedContextWindow;
+      }
+
+      const savedTemperature = localStorage.getItem('temperature');
+      if (savedTemperature) {
+        temperatureSlider.value = savedTemperature;
+        temperatureValue.textContent = savedTemperature;
+      }
+
+      const savedTopP = localStorage.getItem('topP');
+      if (savedTopP) {
+        topPSlider.value = savedTopP;
+        topPValue.textContent = savedTopP;
+      }
       const embedButton = document.getElementById('embed-button');
       const ragDirectoryInput = document.getElementById('rag-directory-input');
       const loadRagDocsBtn = document.getElementById('load-rag-docs-btn');
       const ragToggle = document.getElementById('rag-toggle');
+
+      // Load saved RAG directory on startup
+      const savedRagDirectory = localStorage.getItem('ragKnowledgeBaseDirectory');
+      if (savedRagDirectory) {
+        ragDirectoryInput.value = savedRagDirectory;
+      }
+
+      // Load saved RAG toggle state on startup
+      const savedRagToggleState = localStorage.getItem('ragToggleState');
+      if (savedRagToggleState !== null) {
+        ragToggle.checked = JSON.parse(savedRagToggleState);
+      }
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
@@ -419,24 +456,32 @@
 
       maxTokensSlider.addEventListener('input', (e) => {
           maxTokensValue.textContent = e.target.value;
+          localStorage.setItem('maxTokens', e.target.value);
       });
 
       contextWindowSlider.addEventListener('input', (e) => {
           contextWindowValue.textContent = e.target.value;
+          localStorage.setItem('contextWindow', e.target.value);
       });
 
       temperatureSlider.addEventListener('input', (e) => {
           temperatureValue.textContent = e.target.value;
+          localStorage.setItem('temperature', e.target.value);
       });
 
       topPSlider.addEventListener('input', (e) => {
           topPValue.textContent = e.target.value;
+          localStorage.setItem('topP', e.target.value);
       });
 
       embedButton.addEventListener('click', async () => {
         const message = messageInput.value.trim();
         if (!message) { alert("Please type a message to embed."); return; }
         await sendEmbedRequest(message);
+      });
+
+      ragDirectoryInput.addEventListener('input', () => {
+        localStorage.setItem('ragKnowledgeBaseDirectory', ragDirectoryInput.value);
       });
 
       loadRagDocsBtn.addEventListener('click', async () => {
@@ -446,6 +491,7 @@
       });
 
       ragToggle.addEventListener('change', () => {
+        localStorage.setItem('ragToggleState', ragToggle.checked);
         if (ragToggle.checked && !ragDirectoryInput.value.trim()) {
           alert("Please load RAG documents first or specify a directory.");
           ragToggle.checked = false;
@@ -481,6 +527,10 @@
         }
       });
 
+      modelSelect.addEventListener('change', () => {
+        localStorage.setItem('selectedOllamaModel', modelSelect.value);
+      });
+
       async function fetchModels() {
         try {
           const response = await fetch("/api/tags");
@@ -491,6 +541,11 @@
             option.textContent = model.name;
             modelSelect.appendChild(option);
           });
+          // Load saved model after fetching models
+          const savedModel = localStorage.getItem('selectedOllamaModel');
+          if (savedModel && Array.from(modelSelect.options).some(option => option.value === savedModel)) {
+            modelSelect.value = savedModel;
+          }
         } catch (error) {
           console.error("Error fetching models:", error);
           alert("Could not fetch models. Make sure Ollama is running.");
