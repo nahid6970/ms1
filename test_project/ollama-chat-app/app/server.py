@@ -261,7 +261,9 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
-        if self.path.startswith("/api/rag"):
+        if self.path.startswith("/api/settings"):
+            self._handle_settings_request()
+        elif self.path.startswith("/api/rag"):
             self._handle_rag_request()
         elif self.path.startswith("/api"):
             self._proxy_request()
@@ -272,7 +274,9 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        if self.path.startswith("/api/rag"):
+        if self.path.startswith("/api/settings"):
+            self._handle_settings_request()
+        elif self.path.startswith("/api/rag"):
             self._handle_rag_request()
         elif self.path.startswith("/api"):
             self._proxy_request()
@@ -330,20 +334,7 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                     rag_system.clear_collection()
                     response = {'success': True, 'message': 'Collection cleared'}
                 
-                elif self.path == '/api/settings/save':
-                    # Save settings (instructions and RAG config)
-                    settings_data = data.get('settings', {})
-                    if 'instructions' in settings_data:
-                        current_settings['instructions'] = settings_data['instructions']
-                    if 'rag' in settings_data:
-                        current_settings['rag'].update(settings_data['rag'])
-                    save_settings_to_file(current_settings) # Persist settings to file
-                    print("Settings updated and saved:", current_settings)
-                    response = {'success': True, 'message': 'Settings saved'}
-                
-                elif self.path == '/api/settings/load':
-                    # Load current settings
-                    response = {'success': True, 'settings': current_settings}
+
                 
                 else:
                     self.send_error(404, "RAG endpoint not found")
@@ -366,6 +357,59 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
             
         except Exception as e:
             print(f"RAG Error: {e}")
+            import traceback
+            traceback.print_exc()
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            error_response = {'success': False, 'error': str(e)}
+            self.wfile.write(json.dumps(error_response).encode('utf-8'))
+
+    def _handle_settings_request(self):
+        """Handle settings API requests"""
+        global current_settings
+        
+        try:
+            if self.command == 'POST':
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                
+                if self.path == '/api/settings/save':
+                    # Save settings (instructions and RAG config)
+                    settings_data = data.get('settings', {})
+                    if 'instructions' in settings_data:
+                        current_settings['instructions'] = settings_data['instructions']
+                    if 'rag' in settings_data:
+                        current_settings['rag'].update(settings_data['rag'])
+                    
+                    # Save to file
+                    save_settings_to_file(current_settings)
+                    print("Settings updated and saved:", current_settings)
+                    response = {'success': True, 'message': 'Settings saved'}
+                
+                else:
+                    self.send_error(404, "Settings endpoint not found")
+                    return
+            
+            elif self.command == 'GET':
+                if self.path == '/api/settings/load':
+                    # Load current settings
+                    response = {'success': True, 'settings': current_settings}
+                else:
+                    self.send_error(404, "Settings endpoint not found")
+                    return
+            
+            # Send response
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            
+        except Exception as e:
+            print(f"Settings Error: {e}")
             import traceback
             traceback.print_exc()
             self.send_response(500)
