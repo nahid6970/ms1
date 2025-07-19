@@ -397,6 +397,10 @@
       const maxTokensValue = document.getElementById('max-tokens-value');
       const contextWindowSlider = document.getElementById('context-window-slider');
       const contextWindowValue = document.getElementById('context-window-value');
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      });
       let conversationHistory = [];
       let codeBlocks = [];
 
@@ -777,11 +781,23 @@
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="max-tokens-slider" class="form-label">Max Tokens: <span id="max-tokens-value">2048</span></label>
+          <label for="max-tokens-slider" class="form-label">Max Tokens: <span id="max-tokens-value">2048</span>
+            <i class="nf nf-fa-info_circle text-muted ms-2" 
+               data-bs-toggle="tooltip" 
+               data-bs-placement="right" 
+               title="How long the next answer can be.">
+            </i>
+          </label>
           <input type="range" class="form-range" min="512" max="8192" step="512" id="max-tokens-slider" value="2048">
         </div>
         <div class="mb-3">
-          <label for="context-window-slider" class="form-label">Context Window Size: <span id="context-window-value">4096</span></label>
+          <label for="context-window-slider" class="form-label">Context Window Size: <span id="context-window-value">4096</span>
+            <i class="nf nf-fa-info_circle text-muted ms-2" 
+               data-bs-toggle="tooltip" 
+               data-bs-placement="right" 
+               title="How much of the past conversation the model remembers.">
+            </i>
+          </label>
           <input type="range" class="form-range" min="2048" max="16384" step="2048" id="context-window-slider" value="4096">
         </div>
       </div>
