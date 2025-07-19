@@ -130,19 +130,37 @@ Handle all 5 action types:
 - Thread management for start/stop buttons
 - Update button text: "Start EventName" / "Stop EventName"
 
-### 8. Utility Features
+### 8. Custom Function Framework
+Implement a simple framework for users to add their own custom functions:
+```python
+def execute_custom_function(self, function_name, params, window):
+    """Framework for executing custom functions"""
+    # User can add their own custom functions here
+    print(f"Custom function '{function_name}' called with params: {params}")
+    # Example of how users would add their own:
+    # if function_name == "my_custom_function":
+    #     self.my_custom_function(params, window)
+```
+
+### 9. Utility Features
 - Screenshot tool with timestamp
 - Test image recognition function
 - Mouse position capture (wait for spacebar press)
 - Region selection helper
 - Available windows listing
 
-### 9. Menu System
+### 10. Menu System
 **File Menu**: New, Open, Save, Export, Import, Exit
 **Tools Menu**: Screenshot Tool, Test Image Recognition, Window Settings
 **Help Menu**: About, Help dialog
 
-### 10. Error Handling & Safety
+### 10. Custom Function System
+- Framework to allow users to add their own custom functions
+- Simple method to register new custom functions by name
+- Parameter passing system using JSON format
+- Empty framework ready for user expansion
+
+### 11. Error Handling & Safety
 - Try-catch blocks around all pyautogui operations
 - File existence checks for images
 - JSON validation for config files
@@ -177,14 +195,25 @@ Handle all 5 action types:
 
 ## Sample Custom Functions to Include
 ```python
-def collect_reward_function(self, params, window):
-    # Click multiple reward positions with delays
+def execute_custom_function(self, function_name, params, window):
+    """
+    Framework for custom functions - users add their own functions here
+    Example usage in JSON:
+    "action": {
+        "type": "custom_function", 
+        "function": "my_function_name",
+        "params": "{\"key\": \"value\"}"
+    }
+    """
+    print(f"Custom function '{function_name}' not implemented")
+    print(f"Add your custom function logic here for: {function_name}")
+    print(f"Parameters received: {params}")
     
-def battle_sequence_function(self, params, window):
-    # Execute combat key sequence
-    
-def upgrade_equipment_function(self, params, window):
-    # Navigate upgrade menus and confirm
+    # Users would add their functions like this:
+    # if function_name == "collect_all_rewards":
+    #     self.collect_all_rewards(params, window)
+    # elif function_name == "auto_battle":
+    #     self.auto_battle(params, window)
 ```
 
 ## Final Requirements
@@ -196,3 +225,5 @@ def upgrade_equipment_function(self, params, window):
 - No placeholder functions - everything should work
 
 Make sure the application is production-ready with robust error handling and a professional user interface. The tool should be able to handle multiple events running simultaneously, save/load configurations reliably, and provide a smooth user experience for game automation tasks.
+
+also make it so after creatin event and add image will pop up a gui to input items not in the right side and then i can input the path add region key press etc and  edit will do the same currently having issue with add image and it doesnt add region or kkey press functions properly
