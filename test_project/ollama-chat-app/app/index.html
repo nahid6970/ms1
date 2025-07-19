@@ -376,7 +376,6 @@
       </ul>
     </div>
     <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
-    <button type="button" class="btn btn-secondary" id="embed-button"><i class="nf nf-md-code_braces"></i> Embed</button>
   </div>
 </form>
       </div>
@@ -384,7 +383,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+<script>
     document.addEventListener('DOMContentLoaded', () => {
       const modelSelect = document.getElementById("model-select");
       const chatWindow = document.getElementById("chat-window");
@@ -402,47 +401,6 @@
       const temperatureValue = document.getElementById('temperature-value');
       const topPSlider = document.getElementById('top-p-slider');
       const topPValue = document.getElementById('top-p-value');
-
-      // Load saved settings from localStorage
-      const savedMaxTokens = localStorage.getItem('maxTokens');
-      if (savedMaxTokens) {
-        maxTokensSlider.value = savedMaxTokens;
-        maxTokensValue.textContent = savedMaxTokens;
-      }
-
-      const savedContextWindow = localStorage.getItem('contextWindow');
-      if (savedContextWindow) {
-        contextWindowSlider.value = savedContextWindow;
-        contextWindowValue.textContent = savedContextWindow;
-      }
-
-      const savedTemperature = localStorage.getItem('temperature');
-      if (savedTemperature) {
-        temperatureSlider.value = savedTemperature;
-        temperatureValue.textContent = savedTemperature;
-      }
-
-      const savedTopP = localStorage.getItem('topP');
-      if (savedTopP) {
-        topPSlider.value = savedTopP;
-        topPValue.textContent = savedTopP;
-      }
-      const embedButton = document.getElementById('embed-button');
-      const ragDirectoryInput = document.getElementById('rag-directory-input');
-      const loadRagDocsBtn = document.getElementById('load-rag-docs-btn');
-      const ragToggle = document.getElementById('rag-toggle');
-
-      // Load saved RAG directory on startup
-      const savedRagDirectory = localStorage.getItem('ragKnowledgeBaseDirectory');
-      if (savedRagDirectory) {
-        ragDirectoryInput.value = savedRagDirectory;
-      }
-
-      // Load saved RAG toggle state on startup
-      const savedRagToggleState = localStorage.getItem('ragToggleState');
-      if (savedRagToggleState !== null) {
-        ragToggle.checked = JSON.parse(savedRagToggleState);
-      }
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
@@ -450,52 +408,33 @@
       let conversationHistory = [];
       let codeBlocks = [];
 
+      // Model memory functions
+      function saveSelectedModel(modelName) {
+        localStorage.setItem('selectedOllamaModel', modelName);
+      }
+
+      function loadSelectedModel() {
+        return localStorage.getItem('selectedOllamaModel');
+      }
+
       settingsBtn.addEventListener("click", () => {
         settingsModal.show();
       });
 
       maxTokensSlider.addEventListener('input', (e) => {
           maxTokensValue.textContent = e.target.value;
-          localStorage.setItem('maxTokens', e.target.value);
       });
 
       contextWindowSlider.addEventListener('input', (e) => {
           contextWindowValue.textContent = e.target.value;
-          localStorage.setItem('contextWindow', e.target.value);
       });
 
       temperatureSlider.addEventListener('input', (e) => {
           temperatureValue.textContent = e.target.value;
-          localStorage.setItem('temperature', e.target.value);
       });
 
       topPSlider.addEventListener('input', (e) => {
           topPValue.textContent = e.target.value;
-          localStorage.setItem('topP', e.target.value);
-      });
-
-      embedButton.addEventListener('click', async () => {
-        const message = messageInput.value.trim();
-        if (!message) { alert("Please type a message to embed."); return; }
-        await sendEmbedRequest(message);
-      });
-
-      ragDirectoryInput.addEventListener('input', () => {
-        localStorage.setItem('ragKnowledgeBaseDirectory', ragDirectoryInput.value);
-      });
-
-      loadRagDocsBtn.addEventListener('click', async () => {
-        const directory = ragDirectoryInput.value.trim();
-        if (!directory) { alert("Please enter a directory path."); return; }
-        await loadRagDocuments(directory);
-      });
-
-      ragToggle.addEventListener('change', () => {
-        localStorage.setItem('ragToggleState', ragToggle.checked);
-        if (ragToggle.checked && !ragDirectoryInput.value.trim()) {
-          alert("Please load RAG documents first or specify a directory.");
-          ragToggle.checked = false;
-        }
       });
 
       function autoGrowTextarea(el) {
@@ -527,30 +466,41 @@
         }
       });
 
-      modelSelect.addEventListener('change', () => {
-        localStorage.setItem('selectedOllamaModel', modelSelect.value);
-      });
-
       async function fetchModels() {
         try {
           const response = await fetch("/api/tags");
           const data = await response.json();
+          const savedModel = loadSelectedModel();
+          let modelFound = false;
+          
           data.models.forEach((model) => {
             const option = document.createElement("option");
             option.value = model.name;
             option.textContent = model.name;
             modelSelect.appendChild(option);
+            
+            // Check if this is the previously saved model
+            if (savedModel && model.name === savedModel) {
+              option.selected = true;
+              modelFound = true;
+            }
           });
-          // Load saved model after fetching models
-          const savedModel = localStorage.getItem('selectedOllamaModel');
-          if (savedModel && Array.from(modelSelect.options).some(option => option.value === savedModel)) {
-            modelSelect.value = savedModel;
+          
+          // If saved model wasn't found but we have models, select the first one
+          if (!modelFound && data.models.length > 0) {
+            modelSelect.selectedIndex = 0;
+            saveSelectedModel(data.models[0].name);
           }
         } catch (error) {
           console.error("Error fetching models:", error);
           alert("Could not fetch models. Make sure Ollama is running.");
         }
       }
+
+      // Add event listener for model selection changes
+      modelSelect.addEventListener('change', (e) => {
+        saveSelectedModel(e.target.value);
+      });
 
       function extractAndDisplayCode(text) {
         const codeRegex = /```(\w+)?\n([\s\S]*?)```/g;
@@ -764,33 +714,12 @@
 
         let finalData;
         try {
-          let response;
-          let requestBody;
-
-          if (ragToggle.checked) {
-            const userQuery = history[history.length - 1].content; // Get the latest user query
-            const chatHistoryForRAG = history.slice(0, history.length - 1); // Exclude the current user query
-
-            requestBody = JSON.stringify({
-              query: userQuery,
-              history: chatHistoryForRAG,
-              model: selectedModel,
-              options: {
-                num_predict: parseInt(maxTokensSlider.value, 10),
-                num_ctx: parseInt(contextWindowSlider.value, 10),
-                temperature: parseFloat(temperatureSlider.value),
-                top_p: parseFloat(topPSlider.value)
-              }
-            });
-            response = await fetch("/api/rag_chat", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: requestBody,
-            });
-          } else {
-            requestBody = JSON.stringify({
-              model: selectedModel,
-              messages: history,
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              model: selectedModel, 
+              messages: history, 
               stream: true,
               options: {
                 num_predict: parseInt(maxTokensSlider.value, 10),
@@ -798,13 +727,8 @@
                 temperature: parseFloat(temperatureSlider.value),
                 top_p: parseFloat(topPSlider.value)
               }
-            });
-            response = await fetch("/api/chat", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: requestBody,
-            });
-          }
+            }),
+          });
 
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
@@ -818,8 +742,6 @@
                 const parsed = JSON.parse(line);
                 if (parsed.done) finalData = parsed;
                 else if (parsed.message && parsed.message.content) assistantResponse += parsed.message.content;
-                else if (parsed.response) assistantResponse += parsed.response; // For /api/generate
-
                 const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
                 assistantMessageTextElement.innerHTML = formatMessageText(assistantResponse);
                 extractAndDisplayCode(assistantResponse);
@@ -840,58 +762,6 @@
         } catch (error) {
           console.error("Error during chat:", error);
           assistantMessageTextElement.innerHTML = "Error communicating with Ollama.";
-        }
-      }
-
-      async function sendEmbedRequest(text) {
-        const selectedModel = "nomic-embed-text"; // Explicitly set nomic-embed-text for embedding
-        if (!selectedModel) { alert("Please select a model first."); return; }
-
-        displayMessage("user", `Embedding request for: "${text}"`, conversationHistory.length);
-        const embedMessageElement = displayMessage("assistant", "Generating embedding...", conversationHistory.length + 1, selectedModel);
-
-        try {
-          const response = await fetch("/api/embed", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: selectedModel,
-              prompt: text
-            }),
-          });
-
-          const data = await response.json();
-          if (response.ok) {
-            embedMessageElement.querySelector('.message-text').textContent = `Embedding: [${data.embedding.slice(0, 5).map(e => e.toFixed(4)).join(', ')}...] (length: ${data.embedding.length})`;
-          } else {
-            embedMessageElement.querySelector('.message-text').textContent = `Error generating embedding: ${data.error || response.statusText}`;
-          }
-        } catch (error) {
-          console.error("Error during embedding:", error);
-          embedMessageElement.querySelector('.message-text').textContent = "Error communicating with Ollama for embedding.";
-        }
-      }
-
-      async function loadRagDocuments(directory) {
-        try {
-          displayMessage("user", `Loading RAG documents from: ${directory}`, conversationHistory.length);
-          const loadingMessageElement = displayMessage("assistant", "Indexing documents...", conversationHistory.length + 1);
-
-          const response = await fetch("/api/rag_load", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ directory: directory }),
-          });
-
-          const data = await response.json();
-          if (response.ok) {
-            loadingMessageElement.querySelector('.message-text').textContent = `Successfully loaded ${data.loaded_documents} documents.`;
-          } else {
-            loadingMessageElement.querySelector('.message-text').textContent = `Error loading documents: ${data.error || response.statusText}`;
-          }
-        } catch (error) {
-          console.error("Error loading RAG documents:", error);
-          displayMessage("assistant", `Error communicating with server for RAG: ${error.message}`, conversationHistory.length + 1);
         }
       }
 
@@ -973,20 +843,6 @@
             </i>Top P: <span id="top-p-value">0.9</span>
           </label>
           <input type="range" class="form-range" min="0" max="1" step="0.05" id="top-p-slider" value="0.9">
-        </div>
-        <hr>
-        <h5>RAG Settings</h5>
-        <div class="mb-3">
-          <label for="rag-directory-input" class="form-label">RAG Knowledge Base Directory:</label>
-          <div class="input-group">
-            <input type="text" class="form-control" id="rag-directory-input" placeholder="e.g., C:\Users\YourUser\Documents\knowledge_base">
-            <button class="btn btn-primary" type="button" id="load-rag-docs-btn">Load Documents</button>
-          </div>
-          <small class="form-text text-muted">Specify a directory containing .txt or .md files for RAG.</small>
-        </div>
-        <div class="form-check form-switch mb-3">
-          <input class="form-check-input" type="checkbox" id="rag-toggle">
-          <label class="form-check-label" for="rag-toggle">Enable RAG</label>
         </div>
       </div>
     </div>

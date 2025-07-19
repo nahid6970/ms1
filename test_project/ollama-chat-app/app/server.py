@@ -7,32 +7,6 @@ import json
 import datetime
 import re
 import hashlib
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-
-# In-memory vector store
-class VectorStore:
-    def __init__(self):
-        self.documents = []  # Stores {'text': '...', 'embedding': [...]}
-
-    def add_document(self, text, embedding):
-        self.documents.append({'text': text, 'embedding': embedding})
-
-    def find_similar_documents(self, query_embedding, k=3):
-        if not self.documents:
-            return []
-        
-        similarities = []
-        for doc in self.documents:
-            # Ensure both are numpy arrays for cosine_similarity
-            doc_embedding = np.array(doc['embedding']).reshape(1, -1)
-            q_embedding = np.array(query_embedding).reshape(1, -1)
-            
-            sim = cosine_similarity(doc_embedding, q_embedding)[0][0]
-            similarities.append((sim, doc['text']))
-        
-        similarities.sort(key=lambda x: x[0], reverse=True)
-        return [text for sim, text in similarities[:k]]
 
 PORT = 8000
 OLLAMA_HOST = "http://localhost:11434"
@@ -252,7 +226,6 @@ class CodeExtractor:
 class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.code_extractor = CodeExtractor()
-        self.vector_store = VectorStore() # Initialize the vector store
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
@@ -265,198 +238,11 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        if self.path.startswith("/api/embed"):
-            self._handle_embed_request()
-        elif self.path.startswith("/api/rag_load"):
-            self._handle_rag_load_documents()
-        elif self.path.startswith("/api/rag_chat"):
-            self._handle_rag_chat_request()
-        elif self.path.startswith("/api"):
+        if self.path.startswith("/api"):
             self._proxy_request()
         else:
             self.send_response(404)
             self.end_headers()
-
-    def _handle_embed_request(self):
-        try:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            payload = json.loads(post_data.decode('utf-8'))
-
-            model_name = payload.get('model', 'nomic-embed-text') # Default to nomic-embed-text
-            prompt = payload.get('prompt')
-
-            if not prompt:
-                self.send_error(400, "Bad Request: 'prompt' is required.")
-                return
-
-            ollama_embed_url = f"{OLLAMA_HOST}/api/embeddings"
-            embed_payload = {"model": model_name, "prompt": prompt}
-            
-            embed_response = requests.post(ollama_embed_url, json=embed_payload)
-            embed_response.raise_for_status()
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(embed_response.content)
-
-        except json.JSONDecodeError:
-            self.send_error(400, "Bad Request: Invalid JSON.")
-        except requests.exceptions.RequestException as e:
-            self.send_error(500, f"Ollama Embedding Error: {e}")
-        except Exception as e:
-            self.send_error(500, f"Server Error: {e}")
-
-    def _handle_rag_load_documents(self):
-        try:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            payload = json.loads(post_data.decode('utf-8'))
-            directory = payload.get('directory')
-
-            if not directory:
-                self.send_error(400, "Bad Request: 'directory' is required.")
-                return
-
-            if not os.path.isdir(directory):
-                self.send_error(400, f"Bad Request: Directory {directory} not found.")
-                return
-
-            self.vector_store = VectorStore() # Clear existing documents
-            loaded_count = 0
-            for root, _, files in os.walk(directory):
-                for file in files:
-                    if file.endswith(('.txt', '.md')):
-                        file_path = os.path.join(root, file)
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                            chunks = self._chunk_text(content) # Simple chunking for now
-                            for chunk in chunks:
-                                embedding = self._get_embedding(chunk)
-                                if embedding:
-                                    self.vector_store.add_document(chunk, embedding)
-                                    loaded_count += 1
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({'status': 'success', 'loaded_documents': loaded_count}).encode('utf-8'))
-
-        except json.JSONDecodeError:
-            self.send_error(400, "Bad Request: Invalid JSON.")
-        except Exception as e:
-            self.send_error(500, f"Server Error: {e}")
-
-    def _handle_rag_chat_request(self):
-        try:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            payload = json.loads(post_data.decode('utf-8'))
-
-            user_query = payload.get('query')
-            chat_history = payload.get('history', [])
-            model = payload.get('model')
-            options = payload.get('options', {})
-
-            if not user_query:
-                self.send_error(400, "Bad Request: 'query' is required.")
-                return
-            
-            query_embedding = self._get_embedding(user_query)
-            if not query_embedding:
-                self.send_error(500, "Failed to generate embedding for query.")
-                return
-
-            relevant_docs = self.vector_store.find_similar_documents(query_embedding)
-            context = "\n\n".join(relevant_docs)
-
-            # Augment the user query with retrieved context
-            augmented_query = f"Based on the following information:\n\n{context}\n\nAnswer the question: {user_query}"
-
-            # Prepare messages for Ollama chat API
-            messages = []
-            if SYSTEM_MESSAGE:
-                messages.append({'role': 'system', 'content': SYSTEM_MESSAGE})
-            
-            # Add previous chat history
-            for msg in chat_history:
-                messages.append(msg)
-            
-            messages.append({'role': 'user', 'content': augmented_query})
-
-            ollama_chat_url = f"{OLLAMA_HOST}/api/chat"
-            chat_payload = {
-                'model': model,
-                'messages': messages,
-                'stream': True,
-                'options': options
-            }
-
-            response = requests.post(ollama_chat_url, json=chat_payload, stream=True)
-            response.raise_for_status()
-
-            self.send_response(response.status_code)
-            for k, v in response.headers.items():
-                if k.lower() not in {'transfer-encoding', 'content-encoding'}:
-                    self.send_header(k, v)
-            self.end_headers()
-
-            full_response_content = ""
-            for chunk in response.iter_content(8192):
-                self.wfile.write(chunk)
-                full_response_content += chunk.decode('utf-8', errors='ignore')
-            
-            # Save code blocks from the full response
-            if full_response_content.strip():
-                self.code_extractor.save_code_blocks(full_response_content)
-
-        except json.JSONDecodeError:
-            self.send_error(400, "Bad Request: Invalid JSON.")
-        except requests.exceptions.RequestException as e:
-            self.send_error(500, f"Ollama Chat Error: {e}")
-        except Exception as e:
-            self.send_error(500, f"Server Error: {e}")
-
-    def _chunk_text(self, text, chunk_size=500, chunk_overlap=50):
-        # A very basic text chunking strategy
-        words = text.split()
-        chunks = []
-        for i in range(0, len(words), chunk_size - chunk_overlap):
-            chunk = " ".join(words[i:i + chunk_size])
-            chunks.append(chunk)
-        return chunks
-
-    def _handle_embed_request(self):
-        try:
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            payload = json.loads(post_data.decode('utf-8'))
-
-            model_name = payload.get('model', 'nomic-embed-text') # Default to nomic-embed-text
-            prompt = payload.get('prompt')
-
-            if not prompt:
-                self.send_error(400, "Bad Request: 'prompt' is required.")
-                return
-
-            ollama_embed_url = f"{OLLAMA_HOST}/api/embeddings"
-            embed_payload = {"model": model_name, "prompt": prompt}
-            
-            embed_response = requests.post(ollama_embed_url, json=embed_payload)
-            embed_response.raise_for_status()
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(embed_response.content)
-
-        except json.JSONDecodeError:
-            self.send_error(400, "Bad Request: Invalid JSON.")
-        except requests.exceptions.RequestException as e:
-            self.send_error(500, f"Ollama Embedding Error: {e}")
-        except Exception as e:
-            self.send_error(500, f"Server Error: {e}")
 
     def _proxy_request(self):
         try:
@@ -529,16 +315,6 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
 
         except Exception as e:
             self.send_error(500, f"Proxy Error: {e}")
-
-    def _get_embedding(self, text, model="nomic-embed-text"):
-        try:
-            response = requests.post(f"{OLLAMA_HOST}/api/embeddings",
-                                     json={'model': model, 'prompt': text})
-            response.raise_for_status()
-            return response.json()['embedding']
-        except requests.exceptions.RequestException as e:
-            print(f"Error getting embedding from Ollama: {e}")
-            return None
 
 # ---------------------------------------------------------------------------
 # 4. Serve forever
