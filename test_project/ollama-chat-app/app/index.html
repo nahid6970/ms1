@@ -34,7 +34,14 @@
     .copy-button:hover { background-color: rgba(255,255,255,0.2); }
     .header-select-group { display: flex; align-items: center; gap: 0.5rem; }
     .header-select-group label { margin-bottom: 0; font-weight: 500; }
-    
+    .drag-over {
+  background-color: #e3f2fd !important;
+  border: 2px dashed #2196F3 !important;
+}
+
+.file-message .card {
+  border-left: 4px solid #28a745;
+}
     /* Enhanced styling for code block notification */
     .code-block-notification {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -325,48 +332,6 @@
 .input-row-center textarea {
   flex: 1 1 auto;
 }
-
-.file-drop-zone {
-  border: 2px dashed #dee2e6;
-  border-radius: 0.375rem;
-  padding: 2rem;
-  text-align: center;
-  background-color: #f8f9fa;
-  transition: all 0.3s ease;
-}
-
-.file-drop-zone.dragover {
-  border-color: #007bff;
-  background-color: #e3f2fd;
-}
-
-.file-item {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem;
-  margin: 0.25rem 0;
-  background-color: #e9ecef;
-  border-radius: 0.375rem;
-  font-size: 0.9rem;
-}
-
-.file-item .file-icon {
-  margin-right: 0.5rem;
-  color: #6c757d;
-}
-
-.file-item .file-remove {
-  margin-left: auto;
-  color: #dc3545;
-  cursor: pointer;
-}
-
-.attached-files {
-  max-height: 150px;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-}
-
 @media (max-width: 992px) {
   /* … existing rules … */
   .input-row-center {
@@ -416,10 +381,6 @@
         <li><a class="dropdown-item suggestion-item" href="#" data-suggestion="give me a example of python script">Give me an example of python script</a></li>
         <li><a class="dropdown-item suggestion-item" href="#" data-suggestion="make a goodlooking webpage">Make a goodlooking webpage</a></li>
       </ul>
-      <input type="file" id="file-input" class="d-none" multiple accept=".txt,.md,.js,.py,.html,.css,.json,.xml,.csv">
-<button type="button" class="btn btn-outline-secondary" id="file-upload-btn">
-  <i class="nf nf-md-attachment"></i> Files
-</button>
     </div>
     <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
   </div>
@@ -432,7 +393,172 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
       const modelSelect = document.getElementById("model-select");
+      
+      // Add to your DOMContentLoaded event listener
       const chatWindow = document.getElementById("chat-window");
+
+      // Prevent default drag behaviors
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        chatWindow.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      // Add visual feedback for drag over
+      ['dragenter', 'dragover'].forEach(eventName => {
+        chatWindow.addEventListener(eventName, highlight, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        chatWindow.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight(e) {
+        chatWindow.classList.add('drag-over');
+      }
+
+      function unhighlight(e) {
+        chatWindow.classList.remove('drag-over');
+      }
+
+      async function readFileContent(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          
+          reader.onload = (e) => {
+            const content = e.target.result;
+            resolve({
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              content: content
+            });
+          };
+          
+          reader.onerror = () => reject(reader.error);
+          
+          // Define file extensions that should NOT show content
+          const hideContentExtensions = ['.py', '.ps1', '.html'];
+          const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+          
+          if (hideContentExtensions.includes(fileExtension)) {
+            // For files you want to hide content
+            resolve({
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              content: '[Content hidden for security]'
+            });
+          } else if (file.type.startsWith('text/') || 
+                    file.name.endsWith('.md') || 
+                    file.name.endsWith('.json') ||
+                    file.name.endsWith('.js') ||
+                    file.name.endsWith('.html') ||
+                    file.name.endsWith('.css') ||
+                    file.name.endsWith('.txt')) {
+            reader.readAsText(file);
+          } else {
+            // For binary files
+            resolve({
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              content: '[Binary file - content not displayed]'
+            });
+          }
+        });
+      }
+
+      chatWindow.addEventListener('drop', handleDrop, false);
+
+      async function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        for (let file of files) {
+          try {
+            const fileData = await readFileContent(file);
+            displayFileMessage(fileData);
+          } catch (error) {
+            console.error('Error reading file:', error);
+          }
+        }
+      }
+
+      function displayFileMessage(fileData) {
+        const fileMessage = `**File uploaded:** ${fileData.name} (${formatFileSize(fileData.size)})\n\n`;
+        
+        // Create a special file message
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", "user-message", "file-message");
+        
+        const messageContent = document.createElement('div');
+        messageContent.classList.add('d-flex', 'align-items-center', 'justify-content-end');
+        
+        const card = document.createElement("div");
+        card.classList.add("card", "d-inline-block");
+        card.style.maxWidth = "80%";
+        
+        const cardBody = document.createElement("div");
+        cardBody.classList.add("card-body");
+        
+        // File header
+        const fileHeader = document.createElement("div");
+        fileHeader.innerHTML = `<strong>📎 ${fileData.name}</strong> <small class="text-muted">(${formatFileSize(fileData.size)})</small>`;
+        cardBody.appendChild(fileHeader);
+        
+        // Only show content preview if it's not hidden and not binary
+        if (fileData.content && 
+            fileData.content !== '[Content hidden for security]' && 
+            fileData.content !== '[Binary file - content not displayed]') {
+          const contentPreview = document.createElement("pre");
+          contentPreview.style.fontSize = "0.8rem";
+          contentPreview.style.maxHeight = "200px";
+          contentPreview.style.overflow = "auto";
+          contentPreview.style.backgroundColor = "#f8f9fa";
+          contentPreview.style.padding = "0.5rem";
+          contentPreview.style.borderRadius = "4px";
+          contentPreview.style.marginTop = "0.5rem";
+          
+          const truncatedContent = fileData.content.length > 1000 
+            ? fileData.content.substring(0, 1000) + "...\n[Content truncated]"
+            : fileData.content;
+          
+          contentPreview.textContent = truncatedContent;
+          cardBody.appendChild(contentPreview);
+        }
+        
+        card.appendChild(cardBody);
+        messageContent.appendChild(card);
+        messageElement.appendChild(messageContent);
+        
+        chatWindow.appendChild(messageElement);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        
+        // Add to conversation history - only include actual content, not hidden messages
+        const historyContent = fileData.content === '[Content hidden for security]' || 
+                              fileData.content === '[Binary file - content not displayed]'
+          ? `File uploaded: ${fileData.name}`
+          : `${fileMessage}\`\`\`\n${fileData.content}\n\`\`\``;
+          
+        conversationHistory.push({
+          role: "user",
+          content: historyContent
+        });
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
       const codeWindow = document.getElementById("code-window");
       const chatForm = document.getElementById("chat-form");
       const messageInput = document.getElementById("message-input");
@@ -453,108 +579,6 @@
       });
       let conversationHistory = [];
       let codeBlocks = [];
-      let attachedFiles = [];
-
-      // File upload button event
-      document.getElementById('file-upload-btn').addEventListener('click', () => {
-        document.getElementById('file-input').click();
-      });
-
-      // File input change event
-      document.getElementById('file-input').addEventListener('change', (e) => {
-        handleFiles(e.target.files);
-      });
-
-      // Drag and drop functionality
-      function setupDragAndDrop() {
-        const chatForm = document.getElementById('chat-form');
-        
-        chatForm.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          chatForm.classList.add('dragover');
-        });
-        
-        chatForm.addEventListener('dragleave', (e) => {
-          e.preventDefault();
-          chatForm.classList.remove('dragover');
-        });
-        
-        chatForm.addEventListener('drop', (e) => {
-          e.preventDefault();
-          chatForm.classList.remove('dragover');
-          handleFiles(e.dataTransfer.files);
-        });
-      }
-
-      // Handle file processing
-      function handleFiles(files) {
-        Array.from(files).forEach(file => {
-          if (attachedFiles.find(f => f.name === file.name && f.size === file.size)) {
-            return; // Skip duplicates
-          }
-          
-          attachedFiles.push({
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            file: file
-          });
-        });
-        
-        displayAttachedFiles();
-      }
-
-      // Display attached files
-      function displayAttachedFiles() {
-        let filesContainer = document.getElementById('attached-files');
-        if (!filesContainer) {
-          filesContainer = document.createElement('div');
-          filesContainer.id = 'attached-files';
-          filesContainer.className = 'attached-files';
-          document.querySelector('.input-row-center').insertBefore(filesContainer, document.getElementById('message-input'));
-        }
-        
-        filesContainer.innerHTML = attachedFiles.map((file, index) => `
-          <div class="file-item">
-            <i class="file-icon ${getFileIcon(file.name)}"></i>
-            <span class="file-name">${file.name}</span>
-            <span class="file-size text-muted ms-2">(${formatFileSize(file.size)})</span>
-            <i class="file-remove nf nf-md-close" onclick="removeFile(${index})"></i>
-          </div>
-        `).join('');
-        
-        filesContainer.style.display = attachedFiles.length > 0 ? 'block' : 'none';
-      }
-
-      // Utility functions
-      function getFileIcon(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
-        const iconMap = {
-          'txt': 'nf nf-fa-file_text_o',
-          'md': 'nf nf-md-language_markdown',
-          'js': 'nf nf-md-language_javascript',
-          'py': 'nf nf-md-language_python',
-          'html': 'nf nf-fa-file_code_o',
-          'css': 'nf nf-fa-file_code_o',
-          'json': 'nf nf-md-code_json',
-          'csv': 'nf nf-fa-table'
-        };
-        return iconMap[ext] || 'nf nf-fa-file_o';
-      }
-
-      function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-      }
-
-      function removeFile(index) {
-        attachedFiles.splice(index, 1);
-        displayAttachedFiles();
-      }
-
 
       // Model memory functions
       function saveSelectedModel(modelName) {
