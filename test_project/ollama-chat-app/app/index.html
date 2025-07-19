@@ -397,6 +397,10 @@
       const maxTokensValue = document.getElementById('max-tokens-value');
       const contextWindowSlider = document.getElementById('context-window-slider');
       const contextWindowValue = document.getElementById('context-window-value');
+      const temperatureSlider = document.getElementById('temperature-slider');
+      const temperatureValue = document.getElementById('temperature-value');
+      const topPSlider = document.getElementById('top-p-slider');
+      const topPValue = document.getElementById('top-p-value');
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
@@ -414,6 +418,14 @@
 
       contextWindowSlider.addEventListener('input', (e) => {
           contextWindowValue.textContent = e.target.value;
+      });
+
+      temperatureSlider.addEventListener('input', (e) => {
+          temperatureValue.textContent = e.target.value;
+      });
+
+      topPSlider.addEventListener('input', (e) => {
+          topPValue.textContent = e.target.value;
       });
 
       function autoGrowTextarea(el) {
@@ -682,7 +694,9 @@
               stream: true,
               options: {
                 num_predict: parseInt(maxTokensSlider.value, 10),
-                num_ctx: parseInt(contextWindowSlider.value, 10)
+                num_ctx: parseInt(contextWindowSlider.value, 10),
+                temperature: parseFloat(temperatureSlider.value),
+                top_p: parseFloat(topPSlider.value)
               }
             }),
           });
@@ -780,6 +794,26 @@
             </i>
           </label>
           <input type="range" class="form-range" min="2048" max="16384" step="2048" id="context-window-slider" value="4096">
+        </div>
+        <div class="mb-3">
+          <label for="temperature-slider" class="form-label">Temperature: <span id="temperature-value">0.8</span>
+            <i class="nf nf-fa-info_circle text-muted ms-2" 
+               data-bs-toggle="tooltip" 
+               data-bs-placement="right" 
+               title="Controls the randomness of the output. Higher is more creative.">
+            </i>
+          </label>
+          <input type="range" class="form-range" min="0" max="2" step="0.1" id="temperature-slider" value="0.8">
+        </div>
+        <div class="mb-3">
+          <label for="top-p-slider" class="form-label">Top P: <span id="top-p-value">0.9</span>
+            <i class="nf nf-fa-info_circle text-muted ms-2" 
+               data-bs-toggle="tooltip" 
+               data-bs-placement="right" 
+               title="Controls nucleus sampling. Higher values consider more words.">
+            </i>
+          </label>
+          <input type="range" class="form-range" min="0" max="1" step="0.05" id="top-p-slider" value="0.9">
         </div>
       </div>
     </div>
