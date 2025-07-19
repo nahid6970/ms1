@@ -338,9 +338,9 @@
     <div class="card">
       <div class="card-header ollama-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h1 class="m-0 ollama-title">Ollama Web UI</h1>
-        <div class="header-select-group ollama-model-select-group">
-          <label for="model-select" class="form-label mb-0">Model:</label>
+        <div class="d-flex align-items-center gap-2">
           <select id="model-select" class="form-select form-select-sm ollama-model-select"></select>
+          <button class="btn btn-sm btn-outline-light" id="settings-btn"><i class="nf nf-md-cog"></i></button>
         </div>
       </div>
       <div class="card-body">
@@ -382,362 +382,411 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const modelSelect = document.getElementById("model-select");
-    const chatWindow = document.getElementById("chat-window");
-    const codeWindow = document.getElementById("code-window");
-    const chatForm = document.getElementById("chat-form");
-    const messageInput = document.getElementById("message-input");
-    const clearCodeButton = document.getElementById("clear-code");
-    let conversationHistory = [];
-    let codeBlocks = [];
+    document.addEventListener('DOMContentLoaded', () => {
+      const modelSelect = document.getElementById("model-select");
+      const chatWindow = document.getElementById("chat-window");
+      const codeWindow = document.getElementById("code-window");
+      const chatForm = document.getElementById("chat-form");
+      const messageInput = document.getElementById("message-input");
+      const clearCodeButton = document.getElementById("clear-code");
+      const settingsBtn = document.getElementById("settings-btn");
+      const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+      const maxTokensSlider = document.getElementById('max-tokens-slider');
+      const maxTokensValue = document.getElementById('max-tokens-value');
+      const contextWindowSlider = document.getElementById('context-window-slider');
+      const contextWindowValue = document.getElementById('context-window-value');
+      let conversationHistory = [];
+      let codeBlocks = [];
 
-    function autoGrowTextarea(el) {
-      el.style.height = "auto";
-      const maxHeight = parseFloat(getComputedStyle(el).maxHeight);
-      el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
-    }
-    messageInput.addEventListener("input", () => autoGrowTextarea(messageInput));
-    window.addEventListener("load", () => autoGrowTextarea(messageInput));
-
-    clearCodeButton.addEventListener("click", () => {
-      codeWindow.innerHTML = `
-        <div class="text-muted text-center mt-5">
-          <i class="nf nf-md-code_tags" style="font-size: 3rem;"></i>
-          <p>Code blocks will appear here</p>
-        </div>
-      `;
-      codeBlocks = [];
-    });
-
-    codeWindow.addEventListener("click", (e) => {
-      const copyButton = e.target.closest(".copy-button");
-      if (copyButton) {
-        const codeBlock = copyButton.closest(".code-block");
-        const code = codeBlock.querySelector("code");
-        navigator.clipboard.writeText(code.textContent)
-          .then(() => { copyButton.textContent = "✔️"; setTimeout(() => copyButton.textContent = "Copy", 1500); })
-          .catch(() => { copyButton.textContent = "Failed"; setTimeout(() => copyButton.textContent = "Copy", 1500); });
-      }
-    });
-
-    async function fetchModels() {
-      try {
-        const response = await fetch("/api/tags");
-        const data = await response.json();
-        data.models.forEach((model) => {
-          const option = document.createElement("option");
-          option.value = model.name;
-          option.textContent = model.name;
-          modelSelect.appendChild(option);
-        });
-      } catch (error) {
-        console.error("Error fetching models:", error);
-        alert("Could not fetch models. Make sure Ollama is running.");
-      }
-    }
-
-    function extractAndDisplayCode(text) {
-      const codeRegex = /```(\w+)?\n([\s\S]*?)```/g;
-      let match;
-      const extractedCodes = [];
-      while ((match = codeRegex.exec(text)) !== null) {
-        const language = match[1] || 'text';
-        const code = match[2];
-        extractedCodes.push({ language, code });
-      }
-      if (extractedCodes.length > 0) {
-        const placeholder = codeWindow.querySelector('.text-muted.text-center');
-        if (placeholder) placeholder.remove();
-        const existingBlocks = Array.from(codeWindow.querySelectorAll('.code-block'));
-        extractedCodes.forEach(({ language, code }) => {
-          const isDuplicate = existingBlocks.some(block => {
-            const blockLanguage = block.querySelector('.code-language').textContent;
-            const blockCode = block.querySelector('code').textContent;
-            return blockLanguage === language && blockCode === code;
-          });
-          if (!isDuplicate) {
-            const codeBlockElement = document.createElement("div");
-            codeBlockElement.className = "code-block";
-            codeBlockElement.innerHTML = `
-              <div class="code-language">${language}</div>
-              <button class="copy-button btn btn-sm">Copy</button>
-              <button class="shrink-button btn btn-sm"></button>
-              <code class="language-${language}">${escapeHtml(code)}</code>
-            `;
-            const shrinkBtn = codeBlockElement.querySelector('.shrink-button');
-            shrinkBtn.addEventListener('click', () => codeBlockElement.classList.toggle('collapsed'));
-            codeWindow.appendChild(codeBlockElement);
-            hljs.highlightElement(codeBlockElement.querySelector('code'));
-            codeBlocks.push({ language, code });
-          }
-        });
-        codeWindow.scrollTop = codeWindow.scrollHeight;
-      }
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function formatMessageText(text) {
-      const textWithoutCode = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language) => {
-        // Create a styled notification without animation during streaming
-        return `<div class="code-block-notification static">Code block <strong>(${language || 'text'})</strong> moved to code panel</div>`;
+      settingsBtn.addEventListener("click", () => {
+        settingsModal.show();
       });
-      return marked.parse(textWithoutCode);
-    }
 
-    function displayMessage(sender, message, index, modelName) {
-      const messageElement = document.createElement("div");
-      messageElement.classList.add("message", sender === "user" ? "user-message" : "assistant-message");
-      if (index !== undefined) messageElement.dataset.index = index;
+      maxTokensSlider.addEventListener('input', (e) => {
+          maxTokensValue.textContent = e.target.value;
+      });
 
-      const messageContent = document.createElement('div');
-      const contentClasses = ['d-flex', 'align-items-center'];
-      if (sender === 'user') contentClasses.push('justify-content-end');
-      messageContent.classList.add(...contentClasses);
+      contextWindowSlider.addEventListener('input', (e) => {
+          contextWindowValue.textContent = e.target.value;
+      });
 
-      const card = document.createElement("div");
-      card.classList.add("card", "d-inline-block");
-      const cardBody = document.createElement("div");
-      cardBody.classList.add("card-body");
+      function autoGrowTextarea(el) {
+        el.style.height = "auto";
+        const maxHeight = parseFloat(getComputedStyle(el).maxHeight);
+        el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
+      }
+      messageInput.addEventListener("input", () => autoGrowTextarea(messageInput));
+      window.addEventListener("load", () => autoGrowTextarea(messageInput));
 
-      if (sender === "assistant") {
-        if (modelName) {
-          const modelNameElement = document.createElement('div');
-          modelNameElement.style.fontWeight = 'bold';
-          modelNameElement.style.marginBottom = '0.5rem';
-          modelNameElement.textContent = `Model: ${modelName}`;
-          cardBody.appendChild(modelNameElement);
+      clearCodeButton.addEventListener("click", () => {
+        codeWindow.innerHTML = `
+          <div class="text-muted text-center mt-5">
+            <i class="nf nf-md-code_tags" style="font-size: 3rem;"></i>
+            <p>Code blocks will appear here</p>
+          </div>
+        `;
+        codeBlocks = [];
+      });
+
+      codeWindow.addEventListener("click", (e) => {
+        const copyButton = e.target.closest(".copy-button");
+        if (copyButton) {
+          const codeBlock = copyButton.closest(".code-block");
+          const code = codeBlock.querySelector("code");
+          navigator.clipboard.writeText(code.textContent)
+            .then(() => { copyButton.textContent = "✔️"; setTimeout(() => copyButton.textContent = "Copy", 1500); })
+            .catch(() => { copyButton.textContent = "Failed"; setTimeout(() => copyButton.textContent = "Copy", 1500); });
         }
-        const messageTextElement = document.createElement('div');
-        messageTextElement.className = 'message-text';
-        messageTextElement.innerHTML = formatMessageText(message);
-        cardBody.appendChild(messageTextElement);
-      } else cardBody.textContent = message;
-
-      card.appendChild(cardBody);
-      messageContent.appendChild(card);
-
-      if (sender === "user") {
-        const editButton = document.createElement("button");
-        editButton.innerHTML = '<i class="nf nf-md-pencil"></i>';
-        editButton.className = "btn btn-sm btn-outline-secondary edit-button ms-2";
-        editButton.onclick = () => editMessage(index);
-        messageContent.appendChild(editButton);
-      }
-
-      messageElement.appendChild(messageContent);
-
-      if (sender === "assistant") {
-        const footer = document.createElement('div');
-        footer.className = 'd-flex justify-content-start align-items-center mt-2';
-        const stats = document.createElement('span');
-        stats.className = 'text-muted me-2';
-        stats.style.fontSize = '0.8rem';
-        const reloadButton = document.createElement("button");
-        reloadButton.innerHTML = '<i class="nf nf-md-reload"></i>';
-        reloadButton.className = "btn btn-sm btn-outline-secondary reload-button";
-        reloadButton.onclick = () => reloadResponse(index);
-        const continueButton = document.createElement("button");
-        continueButton.innerHTML = '<i class="nf nf-md-play"></i>';
-        continueButton.className = "btn btn-sm btn-outline-secondary continue-button ms-2";
-        continueButton.onclick = () => continueResponse(index);
-        footer.appendChild(stats);
-        footer.appendChild(reloadButton);
-        footer.appendChild(continueButton);
-        messageElement.appendChild(footer);
-      }
-
-      chatWindow.appendChild(messageElement);
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-      return cardBody;
-    }
-
-    function editMessage(index) {
-      const messageElement = document.querySelector(`.message[data-index='${index}']`);
-      const originalContent = conversationHistory[index].content;
-      const editContainer = document.createElement('div');
-      editContainer.className = 'edit-container mt-2';
-      const textarea = document.createElement('textarea');
-      textarea.className = 'form-control';
-      textarea.value = originalContent;
-      textarea.rows = 3;
-      autoGrowTextarea(textarea);
-      textarea.addEventListener("input", () => autoGrowTextarea(textarea));
-      const saveButton = document.createElement('button');
-      saveButton.textContent = 'Save & Submit';
-      saveButton.className = 'btn btn-sm btn-primary mt-2';
-      saveButton.onclick = () => saveMessage(index, textarea.value);
-      const cancelButton = document.createElement('button');
-      cancelButton.textContent = 'Cancel';
-      cancelButton.className = 'btn btn-sm btn-secondary mt-2 ms-2';
-      cancelButton.onclick = () => cancelEdit(index);
-      editContainer.appendChild(textarea);
-      editContainer.appendChild(saveButton);
-      editContainer.appendChild(cancelButton);
-      const messageContent = messageElement.querySelector('.d-flex');
-      messageContent.style.display = 'none';
-      messageElement.appendChild(editContainer);
-      textarea.focus();
-    }
-
-    function cancelEdit(index) {
-      const messageElement = document.querySelector(`.message[data-index='${index}']`);
-      const editContainer = messageElement.querySelector('.edit-container');
-      if (editContainer) editContainer.remove();
-      const messageContent = messageElement.querySelector('.d-flex');
-      messageContent.style.display = 'flex';
-    }
-
-    async function continueResponse(index) {
-      if (index === undefined || index < 1) return;
-      messageInput.value = "continue";
-      chatForm.requestSubmit();
-    }
-
-    async function reloadResponse(index) {
-      if (index === undefined || index < 1) return;
-      const userMessageToResend = conversationHistory[index - 1];
-      conversationHistory.splice(index - 1);
-      const messages = document.querySelectorAll('.message');
-      messages.forEach(msg => {
-        const msgIndex = parseInt(msg.dataset.index, 10);
-        if (msgIndex >= index - 1) msg.remove();
       });
-      conversationHistory.push(userMessageToResend);
-      displayMessage("user", userMessageToResend.content, conversationHistory.length - 1);
-      await sendChatRequest(conversationHistory);
-    }
 
-    async function saveMessage(index, newContent) {
-      if (newContent.trim() === "") return;
-      conversationHistory[index].content = newContent;
-      conversationHistory.splice(index + 1);
-      const messages = document.querySelectorAll('.message');
-      messages.forEach(msg => {
-        const msgIndex = parseInt(msg.dataset.index, 10);
-        if (msgIndex > index) msg.remove();
-      });
-      const messageElement = document.querySelector(`.message[data-index='${index}']`);
-      const cardBody = messageElement.querySelector('.card-body');
-      cardBody.textContent = newContent;
-      cancelEdit(index);
-      await sendChatRequest(conversationHistory);
-    }
-
-    async function sendChatRequest(history, isContinuation = false) {
-      const selectedModel = modelSelect.value;
-      if (!selectedModel) { alert("Please select a model first."); return; }
-
-      let assistantMessageElement, assistantMessageTextElement, assistantResponse = "", lastMessageIndex;
-
-      if (isContinuation) {
-        lastMessageIndex = history.length - 1;
-        assistantMessageElement = document.querySelector(`.message[data-index='${lastMessageIndex}']`);
-        if (!assistantMessageElement) { console.error("Could not find the message element to continue."); return; }
-        assistantMessageTextElement = assistantMessageElement.querySelector('.message-text');
-        assistantResponse = conversationHistory[lastMessageIndex].content;
-      } else {
-        const cardBody = displayMessage("assistant", "", history.length, selectedModel);
-        assistantMessageElement = cardBody.closest('.message');
-        assistantMessageTextElement = cardBody.querySelector('.message-text');
+      async function fetchModels() {
+        try {
+          const response = await fetch("/api/tags");
+          const data = await response.json();
+          data.models.forEach((model) => {
+            const option = document.createElement("option");
+            option.value = model.name;
+            option.textContent = model.name;
+            modelSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error fetching models:", error);
+          alert("Could not fetch models. Make sure Ollama is running.");
+        }
       }
 
-      let finalData;
-      try {
-        const response = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: selectedModel, messages: history, stream: true }),
+      function extractAndDisplayCode(text) {
+        const codeRegex = /```(\w+)?\n([\s\S]*?)```/g;
+        let match;
+        const extractedCodes = [];
+        while ((match = codeRegex.exec(text)) !== null) {
+          const language = match[1] || 'text';
+          const code = match[2];
+          extractedCodes.push({ language, code });
+        }
+        if (extractedCodes.length > 0) {
+          const placeholder = codeWindow.querySelector('.text-muted.text-center');
+          if (placeholder) placeholder.remove();
+          const existingBlocks = Array.from(codeWindow.querySelectorAll('.code-block'));
+          extractedCodes.forEach(({ language, code }) => {
+            const isDuplicate = existingBlocks.some(block => {
+              const blockLanguage = block.querySelector('.code-language').textContent;
+              const blockCode = block.querySelector('code').textContent;
+              return blockLanguage === language && blockCode === code;
+            });
+            if (!isDuplicate) {
+              const codeBlockElement = document.createElement("div");
+              codeBlockElement.className = "code-block";
+              codeBlockElement.innerHTML = `
+                <div class="code-language">${language}</div>
+                <button class="copy-button btn btn-sm">Copy</button>
+                <button class="shrink-button btn btn-sm"></button>
+                <code class="language-${language}">${escapeHtml(code)}</code>
+              `;
+              const shrinkBtn = codeBlockElement.querySelector('.shrink-button');
+              shrinkBtn.addEventListener('click', () => codeBlockElement.classList.toggle('collapsed'));
+              codeWindow.appendChild(codeBlockElement);
+              hljs.highlightElement(codeBlockElement.querySelector('code'));
+              codeBlocks.push({ language, code });
+            }
+          });
+          codeWindow.scrollTop = codeWindow.scrollHeight;
+        }
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function formatMessageText(text) {
+        const textWithoutCode = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language) => {
+          // Create a styled notification without animation during streaming
+          return `<div class="code-block-notification static">Code block <strong>(${language || 'text'})</strong> moved to code panel</div>`;
         });
+        return marked.parse(textWithoutCode);
+      }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-          for (const line of lines) {
-            if (line) {
-              const parsed = JSON.parse(line);
-              if (parsed.done) finalData = parsed;
-              else if (parsed.message && parsed.message.content) assistantResponse += parsed.message.content;
-              const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
-              assistantMessageTextElement.innerHTML = formatMessageText(assistantResponse);
-              extractAndDisplayCode(assistantResponse);
-              if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;
+      function displayMessage(sender, message, index, modelName) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", sender === "user" ? "user-message" : "assistant-message");
+        if (index !== undefined) messageElement.dataset.index = index;
+
+        const messageContent = document.createElement('div');
+        const contentClasses = ['d-flex', 'align-items-center'];
+        if (sender === 'user') contentClasses.push('justify-content-end');
+        messageContent.classList.add(...contentClasses);
+
+        const card = document.createElement("div");
+        card.classList.add("card", "d-inline-block");
+        const cardBody = document.createElement("div");
+        cardBody.classList.add("card-body");
+
+        if (sender === "assistant") {
+          if (modelName) {
+            const modelNameElement = document.createElement('div');
+            modelNameElement.style.fontWeight = 'bold';
+            modelNameElement.style.marginBottom = '0.5rem';
+            modelNameElement.textContent = `Model: ${modelName}`;
+            cardBody.appendChild(modelNameElement);
+          }
+          const messageTextElement = document.createElement('div');
+          messageTextElement.className = 'message-text';
+          messageTextElement.innerHTML = formatMessageText(message);
+          cardBody.appendChild(messageTextElement);
+        } else cardBody.textContent = message;
+
+        card.appendChild(cardBody);
+        messageContent.appendChild(card);
+
+        if (sender === "user") {
+          const editButton = document.createElement("button");
+          editButton.innerHTML = '<i class="nf nf-md-pencil"></i>';
+          editButton.className = "btn btn-sm btn-outline-secondary edit-button ms-2";
+          editButton.onclick = () => editMessage(index);
+          messageContent.appendChild(editButton);
+        }
+
+        messageElement.appendChild(messageContent);
+
+        if (sender === "assistant") {
+          const footer = document.createElement('div');
+          footer.className = 'd-flex justify-content-start align-items-center mt-2';
+          const stats = document.createElement('span');
+          stats.className = 'text-muted me-2';
+          stats.style.fontSize = '0.8rem';
+          const reloadButton = document.createElement("button");
+          reloadButton.innerHTML = '<i class="nf nf-md-reload"></i>';
+          reloadButton.className = "btn btn-sm btn-outline-secondary reload-button";
+          reloadButton.onclick = () => reloadResponse(index);
+          const continueButton = document.createElement("button");
+          continueButton.innerHTML = '<i class="nf nf-md-play"></i>';
+          continueButton.className = "btn btn-sm btn-outline-secondary continue-button ms-2";
+          continueButton.onclick = () => continueResponse(index);
+          footer.appendChild(stats);
+          footer.appendChild(reloadButton);
+          footer.appendChild(continueButton);
+          messageElement.appendChild(footer);
+        }
+
+        chatWindow.appendChild(messageElement);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        return cardBody;
+      }
+
+      function editMessage(index) {
+        const messageElement = document.querySelector(`.message[data-index='${index}']`);
+        const originalContent = conversationHistory[index].content;
+        const editContainer = document.createElement('div');
+        editContainer.className = 'edit-container mt-2';
+        const textarea = document.createElement('textarea');
+        textarea.className = 'form-control';
+        textarea.value = originalContent;
+        textarea.rows = 3;
+        autoGrowTextarea(textarea);
+        textarea.addEventListener("input", () => autoGrowTextarea(textarea));
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Save & Submit';
+        saveButton.className = 'btn btn-sm btn-primary mt-2';
+        saveButton.onclick = () => saveMessage(index, textarea.value);
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.className = 'btn btn-sm btn-secondary mt-2 ms-2';
+        cancelButton.onclick = () => cancelEdit(index);
+        editContainer.appendChild(textarea);
+        editContainer.appendChild(saveButton);
+        editContainer.appendChild(cancelButton);
+        const messageContent = messageElement.querySelector('.d-flex');
+        messageContent.style.display = 'none';
+        messageElement.appendChild(editContainer);
+        textarea.focus();
+      }
+
+      function cancelEdit(index) {
+        const messageElement = document.querySelector(`.message[data-index='${index}']`);
+        const editContainer = messageElement.querySelector('.edit-container');
+        if (editContainer) editContainer.remove();
+        const messageContent = messageElement.querySelector('.d-flex');
+        messageContent.style.display = 'flex';
+      }
+
+      async function continueResponse(index) {
+        if (index === undefined || index < 1) return;
+        messageInput.value = "continue";
+        chatForm.requestSubmit();
+      }
+
+      async function reloadResponse(index) {
+        if (index === undefined || index < 1) return;
+        const userMessageToResend = conversationHistory[index - 1];
+        conversationHistory.splice(index - 1);
+        const messages = document.querySelectorAll('.message');
+        messages.forEach(msg => {
+          const msgIndex = parseInt(msg.dataset.index, 10);
+          if (msgIndex >= index - 1) msg.remove();
+        });
+        conversationHistory.push(userMessageToResend);
+        displayMessage("user", userMessageToResend.content, conversationHistory.length - 1);
+        await sendChatRequest(conversationHistory);
+      }
+
+      async function saveMessage(index, newContent) {
+        if (newContent.trim() === "") return;
+        conversationHistory[index].content = newContent;
+        conversationHistory.splice(index + 1);
+        const messages = document.querySelectorAll('.message');
+        messages.forEach(msg => {
+          const msgIndex = parseInt(msg.dataset.index, 10);
+          if (msgIndex > index) msg.remove();
+        });
+        const messageElement = document.querySelector(`.message[data-index='${index}']`);
+        const cardBody = messageElement.querySelector('.card-body');
+        cardBody.textContent = newContent;
+        cancelEdit(index);
+        await sendChatRequest(conversationHistory);
+      }
+
+      async function sendChatRequest(history, isContinuation = false) {
+        const selectedModel = modelSelect.value;
+        if (!selectedModel) { alert("Please select a model first."); return; }
+
+        let assistantMessageElement, assistantMessageTextElement, assistantResponse = "", lastMessageIndex;
+
+        if (isContinuation) {
+          lastMessageIndex = history.length - 1;
+          assistantMessageElement = document.querySelector(`.message[data-index='${lastMessageIndex}']`);
+          if (!assistantMessageElement) { console.error("Could not find the message element to continue."); return; }
+          assistantMessageTextElement = assistantMessageElement.querySelector('.message-text');
+          assistantResponse = conversationHistory[lastMessageIndex].content;
+        } else {
+          const cardBody = displayMessage("assistant", "", history.length, selectedModel);
+          assistantMessageElement = cardBody.closest('.message');
+          assistantMessageTextElement = cardBody.querySelector('.message-text');
+        }
+
+        let finalData;
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              model: selectedModel, 
+              messages: history, 
+              stream: true,
+              options: {
+                num_predict: parseInt(maxTokensSlider.value, 10),
+                num_ctx: parseInt(contextWindowSlider.value, 10)
+              }
+            }),
+          });
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            const lines = chunk.split("\n");
+            for (const line of lines) {
+              if (line) {
+                const parsed = JSON.parse(line);
+                if (parsed.done) finalData = parsed;
+                else if (parsed.message && parsed.message.content) assistantResponse += parsed.message.content;
+                const shouldScroll = chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 100;
+                assistantMessageTextElement.innerHTML = formatMessageText(assistantResponse);
+                extractAndDisplayCode(assistantResponse);
+                if (shouldScroll) chatWindow.scrollTop = chatWindow.scrollHeight;
+              }
             }
           }
-        }
 
-        if (isContinuation) conversationHistory[lastMessageIndex].content = assistantResponse;
-        else { history.push({ role: "assistant", content: assistantResponse }); assistantMessageElement.dataset.index = history.length - 1; }
+          if (isContinuation) conversationHistory[lastMessageIndex].content = assistantResponse;
+          else { history.push({ role: "assistant", content: assistantResponse }); assistantMessageElement.dataset.index = history.length - 1; }
 
-        if (finalData) {
-          const durationInSeconds = (finalData.total_duration / 1e9).toFixed(2);
-          const tokens = finalData.eval_count;
-          const statsElement = assistantMessageElement.querySelector('.text-muted');
-          if (statsElement) statsElement.textContent = `Generated in ${durationInSeconds}s / ${tokens} tokens`;
+          if (finalData) {
+            const durationInSeconds = (finalData.total_duration / 1e9).toFixed(2);
+            const tokens = finalData.eval_count;
+            const statsElement = assistantMessageElement.querySelector('.text-muted');
+            if (statsElement) statsElement.textContent = `Generated in ${durationInSeconds}s / ${tokens} tokens`;
+          }
+        } catch (error) {
+          console.error("Error during chat:", error);
+          assistantMessageTextElement.innerHTML = "Error communicating with Ollama.";
         }
-      } catch (error) {
-        console.error("Error during chat:", error);
-        assistantMessageTextElement.innerHTML = "Error communicating with Ollama.";
       }
-    }
 
-    messageInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
-    });
+      messageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
+      });
 
-    chatForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      let message = messageInput.value.trim();
+      chatForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        let message = messageInput.value.trim();
 
-      const crawlPrefix = "@crawl/";
-      if (message.startsWith(crawlPrefix)) {
-        const parts = message.substring(crawlPrefix.length).split(" ");
-        const url = parts[0];
-        const prompt = parts.slice(1).join(" ");
-        if (!url) { alert("Please provide a URL after @crawl/"); return; }
-        displayMessage("user", message, conversationHistory.length);
+        const crawlPrefix = "@crawl/";
+        if (message.startsWith(crawlPrefix)) {
+          const parts = message.substring(crawlPrefix.length).split(" ");
+          const url = parts[0];
+          const prompt = parts.slice(1).join(" ");
+          if (!url) { alert("Please provide a URL after @crawl/"); return; }
+          displayMessage("user", message, conversationHistory.length);
+          messageInput.value = "";
+          autoGrowTextarea(messageInput);
+          try {
+            const response = await fetch("/api/crawl", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+            const data = await response.json();
+            if (response.ok) message = `Content from ${url}:\n\n${data.content}\n\n${prompt}`;
+            else message = `Error crawling ${url}: ${data.error || response.statusText}\n\n${prompt}`;
+          } catch (error) {
+            message = `Error crawling ${url}: ${error.message}\n\n${prompt}`;
+          }
+        }
+
+        if (!message) return;
+        conversationHistory.push({ role: "user", content: message });
+        displayMessage("user", message, conversationHistory.length - 1);
         messageInput.value = "";
         autoGrowTextarea(messageInput);
-        try {
-          const response = await fetch("/api/crawl", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
-          const data = await response.json();
-          if (response.ok) message = `Content from ${url}:\n\n${data.content}\n\n${prompt}`;
-          else message = `Error crawling ${url}: ${data.error || response.statusText}\n\n${prompt}`;
-        } catch (error) {
-          message = `Error crawling ${url}: ${error.message}\n\n${prompt}`;
-        }
-      }
+        await sendChatRequest(conversationHistory);
+      });
 
-      if (!message) return;
-      conversationHistory.push({ role: "user", content: message });
-      displayMessage("user", message, conversationHistory.length - 1);
-      messageInput.value = "";
-      autoGrowTextarea(messageInput);
-      await sendChatRequest(conversationHistory);
-    });
+      fetchModels();
 
-    fetchModels();
-
-    document.querySelectorAll('.suggestion-item').forEach(item => {
-      item.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (messageInput.value !== '') {
-          messageInput.value += ' ';
-        }
-        messageInput.value += this.dataset.suggestion;
-        autoGrowTextarea(messageInput);
+      document.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (messageInput.value !== '') {
+            messageInput.value += ' ';
+          }
+          messageInput.value += this.dataset.suggestion;
+          autoGrowTextarea(messageInput);
+        });
       });
     });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="max-tokens-slider" class="form-label">Max Tokens: <span id="max-tokens-value">2048</span></label>
+          <input type="range" class="form-range" min="512" max="8192" step="512" id="max-tokens-slider" value="2048">
+        </div>
+        <div class="mb-3">
+          <label for="context-window-slider" class="form-label">Context Window Size: <span id="context-window-value">4096</span></label>
+          <input type="range" class="form-range" min="2048" max="16384" step="2048" id="context-window-slider" value="4096">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

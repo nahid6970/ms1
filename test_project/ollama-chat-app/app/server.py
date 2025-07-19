@@ -253,22 +253,31 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                 content_length = int(self.headers['Content-Length'])
                 post_data = self.rfile.read(content_length)
 
-                # ---- inject system message into chat requests ----
-                if SYSTEM_MESSAGE and (self.path == '/api/chat' or self.path == '/api/generate'):
+                # ---- inject system message and handle options ----
+                if self.path in ('/api/chat', '/api/generate'):
                     try:
                         payload = json.loads(post_data.decode('utf-8'))
-                        # Create or prepend system message
-                        if 'messages' in payload:      # /api/chat
-                            if payload.get('messages') and payload['messages'][0].get('role') == 'system':
-                                payload['messages'][0]['content'] = SYSTEM_MESSAGE + "\n\n" + payload['messages'][0]['content']
-                            else:
-                                payload['messages'].insert(0, {'role': 'system', 'content': SYSTEM_MESSAGE})
-                            post_data = json.dumps(payload).encode()
-                        elif 'prompt' in payload:      # /api/generate (legacy)
-                            payload['system'] = SYSTEM_MESSAGE
-                            post_data = json.dumps(payload).encode()
-                    except Exception:
-                        pass  # silently fail if payload not json
+                        
+                        # Extract user-defined options from the request
+                        user_options = payload.pop('options', {})
+
+                        # Inject system message
+                        if SYSTEM_MESSAGE:
+                            if 'messages' in payload:      # /api/chat
+                                if not payload.get('messages') or payload['messages'][0].get('role') != 'system':
+                                    payload['messages'].insert(0, {'role': 'system', 'content': SYSTEM_MESSAGE})
+                                else:
+                                    payload['messages'][0]['content'] = f"{SYSTEM_MESSAGE}\n\n{payload['messages'][0]['content']}"
+                            elif 'prompt' in payload:      # /api/generate
+                                payload['system'] = SYSTEM_MESSAGE
+                        
+                        # Add the options back into the payload for Ollama
+                        if user_options:
+                            payload['options'] = user_options
+
+                        post_data = json.dumps(payload).encode('utf-8')
+                    except (json.JSONDecodeError, KeyError) as e:
+                        print(f"Could not process payload for {self.path}: {e}. Proxying original request.")
                 # -------------------------------------------------
 
                 response = requests.post(api_url, data=post_data, headers=headers, stream=True)
