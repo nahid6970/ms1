@@ -980,7 +980,7 @@
       }
 
       // Save settings to localStorage and server
-      async function saveSettings() {
+      window.saveSettings = async function() {
         const settings = {
           instructions: currentInstructions,
           rag: ragSettings
@@ -1012,7 +1012,7 @@
       }
 
       // Instructions Management
-      function addNewInstruction() {
+      window.addNewInstruction = function() {
         editingInstructionId = null;
         document.getElementById('instructionModalTitle').textContent = 'Add Instruction';
         document.getElementById('instruction-name').value = '';
@@ -1020,7 +1020,7 @@
         new bootstrap.Modal(document.getElementById('instructionModal')).show();
       }
 
-      function editInstruction(id) {
+      window.editInstruction = function(id) {
         const instruction = currentInstructions.find(i => i.id === id);
         if (instruction) {
           editingInstructionId = id;
@@ -1031,7 +1031,7 @@
         }
       }
 
-      function saveInstruction() {
+      window.saveInstruction = function() {
         const name = document.getElementById('instruction-name').value.trim();
         const content = document.getElementById('instruction-content').value.trim();
         
@@ -1059,7 +1059,7 @@
         bootstrap.Modal.getInstance(document.getElementById('instructionModal')).hide();
       }
 
-      function toggleInstruction(id) {
+      window.toggleInstruction = function(id) {
         const instruction = currentInstructions.find(i => i.id === id);
         if (instruction) {
           instruction.enabled = !instruction.enabled;
@@ -1067,7 +1067,7 @@
         }
       }
 
-      function deleteInstruction(id) {
+      window.deleteInstruction = function(id) {
         if (confirm('Are you sure you want to delete this instruction?')) {
           currentInstructions = currentInstructions.filter(i => i.id !== id);
           updateInstructionsList();
