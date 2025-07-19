@@ -955,6 +955,249 @@
         await sendChatRequest(conversationHistory);
       });
 
+      // Settings Management
+      let currentInstructions = [];
+      let editingInstructionId = null;
+      let ragSettings = {
+        enabled: true,
+        numResults: 3,
+        maxContextLength: 1500,
+        minQueryLength: 10
+      };
+
+      // Load settings from localStorage
+      function loadSettings() {
+        const saved = localStorage.getItem('ollamaSettings');
+        if (saved) {
+          const settings = JSON.parse(saved);
+          currentInstructions = settings.instructions || [];
+          ragSettings = { ...ragSettings, ...(settings.rag || {}) };
+        }
+        updateInstructionsList();
+        updateRAGControls();
+        updateRAGIndicator();
+        checkRAGStatus();
+      }
+
+      // Save settings to localStorage and server
+      async function saveSettings() {
+        const settings = {
+          instructions: currentInstructions,
+          rag: ragSettings
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('ollamaSettings', JSON.stringify(settings));
+        
+        // Save to server
+        try {
+          const response = await fetch('/api/settings/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings })
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            updateRAGIndicator();
+            alert('Settings saved successfully!');
+          } else {
+            alert('Failed to save settings to server');
+          }
+        } catch (error) {
+          console.error('Settings save error:', error);
+          updateRAGIndicator();
+          alert('Settings saved locally but failed to sync with server');
+        }
+      }
+
+      // Instructions Management
+      function addNewInstruction() {
+        editingInstructionId = null;
+        document.getElementById('instructionModalTitle').textContent = 'Add Instruction';
+        document.getElementById('instruction-name').value = '';
+        document.getElementById('instruction-content').value = '';
+        new bootstrap.Modal(document.getElementById('instructionModal')).show();
+      }
+
+      function editInstruction(id) {
+        const instruction = currentInstructions.find(i => i.id === id);
+        if (instruction) {
+          editingInstructionId = id;
+          document.getElementById('instructionModalTitle').textContent = 'Edit Instruction';
+          document.getElementById('instruction-name').value = instruction.name;
+          document.getElementById('instruction-content').value = instruction.content;
+          new bootstrap.Modal(document.getElementById('instructionModal')).show();
+        }
+      }
+
+      function saveInstruction() {
+        const name = document.getElementById('instruction-name').value.trim();
+        const content = document.getElementById('instruction-content').value.trim();
+        
+        if (!name || !content) {
+          alert('Please fill in both name and content');
+          return;
+        }
+
+        if (editingInstructionId) {
+          // Edit existing
+          const instruction = currentInstructions.find(i => i.id === editingInstructionId);
+          instruction.name = name;
+          instruction.content = content;
+        } else {
+          // Add new
+          currentInstructions.push({
+            id: Date.now().toString(),
+            name: name,
+            content: content,
+            enabled: true
+          });
+        }
+
+        updateInstructionsList();
+        bootstrap.Modal.getInstance(document.getElementById('instructionModal')).hide();
+      }
+
+      function toggleInstruction(id) {
+        const instruction = currentInstructions.find(i => i.id === id);
+        if (instruction) {
+          instruction.enabled = !instruction.enabled;
+          updateInstructionsList();
+        }
+      }
+
+      function deleteInstruction(id) {
+        if (confirm('Are you sure you want to delete this instruction?')) {
+          currentInstructions = currentInstructions.filter(i => i.id !== id);
+          updateInstructionsList();
+        }
+      }
+
+      function updateInstructionsList() {
+        const container = document.getElementById('instructions-list');
+        if (currentInstructions.length === 0) {
+          container.innerHTML = '<div class="text-muted text-center py-3">No instructions configured</div>';
+          return;
+        }
+
+        let html = '';
+        currentInstructions.forEach(instruction => {
+          html += `
+            <div class="card mb-2">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                      <div class="form-check form-switch me-3">
+                        <input class="form-check-input" type="checkbox" ${instruction.enabled ? 'checked' : ''} 
+                               onchange="toggleInstruction('${instruction.id}')">
+                      </div>
+                      <h6 class="mb-0">${instruction.name}</h6>
+                    </div>
+                    <p class="text-muted small mb-0">${instruction.content.substring(0, 100)}${instruction.content.length > 100 ? '...' : ''}</p>
+                  </div>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="editInstruction('${instruction.id}')">Edit</button>
+                    <button class="btn btn-outline-danger" onclick="deleteInstruction('${instruction.id}')">Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      // RAG Settings Management
+      function updateRAGControls() {
+        document.getElementById('rag-enabled').checked = ragSettings.enabled;
+        document.getElementById('rag-results-slider').value = ragSettings.numResults;
+        document.getElementById('rag-results-value').textContent = ragSettings.numResults;
+        document.getElementById('rag-context-length-slider').value = ragSettings.maxContextLength;
+        document.getElementById('rag-context-length-value').textContent = ragSettings.maxContextLength;
+        document.getElementById('rag-min-query-length').value = ragSettings.minQueryLength;
+        document.getElementById('rag-min-query-value').textContent = ragSettings.minQueryLength;
+        
+        const controls = document.getElementById('rag-controls');
+        controls.style.opacity = ragSettings.enabled ? '1' : '0.5';
+        controls.style.pointerEvents = ragSettings.enabled ? 'auto' : 'none';
+      }
+
+      // RAG event listeners
+      document.getElementById('rag-enabled').addEventListener('change', (e) => {
+        ragSettings.enabled = e.target.checked;
+        updateRAGControls();
+        updateRAGIndicator();
+      });
+
+      document.getElementById('rag-results-slider').addEventListener('input', (e) => {
+        ragSettings.numResults = parseInt(e.target.value);
+        document.getElementById('rag-results-value').textContent = ragSettings.numResults;
+      });
+
+      document.getElementById('rag-context-length-slider').addEventListener('input', (e) => {
+        ragSettings.maxContextLength = parseInt(e.target.value);
+        document.getElementById('rag-context-length-value').textContent = ragSettings.maxContextLength;
+      });
+
+      document.getElementById('rag-min-query-length').addEventListener('input', (e) => {
+        ragSettings.minQueryLength = parseInt(e.target.value);
+        document.getElementById('rag-min-query-value').textContent = ragSettings.minQueryLength;
+      });
+
+      function updateRAGIndicator() {
+        const indicator = document.getElementById('rag-indicator');
+        if (ragSettings.enabled) {
+          indicator.style.display = 'inline-block';
+          indicator.className = 'badge bg-success';
+          indicator.textContent = 'RAG Active';
+        } else {
+          indicator.style.display = 'inline-block';
+          indicator.className = 'badge bg-secondary';
+          indicator.textContent = 'RAG Off';
+        }
+      }
+
+      async function checkRAGStatus() {
+        try {
+          const response = await fetch('/api/rag/documents');
+          const data = await response.json();
+          const statusDiv = document.getElementById('rag-status');
+          
+          if (data.success) {
+            const docCount = data.documents.length;
+            statusDiv.className = 'alert alert-success';
+            statusDiv.innerHTML = `
+              <div class="d-flex align-items-center">
+                <i class="nf nf-md-check_circle me-2"></i>
+                RAG system is running. ${docCount} documents in knowledge base.
+              </div>
+            `;
+          } else {
+            statusDiv.className = 'alert alert-warning';
+            statusDiv.innerHTML = `
+              <div class="d-flex align-items-center">
+                <i class="nf nf-md-alert me-2"></i>
+                RAG system is available but no documents found.
+              </div>
+            `;
+          }
+        } catch (error) {
+          const statusDiv = document.getElementById('rag-status');
+          statusDiv.className = 'alert alert-danger';
+          statusDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+              <i class="nf nf-md-close_circle me-2"></i>
+              RAG system is not available.
+            </div>
+          `;
+        }
+      }
+
+      // Load settings on page load
+      loadSettings();
+
       fetchModels();
 
       document.querySelectorAll('.suggestion-item').forEach(item => {
@@ -971,53 +1214,161 @@
   </script>
   <!-- Settings Modal -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label for="max-tokens-slider" class="form-label">
-            <i class="nf nf-fa-info_circle text-muted me-2" 
-               data-bs-toggle="tooltip" 
-               data-bs-placement="right" 
-               title="How long the next answer can be.">
-            </i>Max Tokens: <span id="max-tokens-value">2048</span>
-          </label>
-          <input type="range" class="form-range" min="512" max="8192" step="512" id="max-tokens-slider" value="2048">
+        <!-- Settings Tabs -->
+        <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="model-settings-tab" data-bs-toggle="tab" data-bs-target="#model-settings" type="button">Model</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="instructions-tab" data-bs-toggle="tab" data-bs-target="#instructions" type="button">Instructions</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rag-settings-tab" data-bs-toggle="tab" data-bs-target="#rag-settings" type="button">RAG</button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="settingsTabContent">
+          <!-- Model Settings Tab -->
+          <div class="tab-pane fade show active" id="model-settings" role="tabpanel">
+            <div class="mb-3">
+              <label for="max-tokens-slider" class="form-label">
+                <i class="nf nf-fa-info_circle text-muted me-2" 
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="right" 
+                   title="How long the next answer can be.">
+                </i>Max Tokens: <span id="max-tokens-value">2048</span>
+              </label>
+              <input type="range" class="form-range" min="512" max="8192" step="512" id="max-tokens-slider" value="2048">
+            </div>
+            <div class="mb-3">
+              <label for="context-window-slider" class="form-label">
+                <i class="nf nf-fa-info_circle text-muted me-2" 
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="right" 
+                   title="How much of the past conversation the model remembers.">
+                </i>Context Window Size: <span id="context-window-value">4096</span>
+              </label>
+              <input type="range" class="form-range" min="2048" max="16384" step="2048" id="context-window-slider" value="4096">
+            </div>
+            <div class="mb-3">
+              <label for="temperature-slider" class="form-label">
+                <i class="nf nf-fa-info_circle text-muted me-2" 
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="right" 
+                   title="Controls the randomness of the output. Higher is more creative.">
+                </i>Temperature: <span id="temperature-value">0.8</span>
+              </label>
+              <input type="range" class="form-range" min="0" max="2" step="0.1" id="temperature-slider" value="0.8">
+            </div>
+            <div class="mb-3">
+              <label for="top-p-slider" class="form-label">
+                <i class="nf nf-fa-info_circle text-muted me-2" 
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="right" 
+                   title="Controls nucleus sampling. Higher values consider more words.">
+                </i>Top P: <span id="top-p-value">0.9</span>
+              </label>
+              <input type="range" class="form-range" min="0" max="1" step="0.05" id="top-p-slider" value="0.9">
+            </div>
+          </div>
+
+          <!-- Instructions Tab -->
+          <div class="tab-pane fade" id="instructions" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6>System Instructions</h6>
+              <button class="btn btn-sm btn-primary" onclick="addNewInstruction()">+ Add New</button>
+            </div>
+            <div id="instructions-list">
+              <!-- Instructions will be loaded here -->
+            </div>
+            
+            <!-- Add/Edit Instruction Modal -->
+            <div class="modal fade" id="instructionModal" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="instructionModalTitle">Add Instruction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label for="instruction-name" class="form-label">Name</label>
+                      <input type="text" class="form-control" id="instruction-name" placeholder="e.g., Code Assistant, Creative Writer">
+                    </div>
+                    <div class="mb-3">
+                      <label for="instruction-content" class="form-label">Content</label>
+                      <textarea class="form-control" id="instruction-content" rows="8" placeholder="Enter your system instruction here..."></textarea>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveInstruction()">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RAG Settings Tab -->
+          <div class="tab-pane fade" id="rag-settings" role="tabpanel">
+            <div class="mb-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="rag-enabled" checked>
+                <label class="form-check-label" for="rag-enabled">
+                  <strong>Enable RAG (Retrieval-Augmented Generation)</strong>
+                </label>
+              </div>
+              <small class="text-muted">When enabled, relevant documents from your knowledge base will enhance AI responses.</small>
+            </div>
+            
+            <div id="rag-controls">
+              <div class="mb-3">
+                <label for="rag-results-slider" class="form-label">
+                  Number of Context Results: <span id="rag-results-value">3</span>
+                </label>
+                <input type="range" class="form-range" min="1" max="10" step="1" id="rag-results-slider" value="3">
+                <small class="text-muted">How many relevant documents to include in context</small>
+              </div>
+              
+              <div class="mb-3">
+                <label for="rag-context-length-slider" class="form-label">
+                  Max Context Length: <span id="rag-context-length-value">1500</span>
+                </label>
+                <input type="range" class="form-range" min="500" max="3000" step="250" id="rag-context-length-slider" value="1500">
+                <small class="text-muted">Maximum characters of context to include</small>
+              </div>
+              
+              <div class="mb-3">
+                <label for="rag-min-query-length" class="form-label">
+                  Minimum Query Length: <span id="rag-min-query-value">10</span>
+                </label>
+                <input type="range" class="form-range" min="5" max="50" step="5" id="rag-min-query-length" value="10">
+                <small class="text-muted">Minimum characters in query to trigger RAG</small>
+              </div>
+              
+              <div class="mt-4">
+                <h6>RAG Status</h6>
+                <div id="rag-status" class="alert alert-info">
+                  <div class="d-flex align-items-center">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Checking RAG system status...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="mb-3">
-          <label for="context-window-slider" class="form-label">
-            <i class="nf nf-fa-info_circle text-muted me-2" 
-               data-bs-toggle="tooltip" 
-               data-bs-placement="right" 
-               title="How much of the past conversation the model remembers.">
-            </i>Context Window Size: <span id="context-window-value">4096</span>
-          </label>
-          <input type="range" class="form-range" min="2048" max="16384" step="2048" id="context-window-slider" value="4096">
-        </div>
-        <div class="mb-3">
-          <label for="temperature-slider" class="form-label">
-            <i class="nf nf-fa-info_circle text-muted me-2" 
-               data-bs-toggle="tooltip" 
-               data-bs-placement="right" 
-               title="Controls the randomness of the output. Higher is more creative.">
-            </i>Temperature: <span id="temperature-value">0.8</span>
-          </label>
-          <input type="range" class="form-range" min="0" max="2" step="0.1" id="temperature-slider" value="0.8">
-        </div>
-        <div class="mb-3">
-          <label for="top-p-slider" class="form-label">
-            <i class="nf nf-fa-info_circle text-muted me-2" 
-               data-bs-toggle="tooltip" 
-               data-bs-placement="right" 
-               title="Controls nucleus sampling. Higher values consider more words.">
-            </i>Top P: <span id="top-p-value">0.9</span>
-          </label>
-          <input type="range" class="form-range" min="0" max="1" step="0.05" id="top-p-slider" value="0.9">
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
       </div>
     </div>
   </div>

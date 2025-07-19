@@ -15,15 +15,40 @@ OLLAMA_HOST = "http://localhost:11434"
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # ---------------------------------------------------------------------------
-# 1. Load the instruction file once at startup and initialize RAG
+# 1. Settings management and RAG initialization
 # ---------------------------------------------------------------------------
+# Global settings storage
+current_settings = {
+    'instructions': [],
+    'rag': {
+        'enabled': True,
+        'numResults': 3,
+        'maxContextLength': 1500,
+        'minQueryLength': 10
+    }
+}
+
+# Load default instruction from file if exists (for backward compatibility)
 INSTRUCTION_FILE = os.path.join(os.path.dirname(__file__), "instruction.txt")
-SYSTEM_MESSAGE = ""
 if os.path.isfile(INSTRUCTION_FILE):
     with open(INSTRUCTION_FILE, encoding="utf-8") as f:
-        SYSTEM_MESSAGE = f.read().strip()
-else:
-    print("Warning: instruction.txt not found; no system prompt injected.")
+        default_content = f.read().strip()
+        if default_content:
+            current_settings['instructions'].append({
+                'id': 'default',
+                'name': 'Default System Instruction',
+                'content': default_content,
+                'enabled': True
+            })
+            print("Loaded default instruction from instruction.txt")
+
+def get_active_system_message():
+    """Build system message from active instructions"""
+    active_instructions = [
+        instr['content'] for instr in current_settings['instructions'] 
+        if instr.get('enabled', True)
+    ]
+    return '\n\n'.join(active_instructions) if active_instructions else ""
 
 # Initialize RAG system
 try:
@@ -307,6 +332,20 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                     rag_system.clear_collection()
                     response = {'success': True, 'message': 'Collection cleared'}
                 
+                elif self.path == '/api/settings/save':
+                    # Save settings (instructions and RAG config)
+                    settings_data = data.get('settings', {})
+                    if 'instructions' in settings_data:
+                        current_settings['instructions'] = settings_data['instructions']
+                    if 'rag' in settings_data:
+                        current_settings['rag'].update(settings_data['rag'])
+                    print("Settings updated:", current_settings)
+                    response = {'success': True, 'message': 'Settings saved'}
+                
+                elif self.path == '/api/settings/load':
+                    # Load current settings
+                    response = {'success': True, 'settings': current_settings}
+                
                 else:
                     self.send_error(404, "RAG endpoint not found")
                     return
@@ -365,18 +404,24 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                         elif 'prompt' in payload:
                             user_query = payload['prompt']
                         
-                        # Get RAG context if available and query is meaningful
+                        # Get RAG context if enabled and query is meaningful
                         rag_context = ""
-                        if rag_system and user_query and len(user_query.strip()) > 10:
+                        rag_settings = current_settings['rag']
+                        if (rag_system and rag_settings['enabled'] and user_query and 
+                            len(user_query.strip()) >= rag_settings['minQueryLength']):
                             try:
-                                rag_context = rag_system.get_context(user_query, n_results=3, max_context_length=1500)
+                                rag_context = rag_system.get_context(
+                                    user_query, 
+                                    n_results=rag_settings['numResults'], 
+                                    max_context_length=rag_settings['maxContextLength']
+                                )
                                 if rag_context:
                                     print(f"RAG context retrieved for query: {user_query[:50]}...")
                             except Exception as e:
                                 print(f"RAG context retrieval failed: {e}")
                         
-                        # Build enhanced system message
-                        enhanced_system_message = SYSTEM_MESSAGE
+                        # Build enhanced system message from active instructions
+                        enhanced_system_message = get_active_system_message()
                         if rag_context:
                             enhanced_system_message += f"\n\n# RELEVANT CONTEXT:\n{rag_context}\n\nUse the above context to provide more accurate and informed responses when relevant to the user's query."
 
