@@ -18,15 +18,27 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # 1. Settings management and RAG initialization
 # ---------------------------------------------------------------------------
 # Global settings storage
-current_settings = {
-    'instructions': [],
-    'rag': {
-        'enabled': True,
-        'numResults': 3,
-        'maxContextLength': 1500,
-        'minQueryLength': 10
+SETTINGS_FILE = "settings.json"
+
+def load_settings():
+    if os.path.exists(SETTINGS_FILE):
+        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {
+        'instructions': [],
+        'rag': {
+            'enabled': True,
+            'numResults': 3,
+            'maxContextLength': 1500,
+            'minQueryLength': 10
+        }
     }
-}
+
+def save_settings_to_file(settings):
+    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(settings, f, indent=4)
+
+current_settings = load_settings()
 
 # Load default instruction from file if exists (for backward compatibility)
 INSTRUCTION_FILE = os.path.join(os.path.dirname(__file__), "instruction.txt")
@@ -339,7 +351,8 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                         current_settings['instructions'] = settings_data['instructions']
                     if 'rag' in settings_data:
                         current_settings['rag'].update(settings_data['rag'])
-                    print("Settings updated:", current_settings)
+                    save_settings_to_file(current_settings) # Persist settings to file
+                    print("Settings updated and saved:", current_settings)
                     response = {'success': True, 'message': 'Settings saved'}
                 
                 elif self.path == '/api/settings/load':
