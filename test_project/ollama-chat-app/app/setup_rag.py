@@ -11,8 +11,7 @@ def install_requirements():
         "sentence-transformers",
         "chromadb",
         "numpy",
-        "faiss-cpu",
-        "nomic"
+        "faiss-cpu"
     ]
     
     for package in requirements:

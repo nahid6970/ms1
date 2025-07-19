@@ -14,7 +14,7 @@ class NomicRAGSystem:
     def __init__(self, 
                  persist_directory: str = "./chroma_db",
                  collection_name: str = "documents",
-                 model_name: str = "nomic-ai/nomic-embed-text-v1"):
+                 model_name: str = "all-MiniLM-L6-v2"):
         """
         Initialize RAG system with Nomic embeddings
         """
@@ -28,7 +28,7 @@ class NomicRAGSystem:
         
         # Initialize embedding model
         self.logger.info(f"Loading embedding model: {model_name}")
-        self.embedding_model = SentenceTransformer(model_name, trust_remote_code=True)
+        self.embedding_model = SentenceTransformer(model_name)
         
         # Initialize ChromaDB
         self.client = chromadb.PersistentClient(
