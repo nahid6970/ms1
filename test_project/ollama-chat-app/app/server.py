@@ -295,6 +295,14 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                     results = rag_system.search(query, n_results)
                     response = {'success': True, 'results': results}
                 
+                elif self.path == '/api/rag/add_directory':
+                    directory_path = data.get('directory_path', '')
+                    metadata = data.get('metadata', {})
+                    recursive = data.get('recursive', True)
+                    file_extensions = data.get('file_extensions', ['.txt', '.md', '.py', '.js', '.html', '.css', '.json'])
+                    added_files = rag_system.add_directory(directory_path, file_extensions, recursive)
+                    response = {'success': True, 'added_files': added_files}
+                
                 elif self.path == '/api/rag/clear':
                     rag_system.clear_collection()
                     response = {'success': True, 'message': 'Collection cleared'}
