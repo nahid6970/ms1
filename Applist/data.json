@@ -761,5 +761,12 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
         "winget_path": ""
+    },
+    {
+        "name": "Msty (CPU only)",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "CloudStack.Msty.CPU",
+        "winget_path": ""
     }
 ]
