@@ -40,20 +40,6 @@ def save_settings_to_file(settings):
 
 current_settings = load_settings()
 
-# Load default instruction from file if exists (for backward compatibility)
-INSTRUCTION_FILE = os.path.join(os.path.dirname(__file__), "instruction.txt")
-if os.path.isfile(INSTRUCTION_FILE):
-    with open(INSTRUCTION_FILE, encoding="utf-8") as f:
-        default_content = f.read().strip()
-        if default_content:
-            current_settings['instructions'].append({
-                'id': 'default',
-                'name': 'Default System Instruction',
-                'content': default_content,
-                'enabled': True
-            })
-            print("Loaded default instruction from instruction.txt")
-
 def get_active_system_message():
     """Build system message from active instructions"""
     active_instructions = [
