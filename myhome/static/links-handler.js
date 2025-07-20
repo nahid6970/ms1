@@ -431,6 +431,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
+  // Function to move group back to regular row maintaining original order
+  function moveToRegularRowInOrder(group) {
+    const container = document.querySelector('.collapsible-groups-container');
+    let regularRow = container.querySelector('.regular-row');
+    
+    if (!regularRow) {
+      regularRow = document.createElement('div');
+      regularRow.className = 'collapsible-groups-row regular-row';
+      container.appendChild(regularRow);
+    }
+    
+    // Get the original index to maintain position
+    const originalIndex = parseInt(group.dataset.originalIndex) || 0;
+    const existingGroups = Array.from(regularRow.children);
+    
+    // Find the correct position to insert based on original index
+    let insertPosition = 0;
+    for (let i = 0; i < existingGroups.length; i++) {
+      const existingIndex = parseInt(existingGroups[i].dataset.originalIndex) || 0;
+      if (originalIndex < existingIndex) {
+        insertPosition = i;
+        break;
+      }
+      insertPosition = i + 1;
+    }
+    
+    // Insert at the correct position
+    if (insertPosition >= existingGroups.length) {
+      regularRow.appendChild(group);
+    } else {
+      regularRow.insertBefore(group, existingGroups[insertPosition]);
+    }
+  }
+
   // Function to clean up empty rows
   function cleanupEmptyRows() {
     const container = document.querySelector('.collapsible-groups-container');
