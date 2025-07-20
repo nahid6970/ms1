@@ -1,6 +1,8 @@
 from flask import Flask, render_template, jsonify, request, send_from_directory
 import json
 import os
+import subprocess
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -17,6 +19,22 @@ def read_data():
 def write_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2)
+    # Auto-generate static HTML after data update
+    generate_static_html()
+
+# Function to generate static HTML
+def generate_static_html():
+    """Generate static HTML file with embedded CSS and JS"""
+    try:
+        # Run the generate_static.py script
+        result = subprocess.run(['python', 'generate_static.py'], 
+                              capture_output=True, text=True, cwd='.')
+        if result.returncode == 0:
+            print(f"✅ Static HTML auto-generated at {datetime.now().strftime('%H:%M:%S')}")
+        else:
+            print(f"❌ Error generating static HTML: {result.stderr}")
+    except Exception as e:
+        print(f"❌ Exception generating static HTML: {e}")
 
 @app.route('/')
 def index():
@@ -69,6 +87,15 @@ def delete_link(link_id):
         write_data(links)
         return jsonify({'message': 'Link deleted successfully', 'deleted_link': deleted_link})
     return jsonify({'message': 'Link not found'}), 404
+
+@app.route('/generate-static')
+def manual_generate_static():
+    """Manual endpoint to generate static HTML"""
+    try:
+        generate_static_html()
+        return jsonify({'message': 'Static HTML generated successfully', 'file': 'myhome.html'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
