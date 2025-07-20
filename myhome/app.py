@@ -6,7 +6,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-DATA_FILE = 'C:\msBackups\DataBase\myhome\data.json'
+DATA_FILE = r'C:\msBackups\DataBase\myhome\data.json'
 
 # Helper function to read data from JSON file
 def read_data():
@@ -26,15 +26,23 @@ def write_data(data):
 def generate_static_html():
     """Generate static HTML file with embedded CSS and JS"""
     try:
-        # Run the generate_static.py script
-        result = subprocess.run(['python', 'generate_static.py'], 
-                              capture_output=True, text=True, cwd='.')
+        # Run the generate_static.py script from current directory
+        result = subprocess.run(['pythonw', r'C:\ms1\myhome\generate_static.py'], 
+                              capture_output=True, text=True, cwd='.', 
+                              encoding='utf-8', errors='replace')
         if result.returncode == 0:
-            print(f"✅ Static HTML auto-generated at {datetime.now().strftime('%H:%M:%S')}")
+            print(f"[SUCCESS] Static HTML auto-generated at {datetime.now().strftime('%H:%M:%S')}")
+            if result.stdout:
+                print(f"[OUTPUT] {result.stdout.strip()}")
         else:
-            print(f"❌ Error generating static HTML: {result.stderr}")
+            print(f"[ERROR] Error generating static HTML:")
+            print(f"[ERROR] Return code: {result.returncode}")
+            if result.stderr:
+                print(f"[ERROR] {result.stderr.strip()}")
+            if result.stdout:
+                print(f"[OUTPUT] {result.stdout.strip()}")
     except Exception as e:
-        print(f"❌ Exception generating static HTML: {e}")
+        print(f"[EXCEPTION] Exception generating static HTML: {e}")
 
 @app.route('/')
 def index():
@@ -93,7 +101,7 @@ def manual_generate_static():
     """Manual endpoint to generate static HTML"""
     try:
         generate_static_html()
-        return jsonify({'message': 'Static HTML generated successfully', 'file': 'myhome.html'})
+        return jsonify({'message': 'Static HTML generated successfully', 'file': r'C:\ms1\myhome\myhome.html'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -29,12 +29,12 @@ def generate_static_html():
     """Generate static HTML file with embedded CSS and JS"""
     
     # Read the template HTML
-    template_html = read_file('templates/index.html')
+    template_html = read_file(r'C:\ms1\myhome\templates\index.html')
     
     # Read CSS and JS files
-    css_content = read_file('static/style.css')
-    main_js_content = read_file('static/main.js')
-    links_handler_js_content = read_file('static/links-handler.js')
+    css_content = read_file(r'C:\ms1\myhome\static\style.css')
+    main_js_content = read_file(r'C:\ms1\myhome\static\main.js')
+    links_handler_js_content = read_file(r'C:\ms1\myhome\static\links-handler.js')
     
     # Read the data
     links_data = read_data()
@@ -167,12 +167,12 @@ def generate_static_html():
 </html>"""
 
     # Write the static HTML file
-    with open('myhome.html', 'w', encoding='utf-8') as f:
+    with open(r'C:\ms1\myhome\myhome.html', 'w', encoding='utf-8') as f:
         f.write(static_html)
     
-    print(f"✅ Static HTML generated successfully: myhome.html")
-    print(f"📊 Included {len(links_data)} links")
-    print(f"🕒 Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"[SUCCESS] Static HTML generated successfully: myhome.html")
+    print(f"[INFO] Included {len(links_data)} links")
+    print(f"[INFO] Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     generate_static_html()

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4021/4021539.png" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <div class="flex-container2">
+
+    <div class="toggle-container" style="margin-left: 25px;">
+      <label class="switch">
+        <input type="checkbox" id="edit-mode-toggle">
+        <span class="slider round"></span>
+      </label>
+      <span style="color: white; margin-left: 10px;">Modify</span>
+    </div>
+
+    <!-- Updated styling for better edit mode control -->
+    <style>
+      .dragging {
+        opacity: 0.5;
+      }
+      
+      .reorder-buttons {
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        margin-left: 5px;
+      }
+      .edit-mode .reorder-buttons {
+        display: none;
+      }
+      .reorder-btn {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 2px 6px;
+        cursor: pointer;
+        font-size: 12px;
+        border-radius: 3px;
+      }
+      .reorder-btn:hover {
+        background: #555;
+      }
+      
+      /* Group reorder buttons - only visible in edit mode */
+      .group-reorder-buttons {
+        display: none;
+        gap: 5px;
+        margin-left: 10px;
+      }
+      .edit-mode .group-reorder-buttons {
+        display: flex;
+      }
+      
+      .link-item {
+        cursor: move;
+      }
+
+    </style>
+
+  <div id="links-container" style="display: flex; width: 100%; flex-wrap: wrap; justify-content: left; flex-direction: column;">
+  </div>
+
+  <script>
+    // Embedded data
+    const STATIC_LINKS_DATA = [
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "JobCircular",
+    "name": "erecruitment",
+    "url": "https://erecruitment.bb.org.bd/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "JobCircular",
+    "name": "bepza",
+    "title": "Bangladesh Export Processing Zones Authority",
+    "url": "https://www.bepza.gov.bd/career"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "JobCircular",
+    "name": "dnc",
+    "title": "Department of Narcotics Control Security Services Division Ministry of Home Affairs",
+    "url": "http://dnc.teletalk.com.bd/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "JobCircular",
+    "name": "bpsc",
+    "title": "Bangladesh Public Service Commission",
+    "url": "http://bpsc.teletalk.com.bd/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "JobCircular",
+    "name": "brdb",
+    "url": "http://brdb.teletalk.com.bd/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "JobCircular",
+    "name": "ndr",
+    "text": "ndr",
+    "url": "http://ndr.teletalk.com.bd/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "JobCircular",
+    "name": "bscic",
+    "title": "Bangladesh Small and Cottage Industries Corporation",
+    "url": "http://bscic.teletalk.com.bd/bscic25/index.php"
+  },
+  {
+    "color": "#f46613",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-cod-mail",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/022/613/021/non_2x/google-mail-gmail-icon-logo-symbol-free-png.png",
+    "name": "Google Mail",
+    "url": "https://mail.google.com/"
+  },
+  {
+    "color": "#1399f4",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-dev-facebook",
+    "img_src": "https://img.icons8.com/ios11/512/facebook-new.png",
+    "name": "Facebook",
+    "url": "https://www.facebook.com/"
+  },
+  {
+    "color": "#3675ff",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-fa-facebook_messenger",
+    "name": "Messenger",
+    "url": "https://www.messenger.com/"
+  },
+  {
+    "color": "#ff0000",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-fa-youtube",
+    "name": "YouTube",
+    "url": "https://www.youtube.com/"
+  },
+  {
+    "color": "#5765f2",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-fa-discord",
+    "name": "Discord",
+    "url": "https://discord.com/channels/@me"
+  },
+  {
+    "color": "#ffffff",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-md-google_translate",
+    "name": "Google Translate",
+    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate"
+  },
+  {
+    "default_type": "img",
+    "img_src": "https://www.vlr.gg/img/vlr/logo_tw.png",
+    "name": "VLR.gg",
+    "url": "https://www.vlr.gg/"
+  },
+  {
+    "color": "#4b70cc",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-md-dots_hexagon",
+    "name": "Tailscale",
+    "url": "https://login.tailscale.com/admin/machines"
+  },
+  {
+    "default_type": "img",
+    "img_src": "https://d2qr50rz2oof04.cloudfront.net/assets/img/logo/logo-bug.png",
+    "name": "noip",
+    "url": "https://my.noip.com/dynamic-dns"
+  },
+  {
+    "color": "#b259e6",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-md-microsoft_onenote",
+    "name": "OneNote",
+    "url": "https://www.onenote.com/"
+  },
+  {
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-fa-github_square",
+    "name": "github",
+    "url": "https://github.com/nahid6970"
+  },
+  {
+    "color": "#fbbc04",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-md-google_keep",
+    "name": "Keep",
+    "url": "https://keep.google.com/"
+  },
+  {
+    "color": "#ff2e2e",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "hidden": true,
+    "icon_class": "nf nf-fa-battery_2",
+    "name": "mi9t",
+    "title": "mi9t",
+    "url": "http://mi9t:5002"
+  },
+  {
+    "color": "#69e8ff",
+    "default_type": "nerd-font",
+    "font_size": "35px",
+    "icon_class": "nf nf-seti-font",
+    "name": "nerdfonts",
+    "url": "https://www.nerdfonts.com/cheat-sheet"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "https://static.vecteezy.com/system/resources/previews/024/558/807/non_2x/openai-chatgpt-logo-icon-free-png.png",
+    "name": "ChatGPT",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://chatgpt.com/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "https://statics.moonshot.cn/kimi-blog/assets/logo-CvjirWOb.svg",
+    "name": "Kimi k2",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://www.kimi.com/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png",
+    "name": "DeepSeek",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://chat.deepseek.com/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "https://img.icons8.com/fluent/512/claude-ai.png",
+    "li_hover_color": "#d97757",
+    "name": "Claude",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://claude.ai/new"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Google_Bard_logo.svg",
+    "name": "Google Bard",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://bard.google.com/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "https://www.techspot.com/images2/downloads/topdownload/2025/07/2025-07-14-ts3_thumbs-d25.png",
+    "li_bg_color": "white",
+    "name": "KIRO",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://kiro.dev/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "https://ollama.com/public/ollama.png",
+    "li_bg_color": "white",
+    "name": "ollama-chat",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "http://localhost:8000/",
+    "width": "40"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "name": "mcp",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://github.com/modelcontextprotocol/servers"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "name": "mcp-host",
+    "top_bg_color": "#fff",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#8d7777",
+    "top_text_color": "#5451f0",
+    "url": "https://github.com/mark3labs/mcphost"
+  },
+  {
+    "default_type": "img",
+    "font_size": "35px",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-md-television_classic",
+    "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
+    "name": "Sonarr",
+    "text": "Sonarr",
+    "url": "http://192.168.0.101:8989/"
+  },
+  {
+    "default_type": "img",
+    "font_size": "35px",
+    "group": "Local (Apps)",
+    "icon_class": "nf-md-movie_roll",
+    "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
+    "name": "Radarr",
+    "text": "Radarr",
+    "url": "http://192.168.0.101:7878/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Local (Apps)",
+    "height": "50",
+    "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
+    "name": "Prowlarr",
+    "url": "http://192.168.0.101:9696/",
+    "width": "50"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Local (Apps)",
+    "img_src": "http://192.168.0.101:6767/images/logo64.png",
+    "name": "Bazarr",
+    "url": "http://192.168.0.101:6767/series"
+  },
+  {
+    "collapsible": true,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Local (Apps)",
+    "img_src": "http://127.0.0.1:9117/jacket_medium.png",
+    "name": "JackettAPI ",
+    "url": "http://127.0.0.1:9117/UI/Dashboard"
+  },
+  {
+    "collapsible": true,
+    "color": "#20acd7",
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "font_size": "35px",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-md-folder_sync",
+    "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
+    "name": "Syncthing",
+    "url": "http://127.0.0.1:8384/"
+  },
+  {
+    "collapsible": true,
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "font_size": "35px",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-linux-tor",
+    "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
+    "name": "qBittorrent",
+    "url": "http://192.168.0.101:8080/"
+  },
+  {
+    "collapsible": true,
+    "color": "#009fff",
+    "default_type": "nerd-font",
+    "display_style": "flex",
+    "font_size": "35px",
+    "group": "Local (Apps)",
+    "icon_class": "nf nf-fa-wifi",
+    "name": "WIFI",
+    "url": "http://192.168.0.1/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/4400/4400968.png",
+    "name": "ShareTXT",
+    "url": "http://192.168.0.101:5001/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2840/2840124.png",
+    "name": "ShareFile",
+    "url": "http://192.168.0.101:5002/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2250/2250195.png",
+    "name": "Browse",
+    "url": "http://192.168.0.101:5003/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "name": "GameARR",
+    "url": "http://192.168.0.101:5005/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Local (Flask)",
+    "icon_class": "nf nf-oct-command_palette",
+    "name": "Command",
+    "url": "http://192.168.0.101:5007/"
+  },
+  {
+    "default_type": "img",
+    "group": "Local (Flask)",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/4021/4021539.png",
+    "name": "myhome",
+    "url": "https://nahid6970.github.io/ms1/myhome/myhome"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "http://fitgirl-repacks.site/wp-content/uploads/2016/08/cropped-icon-192x192.jpg",
+    "name": "Fitgirl",
+    "url": "https://fitgirl-repacks.site/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Download PKG",
+    "name": "romsfun",
+    "url": "https://romsfun.com/"
+  },
+  {
+    "default_type": "nerd-font",
+    "group": "Download PKG",
+    "name": "DODI",
+    "url": "https://dodi-repacks.site/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "https://avatars.githubusercontent.com/u/16618068?s=30",
+    "name": "Scoop",
+    "url": "https://scoop.sh/#/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MC40OTIiIGhlaWdodD0iNDUuOTg2IiB2aWV3Qm94PSIwIDAgNDAuNDkyIDQ1Ljk4NiI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTgzNS4xMzEgLTcyLjEzNikiPjxsaW5lIHkyPSIyMS41NDciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgOTUuMjExKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxOC45NiIgeTI9IjExLjAyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkyPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgMTA2LjA2NykiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5Mj0iMjEuODc2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NzQuMjU1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkxPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgNzMuNSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5MT0iMTAuNjkxIiB4Mj0iMTguNzk1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSA3My41KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgyPSIxOC43OTUiIHkyPSIxMS4wMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODM2LjUgODQuMTkxKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSIyMS44NzYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgzNi41IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguNzk1IiB5MT0iMTAuNjkxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDYuMDY3KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSI1LjA5OSIgeDI9IjguNzM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDAuOTY4KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkyPSIxMS42NzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg0NS4yMzggODkuMjkpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjEwLjA1NyIgeTI9IjUuNzU3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NDUuMjM4IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTE9IjUuNzU3IiB4Mj0iMTAuMjIyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjExLjY3OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY1LjUxNyA4OS4yOSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4Mj0iMTAuMjIyIiB5Mj0iNi4wODYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgODMuMjA0KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxMC4wNTciIHkyPSI2LjA4NiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODQ1LjIzOCA4My4yMDQpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjkuNzA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDczLjUpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjguNzM4IiB5Mj0iNS4wOTkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg2NS41MTcgMTAwLjk2OCkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+",
+    "name": "Winget",
+    "url": "https://winget.run/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "https://apps.evozi.com/apk-downloader/assets/img/mini_icon.png",
+    "name": "evozi",
+    "url": "https://apps.evozi.com/apk-downloader/"
+  },
+  {
+    "default_type": "img",
+    "group": "Download PKG",
+    "img_src": "https://store.rg-adguard.net/img/Store.png",
+    "name": "MS-Store",
+    "url": "https://store.rg-adguard.net/"
+  }
+];
+    
+    // Override fetch for static version
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+      if (url === '/api/links' && (!options || options.method === 'GET' || !options.method)) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(STATIC_LINKS_DATA)
+        });
+      }
+      // For other requests, show a message that editing is not available
+      if (url.startsWith('/api/')) {
+        alert('Editing is not available in static version. Use the live version to make changes.');
+        return Promise.reject(new Error('Static version - editing disabled'));
+      }
+      return originalFetch.apply(this, arguments);
+    };
+    
+    
+    
+    
+    
+    // Disable edit functionality in static version
+    document.addEventListener('DOMContentLoaded', function() {
+      // Hide edit toggle
+      const editToggle = document.querySelector('.toggle-container');
+      if (editToggle) {
+        editToggle.style.display = 'none';
+      }
+      
+      // Remove edit buttons and functionality
+      const style = document.createElement('style');
+      style.textContent = `
+        .edit-button, .delete-button, .add-link-item, .edit-group-button, .collapsible-edit-btn {
+          display: none !important;
+        }
+        .link-item {
+          cursor: default !important;
+        }
+        .collapsible-group {
+          cursor: default !important;
+        }
+      `;
+      document.head.appendChild(style);
+    });
+  </script>
+
+  </div>
+  
+  <!-- Generated on 2025-07-20 15:27:05 -->
+</body>
+</html>
