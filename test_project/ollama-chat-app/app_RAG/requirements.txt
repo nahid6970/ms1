@@ -1,6 +1,0 @@
-# filename: requirements.txt
-requests
-numpy
-sentence-transformers
-faiss-cpu
-chromadb
