@@ -14,75 +14,101 @@ body {
   background-color: #31343a;
   font-family: Calibri;
   scrollbar-width: thin;
-  scrollbar-color: #ff0000 #000000; /* black background and red thumb */
+  scrollbar-color: #ff0000 #000000;
+  /* black background and red thumb */
 }
 
 /* WebKit browsers (Chrome, Safari) */
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-  width: 1px; /* Set the width of the scrollbar */
+  width: 1px;
+  /* Set the width of the scrollbar */
 }
 
 html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
-  background-color: #ff000f; /* Color of the thumb (red) */
+  background-color: #ff000f;
+  /* Color of the thumb (red) */
 }
 
 html::-webkit-scrollbar-track,
 body::-webkit-scrollbar-track {
-  background-color: #000000; /* Color of the track (black) */
+  background-color: #000000;
+  /* Color of the track (black) */
 }
 
 /* For html part 2 ############################################################*/
 .flex-container2 {
-display: flex;
-flex-direction: row;
-background-color: #31343a;
-gap: 3px;
-flex-wrap: wrap;
-text-align: left;
-line-height: auto;
-align-items: flex-start;
-font-size: auto;
-color: rgb(255, 255, 255);
-padding: 1cm;
-border-radius: 1cm;
-position: relative; /* Added for positioning context */
+  display: flex;
+  flex-direction: row;
+  background-color: #31343a;
+  gap: 3px;
+  flex-wrap: wrap;
+  text-align: left;
+  line-height: auto;
+  align-items: flex-start;
+  font-size: auto;
+  color: rgb(255, 255, 255);
+  padding: 1cm;
+  border-radius: 1cm;
+  position: relative;
+  /* Added for positioning context */
 }
 
-.flex-container2 > div {
-font-weight: normal;
-flex-grow: 1;
-border-radius: 0px;
-width: max-content;
-margin: 1px;
-text-align: left;
-width: 500px;
+.flex-container2>div {
+  font-weight: normal;
+  flex-grow: 1;
+  border-radius: 0px;
+  width: max-content;
+  margin: 1px;
+  text-align: left;
+  width: 500px;
 }
 
 p {
-text-align: justify;
-line-height: 1.5;
-height: auto;
-color: #4a90e2;
-font-family: Arial, sans-serif;
-font-size: 16px;
+  text-align: justify;
+  line-height: 1.5;
+  height: auto;
+  color: #4a90e2;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
 }
 
-a:link {color: #b5ac97;background-color: transparent;text-decoration: none;}
-a:visited {color: #bbd853;background-color: transparent;text-decoration: none;}
-a:hover {color: red;background-color: transparent;text-decoration: none;}
-a:active {color: yellow;background-color: transparent;text-decoration: underline;}
+a:link {
+  color: #b5ac97;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #bbd853;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:hover {
+  color: red;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:active {
+  color: yellow;
+  background-color: transparent;
+  text-decoration: underline;
+}
 
 img {
-border: 1px solid transparent;
-vertical-align: middle;
-border-radius: 10px;
+  border: 1px solid transparent;
+  vertical-align: middle;
+  border-radius: 10px;
 }
 
 .link-group-content {
-  list-style: none; /* Remove default list bullets */
-  padding: 10px; /* Remove default padding */
+  list-style: none;
+  /* Remove default list bullets */
+  padding: 10px;
+  /* Remove default padding */
   flex-wrap: wrap;
   justify-content: left;
   background-color: #252525;
@@ -104,8 +130,10 @@ border-radius: 10px;
 .link-item {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center the link and buttons horizontally */
-  margin: 5px; /* Add some margin around each item */
+  align-items: center;
+  /* Center the link and buttons horizontally */
+  margin: 5px;
+  /* Add some margin around each item */
   padding: 5px;
   background-color: #474747;
   border-radius: 5px;
@@ -122,29 +150,35 @@ border-radius: 10px;
 
 .link-item a {
   /* Styles for the link itself within the container */
-  display: block; /* Make the span take full width */
+  display: block;
+  /* Make the span take full width */
   padding: 10px 5px;
   width: fit-content;
   height: fit-content;
   font-family: jetbrainsmono nfp;
   align-content: center;
-  background-color: transparent; /* Remove background from the span itself */
+  background-color: transparent;
+  /* Remove background from the span itself */
   box-shadow: none;
-  margin: 0; /* Remove margin from the span */
+  margin: 0;
+  /* Remove margin from the span */
 }
 
 .link-buttons {
   display: flex;
   justify-content: center;
-  margin-top: 5px; /* Space between link and buttons */
+  margin-top: 5px;
+  /* Space between link and buttons */
 }
 
 .add-link-item {
   max-height: fit-content;
   align-self: center;
 }
+
 .add-link-item:hover {
-  background-color: #4CAF50; /* Green color on hover */
+  background-color: #4CAF50;
+  /* Green color on hover */
 }
 
 .toggle-container span {
@@ -158,8 +192,10 @@ border-radius: 10px;
   margin: 0;
   width: auto;
   height: auto;
-  font-family: Calibri; /* Or your preferred default font */
-  font-size: 16px; /* Or your preferred default font size */
+  font-family: Calibri;
+  /* Or your preferred default font */
+  font-size: 16px;
+  /* Or your preferred default font size */
   align-content: center;
 }
 
@@ -218,15 +254,15 @@ border-radius: 10px;
   transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #2196F3;
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px #2196F3;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
@@ -241,14 +277,17 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-.edit-button, .delete-button {
-  display: none; /* Hidden by default */
+.edit-button,
+.delete-button {
+  display: none;
+  /* Hidden by default */
   font-family: jetbrainsmono nfp;
 }
 
 .edit-mode .edit-button,
 .edit-mode .delete-button {
-  display: inline-block; /* Show when edit mode is active */
+  display: inline-block;
+  /* Show when edit mode is active */
 }
 
 /* Popup styles - Enhanced centering */
@@ -281,7 +320,8 @@ input:checked + .slider:before {
 .popup-content {
   background-color: #31343a;
   padding: 20px;
-  border-radius: 8px;  position: absolute;
+  border-radius: 8px;
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -313,8 +353,10 @@ input:checked + .slider:before {
   padding-bottom: 5px;
 }
 
-.edit-button, .delete-button {
-  background-color: #4CAF50; /* Green */
+.edit-button,
+.delete-button {
+  background-color: #4CAF50;
+  /* Green */
   color: white;
   padding: 5px 10px;
   border: none;
@@ -325,7 +367,8 @@ input:checked + .slider:before {
 }
 
 .delete-button {
-  background-color: #f44336; /* Red */
+  background-color: #f44336;
+  /* Red */
 }
 
 .edit-button:hover {
@@ -339,10 +382,13 @@ input:checked + .slider:before {
 .popup-container input[type="text"],
 .popup-container input[type="url"],
 .popup-container input[type="color"] {
-  flex-grow: 1; /* Allow inputs to grow within a flex container */
-  min-width: 120px; /* Ensure a minimum width */
+  flex-grow: 1;
+  /* Allow inputs to grow within a flex container */
+  min-width: 120px;
+  /* Ensure a minimum width */
   padding: 8px;
-  margin-bottom: 0; /* Remove individual margin-bottom, use gap on parent */
+  margin-bottom: 0;
+  /* Remove individual margin-bottom, use gap on parent */
   border-radius: 4px;
   border: 1px solid #ddd;
   background-color: #555;
@@ -380,7 +426,8 @@ input:checked + .slider:before {
 
 /* Edit group button styling */
 .edit-group-button {
-  display: none; /* Hidden by default */
+  display: none;
+  /* Hidden by default */
   background-color: #ffffff;
   color: white;
   border: none;
@@ -440,6 +487,7 @@ input:checked + .slider:before {
 ul.link-group-content {
   margin-top: 0;
 }
+
 div.group-header-container {
   margin-top: 0;
 }
@@ -450,4 +498,74 @@ html body {
 
 div.toggle-container {
   margin-top: -16px;
+}
+
+/* Collapsible groups styling */
+.collapsible-groups-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #1e1e1e;
+  border-radius: 10px;
+}
+
+.collapsible-group {
+  background-color: #2d2d2d;
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.collapsible-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 5px 0;
+  border-bottom: 1px solid #444;
+  margin-bottom: 10px;
+}
+
+.collapsible-group-title {
+  color: #ffffff;
+  margin: 0;
+  font-size: 16px;
+}
+
+.collapsible-toggle-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collapsible-group-content {
+  display: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.collapsible-group-content.expanded {
+  display: block;
+}
+
+.collapsible-group-content .link-item {
+  margin: 5px 0;
+  padding: 8px;
+  background-color: #3a3a3a;
+}
+
+.collapsible-group-content .link-item:hover {
+  background-color: #4a4a4a;
 }

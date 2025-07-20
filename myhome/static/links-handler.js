@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const groupedElements = {}; // Store HTML elements grouped by name
       const groupedLinks = {}; // Store original links grouped by name
+      const collapsibleGroups = {}; // Store collapsible groups separately
 
       links.forEach((link, index) => { // Use the index from the original links array
         // Skip hidden items unless in edit mode
@@ -79,11 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         listItem.innerHTML = linkContent;
-        // Apply font size if it's a text-based link (either default_type text or fallback to name)
-        if (link.default_type === 'text' || link.default_type === 'nerd-font' || (!link.default_type && (link.icon_class || (!link.icon_class && !link.img_src)))) {
-          // Font size is now applied directly to the <a> tag, so this line is no longer needed here.
-          // listItem.style.fontSize = link.font_size || '40px';
-        }
 
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'link-buttons';
@@ -113,13 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonContainer.appendChild(reorderButtonsContainer);
 
         const editButton = document.createElement('button');
-        editButton.textContent = '';
+        editButton.textContent = '✏️';
         editButton.className = 'edit-button';
         editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
         buttonContainer.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = '';
+        deleteButton.textContent = '🗑️';
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteLink(index); // Pass original index
         buttonContainer.appendChild(deleteButton);
@@ -127,97 +123,45 @@ document.addEventListener('DOMContentLoaded', function() {
         listItem.appendChild(buttonContainer);
         groupedElements[groupName].push(listItem);
         groupedLinks[groupName].push({link, index});
+
+        // Check if this group should be collapsible
+        if (link.collapsible) {
+          collapsibleGroups[groupName] = true;
+        }
       });
 
-      // Now append the grouped elements to the container
+      // Create collapsible groups container at the top
+      const collapsibleGroupNames = Object.keys(collapsibleGroups);
+      if (collapsibleGroupNames.length > 0) {
+        const collapsibleContainer = document.createElement('div');
+        collapsibleContainer.className = 'collapsible-groups-container';
+        
+        collapsibleGroupNames.forEach(groupName => {
+          if (groupedElements[groupName] && groupedElements[groupName].length > 0) {
+            const collapsibleGroup = createCollapsibleGroup(groupName, groupedElements[groupName], groupedLinks[groupName]);
+            collapsibleContainer.appendChild(collapsibleGroup);
+          }
+        });
+        
+        linksContainer.appendChild(collapsibleContainer);
+      }
+
+      // Now append the regular grouped elements to the container
       const groupNames = Object.keys(groupedElements);
       for (let i = 0; i < groupNames.length; i++) {
         const groupName = groupNames[i];
+        
+        // Skip collapsible groups as they're already rendered above
+        if (collapsibleGroups[groupName]) {
+          continue;
+        }
+        
         // Skip empty groups (when all items are hidden)
         if (groupedElements[groupName].length === 0) {
           continue;
         }
 
-        const groupDiv = document.createElement('div');
-        groupDiv.className = 'link-group';
-        // Remove draggable attribute - we'll handle reordering with buttons only
-        groupDiv.dataset.groupName = groupName;
-
-        const groupHeaderContainer = document.createElement('div');
-        groupHeaderContainer.className = 'group-header-container';
-
-        const groupTitle = document.createElement('h3');
-        groupTitle.textContent = groupName;
-        groupTitle.className = 'group-title';
-        groupHeaderContainer.appendChild(groupTitle);
-
-        // Add group reorder buttons
-        const groupReorderButtons = document.createElement('div');
-        groupReorderButtons.className = 'group-reorder-buttons';
-        
-        const groupUpButton = document.createElement('button');
-        groupUpButton.textContent = '↑';
-        groupUpButton.className = 'reorder-btn';
-        groupUpButton.onclick = (e) => {
-          e.stopPropagation();
-          moveGroup(groupName, -1);
-        };
-        groupReorderButtons.appendChild(groupUpButton);
-        
-        const groupDownButton = document.createElement('button');
-        groupDownButton.textContent = '↓';
-        groupDownButton.className = 'reorder-btn';
-        groupDownButton.onclick = (e) => {
-          e.stopPropagation();
-          moveGroup(groupName, 1);
-        };
-        groupReorderButtons.appendChild(groupDownButton);
-        
-        groupHeaderContainer.appendChild(groupReorderButtons);
-
-        // Add edit group button (only visible in edit mode)
-        const editGroupButton = document.createElement('button');
-        editGroupButton.textContent = '';
-        editGroupButton.className = 'edit-group-button';
-        editGroupButton.onclick = () => openEditGroupPopup(groupName);
-        groupHeaderContainer.appendChild(editGroupButton);
-
-        groupDiv.appendChild(groupHeaderContainer);
-
-        const groupList = document.createElement('ul');
-        groupList.className = 'link-group-content';
-        // Set display style based on the first link in the group, or default to flex
-        const firstLinkInGroup = groupedLinks[groupName][0];
-        if (firstLinkInGroup && firstLinkInGroup.link.display_style) {
-          groupList.style.display = firstLinkInGroup.link.display_style;
-        } else {
-          groupList.style.display = 'flex'; // Default display style
-        }
-
-        groupedElements[groupName].forEach(element => {
-          groupList.appendChild(element);
-        });
-
-        // Add button for adding new links to this group
-        const addLinkItem = document.createElement('li');
-        addLinkItem.className = 'link-item add-link-item';
-
-        const addLinkSpan = document.createElement('span');
-        addLinkSpan.textContent = '+';
-        addLinkSpan.style.cursor = 'pointer';
-        addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-        addLinkSpan.style.fontSize = '25px';
-        addLinkSpan.style.alignContent = 'center';
-
-        addLinkSpan.addEventListener('click', () => {
-          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-          const addLinkPopup = document.getElementById('add-link-popup');
-          addLinkPopup.classList.remove('hidden'); // Remove hidden class
-        });
-        addLinkItem.appendChild(addLinkSpan);
-        groupList.appendChild(addLinkItem);
-
-        groupDiv.appendChild(groupList);
+        const groupDiv = createRegularGroup(groupName, groupedElements[groupName], groupedLinks[groupName]);
         linksContainer.appendChild(groupDiv);
       }
     } catch (error) {
@@ -225,34 +169,165 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Function to open edit group popup
+  // Function to create a collapsible group
+  function createCollapsibleGroup(groupName, elements, links) {
+    const collapsibleGroup = document.createElement('div');
+    collapsibleGroup.className = 'collapsible-group';
+    
+    const header = document.createElement('div');
+    header.className = 'collapsible-group-header';
+    
+    const title = document.createElement('h4');
+    title.className = 'collapsible-group-title';
+    title.textContent = groupName;
+    
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'collapsible-toggle-btn';
+    toggleBtn.textContent = '▼';
+    
+    header.appendChild(title);
+    header.appendChild(toggleBtn);
+    
+    const content = document.createElement('ul');
+    content.className = 'collapsible-group-content';
+    
+    // Clone elements for collapsible group (remove edit buttons for cleaner look)
+    elements.forEach(element => {
+      const clonedElement = element.cloneNode(true);
+      // Remove edit buttons from collapsible view
+      const buttons = clonedElement.querySelector('.link-buttons');
+      if (buttons) {
+        buttons.remove();
+      }
+      content.appendChild(clonedElement);
+    });
+    
+    // Add toggle functionality
+    header.addEventListener('click', () => {
+      content.classList.toggle('expanded');
+      toggleBtn.textContent = content.classList.contains('expanded') ? '▲' : '▼';
+    });
+    
+    collapsibleGroup.appendChild(header);
+    collapsibleGroup.appendChild(content);
+    
+    return collapsibleGroup;
+  }
+
+  // Function to create a regular group
+  function createRegularGroup(groupName, elements, links) {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'link-group';
+    groupDiv.dataset.groupName = groupName;
+
+    const groupHeaderContainer = document.createElement('div');
+    groupHeaderContainer.className = 'group-header-container';
+
+    const groupTitle = document.createElement('h3');
+    groupTitle.textContent = groupName;
+    groupTitle.className = 'group-title';
+    groupHeaderContainer.appendChild(groupTitle);
+
+    // Add group reorder buttons
+    const groupReorderButtons = document.createElement('div');
+    groupReorderButtons.className = 'group-reorder-buttons';
+    
+    const groupUpButton = document.createElement('button');
+    groupUpButton.textContent = '↑';
+    groupUpButton.className = 'reorder-btn';
+    groupUpButton.onclick = (e) => {
+      e.stopPropagation();
+      moveGroup(groupName, -1);
+    };
+    groupReorderButtons.appendChild(groupUpButton);
+    
+    const groupDownButton = document.createElement('button');
+    groupDownButton.textContent = '↓';
+    groupDownButton.className = 'reorder-btn';
+    groupDownButton.onclick = (e) => {
+      e.stopPropagation();
+      moveGroup(groupName, 1);
+    };
+    groupReorderButtons.appendChild(groupDownButton);
+    
+    groupHeaderContainer.appendChild(groupReorderButtons);
+
+    // Add edit group button (only visible in edit mode)
+    const editGroupButton = document.createElement('button');
+    editGroupButton.textContent = '⚙️';
+    editGroupButton.className = 'edit-group-button';
+    editGroupButton.onclick = () => openEditGroupPopup(groupName);
+    groupHeaderContainer.appendChild(editGroupButton);
+
+    groupDiv.appendChild(groupHeaderContainer);
+
+    const groupList = document.createElement('ul');
+    groupList.className = 'link-group-content';
+    // Set display style based on the first link in the group, or default to flex
+    const firstLinkInGroup = links[0];
+    if (firstLinkInGroup && firstLinkInGroup.link.display_style) {
+      groupList.style.display = firstLinkInGroup.link.display_style;
+    } else {
+      groupList.style.display = 'flex'; // Default display style
+    }
+
+    elements.forEach(element => {
+      groupList.appendChild(element);
+    });
+
+    // Add button for adding new links to this group
+    const addLinkItem = document.createElement('li');
+    addLinkItem.className = 'link-item add-link-item';
+
+    const addLinkSpan = document.createElement('span');
+    addLinkSpan.textContent = '+';
+    addLinkSpan.style.cursor = 'pointer';
+    addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+    addLinkSpan.style.fontSize = '25px';
+    addLinkSpan.style.alignContent = 'center';
+
+    addLinkSpan.addEventListener('click', () => {
+      document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+      const addLinkPopup = document.getElementById('add-link-popup');
+      addLinkPopup.classList.remove('hidden'); // Remove hidden class
+    });
+    addLinkItem.appendChild(addLinkSpan);
+    groupList.appendChild(addLinkItem);
+
+    groupDiv.appendChild(groupList);
+    return groupDiv;
+  }  
+// Function to open edit group popup
   function openEditGroupPopup(currentGroupName) {
     const editGroupPopup = document.getElementById('edit-group-popup');
     const editGroupNameInput = document.getElementById('edit-group-name');
     const editGroupOriginalName = document.getElementById('edit-group-original-name');
     const editGroupDisplaySelect = document.getElementById('edit-group-display');
+    const editGroupCollapsibleCheckbox = document.getElementById('edit-group-collapsible');
 
     editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
     editGroupOriginalName.value = currentGroupName;
 
-    // Find a link in the current group to get its display_style
+    // Find a link in the current group to get its display_style and collapsible setting
     const linksInGroup = links.filter(link => (link.group || 'Ungrouped') === currentGroupName);
     if (linksInGroup.length > 0) {
       editGroupDisplaySelect.value = linksInGroup[0].display_style || 'flex';
+      editGroupCollapsibleCheckbox.checked = linksInGroup[0].collapsible || false;
     } else {
       editGroupDisplaySelect.value = 'flex'; // Default if no links in group
+      editGroupCollapsibleCheckbox.checked = false;
     }
 
     editGroupPopup.classList.remove('hidden');
   }
 
   // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle) {
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
       
-      // Create a new array with the updated group names and display styles
+      // Create a new array with the updated group names, display styles, and collapsible setting
       const newLinks = links.map(link => {
         const linkGroupName = link.group || 'Ungrouped';
         if (linkGroupName === originalGroupName) {
@@ -263,6 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
             delete updatedLink.group; // For "Ungrouped"
           }
           updatedLink.display_style = newDisplayStyle;
+          updatedLink.collapsible = isCollapsible;
           return updatedLink;
         }
         return link;
@@ -435,25 +511,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalGroupName = document.getElementById('edit-group-original-name').value;
         const newGroupName = document.getElementById('edit-group-name').value;
         const newDisplayStyle = document.getElementById('edit-group-display').value;
-
-        if (originalGroupName === newGroupName && 
-            (originalGroupName === 'Ungrouped' && newGroupName === '')) {
-          alert('No changes made to group name or display style.');
-          document.getElementById('edit-group-popup').classList.add('hidden');
-          return;
-        }
+        const isCollapsible = document.getElementById('edit-group-collapsible').checked;
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible);
           if (success) {
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();
           } else {
-            alert('Failed to update group name.');
+            alert('Failed to update group settings.');
           }
         } catch (error) {
-          console.error('Error updating group name:', error);
-          alert('Error updating group name.');
+          console.error('Error updating group settings:', error);
+          alert('Error updating group settings.');
         }
       });
       editGroupForm.setAttribute('data-listener-attached', 'true');
@@ -649,58 +719,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
     } catch (error) {
       console.error('Error swapping links:', error);
-    }
-  }
-
-  // Swap all links between two groups
-  async function swapGroups(group1Name, group2Name) {
-    try {
-      const response = await fetch('/api/links');
-      const links = await response.json();
-      
-      const group1Indices = [];
-      const group2Indices = [];
-      
-      links.forEach((link, index) => {
-        const linkGroup = link.group || 'Ungrouped';
-        if (linkGroup === group1Name) {
-          group1Indices.push(index);
-        } else if (linkGroup === group2Name) {
-          group2Indices.push(index);
-        }
-      });
-      
-      // Create a new links array with the groups swapped
-      const newLinks = [...links];
-      
-      group1Indices.forEach((linkIndex, i) => {
-        const correspondingGroup2Index = group2Indices[i];
-        
-        // Swap the group property of the links
-        const group1Link = { ...newLinks[linkIndex] };
-        const group2Link = { ...newLinks[correspondingGroup2Index] };
-        
-        const tempGroup = group1Link.group;
-        group1Link.group = group2Link.group;
-        group2Link.group = tempGroup;
-        
-        newLinks[linkIndex] = group1Link;
-        newLinks[correspondingGroup2Index] = group2Link;
-      });
-      
-      // Update the entire list of links on the server
-      await fetch('/api/links', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newLinks),
-      });
-      
-      fetchAndDisplayLinks();
-      
-    } catch (error) {
-      console.error('Error swapping groups:', error);
     }
   }
 });
