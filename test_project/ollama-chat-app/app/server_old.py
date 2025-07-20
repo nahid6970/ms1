@@ -7,6 +7,7 @@ import json
 import datetime
 import re
 import hashlib
+from rag_system import NomicRAGSystem
 
 PORT = 8000
 OLLAMA_HOST = "http://localhost:11434"
@@ -14,8 +15,9 @@ OLLAMA_HOST = "http://localhost:11434"
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # ---------------------------------------------------------------------------
-# 1. Settings management
+# 1. Settings management and RAG initialization
 # ---------------------------------------------------------------------------
+# Global settings storage
 SETTINGS_FILE = "settings.json"
 
 def load_settings():
@@ -23,7 +25,13 @@ def load_settings():
         with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {
-        'instructions': []
+        'instructions': [],
+        'rag': {
+            'enabled': True,
+            'numResults': 3,
+            'maxContextLength': 1500,
+            'minQueryLength': 10
+        }
     }
 
 def save_settings_to_file(settings):
@@ -39,6 +47,14 @@ def get_active_system_message():
         if instr.get('enabled', True)
     ]
     return '\n\n'.join(active_instructions) if active_instructions else ""
+
+# Initialize RAG system
+try:
+    rag_system = NomicRAGSystem()
+    print("RAG system initialized successfully")
+except Exception as e:
+    print(f"Warning: Could not initialize RAG system: {e}")
+    rag_system = None
 
 # ---------------------------------------------------------------------------
 # 2. CodeExtractor with filename-from-first-line support
@@ -245,7 +261,11 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
-        if self.path.startswith("/api"):
+        if self.path.startswith("/api/settings"):
+            self._handle_settings_request()
+        elif self.path.startswith("/api/rag"):
+            self._handle_rag_request()
+        elif self.path.startswith("/api"):
             self._proxy_request()
         elif self.path == "/":
             self.path = "index.html"
@@ -254,11 +274,150 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        if self.path.startswith("/api"):
+        if self.path.startswith("/api/settings"):
+            self._handle_settings_request()
+        elif self.path.startswith("/api/rag"):
+            self._handle_rag_request()
+        elif self.path.startswith("/api"):
             self._proxy_request()
         else:
             self.send_response(404)
             self.end_headers()
+    
+    def do_OPTIONS(self):
+        """Handle CORS preflight requests"""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+
+    def _handle_rag_request(self):
+        """Handle RAG-specific API requests"""
+        if not rag_system:
+            self.send_error(503, "RAG system not available")
+            return
+        
+        try:
+            if self.command == 'POST':
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                
+                if self.path == '/api/rag/add_document':
+                    content = data.get('content', '')
+                    metadata = data.get('metadata', {})
+                    chunk_ids = rag_system.add_document(content, metadata)
+                    response = {'success': True, 'chunk_ids': chunk_ids}
+                
+                elif self.path == '/api/rag/add_file':
+                    file_path = data.get('file_path', '')
+                    metadata = data.get('metadata', {})
+                    chunk_ids = rag_system.add_file(file_path, metadata)
+                    response = {'success': True, 'chunk_ids': chunk_ids}
+                
+                elif self.path == '/api/rag/search':
+                    query = data.get('query', '')
+                    n_results = data.get('n_results', 5)
+                    results = rag_system.search(query, n_results)
+                    response = {'success': True, 'results': results}
+                
+                elif self.path == '/api/rag/add_directory':
+                    directory_path = data.get('directory_path', '')
+                    metadata = data.get('metadata', {})
+                    recursive = data.get('recursive', True)
+                    file_extensions = data.get('file_extensions', ['.txt', '.md', '.py', '.js', '.html', '.css', '.json'])
+                    added_files = rag_system.add_directory(directory_path, file_extensions, recursive)
+                    response = {'success': True, 'added_files': added_files}
+                
+                elif self.path == '/api/rag/clear':
+                    rag_system.clear_collection()
+                    response = {'success': True, 'message': 'Collection cleared'}
+                
+
+                
+                else:
+                    self.send_error(404, "RAG endpoint not found")
+                    return
+            
+            elif self.command == 'GET':
+                if self.path == '/api/rag/documents':
+                    documents = rag_system.list_documents()
+                    response = {'success': True, 'documents': documents}
+                else:
+                    self.send_error(404, "RAG endpoint not found")
+                    return
+            
+            # Send response
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            
+        except Exception as e:
+            print(f"RAG Error: {e}")
+            import traceback
+            traceback.print_exc()
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            error_response = {'success': False, 'error': str(e)}
+            self.wfile.write(json.dumps(error_response).encode('utf-8'))
+
+    def _handle_settings_request(self):
+        """Handle settings API requests"""
+        global current_settings
+        
+        try:
+            if self.command == 'POST':
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                
+                if self.path == '/api/settings/save':
+                    # Save settings (instructions and RAG config)
+                    settings_data = data.get('settings', {})
+                    if 'instructions' in settings_data:
+                        current_settings['instructions'] = settings_data['instructions']
+                    if 'rag' in settings_data:
+                        current_settings['rag'].update(settings_data['rag'])
+                    
+                    # Save to file
+                    save_settings_to_file(current_settings)
+                    print("Settings updated and saved:", current_settings)
+                    response = {'success': True, 'message': 'Settings saved'}
+                
+                else:
+                    self.send_error(404, "Settings endpoint not found")
+                    return
+            
+            elif self.command == 'GET':
+                if self.path == '/api/settings/load':
+                    # Load current settings
+                    response = {'success': True, 'settings': current_settings}
+                else:
+                    self.send_error(404, "Settings endpoint not found")
+                    return
+            
+            # Send response
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+            
+        except Exception as e:
+            print(f"Settings Error: {e}")
+            import traceback
+            traceback.print_exc()
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            error_response = {'success': False, 'error': str(e)}
+            self.wfile.write(json.dumps(error_response).encode('utf-8'))
 
     def _proxy_request(self):
         try:
@@ -269,23 +428,55 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                 content_length = int(self.headers['Content-Length'])
                 post_data = self.rfile.read(content_length)
 
-                # ---- inject system message and handle options ----
+                # ---- inject system message, RAG context, and handle options ----
                 if self.path in ('/api/chat', '/api/generate'):
                     try:
                         payload = json.loads(post_data.decode('utf-8'))
                         
                         # Extract user-defined options from the request
                         user_options = payload.pop('options', {})
+                        
+                        # Get user query for RAG
+                        user_query = ""
+                        if 'messages' in payload and payload['messages']:
+                            # Get the last user message
+                            for msg in reversed(payload['messages']):
+                                if msg.get('role') == 'user':
+                                    user_query = msg.get('content', '')
+                                    break
+                        elif 'prompt' in payload:
+                            user_query = payload['prompt']
+                        
+                        # Get RAG context if enabled and query is meaningful
+                        rag_context = ""
+                        rag_settings = current_settings['rag']
+                        if (rag_system and rag_settings['enabled'] and user_query and 
+                            len(user_query.strip()) >= rag_settings['minQueryLength']):
+                            try:
+                                rag_context = rag_system.get_context(
+                                    user_query, 
+                                    n_results=rag_settings['numResults'], 
+                                    max_context_length=rag_settings['maxContextLength']
+                                )
+                                if rag_context:
+                                    print(f"RAG context retrieved for query: {user_query[:50]}...")
+                            except Exception as e:
+                                print(f"RAG context retrieval failed: {e}")
+                        
+                        # Build enhanced system message from active instructions
+                        enhanced_system_message = get_active_system_message()
+                        if rag_context:
+                            enhanced_system_message += f"\n\n# RELEVANT CONTEXT:\n{rag_context}\n\nUse the above context to provide more accurate and informed responses when relevant to the user's query."
 
-                        # Inject system message
-                        if SYSTEM_MESSAGE:
+                        # Inject enhanced system message
+                        if enhanced_system_message:
                             if 'messages' in payload:      # /api/chat
                                 if not payload.get('messages') or payload['messages'][0].get('role') != 'system':
-                                    payload['messages'].insert(0, {'role': 'system', 'content': SYSTEM_MESSAGE})
+                                    payload['messages'].insert(0, {'role': 'system', 'content': enhanced_system_message})
                                 else:
-                                    payload['messages'][0]['content'] = f"{SYSTEM_MESSAGE}\n\n{payload['messages'][0]['content']}"
+                                    payload['messages'][0]['content'] = f"{enhanced_system_message}\n\n{payload['messages'][0]['content']}"
                             elif 'prompt' in payload:      # /api/generate
-                                payload['system'] = SYSTEM_MESSAGE
+                                payload['system'] = enhanced_system_message
                         
                         # Add the options back into the payload for Ollama
                         if user_options:

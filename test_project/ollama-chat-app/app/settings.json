@@ -1,0 +1,9 @@
+{
+  "instructions": [],
+  "rag": {
+    "enabled": true,
+    "numResults": 3,
+    "maxContextLength": 1500,
+    "minQueryLength": 10
+  }
+}

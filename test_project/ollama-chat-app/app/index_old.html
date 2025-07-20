@@ -347,6 +347,8 @@
         <h1 class="m-0 ollama-title">Ollama Web UI</h1>
         <div class="d-flex align-items-center gap-2">
           <select id="model-select" class="form-select form-select-sm ollama-model-select"></select>
+          <span id="rag-indicator" class="badge bg-success" style="display: none;">RAG Active</span>
+          <a href="rag_interface.html" class="btn btn-sm btn-outline-light" title="RAG Management">📚</a>
           <button class="btn btn-sm btn-outline-light" id="settings-btn"><i class="nf nf-md-cog"></i></button>
         </div>
       </div>
@@ -956,6 +958,12 @@
       // Settings Management
       let currentInstructions = [];
       let editingInstructionId = null;
+      let ragSettings = {
+        enabled: true,
+        numResults: 3,
+        maxContextLength: 1500,
+        minQueryLength: 10
+      };
 
       // Load settings from localStorage
       function loadSettings() {
@@ -963,14 +971,19 @@
         if (saved) {
           const settings = JSON.parse(saved);
           currentInstructions = settings.instructions || [];
+          ragSettings = { ...ragSettings, ...(settings.rag || {}) };
         }
         updateInstructionsList();
+        updateRAGControls();
+        updateRAGIndicator();
+        checkRAGStatus();
       }
 
       // Save settings to localStorage and server
       window.saveSettings = async function() {
         const settings = {
           instructions: currentInstructions,
+          rag: ragSettings
         };
         
         // Save to localStorage
@@ -986,12 +999,14 @@
           
           const data = await response.json();
           if (data.success) {
+            updateRAGIndicator();
             alert('Settings saved successfully!');
           } else {
             alert('Failed to save settings to server');
           }
         } catch (error) {
           console.error('Settings save error:', error);
+          updateRAGIndicator();
           alert('Settings saved locally but failed to sync with server');
         }
       }
@@ -1097,6 +1112,92 @@
         container.innerHTML = html;
       }
 
+      // RAG Settings Management
+      function updateRAGControls() {
+        document.getElementById('rag-enabled').checked = ragSettings.enabled;
+        document.getElementById('rag-results-slider').value = ragSettings.numResults;
+        document.getElementById('rag-results-value').textContent = ragSettings.numResults;
+        document.getElementById('rag-context-length-slider').value = ragSettings.maxContextLength;
+        document.getElementById('rag-context-length-value').textContent = ragSettings.maxContextLength;
+        document.getElementById('rag-min-query-length').value = ragSettings.minQueryLength;
+        document.getElementById('rag-min-query-value').textContent = ragSettings.minQueryLength;
+        
+        const controls = document.getElementById('rag-controls');
+        controls.style.opacity = ragSettings.enabled ? '1' : '0.5';
+        controls.style.pointerEvents = ragSettings.enabled ? 'auto' : 'none';
+      }
+
+      // RAG event listeners
+      document.getElementById('rag-enabled').addEventListener('change', (e) => {
+        ragSettings.enabled = e.target.checked;
+        updateRAGControls();
+        updateRAGIndicator();
+      });
+
+      document.getElementById('rag-results-slider').addEventListener('input', (e) => {
+        ragSettings.numResults = parseInt(e.target.value);
+        document.getElementById('rag-results-value').textContent = ragSettings.numResults;
+      });
+
+      document.getElementById('rag-context-length-slider').addEventListener('input', (e) => {
+        ragSettings.maxContextLength = parseInt(e.target.value);
+        document.getElementById('rag-context-length-value').textContent = ragSettings.maxContextLength;
+      });
+
+      document.getElementById('rag-min-query-length').addEventListener('input', (e) => {
+        ragSettings.minQueryLength = parseInt(e.target.value);
+        document.getElementById('rag-min-query-value').textContent = ragSettings.minQueryLength;
+      });
+
+      function updateRAGIndicator() {
+        const indicator = document.getElementById('rag-indicator');
+        if (ragSettings.enabled) {
+          indicator.style.display = 'inline-block';
+          indicator.className = 'badge bg-success';
+          indicator.textContent = 'RAG Active';
+        } else {
+          indicator.style.display = 'inline-block';
+          indicator.className = 'badge bg-secondary';
+          indicator.textContent = 'RAG Off';
+        }
+      }
+
+      async function checkRAGStatus() {
+        try {
+          const response = await fetch('/api/rag/documents');
+          const data = await response.json();
+          const statusDiv = document.getElementById('rag-status');
+          
+          if (data.success) {
+            const docCount = data.documents.length;
+            statusDiv.className = 'alert alert-success';
+            statusDiv.innerHTML = `
+              <div class="d-flex align-items-center">
+                <i class="nf nf-md-check_circle me-2"></i>
+                RAG system is running. ${docCount} documents in knowledge base.
+              </div>
+            `;
+          } else {
+            statusDiv.className = 'alert alert-warning';
+            statusDiv.innerHTML = `
+              <div class="d-flex align-items-center">
+                <i class="nf nf-md-alert me-2"></i>
+                RAG system is available but no documents found.
+              </div>
+            `;
+          }
+        } catch (error) {
+          const statusDiv = document.getElementById('rag-status');
+          statusDiv.className = 'alert alert-danger';
+          statusDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+              <i class="nf nf-md-close_circle me-2"></i>
+              RAG system is not available.
+            </div>
+          `;
+        }
+      }
+
       // Load settings on page load
       loadSettings();
 
@@ -1130,6 +1231,9 @@
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="instructions-tab" data-bs-toggle="tab" data-bs-target="#instructions" type="button">Instructions</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rag-settings-tab" data-bs-toggle="tab" data-bs-target="#rag-settings" type="button">RAG</button>
           </li>
         </ul>
 
@@ -1209,6 +1313,55 @@
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="saveInstruction()">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RAG Settings Tab -->
+          <div class="tab-pane fade" id="rag-settings" role="tabpanel">
+            <div class="mb-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="rag-enabled" checked>
+                <label class="form-check-label" for="rag-enabled">
+                  <strong>Enable RAG (Retrieval-Augmented Generation)</strong>
+                </label>
+              </div>
+              <small class="text-muted">When enabled, relevant documents from your knowledge base will enhance AI responses.</small>
+            </div>
+            
+            <div id="rag-controls">
+              <div class="mb-3">
+                <label for="rag-results-slider" class="form-label">
+                  Number of Context Results: <span id="rag-results-value">3</span>
+                </label>
+                <input type="range" class="form-range" min="1" max="10" step="1" id="rag-results-slider" value="3">
+                <small class="text-muted">How many relevant documents to include in context</small>
+              </div>
+              
+              <div class="mb-3">
+                <label for="rag-context-length-slider" class="form-label">
+                  Max Context Length: <span id="rag-context-length-value">1500</span>
+                </label>
+                <input type="range" class="form-range" min="500" max="3000" step="250" id="rag-context-length-slider" value="1500">
+                <small class="text-muted">Maximum characters of context to include</small>
+              </div>
+              
+              <div class="mb-3">
+                <label for="rag-min-query-length" class="form-label">
+                  Minimum Query Length: <span id="rag-min-query-value">10</span>
+                </label>
+                <input type="range" class="form-range" min="5" max="50" step="5" id="rag-min-query-length" value="10">
+                <small class="text-muted">Minimum characters in query to trigger RAG</small>
+              </div>
+              
+              <div class="mt-4">
+                <h6>RAG Status</h6>
+                <div id="rag-status" class="alert alert-info">
+                  <div class="d-flex align-items-center">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Checking RAG system status...
                   </div>
                 </div>
               </div>
