@@ -261,6 +261,8 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
     def _proxy_request(self):
+        global current_settings
+        current_settings = load_settings() # Ensure latest settings are loaded for each request
         try:
             api_url = f"{OLLAMA_HOST}{self.path}"
             headers = {h: self.headers[h] for h in self.headers}
@@ -278,14 +280,27 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                         user_options = payload.pop('options', {})
 
                         # Inject system message
-                        if SYSTEM_MESSAGE:
+                        # Prioritize system_instructions from payload, otherwise use active instructions from settings
+                        system_message_content = ""
+                        if 'system_instructions' in payload:
+                            active_payload_instructions = [
+                                instr['content'] for instr in payload['system_instructions'] 
+                                if instr.get('enabled', True)
+                            ]
+                            system_message_content = '\n\n'.join(active_payload_instructions)
+                            del payload['system_instructions'] # Remove from payload before sending to Ollama
+                        else:
+                            system_message_content = get_active_system_message()
+
+                        if system_message_content:
+                            print(f"Using system message: {system_message_content}")
                             if 'messages' in payload:      # /api/chat
                                 if not payload.get('messages') or payload['messages'][0].get('role') != 'system':
-                                    payload['messages'].insert(0, {'role': 'system', 'content': SYSTEM_MESSAGE})
+                                    payload['messages'].insert(0, {'role': 'system', 'content': system_message_content})
                                 else:
-                                    payload['messages'][0]['content'] = f"{SYSTEM_MESSAGE}\n\n{payload['messages'][0]['content']}"
+                                    payload['messages'][0]['content'] = f"{system_message_content}\n\n{payload['messages'][0]['content']}"
                             elif 'prompt' in payload:      # /api/generate
-                                payload['system'] = SYSTEM_MESSAGE
+                                payload['system'] = system_message_content
                         
                         # Add the options back into the payload for Ollama
                         if user_options:
@@ -331,6 +346,27 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
 
         except Exception as e:
             self.send_error(500, f"Proxy Error: {e}")
+
+    def do_POST(self):
+        if self.path == '/api/settings/save':
+            self._handle_settings_save()
+        else:
+            self._proxy_request()
+
+    def _handle_settings_save(self):
+        try:
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            settings_data = json.loads(post_data.decode('utf-8'))['settings']
+            save_settings_to_file(settings_data)
+            global current_settings
+            current_settings = load_settings() # Reload settings after saving
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True}).encode('utf-8'))
+        except Exception as e:
+            self.send_error(500, f"Error saving settings: {e}")
 
 # ---------------------------------------------------------------------------
 # 4. Serve forever

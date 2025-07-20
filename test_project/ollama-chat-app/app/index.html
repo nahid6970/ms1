@@ -898,7 +898,8 @@
                 num_ctx: parseInt(contextWindowSlider.value, 10),
                 temperature: parseFloat(temperatureSlider.value),
                 top_p: parseFloat(topPSlider.value)
-              }
+              },
+              system_instructions: currentInstructions.filter(instr => instr.enabled)
             }),
           });
 
