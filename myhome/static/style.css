@@ -503,12 +503,18 @@ div.toggle-container {
 /* Collapsible groups styling */
 .collapsible-groups-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   margin-bottom: 20px;
   padding: 10px;
   background-color: #1e1e1e;
   border-radius: 10px;
+}
+
+.collapsible-groups-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .collapsible-group {
@@ -517,6 +523,13 @@ div.toggle-container {
   padding: 10px;
   min-width: 200px;
   max-width: 300px;
+  transition: all 0.3s ease;
+}
+
+.collapsible-group.expanded {
+  width: 100%;
+  max-width: 100%;
+  order: -1;
 }
 
 .collapsible-group-header {
@@ -529,10 +542,21 @@ div.toggle-container {
   margin-bottom: 10px;
 }
 
+.collapsible-group-header .edit-buttons {
+  display: none;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.edit-mode .collapsible-group-header .edit-buttons {
+  display: flex;
+}
+
 .collapsible-group-title {
   color: #ffffff;
   margin: 0;
   font-size: 16px;
+  flex-grow: 1;
 }
 
 .collapsible-toggle-btn {
@@ -557,15 +581,32 @@ div.toggle-container {
 }
 
 .collapsible-group-content.expanded {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .collapsible-group-content .link-item {
   margin: 5px 0;
   padding: 8px;
   background-color: #3a3a3a;
+  flex: 0 0 auto;
 }
 
 .collapsible-group-content .link-item:hover {
   background-color: #4a4a4a;
+}
+
+.collapsible-edit-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 3px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.collapsible-edit-btn:hover {
+  background-color: #45a049;
 }

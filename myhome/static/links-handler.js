@@ -136,13 +136,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const collapsibleContainer = document.createElement('div');
         collapsibleContainer.className = 'collapsible-groups-container';
         
+        // Create regular row for collapsed groups
+        const regularRow = document.createElement('div');
+        regularRow.className = 'collapsible-groups-row regular-row';
+        
         collapsibleGroupNames.forEach(groupName => {
           if (groupedElements[groupName] && groupedElements[groupName].length > 0) {
             const collapsibleGroup = createCollapsibleGroup(groupName, groupedElements[groupName], groupedLinks[groupName]);
-            collapsibleContainer.appendChild(collapsibleGroup);
+            regularRow.appendChild(collapsibleGroup);
           }
         });
         
+        collapsibleContainer.appendChild(regularRow);
         linksContainer.appendChild(collapsibleContainer);
       }
 
@@ -173,19 +178,38 @@ document.addEventListener('DOMContentLoaded', function() {
   function createCollapsibleGroup(groupName, elements, links) {
     const collapsibleGroup = document.createElement('div');
     collapsibleGroup.className = 'collapsible-group';
+    collapsibleGroup.dataset.groupName = groupName;
     
     const header = document.createElement('div');
     header.className = 'collapsible-group-header';
     
     const title = document.createElement('h4');
     title.className = 'collapsible-group-title';
-    title.textContent = groupName;
+    
+    // Use custom top name if available, otherwise use group name
+    const firstLink = links[0];
+    const displayName = (firstLink && firstLink.link.top_name) ? firstLink.link.top_name : groupName;
+    title.textContent = displayName;
+    
+    // Add edit buttons container
+    const editButtons = document.createElement('div');
+    editButtons.className = 'edit-buttons';
+    
+    const editBtn = document.createElement('button');
+    editBtn.className = 'collapsible-edit-btn';
+    editBtn.textContent = '⚙️';
+    editBtn.onclick = (e) => {
+      e.stopPropagation();
+      openEditGroupPopup(groupName);
+    };
+    editButtons.appendChild(editBtn);
     
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'collapsible-toggle-btn';
     toggleBtn.textContent = '▼';
     
     header.appendChild(title);
+    header.appendChild(editButtons);
     header.appendChild(toggleBtn);
     
     const content = document.createElement('ul');
@@ -202,16 +226,75 @@ document.addEventListener('DOMContentLoaded', function() {
       content.appendChild(clonedElement);
     });
     
-    // Add toggle functionality
-    header.addEventListener('click', () => {
+    // Add toggle functionality with repositioning
+    header.addEventListener('click', (e) => {
+      // Don't trigger if clicking on edit button
+      if (e.target.classList.contains('collapsible-edit-btn')) {
+        return;
+      }
+      
+      const wasExpanded = content.classList.contains('expanded');
+      
+      // Close all other expanded groups first
+      const allGroups = document.querySelectorAll('.collapsible-group');
+      allGroups.forEach(group => {
+        const groupContent = group.querySelector('.collapsible-group-content');
+        const groupToggle = group.querySelector('.collapsible-toggle-btn');
+        if (group !== collapsibleGroup) {
+          groupContent.classList.remove('expanded');
+          groupToggle.textContent = '▼';
+          group.classList.remove('expanded');
+        }
+      });
+      
+      // Toggle current group
       content.classList.toggle('expanded');
       toggleBtn.textContent = content.classList.contains('expanded') ? '▲' : '▼';
+      
+      // Move expanded group to top by adding expanded class
+      if (content.classList.contains('expanded')) {
+        collapsibleGroup.classList.add('expanded');
+        // Move to expanded row
+        moveToExpandedRow(collapsibleGroup);
+      } else {
+        collapsibleGroup.classList.remove('expanded');
+        // Move back to regular row
+        moveToRegularRow(collapsibleGroup);
+      }
     });
     
     collapsibleGroup.appendChild(header);
     collapsibleGroup.appendChild(content);
     
     return collapsibleGroup;
+  }
+  
+  // Function to move group to expanded row (top)
+  function moveToExpandedRow(group) {
+    const container = document.querySelector('.collapsible-groups-container');
+    let expandedRow = container.querySelector('.expanded-row');
+    
+    if (!expandedRow) {
+      expandedRow = document.createElement('div');
+      expandedRow.className = 'collapsible-groups-row expanded-row';
+      container.insertBefore(expandedRow, container.firstChild);
+    }
+    
+    expandedRow.appendChild(group);
+  }
+  
+  // Function to move group back to regular row
+  function moveToRegularRow(group) {
+    const container = document.querySelector('.collapsible-groups-container');
+    let regularRow = container.querySelector('.regular-row');
+    
+    if (!regularRow) {
+      regularRow = document.createElement('div');
+      regularRow.className = 'collapsible-groups-row regular-row';
+      container.appendChild(regularRow);
+    }
+    
+    regularRow.appendChild(group);
   }
 
   // Function to create a regular group
@@ -304,19 +387,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const editGroupOriginalName = document.getElementById('edit-group-original-name');
     const editGroupDisplaySelect = document.getElementById('edit-group-display');
     const editGroupCollapsibleCheckbox = document.getElementById('edit-group-collapsible');
+    const editGroupTopNameInput = document.getElementById('edit-group-top-name');
+    const collapsibleRenameSection = document.getElementById('collapsible-rename-section');
 
     editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
     editGroupOriginalName.value = currentGroupName;
 
-    // Find a link in the current group to get its display_style and collapsible setting
+    // Find a link in the current group to get its display_style, collapsible setting, and top_name
     const linksInGroup = links.filter(link => (link.group || 'Ungrouped') === currentGroupName);
     if (linksInGroup.length > 0) {
       editGroupDisplaySelect.value = linksInGroup[0].display_style || 'flex';
       editGroupCollapsibleCheckbox.checked = linksInGroup[0].collapsible || false;
+      editGroupTopNameInput.value = linksInGroup[0].top_name || '';
     } else {
       editGroupDisplaySelect.value = 'flex'; // Default if no links in group
       editGroupCollapsibleCheckbox.checked = false;
+      editGroupTopNameInput.value = '';
     }
+
+    // Show/hide the rename section based on collapsible checkbox
+    function toggleRenameSection() {
+      if (editGroupCollapsibleCheckbox.checked) {
+        collapsibleRenameSection.style.display = 'block';
+      } else {
+        collapsibleRenameSection.style.display = 'none';
+      }
+    }
+
+    // Initial toggle
+    toggleRenameSection();
+
+    // Add event listener for checkbox changes
+    editGroupCollapsibleCheckbox.addEventListener('change', toggleRenameSection);
 
     editGroupPopup.classList.remove('hidden');
   }
