@@ -655,7 +655,7 @@ Stop-Process -Name "chrome"
 }
 
 function chat {
-  cd "C:\ms1\ollama-chat-app"
+  Set-Location "C:\ms1\ollama-chat-app"
   python server.py
 }
 
@@ -889,6 +889,8 @@ function pkill {
 
 # $env:GEMINI_API_KEY = "AIzaSyD3tpmHrTXFJGAvL7N055Qz1b4ZRUX6yJM"
 $ENV:STARSHIP_CONFIG = "C:\ms1\linux\config\.config\starship\starship.toml"
+$env:OLLAMA_HOST = "http://localhost:11434"
+
 
 Invoke-Expression (& 'C:\Users\nahid\scoop\shims\starship.exe' init powershell --print-full-init | Out-String)
 # oh-my-posh init pwsh --config 'C:\Users\nahid\scoop\apps\oh-my-posh\current\themes\1_shell.omp.json' | Invoke-Expression
