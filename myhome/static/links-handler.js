@@ -292,6 +292,25 @@ document.addEventListener('DOMContentLoaded', function() {
       content.appendChild(clonedElement);
     });
     
+    // Add button for adding new links to this collapsible group
+    const addLinkItem = document.createElement('li');
+    addLinkItem.className = 'link-item add-link-item';
+
+    const addLinkSpan = document.createElement('span');
+    addLinkSpan.textContent = '+';
+    addLinkSpan.style.cursor = 'pointer';
+    addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+    addLinkSpan.style.fontSize = '25px';
+    addLinkSpan.style.alignContent = 'center';
+
+    addLinkSpan.addEventListener('click', () => {
+      document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+      const addLinkPopup = document.getElementById('add-link-popup');
+      addLinkPopup.classList.remove('hidden'); // Remove hidden class
+    });
+    addLinkItem.appendChild(addLinkSpan);
+    content.appendChild(addLinkItem);
+    
     // Add toggle functionality with repositioning
     let isDragging = false;
     let dragTimeout = null;
