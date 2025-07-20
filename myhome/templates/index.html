@@ -87,27 +87,21 @@
           </label>
         </div>
         <div id="collapsible-rename-section" style="display: none;">
-          <label for="edit-group-top-name">Top Group Display Name (optional):</label>
+          <h4 style="color: white; margin: 15px 0 10px 0; border-bottom: 1px solid #555; padding-bottom: 5px;">Top Group Display Settings</h4>
+          
+          <label for="edit-group-top-name">Display Name (optional):</label>
           <input type="text" id="edit-group-top-name" placeholder="Custom name for top display (leave empty to use group name)">
-          <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <div style="flex: 1;">
-              <label for="edit-group-top-bg-color">Top Group Background Color:</label>
-              <input type="color" id="edit-group-top-bg-color" placeholder="#2d2d2d">
-            </div>
-            <div style="flex: 1;">
-              <label for="edit-group-top-text-color">Top Group Text Color:</label>
-              <input type="color" id="edit-group-top-text-color" placeholder="#ffffff">
-            </div>
+          
+          <h4 style="color: white; margin: 15px 0 10px 0; border-bottom: 1px solid #555; padding-bottom: 5px;">Top Group Color Settings</h4>
+          
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-group-top-bg-color" placeholder="Background Color (e.g., #2d2d2d or blue)">
+            <input type="text" id="edit-group-top-text-color" placeholder="Text Color (e.g., #ffffff or white)">
           </div>
-          <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <div style="flex: 1;">
-              <label for="edit-group-top-border-color">Top Group Border Color (optional):</label>
-              <input type="color" id="edit-group-top-border-color" placeholder="#444444">
-            </div>
-            <div style="flex: 1;">
-              <label for="edit-group-top-hover-color">Top Group Hover Color (optional):</label>
-              <input type="color" id="edit-group-top-hover-color" placeholder="#3a3a3a">
-            </div>
+          
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="edit-group-top-border-color" placeholder="Border Color (e.g., #444444 or gray)">
+            <input type="text" id="edit-group-top-hover-color" placeholder="Hover Color (e.g., #3a3a3a or darkgray)">
           </div>
         </div>
         <button type="submit">Save Group Settings</button>
