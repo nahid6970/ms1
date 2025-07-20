@@ -140,9 +140,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const regularRow = document.createElement('div');
         regularRow.className = 'collapsible-groups-row regular-row';
         
-        collapsibleGroupNames.forEach(groupName => {
+        // Sort groups by their original order in the links array to maintain consistent positioning
+        const sortedGroupNames = collapsibleGroupNames.sort((a, b) => {
+          const aFirstIndex = links.findIndex(link => (link.group || 'Ungrouped') === a);
+          const bFirstIndex = links.findIndex(link => (link.group || 'Ungrouped') === b);
+          return aFirstIndex - bFirstIndex;
+        });
+        
+        sortedGroupNames.forEach((groupName, index) => {
           if (groupedElements[groupName] && groupedElements[groupName].length > 0) {
-            const collapsibleGroup = createCollapsibleGroup(groupName, groupedElements[groupName], groupedLinks[groupName]);
+            const collapsibleGroup = createCollapsibleGroup(groupName, groupedElements[groupName], groupedLinks[groupName], index);
             regularRow.appendChild(collapsibleGroup);
           }
         });
@@ -175,11 +182,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Function to create a collapsible group
-  function createCollapsibleGroup(groupName, elements, links) {
+  function createCollapsibleGroup(groupName, elements, links, originalIndex) {
     const collapsibleGroup = document.createElement('div');
     collapsibleGroup.className = 'collapsible-group';
     collapsibleGroup.dataset.groupName = groupName;
     collapsibleGroup.draggable = true;
+    
+    // Store original position for proper restoration
+    collapsibleGroup.dataset.originalIndex = originalIndex;
     
     // Add drag event listeners for the group itself
     collapsibleGroup.addEventListener('dragstart', handleGroupDragStart);
@@ -253,25 +263,101 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Add toggle functionality with repositioning
+    let isDragging = false;
+    let dragTimeout = null;
+    
+    // Create a more robust drag state management
+    const setDragState = (dragging) => {
+      isDragging = dragging;
+      if (dragging) {
+        collapsibleGroup.classList.add('drag-active');
+        // Clear any existing timeout
+        if (dragTimeout) {
+          clearTimeout(dragTimeout);
+        }
+      } else {
+        // Use a longer timeout to ensure drag operations are complete
+        dragTimeout = setTimeout(() => {
+          isDragging = false;
+          collapsibleGroup.classList.remove('drag-active');
+        }, 300);
+      }
+    };
+    
+    // Track drag state on the content area
+    content.addEventListener('dragstart', (e) => {
+      setDragState(true);
+      e.stopPropagation();
+    });
+    
+    content.addEventListener('dragend', (e) => {
+      setDragState(false);
+    });
+    
+    // Prevent all drag-related events from bubbling to header
+    content.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    
+    content.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Reset drag state after drop
+      setDragState(false);
+    });
+    
+    // Also listen for mouse events during drag to prevent accidental clicks
+    content.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.link-item')) {
+        // Small delay to detect if this is start of a drag
+        setTimeout(() => {
+          if (document.querySelector('.link-item.dragging')) {
+            setDragState(true);
+          }
+        }, 50);
+      }
+    });
+    
     header.addEventListener('click', (e) => {
-      // Don't trigger if clicking on edit button
-      if (e.target.classList.contains('collapsible-edit-btn')) {
-        return;
+      // Don't trigger if clicking on edit button or during drag operations
+      if (e.target.classList.contains('collapsible-edit-btn') || 
+          isDragging || 
+          collapsibleGroup.classList.contains('drag-active')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
       }
       
       const wasExpanded = content.classList.contains('expanded');
       
-      // Close all other expanded groups first
+      // Close all other expanded groups first and properly restore them
       const allGroups = document.querySelectorAll('.collapsible-group');
+      const groupsToRestore = [];
+      
       allGroups.forEach(group => {
         const groupContent = group.querySelector('.collapsible-group-content');
         const groupToggle = group.querySelector('.collapsible-toggle-btn');
         if (group !== collapsibleGroup) {
+          // Always ensure proper state cleanup for all other groups
           groupContent.classList.remove('expanded');
           groupToggle.textContent = '▼';
           group.classList.remove('expanded');
+          
+          // Collect groups that need to be moved back
+          if (group.closest('.expanded-row')) {
+            groupsToRestore.push(group);
+          }
         }
       });
+      
+      // Move all groups back to regular row in their original order
+      groupsToRestore.forEach(group => {
+        moveToRegularRowInOrder(group);
+      });
+      
+      // Clean up empty expanded rows
+      cleanupEmptyRows();
       
       // Toggle current group
       content.classList.toggle('expanded');
@@ -286,6 +372,8 @@ document.addEventListener('DOMContentLoaded', function() {
         collapsibleGroup.classList.remove('expanded');
         // Move back to regular row
         moveToRegularRow(collapsibleGroup);
+        // Clean up empty rows after moving
+        cleanupEmptyRows();
       }
     });
     
@@ -309,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
     expandedRow.appendChild(group);
   }
   
-  // Function to move group back to regular row
+  // Function to move group back to regular row (maintain original position)
   function moveToRegularRow(group) {
     const container = document.querySelector('.collapsible-groups-container');
     let regularRow = container.querySelector('.regular-row');
@@ -320,7 +408,47 @@ document.addEventListener('DOMContentLoaded', function() {
       container.appendChild(regularRow);
     }
     
-    regularRow.appendChild(group);
+    // Get the original index to maintain position
+    const originalIndex = parseInt(group.dataset.originalIndex) || 0;
+    const existingGroups = Array.from(regularRow.children);
+    
+    // Find the correct position to insert based on original index
+    let insertPosition = 0;
+    for (let i = 0; i < existingGroups.length; i++) {
+      const existingIndex = parseInt(existingGroups[i].dataset.originalIndex) || 0;
+      if (originalIndex < existingIndex) {
+        insertPosition = i;
+        break;
+      }
+      insertPosition = i + 1;
+    }
+    
+    // Insert at the correct position
+    if (insertPosition >= existingGroups.length) {
+      regularRow.appendChild(group);
+    } else {
+      regularRow.insertBefore(group, existingGroups[insertPosition]);
+    }
+  }
+  
+  // Function to clean up empty rows
+  function cleanupEmptyRows() {
+    const container = document.querySelector('.collapsible-groups-container');
+    if (!container) return;
+    
+    const expandedRows = container.querySelectorAll('.expanded-row');
+    expandedRows.forEach(row => {
+      if (row.children.length === 0) {
+        row.remove();
+      }
+    });
+    
+    const regularRows = container.querySelectorAll('.regular-row');
+    regularRows.forEach(row => {
+      if (row.children.length === 0) {
+        row.remove();
+      }
+    });
   }
 
   // Function to create a regular group
@@ -806,6 +934,10 @@ document.addEventListener('DOMContentLoaded', function() {
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.outerHTML);
+    e.stopPropagation(); // Prevent bubbling to group header
+    
+    // Disable group toggle during drag
+    document.body.classList.add('dragging-active');
   }
 
   function handleDragOver(e) {
@@ -832,6 +964,9 @@ document.addEventListener('DOMContentLoaded', function() {
     this.classList.remove('dragging');
     draggedElement = null;
     draggedIndex = null;
+    
+    // Re-enable group toggle after drag
+    document.body.classList.remove('dragging-active');
   }
 
   // Move link up or down within the same group
