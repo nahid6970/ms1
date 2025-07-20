@@ -208,6 +208,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const displayName = (firstLink && firstLink.link.top_name) ? firstLink.link.top_name : groupName;
     title.textContent = displayName;
     
+    // Apply custom styling if available
+    if (firstLink && firstLink.link) {
+      const linkData = firstLink.link;
+      
+      // Apply background color
+      if (linkData.top_bg_color) {
+        collapsibleGroup.style.backgroundColor = linkData.top_bg_color;
+      }
+      
+      // Apply text color
+      if (linkData.top_text_color) {
+        title.style.color = linkData.top_text_color;
+      }
+      
+      // Apply border color
+      if (linkData.top_border_color) {
+        collapsibleGroup.style.border = `1px solid ${linkData.top_border_color}`;
+      }
+      
+      // Apply hover color
+      if (linkData.top_hover_color) {
+        collapsibleGroup.addEventListener('mouseenter', () => {
+          collapsibleGroup.style.backgroundColor = linkData.top_hover_color;
+        });
+        collapsibleGroup.addEventListener('mouseleave', () => {
+          collapsibleGroup.style.backgroundColor = linkData.top_bg_color || '';
+        });
+      }
+    }
+    
     // Add edit buttons container
     const editButtons = document.createElement('div');
     editButtons.className = 'edit-buttons';
@@ -576,21 +606,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const editGroupDisplaySelect = document.getElementById('edit-group-display');
     const editGroupCollapsibleCheckbox = document.getElementById('edit-group-collapsible');
     const editGroupTopNameInput = document.getElementById('edit-group-top-name');
+    const editGroupTopBgColorInput = document.getElementById('edit-group-top-bg-color');
+    const editGroupTopTextColorInput = document.getElementById('edit-group-top-text-color');
+    const editGroupTopBorderColorInput = document.getElementById('edit-group-top-border-color');
+    const editGroupTopHoverColorInput = document.getElementById('edit-group-top-hover-color');
     const collapsibleRenameSection = document.getElementById('collapsible-rename-section');
 
     editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
     editGroupOriginalName.value = currentGroupName;
 
-    // Find a link in the current group to get its display_style, collapsible setting, and top_name
+    // Find a link in the current group to get its display_style, collapsible setting, and styling options
     const linksInGroup = links.filter(link => (link.group || 'Ungrouped') === currentGroupName);
     if (linksInGroup.length > 0) {
       editGroupDisplaySelect.value = linksInGroup[0].display_style || 'flex';
       editGroupCollapsibleCheckbox.checked = linksInGroup[0].collapsible || false;
       editGroupTopNameInput.value = linksInGroup[0].top_name || '';
+      editGroupTopBgColorInput.value = linksInGroup[0].top_bg_color || '#2d2d2d';
+      editGroupTopTextColorInput.value = linksInGroup[0].top_text_color || '#ffffff';
+      editGroupTopBorderColorInput.value = linksInGroup[0].top_border_color || '#444444';
+      editGroupTopHoverColorInput.value = linksInGroup[0].top_hover_color || '#3a3a3a';
     } else {
       editGroupDisplaySelect.value = 'flex'; // Default if no links in group
       editGroupCollapsibleCheckbox.checked = false;
       editGroupTopNameInput.value = '';
+      editGroupTopBgColorInput.value = '#2d2d2d';
+      editGroupTopTextColorInput.value = '#ffffff';
+      editGroupTopBorderColorInput.value = '#444444';
+      editGroupTopHoverColorInput.value = '#3a3a3a';
     }
 
     // Show/hide the rename section based on collapsible checkbox
@@ -704,12 +746,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName) {
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName, topBgColor, topTextColor, topBorderColor, topHoverColor) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
       
-      // Create a new array with the updated group names, display styles, collapsible setting, and top_name
+      // Create a new array with the updated group names, display styles, collapsible setting, and styling options
       const newLinks = links.map(link => {
         const linkGroupName = link.group || 'Ungrouped';
         if (linkGroupName === originalGroupName) {
@@ -721,11 +763,38 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           updatedLink.display_style = newDisplayStyle;
           updatedLink.collapsible = isCollapsible;
+          
+          // Handle top group styling options
           if (topName && topName !== '') {
             updatedLink.top_name = topName;
           } else {
             delete updatedLink.top_name;
           }
+          
+          if (topBgColor && topBgColor !== '') {
+            updatedLink.top_bg_color = topBgColor;
+          } else {
+            delete updatedLink.top_bg_color;
+          }
+          
+          if (topTextColor && topTextColor !== '') {
+            updatedLink.top_text_color = topTextColor;
+          } else {
+            delete updatedLink.top_text_color;
+          }
+          
+          if (topBorderColor && topBorderColor !== '') {
+            updatedLink.top_border_color = topBorderColor;
+          } else {
+            delete updatedLink.top_border_color;
+          }
+          
+          if (topHoverColor && topHoverColor !== '') {
+            updatedLink.top_hover_color = topHoverColor;
+          } else {
+            delete updatedLink.top_hover_color;
+          }
+          
           return updatedLink;
         }
         return link;
@@ -900,9 +969,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const newDisplayStyle = document.getElementById('edit-group-display').value;
         const isCollapsible = document.getElementById('edit-group-collapsible').checked;
         const topName = document.getElementById('edit-group-top-name').value;
+        const topBgColor = document.getElementById('edit-group-top-bg-color').value;
+        const topTextColor = document.getElementById('edit-group-top-text-color').value;
+        const topBorderColor = document.getElementById('edit-group-top-border-color').value;
+        const topHoverColor = document.getElementById('edit-group-top-hover-color').value;
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName, topBgColor, topTextColor, topBorderColor, topHoverColor);
           if (success) {
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();
