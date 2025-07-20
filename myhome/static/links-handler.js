@@ -179,6 +179,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const collapsibleGroup = document.createElement('div');
     collapsibleGroup.className = 'collapsible-group';
     collapsibleGroup.dataset.groupName = groupName;
+    collapsibleGroup.draggable = true;
+    
+    // Add drag event listeners for the group itself
+    collapsibleGroup.addEventListener('dragstart', handleGroupDragStart);
+    collapsibleGroup.addEventListener('dragover', handleGroupDragOver);
+    collapsibleGroup.addEventListener('drop', handleGroupDrop);
+    collapsibleGroup.addEventListener('dragend', handleGroupDragEnd);
     
     const header = document.createElement('div');
     header.className = 'collapsible-group-header';
@@ -215,14 +222,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const content = document.createElement('ul');
     content.className = 'collapsible-group-content';
     
-    // Clone elements for collapsible group (remove edit buttons for cleaner look)
-    elements.forEach(element => {
+    // Create elements for collapsible group with full functionality
+    elements.forEach((element, index) => {
       const clonedElement = element.cloneNode(true);
-      // Remove edit buttons from collapsible view
+      
+      // Re-add drag functionality to cloned elements
+      clonedElement.addEventListener('dragstart', handleDragStart);
+      clonedElement.addEventListener('dragover', handleDragOver);
+      clonedElement.addEventListener('drop', handleDrop);
+      clonedElement.addEventListener('dragend', handleDragEnd);
+      
+      // Keep edit buttons but update their functionality for top groups
       const buttons = clonedElement.querySelector('.link-buttons');
       if (buttons) {
-        buttons.remove();
+        const editButton = buttons.querySelector('.edit-button');
+        const deleteButton = buttons.querySelector('.delete-button');
+        
+        if (editButton) {
+          const originalIndex = parseInt(clonedElement.dataset.linkIndex);
+          editButton.onclick = () => openEditLinkPopup(links.find(l => l.index === originalIndex).link, originalIndex);
+        }
+        
+        if (deleteButton) {
+          const originalIndex = parseInt(clonedElement.dataset.linkIndex);
+          deleteButton.onclick = () => deleteLink(originalIndex);
+        }
       }
+      
       content.appendChild(clonedElement);
     });
     
@@ -423,13 +449,105 @@ document.addEventListener('DOMContentLoaded', function() {
     editGroupPopup.classList.remove('hidden');
   }
 
-  // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible) {
+  // Drag and Drop functionality for collapsible groups
+  let draggedGroup = null;
+
+  function handleGroupDragStart(e) {
+    draggedGroup = this;
+    this.style.opacity = '0.5';
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+  }
+
+  function handleGroupDragOver(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  function handleGroupDrop(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    
+    if (draggedGroup !== this) {
+      const draggedGroupName = draggedGroup.dataset.groupName;
+      const targetGroupName = this.dataset.groupName;
+      swapCollapsibleGroups(draggedGroupName, targetGroupName);
+    }
+    return false;
+  }
+
+  function handleGroupDragEnd(e) {
+    this.style.opacity = '';
+    draggedGroup = null;
+  }
+
+  // Function to swap collapsible groups
+  async function swapCollapsibleGroups(group1Name, group2Name) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
       
-      // Create a new array with the updated group names, display styles, and collapsible setting
+      // Find all links in both groups
+      const group1Links = [];
+      const group2Links = [];
+      const otherLinks = [];
+      
+      links.forEach((link, index) => {
+        const linkGroup = link.group || 'Ungrouped';
+        if (linkGroup === group1Name) {
+          group1Links.push({link, index});
+        } else if (linkGroup === group2Name) {
+          group2Links.push({link, index});
+        } else {
+          otherLinks.push({link, index});
+        }
+      });
+      
+      // Create new links array with swapped group positions
+      const newLinks = [];
+      
+      // Add other groups first (maintain their positions)
+      const processedGroups = new Set([group1Name, group2Name]);
+      const groupOrder = [...new Set(links.map(link => link.group || 'Ungrouped'))];
+      
+      groupOrder.forEach(groupName => {
+        if (groupName === group1Name) {
+          group2Links.forEach(item => newLinks.push(item.link));
+        } else if (groupName === group2Name) {
+          group1Links.forEach(item => newLinks.push(item.link));
+        } else {
+          const groupLinks = links.filter(link => (link.group || 'Ungrouped') === groupName);
+          groupLinks.forEach(link => newLinks.push(link));
+        }
+      });
+      
+      // Update the entire list of links on the server
+      await fetch('/api/links', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newLinks),
+      });
+      
+      fetchAndDisplayLinks();
+      
+    } catch (error) {
+      console.error('Error swapping collapsible groups:', error);
+    }
+  }
+
+  // Function to update group name for all links in that group
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName) {
+    try {
+      const response = await fetch('/api/links');
+      const links = await response.json();
+      
+      // Create a new array with the updated group names, display styles, collapsible setting, and top_name
       const newLinks = links.map(link => {
         const linkGroupName = link.group || 'Ungrouped';
         if (linkGroupName === originalGroupName) {
@@ -441,6 +559,11 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           updatedLink.display_style = newDisplayStyle;
           updatedLink.collapsible = isCollapsible;
+          if (topName && topName !== '') {
+            updatedLink.top_name = topName;
+          } else {
+            delete updatedLink.top_name;
+          }
           return updatedLink;
         }
         return link;
@@ -614,9 +737,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const newGroupName = document.getElementById('edit-group-name').value;
         const newDisplayStyle = document.getElementById('edit-group-display').value;
         const isCollapsible = document.getElementById('edit-group-collapsible').checked;
+        const topName = document.getElementById('edit-group-top-name').value;
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName);
           if (success) {
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();

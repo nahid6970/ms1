@@ -610,3 +610,36 @@ div.toggle-container {
 .collapsible-edit-btn:hover {
   background-color: #45a049;
 }
+
+/* Drag and drop styling for collapsible groups */
+.collapsible-group.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+}
+
+.collapsible-group {
+  cursor: move;
+}
+
+.collapsible-group-header {
+  cursor: pointer;
+}
+
+/* Enhanced styling for expanded groups */
+.collapsible-groups-row.expanded-row {
+  order: -1;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #444;
+}
+
+.collapsible-groups-row.expanded-row .collapsible-group {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Drag over effect */
+.collapsible-group.drag-over {
+  border: 2px dashed #4CAF50;
+  background-color: #2a4a2a;
+}
