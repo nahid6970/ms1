@@ -5,8 +5,6 @@ import winreg
 import json
 import threading
 import time
-import subprocess
-import psutil
 
 def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
@@ -161,15 +159,11 @@ class StartupManager(tk.Tk):
         self.items = self.filter_existing_items(self.load_items())  # Load and filter items
         self.item_widgets = {}  # Store references to item widgets for smooth updates
         self.is_refreshing = False  # Flag to prevent multiple simultaneous refreshes
-        self.running_processes = {}  # Track running processes by item name
         
         self.create_widgets()
         self.center_window()
         self.attributes('-topmost', True)  # Set always on top
         self.deiconify()  # Show the window after fully initializing
-        
-        # Start periodic update for running status
-        self.start_periodic_update()
 
     def load_items(self):
         """Load items from JSON file"""
@@ -429,34 +423,30 @@ class StartupManager(tk.Tk):
         frame = tk.Frame(self.items_frame, bg="#2e2f3e")
         frame.grid(row=row, column=col, padx=5, pady=2, sticky="ew")
         
-        # Left side - checkbox, running status, and name
+        # Left side - checkbox and name
         left_frame = tk.Frame(frame, bg="#2e2f3e")
         left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         checked = self.is_checked(item)
         
-        # Toggle checkbox icon
         icon_label = tk.Label(left_frame, text="\uf205" if checked else "\uf204", 
                              font=("Jetbrainsmono nfp", 12, "bold"), 
                              fg="#9ef959" if checked else "gray", bg="#2e2f3e")
         icon_label.bind("<Button-1>", lambda event, item=item: self.toggle_startup_smooth(item))
         icon_label.pack(side=tk.LEFT, padx=0)
 
-        # Running status icon (clickable to kill process when running)
-        is_running = self.is_process_running(item["name"]) or self.check_process_by_path(item)
-        running_icon = tk.Label(left_frame, text="●", 
-                               font=("Arial", 12, "bold"), 
-                               fg="#00ff00" if is_running else "#666666", bg="#2e2f3e",
-                               cursor="hand2" if is_running else "arrow")
-        running_icon.bind("<Button-1>", lambda event, item=item: self.kill_process(item) if (self.is_process_running(item["name"]) or self.check_process_by_path(item)) else None)
-        running_icon.pack(side=tk.LEFT, padx=(5, 0))
-
-        # Item name
         name_label = tk.Label(left_frame, text=item["name"], font=("Jetbrainsmono nfp", 10), bg="#2e2f3e")
         name_label.bind("<Button-1>", lambda event, item=item: self.launch_command(item))
         name_label.pack(side=tk.LEFT, padx=(5, 0))
         
         self.update_label_color(name_label, checked)
+        
+        # Store widget references for smooth updates
+        self.item_widgets[item["name"]] = {
+            'icon': icon_label,
+            'name': name_label,
+            'frame': frame
+        }
         
         # Right side - edit and delete buttons
         right_frame = tk.Frame(frame, bg="#2e2f3e")
@@ -469,14 +459,6 @@ class StartupManager(tk.Tk):
         delete_btn = tk.Button(right_frame, text="Delete", command=lambda: self.delete_item(item),
                               bg="#d32f2f", fg="white", font=("Arial", 8), width=6)
         delete_btn.pack(side=tk.LEFT, padx=2)
-        
-        # Store widget references for smooth updates
-        self.item_widgets[item["name"]] = {
-            'icon': icon_label,
-            'name': name_label,
-            'frame': frame,
-            'running_icon': running_icon
-        }
 
     def toggle_startup_smooth(self, item):
         """Toggle startup with smooth visual feedback"""
@@ -604,168 +586,12 @@ class StartupManager(tk.Tk):
             else:
                 full_command = f'"{path}"'
         try:
-            # Execute the command using subprocess to track the process
-            if executable_type in ["pythonw", "pwsh", "cmd", "powershell"]:
-                if executable_type == "pythonw":
-                    process = subprocess.Popen([path] + command.split() if command else [path])
-                elif executable_type == "pwsh":
-                    process = subprocess.Popen([path, "-Command", command] if command else [path])
-                elif executable_type == "cmd":
-                    process = subprocess.Popen([path, "/c", command] if command else [path])
-                elif executable_type == "powershell":
-                    process = subprocess.Popen([path, "-Command", command] if command else [path])
-            else:
-                # For other executables
-                if command:
-                    process = subprocess.Popen([path] + command.split())
-                else:
-                    process = subprocess.Popen([path])
-            
-            # Store the process reference
-            self.running_processes[item["name"]] = process
+            # Execute the command using os.system
+            os.system(f'start "" {full_command}')
             self.show_status(f"Launched {item['name']}", "#9ef959")
-            
-            # Update UI to show running status
-            self.update_running_status()
-            
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch {item['name']}: {e}")
             self.show_status(f"Failed to launch {item['name']}", "#ff6b6b")
-
-    def is_process_running(self, item_name):
-        """Check if a process is still running"""
-        if item_name not in self.running_processes:
-            return False
-        
-        process = self.running_processes[item_name]
-        if process.poll() is None:  # Process is still running
-            return True
-        else:
-            # Process has terminated, remove from tracking
-            del self.running_processes[item_name]
-            return False
-
-    def kill_process(self, item):
-        """Kill a running process"""
-        item_name = item["name"]
-        if item_name in self.running_processes:
-            try:
-                process = self.running_processes[item_name]
-                process.terminate()
-                
-                # Wait a bit for graceful termination
-                try:
-                    process.wait(timeout=3)
-                except subprocess.TimeoutExpired:
-                    # Force kill if it doesn't terminate gracefully
-                    process.kill()
-                
-                del self.running_processes[item_name]
-                self.show_status(f"Stopped {item_name}", "#9ef959")
-                self.update_running_status()
-                
-            except Exception as e:
-                self.show_status(f"Failed to stop {item_name}: {e}", "#ff6b6b")
-        else:
-            # Try to find and kill by process name/path
-            self.kill_process_by_path(item)
-
-    def kill_process_by_path(self, item):
-        """Kill process by finding it through psutil"""
-        try:
-            path = item["paths"][0]
-            executable_name = os.path.basename(path)
-            killed_any = False
-            
-            for proc in psutil.process_iter(['pid', 'name', 'exe']):
-                try:
-                    if proc.info['exe'] and (
-                        proc.info['exe'].lower() == path.lower() or 
-                        proc.info['name'].lower() == executable_name.lower()
-                    ):
-                        proc.terminate()
-                        killed_any = True
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
-            
-            if killed_any:
-                self.show_status(f"Stopped {item['name']}", "#9ef959")
-            else:
-                self.show_status(f"No running process found for {item['name']}", "#ffaa00")
-                
-            self.update_running_status()
-            
-        except Exception as e:
-            self.show_status(f"Failed to stop {item['name']}: {e}", "#ff6b6b")
-
-    def update_running_status(self):
-        """Update the running status indicators for all items"""
-        for item_name, widgets in self.item_widgets.items():
-            running_icon = widgets.get('running_icon')
-            
-            if running_icon:
-                # Find the item
-                item = next((item for item in self.items if item["name"] == item_name), None)
-                if item:
-                    is_running = self.is_process_running(item_name) or self.check_process_by_path(item)
-                    
-                    if is_running:
-                        running_icon.config(text="●", fg="#00ff00", cursor="hand2")  # Green dot for running
-                    else:
-                        running_icon.config(text="●", fg="#666666", cursor="arrow")  # Gray dot for not running
-
-    def check_process_by_path(self, item):
-        """Check if process is running by path using psutil"""
-        try:
-            path = item["paths"][0]
-            executable_name = os.path.basename(path)
-            
-            for proc in psutil.process_iter(['pid', 'name', 'exe']):
-                try:
-                    if proc.info['exe'] and (
-                        proc.info['exe'].lower() == path.lower() or 
-                        proc.info['name'].lower() == executable_name.lower()
-                    ):
-                        return True
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
-            return False
-        except:
-            return False
-
-    def start_periodic_update(self):
-        """Start periodic updates for running status"""
-        def periodic_update():
-            try:
-                self.update_running_status()
-            except Exception as e:
-                # Silently handle errors to avoid disrupting the UI
-                pass
-            finally:
-                # Schedule next update
-                self.after(3000, periodic_update)  # Update every 3 seconds
-        
-        # Start the periodic update
-        self.after(1000, periodic_update)  # First update after 1 second
-
-    def check_process_by_path(self, item):
-        """Check if process is running by path using psutil"""
-        try:
-            path = item["paths"][0]
-            executable_name = os.path.basename(path)
-            
-            for proc in psutil.process_iter(['pid', 'name', 'exe']):
-                try:
-                    if proc.info['exe'] and (
-                        proc.info['exe'].lower() == path.lower() or 
-                        proc.info['name'].lower() == executable_name.lower()
-                    ):
-                        return True
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
-            return False
-        except:
-            return False
 
     def is_checked(self, item):
         try:
