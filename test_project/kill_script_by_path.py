@@ -2,17 +2,17 @@ import sys
 import subprocess
 import psutil
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction, QMessageBox
-from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QIcon, QPixmap, QPainter, QBrush
+from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QBrush, QFont, QColor
 import os
 
 class ProcessManager:
     def __init__(self):
         # Define your target processes here
         self.target_processes = {
-            r"C:\ms1\myhome\app.py": "MyHome App",
-            r"C:\ms1\myhome\generate_static.py": "Generate Static",
-            r"C:\ms1\tailscale\battery.py": "Battery Monitor"
+            r"C:\ms1\myhome\app.py": "MyHome",
+            r"C:\ms1\scripts\flask\5001_share_text\share_text.py": "5001_share_text",
+            r"C:\ms1\scripts\flask\5002_upload_files\upload_files.py": "5002_upload_files"
         }
         
         self.app = QApplication(sys.argv)
@@ -37,13 +37,25 @@ class ProcessManager:
         self.timer.start(5000)  # Check every 5 seconds
         
     def create_icon(self):
-        """Create a simple icon for the tray"""
-        pixmap = QPixmap(16, 16)
-        pixmap.fill()
+        """Create a red 'K' icon for the tray"""
+        # Create a larger pixmap for better quality
+        size = 32
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.transparent)  # Transparent background
         
         painter = QPainter(pixmap)
-        painter.setBrush(QBrush())
-        painter.drawEllipse(2, 2, 12, 12)
+        painter.setRenderHint(QPainter.Antialiasing)
+        
+        # Set font for the 'K'
+        font = QFont("Arial", int(size * 0.7), QFont.Bold)
+        painter.setFont(font)
+        
+        # Set red color for the text
+        painter.setPen(QColor(220, 20, 20))  # Red color
+        
+        # Draw the 'K' centered
+        painter.drawText(pixmap.rect(), Qt.AlignCenter, "K")
+        
         painter.end()
         
         self.icon = QIcon(pixmap)
@@ -151,7 +163,6 @@ class ProcessManager:
                 process = psutil.Process(pid)
                 process_name = process.name()
             except (psutil.NoSuchProcess, psutil.AccessDenied):
-                self.show_message("Info", f"Process {display_name} (PID: {pid}) no longer exists")
                 self.update_menu()
                 return
             
@@ -160,19 +171,16 @@ class ProcessManager:
                 try:
                     kill_command = f"taskkill /PID {pid} /F"
                     result = subprocess.check_output(kill_command, shell=True, text=True, stderr=subprocess.PIPE)
-                    self.show_message("Process Killed", f"Successfully killed {display_name} (PID: {pid})")
                 except subprocess.CalledProcessError as e:
-                    if "not found" in str(e).lower() or "128" in str(e):
-                        self.show_message("Info", f"Process {display_name} (PID: {pid}) already terminated")
-                    else:
-                        self.show_message("Error", f"Failed to kill {display_name} (PID: {pid}): {e}")
+                    # Silently handle errors - process might already be terminated
+                    pass
             else:
                 # Use kill on Linux/Mac
                 try:
                     subprocess.run(f'kill -9 {pid}', shell=True, check=True)
-                    self.show_message("Process Killed", f"Successfully killed {display_name} (PID: {pid})")
                 except subprocess.CalledProcessError as e:
-                    self.show_message("Error", f"Failed to kill {display_name} (PID: {pid}): {e}")
+                    # Silently handle errors
+                    pass
             
             # Wait a moment and update menu
             import time
@@ -180,7 +188,8 @@ class ProcessManager:
             self.update_menu()
             
         except Exception as e:
-            self.show_message("Error", f"Unexpected error killing {display_name}: {str(e)}")
+            # Silently handle any other errors
+            pass
     
     def update_menu(self):
         """Update the context menu with current process status"""
@@ -203,7 +212,6 @@ class ProcessManager:
             return
         
         self.tray_icon.show()
-        self.show_message("Process Manager", "Process Manager started. Click the tray icon to manage processes.")
         
         return self.app.exec_()
 
