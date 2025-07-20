@@ -338,6 +338,32 @@
     max-width: 100%;   /* full width on small screens */
   }
 }
+
+.success-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 1000;
+}
+
+.success-notification.show {
+  opacity: 1;
+}
+
+.success-notification .check-icon {
+  font-size: 1.5em;
+}
   </style>
 </head>
 <body>
@@ -587,6 +613,16 @@
 
       function loadSelectedModel() {
         return localStorage.getItem('selectedOllamaModel');
+      }
+
+      function showSuccessNotification(message) {
+        const notification = document.getElementById('success-notification');
+        const notificationMessage = document.getElementById('notification-message');
+        notificationMessage.textContent = message;
+        notification.classList.add('show');
+        setTimeout(() => {
+          notification.classList.remove('show');
+        }, 2000);
       }
 
       // Model parameter settings
@@ -1033,7 +1069,7 @@
           
           const data = await response.json();
           if (data.success) {
-            alert('Settings saved successfully!');
+            showSuccessNotification('Settings saved successfully!');
           } else {
             alert('Failed to save settings to server');
           }
@@ -1275,3 +1311,7 @@
 </div>
 </body>
 </html>
+
+<div id="success-notification" class="success-notification">
+  <span class="check-icon">✔️</span> <span id="notification-message"></span>
+</div>
