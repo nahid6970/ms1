@@ -32,7 +32,7 @@ def kill_and_start_server(port):
 
     # --- Start Server Section ---
     try:
-        server_path = os.path.join("C:/ms1/test_project/ollama-chat-app/app", "server.py")
+        server_path = os.path.join("C:/ms1/test_project/ollama-chat-app/app_RAGV2", "server.py")
         
         if not os.path.exists(server_path):
             raise FileNotFoundError(f"server.py not found at: {server_path}")
