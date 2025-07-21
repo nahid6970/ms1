@@ -417,8 +417,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="rag_settings_fix.js"></script>
-  <script src="fix_settings_and_models.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
       const modelSelect = document.getElementById("model-select");
@@ -644,6 +642,41 @@
           top_p: parseFloat(topPSlider.value)
         };
         localStorage.setItem('ollamaModelSettings', JSON.stringify(settings));
+        saveSettingsToServer(); // Save to server
+      }
+
+      async function saveSettingsToServer() {
+        const modelSettings = JSON.parse(localStorage.getItem('ollamaModelSettings')) || DEFAULT_MODEL_SETTINGS;
+        const ragSettings = JSON.parse(localStorage.getItem('ollamaRAGSettings')) || DEFAULT_RAG_SETTINGS;
+        const instructions = currentInstructions || [];
+
+        const settings = {
+          instructions: instructions,
+          num_predict: modelSettings.num_predict,
+          num_ctx: modelSettings.num_ctx,
+          temperature: modelSettings.temperature,
+          top_p: modelSettings.top_p,
+          rag_enabled: ragSettings.rag_enabled,
+          rag_max_results: ragSettings.rag_max_results
+        };
+
+        try {
+          const response = await fetch('/api/settings/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings })
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            showSuccessNotification('Settings saved successfully!');
+          } else {
+            alert('Failed to save settings to server');
+          }
+        } catch (error) {
+          console.error('Settings save error:', error);
+          alert('Settings saved locally but failed to sync with server');
+        }
       }
 
       function loadModelSettings() {
@@ -685,47 +718,11 @@
             rag_max_results: parseInt(ragMaxResultsSlider.value, 10)
           };
           localStorage.setItem('ollamaRAGSettings', JSON.stringify(settings));
-          
-          // Also save to server settings
-          saveRAGSettingsToServer(settings);
+          saveSettingsToServer(); // Save to server
         }
       }
 
-      async function saveRAGSettingsToServer(ragSettings) {
-        try {
-          // Ensure currentInstructions is loaded
-          if (!currentInstructions) {
-            loadSettings();
-          }
-
-          // Get current server settings
-          const currentSettings = {
-            instructions: currentInstructions || [],
-            rag_enabled: ragSettings.rag_enabled,
-            rag_max_results: ragSettings.rag_max_results
-          };
-
-          console.log('Saving RAG settings to server:', currentSettings);
-
-          const response = await fetch('/api/settings/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ settings: currentSettings })
-          });
-          
-          const data = await response.json();
-          if (data.success) {
-            console.log('RAG settings saved to server successfully');
-            showSuccessNotification('RAG settings saved!');
-          } else {
-            console.error('Failed to save RAG settings to server:', data);
-            alert('Failed to save RAG settings to server');
-          }
-        } catch (error) {
-          console.error('RAG settings save error:', error);
-          alert('Error saving RAG settings: ' + error.message);
-        }
-      }
+      
 
       async function loadRAGSettings() {
         // First try to load from server settings
@@ -801,32 +798,6 @@
         saveRAGSettings();
         loadRAGSettings();
       };
-
-      settingsBtn.addEventListener("click", () => {
-        loadModelSettings(); // Load settings when modal is opened
-        loadRAGSettings(); // Load RAG settings when modal is opened
-        settingsModal.show();
-      });
-
-      maxTokensSlider.addEventListener('input', (e) => {
-          maxTokensValue.textContent = e.target.value;
-          saveModelSettings();
-      });
-
-      contextWindowSlider.addEventListener('input', (e) => {
-          contextWindowValue.textContent = e.target.value;
-          saveModelSettings();
-      });
-
-      temperatureSlider.addEventListener('input', (e) => {
-          temperatureValue.textContent = e.target.value;
-          saveModelSettings();
-      });
-
-      topPSlider.addEventListener('input', (e) => {
-          topPValue.textContent = e.target.value;
-          saveModelSettings();
-      });
 
       // RAG Settings Event Listeners - Initialize after DOM is loaded
       function initializeRAGEventListeners() {
@@ -850,101 +821,11 @@
         }
       }
 
-      // Initialize RAG event listeners when settings modal is shown
       settingsBtn.addEventListener("click", () => {
         loadModelSettings();
         loadRAGSettings();
         // Small delay to ensure DOM elements are ready
         setTimeout(initializeRAGEventListeners, 100);
-        settingsModal.show();
-      });
-            console.error('Failed to save RAG settings to server:', data);
-            alert('Failed to save RAG settings to server');
-          }
-        } catch (error) {
-          console.error('RAG settings save error:', error);
-          alert('Error saving RAG settings: ' + error.message);
-        }
-      }
-
-      async function loadRAGSettings() {
-        // First try to load from server settings
-        let serverSettings = null;
-        try {
-          const saved = localStorage.getItem('ollamaSettings');
-          if (saved) {
-            const settings = JSON.parse(saved);
-            serverSettings = {
-              rag_enabled: settings.rag_enabled,
-              rag_max_results: settings.rag_max_results
-            };
-          }
-        } catch (error) {
-          console.log('No server settings found, using defaults');
-        }
-
-        // Fallback to local storage, then defaults
-        const localSettings = JSON.parse(localStorage.getItem('ollamaRAGSettings'));
-        const settingsToApply = serverSettings || localSettings || DEFAULT_RAG_SETTINGS;
-
-        const ragEnabled = document.getElementById('rag-enabled');
-        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
-        const ragMaxResultsValue = document.getElementById('rag-max-results-value');
-
-        console.log('Loading RAG settings:', settingsToApply);
-
-        if (ragEnabled) {
-          ragEnabled.checked = settingsToApply.rag_enabled !== false; // Default to true
-        }
-        if (ragMaxResultsSlider && ragMaxResultsValue) {
-          ragMaxResultsSlider.value = settingsToApply.rag_max_results || 3;
-          ragMaxResultsValue.textContent = settingsToApply.rag_max_results || 3;
-        }
-
-        // Load knowledge base status
-        loadRAGStatus();
-      }
-
-      async function loadRAGStatus() {
-        const statusDiv = document.getElementById('rag-status');
-        if (!statusDiv) return;
-
-        try {
-          const response = await fetch('/api/rag/documents');
-          if (response.ok) {
-            const data = await response.json();
-            const docCount = data.documents.length;
-            const totalChunks = data.documents.reduce((sum, doc) => sum + doc.chunk_count, 0);
-            
-            statusDiv.innerHTML = `
-              <div class="d-flex justify-content-between">
-                <span><strong>${docCount}</strong> documents</span>
-                <span><strong>${totalChunks}</strong> chunks</span>
-              </div>
-              <small class="text-muted">Knowledge base is ${docCount > 0 ? 'ready' : 'empty'}</small>
-            `;
-          } else {
-            statusDiv.innerHTML = '<span class="text-warning">⚠️ Unable to load status</span>';
-          }
-        } catch (error) {
-          statusDiv.innerHTML = '<span class="text-danger">❌ Connection error</span>';
-        }
-      }
-
-      window.resetRAGSettings = function() {
-        const ragEnabled = document.getElementById('rag-enabled');
-        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
-        
-        if (ragEnabled) ragEnabled.checked = DEFAULT_RAG_SETTINGS.rag_enabled;
-        if (ragMaxResultsSlider) ragMaxResultsSlider.value = DEFAULT_RAG_SETTINGS.rag_max_results;
-        
-        saveRAGSettings();
-        loadRAGSettings();
-      };
-
-      settingsBtn.addEventListener("click", () => {
-        loadModelSettings(); // Load settings when modal is opened
-        loadRAGSettings(); // Load RAG settings when modal is opened
         settingsModal.show();
       });
 
