@@ -43,6 +43,14 @@ class GameAutomationTool(ctk.CTk):
         # Bind close event
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
+        # Bind global hotkey for stopping all events
+        if KEYBOARD_AVAILABLE:
+            try:
+                keyboard.add_hotkey('esc', self.stop_all_events)
+                self.log_status("Global hotkey 'ESC' to stop all events is enabled.")
+            except Exception as e:
+                self.log_status(f"Could not bind ESC hotkey: {e}. Run as administrator if needed.")
+
     def setup_gui(self):
         # Main container
         main_frame = ctk.CTkFrame(self)
@@ -1026,7 +1034,20 @@ KEYBOARD SHORTCUTS:
                 self.stop_event(event_name)
         time.sleep(0.5)
         self.save_config()
+        if KEYBOARD_AVAILABLE:
+            try:
+                keyboard.unhook_all_hotkeys()
+                self.log_status("Unhooked all hotkeys.")
+            except Exception as e:
+                self.log_status(f"Error unhooking hotkeys: {e}")
         self.destroy()
+
+    def stop_all_events(self):
+        self.log_status("ESC pressed: Stopping all running events...")
+        for event_name in list(self.threads.keys()):
+            if self.threads[event_name].is_alive():
+                self.stop_event(event_name)
+        self.after(100, self.refresh_control_buttons) # Refresh UI after all events are stopped
 
 def main():
     pyautogui.FAILSAFE = True
