@@ -669,20 +669,26 @@ class GameAutomationTool(ctk.CTk):
 
     def run_event(self, event_name):
         event_data = self.events_data[event_name]
-        while not self.stop_flags[event_name]:
-            try:
-                self.focus_window(self.target_window)
-                for image_data in event_data["images"]:
-                    if self.stop_flags[event_name]:
-                        break
-                    if image_data.get("enabled", True): # Only process if enabled
-                        if self.find_image_and_execute(image_data):
-                            self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
+        try:
+            while not self.stop_flags[event_name]:
+                try:
+                    self.focus_window(self.target_window)
+                    for image_data in event_data["images"]:
+                        if self.stop_flags[event_name]:
                             break
-                time.sleep(0.1)
-            except Exception as e:
-                self.log_status(f"Error in event {event_name}: {str(e)}")
-                time.sleep(1)
+                        if image_data.get("enabled", True): # Only process if enabled
+                            if self.find_image_and_execute(image_data):
+                                self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
+                                break
+                    time.sleep(0.1)
+                except Exception as e:
+                    self.log_status(f"Error in event {event_name}: {str(e)}")
+                    time.sleep(1)
+        finally:
+            # Ensure the thread is removed from the active threads list when it finishes
+            if event_name in self.threads:
+                del self.threads[event_name]
+            self.after(100, self.refresh_control_buttons) # Refresh UI after thread truly stops
 
     def find_image_and_execute(self, image_data):
         try:
