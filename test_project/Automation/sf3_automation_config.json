@@ -1,4 +1,9 @@
 {
-  "events": {},
+  "events": {
+    "dss": {
+      "images": [],
+      "enabled": true
+    }
+  },
   "target_window": "LDPlayer"
 }
