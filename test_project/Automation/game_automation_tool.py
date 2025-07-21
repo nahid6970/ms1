@@ -255,13 +255,28 @@ class GameAutomationTool(ctk.CTk):
 
     def edit_image(self):
         event_name = self.selected_event.get()
-        # This needs to be adapted for the new image list implementation
-        messagebox.showinfo("Info", "Edit image functionality needs to be updated for the new UI.")
+        if not event_name:
+            messagebox.showwarning("Warning", "Please select an event first.")
+            return
+        if self.selected_image_index is None:
+            messagebox.showwarning("Warning", "Please select an image to edit.")
+            return
+        self.show_image_config_dialog(event_name, self.selected_image_index)
 
     def delete_image(self):
         event_name = self.selected_event.get()
-        # This needs to be adapted for the new image list implementation
-        messagebox.showinfo("Info", "Delete image functionality needs to be updated for the new UI.")
+        if not event_name:
+            messagebox.showwarning("Warning", "Please select an event first.")
+            return
+        if self.selected_image_index is None:
+            messagebox.showwarning("Warning", "Please select an image to delete.")
+            return
+
+        if messagebox.askyesno("Confirm Delete", f"Delete image '{self.events_data[event_name]["images"][self.selected_image_index]["name"]}'?"):
+            del self.events_data[event_name]["images"][self.selected_image_index]
+            self.save_config()
+            self.refresh_image_list()
+            self.log_status("Image deleted.")
 
     def show_image_config_dialog(self, event_name, image_index=None):
         dialog = ctk.CTkToplevel(self)
@@ -270,7 +285,161 @@ class GameAutomationTool(ctk.CTk):
         dialog.transient(self)
         dialog.grab_set()
 
-        # ... (rest of the dialog implementation needs to be converted to customtkinter)
+        # Variables for image data
+        image_data = self.events_data[event_name]["images"][image_index] if image_index is not None else {}
+        name_var = ctk.StringVar(value=image_data.get("name", ""))
+        path_var = ctk.StringVar(value=image_data.get("path", ""))
+        confidence_var = ctk.StringVar(value=str(image_data.get("confidence", 0.8)))
+        x1_var = ctk.StringVar(value=str(image_data.get("region", [None, None, None, None])[0] or ""))
+        y1_var = ctk.StringVar(value=str(image_data.get("region", [None, None, None, None])[1] or ""))
+        x2_var = ctk.StringVar(value=str(image_data.get("region", [None, None, None, None])[2] or ""))
+        y2_var = ctk.StringVar(value=str(image_data.get("region", [None, None, None, None])[3] or ""))
+        action_type_var = ctk.StringVar(value=image_data.get("action", {}).get("type", "mouse_click"))
+        enabled_var = ctk.BooleanVar(value=image_data.get("enabled", True))
+
+        # Image Name
+        ctk.CTkLabel(dialog, text="Image Name:").pack(anchor="w", padx=20, pady=(10, 0))
+        ctk.CTkEntry(dialog, textvariable=name_var, width=500).pack(padx=20, fill=ctk.X)
+
+        # Image Path
+        ctk.CTkLabel(dialog, text="Image Path:").pack(anchor="w", padx=20, pady=(10, 0))
+        path_frame = ctk.CTkFrame(dialog)
+        path_frame.pack(padx=20, fill=ctk.X)
+        ctk.CTkEntry(path_frame, textvariable=path_var, width=400).pack(side=ctk.LEFT, fill=ctk.X, expand=True)
+        ctk.CTkButton(path_frame, text="Browse", command=lambda: self.browse_image_file(path_var)).pack(side=ctk.RIGHT, padx=(10, 0))
+
+        # Confidence
+        ctk.CTkLabel(dialog, text="Confidence (0.1-1.0):").pack(anchor="w", padx=20, pady=(10, 0))
+        ctk.CTkEntry(dialog, textvariable=confidence_var, width=500).pack(padx=20, fill=ctk.X)
+
+        # Region
+        ctk.CTkLabel(dialog, text="Region (x1, y1, x2, y2):").pack(anchor="w", padx=20, pady=(10, 0))
+        region_frame = ctk.CTkFrame(dialog)
+        region_frame.pack(padx=20, fill=ctk.X)
+        ctk.CTkEntry(region_frame, textvariable=x1_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkEntry(region_frame, textvariable=y1_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkEntry(region_frame, textvariable=x2_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkEntry(region_frame, textvariable=y2_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkButton(region_frame, text="Get Region", command=lambda: self.get_screen_region(x1_var, y1_var, x2_var, y2_var)).pack(side=ctk.RIGHT, padx=(10, 0))
+
+        # Action Type
+        ctk.CTkLabel(dialog, text="Action Type:").pack(anchor="w", padx=20, pady=(10, 0))
+        action_type_options = ["mouse_click", "key_press", "key_sequence", "mouse_sequence", "custom_function"]
+        ctk.CTkOptionMenu(dialog, variable=action_type_var, values=action_type_options, command=lambda x: self.on_action_type_select(x, action_frame, image_data.get("action", {}))).pack(padx=20, fill=ctk.X)
+
+        # Action specific inputs frame
+        action_frame = ctk.CTkFrame(dialog)
+        action_frame.pack(padx=20, pady=(10, 0), fill=ctk.BOTH, expand=True)
+
+        # Enabled Checkbox
+        ctk.CTkCheckBox(dialog, text="Enabled", variable=enabled_var).pack(anchor="w", padx=20, pady=(10, 0))
+
+        # Buttons
+        button_frame = ctk.CTkFrame(dialog)
+        button_frame.pack(pady=20)
+        ctk.CTkButton(button_frame, text="Save", command=lambda: self.save_image_config(event_name, image_index, name_var.get(), path_var.get(), confidence_var.get(), x1_var.get(), y1_var.get(), x2_var.get(), y2_var.get(), action_type_var.get(), action_frame, enabled_var.get(), dialog)).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
+
+        # Initial call to set up action fields
+        self.on_action_type_select(action_type_var.get(), action_frame, image_data.get("action", {}))
+
+        dialog.wait_window()
+
+    def save_image_config(self, event_name, image_index, name, path, confidence, x1, y1, x2, y2, action_type, action_frame, enabled, dialog):
+        if not name or not path:
+            messagebox.showerror("Error", "Image Name and Path cannot be empty.")
+            return
+
+        try:
+            confidence = float(confidence)
+            if not (0.1 <= confidence <= 1.0):
+                raise ValueError("Confidence must be between 0.1 and 1.0")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Invalid Confidence: {e}")
+            return
+
+        region = None
+        if x1 and y1 and x2 and y2:
+            try:
+                region = (int(x1), int(y1), int(x2), int(y2))
+            except ValueError:
+                messagebox.showerror("Error", "Region coordinates must be integers.")
+                return
+
+        action = {"type": action_type}
+        if action_type == "key_press":
+            key = action_frame.key_var.get()
+            delay = action_frame.delay_var.get()
+            if not key:
+                messagebox.showerror("Error", "Key cannot be empty for Key Press action.")
+                return
+            try:
+                delay = float(delay)
+            except ValueError:
+                messagebox.showerror("Error", "Delay must be a number for Key Press action.")
+                return
+            action.update({"key": key, "delay": delay})
+        elif action_type == "key_sequence":
+            sequence = action_frame.sequence_var.get()
+            if not sequence:
+                messagebox.showerror("Error", "Key Sequence cannot be empty.")
+                return
+            action.update({"sequence": sequence})
+        elif action_type == "mouse_click":
+            x = action_frame.x_var.get()
+            y = action_frame.y_var.get()
+            delay = action_frame.delay_var.get()
+            if not x or not y:
+                messagebox.showerror("Error", "X and Y coordinates cannot be empty for Mouse Click action.")
+                return
+            try:
+                x = int(x)
+                y = int(y)
+                delay = float(delay)
+            except ValueError:
+                messagebox.showerror("Error", "Coordinates and Delay must be numbers for Mouse Click action.")
+                return
+            action.update({"x": x, "y": y, "delay": delay})
+        elif action_type == "mouse_sequence":
+            sequence = action_frame.sequence_var.get()
+            if not sequence:
+                messagebox.showerror("Error", "Mouse Sequence cannot be empty.")
+                return
+            action.update({"sequence": sequence})
+        elif action_type == "custom_function":
+            function_name = action_frame.function_var.get()
+            params = action_frame.params_var.get()
+            if not function_name:
+                messagebox.showerror("Error", "Function Name cannot be empty for Custom Function action.")
+                return
+            try:
+                json.loads(params) # Validate JSON
+            except json.JSONDecodeError:
+                messagebox.showerror("Error", "Parameters must be a valid JSON string.")
+                return
+            action.update({"function": function_name, "params": params})
+
+        image_data = {
+            "name": name,
+            "path": path,
+            "confidence": confidence,
+            "region": region,
+            "action": action,
+            "enabled": enabled
+        }
+
+        if image_index is None:
+            # Add new image
+            self.events_data[event_name]["images"].append(image_data)
+            self.log_status(f"Added image '{name}' to event '{event_name}'")
+        else:
+            # Update existing image
+            self.events_data[event_name]["images"][image_index] = image_data
+            self.log_status(f"Updated image '{name}' in event '{event_name}'")
+
+        self.save_config()
+        self.refresh_image_list()
+        dialog.destroy()
 
     def browse_image_file(self, path_var):
         filename = filedialog.askopenfilename(
@@ -281,12 +450,111 @@ class GameAutomationTool(ctk.CTk):
             path_var.set(filename)
 
     def get_screen_region(self, x1_var, y1_var, x2_var, y2_var):
-        messagebox.showinfo("Get Region", "Move mouse to first corner and press SPACE.")
-        # ... (rest of the implementation)
+        if not KEYBOARD_AVAILABLE:
+            messagebox.showerror("Error", "Keyboard module not available. Cannot capture region.")
+            return
+
+        messagebox.showinfo("Get Region", "Move mouse to first corner and press SPACE. Then move to second corner and press SPACE again.")
+        self.log_status("Waiting for SPACE key for first corner...")
+
+        def capture_region_thread():
+            try:
+                keyboard.wait('space')
+                x1, y1 = pyautogui.position()
+                self.log_status(f"First corner captured: ({x1}, {y1})")
+                x1_var.set(x1)
+                y1_var.set(y1)
+
+                self.log_status("Waiting for SPACE key for second corner...")
+                keyboard.wait('space')
+                x2, y2 = pyautogui.position()
+                self.log_status(f"Second corner captured: ({x2}, {y2})")
+                x2_var.set(x2)
+                y2_var.set(y2)
+
+                messagebox.showinfo("Region Captured", f"Region: ({x1}, {y1}, {x2}, {y2})")
+            except Exception as e:
+                self.log_status(f"Error capturing region: {str(e)}")
+                messagebox.showerror("Error", f"Failed to capture region: {str(e)}")
+
+        threading.Thread(target=capture_region_thread, daemon=True).start()
 
     def get_click_position(self, x_var, y_var):
+        if not KEYBOARD_AVAILABLE:
+            messagebox.showerror("Error", "Keyboard module not available. Cannot capture position.")
+            return
+
         messagebox.showinfo("Get Position", "Move mouse to desired position and press SPACE.")
-        # ... (rest of the implementation)
+        self.log_status("Waiting for SPACE key for position...")
+
+        def capture_position_thread():
+            try:
+                keyboard.wait('space')
+                x, y = pyautogui.position()
+                self.log_status(f"Position captured: ({x}, {y})")
+                x_var.set(x)
+                y_var.set(y)
+                messagebox.showinfo("Position Captured", f"Position: ({x}, {y})")
+            except Exception as e:
+                self.log_status(f"Error capturing position: {str(e)}")
+                messagebox.showerror("Error", f"Failed to capture position: {str(e)}")
+
+        threading.Thread(target=capture_position_thread, daemon=True).start()
+
+    def on_action_type_select(self, action_type, action_frame, initial_action_data=None):
+        # Clear existing widgets in the action_frame
+        for widget in action_frame.winfo_children():
+            widget.destroy()
+
+        if initial_action_data is None:
+            initial_action_data = {}
+
+        if action_type == "key_press":
+            ctk.CTkLabel(action_frame, text="Key:").pack(anchor="w", padx=5, pady=(5, 0))
+            key_var = ctk.StringVar(value=initial_action_data.get("key", ""))
+            ctk.CTkEntry(action_frame, textvariable=key_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkLabel(action_frame, text="Delay (seconds):").pack(anchor="w", padx=5, pady=(5, 0))
+            delay_var = ctk.StringVar(value=str(initial_action_data.get("delay", 0.1)))
+            ctk.CTkEntry(action_frame, textvariable=delay_var).pack(fill=ctk.X, padx=5)
+            action_frame.key_var = key_var
+            action_frame.delay_var = delay_var
+
+        elif action_type == "key_sequence":
+            ctk.CTkLabel(action_frame, text="Key Sequence (key1,delay1,key2,delay2,...):").pack(anchor="w", padx=5, pady=(5, 0))
+            sequence_var = ctk.StringVar(value=initial_action_data.get("sequence", ""))
+            ctk.CTkEntry(action_frame, textvariable=sequence_var).pack(fill=ctk.X, padx=5)
+            action_frame.sequence_var = sequence_var
+
+        elif action_type == "mouse_click":
+            ctk.CTkLabel(action_frame, text="X Coordinate:").pack(anchor="w", padx=5, pady=(5, 0))
+            x_var = ctk.StringVar(value=str(initial_action_data.get("x", "")))
+            ctk.CTkEntry(action_frame, textvariable=x_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkLabel(action_frame, text="Y Coordinate:").pack(anchor="w", padx=5, pady=(5, 0))
+            y_var = ctk.StringVar(value=str(initial_action_data.get("y", "")))
+            ctk.CTkEntry(action_frame, textvariable=y_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkButton(action_frame, text="Get Position", command=lambda: self.get_click_position(x_var, y_var)).pack(pady=(5, 0))
+            ctk.CTkLabel(action_frame, text="Delay (seconds):").pack(anchor="w", padx=5, pady=(5, 0))
+            delay_var = ctk.StringVar(value=str(initial_action_data.get("delay", 0.1)))
+            ctk.CTkEntry(action_frame, textvariable=delay_var).pack(fill=ctk.X, padx=5)
+            action_frame.x_var = x_var
+            action_frame.y_var = y_var
+            action_frame.delay_var = delay_var
+
+        elif action_type == "mouse_sequence":
+            ctk.CTkLabel(action_frame, text="Mouse Sequence (x1,y1,delay1,x2,y2,delay2,...):").pack(anchor="w", padx=5, pady=(5, 0))
+            sequence_var = ctk.StringVar(value=initial_action_data.get("sequence", ""))
+            ctk.CTkEntry(action_frame, textvariable=sequence_var).pack(fill=ctk.X, padx=5)
+            action_frame.sequence_var = sequence_var
+
+        elif action_type == "custom_function":
+            ctk.CTkLabel(action_frame, text="Function Name:").pack(anchor="w", padx=5, pady=(5, 0))
+            function_var = ctk.StringVar(value=initial_action_data.get("function", ""))
+            ctk.CTkEntry(action_frame, textvariable=function_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkLabel(action_frame, text="Parameters (JSON string):").pack(anchor="w", padx=5, pady=(5, 0))
+            params_var = ctk.StringVar(value=initial_action_data.get("params", "{}"))
+            ctk.CTkEntry(action_frame, textvariable=params_var).pack(fill=ctk.X, padx=5)
+            action_frame.function_var = function_var
+            action_frame.params_var = params_var
 
     def on_event_select(self, event):
         self.refresh_image_list()
@@ -309,10 +577,48 @@ class GameAutomationTool(ctk.CTk):
             widget.destroy()
 
         event_name = self.selected_event.get()
+        self.selected_image_index = None  # Reset selection
+
         if event_name and event_name in self.events_data:
-            for image_data in self.events_data[event_name]["images"]:
-                ctk.CTkLabel(self.image_frame, text=image_data["name"]).pack(anchor="w")
+            images = self.events_data[event_name]["images"]
+            for i, image_data in enumerate(images):
+                checkbox_var = ctk.BooleanVar(value=image_data.get("enabled", True))
+                checkbox = ctk.CTkCheckBox(
+                    self.image_frame,
+                    text=image_data["name"],
+                    variable=checkbox_var,
+                    command=lambda idx=i, var=checkbox_var: self.toggle_image_enabled(idx, var.get())
+                )
+                checkbox.pack(fill=ctk.X, pady=2)
+                # Store the checkbox reference to update its color later (if needed, though checkbox handles it)
+                image_data["_checkbox_ref"] = checkbox
         self.update_idletasks()
+
+    def select_image(self, index):
+        event_name = self.selected_event.get()
+        if not event_name or event_name not in self.events_data:
+            return
+
+        # Deselect previous checkbox if any
+        if self.selected_image_index is not None:
+            prev_image_data = self.events_data[event_name]["images"][self.selected_image_index]
+            if "_checkbox_ref" in prev_image_data and prev_image_data["_checkbox_ref"] is not None:
+                # CTkCheckBox doesn't have fg_color for selection, so we'll just ensure it's not highlighted
+                pass
+
+        # Select new checkbox (visually, by updating selected_image_index)
+        self.selected_image_index = index
+        # CTkCheckBox doesn't have a direct way to highlight like a button, but we can ensure its state is reflected
+
+    def toggle_image_enabled(self, index, enabled):
+        event_name = self.selected_event.get()
+        if not event_name or event_name not in self.events_data:
+            return
+
+        if 0 <= index < len(self.events_data[event_name]["images"]):
+            self.events_data[event_name]["images"][index]["enabled"] = enabled
+            self.save_config()
+            self.log_status(f"Image '{self.events_data[event_name]["images"][index]["name"]}' enabled set to {enabled}")
 
     def refresh_control_buttons(self):
         for widget in self.control_buttons_frame.winfo_children():
@@ -360,9 +666,10 @@ class GameAutomationTool(ctk.CTk):
                 for image_data in event_data["images"]:
                     if self.stop_flags[event_name]:
                         break
-                    if self.find_image_and_execute(image_data):
-                        self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
-                        break
+                    if image_data.get("enabled", True): # Only process if enabled
+                        if self.find_image_and_execute(image_data):
+                            self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
+                            break
                 time.sleep(0.1)
             except Exception as e:
                 self.log_status(f"Error in event {event_name}: {str(e)}")

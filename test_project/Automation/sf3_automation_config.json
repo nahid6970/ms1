@@ -1,9 +1,22 @@
 {
   "events": {
-    "dss": {
-      "images": [],
-      "enabled": true
-    }
-  },
-  "target_window": "LDPlayer"
-}
+    "ffk": {
+      "images": [
+        {
+          "name": "ss   ",
+          "path": "C:/Users/nahid/Pictures/Title/1000006832.jpg",
+          "confidence": 0.8,
+          "region": [
+            1054,
+            457,
+            1361,
+            636
+          ],
+          "action": {
+            "type": "mouse_click",
+            "x": 1420,
+            "y": 599,
+            "delay": 0.1
+          },
+          "enabled": true,
+          "_checkbox_ref": 
