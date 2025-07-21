@@ -639,7 +639,9 @@ class GameAutomationTool(ctk.CTk):
                 self.control_buttons_frame,
                 text=button_text,
                 command=lambda name=event_name: self.toggle_event(name),
-                width=20
+                width=20,
+                fg_color="red" if is_running else "#3B8ED0", # Red when running, default otherwise
+                hover_color="darkred" if is_running else "#325882" # Darker red when running, default otherwise
             )
             btn.pack(pady=2, fill=ctk.X)
         self.update_idletasks()
