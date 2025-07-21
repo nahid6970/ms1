@@ -725,24 +725,8 @@
       
 
       async function loadRAGSettings() {
-        // First try to load from server settings
-        let serverSettings = null;
-        try {
-          const saved = localStorage.getItem('ollamaSettings');
-          if (saved) {
-            const settings = JSON.parse(saved);
-            serverSettings = {
-              rag_enabled: settings.rag_enabled,
-              rag_max_results: settings.rag_max_results
-            };
-          }
-        } catch (error) {
-          console.log('No server settings found, using defaults');
-        }
-
-        // Fallback to local storage, then defaults
         const localSettings = JSON.parse(localStorage.getItem('ollamaRAGSettings'));
-        const settingsToApply = serverSettings || localSettings || DEFAULT_RAG_SETTINGS;
+        const settingsToApply = localSettings || DEFAULT_RAG_SETTINGS;
 
         const ragEnabled = document.getElementById('rag-enabled');
         const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');

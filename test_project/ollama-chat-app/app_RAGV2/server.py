@@ -585,15 +585,15 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                         elif 'prompt' in payload:
                             user_query = payload['prompt']
 
-                        # Perform RAG search if we have documents and a query
+                        # Perform RAG search if enabled, we have documents, and a query
                         rag_context = ""
-                        if user_query.strip():
+                        if current_settings.get('rag_enabled') and user_query.strip():
                             try:
                                 # Check if we have any documents
                                 documents = rag_system.get_documents()
                                 if documents:
                                     # Search for relevant content
-                                    search_results = rag_system.search(user_query, n_results=3)
+                                    search_results = rag_system.search(user_query, n_results=current_settings.get('rag_max_results', 5))
                                     if search_results:
                                         rag_context = "\n\n--- RELEVANT CONTEXT FROM KNOWLEDGE BASE ---\n"
                                         for i, result in enumerate(search_results):
