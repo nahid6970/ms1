@@ -417,6 +417,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="rag_settings_fix.js"></script>
+  <script src="fix_settings_and_models.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
       const modelSelect = document.getElementById("model-select");
@@ -667,8 +669,142 @@
         loadModelSettings(); // Update displayed values
       };
 
+      // RAG Settings Management
+      const DEFAULT_RAG_SETTINGS = {
+        rag_enabled: true,
+        rag_max_results: 3
+      };
+
+      function saveRAGSettings() {
+        const ragEnabled = document.getElementById('rag-enabled');
+        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
+        
+        if (ragEnabled && ragMaxResultsSlider) {
+          const settings = {
+            rag_enabled: ragEnabled.checked,
+            rag_max_results: parseInt(ragMaxResultsSlider.value, 10)
+          };
+          localStorage.setItem('ollamaRAGSettings', JSON.stringify(settings));
+          
+          // Also save to server settings
+          saveRAGSettingsToServer(settings);
+        }
+      }
+
+      async function saveRAGSettingsToServer(ragSettings) {
+        try {
+          // Ensure currentInstructions is loaded
+          if (!currentInstructions) {
+            loadSettings();
+          }
+
+          // Get current server settings
+          const currentSettings = {
+            instructions: currentInstructions || [],
+            rag_enabled: ragSettings.rag_enabled,
+            rag_max_results: ragSettings.rag_max_results
+          };
+
+          console.log('Saving RAG settings to server:', currentSettings);
+
+          const response = await fetch('/api/settings/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: currentSettings })
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            console.log('RAG settings saved to server successfully');
+            showSuccessNotification('RAG settings saved!');
+          } else {
+            console.error('Failed to save RAG settings to server:', data);
+            alert('Failed to save RAG settings to server');
+          }
+        } catch (error) {
+          console.error('RAG settings save error:', error);
+          alert('Error saving RAG settings: ' + error.message);
+        }
+      }
+
+      async function loadRAGSettings() {
+        // First try to load from server settings
+        let serverSettings = null;
+        try {
+          const saved = localStorage.getItem('ollamaSettings');
+          if (saved) {
+            const settings = JSON.parse(saved);
+            serverSettings = {
+              rag_enabled: settings.rag_enabled,
+              rag_max_results: settings.rag_max_results
+            };
+          }
+        } catch (error) {
+          console.log('No server settings found, using defaults');
+        }
+
+        // Fallback to local storage, then defaults
+        const localSettings = JSON.parse(localStorage.getItem('ollamaRAGSettings'));
+        const settingsToApply = serverSettings || localSettings || DEFAULT_RAG_SETTINGS;
+
+        const ragEnabled = document.getElementById('rag-enabled');
+        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
+        const ragMaxResultsValue = document.getElementById('rag-max-results-value');
+
+        console.log('Loading RAG settings:', settingsToApply);
+
+        if (ragEnabled) {
+          ragEnabled.checked = settingsToApply.rag_enabled !== false; // Default to true
+        }
+        if (ragMaxResultsSlider && ragMaxResultsValue) {
+          ragMaxResultsSlider.value = settingsToApply.rag_max_results || 3;
+          ragMaxResultsValue.textContent = settingsToApply.rag_max_results || 3;
+        }
+
+        // Load knowledge base status
+        loadRAGStatus();
+      }
+
+      async function loadRAGStatus() {
+        const statusDiv = document.getElementById('rag-status');
+        if (!statusDiv) return;
+
+        try {
+          const response = await fetch('/api/rag/documents');
+          if (response.ok) {
+            const data = await response.json();
+            const docCount = data.documents.length;
+            const totalChunks = data.documents.reduce((sum, doc) => sum + doc.chunk_count, 0);
+            
+            statusDiv.innerHTML = `
+              <div class="d-flex justify-content-between">
+                <span><strong>${docCount}</strong> documents</span>
+                <span><strong>${totalChunks}</strong> chunks</span>
+              </div>
+              <small class="text-muted">Knowledge base is ${docCount > 0 ? 'ready' : 'empty'}</small>
+            `;
+          } else {
+            statusDiv.innerHTML = '<span class="text-warning">⚠️ Unable to load status</span>';
+          }
+        } catch (error) {
+          statusDiv.innerHTML = '<span class="text-danger">❌ Connection error</span>';
+        }
+      }
+
+      window.resetRAGSettings = function() {
+        const ragEnabled = document.getElementById('rag-enabled');
+        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
+        
+        if (ragEnabled) ragEnabled.checked = DEFAULT_RAG_SETTINGS.rag_enabled;
+        if (ragMaxResultsSlider) ragMaxResultsSlider.value = DEFAULT_RAG_SETTINGS.rag_max_results;
+        
+        saveRAGSettings();
+        loadRAGSettings();
+      };
+
       settingsBtn.addEventListener("click", () => {
         loadModelSettings(); // Load settings when modal is opened
+        loadRAGSettings(); // Load RAG settings when modal is opened
         settingsModal.show();
       });
 
@@ -690,6 +826,164 @@
       topPSlider.addEventListener('input', (e) => {
           topPValue.textContent = e.target.value;
           saveModelSettings();
+      });
+
+      // RAG Settings Event Listeners - Initialize after DOM is loaded
+      function initializeRAGEventListeners() {
+        const ragEnabled = document.getElementById('rag-enabled');
+        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
+        const ragMaxResultsValue = document.getElementById('rag-max-results-value');
+
+        if (ragEnabled) {
+          ragEnabled.addEventListener('change', function() {
+            console.log('RAG toggle changed to:', this.checked);
+            saveRAGSettings();
+          });
+        }
+
+        if (ragMaxResultsSlider && ragMaxResultsValue) {
+          ragMaxResultsSlider.addEventListener('input', function(e) {
+            ragMaxResultsValue.textContent = e.target.value;
+            console.log('RAG max results changed to:', e.target.value);
+            saveRAGSettings();
+          });
+        }
+      }
+
+      // Initialize RAG event listeners when settings modal is shown
+      settingsBtn.addEventListener("click", () => {
+        loadModelSettings();
+        loadRAGSettings();
+        // Small delay to ensure DOM elements are ready
+        setTimeout(initializeRAGEventListeners, 100);
+        settingsModal.show();
+      });
+            console.error('Failed to save RAG settings to server:', data);
+            alert('Failed to save RAG settings to server');
+          }
+        } catch (error) {
+          console.error('RAG settings save error:', error);
+          alert('Error saving RAG settings: ' + error.message);
+        }
+      }
+
+      async function loadRAGSettings() {
+        // First try to load from server settings
+        let serverSettings = null;
+        try {
+          const saved = localStorage.getItem('ollamaSettings');
+          if (saved) {
+            const settings = JSON.parse(saved);
+            serverSettings = {
+              rag_enabled: settings.rag_enabled,
+              rag_max_results: settings.rag_max_results
+            };
+          }
+        } catch (error) {
+          console.log('No server settings found, using defaults');
+        }
+
+        // Fallback to local storage, then defaults
+        const localSettings = JSON.parse(localStorage.getItem('ollamaRAGSettings'));
+        const settingsToApply = serverSettings || localSettings || DEFAULT_RAG_SETTINGS;
+
+        const ragEnabled = document.getElementById('rag-enabled');
+        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
+        const ragMaxResultsValue = document.getElementById('rag-max-results-value');
+
+        console.log('Loading RAG settings:', settingsToApply);
+
+        if (ragEnabled) {
+          ragEnabled.checked = settingsToApply.rag_enabled !== false; // Default to true
+        }
+        if (ragMaxResultsSlider && ragMaxResultsValue) {
+          ragMaxResultsSlider.value = settingsToApply.rag_max_results || 3;
+          ragMaxResultsValue.textContent = settingsToApply.rag_max_results || 3;
+        }
+
+        // Load knowledge base status
+        loadRAGStatus();
+      }
+
+      async function loadRAGStatus() {
+        const statusDiv = document.getElementById('rag-status');
+        if (!statusDiv) return;
+
+        try {
+          const response = await fetch('/api/rag/documents');
+          if (response.ok) {
+            const data = await response.json();
+            const docCount = data.documents.length;
+            const totalChunks = data.documents.reduce((sum, doc) => sum + doc.chunk_count, 0);
+            
+            statusDiv.innerHTML = `
+              <div class="d-flex justify-content-between">
+                <span><strong>${docCount}</strong> documents</span>
+                <span><strong>${totalChunks}</strong> chunks</span>
+              </div>
+              <small class="text-muted">Knowledge base is ${docCount > 0 ? 'ready' : 'empty'}</small>
+            `;
+          } else {
+            statusDiv.innerHTML = '<span class="text-warning">⚠️ Unable to load status</span>';
+          }
+        } catch (error) {
+          statusDiv.innerHTML = '<span class="text-danger">❌ Connection error</span>';
+        }
+      }
+
+      window.resetRAGSettings = function() {
+        const ragEnabled = document.getElementById('rag-enabled');
+        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
+        
+        if (ragEnabled) ragEnabled.checked = DEFAULT_RAG_SETTINGS.rag_enabled;
+        if (ragMaxResultsSlider) ragMaxResultsSlider.value = DEFAULT_RAG_SETTINGS.rag_max_results;
+        
+        saveRAGSettings();
+        loadRAGSettings();
+      };
+
+      settingsBtn.addEventListener("click", () => {
+        loadModelSettings(); // Load settings when modal is opened
+        loadRAGSettings(); // Load RAG settings when modal is opened
+        settingsModal.show();
+      });
+
+      maxTokensSlider.addEventListener('input', (e) => {
+          maxTokensValue.textContent = e.target.value;
+          saveModelSettings();
+      });
+
+      contextWindowSlider.addEventListener('input', (e) => {
+          contextWindowValue.textContent = e.target.value;
+          saveModelSettings();
+      });
+
+      temperatureSlider.addEventListener('input', (e) => {
+          temperatureValue.textContent = e.target.value;
+          saveModelSettings();
+      });
+
+      topPSlider.addEventListener('input', (e) => {
+          topPValue.textContent = e.target.value;
+          saveModelSettings();
+      });
+
+      // RAG Settings Event Listeners
+      document.addEventListener('DOMContentLoaded', () => {
+        const ragEnabled = document.getElementById('rag-enabled');
+        const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
+        const ragMaxResultsValue = document.getElementById('rag-max-results-value');
+
+        if (ragEnabled) {
+          ragEnabled.addEventListener('change', saveRAGSettings);
+        }
+
+        if (ragMaxResultsSlider && ragMaxResultsValue) {
+          ragMaxResultsSlider.addEventListener('input', (e) => {
+            ragMaxResultsValue.textContent = e.target.value;
+            saveRAGSettings();
+          });
+        }
       });
 
       function autoGrowTextarea(el) {
@@ -1216,6 +1510,9 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="instructions-tab" data-bs-toggle="tab" data-bs-target="#instructions" type="button">Instructions</button>
           </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rag-tab" data-bs-toggle="tab" data-bs-target="#rag-settings" type="button">RAG</button>
+          </li>
         </ul>
 
         <div class="tab-content" id="settingsTabContent">
@@ -1300,6 +1597,57 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- RAG Settings Tab -->
+          <div class="tab-pane fade" id="rag-settings" role="tabpanel">
+            <div class="mb-4">
+              <h6>RAG (Retrieval-Augmented Generation) Settings</h6>
+              <p class="text-muted small">Configure how the AI uses your knowledge base to enhance responses.</p>
+            </div>
+            
+            <div class="mb-3">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="rag-enabled" checked>
+                <label class="form-check-label" for="rag-enabled">
+                  <strong>Enable RAG</strong>
+                </label>
+              </div>
+              <small class="text-muted">When enabled, the AI will search your knowledge base for relevant context before responding.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="rag-max-results-slider" class="form-label">
+                <i class="nf nf-fa-info_circle text-muted me-2" 
+                   data-bs-toggle="tooltip" 
+                   data-bs-placement="right" 
+                   title="Maximum number of relevant chunks to include as context for each query.">
+                </i>Max Context Chunks: <span id="rag-max-results-value">3</span>
+              </label>
+              <input type="range" class="form-range" min="1" max="10" step="1" id="rag-max-results-slider" value="3">
+              <small class="text-muted">Higher values provide more context but may slow down responses.</small>
+            </div>
+
+            <div class="mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title">📚 Knowledge Base Status</h6>
+                  <div id="rag-status">
+                    <div class="d-flex align-items-center">
+                      <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                      <span>Loading...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a href="rag_interface.html" class="btn btn-outline-primary" target="_blank">
+                📚 Manage Knowledge Base
+              </a>
+              <button type="button" class="btn btn-outline-secondary" onclick="resetRAGSettings()">Reset to Defaults</button>
             </div>
           </div>
         </div>

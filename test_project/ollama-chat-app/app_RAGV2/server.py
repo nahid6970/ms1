@@ -29,7 +29,9 @@ def load_settings():
         with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {
-        'instructions': []
+        'instructions': [],
+        'rag_enabled': True,
+        'rag_max_results': 3
     }
 
 def save_settings_to_file(settings):
@@ -585,15 +587,17 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                         elif 'prompt' in payload:
                             user_query = payload['prompt']
 
-                        # Perform RAG search if we have documents and a query
+                        # Perform RAG search if enabled and we have documents and a query
                         rag_context = ""
-                        if user_query.strip():
+                        if user_query.strip() and current_settings.get('rag_enabled', True):
                             try:
                                 # Check if we have any documents
                                 documents = rag_system.get_documents()
                                 if documents:
+                                    # Get max results from settings
+                                    max_results = current_settings.get('rag_max_results', 3)
                                     # Search for relevant content
-                                    search_results = rag_system.search(user_query, n_results=3)
+                                    search_results = rag_system.search(user_query, n_results=max_results)
                                     if search_results:
                                         rag_context = "\n\n--- RELEVANT CONTEXT FROM KNOWLEDGE BASE ---\n"
                                         for i, result in enumerate(search_results):
@@ -602,9 +606,13 @@ class OllamaProxyHandler(http.server.SimpleHTTPRequestHandler):
                                             rag_context += f"Source: {result['metadata'].get('filename', 'Unknown')}\n"
                                             rag_context += f"Content: {result['content']}\n"
                                         rag_context += "\n--- END CONTEXT ---\n\n"
-                                        print(f"Added RAG context from {len(search_results)} relevant chunks")
+                                        print(f"RAG enabled: Added context from {len(search_results)} relevant chunks")
+                                else:
+                                    print("RAG enabled but no documents found in knowledge base")
                             except Exception as e:
                                 print(f"RAG search error: {e}")
+                        elif not current_settings.get('rag_enabled', True):
+                            print("RAG is disabled in settings")
 
                         # Inject system message
                         # Prioritize system_instructions from payload, otherwise use active instructions from settings
