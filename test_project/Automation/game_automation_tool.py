@@ -54,26 +54,39 @@ class GameAutomationTool:
         event_label = tk.Label(left_frame, text="Events", bg="#2b2b2b", fg="white", font=("Arial", 12, "bold"))
         event_label.pack(anchor="w", pady=(0, 5))
         
-        # Event listbox with scrollbar
-        event_frame = tk.Frame(left_frame, bg="#2b2b2b")
-        event_frame.pack(fill=tk.BOTH, expand=False, pady=(0, 10))
+        # Event selection frame
+        event_select_frame = tk.Frame(left_frame, bg="#2b2b2b")
+        event_select_frame.pack(fill=tk.X, pady=(0, 10))
         
-        self.event_listbox = tk.Listbox(event_frame, bg="#404040", fg="white", selectbackground="#555555", height=8)
-        event_scrollbar = tk.Scrollbar(event_frame, orient=tk.VERTICAL, command=self.event_listbox.yview)
-        self.event_listbox.config(yscrollcommand=event_scrollbar.set)
+        # Event dropdown
+        self.selected_event = tk.StringVar()
+        self.event_dropdown = ttk.Combobox(
+            event_select_frame, 
+            textvariable=self.selected_event, 
+            state="readonly",
+            width=25
+        )
+        self.event_dropdown.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        self.event_dropdown.bind("<<ComboboxSelected>>", self.on_event_select)
         
-        self.event_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        event_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # Add event button with + icon
+        add_event_btn = tk.Button(
+            event_select_frame, 
+            text="+ Add", 
+            command=self.add_event, 
+            bg="#4CAF50", 
+            fg="white",
+            width=6
+        )
+        add_event_btn.pack(side=tk.RIGHT)
         
-        self.event_listbox.bind("<<ListboxSelect>>", self.on_event_select)
-        
-        # Event buttons
+        # Event management buttons
         event_btn_frame = tk.Frame(left_frame, bg="#2b2b2b")
         event_btn_frame.pack(fill=tk.X, pady=(0, 10))
         
-        tk.Button(event_btn_frame, text="Add Event", command=self.add_event, bg="#4CAF50", fg="white").pack(side=tk.LEFT, padx=(0, 5))
         tk.Button(event_btn_frame, text="Delete Event", command=self.delete_event, bg="#f44336", fg="white").pack(side=tk.LEFT, padx=(0, 5))
-        tk.Button(event_btn_frame, text="Rename Event", command=self.rename_event, bg="#2196F3", fg="white").pack(side=tk.LEFT)
+        tk.Button(event_btn_frame, text="Rename Event", command=self.rename_event, bg="#2196F3", fg="white").pack(side=tk.LEFT, padx=(0, 5))
+        tk.Button(event_btn_frame, text="Duplicate Event", command=self.duplicate_event, bg="#FF9800", fg="white").pack(side=tk.LEFT)
         
         # Image Management Section
         image_label = tk.Label(left_frame, text="Images", bg="#2b2b2b", fg="white", font=("Arial", 12, "bold"))
@@ -185,12 +198,11 @@ class GameAutomationTool:
     
     def delete_event(self):
         """Delete selected event"""
-        selection = self.event_listbox.curselection()
-        if not selection:
+        event_name = self.selected_event.get()
+        if not event_name:
             messagebox.showwarning("Warning", "Please select an event to delete.")
             return
         
-        event_name = self.event_listbox.get(selection[0])
         if messagebox.askyesno("Confirm Delete", f"Delete event '{event_name}'?"):
             # Stop the event if running
             if event_name in self.threads and self.threads[event_name].is_alive():
@@ -210,12 +222,11 @@ class GameAutomationTool:
     
     def rename_event(self):
         """Rename selected event"""
-        selection = self.event_listbox.curselection()
-        if not selection:
+        old_name = self.selected_event.get()
+        if not old_name:
             messagebox.showwarning("Warning", "Please select an event to rename.")
             return
         
-        old_name = self.event_listbox.get(selection[0])
         new_name = simpledialog.askstring("Rename Event", f"Enter new name for '{old_name}':", initialvalue=old_name)
         
         if new_name and new_name != old_name:
@@ -238,46 +249,66 @@ class GameAutomationTool:
             self.save_config()
             self.log_status(f"Renamed event: {old_name} -> {new_name}")
     
+    def duplicate_event(self):
+        """Duplicate selected event"""
+        old_name = self.selected_event.get()
+        if not old_name:
+            messagebox.showwarning("Warning", "Please select an event to duplicate.")
+            return
+        
+        new_name = simpledialog.askstring("Duplicate Event", f"Enter name for duplicate of '{old_name}':", initialvalue=f"{old_name}_copy")
+        
+        if new_name and new_name != old_name:
+            if new_name in self.events_data:
+                messagebox.showerror("Error", "Event name already exists!")
+                return
+            
+            # Create a deep copy of the event data
+            import copy
+            self.events_data[new_name] = copy.deepcopy(self.events_data[old_name])
+            self.stop_flags[new_name] = False
+            
+            self.refresh_event_list()
+            self.refresh_control_buttons()
+            self.save_config()
+            self.log_status(f"Duplicated event: {old_name} -> {new_name}")
+    
     def add_image(self):
         """Add image to selected event with popup configuration"""
-        selection = self.event_listbox.curselection()
-        if not selection:
+        event_name = self.selected_event.get()
+        if not event_name:
             messagebox.showwarning("Warning", "Please select an event first.")
             return
         
-        event_name = self.event_listbox.get(selection[0])
         self.show_image_config_dialog(event_name)
     
     def edit_image(self):
         """Edit selected image with popup configuration"""
-        event_selection = self.event_listbox.curselection()
+        event_name = self.selected_event.get()
         image_selection = self.image_listbox.curselection()
         
-        if not event_selection:
+        if not event_name:
             messagebox.showwarning("Warning", "Please select an event first.")
             return
         if not image_selection:
             messagebox.showwarning("Warning", "Please select an image to edit.")
             return
         
-        event_name = self.event_listbox.get(event_selection[0])
         image_index = image_selection[0]
-        
         self.show_image_config_dialog(event_name, image_index)
     
     def delete_image(self):
         """Delete selected image"""
-        event_selection = self.event_listbox.curselection()
+        event_name = self.selected_event.get()
         image_selection = self.image_listbox.curselection()
         
-        if not event_selection:
+        if not event_name:
             messagebox.showwarning("Warning", "Please select an event first.")
             return
         if not image_selection:
             messagebox.showwarning("Warning", "Please select an image to delete.")
             return
         
-        event_name = self.event_listbox.get(event_selection[0])
         image_index = image_selection[0]
         image_name = self.events_data[event_name]["images"][image_index]["name"]
         
@@ -665,10 +696,22 @@ class GameAutomationTool:
         self.refresh_image_list()
     
     def refresh_event_list(self):
-        """Refresh the event listbox"""
-        self.event_listbox.delete(0, tk.END)
-        for event_name in self.events_data.keys():
-            self.event_listbox.insert(tk.END, event_name)
+        """Refresh the event dropdown"""
+        # Store current selection
+        current_selection = self.selected_event.get()
+        
+        # Update dropdown values
+        event_names = list(self.events_data.keys())
+        self.event_dropdown['values'] = event_names
+        
+        # Restore selection if it still exists, otherwise select first item
+        if current_selection in event_names:
+            self.selected_event.set(current_selection)
+        elif event_names:
+            self.selected_event.set(event_names[0])
+        else:
+            self.selected_event.set("")
+        
         # Force GUI update
         self.root.update_idletasks()
     
@@ -676,9 +719,8 @@ class GameAutomationTool:
         """Refresh the image listbox"""
         self.image_listbox.delete(0, tk.END)
         
-        selection = self.event_listbox.curselection()
-        if selection:
-            event_name = self.event_listbox.get(selection[0])
+        event_name = self.selected_event.get()
+        if event_name and event_name in self.events_data:
             for image_data in self.events_data[event_name]["images"]:
                 self.image_listbox.insert(tk.END, image_data["name"])
         # Force GUI update

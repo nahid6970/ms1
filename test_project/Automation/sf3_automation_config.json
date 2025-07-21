@@ -20,6 +20,14 @@
         }
       ],
       "enabled": true
+    },
+    "asd": {
+      "images": [],
+      "enabled": true
+    },
+    "TT": {
+      "images": [],
+      "enabled": true
     }
   },
   "target_window": "LDPlayer"
