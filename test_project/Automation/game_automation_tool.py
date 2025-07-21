@@ -837,12 +837,20 @@ class GameAutomationTool(ctk.CTk):
 
     def save_config(self):
         try:
-            data = {
-                "events": self.events_data,
-                "target_window": self.target_window
-            }
+            # Create a deep copy to avoid modifying the live data structure during cleanup
+            data_to_save = {"events": {}, "target_window": self.target_window}
+            for event_name, event_data in self.events_data.items():
+                copied_event_data = event_data.copy()
+                copied_event_data["images"] = []
+                for image_data in event_data["images"]:
+                    cleaned_image_data = image_data.copy()
+                    cleaned_image_data.pop("_checkbox_ref", None) # Remove the UI widget reference
+                    cleaned_image_data.pop("_button_ref", None) # Remove old UI widget reference if it exists
+                    copied_event_data["images"].append(cleaned_image_data)
+                data_to_save["events"][event_name] = copied_event_data
+
             with open(self.config_file, 'w') as f:
-                json.dump(data, f, indent=2)
+                json.dump(data_to_save, f, indent=2)
             self.log_status(f"Configuration saved to {self.config_file}")
         except Exception as e:
             self.log_status(f"Error saving configuration: {str(e)}")
