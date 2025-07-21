@@ -1219,24 +1219,8 @@
         // Save to localStorage
         localStorage.setItem('ollamaSettings', JSON.stringify(settings));
         
-        // Save to server
-        try {
-          const response = await fetch('/api/settings/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ settings })
-          });
-          
-          const data = await response.json();
-          if (data.success) {
-            showSuccessNotification('Settings saved successfully!');
-          } else {
-            alert('Failed to save settings to server');
-          }
-        } catch (error) {
-          console.error('Settings save error:', error);
-          alert('Settings saved locally but failed to sync with server');
-        }
+        // Save all settings to server
+        await saveSettingsToServer();
       }
 
       // Instructions Management
