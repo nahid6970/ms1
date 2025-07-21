@@ -658,7 +658,8 @@ def Event_Function():
                     # Special logic for Tournament_step1
                     if find_image(Tournament_step1, confidence=0.8):
                         if selected_key == "num3":
-                            press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1)
+                            # press_keys_with_delays(window, "num2", 1, 'c', 1, "m", 1, "num1", 1, "c", 1) #!default
+                            press_keys_with_delays(window, "num2", 1, 'c', 1, "num1", 1, "c", 1)
                         else:
                             press_keys_with_delays(window, selected_key, 1, 'c', 1, "y", 1, "c", 1)
 

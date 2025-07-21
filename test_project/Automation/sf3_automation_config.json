@@ -1,0 +1,9 @@
+{
+  "events": {
+    "dd": {
+      "images": [],
+      "enabled": true
+    }
+  },
+  "target_window": "LDPlayer"
+}

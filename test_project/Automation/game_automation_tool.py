@@ -9,6 +9,13 @@ import pygetwindow as gw
 from datetime import datetime
 from pathlib import Path
 
+# Try to import keyboard module, fallback if not available
+try:
+    import keyboard
+    KEYBOARD_AVAILABLE = True
+except ImportError:
+    KEYBOARD_AVAILABLE = False
+
 class GameAutomationTool:
     def __init__(self, root):
         self.root = root
@@ -541,30 +548,22 @@ class GameAutomationTool:
             path_var.set(filename)   
     def get_screen_region(self, x1_var, y1_var, x2_var, y2_var):
         """Get screen region by user selection"""
-        messagebox.showinfo("Get Region", "Click and drag to select a region on the screen.\nPress SPACE when done.")
+        messagebox.showinfo("Get Region", "Move mouse to first corner and press SPACE.")
         
         def get_region():
             try:
+                import keyboard
+                
                 # Wait for user to press space
-                while True:
-                    if pyautogui.keyDown('space'):
-                        break
-                    time.sleep(0.1)
+                keyboard.wait('space')
                 
                 # Get current mouse position as starting point
                 start_x, start_y = pyautogui.position()
                 
-                # Wait for space release
-                while pyautogui.keyDown('space'):
-                    time.sleep(0.1)
-                
-                messagebox.showinfo("Region Selection", "Now click the opposite corner and press SPACE again.")
+                messagebox.showinfo("Region Selection", "Now move to opposite corner and press SPACE again.")
                 
                 # Wait for second space press
-                while True:
-                    if pyautogui.keyDown('space'):
-                        break
-                    time.sleep(0.1)
+                keyboard.wait('space')
                 
                 end_x, end_y = pyautogui.position()
                 
@@ -573,6 +572,48 @@ class GameAutomationTool:
                 y1_var.set(str(min(start_y, end_y)))
                 x2_var.set(str(max(start_x, end_x)))
                 y2_var.set(str(max(start_y, end_y)))
+                
+                messagebox.showinfo("Success", f"Region set: ({min(start_x, end_x)}, {min(start_y, end_y)}) to ({max(start_x, end_x)}, {max(start_y, end_y)})")
+                
+            except ImportError:
+                # Fallback method using mouse clicks instead of keyboard
+                messagebox.showinfo("Get Region", "Keyboard module not available. Click at first corner.")
+                
+                # Simple fallback - wait for mouse clicks
+                import tkinter as tk
+                
+                def wait_for_click():
+                    root = tk.Tk()
+                    root.withdraw()  # Hide the window
+                    root.attributes('-topmost', True)
+                    root.attributes('-alpha', 0.1)
+                    root.geometry('1x1+0+0')
+                    
+                    clicks = []
+                    
+                    def on_click(event):
+                        clicks.append(pyautogui.position())
+                        if len(clicks) == 1:
+                            messagebox.showinfo("Region Selection", "Now click at opposite corner.")
+                        elif len(clicks) == 2:
+                            root.quit()
+                    
+                    root.bind('<Button-1>', on_click)
+                    root.mainloop()
+                    root.destroy()
+                    
+                    if len(clicks) == 2:
+                        start_x, start_y = clicks[0]
+                        end_x, end_y = clicks[1]
+                        
+                        x1_var.set(str(min(start_x, end_x)))
+                        y1_var.set(str(min(start_y, end_y)))
+                        x2_var.set(str(max(start_x, end_x)))
+                        y2_var.set(str(max(start_y, end_y)))
+                        
+                        messagebox.showinfo("Success", f"Region set: ({min(start_x, end_x)}, {min(start_y, end_y)}) to ({max(start_x, end_x)}, {max(start_y, end_y)})")
+                
+                wait_for_click()
                 
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to get region: {str(e)}")
@@ -585,13 +626,35 @@ class GameAutomationTool:
         
         def get_position():
             try:
-                while True:
-                    if pyautogui.keyDown('space'):
+                if KEYBOARD_AVAILABLE:
+                    import keyboard
+                    keyboard.wait('space')
+                    x, y = pyautogui.position()
+                    x_var.set(str(x))
+                    y_var.set(str(y))
+                    messagebox.showinfo("Success", f"Position captured: ({x}, {y})")
+                else:
+                    # Fallback method - wait for mouse click
+                    messagebox.showinfo("Get Position", "Keyboard module not available. Click at desired position.")
+                    
+                    import tkinter as tk
+                    root = tk.Tk()
+                    root.withdraw()
+                    root.attributes('-topmost', True)
+                    root.attributes('-alpha', 0.1)
+                    root.geometry('1x1+0+0')
+                    
+                    def on_click(event):
                         x, y = pyautogui.position()
                         x_var.set(str(x))
                         y_var.set(str(y))
-                        break
-                    time.sleep(0.1)
+                        messagebox.showinfo("Success", f"Position captured: ({x}, {y})")
+                        root.quit()
+                    
+                    root.bind('<Button-1>', on_click)
+                    root.mainloop()
+                    root.destroy()
+                    
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to get position: {str(e)}")
         
@@ -811,13 +874,33 @@ class GameAutomationTool:
         
         def capture_position():
             try:
-                while True:
-                    if pyautogui.keyDown('space'):
+                if KEYBOARD_AVAILABLE:
+                    import keyboard
+                    keyboard.wait('space')
+                    x, y = pyautogui.position()
+                    self.log_status(f"Mouse position captured: ({x}, {y})")
+                    messagebox.showinfo("Position Captured", f"Mouse position: ({x}, {y})")
+                else:
+                    # Fallback method - wait for mouse click
+                    messagebox.showinfo("Mouse Position", "Keyboard module not available. Click at desired position.")
+                    
+                    import tkinter as tk
+                    root = tk.Tk()
+                    root.withdraw()
+                    root.attributes('-topmost', True)
+                    root.attributes('-alpha', 0.1)
+                    root.geometry('1x1+0+0')
+                    
+                    def on_click(event):
                         x, y = pyautogui.position()
                         self.log_status(f"Mouse position captured: ({x}, {y})")
                         messagebox.showinfo("Position Captured", f"Mouse position: ({x}, {y})")
-                        break
-                    time.sleep(0.1)
+                        root.quit()
+                    
+                    root.bind('<Button-1>', on_click)
+                    root.mainloop()
+                    root.destroy()
+                    
             except Exception as e:
                 self.log_status(f"Error capturing mouse position: {str(e)}")
         
