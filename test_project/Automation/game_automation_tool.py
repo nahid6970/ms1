@@ -102,8 +102,6 @@ class GameAutomationTool(ctk.CTk):
         image_btn_frame.pack(fill=ctk.X, pady=(0, 10))
 
         ctk.CTkButton(image_btn_frame, text="Add Image", command=self.add_image).pack(side=ctk.LEFT, padx=(0, 5))
-        ctk.CTkButton(image_btn_frame, text="Edit Image", command=self.edit_image).pack(side=ctk.LEFT, padx=(0, 5))
-        ctk.CTkButton(image_btn_frame, text="Delete Image", command=self.delete_image).pack(side=ctk.LEFT)
 
         # Control Panel
         control_frame = ctk.CTkFrame(left_frame)
@@ -263,27 +261,21 @@ class GameAutomationTool(ctk.CTk):
             return
         self.show_image_config_dialog(event_name)
 
-    def edit_image(self):
+    def edit_image(self, image_index):
         event_name = self.selected_event.get()
         if not event_name:
             messagebox.showwarning("Warning", "Please select an event first.")
             return
-        if self.selected_image_index is None:
-            messagebox.showwarning("Warning", "Please select an image to edit.")
-            return
-        self.show_image_config_dialog(event_name, self.selected_image_index)
+        self.show_image_config_dialog(event_name, image_index)
 
-    def delete_image(self):
+    def delete_image(self, image_index):
         event_name = self.selected_event.get()
         if not event_name:
             messagebox.showwarning("Warning", "Please select an event first.")
             return
-        if self.selected_image_index is None:
-            messagebox.showwarning("Warning", "Please select an image to delete.")
-            return
 
-        if messagebox.askyesno("Confirm Delete", f"Delete image '{self.events_data[event_name]["images"][self.selected_image_index]["name"]}'?"):
-            del self.events_data[event_name]["images"][self.selected_image_index]
+        if messagebox.askyesno("Confirm Delete", f"Delete image '{self.events_data[event_name]["images"][image_index]["name"]}'?"):
+            del self.events_data[event_name]["images"][image_index]
             self.save_config()
             self.refresh_image_list()
             self.log_status("Image deleted.")
@@ -592,33 +584,38 @@ class GameAutomationTool(ctk.CTk):
         if event_name and event_name in self.events_data:
             images = self.events_data[event_name]["images"]
             for i, image_data in enumerate(images):
+                image_entry_frame = ctk.CTkFrame(self.image_frame)
+                image_entry_frame.pack(fill=ctk.X, pady=2)
+
                 checkbox_var = ctk.BooleanVar(value=image_data.get("enabled", True))
                 checkbox = ctk.CTkCheckBox(
-                    self.image_frame,
+                    image_entry_frame,
                     text=image_data["name"],
                     variable=checkbox_var,
                     command=lambda idx=i, var=checkbox_var: self.toggle_image_enabled(idx, var.get())
                 )
-                checkbox.pack(fill=ctk.X, pady=2)
-                # Store the checkbox reference to update its color later (if needed, though checkbox handles it)
-                image_data["_checkbox_ref"] = checkbox
+                checkbox.pack(side=ctk.LEFT, padx=(5, 0), expand=True, fill=ctk.X)
+
+                edit_btn = ctk.CTkButton(
+                    image_entry_frame,
+                    text="Edit",
+                    command=lambda idx=i: self.edit_image(idx),
+                    width=60
+                )
+                edit_btn.pack(side=ctk.LEFT, padx=(5, 0))
+
+                delete_btn = ctk.CTkButton(
+                    image_entry_frame,
+                    text="Delete",
+                    command=lambda idx=i: self.delete_image(idx),
+                    fg_color="red",
+                    hover_color="darkred",
+                    width=60
+                )
+                delete_btn.pack(side=ctk.LEFT, padx=(5, 5))
         self.update_idletasks()
 
-    def select_image(self, index):
-        event_name = self.selected_event.get()
-        if not event_name or event_name not in self.events_data:
-            return
-
-        # Deselect previous checkbox if any
-        if self.selected_image_index is not None:
-            prev_image_data = self.events_data[event_name]["images"][self.selected_image_index]
-            if "_checkbox_ref" in prev_image_data and prev_image_data["_checkbox_ref"] is not None:
-                # CTkCheckBox doesn't have fg_color for selection, so we'll just ensure it's not highlighted
-                pass
-
-        # Select new checkbox (visually, by updating selected_image_index)
-        self.selected_image_index = index
-        # CTkCheckBox doesn't have a direct way to highlight like a button, but we can ensure its state is reflected
+    
 
     def toggle_image_enabled(self, index, enabled):
         event_name = self.selected_event.get()
