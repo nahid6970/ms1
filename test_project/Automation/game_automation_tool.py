@@ -669,6 +669,8 @@ class GameAutomationTool:
         self.event_listbox.delete(0, tk.END)
         for event_name in self.events_data.keys():
             self.event_listbox.insert(tk.END, event_name)
+        # Force GUI update
+        self.root.update_idletasks()
     
     def refresh_image_list(self):
         """Refresh the image listbox"""
@@ -679,6 +681,8 @@ class GameAutomationTool:
             event_name = self.event_listbox.get(selection[0])
             for image_data in self.events_data[event_name]["images"]:
                 self.image_listbox.insert(tk.END, image_data["name"])
+        # Force GUI update
+        self.root.update_idletasks()
     
     def refresh_control_buttons(self):
         """Refresh control buttons for each event"""
@@ -701,6 +705,9 @@ class GameAutomationTool:
                 width=20
             )
             btn.pack(pady=2, fill=tk.X)
+        
+        # Force GUI update
+        self.root.update_idletasks()
     
     def toggle_event(self, event_name):
         """Start or stop an event"""
