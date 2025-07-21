@@ -1,0 +1,31 @@
+Python Programming Best Practices
+
+1. Code Style and Formatting
+- Use PEP 8 style guide for Python code
+- Keep line length under 79 characters
+- Use meaningful variable and function names
+- Add docstrings to functions and classes
+
+2. Error Handling
+- Use try-except blocks for error handling
+- Be specific about which exceptions you catch
+- Always clean up resources in finally blocks
+- Log errors appropriately
+
+3. Performance Tips
+- Use list comprehensions instead of loops when possible
+- Avoid global variables
+- Use generators for large datasets
+- Profile your code to identify bottlenecks
+
+4. Testing
+- Write unit tests for all functions
+- Use pytest for testing framework
+- Aim for high test coverage
+- Test edge cases and error conditions
+
+5. Documentation
+- Write clear README files
+- Document your API endpoints
+- Include code examples in documentation
+- Keep documentation up to date with code changes
