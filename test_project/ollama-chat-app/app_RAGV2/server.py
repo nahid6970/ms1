@@ -23,18 +23,58 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # 1. Settings management
 # ---------------------------------------------------------------------------
 SETTINGS_FILE = "settings.json"
+OTHER_SETTINGS_FILE = "C:/Users/nahid/script_output/ollama_settings.json"
 
 def load_settings():
+    # Defaults
+    settings = {
+        'instructions': [],
+        'num_predict': 2048,
+        'num_ctx': 4096,
+        'temperature': 0.8,
+        'top_p': 0.9,
+        'rag_enabled': True,
+        'rag_max_results': 10
+    }
+    
+    # Load instructions
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {
-        'instructions': []
-    }
+            try:
+                instruction_settings = json.load(f)
+                if 'instructions' in instruction_settings:
+                    settings['instructions'] = instruction_settings['instructions']
+            except json.JSONDecodeError:
+                print(f"Warning: Could not decode {SETTINGS_FILE}. Using default instructions.")
+
+    # Load other settings
+    if os.path.exists(OTHER_SETTINGS_FILE):
+        with open(OTHER_SETTINGS_FILE, 'r', encoding='utf-8') as f:
+            try:
+                other_settings = json.load(f)
+                settings.update(other_settings)
+            except json.JSONDecodeError:
+                print(f"Warning: Could not decode {OTHER_SETTINGS_FILE}. Using default model/RAG settings.")
+
+    return settings
 
 def save_settings_to_file(settings):
+    # Instructions
+    instruction_settings = {
+        'instructions': settings.get('instructions', [])
+    }
     with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(settings, f, indent=4)
+        json.dump(instruction_settings, f, indent=4)
+
+    # Other settings
+    other_settings = {k: v for k, v in settings.items() if k != 'instructions'}
+    
+    # Create directory if it doesn't exist
+    other_settings_path = Path(OTHER_SETTINGS_FILE)
+    other_settings_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    with open(other_settings_path, 'w', encoding='utf-8') as f:
+        json.dump(other_settings, f, indent=4)
 
 current_settings = load_settings()
 
