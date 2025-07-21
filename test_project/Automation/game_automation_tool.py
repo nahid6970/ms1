@@ -238,7 +238,17 @@ class GameAutomationTool(ctk.CTk):
                 return
 
             import copy
-            self.events_data[new_name] = copy.deepcopy(self.events_data[old_name])
+            # Create a cleaned version of the event data for deepcopy
+            cleaned_event_data = self.events_data[old_name].copy()
+            cleaned_images = []
+            for img_data in self.events_data[old_name]["images"]:
+                cleaned_img_data = img_data.copy()
+                cleaned_img_data.pop("_checkbox_ref", None)
+                cleaned_img_data.pop("_button_ref", None)
+                cleaned_images.append(cleaned_img_data)
+            cleaned_event_data["images"] = cleaned_images
+
+            self.events_data[new_name] = copy.deepcopy(cleaned_event_data)
             self.stop_flags[new_name] = False
 
             self.refresh_event_list()
