@@ -1,34 +1,4 @@
 {
-  "events": {
-    "ss": {
-      "images": [
-        {
-          "name": "asdasd",
-          "path": "C:/Users/nahid/Pictures/Title/1000000799.jpg",
-          "confidence": 0.8,
-          "region": [
-            208,
-            294,
-            1706,
-            313
-          ],
-          "action": {
-            "type": "key_press",
-            "key": "f",
-            "delay": 0.1
-          }
-        }
-      ],
-      "enabled": true
-    },
-    "asd": {
-      "images": [],
-      "enabled": true
-    },
-    "TT": {
-      "images": [],
-      "enabled": true
-    }
-  },
+  "events": {},
   "target_window": "LDPlayer"
 }

@@ -1005,6 +1005,11 @@ class GameAutomationTool:
                         self.stop_flags[event_name] = False
                         
                 self.log_status(f"Configuration loaded from {self.config_file}")
+                
+                # Refresh UI to show loaded events
+                self.refresh_event_list()
+                self.refresh_control_buttons()
+                self.refresh_image_list()
             else:
                 self.log_status("No existing configuration found, starting fresh")
         except Exception as e:
