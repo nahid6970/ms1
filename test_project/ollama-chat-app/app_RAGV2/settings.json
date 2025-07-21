@@ -11,6 +11,6 @@
     "num_ctx": 4096,
     "temperature": 0.8,
     "top_p": 0.9,
-    "rag_enabled": true,
+    "rag_enabled": false,
     "rag_max_results": 3
 }
