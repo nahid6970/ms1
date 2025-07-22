@@ -22,7 +22,7 @@ class GameAutomationTool(ctk.CTk):
         super().__init__()
 
         self.title("PyAutoGUI Game Automation Tool - Shadow Fight 3")
-        self.geometry("1200x800")
+        self.geometry("460x800")
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
 
@@ -32,6 +32,7 @@ class GameAutomationTool(ctk.CTk):
         self.threads = {}
         self.config_file = "sf3_automation_config.json"
         self.target_window = "LDPlayer"
+        self.right_frame_visible = False
 
         # Setup GUI
         self.setup_gui()
@@ -120,16 +121,20 @@ class GameAutomationTool(ctk.CTk):
         self.control_buttons_frame.pack(fill=ctk.X)
 
         # Right Panel - Status and Info
-        right_frame = ctk.CTkFrame(main_frame)
-        right_frame.pack(side=ctk.RIGHT, fill=ctk.BOTH, expand=True)
+        self.right_frame = ctk.CTkFrame(main_frame)
+        # Don't pack it initially
 
         # Status Section
-        status_label = ctk.CTkLabel(right_frame, text="Status & Information", font=("Arial", 12, "bold"))
+        status_label = ctk.CTkLabel(self.right_frame, text="Status & Information", font=("Arial", 12, "bold"))
         status_label.pack(anchor="w", pady=(0, 10))
 
         # Status text area
-        self.status_text = ctk.CTkTextbox(right_frame, wrap=ctk.WORD, height=20)
+        self.status_text = ctk.CTkTextbox(self.right_frame, wrap=ctk.WORD, height=20)
         self.status_text.pack(fill=ctk.BOTH, expand=True)
+
+        # Toggle button for the right panel
+        self.toggle_right_frame_btn = ctk.CTkButton(main_frame, text=">", command=self.toggle_right_frame, width=30)
+        self.toggle_right_frame_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
         
 
@@ -1104,6 +1109,17 @@ KEYBOARD SHORTCUTS:
             except Exception as e:
                 self.log_status(f"Error unhooking hotkeys: {e}")
         self.destroy()
+
+    def toggle_right_frame(self):
+        self.right_frame_visible = not self.right_frame_visible
+        if self.right_frame_visible:
+            self.geometry("1200x800")
+            self.right_frame.pack(side=ctk.RIGHT, fill=ctk.BOTH, expand=True)
+            self.toggle_right_frame_btn.configure(text="<")
+        else:
+            self.right_frame.pack_forget()
+            self.geometry("460x800")
+            self.toggle_right_frame_btn.configure(text=">")
 
     def stop_all_events(self):
         self.log_status("ESC pressed: Stopping all running events...")
