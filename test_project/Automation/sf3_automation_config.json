@@ -3,6 +3,18 @@
     "Event": {
       "images": [
         {
+          "name": "Home \u2794 Event",
+          "path": "C:\\msBackups\\shadowfight3\\Home.png",
+          "confidence": 0.8,
+          "region": null,
+          "action": {
+            "type": "mouse_sequence",
+            "sequence": "1427, 401,2,637, 614,1"
+          },
+          "enabled": true,
+          "is_folder": false
+        },
+        {
           "name": "Action",
           "path": "C:/msBackups/shadowfight3/action",
           "confidence": 0.8,
@@ -19,18 +31,6 @@
           },
           "enabled": true,
           "is_folder": true
-        },
-        {
-          "name": "Home \u2794 Event",
-          "path": "C:\\msBackups\\shadowfight3\\Home.png",
-          "confidence": 0.8,
-          "region": null,
-          "action": {
-            "type": "mouse_sequence",
-            "sequence": "1427, 401,2,637, 614,1"
-          },
-          "enabled": true,
-          "is_folder": false
         }
       ],
       "enabled": true
