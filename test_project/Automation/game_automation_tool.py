@@ -339,7 +339,7 @@ class GameAutomationTool(ctk.CTk):
 
         # Action Type
         ctk.CTkLabel(dialog, text="Action Type:").pack(anchor="w", padx=20, pady=(10, 0))
-        action_type_options = ["mouse_click", "key_press", "key_sequence", "mouse_sequence", "custom_function"]
+        action_type_options = ["mouse_click", "key_press", "key_sequence", "mouse_sequence", "custom_function", "click_on_found_image"]
         ctk.CTkOptionMenu(dialog, variable=action_type_var, values=action_type_options, command=lambda x: self.on_action_type_select(x, action_frame, image_data.get("action", {}))).pack(padx=20, fill=ctk.X)
 
         # Action specific inputs frame
@@ -579,6 +579,10 @@ class GameAutomationTool(ctk.CTk):
             action_frame.function_var = function_var
             action_frame.params_var = params_var
 
+        elif action_type == "click_on_found_image":
+            # No specific inputs needed for this action type
+            pass
+
     def on_event_select(self, event):
         self.refresh_image_list()
 
@@ -742,7 +746,7 @@ class GameAutomationTool(ctk.CTk):
                 )
 
             if location:
-                self.execute_action(image_data["action"])
+                self.execute_action(image_data["action"], location)
                 return True
         except pyautogui.ImageNotFoundException:
             pass
@@ -750,7 +754,7 @@ class GameAutomationTool(ctk.CTk):
             self.log_status(f"Error finding image {image_data['name']}: {str(e)}")
         return False
 
-    def execute_action(self, action):
+    def execute_action(self, action, found_location=None):
         try:
             action_type = action["type"]
             if action_type == "key_press":
@@ -782,6 +786,15 @@ class GameAutomationTool(ctk.CTk):
                     action.get("params", "{}"),
                     self.target_window
                 )
+            elif action_type == "click_on_found_image":
+                if found_location:
+                    x, y, w, h = found_location
+                    center_x = x + w // 2
+                    center_y = y + h // 2
+                    pyautogui.click(center_x, center_y)
+                    time.sleep(action.get("delay", 0.1)) # Add a small delay after clicking
+                else:
+                    self.log_status("Error: No image location provided for 'click_on_found_image' action.")
         except Exception as e:
             self.log_status(f"Error executing action: {str(e)}")
 
