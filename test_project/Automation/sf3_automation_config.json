@@ -66,6 +66,38 @@
           },
           "enabled": true,
           "is_folder": true
+        },
+        {
+          "name": "Enter Fight",
+          "path": "C:\\msBackups\\shadowfight3\\fame\\b_tournament.png",
+          "confidence": 0.8,
+          "region": [
+            196,
+            658,
+            427,
+            862
+          ],
+          "action": {
+            "type": "click_on_found_image"
+          },
+          "enabled": true,
+          "is_folder": false
+        },
+        {
+          "name": "Enter Fight (Fight TXT)",
+          "path": "C:\\msBackups\\shadowfight3\\fame\\b_space2.png",
+          "confidence": 0.8,
+          "region": [
+            700,
+            821,
+            1347,
+            952
+          ],
+          "action": {
+            "type": "click_on_found_image"
+          },
+          "enabled": true,
+          "is_folder": false
         }
       ],
       "enabled": true
