@@ -38,7 +38,6 @@ class GameAutomationTool(ctk.CTk):
 
         # Load existing config
         self.load_config()
-        self.setup_menu()
 
         # Bind close event
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -132,36 +131,13 @@ class GameAutomationTool(ctk.CTk):
         self.status_text = ctk.CTkTextbox(right_frame, wrap=ctk.WORD, height=20)
         self.status_text.pack(fill=ctk.BOTH, expand=True)
 
-        # Utility buttons
-        util_frame = ctk.CTkFrame(right_frame)
-        util_frame.pack(fill=ctk.X, pady=(10, 0))
-
-        ctk.CTkButton(util_frame, text="Screenshot", command=self.take_screenshot).pack(side=ctk.LEFT, padx=(0, 5))
-        ctk.CTkButton(util_frame, text="Get Mouse Position", command=self.get_mouse_position).pack(side=ctk.LEFT, padx=(0, 5))
-        ctk.CTkButton(util_frame, text="Test Image", command=self.test_image_recognition).pack(side=ctk.LEFT)
+        
 
         # Initialize display
         self.refresh_event_list()
         self.refresh_control_buttons()
 
-    def setup_menu(self):
-        menu_frame = ctk.CTkFrame(self)
-        menu_frame.pack(fill=ctk.X, side=ctk.TOP, pady=(0, 5))
-
-        # File menu
-        file_button = ctk.CTkButton(menu_frame, text="File")
-        file_button.pack(side=ctk.LEFT, padx=5)
-        # You can create a dropdown menu for this button if needed
-
-        # Tools menu
-        tools_button = ctk.CTkButton(menu_frame, text="Tools")
-        tools_button.pack(side=ctk.LEFT, padx=5)
-        # You can create a dropdown menu for this button if needed
-
-        # Help menu
-        help_button = ctk.CTkButton(menu_frame, text="Help")
-        help_button.pack(side=ctk.LEFT, padx=5)
-        # You can create a dropdown menu for this button if needed
+    
 
     def add_event(self):
         dialog = CTkInputDialog(text="Enter event name:", title="Add Event")
