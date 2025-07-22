@@ -621,6 +621,21 @@ path_replace.pack(side="left", padx=(0, 0), pady=(0, 0))
 path_replace.bind("<Button-1>",lambda event=None:subprocess.Popen(r'cmd /c C:\ms1\path_tracker.py'))
 path_replace.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\path_tracker.py'))
 
+Automation = tk.Label(ROOT1, text="AutoTT", bg="#1d2027", fg="#86ff45",
+                      height=0, width=0, relief="flat", highlightthickness=0,
+                      highlightbackground="#ffffff", anchor="w",
+                      font=("JetBrainsMono NFP", 16, "bold"))
+Automation.pack(side="left", padx=(0, 0), pady=(0, 0))
+Automation.bind("<Button-1>", lambda event=None: subprocess.Popen(
+    r'cmd /c game_automation_tool.py',
+    cwd=r'C:\ms1\test_project\Automation',
+    shell=True
+))
+Automation.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
+    r'code game_automation_tool.py',
+    cwd=r'C:\ms1\test_project\Automation',
+    shell=True
+))
 
 
 #! FFMPEG
