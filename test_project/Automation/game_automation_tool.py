@@ -625,6 +625,17 @@ class GameAutomationTool(ctk.CTk):
                 )
                 checkbox.pack(side=ctk.LEFT, padx=(5, 0), expand=True, fill=ctk.X)
 
+                move_btn = ctk.CTkButton(
+                    image_entry_frame,
+                    text="↕", # Up-Down arrow
+                    width=30
+                )
+                move_btn.pack(side=ctk.LEFT, padx=(5, 0))
+
+                # Bind left-click to move up and right-click to move down
+                move_btn.bind("<Button-1>", lambda event, idx=i: self.move_image_up(idx))
+                move_btn.bind("<Button-3>", lambda event, idx=i: self.move_image_down(idx))
+
                 edit_btn = ctk.CTkButton(
                     image_entry_frame,
                     text="Edit",
@@ -655,6 +666,30 @@ class GameAutomationTool(ctk.CTk):
             self.events_data[event_name]["images"][index]["enabled"] = enabled
             self.save_config()
             self.log_status(f"Image '{self.events_data[event_name]["images"][index]["name"]}' enabled set to {enabled}")
+
+    def move_image_up(self, index, event=None):
+        event_name = self.selected_event.get()
+        if not event_name or event_name not in self.events_data:
+            return
+
+        if index > 0:
+            images = self.events_data[event_name]["images"]
+            images.insert(index - 1, images.pop(index))
+            self.save_config()
+            self.refresh_image_list()
+            self.log_status("Image moved up.")
+
+    def move_image_down(self, index, event=None):
+        event_name = self.selected_event.get()
+        if not event_name or event_name not in self.events_data:
+            return
+
+        images = self.events_data[event_name]["images"]
+        if index < len(images) - 1:
+            images.insert(index + 1, images.pop(index))
+            self.save_config()
+            self.refresh_image_list()
+            self.log_status("Image moved down.")
 
     def refresh_control_buttons(self):
         for widget in self.control_buttons_frame.winfo_children():
