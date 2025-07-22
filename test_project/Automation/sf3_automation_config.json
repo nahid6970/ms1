@@ -3,14 +3,14 @@
     "RR": {
       "images": [
         {
-          "name": "asdasd ",
-          "path": "C:/Users/nahid/Pictures/Title/1000006832.jpg",
+          "name": "Home",
+          "path": "C:\\msBackups\\shadowfight3\\Home.png",
           "confidence": 0.8,
           "region": null,
           "action": {
             "type": "mouse_click",
-            "x": 1201,
-            "y": 583,
+            "x": 1429,
+            "y": 399,
             "delay": 0.1
           },
           "enabled": true
