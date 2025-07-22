@@ -12,6 +12,24 @@
             "sequence": "1427, 401,2,570, 215,1"
           },
           "enabled": true
+        },
+        {
+          "name": "Action",
+          "path": "C:/msBackups/shadowfight3/action",
+          "confidence": 0.8,
+          "region": [
+            187,
+            100,
+            383,
+            265
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "j",
+            "delay": 0.1
+          },
+          "enabled": true,
+          "is_folder": true
         }
       ],
       "enabled": true

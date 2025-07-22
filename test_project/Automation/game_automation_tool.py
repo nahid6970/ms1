@@ -307,6 +307,7 @@ class GameAutomationTool(ctk.CTk):
         y2_var = ctk.StringVar(value=str(region_data[3]) if region_data and len(region_data) > 3 and region_data[3] is not None else "")
         action_type_var = ctk.StringVar(value=image_data.get("action", {}).get("type", "mouse_click"))
         enabled_var = ctk.BooleanVar(value=image_data.get("enabled", True))
+        is_folder_var = ctk.BooleanVar(value=image_data.get("is_folder", False))
 
         # Image Name
         ctk.CTkLabel(dialog, text="Image Name:").pack(anchor="w", padx=20, pady=(10, 0))
@@ -317,7 +318,10 @@ class GameAutomationTool(ctk.CTk):
         path_frame = ctk.CTkFrame(dialog)
         path_frame.pack(padx=20, fill=ctk.X)
         ctk.CTkEntry(path_frame, textvariable=path_var, width=400).pack(side=ctk.LEFT, fill=ctk.X, expand=True)
-        ctk.CTkButton(path_frame, text="Browse", command=lambda: self.browse_image_file(path_var)).pack(side=ctk.RIGHT, padx=(10, 0))
+        ctk.CTkButton(path_frame, text="Browse", command=lambda: self.browse_image_file(path_var, is_folder_var.get())).pack(side=ctk.RIGHT, padx=(10, 0))
+
+        # Is Folder Checkbox
+        ctk.CTkCheckBox(dialog, text="Is Folder (search for any image in this directory)", variable=is_folder_var).pack(anchor="w", padx=20, pady=(5, 0))
 
         # Confidence
         ctk.CTkLabel(dialog, text="Confidence (0.1-1.0):").pack(anchor="w", padx=20, pady=(10, 0))
@@ -348,7 +352,7 @@ class GameAutomationTool(ctk.CTk):
         # Buttons
         button_frame = ctk.CTkFrame(dialog)
         button_frame.pack(pady=20)
-        ctk.CTkButton(button_frame, text="Save", command=lambda: self.save_image_config(event_name, image_index, name_var.get(), path_var.get(), confidence_var.get(), x1_var.get(), y1_var.get(), x2_var.get(), y2_var.get(), action_type_var.get(), action_frame, enabled_var.get(), dialog)).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Save", command=lambda: self.save_image_config(event_name, image_index, name_var.get(), path_var.get(), confidence_var.get(), x1_var.get(), y1_var.get(), x2_var.get(), y2_var.get(), action_type_var.get(), action_frame, enabled_var.get(), is_folder_var.get(), dialog)).pack(side=ctk.LEFT, padx=10)
         ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
 
         # Initial call to set up action fields
@@ -356,7 +360,7 @@ class GameAutomationTool(ctk.CTk):
 
         dialog.wait_window()
 
-    def save_image_config(self, event_name, image_index, name, path, confidence, x1, y1, x2, y2, action_type, action_frame, enabled, dialog):
+    def save_image_config(self, event_name, image_index, name, path, confidence, x1, y1, x2, y2, action_type, action_frame, enabled, is_folder, dialog):
         if not name or not path:
             messagebox.showerror("Error", "Image Name and Path cannot be empty.")
             return
@@ -436,7 +440,8 @@ class GameAutomationTool(ctk.CTk):
             "confidence": confidence,
             "region": region,
             "action": action,
-            "enabled": enabled
+            "enabled": enabled,
+            "is_folder": is_folder
         }
 
         if image_index is None:
@@ -452,13 +457,20 @@ class GameAutomationTool(ctk.CTk):
         self.refresh_image_list()
         dialog.destroy()
 
-    def browse_image_file(self, path_var):
-        filename = filedialog.askopenfilename(
-            title="Select Image File",
-            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif"), ("All files", "*.*")]
-        )
-        if filename:
-            path_var.set(filename)
+    def browse_image_file(self, path_var, is_folder=False):
+        if is_folder:
+            dirname = filedialog.askdirectory(
+                title="Select Image Folder"
+            )
+            if dirname:
+                path_var.set(dirname)
+        else:
+            filename = filedialog.askopenfilename(
+                title="Select Image File",
+                filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif"), ("All files", "*.*")]
+            )
+            if filename:
+                path_var.set(filename)
 
     def get_screen_region(self, x1_var, y1_var, x2_var, y2_var):
         if not KEYBOARD_AVAILABLE:
@@ -701,12 +713,34 @@ class GameAutomationTool(ctk.CTk):
 
     def find_image_and_execute(self, image_data):
         try:
-            location = pyautogui.locateOnScreen(
-                image_data["path"],
-                confidence=image_data["confidence"],
-                grayscale=True,
-                region=image_data.get("region")
-            )
+            location = None
+            if image_data.get("is_folder", False):
+                # Search for any image in the specified folder
+                image_folder = image_data["path"]
+                for filename in os.listdir(image_folder):
+                    if filename.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif")):
+                        full_path = os.path.join(image_folder, filename)
+                        try:
+                            location = pyautogui.locateOnScreen(
+                                full_path,
+                                confidence=image_data["confidence"],
+                                grayscale=True,
+                                region=image_data.get("region")
+                            )
+                            if location:
+                                self.log_status(f"Found image '{filename}' in folder '{image_folder}'")
+                                break # Found an image, no need to search further in this folder
+                        except pyautogui.ImageNotFoundException:
+                            continue # Image not found, try next one in folder
+            else:
+                # Search for a single image file
+                location = pyautogui.locateOnScreen(
+                    image_data["path"],
+                    confidence=image_data["confidence"],
+                    grayscale=True,
+                    region=image_data.get("region")
+                )
+
             if location:
                 self.execute_action(image_data["action"])
                 return True
