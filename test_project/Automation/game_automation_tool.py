@@ -71,11 +71,10 @@ class GameAutomationTool(ctk.CTk):
 
         # Event dropdown
         self.selected_event = ctk.StringVar()
-        self.event_dropdown = ctk.CTkComboBox(
+        self.event_dropdown = ctk.CTkOptionMenu(
             event_select_frame,
             variable=self.selected_event,
-            state="readonly",
-            width=25,
+            values=["No Events"], # Initial dummy value
             command=self.on_event_select
         )
         self.event_dropdown.pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 5))
@@ -93,7 +92,7 @@ class GameAutomationTool(ctk.CTk):
         event_btn_frame = ctk.CTkFrame(left_frame)
         event_btn_frame.pack(fill=ctk.X, pady=(0, 10))
 
-        ctk.CTkButton(event_btn_frame, text="Delete Event", command=self.delete_event).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkButton(event_btn_frame, text="Delete Event", command=self.delete_event, fg_color="red", hover_color="darkred").pack(side=ctk.LEFT, padx=(0, 5))
         ctk.CTkButton(event_btn_frame, text="Rename Event", command=self.rename_event).pack(side=ctk.LEFT, padx=(0, 5))
         ctk.CTkButton(event_btn_frame, text="Duplicate Event", command=self.duplicate_event).pack(side=ctk.LEFT)
 
@@ -589,15 +588,20 @@ class GameAutomationTool(ctk.CTk):
     def refresh_event_list(self):
         current_selection = self.selected_event.get()
         event_names = list(self.events_data.keys())
+        if not event_names:
+            event_names = ["No Events"] # Placeholder if no events exist
+
+        # Update the values of the OptionMenu
         self.event_dropdown.configure(values=event_names)
 
-        if current_selection in event_names:
+        if current_selection in event_names and current_selection != "No Events":
             self.selected_event.set(current_selection)
-        elif event_names:
+        elif event_names and event_names[0] != "No Events":
             self.selected_event.set(event_names[0])
         else:
-            self.selected_event.set("")
+            self.selected_event.set("No Events")
         self.update_idletasks()
+        self.refresh_image_list() # Refresh image list when event list changes
 
     def refresh_image_list(self):
         for widget in self.image_frame.winfo_children():

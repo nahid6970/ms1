@@ -626,7 +626,7 @@ def Event_Function():
                         press_global_screen_with_delays((center[0], center[1], 5))
                         press_keys_with_delays(window, 'g', 1)
 
-                    # elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
+                    elif any(find_image(image, confidence=actionF[image], region=Action_region) for image in actionF): press_keys_with_delays(window, 'q', 1, '0', 1, "m", 0) #! quit game creepy party
 
                     # Handle cont_dynamic folder images
                     for contimg in cont_images:
