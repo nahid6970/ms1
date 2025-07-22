@@ -44,7 +44,7 @@
           "region": null,
           "action": {
             "type": "mouse_sequence",
-            "sequence": "1632, 893,2,1632, 893,1"
+            "sequence": "1632, 893,3,1677, 367,1"
           },
           "enabled": true,
           "is_folder": false
