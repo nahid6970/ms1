@@ -685,7 +685,9 @@ class GameAutomationTool(ctk.CTk):
                     image_entry_frame,
                     text="\uf0dc", # Up-Down arrow
                     font=("Jetbrainsmono nfp", 16), corner_radius=0,
-                    width=25
+                    width=25,
+                    fg_color="#212121",
+                    text_color="#5cf25c"
                 )
                 move_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
@@ -698,7 +700,9 @@ class GameAutomationTool(ctk.CTk):
                     text="\uf044",
                     font=("Jetbrainsmono nfp", 16), corner_radius=0,
                     command=lambda idx=i: self.edit_image(idx),
-                    width=25
+                    width=25,
+                    fg_color="#212121",
+                    text_color="#6ca8fa"
                 )
                 edit_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
@@ -707,7 +711,9 @@ class GameAutomationTool(ctk.CTk):
                     text="\uf4c4",
                     font=("Jetbrainsmono nfp", 16), corner_radius=0,
                     command=lambda idx=i: self.duplicate_image(idx),
-                    width=25
+                    width=25,
+                    fg_color="#212121",
+                    text_color="#f2d21c"
                 )
                 duplicate_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
@@ -716,10 +722,10 @@ class GameAutomationTool(ctk.CTk):
                     text="\uf00d",
                     font=("Jetbrainsmono nfp", 16), corner_radius=0,
                     command=lambda idx=i: self.delete_image(idx),
-                    fg_color="red",
+                    fg_color="#212121",
                     hover_color="darkred",
-                    text_color="black",
-                    width=25
+                    text_color="red",
+                    width=25,
                 )
                 delete_btn.pack(side=ctk.LEFT, padx=(5, 5))
         self.update_idletasks()
