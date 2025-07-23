@@ -22,7 +22,7 @@ class GameAutomationTool(ctk.CTk):
         super().__init__()
 
         self.title("PyAutoGUI Game Automation Tool - Shadow Fight 3")
-        self.geometry("460x800")
+        self.geometry("570x800")
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
 
@@ -138,8 +138,8 @@ class GameAutomationTool(ctk.CTk):
         self.status_text.pack(fill=ctk.BOTH, expand=True)
 
         # Toggle button for the right panel
-        self.toggle_right_frame_btn = ctk.CTkButton(self.main_frame, text=">", command=self.toggle_right_frame, width=30)
-        self.toggle_right_frame_btn.pack(side=ctk.LEFT, padx=(5, 0))
+        self.toggle_right_frame_btn = ctk.CTkButton(self, text="Expand", command=self.toggle_right_frame, width=30)
+        self.toggle_right_frame_btn.place(relx=0.95, rely=0.06, anchor="ne") # Position below minimal button
 
         
 
@@ -366,7 +366,7 @@ class GameAutomationTool(ctk.CTk):
 
         # Image Name
         ctk.CTkLabel(dialog, text="Image Name:").pack(anchor="w", padx=20, pady=(10, 0))
-        ctk.CTkEntry(dialog, textvariable=name_var, width=500).pack(padx=20, fill=ctk.X)
+        ctk.CTkEntry(dialog, textvariable=name_var, width=570).pack(padx=20, fill=ctk.X)
 
         # Image Path
         ctk.CTkLabel(dialog, text="Image Path:").pack(anchor="w", padx=20, pady=(10, 0))
@@ -380,7 +380,7 @@ class GameAutomationTool(ctk.CTk):
 
         # Confidence
         ctk.CTkLabel(dialog, text="Confidence (0.1-1.0):").pack(anchor="w", padx=20, pady=(10, 0))
-        ctk.CTkEntry(dialog, textvariable=confidence_var, width=500).pack(padx=20, fill=ctk.X)
+        ctk.CTkEntry(dialog, textvariable=confidence_var, width=570).pack(padx=20, fill=ctk.X)
 
         # Region
         ctk.CTkLabel(dialog, text="Region (x1, y1, x2, y2):").pack(anchor="w", padx=20, pady=(10, 0))
@@ -1224,8 +1224,8 @@ KEYBOARD SHORTCUTS:
             self.toggle_right_frame_btn.configure(text="<")
         else:
             self.right_frame.pack_forget()
-            self.geometry("550x800")
-            self.toggle_right_frame_btn.configure(text=">")
+            self.geometry("570x800")
+            self.toggle_right_frame_btn.configure(text="Expand")
 
     def show_minimal_mode_window(self):
         self.withdraw() # Hide the main window
