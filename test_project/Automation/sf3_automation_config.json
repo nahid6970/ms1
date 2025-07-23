@@ -46,7 +46,7 @@
             "type": "key_sequence",
             "sequence": "num1,0,c,0"
           },
-          "enabled": true,
+          "enabled": false,
           "is_folder": false
         },
         {
