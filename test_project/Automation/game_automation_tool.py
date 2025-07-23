@@ -683,8 +683,9 @@ class GameAutomationTool(ctk.CTk):
 
                 move_btn = ctk.CTkButton(
                     image_entry_frame,
-                    text="↕", # Up-Down arrow
-                    width=30
+                    text="\uf0dc", # Up-Down arrow
+                    font=("Jetbrainsmono nfp", 16), corner_radius=0,
+                    width=25
                 )
                 move_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
@@ -694,27 +695,31 @@ class GameAutomationTool(ctk.CTk):
 
                 edit_btn = ctk.CTkButton(
                     image_entry_frame,
-                    text="Edit",
+                    text="\uf044",
+                    font=("Jetbrainsmono nfp", 16), corner_radius=0,
                     command=lambda idx=i: self.edit_image(idx),
-                    width=60
+                    width=25
                 )
                 edit_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
                 duplicate_btn = ctk.CTkButton(
                     image_entry_frame,
-                    text="Duplicate",
+                    text="\uf4c4",
+                    font=("Jetbrainsmono nfp", 16), corner_radius=0,
                     command=lambda idx=i: self.duplicate_image(idx),
-                    width=80
+                    width=25
                 )
                 duplicate_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
                 delete_btn = ctk.CTkButton(
                     image_entry_frame,
-                    text="Delete",
+                    text="\uf00d",
+                    font=("Jetbrainsmono nfp", 16), corner_radius=0,
                     command=lambda idx=i: self.delete_image(idx),
                     fg_color="red",
                     hover_color="darkred",
-                    width=60
+                    text_color="black",
+                    width=25
                 )
                 delete_btn.pack(side=ctk.LEFT, padx=(5, 5))
         self.update_idletasks()
@@ -769,7 +774,9 @@ class GameAutomationTool(ctk.CTk):
                 command=lambda name=event_name: self.toggle_event(name),
                 width=20,
                 fg_color="red" if is_running else "#3B8ED0", # Red when running, default otherwise
-                hover_color="darkred" if is_running else "#325882" # Darker red when running, default otherwise
+                hover_color="darkred" if is_running else "#325882", # Darker red when running, default otherwise
+                font=("Jetbrainsmono nfp", 16, "bold"), corner_radius=0,
+                text_color="#442f1e"
             )
             btn.pack(pady=2, fill=ctk.X)
         self.update_idletasks()
@@ -790,7 +797,9 @@ class GameAutomationTool(ctk.CTk):
                 command=lambda name=event_name: self.toggle_event(name),
                 width=100,
                 fg_color="red" if is_running else "#3B8ED0",
-                hover_color="darkred" if is_running else "#325882"
+                hover_color="darkred" if is_running else "#325882",
+                font=("Jetbrainsmono nfp", 12, "bold"), corner_radius=0,
+                text_color="#442f1e"
             )
             btn.pack(side=ctk.LEFT, padx=5, pady=5)
 
