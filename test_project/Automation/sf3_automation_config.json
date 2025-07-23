@@ -15,7 +15,7 @@
           "is_folder": false
         },
         {
-          "name": "Action",
+          "name": "Action (Hound)",
           "path": "C:/msBackups/shadowfight3/action",
           "confidence": 0.8,
           "region": [
@@ -26,8 +26,8 @@
           ],
           "action": {
             "type": "key_press",
-            "key": "j",
-            "delay": 0.1
+            "key": "F15",
+            "delay": 5.0
           },
           "enabled": true,
           "is_folder": true
@@ -46,7 +46,7 @@
             "type": "key_sequence",
             "sequence": "num1,0,c,0"
           },
-          "enabled": false,
+          "enabled": true,
           "is_folder": false
         },
         {
@@ -62,6 +62,24 @@
           "action": {
             "type": "key_sequence",
             "sequence": "num2,0,c,0"
+          },
+          "enabled": false,
+          "is_folder": false
+        },
+        {
+          "name": "Register  ",
+          "path": "C:\\msBackups\\shadowfight3\\event\\SELECT.png",
+          "confidence": 0.8,
+          "region": [
+            1076,
+            183,
+            1524,
+            502
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "1",
+            "delay": 0.1
           },
           "enabled": true,
           "is_folder": false
