@@ -9,7 +9,7 @@
           "region": null,
           "action": {
             "type": "mouse_sequence",
-            "sequence": "1427, 401,2,637, 614,1"
+            "sequence": "1427, 401,1"
           },
           "enabled": true,
           "is_folder": false
