@@ -865,11 +865,11 @@ div.toggle-container {
     "url": "https://login.tailscale.com/admin/machines"
   },
   {
-    "name": "noip",
-    "url": "https://my.noip.com/dynamic-dns",
+    "default_type": "text",
     "img_src": "https://d2qr50rz2oof04.cloudfront.net/assets/img/logo/logo-bug.png",
+    "name": "noip",
     "text": "noip<br>Aug7",
-    "default_type": "text"
+    "url": "https://my.noip.com/dynamic-dns"
   },
   {
     "color": "#b259e6",
@@ -913,56 +913,80 @@ div.toggle-container {
     "url": "https://www.nerdfonts.com/cheat-sheet"
   },
   {
+    "collapsible": false,
     "default_type": "img",
+    "display_style": "flex",
     "font_size": "35px",
     "group": "Local (Apps)",
     "icon_class": "nf nf-md-television_classic",
     "img_src": "http://192.168.0.101:8989/Content/Images/logo.svg",
     "name": "Sonarr",
     "text": "Sonarr",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://192.168.0.101:8989/"
   },
   {
+    "collapsible": false,
     "default_type": "img",
+    "display_style": "flex",
     "font_size": "35px",
     "group": "Local (Apps)",
     "icon_class": "nf-md-movie_roll",
     "img_src": "http://192.168.0.101:7878/Content/Images/Icons/logo-radarr.png",
     "name": "Radarr",
     "text": "Radarr",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://192.168.0.101:7878/"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Local (Apps)",
     "height": "50",
     "img_src": "http://192.168.0.101:9696/Content/Images/logo.png",
     "name": "Prowlarr",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://192.168.0.101:9696/",
     "width": "50"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Local (Apps)",
     "img_src": "http://192.168.0.101:6767/images/logo64.png",
     "name": "Bazarr",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://192.168.0.101:6767/series"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Local (Apps)",
     "img_src": "http://127.0.0.1:9117/jacket_medium.png",
     "name": "JackettAPI ",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://127.0.0.1:9117/UI/Dashboard"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "color": "#20acd7",
     "default_type": "nerd-font",
     "display_style": "flex",
@@ -971,10 +995,14 @@ div.toggle-container {
     "icon_class": "nf nf-md-folder_sync",
     "img_src": "http://127.0.0.1:8384/assets/img/logo-horizontal.svg",
     "name": "Syncthing",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://127.0.0.1:8384/"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "nerd-font",
     "display_style": "flex",
     "font_size": "35px",
@@ -982,10 +1010,14 @@ div.toggle-container {
     "icon_class": "nf nf-linux-tor",
     "img_src": "http://192.168.0.101:8080/images/qbittorrent-tray.svg",
     "name": "qBittorrent",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://192.168.0.101:8080/"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "color": "#009fff",
     "default_type": "nerd-font",
     "display_style": "flex",
@@ -993,10 +1025,21 @@ div.toggle-container {
     "group": "Local (Apps)",
     "icon_class": "nf nf-fa-wifi",
     "name": "WIFI",
+    "top_bg_color": "#2d2d2d",
+    "top_border_color": "#444444",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://192.168.0.1/"
   },
   {
-    "collapsible": true,
+    "default_type": "img",
+    "group": "Chat-BOT",
+    "img_src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAaVBMVEVHcEwdHR0AAAEFBQYCAgIDAwQJCQkBAQJaWlojJScLOGwXhf0TExQQWq8QEBE8PDxLS0swMDH09PT///+FhYVaW1qam5oaGxvd3d27u7tvcG8sLixCQ0NSUlF0dXVvcHB7fHw/QEBNTk0iDk46AAAAI3RSTlMAN4O42en//yb///+F//////////7////////LuoK35YLWhTozBjoAAAGBSURBVHgBfZMFlsMwDAUdkqqCoYmqxst7/0Put1PK0pQ7E9N7cZWm7fqB+AYNfdc27sqm41/pNpfLB/6DoanX/+mJhzJGx//QYYI/lAgXGtf+7re73ZbB/q8ZDrvdgYl953pe8CEKV1KMEcEBP8n37rqHdBwnLuhxHE9w9SoaHK2Dq68QhnC8Dq6ersU6uHoCsP5HcPUVBObXgY6L50tgtl7DGdef4a94T+ugcg5LUqQQyzqYz+N4nFDA4+FNwiqYWeaSGbP3CCSl9BDAg1OZZhICCAKC344aX30pQgo/jprqNBNZRYIbeElkPmcGHj91zgICnsn1VIMrtPQpWNJgQZ9c50uxithblBRDTBqf3V7MY1g8ES5p2Z4FSRJVX1zjBXu2uvFlEkkgpCQJwca5J5MURPBuaMjgTOBDjFFfy42jQSMIQeCyxmCGVoKqvmEAFG85K4gxT3hoEjOTePWleM2T5pynE8iao4kE9M8XD5r31zfoGcE05USUPl4/m6q+ALq7K1Ui7+ebAAAAAElFTkSuQmCC",
+    "name": "KIMI-K2",
+    "url": "https://www.kimi.com/"
+  },
+  {
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Chat-BOT",
@@ -1004,21 +1047,12 @@ div.toggle-container {
     "name": "ChatGPT",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "https://chatgpt.com/"
   },
   {
-    "collapsible": true,
-    "default_type": "img",
-    "display_style": "flex",
-    "group": "Chat-BOT",
-    "img_src": "https://statics.moonshot.cn/kimi-blog/assets/logo-CvjirWOb.svg",
-    "name": "Kimi k2",
-    "top_bg_color": "#",
-    "top_border_color": "#ec2222",
-    "url": "https://www.kimi.com/"
-  },
-  {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Chat-BOT",
@@ -1026,10 +1060,12 @@ div.toggle-container {
     "name": "DeepSeek",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "https://chat.deepseek.com/"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Chat-BOT",
@@ -1038,10 +1074,12 @@ div.toggle-container {
     "name": "Claude",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "https://claude.ai/new"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Chat-BOT",
@@ -1049,10 +1087,12 @@ div.toggle-container {
     "name": "Google Bard",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "https://bard.google.com/"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Chat-BOT",
@@ -1061,10 +1101,12 @@ div.toggle-container {
     "name": "KIRO",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "https://kiro.dev/"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Chat-BOT",
@@ -1073,27 +1115,33 @@ div.toggle-container {
     "name": "ollama-chat",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "http://localhost:8000/",
     "width": "40"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Chat-BOT",
     "name": "mcp",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "https://github.com/modelcontextprotocol/servers"
   },
   {
-    "collapsible": true,
+    "collapsible": false,
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Chat-BOT",
     "name": "mcp-host",
     "top_bg_color": "#",
     "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
     "url": "https://github.com/mark3labs/mcphost"
   },
   {
@@ -1194,16 +1242,16 @@ div.toggle-container {
     "url": "https://store.rg-adguard.net/"
   },
   {
+    "collapsible": true,
     "default_type": "nerd-font",
+    "display_style": "flex",
     "group": "info / News",
     "name": "diyabari milestone school & college \ud83c\udfaf proshikhon biman blast // 21 july // Chengdu F-7BGI (Combat Jet)",
-    "url": "http://example.com",
-    "display_style": "flex",
-    "collapsible": true,
     "top_bg_color": "#2d2d2d",
-    "top_text_color": "#ffffff",
     "top_border_color": "#444444",
-    "top_hover_color": "#3a3a3a"
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
+    "url": "http://example.com"
   },
   {
     "default_type": "nerd-font",
@@ -1212,10 +1260,23 @@ div.toggle-container {
     "url": "https://github.com/Vysp3r/ProtonPlus"
   },
   {
-    "name": "Wayland-Protocol addoption info",
+    "default_type": "nerd-font",
     "group": "Linux",
-    "url": "https://absurdlysuspicious.github.io/wayland-protocols-table/",
-    "default_type": "nerd-font"
+    "name": "Wayland-Protocol addoption info",
+    "url": "https://absurdlysuspicious.github.io/wayland-protocols-table/"
+  },
+  {
+    "collapsible": false,
+    "default_type": "img",
+    "display_style": "flex",
+    "group": "Chat-BOT",
+    "img_src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAgVBMVEVHcExNOe5hVu5ua/FiTe2AbO3HxPhhUetpYu5va/BaS/FDCubc2fr///9jWO2Hf/Dl4/xaQ+pdVu94ffRZQuvv7f13e/Kll/GZivBeQer5+P9NC+RXOOhcS+vCvPbUz/i5svVlXe5YTO5WHeVSLOetpPNiMuZiPuhiSephU+xfI+XgKL3tAAAAK3RSTlMALsbAa/3/////Fnz///////+Ifqv//v//1P/////////dWP////////XBmCbmPwAAAWxJREFUeAFtkQViwzAMAMMqGLO6dZgTb/9/4CRv5V4xOZGV4EYYxXGcBJ9JM9jt94eP7sj4Xux28UcpOVcabf71x6M7Gc65Fmix9v58lg/dwws6qwFIe3v+E4cwDAtVclXVWjdN8x/w5d0+a9tLZnjXejJ8I50kGWlFJVnJn1A5dROwx/9Zb56l7zkIoTNK7Tv2QD+SzIWAhspU0zTPc13X89Ijp4BAqRdKXdcNcdqWxphyCUmOAmDGhuVE1m31/2RDQAwAWuJVP1Fq3eNfWkmXkAwB3MzwcvOp+IfNLX7Lv72C24Biq3WdOvyzczSiyX1XcM7Hpuua4k9buya11vqu3yi3mWKrilZRO+doxzRvDoAzThYHlpamIQkAkT8oTmuX5cJLZUtMnzbn7SHwmU5wwrR/jbetwMdIDoGakSuZpZEnPCx1+2dMjULYcj3sKXggOf7R05pQBp/4KTm6NfkoD/ZCMvhM8oPcp/kFeWsqRiVRXjsAAAAASUVORK5CYII=",
+    "name": "qwen",
+    "top_bg_color": "#",
+    "top_border_color": "#ec2222",
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
+    "url": "https://chat.qwen.ai/"
   }
 ];
     
@@ -2635,6 +2696,6 @@ setInterval(updateDateTime, 1000);
 
   </div>
   
-  <!-- Generated on 2025-07-22 21:52:09 -->
+  <!-- Generated on 2025-07-23 10:03:52 -->
 </body>
 </html>
