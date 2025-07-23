@@ -33,6 +33,7 @@ class GameAutomationTool(ctk.CTk):
         self.config_file = "sf3_automation_config.json"
         self.target_window = "LDPlayer"
         self.right_frame_visible = False
+        self.minimal_window = None
 
         # Setup GUI
         self.setup_gui()
@@ -42,6 +43,10 @@ class GameAutomationTool(ctk.CTk):
 
         # Bind close event
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        # Add a minimize button to the title bar (or a custom one)
+        self.minimize_button = ctk.CTkButton(self, text="Minimal Mode", width=100, command=self.show_minimal_mode_window)
+        self.minimize_button.place(relx=0.95, rely=0.01, anchor="ne")
 
         # Bind global hotkey for stopping all events
         if KEYBOARD_AVAILABLE:
@@ -53,11 +58,11 @@ class GameAutomationTool(ctk.CTk):
 
     def setup_gui(self):
         # Main container
-        main_frame = ctk.CTkFrame(self)
-        main_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=10)
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=10)
 
         # Left Panel - Event Management
-        left_frame = ctk.CTkFrame(main_frame, width=400)
+        left_frame = ctk.CTkFrame(self.main_frame, width=400)
         left_frame.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=False, padx=(0, 10))
         left_frame.pack_propagate(False)
 
@@ -121,7 +126,7 @@ class GameAutomationTool(ctk.CTk):
         self.control_buttons_frame.pack(fill=ctk.X)
 
         # Right Panel - Status and Info
-        self.right_frame = ctk.CTkFrame(main_frame)
+        self.right_frame = ctk.CTkFrame(self.main_frame)
         # Don't pack it initially
 
         # Status Section
@@ -133,7 +138,7 @@ class GameAutomationTool(ctk.CTk):
         self.status_text.pack(fill=ctk.BOTH, expand=True)
 
         # Toggle button for the right panel
-        self.toggle_right_frame_btn = ctk.CTkButton(main_frame, text=">", command=self.toggle_right_frame, width=30)
+        self.toggle_right_frame_btn = ctk.CTkButton(self.main_frame, text=">", command=self.toggle_right_frame, width=30)
         self.toggle_right_frame_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
         
@@ -769,12 +774,33 @@ class GameAutomationTool(ctk.CTk):
             btn.pack(pady=2, fill=ctk.X)
         self.update_idletasks()
 
+    def refresh_minimal_control_buttons(self):
+        if not self.minimal_window:
+            return
+
+        for widget in self.minimal_control_frame.winfo_children():
+            widget.destroy()
+
+        for i, event_name in enumerate(self.events_data.keys()):
+            is_running = event_name in self.threads and self.threads[event_name].is_alive()
+            button_text = f"Stop {event_name}" if is_running else f"Start {event_name}"
+            btn = ctk.CTkButton(
+                self.minimal_control_frame,
+                text=button_text,
+                command=lambda name=event_name: self.toggle_event(name),
+                width=100,
+                fg_color="red" if is_running else "#3B8ED0",
+                hover_color="darkred" if is_running else "#325882"
+            )
+            btn.pack(side=ctk.LEFT, padx=5, pady=5)
+
     def toggle_event(self, event_name):
         if event_name in self.threads and self.threads[event_name].is_alive():
             self.stop_event(event_name)
         else:
             self.start_event(event_name)
         self.refresh_control_buttons()
+        self.refresh_minimal_control_buttons()
 
     def start_event(self, event_name):
         if not self.events_data[event_name]["images"]:
@@ -789,6 +815,7 @@ class GameAutomationTool(ctk.CTk):
     def stop_event(self, event_name):
         self.stop_flags[event_name] = True
         self.log_status(f"Stopped event: {event_name}")
+        self.after(100, self.refresh_minimal_control_buttons)
 
     def run_event(self, event_name):
         event_data = self.events_data[event_name]
@@ -812,6 +839,7 @@ class GameAutomationTool(ctk.CTk):
             if event_name in self.threads:
                 del self.threads[event_name]
             self.after(100, self.refresh_control_buttons) # Refresh UI after thread truly stops
+            self.after(100, self.refresh_minimal_control_buttons)
 
     def find_image_and_execute(self, image_data):
         try:
@@ -1196,8 +1224,39 @@ KEYBOARD SHORTCUTS:
             self.toggle_right_frame_btn.configure(text="<")
         else:
             self.right_frame.pack_forget()
-            self.geometry("460x800")
+            self.geometry("550x800")
             self.toggle_right_frame_btn.configure(text=">")
+
+    def show_minimal_mode_window(self):
+        self.withdraw() # Hide the main window
+
+        self.minimal_window = ctk.CTkToplevel(self)
+        self.minimal_window.title("Minimal Mode")
+        self.minimal_window.geometry("400x100")
+        self.minimal_window.transient(self)
+
+        def on_minimal_close():
+            self.deiconify() # Show the main window again
+            self.minimal_window.destroy()
+            self.minimal_window = None
+
+        self.minimal_window.protocol("WM_DELETE_WINDOW", on_minimal_close)
+
+        # Main container frame in the minimal window
+        container_frame = ctk.CTkFrame(self.minimal_window)
+        container_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=10)
+
+        # Frame for the event buttons that will be refreshed
+        self.minimal_control_frame = ctk.CTkFrame(container_frame)
+        self.minimal_control_frame.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
+
+        # Restore button in the main container, won't be cleared
+        restore_btn = ctk.CTkButton(container_frame, text="Restore", command=on_minimal_close, width=80)
+        restore_btn.pack(side=ctk.RIGHT, padx=(5, 0))
+
+        self.refresh_minimal_control_buttons() # Initial population of the event buttons
+
+    
 
     def stop_all_events(self):
         self.log_status("ESC pressed: Stopping all running events...")
@@ -1205,6 +1264,7 @@ KEYBOARD SHORTCUTS:
             if self.threads[event_name].is_alive():
                 self.stop_event(event_name)
         self.after(100, self.refresh_control_buttons) # Refresh UI after all events are stopped
+        self.after(100, self.refresh_minimal_control_buttons)
 
 def main():
     pyautogui.FAILSAFE = True
