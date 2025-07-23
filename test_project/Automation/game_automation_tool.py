@@ -136,7 +136,7 @@ class GameAutomationTool(ctk.CTk):
         status_label.pack(anchor="w", pady=(0, 10))
 
         # Status text area
-        self.status_text = ctk.CTkTextbox(self.right_frame, font=("Jetbrainsmono nfp", 12), wrap=ctk.WORD, height=20)
+        self.status_text = ctk.CTkTextbox(self.right_frame, font=("Jetbrainsmono nfp", 16), wrap=ctk.WORD, height=20)
         self.status_text.pack(fill=ctk.BOTH, expand=True)
 
         # Toggle button for the right panel
