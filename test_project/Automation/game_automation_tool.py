@@ -46,7 +46,7 @@ class GameAutomationTool(ctk.CTk):
 
         # Add a minimize button to the title bar (or a custom one)
         self.minimize_button = ctk.CTkButton(self, text="Minimal Mode", width=100, command=self.show_minimal_mode_window)
-        self.minimize_button.place(relx=0.95, rely=0.01, anchor="ne")
+        self.minimize_button.place(relx=0.99, rely=0.01, anchor="ne")
 
         # Bind global hotkey for stopping all events
         if KEYBOARD_AVAILABLE:
@@ -138,8 +138,8 @@ class GameAutomationTool(ctk.CTk):
         self.status_text.pack(fill=ctk.BOTH, expand=True)
 
         # Toggle button for the right panel
-        self.toggle_right_frame_btn = ctk.CTkButton(self, text="Expand", command=self.toggle_right_frame, width=30)
-        self.toggle_right_frame_btn.place(relx=0.95, rely=0.06, anchor="ne") # Position below minimal button
+        self.toggle_right_frame_btn = ctk.CTkButton(self, text="Expand Desk", command=self.toggle_right_frame, width=30)
+        self.toggle_right_frame_btn.place(relx=0.99, rely=0.06, anchor="ne") # Position below minimal button
 
         
 
@@ -1221,11 +1221,11 @@ KEYBOARD SHORTCUTS:
         if self.right_frame_visible:
             self.geometry("1200x800")
             self.right_frame.pack(side=ctk.RIGHT, fill=ctk.BOTH, expand=True)
-            self.toggle_right_frame_btn.configure(text="<")
+            self.toggle_right_frame_btn.configure(text="Shrink")
         else:
             self.right_frame.pack_forget()
             self.geometry("570x800")
-            self.toggle_right_frame_btn.configure(text="Expand")
+            self.toggle_right_frame_btn.configure(text="Expand Desk")
 
     def show_minimal_mode_window(self):
         self.withdraw() # Hide the main window
