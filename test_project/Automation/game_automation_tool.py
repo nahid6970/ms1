@@ -1244,11 +1244,6 @@ KEYBOARD SHORTCUTS:
         self.minimal_window.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.minimal_window.transient(self)
         self.minimal_window.overrideredirect(True) # Remove default title bar
-        self.minimal_window.update_idletasks() # Ensure window is rendered before getting dimensions
-
-        # Store initial dimensions for dragging
-        self.minimal_window_initial_width = self.minimal_window.winfo_width()
-        self.minimal_window_initial_height = self.minimal_window.winfo_height()
 
         # Custom drag functionality
         self.minimal_window.x = 0
@@ -1263,7 +1258,7 @@ KEYBOARD SHORTCUTS:
             deltay = event.y - self.minimal_window.y
             x = self.minimal_window.winfo_x() + deltax
             y = self.minimal_window.winfo_y() + deltay
-            self.minimal_window.geometry(f"{self.minimal_window_initial_width}x{self.minimal_window_initial_height}+{x}+{y}")
+            self.minimal_window.geometry(f"{{self.minimal_window_initial_width}}x{{self.minimal_window_initial_height}}+{x}+{y}")
 
         self.minimal_window.bind("<Button-1>", start_drag)
         self.minimal_window.bind("<B1-Motion>", do_drag)
@@ -1277,11 +1272,12 @@ KEYBOARD SHORTCUTS:
 
         # Main container frame in the minimal window
         container_frame = ctk.CTkFrame(self.minimal_window)
-        container_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=10)
+        container_frame.pack(fill=ctk.X, padx=10)
 
         # Configure grid for container_frame
         container_frame.grid_columnconfigure(0, weight=1) # Column for event buttons
         container_frame.grid_columnconfigure(1, weight=0) # Column for restore button
+        container_frame.grid_rowconfigure(0, weight=0) # Row for content, prevent vertical expansion
 
         # Frame for the event buttons that will be refreshed
         self.minimal_control_frame = ctk.CTkFrame(container_frame)
@@ -1292,6 +1288,22 @@ KEYBOARD SHORTCUTS:
         restore_btn.grid(row=0, column=1, sticky="e", padx=(5, 0))
 
         self.refresh_minimal_control_buttons() # Initial population of the event buttons
+
+        # Calculate and set the window size based on content
+        self.minimal_window.update_idletasks() # Update to get correct sizes
+        req_width = self.minimal_window.winfo_reqwidth()
+        req_height = self.minimal_window.winfo_reqheight()
+
+        # Calculate top-center position based on actual content size
+        screen_width = self.winfo_screenwidth()
+        x = (screen_width // 2) - (req_width // 2)
+        y = 0 # Top of the screen
+
+        self.minimal_window.geometry(f"{req_width}x{req_height}+{x}+{y}")
+
+        # Store initial dimensions for dragging
+        self.minimal_window_initial_width = req_width
+        self.minimal_window_initial_height = req_height
 
     
 
