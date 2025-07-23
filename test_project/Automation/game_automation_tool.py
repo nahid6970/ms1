@@ -268,6 +268,22 @@ class GameAutomationTool(ctk.CTk):
             self.refresh_image_list()
             self.log_status("Image deleted.")
 
+    def duplicate_image(self, image_index):
+        event_name = self.selected_event.get()
+        if not event_name:
+            messagebox.showwarning("Warning", "Please select an event first.")
+            return
+
+        import copy
+        original_image_data = self.events_data[event_name]["images"][image_index]
+        duplicated_image_data = copy.deepcopy(original_image_data)
+        duplicated_image_data["name"] = f"{original_image_data['name']} (copy)"
+
+        self.events_data[event_name]["images"].insert(image_index + 1, duplicated_image_data)
+        self.save_config()
+        self.refresh_image_list()
+        self.log_status(f"Duplicated image: {original_image_data['name']}")
+
     def show_image_config_dialog(self, event_name, image_index=None):
         dialog = ctk.CTkToplevel(self)
         dialog.title("Image Configuration")
@@ -624,6 +640,14 @@ class GameAutomationTool(ctk.CTk):
                     width=60
                 )
                 edit_btn.pack(side=ctk.LEFT, padx=(5, 0))
+
+                duplicate_btn = ctk.CTkButton(
+                    image_entry_frame,
+                    text="Duplicate",
+                    command=lambda idx=i: self.duplicate_image(idx),
+                    width=80
+                )
+                duplicate_btn.pack(side=ctk.LEFT, padx=(5, 0))
 
                 delete_btn = ctk.CTkButton(
                     image_entry_frame,
