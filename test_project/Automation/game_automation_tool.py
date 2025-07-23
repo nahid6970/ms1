@@ -80,6 +80,7 @@ class GameAutomationTool(ctk.CTk):
             event_select_frame,
             variable=self.selected_event,
             values=["No Events"], # Initial dummy value
+            corner_radius=0,
             command=self.on_event_select
         )
         self.event_dropdown.pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=(0, 5))
@@ -88,6 +89,7 @@ class GameAutomationTool(ctk.CTk):
         add_event_btn = ctk.CTkButton(
             event_select_frame,
             text="+ Add",
+            corner_radius=0,
             command=self.add_event,
             width=60
         )
@@ -97,9 +99,9 @@ class GameAutomationTool(ctk.CTk):
         event_btn_frame = ctk.CTkFrame(left_frame)
         event_btn_frame.pack(fill=ctk.X, pady=(0, 10))
 
-        ctk.CTkButton(event_btn_frame, text="Delete Event", command=self.delete_event, fg_color="red", hover_color="darkred").pack(side=ctk.LEFT, padx=(0, 5))
-        ctk.CTkButton(event_btn_frame, text="Rename Event", command=self.rename_event).pack(side=ctk.LEFT, padx=(0, 5))
-        ctk.CTkButton(event_btn_frame, text="Duplicate Event", command=self.duplicate_event).pack(side=ctk.LEFT)
+        ctk.CTkButton(event_btn_frame, text="Rename Event", corner_radius=0, command=self.rename_event).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkButton(event_btn_frame, text="Duplicate Event", corner_radius=0, command=self.duplicate_event).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkButton(event_btn_frame, text="Delete Event", corner_radius=0, command=self.delete_event, fg_color="red", hover_color="darkred").pack(side=ctk.LEFT)
 
         # Image Management Section
         image_label = ctk.CTkLabel(left_frame, text="Images", font=("Arial", 12, "bold"))
@@ -130,11 +132,11 @@ class GameAutomationTool(ctk.CTk):
         # Don't pack it initially
 
         # Status Section
-        status_label = ctk.CTkLabel(self.right_frame, text="Status & Information", font=("Arial", 12, "bold"))
+        status_label = ctk.CTkLabel(self.right_frame, text="Status & Information", font=("Jetbrainsmono nfp", 12, "bold"))
         status_label.pack(anchor="w", pady=(0, 10))
 
         # Status text area
-        self.status_text = ctk.CTkTextbox(self.right_frame, wrap=ctk.WORD, height=20)
+        self.status_text = ctk.CTkTextbox(self.right_frame, font=("Jetbrainsmono nfp", 12), wrap=ctk.WORD, height=20)
         self.status_text.pack(fill=ctk.BOTH, expand=True)
 
         # Toggle button for the right panel
