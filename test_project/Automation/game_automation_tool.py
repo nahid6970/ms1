@@ -274,15 +274,69 @@ class GameAutomationTool(ctk.CTk):
             messagebox.showwarning("Warning", "Please select an event first.")
             return
 
+        destination_event = self.ask_duplicate_destination(event_name)
+        if not destination_event:
+            return # User cancelled
+
         import copy
         original_image_data = self.events_data[event_name]["images"][image_index]
         duplicated_image_data = copy.deepcopy(original_image_data)
         duplicated_image_data["name"] = f"{original_image_data['name']} (copy)"
 
-        self.events_data[event_name]["images"].insert(image_index + 1, duplicated_image_data)
+        if destination_event == event_name:
+            # Duplicate in the same event
+            self.events_data[event_name]["images"].insert(image_index + 1, duplicated_image_data)
+        else:
+            # Duplicate to another event
+            self.events_data[destination_event]["images"].append(duplicated_image_data)
+
         self.save_config()
         self.refresh_image_list()
-        self.log_status(f"Duplicated image: {original_image_data['name']}")
+        self.log_status(f"Duplicated image '{original_image_data['name']}' to event '{destination_event}'")
+
+    def ask_duplicate_destination(self, current_event_name):
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Duplicate Image")
+        dialog.geometry("400x200")
+        dialog.transient(self)
+        dialog.grab_set()
+
+        result = {"destination": None}
+
+        ctk.CTkLabel(dialog, text="Where do you want to duplicate this image?").pack(pady=10)
+
+        destination_var = ctk.StringVar(value="Current Event")
+        current_rb = ctk.CTkRadioButton(dialog, text=f"Current Event ('{current_event_name}')", variable=destination_var, value="Current Event")
+        current_rb.pack(anchor="w", padx=20)
+
+        other_events = [name for name in self.events_data.keys() if name != current_event_name]
+        other_event_rb = ctk.CTkRadioButton(dialog, text="Another Event", variable=destination_var, value="Another Event", state=ctk.NORMAL if other_events else ctk.DISABLED)
+        other_event_rb.pack(anchor="w", padx=20)
+
+        other_event_var = ctk.StringVar()
+        if other_events:
+            other_event_var.set(other_events[0])
+
+        other_event_dropdown = ctk.CTkOptionMenu(dialog, variable=other_event_var, values=other_events, state=ctk.NORMAL if other_events else ctk.DISABLED)
+        other_event_dropdown.pack(padx=40, pady=(0, 10), fill="x")
+
+        def on_ok():
+            if destination_var.get() == "Current Event":
+                result["destination"] = current_event_name
+            else:
+                result["destination"] = other_event_var.get()
+            dialog.destroy()
+
+        def on_cancel():
+            dialog.destroy()
+
+        button_frame = ctk.CTkFrame(dialog)
+        button_frame.pack(pady=20)
+        ctk.CTkButton(button_frame, text="OK", command=on_ok).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).pack(side=ctk.RIGHT, padx=10)
+
+        dialog.wait_window()
+        return result["destination"]
 
     def show_image_config_dialog(self, event_name, image_index=None):
         dialog = ctk.CTkToplevel(self)
