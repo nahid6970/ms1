@@ -1232,8 +1232,41 @@ KEYBOARD SHORTCUTS:
 
         self.minimal_window = ctk.CTkToplevel(self)
         self.minimal_window.title("Minimal Mode")
-        self.minimal_window.geometry("400x100")
+        # Calculate top-center position
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        window_width = 400
+        window_height = 100
+
+        x = (screen_width // 2) - (window_width // 2)
+        y = 0 # Top of the screen
+
+        self.minimal_window.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.minimal_window.transient(self)
+        self.minimal_window.overrideredirect(True) # Remove default title bar
+        self.minimal_window.update_idletasks() # Ensure window is rendered before getting dimensions
+
+        # Store initial dimensions for dragging
+        self.minimal_window_initial_width = self.minimal_window.winfo_width()
+        self.minimal_window_initial_height = self.minimal_window.winfo_height()
+
+        # Custom drag functionality
+        self.minimal_window.x = 0
+        self.minimal_window.y = 0
+
+        def start_drag(event):
+            self.minimal_window.x = event.x
+            self.minimal_window.y = event.y
+
+        def do_drag(event):
+            deltax = event.x - self.minimal_window.x
+            deltay = event.y - self.minimal_window.y
+            x = self.minimal_window.winfo_x() + deltax
+            y = self.minimal_window.winfo_y() + deltay
+            self.minimal_window.geometry(f"{self.minimal_window_initial_width}x{self.minimal_window_initial_height}+{x}+{y}")
+
+        self.minimal_window.bind("<Button-1>", start_drag)
+        self.minimal_window.bind("<B1-Motion>", do_drag)
 
         def on_minimal_close():
             self.deiconify() # Show the main window again
@@ -1246,13 +1279,17 @@ KEYBOARD SHORTCUTS:
         container_frame = ctk.CTkFrame(self.minimal_window)
         container_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=10)
 
+        # Configure grid for container_frame
+        container_frame.grid_columnconfigure(0, weight=1) # Column for event buttons
+        container_frame.grid_columnconfigure(1, weight=0) # Column for restore button
+
         # Frame for the event buttons that will be refreshed
         self.minimal_control_frame = ctk.CTkFrame(container_frame)
-        self.minimal_control_frame.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
+        self.minimal_control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
 
         # Restore button in the main container, won't be cleared
         restore_btn = ctk.CTkButton(container_frame, text="Restore", command=on_minimal_close, width=80)
-        restore_btn.pack(side=ctk.RIGHT, padx=(5, 0))
+        restore_btn.grid(row=0, column=1, sticky="e", padx=(5, 0))
 
         self.refresh_minimal_control_buttons() # Initial population of the event buttons
 
