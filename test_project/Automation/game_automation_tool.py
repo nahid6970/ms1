@@ -45,8 +45,8 @@ class GameAutomationTool(ctk.CTk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # Add a minimize button to the title bar (or a custom one)
-        self.minimize_button = ctk.CTkButton(self, text="Minimal Mode", width=100, command=self.show_minimal_mode_window)
-        self.minimize_button.place(relx=0.99, rely=0.01, anchor="ne")
+        self.minimize_button = ctk.CTkButton(self, text="Minimal Mode", width=100, font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.show_minimal_mode_window)
+        self.minimize_button.place(relx=0.99, rely=0.02, anchor="ne")
 
         # Bind global hotkey for stopping all events
         if KEYBOARD_AVAILABLE:
@@ -138,7 +138,7 @@ class GameAutomationTool(ctk.CTk):
         self.status_text.pack(fill=ctk.BOTH, expand=True)
 
         # Toggle button for the right panel
-        self.toggle_right_frame_btn = ctk.CTkButton(self, text="Expand Desk", command=self.toggle_right_frame, width=30)
+        self.toggle_right_frame_btn = ctk.CTkButton(self, text="Expand Desk", width=100, font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.toggle_right_frame)
         self.toggle_right_frame_btn.place(relx=0.99, rely=0.06, anchor="ne") # Position below minimal button
 
         
@@ -1272,7 +1272,7 @@ KEYBOARD SHORTCUTS:
 
         # Main container frame in the minimal window
         container_frame = ctk.CTkFrame(self.minimal_window)
-        container_frame.pack(fill=ctk.X, padx=10)
+        container_frame.pack(fill=ctk.X, padx=(0,5))
 
         # Configure grid for container_frame
         container_frame.grid_columnconfigure(0, weight=1) # Column for event buttons
@@ -1284,8 +1284,8 @@ KEYBOARD SHORTCUTS:
         self.minimal_control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
 
         # Restore button in the main container, won't be cleared
-        restore_btn = ctk.CTkButton(container_frame, text="Restore", command=on_minimal_close, width=80)
-        restore_btn.grid(row=0, column=1, sticky="e", padx=(5, 0))
+        restore_btn = ctk.CTkButton(container_frame, text="Restore", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=80)
+        restore_btn.grid(row=0, column=1, sticky="e", padx=(0, 0))
 
         self.refresh_minimal_control_buttons() # Initial population of the event buttons
 
