@@ -772,7 +772,7 @@ class GameAutomationTool(ctk.CTk):
 
         for i, event_name in enumerate(self.events_data.keys()):
             is_running = event_name in self.threads and self.threads[event_name].is_alive()
-            button_text = f"Stop {event_name}" if is_running else f"Start {event_name}"
+            button_text = f"Stop {event_name}" if is_running else f"{event_name}"
 
             btn = ctk.CTkButton(
                 self.control_buttons_frame,
@@ -796,7 +796,7 @@ class GameAutomationTool(ctk.CTk):
 
         for i, event_name in enumerate(self.events_data.keys()):
             is_running = event_name in self.threads and self.threads[event_name].is_alive()
-            button_text = f"Stop {event_name}" if is_running else f"Start {event_name}"
+            button_text = f"Stop {event_name}" if is_running else f"{event_name}"
             btn = ctk.CTkButton(
                 self.minimal_control_frame,
                 text=button_text,
@@ -1299,7 +1299,7 @@ KEYBOARD SHORTCUTS:
         self.minimal_control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
 
         # Restore button in the main container, won't be cleared
-        restore_btn = ctk.CTkButton(container_frame, text="Restore", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=80)
+        restore_btn = ctk.CTkButton(container_frame, text="\uf2d2", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=40)
         restore_btn.grid(row=0, column=1, sticky="e", padx=(0, 0))
 
         self.refresh_minimal_control_buttons() # Initial population of the event buttons
