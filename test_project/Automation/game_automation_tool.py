@@ -1463,6 +1463,7 @@ KEYBOARD SHORTCUTS:
         self.minimal_window.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.minimal_window.transient(self)
         self.minimal_window.overrideredirect(True) # Remove default title bar
+        self.minimal_window.attributes("-topmost", True)  # Always on top
 
         # Custom drag functionality
         self.minimal_window.x = 0
