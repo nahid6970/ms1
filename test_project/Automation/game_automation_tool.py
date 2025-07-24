@@ -1253,10 +1253,10 @@ class GameAutomationTool(ctk.CTk):
     def save_config(self):
         try:
             # Create a deep copy to avoid modifying the live data structure during cleanup
-            data_to_save = {"events": {}, "target_window": self.target_window}
+            data_to_save = {"events": {}} # No global "target_window" here
             for event_name, event_data in self.events_data.items():
                 copied_event_data = event_data.copy()
-                copied_event_data.pop("target_window", None) # Remove target_window from top-level if it exists
+                # DO NOT POP 'target_window' here, it should be part of the event_data
                 copied_event_data["images"] = []
                 for image_data in event_data["images"]:
                     cleaned_image_data = image_data.copy()

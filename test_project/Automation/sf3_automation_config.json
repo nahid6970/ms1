@@ -172,7 +172,8 @@
           "color": "red"
         }
       ],
-      "enabled": true
+      "enabled": true,
+      "target_window": "LDPlayer"
     },
     "Fame": {
       "images": [
@@ -254,8 +255,8 @@
           "is_folder": true
         }
       ],
-      "enabled": true
+      "enabled": true,
+      "target_window": "LDPlayer"
     }
-  },
-  "target_window": "LDPlayer"
+  }
 }
