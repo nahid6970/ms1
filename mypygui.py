@@ -621,7 +621,7 @@ path_replace.pack(side="left", padx=(0, 0), pady=(0, 0))
 path_replace.bind("<Button-1>",lambda event=None:subprocess.Popen(r'cmd /c C:\ms1\path_tracker.py'))
 path_replace.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\path_tracker.py'))
 
-Automation = tk.Label(ROOT1, text="AutoTT", bg="#1d2027", fg="#86ff45",
+Automation = tk.Label(ROOT1, text="AutoM", bg="#1d2027", fg="#ffab2d",
                       height=0, width=0, relief="flat", highlightthickness=0,
                       highlightbackground="#ffffff", anchor="w",
                       font=("JetBrainsMono NFP", 16, "bold"))
