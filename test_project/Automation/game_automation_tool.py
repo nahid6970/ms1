@@ -357,6 +357,50 @@ class GameAutomationTool(ctk.CTk):
         dialog.wait_window()
         return result["destination"]
 
+    def edit_separator(self, index):
+        event_name = self.selected_event.get()
+        if not event_name:
+            messagebox.showwarning("Warning", "Please select an event first.")
+            return
+
+        separator_data = self.events_data[event_name]["images"][index]
+
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Edit Separator")
+        dialog.geometry("300x200")
+        dialog.transient(self)
+        dialog.grab_set()
+
+        # Thickness
+        ctk.CTkLabel(dialog, text="Thickness:").pack(anchor="w", padx=20, pady=(10, 0))
+        thickness_var = ctk.StringVar(value=str(separator_data.get("thickness", 2)))
+        ctk.CTkEntry(dialog, textvariable=thickness_var).pack(padx=20, fill=ctk.X)
+
+        # Color
+        ctk.CTkLabel(dialog, text="Color (e.g., red, #FF0000):").pack(anchor="w", padx=20, pady=(10, 0))
+        color_var = ctk.StringVar(value=separator_data.get("color", "gray"))
+        ctk.CTkEntry(dialog, textvariable=color_var).pack(padx=20, fill=ctk.X)
+
+        def save_separator_config():
+            try:
+                thickness = int(thickness_var.get())
+                if thickness <= 0:
+                    raise ValueError("Thickness must be a positive integer.")
+                separator_data["thickness"] = thickness
+                separator_data["color"] = color_var.get()
+                self.save_config()
+                self.refresh_image_list()
+                dialog.destroy()
+            except ValueError as e:
+                messagebox.showerror("Error", f"Invalid input: {e}")
+
+        button_frame = ctk.CTkFrame(dialog)
+        button_frame.pack(pady=20)
+        ctk.CTkButton(button_frame, text="Save", command=save_separator_config).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
+
+        dialog.wait_window()
+
     def show_image_config_dialog(self, event_name, image_index=None):
         dialog = ctk.CTkToplevel(self)
         dialog.title("Image Configuration")
@@ -684,10 +728,57 @@ class GameAutomationTool(ctk.CTk):
             images = self.events_data[event_name]["images"]
             for i, image_data in enumerate(images):
                 if image_data.get("type") == "separator":
-                    separator_frame = ctk.CTkFrame(self.image_frame, height=2, fg_color="gray")
-                    separator_frame.pack(fill=ctk.X, pady=5)
-                    # Add a label for visual clarity, though it's just a line
-                    ctk.CTkLabel(separator_frame, text="-- Separator --", font=("Arial", 10), text_color="#888").pack(pady=0)
+                    separator_entry_frame = ctk.CTkFrame(self.image_frame)
+                    separator_entry_frame.pack(fill=ctk.X, pady=2)
+
+                    thickness = image_data.get("thickness", 2)
+                    color = image_data.get("color", "gray")
+
+                    # Separator line
+                    separator_line = ctk.CTkFrame(separator_entry_frame, height=thickness, fg_color=color)
+                    separator_line.pack(side=ctk.LEFT, padx=(5, 0), expand=True, fill=ctk.X)
+
+                    # Separator label (optional, can be removed if just a line is desired)
+                    ctk.CTkLabel(separator_entry_frame, text="-- Separator --", font=("Arial", 10), text_color="#888").pack(side=ctk.LEFT, padx=(5, 0))
+
+                    # Move button for separator
+                    move_btn = ctk.CTkButton(
+                        separator_entry_frame,
+                        text="↕", # Up-Down arrow
+                        font=("Jetbrainsmono nfp", 16), corner_radius=0,
+                        width=25,
+                        fg_color="#212121",
+                        text_color="#5cf25c"
+                    )
+                    move_btn.pack(side=ctk.LEFT, padx=(5, 0))
+                    move_btn.bind("<Button-1>", lambda event, idx=i: self.move_image_up(idx))
+                    move_btn.bind("<Button-3>", lambda event, idx=i: self.move_image_down(idx))
+
+                    # Edit button for separator
+                    edit_btn = ctk.CTkButton(
+                        separator_entry_frame,
+                        text="\uf044", # Edit icon
+                        font=("Jetbrainsmono nfp", 16), corner_radius=0,
+                        command=lambda idx=i: self.edit_separator(idx),
+                        width=25,
+                        fg_color="#212121",
+                        text_color="#6ca8fa"
+                    )
+                    edit_btn.pack(side=ctk.LEFT, padx=(5, 0))
+
+                    # Delete button for separator
+                    delete_btn = ctk.CTkButton(
+                        separator_entry_frame,
+                        text="\uf00d", # Delete icon
+                        font=("Jetbrainsmono nfp", 16), corner_radius=0,
+                        command=lambda idx=i: self.delete_image(idx),
+                        fg_color="#212121",
+                        hover_color="darkred",
+                        text_color="red",
+                        width=25,
+                    )
+                    delete_btn.pack(side=ctk.LEFT, padx=(5, 5))
+
                 else:
                     image_entry_frame = ctk.CTkFrame(self.image_frame)
                     image_entry_frame.pack(fill=ctk.X, pady=2)

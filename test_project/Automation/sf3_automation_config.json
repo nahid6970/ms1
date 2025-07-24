@@ -101,7 +101,9 @@
           "is_folder": true
         },
         {
-          "type": "separator"
+          "type": "separator",
+          "thickness": 10,
+          "color": "gray"
         },
         {
           "type": "separator"
