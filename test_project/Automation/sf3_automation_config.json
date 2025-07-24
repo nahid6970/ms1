@@ -15,24 +15,6 @@
           "is_folder": false
         },
         {
-          "name": "Action (Hound)",
-          "path": "C:/msBackups/shadowfight3/action",
-          "confidence": 0.8,
-          "region": [
-            187,
-            100,
-            383,
-            265
-          ],
-          "action": {
-            "type": "key_press",
-            "key": "F15",
-            "delay": 5.0
-          },
-          "enabled": true,
-          "is_folder": true
-        },
-        {
           "type": "separator",
           "thickness": 10,
           "color": "gray"
@@ -51,7 +33,7 @@
             "type": "key_sequence",
             "sequence": "num1,0,c,0"
           },
-          "enabled": true,
+          "enabled": false,
           "is_folder": false
         },
         {
@@ -69,6 +51,23 @@
             "sequence": "num2,0,c,0"
           },
           "enabled": false,
+          "is_folder": false
+        },
+        {
+          "name": "Event (ALT)",
+          "path": "C:/msBackups/shadowfight3/event/Tournament.png",
+          "confidence": 0.8,
+          "region": [
+            269,
+            89,
+            459,
+            152
+          ],
+          "action": {
+            "type": "key_sequence",
+            "sequence": "num2, 1,c,1,m,1,num1,1,c,1"
+          },
+          "enabled": true,
           "is_folder": false
         },
         {
@@ -125,6 +124,52 @@
           },
           "enabled": true,
           "is_folder": false
+        },
+        {
+          "type": "separator",
+          "thickness": 10,
+          "color": "red"
+        },
+        {
+          "name": "Action (KOS 2TAP)",
+          "path": "C:/msBackups/shadowfight3/action",
+          "confidence": 0.8,
+          "region": [
+            187,
+            100,
+            383,
+            265
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "F13",
+            "delay": 5.0
+          },
+          "enabled": true,
+          "is_folder": true
+        },
+        {
+          "name": "Action (Hound)",
+          "path": "C:/msBackups/shadowfight3/action",
+          "confidence": 0.8,
+          "region": [
+            187,
+            100,
+            383,
+            265
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "F15",
+            "delay": 5.0
+          },
+          "enabled": false,
+          "is_folder": true
+        },
+        {
+          "type": "separator",
+          "thickness": 10,
+          "color": "red"
         }
       ],
       "enabled": true
