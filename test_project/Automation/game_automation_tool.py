@@ -870,8 +870,11 @@ class GameAutomationTool(ctk.CTk):
             images = self.events_data[event_name]["images"]
             images.insert(index - 1, images.pop(index))
             self.save_config()
-            self.refresh_image_list()
             self.log_status("Image moved up.")
+            # Debounce refresh_image_list
+            if hasattr(self, '_refresh_image_list_after_id'):
+                self.after_cancel(self._refresh_image_list_after_id)
+            self._refresh_image_list_after_id = self.after(100, self.refresh_image_list)
 
     def move_image_down(self, index, event=None):
         event_name = self.selected_event.get()
@@ -882,8 +885,11 @@ class GameAutomationTool(ctk.CTk):
         if index < len(images) - 1:
             images.insert(index + 1, images.pop(index))
             self.save_config()
-            self.refresh_image_list()
             self.log_status("Image moved down.")
+            # Debounce refresh_image_list
+            if hasattr(self, '_refresh_image_list_after_id'):
+                self.after_cancel(self._refresh_image_list_after_id)
+            self._refresh_image_list_after_id = self.after(100, self.refresh_image_list)
 
     def refresh_control_buttons(self):
         for widget in self.control_buttons_frame.winfo_children():
