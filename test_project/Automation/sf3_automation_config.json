@@ -109,6 +109,22 @@
           },
           "enabled": true,
           "is_folder": true
+        },
+        {
+          "name": "X button home",
+          "path": "C:\\msBackups\\shadowfight3\\event\\inside_ads.png",
+          "confidence": 0.8,
+          "region": [
+            171,
+            85,
+            300,
+            172
+          ],
+          "action": {
+            "type": "click_on_found_image"
+          },
+          "enabled": true,
+          "is_folder": false
         }
       ],
       "enabled": true
