@@ -33,6 +33,11 @@
           "is_folder": true
         },
         {
+          "type": "separator",
+          "thickness": 10,
+          "color": "gray"
+        },
+        {
           "name": "Event (num1)",
           "path": "C:/msBackups/shadowfight3/event/Tournament.png",
           "confidence": 0.8,
@@ -67,6 +72,11 @@
           "is_folder": false
         },
         {
+          "type": "separator",
+          "thickness": 10,
+          "color": "gray"
+        },
+        {
           "name": "Register  ",
           "path": "C:\\msBackups\\shadowfight3\\event\\SELECT.png",
           "confidence": 0.8,
@@ -99,14 +109,6 @@
           },
           "enabled": true,
           "is_folder": true
-        },
-        {
-          "type": "separator",
-          "thickness": 10,
-          "color": "gray"
-        },
-        {
-          "type": "separator"
         }
       ],
       "enabled": true

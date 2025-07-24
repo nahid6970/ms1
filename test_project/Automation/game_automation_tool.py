@@ -738,9 +738,6 @@ class GameAutomationTool(ctk.CTk):
                     separator_line = ctk.CTkFrame(separator_entry_frame, height=thickness, fg_color=color)
                     separator_line.pack(side=ctk.LEFT, padx=(5, 0), expand=True, fill=ctk.X)
 
-                    # Separator label (optional, can be removed if just a line is desired)
-                    ctk.CTkLabel(separator_entry_frame, text="-- Separator --", font=("Arial", 10), text_color="#888").pack(side=ctk.LEFT, padx=(5, 0))
-
                     # Move button for separator
                     move_btn = ctk.CTkButton(
                         separator_entry_frame,
