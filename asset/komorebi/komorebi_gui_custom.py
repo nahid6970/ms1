@@ -23,29 +23,37 @@ class AddEditDialog(ctk.CTkToplevel):
         else:
             self.title(f"Add New {item_type.capitalize()} Item")
 
-        self.kind_entry = ctk.CTkEntry(self, placeholder_text="Kind (Exe, Class, Title)")
-        self.kind_entry.pack(padx=20, pady=5, fill="x")
+        kind_options = ["Exe", "Class", "Title", "Path"]
+        matching_strategy_options = [
+            "Legacy", "Equals", "StartsWith", "EndsWith", "Contains", "Regex",
+            "DoesNotEndWith", "DoesNotStartWith", "DoesNotEqual", "DoesNotContain"
+        ]
+
+        self.kind_combobox = ctk.CTkComboBox(self, values=kind_options)
+        self.kind_combobox.pack(padx=20, pady=5, fill="x")
         self.id_entry = ctk.CTkEntry(self, placeholder_text="ID (e.g., notepad.exe)")
         self.id_entry.pack(padx=20, pady=5, fill="x")
-        self.matching_strategy_entry = ctk.CTkEntry(self, placeholder_text="Matching Strategy (Equals, Contains)")
-        self.matching_strategy_entry.pack(padx=20, pady=5, fill="x")
+        self.matching_strategy_combobox = ctk.CTkComboBox(self, values=matching_strategy_options)
+        self.matching_strategy_combobox.pack(padx=20, pady=5, fill="x")
 
         if self.item_data:  # Pre-fill for edit mode
-            self.kind_entry.insert(0, self.item_data.get("kind", ""))
+            self.kind_combobox.set(self.item_data.get("kind", "Exe"))
             self.id_entry.insert(0, self.item_data.get("id", ""))
-            self.matching_strategy_entry.insert(0, self.item_data.get("matching_strategy", ""))
+            self.matching_strategy_combobox.set(self.item_data.get("matching_strategy", "Equals"))
             save_button = ctk.CTkButton(self, text="Save Changes", command=self.save_changes)
         else:
+            self.kind_combobox.set(kind_options[0]) # Set default value
+            self.matching_strategy_combobox.set(matching_strategy_options[0]) # Set default value
             save_button = ctk.CTkButton(self, text="Add Item", command=self.add_item)
         save_button.pack(padx=20, pady=10)
 
     def add_item(self):
-        kind = self.kind_entry.get().strip()
+        kind = self.kind_combobox.get()
         item_id = self.id_entry.get().strip()
-        matching_strategy = self.matching_strategy_entry.get().strip()
+        matching_strategy = self.matching_strategy_combobox.get()
 
-        if not kind or not item_id or not matching_strategy:
-            messagebox.showwarning("Warning", "All fields are required.", parent=self)
+        if not item_id:
+            messagebox.showwarning("Warning", "The ID field cannot be empty.", parent=self)
             return
 
         new_item = {"kind": kind, "id": item_id, "matching_strategy": matching_strategy}
@@ -67,19 +75,18 @@ class AddEditDialog(ctk.CTkToplevel):
         self.destroy()  # Close dialog
 
     def save_changes(self):
-        kind = self.kind_entry.get().strip()
+        kind = self.kind_combobox.get()
         item_id = self.id_entry.get().strip()
-        matching_strategy = self.matching_strategy_entry.get().strip()
+        matching_strategy = self.matching_strategy_combobox.get()
 
-        if not kind or not item_id or not matching_strategy:
-            messagebox.showwarning("Warning", "All fields are required.", parent=self)
+        if not item_id:
+            messagebox.showwarning("Warning", "The ID field cannot be empty.", parent=self)
             return
 
         updated_item = {"kind": kind, "id": item_id, "matching_strategy": matching_strategy}
 
         if self.item_type == "float":
             try:
-                # Find the index of the original item and replace it
                 index = self.master.config_data["float_rules"].index(self.item_data)
                 self.master.config_data["float_rules"][index] = updated_item
             except ValueError:
@@ -87,7 +94,6 @@ class AddEditDialog(ctk.CTkToplevel):
                 return
         elif self.item_type == "tray":
             try:
-                # Find the index of the original item and replace it
                 index = self.master.config_data["tray_and_multi_window_applications"].index(self.item_data)
                 self.master.config_data["tray_and_multi_window_applications"][index] = updated_item
             except ValueError:
