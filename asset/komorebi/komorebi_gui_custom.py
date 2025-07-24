@@ -141,7 +141,8 @@ class KomorebiConfigApp(ctk.CTk):
 
         # Populate float rules display
         for i, rule_obj in enumerate(self.config_data.get("float_rules", [])):
-            display_text = f"{rule_obj.get('kind', '')}: {rule_obj.get('id', '')} ({rule_obj.get('matching_strategy', '')})"
+            # Changed display_text format
+            display_text = f"{rule_obj.get('id', '')} ({rule_obj.get('kind', '')}) ({rule_obj.get('matching_strategy', '')})"
             label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, anchor="w")
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             # Store the full rule_obj with the label for easy access during selection
@@ -157,7 +158,8 @@ class KomorebiConfigApp(ctk.CTk):
 
         # Populate tray apps display
         for i, app_obj in enumerate(self.config_data.get("tray_and_multi_window_applications", [])):
-            display_text = f"{app_obj.get('kind', '')}: {app_obj.get('id', '')} ({app_obj.get('matching_strategy', '')})"
+            # Changed display_text format
+            display_text = f"{app_obj.get('id', '')} ({app_obj.get('kind', '')}) ({app_obj.get('matching_strategy', '')})"
             label = ctk.CTkLabel(self.tray_scroll_frame, text=display_text, anchor="w")
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             # Store the full app_obj with the label
