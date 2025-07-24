@@ -75,6 +75,10 @@
     "matching_strategy": "Equals" },
 
     { "kind": "Exe",
+    "id": "PSUAConsole.exe",
+    "matching_strategy": "Equals" },
+
+    { "kind": "Exe",
     "id": "scrcpy.exe",
     "matching_strategy": "Equals" },
 
