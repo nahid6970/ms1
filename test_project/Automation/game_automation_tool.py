@@ -56,6 +56,9 @@ class GameAutomationTool(ctk.CTk):
             except Exception as e:
                 self.log_status(f"Could not bind ESC hotkey: {e}. Run as administrator if needed.")
 
+        # Start in minimal mode
+        self.show_minimal_mode_window()
+
     def setup_gui(self):
         # Main container
         self.main_frame = ctk.CTkFrame(self)
