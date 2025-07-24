@@ -252,7 +252,7 @@
     "name": "Prowlarr",
     "type": "App",
     "paths": [
-      "C:\\ProgramData\\Prowlarr\\bin\\Prowlarr.exe"
+      "C:/ProgramData/Prowlarr/bin/Prowlarr.exe"
     ],
     "Command": "",
     "ExecutableType": "other"
