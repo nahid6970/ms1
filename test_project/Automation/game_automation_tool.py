@@ -273,11 +273,19 @@ class GameAutomationTool(ctk.CTk):
             messagebox.showwarning("Warning", "Please select an event first.")
             return
 
-        if messagebox.askyesno("Confirm Delete", f"Delete image '{self.events_data[event_name]["images"][image_index]["name"]}'?"):
+        item_to_delete = self.events_data[event_name]["images"][image_index]
+        item_type = "image" if item_to_delete.get("type") != "separator" else "separator"
+        
+        if item_type == "image":
+            confirm_message = f"Delete image '{item_to_delete.get('name', 'Untitled')}'?"
+        else:
+            confirm_message = "Delete this separator?"
+
+        if messagebox.askyesno("Confirm Delete", confirm_message):
             del self.events_data[event_name]["images"][image_index]
             self.save_config()
             self.refresh_image_list()
-            self.log_status("Image deleted.")
+            self.log_status(f"{item_type.capitalize()} deleted.")
 
     def duplicate_image(self, image_index):
         event_name = self.selected_event.get()
