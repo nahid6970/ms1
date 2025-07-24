@@ -103,6 +103,7 @@ class GameAutomationTool(ctk.CTk):
         event_btn_frame.pack(fill=ctk.X, pady=(0, 10))
 
         ctk.CTkButton(event_btn_frame, text="Rename Event", corner_radius=0, command=self.rename_event).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkButton(event_btn_frame, text="Event Settings", corner_radius=0, command=self.edit_event_settings).pack(side=ctk.LEFT, padx=(0, 5))
         ctk.CTkButton(event_btn_frame, text="Duplicate Event", corner_radius=0, command=self.duplicate_event).pack(side=ctk.LEFT, padx=(0, 5))
         ctk.CTkButton(event_btn_frame, text="Delete Event", corner_radius=0, command=self.delete_event, fg_color="red", hover_color="darkred").pack(side=ctk.LEFT)
 
@@ -161,7 +162,8 @@ class GameAutomationTool(ctk.CTk):
         if name and name not in self.events_data:
             self.events_data[name] = {
                 "images": [],
-                "enabled": True
+                "enabled": True,
+                "target_window": self.target_window # Initialize with global default
             }
             self.stop_flags[name] = False
             self.refresh_event_list()
@@ -252,6 +254,71 @@ class GameAutomationTool(ctk.CTk):
             self.refresh_control_buttons()
             self.save_config()
             self.log_status(f"Duplicated event: {old_name} -> {new_name}")
+
+    def duplicate_event(self):
+        old_name = self.selected_event.get()
+        if not old_name:
+            messagebox.showwarning("Warning", "Please select an event to duplicate.")
+            return
+
+        dialog = CTkInputDialog(text=f"Enter name for duplicate of '{old_name}':", title="Duplicate Event")
+        new_name = dialog.get_input()
+
+        if new_name and new_name != old_name:
+            if new_name in self.events_data:
+                messagebox.showerror("Error", "Event name already exists!")
+                return
+
+            import copy
+            # Create a cleaned version of the event data for deepcopy
+            cleaned_event_data = self.events_data[old_name].copy()
+            cleaned_images = []
+            for img_data in self.events_data[old_name]["images"]:
+                cleaned_img_data = img_data.copy()
+                cleaned_img_data.pop("_checkbox_ref", None)
+                cleaned_img_data.pop("_button_ref", None)
+                cleaned_images.append(cleaned_img_data)
+            cleaned_event_data["images"] = cleaned_images
+
+            self.events_data[new_name] = copy.deepcopy(cleaned_event_data)
+            self.stop_flags[new_name] = False
+
+            self.refresh_event_list()
+            self.refresh_control_buttons()
+            self.save_config()
+            self.log_status(f"Duplicated event: {old_name} -> {new_name}")
+
+    def edit_event_settings(self):
+        event_name = self.selected_event.get()
+        if not event_name:
+            messagebox.showwarning("Warning", "Please select an event first.")
+            return
+
+        dialog = ctk.CTkToplevel(self)
+        dialog.title(f"Settings for {event_name}")
+        dialog.geometry("400x150")
+        dialog.transient(self)
+        dialog.grab_set()
+
+        current_target_window = self.events_data[event_name].get("target_window", "LDPlayer")
+        target_window_var = ctk.StringVar(value=current_target_window)
+
+        ctk.CTkLabel(dialog, text="Target Window Title:").pack(anchor="w", padx=20, pady=(10, 0))
+        ctk.CTkEntry(dialog, textvariable=target_window_var, width=300).pack(padx=20, fill=ctk.X)
+
+        def save_settings():
+            new_target_window = target_window_var.get()
+            self.events_data[event_name]["target_window"] = new_target_window
+            self.save_config()
+            self.log_status(f"Target window for '{event_name}' set to '{new_target_window}'")
+            dialog.destroy()
+
+        button_frame = ctk.CTkFrame(dialog)
+        button_frame.pack(pady=20)
+        ctk.CTkButton(button_frame, text="Save", command=save_settings).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
+
+        dialog.wait_window()
 
     def add_image(self):
         event_name = self.selected_event.get()
@@ -959,10 +1026,11 @@ class GameAutomationTool(ctk.CTk):
 
     def run_event(self, event_name):
         event_data = self.events_data[event_name]
+        event_target_window = event_data.get("target_window", self.target_window) # Use event-specific or global default
         try:
             while not self.stop_flags[event_name]:
                 try:
-                    self.focus_window(self.target_window)
+                    self.focus_window(event_target_window)
                     for image_data in event_data["images"]:
                         if self.stop_flags[event_name]:
                             break
@@ -1161,9 +1229,11 @@ class GameAutomationTool(ctk.CTk):
                 with open(self.config_file, 'r') as f:
                     data = json.load(f)
                     self.events_data = data.get("events", {})
-                    self.target_window = data.get("target_window", "LDPlayer")
-                    for event_name in self.events_data.keys():
+                    # Iterate through events to set stop_flags and ensure target_window is present
+                    for event_name, event_data in self.events_data.items():
                         self.stop_flags[event_name] = False
+                        if "target_window" not in event_data:
+                            event_data["target_window"] = self.target_window # Set default if not present
                 self.log_status(f"Configuration loaded from {self.config_file}")
                 self.refresh_event_list()
                 self.refresh_control_buttons()
@@ -1180,6 +1250,7 @@ class GameAutomationTool(ctk.CTk):
             data_to_save = {"events": {}, "target_window": self.target_window}
             for event_name, event_data in self.events_data.items():
                 copied_event_data = event_data.copy()
+                copied_event_data.pop("target_window", None) # Remove target_window from top-level if it exists
                 copied_event_data["images"] = []
                 for image_data in event_data["images"]:
                     cleaned_image_data = image_data.copy()
