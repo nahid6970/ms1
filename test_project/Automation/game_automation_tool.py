@@ -21,7 +21,7 @@ class GameAutomationTool(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("PyAutoGUI Game Automation Tool - Shadow Fight 3")
+        self.title("PyAutoGUI Automation Tool")
         self.geometry("570x800")
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
@@ -1396,7 +1396,7 @@ Features:
 - Region-based searching
 - Multi-threading support
 - Configuration save/load
-Created for Shadow Fight 3 automation and general game automation tasks."""
+Created for automation tasks."""
         messagebox.showinfo("About", about_text)
 
     def show_help(self):
