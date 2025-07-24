@@ -1405,6 +1405,7 @@ KEYBOARD SHORTCUTS:
         # Configure grid for container_frame
         container_frame.grid_columnconfigure(0, weight=1) # Column for event buttons
         container_frame.grid_columnconfigure(1, weight=0) # Column for restore button
+        container_frame.grid_columnconfigure(2, weight=0) # Column for close button
         container_frame.grid_rowconfigure(0, weight=0) # Row for content, prevent vertical expansion
 
         # Frame for the event buttons that will be refreshed
@@ -1413,7 +1414,11 @@ KEYBOARD SHORTCUTS:
 
         # Restore button in the main container, won't be cleared
         restore_btn = ctk.CTkButton(container_frame, text="\uf2d2", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=40)
-        restore_btn.grid(row=0, column=1, sticky="e", padx=(0, 0))
+        restore_btn.grid(row=0, column=1, sticky="e", padx=(0, 5))
+
+        # Close button in the main container
+        close_btn = ctk.CTkButton(container_frame, text="\uf00d", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.on_closing, width=40, fg_color="red", hover_color="darkred")
+        close_btn.grid(row=0, column=2, sticky="e", padx=(0, 0))
 
         self.refresh_minimal_control_buttons() # Initial population of the event buttons
 
