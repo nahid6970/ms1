@@ -637,6 +637,22 @@ Automation.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
     shell=True
 ))
 
+KomoBT = tk.Label(ROOT1, text="KOMO", bg="#1d2027", fg="#8319f5",
+                      height=0, width=0, relief="flat", highlightthickness=0,
+                      highlightbackground="#ffffff", anchor="w",
+                      font=("JetBrainsMono NFP", 16, "bold"))
+KomoBT.pack(side="left", padx=(0, 0), pady=(0, 0))
+KomoBT.bind("<Button-1>", lambda event=None: subprocess.Popen(
+    r'cmd /c komorebi_gui_custom.py',
+    cwd=r'C:\ms1\asset\komorebi',
+    shell=True
+))
+KomoBT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
+    r'code komorebi_gui_custom.py',
+    cwd=r'C:\ms1\asset\komorebi',
+    shell=True
+))
+
 
 #! FFMPEG
 # FFMPEG_bt = CTkButton(ROOT1, text="\uf07cffmpeg",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
