@@ -109,7 +109,7 @@ class GameAutomationTool(ctk.CTk):
         event_btn_frame.grid_columnconfigure(3, weight=1)
 
         ctk.CTkButton(event_btn_frame, text="Rename Event", corner_radius=0, command=self.rename_event).grid(row=0, column=0, padx=(0, 5), sticky="ew")
-        ctk.CTkButton(event_btn_frame, text="Event Settings", corner_radius=0, command=self.edit_event_settings).grid(row=0, column=1, padx=(0, 5), sticky="ew")
+        ctk.CTkButton(event_btn_frame, text="Window Title", corner_radius=0, command=self.edit_event_settings).grid(row=0, column=1, padx=(0, 5), sticky="ew")
         ctk.CTkButton(event_btn_frame, text="Duplicate Event", corner_radius=0, command=self.duplicate_event).grid(row=0, column=2, padx=(0, 5), sticky="ew")
         ctk.CTkButton(event_btn_frame, text="Delete Event", corner_radius=0, command=self.delete_event, fg_color="red", hover_color="darkred").grid(row=0, column=3, sticky="ew")
 
