@@ -115,7 +115,7 @@ class GameAutomationTool(ctk.CTk):
         image_btn_frame = ctk.CTkFrame(left_frame)
         image_btn_frame.pack(fill=ctk.X, pady=(0, 10))
 
-        ctk.CTkButton(image_btn_frame, text="Add Image", command=self.add_image).pack(side=ctk.LEFT, padx=(0, 5))
+        ctk.CTkButton(image_btn_frame, text="Add Image", fg_color="#a8df92", text_color="black", corner_radius=0, font=("Jetbrainsmono nfp", 16, "bold"), command=self.add_image).pack(side=ctk.LEFT, padx=(0, 5))
 
         # Control Panel
         control_frame = ctk.CTkFrame(left_frame)
