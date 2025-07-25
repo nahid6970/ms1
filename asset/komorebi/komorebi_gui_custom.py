@@ -162,22 +162,22 @@ class KomorebiConfigApp(ctk.CTk):
 
         # --- Buttons Frame (Bottom) ---
         self.button_frame = ctk.CTkFrame(self)
-        self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+        self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew",)
         self.button_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # 5 buttons
 
-        self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", command=self.open_add_float_dialog)
+        self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", corner_radius=0, command=self.open_add_float_dialog)
         self.add_float_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
-        self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", command=self.open_add_tray_dialog)
+        self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", corner_radius=0, command=self.open_add_tray_dialog)
         self.add_tray_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", command=self.remove_selected_item)
-        self.remove_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        self.edit_selected_button = ctk.CTkButton(self.button_frame, text="Edit Selected Item", fg_color="#155ae2", text_color="white", corner_radius=0, command=self.open_edit_dialog)
+        self.edit_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
-        self.edit_selected_button = ctk.CTkButton(self.button_frame, text="Edit Selected Item", command=self.open_edit_dialog)
-        self.edit_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
+        self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", fg_color="red", corner_radius=0, command=self.remove_selected_item)
+        self.remove_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-        self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", command=self.save_config)
+        self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", fg_color="green", corner_radius=0, command=self.save_config)
         self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
 
         self.update_list_displays() # Initial display update

@@ -1,240 +1,280 @@
 {
-  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.29/schema.json",
-  "app_specific_configuration_path": "$Env:USERPROFILE/applications.json",
-  "window_hiding_behaviour": "Cloak",
-  "cross_monitor_move_behaviour": "Insert",
-
-  "default_workspace_padding": 20,
-  "default_container_padding": 20,
-
-  "border": true,
-  "border_style":"Square",
-  "border_width": 2,
-  "border_offset": -1,
-
-  "global_work_area_offset": {"left": -40, "right": -80, "top": -40, "bottom": -38},
-
-  "theme": {
-    "palette": "Base16",
-    "name": "AtelierCaveLight",
-    "unfocused_border": "Base03",
-    "bar_accent": "Base0D"
-  },
-
-"mouse_follows_focus": false,
-
-  "stackbar": {
-    "height": 40,
-    "mode": "OnStack",
-    "tabs": {
-      "width": 300
-    }
-  },
-  "monitors": [
-    {
-      "workspaces": [
-        {
-          "name": "I",
-          "layout": "BSP"
-        },
-        {
-          "name": "II",
-          "layout": "VerticalStack"
-        },
-        {
-          "name": "III",
-          "layout": "HorizontalStack"
-        },
-        {
-          "name": "IV",
-          "layout": "UltrawideVerticalStack"
-        },
-        {
-          "name": "V",
-          "layout": "Rows"
-        },
-        {
-          "name": "VI",
-          "layout": "Grid"
-        },
-        {
-          "name": "VII",
-          "layout": "RightMainVerticalStack"
+    "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.29/schema.json",
+    "app_specific_configuration_path": "$Env:USERPROFILE/applications.json",
+    "window_hiding_behaviour": "Cloak",
+    "cross_monitor_move_behaviour": "Insert",
+    "default_workspace_padding": 20,
+    "default_container_padding": 20,
+    "border": true,
+    "border_style": "Square",
+    "border_width": 2,
+    "border_offset": -1,
+    "global_work_area_offset": {
+        "left": -40,
+        "right": -80,
+        "top": -40,
+        "bottom": -38
+    },
+    "theme": {
+        "palette": "Base16",
+        "name": "AtelierCaveLight",
+        "unfocused_border": "Base03",
+        "bar_accent": "Base0D"
+    },
+    "mouse_follows_focus": false,
+    "stackbar": {
+        "height": 40,
+        "mode": "OnStack",
+        "tabs": {
+            "width": 300
         }
-      ]
-    }
-  ],
-
-"float_rules": [
-    { "kind": "Class",
-    "id": "Qt643QWindowIcon",
-    "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-    "id": "AutoHotkey.exe",
-    "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-    "id": "PSUAConsole.exe",
-    "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-    "id": "scrcpy.exe",
-    "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-    "id": "kdeconnect-app.exe",
-    "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-    "id": "vmware.exe",
-    "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-    "id": "PowerToys.FileLocksmithUI.exe",
-    "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "Cloudflare WARP.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "qbittorrent.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "7zFM.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Class",
-      "id": "CASCADIA_HOSTING_WINDOW_CLASS",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "GlassWire.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "fdm.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "Riot Client.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Title",
-      "id": "Picture-in-picture",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "PowerToys.Settings.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Title",
-      "id": "Settingsssssss",
-      "matching_strategy": "Equals" },
-
-    {
-      "kind": "Exe",
-      "id": "PotPlayerMini64",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "WorkspaceUtilities.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "VALORANT-Win64-Shipping.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "mylbx.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "DesktopCoral.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "LosslessScaling.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "python.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "VirtualBox.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "VirtualBoxVM.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "localsend_app.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "crosvm.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Title",
-      "id": "WhatsApp",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Title",
-      "id": "WhatsApp",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "PCHealthCheck.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "WsaClient.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "MuMuPlayer.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Exe",
-      "id": "ChatGPT.exe",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Title",
-      "id": "Enhancer for YouTube",
-      "matching_strategy": "Equals" },
-
-    { "kind": "Title",
-      "id": "OS_v2",
-      "matching_strategy": "Equals" }
-  ],
-
-"tray_and_multi_window_applications": [
-      {"kind": "Exe",
-      "id": "rssguard.exe",
-      "matching_strategy": "Equals"},
-
-      {"kind": "Exe",
-      "id": "PotPlayerMini64.exe",
-      "matching_strategy": "Equals"},
-
-      {"kind": "Exe",
-      "id": "Text-Grab.exe",
-      "matching_strategy": "Equals"},
-
-      { "kind": "Exe",
-      "id": "ChatGPT.exe",
-      "matching_strategy": "Equals" },
-
-      { "kind": "Exe",
-      "id": "OpenVPNConnect.exe",
-      "matching_strategy": "Equals" },
-
-      { "kind": "Exe",
-      "id": "AutoHotkey.exe",
-      "matching_strategy": "Equals" }
+    },
+    "monitors": [
+        {
+            "workspaces": [
+                {
+                    "name": "I",
+                    "layout": "BSP"
+                },
+                {
+                    "name": "II",
+                    "layout": "VerticalStack"
+                },
+                {
+                    "name": "III",
+                    "layout": "HorizontalStack"
+                },
+                {
+                    "name": "IV",
+                    "layout": "UltrawideVerticalStack"
+                },
+                {
+                    "name": "V",
+                    "layout": "Rows"
+                },
+                {
+                    "name": "VI",
+                    "layout": "Grid"
+                },
+                {
+                    "name": "VII",
+                    "layout": "RightMainVerticalStack"
+                }
+            ]
+        }
+    ],
+    "float_rules": [
+        {
+            "kind": "Class",
+            "id": "Qt643QWindowIcon",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "AutoHotkey.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "PSUAConsole.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "scrcpy.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "kdeconnect-app.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "vmware.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "PowerToys.FileLocksmithUI.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Cloudflare WARP.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "qbittorrent.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "7zFM.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Class",
+            "id": "CASCADIA_HOSTING_WINDOW_CLASS",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "GlassWire.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "fdm.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Riot Client.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "Picture-in-picture",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "PowerToys.Settings.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "Settingsssssss",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "PotPlayerMini64",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "WorkspaceUtilities.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "VALORANT-Win64-Shipping.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "mylbx.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "DesktopCoral.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "LosslessScaling.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "python.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "VirtualBox.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "VirtualBoxVM.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "localsend_app.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "crosvm.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "WhatsApp",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "WhatsApp",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "PCHealthCheck.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "WsaClient.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "MuMuPlayer.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "ChatGPT.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "Enhancer for YouTube",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "OS_v2",
+            "matching_strategy": "Equals"
+        }
+    ],
+    "tray_and_multi_window_applications": [
+        {
+            "kind": "Exe",
+            "id": "rssguard.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "PotPlayerMini64.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Text-Grab.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "ChatGPT.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "OpenVPNConnect.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "AutoHotkey.exe",
+            "matching_strategy": "Equals"
+        }
     ]
 }
