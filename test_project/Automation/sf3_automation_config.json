@@ -175,7 +175,7 @@
       "enabled": true,
       "target_window": "LDPlayer",
       "timer_enabled": true,
-      "timer_duration": 120,
+      "timer_duration": 10,
       "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"CurrentTime\" +8801779787186"
     },
     "Fame": {
@@ -260,6 +260,47 @@
       ],
       "enabled": true,
       "target_window": "LDPlayer"
+    },
+    "Test": {
+      "images": [
+        {
+          "name": "test1  ",
+          "path": "C:\\Users\\nahid\\Desktop\\image_185.png",
+          "confidence": 0.8,
+          "region": [
+            1237,
+            714,
+            1587,
+            909
+          ],
+          "action": {
+            "type": "click_on_found_image"
+          },
+          "enabled": true,
+          "is_folder": false
+        },
+        {
+          "name": "fake  ",
+          "path": "C:\\Users\\nahid\\Desktop\\image_186.png",
+          "confidence": 1.0,
+          "region": [
+            1377,
+            561,
+            1669,
+            835
+          ],
+          "action": {
+            "type": "click_on_found_image"
+          },
+          "enabled": true,
+          "is_folder": false
+        }
+      ],
+      "enabled": true,
+      "target_window": "FolderView",
+      "timer_enabled": true,
+      "timer_duration": 10,
+      "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"CurrentTime\" +8801779787186"
     }
   }
 }
