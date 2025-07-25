@@ -173,7 +173,10 @@
         }
       ],
       "enabled": true,
-      "target_window": "LDPlayer"
+      "target_window": "LDPlayer",
+      "timer_enabled": true,
+      "timer_duration": 120,
+      "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"CurrentTime\" +8801779787186"
     },
     "Fame": {
       "images": [
