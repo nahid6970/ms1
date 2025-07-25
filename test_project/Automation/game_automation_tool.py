@@ -312,11 +312,34 @@ class GameAutomationTool(ctk.CTk):
         ctk.CTkLabel(dialog, text="Target Window Title:").pack(anchor="w", padx=20, pady=(10, 0))
         ctk.CTkEntry(dialog, textvariable=target_window_var, width=300).pack(padx=20, fill=ctk.X)
 
+        # Timer settings
+        timer_enabled_var = ctk.BooleanVar(value=self.events_data[event_name].get("timer_enabled", False))
+        timer_duration_var = ctk.StringVar(value=str(self.events_data[event_name].get("timer_duration", 60)))
+        timer_command_var = ctk.StringVar(value=self.events_data[event_name].get("timer_command", ""))
+
+        ctk.CTkCheckBox(dialog, text="Enable Timer", variable=timer_enabled_var).pack(anchor="w", padx=20, pady=(10, 0))
+        ctk.CTkLabel(dialog, text="Timer Duration (seconds):").pack(anchor="w", padx=20, pady=(5, 0))
+        ctk.CTkEntry(dialog, textvariable=timer_duration_var).pack(padx=20, fill=ctk.X)
+        ctk.CTkLabel(dialog, text="Timer Command:").pack(anchor="w", padx=20, pady=(5, 0))
+        ctk.CTkEntry(dialog, textvariable=timer_command_var, width=300).pack(padx=20, fill=ctk.X)
+
         def save_settings():
             new_target_window = target_window_var.get()
             self.events_data[event_name]["target_window"] = new_target_window
+
+            try:
+                timer_duration = int(timer_duration_var.get())
+                if timer_duration < 0:
+                    raise ValueError("Timer duration cannot be negative.")
+                self.events_data[event_name]["timer_enabled"] = timer_enabled_var.get()
+                self.events_data[event_name]["timer_duration"] = timer_duration
+                self.events_data[event_name]["timer_command"] = timer_command_var.get()
+            except ValueError as e:
+                messagebox.showerror("Error", f"Invalid timer duration: {e}")
+                return
+
             self.save_config()
-            self.log_status(f"Target window for '{event_name}' set to '{new_target_window}'")
+            self.log_status(f"Settings for '{event_name}' saved.")
             dialog.destroy()
 
         button_frame = ctk.CTkFrame(dialog)
@@ -1033,10 +1056,16 @@ class GameAutomationTool(ctk.CTk):
     def run_event(self, event_name):
         event_data = self.events_data[event_name]
         event_target_window = event_data.get("target_window", self.target_window) # Use event-specific or global default
+        timer_enabled = event_data.get("timer_enabled", False)
+        timer_duration = event_data.get("timer_duration", 60)
+        timer_command = event_data.get("timer_command", "")
+        last_image_found_time = time.time()
+
         try:
             while not self.stop_flags[event_name]:
                 try:
                     self.focus_window(event_target_window)
+                    image_found_in_loop = False
                     for image_data in event_data["images"]:
                         if self.stop_flags[event_name]:
                             break
@@ -1045,7 +1074,17 @@ class GameAutomationTool(ctk.CTk):
                         if image_data.get("enabled", True): # Only process if enabled
                             if self.find_image_and_execute(image_data):
                                 self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
+                                last_image_found_time = time.time()
+                                image_found_in_loop = True
                                 break
+                    
+                    if not image_found_in_loop and timer_enabled:
+                        if time.time() - last_image_found_time > timer_duration:
+                            self.log_status(f"Timer expired for event '{event_name}'. Executing command: {timer_command}")
+                            # Execute the command in a separate thread to avoid blocking
+                            threading.Thread(target=os.system, args=(timer_command,), daemon=True).start()
+                            last_image_found_time = time.time() # Reset timer after executing
+
                     time.sleep(0.1)
                 except Exception as e:
                     self.log_status(f"Error in event {event_name}: {str(e)}")
