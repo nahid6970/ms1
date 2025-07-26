@@ -297,7 +297,8 @@
             "delay": 4.0
           },
           "enabled": true,
-          "is_folder": true
+          "is_folder": true,
+          "run_in_thread": true
         },
         {
           "type": "separator"
