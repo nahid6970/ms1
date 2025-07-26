@@ -33,7 +33,6 @@ class GameAutomationTool(ctk.CTk):
         self.stop_flags = {}
         self.threads = {}
         self.config_file = "sf3_automation_config.json"
-        self.event_status_lock = threading.Lock() # For thread-safe updates of event status
         self.target_window = "LDPlayer"
         self.right_frame_visible = False
         self.minimal_window = None
@@ -567,8 +566,8 @@ class GameAutomationTool(ctk.CTk):
         # Enabled Checkbox
         ctk.CTkCheckBox(dialog, text="Enabled", variable=enabled_var).pack(anchor="w", padx=20, pady=(10, 0))
 
-        # Run in separate thread Checkbox
-        ctk.CTkCheckBox(dialog, text="Run in separate thread", variable=run_in_thread_var).pack(anchor="w", padx=20, pady=(5, 0))
+        # Run in Thread Checkbox
+        ctk.CTkCheckBox(dialog, text="Run in Separate Thread", variable=run_in_thread_var).pack(anchor="w", padx=20, pady=(5, 0))
 
         # Buttons
         button_frame = ctk.CTkFrame(dialog)
@@ -1081,55 +1080,37 @@ class GameAutomationTool(ctk.CTk):
         self.log_status(f"Stopped event: {event_name}")
         self.after(100, self.refresh_minimal_control_buttons)
 
-    def _threaded_find_and_execute(self, image_data, event_name, last_image_found_time_ref, image_found_in_loop_ref):
-        """Helper function to run find_image_and_execute in a separate thread and update shared state."""
-        try:
-            if self.find_image_and_execute(image_data):
-                self.log_status(f"Found and executed (threaded): {image_data['name']} in {event_name}")
-                with self.event_status_lock:
-                    # Update the shared variables. These are passed as mutable references (lists/dicts)
-                    # to allow modification within the thread.
-                    last_image_found_time_ref[0] = time.time()
-                    image_found_in_loop_ref[0] = True
-        except Exception as e:
-            self.log_status(f"Error in threaded image search for {image_data['name']}: {str(e)}")
-
     def run_event(self, event_name):
         event_data = self.events_data[event_name]
         event_target_window = event_data.get("target_window", self.target_window) # Use event-specific or global default
         timer_enabled = event_data.get("timer_enabled", False)
         timer_duration = event_data.get("timer_duration", 60)
         timer_command = event_data.get("timer_command", "")
-        last_image_found_time = [time.time()]
+        last_image_found_time = time.time()
 
         try:
             while not self.stop_flags[event_name]:
                 try:
                     self.focus_window(event_target_window)
-                    image_found_in_loop = [False]
+                    image_found_in_loop = False
                     for image_data in event_data["images"]:
                         if self.stop_flags[event_name]:
                             break
                         if image_data.get("type") == "separator": # Skip separators
                             continue
                         if image_data.get("enabled", True): # Only process if enabled
-                            if image_data.get("run_in_thread", False):
-                                # Run find_image_and_execute in a separate thread
-                                threading.Thread(target=self._threaded_find_and_execute, args=(image_data, event_name, last_image_found_time, image_found_in_loop)).start()
-                            else:
-                                if self.find_image_and_execute(image_data):
-                                    self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
-                                with self.event_status_lock:
-                                    last_image_found_time[0] = time.time()
-                                    image_found_in_loop[0] = True
+                            if self.find_image_and_execute(image_data):
+                                self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
+                                last_image_found_time = time.time()
+                                image_found_in_loop = True
                                 break
                     
-                    if not image_found_in_loop[0] and timer_enabled:
-                        if time.time() - last_image_found_time[0] > timer_duration:
+                    if not image_found_in_loop and timer_enabled:
+                        if time.time() - last_image_found_time > timer_duration:
                             self.log_status(f"Timer expired for event '{event_name}'. Executing command: {timer_command}")
                             # Execute the command in a separate thread to avoid blocking
                             threading.Thread(target=os.system, args=(timer_command,), daemon=True).start()
-                            last_image_found_time[0] = time.time() # Reset timer after executing
+                            last_image_found_time = time.time() # Reset timer after executing
 
                     time.sleep(0.1)
                 except Exception as e:
@@ -1610,10 +1591,10 @@ KEYBOARD SHORTCUTS:
         Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.force_restart, width=40)
         Restart_Reload.grid(row=0, column=2, sticky="e", padx=(0, 5))
 
-        def listen_for_esc():
-            keyboard.wait('esc')
-            self.force_restart()
-        threading.Thread(target=listen_for_esc, daemon=True).start()
+        # Start listening for ESC key in a separate thread
+        if KEYBOARD_AVAILABLE:
+            threading.Thread(target=lambda: keyboard.wait('esc') or self.force_restart(), daemon=True).start()
+            self.log_status("ESC hotkey for force restart is active.")
 
 
         # Close button in the main container
