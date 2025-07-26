@@ -158,19 +158,19 @@ class KomorebiConfigApp(ctk.CTk):
         self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
         self.button_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # 5 buttons
 
-        self.add_float_button = ctk.CTkButton(self.button_frame, corner_radius=0, text="Add Float Rule", command=self.open_add_float_dialog)
+        self.add_float_button = ctk.CTkButton(self.button_frame, corner_radius=0, font=("jetbrainsmono nfp", 14), text="Add Float Rule", command=self.open_add_float_dialog)
         self.add_float_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
-        self.add_tray_button = ctk.CTkButton(self.button_frame, corner_radius=0, text="Add Tray App", command=self.open_add_tray_dialog)
+        self.add_tray_button = ctk.CTkButton(self.button_frame, corner_radius=0, font=("jetbrainsmono nfp", 14), text="Add Tray App", command=self.open_add_tray_dialog)
         self.add_tray_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        self.edit_selected_button = ctk.CTkButton(self.button_frame, corner_radius=0, fg_color="blue", text="Edit Selected Item", command=self.open_edit_dialog)
+        self.edit_selected_button = ctk.CTkButton(self.button_frame, corner_radius=0, font=("jetbrainsmono nfp", 14), fg_color="blue", text="Edit Selected Item", command=self.open_edit_dialog)
         self.edit_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
-        self.remove_selected_button = ctk.CTkButton(self.button_frame, fg_color="red", corner_radius=0, text="Remove Selected Item", command=self.remove_selected_item)
+        self.remove_selected_button = ctk.CTkButton(self.button_frame, fg_color="red", corner_radius=0, font=("jetbrainsmono nfp", 14), text="Remove Selected Item", command=self.remove_selected_item)
         self.remove_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-        self.save_button = ctk.CTkButton(self.button_frame, fg_color="green", corner_radius=0, text="Save to komorebi.json", command=self.save_config)
+        self.save_button = ctk.CTkButton(self.button_frame, fg_color="green", corner_radius=0, font=("jetbrainsmono nfp", 14), text="Save to komorebi.json", command=self.save_config)
         self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
 
         self.update_list_displays() # Initial display update
@@ -215,7 +215,7 @@ class KomorebiConfigApp(ctk.CTk):
         ]
         for i, rule_obj in enumerate(filtered_float_rules):
             display_text = f"{rule_obj.get('id', '')} ({rule_obj.get('kind', '')}) ({rule_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, anchor="w")
+            label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, font=("jetbrainsmono nfp", 14), anchor="w")
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.rule_obj = rule_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_float_rule(l))
@@ -235,7 +235,7 @@ class KomorebiConfigApp(ctk.CTk):
         ]
         for i, app_obj in enumerate(filtered_tray_apps):
             display_text = f"{app_obj.get('id', '')} ({app_obj.get('kind', '')}) ({app_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.tray_scroll_frame, text=display_text, anchor="w")
+            label = ctk.CTkLabel(self.tray_scroll_frame, font=("jetbrainsmono nfp", 14), text=display_text, anchor="w")
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.app_obj = app_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_tray_app(l))
