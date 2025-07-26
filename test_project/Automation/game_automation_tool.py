@@ -1583,7 +1583,7 @@ KEYBOARD SHORTCUTS:
 
 
         # Button to restart the script
-        Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.restart, width=40)
+        Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.force_restart, width=40)
         Restart_Reload.grid(row=0, column=2, sticky="e", padx=(0, 5))
 
         def listen_for_esc():
