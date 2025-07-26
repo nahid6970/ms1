@@ -1279,16 +1279,18 @@ class GameAutomationTool(ctk.CTk):
     def test_image_recognition(self):
         filename = filedialog.askopenfilename(
             title="Select Image to Test",
-            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif"), ("All files", "*.*")]
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif"), ("All files", "*.* ")]
         )
         if filename:
             dialog = CTkInputDialog(text="Enter confidence level (0.1-1.0):", title="Confidence", initialvalue=0.8)
             confidence = dialog.get_input()
             if confidence:
                 try:
-                    location = pyautogui.locateOnScreen(filename, confidence=float(confidence), grayscale=True)
+                    with self.pyautogui_lock: # Lock for image recognition test
+                        location = pyautogui.locateOnScreen(filename, confidence=float(confidence), grayscale=True)
                     if location:
-                        center = pyautogui.center(location)
+                        with self.pyautogui_lock: # Lock for center calculation
+                            center = pyautogui.center(location)
                         self.log_status(f"Image found at: {location}, center: {center}")
                         messagebox.showinfo("Image Found", f"Image found at: {location}\nCenter: {center}")
                     else:
