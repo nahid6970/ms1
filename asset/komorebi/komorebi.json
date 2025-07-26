@@ -145,11 +145,6 @@
             "matching_strategy": "Equals"
         },
         {
-            "kind": "Title",
-            "id": "Settingsssssss",
-            "matching_strategy": "Equals"
-        },
-        {
             "kind": "Exe",
             "id": "PotPlayerMini64",
             "matching_strategy": "Equals"
