@@ -267,40 +267,25 @@
     "Test": {
       "images": [
         {
-          "name": "test1  ",
-          "path": "C:\\Users\\nahid\\Desktop\\image_185.png",
+          "name": "uniq test  ",
+          "path": "C:\\Users\\nahid\\Desktop\\image_187.png",
           "confidence": 0.8,
           "region": [
-            1237,
-            714,
-            1587,
-            909
+            802,
+            611,
+            1139,
+            785
           ],
           "action": {
-            "type": "click_on_found_image"
-          },
-          "enabled": true,
-          "is_folder": false
-        },
-        {
-          "name": "fake  ",
-          "path": "C:\\Users\\nahid\\Desktop\\image_186.png",
-          "confidence": 1.0,
-          "region": [
-            1377,
-            561,
-            1669,
-            835
-          ],
-          "action": {
-            "type": "click_on_found_image"
+            "type": "swipe",
+            "sequence": "744,250,1220,776,0.5,1200,235,684,790,0.5"
           },
           "enabled": true,
           "is_folder": false
         }
       ],
       "enabled": true,
-      "target_window": "FolderView",
+      "target_window": "LDPlayer",
       "timer_enabled": true,
       "timer_duration": 10,
       "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"Test?\" +8801779787186"
