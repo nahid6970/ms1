@@ -67,6 +67,23 @@
             "type": "key_sequence",
             "sequence": "num2, 1,c,1,m,1,num1,1,c,1"
           },
+          "enabled": false,
+          "is_folder": false
+        },
+        {
+          "name": "Event (ALT) mapTXTalt",
+          "path": "C:\\msBackups\\shadowfight3\\event\\map_alt.png  ",
+          "confidence": 0.8,
+          "region": [
+            1158,
+            531,
+            1275,
+            617
+          ],
+          "action": {
+            "type": "key_sequence",
+            "sequence": "num2, 1,c,1,m,1,num1,1,c,1"
+          },
           "enabled": true,
           "is_folder": false
         },
