@@ -1588,7 +1588,7 @@ KEYBOARD SHORTCUTS:
 
         def listen_for_esc():
             keyboard.wait('esc')
-            self.restart()
+            self.force_restart()
         threading.Thread(target=listen_for_esc, daemon=True).start()
 
 
@@ -1623,6 +1623,14 @@ KEYBOARD SHORTCUTS:
         # Then destroy GUI and exit current process
         self.on_closing()
         sys.exit()  # ensures current process ends cleanly
+
+    def force_restart(self):
+        self.log_status("Force restarting application...")
+        try:
+            # Replace the current process with a new one
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        except Exception as e:
+            self.log_status(f"Failed to force restart: {e}")
 
     
 
