@@ -9,8 +9,6 @@ import pyautogui
 import pygetwindow as gw
 from datetime import datetime
 from pathlib import Path
-import subprocess
-import sys
 
 # Try to import keyboard module, fallback if not available
 try:
@@ -1070,26 +1068,10 @@ class GameAutomationTool(ctk.CTk):
         self.threads[event_name].start()
         self.log_status(f"Started event: {event_name}")
 
-        # Bind ESC key if this is the first event to start
-        if KEYBOARD_AVAILABLE and len(self.threads) == 1:
-            try:
-                keyboard.add_hotkey('esc', self.restart_on_esc)
-                self.log_status("ESC hotkey for restart is now active.")
-            except Exception as e:
-                self.log_status(f"Could not bind ESC hotkey: {e}")
-
     def stop_event(self, event_name):
         self.stop_flags[event_name] = True
         self.log_status(f"Stopped event: {event_name}")
         self.after(100, self.refresh_minimal_control_buttons)
-
-        # Unbind ESC key if this is the last event to stop
-        if KEYBOARD_AVAILABLE and not any(t.is_alive() for t in self.threads.values()):
-            try:
-                keyboard.remove_hotkey('esc')
-                self.log_status("ESC hotkey for restart is now inactive.")
-            except Exception as e:
-                self.log_status(f"Could not unbind ESC hotkey: {e}")
 
     def run_event(self, event_name):
         event_data = self.events_data[event_name]
@@ -1621,19 +1603,7 @@ KEYBOARD SHORTCUTS:
 
     
 
-    def restart_on_esc(self):
-        self.log_status("ESC pressed: Restarting application...")
-        self.restart_application()
-
-    def restart_application(self):
-        self.log_status("Restarting application...")
-        # Launch a new process running this same script
-        subprocess.Popen([sys.executable] + sys.argv)
-        # Optional: give it a little time to start
-        time.sleep(0.5)
-        # Then destroy GUI and exit current process
-        self.on_closing()
-        sys.exit()  # ensures current process ends cleanly
+    
 
 def main():
     pyautogui.FAILSAFE = True
