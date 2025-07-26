@@ -654,24 +654,25 @@ class GameAutomationTool(ctk.CTk):
                 return
             action.update({"function": function_name, "params": params})
         elif action_type == "swipe":
-            start_x = action_frame.start_x_var.get()
-            start_y = action_frame.start_y_var.get()
-            end_x = action_frame.end_x_var.get()
-            end_y = action_frame.end_y_var.get()
-            duration = action_frame.duration_var.get()
-            if not start_x or not start_y or not end_x or not end_y:
-                messagebox.showerror("Error", "Start and End coordinates cannot be empty for Swipe action.")
+            sequence = action_frame.sequence_var.get()
+            if not sequence:
+                messagebox.showerror("Error", "Swipe Sequence cannot be empty.")
+                return
+            # Validate the sequence format (e.g., comma-separated numbers, divisible by 5)
+            parts = [p.strip() for p in sequence.split(",")]
+            if len(parts) % 5 != 0:
+                messagebox.showerror("Error", "Swipe Sequence must have groups of 5 values (startX,startY,endX,endY,duration).")
                 return
             try:
-                start_x = int(start_x)
-                start_y = int(start_y)
-                end_x = int(end_x)
-                end_y = int(end_y)
-                duration = float(duration)
+                for i in range(len(parts)):
+                    if (i + 1) % 5 == 0: # Duration is a float
+                        float(parts[i])
+                    else: # Coordinates are integers
+                        int(parts[i])
             except ValueError:
-                messagebox.showerror("Error", "Coordinates and Duration must be numbers for Swipe action.")
+                messagebox.showerror("Error", "Swipe Sequence contains invalid numbers.")
                 return
-            action.update({"start_x": start_x, "start_y": start_y, "end_x": end_x, "end_y": end_y, "duration": duration})
+            action.update({"sequence": sequence})
 
         image_data = {
             "name": name,
@@ -823,26 +824,10 @@ class GameAutomationTool(ctk.CTk):
             pass
 
         elif action_type == "swipe":
-            ctk.CTkLabel(action_frame, text="Start X:").pack(anchor="w", padx=5, pady=(5, 0))
-            start_x_var = ctk.StringVar(value=str(initial_action_data.get("start_x", "")))
-            ctk.CTkEntry(action_frame, textvariable=start_x_var).pack(fill=ctk.X, padx=5)
-            ctk.CTkLabel(action_frame, text="Start Y:").pack(anchor="w", padx=5, pady=(5, 0))
-            start_y_var = ctk.StringVar(value=str(initial_action_data.get("start_y", "")))
-            ctk.CTkEntry(action_frame, textvariable=start_y_var).pack(fill=ctk.X, padx=5)
-            ctk.CTkLabel(action_frame, text="End X:").pack(anchor="w", padx=5, pady=(5, 0))
-            end_x_var = ctk.StringVar(value=str(initial_action_data.get("end_x", "")))
-            ctk.CTkEntry(action_frame, textvariable=end_x_var).pack(fill=ctk.X, padx=5)
-            ctk.CTkLabel(action_frame, text="End Y:").pack(anchor="w", padx=5, pady=(5, 0))
-            end_y_var = ctk.StringVar(value=str(initial_action_data.get("end_y", "")))
-            ctk.CTkEntry(action_frame, textvariable=end_y_var).pack(fill=ctk.X, padx=5)
-            ctk.CTkLabel(action_frame, text="Duration (seconds):").pack(anchor="w", padx=5, pady=(5, 0))
-            duration_var = ctk.StringVar(value=str(initial_action_data.get("duration", 0.5)))
-            ctk.CTkEntry(action_frame, textvariable=duration_var).pack(fill=ctk.X, padx=5)
-            action_frame.start_x_var = start_x_var
-            action_frame.start_y_var = start_y_var
-            action_frame.end_x_var = end_x_var
-            action_frame.end_y_var = end_y_var
-            action_frame.duration_var = duration_var
+            ctk.CTkLabel(action_frame, text="Swipe Sequence (startX1,startY1,endX1,endY1,duration1,startX2,startY2,endX2,endY2,duration2,...):").pack(anchor="w", padx=5, pady=(5, 0))
+            sequence_var = ctk.StringVar(value=initial_action_data.get("sequence", ""))
+            ctk.CTkEntry(action_frame, textvariable=sequence_var).pack(fill=ctk.X, padx=5)
+            action_frame.sequence_var = sequence_var
 
     def on_event_select(self, event):
         self.refresh_image_list()
@@ -1218,9 +1203,17 @@ class GameAutomationTool(ctk.CTk):
                 else:
                     self.log_status("Error: No image location provided for 'click_on_found_image' action.")
             elif action_type == "swipe":
-                pyautogui.moveTo(action["start_x"], action["start_y"])
-                pyautogui.dragTo(action["end_x"], action["end_y"], duration=action["duration"])
-                time.sleep(action.get("delay", 0.1)) # Add a small delay after swiping
+                sequence = action["sequence"].split(",")
+                for i in range(0, len(sequence), 5):
+                    if i + 4 < len(sequence):
+                        start_x = int(sequence[i].strip())
+                        start_y = int(sequence[i + 1].strip())
+                        end_x = int(sequence[i + 2].strip())
+                        end_y = int(sequence[i + 3].strip())
+                        duration = float(sequence[i + 4].strip())
+                        pyautogui.moveTo(start_x, start_y)
+                        pyautogui.dragTo(end_x, end_y, duration=duration)
+                        time.sleep(action.get("delay", 0.1)) # Add a small delay after each swipe
         except Exception as e:
             self.log_status(f"Error executing action: {str(e)}")
 
