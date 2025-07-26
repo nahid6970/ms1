@@ -559,7 +559,7 @@ class GameAutomationTool(ctk.CTk):
 
         # Action Type
         ctk.CTkLabel(dialog, text="Action Type:").pack(anchor="w", padx=20, pady=(10, 0))
-        action_type_options = ["mouse_click", "key_press", "key_sequence", "mouse_sequence", "custom_function", "click_on_found_image"]
+        action_type_options = ["mouse_click", "key_press", "key_sequence", "mouse_sequence", "custom_function", "click_on_found_image", "swipe"]
         ctk.CTkOptionMenu(dialog, variable=action_type_var, values=action_type_options, command=lambda x: self.on_action_type_select(x, action_frame, image_data.get("action", {}))).pack(padx=20, fill=ctk.X)
 
         # Action specific inputs frame
@@ -653,6 +653,25 @@ class GameAutomationTool(ctk.CTk):
                 messagebox.showerror("Error", "Parameters must be a valid JSON string.")
                 return
             action.update({"function": function_name, "params": params})
+        elif action_type == "swipe":
+            start_x = action_frame.start_x_var.get()
+            start_y = action_frame.start_y_var.get()
+            end_x = action_frame.end_x_var.get()
+            end_y = action_frame.end_y_var.get()
+            duration = action_frame.duration_var.get()
+            if not start_x or not start_y or not end_x or not end_y:
+                messagebox.showerror("Error", "Start and End coordinates cannot be empty for Swipe action.")
+                return
+            try:
+                start_x = int(start_x)
+                start_y = int(start_y)
+                end_x = int(end_x)
+                end_y = int(end_y)
+                duration = float(duration)
+            except ValueError:
+                messagebox.showerror("Error", "Coordinates and Duration must be numbers for Swipe action.")
+                return
+            action.update({"start_x": start_x, "start_y": start_y, "end_x": end_x, "end_y": end_y, "duration": duration})
 
         image_data = {
             "name": name,
@@ -802,6 +821,28 @@ class GameAutomationTool(ctk.CTk):
         elif action_type == "click_on_found_image":
             # No specific inputs needed for this action type
             pass
+
+        elif action_type == "swipe":
+            ctk.CTkLabel(action_frame, text="Start X:").pack(anchor="w", padx=5, pady=(5, 0))
+            start_x_var = ctk.StringVar(value=str(initial_action_data.get("start_x", "")))
+            ctk.CTkEntry(action_frame, textvariable=start_x_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkLabel(action_frame, text="Start Y:").pack(anchor="w", padx=5, pady=(5, 0))
+            start_y_var = ctk.StringVar(value=str(initial_action_data.get("start_y", "")))
+            ctk.CTkEntry(action_frame, textvariable=start_y_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkLabel(action_frame, text="End X:").pack(anchor="w", padx=5, pady=(5, 0))
+            end_x_var = ctk.StringVar(value=str(initial_action_data.get("end_x", "")))
+            ctk.CTkEntry(action_frame, textvariable=end_x_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkLabel(action_frame, text="End Y:").pack(anchor="w", padx=5, pady=(5, 0))
+            end_y_var = ctk.StringVar(value=str(initial_action_data.get("end_y", "")))
+            ctk.CTkEntry(action_frame, textvariable=end_y_var).pack(fill=ctk.X, padx=5)
+            ctk.CTkLabel(action_frame, text="Duration (seconds):").pack(anchor="w", padx=5, pady=(5, 0))
+            duration_var = ctk.StringVar(value=str(initial_action_data.get("duration", 0.5)))
+            ctk.CTkEntry(action_frame, textvariable=duration_var).pack(fill=ctk.X, padx=5)
+            action_frame.start_x_var = start_x_var
+            action_frame.start_y_var = start_y_var
+            action_frame.end_x_var = end_x_var
+            action_frame.end_y_var = end_y_var
+            action_frame.duration_var = duration_var
 
     def on_event_select(self, event):
         self.refresh_image_list()
@@ -1176,6 +1217,10 @@ class GameAutomationTool(ctk.CTk):
                     time.sleep(action.get("delay", 0.1)) # Add a small delay after clicking
                 else:
                     self.log_status("Error: No image location provided for 'click_on_found_image' action.")
+            elif action_type == "swipe":
+                pyautogui.moveTo(action["start_x"], action["start_y"])
+                pyautogui.dragTo(action["end_x"], action["end_y"], duration=action["duration"])
+                time.sleep(action.get("delay", 0.1)) # Add a small delay after swiping
         except Exception as e:
             self.log_status(f"Error executing action: {str(e)}")
 
