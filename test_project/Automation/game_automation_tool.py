@@ -9,6 +9,8 @@ import pyautogui
 import pygetwindow as gw
 from datetime import datetime
 from pathlib import Path
+import subprocess
+import sys
 
 # Try to import keyboard module, fallback if not available
 try:
@@ -51,8 +53,8 @@ class GameAutomationTool(ctk.CTk):
         # Bind global hotkey for stopping all events
         if KEYBOARD_AVAILABLE:
             try:
-                keyboard.add_hotkey('esc', self.stop_all_events)
-                self.log_status("Global hotkey 'ESC' to stop all events is enabled.")
+                keyboard.add_hotkey('esc', self.restart_on_esc)
+                self.log_status("Global hotkey 'ESC' to restart the application is enabled.")
             except Exception as e:
                 self.log_status(f"Could not bind ESC hotkey: {e}. Run as administrator if needed.")
 
@@ -1609,13 +1611,19 @@ KEYBOARD SHORTCUTS:
 
     
 
-    def stop_all_events(self):
-        self.log_status("ESC pressed: Stopping all running events...")
-        for event_name in list(self.threads.keys()):
-            if self.threads[event_name].is_alive():
-                self.stop_event(event_name)
-        self.after(100, self.refresh_control_buttons) # Refresh UI after all events are stopped
-        self.after(100, self.refresh_minimal_control_buttons)
+    def restart_on_esc(self):
+        self.log_status("ESC pressed: Restarting application...")
+        self.restart_application()
+
+    def restart_application(self):
+        self.log_status("Restarting application...")
+        # Launch a new process running this same script
+        subprocess.Popen([sys.executable] + sys.argv)
+        # Optional: give it a little time to start
+        time.sleep(0.5)
+        # Then destroy GUI and exit current process
+        self.on_closing()
+        sys.exit()  # ensures current process ends cleanly
 
 def main():
     pyautogui.FAILSAFE = True
