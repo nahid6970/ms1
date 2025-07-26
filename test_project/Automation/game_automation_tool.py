@@ -50,13 +50,7 @@ class GameAutomationTool(ctk.CTk):
         self.minimize_button = ctk.CTkButton(self, text="Minimal Mode", width=100, font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.show_minimal_mode_window)
         self.minimize_button.place(relx=0.99, rely=0.02, anchor="ne")
 
-        # Bind global hotkey for stopping all events
-        if KEYBOARD_AVAILABLE:
-            try:
-                keyboard.add_hotkey('esc', self.restart_on_esc)
-                self.log_status("Global hotkey 'ESC' to restart the application is enabled.")
-            except Exception as e:
-                self.log_status(f"Could not bind ESC hotkey: {e}. Run as administrator if needed.")
+        
 
         # Start in minimal mode
         self.show_minimal_mode_window()
@@ -1076,10 +1070,26 @@ class GameAutomationTool(ctk.CTk):
         self.threads[event_name].start()
         self.log_status(f"Started event: {event_name}")
 
+        # Bind ESC key if this is the first event to start
+        if KEYBOARD_AVAILABLE and len(self.threads) == 1:
+            try:
+                keyboard.add_hotkey('esc', self.restart_on_esc)
+                self.log_status("ESC hotkey for restart is now active.")
+            except Exception as e:
+                self.log_status(f"Could not bind ESC hotkey: {e}")
+
     def stop_event(self, event_name):
         self.stop_flags[event_name] = True
         self.log_status(f"Stopped event: {event_name}")
         self.after(100, self.refresh_minimal_control_buttons)
+
+        # Unbind ESC key if this is the last event to stop
+        if KEYBOARD_AVAILABLE and not any(t.is_alive() for t in self.threads.values()):
+            try:
+                keyboard.remove_hotkey('esc')
+                self.log_status("ESC hotkey for restart is now inactive.")
+            except Exception as e:
+                self.log_status(f"Could not unbind ESC hotkey: {e}")
 
     def run_event(self, event_name):
         event_data = self.events_data[event_name]
