@@ -273,6 +273,13 @@
         "winget_path": ""
     },
     {
+        "name": "go",
+        "scoop_name": "go",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\go\\current\\go.env",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "grep [Find]",
         "scoop_name": "grep",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\grep\\current\\grep.exe",
@@ -770,10 +777,10 @@
         "winget_path": ""
     },
     {
-        "name": "go",
-        "scoop_name": "go",
-        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\go\\current\\go.env",
-        "winget_name": "",
-        "winget_path": ""
+        "name": "BleachBit",
+        "scoop_name": "bleachbit",
+        "scoop_path": "",
+        "winget_name": "BleachBit.BleachBit",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\BleachBit\\bleachbit.exe"
     }
 ]
