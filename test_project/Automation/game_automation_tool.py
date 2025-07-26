@@ -1,3 +1,5 @@
+import subprocess
+import sys
 import customtkinter as ctk
 from customtkinter import CTkInputDialog
 from tkinter import filedialog, messagebox
@@ -1579,9 +1581,20 @@ KEYBOARD SHORTCUTS:
         restore_btn = ctk.CTkButton(container_frame, text="\uf2d2", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=40)
         restore_btn.grid(row=0, column=1, sticky="e", padx=(0, 5))
 
+
+        # Button to restart the script
+        Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.restart, width=40)
+        Restart_Reload.grid(row=0, column=2, sticky="e", padx=(0, 5))
+
+        def listen_for_esc():
+            keyboard.wait('esc')
+            self.restart()
+        threading.Thread(target=listen_for_esc, daemon=True).start()
+
+
         # Close button in the main container
         close_btn = ctk.CTkButton(container_frame, text="\uf00d", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.on_closing, width=40, fg_color="red", hover_color="darkred")
-        close_btn.grid(row=0, column=2, sticky="e", padx=(0, 0))
+        close_btn.grid(row=0, column=3, sticky="e", padx=(0, 0))
 
         self.refresh_minimal_control_buttons() # Initial population of the event buttons
 
@@ -1600,6 +1613,16 @@ KEYBOARD SHORTCUTS:
         # Store initial dimensions for dragging
         self.minimal_window_initial_width = req_width
         self.minimal_window_initial_height = req_height
+
+    def restart(self):
+        self.log_status("Restarting application...")
+        # Launch a new process running this same script
+        subprocess.Popen([sys.executable] + sys.argv)
+        # Optional: give it a little time to start
+        time.sleep(0.5)
+        # Then destroy GUI and exit current process
+        self.on_closing()
+        sys.exit()  # ensures current process ends cleanly
 
     
 
