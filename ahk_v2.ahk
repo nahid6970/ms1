@@ -31,6 +31,7 @@ Persistent
 
 
 !Space::Run("C:\ms1\Run_v2.py", , "Show")
+!x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
 
 
 ;! monitor
@@ -52,7 +53,6 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 #x::Run("C:\ms1\mypygui.py", , "Hide")
 #s::Run("C:\ms1\startup.py", , "Hide")
 ^+m::Run("C:\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
-LAlt & x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
 
 ;! text
 ::;v1:: {#}Requires AutoHotkey v1.0

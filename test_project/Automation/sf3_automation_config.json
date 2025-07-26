@@ -210,23 +210,6 @@
           "is_folder": false
         },
         {
-          "name": "Action",
-          "path": "C:/msBackups/shadowfight3/action",
-          "confidence": 0.8,
-          "region": [
-            187,
-            100,
-            383,
-            265
-          ],
-          "action": {
-            "type": "key_sequence",
-            "sequence": "j,0,x,0,j,0,x,0,j,0,x,0,j,0,x,0"
-          },
-          "enabled": true,
-          "is_folder": true
-        },
-        {
           "name": "Enter Fight",
           "path": "C:\\msBackups\\shadowfight3\\fame\\b_tournament.png",
           "confidence": 0.8,
@@ -237,7 +220,10 @@
             862
           ],
           "action": {
-            "type": "click_on_found_image"
+            "type": "mouse_click",
+            "x": 316,
+            "y": 767,
+            "delay": 2.0
           },
           "enabled": true,
           "is_folder": false
@@ -273,6 +259,48 @@
           },
           "enabled": true,
           "is_folder": true
+        },
+        {
+          "type": "separator"
+        },
+        {
+          "name": "Action (KOS 2TAP) (copy)",
+          "path": "C:/msBackups/shadowfight3/action",
+          "confidence": 0.8,
+          "region": [
+            187,
+            100,
+            383,
+            265
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "F13",
+            "delay": 4.0
+          },
+          "enabled": false,
+          "is_folder": true
+        },
+        {
+          "name": "Action (Hound) (copy)",
+          "path": "C:/msBackups/shadowfight3/action",
+          "confidence": 0.8,
+          "region": [
+            187,
+            100,
+            383,
+            265
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "F15",
+            "delay": 5.0
+          },
+          "enabled": true,
+          "is_folder": true
+        },
+        {
+          "type": "separator"
         }
       ],
       "enabled": true,
