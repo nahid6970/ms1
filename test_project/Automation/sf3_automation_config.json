@@ -220,10 +220,7 @@
             862
           ],
           "action": {
-            "type": "mouse_click",
-            "x": 316,
-            "y": 767,
-            "delay": 2.0
+            "type": "click_on_found_image"
           },
           "enabled": true,
           "is_folder": false
@@ -255,7 +252,10 @@
             961
           ],
           "action": {
-            "type": "click_on_found_image"
+            "type": "mouse_click",
+            "x": 1589,
+            "y": 893,
+            "delay": 3.0
           },
           "enabled": true,
           "is_folder": true
@@ -294,7 +294,7 @@
           "action": {
             "type": "key_press",
             "key": "F15",
-            "delay": 5.0
+            "delay": 4.0
           },
           "enabled": true,
           "is_folder": true
