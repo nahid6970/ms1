@@ -172,4 +172,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load scripts when popup opens
   loadScriptList();
+
+  const noteInput = document.getElementById('note-input');
+  const saveNoteBtn = document.getElementById('save-note-btn');
+
+  let activeTabUrl = '';
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0] && tabs[0].url) {
+      activeTabUrl = tabs[0].url;
+      chrome.storage.local.get([activeTabUrl], (result) => {
+        if (result[activeTabUrl]) {
+          noteInput.value = result[activeTabUrl];
+        }
+      });
+    }
+  });
+
+  saveNoteBtn.addEventListener('click', () => {
+    const noteText = noteInput.value;
+    if (activeTabUrl) {
+      chrome.storage.local.set({ [activeTabUrl]: noteText }, () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, { action: 'updateNote', note: noteText });
+        });
+        window.close();
+      });
+    }
+  });
 });
