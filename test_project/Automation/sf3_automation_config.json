@@ -210,26 +210,6 @@
           "is_folder": false
         },
         {
-          "name": "change window",
-          "path": "C:\\msBackups\\shadowfight3\\fame\\image_20.png",
-          "confidence": 0.8,
-          "region": [
-            167,
-            136,
-            407,
-            276
-          ],
-          "action": {
-            "type": "mouse_click",
-            "x": 1679,
-            "y": 373,
-            "delay": 0.1
-          },
-          "enabled": true,
-          "is_folder": false,
-          "run_in_thread": false
-        },
-        {
           "name": "Enter Fight",
           "path": "C:\\msBackups\\shadowfight3\\fame\\b_tournament.png",
           "confidence": 0.8,
@@ -281,22 +261,6 @@
           "is_folder": true
         },
         {
-          "name": "X button home (copy)",
-          "path": "C:\\msBackups\\shadowfight3\\event\\inside_ads.png",
-          "confidence": 0.8,
-          "region": [
-            171,
-            85,
-            300,
-            172
-          ],
-          "action": {
-            "type": "click_on_found_image"
-          },
-          "enabled": true,
-          "is_folder": false
-        },
-        {
           "type": "separator"
         },
         {
@@ -333,8 +297,7 @@
             "delay": 4.0
           },
           "enabled": true,
-          "is_folder": true,
-          "run_in_thread": true
+          "is_folder": true
         },
         {
           "type": "separator"

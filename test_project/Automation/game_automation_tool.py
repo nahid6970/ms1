@@ -524,7 +524,6 @@ class GameAutomationTool(ctk.CTk):
         action_type_var = ctk.StringVar(value=image_data.get("action", {}).get("type", "mouse_click"))
         enabled_var = ctk.BooleanVar(value=image_data.get("enabled", True))
         is_folder_var = ctk.BooleanVar(value=image_data.get("is_folder", False))
-        run_in_thread_var = ctk.BooleanVar(value=image_data.get("run_in_thread", False))
 
         # Image Name
         ctk.CTkLabel(dialog, text="Image Name:").pack(anchor="w", padx=20, pady=(10, 0))
@@ -566,13 +565,10 @@ class GameAutomationTool(ctk.CTk):
         # Enabled Checkbox
         ctk.CTkCheckBox(dialog, text="Enabled", variable=enabled_var).pack(anchor="w", padx=20, pady=(10, 0))
 
-        # Run in Thread Checkbox
-        ctk.CTkCheckBox(dialog, text="Run in Separate Thread", variable=run_in_thread_var).pack(anchor="w", padx=20, pady=(5, 0))
-
         # Buttons
         button_frame = ctk.CTkFrame(dialog)
         button_frame.pack(pady=20)
-        ctk.CTkButton(button_frame, text="Save", command=lambda: self.save_image_config(event_name, image_index, name_var.get(), path_var.get(), confidence_var.get(), x1_var.get(), y1_var.get(), x2_var.get(), y2_var.get(), action_type_var.get(), action_frame, enabled_var.get(), is_folder_var.get(), run_in_thread_var.get(), dialog)).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Save", command=lambda: self.save_image_config(event_name, image_index, name_var.get(), path_var.get(), confidence_var.get(), x1_var.get(), y1_var.get(), x2_var.get(), y2_var.get(), action_type_var.get(), action_frame, enabled_var.get(), is_folder_var.get(), dialog)).pack(side=ctk.LEFT, padx=10)
         ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
 
         # Initial call to set up action fields
@@ -580,7 +576,7 @@ class GameAutomationTool(ctk.CTk):
 
         dialog.wait_window()
 
-    def save_image_config(self, event_name, image_index, name, path, confidence, x1, y1, x2, y2, action_type, action_frame, enabled, is_folder, run_in_thread, dialog):
+    def save_image_config(self, event_name, image_index, name, path, confidence, x1, y1, x2, y2, action_type, action_frame, enabled, is_folder, dialog):
         if not name or not path:
             messagebox.showerror("Error", "Image Name and Path cannot be empty.")
             return
@@ -681,8 +677,7 @@ class GameAutomationTool(ctk.CTk):
             "region": region,
             "action": action,
             "enabled": enabled,
-            "is_folder": is_folder,
-            "run_in_thread": run_in_thread
+            "is_folder": is_folder
         }
 
         if image_index is None:
@@ -1279,18 +1274,16 @@ class GameAutomationTool(ctk.CTk):
     def test_image_recognition(self):
         filename = filedialog.askopenfilename(
             title="Select Image to Test",
-            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif"), ("All files", "*.* ")]
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif"), ("All files", "*.*")]
         )
         if filename:
             dialog = CTkInputDialog(text="Enter confidence level (0.1-1.0):", title="Confidence", initialvalue=0.8)
             confidence = dialog.get_input()
             if confidence:
                 try:
-                    with self.pyautogui_lock: # Lock for image recognition test
-                        location = pyautogui.locateOnScreen(filename, confidence=float(confidence), grayscale=True)
+                    location = pyautogui.locateOnScreen(filename, confidence=float(confidence), grayscale=True)
                     if location:
-                        with self.pyautogui_lock: # Lock for center calculation
-                            center = pyautogui.center(location)
+                        center = pyautogui.center(location)
                         self.log_status(f"Image found at: {location}, center: {center}")
                         messagebox.showinfo("Image Found", f"Image found at: {location}\nCenter: {center}")
                     else:
@@ -1593,10 +1586,10 @@ KEYBOARD SHORTCUTS:
         Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.force_restart, width=40)
         Restart_Reload.grid(row=0, column=2, sticky="e", padx=(0, 5))
 
-        # Start listening for ESC key in a separate thread
-        if KEYBOARD_AVAILABLE:
-            threading.Thread(target=lambda: keyboard.wait('esc') or self.force_restart(), daemon=True).start()
-            self.log_status("ESC hotkey for force restart is active.")
+        def listen_for_esc():
+            keyboard.wait('esc')
+            self.force_restart()
+        threading.Thread(target=listen_for_esc, daemon=True).start()
 
 
         # Close button in the main container
