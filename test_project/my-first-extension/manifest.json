@@ -26,12 +26,5 @@
       "128": "assets/icons/fdm128.png",
       "16": "assets/icons/fdm16.png",
       "48": "assets/icons/fdm48.png"
-   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "css": ["note_taker.css"],
-      "js": ["user_scripts/note_taker.js"]
-    }
-  ]
+   }
 }
