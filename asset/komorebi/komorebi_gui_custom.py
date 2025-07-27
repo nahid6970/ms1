@@ -17,36 +17,43 @@ class AddEditDialog(ctk.CTkToplevel):
         self.item_data = item_data  # None for add, dict for edit
         self.transient(master)  # Make dialog appear on top of main window
         self.grab_set()  # Make it a modal window
-        self.geometry("400x180") # Set the size of the dialog window
 
         if self.item_data:
             self.title(f"Edit {item_type.capitalize()} Item")
         else:
             self.title(f"Add New {item_type.capitalize()} Item")
 
-        self.kind_entry = ctk.CTkEntry(self, placeholder_text="Kind (e.g., Exe, Class, Title)")
-        self.kind_entry.pack(padx=20, pady=5, fill="x")
+        kind_options = ["Exe", "Class", "Title", "Path"]
+        matching_strategy_options = [
+            "Legacy", "Equals", "StartsWith", "EndsWith", "Contains", "Regex",
+            "DoesNotEndWith", "DoesNotStartWith", "DoesNotEqual", "DoesNotContain"
+        ]
+
+        self.kind_combobox = ctk.CTkComboBox(self, values=kind_options)
+        self.kind_combobox.pack(padx=20, pady=5, fill="x")
         self.id_entry = ctk.CTkEntry(self, placeholder_text="ID (e.g., notepad.exe)")
         self.id_entry.pack(padx=20, pady=5, fill="x")
-        self.matching_strategy_entry = ctk.CTkEntry(self, placeholder_text="Matching Strategy (e.g., Equals, Contains)")
-        self.matching_strategy_entry.pack(padx=20, pady=5, fill="x")
+        self.matching_strategy_combobox = ctk.CTkComboBox(self, values=matching_strategy_options)
+        self.matching_strategy_combobox.pack(padx=20, pady=5, fill="x")
 
-        if self.item_data:
-            self.kind_entry.insert(0, self.item_data.get("kind", ""))
+        if self.item_data:  # Pre-fill for edit mode
+            self.kind_combobox.set(self.item_data.get("kind", "Exe"))
             self.id_entry.insert(0, self.item_data.get("id", ""))
-            self.matching_strategy_entry.insert(0, self.item_data.get("matching_strategy", ""))
+            self.matching_strategy_combobox.set(self.item_data.get("matching_strategy", "Equals"))
             save_button = ctk.CTkButton(self, text="Save Changes", command=self.save_changes)
         else:
+            self.kind_combobox.set(kind_options[0]) # Set default value
+            self.matching_strategy_combobox.set(matching_strategy_options[0]) # Set default value
             save_button = ctk.CTkButton(self, text="Add Item", command=self.add_item)
         save_button.pack(padx=20, pady=10)
 
     def add_item(self):
-        kind = self.kind_entry.get().strip()
+        kind = self.kind_combobox.get()
         item_id = self.id_entry.get().strip()
-        matching_strategy = self.matching_strategy_entry.get().strip()
+        matching_strategy = self.matching_strategy_combobox.get()
 
-        if not kind or not item_id or not matching_strategy:
-            messagebox.showwarning("Warning", "All fields are required.", parent=self)
+        if not item_id:
+            messagebox.showwarning("Warning", "The ID field cannot be empty.", parent=self)
             return
 
         new_item = {"kind": kind, "id": item_id, "matching_strategy": matching_strategy}
@@ -68,12 +75,12 @@ class AddEditDialog(ctk.CTkToplevel):
         self.destroy()  # Close dialog
 
     def save_changes(self):
-        kind = self.kind_entry.get().strip()
+        kind = self.kind_combobox.get()
         item_id = self.id_entry.get().strip()
-        matching_strategy = self.matching_strategy_entry.get().strip()
+        matching_strategy = self.matching_strategy_combobox.get()
 
-        if not kind or not item_id or not matching_strategy:
-            messagebox.showwarning("Warning", "All fields are required.", parent=self)
+        if not item_id:
+            messagebox.showwarning("Warning", "The ID field cannot be empty.", parent=self)
             return
 
         updated_item = {"kind": kind, "id": item_id, "matching_strategy": matching_strategy}
@@ -155,22 +162,22 @@ class KomorebiConfigApp(ctk.CTk):
 
         # --- Buttons Frame (Bottom) ---
         self.button_frame = ctk.CTkFrame(self)
-        self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+        self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew",)
         self.button_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # 5 buttons
 
-        self.add_float_button = ctk.CTkButton(self.button_frame, corner_radius=0, font=("jetbrainsmono nfp", 14), text="Add Float Rule", command=self.open_add_float_dialog)
+        self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", corner_radius=0, command=self.open_add_float_dialog)
         self.add_float_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
-        self.add_tray_button = ctk.CTkButton(self.button_frame, corner_radius=0, font=("jetbrainsmono nfp", 14), text="Add Tray App", command=self.open_add_tray_dialog)
+        self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", corner_radius=0, command=self.open_add_tray_dialog)
         self.add_tray_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        self.edit_selected_button = ctk.CTkButton(self.button_frame, corner_radius=0, font=("jetbrainsmono nfp", 14), fg_color="blue", text="Edit Selected Item", command=self.open_edit_dialog)
+        self.edit_selected_button = ctk.CTkButton(self.button_frame, text="Edit Selected Item", fg_color="#155ae2", text_color="white", corner_radius=0, command=self.open_edit_dialog)
         self.edit_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
-        self.remove_selected_button = ctk.CTkButton(self.button_frame, fg_color="red", corner_radius=0, font=("jetbrainsmono nfp", 14), text="Remove Selected Item", command=self.remove_selected_item)
+        self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", fg_color="red", corner_radius=0, command=self.remove_selected_item)
         self.remove_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-        self.save_button = ctk.CTkButton(self.button_frame, fg_color="green", corner_radius=0, font=("jetbrainsmono nfp", 14), text="Save to komorebi.json", command=self.save_config)
+        self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", fg_color="green", corner_radius=0, command=self.save_config)
         self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
 
         self.update_list_displays() # Initial display update
@@ -207,15 +214,14 @@ class KomorebiConfigApp(ctk.CTk):
         self.float_list_items.clear()
         self.selected_float_rule = None
 
-        # Sort and populate float rules display
-        float_rules = sorted(self.config_data.get("float_rules", []), key=lambda x: x.get('id', '').lower())
+        # Populate float rules display
         filtered_float_rules = [
-            rule_obj for rule_obj in float_rules
+            rule_obj for rule_obj in self.config_data.get("float_rules", [])
             if search_query in f"{rule_obj.get('id', '')} {rule_obj.get('kind', '')} {rule_obj.get('matching_strategy', '')}".lower()
         ]
         for i, rule_obj in enumerate(filtered_float_rules):
             display_text = f"{rule_obj.get('id', '')} ({rule_obj.get('kind', '')}) ({rule_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, font=("jetbrainsmono nfp", 14), anchor="w")
+            label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, anchor="w")
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.rule_obj = rule_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_float_rule(l))
@@ -227,15 +233,14 @@ class KomorebiConfigApp(ctk.CTk):
         self.tray_list_items.clear()
         self.selected_tray_app = None
 
-        # Sort and populate tray apps display
-        tray_apps = sorted(self.config_data.get("tray_and_multi_window_applications", []), key=lambda x: x.get('id', '').lower())
+        # Populate tray apps display
         filtered_tray_apps = [
-            app_obj for app_obj in tray_apps
+            app_obj for app_obj in self.config_data.get("tray_and_multi_window_applications", [])
             if search_query in f"{app_obj.get('id', '')} {app_obj.get('kind', '')} {app_obj.get('matching_strategy', '')}".lower()
         ]
         for i, app_obj in enumerate(filtered_tray_apps):
             display_text = f"{app_obj.get('id', '')} ({app_obj.get('kind', '')}) ({app_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.tray_scroll_frame, font=("jetbrainsmono nfp", 14), text=display_text, anchor="w")
+            label = ctk.CTkLabel(self.tray_scroll_frame, text=display_text, anchor="w")
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.app_obj = app_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_tray_app(l))
