@@ -13,9 +13,9 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "128": "assets/icons/fdm128.png",
-      "16": "assets/icons/fdm16.png",
-      "48": "assets/icons/fdm48.png"
+      "128": "assets/icons/img-128x128.png",
+      "48": "assets/icons/img-48x48.png",
+      "16": "assets/icons/img-16x16.png"
     }
   },
   "content_scripts": [
