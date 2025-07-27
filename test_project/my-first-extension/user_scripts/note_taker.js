@@ -1,12 +1,14 @@
-// Create a div to hold the notes
-const noteDiv = document.createElement('div');
-noteDiv.id = 'note-taker-div';
-document.body.appendChild(noteDiv);
-
 // Function to display the note
 const displayNote = (note) => {
-  noteDiv.innerHTML = ''; // Clear previous note
+  let noteDiv = document.getElementById('note-taker-div');
+
   if (note) {
+    if (!noteDiv) {
+      noteDiv = document.createElement('div');
+      noteDiv.id = 'note-taker-div';
+      document.body.appendChild(noteDiv);
+    }
+    noteDiv.innerHTML = ''; // Clear previous note
     const noteContent = document.createElement('pre');
     noteContent.textContent = note;
     const closeButton = document.createElement('button');
@@ -18,7 +20,9 @@ const displayNote = (note) => {
     noteDiv.appendChild(noteContent);
     noteDiv.style.display = 'block';
   } else {
-    noteDiv.style.display = 'none';
+    if (noteDiv) {
+      noteDiv.style.display = 'none';
+    }
   }
 };
 

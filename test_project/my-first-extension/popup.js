@@ -194,6 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
           domainToggle.checked = true;
         }
       });
+
+      domainToggle.addEventListener('change', () => {
+        const key = domainToggle.checked ? activeTabHostname : activeTabUrl;
+        chrome.storage.local.get([key], (result) => {
+          noteInput.value = result[key] || '';
+        });
+      });
     }
   });
 
