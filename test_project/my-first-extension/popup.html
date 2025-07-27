@@ -238,16 +238,13 @@
     </div>
 
     <div id="note-section" style="margin-top: 16px;">
-        <h3 style="color: #569cd6; font-size: 14px; margin-bottom: 8px;">Notes for this site:</h3>
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <span style="font-size: 12px; color: #808080;">Save note for entire domain:</span>
-            <label class="switch">
-                <input type="checkbox" id="domain-toggle">
-                <span class="slider round"></span>
-            </label>
-        </div>
-        <textarea id="note-input" style="width: 100%; box-sizing: border-box; height: 100px; background: #2d2d30; color: #d4d4d4; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'JetBrains Mono', monospace;"></textarea>
-        <button id="save-note-btn" style="width: 100%; padding: 8px; background: #0e639c; color: white; border: none; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer; margin-top: 8px;">Save Note</button>
+        <h3 style="color: #569cd6; font-size: 14px; margin-bottom: 8px;">Domain Specific Notes:</h3>
+        <textarea id="domain-note-input" style="width: 100%; box-sizing: border-box; height: 70px; background: #2d2d30; color: #d4d4d4; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'JetBrains Mono', monospace;"></textarea>
+        <button id="save-domain-note-btn" style="width: 100%; padding: 8px; background: #0e639c; color: white; border: none; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer; margin-top: 8px; margin-bottom: 16px;">Save Domain Note</button>
+
+        <h3 style="color: #569cd6; font-size: 14px; margin-bottom: 8px;">Page Specific Notes:</h3>
+        <textarea id="page-note-input" style="width: 100%; box-sizing: border-box; height: 70px; background: #2d2d30; color: #d4d4d4; border: 1px solid #333; border-radius: 4px; padding: 8px; font-family: 'JetBrains Mono', monospace;"></textarea>
+        <button id="save-page-note-btn" style="width: 100%; padding: 8px; background: #0e639c; color: white; border: none; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer; margin-top: 8px;">Save Page Note</button>
         <div style="display: flex; justify-content: space-between; margin-top: 8px;">
             <button id="import-notes-btn" style="width: 48%; padding: 8px; background: #3c3c3c; color: white; border: none; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer;">Import Notes</button>
             <button id="export-notes-btn" style="width: 48%; padding: 8px; background: #3c3c3c; color: white; border: none; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer;">Export Notes</button>

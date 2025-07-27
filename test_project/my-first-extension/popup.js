@@ -173,9 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load scripts when popup opens
   loadScriptList();
 
-  const noteInput = document.getElementById('note-input');
-  const saveNoteBtn = document.getElementById('save-note-btn');
-  const domainToggle = document.getElementById('domain-toggle');
+  const domainNoteInput = document.getElementById('domain-note-input');
+  const saveDomainNoteBtn = document.getElementById('save-domain-note-btn');
+  const pageNoteInput = document.getElementById('page-note-input');
+  const savePageNoteBtn = document.getElementById('save-page-note-btn');
 
   let activeTabUrl = '';
   let activeTabHostname = '';
@@ -187,31 +188,34 @@ document.addEventListener('DOMContentLoaded', () => {
       activeTabHostname = url.hostname;
 
       chrome.storage.local.get([activeTabUrl, activeTabHostname], (result) => {
-        if (result[activeTabUrl]) {
-          noteInput.value = result[activeTabUrl];
-        } else if (result[activeTabHostname]) {
-          noteInput.value = result[activeTabHostname];
-          domainToggle.checked = true;
+        if (result[activeTabHostname]) {
+          domainNoteInput.value = result[activeTabHostname];
         }
-      });
-
-      domainToggle.addEventListener('change', () => {
-        const key = domainToggle.checked ? activeTabHostname : activeTabUrl;
-        chrome.storage.local.get([key], (result) => {
-          noteInput.value = result[key] || '';
-        });
+        if (result[activeTabUrl]) {
+          pageNoteInput.value = result[activeTabUrl];
+        }
       });
     }
   });
 
-  saveNoteBtn.addEventListener('click', () => {
-    const noteText = noteInput.value;
-    const storageKey = domainToggle.checked ? activeTabHostname : activeTabUrl;
-
-    if (storageKey) {
-      chrome.storage.local.set({ [storageKey]: noteText }, () => {
+  saveDomainNoteBtn.addEventListener('click', () => {
+    const noteText = domainNoteInput.value;
+    if (activeTabHostname) {
+      chrome.storage.local.set({ [activeTabHostname]: noteText }, () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          chrome.tabs.sendMessage(tabs[0].id, { action: 'updateNote', note: noteText });
+          chrome.tabs.sendMessage(tabs[0].id, { action: 'updateDomainNote', note: noteText });
+        });
+        window.close();
+      });
+    }
+  });
+
+  savePageNoteBtn.addEventListener('click', () => {
+    const noteText = pageNoteInput.value;
+    if (activeTabUrl) {
+      chrome.storage.local.set({ [activeTabUrl]: noteText }, () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, { action: 'updatePageNote', note: noteText });
         });
         window.close();
       });
