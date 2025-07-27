@@ -175,15 +175,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const noteInput = document.getElementById('note-input');
   const saveNoteBtn = document.getElementById('save-note-btn');
+  const domainToggle = document.getElementById('domain-toggle');
 
   let activeTabUrl = '';
+  let activeTabHostname = '';
 
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs[0] && tabs[0].url) {
-      activeTabUrl = tabs[0].url;
-      chrome.storage.local.get([activeTabUrl], (result) => {
+      const url = new URL(tabs[0].url);
+      activeTabUrl = url.href;
+      activeTabHostname = url.hostname;
+
+      chrome.storage.local.get([activeTabUrl, activeTabHostname], (result) => {
         if (result[activeTabUrl]) {
           noteInput.value = result[activeTabUrl];
+        } else if (result[activeTabHostname]) {
+          noteInput.value = result[activeTabHostname];
+          domainToggle.checked = true;
         }
       });
     }
@@ -191,8 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   saveNoteBtn.addEventListener('click', () => {
     const noteText = noteInput.value;
-    if (activeTabUrl) {
-      chrome.storage.local.set({ [activeTabUrl]: noteText }, () => {
+    const storageKey = domainToggle.checked ? activeTabHostname : activeTabUrl;
+
+    if (storageKey) {
+      chrome.storage.local.set({ [storageKey]: noteText }, () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           chrome.tabs.sendMessage(tabs[0].id, { action: 'updateNote', note: noteText });
         });

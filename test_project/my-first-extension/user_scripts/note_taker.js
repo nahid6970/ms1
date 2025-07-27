@@ -24,8 +24,15 @@ const displayNote = (note) => {
 
 // Load the note for the current page
 const url = window.location.href;
-chrome.storage.local.get([url], (result) => {
-  displayNote(result[url]);
+const hostname = window.location.hostname;
+
+// Check for domain-specific note first, then page-specific
+chrome.storage.local.get([hostname, url], (result) => {
+  if (result[hostname]) {
+    displayNote(result[hostname]);
+  } else if (result[url]) {
+    displayNote(result[url]);
+  }
 });
 
 // Listen for messages from the popup to update the note
