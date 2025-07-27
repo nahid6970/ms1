@@ -96,6 +96,7 @@ style.textContent = `
     margin: 0;
     white-space: pre-wrap;
     word-break: break-word;
+    color: white;
   }
   .note-close-button {
     position: absolute;
