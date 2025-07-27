@@ -230,7 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(null, (items) => {
       const notes = {};
       for (const key in items) {
-        if (key.startsWith('http')) {
+        // Include both URLs (page-specific) and hostnames (domain-specific)
+        if (key.startsWith('http') || key.includes('.')) { // Simple check for hostname (contains a dot)
           notes[key] = items[key];
         }
       }
@@ -255,13 +256,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const notes = JSON.parse(e.target.result);
         chrome.storage.local.set(notes, () => {
           alert('Notes imported successfully!');
-          // Refresh the note for the current page
+          // Refresh the notes for the current page
           chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs[0] && tabs[0].url) {
-              activeTabUrl = tabs[0].url;
-              chrome.storage.local.get([activeTabUrl], (result) => {
+              const url = new URL(tabs[0].url);
+              activeTabUrl = url.href;
+              activeTabHostname = url.hostname;
+              chrome.storage.local.get([activeTabUrl, activeTabHostname], (result) => {
+                if (result[activeTabHostname]) {
+                  domainNoteInput.value = result[activeTabHostname];
+                } else {
+                  domainNoteInput.value = '';
+                }
                 if (result[activeTabUrl]) {
-                  noteInput.value = result[activeTabUrl];
+                  pageNoteInput.value = result[activeTabUrl];
+                } else {
+                  pageNoteInput.value = '';
                 }
               });
             }
