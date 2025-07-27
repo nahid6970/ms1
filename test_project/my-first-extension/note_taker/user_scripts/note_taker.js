@@ -113,12 +113,15 @@ style.textContent = `
     right: 5px;
     background: none;
     border: none;
-    color: #d4d4d4;
+    color: #000000;
     background-color: red;
     font-size: 16px;
     cursor: pointer;
     width: 8%;
     height: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .note-close-button:hover {
     color: #fff;
