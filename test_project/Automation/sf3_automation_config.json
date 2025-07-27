@@ -247,7 +247,7 @@
         {
           "name": "Enter Fight (Fight TXT)",
           "path": "C:\\msBackups\\shadowfight3\\fame\\b_space2.png",
-          "confidence": 0.8,
+          "confidence": 0.75,
           "region": [
             700,
             821,
