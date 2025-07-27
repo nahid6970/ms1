@@ -200,4 +200,54 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  const importNotesBtn = document.getElementById('import-notes-btn');
+  const exportNotesBtn = document.getElementById('export-notes-btn');
+  const importNotesInput = document.getElementById('import-notes-input');
+
+  exportNotesBtn.addEventListener('click', () => {
+    chrome.storage.local.get(null, (items) => {
+      const notes = {};
+      for (const key in items) {
+        if (key.startsWith('http')) {
+          notes[key] = items[key];
+        }
+      }
+      const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      chrome.downloads.download({
+        url: url,
+        filename: 'notes.json'
+      });
+    });
+  });
+
+  importNotesBtn.addEventListener('click', () => {
+    importNotesInput.click();
+  });
+
+  importNotesInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const notes = JSON.parse(e.target.result);
+        chrome.storage.local.set(notes, () => {
+          alert('Notes imported successfully!');
+          // Refresh the note for the current page
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0] && tabs[0].url) {
+              activeTabUrl = tabs[0].url;
+              chrome.storage.local.get([activeTabUrl], (result) => {
+                if (result[activeTabUrl]) {
+                  noteInput.value = result[activeTabUrl];
+                }
+              });
+            }
+          });
+        });
+      };
+      reader.readAsText(file);
+    }
+  });
 });

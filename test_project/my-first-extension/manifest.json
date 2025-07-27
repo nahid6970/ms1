@@ -5,7 +5,8 @@
   "description": "A Chrome extension to manage and inject custom scripts.",
   "permissions": [
     "storage",
-    "scripting"
+    "scripting",
+    "downloads"
   ],
   "host_permissions": [
     "<all_urls>"
