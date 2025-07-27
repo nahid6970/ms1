@@ -89,7 +89,7 @@ style.textContent = `
     overflow-y: auto;
     background-color: #2d2d30;
     border: 1px solid #333;
-    border-radius: 8px;
+    border-radius: 0px;
     padding: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 10000;
@@ -114,8 +114,11 @@ style.textContent = `
     background: none;
     border: none;
     color: #d4d4d4;
+    background-color: red;
     font-size: 16px;
     cursor: pointer;
+    width: 8%;
+    height: 15%;
   }
   .note-close-button:hover {
     color: #fff;
