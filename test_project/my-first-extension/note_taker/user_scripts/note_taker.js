@@ -105,6 +105,7 @@ style.textContent = `
     white-space: pre-wrap;
     word-break: break-word;
     color: white;
+    line-height: 150%;
   }
   .note-close-button {
     position: absolute;
