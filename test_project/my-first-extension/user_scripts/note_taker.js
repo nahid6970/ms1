@@ -47,14 +47,22 @@ const url = window.location.href;
 const hostname = window.location.hostname;
 
 chrome.storage.local.get([hostname, url], (result) => {
+  let domainNoteExists = false;
   // Display domain note if exists
   if (result[hostname]) {
     displayNoteInBox(result[hostname], domainNoteDiv, 'Domain Note');
+    domainNoteExists = true;
   }
 
   // Display page note if exists
   if (result[url]) {
     displayNoteInBox(result[url], pageNoteDiv, 'Page Note');
+    // Adjust position of page note div
+    if (domainNoteExists) {
+      pageNoteDiv.style.top = (domainNoteDiv.offsetHeight + 20) + 'px'; // 10px for top, 10px for gap
+    } else {
+      pageNoteDiv.style.top = '10px';
+    }
   }
 });
 
