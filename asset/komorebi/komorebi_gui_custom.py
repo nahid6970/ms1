@@ -17,6 +17,7 @@ class AddEditDialog(ctk.CTkToplevel):
         self.item_data = item_data  # None for add, dict for edit
         self.transient(master)  # Make dialog appear on top of main window
         self.grab_set()  # Make it a modal window
+        self.geometry("400x180")
 
         if self.item_data:
             self.title(f"Edit {item_type.capitalize()} Item")
@@ -215,10 +216,10 @@ class KomorebiConfigApp(ctk.CTk):
         self.selected_float_rule = None
 
         # Populate float rules display
-        filtered_float_rules = [
+        filtered_float_rules = sorted([
             rule_obj for rule_obj in self.config_data.get("float_rules", [])
             if search_query in f"{rule_obj.get('id', '')} {rule_obj.get('kind', '')} {rule_obj.get('matching_strategy', '')}".lower()
-        ]
+        ], key=lambda x: x.get('id', '').lower())
         for i, rule_obj in enumerate(filtered_float_rules):
             display_text = f"{rule_obj.get('id', '')} ({rule_obj.get('kind', '')}) ({rule_obj.get('matching_strategy', '')})"
             label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, anchor="w")
@@ -234,10 +235,10 @@ class KomorebiConfigApp(ctk.CTk):
         self.selected_tray_app = None
 
         # Populate tray apps display
-        filtered_tray_apps = [
+        filtered_tray_apps = sorted([
             app_obj for app_obj in self.config_data.get("tray_and_multi_window_applications", [])
             if search_query in f"{app_obj.get('id', '')} {app_obj.get('kind', '')} {app_obj.get('matching_strategy', '')}".lower()
-        ]
+        ], key=lambda x: x.get('id', '').lower())
         for i, app_obj in enumerate(filtered_tray_apps):
             display_text = f"{app_obj.get('id', '')} ({app_obj.get('kind', '')}) ({app_obj.get('matching_strategy', '')})"
             label = ctk.CTkLabel(self.tray_scroll_frame, text=display_text, anchor="w")
