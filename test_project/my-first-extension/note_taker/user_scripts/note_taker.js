@@ -111,9 +111,9 @@ style.textContent = `
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: red;
+    background-color: rgb(0, 0, 0);
     border: none;
-    color: #000000;
+    color: #ff8b8b;
     font-size: 14px;
     cursor: pointer;
     width: 20px;
