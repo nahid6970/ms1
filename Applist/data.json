@@ -84,6 +84,13 @@
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\Bitwarden\\Bitwarden.exe"
     },
     {
+        "name": "BleachBit",
+        "scoop_name": "bleachbit",
+        "scoop_path": "",
+        "winget_name": "BleachBit.BleachBit",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\BleachBit\\bleachbit.exe"
+    },
+    {
         "name": "btop [Sys-Monitor]",
         "scoop_name": "btop",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\btop\\current\\btop.exe",
@@ -326,6 +333,13 @@
         "scoop_name": "",
         "scoop_path": "",
         "winget_name": "Jellyfin.Server",
+        "winget_path": ""
+    },
+    {
+        "name": "keyviz",
+        "scoop_name": "keyviz",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe",
+        "winget_name": "",
         "winget_path": ""
     },
     {
@@ -775,12 +789,5 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
         "winget_path": ""
-    },
-    {
-        "name": "BleachBit",
-        "scoop_name": "bleachbit",
-        "scoop_path": "",
-        "winget_name": "BleachBit.BleachBit",
-        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\BleachBit\\bleachbit.exe"
     }
 ]
