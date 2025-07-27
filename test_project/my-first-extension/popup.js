@@ -174,9 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadScriptList();
 
   const domainNoteInput = document.getElementById('domain-note-input');
-  const saveDomainNoteBtn = document.getElementById('save-domain-note-btn');
   const pageNoteInput = document.getElementById('page-note-input');
-  const savePageNoteBtn = document.getElementById('save-page-note-btn');
+  const saveAllNotesBtn = document.getElementById('save-all-notes-btn');
 
   let activeTabUrl = '';
   let activeTabHostname = '';
@@ -198,24 +197,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  saveDomainNoteBtn.addEventListener('click', () => {
-    const noteText = domainNoteInput.value;
-    if (activeTabHostname) {
-      chrome.storage.local.set({ [activeTabHostname]: noteText }, () => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          chrome.tabs.sendMessage(tabs[0].id, { action: 'updateDomainNote', note: noteText });
-        });
-        window.close();
-      });
-    }
-  });
+  saveAllNotesBtn.addEventListener('click', () => {
+    const domainNoteText = domainNoteInput.value;
+    const pageNoteText = pageNoteInput.value;
 
-  savePageNoteBtn.addEventListener('click', () => {
-    const noteText = pageNoteInput.value;
+    const itemsToSet = {};
+    if (activeTabHostname) {
+      itemsToSet[activeTabHostname] = domainNoteText;
+    }
     if (activeTabUrl) {
-      chrome.storage.local.set({ [activeTabUrl]: noteText }, () => {
+      itemsToSet[activeTabUrl] = pageNoteText;
+    }
+
+    if (Object.keys(itemsToSet).length > 0) {
+      chrome.storage.local.set(itemsToSet, () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          chrome.tabs.sendMessage(tabs[0].id, { action: 'updatePageNote', note: noteText });
+          if (activeTabHostname) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: 'updateDomainNote', note: domainNoteText });
+          }
+          if (activeTabUrl) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: 'updatePageNote', note: pageNoteText });
+          }
         });
         window.close();
       });
