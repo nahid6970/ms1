@@ -112,6 +112,13 @@
         "winget_path": ""
     },
     {
+        "name": "carnac [keypress monitor]",
+        "scoop_name": "carnac",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\carnac\\current\\Carnac.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "Cheat Engine [7.4]",
         "scoop_name": "cheat-engine",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\cheat-engine\\current\\Cheat Engine.exe",
@@ -336,7 +343,7 @@
         "winget_path": ""
     },
     {
-        "name": "keyviz",
+        "name": "keyviz [keypress monitor]",
         "scoop_name": "keyviz",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe",
         "winget_name": "",
