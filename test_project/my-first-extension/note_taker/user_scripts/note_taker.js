@@ -111,20 +111,23 @@ style.textContent = `
     position: absolute;
     top: 5px;
     right: 5px;
-    background: none;
+    background-color: red;
     border: none;
     color: #000000;
-    background-color: red;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
-    width: 8%;
-    height: 15%;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
+    line-height: 1;
+    padding: 0;
   }
   .note-close-button:hover {
     color: #fff;
+    background-color: #cc0000;
   }
 `;
 document.head.appendChild(style);
