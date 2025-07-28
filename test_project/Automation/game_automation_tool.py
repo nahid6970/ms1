@@ -1625,7 +1625,7 @@ KEYBOARD SHORTCUTS:
             corner_radius=0,
             width=120
         )
-        self.minimal_event_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
+        # self.minimal_event_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
 
         self.minimal_image_dropdown = ctk.CTkOptionMenu(
             self.minimal_image_automation_frame,
