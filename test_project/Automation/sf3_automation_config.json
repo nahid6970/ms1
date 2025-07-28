@@ -369,6 +369,11 @@
       "timer_enabled": true,
       "timer_duration": 10,
       "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"Test?\" +8801779787186"
+    },
+    "Action": {
+      "images": [],
+      "enabled": true,
+      "target_window": "LDPlayer"
     }
   }
 }

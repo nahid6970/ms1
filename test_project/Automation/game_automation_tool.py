@@ -1602,7 +1602,7 @@ KEYBOARD SHORTCUTS:
         self.minimal_image_automation_frame = ctk.CTkFrame(self.minimal_window)
         self.minimal_image_automation_frame.pack(fill=ctk.X, padx=(0,5), pady=(5,0))
 
-        self.minimal_event_selection_var = ctk.StringVar(value="Select Event")
+        self.minimal_event_selection_var = ctk.StringVar(value="Action")
         self.minimal_image_selection_var = ctk.StringVar(value="Select Image")
 
         event_names = list(self.events_data.keys()) if self.events_data else ["No Events"]
