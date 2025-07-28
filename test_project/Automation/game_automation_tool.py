@@ -1504,6 +1504,13 @@ KEYBOARD SHORTCUTS:
 
         self.minimal_window.protocol("WM_DELETE_WINDOW", on_minimal_close)
 
+
+        #* ██████╗ ██╗   ██╗████████╗████████╗ ██████╗ ███╗   ██╗███████╗
+        #* ██╔══██╗██║   ██║╚══██╔══╝╚══██╔══╝██╔═══██╗████╗  ██║██╔════╝
+        #* ██████╔╝██║   ██║   ██║      ██║   ██║   ██║██╔██╗ ██║███████╗
+        #* ██╔══██╗██║   ██║   ██║      ██║   ██║   ██║██║╚██╗██║╚════██║
+        #* ██████╔╝╚██████╔╝   ██║      ██║   ╚██████╔╝██║ ╚████║███████║
+        #* ╚═════╝  ╚═════╝    ╚═╝      ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚══════╝
         # --- Main container for all controls ---
         main_container = ctk.CTkFrame(self.minimal_window, corner_radius=0)
         main_container.pack(fill="both", expand=True, padx=5, pady=5)
@@ -1539,20 +1546,24 @@ KEYBOARD SHORTCUTS:
             main_container,
             variable=self.minimal_image_selection_var,
             values=["No Images"],
+            anchor="n",
             corner_radius=0,
-            width=120,
+            width=150,
+            font=("jetbrainsmono nfp", 16, "bold"),
             command=self.on_minimal_image_select
         )
         self.minimal_image_dropdown.pack(side="left", padx=(0, 5))
 
         self.toggle_image_btn = ctk.CTkButton(
             main_container,
-            text="Start Image",
+            text="Fight",
             command=self.toggle_single_image,
             corner_radius=0,
-            width=160,
+            width=80,
             fg_color="#28a745",
-            hover_color="#218838"
+            hover_color="#218838",
+            text_color="black",
+            font=("jetbrainsmono nfp",16,"bold")
         )
         self.toggle_image_btn.pack(side="left", padx=(0, 5))
 
@@ -1656,7 +1667,7 @@ KEYBOARD SHORTCUTS:
             self.minimal_image_dropdown.configure(values=image_names, state=ctk.NORMAL)
             if self.minimal_image_selection_var.get() not in image_names:
                 self.minimal_image_selection_var.set(image_names[0])
-            self.toggle_image_btn.configure(state=ctk.NORMAL, text="Start Image", fg_color="#28a745", hover_color="#218838")
+            self.toggle_image_btn.configure(state=ctk.NORMAL, text="Fight", fg_color="#28a745", hover_color="#218838")
 
     def toggle_single_image(self):
         if self.single_image_thread and self.single_image_thread.is_alive():
@@ -1669,7 +1680,7 @@ KEYBOARD SHORTCUTS:
                 self.log_status("Single image automation thread did not terminate gracefully.")
             else:
                 self.log_status("Single image automation stopped.")
-            self.toggle_image_btn.configure(text="Start Image", fg_color="#28a745", hover_color="#218838")
+            self.toggle_image_btn.configure(text="Fight", fg_color="#28a745", hover_color="#218838")
         else:
             # Start the automation
             event_name = self.minimal_event_selection_var.get()
@@ -1691,7 +1702,7 @@ KEYBOARD SHORTCUTS:
                 return
 
             self.single_image_stop_flag = False
-            self.toggle_image_btn.configure(text="Stop Image", fg_color="red", hover_color="darkred")
+            self.toggle_image_btn.configure(text="StopF", fg_color="red", hover_color="darkred")
             self.log_status(f"Starting single image automation: '{image_name}' from event '{event_name}'")
             self.single_image_thread = threading.Thread(target=self.run_single_image, args=(event_name, selected_image_data,), daemon=True)
             self.single_image_thread.start()
@@ -1713,7 +1724,7 @@ KEYBOARD SHORTCUTS:
                     self.log_status(f"Error in single image run for '{image_data['name']}': {str(e)}")
                     time.sleep(1) # Wait a bit before retrying on error
         finally:
-            self.after(100, lambda: self.toggle_image_btn.configure(text="Start Image", fg_color="#28a745", hover_color="#218838"))
+            self.after(100, lambda: self.toggle_image_btn.configure(text="Fight", fg_color="#28a745", hover_color="#218838"))
             self.single_image_thread = None # Clear the thread reference
 
     def on_minimal_image_select(self, image_name):
