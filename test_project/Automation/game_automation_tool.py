@@ -1625,28 +1625,16 @@ KEYBOARD SHORTCUTS:
         )
         self.minimal_image_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
 
-        self.start_image_btn = ctk.CTkButton(
+        self.toggle_image_btn = ctk.CTkButton(
             self.minimal_image_automation_frame,
             text="Start Image",
-            command=self.start_single_image,
+            command=self.toggle_single_image,
             corner_radius=0,
-            width=80,
+            width=160, # Make it wider since it's a single button
             fg_color="#28a745",
             hover_color="#218838"
         )
-        self.start_image_btn.pack(side=ctk.LEFT, padx=(0, 5))
-
-        self.stop_image_btn = ctk.CTkButton(
-            self.minimal_image_automation_frame,
-            text="Stop Image",
-            command=self.stop_single_image,
-            corner_radius=0,
-            width=80,
-            fg_color="red",
-            hover_color="darkred",
-            state=ctk.DISABLED
-        )
-        self.stop_image_btn.pack(side=ctk.LEFT, padx=(0, 0))
+        self.toggle_image_btn.pack(side=ctk.LEFT, padx=(0, 0))
 
         self.single_image_thread = None
         self.single_image_stop_flag = False
@@ -1696,8 +1684,7 @@ KEYBOARD SHORTCUTS:
             self.minimal_event_selection_var.set("No Events")
             self.minimal_image_dropdown.configure(values=["No Images"], state=ctk.DISABLED)
             self.minimal_image_selection_var.set("Select Image")
-            self.start_image_btn.configure(state=ctk.DISABLED)
-            self.stop_image_btn.configure(state=ctk.DISABLED)
+            self.toggle_image_btn.configure(state=ctk.DISABLED)
         else:
             self.minimal_event_dropdown.configure(values=event_names, state=ctk.NORMAL)
             if self.minimal_event_selection_var.get() not in event_names:
@@ -1708,8 +1695,7 @@ KEYBOARD SHORTCUTS:
         if event_name == "No Events" or event_name not in self.events_data:
             self.minimal_image_dropdown.configure(values=["No Images"], state=ctk.DISABLED)
             self.minimal_image_selection_var.set("Select Image")
-            self.start_image_btn.configure(state=ctk.DISABLED)
-            self.stop_image_btn.configure(state=ctk.DISABLED)
+            self.toggle_image_btn.configure(state=ctk.DISABLED)
             return
 
         images = self.events_data[event_name]["images"]
@@ -1718,46 +1704,16 @@ KEYBOARD SHORTCUTS:
             image_names = ["No Images"]
             self.minimal_image_dropdown.configure(values=image_names, state=ctk.DISABLED)
             self.minimal_image_selection_var.set("Select Image")
-            self.start_image_btn.configure(state=ctk.DISABLED)
-            self.stop_image_btn.configure(state=ctk.DISABLED)
+            self.toggle_image_btn.configure(state=ctk.DISABLED)
         else:
             self.minimal_image_dropdown.configure(values=image_names, state=ctk.NORMAL)
             if self.minimal_image_selection_var.get() not in image_names:
                 self.minimal_image_selection_var.set(image_names[0])
-            self.start_image_btn.configure(state=ctk.NORMAL)
-            self.stop_image_btn.configure(state=ctk.DISABLED) # Initially disabled
+            self.toggle_image_btn.configure(state=ctk.NORMAL, text="Start Image", fg_color="#28a745", hover_color="#218838")
 
-    def start_single_image(self):
-        event_name = self.minimal_event_selection_var.get()
-        image_name = self.minimal_image_selection_var.get()
-
-        if event_name == "No Events" or image_name == "No Images":
-            messagebox.showwarning("Warning", "Please select an event and an image first.")
-            return
+    def toggle_single_image(self):
         if self.single_image_thread and self.single_image_thread.is_alive():
-            messagebox.showwarning("Warning", "A single image automation is already running. Please stop it first.")
-            return
-        
-        # Find the image data
-        selected_image_data = None
-        for img_data in self.events_data[event_name]["images"]:
-            if img_data.get("name") == image_name and img_data.get("type") != "separator":
-                selected_image_data = img_data
-                break
-        
-        if not selected_image_data:
-            messagebox.showerror("Error", f"Image '{image_name}' not found in event '{event_name}'.")
-            return
-
-        self.single_image_stop_flag = False
-        self.start_image_btn.configure(state=ctk.DISABLED)
-        self.stop_image_btn.configure(state=ctk.NORMAL)
-        self.log_status(f"Starting single image automation: '{image_name}' from event '{event_name}'")
-        self.single_image_thread = threading.Thread(target=self.run_single_image, args=(event_name, selected_image_data,), daemon=True)
-        self.single_image_thread.start()
-
-    def stop_single_image(self):
-        if self.single_image_thread and self.single_image_thread.is_alive():
+            # Stop the automation
             self.single_image_stop_flag = True
             self.log_status("Stopping single image automation...")
             # Wait for the thread to finish, with a timeout
@@ -1766,10 +1722,32 @@ KEYBOARD SHORTCUTS:
                 self.log_status("Single image automation thread did not terminate gracefully.")
             else:
                 self.log_status("Single image automation stopped.")
-            self.start_image_btn.configure(state=ctk.NORMAL)
-            self.stop_image_btn.configure(state=ctk.DISABLED)
+            self.toggle_image_btn.configure(text="Start Image", fg_color="#28a745", hover_color="#218838")
         else:
-            self.log_status("No single image automation is currently running.")
+            # Start the automation
+            event_name = self.minimal_event_selection_var.get()
+            image_name = self.minimal_image_selection_var.get()
+
+            if event_name == "No Events" or image_name == "No Images":
+                messagebox.showwarning("Warning", "Please select an event and an image first.")
+                return
+            
+            # Find the image data
+            selected_image_data = None
+            for img_data in self.events_data[event_name]["images"]:
+                if img_data.get("name") == image_name and img_data.get("type") != "separator":
+                    selected_image_data = img_data
+                    break
+            
+            if not selected_image_data:
+                messagebox.showerror("Error", f"Image '{image_name}' not found in event '{event_name}'.")
+                return
+
+            self.single_image_stop_flag = False
+            self.toggle_image_btn.configure(text="Stop Image", fg_color="red", hover_color="darkred")
+            self.log_status(f"Starting single image automation: '{image_name}' from event '{event_name}'")
+            self.single_image_thread = threading.Thread(target=self.run_single_image, args=(event_name, selected_image_data,), daemon=True)
+            self.single_image_thread.start()
 
     def run_single_image(self, event_name, image_data):
         event_target_window = self.events_data[event_name].get("target_window", self.target_window)
@@ -1788,8 +1766,7 @@ KEYBOARD SHORTCUTS:
                     self.log_status(f"Error in single image run for '{image_data['name']}': {str(e)}")
                     time.sleep(1) # Wait a bit before retrying on error
         finally:
-            self.after(100, lambda: self.start_image_btn.configure(state=ctk.NORMAL))
-            self.after(100, lambda: self.stop_image_btn.configure(state=ctk.DISABLED))
+            self.after(100, lambda: self.toggle_image_btn.configure(text="Start Image", fg_color="#28a745", hover_color="#218838"))
             self.single_image_thread = None # Clear the thread reference
 
 def main():
