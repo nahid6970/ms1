@@ -162,7 +162,7 @@
             "key": "F13",
             "delay": 1.0
           },
-          "enabled": true,
+          "enabled": false,
           "is_folder": true
         },
         {

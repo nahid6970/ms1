@@ -1579,26 +1579,14 @@ KEYBOARD SHORTCUTS:
         self.minimal_control_frame = ctk.CTkFrame(container_frame)
         self.minimal_control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
 
-        # Restore button in the main container, won't be cleared
-        restore_btn = ctk.CTkButton(container_frame, text="\uf2d2", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=40)
-        restore_btn.grid(row=0, column=1, sticky="e", padx=(0, 5))
 
 
-        # Button to restart the script
-        Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.force_restart, width=40)
-        Restart_Reload.grid(row=0, column=2, sticky="e", padx=(0, 5))
-
-        def listen_for_esc():
-            keyboard.wait('esc')
-            self.force_restart()
-        threading.Thread(target=listen_for_esc, daemon=True).start()
 
 
-        # Close button in the main container
-        close_btn = ctk.CTkButton(container_frame, text="\uf00d", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.on_closing, width=40, fg_color="red", hover_color="darkred")
-        close_btn.grid(row=0, column=3, sticky="e", padx=(0, 0))
 
-        self.refresh_minimal_control_buttons() # Initial population of the event buttons
+
+
+
 
         # --- New: Single Image Automation Controls ---
         self.minimal_image_automation_frame = ctk.CTkFrame(self.minimal_window)
@@ -1628,16 +1616,16 @@ KEYBOARD SHORTCUTS:
         # self.minimal_event_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
 
         self.minimal_image_dropdown = ctk.CTkOptionMenu(
-            self.minimal_image_automation_frame,
+            container_frame,
             variable=self.minimal_image_selection_var,
             values=["No Images"],
             corner_radius=0,
             width=120
         )
-        self.minimal_image_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
+        self.minimal_image_dropdown.grid(row=0, column=1, sticky="e", padx=(0, 5))
 
         self.toggle_image_btn = ctk.CTkButton(
-            self.minimal_image_automation_frame,
+            container_frame,
             text="Start Image",
             command=self.toggle_single_image,
             corner_radius=0,
@@ -1645,13 +1633,47 @@ KEYBOARD SHORTCUTS:
             fg_color="#28a745",
             hover_color="#218838"
         )
-        self.toggle_image_btn.pack(side=ctk.LEFT, padx=(0, 0))
+        self.toggle_image_btn.grid(row=0, column=2, sticky="e", padx=(0, 5))
 
         self.single_image_thread = None
         self.single_image_stop_flag = False
 
         self.refresh_minimal_event_image_controls()
         # --- End New Controls ---
+
+
+
+
+        # Restore button in the main container, won't be cleared
+        restore_btn = ctk.CTkButton(container_frame, text="\uf2d2", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=40)
+        restore_btn.grid(row=0, column=3, sticky="e", padx=(0, 5))
+
+
+        # Button to restart the script
+        Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.force_restart, width=40)
+        Restart_Reload.grid(row=0, column=4, sticky="e", padx=(0, 5))
+
+        def listen_for_esc():
+            keyboard.wait('esc')
+            self.force_restart()
+        threading.Thread(target=listen_for_esc, daemon=True).start()
+
+
+        # Close button in the main container
+        close_btn = ctk.CTkButton(container_frame, text="\uf00d", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.on_closing, width=40, fg_color="red", hover_color="darkred")
+        close_btn.grid(row=0, column=5, sticky="e", padx=(0, 0))
+
+        self.refresh_minimal_control_buttons() # Initial population of the event buttons
+
+
+
+
+
+
+
+
+
+
 
         # Calculate and set the window size based on content
         self.minimal_window.update_idletasks() # Update to get correct sizes
