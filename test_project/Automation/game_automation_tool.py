@@ -36,6 +36,8 @@ class GameAutomationTool(ctk.CTk):
         self.target_window = "LDPlayer"
         self.right_frame_visible = False
         self.minimal_window = None
+        self.minimal_event_selection_var = ctk.StringVar(value="Action")
+        self.minimal_image_selection_var = ctk.StringVar(value="Select Image")
 
         # Setup GUI
         self.setup_gui()
@@ -1310,6 +1312,8 @@ class GameAutomationTool(ctk.CTk):
                 with open(self.config_file, 'r') as f:
                     data = json.load(f)
                     self.events_data = data.get("events", {})
+                    self.minimal_event_selection_var.set(data.get("last_selected_event", "Action"))
+                    self.minimal_image_selection_var.set(data.get("last_selected_image", "Select Image"))
                     # Iterate through events to set stop_flags and ensure target_window is present
                     for event_name, event_data in self.events_data.items():
                         self.stop_flags[event_name] = False
@@ -1327,21 +1331,14 @@ class GameAutomationTool(ctk.CTk):
 
     def save_config(self):
         try:
-            # Create a deep copy to avoid modifying the live data structure during cleanup
-            data_to_save = {"events": {}} # No global "target_window" here
-            for event_name, event_data in self.events_data.items():
-                copied_event_data = event_data.copy()
-                # DO NOT POP 'target_window' here, it should be part of the event_data
-                copied_event_data["images"] = []
-                for image_data in event_data["images"]:
-                    cleaned_image_data = image_data.copy()
-                    cleaned_image_data.pop("_checkbox_ref", None) # Remove the UI widget reference
-                    cleaned_image_data.pop("_button_ref", None) # Remove old UI widget reference if it exists
-                    copied_event_data["images"].append(cleaned_image_data)
-                data_to_save["events"][event_name] = copied_event_data
-
+            data_to_save = {
+                "events": self.events_data,
+                "last_selected_event": self.minimal_event_selection_var.get(),
+                "last_selected_image": self.minimal_image_selection_var.get()
+            }
+            
             with open(self.config_file, 'w') as f:
-                json.dump(data_to_save, f, indent=2)
+                json.dump(data_to_save, f, indent=4)
             self.log_status(f"Configuration saved to {self.config_file}")
         except Exception as e:
             self.log_status(f"Error saving configuration: {str(e)}")
@@ -1589,7 +1586,8 @@ KEYBOARD SHORTCUTS:
             variable=self.minimal_image_selection_var,
             values=["No Images"],
             corner_radius=0,
-            width=120
+            width=120,
+            command=self.on_minimal_image_select
         )
         self.minimal_image_dropdown.pack(side="left", padx=(0, 5))
 
@@ -1775,6 +1773,18 @@ KEYBOARD SHORTCUTS:
         if image_name == "No Images":
             self.log_status("No image selected.")
             return
+
+        # Find the selected image and move it to the top of the list
+        images = self.events_data[event_name]["images"]
+        selected_image_index = -1
+        for i, img_data in enumerate(images):
+            if img_data.get("name") == image_name:
+                selected_image_index = i
+                break
+
+        if selected_image_index != -1:
+            selected_image = images.pop(selected_image_index)
+            images.insert(0, selected_image)
 
         # Ensure only the selected image is enabled within the chosen event
         for i, img_data in enumerate(self.events_data[event_name]["images"]):
