@@ -1598,6 +1598,62 @@ KEYBOARD SHORTCUTS:
 
         self.refresh_minimal_control_buttons() # Initial population of the event buttons
 
+        # --- New: Single Image Automation Controls ---
+        self.minimal_image_automation_frame = ctk.CTkFrame(self.minimal_window)
+        self.minimal_image_automation_frame.pack(fill=ctk.X, padx=(0,5), pady=(5,0))
+
+        self.minimal_event_selection_var = ctk.StringVar(value="Select Event")
+        self.minimal_image_selection_var = ctk.StringVar(value="Select Image")
+
+        event_names = list(self.events_data.keys()) if self.events_data else ["No Events"]
+        self.minimal_event_dropdown = ctk.CTkOptionMenu(
+            self.minimal_image_automation_frame,
+            variable=self.minimal_event_selection_var,
+            values=event_names,
+            command=self.on_minimal_event_select,
+            corner_radius=0,
+            width=120
+        )
+        self.minimal_event_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
+
+        self.minimal_image_dropdown = ctk.CTkOptionMenu(
+            self.minimal_image_automation_frame,
+            variable=self.minimal_image_selection_var,
+            values=["No Images"],
+            corner_radius=0,
+            width=120
+        )
+        self.minimal_image_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
+
+        self.start_image_btn = ctk.CTkButton(
+            self.minimal_image_automation_frame,
+            text="Start Image",
+            command=self.start_single_image,
+            corner_radius=0,
+            width=80,
+            fg_color="#28a745",
+            hover_color="#218838"
+        )
+        self.start_image_btn.pack(side=ctk.LEFT, padx=(0, 5))
+
+        self.stop_image_btn = ctk.CTkButton(
+            self.minimal_image_automation_frame,
+            text="Stop Image",
+            command=self.stop_single_image,
+            corner_radius=0,
+            width=80,
+            fg_color="red",
+            hover_color="darkred",
+            state=ctk.DISABLED
+        )
+        self.stop_image_btn.pack(side=ctk.LEFT, padx=(0, 0))
+
+        self.single_image_thread = None
+        self.single_image_stop_flag = False
+
+        self.refresh_minimal_event_image_controls()
+        # --- End New Controls ---
+
         # Calculate and set the window size based on content
         self.minimal_window.update_idletasks() # Update to get correct sizes
         req_width = self.minimal_window.winfo_reqwidth()
@@ -1632,9 +1688,109 @@ KEYBOARD SHORTCUTS:
         except Exception as e:
             self.log_status(f"Failed to force restart: {e}")
 
-    
+    def refresh_minimal_event_image_controls(self):
+        # Update event dropdown
+        event_names = list(self.events_data.keys())
+        if not event_names:
+            event_names = ["No Events"]
+            self.minimal_event_selection_var.set("No Events")
+            self.minimal_image_dropdown.configure(values=["No Images"], state=ctk.DISABLED)
+            self.minimal_image_selection_var.set("Select Image")
+            self.start_image_btn.configure(state=ctk.DISABLED)
+            self.stop_image_btn.configure(state=ctk.DISABLED)
+        else:
+            self.minimal_event_dropdown.configure(values=event_names, state=ctk.NORMAL)
+            if self.minimal_event_selection_var.get() not in event_names:
+                self.minimal_event_selection_var.set(event_names[0])
+            self.on_minimal_event_select(self.minimal_event_selection_var.get()) # Refresh image dropdown based on current event
 
-    
+    def on_minimal_event_select(self, event_name):
+        if event_name == "No Events" or event_name not in self.events_data:
+            self.minimal_image_dropdown.configure(values=["No Images"], state=ctk.DISABLED)
+            self.minimal_image_selection_var.set("Select Image")
+            self.start_image_btn.configure(state=ctk.DISABLED)
+            self.stop_image_btn.configure(state=ctk.DISABLED)
+            return
+
+        images = self.events_data[event_name]["images"]
+        image_names = [img["name"] for img in images if img.get("type") != "separator"]
+        if not image_names:
+            image_names = ["No Images"]
+            self.minimal_image_dropdown.configure(values=image_names, state=ctk.DISABLED)
+            self.minimal_image_selection_var.set("Select Image")
+            self.start_image_btn.configure(state=ctk.DISABLED)
+            self.stop_image_btn.configure(state=ctk.DISABLED)
+        else:
+            self.minimal_image_dropdown.configure(values=image_names, state=ctk.NORMAL)
+            if self.minimal_image_selection_var.get() not in image_names:
+                self.minimal_image_selection_var.set(image_names[0])
+            self.start_image_btn.configure(state=ctk.NORMAL)
+            self.stop_image_btn.configure(state=ctk.DISABLED) # Initially disabled
+
+    def start_single_image(self):
+        event_name = self.minimal_event_selection_var.get()
+        image_name = self.minimal_image_selection_var.get()
+
+        if event_name == "No Events" or image_name == "No Images":
+            messagebox.showwarning("Warning", "Please select an event and an image first.")
+            return
+        if self.single_image_thread and self.single_image_thread.is_alive():
+            messagebox.showwarning("Warning", "A single image automation is already running. Please stop it first.")
+            return
+        
+        # Find the image data
+        selected_image_data = None
+        for img_data in self.events_data[event_name]["images"]:
+            if img_data.get("name") == image_name and img_data.get("type") != "separator":
+                selected_image_data = img_data
+                break
+        
+        if not selected_image_data:
+            messagebox.showerror("Error", f"Image '{image_name}' not found in event '{event_name}'.")
+            return
+
+        self.single_image_stop_flag = False
+        self.start_image_btn.configure(state=ctk.DISABLED)
+        self.stop_image_btn.configure(state=ctk.NORMAL)
+        self.log_status(f"Starting single image automation: '{image_name}' from event '{event_name}'")
+        self.single_image_thread = threading.Thread(target=self.run_single_image, args=(event_name, selected_image_data,), daemon=True)
+        self.single_image_thread.start()
+
+    def stop_single_image(self):
+        if self.single_image_thread and self.single_image_thread.is_alive():
+            self.single_image_stop_flag = True
+            self.log_status("Stopping single image automation...")
+            # Wait for the thread to finish, with a timeout
+            self.single_image_thread.join(timeout=1.0) 
+            if self.single_image_thread.is_alive():
+                self.log_status("Single image automation thread did not terminate gracefully.")
+            else:
+                self.log_status("Single image automation stopped.")
+            self.start_image_btn.configure(state=ctk.NORMAL)
+            self.stop_image_btn.configure(state=ctk.DISABLED)
+        else:
+            self.log_status("No single image automation is currently running.")
+
+    def run_single_image(self, event_name, image_data):
+        event_target_window = self.events_data[event_name].get("target_window", self.target_window)
+        try:
+            while not self.single_image_stop_flag:
+                try:
+                    self.focus_window(event_target_window)
+                    if image_data.get("enabled", True):
+                        if self.find_image_and_execute(image_data):
+                            self.log_status(f"Found and executed: {image_data['name']} (single run)")
+                            # If you want it to run only once, break here
+                            # If you want it to continuously try to find and execute, remove break
+                            break 
+                    time.sleep(0.1) # Small delay to prevent busy-waiting
+                except Exception as e:
+                    self.log_status(f"Error in single image run for '{image_data['name']}': {str(e)}")
+                    time.sleep(1) # Wait a bit before retrying on error
+        finally:
+            self.after(100, lambda: self.start_image_btn.configure(state=ctk.NORMAL))
+            self.after(100, lambda: self.stop_image_btn.configure(state=ctk.DISABLED))
+            self.single_image_thread = None # Clear the thread reference
 
 def main():
     pyautogui.FAILSAFE = True
