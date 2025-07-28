@@ -1248,56 +1248,6 @@ class GameAutomationTool(ctk.CTk):
         except Exception as e:
             self.log_status(f"Error focusing window: {str(e)}")
 
-    def take_screenshot(self):
-        try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"screenshot_{timestamp}.png"
-            screenshot = pyautogui.screenshot()
-            screenshot.save(filename)
-            self.log_status(f"Screenshot saved: {filename}")
-            messagebox.showinfo("Screenshot", f"Screenshot saved as {filename}")
-        except Exception as e:
-            self.log_status(f"Error taking screenshot: {str(e)}")
-            messagebox.showerror("Error", f"Failed to take screenshot: {str(e)}")
-
-    def get_mouse_position(self):
-        messagebox.showinfo("Mouse Position", "Move mouse to desired position and press SPACE to capture coordinates.")
-        def capture_position():
-            try:
-                if KEYBOARD_AVAILABLE:
-                    keyboard.wait('space')
-                    x, y = pyautogui.position()
-                    self.log_status(f"Mouse position captured: ({x}, {y})")
-                    messagebox.showinfo("Position Captured", f"Mouse position: ({x}, {y})")
-                else:
-                    messagebox.showinfo("Mouse Position", "Keyboard module not available. Click at desired position.")
-                    # Fallback implementation
-            except Exception as e:
-                self.log_status(f"Error capturing mouse position: {str(e)}")
-        threading.Thread(target=capture_position, daemon=True).start()
-
-    def test_image_recognition(self):
-        filename = filedialog.askopenfilename(
-            title="Select Image to Test",
-            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp *.gif"), ("All files", "*.*")]
-        )
-        if filename:
-            dialog = CTkInputDialog(text="Enter confidence level (0.1-1.0):", title="Confidence", initialvalue=0.8)
-            confidence = dialog.get_input()
-            if confidence:
-                try:
-                    location = pyautogui.locateOnScreen(filename, confidence=float(confidence), grayscale=True)
-                    if location:
-                        center = pyautogui.center(location)
-                        self.log_status(f"Image found at: {location}, center: {center}")
-                        messagebox.showinfo("Image Found", f"Image found at: {location}\nCenter: {center}")
-                    else:
-                        self.log_status("Image not found on screen")
-                        messagebox.showinfo("Image Not Found", "Image not found on screen")
-                except Exception as e:
-                    self.log_status(f"Error testing image: {str(e)}")
-                    messagebox.showerror("Error", f"Error testing image: {str(e)}")
-
     def log_status(self, message):
         timestamp = datetime.now().strftime("%H:%M:%S")
         log_message = f"[{timestamp}] {message}\n"
