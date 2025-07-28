@@ -1032,6 +1032,12 @@ class GameAutomationTool(ctk.CTk):
             btn.pack(pady=2, fill=ctk.X)
         self.update_idletasks()
 
+# ███╗   ███╗██╗███╗   ██╗██╗███╗   ███╗ █████╗ ██╗         ██████╗ ██╗   ██╗████████╗████████╗ ██████╗ ███╗   ██╗███████╗
+# ████╗ ████║██║████╗  ██║██║████╗ ████║██╔══██╗██║         ██╔══██╗██║   ██║╚══██╔══╝╚══██╔══╝██╔═══██╗████╗  ██║██╔════╝
+# ██╔████╔██║██║██╔██╗ ██║██║██╔████╔██║███████║██║         ██████╔╝██║   ██║   ██║      ██║   ██║   ██║██╔██╗ ██║███████╗
+# ██║╚██╔╝██║██║██║╚██╗██║██║██║╚██╔╝██║██╔══██║██║         ██╔══██╗██║   ██║   ██║      ██║   ██║   ██║██║╚██╗██║╚════██║
+# ██║ ╚═╝ ██║██║██║ ╚████║██║██║ ╚═╝ ██║██║  ██║███████╗    ██████╔╝╚██████╔╝   ██║      ██║   ╚██████╔╝██║ ╚████║███████║
+# ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝    ╚═════╝  ╚═════╝    ╚═╝      ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚══════╝
     def refresh_minimal_control_buttons(self):
         if not self.minimal_window:
             return
@@ -1043,7 +1049,7 @@ class GameAutomationTool(ctk.CTk):
             if event_name.strip() == "Action": # Skip creating a button for the "Action" event
                 continue
             is_running = event_name in self.threads and self.threads[event_name].is_alive()
-            button_text = f"Stop {event_name}" if is_running else f"{event_name}"
+            button_text = f"{event_name}" if is_running else f"{event_name}"
             btn = ctk.CTkButton(
                 self.minimal_control_frame,
                 text=button_text,
