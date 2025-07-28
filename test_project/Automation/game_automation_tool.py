@@ -1038,6 +1038,8 @@ class GameAutomationTool(ctk.CTk):
             widget.destroy()
 
         for i, event_name in enumerate(self.events_data.keys()):
+            if event_name.strip() == "Action": # Skip creating a button for the "Action" event
+                continue
             is_running = event_name in self.threads and self.threads[event_name].is_alive()
             button_text = f"Stop {event_name}" if is_running else f"{event_name}"
             btn = ctk.CTkButton(
@@ -1605,11 +1607,20 @@ KEYBOARD SHORTCUTS:
         self.minimal_event_selection_var = ctk.StringVar(value="Action")
         self.minimal_image_selection_var = ctk.StringVar(value="Select Image")
 
-        event_names = list(self.events_data.keys()) if self.events_data else ["No Events"]
+        event_names_all = list(self.events_data.keys())
+        initial_event_dropdown_values = []
+        if "Action" in event_names_all and len(event_names_all) > 1:
+            initial_event_dropdown_values = [name for name in event_names_all if name != "Action"]
+        else:
+            initial_event_dropdown_values = event_names_all
+
+        if not initial_event_dropdown_values:
+            initial_event_dropdown_values = ["No Events"]
+
         self.minimal_event_dropdown = ctk.CTkOptionMenu(
             self.minimal_image_automation_frame,
             variable=self.minimal_event_selection_var,
-            values=event_names,
+            values=initial_event_dropdown_values,
             command=self.on_minimal_event_select,
             corner_radius=0,
             width=120
@@ -1678,17 +1689,31 @@ KEYBOARD SHORTCUTS:
 
     def refresh_minimal_event_image_controls(self):
         # Update event dropdown
-        event_names = list(self.events_data.keys())
-        if not event_names:
-            event_names = ["No Events"]
+        all_event_names = list(self.events_data.keys())
+        display_event_names = []
+
+        if "Action" in all_event_names and len(all_event_names) > 1:
+            # If 'Action' exists and there are other events, exclude 'Action' from the dropdown list
+            display_event_names = [name for name in all_event_names if name != "Action"]
+        else:
+            # Otherwise, include all events (which might just be 'Action' or no events)
+            display_event_names = all_event_names
+
+        if not display_event_names:
+            display_event_names = ["No Events"]
             self.minimal_event_selection_var.set("No Events")
             self.minimal_image_dropdown.configure(values=["No Images"], state=ctk.DISABLED)
             self.minimal_image_selection_var.set("Select Image")
             self.toggle_image_btn.configure(state=ctk.DISABLED)
         else:
-            self.minimal_event_dropdown.configure(values=event_names, state=ctk.NORMAL)
-            if self.minimal_event_selection_var.get() not in event_names:
-                self.minimal_event_selection_var.set(event_names[0])
+            self.minimal_event_dropdown.configure(values=display_event_names, state=ctk.NORMAL)
+            
+            # Set the selected value for the dropdown
+            if "Action" in all_event_names: # If 'Action' event exists, always try to select it
+                self.minimal_event_selection_var.set("Action")
+            else: # Otherwise, select the first available event in the display list
+                self.minimal_event_selection_var.set(display_event_names[0])
+            
             self.on_minimal_event_select(self.minimal_event_selection_var.get()) # Refresh image dropdown based on current event
 
     def on_minimal_event_select(self, event_name):
