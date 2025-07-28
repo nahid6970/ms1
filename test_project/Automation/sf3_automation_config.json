@@ -160,7 +160,7 @@
           "action": {
             "type": "key_press",
             "key": "F13",
-            "delay": 4.0
+            "delay": 1.0
           },
           "enabled": true,
           "is_folder": true
@@ -178,7 +178,7 @@
           "action": {
             "type": "key_press",
             "key": "F15",
-            "delay": 5.0
+            "delay": 1.0
           },
           "enabled": false,
           "is_folder": true
@@ -311,7 +311,7 @@
           "action": {
             "type": "key_press",
             "key": "F13",
-            "delay": 4.0
+            "delay": 1.0
           },
           "enabled": false,
           "is_folder": true
