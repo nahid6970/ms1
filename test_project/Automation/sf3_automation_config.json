@@ -275,24 +275,6 @@
         "Action": {
             "images": [
                 {
-                    "name": "Hound",
-                    "path": "C:/msBackups/shadowfight3/action",
-                    "confidence": 0.8,
-                    "region": [
-                        187,
-                        100,
-                        383,
-                        265
-                    ],
-                    "action": {
-                        "type": "key_press",
-                        "key": "F15",
-                        "delay": 1.0
-                    },
-                    "enabled": true,
-                    "is_folder": true
-                },
-                {
                     "name": "KOS 2TAP",
                     "path": "C:/msBackups/shadowfight3/action",
                     "confidence": 0.8,
@@ -307,14 +289,35 @@
                         "key": "F13",
                         "delay": 1.0
                     },
+                    "enabled": true,
+                    "is_folder": true
+                },
+                {
+                    "name": "Hound",
+                    "path": "C:/msBackups/shadowfight3/action",
+                    "confidence": 0.8,
+                    "region": [
+                        187,
+                        100,
+                        383,
+                        265
+                    ],
+                    "action": {
+                        "type": "key_press",
+                        "key": "F15",
+                        "delay": 1.0
+                    },
                     "enabled": false,
                     "is_folder": true
                 }
             ],
             "enabled": true,
-            "target_window": "LDPlayer"
+            "target_window": "LDPlayer",
+            "timer_enabled": false,
+            "timer_duration": 20,
+            "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"Action?\" +8801779787186"
         }
     },
     "last_selected_event": "Action",
-    "last_selected_image": "Hound"
+    "last_selected_image": "KOS 2TAP"
 }

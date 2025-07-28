@@ -321,5 +321,14 @@
     ],
     "Command": "C:\\ms1\\myhome\\app.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "KeyWiz",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
   }
 ]
