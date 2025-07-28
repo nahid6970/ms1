@@ -371,7 +371,44 @@
       "timer_command": "signal-cli --trust-new-identities always -a +8801533876178 send -m \"Test?\" +8801779787186"
     },
     "Action": {
-      "images": [],
+      "images": [
+        {
+          "name": "Action (KOS 2TAP) (copy)",
+          "path": "C:/msBackups/shadowfight3/action",
+          "confidence": 0.8,
+          "region": [
+            187,
+            100,
+            383,
+            265
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "F13",
+            "delay": 1.0
+          },
+          "enabled": true,
+          "is_folder": true
+        },
+        {
+          "name": "Action (Hound) (copy)",
+          "path": "C:/msBackups/shadowfight3/action",
+          "confidence": 0.8,
+          "region": [
+            187,
+            100,
+            383,
+            265
+          ],
+          "action": {
+            "type": "key_press",
+            "key": "F15",
+            "delay": 1.0
+          },
+          "enabled": true,
+          "is_folder": true
+        }
+      ],
       "enabled": true,
       "target_window": "LDPlayer"
     }

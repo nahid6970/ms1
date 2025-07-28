@@ -1760,7 +1760,7 @@ KEYBOARD SHORTCUTS:
                             self.log_status(f"Found and executed: {image_data['name']} (single run)")
                             # If you want it to run only once, break here
                             # If you want it to continuously try to find and execute, remove break
-                            break 
+                            # break 
                     time.sleep(0.1) # Small delay to prevent busy-waiting
                 except Exception as e:
                     self.log_status(f"Error in single image run for '{image_data['name']}': {str(e)}")
@@ -1768,6 +1768,43 @@ KEYBOARD SHORTCUTS:
         finally:
             self.after(100, lambda: self.toggle_image_btn.configure(text="Start Image", fg_color="#28a745", hover_color="#218838"))
             self.single_image_thread = None # Clear the thread reference
+
+    def on_minimal_image_select(self, image_name):
+        event_name = self.minimal_event_selection_var.get()
+        self.log_status(f"on_minimal_image_select called. Event: {event_name}, Image: {image_name}")
+
+        if event_name == "No Events" or event_name not in self.events_data:
+            self.log_status(f"Invalid event selected: {event_name}")
+            return
+
+        if image_name == "No Images":
+            self.log_status("No image selected.")
+            return
+
+        # Ensure only the selected image is enabled within the chosen event
+        for i, img_data in enumerate(self.events_data[event_name]["images"]):
+            if img_data.get("type") == "separator": # Skip separators
+                continue
+
+            current_enabled_state = img_data.get("enabled", True)
+            image_data_name = img_data.get("name")
+
+            if image_data_name == image_name:
+                if not current_enabled_state: # Only update if it's not already enabled
+                    self.events_data[event_name]["images"][i]["enabled"] = True
+                    self.log_status(f"Changed: Enabled image: {image_data_name} in event {event_name}. Was: {current_enabled_state} -> True")
+                else:
+                    self.log_status(f"No change: Image {image_data_name} already enabled in event {event_name}.")
+            else:
+                if current_enabled_state: # Only update if it's not already disabled
+                    self.events_data[event_name]["images"][i]["enabled"] = False
+                    self.log_status(f"Changed: Disabled image: {image_data_name} in event {event_name}. Was: {current_enabled_state} -> False")
+                else:
+                    self.log_status(f"No change: Image {image_data_name} already disabled in event {event_name}.")
+        self.save_config()
+        self.log_status("Configuration saved after image selection.")
+        self.refresh_image_list() # Refresh the main window's image list to reflect changes
+        self.log_status("Main image list refreshed.")
 
 def main():
     pyautogui.FAILSAFE = True
