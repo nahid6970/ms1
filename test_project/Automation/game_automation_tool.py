@@ -1048,10 +1048,11 @@ class GameAutomationTool(ctk.CTk):
                 self.minimal_control_frame,
                 text=button_text,
                 command=lambda name=event_name: self.toggle_event(name),
-                width=100,
+                width=0,
+                height=25,
                 fg_color="red" if is_running else "#3B8ED0",
                 hover_color="darkred" if is_running else "#325882",
-                font=("Jetbrainsmono nfp", 12, "bold"), corner_radius=0,
+                font=("Jetbrainsmono nfp", 20, "bold"), corner_radius=0,
                 text_color="#442f1e"
             )
             btn.pack(side=ctk.LEFT, padx=5, pady=5)
@@ -1546,9 +1547,6 @@ KEYBOARD SHORTCUTS:
             y = self.minimal_window.winfo_y() + deltay
             self.minimal_window.geometry(f"+{x}+{y}")
 
-        self.minimal_window.bind("<Button-1>", start_drag)
-        self.minimal_window.bind("<B1-Motion>", do_drag)
-
         def on_minimal_close():
             self.deiconify()
             self.minimal_window.destroy()
@@ -1559,6 +1557,12 @@ KEYBOARD SHORTCUTS:
         # --- Main container for all controls ---
         main_container = ctk.CTkFrame(self.minimal_window, corner_radius=0)
         main_container.pack(fill="both", expand=True, padx=5, pady=5)
+
+        # --- Drag Handle ---
+        drag_handle = ctk.CTkFrame(main_container, height=5, corner_radius=0, fg_color="gray")
+        drag_handle.pack(fill="x", pady=(0, 2))
+        drag_handle.bind("<Button-1>", start_drag)
+        drag_handle.bind("<B1-Motion>", do_drag)
 
         # --- Event controls ---
         self.minimal_control_frame = ctk.CTkFrame(main_container)

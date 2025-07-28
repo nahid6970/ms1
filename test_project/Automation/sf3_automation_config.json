@@ -148,42 +148,6 @@
                     "color": "red"
                 },
                 {
-                    "name": "Action (KOS 2TAP)",
-                    "path": "C:/msBackups/shadowfight3/action",
-                    "confidence": 0.8,
-                    "region": [
-                        187,
-                        100,
-                        383,
-                        265
-                    ],
-                    "action": {
-                        "type": "key_press",
-                        "key": "F13",
-                        "delay": 1.0
-                    },
-                    "enabled": false,
-                    "is_folder": true
-                },
-                {
-                    "name": "Action (Hound)",
-                    "path": "C:/msBackups/shadowfight3/action",
-                    "confidence": 0.8,
-                    "region": [
-                        187,
-                        100,
-                        383,
-                        265
-                    ],
-                    "action": {
-                        "type": "key_press",
-                        "key": "F15",
-                        "delay": 1.0
-                    },
-                    "enabled": false,
-                    "is_folder": true
-                },
-                {
                     "type": "separator",
                     "thickness": 10,
                     "color": "red"
@@ -299,42 +263,6 @@
                     "type": "separator"
                 },
                 {
-                    "name": "Action (KOS 2TAP) (copy)",
-                    "path": "C:/msBackups/shadowfight3/action",
-                    "confidence": 0.8,
-                    "region": [
-                        187,
-                        100,
-                        383,
-                        265
-                    ],
-                    "action": {
-                        "type": "key_press",
-                        "key": "F13",
-                        "delay": 1.0
-                    },
-                    "enabled": false,
-                    "is_folder": true
-                },
-                {
-                    "name": "Action (Hound) (copy)",
-                    "path": "C:/msBackups/shadowfight3/action",
-                    "confidence": 0.8,
-                    "region": [
-                        187,
-                        100,
-                        383,
-                        265
-                    ],
-                    "action": {
-                        "type": "key_press",
-                        "key": "F15",
-                        "delay": 1.0
-                    },
-                    "enabled": true,
-                    "is_folder": true
-                },
-                {
                     "type": "separator"
                 }
             ],
@@ -373,25 +301,7 @@
         "Action": {
             "images": [
                 {
-                    "name": "Action (KOS 2TAP) (copy)",
-                    "path": "C:/msBackups/shadowfight3/action",
-                    "confidence": 0.8,
-                    "region": [
-                        187,
-                        100,
-                        383,
-                        265
-                    ],
-                    "action": {
-                        "type": "key_press",
-                        "key": "F13",
-                        "delay": 1.0
-                    },
-                    "enabled": true,
-                    "is_folder": true
-                },
-                {
-                    "name": "Action (Hound) (copy)",
+                    "name": "Hound",
                     "path": "C:/msBackups/shadowfight3/action",
                     "confidence": 0.8,
                     "region": [
@@ -405,6 +315,24 @@
                         "key": "F15",
                         "delay": 1.0
                     },
+                    "enabled": true,
+                    "is_folder": true
+                },
+                {
+                    "name": "KOS 2TAP",
+                    "path": "C:/msBackups/shadowfight3/action",
+                    "confidence": 0.8,
+                    "region": [
+                        187,
+                        100,
+                        383,
+                        265
+                    ],
+                    "action": {
+                        "type": "key_press",
+                        "key": "F13",
+                        "delay": 1.0
+                    },
                     "enabled": false,
                     "is_folder": true
                 }
@@ -414,5 +342,5 @@
         }
     },
     "last_selected_event": "Action",
-    "last_selected_image": "Action (KOS 2TAP) (copy)"
+    "last_selected_image": "Hound"
 }
