@@ -39,6 +39,9 @@ class GameAutomationTool(ctk.CTk):
         self.minimal_event_selection_var = ctk.StringVar(value="Action")
         self.minimal_image_selection_var = ctk.StringVar(value="Select Image")
 
+        # Initialize global timer for all events
+        self.global_last_image_found_time = time.time()
+
         # Setup GUI
         self.setup_gui()
 
@@ -1107,16 +1110,15 @@ class GameAutomationTool(ctk.CTk):
                         if image_data.get("enabled", True): # Only process if enabled
                             if self.find_image_and_execute(image_data):
                                 self.log_status(f"Found and executed: {image_data['name']} in {event_name}")
-                                last_image_found_time = time.time()
+                                self.global_last_image_found_time = time.time() # Update global timestamp
                                 image_found_in_loop = True
                                 break
                     
                     if not image_found_in_loop and timer_enabled:
-                        if time.time() - last_image_found_time > timer_duration:
+                        if time.time() - self.global_last_image_found_time > timer_duration: # Use global timestamp
                             self.log_status(f"Timer expired for event '{event_name}'. Executing command: {timer_command}")
                             # Execute the command in a separate thread to avoid blocking
-                            threading.Thread(target=os.system, args=(timer_command,), daemon=True).start()
-                            last_image_found_time = time.time() # Reset timer after executing
+                            threading.Thread(target=lambda: (os.system(timer_command), self.after(0, lambda: setattr(self, 'global_last_image_found_time', time.time()))), daemon=True).start()
 
                     time.sleep(0.1)
                 except Exception as e:
@@ -1722,6 +1724,7 @@ KEYBOARD SHORTCUTS:
                     if image_data.get("enabled", True):
                         if self.find_image_and_execute(image_data):
                             self.log_status(f"Found and executed: {image_data['name']} (single run)")
+                            self.global_last_image_found_time = time.time() # Update global timestamp
                             # If you want it to run only once, break here
                             # If you want it to continuously try to find and execute, remove break
                             # break 
