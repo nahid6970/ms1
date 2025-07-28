@@ -1522,174 +1522,122 @@ KEYBOARD SHORTCUTS:
             self.toggle_right_frame_btn.configure(text="Expand Desk")
 
     def show_minimal_mode_window(self):
-        self.withdraw() # Hide the main window
+        self.withdraw()  # Hide the main window
+
+        if self.minimal_window is not None:
+            self.minimal_window.destroy()
 
         self.minimal_window = ctk.CTkToplevel(self)
         self.minimal_window.title("Minimal Mode")
-        # Calculate top-center position
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-        window_width = 400
-        window_height = 100
 
-        x = (screen_width // 2) - (window_width // 2)
-        y = 0 # Top of the screen
-
-        self.minimal_window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        self.minimal_window.overrideredirect(True)
+        self.minimal_window.attributes("-topmost", True)
         self.minimal_window.transient(self)
-        self.minimal_window.overrideredirect(True) # Remove default title bar
-        self.minimal_window.attributes("-topmost", True)  # Always on top
 
         # Custom drag functionality
-        self.minimal_window.x = 0
-        self.minimal_window.y = 0
+        self.minimal_window.x_drag = 0
+        self.minimal_window.y_drag = 0
 
         def start_drag(event):
-            self.minimal_window.x = event.x
-            self.minimal_window.y = event.y
+            self.minimal_window.x_drag = event.x
+            self.minimal_window.y_drag = event.y
 
         def do_drag(event):
-            deltax = event.x - self.minimal_window.x
-            deltay = event.y - self.minimal_window.y
+            deltax = event.x - self.minimal_window.x_drag
+            deltay = event.y - self.minimal_window.y_drag
             x = self.minimal_window.winfo_x() + deltax
             y = self.minimal_window.winfo_y() + deltay
-            self.minimal_window.geometry(f"{{self.minimal_window_initial_width}}x{{self.minimal_window_initial_height}}+{x}+{y}")
+            self.minimal_window.geometry(f"+{x}+{y}")
 
         self.minimal_window.bind("<Button-1>", start_drag)
         self.minimal_window.bind("<B1-Motion>", do_drag)
 
         def on_minimal_close():
-            self.deiconify() # Show the main window again
+            self.deiconify()
             self.minimal_window.destroy()
             self.minimal_window = None
 
         self.minimal_window.protocol("WM_DELETE_WINDOW", on_minimal_close)
 
-        # Main container frame in the minimal window
-        container_frame = ctk.CTkFrame(self.minimal_window)
-        container_frame.pack(fill=ctk.X, padx=(0,5))
+        # --- Main container for all controls ---
+        main_container = ctk.CTkFrame(self.minimal_window, corner_radius=0)
+        main_container.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Configure grid for container_frame
-        container_frame.grid_columnconfigure(0, weight=1) # Column for event buttons
-        container_frame.grid_columnconfigure(1, weight=0) # Column for restore button
-        container_frame.grid_columnconfigure(2, weight=0) # Column for close button
-        container_frame.grid_rowconfigure(0, weight=0) # Row for content, prevent vertical expansion
+        # --- Event controls ---
+        self.minimal_control_frame = ctk.CTkFrame(main_container)
+        self.minimal_control_frame.pack(side="left", fill="x", expand=True)
 
-        # Frame for the event buttons that will be refreshed
-        self.minimal_control_frame = ctk.CTkFrame(container_frame)
-        self.minimal_control_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
-
-
-
-
-
-
-
-
-
-
-        # --- New: Single Image Automation Controls ---
-        self.minimal_image_automation_frame = ctk.CTkFrame(self.minimal_window)
-        self.minimal_image_automation_frame.pack(fill=ctk.X, padx=(0,5), pady=(5,0))
-
+        # --- Single image automation controls ---
         self.minimal_event_selection_var = ctk.StringVar(value="Action")
         self.minimal_image_selection_var = ctk.StringVar(value="Select Image")
 
-        event_names_all = list(self.events_data.keys())
-        initial_event_dropdown_values = []
-        if "Action" in event_names_all and len(event_names_all) > 1:
-            initial_event_dropdown_values = [name for name in event_names_all if name != "Action"]
-        else:
-            initial_event_dropdown_values = event_names_all
-
-        if not initial_event_dropdown_values:
-            initial_event_dropdown_values = ["No Events"]
+        all_event_names = list(self.events_data.keys())
+        initial_event_dropdown_values = [name for name in all_event_names if name != "Action"] or all_event_names or ["No Events"]
 
         self.minimal_event_dropdown = ctk.CTkOptionMenu(
-            self.minimal_image_automation_frame,
+            main_container,
             variable=self.minimal_event_selection_var,
             values=initial_event_dropdown_values,
             command=self.on_minimal_event_select,
             corner_radius=0,
             width=120
         )
-        # self.minimal_event_dropdown.pack(side=ctk.LEFT, padx=(0, 5))
+        # self.minimal_event_dropdown.pack(side="left", padx=(0, 5))
 
         self.minimal_image_dropdown = ctk.CTkOptionMenu(
-            container_frame,
+            main_container,
             variable=self.minimal_image_selection_var,
             values=["No Images"],
             corner_radius=0,
             width=120
         )
-        self.minimal_image_dropdown.grid(row=0, column=1, sticky="e", padx=(0, 5))
+        self.minimal_image_dropdown.pack(side="left", padx=(0, 5))
 
         self.toggle_image_btn = ctk.CTkButton(
-            container_frame,
+            main_container,
             text="Start Image",
             command=self.toggle_single_image,
             corner_radius=0,
-            width=160, # Make it wider since it's a single button
+            width=160,
             fg_color="#28a745",
             hover_color="#218838"
         )
-        self.toggle_image_btn.grid(row=0, column=2, sticky="e", padx=(0, 5))
+        self.toggle_image_btn.pack(side="left", padx=(0, 5))
 
         self.single_image_thread = None
         self.single_image_stop_flag = False
 
+        # --- Window control buttons ---
+        restore_btn = ctk.CTkButton(main_container, text="\uf2d2", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=40)
+        restore_btn.pack(side="left", padx=(5, 0))
+
+        restart_reload_btn = ctk.CTkButton(main_container, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.force_restart, width=40)
+        restart_reload_btn.pack(side="left", padx=(5, 0))
+
+        close_btn = ctk.CTkButton(main_container, text="\uf00d", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.on_closing, width=40, fg_color="red", hover_color="darkred")
+        close_btn.pack(side="left", padx=(5, 0))
+
+        # --- Final setup ---
+        self.refresh_minimal_control_buttons()
         self.refresh_minimal_event_image_controls()
-        # --- End New Controls ---
 
+        # Set ESC to force restart
+        if KEYBOARD_AVAILABLE:
+            def listen_for_esc():
+                keyboard.wait('esc')
+                self.force_restart()
+            threading.Thread(target=listen_for_esc, daemon=True).start()
 
-
-
-        # Restore button in the main container, won't be cleared
-        restore_btn = ctk.CTkButton(container_frame, text="\uf2d2", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=on_minimal_close, width=40)
-        restore_btn.grid(row=0, column=3, sticky="e", padx=(0, 5))
-
-
-        # Button to restart the script
-        Restart_Reload = ctk.CTkButton(container_frame, text="\udb81\udc53", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.force_restart, width=40)
-        Restart_Reload.grid(row=0, column=4, sticky="e", padx=(0, 5))
-
-        def listen_for_esc():
-            keyboard.wait('esc')
-            self.force_restart()
-        threading.Thread(target=listen_for_esc, daemon=True).start()
-
-
-        # Close button in the main container
-        close_btn = ctk.CTkButton(container_frame, text="\uf00d", font=("Jetbrainsmono nfp", 12), corner_radius=0, command=self.on_closing, width=40, fg_color="red", hover_color="darkred")
-        close_btn.grid(row=0, column=5, sticky="e", padx=(0, 0))
-
-        self.refresh_minimal_control_buttons() # Initial population of the event buttons
-
-
-
-
-
-
-
-
-
-
-
-        # Calculate and set the window size based on content
-        self.minimal_window.update_idletasks() # Update to get correct sizes
-        req_width = self.minimal_window.winfo_reqwidth()
-        req_height = self.minimal_window.winfo_reqheight()
-
-        # Calculate top-center position based on actual content size
+        # --- Adjust window size and position ---
+        self.minimal_window.update_idletasks()
+        req_width = main_container.winfo_reqwidth()
+        req_height = main_container.winfo_reqheight()
+        
         screen_width = self.winfo_screenwidth()
         x = (screen_width // 2) - (req_width // 2)
-        y = 0 # Top of the screen
+        y = 0
 
         self.minimal_window.geometry(f"{req_width}x{req_height}+{x}+{y}")
-
-        # Store initial dimensions for dragging
-        self.minimal_window_initial_width = req_width
-        self.minimal_window_initial_height = req_height
 
     def restart(self):
         self.log_status("Restarting application...")
