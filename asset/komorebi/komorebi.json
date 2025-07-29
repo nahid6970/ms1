@@ -238,6 +238,11 @@
             "kind": "Title",
             "id": "OS_v2",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "Status Bar",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [

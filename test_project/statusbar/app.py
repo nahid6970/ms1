@@ -1,9 +1,20 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 import psutil
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app) # This will enable CORS for all routes
+
+# Serve static files (CSS, JS, etc.)
+@app.route('/<path:filename>')
+def static_files(filename):
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), filename)
+
+# Serve the main HTML file
+@app.route('/')
+def index():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'index.html')
 
 @app.route('/usage')
 def get_usage():

@@ -1,6 +1,6 @@
 async function updateUsage() {
     try {
-        const response = await fetch('http://localhost:4050/usage');
+        const response = await fetch('http://127.0.0.1:4050/usage');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -26,15 +26,6 @@ async function updateUsage() {
         ramValue.textContent = 'Error';
     }
 }
-
-document.getElementById('shutdown-btn').addEventListener('click', async () => {
-    try {
-        await fetch('http://localhost:4050/shutdown', { method: 'POST' });
-        window.close();
-    } catch (error) {
-        console.error('Error shutting down server:', error);
-    }
-});
 
 // Update usage every 2 seconds
 setInterval(updateUsage, 2000);

@@ -15,8 +15,15 @@ body {
     padding: 15px 20px;
     border-radius: 8px;
     display: flex;
+    justify-content: space-between; /* Align items with space between */
+    align-items: center;
     gap: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.status-items-container {
+    display: flex;
+    gap: 20px;
 }
 
 .status-item {
@@ -52,17 +59,3 @@ body {
     text-align: right;
 }
 
-#shutdown-btn {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}
