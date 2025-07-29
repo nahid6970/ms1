@@ -2,6 +2,9 @@ from flask import Flask, jsonify, request, send_from_directory
 import psutil
 from flask_cors import CORS
 import os
+import webview
+import threading
+import time
 
 app = Flask(__name__)
 CORS(app) # This will enable CORS for all routes
@@ -30,5 +33,15 @@ def shutdown():
     shutdown_server()
     return 'Server shutting down...'
 
-if __name__ == '__main__':
+def start_flask_app():
     app.run(port=4050)
+
+if __name__ == '__main__':
+    t = threading.Thread(target=start_flask_app)
+    t.daemon = True
+    t.start()
+    time.sleep(2) # Give the Flask server a moment to start
+
+    webview.create_window('Status Bar', 'http://127.0.0.1:4050', frameless=True)
+    print("Attempting to load URL: http://127.0.0.1:4050")
+    webview.start()
