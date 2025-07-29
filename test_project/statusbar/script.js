@@ -27,6 +27,15 @@ async function updateUsage() {
     }
 }
 
+document.getElementById('shutdown-btn').addEventListener('click', async () => {
+    try {
+        await fetch('http://localhost:4050/shutdown', { method: 'POST' });
+        window.close();
+    } catch (error) {
+        console.error('Error shutting down server:', error);
+    }
+});
+
 // Update usage every 2 seconds
 setInterval(updateUsage, 2000);
 

@@ -9,6 +9,7 @@ body {
 }
 
 .status-bar {
+    position: relative; /* This is needed for the shutdown button positioning */
     background-color: #333;
     color: #fff;
     padding: 15px 20px;
@@ -49,4 +50,19 @@ body {
     font-size: 0.9em;
     min-width: 35px;
     text-align: right;
+}
+
+#shutdown-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    right: 5px;
 }
