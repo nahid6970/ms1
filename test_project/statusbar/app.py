@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, send_from_directory
 import psutil
 from flask_cors import CORS
 import os
-import webview
+import webview.screen
 import threading
 import time
 
@@ -42,6 +42,11 @@ if __name__ == '__main__':
     t.start()
     time.sleep(2) # Give the Flask server a moment to start
 
-    webview.create_window('Status Bar', 'http://127.0.0.1:4050', frameless=True)
+    window_width = 500
+    window_height = 40
+    screen_width = webview.screens[0].width
+    x_coordinate = int((screen_width / 2) - (window_width / 2))
+
+    webview.create_window('Status Bar', 'http://127.0.0.1:4050', frameless=True, x=x_coordinate, y=0, width=window_width, height=window_height)
     print("Attempting to load URL: http://127.0.0.1:4050")
     webview.start()
