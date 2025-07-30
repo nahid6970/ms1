@@ -796,5 +796,12 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
         "winget_path": ""
+    },
+    {
+        "name": "gdu [ncdu alternative]",
+        "scoop_name": "gdu",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\gdu\\current\\gdu.exe",
+        "winget_name": "",
+        "winget_path": ""
     }
 ]
