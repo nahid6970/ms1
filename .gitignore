@@ -1,4 +1,5 @@
 /asset/ignore
+/test_project/C#/obj
 *.exe
 *.msi
 *.rar
