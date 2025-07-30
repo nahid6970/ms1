@@ -10,11 +10,12 @@ ctk.set_default_color_theme("blue")  # Themes: "blue" (default), "dark-blue", "g
 KOMOREBI_JSON_PATH = "C:/ms1/asset/komorebi/komorebi.json"
 
 class AddEditDialog(ctk.CTkToplevel):
-    def __init__(self, master, item_type, item_data=None):
+    def __init__(self, master, item_type, item_data=None, *, font=None):
         super().__init__(master)
         self.master = master
         self.item_type = item_type  # "float" or "tray"
         self.item_data = item_data  # None for add, dict for edit
+        self.font = font if font else ("sans-serif", 12, "normal") # fallback
         self.transient(master)  # Make dialog appear on top of main window
         self.grab_set()  # Make it a modal window
         self.geometry("400x180")
@@ -30,22 +31,22 @@ class AddEditDialog(ctk.CTkToplevel):
             "DoesNotEndWith", "DoesNotStartWith", "DoesNotEqual", "DoesNotContain"
         ]
 
-        self.kind_combobox = ctk.CTkComboBox(self, values=kind_options)
+        self.kind_combobox = ctk.CTkComboBox(self, values=kind_options, font=self.font)
         self.kind_combobox.pack(padx=20, pady=5, fill="x")
-        self.id_entry = ctk.CTkEntry(self, placeholder_text="ID (e.g., notepad.exe)")
+        self.id_entry = ctk.CTkEntry(self, placeholder_text="ID (e.g., notepad.exe)", font=self.font)
         self.id_entry.pack(padx=20, pady=5, fill="x")
-        self.matching_strategy_combobox = ctk.CTkComboBox(self, values=matching_strategy_options)
+        self.matching_strategy_combobox = ctk.CTkComboBox(self, values=matching_strategy_options, font=self.font)
         self.matching_strategy_combobox.pack(padx=20, pady=5, fill="x")
 
         if self.item_data:  # Pre-fill for edit mode
             self.kind_combobox.set(self.item_data.get("kind", "Exe"))
             self.id_entry.insert(0, self.item_data.get("id", ""))
             self.matching_strategy_combobox.set(self.item_data.get("matching_strategy", "Equals"))
-            save_button = ctk.CTkButton(self, text="Save Changes", command=self.save_changes)
+            save_button = ctk.CTkButton(self, text="Save Changes", command=self.save_changes, font=self.font)
         else:
             self.kind_combobox.set(kind_options[0]) # Set default value
             self.matching_strategy_combobox.set(matching_strategy_options[0]) # Set default value
-            save_button = ctk.CTkButton(self, text="Add Item", command=self.add_item)
+            save_button = ctk.CTkButton(self, text="Add Item", command=self.add_item, font=self.font)
         save_button.pack(padx=20, pady=10)
 
     def add_item(self):
@@ -112,6 +113,9 @@ class KomorebiConfigApp(ctk.CTk):
         self.title("Komorebi Config Editor")
         self.geometry("900x700")  # Adjusted size for two columns
 
+        self.app_font = ("jetbrainsmono nfp", 12, "normal")
+        self.bold_font = ("jetbrainsmono nfp", 16, "bold")
+
         self.config_data = self.load_config()
 
         # Configure grid layout for the main window
@@ -125,7 +129,7 @@ class KomorebiConfigApp(ctk.CTk):
         self.search_frame = ctk.CTkFrame(self)
         self.search_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         self.search_frame.grid_columnconfigure(0, weight=1)
-        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search rules and applications...")
+        self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search rules and applications...", font=self.app_font)
         self.search_entry.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
         self.search_entry.bind("<KeyRelease>", self.filter_list_displays)
 
@@ -136,7 +140,7 @@ class KomorebiConfigApp(ctk.CTk):
         self.float_frame.grid_rowconfigure(0, weight=0)
         self.float_frame.grid_rowconfigure(1, weight=1)
 
-        self.float_label = ctk.CTkLabel(self.float_frame, text="Float Rules", font=ctk.CTkFont(size=16, weight="bold"))
+        self.float_label = ctk.CTkLabel(self.float_frame, text="Float Rules", font=self.bold_font)
         self.float_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
         self.float_scroll_frame = ctk.CTkScrollableFrame(self.float_frame)
@@ -152,7 +156,7 @@ class KomorebiConfigApp(ctk.CTk):
         self.tray_frame.grid_rowconfigure(0, weight=0)
         self.tray_frame.grid_rowconfigure(1, weight=1)
 
-        self.tray_label = ctk.CTkLabel(self.tray_frame, text="Tray and Multi-Window Applications", font=ctk.CTkFont(size=16, weight="bold"))
+        self.tray_label = ctk.CTkLabel(self.tray_frame, text="Tray and Multi-Window Applications", font=self.bold_font)
         self.tray_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
         self.tray_scroll_frame = ctk.CTkScrollableFrame(self.tray_frame)
@@ -166,19 +170,19 @@ class KomorebiConfigApp(ctk.CTk):
         self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew",)
         self.button_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # 5 buttons
 
-        self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", corner_radius=0, command=self.open_add_float_dialog)
+        self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", corner_radius=0, command=self.open_add_float_dialog, font=self.app_font)
         self.add_float_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
-        self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", corner_radius=0, command=self.open_add_tray_dialog)
+        self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", corner_radius=0, command=self.open_add_tray_dialog, font=self.app_font)
         self.add_tray_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        self.edit_selected_button = ctk.CTkButton(self.button_frame, text="Edit Selected Item", fg_color="#155ae2", text_color="white", corner_radius=0, command=self.open_edit_dialog)
+        self.edit_selected_button = ctk.CTkButton(self.button_frame, text="Edit Selected Item", fg_color="#155ae2", text_color="white", corner_radius=0, command=self.open_edit_dialog, font=self.app_font)
         self.edit_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
-        self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", fg_color="red", corner_radius=0, command=self.remove_selected_item)
+        self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", fg_color="red", corner_radius=0, command=self.remove_selected_item, font=self.app_font)
         self.remove_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-        self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", fg_color="green", corner_radius=0, command=self.save_config)
+        self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", fg_color="green", corner_radius=0, command=self.save_config, font=self.app_font)
         self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
 
         self.update_list_displays() # Initial display update
@@ -222,7 +226,7 @@ class KomorebiConfigApp(ctk.CTk):
         ], key=lambda x: x.get('id', '').lower())
         for i, rule_obj in enumerate(filtered_float_rules):
             display_text = f"{rule_obj.get('id', '')} ({rule_obj.get('kind', '')}) ({rule_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, anchor="w")
+            label = ctk.CTkLabel(self.float_scroll_frame, text=display_text, anchor="w", font=self.app_font)
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.rule_obj = rule_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_float_rule(l))
@@ -241,7 +245,7 @@ class KomorebiConfigApp(ctk.CTk):
         ], key=lambda x: x.get('id', '').lower())
         for i, app_obj in enumerate(filtered_tray_apps):
             display_text = f"{app_obj.get('id', '')} ({app_obj.get('kind', '')}) ({app_obj.get('matching_strategy', '')})"
-            label = ctk.CTkLabel(self.tray_scroll_frame, text=display_text, anchor="w")
+            label = ctk.CTkLabel(self.tray_scroll_frame, text=display_text, anchor="w", font=self.app_font)
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.app_obj = app_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_tray_app(l))
@@ -272,16 +276,16 @@ class KomorebiConfigApp(ctk.CTk):
         label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
 
     def open_add_float_dialog(self):
-        AddEditDialog(self, "float")
+        AddEditDialog(self, "float", font=self.app_font)
 
     def open_add_tray_dialog(self):
-        AddEditDialog(self, "tray")
+        AddEditDialog(self, "tray", font=self.app_font)
 
     def open_edit_dialog(self):
         if self.selected_float_rule:
-            AddEditDialog(self, "float", self.selected_float_rule)
+            AddEditDialog(self, "float", self.selected_float_rule, font=self.app_font)
         elif self.selected_tray_app:
-            AddEditDialog(self, "tray", self.selected_tray_app)
+            AddEditDialog(self, "tray", self.selected_tray_app, font=self.app_font)
         else:
             messagebox.showwarning("Warning", "Please select an item to edit.")
 
