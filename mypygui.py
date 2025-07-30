@@ -502,6 +502,7 @@ OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0,
 OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
 OS_LB.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\dotnet\net9.0\simple-csharp-project.exe"], shell=True))
 OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\ms1\test_project\C#\Program.cs'))
+OS_LB.bind( "<Button-3>", lambda event=None: subprocess.Popen( r'cmd /c start dotnet run', cwd=r'C:\ms1\test_project\C#\\' ))
 
 Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
