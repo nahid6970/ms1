@@ -168,7 +168,7 @@ class KomorebiConfigApp(ctk.CTk):
         # --- Buttons Frame (Bottom) ---
         self.button_frame = ctk.CTkFrame(self)
         self.button_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew",)
-        self.button_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)  # 5 buttons
+        self.button_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)  # 4 buttons
 
         self.add_float_button = ctk.CTkButton(self.button_frame, text="Add Float Rule", corner_radius=0, command=self.open_add_float_dialog, font=self.app_font)
         self.add_float_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
@@ -176,14 +176,11 @@ class KomorebiConfigApp(ctk.CTk):
         self.add_tray_button = ctk.CTkButton(self.button_frame, text="Add Tray App", corner_radius=0, command=self.open_add_tray_dialog, font=self.app_font)
         self.add_tray_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        self.edit_selected_button = ctk.CTkButton(self.button_frame, text="Edit Selected Item", fg_color="#155ae2", text_color="white", corner_radius=0, command=self.open_edit_dialog, font=self.app_font)
-        self.edit_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
-
         self.remove_selected_button = ctk.CTkButton(self.button_frame, text="Remove Selected Item", fg_color="red", corner_radius=0, command=self.remove_selected_item, font=self.app_font)
-        self.remove_selected_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
+        self.remove_selected_button.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
         self.save_button = ctk.CTkButton(self.button_frame, text="Save to komorebi.json", fg_color="green", corner_radius=0, command=self.save_config, font=self.app_font)
-        self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
+        self.save_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
         self.update_list_displays() # Initial display update
 
@@ -230,6 +227,7 @@ class KomorebiConfigApp(ctk.CTk):
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.rule_obj = rule_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_float_rule(l))
+            label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
             self.float_list_items.append(label)
 
         # Clear existing items in tray apps display
@@ -249,30 +247,45 @@ class KomorebiConfigApp(ctk.CTk):
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.app_obj = app_obj
             label.bind("<Button-1>", lambda event, l=label: self.select_tray_app(l))
+            label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
             self.tray_list_items.append(label)
 
     def select_float_rule(self, label):
-        # Deselect previous
+        # Deselect previous float rule
         if self.selected_float_rule:
             for item_label in self.float_list_items:
                 if item_label.rule_obj == self.selected_float_rule:
                     item_label.configure(fg_color="transparent")
                     break
-        # Select new
-        self.selected_float_rule = label.rule_obj
-        self.selected_tray_app = None # Ensure only one type is selected at a time
-        label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
-
-    def select_tray_app(self, label):
-        # Deselect previous
+        # Deselect previous tray app
         if self.selected_tray_app:
             for item_label in self.tray_list_items:
                 if item_label.app_obj == self.selected_tray_app:
                     item_label.configure(fg_color="transparent")
                     break
-        # Select new
+            self.selected_tray_app = None
+
+        # Select new float rule
+        self.selected_float_rule = label.rule_obj
+        label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
+
+    def select_tray_app(self, label):
+        # Deselect previous tray app
+        if self.selected_tray_app:
+            for item_label in self.tray_list_items:
+                if item_label.app_obj == self.selected_tray_app:
+                    item_label.configure(fg_color="transparent")
+                    break
+        # Deselect previous float rule
+        if self.selected_float_rule:
+            for item_label in self.float_list_items:
+                if item_label.rule_obj == self.selected_float_rule:
+                    item_label.configure(fg_color="transparent")
+                    break
+            self.selected_float_rule = None
+
+        # Select new tray app
         self.selected_tray_app = label.app_obj
-        self.selected_float_rule = None # Ensure only one type is selected at a time
         label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
 
     def open_add_float_dialog(self):
