@@ -8,10 +8,7 @@ def search_directories_and_files():
     directories = []
 
     # Add directories (comment any line freely without breaking syntax)
-    directories.append("C:\\ms1")
-    directories.append("C:\\ms2")
-    directories.append("C:\\ms3")
-    directories.append("C:\\ms3")
+    directories.append(r"C:\Users\nahid\ms\ms1")
     directories.append(r"C:\msBackups")
     directories.append(r"C:\Users\nahid\Pictures")
     # directories.append("D:\\")
