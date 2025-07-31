@@ -30,28 +30,34 @@ def hash_file(path):
         return None
 
 def get_all_files_with_hashes(base_paths, log_callback):
-    """Modified to accept multiple base paths"""
+    """Modified to show progress for each folder on one line"""
     d = {}
-    file_count = 0
+    total_file_count = 0
     
     # Handle single path or list of paths
     if isinstance(base_paths, str):
         base_paths = [base_paths]
     
-    for base_path in base_paths:
-        log_callback(f"Scanning folder: {base_path}")
+    for i, base_path in enumerate(base_paths, 1):
+        folder_file_count = 0
+        log_callback(f"[{i}/{len(base_paths)}] Scanning: {base_path}")
+        
         for root, dirs, files in os.walk(base_path):
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
             for fn in files:
-                file_count += 1
-                if file_count % 100 == 0:
-                    log_callback(f"Processing... {file_count} files")
+                folder_file_count += 1
+                total_file_count += 1
+                
                 if not SCAN_ALL and not fn.endswith(EXTENSIONS):
                     continue
                 full = os.path.normpath(os.path.join(root, fn))
                 h = hash_file(full)
                 if h:
                     d.setdefault(h, []).append(full)
+        
+        # Show completion for this folder in one line
+        log_callback(f"[{i}/{len(base_paths)}] ✅ {os.path.basename(base_path)}: {folder_file_count} files")
+    
     return d
 
 def save_snapshot(base_paths, log_callback):
