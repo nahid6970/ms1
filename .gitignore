@@ -10,4 +10,6 @@
 *.cpython-312
 *.log
 *.db
+*.bin
+*.sqlite3
 yasb.log
