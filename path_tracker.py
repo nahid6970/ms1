@@ -162,7 +162,7 @@ class PathTrackerApp(ctk.CTk):
         ctk.set_default_color_theme("blue")
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
 
         # --- Top Frame ---
         self.top_frame = ctk.CTkFrame(self)
@@ -178,9 +178,15 @@ class PathTrackerApp(ctk.CTk):
         self.browse_button = ctk.CTkButton(self.top_frame, text="Browse", command=self.browse_folder)
         self.browse_button.grid(row=0, column=2, padx=10, pady=10)
 
+        self.quick_select_label = ctk.CTkLabel(self.top_frame, text="Quick Select:")
+        self.quick_select_label.grid(row=1, column=0, padx=10, pady=10)
+
+        self.quick_select = ctk.CTkOptionMenu(self.top_frame, values=["C:\\ms1", "C:\\msBackups"], command=self.select_folder_from_menu)
+        self.quick_select.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+
         # --- Button Frame ---
         self.button_frame = ctk.CTkFrame(self)
-        self.button_frame.grid(row=1, column=0, padx=10, pady=0, sticky="ew")
+        self.button_frame.grid(row=2, column=0, padx=10, pady=0, sticky="ew")
         self.button_frame.grid_columnconfigure((0, 1), weight=1)
 
         self.scan_button = ctk.CTkButton(self.button_frame, text="Scan", command=self.start_scan)
@@ -191,11 +197,15 @@ class PathTrackerApp(ctk.CTk):
 
         # --- Output Textbox ---
         self.output_textbox = ctk.CTkTextbox(self, wrap="word")
-        self.output_textbox.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        self.output_textbox.grid(row=3, column=0, padx=10, pady=10, sticky="nsew")
         self.output_textbox.configure(state="disabled")
 
         self.log_queue = queue.Queue()
         self.process_log_queue()
+
+    def select_folder_from_menu(self, folder_path):
+        self.folder_entry.delete(0, "end")
+        self.folder_entry.insert(0, folder_path)
 
     def browse_folder(self):
         folder_path = filedialog.askdirectory()
