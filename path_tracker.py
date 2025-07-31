@@ -104,27 +104,23 @@ def replace_in_file(path, old_p, new_p, log_entries, log_callback):
     except Exception as e:
         return
 
-    orig = txt
+    orig    = txt
     replacements = []
-    
-    # Create path variants - FIXED VERSION from the working old code
     variants = {
         old_p,
         old_p.replace("\\", "/"),
         old_p.replace("/", "\\"),
-        old_p.replace("\\", "\\\\"),  # This was broken in the nice gui version
+        old_p.replace("\\", "\\\\"),
     }
 
     for var in variants:
         if var in txt:
-            # Determine replacement format based on variant - FIXED
-            if "\\\\" in var:  # Double backslash variant
+            if "\\\\" in var:
                 rp = new_p.replace("\\", "\\\\")
-            elif "/" in var:   # Forward slash variant
+            elif "/" in var:
                 rp = new_p.replace("\\", "/")
-            else:              # Normal backslash variant
+            else:
                 rp = new_p
-            
             pat = re.escape(var)
             txt = re.sub(pat, lambda m, rp=rp: rp, txt)
             replacements.append(f"    {var} → {rp}")
