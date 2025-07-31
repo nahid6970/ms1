@@ -16,7 +16,20 @@ EXTENSIONS  = (".py", ".ahk", ".ps1", ".bat", ".txt")
 SKIP_DIRS   = {'.git', '__pycache__', '.vscode', 'node_modules'}
 SAVE_FILE   = r"C:\Users\nahid\script_output\paths_before.json"
 LOG_FILE    = r"C:\Users\nahid\script_output\path_replacements.log"
-BACKUP_DIR  = r"C:\Users\nahid\ms\msBackups\bak"
+BACKUP_DIR  = r"C:\msBackups\bak"
+
+# Binary file extensions to skip during reference replacement
+BINARY_EXTENSIONS = (
+    '.exe', '.dll', '.bin', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.ico',
+    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2',
+    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+    '.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.mp3', '.wav', '.flac', '.ogg',
+    '.iso', '.img', '.dmg', '.vhd', '.vmdk',
+    '.db', '.sqlite', '.mdb', '.accdb',
+    '.so', '.dylib', '.lib', '.a', '.o', '.obj',
+    '.class', '.jar', '.war', '.ear',
+    '.pyc', '.pyo', '.pyd'
+)
 # ——————————————————
 
 def hash_file(path):
@@ -98,7 +111,15 @@ def backup_file(original_path):
     shutil.copy2(original_path, bak_path)
     return bak_path
 
+def is_binary_file(path):
+    """Check if file should be skipped based on binary extensions"""
+    return any(path.lower().endswith(ext) for ext in BINARY_EXTENSIONS)
+
 def replace_in_file(path, old_p, new_p, log_entries, log_callback):
+    # Skip binary files to improve performance
+    if is_binary_file(path):
+        return
+    
     try:
         txt = open(path, 'r', encoding='utf-8', errors='ignore').read()
     except Exception as e:
@@ -169,19 +190,26 @@ def update_references(base_paths, log_callback):
                 if SCAN_ALL or fn.endswith(EXTENSIONS):
                     all_files.append(os.path.normpath(os.path.join(root, fn)))
 
-    log_callback(f"📝 Scanning {len(all_files)} files for references...")
+    # Filter out binary files from scanning to improve performance
+    text_files = [f for f in all_files if not is_binary_file(f)]
+    skipped_count = len(all_files) - len(text_files)
+    
+    if skipped_count > 0:
+        log_callback(f"⚡ Skipping {skipped_count} binary files for performance")
+    
+    log_callback(f"📝 Scanning {len(text_files)} text files for references...")
     
     # Create backup directory
     os.makedirs(BACKUP_DIR, exist_ok=True)
 
     log_entries = []
 
-    for file_path in all_files:
+    for file_path in text_files:
         for old_p, new_p in mappings:
             replace_in_file(file_path, old_p, new_p, log_entries, log_callback)
 
     if log_entries:
-        log_callback(f"Processing... {len(all_files)}/{len(all_files)} files")
+        log_callback(f"Processing... {len(text_files)}/{len(text_files)} files")
         with open(LOG_FILE, 'a', encoding='utf-8') as L:
             L.write(f"\n--- {datetime.now()} ---\n")
             L.write("\n".join(log_entries) + "\n")
@@ -204,7 +232,8 @@ class PathTrackerGUI:
             'SKIP_DIRS': SKIP_DIRS,
             'SAVE_FILE': SAVE_FILE,
             'LOG_FILE': LOG_FILE,
-            'BACKUP_DIR': BACKUP_DIR
+            'BACKUP_DIR': BACKUP_DIR,
+            'BINARY_EXTENSIONS': BINARY_EXTENSIONS
         }
         
         self.selected_folders = []
@@ -279,6 +308,12 @@ class PathTrackerGUI:
         skip_dirs_entry = ttk.Entry(config_frame, textvariable=self.skip_dirs_var, width=40)
         skip_dirs_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), padx=(5, 0), pady=2)
         
+        # Binary extensions (read-only display)
+        ttk.Label(config_frame, text="Skip Binary:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        binary_ext_text = ", ".join(sorted(self.config['BINARY_EXTENSIONS'])[:10]) + "... (and more)"
+        binary_ext_label = ttk.Label(config_frame, text=binary_ext_text, foreground="gray")
+        binary_ext_label.grid(row=3, column=1, sticky=tk.W, padx=(5, 0), pady=2)
+        
         # Buttons frame
         buttons_frame = ttk.Frame(main_frame)
         buttons_frame.grid(row=3, column=0, columnspan=3, pady=20)
@@ -302,7 +337,7 @@ class PathTrackerGUI:
         self.log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # Status bar
-        self.status_var = tk.StringVar(value="Ready")
+        self.status_var = tk.StringVar(value="Ready - Binary files will be skipped for performance")
         status_bar = ttk.Label(main_frame, textvariable=self.status_var, 
                               relief=tk.SUNKEN, anchor=tk.W)
         status_bar.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(5, 0))
@@ -380,7 +415,7 @@ class PathTrackerGUI:
                 os.makedirs(os.path.dirname(SAVE_FILE), exist_ok=True)
                 
                 save_snapshot(self.selected_folders, self.log_message)
-                self.status_var.set("Scan completed")
+                self.status_var.set("Scan completed - Binary files skipped for performance")
                 
             except Exception as e:
                 self.log_message(f"❌ Error during scan: {str(e)}")
@@ -410,7 +445,7 @@ class PathTrackerGUI:
                 self.log_message(f"Starting reference update for {len(self.selected_folders)} folders")
                 
                 update_references(self.selected_folders, self.log_message)
-                self.status_var.set("Update completed")
+                self.status_var.set("Update completed - Binary files were skipped")
                 
             except Exception as e:
                 self.log_message(f"❌ Error during update: {str(e)}")
