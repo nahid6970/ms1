@@ -237,8 +237,8 @@ class PathTrackerGUI:
         folder_frame.columnconfigure(1, weight=1)
         
         # Quick select dropdown
-        self.quick_folders = ["C:/Users/nahid/ms/ms1/", "c:/msBackups/"]
-        self.quick_select = ttk.Combobox(folder_frame, values=self.quick_folders, width=15, state="readonly")
+        self.quick_folders = ["C:/Users/nahid/ms/ms1/", "C:/msBackups/"]
+        self.quick_select = ttk.Combobox(folder_frame, values=self.quick_folders, width=30, state="readonly")
         self.quick_select.grid(row=0, column=0, padx=(0, 5))
         self.quick_select.bind('<<ComboboxSelected>>', self.on_quick_select)
         
@@ -330,7 +330,8 @@ class PathTrackerGUI:
     def update_folder_display(self):
         self.folder_listbox.delete('1.0', tk.END)
         if not self.selected_folders:
-            self.folder_listbox.insert('1.0', "No folders selected. Use dropdown or Browse button to add folders.")
+            # self.folder_listbox.insert('1.0', "No folders selected. Use dropdown or Browse button to add folders.")
+            self.folder_listbox.insert('1.0', "")
         else:
             for i, folder in enumerate(self.selected_folders, 1):
                 self.folder_listbox.insert(tk.END, f"{i}. {folder}\n")
