@@ -886,7 +886,7 @@ for repo in repos:
     label.bind("<Button-1>", lambda e, p=repo["path"]: subprocess.Popen(
         ["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd {p.replace(os.sep, '/')} ; gitter}}"], shell=True
     ))
-    label.bind("<Button-3>", lambda e, p=repo["path"]: show_git_changes(p))
+    label.bind("<Button-3>", lambda e, p=repo["path"]: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=p, shell=True))
     label.bind("<Control-Button-3>", lambda e, p=repo["path"]: subprocess.Popen(
         ["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd {p.replace(os.sep, '/')} ; git restore . }}"], shell=True
     ))
