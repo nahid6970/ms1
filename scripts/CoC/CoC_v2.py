@@ -154,14 +154,14 @@ def Event_Function():
             event_save_selected_key(selected_key)
 
             image_action_map = [
-                (r"C:\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
-                (r"C:\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
-                (r"C:\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
+                (r"C:\Users\nahid\ms\msBackups\CoC\MainBase\Train.png", (179, 690, 269, 781), lambda: press_global_screen_with_delays((265,878,1),(1313,591,1))),
+                (r"C:\Users\nahid\ms\msBackups\CoC\MainBase\return.png", (819, 786, 1087, 920), lambda: press_global_screen_with_delays((961, 855,1))),
+                (r"C:\Users\nahid\ms\msBackups\CoC\MainBase\okay.png", (757, 758, 1158, 951), lambda: press_global_screen_with_delays((961, 855,1))),
             ]
 
             try:
                 while not Event_Function.state["stop_flag"]:
-                    if find_image(r"C:\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\MainBase\attack.png", confidence=0.8, region=(1452, 639, 1759, 804)):
                         # Access troop keys dynamically
                         press_keys_with_delays(window, troop_vars["jump_spell_key"].get(), 1)
                         press_global_screen_with_delays((1230,426,1), (1227,626,1))

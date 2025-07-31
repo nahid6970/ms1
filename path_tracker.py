@@ -16,7 +16,7 @@ EXTENSIONS  = (".py", ".ahk", ".ps1", ".bat", ".txt")
 SKIP_DIRS   = {'.git', '__pycache__', '.vscode', 'node_modules'}
 SAVE_FILE   = r"C:\Users\nahid\script_output\paths_before.json"
 LOG_FILE    = r"C:\Users\nahid\script_output\path_replacements.log"
-BACKUP_DIR  = r"C:\msBackups\bak"
+BACKUP_DIR  = r"C:\Users\nahid\ms\msBackups\bak"
 # ——————————————————
 
 def hash_file(path):
@@ -237,7 +237,7 @@ class PathTrackerGUI:
         folder_frame.columnconfigure(1, weight=1)
         
         # Quick select dropdown
-        self.quick_folders = ["C:/Users/nahid/ms/ms1/", "C:/msBackups/"]
+        self.quick_folders = ["C:/Users/nahid/ms/ms1/", "C:/Users/nahid/ms/msBackups/"]
         self.quick_select = ttk.Combobox(folder_frame, values=self.quick_folders, width=30, state="readonly")
         self.quick_select.grid(row=0, column=0, padx=(0, 5))
         self.quick_select.bind('<<ComboboxSelected>>', self.on_quick_select)

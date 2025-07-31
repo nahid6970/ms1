@@ -5,7 +5,7 @@ from flask import jsonify
 import math
 
 app = Flask(__name__, static_folder='C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5005_GameARR\\static')
-DB_PATH = r"C:\msBackups\gameARR\game.db"
+DB_PATH = r"C:\Users\nahid\ms\msBackups\gameARR\game.db"
 GAMES_PER_PAGE = 20
 
 # Ensure database exists and creates the necessary table

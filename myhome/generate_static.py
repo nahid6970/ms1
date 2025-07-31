@@ -10,7 +10,7 @@ from datetime import datetime
 
 def read_data():
     """Read data from JSON file"""
-    data_file = 'C:\\msBackups\\DataBase\\myhome\\data.json'
+    data_file = 'C:\\Users\\nahid\\ms\\msBackups\\DataBase\\myhome\\data.json'
     if not os.path.exists(data_file):
         return []
     with open(data_file, 'r') as f:

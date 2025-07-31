@@ -1,17 +1,17 @@
 #Requires AutoHotkey v2.0
 
 ; Set the tray icon
-TraySetIcon("C:\msBackups\icon\shutdown3.png")
+TraySetIcon("C:\Users\nahid\ms\msBackups\icon\shutdown3.png")
 ; Create a custom tray menu
 Tray := A_TrayMenu
 Tray.Delete() ; Remove default items
 Tray.Add("Restart Explorer", (*) => RestartExplorer())
-Tray.SetIcon("Restart Explorer", "C:\msBackups\icon\system_icon\shell32\965.ico")
+Tray.SetIcon("Restart Explorer", "C:\Users\nahid\ms\msBackups\icon\system_icon\shell32\965.ico")
 Tray.Add("Screen Dimmer", (*) => Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\Display\ScreenDimmer.ahk"))
 Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
 Tray.Add() ; Add a separator
 Tray.Add("Exit", (*) => ExitApp()) ; Add Exit button
-Tray.SetIcon("Exit","C:\msBackups\icon\system_icon\shell32\295.ico")
+Tray.SetIcon("Exit","C:\Users\nahid\ms\msBackups\icon\system_icon\shell32\295.ico")
 
 ; Function to restart explorer.exe using PowerShell
 RestartExplorer() {

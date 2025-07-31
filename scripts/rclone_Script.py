@@ -341,8 +341,8 @@ clear_button.grid(row=10, column=1, pady=10, sticky=tk.W)
 msBackups_Label = tk.Label( quick_commands_frame, text="msBackups \uf40a", font=("Jetbrainsmono nfp", 12, "bold"), bg="#a0522d", fg="#ffffff" )
 msBackups_Label.grid(row=1, column=1, pady=10, padx=10, sticky=tk.W)
 msBackups_Label.bind("<Button-1>", lambda event: threading.Thread(target=lambda: (
-    print("Executing: rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"),
-    subprocess.Popen("rclone sync C:\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
+    print("Executing: rclone sync C:\\Users\\nahid\\ms\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list"),
+    subprocess.Popen("rclone sync C:\\Users\\nahid\\ms\\msBackups\\ o0:\\msBackups\\ -P --check-first --transfers=10 --track-renames --fast-list", shell=True).wait(),
     print("\033[92mBackup Sync Completed\033[0m")
 )).start())
 

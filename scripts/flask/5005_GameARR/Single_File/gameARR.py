@@ -3,7 +3,7 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-DB_PATH = r"C:\msBackups\gameARR\game.db"
+DB_PATH = r"C:\Users\nahid\ms\msBackups\gameARR\game.db"
 
 def recreate_table():
     conn = sqlite3.connect(DB_PATH)

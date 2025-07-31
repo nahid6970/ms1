@@ -13,7 +13,7 @@ def is_admin():
 
 def find_locked_process(folder_path):
     """Find which process is locking the folder using Sysinternals' handle.exe"""
-    handle_exe = r"C:\msBackups\sysinternals\SysinternalsSuite\handle.exe"  # Change this to the actual path of handle.exe
+    handle_exe = r"C:\Users\nahid\ms\msBackups\sysinternals\SysinternalsSuite\handle.exe"  # Change this to the actual path of handle.exe
 
     if not os.path.exists(handle_exe):
         print("Error: handle.exe not found. Download it from https://docs.microsoft.com/en-us/sysinternals/downloads/handle")

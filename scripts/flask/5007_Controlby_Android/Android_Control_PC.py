@@ -6,8 +6,8 @@ import time
 app = Flask(__name__)
 
 COMMANDS = {
-    "Display 1": "C:\\msBackups\\Display\\DisplaySwitch.exe /internal",
-    "Display 2": "C:\\msBackups\\Display\\DisplaySwitch.exe /external",
+    "Display 1": "C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal",
+    "Display 2": "C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /external",
     "Display 1 KillApps": "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\monitor_1.ahk && taskkill /IM python.exe /IM notepad++.exe /IM dnplayer.exe /F",
     "Show IP Config": "ipconfig",
     "Open Notepad": "start notepad",

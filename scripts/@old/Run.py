@@ -37,7 +37,7 @@ directories = [
     "C:/Users/nahid/ms/ms1/",
     "C:/ms2/",
     "C:/ms3/",
-    "C:/msBackups/",
+    "C:/Users/nahid/ms/msBackups/",
 ]
 
 # Flag to indicate if we are viewing bookmarks

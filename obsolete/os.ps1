@@ -447,8 +447,8 @@ function Show-MainMenu {
                 Stop-Process -Name "rssguard"
                 Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Recurse
                 Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Recurse
-                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\msBackups\@mklink\rssguard\config" -Force
-                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\msBackups\@mklink\rssguard\database" -Force
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\Users\nahid\ms\msBackups\@mklink\rssguard\config" -Force
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\Users\nahid\ms\msBackups\@mklink\rssguard\database" -Force
                 '
             }
 
@@ -540,9 +540,9 @@ function Show-MainMenu {
                     Winget install TeamSonarr.Sonarr
                     # $su Stop-Process -Name 'Sonarr' -Verbose
                     # Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
-                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
+                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\Users\nahid\ms\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
                     # Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
-                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
+                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\Users\nahid\ms\msBackups\ARR_timely'
                                          "
             }
             "Radarr" {
@@ -551,9 +551,9 @@ function Show-MainMenu {
                     # $su Stop-Process -Name 'Radarr' -Verbose
                     # $su Stop-Process -Name 'Radarr.Console' -Verbose
                     # Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
-                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\msBackups\@mklink\radarr\radarr.db -Force -Verbose
+                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\Users\nahid\ms\msBackups\@mklink\radarr\radarr.db -Force -Verbose
                     # Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
-                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
+                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\Users\nahid\ms\msBackups\ARR_timely'
                                          "
             }
             "Prowlarr" {
@@ -561,9 +561,9 @@ function Show-MainMenu {
                     Winget install TeamProwlarr.Prowlarr
                     # $su Stop-Process -Name 'Prowlarr' -Verbose
                     # Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
-                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
+                    # $su New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\ms\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
                     # Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
-                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\msBackups\ARR_timely'
+                Write-Host Do it with manual Restore! -ForegroundColor Green && Start-Process 'C:\Users\nahid\ms\msBackups\ARR_timely'
                                          "
             }
 	# initially after creating with  quickstart have to run komorebi with the default profile then we can mklink

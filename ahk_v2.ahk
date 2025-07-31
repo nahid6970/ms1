@@ -25,7 +25,7 @@ Persistent
     ; Kill python.exe
     Run("taskkill /F /IM python.exe",,"Hide")
     ; Run the command
-    Run("C:\msBackups\Display\DisplaySwitch.exe /internal",,"Hide")
+    Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /internal",,"Hide")
 }
 
 
@@ -35,9 +35,9 @@ Persistent
 
 
 ;! monitor
-RAlt & Numpad1::Run("C:\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
-RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
-RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
+RAlt & Numpad1::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
+RAlt & Numpad2::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
+RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
 
 ;! gui
 !b::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")

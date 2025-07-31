@@ -6,7 +6,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-DATA_FILE = r'C:\msBackups\DataBase\myhome\data.json'
+DATA_FILE = r'C:\Users\nahid\ms\msBackups\DataBase\myhome\data.json'
 
 # Helper function to read data from JSON file
 def read_data():

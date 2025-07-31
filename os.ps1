@@ -377,10 +377,10 @@ $menu = [ordered]@{
                 Winget install TeamProwlarr.Prowlarr
                 # Stop-Process -Name 'Prowlarr' -Verbose
                 # Remove-Item C:\ProgramData\Prowlarr\prowlarr.db -Verbose
-                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Prowlarr\prowlarr.db -Target C:\Users\nahid\ms\msBackups\@mklink\prowlarr\prowlarr.db -Force -Verbose
                 # Start-Process C:\ProgramData\Prowlarr\bin\Prowlarr.exe -Verbose
                 Write-Host "Do it with manual Restore!" -ForegroundColor Green
-                Start-Process 'C:\msBackups\ARR_timely'
+                Start-Process 'C:\Users\nahid\ms\msBackups\ARR_timely'
             }
         }
         "Radarr" = {
@@ -389,10 +389,10 @@ $menu = [ordered]@{
                 # Stop-Process -Name 'Radarr' -Verbose
                 # Stop-Process -Name 'Radarr.Console' -Verbose
                 # Remove-Item C:\ProgramData\Radarr\radarr.db -Verbose
-                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\msBackups\@mklink\radarr\radarr.db -Force -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Radarr\radarr.db -Target C:\Users\nahid\ms\msBackups\@mklink\radarr\radarr.db -Force -Verbose
                 # Start-Process C:\ProgramData\Radarr\bin\Radarr.exe -Verbose
                 Write-Host "Do it with manual Restore!" -ForegroundColor Green
-                Start-Process 'C:\msBackups\ARR_timely'
+                Start-Process 'C:\Users\nahid\ms\msBackups\ARR_timely'
             }
         }
         "RssGuard" = {
@@ -401,8 +401,8 @@ $menu = [ordered]@{
                 Stop-Process -Name "rssguard"
                 Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Recurse
                 Remove-Item "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Recurse
-                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\msBackups\@mklink\rssguard\config" -Force
-                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\msBackups\@mklink\rssguard\database" -Force
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\config" -Target "C:\Users\nahid\ms\msBackups\@mklink\rssguard\config" -Force
+                New-Item -ItemType SymbolicLink -Path "C:\Users\nahid\scoop\apps\rssguard\current\data4\database" -Target "C:\Users\nahid\ms\msBackups\@mklink\rssguard\database" -Force
             }
         }
         "Sonarr" = {
@@ -410,10 +410,10 @@ $menu = [ordered]@{
                 Winget install TeamSonarr.Sonarr
                 # Stop-Process -Name 'Sonarr' -Verbose
                 # Remove-Item C:\ProgramData\Sonarr\sonarr.db -Verbose
-                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
+                # New-Item -ItemType SymbolicLink -Path C:\ProgramData\Sonarr\sonarr.db -Target C:\Users\nahid\ms\msBackups\@mklink\sonarr\sonarr.db -Force -Verbose
                 # Start-Process C:\ProgramData\Sonarr\bin\Sonarr.exe -Verbose
                 Write-Host "Do it with manual Restore!" -ForegroundColor Green
-                Start-Process 'C:\msBackups\ARR_timely'
+                Start-Process 'C:\Users\nahid\ms\msBackups\ARR_timely'
             }
         }
         "Terminal Profile" = {

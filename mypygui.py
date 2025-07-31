@@ -933,7 +933,7 @@ Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,10))
 commands = {
     "msBackups": {
         "cmd": "rclone check src dst --fast-list --size-only",
-        "src": "C:/msBackups",
+        "src": "C:/Users/nahid/ms/msBackups",
         "dst": "o0:/msBackups",
         "log": "C:/test/msBackups_check.log",
         "label": "\udb85\ude32"

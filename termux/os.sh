@@ -306,8 +306,8 @@ remote_access_goto_d2() {
     local remote_password="1823"
     local remote_user="nahid"
     local remote_host="192.168.0.101"
-    local psexec_path="C:/msBackups/PSTools/PsExec64.exe"
-    local displayswitch_path="C:/msBackups/Display/DisplaySwitch.exe"
+    local psexec_path="C:/Users/nahid/ms/msBackups/PSTools/PsExec64.exe"
+    local displayswitch_path="C:/Users/nahid/ms/msBackups/Display/DisplaySwitch.exe"
     echo -e "Connecting to the remote server to execute DisplaySwitch..."
     # Run the PsExec command on the Windows remote system
     sshpass -p "$remote_password" ssh "$remote_user@$remote_host" \
@@ -324,8 +324,8 @@ remote_access_goto_d1() {
     local remote_password="1823"
     local remote_user="nahid"
     local remote_host="192.168.0.101"
-    local psexec_path="C:/msBackups/PSTools/PsExec64.exe"
-    local displayswitch_path="C:/msBackups/Display/DisplaySwitch.exe"
+    local psexec_path="C:/Users/nahid/ms/msBackups/PSTools/PsExec64.exe"
+    local displayswitch_path="C:/Users/nahid/ms/msBackups/Display/DisplaySwitch.exe"
     echo -e "Connecting to the remote server to execute script..."
     # Run the taskkill commands to kill the processes
     sshpass -p "$remote_password" ssh "$remote_user@$remote_host" \

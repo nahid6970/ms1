@@ -187,9 +187,9 @@ def ntfy_termux_rclone_touch():
         print("Script stopped by user.")
 
 
-WhatsApp_Entry=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
-WhatsApp_Cally=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
-WhatsApp_Cancel=r'C:\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
+WhatsApp_Entry=r'C:\Users\nahid\ms\msBackups\shadowfight3\whatsapp\whatsapp_mobile\Enter_Whatsapp.png'
+WhatsApp_Cally=r'C:\Users\nahid\ms\msBackups\shadowfight3\whatsapp\whatsapp_mobile\call.png'
+WhatsApp_Cancel=r'C:\Users\nahid\ms\msBackups\shadowfight3\whatsapp\whatsapp_mobile\cancel.png'
 def ntfy_WhatsApp():
     pyautogui.click(x=1778, y=900)
     time.sleep(2)
@@ -207,8 +207,8 @@ def ntfy_WhatsApp():
     except KeyboardInterrupt: print("Script stopped by user.")
 
 
-Signal_Entry =r"C:\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
-Signal_Cally =r"C:\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
+Signal_Entry =r"C:\Users\nahid\ms\msBackups\shadowfight3\ntfy\Signal\Signal_Enter.png"
+Signal_Cally =r"C:\Users\nahid\ms\msBackups\shadowfight3\ntfy\Signal\Signal_Call.png"
 def ntfy_Signal():
     pyautogui.click(x=1778, y=900)
     time.sleep(2)
@@ -504,8 +504,8 @@ ACTION_5_AHK.pack( side="left",padx=(1, 1), pady=(1, 1))
 #! ██╔═══╝ ██║███╗██║██╔══██║  ╚██╔╝      ██╔══██║██╔══██║██╔═██╗
 #! ███████╗╚███╔███╔╝██║  ██║   ██║       ██║  ██║██║  ██║██║  ██╗
 #! ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
-# hornass =r"C:\msBackups\shadowfight3\testing\horn.png"
-hornass =r"C:\msBackups\shadowfight3\testing\guardian_trash.png"
+# hornass =r"C:\Users\nahid\ms\msBackups\shadowfight3\testing\horn.png"
+hornass =r"C:\Users\nahid\ms\msBackups\shadowfight3\testing\guardian_trash.png"
 
 def Attack2Way(button):
     """Toggles the two-region attack functionality."""
@@ -583,24 +583,24 @@ def FameFunction(button):
                 while not state["stop_flag"]:
                     focus_window(window_title)
                     # Example logic
-                    if find_image(r"C:\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\Chat.png", confidence=0.8, region=(173, 420, 279, 547)): 
                         press_global_screen_with_delays((1276, 200,1))
                         press_global_screen_with_delays((1339, 846,1))
                         press_global_screen_with_delays((268, 875,1),(268, 875,1))
                         press_global_screen_with_delays((1355, 671,1))
 
-                    if find_image(r"C:\msBackups\CoC\builder\return.png", confidence=0.8, region=(797, 772, 1115, 920)): 
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\return.png", confidence=0.8, region=(797, 772, 1115, 920)): 
                         press_global_screen_with_delays((960, 840,1))
 
                     #! 1st troops
-                    if find_image(r"C:\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
                         # press_keys_with_delays(window, 'x',1, 'y',1, 'z',1)
                         press_keys_with_delays(window, 't',4)
                         press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
                         press_keys_with_delays(window, '3',1, 'y',1, '3',1)
                         press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
                     #! 2nd troops
-                    if find_image(r"C:\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
                         press_keys_with_delays(window, 'f',4)
                         press_keys_with_delays(window, '6',0, 'x',0, '7',0, 'z',0)
                         press_keys_with_delays(window, '0',0, 'x',0, '1',0, 'y',0, '2',0, 'z',0)
@@ -645,23 +645,23 @@ Restart_BT.pack( side="left",padx=(1, 1), pady=(1, 1))
 #* ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝
 
 window_title='LDPlayer'
-# mhome = r"C:\msBackups\shadowfight3"
+# mhome = r"C:\Users\nahid\ms\msBackups\shadowfight3"
 # Home = rf"{mhome}\Home.png"
 
 # Home Page of the SH3
-Home=r"C:\msBackups\shadowfight3\Home.png"
+Home=r"C:\Users\nahid\ms\msBackups\shadowfight3\Home.png"
 
 # # Action Related Images
-void_compass=r"C:\msBackups\shadowfight3\action\void_compass.png"
-eruption=r"C:\msBackups\shadowfight3\action\eruption.png"
-thud=r"C:\msBackups\shadowfight3\action\thud.png"
-collector=r"C:\msBackups\shadowfight3\action\collector.png"
-bolt=r"C:\msBackups\shadowfight3\action\bolt.png"
-uppercut=r"C:\msBackups\shadowfight3\action\uppercut.png"
-Peg_Top=r"C:\msBackups\shadowfight3\action\peg_top.png"
-KOS_Cloud=r"C:\msBackups\shadowfight3\action\Kos_Cloud.png"
-Temporary_Kibo=r"C:\msBackups\shadowfight3\action\temporary_kibo.png"
-Temporary_Serge=r"C:\msBackups\shadowfight3\action\temporary_serge.png"
+void_compass=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\void_compass.png"
+eruption=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\eruption.png"
+thud=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\thud.png"
+collector=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\collector.png"
+bolt=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\bolt.png"
+uppercut=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\uppercut.png"
+Peg_Top=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\peg_top.png"
+KOS_Cloud=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\Kos_Cloud.png"
+Temporary_Kibo=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\temporary_kibo.png"
+Temporary_Serge=r"C:\Users\nahid\ms\msBackups\shadowfight3\action\temporary_serge.png"
 #! actionF = [void_compass, eruption, thud, collector]
 actionF = {
     void_compass: 0.7,
@@ -679,61 +679,61 @@ Action_region = (216, 99, 374, 253)  # Replace with your actual coordinates
 
 
 #* Continue Related Images
-cont1 =r"C:\msBackups\shadowfight3\continue\cont1.png"
-# cont2 =r"C:\msBackups\shadowfight3\continue\cont2.png"
-cont3 =r"C:\msBackups\shadowfight3\continue\cont3.png"
-cont4 =r"C:\msBackups\shadowfight3\continue\cont4.png"
-# cont5 =r"C:\msBackups\shadowfight3\continue\cont5.png"
+cont1 =r"C:\Users\nahid\ms\msBackups\shadowfight3\continue\cont1.png"
+# cont2 =r"C:\Users\nahid\ms\msBackups\shadowfight3\continue\cont2.png"
+cont3 =r"C:\Users\nahid\ms\msBackups\shadowfight3\continue\cont3.png"
+cont4 =r"C:\Users\nahid\ms\msBackups\shadowfight3\continue\cont4.png"
+# cont5 =r"C:\Users\nahid\ms\msBackups\shadowfight3\continue\cont5.png"
 continueF = [cont1, cont3, cont4]
 contF_Region = (1380, 792, 1738, 966)
 
-SPACE =r"C:\msBackups\shadowfight3\fame\b_space2.png"
-Resume =r"C:\msBackups\shadowfight3\resume.png"
-later =r"C:\msBackups\shadowfight3\later.png"
+SPACE =r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\b_space2.png"
+Resume =r"C:\Users\nahid\ms\msBackups\shadowfight3\resume.png"
+later =r"C:\Users\nahid\ms\msBackups\shadowfight3\later.png"
 
 # Fame Related Images
-e_image      =r"C:\msBackups\shadowfight3\fame\b_tournament.png"
+e_image      =r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\b_tournament.png"
 e_image_region = (196, 656, 384, 845)  # Example coordinates and dimensions
 
 
-StartFame    =r"C:\msBackups\shadowfight3\fame\image_19.png"
-WorldIcon    =r"C:\msBackups\shadowfight3\fame\image_20.png"
-GoBack       =r"C:\msBackups\shadowfight3\fame\image_21.png"
+StartFame    =r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\image_19.png"
+WorldIcon    =r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\image_20.png"
+GoBack       =r"C:\Users\nahid\ms\msBackups\shadowfight3\fame\image_21.png"
 
 # Raids Related Images
-level3         =r"C:\msBackups\shadowfight3\raids\level3.png"
-participate    =r"C:\msBackups\shadowfight3\raids\participate.png"
-toraid         =r"C:\msBackups\shadowfight3\raids\to_raid.png"
-fight          =r"C:\msBackups\shadowfight3\raids\fightttttt.png"
-claimreward    =r"C:\msBackups\shadowfight3\raids\claim.png"
+level3         =r"C:\Users\nahid\ms\msBackups\shadowfight3\raids\level3.png"
+participate    =r"C:\Users\nahid\ms\msBackups\shadowfight3\raids\participate.png"
+toraid         =r"C:\Users\nahid\ms\msBackups\shadowfight3\raids\to_raid.png"
+fight          =r"C:\Users\nahid\ms\msBackups\shadowfight3\raids\fightttttt.png"
+claimreward    =r"C:\Users\nahid\ms\msBackups\shadowfight3\raids\claim.png"
 
-# DailyMission=r"C:\msBackups\shadowfight3\DailyMission.png"
+# DailyMission=r"C:\Users\nahid\ms\msBackups\shadowfight3\DailyMission.png"
 
 # Event Related
-Tournament_step1=r"C:\msBackups\shadowfight3\event\Tournament.png"
-back_battlepass=r'C:\msBackups\shadowfight3\back_battlepass.png'
+Tournament_step1=r"C:\Users\nahid\ms\msBackups\shadowfight3\event\Tournament.png"
+back_battlepass=r'C:\Users\nahid\ms\msBackups\shadowfight3\back_battlepass.png'
 
-Select_CreepyParty=r"C:\msBackups\shadowfight3\event\Select\CreepyParty.png"
-Select_SelectOption=r"C:\msBackups\shadowfight3\event\Select\Select.png"
+Select_CreepyParty=r"C:\Users\nahid\ms\msBackups\shadowfight3\event\Select\CreepyParty.png"
+Select_SelectOption=r"C:\Users\nahid\ms\msBackups\shadowfight3\event\Select\Select.png"
 
-Open_Chest=r"C:\msBackups\shadowfight3\chest.png"
+Open_Chest=r"C:\Users\nahid\ms\msBackups\shadowfight3\chest.png"
 
 # continue for ads
-passed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv.png"
-failed_50sv=r"C:\msBackups\shadowfight3\continue\cont_ads\50sv_failed.png"
+passed_50sv=r"C:\Users\nahid\ms\msBackups\shadowfight3\continue\cont_ads\50sv.png"
+failed_50sv=r"C:\Users\nahid\ms\msBackups\shadowfight3\continue\cont_ads\50sv_failed.png"
 continueADS = [passed_50sv, failed_50sv]
 
-ads_folder = r"C:\msBackups\shadowfight3\ads\ads_auto_click"
+ads_folder = r"C:\Users\nahid\ms\msBackups\shadowfight3\ads\ads_auto_click"
 ads_images = glob.glob(os.path.join(ads_folder, "*.png"))
 
-cont_folder = r"C:\msBackups\shadowfight3\cont_dynamic"
+cont_folder = r"C:\Users\nahid\ms\msBackups\shadowfight3\cont_dynamic"
 cont_dynamic = glob.glob(os.path.join(cont_folder, "*.png"))
 
-back_GPlay=r"C:\msBackups\shadowfight3\ads\Back_GooglePlay.png"
-Error_Processing_Video=r"C:\msBackups\shadowfight3\ads\error_Video.png"
+back_GPlay=r"C:\Users\nahid\ms\msBackups\shadowfight3\ads\Back_GooglePlay.png"
+Error_Processing_Video=r"C:\Users\nahid\ms\msBackups\shadowfight3\ads\error_Video.png"
 
-skip=r'C:\msBackups\shadowfight3\skip.png'
-default_ads=r"C:\msBackups\shadowfight3\event\inside_ads.png"
+skip=r'C:\Users\nahid\ms\msBackups\shadowfight3\skip.png'
+default_ads=r"C:\Users\nahid\ms\msBackups\shadowfight3\event\inside_ads.png"
 
 
 

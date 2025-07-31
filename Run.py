@@ -9,7 +9,7 @@ def search_directories_and_files():
 
     # Add directories (comment any line freely without breaking syntax)
     directories.append(r"C:\Users\nahid\ms\ms1")
-    directories.append(r"C:\msBackups")
+    directories.append(r"C:\Users\nahid\ms\msBackups")
     directories.append(r"C:\Users\nahid\Pictures")
     # directories.append("D:\\")
     # directories.append("C:\\Program Files\\WindowsApps")

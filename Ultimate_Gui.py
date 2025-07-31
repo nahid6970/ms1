@@ -193,7 +193,7 @@ def create_control_panel_without_tab_border():
 
     ahk_converter_button = tk.Label(BOX_4, text="AhkConverter", width=20, bg="#32ec44", fg="black", font=default_font)
     ahk_converter_button.grid(row=3, column=1, padx=5, pady=5)
-    ahk_converter_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\msBackups\\Autohotkey\\AHK_converter\\QuickConvertorV2_scintilla.ahk", hide=True)))
+    ahk_converter_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\Users\\nahid\\ms\\msBackups\\Autohotkey\\AHK_converter\\QuickConvertorV2_scintilla.ahk", hide=True)))
 
     uia_v2_button = tk.Label(BOX_4, text="UIA-V2", width=20, bg="#32ec44", fg="black", font=default_font)
     uia_v2_button.grid(row=3, column=2, padx=5, pady=5)
