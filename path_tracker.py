@@ -175,17 +175,13 @@ def update_references(base_paths, log_callback):
     os.makedirs(BACKUP_DIR, exist_ok=True)
 
     log_entries = []
-    processed = 0
 
     for file_path in all_files:
         for old_p, new_p in mappings:
             replace_in_file(file_path, old_p, new_p, log_entries, log_callback)
-        
-        processed += 1
-        if processed % 50 == 0:
-            log_callback(f"Processing... {processed}/{len(all_files)} files")
 
     if log_entries:
+        log_callback(f"Processing... {len(all_files)}/{len(all_files)} files")
         with open(LOG_FILE, 'a', encoding='utf-8') as L:
             L.write(f"\n--- {datetime.now()} ---\n")
             L.write("\n".join(log_entries) + "\n")
