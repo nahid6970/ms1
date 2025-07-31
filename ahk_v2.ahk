@@ -30,7 +30,7 @@ Persistent
 
 
 
-!Space::Run("C:\Users\nahid\ms\ms1\Run_v2.py", , "Show")
+!Space::Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
 !x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
 
 
