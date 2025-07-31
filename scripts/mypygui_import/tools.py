@@ -91,7 +91,7 @@ def Folder(WINDOWSTOOLS_FRAME):
     items = [
 ("#204892", "#ffffff", "Advanced Adapter",              {"command": "control ncpa.cpl"}),
 ("#204892", "#ffffff", "CheckDisk",                     {"command": ["powershell", "Start-Process", "-FilePath", "chkdsk", "-ArgumentList", '"/f /r"', "-Verb", "RunAs"]}),
-("#000000", "#ffffff", "Chris Titus Win Utility",       {"command": 'C:\\Users\\nahid\\scoop\\shims\\sudo C:/ms1/scripts/ctt.ps1'}),
+("#000000", "#ffffff", "Chris Titus Win Utility",       {"command": 'C:\\Users\\nahid\\scoop\\shims\\sudo C:/Users/nahid/ms/ms1/scripts/ctt.ps1'}),
 ("#204892", "#ffffff", "Disk Cleanup",                  {"command": ["powershell", "Start-Process", "-FilePath","cleanmgr","-Verb", "RunAs"]}),
 ("#204892", "#ffffff", "DISM",                          {"command": ["powershell","Start-Process","-FilePath","cmd","-ArgumentList",'"/k DISM /Online /Cleanup-Image /RestoreHealth"',"-Verb", "RunAs"]}),
 ("#204892", "#ffffff", "DxDiag",                        {"command": "dxdiag"}),
@@ -112,7 +112,7 @@ def Folder(WINDOWSTOOLS_FRAME):
 ("#204892", "#ffffff", "God Mode",                      {"command": "explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"}),
 ("#204892", "#ffffff", "Performance Options",           {"command": "systempropertiesperformance"}),
 ("#204892", "#ffffff", "Windows Activation Info",       {"command": "slmgr /dli"}),
-("#ee4816", "#ffffff", "Windows [Activate-Script]",     {"command": "C:\\ms1\\scripts\\Activate_Key\\mas.ps1"}),
+("#ee4816", "#ffffff", "Windows [Activate-Script]",     {"command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\Activate_Key\\mas.ps1"}),
     ]
 
     # Sort the items alphabetically by their text
@@ -151,12 +151,12 @@ BACK.grid(row=0, column=0, columnspan=3, pady=(0, 10))  # Add BACK button at the
 
 def Folder(PYTHON_SCRIPT_FRAME):
     items = [
-("#204892", "#ffffff", "Rounded Corner",       {"command": "C:\\ms1\\scripts\\RoundedCornerOnOff.py"}),
-("#204892", "#ffffff", "Font",                 {"command": "C:\\ms1\\scripts\\python\\font_style.py"}),
-("#204892", "#ffffff", "Dictionary",           {"command": "C:\\ms1\\scripts\\python\\dictionary.py"}),
-("#204892", "#ffffff", "Process",              {"command": "cmd /c start C:\\ms1\\scripts\\mypygui_import\\process.py"}),
-("#204892", "#ffffff", "Rock-Paper-Scissor",   {"command": "C:\\ms1\\scripts\\python\\Game_rock_paper_scissor.py"}),
-("#204892", "#ffffff", "Morse-Code",           {"command": "cmd /c start C:\\ms1\\scripts\\python\\morse.py"}),
+("#204892", "#ffffff", "Rounded Corner",       {"command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\RoundedCornerOnOff.py"}),
+("#204892", "#ffffff", "Font",                 {"command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\font_style.py"}),
+("#204892", "#ffffff", "Dictionary",           {"command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\dictionary.py"}),
+("#204892", "#ffffff", "Process",              {"command": "cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\process.py"}),
+("#204892", "#ffffff", "Rock-Paper-Scissor",   {"command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\Game_rock_paper_scissor.py"}),
+("#204892", "#ffffff", "Morse-Code",           {"command": "cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\morse.py"}),
     ]
 
     # Sort the items alphabetically by their text
@@ -196,13 +196,13 @@ Folder(PYTHON_SCRIPT_FRAME)
 # def Folder(PYTHON_FRAME):
 #     RoundedCorner_lb = tk.Label(BOX, text="Rounded Corner", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
 #     RoundedCorner_lb.pack(side="top", anchor="w", padx=(0, 0), pady=(0, 0))
-#     RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\ms1\\scripts\\RoundedCornerOnOff.py"'))
-#     RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\ms1\\scripts\\RoundedCornerOnOff.py"'))
+#     RoundedCorner_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c "C:\\Users\\nahid\\ms\\ms1\\scripts\\RoundedCornerOnOff.py"'))
+#     RoundedCorner_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c Code "C:\\Users\\nahid\\ms\\ms1\\scripts\\RoundedCornerOnOff.py"'))
 
 #     Process_bt=tk.Label(BOX, text="Process", font=("jetbrainsmono nf",12,"bold"),width=0 ,fg="#ffffff", bg="#204892")
 #     Process_bt.pack(side="top", anchor="w",padx=(0,0),pady=(0,0))
-#     Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
-#     Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
+#     Process_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
+#     Process_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\process.py"], shell=True))
 
 #     BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,PYTHON_FRAME))
 #     BACK.pack(side="top" ,padx=(0,0))
@@ -215,23 +215,23 @@ ROW_2.pack(side="top", anchor="center", pady=(30,0), padx=(0,0))
 
 Update_bt=tk.Label(ROW_2, text="\uf01b",bg="#1d2027",fg="#16a2ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",50,"bold"))
 Update_bt.pack(side="left",padx=(3,0),pady=(0,0))
-Update_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\update.ps1"],  shell=True))
-Update_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\update.ps1"],  shell=True))
+Update_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"],  shell=True))
+Update_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"],  shell=True))
 
 Backup_bt=tk.Label(ROW_2, text="\uf01b",bg="#1d2027",fg="#2af083",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",50,"bold"))
 Backup_bt.pack(side="left",padx=(3,0),pady=(0,0))
-Backup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\backup.ps1"], shell=True))
-Backup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\backup.ps1"], shell=True))
+Backup_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\backup.ps1"], shell=True))
+Backup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\backup.ps1"], shell=True))
 
 BackupRestore_bt=tk.Label(ROW_2, text="\udb84\udc38",bg="#1d2027",fg="#3bc7ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",50,"bold"))
 BackupRestore_bt.pack(side="left",padx=(3,0),pady=(0,0))
-BackupRestore_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\BackupRestore.py"], shell=True))
-BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\BackupRestore.py"],shell=True))
+BackupRestore_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\BackupRestore.py"], shell=True))
+BackupRestore_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\BackupRestore.py"],shell=True))
 
 Encrypt_lb = tk.Label(ROW_2,text="\uf084", bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 50, "bold"))
 Encrypt_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\scripts\\Locker.py'))
-Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\scripts\\Locker.py'))
+Encrypt_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\Locker.py'))
+Encrypt_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\Locker.py'))
 
 
 

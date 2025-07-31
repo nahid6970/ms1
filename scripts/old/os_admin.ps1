@@ -6,4 +6,4 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 }
 
 # Run the target script as admin
-& "C:\ms1\os.ps1"
+& "C:\Users\nahid\ms\ms1\os.ps1"

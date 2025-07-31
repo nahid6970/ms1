@@ -54,9 +54,9 @@ class CombinedWidget(BaseWidget):
     #     self._XXX.mousePressEvent=lambda event:self._XXX_action(event,self._XXX)
     # def _XXX_action(self, event, label):
     #     if event.button() == Qt.MouseButton.LeftButton:
-    #        subprocess.Popen('cmd /c start C:/ms1/scripts/mypygui_import/app_store.py')
+    #        subprocess.Popen('cmd /c start C:/Users/nahid/ms/ms1/scripts/mypygui_import/app_store.py')
     #     elif event.button() == Qt.MouseButton.RightButton:
-    #        subprocess.Popen('cmd /c start C:/ms1/scripts/mypygui_import/applist.py')
+    #        subprocess.Popen('cmd /c start C:/Users/nahid/ms/ms1/scripts/mypygui_import/applist.py')
 
 
 
@@ -222,51 +222,51 @@ class CombinedWidget(BaseWidget):
         modifiers = QApplication.keyboardModifiers()
         if event.button() == Qt.MouseButton.LeftButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen(['cmd.exe', '/c', 'Code C:\\ms1\\utility\\find_files.ps1']) 
+                subprocess.Popen(['cmd.exe', '/c', 'Code C:\\Users\\nahid\\ms\\ms1\\utility\\find_files.ps1']) 
             else:
-                subprocess.Popen(['cmd.exe', '/c','start', 'C:\\ms1\\utility\\find_files.ps1']) 
+                subprocess.Popen(['cmd.exe', '/c','start', 'C:\\Users\\nahid\\ms\\ms1\\utility\\find_files.ps1']) 
         elif event.button() == Qt.MouseButton.RightButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\ms1\\scripts\\mypygui_import\\edit_files.py:89'])
+                subprocess.Popen(['cmd.exe', '/c', 'code', '-g', 'C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\edit_files.py:89'])
             else:
-                subprocess.Popen(['cmd.exe', '/c', 'start', 'C:\\ms1\\scripts\\mypygui_import\\edit_files.py'])
+                subprocess.Popen(['cmd.exe', '/c', 'start', 'C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\edit_files.py'])
         elif event.button() == Qt.MouseButton.MiddleButton:
             self.callback_middle()
 
 
     def _get_info(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen(['cmd.exe', '/c', 'start', 'C:\\ms1\\scripts\\info.py'])
+           subprocess.Popen(['cmd.exe', '/c', 'start', 'C:\\Users\\nahid\\ms\\ms1\\scripts\\info.py'])
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen(['cmd.exe', '/c', 'code', 'C:\\ms1\\scripts\\info.py'])
+           subprocess.Popen(['cmd.exe', '/c', 'code', 'C:\\Users\\nahid\\ms\\ms1\\scripts\\info.py'])
 
 
     def _Tools_yasb(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            subprocess.Popen('cmd /c start C:/ms1/scripts/mypygui_import/tools.py')
+            subprocess.Popen('cmd /c start C:/Users/nahid/ms/ms1/scripts/mypygui_import/tools.py')
         elif event.button() == Qt.MouseButton.RightButton:
            subprocess.Popen(['cmd.exe', '/c', ''])
 
 
     def _desktop_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            subprocess.Popen('cmd /c C:\\ms1\\utility\\desktop_icon.py')
+            subprocess.Popen('cmd /c C:\\Users\\nahid\\ms\\ms1\\utility\\desktop_icon.py')
         elif event.button() == Qt.MouseButton.RightButton:
-            subprocess.Popen('cmd /c Code C:\\ms1\\utility\\desktop_icon.py')
+            subprocess.Popen('cmd /c Code C:\\Users\\nahid\\ms\\ms1\\utility\\desktop_icon.py')
 
 
     def _folder_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-            subprocess.Popen('cmd /c C:/ms1/scripts/mypygui_import/folder.py')
+            subprocess.Popen('cmd /c C:/Users/nahid/ms/ms1/scripts/mypygui_import/folder.py')
         elif event.button() == Qt.MouseButton.RightButton:
-            subprocess.Popen('cmd /c Code C:/ms1/scripts/mypygui_import/folder.py')
+            subprocess.Popen('cmd /c Code C:/Users/nahid/ms/ms1/scripts/mypygui_import/folder.py')
 
 
     def _appmanager_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c start C:/ms1/scripts/mypygui_import/app_store.py')
+           subprocess.Popen('cmd /c start C:/Users/nahid/ms/ms1/scripts/mypygui_import/app_store.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c start C:/ms1/scripts/mypygui_import/applist.py')
+           subprocess.Popen('cmd /c start C:/Users/nahid/ms/ms1/scripts/mypygui_import/applist.py')
 
 
     def _shutdown_restart_action(self, event, label):
@@ -284,52 +284,52 @@ class CombinedWidget(BaseWidget):
         modifiers = QApplication.keyboardModifiers()
         if event.button() == Qt.MouseButton.LeftButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen('cmd /c Code C:/ms1/scripts/color/color_picker.py')
+                subprocess.Popen('cmd /c Code C:/Users/nahid/ms/ms1/scripts/color/color_picker.py')
             else:
-                subprocess.Popen('cmd /c C:/ms1/scripts/color/color_picker.py')
+                subprocess.Popen('cmd /c C:/Users/nahid/ms/ms1/scripts/color/color_picker.py')
         elif event.button() == Qt.MouseButton.RightButton:
             if modifiers == Qt.KeyboardModifier.ControlModifier:
-                subprocess.Popen('cmd /c Code C:/ms1/scripts/color/color_pallet_rand_fg_bgFF00.py')
+                subprocess.Popen('cmd /c Code C:/Users/nahid/ms/ms1/scripts/color/color_pallet_rand_fg_bgFF00.py')
             else:
-                subprocess.Popen('cmd /c C:/ms1/scripts/color/color_pallet_rand_fg_bgFF00.py')
+                subprocess.Popen('cmd /c C:/Users/nahid/ms/ms1/scripts/color/color_pallet_rand_fg_bgFF00.py')
         elif event.button() == Qt.MouseButton.MiddleButton:
             self.callback_middle()
 
 
     def _xy_position_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c C:/ms1/utility/position_x_y.py')
+           subprocess.Popen('cmd /c C:/Users/nahid/ms/ms1/utility/position_x_y.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c code C:/ms1/utility/position_x_y.py')
+           subprocess.Popen('cmd /c code C:/Users/nahid/ms/ms1/utility/position_x_y.py')
 
 
     def PowerToys_Mouse_Pointer_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_mouse_crosshair')
+           subprocess.Popen('cmd /c python C:/Users/nahid/ms/ms1/scripts/HotKeys.py powertoys_mouse_crosshair')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py x_mouse_enable')
+           subprocess.Popen('cmd /c python C:/Users/nahid/ms/ms1/scripts/HotKeys.py x_mouse_enable')
 
 
     def PowerToys_Text_Extract_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_TextExtract')
+           subprocess.Popen('cmd /c python C:/Users/nahid/ms/ms1/scripts/HotKeys.py powertoys_TextExtract')
 
 
     def PowerToys_Screen_Ruler_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_ruler')
+           subprocess.Popen('cmd /c python C:/Users/nahid/ms/ms1/scripts/HotKeys.py powertoys_ruler')
 
 
     def PowerToys_Screen_Color_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c python C:/ms1/scripts/HotKeys.py powertoys_color_picker')
+           subprocess.Popen('cmd /c python C:/Users/nahid/ms/ms1/scripts/HotKeys.py powertoys_color_picker')
 
 
     def _potplaylist_action(self, event, label):
         if event.button() == Qt.MouseButton.LeftButton:
-           subprocess.Popen('cmd /c start C:/ms1/scripts/playlist.py')
+           subprocess.Popen('cmd /c start C:/Users/nahid/ms/ms1/scripts/playlist.py')
         elif event.button() == Qt.MouseButton.RightButton:
-           subprocess.Popen('cmd /c start Code C:/ms1/scripts/playlist.py')
+           subprocess.Popen('cmd /c start Code C:/Users/nahid/ms/ms1/scripts/playlist.py')
 
 
     def _killProcess_action(self, event, label):

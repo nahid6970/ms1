@@ -3,7 +3,7 @@
     "type": "Command",
     "name": "ahk_v2",
     "paths": [
-      "C:\\ms1\\ahk_v2.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk"
     ],
     "Command": ""
   },
@@ -13,7 +13,7 @@
     "paths": [
       "C:\\Windows\\System32\\cmd.exe"
     ],
-    "Command": "C:\\ms1\\test_project\\ollama-chat-app\\server.py",
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\server.py",
     "ExecutableType": "cmd"
   },
   {
@@ -22,7 +22,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5001_share_text\\share_text.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5001_share_text\\share_text.py"
   },
   {
     "type": "Command",
@@ -30,7 +30,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py"
   },
   {
     "type": "Command",
@@ -38,7 +38,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py"
   },
   {
     "type": "Command",
@@ -46,7 +46,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5005_GameARR\\GameARR.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5005_GameARR\\GameARR.py"
   },
   {
     "type": "Command",
@@ -54,7 +54,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5006_Run_Commands\\Run_Commands.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5006_Run_Commands\\Run_Commands.py"
   },
   {
     "type": "Command",
@@ -62,7 +62,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5007_Controlby_Android\\Android_Control_PC.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5007_Controlby_Android\\Android_Control_PC.py"
   },
   {
     "type": "Command",
@@ -70,7 +70,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py"
   },
   {
     "type": "Command",
@@ -78,7 +78,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5009_MCQ\\app.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5009_MCQ\\app.py"
   },
   {
     "type": "Command",
@@ -86,7 +86,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py"
   },
   {
     "type": "Command",
@@ -94,13 +94,13 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\scripts\\clipboard.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\clipboard.py"
   },
   {
     "type": "Command",
     "name": "Komorebi",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\komorebi.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\komorebi.ahk"
     ],
     "Command": ""
   },
@@ -108,7 +108,7 @@
     "type": "Command",
     "name": "mypygui",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\mypygui.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\mypygui.ahk"
     ],
     "Command": ""
   },
@@ -116,7 +116,7 @@
     "type": "Command",
     "name": "Open WebUI",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\openwebui.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\openwebui.ahk"
     ],
     "Command": ""
   },
@@ -124,7 +124,7 @@
     "type": "Command",
     "name": "Remote Control",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\remote_control.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\remote_control.ahk"
     ],
     "Command": ""
   },
@@ -132,7 +132,7 @@
     "type": "Command",
     "name": "Square-Corner",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\square_corner.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\square_corner.ahk"
     ],
     "Command": ""
   },
@@ -140,7 +140,7 @@
     "type": "Command",
     "name": "SSHD",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\sshd.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\sshd.ahk"
     ],
     "Command": ""
   },
@@ -148,7 +148,7 @@
     "type": "Command",
     "name": "Sync",
     "paths": [
-      "C:\\ms1\\scripts\\sync.ps1"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\sync.ps1"
     ],
     "Command": ""
   },
@@ -156,7 +156,7 @@
     "type": "Command",
     "name": "Syncthing",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\syncthing.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\syncthing.ahk"
     ],
     "Command": ""
   },
@@ -164,7 +164,7 @@
     "type": "Command",
     "name": "Virtual_Monitor",
     "paths": [
-      "C:\\ms1\\scripts\\Autohtokey\\Command\\virtual_monitor.ahk"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\virtual_monitor.ahk"
     ],
     "Command": ""
   },
@@ -172,7 +172,7 @@
     "type": "Command",
     "name": "Disable Defender",
     "paths": [
-      "C:\\ms1\\scripts\\disable_defender.ps1"
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\disable_defender.ps1"
     ],
     "Command": ""
   },
@@ -319,7 +319,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\ms1\\myhome\\app.py",
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\myhome\\app.py",
     "ExecutableType": "pythonw"
   },
   {

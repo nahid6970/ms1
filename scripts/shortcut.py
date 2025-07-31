@@ -117,7 +117,7 @@ for i, (command_name, lbl_text, style_name) in enumerate(labels):
     label.grid(row=row, column=column, padx=(0, 0), pady=(0, 0), sticky="ew")
     label.bind("<Enter>", on_enter)
     label.bind("<Leave>", on_leave)
-    label.bind("<Button-1>", lambda e, c=command_name: subprocess.Popen(["powershell", f"python c:/ms1/HotKeys.py {c}"]))
+    label.bind("<Button-1>", lambda e, c=command_name: subprocess.Popen(["powershell", f"python C:/Users/nahid/ms/ms1/HotKeys.py {c}"]))
 
     # Configure row and column weights
     vscode_window.grid_columnconfigure(column, weight=1)

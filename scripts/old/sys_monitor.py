@@ -168,7 +168,7 @@ get_net_speed.upload_speed_last = 0
 get_net_speed.download_speed_last = 0
 
 def git_sync(event=None):
-    subprocess.Popen(["powershell", "C:\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\ms1\\scripts\\Github\\ms2u.ps1"])
+    subprocess.Popen(["powershell", "C:\\Users\\nahid\\ms\\ms1\\scripts\\Github\\ms1u.ps1 ; C:\\Users\\nahid\\ms\\ms1\\scripts\\Github\\ms2u.ps1"])
 
 #! Github status
 def check_git_status(git_path, status_label):
@@ -194,7 +194,7 @@ def update_status():
         # Update the status every second
         time.sleep(1)
 def extra_bar(event=None):
-    subprocess.Popen(["powershell", "start-process", "C:\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
+    subprocess.Popen(["powershell", "start-process", "C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\bar_1.py", "-WindowStyle", "Hidden"])
 
 BOX_ROW_ROOT = tk.Frame(ROOT, bg="#1d2027")
 BOX_ROW_ROOT.pack(side="right", anchor="ne", pady=(2,2),padx=(3,1))
@@ -331,7 +331,7 @@ update_cpu_core_bars()
 
 
 def rclone_sync(event=None):
-    subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\sync.ps1"])
+    subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\sync.ps1"])
 def windows_terminal(even=None):
     subprocess.Popen(["wt"])
 def powertoys_ruler(event=None):

@@ -4,7 +4,7 @@ import tkinter as tk
 import filecmp
 
 import sys
-sys.path.append('C:/ms1/')
+sys.path.append('C:/Users/nahid/ms/ms1/')
 from functionlist import *
 
 

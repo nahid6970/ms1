@@ -27,7 +27,7 @@ def generate_static_html():
     """Generate static HTML file with embedded CSS and JS"""
     try:
         # Run the generate_static.py script from current directory
-        result = subprocess.run(['pythonw', r'C:\ms1\myhome\generate_static.py'], 
+        result = subprocess.run(['pythonw', r'C:\Users\nahid\ms\ms1\myhome\generate_static.py'], 
                               capture_output=True, text=True, cwd='.', 
                               encoding='utf-8', errors='replace')
         if result.returncode == 0:
@@ -101,7 +101,7 @@ def manual_generate_static():
     """Manual endpoint to generate static HTML"""
     try:
         generate_static_html()
-        return jsonify({'message': 'Static HTML generated successfully', 'file': r'C:\ms1\myhome\myhome.html'})
+        return jsonify({'message': 'Static HTML generated successfully', 'file': r'C:\Users\nahid\ms\ms1\myhome\myhome.html'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

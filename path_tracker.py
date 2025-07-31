@@ -237,7 +237,7 @@ class PathTrackerGUI:
         folder_frame.columnconfigure(1, weight=1)
         
         # Quick select dropdown
-        self.quick_folders = ["c:/ms1/", "c:/msBackups/"]
+        self.quick_folders = ["C:/Users/nahid/ms/ms1/", "c:/msBackups/"]
         self.quick_select = ttk.Combobox(folder_frame, values=self.quick_folders, width=15, state="readonly")
         self.quick_select.grid(row=0, column=0, padx=(0, 5))
         self.quick_select.bind('<<ComboboxSelected>>', self.on_quick_select)

@@ -21,7 +21,7 @@ def kill_process(process_name):
 
 def start_python_st():
     """Starts Python with a specific script, keeping the terminal open for errors."""
-    subprocess.Popen(['python', 'C:\\ms1\\mypygui.py']) # Simple way to run, might not keep terminal open
+    subprocess.Popen(['python', 'C:\\Users\\nahid\\ms\\ms1\\mypygui.py']) # Simple way to run, might not keep terminal open
 
 def restart_explorer():
     """Restarts explorer.exe."""
@@ -140,10 +140,10 @@ def create_control_panel_without_tab_border():
 
     def start_flask_scripts_silently():
         scripts = [
-            r"C:\ms1\flask\Browse_PC_Files\Browse_PC_Files.py",
-            r"C:\ms1\flask\GameARR\SeperateFiles\GameARR.py",
-            r"C:\ms1\flask\share_text\share_text.py",
-            r"C:\ms1\flask\upload_files.py",
+            r"C:\Users\nahid\ms\ms1\flask\Browse_PC_Files\Browse_PC_Files.py",
+            r"C:\Users\nahid\ms\ms1\flask\GameARR\SeperateFiles\GameARR.py",
+            r"C:\Users\nahid\ms\ms1\flask\share_text\share_text.py",
+            r"C:\Users\nahid\ms\ms1\flask\upload_files.py",
         ]
         for script in scripts:
             subprocess.Popen(
@@ -178,11 +178,11 @@ def create_control_panel_without_tab_border():
 
     crosshair_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     crosshair_button.grid(row=0, column=1, padx=5, pady=5)
-    crosshair_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\xy\\XY_CroosHair.py", hide=True))
+    crosshair_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_CroosHair.py", hide=True))
 
     locker_button = tk.Label(ROW_3, text="", width=2, bg="#31ffc1", fg="#eb3d30", relief="solid", borderwidth=1, font=medium_font)
     locker_button.grid(row=0, column=2, padx=5, pady=5)
-    locker_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\Locker.py", hide=True))
+    locker_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\Locker.py", hide=True))
 
     # AHK-Scripts Section
     BOX_4 = tk.Frame(main_tab, bg="#555555")
@@ -197,7 +197,7 @@ def create_control_panel_without_tab_border():
 
     uia_v2_button = tk.Label(BOX_4, text="UIA-V2", width=20, bg="#32ec44", fg="black", font=default_font)
     uia_v2_button.grid(row=3, column=2, padx=5, pady=5)
-    uia_v2_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\ms1\\scripts\\Autohtokey\\UIA_v2\\Lib\\UIA.ahk", hide=True)))
+    uia_v2_button.bind("<Button-1>", lambda event: (root.destroy(), run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\UIA_v2\\Lib\\UIA.ahk", hide=True)))
 
     # Python Section
     python_label = tk.Label(BOX_4, text="Python", width=20, relief="solid", borderwidth=1, font=default_font)
@@ -205,7 +205,7 @@ def create_control_panel_without_tab_border():
 
     mypygui_h_button = tk.Label(BOX_4, text="mypygui-H", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_h_button.grid(row=5, column=1, padx=5, pady=5)
-    mypygui_h_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\mypygui.py", hide=True))
+    mypygui_h_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\mypygui.py", hide=True))
 
     mypygui_s_button = tk.Label(BOX_4, text="mypygui-S", width=20, bg="#32ec44", fg="black", font=default_font)
     mypygui_s_button.grid(row=5, column=2, padx=5, pady=5)
@@ -219,23 +219,23 @@ def create_control_panel_without_tab_border():
     # FFmpeg Scripts Section
     ffmpeg_trim_button = tk.Label(ffmpeg_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     ffmpeg_trim_button.grid(row=0, column=0, padx=5, pady=5)
-    ffmpeg_trim_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\ffmpeg\\trim.ps1", hide=False))
+    ffmpeg_trim_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\trim.ps1", hide=False))
 
     ffmpeg_convert_button = tk.Label(ffmpeg_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     ffmpeg_convert_button.grid(row=0, column=1, padx=5, pady=5)
-    ffmpeg_convert_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\ffmpeg\\convert.ps1", hide=False))
+    ffmpeg_convert_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\convert.ps1", hide=False))
 
     ffmpeg_merge_button = tk.Label(ffmpeg_tab, text="󰕩", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     ffmpeg_merge_button.grid(row=0, column=2, padx=5, pady=5)
-    ffmpeg_merge_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\ffmpeg\\merge.ps1", hide=False))
+    ffmpeg_merge_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\merge.ps1", hide=False))
 
     ffmpeg_vid_dim_button = tk.Label(ffmpeg_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     ffmpeg_vid_dim_button.grid(row=0, column=3, padx=5, pady=5)
-    ffmpeg_vid_dim_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\ffmpeg\\vid_dim.ps1", hide=False))
+    ffmpeg_vid_dim_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\vid_dim.ps1", hide=False))
 
     ffmpeg_img_dim_button = tk.Label(ffmpeg_tab, text="", width=2, bg="#31ffc1", fg="#000000", relief="solid", borderwidth=1, font=medium_font)
     ffmpeg_img_dim_button.grid(row=0, column=4, padx=5, pady=5)
-    ffmpeg_img_dim_button.bind("<Button-1>", lambda event: run_script("C:\\ms1\\scripts\\ffmpeg\\img_dim.ps1", hide=False))
+    ffmpeg_img_dim_button.bind("<Button-1>", lambda event: run_script("C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\img_dim.ps1", hide=False))
 
     notebook.add(ffmpeg_tab, text="ffmpeg")
 

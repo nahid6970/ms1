@@ -73,7 +73,7 @@ def main():
     elif args.action=='powertoys_TextExtract'    :global_shortcut ("win+shift+t"         )
     elif args.action=='capture2text'             :global_shortcut ("win+ctrl+alt+shift+q")
     elif args.action=='x_mouse_enable'           :global_shortcut ("ctrl+alt+F1"         )
-    elif args.action=='kill_process'             :subprocess.Popen(["powershell", "start-process", "C:/ms1/utility//kill_process.ps1", "-WindowStyle", "Normal"],shell=True)
+    elif args.action=='kill_process'             :subprocess.Popen(["powershell", "start-process", "C:/Users/nahid/ms/ms1/utility//kill_process.ps1", "-WindowStyle", "Normal"],shell=True)
 
     else:
         print("Invalid action")
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
 
 # def rclone_sync():
-#     subprocess.Popen(["powershell", "start", "C:\\ms1\\scripts\\sync.ps1"])
+#     subprocess.Popen(["powershell", "start", "C:\\Users\\nahid\\ms\\ms1\\scripts\\sync.ps1"])
 
 # def windows_terminal():
 #     subprocess.Popen(["wt"])

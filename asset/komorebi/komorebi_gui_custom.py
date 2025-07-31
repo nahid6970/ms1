@@ -7,7 +7,7 @@ import os
 ctk.set_appearance_mode("System")  # Modes: "System" (default), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (default), "dark-blue", "green"
 
-KOMOREBI_JSON_PATH = "C:/ms1/asset/komorebi/komorebi.json"
+KOMOREBI_JSON_PATH = "C:/Users/nahid/ms/ms1/asset/komorebi/komorebi.json"
 
 class AddEditDialog(ctk.CTkToplevel):
     def __init__(self, master, item_type, item_data=None, *, font=None):

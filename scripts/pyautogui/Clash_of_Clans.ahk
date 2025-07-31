@@ -1,5 +1,5 @@
 #Requires AutoHotkey v2.0
-#include C:\ms1\scripts\Autohtokey\UIA_v2\Lib\UIA.ahk
+#include C:\Users\nahid\ms\ms1\scripts\Autohtokey\UIA_v2\Lib\UIA.ahk
 
 #HotIf WinActive("ahk_exe dnplayer.exe",)
 

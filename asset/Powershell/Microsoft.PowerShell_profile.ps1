@@ -644,8 +644,8 @@ Set-PSReadLineKeyHandler -Chord 'Alt+x' `
 
 #* Environmental Variable
 $env:PATH += ";c:\ms1"
-$env:PATH += ";c:\ms1\scripts"
-$env:PATH += ";C:\ms1\utility"
+$env:PATH += ";C:\Users\nahid\ms\ms1\scripts"
+$env:PATH += ";C:\Users\nahid\ms\ms1\utility"
 # $env:PATH += ";D:\binutils-gdb\ld"
 
 function killme  {
@@ -655,18 +655,18 @@ Stop-Process -Name "chrome"
 }
 
 function chat {
-  Set-Location "C:\ms1\ollama-chat-app"
+  Set-Location "C:\Users\nahid\ms\ms1\ollama-chat-app"
   python server.py
 }
 
-function yy { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_install.ps1" }
-function nay { pwsh -c "C:\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
+function yy { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\scoop_install.ps1" }
+function nay { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\scoop_uninstall.ps1" }
 
-function ww { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install.ps1" }
-function yayw2 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
-function nayw { pwsh -c "C:\ms1\scripts\winget_scoop\wget_install2.ps1" }
-function yaywn1 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_n_install.ps1" }
-function yaywn2 { pwsh -c "C:\ms1\scripts\winget_scoop\wget_n_install2.ps1" }
+function ww { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_install.ps1" }
+function yayw2 { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function nayw { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_install2.ps1" }
+function yaywn1 { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_n_install.ps1" }
+function yaywn2 { pwsh -c "C:\Users\nahid\ms\ms1\scripts\winget_scoop\wget_n_install2.ps1" }
 
 
 # PsExec.exe this will only work through remote not in real terminal
@@ -767,8 +767,8 @@ function killp  {
 #     Write-Output $filteredOutput
 # }
 
-# Import-Module -Name C:\ms1\asset\Powershell\pwsh_AutinHistory.ps1
-# Import-Module -Name C:\ms1\asset\Powershell\pwsh_Polyfill.ps1
+# Import-Module -Name C:\Users\nahid\ms\ms1\asset\Powershell\pwsh_AutinHistory.ps1
+# Import-Module -Name C:\Users\nahid\ms\ms1\asset\Powershell\pwsh_Polyfill.ps1
 
 #* Enable Zoxide at the end of the script to work
 #f45873b3-b655-43a6-b217-97c00aa0db58 PowerToys CommandNotFound module
@@ -819,9 +819,9 @@ function killp  {
 
 New-Item -Path Function:e -Value { explorer . } -Force | Out-Null
 New-Item -Path Function:lse -Value { eza -al --color=always --group-directories-first } -Force | Out-Null
-New-Item -Path Function:pk -Value { C:\WINDOWS\SYSTEM32\cmd.exe /c start powershell -ExecutionPolicy Bypass -File "C:\ms1\kp.ps1" } -Force | Out-Null
+New-Item -Path Function:pk -Value { C:\WINDOWS\SYSTEM32\cmd.exe /c start powershell -ExecutionPolicy Bypass -File "C:\Users\nahid\ms\ms1\kp.ps1" } -Force | Out-Null
 Set-Alias time date
-New-Item -Path Function:ms1 -Value  { Set-Location c:\ms1\ } -Force | Out-Null
+New-Item -Path Function:ms1 -Value  { Set-Location C:\Users\nahid\ms\ms1\ } -Force | Out-Null
 New-Item -Path Function:ms2 -Value  { Set-Location c:\ms2\ } -Force | Out-Null
 New-Item -Path Function:ms3 -Value  { Set-Location c:\ms3\ } -Force | Out-Null
 # New-Item -Path Function:yt -Value {yt-dlp} -Force | Out-Null
@@ -834,9 +834,9 @@ New-Item -Path Function:trim -Value { C:\Users\nahid\OneDrive\Git\ms1\scripts\ff
 # function scoop_install_fzf { winget search  "" | fzf --multi --preview 'scoop info {1}' | ForEach-Object { scoop install $_.split()[0] } }
 # function scoop_uninstall_fzf { scoop list  "" | fzf --multi --preview 'scoop show {1}' | ForEach-Object { scoop uninstall $_.split()[0] } }
 
-Set-Alias trim C:\ms1\scripts\ffmpeg\trim.ps1
+Set-Alias trim C:\Users\nahid\ms\ms1\scripts\ffmpeg\trim.ps1
 
-# function sync { c:\ms1\sync.ps1 }
+# function sync { C:\Users\nahid\ms\ms1\sync.ps1 }
 
 # function prowlarr_stop { Stop-Process -Name prowlarr }
 # function prowlarr      { Start-Process -FilePath "C:\ProgramData\Prowlarr\bin\Prowlarr.exe" }
@@ -888,7 +888,7 @@ function pkill {
 }
 
 # $env:GEMINI_API_KEY = "AIzaSyD3tpmHrTXFJGAvL7N055Qz1b4ZRUX6yJM"
-$ENV:STARSHIP_CONFIG = "C:\ms1\linux\config\.config\starship\starship.toml"
+$ENV:STARSHIP_CONFIG = "C:\Users\nahid\ms\ms1\linux\config\.config\starship\starship.toml"
 $env:OLLAMA_HOST = "http://localhost:11434"
 
 

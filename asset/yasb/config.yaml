@@ -63,7 +63,7 @@ widgets:
     type: "yasb.performance.bar_cpu_gpu.CustomWidget"
     options:
       callbacks:
-        on_left: "exec powershell Start C:/ms1/utility/kill_process.ps1"
+        on_left: "exec powershell Start C:/Users/nahid/ms/ms1/utility/kill_process.ps1"
         on_right: "exec cmd /c Taskmgr"
 
 
@@ -524,7 +524,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec cmd /c python C:\\ms1\\scripts\\HotKeys.py powertoys_TextExtract"
+  #       on_left: "exec cmd /c python C:\\Users\\nahid\\ms\\ms1\\scripts\\HotKeys.py powertoys_TextExtract"
   #       on_right: "do_nothing"
 
   # PowerToys_Screen_Ruler:
@@ -536,7 +536,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec cmd /c python C:\\ms1\\scripts\\HotKeys.py powertoys_ruler"
+  #       on_left: "exec cmd /c python C:\\Users\\nahid\\ms\\ms1\\scripts\\HotKeys.py powertoys_ruler"
   #       on_right: "do_nothing"
 
   # PowerToys_Color_Picker:
@@ -548,7 +548,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec cmd /c python C:\\ms1\\scripts\\HotKeys.py powertoys_color_picker"
+  #       on_left: "exec cmd /c python C:\\Users\\nahid\\ms\\ms1\\scripts\\HotKeys.py powertoys_color_picker"
   #       on_right: "do_nothing"
 
   # PowerToys:
@@ -563,8 +563,8 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec powershell C:/ms1/scripts/mypygui_import/app_store.py"
-  #       on_right: "exec powershell C:/ms1/scripts/mypygui_import/applist.py"
+  #       on_left: "exec powershell C:/Users/nahid/ms/ms1/scripts/mypygui_import/app_store.py"
+  #       on_right: "exec powershell C:/Users/nahid/ms/ms1/scripts/mypygui_import/applist.py"
 
   # Browser:
   #   type: "yasb.Browser.Browser"
@@ -586,7 +586,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec C:/ms1/scripts/mypygui_import/folder.py"
+  #       on_left: "exec C:/Users/nahid/ms/ms1/scripts/mypygui_import/folder.py"
   #       on_right: "exec explorer.exe"
 
 
@@ -599,8 +599,8 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec C:\\ms1\\scripts\\color\\color_picker.py"
-  #       on_right: "exec C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
+  #       on_left: "exec C:\\Users\\nahid\\ms\\ms1\\scripts\\color\\color_picker.py"
+  #       on_right: "exec C:\\Users\\nahid\\ms\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
 
   # position:
   #   type: "yasb.position.Position_Widget"
@@ -611,8 +611,8 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec C:\\ms1\\utility\\position_x_y.py"
-  #       on_right: "exec code C:\\ms1\\utility\\position_x_y.py"
+  #       on_left: "exec C:\\Users\\nahid\\ms\\ms1\\utility\\position_x_y.py"
+  #       on_right: "exec code C:\\Users\\nahid\\ms\\ms1\\utility\\position_x_y.py"
 
   # desktop:
   #   type: "yasb.desktop.CustomWidget"
@@ -623,7 +623,7 @@ widgets:
   #     exec_options:
   #       run_once: true
   #     callbacks:
-  #       on_left: "exec C:\\ms1\\desktop_icon.py"
+  #       on_left: "exec C:\\Users\\nahid\\ms\\ms1\\desktop_icon.py"
   #       on_right: "do_nothing"
 
     # CPU_Histo:

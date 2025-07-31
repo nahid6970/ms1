@@ -332,7 +332,7 @@ def close_window(event=None):
     # Close the current window
     ROOT.destroy()
     # Start the specified script
-    script_path = r"C:\ms1\SH3\sf3_AHK.py"
+    script_path = r"C:\Users\nahid\ms\ms1\SH3\sf3_AHK.py"
     subprocess.Popen([sys.executable, script_path])
 
 """
@@ -364,7 +364,7 @@ def fame_items_handler(window):
             elif any(find_image(image, region=contF_Region) for image in continueF): press_keys_with_delays(window, 'c', 2, "e", 0)
 
             # elif any(find_image(image) for image in notifyF):
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
             #     time.sleep(60)
 
             time.sleep(2)
@@ -462,13 +462,13 @@ def event_function_Main():
 
                 # # Check if the no_currency image is found
                 # elif any(find_image(image) for image in notifyF):
-                #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
                 #     time.sleep(60)
 
                 # # Check if the no_currency image is found
                 # elif find_image(r'C:\msBackups\shadowfight3\notify\no_currency.png', confidence=0.8):
                 #     # Run the whatsapp.py script
-                #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
                 #     # Wait for 1 minute
                 #     time.sleep(60)
 
@@ -580,7 +580,7 @@ def raid_items_handler(window):
             elif any(find_image(image) for image in continueF): press_key(window, 'c')
 
             # elif any(find_image(image) for image in notifyF):
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
             #     time.sleep(60)
 
             time.sleep(0.05)
@@ -808,7 +808,7 @@ ACTION_3.pack(padx=(1,1), pady=(1,1))
 #* ██║     ██║   ██║██║╚██╔╝██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║       ██║   ██║██║   ██║   ██║
 #* ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║ ╚═╝ ██║███████╗██║ ╚████║   ██║       ╚██████╔╝╚██████╔╝   ██║
 #*  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝        ╚═════╝  ╚═════╝    ╚═╝
-file_path = r"C:\ms1\scripts\shadowFight3\shadowFight3.py"  # Path to your script file
+file_path = r"C:\Users\nahid\ms\ms1\scripts\shadowFight3\shadowFight3.py"  # Path to your script file
 # Generalized function to toggle comments on specified line number
 def toggle_comment(line_number, button):
     with open(file_path, 'r', encoding='utf-8') as f:

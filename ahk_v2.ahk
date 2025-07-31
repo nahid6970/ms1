@@ -5,13 +5,13 @@
 Persistent
 
 ;! v2 startups
-#Include C:\ms1\scripts\Autohtokey\version2\tray.ahk
-#Include C:\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
-#Include C:\ms1\scripts\pyautogui\Clash_of_Clans.ahk
-#Include C:\ms1\scripts\Autohtokey\math.ahk
+#Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\tray.ahk
+#Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
+#Include C:\Users\nahid\ms\ms1\scripts\pyautogui\Clash_of_Clans.ahk
+#Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\math.ahk
 
 ;! v1 startups
-; Run("C:\ms1\scripts\ahk\old\shadowFight3.ahk")
+; Run("C:\Users\nahid\ms\ms1\scripts\ahk\old\shadowFight3.ahk")
 ; Run("control.exe folders")
 
 ;! AHK Related
@@ -30,7 +30,7 @@ Persistent
 
 
 
-!Space::Run("C:\ms1\Run_v2.py", , "Show")
+!Space::Run("C:\Users\nahid\ms\ms1\Run_v2.py", , "Show")
 !x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
 
 
@@ -40,19 +40,19 @@ RAlt & Numpad2::Run("C:\msBackups\Display\DisplaySwitch.exe /external", "", "Hid
 RAlt & Numpad3::Run("C:\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
 
 ;! gui
-!b::Run("C:\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
-; !u::Run("C:\ms1\scripts\Autohtokey\version2\gui\Ultimate_Gui.ahk", "", "Hide")
-!u::Run("C:\ms1\Ultimate_Gui.py", "", "Hide")
+!b::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
+; !u::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Ultimate_Gui.ahk", "", "Hide")
+!u::Run("C:\Users\nahid\ms\ms1\Ultimate_Gui.py", "", "Hide")
 
 ;! shortcuts
-^!n::Run("C:\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
-!1::Run("C:\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
-RAlt & -::Run("C:\ms1\scripts\Autohtokey\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
-RAlt & Space::Run("C:\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
+^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
+!1::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
+RAlt & -::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
+RAlt & Space::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
-#x::Run("C:\ms1\mypygui.py", , "Hide")
-#s::Run("C:\ms1\startup.py", , "Hide")
-^+m::Run("C:\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
+#x::Run("C:\Users\nahid\ms\ms1\mypygui.py", , "Hide")
+#s::Run("C:\Users\nahid\ms\ms1\startup.py", , "Hide")
+^+m::Run("C:\Users\nahid\ms\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 
 ;! text
 ::;v1:: {#}Requires AutoHotkey v1.0

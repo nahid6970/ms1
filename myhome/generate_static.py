@@ -29,12 +29,12 @@ def generate_static_html():
     """Generate static HTML file with embedded CSS and JS"""
     
     # Read the template HTML
-    template_html = read_file(r'C:\ms1\myhome\templates\index.html')
+    template_html = read_file(r'C:\Users\nahid\ms\ms1\myhome\templates\index.html')
     
     # Read CSS and JS files
-    css_content = read_file(r'C:\ms1\myhome\static\style.css')
-    main_js_content = read_file(r'C:\ms1\myhome\static\main.js')
-    links_handler_js_content = read_file(r'C:\ms1\myhome\static\links-handler.js')
+    css_content = read_file(r'C:\Users\nahid\ms\ms1\myhome\static\style.css')
+    main_js_content = read_file(r'C:\Users\nahid\ms\ms1\myhome\static\main.js')
+    links_handler_js_content = read_file(r'C:\Users\nahid\ms\ms1\myhome\static\links-handler.js')
     
     # Read the data
     links_data = read_data()
@@ -167,7 +167,7 @@ def generate_static_html():
 </html>"""
 
     # Write the static HTML file
-    with open(r'C:\ms1\myhome\myhome.html', 'w', encoding='utf-8') as f:
+    with open(r'C:\Users\nahid\ms\ms1\myhome\myhome.html', 'w', encoding='utf-8') as f:
         f.write(static_html)
     
     print(f"[SUCCESS] Static HTML generated successfully: myhome.html")

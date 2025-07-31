@@ -86,7 +86,7 @@ bar:
 
     - type: "text"
       text: "E" 
-      left_click_command: "exec C:\\ms1\\scripts\\mypygui_import\\edit_files.py"
+      left_click_command: "exec C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\edit_files.py"
       background: "#3c97ff"
       foreground: "#000000"
       margin: 1 1
@@ -112,7 +112,7 @@ bar:
 
     # - type: "text"
     #   text: "Sync" 
-    #   left_click_command: "exec 'C://ms1//sync.ps1'"
+    #   left_click_command: "exec 'C://Users//nahid//ms//ms1//sync.ps1'"
     #   background: "#005900"
     #   foreground: "#fff"
     #   margin: 0 2 # Moves it left on top of the previous component

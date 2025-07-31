@@ -170,7 +170,7 @@ $menu = [ordered]@{
                 Write-Host 'Setting up Neovim...'
                 $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim
                 $su Remove-Item -Force -Recurse -Verbose C:\Users\nahid\AppData\Local\nvim-data
-                $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\ms1\asset\linux\neovim\init.lua -Force
+                $su New-Item -ItemType SymbolicLink -Path C:\Users\nahid\AppData\Local\nvim\init.lua -Target C:\Users\nahid\ms\ms1\asset\linux\neovim\init.lua -Force
             "
         }
         "Notepad++ Theme Setup" = {
@@ -181,7 +181,7 @@ $menu = [ordered]@{
         }
         "PotPlayer Register" = {
             nw_pwsh -Command "
-                Start-Process 'C:\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
+                Start-Process 'C:\Users\nahid\ms\ms1\asset\potplayer\PotPlayerMini64.reg' -Verbose
             "
         }
     }

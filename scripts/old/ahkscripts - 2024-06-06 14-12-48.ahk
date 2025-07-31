@@ -12,9 +12,9 @@
 ~Esc & q::KillForeground()
 
 ;;* Start Apps / Scripts
-#x::RunWait, C:\ms1\mypygui.py ,,Hide                                                  ;* mypygui
-!y::RunWait, python.exe C:\ms1\yasb\main.py,,Hide                                      ;* yasb
-!r::RunWait, python.exe C:\ms1\running_apps.py,,Hide                                   ;* running apps
+#x::RunWait, C:\Users\nahid\ms\ms1\mypygui.py ,,Hide                                                  ;* mypygui
+!y::RunWait, python.exe C:\Users\nahid\ms\ms1\yasb\main.py,,Hide                                      ;* yasb
+!r::RunWait, python.exe C:\Users\nahid\ms\ms1\running_apps.py,,Hide                                   ;* running apps
 !o::RunWait, C:\Users\nahid\scoop\apps\whkd\current\whkd.exe,,Hide                     ;* whkd
 !g::RunWait, C:\Users\nahid\scoop\apps\glazewm\current\GlazeWM.exe,,Hide               ;* GlazeWM
 !x::RunWait, pwsh -Command "cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs",,Hide ;* cmd as admin

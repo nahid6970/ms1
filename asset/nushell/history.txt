@@ -47,18 +47,18 @@ goto
 cls
 g
 cls
-C:\ms1\kp.ps1
-C:/ms1/kp.ps1
-C:\ms1\mypygui.py
+C:\Users\nahid\ms\ms1\kp.ps1
+C:/Users/nahid/ms/ms1/kp.ps1
+C:\Users\nahid\ms\ms1\mypygui.py
 cls
-python C:\ms1\mypygui.py
+python C:\Users\nahid\ms\ms1\mypygui.py
 cls
-C:\ms1\kill_processes.nu
-nu C:\ms1\kill_processes.nu
+C:\Users\nahid\ms\ms1\kill_processes.nu
+nu C:\Users\nahid\ms\ms1\kill_processes.nu
 cls
-nu C:\ms1\kill_processes.nu
-powershell C:\ms1\kp.ps1
-p C:\ms1\kp.ps1
+nu C:\Users\nahid\ms\ms1\kill_processes.nu
+powershell C:\Users\nahid\ms\ms1\kp.ps1
+p C:\Users\nahid\ms\ms1\kp.ps1
 nvim
 emacs
 cls
@@ -77,13 +77,13 @@ start https://google.com
 rclone ndu d:
 ms1
 cls
-cd C:\ms1\
+cd C:\Users\nahid\ms\ms1\
 ls
 ms1
 ls
 ms1
 ls
-cd C:\ms1\
+cd C:\Users\nahid\ms\ms1\
 ls
 ms1
 ls

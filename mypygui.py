@@ -501,13 +501,13 @@ uptime_label.pack(side="left",padx=(0,5),pady=(1,0))
 OS_LB = tk.Label(ROOT1,text="OS", bg="#1d2027", fg="#59e3a7", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 OS_LB.pack(side="left", padx=(0, 0), pady=(0, 0))
 OS_LB.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\dotnet\net9.0\simple-csharp-project.exe"], shell=True))
-OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\ms1\test_project\C#\Program.cs'))
-OS_LB.bind( "<Button-3>", lambda event=None: subprocess.Popen( r'cmd /c start dotnet run', cwd=r'C:\ms1\test_project\C#\\' ))
+OS_LB.bind("<Control-Button-1>",lambda event=None:subprocess.Popen(r'cmd /c code C:\Users\nahid\ms\ms1\test_project\C#\Program.cs'))
+OS_LB.bind( "<Button-3>", lambda event=None: subprocess.Popen( r'cmd /c start dotnet run', cwd=r'C:\Users\nahid\ms\ms1\test_project\C#\\' ))
 
 Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Update.pack(side="left",padx=(0,0),pady=(1,0))
-Update.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\update.ps1"], shell=True))
-Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\update.ps1"], shell=True))
+Update.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"], shell=True))
+Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\update.ps1"], shell=True))
 
 # Update=CTkLabel(ROOT1, text="\uf01b", bg_color="#1d2027",text_color="#16a2ff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 # Update.pack(side="left",padx=(0,0),pady=(1,0))
@@ -516,83 +516,83 @@ Update.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\
 
 Tools_bt=CTkLabel(ROOT1, text="\ueb51", bg_color="#1d2027",text_color="#ffffff", corner_radius=5, anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Tools_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
-Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
+Tools_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
+Tools_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\tools.py"], shell=True))
 
 Startup_bt=CTkLabel(ROOT1, text="\uf4cc", bg_color="#1d2027",text_color="#10b153", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 Startup_bt.pack(side="left",padx=(2,0),pady=(1,0))
-Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c C:\ms1\startup\startup.py"], shell=True))
-Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\ms1\startup\startup.py"], shell=True))
+Startup_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c C:\Users\nahid\ms\ms1\startup\startup.py"], shell=True))
+Startup_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\Users\nahid\ms\ms1\startup\startup.py"], shell=True))
 
 
 # ProcessPRLS_bt=CTkLabel(ROOT1, text="\uf4bc", bg_color="#1d2027",text_color="#f04410", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 # ProcessPRLS_bt.pack(side="left",padx=(10,0),pady=(1,0))
-# ProcessPRLS_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
-# ProcessPRLS_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
+# ProcessPRLS_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
+# ProcessPRLS_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\ProcessPRLS.py"], shell=True))
 
 AppManagement_bt=CTkLabel(ROOT1, text="\uf40e", bg_color="#1d2027",text_color="#26b2f3", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 AppManagement_bt.pack(side="left",padx=(10,0),pady=(1,0))
-AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start c:\ms1\Applist\applist.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code c:\ms1\Applist\applist.py"], shell=True))
-AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
-AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
+AppManagement_bt.bind("<Button-1>",lambda event:subprocess.Popen([r"cmd /c start C:\Users\nahid\ms\ms1\Applist\applist.py"], shell=True))
+AppManagement_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen([r"cmd /c code C:\Users\nahid\ms\ms1\Applist\applist.py"], shell=True))
+AppManagement_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
+AppManagement_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\app_store.py"], shell=True))
 
 Rclone_bt=CTkLabel(ROOT1, text="\uef2c", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#fcfcfc")
 Rclone_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Rclone_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\ms1\\rclone_Script.py"], shell=True))
-Rclone_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\rclone_Script.py"], shell=True))
+Rclone_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\rclone_Script.py"], shell=True))
+Rclone_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\rclone_Script.py"], shell=True))
 
 Folder_bt=CTkLabel(ROOT1, text="\ueaf7", font=("JetBrainsMono NFP",25,"bold"), anchor="w", bg_color="#1d2027",text_color="#ffd900")
 Folder_bt.pack(side="left",padx=(10,0),pady=(1,0))
-Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
-Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
+Folder_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
+Folder_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\folder.py"], shell=True))
 
 # ScriptList_bt=CTkLabel(ROOT1, text="\uf03a", bg_color="#1d2027",text_color="#e0a04c", anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 # ScriptList_bt.pack(side="left",padx=(10,0),pady=(1,0))
-# ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
-# ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
+# ScriptList_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
+# ScriptList_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\mypygui_import\\script_list.py"], shell=True))
 
 # ShortcutBar1=tk.Label(ROOT1, text="\udb80\udfa4",bg="#1d2027",fg="#ed4231",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 # ShortcutBar1.pack(side="left",padx=(3,0),pady=(0,0))
-# ShortcutBar1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
-# ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\python\\bar_1.py"], shell=True))
+# ShortcutBar1.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\bar_1.py"], shell=True))
+# ShortcutBar1.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\python\\bar_1.py"], shell=True))
 
 # ShortcutBar2=CTkLabel(ROOT1, text="\udb80\udf11", bg_color="#1d2027",text_color="#d4d654", anchor="w",font=("JetBrainsMono NFP",25,"bold"))
 # ShortcutBar2.pack(side="left",padx=(5,0),pady=(1,0))
-# ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\shortcut.py"], shell=True))
-# ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\shortcut.py"], shell=True))
+# ShortcutBar2.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\shortcut.py"], shell=True))
+# ShortcutBar2.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\shortcut.py"], shell=True))
 
 # PositionXY_bt=tk.Label(ROOT1, text="\udb83\ude51",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w", font=("JetBrainsMono NFP",16,"bold"))
 # PositionXY_bt.pack(side="left",padx=(3,0),pady=(0,0))
-# PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_FULL.py"], shell=True))
-# PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_FULL.py"],shell=True))
-# PositionXY_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_APP.py"], shell=True))
-# PositionXY_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_APP.py"],shell=True))
+# PositionXY_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_FULL.py"], shell=True))
+# PositionXY_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_FULL.py"],shell=True))
+# PositionXY_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_APP.py"], shell=True))
+# PositionXY_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_APP.py"],shell=True))
 
 PositionXY_CrossHair_bt=tk.Label(ROOT1, text="\uf05b",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 PositionXY_CrossHair_bt.pack(side="left",padx=(3,0),pady=(0,0))
-PositionXY_CrossHair_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_CroosHair.py"], shell=True))
-PositionXY_CrossHair_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_CroosHair.py"],shell=True))
-PositionXY_CrossHair_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"], shell=True))
-PositionXY_CrossHair_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"],shell=True))
+PositionXY_CrossHair_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_CroosHair.py"], shell=True))
+PositionXY_CrossHair_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_CroosHair.py"],shell=True))
+PositionXY_CrossHair_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"], shell=True))
+PositionXY_CrossHair_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\xy\\XY_CroosHairGemini.py"],shell=True))
 
 ColorTool_bt=tk.Label(ROOT1, text="\ue22b",bg="#1d2027",fg="#c588fd",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",16,"bold"))
 ColorTool_bt.pack(side="left",padx=(3,0),pady=(0,0))
-ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\color\\color_picker.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\color\\color_picker.py"],shell=True))
-ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
-ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
+ColorTool_bt.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\color\\color_picker.py"], shell=True))
+ColorTool_bt.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\color\\color_picker.py"],shell=True))
+ColorTool_bt.bind("<Button-3>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"], shell=True))
+ColorTool_bt.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"],shell=True))
 
 Info_lb=tk.Label(ROOT1, text="\udb80\udefc",bg="#1d2027",fg="#ffffff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",20,"bold"))
 Info_lb.pack(side="left",padx=(3,3),pady=(0,0))
-Info_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\info.py"], shell=True))
-Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\info.py"], shell=True))
+Info_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\info.py"], shell=True))
+Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\info.py"], shell=True))
 # Info_lb.bind("<Button-1>",lambda event:get_active_window_info())
 
 # wifi_reboot_lb=tk.Label(ROOT1, text="\udb85\udec4",bg="#1d2027",fg="#3ac0ff",height=0,width=0,relief="flat",anchor="w",font=("JetBrainsMono NFP",18,"bold"))
 # wifi_reboot_lb.pack(side="left",padx=(3,3),pady=(0,0))
-# wifi_reboot_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\ms1\\scripts\\Autohtokey\\UIA_v2\\wifi_reboot.ahk"], shell=True))
-# wifi_reboot_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\Autohtokey\\UIA_v2\\wifi_reboot.ahk"], shell=True))
+# wifi_reboot_lb.bind("<Button-1>",lambda event:subprocess.Popen(["cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\UIA_v2\\wifi_reboot.ahk"], shell=True))
+# wifi_reboot_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\UIA_v2\\wifi_reboot.ahk"], shell=True))
 
 # LockBox_lb = tk.Label(ROOT1, bg="#1d2027", fg="#ff0000", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 # LockBox_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
@@ -600,27 +600,27 @@ Info_lb.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:
 
 VirtualMonitor_lb = tk.Label(ROOT1,text="2nd", bg="#1d2027", fg="#8ab9ff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 VirtualMonitor_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-VirtualMonitor_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\ms1\\scripts\\2nd_Monitor.py'))
-VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\ms1\\scripts\\2nd_Monitor.py'))
+VirtualMonitor_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c C:\\Users\\nahid\\ms\\ms1\\scripts\\2nd_Monitor.py'))
+VirtualMonitor_lb.bind("<Control-Button-1>",lambda event=None:subprocess.Popen('cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\2nd_Monitor.py'))
 
 ShadowFight3_lb = tk.Label(ROOT1,text="sf3", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ShadowFight3_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-# ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\SH3\\SH3V2.py'))
-ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\ms1\scripts\pyautogui\sf3_Lcpu.py'))
-ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\scripts\pyautogui\sf3_Lcpu.py'))
-ShadowFight3_lb.bind( "<Button-3>", lambda event=None: run_command(r'python C:\ms1\scripts\pyautogui\sf3_Hcpu.py'))
-ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command(r'code C:\ms1\scripts\pyautogui\sf3_Hcpu.py'))
+# ShadowFight3_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\Users\\nahid\\ms\\ms1\\SH3\\SH3V2.py'))
+ShadowFight3_lb.bind( "<Button-1>", lambda event=None: run_command(r'python C:\Users\nahid\ms\ms1\scripts\pyautogui\sf3_Lcpu.py'))
+ShadowFight3_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\Users\nahid\ms\ms1\scripts\pyautogui\sf3_Lcpu.py'))
+ShadowFight3_lb.bind( "<Button-3>", lambda event=None: run_command(r'python C:\Users\nahid\ms\ms1\scripts\pyautogui\sf3_Hcpu.py'))
+ShadowFight3_lb.bind("<Control-Button-3>",lambda event=None: run_command(r'code C:\Users\nahid\ms\ms1\scripts\pyautogui\sf3_Hcpu.py'))
 
 ollama_lb = tk.Label(ROOT1,text="ollama", bg="#1d2027", fg="#ffffff", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 ollama_lb.pack(side="left", padx=(0, 0), pady=(0, 0))
-ollama_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\test_project\\ollama-chat-app\\kill_port_8000.py'))
-ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
-ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\test_project\ollama-chat-app\server.py'))
+ollama_lb.bind("<Button-1>",lambda event=None:subprocess.Popen('cmd /c start C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\kill_port_8000.py'))
+ollama_lb.bind("<Button-3>",lambda event=None:subprocess.Popen('cmd /c start C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1'))
+ollama_lb.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\Users\nahid\ms\ms1\test_project\ollama-chat-app\server.py'))
 
 path_replace = tk.Label(ROOT1,text="PathR", bg="#1d2027", fg="#86ff45", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 path_replace.pack(side="left", padx=(0, 0), pady=(0, 0))
-path_replace.bind("<Button-1>",lambda event=None:subprocess.Popen(r'cmd /c C:\ms1\path_tracker.py'))
-path_replace.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\path_tracker.py'))
+path_replace.bind("<Button-1>",lambda event=None:subprocess.Popen(r'cmd /c C:\Users\nahid\ms\ms1\path_tracker.py'))
+path_replace.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\Users\nahid\ms\ms1\path_tracker.py'))
 
 Automation = tk.Label(ROOT1, text="AutoM", bg="#1d2027", fg="#ffab2d",
                       height=0, width=0, relief="flat", highlightthickness=0,
@@ -629,12 +629,12 @@ Automation = tk.Label(ROOT1, text="AutoM", bg="#1d2027", fg="#ffab2d",
 Automation.pack(side="left", padx=(0, 0), pady=(0, 0))
 Automation.bind("<Button-1>", lambda event=None: subprocess.Popen(
     r'cmd /c game_automation_tool.py',
-    cwd=r'C:\ms1\test_project\Automation',
+    cwd=r'C:\Users\nahid\ms\ms1\test_project\Automation',
     shell=True
 ))
 Automation.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
     r'code game_automation_tool.py',
-    cwd=r'C:\ms1\test_project\Automation',
+    cwd=r'C:\Users\nahid\ms\ms1\test_project\Automation',
     shell=True
 ))
 
@@ -645,12 +645,12 @@ KomoBT = tk.Label(ROOT1, text="KOMO", bg="#1d2027", fg="#8319f5",
 KomoBT.pack(side="left", padx=(0, 0), pady=(0, 0))
 KomoBT.bind("<Button-1>", lambda event=None: subprocess.Popen(
     r'cmd /c komorebi_gui_custom.py',
-    cwd=r'C:\ms1\asset\komorebi',
+    cwd=r'C:\Users\nahid\ms\ms1\asset\komorebi',
     shell=True
 ))
 KomoBT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
     r'code komorebi_gui_custom.py',
-    cwd=r'C:\ms1\asset\komorebi',
+    cwd=r'C:\Users\nahid\ms\ms1\asset\komorebi',
     shell=True
 ))
 
@@ -668,7 +668,7 @@ KomoBT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
 #     Trim_bt          =tk.Button(BoxForFFmpeg,text="Trim"          ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_trim        ); Trim_bt.pack          (side="left",padx=(0,0))
 #     Convert_bt       =tk.Button(BoxForFFmpeg,text="Convert"       ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_convert     ); Convert_bt.pack       (side="left",padx=(0,0))
 #     Dimension_bt     =tk.Button(BoxForFFmpeg,text="Dimension"     ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_dimension   ); Dimension_bt.pack     (side="left",padx=(0,0))
-#     Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
+#     Imagedimension_bt=tk.Button(BoxForFFmpeg,text="Imagedimension",width=0,fg="#FFFFFF",bg="#1D2027", command=lambda: subprocess.Popen(["cmd /c start C:\\Users\\nahid\\ms\\ms1\\scripts\\ffmpeg\\imgdim.ps1"], shell=True)) ; Imagedimension_bt.pack(side="left",padx=(0,0))
 #     Merge_bt         =tk.Button(BoxForFFmpeg,text="Merge"         ,width=0,fg="#FFFFFF",bg="#1D2027",command=start_merge       ); Merge_bt.pack         (side="left",padx=(0,0))
 # ffmpeg(FR_FFmpeg)
 
@@ -737,9 +737,9 @@ KomoBT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
 # BACK=tk.Button(BOX,text="\ueb6f",width=0 ,bg="#1d2027", fg="#ffffff", command=lambda:switch_to_frame(MAIN_FRAME,EDIT_FRAME))
 # BACK.pack(side="left" ,padx=(0,0))
 # def Folder(EDIT_FRAME):
-#     MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\mypygui.py"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+#     MYPYGUI=tk.Button(BOX,text="MYPYGUI",width=0 ,fg="#ffffff", bg="#204892", command=lambda:(subprocess.Popen(["cmd /c Code C:\\Users\\nahid\\ms\\ms1\\mypygui.py"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
 #     MYPYGUI.pack(side="left" ,padx=(0,0))
-#     AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#020202", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\ms1\\ahk_v2.ahk"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
+#     AHKEDIT=tk.Button(BOX,text="AHKSCRIPT",width=0 ,fg="#020202", bg="#5f925f", command=lambda:(subprocess.Popen(["cmd /c Code C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
 #     AHKEDIT.pack(side="left" ,padx=(0,0))
 #     KOMOREBIC=tk.Button(BOX,text="Komoreb",width=0 ,fg="#080808", bg="#7fc8f3", command=lambda:(subprocess.Popen(["cmd /c Code C:\\Users\\nahid\\komorebi.json"],shell=True), switch_to_frame(MAIN_FRAME,EDIT_FRAME)))
 #     KOMOREBIC.pack(side="left" ,padx=(0,0))
@@ -804,7 +804,7 @@ SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 # Define your repositories here
 queue = Queue()
 repos = [
-    {"name": "ms1", "path": "C:\\ms1", "label": "ms1"},
+    {"name": "ms1", "path": "C:\\Users\\nahid\\ms\\ms1", "label": "ms1"},
     # {"name": "ms2", "path": "C:\\ms2", "label": "2"},
     # {"name": "ms3", "path": "C:\\ms3", "label": "3"},
     # Add more as needed
@@ -953,7 +953,7 @@ commands = {
     },
     "ms1": {
         "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
-        "src": "C:/ms1/",
+        "src": "C:/Users/nahid/ms/ms1/",
         "dst": "o0:/ms1/",
         "log": "C:/test/ms1_check.log",
         "label": "ms1",
@@ -1043,7 +1043,7 @@ create_gui()
 
 # ms1_rclone_o0 = tk.Label(ROOT1,text="ms1", bg="#1d2027", fg="#cc5907", height=0, width=0, relief="flat", highlightthickness=0, highlightbackground="#ffffff", anchor="w", font=("JetBrainsMono NFP", 16, "bold"))
 # ms1_rclone_o0.pack(side="left", padx=(0, 0), pady=(0, 0))
-# ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/ms1/ o0:/ms1/ --exclude ".git/**" --exclude "__pycache__/**" -P --fast-list' ))
+# ms1_rclone_o0.bind( "<Button-1>", lambda event=None: run_command( r'rclone sync C:/Users/nahid/ms/ms1/ o0:/ms1/ --exclude ".git/**" --exclude "__pycache__/**" -P --fast-list' ))
 
 
 #! ██████╗ ██╗ ██████╗ ██╗  ██╗████████╗
@@ -1149,12 +1149,12 @@ Upload_lb.bind("<Button-1>",None)
 
 LB_CPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#1b8af1",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_CPU.pack(side="left",padx=(3,0 ),pady=(0,0))
-LB_CPU.bind( "<Button-1>", lambda event=None: run_command(r'python C:\ms1\scripts\killprocess.py'))
-LB_CPU.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\ms1\scripts\killprocess.py'))
-# LB_CPU.bind("<Button-1>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\ms1\scripts\pk.ps1"], shell=True))
-# LB_CPU.bind("<Button-3>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\ms1\scripts\pk2.ps1"], shell=True))
-# LB_CPU.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\pk.ps1"], shell=True))
-# LB_CPU.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\ms1\\scripts\\pk2.ps1"], shell=True))
+LB_CPU.bind( "<Button-1>", lambda event=None: run_command(r'python C:\Users\nahid\ms\ms1\scripts\killprocess.py'))
+LB_CPU.bind("<Control-Button-1>",lambda event=None: run_command(r'code C:\Users\nahid\ms\ms1\scripts\killprocess.py'))
+# LB_CPU.bind("<Button-1>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\Users\nahid\ms\ms1\scripts\pk.ps1"], shell=True))
+# LB_CPU.bind("<Button-3>", lambda event: subprocess.Popen( [r"C:\WINDOWS\SYSTEM32\cmd.exe", "/c", "start" ,"powershell", "-ExecutionPolicy", "Bypass", "-File", r"C:\Users\nahid\ms\ms1\scripts\pk2.ps1"], shell=True))
+# LB_CPU.bind("<Control-Button-1>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\pk.ps1"], shell=True))
+# LB_CPU.bind("<Control-Button-3>",lambda event:subprocess.Popen(["cmd /c code C:\\Users\\nahid\\ms\\ms1\\scripts\\pk2.ps1"], shell=True))
 
 LB_GPU=tk.Label(ROOT2,bg="#000000",fg="#FFFFFF",height=0,width =5,relief="flat",highlightthickness=1,highlightbackground="#00ff21",anchor ="center",font=("JetBrainsMono NFP",10,"bold"),text="")
 LB_GPU.pack(side="left",padx=(3,0 ),pady=(0,0))

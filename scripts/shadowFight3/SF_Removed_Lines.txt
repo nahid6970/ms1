@@ -293,13 +293,13 @@ Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 
                     # # Check if the no_currency image is found
                     # elif any(find_image(image) for image in notifyF):
-                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                    #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
                     #     time.sleep(60)
 
                     # # Check if the no_currency image is found
                     # elif find_image(r'C:\msBackups\shadowfight3\notify\no_currency.png', confidence=0.8):
                     #     # Run the whatsapp.py script
-                    #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+                    #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
                     #     # Wait for 1 minute
                     #     time.sleep(60)
 					
@@ -313,5 +313,5 @@ Event_w_Ads_BT.pack(side="left", padx=(1, 1), pady=(1, 1))
 #? ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═════╝ ╚══════╝
 
             # elif any(find_image(image) for image in notifyF):
-            #     subprocess.run(['python', r'C:\ms1\SH3\whatsapp.py'])
+            #     subprocess.run(['python', r'C:\Users\nahid\ms\ms1\SH3\whatsapp.py'])
             #     time.sleep(60)
