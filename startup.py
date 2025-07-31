@@ -53,7 +53,7 @@ class StartupManager(tk.Tk):
 # {"type": "Command","name": "NetworkCondition" ,"paths": "Start-Process 'C:\\Users\\nahid\\ms\\ms1\\scripts\\NetworkCondition.ps1' -WindowStyle Hidden"},
 # {"type": "Command","name": "Scheduled_Task"   ,"paths": "C:\\Users\\nahid\\ms\\ms1\\scripts\\scheduled.ps1"},
 
-# {"type": "Command","name": "ahk_v1"           ,"paths": r"C:\Users\nahid\ms\ms1\ahk_v1.ahk"},
+# {"type": "Command","name": "ahk_v1"           ,"paths": r"C:\Users\nahid\ms\ms1\scripts\@old\ahk_v1.ahk"},
 # {"type": "Command","name": "MONITOR_SIZE"     ,"paths": "Start-Process 'powershell.exe' -ArgumentList '-File C:\\Users\\nahid\\ms\\ms1\\scripts\\monitor_size.ps1' -Verb RunAs -WindowStyle Hidden"},
 # {"type": "Command","name": "Bazarr"           ,"paths": "Start-Process -FilePath 'C:\\ProgramData\\Bazarr\\WinPython\\python-3.10.0\\python.exe' -ArgumentList 'C:\\ProgramData\\Bazarr\\bazarr.py' -WindowStyle Hidden"},
 # {"type": "Command","name": "Flaresolverr"     ,"paths": "Start-Process 'C:\\Users\\nahid\\scoop\\apps\\flaresolverr\\current\\flaresolverr.exe' -WindowStyle Hidden"},
