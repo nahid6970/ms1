@@ -805,6 +805,7 @@ SEPARATOR.pack(side="left",padx=(3,0),pady=(0,0))
 queue = Queue()
 repos = [
     {"name": "ms1", "path": "C:\\Users\\nahid\\ms\\ms1", "label": "ms1"},
+    {"name": "test", "path": "C:\\Users\\nahid\\ms\\test", "label": "test"},
     # {"name": "ms2", "path": "C:\\ms2", "label": "2"},
     # {"name": "ms3", "path": "C:\\ms3", "label": "3"},
     # Add more as needed
