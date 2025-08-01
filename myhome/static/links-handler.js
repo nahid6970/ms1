@@ -1090,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (draggedElement !== this) {
       const targetIndex = parseInt(this.dataset.linkIndex);
-      swapLinks(draggedIndex, targetIndex);
+      reorderLink(draggedIndex, targetIndex);
     }
     return false;
   }
@@ -1128,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Swap with target
       const targetLinkIndex = groupLinks[targetGroupIndex].index;
-      await swapLinks(linkIndex, targetLinkIndex);
+      reorderLink(linkIndex, targetLinkIndex);
       
     } catch (error) {
       console.error('Error moving link:', error);
@@ -1185,36 +1185,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Swap two links by their indices
-  async function swapLinks(index1, index2) {
+  // Reorder a link by moving it from oldIndex to newIndex
+  async function reorderLink(oldIndex, newIndex) {
     try {
+      // Ensure we have the latest links data
       const response = await fetch('/api/links');
-      const links = await response.json();
-      
-      // Swap the links
-      [links[index1], links[index2]] = [links[index2], links[index1]];
-      
-      // Update both links
-      await fetch(`/api/links/${index1}`, {
+      let currentLinks = await response.json();
+
+      // Remove the dragged link from its original position
+      const [draggedLink] = currentLinks.splice(oldIndex, 1);
+
+      // Insert the dragged link at the new position
+      currentLinks.splice(newIndex, 0, draggedLink);
+
+      // Update the entire list of links on the server
+      await fetch('/api/links', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(links[index1]),
+        body: JSON.stringify(currentLinks),
       });
-      
-      await fetch(`/api/links/${index2}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(links[index2]),
-      });
-      
-      fetchAndDisplayLinks();
-      
+
+      fetchAndDisplayLinks(); // Re-render the UI
+
     } catch (error) {
-      console.error('Error swapping links:', error);
+      console.error('Error reordering link:', error);
     }
   }
 });
