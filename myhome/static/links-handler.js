@@ -59,23 +59,23 @@ document.addEventListener('DOMContentLoaded', function() {
         let linkContent;
 
         if (link.default_type === 'nerd-font' && link.icon_class) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
         } else if (link.default_type === 'img' && link.img_src) {
           const width = link.width || '50';
           const height = link.height || '50';
-          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+          linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
         } else if (link.default_type === 'text' && link.text) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.text}</a>`;
         } else {
           // Fallback if default_type is not set or doesn't match available content
           if (link.icon_class) {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
           } else if (link.img_src) {
             const width = link.width || '50';
             const height = link.height || '50';
-            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+            linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
           } else {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.name}</a>`;
           }
         }
 
