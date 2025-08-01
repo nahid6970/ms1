@@ -5,7 +5,8 @@
   "description": "A dedicated extension for taking notes on websites.",
   "permissions": [
     "storage",
-    "scripting"
+    "scripting",
+    "downloads"
   ],
   "host_permissions": [
     "<all_urls>"
