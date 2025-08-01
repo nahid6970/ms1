@@ -1025,14 +1025,37 @@ document.addEventListener('DOMContentLoaded', function() {
   const flexContainer2 = document.querySelector('.flex-container2');
 
   if (editModeToggle && flexContainer2) {
-    editModeToggle.addEventListener('change', function() {
+    editModeToggle.addEventListener('change', async function() {
+      const expandedGroups = [];
+      // Capture currently expanded groups before re-rendering
+      document.querySelectorAll('.collapsible-group.expanded').forEach(group => {
+        expandedGroups.push(group.dataset.groupName);
+      });
+
       if (this.checked) {
         flexContainer2.classList.add('edit-mode');
       } else {
         flexContainer2.classList.remove('edit-mode');
       }
+      
       // Refresh the display when edit mode is toggled to show/hide items
-      fetchAndDisplayLinks();
+      await fetchAndDisplayLinks();
+
+      // Re-expand previously expanded groups
+      expandedGroups.forEach(groupName => {
+        const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+        if (groupElement) {
+          const content = groupElement.querySelector('.collapsible-group-content');
+          const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+          if (content && toggleBtn) {
+            content.classList.add('expanded');
+            toggleBtn.textContent = '▲';
+            groupElement.classList.add('expanded');
+            // Move to expanded row if it's a collapsible group
+            moveToExpandedRow(groupElement);
+          }
+        }
+      });
     });
   }
 
