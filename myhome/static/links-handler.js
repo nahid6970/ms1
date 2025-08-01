@@ -790,29 +790,10 @@ document.addEventListener('DOMContentLoaded', function() {
             delete updatedLink.top_name;
           }
           
-          if (topBgColor && topBgColor !== '') {
-            updatedLink.top_bg_color = topBgColor;
-          } else {
-            delete updatedLink.top_bg_color;
-          }
-          
-          if (topTextColor && topTextColor !== '') {
-            updatedLink.top_text_color = topTextColor;
-          } else {
-            delete updatedLink.top_text_color;
-          }
-          
-          if (topBorderColor && topBorderColor !== '') {
-            updatedLink.top_border_color = topBorderColor;
-          } else {
-            delete updatedLink.top_border_color;
-          }
-          
-          if (topHoverColor && topHoverColor !== '') {
-            updatedLink.top_hover_color = topHoverColor;
-          } else {
-            delete updatedLink.top_hover_color;
-          }
+          updatedLink.top_bg_color = topBgColor || '#2d2d2d';
+          updatedLink.top_text_color = topTextColor || '#ffffff';
+          updatedLink.top_border_color = topBorderColor || '#444444';
+          updatedLink.top_hover_color = topHoverColor || '#3a3a3a';
           
           return updatedLink;
         }
@@ -945,12 +926,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 hidden: document.getElementById('edit-link-hidden').checked || undefined,
             };
 
-            // Clean up empty strings and false values for optional fields
-            Object.keys(updatedLink).forEach(key => {
-                if (updatedLink[key] === '' || updatedLink[key] === false) {
-                    delete updatedLink[key];
-                }
-            });
+            // Preserve group-level properties if not explicitly changed in link edit
+            const originalLink = links[linkId];
+            if (originalLink) {
+                updatedLink.collapsible = originalLink.collapsible;
+                updatedLink.display_style = originalLink.display_style;
+                updatedLink.top_name = originalLink.top_name;
+                updatedLink.top_bg_color = originalLink.top_bg_color;
+                updatedLink.top_text_color = originalLink.top_text_color;
+                updatedLink.top_border_color = originalLink.top_border_color;
+                updatedLink.top_hover_color = originalLink.top_hover_color;
+            }
 
             try {
                 const response = await fetch(`/api/links/${linkId}`, {

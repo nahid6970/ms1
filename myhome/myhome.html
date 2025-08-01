@@ -1300,16 +1300,16 @@ div.toggle-container {
     "url": "https://absurdlysuspicious.github.io/wayland-protocols-table/"
   },
   {
-    "collapsible": true,
-    "default_type": "nerd-font",
-    "display_style": "flex",
-    "group": "info / News",
     "name": "diyabari milestone school & college \ud83c\udfaf proshikhon biman blast // 21 july // Chengdu F-7BGI (Combat Jet)",
+    "group": "info / News",
+    "url": "http://example.com",
+    "default_type": "nerd-font",
+    "collapsible": true,
+    "display_style": "flex",
     "top_bg_color": "#fff",
-    "top_border_color": "#fff",
-    "top_hover_color": "#fff",
     "top_text_color": "#000",
-    "url": "http://example.com"
+    "top_border_color": "#fff",
+    "top_hover_color": "#fff"
   },
   {
     "collapsible": true,
@@ -1611,23 +1611,23 @@ document.addEventListener('keydown', (event) => {
         let linkContent;
 
         if (link.default_type === 'nerd-font' && link.icon_class) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
         } else if (link.default_type === 'img' && link.img_src) {
           const width = link.width || '50';
           const height = link.height || '50';
-          linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+          linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
         } else if (link.default_type === 'text' && link.text) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.text}</a>`;
+          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.text}</a>`;
         } else {
           // Fallback if default_type is not set or doesn't match available content
           if (link.icon_class) {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}><i class="${link.icon_class}"></i></a>`;
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
           } else if (link.img_src) {
             const width = link.width || '50';
             const height = link.height || '50';
-            linkContent = `<a href="${link.url}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+            linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
           } else {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" ${link.title ? `title="${link.title}"` : ''}>${link.name}</a>`;
+            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.name}</a>`;
           }
         }
 
@@ -2342,29 +2342,10 @@ document.addEventListener('keydown', (event) => {
             delete updatedLink.top_name;
           }
           
-          if (topBgColor && topBgColor !== '') {
-            updatedLink.top_bg_color = topBgColor;
-          } else {
-            delete updatedLink.top_bg_color;
-          }
-          
-          if (topTextColor && topTextColor !== '') {
-            updatedLink.top_text_color = topTextColor;
-          } else {
-            delete updatedLink.top_text_color;
-          }
-          
-          if (topBorderColor && topBorderColor !== '') {
-            updatedLink.top_border_color = topBorderColor;
-          } else {
-            delete updatedLink.top_border_color;
-          }
-          
-          if (topHoverColor && topHoverColor !== '') {
-            updatedLink.top_hover_color = topHoverColor;
-          } else {
-            delete updatedLink.top_hover_color;
-          }
+          updatedLink.top_bg_color = topBgColor || '#2d2d2d';
+          updatedLink.top_text_color = topTextColor || '#ffffff';
+          updatedLink.top_border_color = topBorderColor || '#444444';
+          updatedLink.top_hover_color = topHoverColor || '#3a3a3a';
           
           return updatedLink;
         }
@@ -2497,12 +2478,17 @@ document.addEventListener('keydown', (event) => {
                 hidden: document.getElementById('edit-link-hidden').checked || undefined,
             };
 
-            // Clean up empty strings and false values for optional fields
-            Object.keys(updatedLink).forEach(key => {
-                if (updatedLink[key] === '' || updatedLink[key] === false) {
-                    delete updatedLink[key];
-                }
-            });
+            // Preserve group-level properties if not explicitly changed in link edit
+            const originalLink = links[linkId];
+            if (originalLink) {
+                updatedLink.collapsible = originalLink.collapsible;
+                updatedLink.display_style = originalLink.display_style;
+                updatedLink.top_name = originalLink.top_name;
+                updatedLink.top_bg_color = originalLink.top_bg_color;
+                updatedLink.top_text_color = originalLink.top_text_color;
+                updatedLink.top_border_color = originalLink.top_border_color;
+                updatedLink.top_hover_color = originalLink.top_hover_color;
+            }
 
             try {
                 const response = await fetch(`/api/links/${linkId}`, {
@@ -2824,6 +2810,6 @@ setInterval(updateDateTime, 1000);
 
   </div>
   
-  <!-- Generated on 2025-08-01 15:41:48 -->
+  <!-- Generated on 2025-08-01 15:58:22 -->
 </body>
 </html>
