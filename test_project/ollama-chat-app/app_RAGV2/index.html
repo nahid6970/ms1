@@ -468,25 +468,10 @@
           
           reader.onerror = () => reject(reader.error);
           
-          // Define file extensions that should NOT show content
-          const hideContentExtensions = ['.py', '.ps1', '.html', '.txt'];
+          const textExtensions = ['.py', '.ps1', '.html', '.txt', '.md', '.json', '.js', '.css'];
           const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-          
-          if (hideContentExtensions.includes(fileExtension)) {
-            // For files you want to hide content
-            resolve({
-              name: file.name,
-              type: file.type,
-              size: file.size,
-              content: '[Content hidden for security]'
-            });
-          } else if (file.type.startsWith('text/') || 
-                    file.name.endsWith('.md') || 
-                    file.name.endsWith('.json') ||
-                    file.name.endsWith('.js') ||
-                    file.name.endsWith('.html') ||
-                    file.name.endsWith('.css') ||
-                    file.name.endsWith('.txt')) {
+
+          if (file.type.startsWith('text/') || textExtensions.includes(fileExtension)) {
             reader.readAsText(file);
           } else {
             // For binary files
@@ -538,9 +523,8 @@
         fileHeader.innerHTML = `<strong>📎 ${fileData.name}</strong> <small class="text-muted">(${formatFileSize(fileData.size)})</small>`;
         cardBody.appendChild(fileHeader);
         
-        // Only show content preview if it's not hidden and not binary
+        // Only show content preview if it's not binary
         if (fileData.content && 
-            fileData.content !== '[Content hidden for security]' && 
             fileData.content !== '[Binary file - content not displayed]') {
           const contentPreview = document.createElement("pre");
           contentPreview.style.fontSize = "0.8rem";
