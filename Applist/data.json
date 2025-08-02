@@ -266,6 +266,13 @@
         "winget_path": ""
     },
     {
+        "name": "gdu [ncdu alternative]",
+        "scoop_name": "gdu",
+        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\gdu\\current\\gdu.exe",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "git",
         "scoop_name": "git",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\git\\current\\cmd\\git.exe",
@@ -798,9 +805,9 @@
         "winget_path": ""
     },
     {
-        "name": "gdu [ncdu alternative]",
-        "scoop_name": "gdu",
-        "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\gdu\\current\\gdu.exe",
+        "name": "handbrake",
+        "scoop_name": "handbrake",
+        "scoop_path": "",
         "winget_name": "",
         "winget_path": ""
     }
