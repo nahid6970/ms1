@@ -29,6 +29,20 @@ Persistent
 }
 
 
+#HotIf WinActive("ahk_exe chrome.exe")
+; Switch to the last visited tab (most recent in history)
+switchToLastTab() {
+    Send("^+a")           ; Open Chrome's tab search  
+    Sleep(100)            ; Wait for search to open
+    Send("{Enter}")       ; Press Enter to go to first result (last visited tab)
+}
+; Use Ctrl+Tab to switch to the last tab you were on
+^Tab::switchToLastTab()
+
+#HotIf
+
+
+
 
 !Space::Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
 !x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
