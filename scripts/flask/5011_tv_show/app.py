@@ -85,7 +85,7 @@ def index():
     elif sort_by == 'year':
         shows.sort(key=lambda x: int(x['year']) if x['year'].isdigit() else 0, reverse=(order == 'desc'))
     elif sort_by == 'rating':
-        shows.sort(key=lambda x: float(x['rating']) if x['rating'] is not None else -1, reverse=(order == 'desc'))
+        shows.sort(key=lambda x: float(x.get('rating', -1)) if x.get('rating') is not None else -1, reverse=(order == 'desc'))
     elif sort_by == 'added': # Sort by ID for 'added' order
         shows.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
 
