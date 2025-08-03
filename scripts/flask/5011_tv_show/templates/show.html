@@ -15,10 +15,10 @@
             <form action="{{ url_for('add_episode', show_id=show.id) }}" method="post" style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-bottom: 10px;">
                 <input type="text" name="title" placeholder="New episode title" required style="flex-grow: 1;">
                 <button type="submit">+</button>
+                <a href="{{ url_for('scan_manual', show_id=show.id) }}" class="add-button" style="background-color: #007bff; color: white;"><i class="nf nf-oct-sync"></i></a>
             </form>
             <div style="display: flex; justify-content: center; gap: 10px;">
                 <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black;"><i class="nf nf-cod-home"></i></a>
-                <a href="{{ url_for('scan_manual', show_id=show.id) }}" class="add-button" style="background-color: #007bff; color: white;"><i class="nf nf-oct-sync"></i></a>
             </div>
         </div>
         <div class="episode-list">
