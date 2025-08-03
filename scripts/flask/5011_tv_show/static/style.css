@@ -234,6 +234,10 @@ body.modal-open {
     margin-top: 5px;
 }
 
+.show-card p.all-watched {
+    color: #1db954; /* Green color for watched shows */
+}
+
 .show-card .btn-group {
     display: flex;
     justify-content: center;
@@ -283,6 +287,20 @@ body.modal-open {
     flex: 1;
     margin-right: 20px;
     max-width: 350px;
+}
+
+.show-cover img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.episode-list {
+    flex: 2;
+    background-color: #282828;
+    padding: 20px;
+    border-radius: 5px;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .show-cover img {
