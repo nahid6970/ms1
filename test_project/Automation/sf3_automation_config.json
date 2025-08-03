@@ -141,16 +141,6 @@
                     },
                     "enabled": true,
                     "is_folder": false
-                },
-                {
-                    "type": "separator",
-                    "thickness": 10,
-                    "color": "red"
-                },
-                {
-                    "type": "separator",
-                    "thickness": 10,
-                    "color": "red"
                 }
             ],
             "enabled": true,
