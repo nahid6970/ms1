@@ -300,3 +300,7 @@ button[type="submit"] {
     border-radius: 5px;
     cursor: pointer;
 }
+
+input[type="checkbox"]:checked {
+    accent-color: #1db954; /* Green color */
+}
