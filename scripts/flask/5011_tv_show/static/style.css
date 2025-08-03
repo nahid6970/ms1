@@ -400,3 +400,37 @@ button[type="submit"] {
 input[type="checkbox"]:checked {
     accent-color: #1db954; /* Green color */
 }
+
+.rating-group {
+    margin-top: 20px;
+    margin-bottom: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rating-group label {
+    margin-right: 10px;
+}
+
+.rating-group input[type="radio"] {
+    display: none;
+}
+
+.rating-group label span {
+    padding: 8px 15px;
+    border: 1px solid #555;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #444;
+    color: white;
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+}
+
+.rating-group input[type="radio"]:checked+span {
+    background-color: gold;
+    border-color: gold;
+    color: black;
+}

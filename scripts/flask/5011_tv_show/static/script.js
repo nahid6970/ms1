@@ -17,6 +17,17 @@ async function openEditShowModal(showId) {
     document.getElementById('editShowYear').value = show.year;
     document.getElementById('editShowCoverImage').value = show.cover_image;
     document.getElementById('editShowDirectoryPath').value = show.directory_path || '';
+
+    // Set the rating radio button
+    const ratingRadios = document.querySelectorAll('#editShowModal input[name="rating"]');
+    ratingRadios.forEach(radio => {
+        if (parseInt(radio.value) === show.rating) {
+            radio.checked = true;
+        } else {
+            radio.checked = false;
+        }
+    });
+
     document.getElementById('editShowForm').action = `/edit_show/${show.id}`;
 
     document.getElementById('editShowModal').style.display = 'block';

@@ -84,6 +84,8 @@ def index():
         shows.sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
     elif sort_by == 'year':
         shows.sort(key=lambda x: int(x['year']) if x['year'].isdigit() else 0, reverse=(order == 'desc'))
+    elif sort_by == 'rating':
+        shows.sort(key=lambda x: float(x['rating']) if x['rating'] is not None else -1, reverse=(order == 'desc'))
     elif sort_by == 'added': # Sort by ID for 'added' order
         shows.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
 
@@ -109,6 +111,7 @@ def add_show():
             'year': request.form.get('year', ''),
             'cover_image': request.form.get('cover_image', ''),
             'directory_path': request.form.get('directory_path', ''),
+            'rating': request.form.get('rating', None), # Add rating field
             'episodes': []
         }
         shows.append(new_show)
@@ -127,6 +130,7 @@ def edit_show(show_id):
         show['year'] = request.form.get('year', '')
         show['cover_image'] = request.form.get('cover_image', '')
         show['directory_path'] = request.form.get('directory_path', '')
+        show['rating'] = request.form.get('rating', None) # Update rating field
         save_data(shows)
         return redirect(url_for('index'))
     else:
