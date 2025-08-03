@@ -7,8 +7,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>My TV Shows</h1>
-    <button onclick="openAddShowModal()" class="add-button">+ Add Show</button>
+    <div class="fixed-sidebar-controls">
+        <button onclick="openAddShowModal()" class="add-button"><i class="nf nf-cod-add"></i> Add Show</button>
+    </div>
+    <div class="header-container">
+        <h1>My TV Shows</h1>
+    </div>
 
     <div class="show-grid">
         {% for show in shows %}
