@@ -62,13 +62,34 @@ scheduler.start()
 
 @app.route('/')
 def index():
+    sort_by = request.args.get('sort_by', 'title')
+    order = request.args.get('order', 'asc')
+    query = request.args.get('query')
+
     shows = load_data()
+
+    # Filter shows based on query
+    if query:
+        shows = [show for show in shows if query.lower() in show['title'].lower()]
+
+    # Calculate watched and total episodes
     for show in shows:
         watched_episodes = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))
         total_episodes = len(show.get('episodes', []))
         show['watched_count'] = watched_episodes
         show['total_count'] = total_episodes
-    return render_template('index.html', shows=shows)
+
+    # Sort shows
+    if sort_by == 'title':
+        shows.sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+    elif sort_by == 'year':
+        shows.sort(key=lambda x: int(x['year']) if x['year'].isdigit() else 0, reverse=(order == 'desc'))
+    elif sort_by == 'added': # Sort by ID for 'added' order
+        shows.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
+
+    next_order = 'desc' if order == 'asc' else 'asc'
+
+    return render_template('index.html', shows=shows, sort_by=sort_by, order=order, next_order=next_order, query=query)
 
 @app.route('/show/<int:show_id>')
 def show(show_id):
