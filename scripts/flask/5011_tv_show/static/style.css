@@ -229,12 +229,19 @@ body.modal-open {
 }
 
 .show-card p:last-of-type {
-    color: #e0e0e0; /* Ensure the episode count is visible */
     font-size: 1em;
     margin-top: 5px;
 }
 
-.show-card p.all-watched {
+.show-card p.no-episodes-watched {
+    color: red;
+}
+
+.show-card p.some-episodes-watched {
+    color: yellow;
+}
+
+.show-card p.all-episodes-watched {
     color: #1db954; /* Green color for watched shows */
 }
 
