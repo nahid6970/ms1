@@ -63,6 +63,11 @@ scheduler.start()
 @app.route('/')
 def index():
     shows = load_data()
+    for show in shows:
+        watched_episodes = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))
+        total_episodes = len(show.get('episodes', []))
+        show['watched_count'] = watched_episodes
+        show['total_count'] = total_episodes
     return render_template('index.html', shows=shows)
 
 @app.route('/show/<int:show_id>')

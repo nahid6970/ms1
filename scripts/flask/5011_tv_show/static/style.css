@@ -190,6 +190,12 @@ body.modal-open {
     color: gold;
 }
 
+.show-card p:last-of-type {
+    color: #e0e0e0; /* Ensure the episode count is visible */
+    font-size: 1em;
+    margin-top: 5px;
+}
+
 .show-card .btn-group {
     display: flex;
     justify-content: center;
