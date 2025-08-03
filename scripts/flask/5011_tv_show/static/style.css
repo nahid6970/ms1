@@ -136,10 +136,20 @@ body.modal-open {
 .search-form {
     display: flex;
     gap: 10px;
+    align-items: center; /* Align items vertically in the center */
+}
+
+.search-form input[type="text"],
+.search-form .btn {
+    padding: 8px 10px; /* Consistent padding */
+    height: 38px; /* Explicit height */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    font-size: 1em; /* Consistent font size */
+    line-height: 1.2; /* Consistent line height */
+    margin: 0; /* Remove any default margins */
 }
 
 .search-form input[type="text"] {
-    padding: 8px;
     border: 1px solid #555;
     background-color: #333;
     color: #e0e0e0;
