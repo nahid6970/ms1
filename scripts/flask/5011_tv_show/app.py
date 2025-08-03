@@ -12,7 +12,8 @@ def add_header(response):
     response.headers['Expires'] = '0'
     return response
 
-DATA_FILE = 'data.json'
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DATA_FILE = os.path.join(BASE_DIR, 'data.json')
 
 def load_data():
     try:
