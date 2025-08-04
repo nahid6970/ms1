@@ -7,12 +7,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="fixed-sidebar-controls">
+    <div class="top-center-controls">
         <button onclick="openAddShowModal()" class="add-button"><i class="nf nf-cod-add"></i></button>
         <a href="{{ url_for('index') }}" class="add-button"><i class="nf nf-fa-home"></i></a>
         <button onclick="openSettingsModal()" class="add-button settings-button"><i class="nf nf-fa-cog"></i></button>
     </div>
-    
 
     <div class="controls-container">
         <form action="/" method="get" class="search-form">

@@ -7,16 +7,13 @@ body {
     text-align: center;
 }
 
-.fixed-sidebar-controls {
-    position: fixed;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+.top-center-controls {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 0;
     z-index: 100;
-    padding: 10px;
 }
 
 .header-container {
@@ -40,7 +37,9 @@ body {
     text-decoration: none;
     font-weight: bold;
     transition: transform 0.2s, background 0.2s;
-    margin-bottom: 10px; /* Add consistent spacing */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .add-button:hover {
