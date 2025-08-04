@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My TV Shows</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Apply table view immediately if enabled to prevent flash
+        if (localStorage.getItem('tableViewEnabled') === 'true') {
+            document.documentElement.classList.add('table-view-active');
+        }
+    </script>
 </head>
 <body>
     <div class="top-center-controls">

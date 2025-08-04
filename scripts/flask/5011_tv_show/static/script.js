@@ -71,22 +71,22 @@ function closeSettingsModal() {
 // Toggle Table View
 document.addEventListener('DOMContentLoaded', () => {
     const tableViewToggle = document.getElementById('tableViewToggle');
-    const body = document.body;
+    const html = document.documentElement;
 
     // Load preference from localStorage
     const isTableViewEnabled = localStorage.getItem('tableViewEnabled') === 'true';
     if (isTableViewEnabled) {
-        body.classList.add('table-view-active');
+        html.classList.add('table-view-active');
         tableViewToggle.checked = true;
     }
 
     // Save preference to localStorage on change
     tableViewToggle.addEventListener('change', () => {
         if (tableViewToggle.checked) {
-            body.classList.add('table-view-active');
+            html.classList.add('table-view-active');
             localStorage.setItem('tableViewEnabled', 'true');
         } else {
-            body.classList.remove('table-view-active');
+            html.classList.remove('table-view-active');
             localStorage.setItem('tableViewEnabled', 'false');
         }
     });
