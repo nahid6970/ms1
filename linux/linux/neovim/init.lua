@@ -256,8 +256,17 @@ wk.add({
   -- Proxy to window mappings
   { "<leader>w", proxy = "<c-w>", group = "Windows" },
 
-  -- Group for "buffers"
-  { "<leader>b", group = "Buffers", expand = function() return require("which-key.extras").expand.buf() end },
+  -- Buffer & Bookmark
+  {
+    "<leader>b",
+    group = "Buffer & Bookmark",
+    t = { function() vim.cmd('Telescope bookmarks') end, "Telescope Bookmarks" },
+    l = { function() vim.cmd("ls") end, "Buffer List" },
+    a = { function() vim.cmd("e %") end, "Add Current File to Buffer List" },
+    n = { function() vim.cmd("bnext") end, "Next Buffer" },
+    p = { function() vim.cmd("bprevious") end, "Previous Buffer" },
+    d = { function() vim.cmd("bufdo bd") end, "Delete All Buffers" },
+  },
 
   -- Comments (Nested mappings)
   {
@@ -266,18 +275,6 @@ wk.add({
     { "<leader>/l", [[i-- <Esc>]], desc = "Insert Comment" },
     { "<leader>/h", [[i<!--  --> <Esc>]], desc = "HTML Comment" },
   },
-
-  -- Bookmark
-  { "<leader>b", group = "Bookmark" },
-  { "<leader>bt", function() vim.cmd('Telescope bookmarks') end, desc = "Telescope Bookmarks" },
-  
-  -- Buffer-related actions
-  { "<leader>bb", group = "Buffers" },
-  { "<leader>bb/l", function() vim.cmd("ls") end, desc = "Buffer List" },
-  { "<leader>bb/a", function() vim.cmd("e %") end, desc = "Add Current File to Buffer List" },
-  { "<leader>bb/n", function() vim.cmd("bnext") end, desc = "Next Buffer" },
-  { "<leader>bb/p", function() vim.cmd("bprevious") end, desc = "Previous Buffer" },
-  { "<leader>bb/d", function() vim.cmd("bufdo bd") end, desc = "Delete All Buffers" },
 
   -- Commands
   { "<leader>c", group = "Command" },
