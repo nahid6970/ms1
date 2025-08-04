@@ -20,13 +20,21 @@ async function openEditShowModal(showId) {
 
     // Set the rating radio button
     const ratingRadios = document.querySelectorAll('#editShowModal input[name="rating"]');
+    
+    // First, clear all radio buttons
     ratingRadios.forEach(radio => {
-        if (parseInt(radio.value) === show.rating) {
-            radio.checked = true;
-        } else {
-            radio.checked = false;
-        }
+        radio.checked = false;
     });
+    
+    // Then set the correct one if rating exists
+    if (show.rating !== null && show.rating !== undefined && show.rating !== '') {
+        ratingRadios.forEach(radio => {
+            // Convert both values to strings for comparison to handle different data types
+            if (radio.value === String(show.rating)) {
+                radio.checked = true;
+            }
+        });
+    }
 
     document.getElementById('editShowForm').action = `/edit_show/${show.id}`;
 
