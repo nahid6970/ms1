@@ -49,6 +49,9 @@ body {
 }
 
 /* Settings button specific styles */
+/* .settings-button {
+    margin-top: 10px; /* Space between add/home buttons and settings */
+/* } */
 
 /* Modal Styles */
 .modal {
@@ -198,7 +201,10 @@ body.modal-open {
     border: 1px solid #bbb;
     flex: 0 0 auto;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    padding-bottom: 3%;
+    padding-bottom: 10px; /* Add padding to the bottom of the card */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute space to push buttons to bottom */
 }
 
 .show-card:hover {
@@ -269,8 +275,8 @@ body.modal-open {
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-top: 0px;
-    padding: 10px;
+    margin-top: 5px;
+    padding: 5px;
 }
 
 .btn {
@@ -594,6 +600,12 @@ body.table-view-active .show-card .btn-delete {
 
 /* Table header for table view */
 body.table-view-active .show-grid::before {
+    content: none; /* Remove the table headers */
+    white-space: pre;
+    text-align: center;
+}
+
+body.table-view-active .show-grid::before {
     content: ""; /* Required for pseudo-element */
     display: grid;
     grid-template-columns: 2fr 1fr 1.5fr 1fr 0.5fr 0.5fr;
@@ -607,8 +619,12 @@ body.table-view-active .show-grid::before {
     margin-bottom: 10px;
 }
 
-body.table-view-active .show-grid::before {
-    content: none; /* Remove the table headers */
-    white-space: pre;
-    text-align: center;
+.show-link-wrapper {
+    text-decoration: none;
+    color: inherit;
+    display: block; /* Default to block for grid view */
+}
+
+body.table-view-active .show-link-wrapper {
+    display: contents; /* Make children direct grid items in table view */
 }

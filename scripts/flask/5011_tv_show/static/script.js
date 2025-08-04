@@ -91,12 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add click listener for show cards in table view
+    // Add click listener for show cards
     document.querySelectorAll('.show-card').forEach(card => {
         card.addEventListener('click', (event) => {
-            // Check if the table view is active and the click wasn't on an edit/delete button
-            if (body.classList.contains('table-view-active') &&
-                !event.target.classList.contains('btn-edit') &&
+            // Check if the click wasn't on an edit/delete button
+            if (!event.target.classList.contains('btn-edit') &&
                 !event.target.classList.contains('btn-delete')) {
                 const showId = card.dataset.showId;
                 if (showId) {
