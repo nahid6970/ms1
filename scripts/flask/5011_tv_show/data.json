@@ -47,7 +47,7 @@
                 "watched": false
             }
         ],
-        "rating": null
+        "rating": "3"
     },
     {
         "id": 2,
@@ -946,7 +946,8 @@
                 "title": "NieR-Automata Ver1.1a - s01e13 - [13] - reckless bra[V]ery HDTV-1080p - [SubsPlease]",
                 "watched": false
             }
-        ]
+        ],
+        "rating": "3"
     },
     {
         "id": 15,
@@ -995,7 +996,8 @@
                 "title": "Reacher - S03E01 - Persuader WEBDL-1080p",
                 "watched": false
             }
-        ]
+        ],
+        "rating": "4"
     },
     {
         "id": 16,
@@ -1261,7 +1263,8 @@
                 "title": "The Rookie - S07E02 - The Watcher HDTV-720p",
                 "watched": false
             }
-        ]
+        ],
+        "rating": "4"
     },
     {
         "id": 20,
@@ -1295,7 +1298,8 @@
                 "title": "The Walking Dead - Dead City - S02E01 - Power Equals Power WEBDL-1080p",
                 "watched": false
             }
-        ]
+        ],
+        "rating": "3"
     },
     {
         "id": 21,
