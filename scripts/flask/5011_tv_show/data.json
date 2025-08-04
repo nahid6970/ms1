@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "title": "Once Piece",
+        "title": "One Piece",
         "year": "1999",
         "cover_image": "https://m.media-amazon.com/images/M/MV5BMTNjNGU4NTUtYmVjMy00YjRiLTkxMWUtNzZkMDNiYjZhNmViXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
         "directory_path": "D:\\Downloads\\@Sonarr\\One Piece",
@@ -47,7 +47,7 @@
                 "watched": false
             }
         ],
-        "rating": "3"
+        "rating": null
     },
     {
         "id": 2,
