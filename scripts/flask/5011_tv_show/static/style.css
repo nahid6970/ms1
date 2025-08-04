@@ -619,12 +619,14 @@ body.table-view-active .show-grid::before {
     margin-bottom: 10px;
 }
 
-.show-link-wrapper {
-    text-decoration: none;
-    color: inherit;
-    display: block; /* Default to block for grid view */
+.show-card-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 5px;
+    padding: 5px;
 }
 
-body.table-view-active .show-link-wrapper {
+body.table-view-active .show-card-buttons {
     display: contents; /* Make children direct grid items in table view */
 }
