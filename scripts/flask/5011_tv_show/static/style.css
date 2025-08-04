@@ -8,11 +8,13 @@ body {
 }
 
 .top-center-controls {
+    position: sticky;
+    top: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 15px;
-    padding: 20px 0;
+    padding: 10px 0;
     z-index: 100;
 }
 
