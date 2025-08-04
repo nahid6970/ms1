@@ -57,7 +57,7 @@ def scan_and_update_episodes():
         print("No new episodes found.")
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=scan_and_update_episodes, trigger="interval", hours=2)
+scheduler.add_job(func=scan_and_update_episodes, trigger="interval", hours=1)
 scheduler.start()
 
 @app.route('/')
