@@ -598,6 +598,27 @@ body.table-view-active .show-card .btn-delete {
     grid-column: 6; /* Delete button in sixth column */
 }
 
+/* Table header for table view */
+body.table-view-active .show-grid::before {
+    content: none; /* Remove the table headers */
+    white-space: pre;
+    text-align: center;
+}
+
+body.table-view-active .show-grid::before {
+    content: ""; /* Required for pseudo-element */
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 0.5fr 0.5fr;
+    gap: 10px;
+    padding: 10px;
+    background-color: #333;
+    border-bottom: 1px solid #555;
+    font-weight: bold;
+    color: #1db954;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
 .show-card-buttons {
     display: flex;
     justify-content: center;
@@ -608,4 +629,31 @@ body.table-view-active .show-card .btn-delete {
 
 body.table-view-active .show-card-buttons {
     display: contents; /* Make children direct grid items in table view */
+}
+
+/* New styles for form action buttons in show.html */
+.form-action-button {
+    background-color: #007bff; /* Blue color */
+    color: white;
+    padding: 8px 10px; /* Consistent padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    height: 38px; /* Match input height */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    font-size: 1em; /* Consistent font size */
+    line-height: 1.2; /* Consistent line height */
+    margin: 0; /* Remove any default margins */
+    text-decoration: none; /* For anchor tags */
+    display: flex; /* Use flex to center icon if needed */
+    align-items: center;
+    justify-content: center;
+}
+
+.form-action-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.add-episode-button:hover {
+    background-color: #158a3e; /* Green hover for add episode button */
 }
