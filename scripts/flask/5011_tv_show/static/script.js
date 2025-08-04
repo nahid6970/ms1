@@ -90,6 +90,21 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('tableViewEnabled', 'false');
         }
     });
+
+    // Add click listener for show cards in table view
+    document.querySelectorAll('.show-card').forEach(card => {
+        card.addEventListener('click', (event) => {
+            // Check if the table view is active and the click wasn't on an edit/delete button
+            if (body.classList.contains('table-view-active') &&
+                !event.target.classList.contains('btn-edit') &&
+                !event.target.classList.contains('btn-delete')) {
+                const showId = card.dataset.showId;
+                if (showId) {
+                    window.location.href = `/show/${showId}`;
+                }
+            }
+        });
+    });
 });
 
 // Close modal if user clicks outside of it

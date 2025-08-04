@@ -29,7 +29,7 @@
 
     <div class="show-grid">
         {% for show in shows %}
-            <div class="show-card">
+            <div class="show-card" data-show-id="{{ show.id }}">
                 <div class="img-wrapper">
                     <img src="{{ show.cover_image }}" alt="{{ show.title }}">
                 </div>
