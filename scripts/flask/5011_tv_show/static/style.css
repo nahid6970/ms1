@@ -40,6 +40,7 @@ body {
     text-decoration: none;
     font-weight: bold;
     transition: transform 0.2s, background 0.2s;
+    margin-bottom: 10px; /* Add consistent spacing */
 }
 
 .add-button:hover {
@@ -48,9 +49,6 @@ body {
 }
 
 /* Settings button specific styles */
-.settings-button {
-    margin-top: 10px; /* Space between add/home buttons and settings */
-}
 
 /* Modal Styles */
 .modal {
