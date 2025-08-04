@@ -57,11 +57,47 @@ function closeEditEpisodeModal() {
     document.body.classList.remove('modal-open');
 }
 
+// Settings Modal Functions
+function openSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'block';
+    document.body.classList.add('modal-open');
+}
+
+function closeSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+// Toggle Table View
+document.addEventListener('DOMContentLoaded', () => {
+    const tableViewToggle = document.getElementById('tableViewToggle');
+    const body = document.body;
+
+    // Load preference from localStorage
+    const isTableViewEnabled = localStorage.getItem('tableViewEnabled') === 'true';
+    if (isTableViewEnabled) {
+        body.classList.add('table-view-active');
+        tableViewToggle.checked = true;
+    }
+
+    // Save preference to localStorage on change
+    tableViewToggle.addEventListener('change', () => {
+        if (tableViewToggle.checked) {
+            body.classList.add('table-view-active');
+            localStorage.setItem('tableViewEnabled', 'true');
+        } else {
+            body.classList.remove('table-view-active');
+            localStorage.setItem('tableViewEnabled', 'false');
+        }
+    });
+});
+
 // Close modal if user clicks outside of it
 window.onclick = function(event) {
     const addModal = document.getElementById('addShowModal');
     const editShowModal = document.getElementById('editShowModal');
     const editEpisodeModal = document.getElementById('editEpisodeModal');
+    const settingsModal = document.getElementById('settingsModal');
 
     if (event.target == addModal) {
         addModal.style.display = 'none';
@@ -71,6 +107,9 @@ window.onclick = function(event) {
         document.body.classList.remove('modal-open');
     } else if (event.target == editEpisodeModal) {
         editEpisodeModal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    } else if (event.target == settingsModal) {
+        settingsModal.style.display = 'none';
         document.body.classList.remove('modal-open');
     }
 }

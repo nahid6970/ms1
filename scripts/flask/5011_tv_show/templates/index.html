@@ -10,6 +10,7 @@
     <div class="fixed-sidebar-controls">
         <button onclick="openAddShowModal()" class="add-button"><i class="nf nf-cod-add"></i></button>
         <a href="{{ url_for('index') }}" class="add-button"><i class="nf nf-fa-home"></i></a>
+        <button onclick="openSettingsModal()" class="add-button settings-button"><i class="nf nf-fa-cog"></i></button>
     </div>
     
 
@@ -96,6 +97,21 @@
                 </div><br>
                 <button type="submit">Save Changes</button>
             </form>
+        </div>
+    </div>
+
+    <!-- The Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSettingsModal()">&times;</span>
+            <h2>Settings</h2>
+            <div class="setting-item">
+                <label for="tableViewToggle">Table View</label>
+                <label class="switch">
+                    <input type="checkbox" id="tableViewToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
         </div>
     </div>
 
