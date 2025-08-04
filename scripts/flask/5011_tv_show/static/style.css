@@ -540,7 +540,7 @@ body.table-view-active .show-grid {
 body.table-view-active .show-card {
     width: auto; /* Take full width */
     display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Edit, Delete */
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Edit, Delete */
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -564,6 +564,7 @@ body.table-view-active .show-card h3 {
     margin: 0;
     height: auto;
     text-align: left;
+    grid-column: 1; /* Name in first column */
 }
 
 body.table-view-active .show-card p {
@@ -571,28 +572,32 @@ body.table-view-active .show-card p {
     text-align: center;
 }
 
-body.table-view-active .show-card p:last-of-type {
-    text-align: center;
+body.table-view-active .show-card p:nth-of-type(1) {
+    grid-column: 2; /* Year in second column */
 }
 
-body.table-view-active .show-card .btn-group {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    margin: 0;
-    padding: 0;
+body.table-view-active .show-card p:nth-of-type(2) {
+    grid-column: 3; /* Watched/Total in third column */
 }
 
-body.table-view-active .show-card .btn {
-    padding: 5px 8px;
-    font-size: 0.8em;
+body.table-view-active .show-card p:nth-of-type(3) {
+    grid-column: 4; /* Rating in fourth column */
+    display: block; /* Ensure rating is visible */
+}
+
+body.table-view-active .show-card .btn-edit {
+    grid-column: 5; /* Edit button in fifth column */
+}
+
+body.table-view-active .show-card .btn-delete {
+    grid-column: 6; /* Delete button in sixth column */
 }
 
 /* Table header for table view */
 body.table-view-active .show-grid::before {
     content: ""; /* Required for pseudo-element */
     display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 0.5fr 0.5fr;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 0.5fr 0.5fr;
     gap: 10px;
     padding: 10px;
     background-color: #333;
@@ -604,40 +609,7 @@ body.table-view-active .show-grid::before {
 }
 
 body.table-view-active .show-grid::before {
-    content: "Name \A Year \A Watched/Total \A Edit \A Delete";
+    content: "Name \A Year \A Watched/Total \A Rating \A Edit \A Delete";
     white-space: pre;
     text-align: center;
-}
-
-body.table-view-active .show-card > a {
-    display: contents; /* Allow children to be direct grid items */
-}
-
-body.table-view-active .show-card > a h3 {
-    grid-column: 1; /* Place title in the first column */
-}
-
-body.table-view-active .show-card > a p:nth-of-type(1) {
-    grid-column: 2; /* Place year in the second column */
-}
-
-body.table-view-active .show-card p:nth-of-type(2) {
-    grid-column: 3; /* Place watched/total in the third column */
-}
-
-body.table-view-active .show-card .btn-group {
-    grid-column: 4 / span 2; /* Place buttons in the fourth and fifth columns */
-    justify-content: space-around;
-}
-
-body.table-view-active .show-card .btn-group .btn-edit {
-    grid-column: 4;
-}
-
-body.table-view-active .show-card .btn-group .btn-delete {
-    grid-column: 5;
-}
-
-body.table-view-active .show-card p:nth-of-type(3) {
-    display: none; /* Hide rating in table view */
 }
