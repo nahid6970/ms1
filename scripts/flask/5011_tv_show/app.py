@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -43,7 +44,8 @@ def scan_and_update_episodes():
                                 new_episode = {
                                     'id': len(show['episodes']) + 1,
                                     'title': name,
-                                    'watched': False
+                                    'watched': False,
+                                    'added_date': datetime.now().isoformat()
                                 }
                                 show['episodes'].insert(0, new_episode)
                                 existing_episode_titles.add(name)
@@ -88,6 +90,24 @@ def index():
         shows.sort(key=lambda x: float(x.get('rating', -1)) if x.get('rating') is not None else -1, reverse=(order == 'desc'))
     elif sort_by == 'added': # Sort by ID for 'added' order
         shows.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
+    elif sort_by == 'last_episode': # Sort by most recent episode
+        def get_last_episode_time(show):
+            episodes = show.get('episodes', [])
+            if not episodes:
+                return datetime.min.isoformat()  # Shows with no episodes go to the end
+            
+            # Get the most recent episode (first in array since new episodes are inserted at index 0)
+            latest_episode = episodes[0]
+            
+            # Use added_date if available, otherwise fall back to a default time based on episode ID
+            if 'added_date' in latest_episode:
+                return latest_episode['added_date']
+            else:
+                # For older episodes without added_date, use episode ID as a proxy for recency
+                # Higher ID = more recent
+                return f"1970-01-01T00:00:{latest_episode['id']:06d}"
+        
+        shows.sort(key=get_last_episode_time, reverse=(order == 'desc'))
 
     next_order = 'desc' if order == 'asc' else 'asc'
 
@@ -151,7 +171,8 @@ def add_episode(show_id):
         new_episode = {
             'id': len(show['episodes']) + 1,
             'title': request.form['title'],
-            'watched': False
+            'watched': False,
+            'added_date': datetime.now().isoformat()
         }
         show['episodes'].insert(0, new_episode)
         save_data(shows)
