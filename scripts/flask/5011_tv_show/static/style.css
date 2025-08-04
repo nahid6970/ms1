@@ -543,7 +543,7 @@ body.table-view-active .show-card {
     gap: 10px;
     align-items: center;
     padding: 10px;
-    border-bottom: 1px solid #444;
+    border: 1px solid #444; /* Set all borders to #444 */
     background-color: #282828;
     margin-bottom: 5px;
 }
