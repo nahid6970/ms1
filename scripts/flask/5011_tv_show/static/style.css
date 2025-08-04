@@ -608,7 +608,7 @@ body.table-view-active .show-grid::before {
 }
 
 body.table-view-active .show-grid::before {
-    content: "Name \A Year \A Watched/Total \A Rating \A Edit \A Delete";
+    content: none; /* Remove the table headers */
     white-space: pre;
     text-align: center;
 }
