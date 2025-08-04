@@ -57,11 +57,6 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\Andor",
         "episodes": [
             {
-                "id": 13,
-                "title": "Andor - S02E12 - Jedha, Kyber, Erso WEBRip-1080p",
-                "watched": false
-            },
-            {
                 "id": 11,
                 "title": "Andor - S02E11 - Who Else Knows WEBRip-1080p",
                 "watched": false
