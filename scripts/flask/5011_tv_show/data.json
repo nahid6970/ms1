@@ -1417,5 +1417,21 @@
                 "watched": false
             }
         ]
+    },
+    {
+        "id": 24,
+        "title": "WWE Raw",
+        "year": "",
+        "cover_image": "https://artworks.thetvdb.com/banners/posters/5d99d81b72d97.jpg",
+        "directory_path": "D:\\Downloads\\@Sonarr\\WWE Raw",
+        "rating": null,
+        "episodes": [
+            {
+                "id": 1,
+                "title": "WWE Raw - 2025-08-04 - RAW 1680 HDTV-1080p",
+                "watched": true,
+                "added_date": "2025-08-05T17:11:40.597364"
+            }
+        ]
     }
 ]
