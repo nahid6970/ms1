@@ -1433,5 +1433,39 @@
                 "added_date": "2025-08-05T17:11:40.597364"
             }
         ]
+    },
+    {
+        "id": 25,
+        "title": "Wednesday",
+        "year": "2022",
+        "cover_image": "https://artworks.thetvdb.com/banners/v4/series/397060/posters/6729521e6fe2c.jpg",
+        "directory_path": "D:\\Downloads\\@Sonarr\\Wednesday",
+        "rating": "3",
+        "episodes": [
+            {
+                "id": 4,
+                "title": "Wednesday - S02E04 - If These Woes Could Talk WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T10:35:24.652821"
+            },
+            {
+                "id": 3,
+                "title": "Wednesday - S02E03 - Call of the Woe WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T10:35:24.652821"
+            },
+            {
+                "id": 2,
+                "title": "Wednesday - S02E02 - The Devil You Woe WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T10:35:24.652821"
+            },
+            {
+                "id": 1,
+                "title": "Wednesday - S02E01 - Here We Woe Again WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T10:35:24.652821"
+            }
+        ]
     }
 ]
