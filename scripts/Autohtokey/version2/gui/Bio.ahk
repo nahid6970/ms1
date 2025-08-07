@@ -22,6 +22,10 @@ myGui.Add("Text", "x+5 yp w100 +Border Center Background00CCFF", "en")         .
 myGui.Add("Text", "x+5 yp w100 +Border Center BackgroundFF6666", "bn")         .OnEvent("Click", (*) => SendText("{U+09A8}{U+09BE}{U+099C}{U+09AE}{U+09BE} {U+09AC}{U+09C7}{U+0997}{U+09AE}"))
 
 ; Address
+myGui.Add("Text", "xm y+5 w200 +Border Center BackgroundFFCC00", "Present Address").OnEvent("Click", (*) => SendText("Village/Town: AAM Tower, Flat: A-8, Giridhara Residential Area, Saddam Market, Matuail, Dhaka"))
+myGui.Add("Text", "x+5 yp w100 +Border Center Background00CCFF", "P.O")              .OnEvent("Click", (*) => SendText("Narayangonj"))
+myGui.Add("Text", "x+5 yp w100 +Border Center BackgroundFF6666", "P.C")              .OnEvent("Click", (*) => SendText("1420"))
+; Address
 myGui.Add("Text", "xm y+5 w200 +Border Center BackgroundFFCC00", "Permanent Address").OnEvent("Click", (*) => SendText("Vill:Munshibari, P.O-Radhapur, 9 No Ward, Dist-Lakshmipur Post Code: 3706"))
 myGui.Add("Text", "x+5 yp w100 +Border Center Background00CCFF", "P.O")              .OnEvent("Click", (*) => SendText("Radhapur"))
 myGui.Add("Text", "x+5 yp w100 +Border Center BackgroundFF6666", "P.C")              .OnEvent("Click", (*) => SendText("3706"))
