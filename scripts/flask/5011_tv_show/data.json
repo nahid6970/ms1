@@ -7,6 +7,12 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\One Piece",
         "episodes": [
             {
+                "id": 9,
+                "title": "One Piece - s22e54 - [1139] - Destroy Egghead - The Buster Call Is Invoked WEBDL-1080p - [Erai-raws]",
+                "watched": false,
+                "added_date": "2025-08-10T22:56:05.155822"
+            },
+            {
                 "id": 8,
                 "title": "One Piece - s22e53 - [1138] - Thank You, Dad - Bonney and Kuma's Warm Embrace WEBDL-1080p v2 - [ToonsHub]",
                 "watched": false
@@ -370,6 +376,12 @@
         "cover_image": "https://artworks.thetvdb.com/banners/series/361140/posters/5f9b1a73efeed.jpg",
         "directory_path": "D:\\Downloads\\@Sonarr\\Blood of Zeus",
         "episodes": [
+            {
+                "id": 11,
+                "title": "Blood of Zeus - S02E08 - The Three Trials WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T19:01:49.484510"
+            },
             {
                 "id": 10,
                 "title": "Blood of Zeus - S02E07 - The Hidden Realm WEBDL-1080p",
