@@ -541,7 +541,19 @@ body.modal-open {
 }
 
 .episode-title {
-    flex-grow: 1;
+    flex: 1;
+    min-width: 0; /* Allow text to truncate if needed */
+    margin-right: 15px; /* Consistent spacing from buttons */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.episode-controls {
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Consistent spacing between buttons */
 }
 
 .episode-controls a {
@@ -549,7 +561,7 @@ body.modal-open {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    margin-left: 10px;
+    flex-shrink: 0; /* Prevent individual buttons from shrinking */
 }
 
 .edit-dot {
