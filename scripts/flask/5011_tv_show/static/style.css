@@ -690,6 +690,29 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
+/* Setting Select Dropdown */
+.setting-select {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    min-width: 180px;
+    cursor: pointer;
+}
+
+.setting-select:focus {
+    outline: none;
+    border-color: #1db954;
+    box-shadow: 0 0 5px rgba(29, 185, 84, 0.3);
+}
+
+.setting-select option {
+    background-color: #333;
+    color: #e0e0e0;
+}
+
 /* Table View Styles */
 html.table-view-active .show-grid {
     display: block; /* Override flex for grid */

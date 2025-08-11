@@ -76,19 +76,24 @@ function closeSettingsModal() {
     document.body.classList.remove('modal-open');
 }
 
-// Toggle Table View
+// Toggle Table View and Default Home Page
 document.addEventListener('DOMContentLoaded', () => {
     const tableViewToggle = document.getElementById('tableViewToggle');
+    const defaultHomePageSelect = document.getElementById('defaultHomePage');
     const html = document.documentElement;
 
-    // Load preference from localStorage
+    // Load table view preference from localStorage
     const isTableViewEnabled = localStorage.getItem('tableViewEnabled') === 'true';
     if (isTableViewEnabled) {
         html.classList.add('table-view-active');
         tableViewToggle.checked = true;
     }
 
-    // Save preference to localStorage on change
+    // Load default home page preference from localStorage
+    const defaultHomePage = localStorage.getItem('defaultHomePage') || 'default';
+    defaultHomePageSelect.value = defaultHomePage;
+
+    // Save table view preference to localStorage on change
     tableViewToggle.addEventListener('change', () => {
         if (tableViewToggle.checked) {
             html.classList.add('table-view-active');
@@ -98,6 +103,22 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('tableViewEnabled', 'false');
         }
     });
+
+    // Save default home page preference to localStorage on change
+    defaultHomePageSelect.addEventListener('change', () => {
+        localStorage.setItem('defaultHomePage', defaultHomePageSelect.value);
+    });
+
+    // Check if we're on the home page without any sort parameters and redirect if needed
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSortBy = urlParams.get('sort_by');
+    const currentQuery = urlParams.get('query');
+    
+    // Only redirect if we're on the base home page (no sort_by parameter and no search query)
+    if (!currentSortBy && !currentQuery && defaultHomePage === 'last_episode') {
+        // Redirect to last episode sort
+        window.location.href = '/?sort_by=last_episode&order=desc';
+    }
 
     // Add click listener for show cards
     document.querySelectorAll('.show-card').forEach(card => {
