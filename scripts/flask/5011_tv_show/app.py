@@ -15,6 +15,7 @@ def add_header(response):
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data.json')
+ROOT_SHOWS_FOLDER = r"D:\Downloads\@Sonarr"
 
 def load_data():
     try:
@@ -26,6 +27,43 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
+
+def scan_for_missing_shows():
+    """Scan the root folder for TV show directories that aren't in the JSON file"""
+    if not os.path.exists(ROOT_SHOWS_FOLDER):
+        return []
+    
+    shows = load_data()
+    existing_paths = {show.get('directory_path', '').lower() for show in shows if show.get('directory_path')}
+    
+    missing_shows = []
+    
+    try:
+        for item in os.listdir(ROOT_SHOWS_FOLDER):
+            item_path = os.path.join(ROOT_SHOWS_FOLDER, item)
+            if os.path.isdir(item_path):
+                # Check if this directory path is already in our shows
+                if item_path.lower() not in existing_paths:
+                    # Check if the directory contains video files
+                    has_videos = False
+                    for root, _, files in os.walk(item_path):
+                        for filename in files:
+                            _, ext = os.path.splitext(filename)
+                            if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                                has_videos = True
+                                break
+                        if has_videos:
+                            break
+                    
+                    if has_videos:
+                        missing_shows.append({
+                            'folder_name': item,
+                            'full_path': item_path
+                        })
+    except Exception as e:
+        print(f"Error scanning root folder: {e}")
+    
+    return missing_shows
 
 def scan_and_update_episodes():
     print("Scanning for new episodes...")
@@ -263,6 +301,54 @@ def scan_manual(show_id):
 def scan_all():
     scan_and_update_episodes()
     return redirect(url_for('index'))
+
+@app.route('/sync_shows')
+def sync_shows():
+    missing_shows = scan_for_missing_shows()
+    return render_template('sync_shows.html', missing_shows=missing_shows)
+
+@app.route('/add_missing_show', methods=['POST'])
+def add_missing_show():
+    folder_name = request.form.get('folder_name')
+    full_path = request.form.get('full_path')
+    
+    if folder_name and full_path and os.path.exists(full_path):
+        shows = load_data()
+        
+        # Create new show entry
+        new_show = {
+            'id': max([show['id'] for show in shows], default=0) + 1,
+            'title': folder_name,
+            'year': '',
+            'cover_image': '',
+            'directory_path': full_path,
+            'rating': None,
+            'episodes': []
+        }
+        
+        # Scan for episodes in this directory
+        existing_episode_titles = set()
+        for root, _, files in os.walk(full_path):
+            for filename in files:
+                name, ext = os.path.splitext(filename)
+                if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                    if name not in existing_episode_titles:
+                        episode = {
+                            'id': len(new_show['episodes']) + 1,
+                            'title': name,
+                            'watched': False,
+                            'added_date': datetime.now().isoformat()
+                        }
+                        new_show['episodes'].append(episode)
+                        existing_episode_titles.add(name)
+        
+        # Sort episodes by title (newest first by default)
+        new_show['episodes'].reverse()
+        
+        shows.append(new_show)
+        save_data(shows)
+    
+    return redirect(url_for('sync_shows'))
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5011)
