@@ -462,6 +462,18 @@ body.modal-open {
     color: rgb(255, 254, 254);
 }
 
+.btn-folder {
+    color: #ffc936;
+    text-decoration: none;
+    border: 2px solid #ffc936;
+    background: transparent;
+}
+
+.btn-folder:hover {
+    background: #ffc936;
+    color: black;
+}
+
 .show-details-container {
     display: flex;
     align-items: flex-start;

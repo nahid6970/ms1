@@ -19,6 +19,11 @@
             </form>
             <div style="display: flex; justify-content: center; gap: 10px;">
                 <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black;"><i class="nf nf-cod-home"></i></a>
+                {% if show.directory_path %}
+                    <a href="{{ url_for('open_folder', show_id=show.id) }}" class="add-button" style="background-color: #ffc936; color: black;" title="Open show folder" onclick="openFolderViaServer(event, {{ show.id }})">
+                        <i class="nf nf-fa-folder"></i>
+                    </a>
+                {% endif %}
                 {% if sort_episodes == 'alphabetical' %}
                     <a href="{{ url_for('show', show_id=show.id, sort_episodes='alphabetical', order=next_order) }}" class="add-button sort-episodes-button" style="background-color: #ffc936; color: black;" title="Sort episodes alphabetically {{ 'descending' if order == 'asc' else 'ascending' }}">
                         <i class="nf nf-fa-sort_alpha_{{ 'desc' if order == 'asc' else 'asc' }}"></i>

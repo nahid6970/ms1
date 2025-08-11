@@ -322,6 +322,32 @@ def scan_all():
     scan_and_update_episodes()
     return redirect(url_for('index'))
 
+@app.route('/open_folder/<int:show_id>')
+def open_folder(show_id):
+    import subprocess
+    import sys
+    
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    
+    if show and show.get('directory_path'):
+        folder_path = show['directory_path']
+        try:
+            if sys.platform == 'win32':
+                # Windows - ignore exit code since explorer sometimes returns non-zero even when successful
+                subprocess.run(['explorer', folder_path], check=False)
+            elif sys.platform == 'darwin':
+                # macOS
+                subprocess.run(['open', folder_path], check=True)
+            else:
+                # Linux
+                subprocess.run(['xdg-open', folder_path], check=True)
+            return jsonify({'success': True, 'message': 'Folder opened successfully'})
+        except Exception as e:
+            return jsonify({'success': False, 'message': f'Error: {str(e)}'})
+    
+    return jsonify({'success': False, 'message': 'Show not found or no directory path'})
+
 @app.route('/sync_shows')
 def sync_shows():
     missing_shows = scan_for_missing_shows()

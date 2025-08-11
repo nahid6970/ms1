@@ -76,6 +76,24 @@ function closeSettingsModal() {
     document.body.classList.remove('modal-open');
 }
 
+// Server-side Folder Opening Function
+function openFolderViaServer(event, showId) {
+    event.preventDefault(); // Prevent default link behavior
+    
+    fetch(`/open_folder/${showId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert(`Failed to open folder: ${data.message}`);
+            }
+            // If successful, no need to show anything - folder should open
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to open folder due to network error');
+        });
+}
+
 // Toggle Table View and Default Home Page
 document.addEventListener('DOMContentLoaded', () => {
     const tableViewToggle = document.getElementById('tableViewToggle');
