@@ -292,6 +292,11 @@ body.modal-open {
     color: #1db954; /* Green color for watched shows */
 }
 
+.show-card p.last-episode-added {
+    color: #888; /* Gray color for last episode date */
+    font-size: 0.9em;
+}
+
 .show-card .btn-group {
     display: flex;
     justify-content: center;
@@ -566,7 +571,7 @@ html.table-view-active .show-grid {
 html.table-view-active .show-card {
     width: auto; /* Take full width */
     display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 1fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Edit, Delete */
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Last Episode, Edit, Delete */
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -611,12 +616,17 @@ html.table-view-active .show-card p:nth-of-type(3) {
     display: block; /* Ensure rating is visible */
 }
 
+html.table-view-active .show-card p:nth-of-type(4) {
+    grid-column: 5; /* Last episode added in fifth column */
+    display: block; /* Ensure last episode date is visible */
+}
+
 html.table-view-active .show-card .btn-edit {
-    grid-column: 5; /* Edit button in fifth column */
+    grid-column: 6; /* Edit button in sixth column */
 }
 
 html.table-view-active .show-card .btn-delete {
-    grid-column: 6; /* Delete button in sixth column */
+    grid-column: 7; /* Delete button in seventh column */
 }
 
 

@@ -119,12 +119,32 @@ def index():
     if query:
         shows = [show for show in shows if query.lower() in show['title'].lower()]
 
-    # Calculate watched and total episodes
+    # Calculate watched and total episodes, and last episode added date
     for show in shows:
         watched_episodes = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))
         total_episodes = len(show.get('episodes', []))
         show['watched_count'] = watched_episodes
         show['total_count'] = total_episodes
+        
+        # Find the most recent episode added date
+        episodes = show.get('episodes', [])
+        if episodes:
+            # Get the most recent added_date from all episodes
+            recent_dates = []
+            for episode in episodes:
+                if 'added_date' in episode:
+                    try:
+                        recent_dates.append(datetime.fromisoformat(episode['added_date']))
+                    except:
+                        pass
+            
+            if recent_dates:
+                latest_date = max(recent_dates)
+                show['last_episode_added'] = latest_date.strftime('%Y-%m-%d')
+            else:
+                show['last_episode_added'] = 'Unknown'
+        else:
+            show['last_episode_added'] = 'No episodes'
 
     # Sort shows
     if sort_by == 'title':
