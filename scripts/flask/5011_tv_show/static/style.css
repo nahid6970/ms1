@@ -400,11 +400,12 @@ body.modal-open {
 .show-card p {
     font-size: 1.2em;
     color: white;
+    margin: 5px 0; /* Reduced margin for tighter spacing */
 }
 
 .show-card p:last-of-type {
     font-size: 1em;
-    margin-top: 5px;
+    margin: 5px 0;
 }
 
 .show-card p.no-episodes-watched {
@@ -422,6 +423,7 @@ body.modal-open {
 .show-card p.last-episode-added {
     color: #888; /* Gray color for last episode date */
     font-size: 0.9em;
+    margin: 5px 0; /* Consistent spacing */
 }
 
 .show-card .btn-group {
