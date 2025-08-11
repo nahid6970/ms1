@@ -123,7 +123,9 @@
                 "watched": false
             }
         ],
-        "rating": "4"
+        "rating": "4",
+        "episode_sort_type": "alphabetical",
+        "episode_sort_order": "desc"
     },
     {
         "id": 3,
@@ -377,30 +379,6 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\Blood of Zeus",
         "episodes": [
             {
-                "id": 12,
-                "title": "Blood of Zeus - S02E02 - Weights & Measures WEBDL-1080p",
-                "watched": false,
-                "added_date": "2025-08-10T23:56:05.167425"
-            },
-            {
-                "id": 11,
-                "title": "Blood of Zeus - S02E08 - The Three Trials WEBDL-1080p",
-                "watched": false,
-                "added_date": "2025-08-07T19:01:49.484510"
-            },
-            {
-                "id": 10,
-                "title": "Blood of Zeus - S02E07 - The Hidden Realm WEBDL-1080p",
-                "watched": false,
-                "added_date": "2025-08-07T14:14:22.447447"
-            },
-            {
-                "id": 9,
-                "title": "Blood of Zeus - S02E06 - Crossing Paths WEBDL-1080p",
-                "watched": false,
-                "added_date": "2025-08-07T14:14:22.447447"
-            },
-            {
                 "id": 8,
                 "title": "Blood of Zeus - S03E08 - A Champion\u2019s Challenge WEBDL-1080p",
                 "watched": false
@@ -439,9 +417,35 @@
                 "id": 1,
                 "title": "Blood of Zeus - S03E01 - A Breath Before Dying WEBDL-1080p",
                 "watched": false
+            },
+            {
+                "id": 11,
+                "title": "Blood of Zeus - S02E08 - The Three Trials WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T19:01:49.484510"
+            },
+            {
+                "id": 10,
+                "title": "Blood of Zeus - S02E07 - The Hidden Realm WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T14:14:22.447447"
+            },
+            {
+                "id": 9,
+                "title": "Blood of Zeus - S02E06 - Crossing Paths WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-07T14:14:22.447447"
+            },
+            {
+                "id": 12,
+                "title": "Blood of Zeus - S02E02 - Weights & Measures WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-10T23:56:05.167425"
             }
         ],
-        "rating": "4"
+        "rating": "4",
+        "episode_sort_type": "alphabetical",
+        "episode_sort_order": "desc"
     },
     {
         "id": 6,

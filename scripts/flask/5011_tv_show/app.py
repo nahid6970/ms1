@@ -36,6 +36,7 @@ def scan_and_update_episodes():
             dir_path = show['directory_path']
             if os.path.isdir(dir_path):
                 existing_episode_titles = {e['title'] for e in show['episodes']}
+                episodes_added = False
                 for root, _, files in os.walk(dir_path):
                     for filename in files:
                         name, ext = os.path.splitext(filename)
@@ -50,6 +51,12 @@ def scan_and_update_episodes():
                                 show['episodes'].insert(0, new_episode)
                                 existing_episode_titles.add(name)
                                 updated_shows = True
+                                episodes_added = True
+                
+                # Re-apply current sort order if episodes were added and sort is alphabetical
+                if episodes_added and show.get('episode_sort_type') == 'alphabetical':
+                    order = show.get('episode_sort_order', 'asc')
+                    show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
             else:
                 print(f"Directory not found for {show['title']}: {dir_path}")
     if updated_shows:
@@ -115,10 +122,34 @@ def index():
 
 @app.route('/show/<int:show_id>')
 def show(show_id):
+    sort_episodes = request.args.get('sort_episodes', 'default')
+    order = request.args.get('order', 'asc')
+    
     shows = load_data()
     show = next((s for s in shows if s['id'] == show_id), None)
     if show:
-        return render_template('show.html', show=show)
+        # Initialize sort preferences if they don't exist
+        if 'episode_sort_type' not in show:
+            show['episode_sort_type'] = 'default'
+        if 'episode_sort_order' not in show:
+            show['episode_sort_order'] = 'asc'
+        
+        # If sort parameters are provided, update and save
+        if sort_episodes != 'default':
+            show['episode_sort_type'] = sort_episodes
+            show['episode_sort_order'] = order
+            show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+            save_data(shows)
+        else:
+            # Use stored preferences
+            sort_episodes = show['episode_sort_type']
+            order = show['episode_sort_order']
+            # Apply stored sort if it's alphabetical
+            if sort_episodes == 'alphabetical':
+                show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+        
+        next_order = 'desc' if order == 'asc' else 'asc'
+        return render_template('show.html', show=show, sort_episodes=sort_episodes, order=order, next_order=next_order)
     return 'Show not found', 404
 
 @app.route('/add_show', methods=['GET', 'POST'])
@@ -175,6 +206,12 @@ def add_episode(show_id):
             'added_date': datetime.now().isoformat()
         }
         show['episodes'].insert(0, new_episode)
+        
+        # Re-apply current sort order if it's alphabetical
+        if show.get('episode_sort_type') == 'alphabetical':
+            order = show.get('episode_sort_order', 'asc')
+            show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+        
         save_data(shows)
         return redirect(url_for('show', show_id=show_id))
     return 'Show not found', 404
