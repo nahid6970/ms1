@@ -26,18 +26,40 @@
             <input type="text" name="query" placeholder="Search Shows" value="{{ query if query }}">
             <button type="submit" class="btn">Search</button>
         </form>
-        <div class="sort-controls">
-            <a href="{{ url_for('index', sort_by='title', order=next_order, query=query) }}" class="sort-btn">Title <i class="nf nf-fa-sort_alpha_asc"></i></a>
-            <a href="{{ url_for('index', sort_by='year', order=next_order, query=query) }}" class="sort-btn">Year <i class="nf nf-md-sort_calendar_ascending"></i></a>
-            <a href="{{ url_for('index', sort_by='rating', order=next_order, query=query) }}" class="sort-btn">Rating <i class="nf nf-fa-star"></i></a>
-            <a href="{{ url_for('index', sort_by='added', order=next_order, query=query) }}" class="sort-btn">Added <i class="nf nf-fa-sort_numeric_asc"></i></a>
-            <a href="{{ url_for('index', sort_by='last_episode', order=next_order, query=query) }}" class="sort-btn">Last Episode <i class="nf nf-fa-clock_o"></i></a>
+        <div class="sort-menu-container">
+            <button class="sort-menu-button" onclick="toggleSortMenu()">
+                <i class="nf nf-fa-sort"></i> Sort by 
+                {% if sort_by == 'title' %}Title
+                {% elif sort_by == 'year' %}Year
+                {% elif sort_by == 'rating' %}Rating
+                {% elif sort_by == 'added' %}Added
+                {% elif sort_by == 'last_episode' %}Last Episode
+                {% endif %}
+                <i class="nf nf-fa-chevron_down sort-chevron"></i>
+            </button>
+            <div class="sort-menu-dropdown" id="sortMenuDropdown">
+                <a href="{{ url_for('index', sort_by='title', order=next_order, query=query) }}" class="sort-menu-item">
+                    <i class="nf nf-fa-sort_alpha_asc"></i> Title
+                </a>
+                <a href="{{ url_for('index', sort_by='year', order=next_order, query=query) }}" class="sort-menu-item">
+                    <i class="nf nf-md-sort_calendar_ascending"></i> Year
+                </a>
+                <a href="{{ url_for('index', sort_by='rating', order=next_order, query=query) }}" class="sort-menu-item">
+                    <i class="nf nf-fa-star"></i> Rating
+                </a>
+                <a href="{{ url_for('index', sort_by='added', order=next_order, query=query) }}" class="sort-menu-item">
+                    <i class="nf nf-fa-sort_numeric_asc"></i> Added
+                </a>
+                <a href="{{ url_for('index', sort_by='last_episode', order=next_order, query=query) }}" class="sort-menu-item">
+                    <i class="nf nf-fa-clock_o"></i> Last Episode
+                </a>
+            </div>
         </div>
     </div>
 
     <div class="show-grid">
         {% for show in shows %}
-            <div class="show-card" data-show-id="{{ show.id }}">
+            <div class="show-card{% if show.watched_count == show.total_count and show.total_count > 0 %} completed{% endif %}" data-show-id="{{ show.id }}">
                 <div class="img-wrapper">
                     <img src="{{ show.cover_image }}" alt="{{ show.title }}">
                 </div>

@@ -114,6 +114,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Sort Menu Functions
+function toggleSortMenu() {
+    const dropdown = document.getElementById('sortMenuDropdown');
+    const button = document.querySelector('.sort-menu-button');
+    
+    dropdown.classList.toggle('show');
+    button.classList.toggle('active');
+}
+
+// Close sort menu when clicking outside
+document.addEventListener('click', function(event) {
+    const sortContainer = document.querySelector('.sort-menu-container');
+    if (sortContainer && !sortContainer.contains(event.target)) {
+        const dropdown = document.getElementById('sortMenuDropdown');
+        const button = document.querySelector('.sort-menu-button');
+        if (dropdown && button) {
+            dropdown.classList.remove('show');
+            button.classList.remove('active');
+        }
+    }
+});
+
 // Close modal if user clicks outside of it
 window.onclick = function(event) {
     const addModal = document.getElementById('addShowModal');
