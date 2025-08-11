@@ -528,6 +528,16 @@ body.modal-open {
     padding: 10px;
     background-color: #333;
     border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.episode-list li.episode-watched {
+    background-color: rgba(29, 185, 84, 0.15); /* Green tint for watched episodes */
+    border: 1px solid rgba(29, 185, 84, 0.3);
+}
+
+.episode-list li.episode-watched:hover {
+    background-color: rgba(29, 185, 84, 0.25); /* Slightly stronger green tint on hover */
 }
 
 .episode-title {
