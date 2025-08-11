@@ -222,5 +222,10 @@ def scan_manual(show_id):
     scan_and_update_episodes()
     return redirect(url_for('show', show_id=show_id))
 
+@app.route('/scan_all')
+def scan_all():
+    scan_and_update_episodes()
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5011)

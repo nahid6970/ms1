@@ -644,6 +644,12 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\DrStone",
         "episodes": [
             {
+                "id": 2,
+                "title": "Dr. STONE - s04e17 - [75] - Sickening Yet Beautiful HDTV-1080p - [SubsPlease]",
+                "watched": false,
+                "added_date": "2025-08-11T14:57:50.329021"
+            },
+            {
                 "id": 1,
                 "title": "Dr. STONE - s04e16 - [74] - MEDUSA MECHANISM HDTV-1080p - [SubsPlease]",
                 "watched": true

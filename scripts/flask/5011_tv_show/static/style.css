@@ -49,6 +49,16 @@ body {
     background: #e0e0e0;
 }
 
+/* Scan button specific styles */
+.scan-button {
+    background-color: #1db954 !important; /* Green background for scan */
+    color: white !important;
+}
+
+.scan-button:hover {
+    background-color: #158a3e !important; /* Darker green on hover */
+}
+
 /* Settings button specific styles */
 /* .settings-button {
     margin-top: 10px; /* Space between add/home buttons and settings */
