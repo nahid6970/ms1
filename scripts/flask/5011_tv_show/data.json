@@ -1507,5 +1507,21 @@
                 "added_date": "2025-08-07T10:35:24.652821"
             }
         ]
+    },
+    {
+        "id": 26,
+        "title": "WWE SmackDown",
+        "year": "1999",
+        "cover_image": "https://artworks.thetvdb.com/banners/posters/5d99dd4e50097.jpg",
+        "directory_path": "D:\\Downloads\\@Sonarr\\WWE SmackDown",
+        "rating": "3",
+        "episodes": [
+            {
+                "id": 1,
+                "title": "WWE SmackDown - 2025-08-08 - SmackDown 1355 WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-11T21:18:24.917923"
+            }
+        ]
     }
 ]
