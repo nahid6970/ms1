@@ -10,6 +10,18 @@
         if (localStorage.getItem('tableViewEnabled') === 'true') {
             document.documentElement.classList.add('table-view-active');
         }
+        
+        // Check default home page preference and redirect immediately if needed
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSortBy = urlParams.get('sort_by');
+        const currentQuery = urlParams.get('query');
+        const defaultHomePage = localStorage.getItem('defaultHomePage') || 'default';
+        
+        // Only redirect if we're on the base home page (no sort_by parameter and no search query)
+        if (!currentSortBy && !currentQuery && defaultHomePage === 'last_episode') {
+            // Redirect to last episode sort immediately
+            window.location.replace('/?sort_by=last_episode&order=desc');
+        }
     </script>
 </head>
 <body>

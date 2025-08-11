@@ -109,16 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('defaultHomePage', defaultHomePageSelect.value);
     });
 
-    // Check if we're on the home page without any sort parameters and redirect if needed
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentSortBy = urlParams.get('sort_by');
-    const currentQuery = urlParams.get('query');
-    
-    // Only redirect if we're on the base home page (no sort_by parameter and no search query)
-    if (!currentSortBy && !currentQuery && defaultHomePage === 'last_episode') {
-        // Redirect to last episode sort
-        window.location.href = '/?sort_by=last_episode&order=desc';
-    }
+
 
     // Add click listener for show cards
     document.querySelectorAll('.show-card').forEach(card => {
