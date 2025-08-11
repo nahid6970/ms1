@@ -43,7 +43,7 @@
                 </div>
                 <h3>{{ show.title }}</h3>
                 <p>{{ show.year }}</p>
-                <p class="{% if show.watched_count == 0 %}no-episodes-watched{% elif show.watched_count > 0 and show.watched_count < show.total_count %}some-episodes-watched{% elif show.watched_count == show.total_count and show.total_count > 0 %}all-episodes-watched{% endif %}">{{ show.watched_count }}/{{ show.total_count }} episodes watched</p>
+                <p class="{% if show.watched_count == 0 %}no-episodes-watched{% elif show.watched_count > 0 and show.watched_count < show.total_count %}some-episodes-watched{% elif show.watched_count == show.total_count and show.total_count > 0 %}all-episodes-watched{% endif %}">{{ show.watched_count }}/{{ show.total_count }}</p>
                 <p>{% if show.rating %}{{ show.rating }}/5 ⭐{% else %}~/5 ⭐{% endif %}</p>
                 <div class="show-card-buttons">
                     <a href="#" onclick="openEditShowModal({{ show.id }})" class="btn btn-edit">Edit</a>
