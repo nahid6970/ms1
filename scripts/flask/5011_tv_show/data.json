@@ -1523,5 +1523,111 @@
                 "added_date": "2025-08-11T21:18:24.917923"
             }
         ]
+    },
+    {
+        "id": 27,
+        "title": "Descendants of the Sun",
+        "year": "2016",
+        "cover_image": "https://artworks.thetvdb.com/banners/posters/305327-5.jpg",
+        "directory_path": "D:\\Downloads\\@Sonarr\\Descendants of the Sun",
+        "rating": null,
+        "episodes": [
+            {
+                "id": 16,
+                "title": "Descendants of the Sun - S01E16 - This Is Unbelievable WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 15,
+                "title": "Descendants of the Sun - S01E15 - I Will Stay Alive WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 14,
+                "title": "Descendants of the Sun - S01E14 - The Movie We Missed WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 13,
+                "title": "Descendants of the Sun - S01E13 - You're Not My Director Anymore WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 12,
+                "title": "Descendants of the Sun - S01E12 - As of This Moment, Everyone Will Return to Team Alpha WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 11,
+                "title": "Descendants of the Sun - S01E11 - Who on Earth Stole It WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 10,
+                "title": "Descendants of the Sun - S01E10 - You Got a Parcel from Shin Ji Young WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 9,
+                "title": "Descendants of the Sun - S01E09 - That Wasn't Me WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 8,
+                "title": "Descendants of the Sun - S01E08 - Comfort the Deceased with a Silent Prayer WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 7,
+                "title": "Descendants of the Sun - S01E07 - I Missed You WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 6,
+                "title": "Descendants of the Sun - S01E06 - I Shouldn't Have Received His Apology WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 5,
+                "title": "Descendants of the Sun - S01E05 - What Should I Do About the Kiss WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 4,
+                "title": "Descendants of the Sun - S01E04 - I Will Find a Way to Drink WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 3,
+                "title": "Descendants of the Sun - S01E03 - How Have You Been WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 2,
+                "title": "Descendants of the Sun - S01E02 - We Bump into Each Other While Passing By WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            },
+            {
+                "id": 1,
+                "title": "Descendants of the Sun - S01E01 - Will You Be My Doctor WEBRip-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T10:18:13.020554"
+            }
+        ]
     }
 ]
