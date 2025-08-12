@@ -1327,6 +1327,12 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\The Walking Dead - Dead City",
         "episodes": [
             {
+                "id": 6,
+                "title": "The Walking Dead - Dead City - S02E08 - If History Were a Conflagration WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T22:37:26.744673"
+            },
+            {
                 "id": 5,
                 "title": "The Walking Dead - Dead City - S02E06 - Bridge Partners Are Hard to Come By These Days HDTV-720p",
                 "watched": false
