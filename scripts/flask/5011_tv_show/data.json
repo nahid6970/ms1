@@ -638,7 +638,9 @@
                 "title": "Dragon Ball Daima - s01e01 - [1] - Conspiracy WEBDL-1080p - [VARYG]",
                 "watched": false
             }
-        ]
+        ],
+        "rating": null,
+        "status": "Ended"
     },
     {
         "id": 9,
@@ -1628,6 +1630,7 @@
                 "watched": false,
                 "added_date": "2025-08-12T10:18:13.020554"
             }
-        ]
+        ],
+        "status": "Ended"
     }
 ]

@@ -24,6 +24,9 @@
                         <i class="nf nf-fa-folder"></i>
                     </a>
                 {% endif %}
+                <a href="http://192.168.0.101:8989/series/{{ show.title.lower().replace(' ', '-').replace(':', '').replace('!', '').replace('?', '').replace(',', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('&', 'and') }}" target="_blank" class="add-button" style="background-color: #007bff; color: white;" title="Open in Sonarr">
+                    <i class="nf nf-fa-external_link"></i>
+                </a>
                 {% if sort_episodes == 'alphabetical' %}
                     <a href="{{ url_for('show', show_id=show.id, sort_episodes='alphabetical', order=next_order) }}" class="add-button sort-episodes-button" style="background-color: #ffc936; color: black;" title="Sort episodes alphabetically {{ 'descending' if order == 'asc' else 'ascending' }}">
                         <i class="nf nf-fa-sort_alpha_{{ 'desc' if order == 'asc' else 'asc' }}"></i>

@@ -221,6 +221,7 @@ def add_show():
             'cover_image': request.form.get('cover_image', ''),
             'directory_path': request.form.get('directory_path', ''),
             'rating': request.form.get('rating', None), # Add rating field
+            'status': request.form.get('status', 'Continuing'), # Add status field
             'episodes': []
         }
         shows.append(new_show)
@@ -240,6 +241,7 @@ def edit_show(show_id):
         show['cover_image'] = request.form.get('cover_image', '')
         show['directory_path'] = request.form.get('directory_path', '')
         show['rating'] = request.form.get('rating', None) # Update rating field
+        show['status'] = request.form.get('status', 'Continuing') # Update status field
         save_data(shows)
         return redirect(url_for('index'))
     else:
@@ -369,6 +371,7 @@ def add_missing_show():
             'cover_image': '',
             'directory_path': full_path,
             'rating': None,
+            'status': 'Continuing', # Default status for synced shows
             'episodes': []
         }
         

@@ -456,6 +456,20 @@ body.modal-open {
     margin: 5px 0; /* Consistent spacing */
 }
 
+.show-card p.show-status {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin: 5px 0; /* Consistent spacing */
+}
+
+.show-card p.status-continuing {
+    color: #28a745; /* Green for continuing shows */
+}
+
+.show-card p.status-ended {
+    color: #dc3545; /* Red for ended shows */
+}
+
 .show-card .btn-group {
     display: flex;
     justify-content: center;
@@ -787,7 +801,7 @@ html.table-view-active .show-grid {
 html.table-view-active .show-card {
     width: auto; /* Take full width */
     display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Last Episode, Edit, Delete */
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Last Episode, Status, Edit, Delete */
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -847,12 +861,17 @@ html.table-view-active .show-card p:nth-of-type(4) {
     display: block; /* Ensure last episode date is visible */
 }
 
+html.table-view-active .show-card p:nth-of-type(5) {
+    grid-column: 6; /* Status in sixth column */
+    display: block; /* Ensure status is visible */
+}
+
 html.table-view-active .show-card .btn-edit {
-    grid-column: 6; /* Edit button in sixth column */
+    grid-column: 7; /* Edit button in seventh column */
 }
 
 html.table-view-active .show-card .btn-delete {
-    grid-column: 7; /* Delete button in seventh column */
+    grid-column: 8; /* Delete button in eighth column */
 }
 
 
