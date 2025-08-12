@@ -1487,6 +1487,12 @@
         "rating": null,
         "episodes": [
             {
+                "id": 2,
+                "title": "WWE Raw - 2025-08-11 - RAW 1681 HDTV-1080p",
+                "watched": false,
+                "added_date": "2025-08-12T17:36:08.636607"
+            },
+            {
                 "id": 1,
                 "title": "WWE Raw - 2025-08-04 - RAW 1680 HDTV-1080p",
                 "watched": true,
