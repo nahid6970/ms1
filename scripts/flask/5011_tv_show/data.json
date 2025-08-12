@@ -125,7 +125,8 @@
         ],
         "rating": "4",
         "episode_sort_type": "alphabetical",
-        "episode_sort_order": "desc"
+        "episode_sort_order": "desc",
+        "status": "Ended"
     },
     {
         "id": 3,
@@ -858,7 +859,7 @@
     },
     {
         "id": 13,
-        "title": "Mushoku Tensei - Jobless Reincarnation",
+        "title": "Mushoku Tensei: Jobless Reincarnation",
         "year": "2021",
         "cover_image": "https://artworks.thetvdb.com/banners/v4/series/371310/posters/64903a85960eb.jpg",
         "directory_path": "D:\\Downloads\\@Sonarr\\Mushoku Tensei - Jobless Reincarnation",
@@ -919,11 +920,12 @@
                 "watched": false
             }
         ],
-        "rating": "3"
+        "rating": "3",
+        "status": "Continuing"
     },
     {
         "id": 14,
-        "title": "NieR-Automata Ver1.1a",
+        "title": "NieR:Automata Ver1.1a",
         "year": "2023",
         "cover_image": "https://artworks.thetvdb.com/banners/v4/series/416998/posters/643bc9a7b6968.jpg",
         "directory_path": "D:\\Downloads\\@Sonarr\\NieR-Automata Ver1.1a",
@@ -989,7 +991,8 @@
                 "watched": false
             }
         ],
-        "rating": "3"
+        "rating": "3",
+        "status": "Ended"
     },
     {
         "id": 15,
