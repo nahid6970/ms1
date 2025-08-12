@@ -446,7 +446,8 @@
         ],
         "rating": "4",
         "episode_sort_type": "alphabetical",
-        "episode_sort_order": "desc"
+        "episode_sort_order": "desc",
+        "status": "Ended"
     },
     {
         "id": 6,
@@ -480,7 +481,7 @@
     },
     {
         "id": 7,
-        "title": "Daredevil - Born Again",
+        "title": "Daredevil: Born Again",
         "year": "2025",
         "cover_image": "https://artworks.thetvdb.com/banners/v4/series/422712/posters/67be532c6fb77.jpg",
         "directory_path": "D:\\Downloads\\@Sonarr\\Daredevil - Born Again",
@@ -530,7 +531,9 @@
                 "title": "Daredevil - Born Again - S01E01 - Heaven's Half Hour WEBDL-1080p",
                 "watched": false
             }
-        ]
+        ],
+        "rating": null,
+        "status": "Continuing"
     },
     {
         "id": 8,

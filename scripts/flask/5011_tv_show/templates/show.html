@@ -19,6 +19,9 @@
             </form>
             <div style="display: flex; justify-content: center; gap: 10px;">
                 <a href="{{ url_for('index') }}" class="add-button home-button" style="background-color: white; color: black;"><i class="nf nf-cod-home"></i></a>
+                <button onclick="openEditShowModal({{ show.id }})" class="add-button" style="background-color: #28a745; color: white;" title="Edit show">
+                    <i class="nf nf-fa-edit"></i>
+                </button>
                 {% if show.directory_path %}
                     <a href="{{ url_for('open_folder', show_id=show.id) }}" class="add-button" style="background-color: #ffc936; color: black;" title="Open show folder" onclick="openFolderViaServer(event, {{ show.id }})">
                         <i class="nf nf-fa-folder"></i>
@@ -66,6 +69,38 @@
                 <input type="hidden" id="editEpisodeId" name="id">
                 <label for="editEpisodeTitle">Title:</label>
                 <input type="text" id="editEpisodeTitle" name="title" required>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- The Edit Show Modal -->
+    <div id="editShowModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditShowModal()">&times;</span>
+            <h2>Edit Show</h2>
+            <form id="editShowForm" action="/edit_show" method="post">
+                <input type="hidden" id="editShowId" name="id">
+                <label for="editShowTitle">Title:</label>
+                <input type="text" id="editShowTitle" name="title" required>
+                <label for="editShowYear">Year:</label>
+                <input type="number" id="editShowYear" name="year">
+                <label for="editShowCoverImage">Cover Image URL:</label>
+                <input type="url" id="editShowCoverImage" name="cover_image">
+                <label for="editShowDirectoryPath">Directory Path (Optional):</label>
+                <input type="text" id="editShowDirectoryPath" name="directory_path">
+                <label for="editShowStatus">Status:</label>
+                <select id="editShowStatus" name="status" class="setting-select">
+                    <option value="Continuing">Continuing</option>
+                    <option value="Ended">Ended</option>
+                </select>
+                <div class="rating-group">
+                    <label><input type="radio" name="rating" value="1"> <span>1</span></label>
+                    <label><input type="radio" name="rating" value="2"> <span>2</span></label>
+                    <label><input type="radio" name="rating" value="3"> <span>3</span></label>
+                    <label><input type="radio" name="rating" value="4"> <span>4</span></label>
+                    <label><input type="radio" name="rating" value="5"> <span>5</span></label>
+                </div><br>
                 <button type="submit">Save Changes</button>
             </form>
         </div>
