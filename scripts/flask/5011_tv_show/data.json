@@ -1327,6 +1327,18 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\The Walking Dead - Dead City",
         "episodes": [
             {
+                "id": 8,
+                "title": "The Walking Dead - Dead City - S02E07 - Novi Dan, Novi Po\u010detak WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-13T08:37:59.853660"
+            },
+            {
+                "id": 7,
+                "title": "The Walking Dead - Dead City - S02E05 - The Bird Always Knows WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-13T08:37:59.853660"
+            },
+            {
                 "id": 6,
                 "title": "The Walking Dead - Dead City - S02E08 - If History Were a Conflagration WEBDL-1080p",
                 "watched": false,
