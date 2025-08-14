@@ -15,6 +15,7 @@
     background-color: #f4f4f4;
     margin: 0;
     padding: 20px;
+    padding-top: 120px; /* Make room for fixed bars */
     }
 
     /* WebKit browsers (Chrome, Safari) */
@@ -166,9 +167,108 @@
     border-radius: 5px;
     cursor: pointer;
     top: 10px;        /* 10px from the top */
+    left: 10px;
     }
     .drive-buttons form {
     margin-right: 10px;
+    }
+
+    .bookmark-bar {
+    font-family: JetBrainsMono NFP, sans-serif;
+    position: fixed;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    background-color: #444;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    top: 60px;
+    left: 10px;
+    right: 10px;
+    overflow: visible;
+    }
+    .bookmark-bar button {
+    background-color: #555;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    }
+    .bookmark-bar button:hover {
+    background-color: #666;
+    }
+    .bookmark-add-btn {
+    background-color: #4CAF50 !important;
+    margin-right: 10px;
+    }
+    .bookmark-add-btn:hover {
+    background-color: #45a049 !important;
+    }
+    .bookmark-dropdown {
+    position: relative;
+    display: inline-block;
+    }
+    .bookmark-dropdown-content {
+    display: none;
+    position: fixed;
+    top: 110px;
+    left: 150px;
+    background-color: #2e2e2e;
+    min-width: 250px;
+    max-width: 400px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+    z-index: 10000;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #555;
+    border-radius: 5px;
+    }
+    .bookmark-dropdown-content.show {
+    display: block;
+    }
+    .bookmark-dropdown-content a {
+    color: #ffffff;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+    border-bottom: 1px solid #444;
+    }
+    .bookmark-dropdown-content a:hover {
+    background-color: #444;
+    }
+    .bookmark-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    border-bottom: 1px solid #444;
+    }
+    .bookmark-item:hover {
+    background-color: #444;
+    }
+    .bookmark-item a {
+    flex-grow: 1;
+    padding: 0;
+    border: none;
+    }
+    .bookmark-remove {
+    color: #ff6b6b;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    }
+    .bookmark-remove:hover {
+    background-color: #ff6b6b;
+    color: white;
     }
 
     .back-btn {
@@ -183,7 +283,7 @@
 
     .current-path {
     font-weight: bold;
-    margin-top: 30px;
+    margin-top: 10px;
     }
 
     .flash {
@@ -407,6 +507,34 @@ background-color: #fc5c2c; /* Darker green when hovering */
         </div>
     </div>
 
+    <!-- Bookmark Bar -->
+    <div class="bookmark-bar">
+        <button class="bookmark-add-btn" onclick="addBookmark()">
+            <i class="nf nf-fa-bookmark"></i> Add
+        </button>
+        
+        <div class="bookmark-dropdown">
+            <button onclick="toggleBookmarkDropdown(event)">
+                <i class="nf nf-fa-chevron_down"></i> Bookmarks
+            </button>
+            <div class="bookmark-dropdown-content" id="bookmarkDropdown">
+                {% for bookmark in bookmarks %}
+                <div class="bookmark-item">
+                    <a href="/?dir_path={{ bookmark.path | urlencode }}&drive={{ bookmark.path | urlencode }}" onclick="closeBookmarkDropdown()">
+                        <i class="nf nf-fa-folder"></i> {{ bookmark.name }}
+                    </a>
+                    <span class="bookmark-remove" onclick="event.stopPropagation(); removeBookmark('{{ bookmark.path | replace("'", "\\'") }}');">×</span>
+                </div>
+                {% endfor %}
+                {% if not bookmarks %}
+                <div style="padding: 10px 15px; color: #999; font-style: italic; text-align: center;">
+                    No bookmarks yet
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     <div id="filter-panel" style="display: none;">
         <div class="filter-container">
             <div class="filter-group">
@@ -623,6 +751,111 @@ background-color: #fc5c2c; /* Darker green when hovering */
     
             if (!filterPanel.contains(event.target) && event.target !== filterButton) {
                 filterPanel.style.display = 'none';
+            }
+        });
+
+        // Bookmark functions
+        function addBookmark() {
+            const currentPath = "{{ current_dir }}";
+            const defaultName = currentPath.split('/').pop() || currentPath.split('\\').pop() || "Bookmark";
+            const bookmarkName = prompt("Enter bookmark name:", defaultName);
+            
+            if (bookmarkName && bookmarkName.trim()) {
+                console.log('Adding bookmark:', { path: currentPath, name: bookmarkName.trim() });
+                
+                fetch('/add_bookmark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path: currentPath,
+                        name: bookmarkName.trim()
+                    })
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        alert('Bookmark added successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Request failed:', error);
+                    alert('Request failed: ' + error);
+                });
+            }
+        }
+
+        function removeBookmark(path) {
+            if (confirm('Remove this bookmark?')) {
+                console.log('Removing bookmark:', path);
+                
+                fetch('/remove_bookmark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path: path
+                    })
+                })
+                .then(response => {
+                    console.log('Remove response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Remove response data:', data);
+                    if (data.success) {
+                        alert('Bookmark removed successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Remove request failed:', error);
+                    alert('Request failed: ' + error);
+                });
+            }
+        }
+
+        function toggleBookmarkDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('bookmarkDropdown');
+            
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+            
+            // Toggle bookmark dropdown
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            } else {
+                dropdown.style.display = 'block';
+            }
+        }
+
+        function closeBookmarkDropdown() {
+            const dropdown = document.getElementById('bookmarkDropdown');
+            dropdown.style.display = 'none';
+        }
+
+        // Close bookmark dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('bookmarkDropdown');
+            const bookmarkButton = document.querySelector('.bookmark-dropdown button');
+            
+            // If click is outside the dropdown and not on the button, close it
+            if (!dropdown.contains(event.target) && !bookmarkButton.contains(event.target)) {
+                dropdown.style.display = 'none';
             }
         });
     </script>

@@ -1,10 +1,13 @@
 import os
+import json
 from datetime import datetime
 from flask import Flask, request, render_template, send_file, redirect, url_for, flash, Response
 from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+BOOKMARKS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bookmarks.json')
 
 EDITABLE_EXTENSIONS = (".py", ".ps1", ".txt", ".log", ".html", ".css", ".ahk", ".md")
 
@@ -97,6 +100,30 @@ def get_file_icon(filename):
     else:
         return '📄'
 
+def load_bookmarks():
+    """Load bookmarks from JSON file."""
+    try:
+        if os.path.exists(BOOKMARKS_FILE):
+            with open(BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading bookmarks: {e}")
+    return []
+
+def save_bookmarks(bookmarks):
+    """Save bookmarks to JSON file."""
+    try:
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(BOOKMARKS_FILE), exist_ok=True)
+        
+        with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(bookmarks, f, indent=2, ensure_ascii=False)
+        print(f"Bookmarks saved successfully to {BOOKMARKS_FILE}")
+        return True
+    except Exception as e:
+        print(f"Error saving bookmarks to {BOOKMARKS_FILE}: {e}")
+        return False
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     drive = request.args.get('drive', 'C:/')
@@ -123,12 +150,15 @@ def index():
         flash(f"Error accessing directory: {e}")
         directories, files, file_times, file_sizes, file_icons = [], [], {}, {}, {}
 
+    bookmarks = load_bookmarks()
+    
     return render_template('index.html',
                            directories=directories,
                            files=files,
                            file_times=file_times,
                            file_sizes=file_sizes,
                            file_icons=file_icons,
+                           bookmarks=bookmarks,
                            current_dir=dir_path,
                            current_drive=drive,
                            editable_extensions=EDITABLE_EXTENSIONS)
@@ -276,6 +306,51 @@ def list_files(dir_path):
             # Add logic to populate file_times
 
     return render_template("file_list.html", files=files, file_times=file_times, current_dir=dir_path)
+
+@app.route('/add_bookmark', methods=['POST'])
+def add_bookmark():
+    """Add a new bookmark."""
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    name = data.get('name', '').strip()
+    
+    if not path or not name:
+        return jsonify({"error": "Path and name are required"}), 400
+    
+    if not os.path.exists(path):
+        return jsonify({"error": "Path does not exist"}), 400
+    
+    bookmarks = load_bookmarks()
+    
+    # Check if bookmark already exists
+    for bookmark in bookmarks:
+        if bookmark['path'] == path:
+            return jsonify({"error": "Bookmark already exists"}), 400
+    
+    # Add new bookmark
+    bookmarks.append({"name": name, "path": path})
+    
+    if save_bookmarks(bookmarks):
+        return jsonify({"success": "Bookmark added successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to save bookmark"}), 500
+
+@app.route('/remove_bookmark', methods=['POST'])
+def remove_bookmark():
+    """Remove a bookmark."""
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+    
+    bookmarks = load_bookmarks()
+    bookmarks = [b for b in bookmarks if b['path'] != path]
+    
+    if save_bookmarks(bookmarks):
+        return jsonify({"success": "Bookmark removed successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to remove bookmark"}), 500
 
 
 if __name__ == "__main__":
