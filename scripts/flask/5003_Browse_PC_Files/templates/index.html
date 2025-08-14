@@ -780,7 +780,6 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 .then(data => {
                     console.log('Response data:', data);
                     if (data.success) {
-                        alert('Bookmark added successfully!');
                         location.reload();
                     } else {
                         alert('Error: ' + data.error);
@@ -813,7 +812,6 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 .then(data => {
                     console.log('Remove response data:', data);
                     if (data.success) {
-                        alert('Bookmark removed successfully!');
                         location.reload();
                     } else {
                         alert('Error: ' + data.error);
