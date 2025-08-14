@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Application Tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <div class="top-center-controls">
         <button onclick="openAddJobModal()" class="add-button"><i class="nf nf-cod-add"></i>Add Job</button>
@@ -16,18 +18,23 @@
         <form action="/" method="get" class="search-form">
             <input type="text" name="query" placeholder="Search Jobs" value="{{ query if query }}">
             <select name="status_filter" class="status-filter">
-                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
-                <option value="interested" {% if status_filter == 'interested' %}selected{% endif %}>Interested</option>
-                <option value="applied" {% if status_filter == 'applied' %}selected{% endif %}>Applied</option>
-                <option value="interview scheduled" {% if status_filter == 'interview scheduled' %}selected{% endif %}>Interview Scheduled</option>
-                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
-                <option value="offer received" {% if status_filter == 'offer received' %}selected{% endif %}>Offer Received</option>
+                <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Status</option>
+                <option value="interested" {% if status_filter=='interested' %}selected{% endif %}>Interested</option>
+                <option value="applied" {% if status_filter=='applied' %}selected{% endif %}>Applied</option>
+                <option value="paid" {% if status_filter=='paid' %}selected{% endif %}>Paid</option>
+                <option value="admit-card-downloaded" {% if status_filter=='admit-card-downloaded' %}selected{% endif
+                    %}>Admit Card Downloaded</option>
+                <option value="preliminary-qualified" {% if status_filter=='preliminary-qualified' %}selected{% endif
+                    %}>Preliminary Qualified</option>
+                <option value="written-qualified" {% if status_filter=='written-qualified' %}selected{% endif %}>Written
+                    Qualified</option>
+                <option value="rejected" {% if status_filter=='rejected' %}selected{% endif %}>Rejected</option>
             </select>
             <button type="submit" class="btn">Search</button>
         </form>
         <div class="sort-menu-container">
             <button class="sort-menu-button" onclick="toggleSortMenu()">
-                Sort by 
+                Sort by
                 {% if sort_by == 'company' %}Company
                 {% elif sort_by == 'position' %}Position
                 {% elif sort_by == 'salary' %}Salary
@@ -38,12 +45,18 @@
                 <span class="sort-chevron">▼</span>
             </button>
             <div class="sort-menu-dropdown" id="sortMenuDropdown">
-                <a href="{{ url_for('index', sort_by='company', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Company</a>
-                <a href="{{ url_for('index', sort_by='position', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Position</a>
-                <a href="{{ url_for('index', sort_by='salary', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Salary</a>
-                <a href="{{ url_for('index', sort_by='applied_date', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Applied Date</a>
-                <a href="{{ url_for('index', sort_by='deadline', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Deadline</a>
-                <a href="{{ url_for('index', sort_by='status', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Status</a>
+                <a href="{{ url_for('index', sort_by='company', order=next_order, query=query, status_filter=status_filter) }}"
+                    class="sort-menu-item">Company</a>
+                <a href="{{ url_for('index', sort_by='position', order=next_order, query=query, status_filter=status_filter) }}"
+                    class="sort-menu-item">Position</a>
+                <a href="{{ url_for('index', sort_by='salary', order=next_order, query=query, status_filter=status_filter) }}"
+                    class="sort-menu-item">Salary</a>
+                <a href="{{ url_for('index', sort_by='applied_date', order=next_order, query=query, status_filter=status_filter) }}"
+                    class="sort-menu-item">Applied Date</a>
+                <a href="{{ url_for('index', sort_by='deadline', order=next_order, query=query, status_filter=status_filter) }}"
+                    class="sort-menu-item">Deadline</a>
+                <a href="{{ url_for('index', sort_by='status', order=next_order, query=query, status_filter=status_filter) }}"
+                    class="sort-menu-item">Status</a>
             </div>
         </div>
     </div>
@@ -58,9 +71,7 @@
                     <th>Salary</th>
                     <th>Applied</th>
                     <th>Applied Date</th>
-                    <th>Deadline</th>
-                    <th>Paid App</th>
-                    <th>Fee</th>
+                    <th>Days Left</th>
                     <th>Status</th>
                     <th>Website</th>
                     <th>Actions</th>
@@ -82,19 +93,18 @@
                     </td>
                     <td class="date-cell">{{ job.applied_date or 'N/A' }}</td>
                     <td class="deadline-cell">
-                        {% if job.deadline %}
-                            <span class="deadline-date">{{ job.deadline }}</span>
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </td>
-                    <td class="paid-cell">
-                        <span class="status-badge {% if job.paid_application %}paid-yes{% else %}paid-no{% endif %}">
-                            {% if job.paid_application %}💰 Yes{% else %}Free{% endif %}
-                        </span>
-                    </td>
-                    <td class="fee-cell">
-                        {% if job.application_fee %}${{ job.application_fee }}{% else %}$0{% endif %}
+                        {% if job.days_left is not none %}
+                        {% if job.days_left < 0 %} <span class="deadline-overdue">{{ job.days_left|abs }} days
+                            ago</span>
+                            {% elif job.days_left == 0 %}
+                            <span class="deadline-today">Today</span>
+                            {% elif job.days_left <= 7 %} <span class="deadline-soon">{{ job.days_left }} days</span>
+                                {% else %}
+                                <span class="deadline-normal">{{ job.days_left }} days</span>
+                                {% endif %}
+                                {% else %}
+                                N/A
+                                {% endif %}
                     </td>
                     <td class="status-cell">
                         <span class="status-badge status-{{ job.status.lower().replace(' ', '-') }}">
@@ -103,14 +113,15 @@
                     </td>
                     <td class="website-cell">
                         {% if job.job_url %}
-                            <a href="{{ job.job_url }}" target="_blank" class="website-link">🔗 View</a>
+                        <a href="{{ job.job_url }}" target="_blank" class="website-link">🔗 View</a>
                         {% else %}
-                            N/A
+                        N/A
                         {% endif %}
                     </td>
                     <td class="actions-cell">
                         <button onclick="openEditJobModal({{ job.id }})" class="btn btn-edit">Edit</button>
-                        <a href="{{ url_for('delete_job', job_id=job.id) }}" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this job?')">Delete</a>
+                        <a href="{{ url_for('delete_job', job_id=job.id) }}" class="btn btn-delete"
+                            onclick="return confirm('Are you sure you want to delete this job?')">Delete</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -163,25 +174,16 @@
                     <label for="deadline">Application Deadline</label>
                     <input type="date" id="deadline" name="deadline">
                 </div>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <label>
-                            <input type="checkbox" name="paid_application"> Paid Application
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label for="application_fee">Application Fee</label>
-                        <input type="number" id="application_fee" name="application_fee" placeholder="0">
-                    </div>
-                </div>
                 <div class="form-group">
                     <label for="status">Status</label>
                     <select id="status" name="status">
                         <option value="Interested">Interested</option>
                         <option value="Applied">Applied</option>
-                        <option value="Interview Scheduled">Interview Scheduled</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Admit Card Downloaded">Admit Card Downloaded</option>
+                        <option value="Preliminary Qualified">Preliminary Qualified</option>
+                        <option value="Written Qualified">Written Qualified</option>
                         <option value="Rejected">Rejected</option>
-                        <option value="Offer Received">Offer Received</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -238,25 +240,16 @@
                     <label for="editDeadline">Application Deadline</label>
                     <input type="date" id="editDeadline" name="deadline">
                 </div>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <label>
-                            <input type="checkbox" id="editPaidApplication" name="paid_application"> Paid Application
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label for="editApplicationFee">Application Fee</label>
-                        <input type="number" id="editApplicationFee" name="application_fee">
-                    </div>
-                </div>
                 <div class="form-group">
                     <label for="editStatus">Status</label>
                     <select id="editStatus" name="status">
                         <option value="Interested">Interested</option>
                         <option value="Applied">Applied</option>
-                        <option value="Interview Scheduled">Interview Scheduled</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Admit Card Downloaded">Admit Card Downloaded</option>
+                        <option value="Preliminary Qualified">Preliminary Qualified</option>
+                        <option value="Written Qualified">Written Qualified</option>
                         <option value="Rejected">Rejected</option>
-                        <option value="Offer Received">Offer Received</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -270,4 +263,5 @@
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>

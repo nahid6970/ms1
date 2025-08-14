@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, date
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 app = Flask(__name__)
@@ -26,6 +26,17 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
+def calculate_days_left(deadline_str):
+    if not deadline_str:
+        return None
+    try:
+        deadline = datetime.strptime(deadline_str, '%Y-%m-%d').date()
+        today = date.today()
+        days_left = (deadline - today).days
+        return days_left
+    except:
+        return None
+
 @app.route('/')
 def index():
     sort_by = request.args.get('sort_by', 'company')
@@ -35,6 +46,10 @@ def index():
 
     jobs = load_data()
 
+    # Add days_left calculation for each job
+    for job in jobs:
+        job['days_left'] = calculate_days_left(job.get('deadline'))
+
     # Filter jobs based on query
     if query:
         jobs = [job for job in jobs if query.lower() in job['company'].lower() or 
@@ -42,7 +57,7 @@ def index():
 
     # Filter by status
     if status_filter != 'all':
-        jobs = [job for job in jobs if job.get('status', '').lower() == status_filter.lower()]
+        jobs = [job for job in jobs if job.get('status', '').lower().replace(' ', '-') == status_filter.lower()]
 
     # Sort jobs
     if sort_by == 'company':
@@ -77,9 +92,7 @@ def add_job():
             'applied': request.form.get('applied') == 'on',
             'applied_date': request.form.get('applied_date', ''),
             'deadline': request.form.get('deadline', ''),
-            'paid_application': request.form.get('paid_application') == 'on',
-            'application_fee': request.form.get('application_fee', ''),
-            'status': request.form.get('status', 'Not Applied'),
+            'status': request.form.get('status', 'Interested'),
             'notes': request.form.get('notes', ''),
             'created_date': datetime.now().isoformat()
         }
@@ -104,9 +117,7 @@ def edit_job(job_id):
         job['applied'] = request.form.get('applied') == 'on'
         job['applied_date'] = request.form.get('applied_date', '')
         job['deadline'] = request.form.get('deadline', '')
-        job['paid_application'] = request.form.get('paid_application') == 'on'
-        job['application_fee'] = request.form.get('application_fee', '')
-        job['status'] = request.form.get('status', 'Not Applied')
+        job['status'] = request.form.get('status', 'Interested')
         job['notes'] = request.form.get('notes', '')
         save_data(jobs)
         return redirect(url_for('index'))

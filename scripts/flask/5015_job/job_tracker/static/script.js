@@ -20,8 +20,6 @@ function openEditJobModal(jobId) {
             document.getElementById('editApplied').checked = job.applied;
             document.getElementById('editAppliedDate').value = job.applied_date || '';
             document.getElementById('editDeadline').value = job.deadline || '';
-            document.getElementById('editPaidApplication').checked = job.paid_application;
-            document.getElementById('editApplicationFee').value = job.application_fee || '';
             document.getElementById('editStatus').value = job.status;
             document.getElementById('editNotes').value = job.notes || '';
             
@@ -86,14 +84,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Show/hide application fee field based on paid application checkbox
-    const paidCheckboxes = document.querySelectorAll('input[name="paid_application"]');
-    paidCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const feeInput = this.closest('form').querySelector('input[name="application_fee"]');
-            if (!this.checked) {
-                feeInput.value = '';
-            }
-        });
-    });
+
 });
