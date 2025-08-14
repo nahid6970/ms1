@@ -64,8 +64,7 @@ def index():
         jobs.sort(key=lambda x: x['company'].lower(), reverse=(order == 'desc'))
     elif sort_by == 'position':
         jobs.sort(key=lambda x: x['position'].lower(), reverse=(order == 'desc'))
-    elif sort_by == 'salary':
-        jobs.sort(key=lambda x: float(x.get('salary', 0)) if x.get('salary') else 0, reverse=(order == 'desc'))
+
     elif sort_by == 'applied_date':
         jobs.sort(key=lambda x: x.get('applied_date', ''), reverse=(order == 'desc'))
     elif sort_by == 'deadline':
@@ -86,10 +85,7 @@ def add_job():
             'id': max([job['id'] for job in jobs], default=0) + 1,
             'company': request.form['company'],
             'position': request.form['position'],
-            'location': request.form.get('location', ''),
-            'salary': request.form.get('salary', ''),
             'job_url': request.form.get('job_url', ''),
-            'applied': request.form.get('applied') == 'on',
             'applied_date': request.form.get('applied_date', ''),
             'deadline': request.form.get('deadline', ''),
             'status': request.form.get('status', 'Interested'),
@@ -111,10 +107,7 @@ def edit_job(job_id):
     if request.method == 'POST':
         job['company'] = request.form['company']
         job['position'] = request.form['position']
-        job['location'] = request.form.get('location', '')
-        job['salary'] = request.form.get('salary', '')
         job['job_url'] = request.form.get('job_url', '')
-        job['applied'] = request.form.get('applied') == 'on'
         job['applied_date'] = request.form.get('applied_date', '')
         job['deadline'] = request.form.get('deadline', '')
         job['status'] = request.form.get('status', 'Interested')

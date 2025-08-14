@@ -7,38 +7,10 @@
         "salary": "50000",
         "job_url": "https://wewb.teletalk.com.bd/",
         "applied": true,
-        "applied_date": "2025-08-10",
-        "deadline": "2025-08-20",
+        "applied_date": "2025-09-07",
+        "deadline": "2025-09-07",
         "status": "Interested",
         "notes": "Government job application",
         "created_date": "2025-08-14T15:32:18.335818"
-    },
-    {
-        "id": 2,
-        "company": "Bangladesh Bank",
-        "position": "Officer",
-        "location": "Dhaka",
-        "salary": "45000",
-        "job_url": "https://bb.org.bd/",
-        "applied": true,
-        "applied_date": "2025-08-12",
-        "deadline": "2025-08-25",
-        "status": "Paid",
-        "notes": "Banking sector job",
-        "created_date": "2025-08-12T10:15:00"
-    },
-    {
-        "id": 3,
-        "company": "BCS",
-        "position": "Assistant Commissioner",
-        "location": "Nationwide",
-        "salary": "60000",
-        "job_url": "https://bpsc.gov.bd/",
-        "applied": true,
-        "applied_date": "2025-08-05",
-        "deadline": "2025-08-30",
-        "status": "Preliminary Qualified",
-        "notes": "Civil service exam",
-        "created_date": "2025-08-05T14:30:00"
     }
 ]

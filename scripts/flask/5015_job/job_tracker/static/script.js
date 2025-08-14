@@ -14,10 +14,7 @@ function openEditJobModal(jobId) {
             document.getElementById('editJobForm').action = `/edit_job/${jobId}`;
             document.getElementById('editCompany').value = job.company;
             document.getElementById('editPosition').value = job.position;
-            document.getElementById('editLocation').value = job.location || '';
-            document.getElementById('editSalary').value = job.salary || '';
             document.getElementById('editJobUrl').value = job.job_url || '';
-            document.getElementById('editApplied').checked = job.applied;
             document.getElementById('editAppliedDate').value = job.applied_date || '';
             document.getElementById('editDeadline').value = job.deadline || '';
             document.getElementById('editStatus').value = job.status;
@@ -72,17 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Form validation and enhancements
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-fill applied date when "Applied" checkbox is checked
-    const appliedCheckboxes = document.querySelectorAll('input[name="applied"]');
-    appliedCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const dateInput = this.closest('form').querySelector('input[name="applied_date"]');
-            if (this.checked && !dateInput.value) {
-                const today = new Date().toISOString().split('T')[0];
-                dateInput.value = today;
-            }
-        });
-    });
+
     
 
 });

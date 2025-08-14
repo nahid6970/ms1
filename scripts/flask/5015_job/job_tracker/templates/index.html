@@ -37,7 +37,6 @@
                 Sort by
                 {% if sort_by == 'company' %}Company
                 {% elif sort_by == 'position' %}Position
-                {% elif sort_by == 'salary' %}Salary
                 {% elif sort_by == 'applied_date' %}Applied Date
                 {% elif sort_by == 'deadline' %}Deadline
                 {% elif sort_by == 'status' %}Status
@@ -49,8 +48,7 @@
                     class="sort-menu-item">Company</a>
                 <a href="{{ url_for('index', sort_by='position', order=next_order, query=query, status_filter=status_filter) }}"
                     class="sort-menu-item">Position</a>
-                <a href="{{ url_for('index', sort_by='salary', order=next_order, query=query, status_filter=status_filter) }}"
-                    class="sort-menu-item">Salary</a>
+
                 <a href="{{ url_for('index', sort_by='applied_date', order=next_order, query=query, status_filter=status_filter) }}"
                     class="sort-menu-item">Applied Date</a>
                 <a href="{{ url_for('index', sort_by='deadline', order=next_order, query=query, status_filter=status_filter) }}"
@@ -67,9 +65,6 @@
                 <tr>
                     <th>Company</th>
                     <th>Position</th>
-                    <th>Location</th>
-                    <th>Salary</th>
-                    <th>Applied</th>
                     <th>Applied Date</th>
                     <th>Days Left</th>
                     <th>Status</th>
@@ -82,15 +77,6 @@
                 <tr class="job-row status-{{ job.status.lower().replace(' ', '-') }}">
                     <td class="company-cell">{{ job.company }}</td>
                     <td class="position-cell">{{ job.position }}</td>
-                    <td class="location-cell">{{ job.location or 'N/A' }}</td>
-                    <td class="salary-cell">
-                        {% if job.salary %}${{ "{:,}".format(job.salary|int) }}{% else %}N/A{% endif %}
-                    </td>
-                    <td class="applied-cell">
-                        <span class="status-badge {% if job.applied %}applied-yes{% else %}applied-no{% endif %}">
-                            {% if job.applied %}✓ Yes{% else %}✗ No{% endif %}
-                        </span>
-                    </td>
                     <td class="date-cell">{{ job.applied_date or 'N/A' }}</td>
                     <td class="deadline-cell">
                         {% if job.days_left is not none %}
@@ -145,30 +131,13 @@
                         <input type="text" id="position" name="position" required>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <input type="text" id="location" name="location">
-                    </div>
-                    <div class="form-group">
-                        <label for="salary">Salary</label>
-                        <input type="number" id="salary" name="salary" placeholder="Annual salary">
-                    </div>
-                </div>
                 <div class="form-group">
                     <label for="job_url">Job Website URL</label>
                     <input type="url" id="job_url" name="job_url" placeholder="https://...">
                 </div>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <label>
-                            <input type="checkbox" name="applied"> Applied
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label for="applied_date">Applied Date</label>
-                        <input type="date" id="applied_date" name="applied_date">
-                    </div>
+                <div class="form-group">
+                    <label for="applied_date">Applied Date</label>
+                    <input type="date" id="applied_date" name="applied_date">
                 </div>
                 <div class="form-group">
                     <label for="deadline">Application Deadline</label>
@@ -211,30 +180,13 @@
                         <input type="text" id="editPosition" name="position" required>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="editLocation">Location</label>
-                        <input type="text" id="editLocation" name="location">
-                    </div>
-                    <div class="form-group">
-                        <label for="editSalary">Salary</label>
-                        <input type="number" id="editSalary" name="salary">
-                    </div>
-                </div>
                 <div class="form-group">
                     <label for="editJobUrl">Job Website URL</label>
                     <input type="url" id="editJobUrl" name="job_url">
                 </div>
-                <div class="form-row">
-                    <div class="form-group checkbox-group">
-                        <label>
-                            <input type="checkbox" id="editApplied" name="applied"> Applied
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label for="editAppliedDate">Applied Date</label>
-                        <input type="date" id="editAppliedDate" name="applied_date">
-                    </div>
+                <div class="form-group">
+                    <label for="editAppliedDate">Applied Date</label>
+                    <input type="date" id="editAppliedDate" name="applied_date">
                 </div>
                 <div class="form-group">
                     <label for="editDeadline">Application Deadline</label>
