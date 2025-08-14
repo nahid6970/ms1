@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="top-center-controls">
+        <button onclick="openAddJobModal()" class="add-button"><i class="nf nf-cod-add"></i>Add Job</button>
+        <a href="{{ url_for('index') }}" class="add-button"><i class="nf nf-fa-home"></i>Home</a>
+    </div>
+
+    <div class="controls-container">
+        <form action="/" method="get" class="search-form">
+            <input type="text" name="query" placeholder="Search Jobs" value="{{ query if query }}">
+            <select name="status_filter" class="status-filter">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                <option value="interested" {% if status_filter == 'interested' %}selected{% endif %}>Interested</option>
+                <option value="applied" {% if status_filter == 'applied' %}selected{% endif %}>Applied</option>
+                <option value="interview scheduled" {% if status_filter == 'interview scheduled' %}selected{% endif %}>Interview Scheduled</option>
+                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                <option value="offer received" {% if status_filter == 'offer received' %}selected{% endif %}>Offer Received</option>
+            </select>
+            <button type="submit" class="btn">Search</button>
+        </form>
+        <div class="sort-menu-container">
+            <button class="sort-menu-button" onclick="toggleSortMenu()">
+                Sort by 
+                {% if sort_by == 'company' %}Company
+                {% elif sort_by == 'position' %}Position
+                {% elif sort_by == 'salary' %}Salary
+                {% elif sort_by == 'applied_date' %}Applied Date
+                {% elif sort_by == 'deadline' %}Deadline
+                {% elif sort_by == 'status' %}Status
+                {% endif %}
+                <span class="sort-chevron">▼</span>
+            </button>
+            <div class="sort-menu-dropdown" id="sortMenuDropdown">
+                <a href="{{ url_for('index', sort_by='company', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Company</a>
+                <a href="{{ url_for('index', sort_by='position', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Position</a>
+                <a href="{{ url_for('index', sort_by='salary', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Salary</a>
+                <a href="{{ url_for('index', sort_by='applied_date', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Applied Date</a>
+                <a href="{{ url_for('index', sort_by='deadline', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Deadline</a>
+                <a href="{{ url_for('index', sort_by='status', order=next_order, query=query, status_filter=status_filter) }}" class="sort-menu-item">Status</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="jobs-table-container">
+        <table class="jobs-table">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Position</th>
+                    <th>Location</th>
+                    <th>Salary</th>
+                    <th>Applied</th>
+                    <th>Applied Date</th>
+                    <th>Deadline</th>
+                    <th>Paid App</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                    <th>Website</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr class="job-row status-{{ job.status.lower().replace(' ', '-') }}">
+                    <td class="company-cell">{{ job.company }}</td>
+                    <td class="position-cell">{{ job.position }}</td>
+                    <td class="location-cell">{{ job.location or 'N/A' }}</td>
+                    <td class="salary-cell">
+                        {% if job.salary %}${{ "{:,}".format(job.salary|int) }}{% else %}N/A{% endif %}
+                    </td>
+                    <td class="applied-cell">
+                        <span class="status-badge {% if job.applied %}applied-yes{% else %}applied-no{% endif %}">
+                            {% if job.applied %}✓ Yes{% else %}✗ No{% endif %}
+                        </span>
+                    </td>
+                    <td class="date-cell">{{ job.applied_date or 'N/A' }}</td>
+                    <td class="deadline-cell">
+                        {% if job.deadline %}
+                            <span class="deadline-date">{{ job.deadline }}</span>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td class="paid-cell">
+                        <span class="status-badge {% if job.paid_application %}paid-yes{% else %}paid-no{% endif %}">
+                            {% if job.paid_application %}💰 Yes{% else %}Free{% endif %}
+                        </span>
+                    </td>
+                    <td class="fee-cell">
+                        {% if job.application_fee %}${{ job.application_fee }}{% else %}$0{% endif %}
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-{{ job.status.lower().replace(' ', '-') }}">
+                            {{ job.status }}
+                        </span>
+                    </td>
+                    <td class="website-cell">
+                        {% if job.job_url %}
+                            <a href="{{ job.job_url }}" target="_blank" class="website-link">🔗 View</a>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td class="actions-cell">
+                        <button onclick="openEditJobModal({{ job.id }})" class="btn btn-edit">Edit</button>
+                        <a href="{{ url_for('delete_job', job_id=job.id) }}" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this job?')">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Job Modal -->
+    <div id="addJobModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddJobModal()">&times;</span>
+            <h2>Add New Job Application</h2>
+            <form action="{{ url_for('add_job') }}" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="company">Company *</label>
+                        <input type="text" id="company" name="company" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position *</label>
+                        <input type="text" id="position" name="position" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location">
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salary</label>
+                        <input type="number" id="salary" name="salary" placeholder="Annual salary">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="job_url">Job Website URL</label>
+                    <input type="url" id="job_url" name="job_url" placeholder="https://...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" name="applied"> Applied
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="applied_date">Applied Date</label>
+                        <input type="date" id="applied_date" name="applied_date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">Application Deadline</label>
+                    <input type="date" id="deadline" name="deadline">
+                </div>
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" name="paid_application"> Paid Application
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="application_fee">Application Fee</label>
+                        <input type="number" id="application_fee" name="application_fee" placeholder="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="Interested">Interested</option>
+                        <option value="Applied">Applied</option>
+                        <option value="Interview Scheduled">Interview Scheduled</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Offer Received">Offer Received</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Job</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Job Modal -->
+    <div id="editJobModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditJobModal()">&times;</span>
+            <h2>Edit Job Application</h2>
+            <form id="editJobForm" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCompany">Company *</label>
+                        <input type="text" id="editCompany" name="company" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPosition">Position *</label>
+                        <input type="text" id="editPosition" name="position" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editLocation">Location</label>
+                        <input type="text" id="editLocation" name="location">
+                    </div>
+                    <div class="form-group">
+                        <label for="editSalary">Salary</label>
+                        <input type="number" id="editSalary" name="salary">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editJobUrl">Job Website URL</label>
+                    <input type="url" id="editJobUrl" name="job_url">
+                </div>
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="editApplied" name="applied"> Applied
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAppliedDate">Applied Date</label>
+                        <input type="date" id="editAppliedDate" name="applied_date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editDeadline">Application Deadline</label>
+                    <input type="date" id="editDeadline" name="deadline">
+                </div>
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="editPaidApplication" name="paid_application"> Paid Application
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="editApplicationFee">Application Fee</label>
+                        <input type="number" id="editApplicationFee" name="application_fee">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">Status</label>
+                    <select id="editStatus" name="status">
+                        <option value="Interested">Interested</option>
+                        <option value="Applied">Applied</option>
+                        <option value="Interview Scheduled">Interview Scheduled</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Offer Received">Offer Received</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">Notes</label>
+                    <textarea id="editNotes" name="notes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
