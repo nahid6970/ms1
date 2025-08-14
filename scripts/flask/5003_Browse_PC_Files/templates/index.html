@@ -489,7 +489,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 {% for file in files %}
                 <li class="file-item" data-filetype="{{ file.split('.')[-1] }}">
                     <div class="file-name">
-                        <span>📃</span>
+                        <span>{{ file_icons[file] }}</span>
                         <a href="/view/{{ current_dir }}/{{ file | urlencode }}">{{ file }}</a>
                         <br>
                         <small style="color: #ddd;">

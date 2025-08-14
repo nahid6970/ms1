@@ -25,6 +25,78 @@ def get_size(path):
         return format_size(os.path.getsize(path))
     return "0 B"
 
+def get_file_icon(filename):
+    """Return appropriate icon based on file extension."""
+    ext = filename.lower().split('.')[-1] if '.' in filename else ''
+    
+    # Image files
+    if ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'ico']:
+        return '🖼️'
+    
+    # Video files
+    elif ext in ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm4v']:
+        return '🎬'
+    
+    # Audio files
+    elif ext in ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma']:
+        return '🎵'
+    
+    # Document files
+    elif ext in ['pdf']:
+        return '📄'
+    elif ext in ['doc', 'docx']:
+        return '📝'
+    elif ext in ['xls', 'xlsx']:
+        return '📊'
+    elif ext in ['ppt', 'pptx']:
+        return '📋'
+    
+    # Code files
+    elif ext in ['py']:
+        return '🐍'
+    elif ext in ['js']:
+        return '🟨'
+    elif ext in ['html', 'htm']:
+        return '🌐'
+    elif ext in ['css']:
+        return '🎨'
+    elif ext in ['json']:
+        return '📋'
+    elif ext in ['xml']:
+        return '📄'
+    elif ext in ['sql']:
+        return '🗃️'
+    
+    # Script files
+    elif ext in ['ps1']:
+        return '💙'
+    elif ext in ['ahk']:
+        return '⚙️'
+    elif ext in ['bat', 'cmd']:
+        return '⚫'
+    elif ext in ['sh']:
+        return '🐚'
+    
+    # Archive files
+    elif ext in ['zip', 'rar', '7z', 'tar', 'gz', 'bz2']:
+        return '📦'
+    elif ext in ['iso']:
+        return '💿'
+    
+    # Executable files
+    elif ext in ['exe', 'msi']:
+        return '⚙️'
+    elif ext in ['apk']:
+        return '📱'
+    
+    # Text files
+    elif ext in ['txt', 'md', 'log', 'ini', 'cfg', 'conf']:
+        return '📃'
+    
+    # Binary/Unknown files
+    else:
+        return '📄'
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     drive = request.args.get('drive', 'C:/')
@@ -44,15 +116,19 @@ def index():
         file_sizes = {
             f: get_size(os.path.join(dir_path, f)) for f in files
         }
+        file_icons = {
+            f: get_file_icon(f) for f in files
+        }
     except Exception as e:
         flash(f"Error accessing directory: {e}")
-        directories, files, file_times, file_sizes = [], [], {}, {}
+        directories, files, file_times, file_sizes, file_icons = [], [], {}, {}, {}
 
     return render_template('index.html',
                            directories=directories,
                            files=files,
                            file_times=file_times,
                            file_sizes=file_sizes,
+                           file_icons=file_icons,
                            current_dir=dir_path,
                            current_drive=drive,
                            editable_extensions=EDITABLE_EXTENSIONS)
