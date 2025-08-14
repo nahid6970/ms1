@@ -8,39 +8,44 @@
     <title>PC File Browser</title>
 
     <style>
-    @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+        @import url("https://www.nerdfonts.com/assets/css/webfont.css");
 
-    body {
-    font-family: JetBrainsMono NFP, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
-    padding-top: 120px; /* Make room for fixed bars */
-    }
+        body {
+            font-family: JetBrainsMono NFP, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            padding-top: 80px;
+            /* Make room for navigation bar */
+        }
 
-    /* WebKit browsers (Chrome, Safari) */
-    html,
-    body {
-    background-color: #bad1ff;
-    scrollbar-width: thin;
-    scrollbar-color: #ff0000 #000000; /* black background and red thumb */
-    }
+        /* WebKit browsers (Chrome, Safari) */
+        html,
+        body {
+            background-color: #bad1ff;
+            scrollbar-width: thin;
+            scrollbar-color: #ff0000 #000000;
+            /* black background and red thumb */
+        }
 
-    /* WebKit browsers (Chrome, Safari) */
-    html::-webkit-scrollbar,
-    body::-webkit-scrollbar {
-    width: 1px; /* Set the width of the scrollbar */
-    }
+        /* WebKit browsers (Chrome, Safari) */
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 1px;
+            /* Set the width of the scrollbar */
+        }
 
-    html::-webkit-scrollbar-thumb,
-    body::-webkit-scrollbar-thumb {
-    background-color: #ff000f; /* Color of the thumb (red) */
-    }
+        html::-webkit-scrollbar-thumb,
+        body::-webkit-scrollbar-thumb {
+            background-color: #ff000f;
+            /* Color of the thumb (red) */
+        }
 
-    html::-webkit-scrollbar-track,
-    body::-webkit-scrollbar-track {
-    background-color: #000000; /* Color of the track (black) */
-    }
+        html::-webkit-scrollbar-track,
+        body::-webkit-scrollbar-track {
+            background-color: #000000;
+            /* Color of the track (black) */
+        }
 
 
         h1 {
@@ -61,47 +66,56 @@
             margin-right: 0;
         }
 
-    .directory-list {
-    margin-top: 20px;
-    padding: 0;
-    display: flex;       /* Enable flex layout */
-    flex-wrap: wrap;     /* Wrap items to the next row */
-    }
-    .directory-list li {
-    list-style-type: none;
-    margin: 5px;         /* Use margin on all sides for spacing */
-    display: flex;
-    align-items: center;     /* Center vertically */
-    padding: 10px;
-    border-radius: 0px;
-    background-color: #3f3d36;
-    flex-grow: 1;        /* Allow items to grow and fill available space */
-    text-align: center;
-    }
-    .directory-list a {
-    text-decoration: none;
-    color: #e3e300;
-    font-weight: bold;
-    overflow-wrap: anywhere;
-    width: 100%;
-    }
-    .folder-icon {
-    margin-right: 5px;
-    color: yellow;
-    }
+        .directory-list {
+            margin-top: 20px;
+            padding: 0;
+            display: flex;
+            /* Enable flex layout */
+            flex-wrap: wrap;
+            /* Wrap items to the next row */
+        }
 
-    .file-list {
-    margin-top: 20px;
-    padding: 0;
-    }
-    .file-list li {
-    list-style-type: none;
-    margin: 5px 0;
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 0px;
-    }
+        .directory-list li {
+            list-style-type: none;
+            margin: 5px;
+            /* Use margin on all sides for spacing */
+            display: flex;
+            align-items: center;
+            /* Center vertically */
+            padding: 10px;
+            border-radius: 0px;
+            background-color: #3f3d36;
+            flex-grow: 1;
+            /* Allow items to grow and fill available space */
+            text-align: center;
+        }
+
+        .directory-list a {
+            text-decoration: none;
+            color: #e3e300;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+            width: 100%;
+        }
+
+        .folder-icon {
+            margin-right: 5px;
+            color: yellow;
+        }
+
+        .file-list {
+            margin-top: 20px;
+            padding: 0;
+        }
+
+        .file-list li {
+            list-style-type: none;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 0px;
+        }
 
 
 
@@ -147,349 +161,481 @@
 
 
 
-    .drive-back-container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    /* Aligns items to the left */
-    margin-bottom: 20px;
-    }
-    .drive-buttons {
-    font-family: JetBrainsMono NFP, sans-serif;
-    position: fixed;  /* Fix it at the top */
-    z-index: 9999;    /* Ensure it's on top of other elements */
-    display: flex;
-    align-items: center;
-    background-color: #333; /* Dark background */
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    top: 10px;        /* 10px from the top */
-    left: 10px;
-    }
-    .drive-buttons form {
-    margin-right: 10px;
-    }
+        .top-navigation {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            z-index: 9999;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-    .bookmark-bar {
-    font-family: JetBrainsMono NFP, sans-serif;
-    position: fixed;
-    z-index: 9998;
-    display: flex;
-    align-items: center;
-    background-color: #444;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 5px;
-    top: 60px;
-    left: 10px;
-    width: auto;
-    overflow: visible;
-    }
-    .bookmark-bar button {
-    background-color: #555;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    margin-right: 5px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
-    white-space: nowrap;
-    }
-    .bookmark-bar button:hover {
-    background-color: #666;
-    }
-    .bookmark-add-btn {
-    background-color: #4CAF50 !important;
-    margin-right: 10px;
-    }
-    .bookmark-add-btn:hover {
-    background-color: #45a049 !important;
-    }
-    .bookmark-dropdown {
-    position: relative;
-    display: inline-block;
-    }
-    .bookmark-dropdown-content {
-    display: none;
-    position: fixed;
-    top: 110px;
-    left: 150px;
-    background-color: #2e2e2e;
-    min-width: 250px;
-    max-width: 400px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
-    z-index: 10000;
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #555;
-    border-radius: 5px;
-    }
-    .bookmark-dropdown-content.show {
-    display: block;
-    }
-    .bookmark-dropdown-content a {
-    color: #ffffff;
-    padding: 10px 15px;
-    text-decoration: none;
-    display: block;
-    font-size: 13px;
-    border-bottom: 1px solid #444;
-    }
-    .bookmark-dropdown-content a:hover {
-    background-color: #444;
-    }
-    .bookmark-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 15px;
-    border-bottom: 1px solid #444;
-    }
-    .bookmark-item:hover {
-    background-color: #444;
-    }
-    .bookmark-item a {
-    flex-grow: 1;
-    padding: 0;
-    border: none;
-    }
-    .bookmark-remove {
-    color: #ff6b6b;
-    cursor: pointer;
-    margin-left: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 3px;
-    }
-    .bookmark-remove:hover {
-    background-color: #ff6b6b;
-    color: white;
-    }
+        .nav-groups {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
 
-    .back-btn {
-    padding: 3px 3px;
-    color: rgb(255, 255, 255);
-    border-radius: 5px;
-    text-decoration: none;
-    }
-    .back-btn:hover {
-    color: #e64b2c;
-    }
+        .drive-group,
+        .bookmark-group {
+            font-family: JetBrainsMono NFP, sans-serif;
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            gap: 10px;
+        }
 
-    .current-path {
-    font-weight: bold;
-    margin-top: 10px;
-    }
+        .bookmark-group {
+            background-color: #444;
+        }
 
-    .flash {
-    color: green;
-    font-weight: bold;
-    margin-top: 20px;
-    }
+        .drive-group form {
+            margin: 0;
+        }
 
-    .dot {
-    margin-right: 8px;
-    color: #6bc0f8;
-    }
+        .drive-group button,
+        .bookmark-group button {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+        }
 
+        .drive-group button:hover,
+        .bookmark-group button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
 
-    
-#filter-btn {
-font-family: JetBrainsMono NFP, sans-serif;
-position: fixed;  /* Fix it at the top */
-top: 10px;        /* 10px from the top */
-right: 10px;      /* 10px from the right */
-z-index: 9999;    /* Ensure it's on top of other elements */
-background-color: #08ff3d; /* Dark background */
-color: rgb(0, 0, 0);
-padding: 10px 15px;
-border: 2px thin;
-border-radius: 0px;
-border: 2px thin;
-cursor: pointer;
-}
-#filter-btn:hover {
-background-color: #555; /* Lighter color on hover */
-}
-#filter-panel {
-display: none; /* Initially hidden */
-position: fixed;  /* Fixed position relative to the viewport */
-top: 50px;         /* Position it just below the filter button */
-right: 10px;       /* Align it to the right */
-background-color: white;
-padding: 5px;
-border: 1px solid #ccc;
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-z-index: 999;      /* Make sure it's above other elements */
-width: 300px;      /* Set the width of the filter panel */
-max-height: 80%;   /* Ensure it doesn't take up the entire screen height */
-overflow-y: auto;  /* Scroll if content exceeds max-height */
-}
-.filter-container {
-display: grid;
-grid-template-columns: repeat(3, 1fr); /* Three equal columns */
-gap: 10px; /* Space between columns */
-max-width: 600px; /* Prevents full-width stretching */
-}
-.filter-group {
-display: flex;
-flex-direction: column;
-gap: 5px;
-background-color: #2e2e2e; /* Optional background */
-padding: 10px;
-border-radius: 5px;
-}
-.filter-group h4 {
-height: 50px;
-margin: 0;
-font-size: 13px;
-color: yellow;
-text-align: center;
-align-content: center;
-}
-.filter-group label {
-color: #ffffff;
-display: flex;
-align-items: center;
-gap: 5px;
-font-size: 12px;
-}
-/* Apply Filter Button Styles */
-#filter-panel button {
-font-family: JetBrainsMono NFP, sans-serif;
-display: block; /* Make button a block-level element */
-margin: 5px auto 0; /* Center the button horizontally and add top margin */
-padding: 10px 20px; /* Add some padding for the button */
-background-color: #4CAF50; /* Green background */
-color: white; /* White text */
-font-size: 14px;
-font-weight: bold;
-border: none; /* Remove border */
-border-radius: 5px; /* Rounded corners */
-cursor: pointer; /* Pointer cursor on hover */
-text-align: center; /* Center text inside the button */
-transition: background-color 0.3s ease; /* Smooth background color transition */
-}
-/* Hover effect for the button */
-#filter-panel button:hover {
-background-color: #fc5c2c; /* Darker green when hovering */
-}
+        .bookmark-bar {
+            font-family: JetBrainsMono NFP, sans-serif;
+            position: fixed;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            background-color: #444;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            top: 60px;
+            left: 10px;
+            width: auto;
+            overflow: visible;
+        }
 
+        .bookmark-bar button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+        }
 
-    .download-btn {
-    padding: 5px 10px;
-    background-color: rgb(119, 255, 119);
-    color: black !important;
-    /* Change text color for Download button */
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: 10px;
-    }
-    .download-btn:hover {
-    background-color: #45a049;
-    }
+        .bookmark-bar button:hover {
+            background-color: #666;
+        }
 
-    .edit-btn {
-    padding: 5px 10px;
-    background-color: #a5d9fc;
-    color: black !important;
-    /* Change text color for Download button */
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: 10px;
-    }
-    .edit-btn:hover {
-    background-color: rgb(103, 113, 255);
-    /* Change hover effect */
-    }
-    button:hover {
-    background-color: #45a049;
-    }
+        .bookmark-add-btn {
+            background-color: #4CAF50 !important;
+        }
+
+        .bookmark-add-btn:hover {
+            background-color: #45a049 !important;
+        }
+
+        .bookmark-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Responsive behavior */
+        @media screen and (max-width: 768px) {
+            .nav-groups {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .drive-group,
+            .bookmark-group {
+                width: auto;
+                /* Don't take full width */
+                justify-content: flex-start;
+                flex-shrink: 0;
+                /* Prevent shrinking */
+            }
+
+            .top-navigation {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            body {
+                padding-top: 120px;
+                /* Adjusted space for wrapped navigation */
+            }
+
+            .current-path {
+                margin-top: 20px;
+                /* More space to prevent overlap */
+            }
+        }
+
+        .bookmark-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #2e2e2e;
+            min-width: 250px;
+            max-width: 400px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .bookmark-dropdown-content.show {
+            display: block;
+        }
+
+        .bookmark-dropdown-content a {
+            color: #ffffff;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            font-size: 13px;
+            border-bottom: 1px solid #444;
+        }
+
+        .bookmark-dropdown-content a:hover {
+            background-color: #444;
+        }
+
+        .bookmark-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .bookmark-item:hover {
+            background-color: #444;
+        }
+
+        .bookmark-item a {
+            flex-grow: 1;
+            padding: 0;
+            border: none;
+        }
+
+        .bookmark-remove {
+            color: #ff6b6b;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .bookmark-remove:hover {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .back-btn {
+            padding: 3px 3px;
+            color: rgb(255, 255, 255);
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            color: #e64b2c;
+        }
+
+        .current-path {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .flash {
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .dot {
+            margin-right: 8px;
+            color: #6bc0f8;
+        }
 
 
-    div.file-actions {
-    margin-right: 0px;
-    max-width: 10px;
-    }
-    .file-actions {
-    position: relative;
-    display: inline-block;
-    max-width: 10px;
-    margin-right: 0px;
-    }
 
-    .dots-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #ff0000;
-    }
-    .dots-btn:hover {
-    color: #000;
-    }
-    .dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 20px;
-    right: 0;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 150px;
-    z-index: 1000;
-    padding: 5px 0;
-    }
-    .dropdown-menu a {
-    display: block;
-    padding: 8px 10px;
-    color: #333;
-    text-decoration: none;
-    font-size: 14px;
-    }
-    .dropdown-menu a:hover {
-    background-color: #f1f1f1;
-    }
-    .dropdown-menu a .nf {
-    margin-right: 8px;
-    }
+        #filter-btn {
+            font-family: JetBrainsMono NFP, sans-serif;
+            position: fixed;
+            /* Fix it at the top */
+            top: 10px;
+            /* 10px from the top */
+            right: 10px;
+            /* 10px from the right */
+            z-index: 9999;
+            /* Ensure it's on top of other elements */
+            background-color: #08ff3d;
+            /* Dark background */
+            color: rgb(0, 0, 0);
+            padding: 10px 15px;
+            border: 2px thin;
+            border-radius: 0px;
+            border: 2px thin;
+            cursor: pointer;
+        }
+
+        #filter-btn:hover {
+            background-color: #555;
+            /* Lighter color on hover */
+        }
+
+        #filter-panel {
+            display: none;
+            /* Initially hidden */
+            position: fixed;
+            /* Fixed position relative to the viewport */
+            top: 50px;
+            /* Position it just below the filter button */
+            right: 10px;
+            /* Align it to the right */
+            background-color: white;
+            padding: 5px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            /* Make sure it's above other elements */
+            width: 300px;
+            /* Set the width of the filter panel */
+            max-height: 80%;
+            /* Ensure it doesn't take up the entire screen height */
+            overflow-y: auto;
+            /* Scroll if content exceeds max-height */
+        }
+
+        .filter-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            /* Three equal columns */
+            gap: 10px;
+            /* Space between columns */
+            max-width: 600px;
+            /* Prevents full-width stretching */
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background-color: #2e2e2e;
+            /* Optional background */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .filter-group h4 {
+            height: 50px;
+            margin: 0;
+            font-size: 13px;
+            color: yellow;
+            text-align: center;
+            align-content: center;
+        }
+
+        .filter-group label {
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        /* Apply Filter Button Styles */
+        #filter-panel button {
+            font-family: JetBrainsMono NFP, sans-serif;
+            display: block;
+            /* Make button a block-level element */
+            margin: 5px auto 0;
+            /* Center the button horizontally and add top margin */
+            padding: 10px 20px;
+            /* Add some padding for the button */
+            background-color: #4CAF50;
+            /* Green background */
+            color: white;
+            /* White text */
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            /* Remove border */
+            border-radius: 5px;
+            /* Rounded corners */
+            cursor: pointer;
+            /* Pointer cursor on hover */
+            text-align: center;
+            /* Center text inside the button */
+            transition: background-color 0.3s ease;
+            /* Smooth background color transition */
+        }
+
+        /* Hover effect for the button */
+        #filter-panel button:hover {
+            background-color: #fc5c2c;
+            /* Darker green when hovering */
+        }
 
 
-    /* Media query for mobile screens */
-    @media screen and (max-width: 768px) {
-    body {
-    padding: 10px;
-    }
-    .container {
-    flex-direction: column;
-    }
-    .drive-back-container {
-    flex-direction: column;
-    align-items: flex-start;
-    }}
+        .download-btn {
+            padding: 5px 10px;
+            background-color: rgb(119, 255, 119);
+            color: black !important;
+            /* Change text color for Download button */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+
+        .edit-btn {
+            padding: 5px 10px;
+            background-color: #a5d9fc;
+            color: black !important;
+            /* Change text color for Download button */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .edit-btn:hover {
+            background-color: rgb(103, 113, 255);
+            /* Change hover effect */
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+
+        div.file-actions {
+            margin-right: 0px;
+            max-width: 10px;
+        }
+
+        .file-actions {
+            position: relative;
+            display: inline-block;
+            max-width: 10px;
+            margin-right: 0px;
+        }
+
+        .dots-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ff0000;
+        }
+
+        .dots-btn:hover {
+            color: #000;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 0;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 150px;
+            z-index: 1000;
+            padding: 5px 0;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 8px 10px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown-menu a .nf {
+            margin-right: 8px;
+        }
+
+
+        /* Media query for mobile screens */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                flex-direction: column;
+            }
+
+            .drive-back-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 
 <body>
 
     <!-- <h1>Browse PC Files</h1> -->
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div class="drive-back-container">
-            <div class="drive-buttons">
+    <div class="top-navigation">
+        <div class="nav-groups">
+            <!-- Drive Group -->
+            <div class="drive-group">
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="C:/"><i
-                            class="nf nf-md-alpha_c"></i>:\\</button>
+                    <button type="submit" name="drive" value="C:/"><i class="nf nf-md-alpha_c"></i>:\\</button>
                 </form>
                 <form method="GET" action="/">
-                    <button type="submit" name="drive" value="D:/"><i
-                            class="nf nf-md-alpha_d"></i>:\\</button>
+                    <button type="submit" name="drive" value="D:/"><i class="nf nf-md-alpha_d"></i>:\\</button>
                 </form>
                 <form method="GET" action="/">
                     <button type="submit" name="drive" value="C:/Users/nahid/"><i class="nf nf-fa-user"></i></button>
@@ -501,39 +647,44 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 <a href="/back?dir_path={{ current_dir }}&drive={{ current_drive }}" class="back-btn"><i
                         class="nf nf-fa-arrow_left"></i></a>
             </div>
+
+            <!-- Bookmark Group -->
+            <div class="bookmark-group">
+                <button class="bookmark-add-btn" onclick="addBookmark()">
+                    <i class="nf nf-fa-bookmark"></i> Add
+                </button>
+
+                <div class="bookmark-dropdown">
+                    <button onclick="toggleBookmarkDropdown(event)">
+                        <i class="nf nf-fa-chevron_down"></i> Bookmarks
+                    </button>
+                    <div class="bookmark-dropdown-content" id="bookmarkDropdown">
+                        {% for bookmark in bookmarks %}
+                        <div class="bookmark-item">
+                            <a href="/?dir_path={{ bookmark.path | urlencode }}&drive={{ bookmark.path | urlencode }}"
+                                onclick="closeBookmarkDropdown()">
+                                <i class="nf nf-fa-folder"></i> {{ bookmark.name }}
+                            </a>
+                            <span class="bookmark-remove"
+                                onclick="event.stopPropagation(); removeBookmark('{{ bookmark.path | replace("'", "\\'") }}');">×</span>
+                        </div>
+                        {% endfor %}
+                        {% if not bookmarks %}
+                        <div style="padding: 10px 15px; color: #999; font-style: italic; text-align: center;">
+                            No bookmarks yet
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
-        <div style="position: relative;">
+
+        <div class="filter-section">
             <button id="filter-btn" onclick="toggleFilterPanel()">Filter</button>
         </div>
     </div>
 
-    <!-- Bookmark Bar -->
-    <div class="bookmark-bar">
-        <button class="bookmark-add-btn" onclick="addBookmark()">
-            <i class="nf nf-fa-bookmark"></i> Add
-        </button>
-        
-        <div class="bookmark-dropdown">
-            <button onclick="toggleBookmarkDropdown(event)">
-                <i class="nf nf-fa-chevron_down"></i> Bookmarks
-            </button>
-            <div class="bookmark-dropdown-content" id="bookmarkDropdown">
-                {% for bookmark in bookmarks %}
-                <div class="bookmark-item">
-                    <a href="/?dir_path={{ bookmark.path | urlencode }}&drive={{ bookmark.path | urlencode }}" onclick="closeBookmarkDropdown()">
-                        <i class="nf nf-fa-folder"></i> {{ bookmark.name }}
-                    </a>
-                    <span class="bookmark-remove" onclick="event.stopPropagation(); removeBookmark('{{ bookmark.path | replace("'", "\\'") }}');">×</span>
-                </div>
-                {% endfor %}
-                {% if not bookmarks %}
-                <div style="padding: 10px 15px; color: #999; font-style: italic; text-align: center;">
-                    No bookmarks yet
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+
 
     <div id="filter-panel" style="display: none;">
         <div class="filter-container">
@@ -543,7 +694,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 <label><input type="checkbox" class="file-filter" value="png"> .png</label>
                 <label><input type="checkbox" class="file-filter" value="gif"> .gif</label>
             </div>
-        
+
             <div class="filter-group">
                 <h4>Videos & Audio</h4>
                 <label><input type="checkbox" class="file-filter" value="mp3"> .mp3</label>
@@ -551,14 +702,14 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 <label><input type="checkbox" class="file-filter" value="webm"> .webm</label>
                 <label><input type="checkbox" class="file-filter" value="mkv"> .mkv</label>
             </div>
-        
+
             <div class="filter-group">
                 <h4>Scripts</h4>
                 <label><input type="checkbox" class="file-filter" value="ahk"> .ahk</label>
                 <label><input type="checkbox" class="file-filter" value="ps1"> .ps1</label>
                 <label><input type="checkbox" class="file-filter" value="py"> .py</label>
             </div>
-        
+
             <div class="filter-group">
                 <h4>Web Files</h4>
                 <label><input type="checkbox" class="file-filter" value="html"> .html</label>
@@ -568,7 +719,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 <label><input type="checkbox" class="file-filter" value="ini"> .ini</label>
                 <label><input type="checkbox" class="file-filter" value="txt"> .txt</label>
             </div>
-        
+
             <div class="filter-group">
                 <h4>Documents</h4>
                 <label><input type="checkbox" class="file-filter" value="doc"> .doc</label>
@@ -577,7 +728,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 <label><input type="checkbox" class="file-filter" value="pptx"> .pptx</label>
                 <label><input type="checkbox" class="file-filter" value="pdf"> .pdf</label>
             </div>
-        
+
             <div class="filter-group">
                 <h4>Compressed & Executables</h4>
                 <label><input type="checkbox" class="file-filter" value="exe"> .exe</label>
@@ -588,11 +739,11 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 <label><input type="checkbox" class="file-filter" value="iso"> .iso</label>
             </div>
         </div>
-        
+
         <button onclick="applyFilter()">Apply Filter</button>
     </div>
-    
-      
+
+
 
     <!-- Path on a new row -->
     <div class="current-path">{{ current_dir }}</div>
@@ -624,7 +775,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
                             {{ file_times[file] }} - {{ file_sizes[file] }}
                         </small>
                     </div>
-        
+
                     <!-- Three dots dropdown menu placed before the edit button -->
                     <div class="file-actions">
                         <button class="dots-btn" onclick="toggleDropdown('{{ file }}')">⋮</button>
@@ -637,13 +788,13 @@ background-color: #fc5c2c; /* Darker green when hovering */
                             </a>
                         </div>
                     </div>
-        
+
                     {% if file.endswith(editable_extensions) %}
                     <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn">
                         <i class="nf nf-fa-edit"></i>
                     </a>
                     {% endif %}
-        
+
                     <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
                         <i class="nf nf-oct-download"></i>
                     </a>
@@ -651,7 +802,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 {% endfor %}
             </ul>
         </div>
-        
+
 
 
     </div>
@@ -668,45 +819,45 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 fetch(`/rename/${encodeURIComponent(currentDir)}/${encodeURIComponent(fileName)}?new_name=${encodeURIComponent(newFileName)}`, {
                     method: "GET"
                 })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload(); // Refresh page after renaming
-                    } else {
-                        response.text().then(text => alert("Error: " + text));
-                    }
-                })
-                .catch(error => alert("Request failed: " + error));
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload(); // Refresh page after renaming
+                        } else {
+                            response.text().then(text => alert("Error: " + text));
+                        }
+                    })
+                    .catch(error => alert("Request failed: " + error));
             }
         }
-    
+
         function deleteFile(currentDir, fileName) {
             if (confirm("Are you sure you want to delete " + fileName + "?")) {
                 fetch(`/delete/${encodeURIComponent(currentDir)}/${encodeURIComponent(fileName)}`, {
                     method: "DELETE"
                 })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload(); // Refresh after deletion
-                    } else {
-                        response.text().then(text => alert("Error: " + text));
-                    }
-                })
-                .catch(error => alert("Request failed: " + error));
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload(); // Refresh after deletion
+                        } else {
+                            response.text().then(text => alert("Error: " + text));
+                        }
+                    })
+                    .catch(error => alert("Request failed: " + error));
             }
         }
-    
+
         // Toggle the visibility of the filter panel
         function toggleFilterPanel() {
             const filterPanel = document.getElementById('filter-panel');
             filterPanel.style.display = (filterPanel.style.display === 'none' || filterPanel.style.display === '') ? 'block' : 'none';
         }
-    
+
         // Apply the selected filters
         function applyFilter() {
             const selectedFilters = Array.from(document.querySelectorAll('.file-filter:checked'))
                 .map(input => input.value);
             const files = document.querySelectorAll('.file-item');
-    
+
             files.forEach(file => {
                 const fileType = file.getAttribute('data-filetype');
                 if (selectedFilters.length === 0 || selectedFilters.includes(fileType)) {
@@ -716,31 +867,31 @@ background-color: #fc5c2c; /* Darker green when hovering */
                 }
             });
         }
-    
-            // Toggle the visibility of the dropdown menu
-            function toggleDropdown(fileName) {
-                const dropdownMenu = document.getElementById('dropdown-' + fileName);
-                const isVisible = dropdownMenu.style.display === 'block';
-                
-                // Hide all dropdowns before displaying the clicked one
-                const allDropdowns = document.querySelectorAll('.dropdown-menu');
-                allDropdowns.forEach(dropdown => {
-                    dropdown.style.display = 'none';
-                });
 
-                // Show or hide the clicked dropdown
-                dropdownMenu.style.display = isVisible ? 'none' : 'block';
-            }
+        // Toggle the visibility of the dropdown menu
+        function toggleDropdown(fileName) {
+            const dropdownMenu = document.getElementById('dropdown-' + fileName);
+            const isVisible = dropdownMenu.style.display === 'block';
 
-            // Close all dropdowns when clicking outside
-            window.addEventListener('click', function (event) {
-                const allDropdowns = document.querySelectorAll('.dropdown-menu');
-                allDropdowns.forEach(dropdown => {
-                    if (!dropdown.contains(event.target) && !event.target.classList.contains('dots-btn')) {
-                        dropdown.style.display = 'none';
-                    }
-                });
+            // Hide all dropdowns before displaying the clicked one
+            const allDropdowns = document.querySelectorAll('.dropdown-menu');
+            allDropdowns.forEach(dropdown => {
+                dropdown.style.display = 'none';
             });
+
+            // Show or hide the clicked dropdown
+            dropdownMenu.style.display = isVisible ? 'none' : 'block';
+        }
+
+        // Close all dropdowns when clicking outside
+        window.addEventListener('click', function (event) {
+            const allDropdowns = document.querySelectorAll('.dropdown-menu');
+            allDropdowns.forEach(dropdown => {
+                if (!dropdown.contains(event.target) && !event.target.classList.contains('dots-btn')) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
 
 
 
@@ -748,7 +899,7 @@ background-color: #fc5c2c; /* Darker green when hovering */
         window.addEventListener('click', function (event) {
             const filterPanel = document.getElementById('filter-panel');
             const filterButton = document.getElementById('filter-btn');
-    
+
             if (!filterPanel.contains(event.target) && event.target !== filterButton) {
                 filterPanel.style.display = 'none';
             }
@@ -759,10 +910,10 @@ background-color: #fc5c2c; /* Darker green when hovering */
             const currentPath = "{{ current_dir }}";
             const defaultName = currentPath.split('/').pop() || currentPath.split('\\').pop() || "Bookmark";
             const bookmarkName = prompt("Enter bookmark name:", defaultName);
-            
+
             if (bookmarkName && bookmarkName.trim()) {
                 console.log('Adding bookmark:', { path: currentPath, name: bookmarkName.trim() });
-                
+
                 fetch('/add_bookmark', {
                     method: 'POST',
                     headers: {
@@ -773,29 +924,29 @@ background-color: #fc5c2c; /* Darker green when hovering */
                         name: bookmarkName.trim()
                     })
                 })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Response data:', data);
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Request failed:', error);
-                    alert('Request failed: ' + error);
-                });
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Response data:', data);
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Request failed:', error);
+                        alert('Request failed: ' + error);
+                    });
             }
         }
 
         function removeBookmark(path) {
             if (confirm('Remove this bookmark?')) {
                 console.log('Removing bookmark:', path);
-                
+
                 fetch('/remove_bookmark', {
                     method: 'POST',
                     headers: {
@@ -805,34 +956,34 @@ background-color: #fc5c2c; /* Darker green when hovering */
                         path: path
                     })
                 })
-                .then(response => {
-                    console.log('Remove response status:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Remove response data:', data);
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Remove request failed:', error);
-                    alert('Request failed: ' + error);
-                });
+                    .then(response => {
+                        console.log('Remove response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Remove response data:', data);
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Remove request failed:', error);
+                        alert('Request failed: ' + error);
+                    });
             }
         }
 
         function toggleBookmarkDropdown(event) {
             event.stopPropagation();
             const dropdown = document.getElementById('bookmarkDropdown');
-            
+
             // Close all other dropdowns first
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
                 menu.style.display = 'none';
             });
-            
+
             // Toggle bookmark dropdown
             if (dropdown.style.display === 'block') {
                 dropdown.style.display = 'none';
@@ -847,18 +998,18 @@ background-color: #fc5c2c; /* Darker green when hovering */
         }
 
         // Close bookmark dropdown when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const dropdown = document.getElementById('bookmarkDropdown');
             const bookmarkButton = document.querySelector('.bookmark-dropdown button');
-            
+
             // If click is outside the dropdown and not on the button, close it
             if (!dropdown.contains(event.target) && !bookmarkButton.contains(event.target)) {
                 dropdown.style.display = 'none';
             }
         });
     </script>
-    
-    
+
+
 </body>
 
 </html>
