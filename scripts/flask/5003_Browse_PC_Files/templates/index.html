@@ -15,7 +15,7 @@
             background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
-            padding-top: 80px;
+            padding-top: 120px;
             /* Make room for navigation bar */
         }
 
@@ -283,7 +283,20 @@
             align-items: center;
         }
 
-        /* Responsive behavior */
+        /* Responsive behavior for medium screens */
+        @media screen and (max-width: 1024px) {
+            .nav-groups {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            body {
+                padding-top: 140px !important;
+                /* Extra space for potential wrapping */
+            }
+        }
+
+        /* Responsive behavior for small screens */
         @media screen and (max-width: 768px) {
             .nav-groups {
                 flex-direction: column;
@@ -307,13 +320,25 @@
             }
 
             body {
-                padding-top: 120px;
-                /* Adjusted space for wrapped navigation */
+                padding-top: 220px !important;
+                /* More space for three stacked groups */
             }
 
             .current-path {
-                margin-top: 20px;
+                margin-top: 30px !important;
                 /* More space to prevent overlap */
+            }
+        }
+
+        /* Extra small screens */
+        @media screen and (max-width: 480px) {
+            body {
+                padding-top: 250px !important;
+                /* Even more space for very small screens */
+            }
+
+            .current-path {
+                margin-top: 35px !important;
             }
         }
 
