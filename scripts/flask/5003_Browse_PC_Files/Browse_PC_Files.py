@@ -352,6 +352,37 @@ def remove_bookmark():
     else:
         return jsonify({"error": "Failed to remove bookmark"}), 500
 
+@app.route('/open_explorer', methods=['POST'])
+def open_explorer():
+    """Open the specified directory in Windows Explorer."""
+    import subprocess
+    
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+    
+    # Normalize the path for Windows
+    normalized_path = os.path.normpath(path)
+    
+    if not os.path.exists(normalized_path):
+        return jsonify({"error": f"Path does not exist: {normalized_path}"}), 400
+    
+    try:
+        # Use Windows Explorer to open the directory
+        # Use /select flag to open and select the folder, or just the path to open it
+        if os.path.isdir(normalized_path):
+            result = subprocess.run(['explorer', normalized_path], shell=True, capture_output=True)
+        else:
+            # If it's a file, open the parent directory and select the file
+            result = subprocess.run(['explorer', '/select,', normalized_path], shell=True, capture_output=True)
+        
+        # Explorer often returns exit code 1 even when successful, so we don't check the return code
+        return jsonify({"success": "Directory opened in Explorer"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Error opening Explorer: {e}"}), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5003, debug=True)
