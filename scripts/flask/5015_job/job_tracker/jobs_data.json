@@ -12,5 +12,16 @@
         "status": "Interested",
         "notes": "Government job application",
         "created_date": "2025-08-14T15:32:18.335818"
+    },
+    {
+        "id": 2,
+        "company": "BCS 49",
+        "position": "Lecturer",
+        "job_url": "http://bpsc.teletalk.com.bd/bcs49/home.php",
+        "applied_date": "",
+        "deadline": "2025-08-22",
+        "status": "Interested",
+        "notes": "",
+        "created_date": "2025-08-14T16:31:40.655988"
     }
 ]
