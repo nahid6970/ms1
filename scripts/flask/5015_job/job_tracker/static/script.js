@@ -69,7 +69,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Form validation and enhancements
 document.addEventListener('DOMContentLoaded', function() {
-
-    
-
+    // Auto-fill applied date when "Applied" status is selected
+    const statusSelects = document.querySelectorAll('select[name="status"]');
+    statusSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            const appliedDateInput = this.closest('form').querySelector('input[name="applied_date"]');
+            if (this.value === 'Applied' && appliedDateInput && !appliedDateInput.value) {
+                const today = new Date().toISOString().split('T')[0];
+                appliedDateInput.value = today;
+            }
+        });
+    });
 });
