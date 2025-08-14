@@ -1688,5 +1688,28 @@
             }
         ],
         "status": "Ended"
+    },
+    {
+        "id": 28,
+        "title": "Alien: Earth",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Sonarr\\Alien - Earth",
+        "rating": null,
+        "status": "Continuing",
+        "episodes": [
+            {
+                "id": 2,
+                "title": "Alien - Earth - S01E02 - Mr. October WEBDL-1080p Proper",
+                "watched": false,
+                "added_date": "2025-08-14T22:12:37.611945"
+            },
+            {
+                "id": 1,
+                "title": "Alien - Earth - S01E01 - Neverland WEBDL-1080p Proper",
+                "watched": false,
+                "added_date": "2025-08-14T22:12:37.611945"
+            }
+        ]
     }
 ]
