@@ -23,5 +23,16 @@
         "status": "Interested",
         "notes": "",
         "created_date": "2025-08-14T16:31:40.655988"
+    },
+    {
+        "id": 3,
+        "company": "Bangladesh Commerce Bank LTD (bcbl)",
+        "position": "Probationary officer",
+        "job_url": "https://ers.bdjobs.com/applications/bcbl/jobcircular.asp",
+        "applied_date": "",
+        "deadline": "2025-08-26",
+        "status": "Interested",
+        "notes": "",
+        "created_date": "2025-08-15T19:51:45.533825"
     }
 ]
