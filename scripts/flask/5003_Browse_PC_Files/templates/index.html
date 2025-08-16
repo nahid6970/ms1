@@ -159,12 +159,15 @@
 
         .file-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-radius: 0px;
+            background-color: #282a36;
         }
 
         .file-name {
-            flex-grow: 1;
+            flex: 1;
             word-break: break-all;
             overflow-wrap: break-word;
         }
@@ -567,11 +570,10 @@
             padding: 5px 10px;
             background-color: rgb(119, 255, 119);
             color: black !important;
-            /* Change text color for Download button */
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: 5px;
         }
 
         .download-btn:hover {
@@ -582,11 +584,10 @@
             padding: 5px 10px;
             background-color: #a5d9fc;
             color: black !important;
-            /* Change text color for Download button */
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: 5px;
         }
 
         .edit-btn:hover {
@@ -599,16 +600,17 @@
         }
 
 
-        div.file-actions {
-            margin-right: 0px;
-            max-width: 10px;
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0px;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .file-actions {
             position: relative;
             display: inline-block;
-            max-width: 10px;
-            margin-right: 0px;
         }
 
         .dots-btn {
@@ -617,23 +619,35 @@
             font-size: 20px;
             cursor: pointer;
             color: #ff0000;
+            padding: 5px;
         }
 
         .dots-btn:hover {
             color: #000;
         }
 
-        .dropdown-menu {
+        .context-menu {
             display: none;
-            position: absolute;
-            top: 20px;
-            right: 0;
+            position: fixed;
             background-color: #fff;
             border: 1px solid #ccc;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 150px;
-            z-index: 1000;
-            padding: 5px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 120px;
+            z-index: 9999;
+            padding: 2px 0;
+            border-radius: 4px;
+        }
+
+        .context-menu a {
+            display: block;
+            padding: 8px 10px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .context-menu a:hover {
+            background-color: #f1f1f1;
         }
 
         .dropdown-menu a {
@@ -827,7 +841,7 @@
                 <ul class="file-list">
                     {% for file in files %}
                     <li class="file-item" data-filetype="{{ file.split('.')[-1] }}">
-                        <div class="file-name">
+                        <div class="file-name" oncontextmenu="showContextMenu(event, '{{ file }}'); return false;">
                             <span>{{ file_icons[file] }}</span>
                             <a href="/view/{{ current_dir }}/{{ file | urlencode }}">{{ file }}</a>
                             <br>
@@ -836,28 +850,28 @@
                             </small>
                         </div>
 
-                        <!-- Three dots dropdown menu placed before the edit button -->
-                        <div class="file-actions">
-                            <button class="dots-btn" onclick="toggleDropdown('{{ file }}')">⋮</button>
-                            <div class="dropdown-menu" id="dropdown-{{ file }}">
-                                <a href="#" class="rename-btn" onclick="renameFile('{{ current_dir }}', '{{ file }}')">
-                                    <i class="nf nf-md-rename_box"></i> Rename
-                                </a>
-                                <a href="#" class="delete-btn" onclick="deleteFile('{{ current_dir }}', '{{ file }}')">
-                                    <i class="nf nf-fa-trash"></i> Delete
-                                </a>
-                            </div>
+                        <!-- Action buttons grouped together on the right -->
+                        <div class="action-buttons">
+                            {% if file.endswith(editable_extensions) %}
+                            <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn">
+                                <i class="nf nf-fa-edit"></i>
+                            </a>
+                            {% endif %}
+
+                            <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
+                                <i class="nf nf-oct-download"></i>
+                            </a>
                         </div>
 
-                        {% if file.endswith(editable_extensions) %}
-                        <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn">
-                            <i class="nf nf-fa-edit"></i>
-                        </a>
-                        {% endif %}
-
-                        <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
-                            <i class="nf nf-oct-download"></i>
-                        </a>
+                        <!-- Right-click context menu (hidden by default) -->
+                        <div class="context-menu" id="context-{{ file }}">
+                            <a href="#" class="rename-btn" onclick="renameFile('{{ current_dir }}', '{{ file }}')">
+                                <i class="nf nf-md-rename_box"></i> Rename
+                            </a>
+                            <a href="#" class="delete-btn" onclick="deleteFile('{{ current_dir }}', '{{ file }}')">
+                                <i class="nf nf-fa-trash"></i> Delete
+                            </a>
+                        </div>
                     </li>
                     {% endfor %}
                 </ul>
@@ -933,26 +947,28 @@
         }
 
         // Toggle the visibility of the dropdown menu
-        function toggleDropdown(fileName) {
-            const dropdownMenu = document.getElementById('dropdown-' + fileName);
-            const isVisible = dropdownMenu.style.display === 'block';
-
-            // Hide all dropdowns before displaying the clicked one
-            const allDropdowns = document.querySelectorAll('.dropdown-menu');
-            allDropdowns.forEach(dropdown => {
-                dropdown.style.display = 'none';
+        function showContextMenu(event, fileName) {
+            event.preventDefault();
+            
+            // Hide all context menus
+            const allMenus = document.querySelectorAll('.context-menu');
+            allMenus.forEach(menu => {
+                menu.style.display = 'none';
             });
 
-            // Show or hide the clicked dropdown
-            dropdownMenu.style.display = isVisible ? 'none' : 'block';
+            // Show the context menu for this file
+            const contextMenu = document.getElementById('context-' + fileName);
+            contextMenu.style.top = event.pageY + 'px';
+            contextMenu.style.left = event.pageX + 'px';
+            contextMenu.style.display = 'block';
         }
 
-        // Close all dropdowns when clicking outside
+        // Close all context menus when clicking outside
         window.addEventListener('click', function (event) {
-            const allDropdowns = document.querySelectorAll('.dropdown-menu');
-            allDropdowns.forEach(dropdown => {
-                if (!dropdown.contains(event.target) && !event.target.classList.contains('dots-btn')) {
-                    dropdown.style.display = 'none';
+            const allMenus = document.querySelectorAll('.context-menu');
+            allMenus.forEach(menu => {
+                if (!menu.contains(event.target)) {
+                    menu.style.display = 'none';
                 }
             });
         });
