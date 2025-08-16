@@ -1581,6 +1581,12 @@
         "rating": "3",
         "episodes": [
             {
+                "id": 2,
+                "title": "WWE SmackDown - 2025-08-15 - SmackDown 1356 HDTV-1080p",
+                "watched": false,
+                "added_date": "2025-08-16T11:25:27.975890"
+            },
+            {
                 "id": 1,
                 "title": "WWE SmackDown - 2025-08-08 - SmackDown 1355 WEBDL-1080p",
                 "watched": true,
