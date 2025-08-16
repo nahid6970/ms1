@@ -601,15 +601,11 @@
 
 
         .action-buttons {
-            display: flex;
-            align-items: center;
+            display: contents;
+            align-items: end;
             gap: 0px;
             flex-shrink: 0;
-            white-space: nowrap;
-
-            position: absolute;          
-            right: 30px;                 
-
+            white-space: nowrap;            
         }
 
         .file-actions {
@@ -845,6 +841,8 @@
                 <ul class="file-list">
                     {% for file in files %}
                     <li class="file-item" data-filetype="{{ file.split('.')[-1] }}">
+                        <!-- Action buttons grouped together on the right -->
+
                         <div class="file-name" oncontextmenu="showContextMenu(event, '{{ file }}'); return false;">
                             <span>{{ file_icons[file] }}</span>
                             <a href="/view/{{ current_dir }}/{{ file | urlencode }}">{{ file }}</a>
@@ -853,18 +851,16 @@
                                 {{ file_times[file] }} - {{ file_sizes[file] }}
                             </small>
                         </div>
-
-                        <!-- Action buttons grouped together on the right -->
                         <div class="action-buttons">
+                            <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
+                                <!-- <i class="nf nf-oct-download"></i> -->
+                            </a>
                             {% if file.endswith(editable_extensions) %}
                             <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn">
-                                <i class="nf nf-fa-edit"></i>
+                                <!-- <i class="nf nf-fa-edit"></i> -->
                             </a>
                             {% endif %}
 
-                            <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
-                                <i class="nf nf-oct-download"></i>
-                            </a>
                         </div>
 
                         <!-- Right-click context menu (hidden by default) -->
