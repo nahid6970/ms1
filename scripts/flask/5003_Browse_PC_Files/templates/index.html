@@ -852,14 +852,14 @@
                             </small>
                         </div>
                         <div class="action-buttons">
-                            <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
-                                <!-- <i class="nf nf-oct-download"></i> -->
-                            </a>
                             {% if file.endswith(editable_extensions) %}
                             <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn">
                                 <!-- <i class="nf nf-fa-edit"></i> -->
                             </a>
                             {% endif %}
+                            <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
+                                <!-- <i class="nf nf-oct-download"></i> -->
+                            </a>
 
                         </div>
 
