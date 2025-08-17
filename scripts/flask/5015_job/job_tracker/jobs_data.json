@@ -89,5 +89,16 @@
         "status": "Interested",
         "notes": "compex application procedure chiti",
         "created_date": "2025-08-17T12:46:04.083659"
+    },
+    {
+        "id": 9,
+        "company": "doict (\u09a4\u09a5\u09cd\u09af \u0993 \u09af\u09cb\u0997\u09be\u09af\u09cb\u0997 \u09aa\u09cd\u09b0\u09af\u09c1\u0995\u09cd\u09a4\u09bf \u0985\u09a7\u09bf\u09a6\u09aa\u09cd\u09a4\u09b0)",
+        "position": "officeh postvacancy497 grade20",
+        "job_url": "http://doict.teletalk.com.bd/",
+        "applied_date": "2025-08-18",
+        "deadline": "2025-09-17",
+        "status": "Interested",
+        "notes": "",
+        "created_date": "2025-08-17T12:54:28.266927"
     }
 ]
