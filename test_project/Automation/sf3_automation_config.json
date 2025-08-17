@@ -141,6 +141,39 @@
                     },
                     "enabled": true,
                     "is_folder": false
+                },
+                {
+                    "name": "boosterTXTclick  ",
+                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\booster.png",
+                    "confidence": 0.8,
+                    "region": [
+                        1277,
+                        860,
+                        1704,
+                        933
+                    ],
+                    "action": {
+                        "type": "click_on_found_image"
+                    },
+                    "enabled": true,
+                    "is_folder": false
+                },
+                {
+                    "name": "booster swipe  ",
+                    "path": "C:\\Users\\nahid\\ms\\msBackups\\shadowfight3\\event\\booster_swipe.png",
+                    "confidence": 0.8,
+                    "region": [
+                        809,
+                        639,
+                        1112,
+                        737
+                    ],
+                    "action": {
+                        "type": "swipe",
+                        "sequence": "766, 204, 1145, 804, 1, 1155, 207, 774, 806, 1"
+                    },
+                    "enabled": true,
+                    "is_folder": false
                 }
             ],
             "enabled": true,
