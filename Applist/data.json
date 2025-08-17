@@ -308,6 +308,13 @@
         "winget_path": ""
     },
     {
+        "name": "handbrake",
+        "scoop_name": "handbrake",
+        "scoop_path": "",
+        "winget_name": "",
+        "winget_path": ""
+    },
+    {
         "name": "highlight [Text-View]",
         "scoop_name": "highlight",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\highlight\\current\\highlight.exe",
@@ -805,10 +812,10 @@
         "winget_path": ""
     },
     {
-        "name": "handbrake",
-        "scoop_name": "handbrake",
+        "name": "UniGetUI ",
+        "scoop_name": "unigetui",
         "scoop_path": "",
-        "winget_name": "",
+        "winget_name": "MartiCliment.UniGetUI",
         "winget_path": ""
     }
 ]
