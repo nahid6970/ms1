@@ -67,5 +67,16 @@
         "status": "Interested",
         "notes": "need to apply with the form and send a letter",
         "created_date": "2025-08-16T23:49:13.387175"
+    },
+    {
+        "id": 7,
+        "company": "BRAC",
+        "position": "Young Professional - Finance & Accounting",
+        "job_url": "https://careers.brac.net/jobs/young-professional-finance-and-accounts-2367?bulk=false",
+        "applied_date": "",
+        "deadline": "2025-08-20",
+        "status": "Interested",
+        "notes": "",
+        "created_date": "2025-08-17T12:33:20.470301"
     }
 ]
