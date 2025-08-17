@@ -78,5 +78,16 @@
         "status": "Interested",
         "notes": "",
         "created_date": "2025-08-17T12:33:20.470301"
+    },
+    {
+        "id": 8,
+        "company": "BOU (BANGLADESH OPEN UNIVERSITY)",
+        "position": "Accountant (grade 11) (salary12500-30000)",
+        "job_url": "https://www.bou.ac.bd/upload/notice/recruitment/1840061776915337.pdf",
+        "applied_date": "",
+        "deadline": "2025-09-07",
+        "status": "Interested",
+        "notes": "compex application procedure chiti",
+        "created_date": "2025-08-17T12:46:04.083659"
     }
 ]
