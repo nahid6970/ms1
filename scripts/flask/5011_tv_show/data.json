@@ -444,6 +444,12 @@
                 "added_date": "2025-08-07T14:14:22.447447"
             },
             {
+                "id": 16,
+                "title": "Blood of Zeus - S02E05 - Judgement Day WEBDL-720p",
+                "watched": false,
+                "added_date": "2025-08-18T19:55:42.469395"
+            },
+            {
                 "id": 13,
                 "title": "Blood of Zeus - S02E04 - Funeral Games WEBDL-1080p",
                 "watched": false,
@@ -460,6 +466,12 @@
                 "title": "Blood of Zeus - S02E02 - Weights & Measures WEBDL-1080p",
                 "watched": false,
                 "added_date": "2025-08-10T23:56:05.167425"
+            },
+            {
+                "id": 15,
+                "title": "Blood of Zeus - S02E01 - A Shadow Emerges WEBDL-720p",
+                "watched": false,
+                "added_date": "2025-08-18T19:55:42.469395"
             }
         ],
         "rating": "4",
