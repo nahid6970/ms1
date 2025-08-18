@@ -7,6 +7,12 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\One Piece",
         "episodes": [
             {
+                "id": 10,
+                "title": "One Piece - s22e55 - [1140] - An Admired Hero - The Warrior of Liberation Who Saves Bonney HDTV-720p - [SubsPlease]",
+                "watched": false,
+                "added_date": "2025-08-17T22:40:44.257628"
+            },
+            {
                 "id": 9,
                 "title": "One Piece - s22e54 - [1139] - Destroy Egghead - The Buster Call Is Invoked WEBDL-1080p - [Erai-raws]",
                 "watched": false,
