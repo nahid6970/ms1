@@ -109,13 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonContainer.appendChild(reorderButtonsContainer);
 
         const editButton = document.createElement('button');
-        editButton.textContent = '✏️';
+        editButton.textContent = ''; //✏️
         editButton.className = 'edit-button';
         editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
         buttonContainer.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = '🗑️';
+        deleteButton.textContent = ''; //🗑️
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteLink(index); // Pass original index
         buttonContainer.appendChild(deleteButton);
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const editBtn = document.createElement('button');
     editBtn.className = 'collapsible-edit-btn';
-    editBtn.textContent = '⚙️';
+    editBtn.textContent = ''; //⚙️
     editBtn.onclick = (e) => {
       e.stopPropagation();
       openEditGroupPopup(groupName);
@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add edit group button (only visible in edit mode)
     const editGroupButton = document.createElement('button');
-    editGroupButton.textContent = '⚙️';
+    editGroupButton.textContent = ''; //⚙️
     editGroupButton.className = 'edit-group-button';
     editGroupButton.onclick = () => openEditGroupPopup(groupName);
     groupHeaderContainer.appendChild(editGroupButton);
