@@ -161,6 +161,7 @@ def add_movie():
             'year': request.form.get('year', ''),
             'cover_image': request.form.get('cover_image', ''),
             'directory_path': request.form.get('directory_path', ''),
+            'radarr_id': request.form.get('radarr_id', ''),
             'rating': request.form.get('rating', None),
             'seen': False,
             'files': []
@@ -181,6 +182,7 @@ def edit_movie(movie_id):
         movie['year'] = request.form.get('year', '')
         movie['cover_image'] = request.form.get('cover_image', '')
         movie['directory_path'] = request.form.get('directory_path', '')
+        movie['radarr_id'] = request.form.get('radarr_id', movie.get('radarr_id', ''))
         movie['rating'] = request.form.get('rating', None)
         save_data(movies)
         return redirect(url_for('index'))
