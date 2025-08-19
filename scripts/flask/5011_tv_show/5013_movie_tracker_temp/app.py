@@ -31,26 +31,18 @@ def save_data(data):
 def scan_for_missing_movies():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
     if not os.path.exists(ROOT_MOVIES_FOLDER):
-        print(f"ROOT_MOVIES_FOLDER does not exist: {ROOT_MOVIES_FOLDER}")
         return []
     
     movies = load_data()
     existing_paths = {movie.get('directory_path', '').lower() for movie in movies if movie.get('directory_path')}
     missing_movies = []
     
-    print(f"ROOT_MOVIES_FOLDER: {ROOT_MOVIES_FOLDER}")
-    print(f"Existing movie paths: {existing_paths}")
-
     try:
         for item in os.listdir(ROOT_MOVIES_FOLDER):
             item_path = os.path.join(ROOT_MOVIES_FOLDER, item)
-            print(f"Scanning item: {item_path}")
-            print(f"Is directory: {os.path.isdir(item_path)}")
             if os.path.isdir(item_path):
                 # Check if this directory path is already in our movies
-                is_not_in_existing = item_path.lower() not in existing_paths
-                print(f"Is not in existing_paths: {is_not_in_existing}")
-                if is_not_in_existing:
+                if item_path.lower() not in existing_paths:
                     # Check if the directory contains video files
                     has_movie_files = False
                     for root, _, files in os.walk(item_path):
@@ -62,7 +54,6 @@ def scan_for_missing_movies():
                         if has_movie_files:
                             break
                     
-                    print(f"Has movie files: {has_movie_files}")
                     if has_movie_files:
                         missing_movies.append({
                             'movie_name': item,
@@ -243,16 +234,11 @@ def sync_movies():
 
 @app.route('/add_missing_movie', methods=['POST'])
 def add_missing_movie():
-    print("add_missing_movie called.")
     movie_name = request.form.get('movie_name')
     full_path = request.form.get('full_path')
     
-    print(f"movie_name: {movie_name}, full_path: {full_path}")
-    print(f"os.path.exists(full_path): {os.path.exists(full_path)}")
-
     if movie_name and full_path and os.path.exists(full_path):
         movies = load_data()
-        print(f"Number of movies before add: {len(movies)}")
         
         # Create new movie entry
         new_movie = {
@@ -280,13 +266,8 @@ def add_missing_movie():
                         new_movie['files'].append(file_entry)
                         existing_file_titles.add(name)
         
-        print(f"New movie: {new_movie['title']}")
-        print(f"Number of files found in new movie: {len(new_movie['files'])}")
-
         movies.append(new_movie)
-        print(f"Number of movies after add: {len(movies)}")
         save_data(movies)
-        print("Data saved.")
     
     return redirect(url_for('sync_movies'))
 

@@ -1,5 +1,4 @@
 function openAddMovieModal() {
-    console.log("openAddMovieModal function called!"); // Added console.log
     document.getElementById('addMovieModal').style.display = 'block';
     document.body.classList.add('modal-open');
 }
