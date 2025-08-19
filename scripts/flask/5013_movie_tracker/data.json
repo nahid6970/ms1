@@ -336,7 +336,7 @@
         "year": "",
         "cover_image": "",
         "directory_path": "D:\\Downloads\\@Radarr\\Alien Covenant (2017)",
-        "rating": null,
+        "rating": "3",
         "files": [
             {
                 "id": 1,
@@ -345,7 +345,7 @@
             }
         ],
         "seen": false,
-        "radarr_id": "126889"
+        "radarr_id": ""
     },
     {
         "id": 28,
