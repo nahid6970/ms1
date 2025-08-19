@@ -67,7 +67,11 @@
 
     <div class="movie-grid">
         {% for movie in movies %}
-            <div class="movie-card" data-movie-id="{{ movie.id }}">
+            <div class="movie-card {% if movie.seen %}seen{% endif %}" data-movie-id="{{ movie.id }}">
+                <div class="seen-checkbox">
+                    <input type="checkbox" id="seen-{{ movie.id }}" {% if movie.seen %}checked{% endif %} onchange="toggleSeen({{ movie.id }})">
+                    <label for="seen-{{ movie.id }}"></label>
+                </div>
                 <div class="img-wrapper">
                     <img src="{{ movie.cover_image }}" alt="{{ movie.title }}">
                 </div>

@@ -731,6 +731,36 @@ input:checked + .slider:before {
     color: #e0e0e0;
 }
 
+.movie-card.seen {
+    opacity: 0.5;
+}
+
+.seen-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+
+.seen-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.seen-checkbox label {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    display: inline-block;
+}
+
+.seen-checkbox input[type="checkbox"]:checked + label {
+    background-color: #1db954;
+    border-color: #1db954;
+}
+
 /* Table View Styles */
 html.table-view-active .movie-grid {
     display: block; /* Override flex for grid */

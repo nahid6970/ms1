@@ -141,6 +141,16 @@ def movie(movie_id):
         return render_template('show.html', movie=movie, sort_files=sort_files, order=order, next_order=next_order)
     return 'Movie not found', 404
 
+@app.route('/toggle_seen/<int:movie_id>', methods=['POST'])
+def toggle_seen(movie_id):
+    movies = load_data()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if movie:
+        movie['seen'] = not movie.get('seen', False)
+        save_data(movies)
+        return jsonify({'success': True})
+    return jsonify({'success': False}), 404
+
 @app.route('/add_movie', methods=['GET', 'POST'])
 def add_movie():
     if request.method == 'POST':
@@ -152,6 +162,7 @@ def add_movie():
             'cover_image': request.form.get('cover_image', ''),
             'directory_path': request.form.get('directory_path', ''),
             'rating': request.form.get('rating', None),
+            'seen': False,
             'files': []
         }
         movies.append(new_movie)

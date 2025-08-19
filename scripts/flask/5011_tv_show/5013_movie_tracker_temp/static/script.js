@@ -47,6 +47,19 @@ function closeEditMovieModal() {
     document.body.classList.remove('modal-open');
 }
 
+function toggleSeen(movieId) {
+    fetch(`/toggle_seen/${movieId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        }
+    });
+}
+
 // Settings Modal Functions
 function openSettingsModal() {
     document.getElementById('settingsModal').style.display = 'block';
