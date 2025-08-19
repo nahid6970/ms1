@@ -1,20 +1,5 @@
 [
     {
-        "id": 1,
-        "title": "Alien Covenant (2017)",
-        "year": "",
-        "cover_image": "",
-        "directory_path": "D:\\Downloads\\@Radarr\\Alien Covenant (2017)",
-        "rating": null,
-        "files": [
-            {
-                "id": 1,
-                "title": "Alien Covenant 2017 PROPER 1080p BluRay H264 AAC RARBG ORARBG",
-                "added_date": "2025-08-19T21:39:32.773687"
-            }
-        ]
-    },
-    {
         "id": 4,
         "title": "AVP Alien vs. Predator (2004)",
         "year": "",
@@ -357,6 +342,22 @@
                 "id": 1,
                 "title": "Aliens Vs. Predator Requiem (2007) [1080p] [BluRay] [5.1] [YTS.MX]",
                 "added_date": "2025-08-19T22:18:56.128152"
+            }
+        ],
+        "seen": false
+    },
+    {
+        "id": 27,
+        "title": "Alien Covenant (2017)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Alien Covenant (2017)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Alien Covenant 2017 PROPER 1080p BluRay H264 AAC RARBG ORARBG",
+                "added_date": "2025-08-19T22:53:36.762956"
             }
         ],
         "seen": false

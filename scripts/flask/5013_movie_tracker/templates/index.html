@@ -73,7 +73,6 @@
                 </div>
                 <h3>{{ movie.title }}</h3>
                 <p>{{ movie.year }}</p>
-                <p class="{% if movie.seen %}all-episodes-watched{% else %}no-episodes-watched{% endif %}">{% if movie.seen %}Seen{% else %}Unseen{% endif %}</p>
                 <p>{% if movie.rating %}{{ movie.rating }}/5 ⭐{% else %}~/5 ⭐{% endif %}</p>
                 <p class="last-episode-added"></p>
                 <p class="show-status"></p>

@@ -863,3 +863,18 @@ html.table-view-active .show-card-buttons {
 .add-episode-button:hover {
     background-color: #158a3e;
 }
+
+.btn-seen {
+    background-color: #6c757d;
+    color: white;
+    border: 2px solid #6c757d;
+}
+
+.btn-seen.seen {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-seen:hover {
+    opacity: 0.8;
+}
