@@ -1,0 +1,362 @@
+[
+    {
+        "id": 1,
+        "title": "Alien Covenant (2017)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Alien Covenant (2017)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Alien Covenant 2017 PROPER 1080p BluRay H264 AAC RARBG ORARBG",
+                "added_date": "2025-08-19T21:39:32.773687"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "title": "Aliens vs Predator Requiem (2007)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Aliens vs Predator Requiem (2007)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Aliens Vs. Predator Requiem (2007) [1080p] [BluRay] [5.1] [YTS.MX]",
+                "added_date": "2025-08-19T21:39:42.309930"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "title": "Arrival (2016)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Arrival (2016)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Arrival 2016 1080p UHD BluRay DD 7 1 DoVi x265-SA89",
+                "added_date": "2025-08-19T21:39:44.717829"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "title": "AVP Alien vs. Predator (2004)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\AVP Alien vs. Predator (2004)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "\u5f02\u5f62\u5927\u6218\u94c1\u8840\u6218\u58eb \u672a\u5206\u7ea7\u7248 AVP Alien vs. Predator 2004 UNRATED.BD1080P.x264.DD5.1.\u4e2d\u82f1\u53cc\u5b57\u5e55.ENG&CHS.taobaobt",
+                "added_date": "2025-08-19T21:39:45.494959"
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "title": "Furiosa (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Furiosa (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Furiosa A Mad Max Saga 2024 BDRip 1080p HEVC HDR10 EAC3 Atmos OEP 8A88D77B mkv",
+                "added_date": "2025-08-19T21:39:46.172978"
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "title": "Inside Out 2 (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Inside Out 2 (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Inside Out 2 (2024) [1080p] [BluRay] [5.1] [YTS.MX]",
+                "added_date": "2025-08-19T21:39:46.933311"
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "title": "Juror #2 (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Juror #2 (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Juror.2.2024.1080p.ITA-ENG.MULTI.WEBRip.x265.AAC-V3SP4EV3R",
+                "added_date": "2025-08-19T21:39:47.572202"
+            }
+        ]
+    },
+    {
+        "id": 8,
+        "title": "Justice League Crisis on Infinite Earths Part Three ()",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice League Crisis on Infinite Earths Part Three ()",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice.League.Crisis.on.Infinite.Earths.Part.Three.2024.1080p.BluRay.DDP5.1.x265.10bit-GalaxyRG265[TGx]",
+                "added_date": "2025-08-19T21:39:48.441696"
+            }
+        ]
+    },
+    {
+        "id": 9,
+        "title": "Justice League Crisis on Infinite Earths Part Two ()",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice League Crisis on Infinite Earths Part Two ()",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice.League.Crisis.on.Infinite.Earths.Part.Two.2024.1080p.BluRay.1400MB.DD5.1.x264-GalaxyRG[TGx]",
+                "added_date": "2025-08-19T21:39:49.138759"
+            }
+        ]
+    },
+    {
+        "id": 10,
+        "title": "Justice League Crisis on Infinite Earths, Part One (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice League Crisis on Infinite Earths, Part One (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice.League.Crisis.on.Infinite.Earths.Part.One.2024.1080p.BluRay.x264.5.1-RiPRG",
+                "added_date": "2025-08-19T21:39:49.939042"
+            }
+        ]
+    },
+    {
+        "id": 11,
+        "title": "Justice League Warworld (2023)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice League Warworld (2023)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice League Warworld (2023) [1080p] [BluRay] [5.1] [YTS.MX]",
+                "added_date": "2025-08-19T21:39:58.884249"
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "title": "Justice Society World War II (2021)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice Society World War II (2021)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice Society World War II (2021) + Extras (1080p BluRay x265 HEVC 10bit EAC3 5.1 English + French + German + Spanish SAMPA) [QxR]",
+                "added_date": "2025-08-19T21:39:59.348681"
+            }
+        ]
+    },
+    {
+        "id": 13,
+        "title": "Kingdom of the Planet of the Apes (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Kingdom of the Planet of the Apes (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Kingdom.of.the.Planet.of.the.Apes.2024.BDRip.1080p.seleZen",
+                "added_date": "2025-08-19T21:39:59.751807"
+            }
+        ]
+    },
+    {
+        "id": 14,
+        "title": "Kraven the Hunter (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Kraven the Hunter (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Kraven the Hunter 2024 1080p BluRay AAC5 1 YTS",
+                "added_date": "2025-08-19T21:40:00.273411"
+            }
+        ]
+    },
+    {
+        "id": 15,
+        "title": "Kung Fu Panda 4 (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Kung Fu Panda 4 (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Kung.Fu.Panda.4.2024.BluRay.1080p.x264",
+                "added_date": "2025-08-19T21:40:00.782188"
+            }
+        ]
+    },
+    {
+        "id": 16,
+        "title": "Madgaon Express (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Madgaon Express (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Madgaon Express (2024) [1080p] [WEBRip] [5.1] [YTS.MX]",
+                "added_date": "2025-08-19T21:40:01.291807"
+            }
+        ]
+    },
+    {
+        "id": 17,
+        "title": "Oppenheimer (2023)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Oppenheimer (2023)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Oppenheimer 2023 1080p BluRay DDP5 1 x265 10bit GalaxyRG265",
+                "added_date": "2025-08-19T21:40:01.817432"
+            }
+        ]
+    },
+    {
+        "id": 18,
+        "title": "Pushpa 2 - The Rule (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Pushpa 2 - The Rule (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Pushpa The Rule Part 2 2024 Hindi 1080p 10bit ET WEBRip AC3 x265 - mkvAnime",
+                "added_date": "2025-08-19T21:40:02.337514"
+            }
+        ]
+    },
+    {
+        "id": 19,
+        "title": "Superman (2025)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Superman (2025)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Superman (2025) 1080p BluRay-LAMA",
+                "added_date": "2025-08-19T21:40:02.848067"
+            }
+        ]
+    },
+    {
+        "id": 20,
+        "title": "The Conjuring (2013)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\The Conjuring (2013)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "The Conjuring (2013) (1080p BluRay x265 SDR DDP 5.1 English - DarQ HONE)",
+                "added_date": "2025-08-19T21:40:03.254388"
+            }
+        ]
+    },
+    {
+        "id": 21,
+        "title": "The Lord of the Rings The War of the Rohirrim (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\The Lord of the Rings The War of the Rohirrim (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "The Lord of the Rings The War of the Rohirrim 2024 1080p BluRay AAC5 1 YTS",
+                "added_date": "2025-08-19T21:40:03.673101"
+            }
+        ]
+    },
+    {
+        "id": 22,
+        "title": "Thunderbolts (2025)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Thunderbolts (2025)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "www.UIndex.org    -    Thunderbolts 2025 1080p HFR BluRay H265 10bit HDR-Robo29",
+                "added_date": "2025-08-19T21:40:04.101533"
+            }
+        ]
+    },
+    {
+        "id": 23,
+        "title": "Toofan (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Toofan (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Toofan (2024) [1080p] [WEBRip] [YTS.MX]",
+                "added_date": "2025-08-19T21:40:04.616146"
+            }
+        ]
+    },
+    {
+        "id": 24,
+        "title": "Transformers One (2024)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Transformers One (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Transformers One 2024 1080p BluRay AAC5 1 YTS",
+                "added_date": "2025-08-19T21:40:05.059286"
+            }
+        ]
+    }
+]
