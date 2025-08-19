@@ -331,22 +331,6 @@
         "seen": false
     },
     {
-        "id": 26,
-        "title": "Aliens vs Predator Requiem (2007)",
-        "year": "",
-        "cover_image": "",
-        "directory_path": "D:\\Downloads\\@Radarr\\Aliens vs Predator Requiem (2007)",
-        "rating": null,
-        "files": [
-            {
-                "id": 1,
-                "title": "Aliens Vs. Predator Requiem (2007) [1080p] [BluRay] [5.1] [YTS.MX]",
-                "added_date": "2025-08-19T22:18:56.128152"
-            }
-        ],
-        "seen": false
-    },
-    {
         "id": 27,
         "title": "Alien Covenant (2017)",
         "year": "",
@@ -362,5 +346,20 @@
         ],
         "seen": false,
         "radarr_id": "126889"
+    },
+    {
+        "id": 28,
+        "title": "Aliens vs Predator Requiem (2007)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Aliens vs Predator Requiem (2007)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Aliens Vs. Predator Requiem (2007) [1080p] [BluRay] [5.1] [YTS.MX]",
+                "added_date": "2025-08-19T23:36:00.251171"
+            }
+        ]
     }
 ]
