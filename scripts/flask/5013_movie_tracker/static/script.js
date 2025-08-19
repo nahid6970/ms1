@@ -72,9 +72,7 @@ function closeSettingsModal() {
 }
 
 // Server-side Folder Opening Function
-function openFolderViaServer(event, movieId) {
-    event.preventDefault(); // Prevent default link behavior
-    
+function openFolder(movieId) {
     fetch(`/open_movie_folder/${movieId}`)
         .then(response => response.json())
         .then(data => {
