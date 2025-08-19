@@ -350,7 +350,7 @@ body.modal-open {
     text-align: center;
 }
 
-.movie-grid {
+.show-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
@@ -359,7 +359,7 @@ body.modal-open {
     align-items: flex-start;
 }
 
-.movie-card {
+.show-card {
     font-family: JetBrainsMono NFP, sans-serif;
     width: 325px;
     background-color: #40435700;
@@ -372,7 +372,16 @@ body.modal-open {
     justify-content: space-between; /* Distribute space to push buttons to bottom */
 }
 
-.movie-card:hover {
+.show-card.completed {
+    background-color: rgba(29, 185, 84, 0.15); /* Green tint for completed shows */
+    border-color: rgba(29, 185, 84, 0.4);
+}
+
+.show-card.completed:hover {
+    background-color: rgba(29, 185, 84, 0.25); /* Slightly stronger green tint on hover */
+}
+
+.show-card:hover {
     transform: scale(1.05);
     border: 2px solid rgb(24, 255, 3);
     border-radius: 5px;
@@ -380,12 +389,12 @@ body.modal-open {
     background-color: #485461;
 }
 
-.movie-card > a {
+.show-card > a {
     text-decoration: none;
     color: #e0e0e0;
 }
 
-.movie-card .img-wrapper {
+.show-card .img-wrapper {
     margin-top: 3%;
     width: 100%;
     aspect-ratio: 16 / 16;
@@ -398,7 +407,7 @@ body.modal-open {
     padding-right: 0px;
 }
 
-.movie-card .img-wrapper img {
+.show-card .img-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -406,7 +415,7 @@ body.modal-open {
     display: block;
 }
 
-.movie-card h3 {
+.show-card h3 {
     font-size: 1.5em;
     color: #e0e0e0;
     margin-top: 10px;
@@ -414,18 +423,50 @@ body.modal-open {
     align-content: end;
 }
 
-.movie-card p {
+.show-card p {
     font-size: 1.2em;
     color: white;
     margin: 5px 0; /* Reduced margin for tighter spacing */
 }
 
-.movie-card p:last-of-type {
+.show-card p:last-of-type {
     font-size: 1em;
     margin: 5px 0;
 }
 
-.movie-card .btn-group {
+.show-card p.no-episodes-watched {
+    color: red;
+}
+
+.show-card p.some-episodes-watched {
+    color: yellow;
+}
+
+.show-card p.all-episodes-watched {
+    color: #1db954; /* Green color for watched shows */
+}
+
+.show-card p.last-episode-added {
+    color: #888; /* Gray color for last episode date */
+    font-size: 0.9em;
+    margin: 5px 0; /* Consistent spacing */
+}
+
+.show-card p.show-status {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin: 5px 0; /* Consistent spacing */
+}
+
+.show-card p.status-continuing {
+    color: #28a745; /* Green for continuing shows */
+}
+
+.show-card p.status-ended {
+    color: #dc3545; /* Red for ended shows */
+}
+
+.show-card .btn-group {
     display: flex;
     justify-content: center;
     gap: 8px;
@@ -475,25 +516,25 @@ body.modal-open {
     color: black;
 }
 
-.movie-details-container {
+.show-details-container {
     display: flex;
     align-items: flex-start;
     text-align: left;
     padding: 20px;
 }
 
-.movie-cover {
+.show-cover {
     flex: 1;
     margin-right: 20px;
     max-width: 350px;
 }
 
-.movie-cover img {
+.show-cover img {
     width: 100%;
     border-radius: 5px;
 }
 
-.file-list {
+.episode-list {
     flex: 2;
     background-color: #282828;
     padding: 20px;
@@ -502,12 +543,12 @@ body.modal-open {
     overflow-y: auto;
 }
 
-.movie-cover img {
+.show-cover img {
     width: 100%;
     border-radius: 5px;
 }
 
-.file-list {
+.episode-list {
     flex: 2;
     background-color: #282828;
     padding: 20px;
@@ -516,12 +557,12 @@ body.modal-open {
     overflow-y: auto;
 }
 
-.file-list ul {
+.episode-list ul {
     list-style-type: none;
     padding: 0;
 }
 
-.file-list li {
+.episode-list li {
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
@@ -532,7 +573,16 @@ body.modal-open {
     transition: background-color 0.3s ease;
 }
 
-.file-title {
+.episode-list li.episode-watched {
+    background-color: rgba(29, 185, 84, 0.15); /* Green tint for watched episodes */
+    border: 1px solid rgba(29, 185, 84, 0.3);
+}
+
+.episode-list li.episode-watched:hover {
+    background-color: rgba(29, 185, 84, 0.25); /* Slightly stronger green tint on hover */
+}
+
+.episode-title {
     flex: 1;
     min-width: 0; /* Allow text to truncate if needed */
     margin-right: 15px; /* Consistent spacing from buttons */
@@ -541,14 +591,14 @@ body.modal-open {
     white-space: nowrap;
 }
 
-.file-controls {
+.episode-controls {
     flex-shrink: 0; /* Prevent buttons from shrinking */
     display: flex;
     align-items: center;
     gap: 10px; /* Consistent spacing between buttons */
 }
 
-.file-controls a {
+.episode-controls a {
     display: inline-block;
     width: 10px;
     height: 10px;
@@ -556,7 +606,15 @@ body.modal-open {
     flex-shrink: 0; /* Prevent individual buttons from shrinking */
 }
 
-.file-list a {
+.edit-dot {
+    background-color: #3498db;
+}
+
+.delete-dot {
+    background-color: #e74c3c;
+}
+
+.episode-list a {
     text-decoration: none;
     color: #e0e0e0;
 }
@@ -565,7 +623,7 @@ h1, h2 {
     color: #1db954;
 }
 
-.movie-cover form input[type="text"] {
+.show-cover form input[type="text"] {
     padding: 8px;
     border: 1px solid #555;
     background-color: #333;
@@ -578,7 +636,7 @@ h1, h2 {
     margin: 0; /* Remove any default margins */
 }
 
-.movie-cover form button[type="submit"] {
+.show-cover form button[type="submit"] {
     padding: 8px 10px;
     height: 38px; /* Explicit height */
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
@@ -731,10 +789,6 @@ input:checked + .slider:before {
     color: #e0e0e0;
 }
 
-.movie-card.seen {
-    opacity: 0.5;
-}
-
 .seen-checkbox {
     position: absolute;
     top: 10px;
@@ -762,11 +816,11 @@ input:checked + .slider:before {
 }
 
 /* Table View Styles */
-html.table-view-active .movie-grid {
+html.table-view-active .show-grid {
     display: block; /* Override flex for grid */
 }
 
-html.table-view-active .movie-card {
+html.table-view-active .show-card {
     width: auto; /* Take full width */
     display: grid;
     grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Last Episode, Status, Edit, Delete */
@@ -778,63 +832,73 @@ html.table-view-active .movie-card {
     margin-bottom: 5px;
 }
 
-html.table-view-active .movie-card:hover {
+html.table-view-active .show-card.completed {
+    background-color: rgba(29, 185, 84, 0.1); /* Green tint for completed shows in table view */
+    border-color: rgba(29, 185, 84, 0.3);
+}
+
+html.table-view-active .show-card:hover {
     transform: none; /* Disable hover transform */
     border: 1px solid #bbb; /* Reset border */
     box-shadow: none;
     background-color: #333; /* Darker background on hover */
 }
 
-html.table-view-active .movie-card .img-wrapper {
+html.table-view-active .show-card.completed:hover {
+    background-color: rgba(29, 185, 84, 0.25); /* Green hover for completed shows in table view */
+    border-color: rgba(29, 185, 84, 0.5);
+}
+
+html.table-view-active .show-card .img-wrapper {
     display: none; /* Hide images */
 }
 
-html.table-view-active .movie-card h3 {
+html.table-view-active .show-card h3 {
     margin: 0;
     height: auto;
     text-align: left;
     grid-column: 1; /* Name in first column */
 }
 
-html.table-view-active .movie-card p {
+html.table-view-active .show-card p {
     margin: 0;
     text-align: center;
 }
 
-html.table-view-active .movie-card p:nth-of-type(1) {
+html.table-view-active .show-card p:nth-of-type(1) {
     grid-column: 2; /* Year in second column */
 }
 
-html.table-view-active .movie-card p:nth-of-type(2) {
+html.table-view-active .show-card p:nth-of-type(2) {
     grid-column: 3; /* Watched/Total in third column */
 }
 
-html.table-view-active .movie-card p:nth-of-type(3) {
+html.table-view-active .show-card p:nth-of-type(3) {
     grid-column: 4; /* Rating in fourth column */
     display: block; /* Ensure rating is visible */
 }
 
-html.table-view-active .movie-card p:nth-of-type(4) {
+html.table-view-active .show-card p:nth-of-type(4) {
     grid-column: 5; /* Last episode added in fifth column */
     display: block; /* Ensure last episode date is visible */
 }
 
-html.table-view-active .movie-card p:nth-of-type(5) {
+html.table-view-active .show-card p:nth-of-type(5) {
     grid-column: 6; /* Status in sixth column */
     display: block; /* Ensure status is visible */
 }
 
-html.table-view-active .movie-card .btn-edit {
+html.table-view-active .show-card .btn-edit {
     grid-column: 7; /* Edit button in seventh column */
 }
 
-html.table-view-active .movie-card .btn-delete {
+html.table-view-active .show-card .btn-delete {
     grid-column: 8; /* Delete button in eighth column */
 }
 
 
 
-.movie-card-buttons {
+.show-card-buttons {
     display: flex;
     justify-content: center;
     gap: 8px;
@@ -842,11 +906,11 @@ html.table-view-active .movie-card .btn-delete {
     padding: 5px;
 }
 
-html.table-view-active .movie-card-buttons {
+html.table-view-active .show-card-buttons {
     display: contents; /* Make children direct grid items in table view */
 }
 
-/* New styles for form action buttons in movie.html */
+/* New styles for form action buttons in show.html */
 .form-action-button {
     background-color: #007bff; /* Blue color */
     color: white;
@@ -869,6 +933,6 @@ html.table-view-active .movie-card-buttons {
     background-color: #0056b3; /* Darker blue on hover */
 }
 
-.add-file-button:hover {
-    background-color: #158a3e; /* Green hover for add file button */
+.add-episode-button:hover {
+    background-color: #158a3e; /* Green hover for add episode button */
 }
