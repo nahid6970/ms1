@@ -15,7 +15,7 @@ def add_header(response):
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data.json')
-ROOT_SHOWS_FOLDER = r"D:\Downloads\@Sonarr"
+ROOT_MOVIES_FOLDER = r"D:\Downloads\@Radarr" 
 
 def load_data():
     try:
@@ -28,83 +28,76 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
-def scan_for_missing_shows():
+def scan_for_missing_movies():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
-    if not os.path.exists(ROOT_SHOWS_FOLDER):
+    if not os.path.exists(ROOT_MOVIES_FOLDER):
         return []
     
-    shows = load_data()
-    existing_paths = {show.get('directory_path', '').lower() for show in shows if show.get('directory_path')}
-    
-    missing_shows = []
+    movies = load_data()
+    existing_paths = {movie.get('directory_path', '').lower() for movie in movies if movie.get('directory_path')}
+    missing_movies = []
     
     try:
-        for item in os.listdir(ROOT_SHOWS_FOLDER):
-            item_path = os.path.join(ROOT_SHOWS_FOLDER, item)
+        for item in os.listdir(ROOT_MOVIES_FOLDER):
+            item_path = os.path.join(ROOT_MOVIES_FOLDER, item)
             if os.path.isdir(item_path):
-                # Check if this directory path is already in our shows
+                # Check if this directory path is already in our movies
                 if item_path.lower() not in existing_paths:
                     # Check if the directory contains video files
-                    has_videos = False
+                    has_movie_files = False
                     for root, _, files in os.walk(item_path):
                         for filename in files:
                             _, ext = os.path.splitext(filename)
                             if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                                has_videos = True
+                                has_movie_files = True
                                 break
-                        if has_videos:
+                        if has_movie_files:
                             break
                     
-                    if has_videos:
-                        missing_shows.append({
-                            'folder_name': item,
+                    if has_movie_files:
+                        missing_movies.append({
+                            'movie_name': item,
                             'full_path': item_path
                         })
     except Exception as e:
         print(f"Error scanning root folder: {e}")
     
-    return missing_shows
+    return missing_movies
 
-def scan_and_update_episodes():
-    print("Scanning for new episodes...")
-    shows = load_data()
-    updated_shows = False
-    for show in shows:
-        if 'directory_path' in show and show['directory_path']:
-            dir_path = show['directory_path']
+def scan_and_update_movie_files():
+    print("Scanning for new movie files...")
+    movies = load_data()
+    updated_movies = False
+    for movie in movies:
+        if 'directory_path' in movie and movie['directory_path']:
+            dir_path = movie['directory_path']
             if os.path.isdir(dir_path):
-                existing_episode_titles = {e['title'] for e in show['episodes']}
-                episodes_added = False
+                existing_file_titles = {f['title'] for f in movie['files']}
+                files_added = False
                 for root, _, files in os.walk(dir_path):
                     for filename in files:
                         name, ext = os.path.splitext(filename)
                         if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                            if name not in existing_episode_titles:
-                                new_episode = {
-                                    'id': len(show['episodes']) + 1,
+                            if name not in existing_file_titles:
+                                new_file = {
+                                    'id': len(movie['files']) + 1,
                                     'title': name,
-                                    'watched': False,
                                     'added_date': datetime.now().isoformat()
                                 }
-                                show['episodes'].insert(0, new_episode)
-                                existing_episode_titles.add(name)
-                                updated_shows = True
-                                episodes_added = True
-                
-                # Re-apply current sort order if episodes were added and sort is alphabetical
-                if episodes_added and show.get('episode_sort_type') == 'alphabetical':
-                    order = show.get('episode_sort_order', 'asc')
-                    show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+                                movie['files'].insert(0, new_file)
+                                existing_file_titles.add(name)
+                                updated_movies = True
+                                files_added = True
             else:
-                print(f"Directory not found for {show['title']}: {dir_path}")
-    if updated_shows:
-        save_data(shows)
-        print("New episodes found and updated.")
+                print(f"Directory not found for {movie['title']}: {dir_path}")
+    if updated_movies:
+        save_data(movies)
+        print("New movie files found and updated.")
     else:
-        print("No new episodes found.")
+        print("No new movie files found.")
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=scan_and_update_episodes, trigger="interval", hours=1)
+scheduler.add_job(func=scan_and_update_movie_files, trigger="interval", hours=1)
 scheduler.start()
 
 @app.route('/')
@@ -113,227 +106,122 @@ def index():
     order = request.args.get('order', 'asc')
     query = request.args.get('query')
 
-    shows = load_data()
+    movies = load_data()
 
-    # Filter shows based on query
+    # Filter movies based on query
     if query:
-        shows = [show for show in shows if query.lower() in show['title'].lower()]
+        movies = [movie for movie in movies if query.lower() in movie['title'].lower()]
 
-    # Calculate watched and total episodes, and last episode added date
-    for show in shows:
-        watched_episodes = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))
-        total_episodes = len(show.get('episodes', []))
-        show['watched_count'] = watched_episodes
-        show['total_count'] = total_episodes
-        
-        # Find the most recent episode added date
-        episodes = show.get('episodes', [])
-        if episodes:
-            # Get the most recent added_date from all episodes
-            recent_dates = []
-            for episode in episodes:
-                if 'added_date' in episode:
-                    try:
-                        recent_dates.append(datetime.fromisoformat(episode['added_date']))
-                    except:
-                        pass
-            
-            if recent_dates:
-                latest_date = max(recent_dates)
-                show['last_episode_added'] = latest_date.strftime('%Y-%m-%d')
-            else:
-                show['last_episode_added'] = 'Unknown'
-        else:
-            show['last_episode_added'] = 'No episodes'
+    
 
-    # Sort shows
+    # Sort movies
     if sort_by == 'title':
-        shows.sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+        movies.sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
     elif sort_by == 'year':
-        shows.sort(key=lambda x: int(x['year']) if x['year'].isdigit() else 0, reverse=(order == 'desc'))
+        movies.sort(key=lambda x: int(x['year']) if x['year'].isdigit() else 0, reverse=(order == 'desc'))
     elif sort_by == 'rating':
-        shows.sort(key=lambda x: float(x.get('rating', -1)) if x.get('rating') is not None else -1, reverse=(order == 'desc'))
+        movies.sort(key=lambda x: float(x.get('rating', -1)) if x.get('rating') is not None else -1, reverse=(order == 'desc'))
     elif sort_by == 'added': # Sort by ID for 'added' order
-        shows.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
-    elif sort_by == 'last_episode': # Sort by most recent episode
-        def get_last_episode_time(show):
-            episodes = show.get('episodes', [])
-            if not episodes:
-                return datetime.min.isoformat()  # Shows with no episodes go to the end
-            
-            # Get the most recent episode (first in array since new episodes are inserted at index 0)
-            latest_episode = episodes[0]
-            
-            # Use added_date if available, otherwise fall back to a default time based on episode ID
-            if 'added_date' in latest_episode:
-                return latest_episode['added_date']
-            else:
-                # For older episodes without added_date, use episode ID as a proxy for recency
-                # Higher ID = more recent
-                return f"1970-01-01T00:00:{latest_episode['id']:06d}"
-        
-        shows.sort(key=get_last_episode_time, reverse=(order == 'desc'))
+        movies.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
 
     next_order = 'desc' if order == 'asc' else 'asc'
 
-    return render_template('index.html', shows=shows, sort_by=sort_by, order=order, next_order=next_order, query=query)
+    return render_template('index.html', movies=movies, sort_by=sort_by, order=order, next_order=next_order, query=query)
 
-@app.route('/show/<int:show_id>')
-def show(show_id):
-    sort_episodes = request.args.get('sort_episodes', 'default')
+@app.route('/movie/<int:movie_id>')
+def movie(movie_id):
+    sort_files = request.args.get('sort_files', 'default')
     order = request.args.get('order', 'asc')
     
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        # Initialize sort preferences if they don't exist
-        if 'episode_sort_type' not in show:
-            show['episode_sort_type'] = 'default'
-        if 'episode_sort_order' not in show:
-            show['episode_sort_order'] = 'asc'
-        
-        # If sort parameters are provided, update and save
-        if sort_episodes != 'default':
-            show['episode_sort_type'] = sort_episodes
-            show['episode_sort_order'] = order
-            show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
-            save_data(shows)
-        else:
-            # Use stored preferences
-            sort_episodes = show['episode_sort_type']
-            order = show['episode_sort_order']
-            # Apply stored sort if it's alphabetical
-            if sort_episodes == 'alphabetical':
-                show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+    movies = load_data()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if movie:
         
         next_order = 'desc' if order == 'asc' else 'asc'
-        return render_template('show.html', show=show, sort_episodes=sort_episodes, order=order, next_order=next_order)
-    return 'Show not found', 404
+        return render_template('show.html', movie=movie, sort_files=sort_files, order=order, next_order=next_order)
+    return 'Movie not found', 404
 
-@app.route('/add_show', methods=['GET', 'POST'])
-def add_show():
+@app.route('/toggle_seen/<int:movie_id>', methods=['POST'])
+def toggle_seen(movie_id):
+    movies = load_data()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if movie:
+        movie['seen'] = not movie.get('seen', False)
+        save_data(movies)
+        return jsonify({'success': True})
+    return jsonify({'success': False}), 404
+
+@app.route('/add_movie', methods=['GET', 'POST'])
+def add_movie():
     if request.method == 'POST':
-        shows = load_data()
-        new_show = {
-            'id': len(shows) + 1,
+        movies = load_data()
+        new_movie = {
+            'id': len(movies) + 1,
             'title': request.form['title'],
             'year': request.form.get('year', ''),
             'cover_image': request.form.get('cover_image', ''),
             'directory_path': request.form.get('directory_path', ''),
-            'rating': request.form.get('rating', None), # Add rating field
-            'status': request.form.get('status', 'Continuing'), # Add status field
-            'episodes': []
+            'rating': request.form.get('rating', None),
+            'seen': False,
+            'files': []
         }
-        shows.append(new_show)
-        save_data(shows)
+        movies.append(new_movie)
+        save_data(movies)
         return redirect(url_for('index'))
-    return render_template('add_show.html')
+    return render_template('add_movie.html')
 
-@app.route('/edit_show/<int:show_id>', methods=['GET', 'POST'])
-def edit_show(show_id):
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if not show:
-        return 'Show not found', 404
+@app.route('/edit_movie/<int:movie_id>', methods=['GET', 'POST'])
+def edit_movie(movie_id):
+    movies = load_data()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if not movie:
+        return 'Movie not found', 404
     if request.method == 'POST':
-        show['title'] = request.form['title']
-        show['year'] = request.form.get('year', '')
-        show['cover_image'] = request.form.get('cover_image', '')
-        show['directory_path'] = request.form.get('directory_path', '')
-        show['rating'] = request.form.get('rating', None) # Update rating field
-        show['status'] = request.form.get('status', 'Continuing') # Update status field
-        save_data(shows)
+        movie['title'] = request.form['title']
+        movie['year'] = request.form.get('year', '')
+        movie['cover_image'] = request.form.get('cover_image', '')
+        movie['directory_path'] = request.form.get('directory_path', '')
+        movie['rating'] = request.form.get('rating', None)
+        save_data(movies)
         return redirect(url_for('index'))
     else:
-        return jsonify(show)
+        return jsonify(movie)
 
-@app.route('/delete_show/<int:show_id>')
-def delete_show(show_id):
-    shows = load_data()
-    shows = [s for s in shows if s['id'] != show_id]
-    save_data(shows)
+@app.route('/delete_movie/<int:movie_id>')
+def delete_movie(movie_id):
+    movies = load_data()
+    movies = [m for m in movies if m['id'] != movie_id]
+    save_data(movies)
     return redirect(url_for('index'))
 
-@app.route('/add_episode/<int:show_id>', methods=['POST'])
-def add_episode(show_id):
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        new_episode = {
-            'id': len(show['episodes']) + 1,
-            'title': request.form['title'],
-            'watched': False,
-            'added_date': datetime.now().isoformat()
-        }
-        show['episodes'].insert(0, new_episode)
-        
-        # Re-apply current sort order if it's alphabetical
-        if show.get('episode_sort_type') == 'alphabetical':
-            order = show.get('episode_sort_order', 'asc')
-            show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
-        
-        save_data(shows)
-        return redirect(url_for('show', show_id=show_id))
-    return 'Show not found', 404
 
-@app.route('/edit_episode/<int:show_id>/<int:episode_id>', methods=['GET', 'POST'])
-def edit_episode(show_id, episode_id):
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if not show:
-        return 'Show not found', 404
-    episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
-    if not episode:
-        return 'Episode not found', 404
-    if request.method == 'POST':
-        episode['title'] = request.form['title']
-        save_data(shows)
-        return redirect(url_for('show', show_id=show_id))
-    else:
-        return jsonify(episode)
 
-@app.route('/delete_episode/<int:show_id>/<int:episode_id>')
-def delete_episode(show_id, episode_id):
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        show['episodes'] = [e for e in show['episodes'] if e['id'] != episode_id]
-        save_data(shows)
-        return redirect(url_for('show', show_id=show_id))
-    return 'Show not found', 404
 
-@app.route('/toggle_watched/<int:show_id>/<int:episode_id>')
-def toggle_watched(show_id, episode_id):
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
-    if show:
-        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
-        if episode:
-            episode['watched'] = not episode['watched']
-            save_data(shows)
-            return redirect(url_for('show', show_id=show_id))
-    return 'Episode not found', 404
 
-@app.route('/scan_manual/<int:show_id>')
-def scan_manual(show_id):
-    scan_and_update_episodes()
-    return redirect(url_for('show', show_id=show_id))
 
-@app.route('/scan_all')
-def scan_all():
-    scan_and_update_episodes()
+
+
+
+@app.route('/scan_manual_movie/<int:movie_id>')
+def scan_manual_movie(movie_id):
+    scan_and_update_movie_files()
+    return redirect(url_for('movie', movie_id=movie_id))
+
+@app.route('/scan_all_movies')
+def scan_all_movies():
+    scan_and_update_movie_files()
     return redirect(url_for('index'))
 
-@app.route('/open_folder/<int:show_id>')
-def open_folder(show_id):
+@app.route('/open_movie_folder/<int:movie_id>')
+def open_movie_folder(movie_id):
     import subprocess
     import sys
     
-    shows = load_data()
-    show = next((s for s in shows if s['id'] == show_id), None)
+    movies = load_data()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
     
-    if show and show.get('directory_path'):
-        folder_path = show['directory_path']
+    if movie and movie.get('directory_path'):
+        folder_path = movie['directory_path']
         try:
             if sys.platform == 'win32':
                 # Windows - ignore exit code since explorer sometimes returns non-zero even when successful
@@ -348,56 +236,51 @@ def open_folder(show_id):
         except Exception as e:
             return jsonify({'success': False, 'message': f'Error: {str(e)}'})
     
-    return jsonify({'success': False, 'message': 'Show not found or no directory path'})
+    return jsonify({'success': False, 'message': 'Movie not found or no directory path'})
 
-@app.route('/sync_shows')
-def sync_shows():
-    missing_shows = scan_for_missing_shows()
-    return render_template('sync_shows.html', missing_shows=missing_shows)
+@app.route('/sync_movies')
+def sync_movies():
+    missing_movies = scan_for_missing_movies()
+    return render_template('sync_movies.html', missing_movies=missing_movies)
 
-@app.route('/add_missing_show', methods=['POST'])
-def add_missing_show():
-    folder_name = request.form.get('folder_name')
+@app.route('/add_missing_movie', methods=['POST'])
+def add_missing_movie():
+    movie_name = request.form.get('movie_name')
     full_path = request.form.get('full_path')
     
-    if folder_name and full_path and os.path.exists(full_path):
-        shows = load_data()
+    if movie_name and full_path and os.path.exists(full_path):
+        movies = load_data()
         
-        # Create new show entry
-        new_show = {
-            'id': max([show['id'] for show in shows], default=0) + 1,
-            'title': folder_name,
+        # Create new movie entry
+        new_movie = {
+            'id': max([movie['id'] for movie in movies], default=0) + 1,
+            'title': movie_name,
             'year': '',
             'cover_image': '',
             'directory_path': full_path,
             'rating': None,
-            'status': 'Continuing', # Default status for synced shows
-            'episodes': []
+            'files': []
         }
         
-        # Scan for episodes in this directory
-        existing_episode_titles = set()
+        # Scan for files in this directory
+        existing_file_titles = set()
         for root, _, files in os.walk(full_path):
             for filename in files:
                 name, ext = os.path.splitext(filename)
                 if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                    if name not in existing_episode_titles:
-                        episode = {
-                            'id': len(new_show['episodes']) + 1,
+                    if name not in existing_file_titles:
+                        file_entry = {
+                            'id': len(new_movie['files']) + 1,
                             'title': name,
-                            'watched': False,
                             'added_date': datetime.now().isoformat()
                         }
-                        new_show['episodes'].append(episode)
-                        existing_episode_titles.add(name)
+                        new_movie['files'].append(file_entry)
+                        existing_file_titles.add(name)
         
-        # Sort episodes by title (newest first by default)
-        new_show['episodes'].reverse()
-        
-        shows.append(new_show)
-        save_data(shows)
+        movies.append(new_movie)
+        save_data(movies)
     
-    return redirect(url_for('sync_shows'))
+    return redirect(url_for('sync_movies'))
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True, port=5011)
+    app.run(host="0.0.0.0", debug=True, port=5013)

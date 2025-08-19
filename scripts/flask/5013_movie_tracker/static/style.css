@@ -50,14 +50,14 @@ body {
 
 .header-container {
     display: grid;
-    grid-template-columns: 1fr auto 1fr; /* Left, Center, Right */
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     padding: 0 20px;
 }
 
 .header-container h1 {
-    grid-column: 2; /* Place h1 in the center column */
-    margin: 0; /* Remove default margin */
+    grid-column: 2;
+    margin: 0;
 }
 
 .add-button {
@@ -79,41 +79,36 @@ body {
     background: #e0e0e0;
 }
 
-/* Scan button specific styles */
+/* Scan button */
 .scan-button {
-    background-color: #007bff !important; /* Blue background for scan */
+    background-color: #007bff !important;
     color: white !important;
 }
 
 .scan-button:hover {
-    background-color: #0056b3 !important; /* Darker blue on hover */
+    background-color: #0056b3 !important;
 }
 
-/* Sync button specific styles */
+/* Sync button */
 .sync-button {
-    background-color: #1db954 !important; /* Green background for sync */
+    background-color: #1db954 !important;
     color: white !important;
 }
 
 .sync-button:hover {
-    background-color: #158a3e !important; /* Darker green on hover */
+    background-color: #158a3e !important;
 }
-
-/* Settings button specific styles */
-/* .settings-button {
-    margin-top: 10px; /* Space between add/home buttons and settings */
-/* } */
 
 /* Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 200; /* Higher than sticky buttons */
+    display: none;
+    position: fixed;
+    z-index: 200;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 body.modal-open {
@@ -122,14 +117,14 @@ body.modal-open {
 
 .modal-content {
     background-color: #282828;
-    margin: 5% auto; /* Moved higher */
+    margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 60%; /* Reduced width */
+    width: 60%;
     border-radius: 8px;
     position: relative;
-    max-height: 70vh; /* Limit modal content height */
-    overflow-y: auto; /* Enable scrolling for modal content */
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .close {
@@ -158,10 +153,10 @@ body.modal-open {
     text-align: left;
 }
 
-.modal-content form input[type="text"], 
-.modal-content form input[type="number"], 
+.modal-content form input[type="text"],
+.modal-content form input[type="number"],
 .modal-content form input[type="url"] {
-    width: calc(100% - 20px); /* Adjust for padding */
+    width: calc(100% - 20px);
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #555;
@@ -181,9 +176,10 @@ body.modal-open {
     margin: 0 auto;
 }
 
+/* Search & Controls */
 .controls-container {
     display: flex;
-    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 20px;
@@ -193,20 +189,24 @@ body.modal-open {
 .search-form {
     display: flex;
     gap: 10px;
-    align-items: center; /* Align items vertically in the center */
+    align-items: center;
 }
 
 .search-form input[type="text"],
-.search-form .btn {
-    padding: 8px 10px; /* Consistent padding */
-    height: 38px; /* Explicit height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
+.search-form .btn,
+.show-cover form input[type="text"],
+.show-cover form button[type="submit"],
+.form-action-button {
+    padding: 8px 10px;
+    height: 38px;
+    box-sizing: border-box;
+    font-size: 1em;
+    line-height: 1.2;
+    margin: 0;
 }
 
-.search-form input[type="text"] {
+.search-form input[type="text"],
+.show-cover form input[type="text"] {
     border: 1px solid #555;
     background-color: #333;
     color: #e0e0e0;
@@ -227,7 +227,6 @@ body.modal-open {
     padding: 12px 18px;
     border: none;
     border-radius: 25px;
-    text-decoration: none;
     font-weight: 600;
     font-size: 0.9em;
     letter-spacing: 0.5px;
@@ -257,10 +256,6 @@ body.modal-open {
     background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
-.sort-controls .sort-btn:hover::before {
-    left: 100%;
-}
-
 .sort-controls .sort-btn:active {
     transform: translateY(0) scale(0.98);
     box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
@@ -271,7 +266,7 @@ body.modal-open {
     opacity: 0.9;
 }
 
-/* Sort Menu Dropdown Styles */
+/* Sort Menu Dropdown */
 .sort-menu-container {
     position: relative;
     display: inline-block;
@@ -354,6 +349,7 @@ body.modal-open {
     text-align: center;
 }
 
+/* Show Grid & Cards */
 .show-grid {
     display: flex;
     flex-wrap: wrap;
@@ -370,19 +366,19 @@ body.modal-open {
     border: 1px solid #bbb;
     flex: 0 0 auto;
     transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    padding-bottom: 10px; /* Add padding to the bottom of the card */
+    padding-bottom: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Distribute space to push buttons to bottom */
+    justify-content: space-between;
 }
 
 .show-card.completed {
-    background-color: rgba(29, 185, 84, 0.15); /* Green tint for completed shows */
+    background-color: rgba(29, 185, 84, 0.15);
     border-color: rgba(29, 185, 84, 0.4);
 }
 
 .show-card.completed:hover {
-    background-color: rgba(29, 185, 84, 0.25); /* Slightly stronger green tint on hover */
+    background-color: rgba(29, 185, 84, 0.25);
 }
 
 .show-card:hover {
@@ -405,10 +401,6 @@ body.modal-open {
     background-color: rgba(45, 116, 128, 0);
     border-radius: 10px;
     overflow: hidden;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 0px;
-    padding-right: 0px;
 }
 
 .show-card .img-wrapper img {
@@ -430,7 +422,7 @@ body.modal-open {
 .show-card p {
     font-size: 1.2em;
     color: white;
-    margin: 5px 0; /* Reduced margin for tighter spacing */
+    margin: 5px 0;
 }
 
 .show-card p:last-of-type {
@@ -447,30 +439,31 @@ body.modal-open {
 }
 
 .show-card p.all-episodes-watched {
-    color: #1db954; /* Green color for watched shows */
+    color: #1db954;
 }
 
 .show-card p.last-episode-added {
-    color: #888; /* Gray color for last episode date */
+    color: #888;
     font-size: 0.9em;
-    margin: 5px 0; /* Consistent spacing */
+    margin: 5px 0;
 }
 
 .show-card p.show-status {
     font-size: 0.9em;
     font-weight: 600;
-    margin: 5px 0; /* Consistent spacing */
+    margin: 5px 0;
 }
 
 .show-card p.status-continuing {
-    color: #28a745; /* Green for continuing shows */
+    color: #28a745;
 }
 
 .show-card p.status-ended {
-    color: #dc3545; /* Red for ended shows */
+    color: #dc3545;
 }
 
-.show-card .btn-group {
+.show-card .btn-group,
+.show-card-buttons {
     display: flex;
     justify-content: center;
     gap: 8px;
@@ -498,14 +491,14 @@ body.modal-open {
 }
 
 .btn-delete {
-    color: rgb(255, 0, 0);
+    color: red;
     text-decoration: none;
     border: 2px solid red;
 }
 
 .btn-delete:hover {
     background: #ff0019;
-    color: rgb(255, 254, 254);
+    color: #fffeff;
 }
 
 .btn-folder {
@@ -520,6 +513,7 @@ body.modal-open {
     color: black;
 }
 
+/* Show Details Page */
 .show-details-container {
     display: flex;
     align-items: flex-start;
@@ -535,21 +529,7 @@ body.modal-open {
 
 .show-cover img {
     width: 100%;
-    border-radius: 5px;
-}
-
-.episode-list {
-    flex: 2;
-    background-color: #282828;
-    padding: 20px;
-    border-radius: 5px;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.show-cover img {
-    width: 100%;
-    border-radius: 5px;
+    border-radius: 50%;
 }
 
 .episode-list {
@@ -578,28 +558,28 @@ body.modal-open {
 }
 
 .episode-list li.episode-watched {
-    background-color: rgba(29, 185, 84, 0.15); /* Green tint for watched episodes */
+    background-color: rgba(29, 185, 84, 0.15);
     border: 1px solid rgba(29, 185, 84, 0.3);
 }
 
 .episode-list li.episode-watched:hover {
-    background-color: rgba(29, 185, 84, 0.25); /* Slightly stronger green tint on hover */
+    background-color: rgba(29, 185, 84, 0.25);
 }
 
 .episode-title {
     flex: 1;
-    min-width: 0; /* Allow text to truncate if needed */
-    margin-right: 15px; /* Consistent spacing from buttons */
+    min-width: 0;
+    margin-right: 15px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .episode-controls {
-    flex-shrink: 0; /* Prevent buttons from shrinking */
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 10px; /* Consistent spacing between buttons */
+    gap: 10px;
 }
 
 .episode-controls a {
@@ -607,7 +587,7 @@ body.modal-open {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    flex-shrink: 0; /* Prevent individual buttons from shrinking */
+    flex-shrink: 0;
 }
 
 .edit-dot {
@@ -627,28 +607,6 @@ h1, h2 {
     color: #1db954;
 }
 
-.show-cover form input[type="text"] {
-    padding: 8px;
-    border: 1px solid #555;
-    background-color: #333;
-    color: #e0e0e0;
-    border-radius: 4px;
-    height: 38px; /* Explicit height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
-}
-
-.show-cover form button[type="submit"] {
-    padding: 8px 10px;
-    height: 38px; /* Explicit height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
-}
-
 button[type="submit"] {
     background-color: #1db954;
     color: white;
@@ -659,12 +617,13 @@ button[type="submit"] {
 }
 
 input[type="checkbox"]:checked {
-    accent-color: #1db954; /* Green color */
+    accent-color: #1db954;
 }
 
+/* Rating Group */
 .rating-group {
     margin-top: 20px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -690,13 +649,13 @@ input[type="checkbox"]:checked {
     text-align: center;
 }
 
-.rating-group input[type="radio"]:checked+span {
+.rating-group input[type="radio"]:checked + span {
     background-color: gold;
     border-color: gold;
     color: black;
 }
 
-/* Toggle Switch Styles */
+/* Toggle Switch */
 .setting-item {
     display: flex;
     justify-content: space-between;
@@ -761,7 +720,6 @@ input:checked + .slider:before {
     transform: translateX(26px);
 }
 
-/* Rounded sliders */
 .slider.round {
     border-radius: 34px;
 }
@@ -770,7 +728,7 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-/* Setting Select Dropdown */
+/* Select Dropdown */
 .setting-select {
     background-color: #333;
     color: #e0e0e0;
@@ -793,49 +751,72 @@ input:checked + .slider:before {
     color: #e0e0e0;
 }
 
-/* Table View Styles */
+/* Seen Checkbox Overlay */
+.seen-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+
+.seen-checkbox label {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    display: inline-block;
+}
+
+.seen-checkbox input[type="checkbox"]:checked + label {
+    background-color: #1db954;
+    border-color: #1db954;
+}
+
+/* Table View */
 html.table-view-active .show-grid {
-    display: block; /* Override flex for grid */
+    display: block;
 }
 
 html.table-view-active .show-card {
-    width: auto; /* Take full width */
+    width: auto;
     display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr; /* Name, Year, Watched/Total, Rating, Last Episode, Status, Edit, Delete */
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr;
     gap: 10px;
     align-items: center;
     padding: 10px;
-    border: 1px solid #444; /* Set all borders to #444 */
+    border: 1px solid #444;
     background-color: #282828;
     margin-bottom: 5px;
 }
 
 html.table-view-active .show-card.completed {
-    background-color: rgba(29, 185, 84, 0.1); /* Green tint for completed shows in table view */
+    background-color: rgba(29, 185, 84, 0.1);
     border-color: rgba(29, 185, 84, 0.3);
 }
 
 html.table-view-active .show-card:hover {
-    transform: none; /* Disable hover transform */
-    border: 1px solid #bbb; /* Reset border */
+    transform: none;
+    border: 1px solid #bbb;
     box-shadow: none;
-    background-color: #333; /* Darker background on hover */
+    background-color: #333;
 }
 
 html.table-view-active .show-card.completed:hover {
-    background-color: rgba(29, 185, 84, 0.25); /* Green hover for completed shows in table view */
+    background-color: rgba(29, 185, 84, 0.25);
     border-color: rgba(29, 185, 84, 0.5);
 }
 
 html.table-view-active .show-card .img-wrapper {
-    display: none; /* Hide images */
+    display: none;
 }
 
 html.table-view-active .show-card h3 {
     margin: 0;
     height: auto;
     text-align: left;
-    grid-column: 1; /* Name in first column */
+    grid-column: 1;
 }
 
 html.table-view-active .show-card p {
@@ -843,74 +824,42 @@ html.table-view-active .show-card p {
     text-align: center;
 }
 
-html.table-view-active .show-card p:nth-of-type(1) {
-    grid-column: 2; /* Year in second column */
-}
+html.table-view-active .show-card p:nth-of-type(1) { grid-column: 2; }
+html.table-view-active .show-card p:nth-of-type(2) { grid-column: 3; }
+html.table-view-active .show-card p:nth-of-type(3) { grid-column: 4; display: block; }
+html.table-view-active .show-card p:nth-of-type(4) { grid-column: 5; display: block; }
+html.table-view-active .show-card p:nth-of-type(5) { grid-column: 6; display: block; }
 
-html.table-view-active .show-card p:nth-of-type(2) {
-    grid-column: 3; /* Watched/Total in third column */
-}
-
-html.table-view-active .show-card p:nth-of-type(3) {
-    grid-column: 4; /* Rating in fourth column */
-    display: block; /* Ensure rating is visible */
-}
-
-html.table-view-active .show-card p:nth-of-type(4) {
-    grid-column: 5; /* Last episode added in fifth column */
-    display: block; /* Ensure last episode date is visible */
-}
-
-html.table-view-active .show-card p:nth-of-type(5) {
-    grid-column: 6; /* Status in sixth column */
-    display: block; /* Ensure status is visible */
-}
-
-html.table-view-active .show-card .btn-edit {
-    grid-column: 7; /* Edit button in seventh column */
-}
-
-html.table-view-active .show-card .btn-delete {
-    grid-column: 8; /* Delete button in eighth column */
-}
-
-
-
-.show-card-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 5px;
-    padding: 5px;
-}
+html.table-view-active .show-card .btn-edit { grid-column: 7; }
+html.table-view-active .show-card .btn-delete { grid-column: 8; }
 
 html.table-view-active .show-card-buttons {
-    display: contents; /* Make children direct grid items in table view */
+    display: contents;
 }
 
-/* New styles for form action buttons in show.html */
+/* Form Action Buttons */
 .form-action-button {
-    background-color: #007bff; /* Blue color */
+    background-color: #007bff;
     color: white;
-    padding: 8px 10px; /* Consistent padding */
+    padding: 8px 10px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    height: 38px; /* Match input height */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 1em; /* Consistent font size */
-    line-height: 1.2; /* Consistent line height */
-    margin: 0; /* Remove any default margins */
-    text-decoration: none; /* For anchor tags */
-    display: flex; /* Use flex to center icon if needed */
+    height: 38px;
+    box-sizing: border-box;
+    font-size: 1em;
+    line-height: 1.2;
+    margin: 0;
+    text-decoration: none;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .form-action-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+    background-color: #0056b3;
 }
 
 .add-episode-button:hover {
-    background-color: #158a3e; /* Green hover for add episode button */
+    background-color: #158a3e;
 }

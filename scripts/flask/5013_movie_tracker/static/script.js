@@ -1,26 +1,25 @@
-function openAddShowModal() {
-    document.getElementById('addShowModal').style.display = 'block';
+function openAddMovieModal() {
+    document.getElementById('addMovieModal').style.display = 'block';
     document.body.classList.add('modal-open');
 }
 
-function closeAddShowModal() {
-    document.getElementById('addShowModal').style.display = 'none';
+function closeAddMovieModal() {
+    document.getElementById('addMovieModal').style.display = 'none';
     document.body.classList.remove('modal-open');
 }
 
-async function openEditShowModal(showId) {
-    const response = await fetch(`/edit_show/${showId}`);
-    const show = await response.json();
+async function openEditMovieModal(movieId) {
+    const response = await fetch(`/edit_movie/${movieId}`);
+    const movie = await response.json();
 
-    document.getElementById('editShowId').value = show.id;
-    document.getElementById('editShowTitle').value = show.title;
-    document.getElementById('editShowYear').value = show.year;
-    document.getElementById('editShowCoverImage').value = show.cover_image;
-    document.getElementById('editShowDirectoryPath').value = show.directory_path || '';
-    document.getElementById('editShowStatus').value = show.status || 'Continuing';
+    document.getElementById('editMovieId').value = movie.id;
+    document.getElementById('editMovieTitle').value = movie.title;
+    document.getElementById('editMovieYear').value = movie.year;
+    document.getElementById('editMovieCoverImage').value = movie.cover_image;
+    document.getElementById('editMovieDirectoryPath').value = movie.directory_path || '';
 
     // Set the rating radio button
-    const ratingRadios = document.querySelectorAll('#editShowModal input[name="rating"]');
+    const ratingRadios = document.querySelectorAll('#editMovieModal input[name="rating"]');
     
     // First, clear all radio buttons
     ratingRadios.forEach(radio => {
@@ -28,42 +27,37 @@ async function openEditShowModal(showId) {
     });
     
     // Then set the correct one if rating exists
-    if (show.rating !== null && show.rating !== undefined && show.rating !== '') {
+    if (movie.rating !== null && movie.rating !== undefined && movie.rating !== '') {
         ratingRadios.forEach(radio => {
             // Convert both values to strings for comparison to handle different data types
-            if (radio.value === String(show.rating)) {
+            if (radio.value === String(movie.rating)) {
                 radio.checked = true;
             }
         });
     }
 
-    document.getElementById('editShowForm').action = `/edit_show/${show.id}`;
+    document.getElementById('editMovieForm').action = `/edit_movie/${movie.id}`;
 
-    document.getElementById('editShowModal').style.display = 'block';
+    document.getElementById('editMovieModal').style.display = 'block';
     document.body.classList.add('modal-open');
 }
 
-function closeEditShowModal() {
-    document.getElementById('editShowModal').style.display = 'none';
+function closeEditMovieModal() {
+    document.getElementById('editMovieModal').style.display = 'none';
     document.body.classList.remove('modal-open');
 }
 
-async function openEditEpisodeModal(showId, episodeId) {
-    const response = await fetch(`/edit_episode/${showId}/${episodeId}`);
-    const episode = await response.json();
-
-    document.getElementById('editEpisodeShowId').value = showId;
-    document.getElementById('editEpisodeId').value = episode.id;
-    document.getElementById('editEpisodeTitle').value = episode.title;
-    document.getElementById('editEpisodeForm').action = `/edit_episode/${showId}/${episode.id}`;
-
-    document.getElementById('editEpisodeModal').style.display = 'block';
-    document.body.classList.add('modal-open');
-}
-
-function closeEditEpisodeModal() {
-    document.getElementById('editEpisodeModal').style.display = 'none';
-    document.body.classList.remove('modal-open');
+function toggleSeen(movieId) {
+    fetch(`/toggle_seen/${movieId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        }
+    });
 }
 
 // Settings Modal Functions
@@ -78,10 +72,10 @@ function closeSettingsModal() {
 }
 
 // Server-side Folder Opening Function
-function openFolderViaServer(event, showId) {
+function openFolderViaServer(event, movieId) {
     event.preventDefault(); // Prevent default link behavior
     
-    fetch(`/open_folder/${showId}`)
+    fetch(`/open_movie_folder/${movieId}`)
         .then(response => response.json())
         .then(data => {
             if (!data.success) {
@@ -130,15 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // Add click listener for show cards
-    document.querySelectorAll('.show-card').forEach(card => {
+    // Add click listener for movie cards
+    document.querySelectorAll('.movie-card').forEach(card => {
         card.addEventListener('click', (event) => {
             // Check if the click wasn't on an edit/delete button
             if (!event.target.classList.contains('btn-edit') &&
                 !event.target.classList.contains('btn-delete')) {
-                const showId = card.dataset.showId;
-                if (showId) {
-                    window.location.href = `/show/${showId}`;
+                const movieId = card.dataset.movieId;
+                if (movieId) {
+                    window.location.href = `/movie/${movieId}`;
                 }
             }
         });
@@ -169,19 +163,15 @@ document.addEventListener('click', function(event) {
 
 // Close modal if user clicks outside of it
 window.onclick = function(event) {
-    const addModal = document.getElementById('addShowModal');
-    const editShowModal = document.getElementById('editShowModal');
-    const editEpisodeModal = document.getElementById('editEpisodeModal');
+    const addModal = document.getElementById('addMovieModal');
+    const editMovieModal = document.getElementById('editMovieModal');
     const settingsModal = document.getElementById('settingsModal');
 
     if (event.target == addModal) {
         addModal.style.display = 'none';
         document.body.classList.remove('modal-open');
-    } else if (event.target == editShowModal) {
-        editShowModal.style.display = 'none';
-        document.body.classList.remove('modal-open');
-    } else if (event.target == editEpisodeModal) {
-        editEpisodeModal.style.display = 'none';
+    } else if (event.target == editMovieModal) {
+        editMovieModal.style.display = 'none';
         document.body.classList.remove('modal-open');
     } else if (event.target == settingsModal) {
         settingsModal.style.display = 'none';
