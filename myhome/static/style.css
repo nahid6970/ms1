@@ -681,7 +681,7 @@ div.toggle-container {
 
 /* Horizontal stacking for groups */
 .horizontal-stack {
-  flex: 0 0 300px; /* Allow to sit side-by-side, fixed width */
+  flex: 0 0 auto; /* Allow to sit side-by-side, fixed width */
   margin-right: 10px; /* Add some space between horizontally stacked groups */
   vertical-align: top; /* Align groups at the top */
 }
