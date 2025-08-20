@@ -348,5 +348,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5015_job\\job_tracker\\app.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5013 - Movies",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5013_movie_tracker\\app.py",
+    "ExecutableType": "pythonw"
   }
 ]
