@@ -69,6 +69,9 @@ def add_link():
     # Ensure default_type is set, default to 'nf-con' if not provided
     if 'default_type' not in new_link or not new_link['default_type']:
         new_link['default_type'] = 'nerd-font'
+    # Ensure horizontal_stack is set, default to false if not provided
+    if 'horizontal_stack' not in new_link:
+        new_link['horizontal_stack'] = False
     links = read_data()
     links.append(new_link)
     write_data(links)
@@ -80,6 +83,9 @@ def edit_link(link_id):
     # Ensure default_type is set, default to 'nerd-font' if not provided
     if 'default_type' not in updated_link or not updated_link['default_type']:
         updated_link['default_type'] = 'nerd-font'
+    # Ensure horizontal_stack is set, default to false if not provided
+    if 'horizontal_stack' not in updated_link:
+        updated_link['horizontal_stack'] = False
     links = read_data()
     if 0 <= link_id < len(links):
         links[link_id] = updated_link

@@ -540,6 +540,11 @@ document.addEventListener('DOMContentLoaded', function() {
     groupDiv.className = 'link-group';
     groupDiv.dataset.groupName = groupName;
 
+    const firstLinkInGroup = links[0];
+    if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
+      groupDiv.classList.add('horizontal-stack');
+    }
+
     const groupHeaderContainer = document.createElement('div');
     groupHeaderContainer.className = 'group-header-container';
 
@@ -584,9 +589,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const groupList = document.createElement('ul');
     groupList.className = 'link-group-content';
     // Set display style based on the first link in the group, or default to flex
-    const firstLinkInGroup = links[0];
-    if (firstLinkInGroup && firstLinkInGroup.link.display_style) {
-      groupList.style.display = firstLinkInGroup.link.display_style;
+    const firstLinkInGroupDisplay = links[0];
+    if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
+      groupList.style.display = firstLinkInGroupDisplay.link.display_style;
     } else {
       groupList.style.display = 'flex'; // Default display style
     }
@@ -624,6 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editGroupOriginalName = document.getElementById('edit-group-original-name');
     const editGroupDisplaySelect = document.getElementById('edit-group-display');
     const editGroupCollapsibleCheckbox = document.getElementById('edit-group-collapsible');
+    const editGroupHorizontalStackCheckbox = document.getElementById('edit-group-horizontal-stack');
     const editGroupTopNameInput = document.getElementById('edit-group-top-name');
     const editGroupTopBgColorInput = document.getElementById('edit-group-top-bg-color');
     const editGroupTopTextColorInput = document.getElementById('edit-group-top-text-color');
@@ -639,6 +645,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (linksInGroup.length > 0) {
       editGroupDisplaySelect.value = linksInGroup[0].display_style || 'flex';
       editGroupCollapsibleCheckbox.checked = linksInGroup[0].collapsible || false;
+      editGroupHorizontalStackCheckbox.checked = linksInGroup[0].horizontal_stack || false;
       editGroupTopNameInput.value = linksInGroup[0].top_name || '';
       editGroupTopBgColorInput.value = linksInGroup[0].top_bg_color || '#2d2d2d';
       editGroupTopTextColorInput.value = linksInGroup[0].top_text_color || '#ffffff';
@@ -647,6 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       editGroupDisplaySelect.value = 'flex'; // Default if no links in group
       editGroupCollapsibleCheckbox.checked = false;
+      editGroupHorizontalStackCheckbox.checked = false;
       editGroupTopNameInput.value = '';
       editGroupTopBgColorInput.value = '#2d2d2d';
       editGroupTopTextColorInput.value = '#ffffff';
@@ -765,7 +773,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName, topBgColor, topTextColor, topBorderColor, topHoverColor) {
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, topName, topBgColor, topTextColor, topBorderColor, topHoverColor) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
@@ -782,6 +790,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           updatedLink.display_style = newDisplayStyle;
           updatedLink.collapsible = isCollapsible;
+          updatedLink.horizontal_stack = isHorizontalStack;
           
           // Handle top group styling options
           if (topName && topName !== '') {
@@ -921,8 +930,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 border_radius: document.getElementById('edit-link-border-radius').value || undefined,
                 title: document.getElementById('edit-link-title').value || undefined,
                 font_size: document.getElementById('edit-link-font-size').value || undefined,
-                li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
-                li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
+                li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
+                li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
                 hidden: document.getElementById('edit-link-hidden').checked || undefined,
             };
 
@@ -931,6 +940,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (originalLink) {
                 updatedLink.collapsible = originalLink.collapsible;
                 updatedLink.display_style = originalLink.display_style;
+                updatedLink.horizontal_stack = originalLink.horizontal_stack;
                 updatedLink.top_name = originalLink.top_name;
                 updatedLink.top_bg_color = originalLink.top_bg_color;
                 updatedLink.top_text_color = originalLink.top_text_color;
@@ -973,6 +983,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const newGroupName = document.getElementById('edit-group-name').value;
         const newDisplayStyle = document.getElementById('edit-group-display').value;
         const isCollapsible = document.getElementById('edit-group-collapsible').checked;
+        const isHorizontalStack = document.getElementById('edit-group-horizontal-stack').checked;
         const topName = document.getElementById('edit-group-top-name').value;
         const topBgColor = document.getElementById('edit-group-top-bg-color').value;
         const topTextColor = document.getElementById('edit-group-top-text-color').value;
@@ -980,7 +991,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const topHoverColor = document.getElementById('edit-group-top-hover-color').value;
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, topName, topBgColor, topTextColor, topBorderColor, topHoverColor);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, topName, topBgColor, topTextColor, topBorderColor, topHoverColor);
           if (success) {
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();
