@@ -100,7 +100,7 @@
         "id": 14,
         "title": "Kraven the Hunter (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/i47IUSsN126K11JUzqQIOi1Mg1M.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Kraven the Hunter (2024)",
         "rating": null,
         "files": [
@@ -110,13 +110,13 @@
                 "added_date": "2025-08-19T21:40:00.273411"
             }
         ],
-        "radarr_id": ""
+        "radarr_id": "539972"
     },
     {
         "id": 15,
         "title": "Kung Fu Panda 4 (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/nqXsAaQsKw2gKpkfhIgjXNDRqg7.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Kung Fu Panda 4 (2024)",
         "rating": null,
         "files": [
@@ -125,7 +125,8 @@
                 "title": "Kung.Fu.Panda.4.2024.BluRay.1080p.x264",
                 "added_date": "2025-08-19T21:40:00.782188"
             }
-        ]
+        ],
+        "radarr_id": "1011985"
     },
     {
         "id": 16,
