@@ -77,10 +77,10 @@
                 <p class="last-episode-added"></p>
                 <p class="show-status"></p>
                 <div class="show-card-buttons">
-                    <a href="#" onclick="toggleSeen({{ movie.id }})" class="btn btn-seen {% if movie.seen %}seen{% endif %}">{% if movie.seen %}<i class="nf nf-fa-check_circle"></i>{% else %}<i class="nf nf-fa-times_circle"></i>{% endif %}</a>
-                    <a href="#" onclick="openEditMovieModal({{ movie.id }})" class="btn btn-edit">Edit</a>
+                    <a href="javascript:void(0)" onclick="toggleSeen({{ movie.id }})" class="btn btn-seen {% if movie.seen %}seen{% endif %}">{% if movie.seen %}<i class="nf nf-fa-check_circle"></i>{% else %}<i class="nf nf-fa-times_circle"></i>{% endif %}</a>
+                    <a href="javascript:void(0)" onclick="openEditMovieModal({{ movie.id }})" class="btn btn-edit">Edit</a>
                     <a href="{{ url_for('delete_movie', movie_id=movie.id) }}" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this movie?')">Delete</a>
-                    <a href="#" onclick="openFolder({{ movie.id }})" class="btn btn-folder"><i class="nf nf-fa-folder"></i></a>
+                    <a href="javascript:void(0)" onclick="openFolder({{ movie.id }})" class="btn btn-folder"><i class="nf nf-fa-folder"></i></a>
                     {% if movie.radarr_id %}
                         <a href="http://192.168.0.101:7878/movie/{{ movie.radarr_id }}" target="_blank" class="btn btn-radarr"><i class="nf nf-fa-external_link"></i></a>
                     {% endif %}
