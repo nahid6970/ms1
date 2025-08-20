@@ -17,6 +17,7 @@ async function openEditMovieModal(movieId) {
     document.getElementById('editMovieYear').value = movie.year;
     document.getElementById('editMovieCoverImage').value = movie.cover_image;
     document.getElementById('editMovieDirectoryPath').value = movie.directory_path || '';
+    document.getElementById('editMovieRadarrId').value = movie.radarr_id || '';
 
     // Set the rating radio button
     const ratingRadios = document.querySelectorAll('#editMovieModal input[name="rating"]');
