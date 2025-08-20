@@ -36,7 +36,7 @@
         "id": 7,
         "title": "Juror #2 (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ugQkpGajKFQ8eyOEhGheR0HfWQ.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Juror #2 (2024)",
         "rating": null,
         "files": [
@@ -45,13 +45,14 @@
                 "title": "Juror.2.2024.1080p.ITA-ENG.MULTI.WEBRip.x265.AAC-V3SP4EV3R",
                 "added_date": "2025-08-19T21:39:47.572202"
             }
-        ]
+        ],
+        "radarr_id": "1106739"
     },
     {
         "id": 9,
         "title": "Justice League Crisis on Infinite Earths Part Two ()",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/g8ak4QAGLZpqMs3CpnFHWWfIzJQ.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Justice League Crisis on Infinite Earths Part Two ()",
         "rating": null,
         "files": [
@@ -60,13 +61,14 @@
                 "title": "Justice.League.Crisis.on.Infinite.Earths.Part.Two.2024.1080p.BluRay.1400MB.DD5.1.x264-GalaxyRG[TGx]",
                 "added_date": "2025-08-19T21:39:49.138759"
             }
-        ]
+        ],
+        "radarr_id": "1209288"
     },
     {
         "id": 10,
         "title": "Justice League Crisis on Infinite Earths, Part One (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/zR6C66EDklgTPLHRSmmMt5878MR.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Justice League Crisis on Infinite Earths, Part One (2024)",
         "rating": null,
         "files": [
@@ -75,13 +77,14 @@
                 "title": "Justice.League.Crisis.on.Infinite.Earths.Part.One.2024.1080p.BluRay.x264.5.1-RiPRG",
                 "added_date": "2025-08-19T21:39:49.939042"
             }
-        ]
+        ],
+        "radarr_id": "1155089"
     },
     {
         "id": 13,
         "title": "Kingdom of the Planet of the Apes (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/gKkl37BQuKTanygYQG1pyYgLVgf.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Kingdom of the Planet of the Apes (2024)",
         "rating": null,
         "files": [
@@ -90,7 +93,8 @@
                 "title": "Kingdom.of.the.Planet.of.the.Apes.2024.BDRip.1080p.seleZen",
                 "added_date": "2025-08-19T21:39:59.751807"
             }
-        ]
+        ],
+        "radarr_id": "653346"
     },
     {
         "id": 14,
@@ -327,7 +331,7 @@
         "id": 30,
         "title": "Justice League Crisis on Infinite Earths Part Three ()",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/a3q8NkM8uTh9E23VsbUOdDSbBeN.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Justice League Crisis on Infinite Earths Part Three ()",
         "rating": null,
         "files": [
@@ -336,13 +340,14 @@
                 "title": "Justice.League.Crisis.on.Infinite.Earths.Part.Three.2024.1080p.BluRay.DDP5.1.x265.10bit-GalaxyRG265[TGx]",
                 "added_date": "2025-08-20T19:15:46.286356"
             }
-        ]
+        ],
+        "radarr_id": "1209290"
     },
     {
         "id": 31,
         "title": "Justice League Warworld (2023)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/pHdSS5G3wDwJp6jWgMpbSjNiTbr.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Justice League Warworld (2023)",
         "rating": null,
         "files": [
@@ -351,13 +356,14 @@
                 "title": "Justice League Warworld (2023) [1080p] [BluRay] [5.1] [YTS.MX]",
                 "added_date": "2025-08-20T19:15:47.252284"
             }
-        ]
+        ],
+        "radarr_id": "1003581"
     },
     {
         "id": 32,
         "title": "Justice Society World War II (2021)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/e4REOC6CZW8J6FslA4nRvdQXFXR.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Justice Society World War II (2021)",
         "rating": null,
         "files": [
@@ -366,6 +372,7 @@
                 "title": "Justice Society World War II (2021) + Extras (1080p BluRay x265 HEVC 10bit EAC3 5.1 English + French + German + Spanish SAMPA) [QxR]",
                 "added_date": "2025-08-20T19:15:47.919939"
             }
-        ]
+        ],
+        "radarr_id": "736069"
     }
 ]
