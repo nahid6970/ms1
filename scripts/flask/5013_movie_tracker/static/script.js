@@ -154,6 +154,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    const editMovieForm = document.getElementById('editMovieForm');
+    if (editMovieForm) {
+        editMovieForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const action = this.action;
+
+            fetch(action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    closeEditMovieModal();
+                    location.reload();
+                } else {
+                    alert('Failed to save changes.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Failed to save changes due to a network error.');
+            });
+        });
+    }
 });
 
 // Sort Menu Functions
