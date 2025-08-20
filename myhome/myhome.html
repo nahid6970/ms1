@@ -849,19 +849,19 @@ div.toggle-container {
     "url": "https://discord.com/channels/@me"
   },
   {
-    "name": "Google Translate",
-    "group": "edu",
-    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate",
-    "icon_class": "nf nf-md-google_translate",
     "color": "#ffffff",
     "default_type": "nerd-font",
-    "font_size": "35px"
+    "font_size": "35px",
+    "group": "edu",
+    "icon_class": "nf nf-md-google_translate",
+    "name": "Google Translate",
+    "url": "https://translate.google.com/?hl=en&tab=TT&sl=bn&tl=en&op=translate"
   },
   {
-    "name": "speechtyping",
+    "default_type": "nerd-font",
     "group": "edu",
-    "url": "https://speechtyping.com/voice-typing/speech-to-text-bengali",
-    "default_type": "nerd-font"
+    "name": "speechtyping",
+    "url": "https://speechtyping.com/voice-typing/speech-to-text-bengali"
   },
   {
     "color": "#4b70cc",
@@ -926,10 +926,10 @@ div.toggle-container {
     "url": "https://www.nerdfonts.com/cheat-sheet"
   },
   {
-    "name": "banglaconverter",
+    "default_type": "nerd-font",
     "group": "edu",
-    "url": "https://www.banglaconverter.org/tools.php?f=Bangla-Voice-To-Text",
-    "default_type": "nerd-font"
+    "name": "banglaconverter",
+    "url": "https://www.banglaconverter.org/tools.php?f=Bangla-Voice-To-Text"
   },
   {
     "collapsible": false,
@@ -979,12 +979,12 @@ div.toggle-container {
     "width": "50"
   },
   {
-    "name": "Cleanuparr",
-    "group": "Local (Apps)",
-    "url": "http://localhost:11011/dashboard",
-    "img_src": "http://localhost:11011/icons/128.png",
     "default_type": "img",
-    "hidden": true
+    "group": "Local (Apps)",
+    "hidden": true,
+    "img_src": "http://localhost:11011/icons/128.png",
+    "name": "Cleanuparr",
+    "url": "http://localhost:11011/dashboard"
   },
   {
     "collapsible": false,
@@ -1540,17 +1540,31 @@ div.toggle-container {
     "url": "https://www.bou.ac.bd/NoticeBoard/Recruitmentmore"
   },
   {
-    "name": "dcsunamganj",
+    "default_type": "nerd-font",
     "group": "JobCircular",
-    "url": "https://dcsunamganj.teletalk.com.bd/",
-    "default_type": "nerd-font"
+    "name": "dcsunamganj",
+    "url": "https://dcsunamganj.teletalk.com.bd/"
   },
   {
-    "name": "NotiNotes",
+    "default_type": "img",
     "group": "Android-Apps",
-    "url": "https://play.google.com/store/apps/details?id=de.dlyt.yanndroid.notinotes&hl",
     "img_src": "https://play-lh.googleusercontent.com/_tTQatRSbDfLSZe-eUKy9C4ktIwJ59wsBkSoqORymZ6C4T44q3TtUasA81HCbOz-JY4=w240-h480-rw",
-    "default_type": "img"
+    "name": "NotiNotes",
+    "url": "https://play.google.com/store/apps/details?id=de.dlyt.yanndroid.notinotes&hl"
+  },
+  {
+    "default_type": "img",
+    "group": "chrome_ext",
+    "img_src": "https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg",
+    "name": "Chromeweb",
+    "url": "https://chromewebstore.google.com/"
+  },
+  {
+    "default_type": "img",
+    "group": "chrome_ext",
+    "img_src": "https://lh3.googleusercontent.com/cvfpnTKw3B67DtM1ZpJG2PNAIjP6hVMOyYy403X4FMkOuStgG1y4cjCn21vmTnnsip1dTZSVsWBA9IxutGuA3dVDWhg=s60",
+    "name": "Picture in Picture",
+    "url": "https://chromewebstore.google.com/detail/picture-in-picture-extens/hkgfoiooedgoejojocmhlaklaeopbecg"
   }
 ];
     
@@ -1807,13 +1821,13 @@ document.addEventListener('keydown', (event) => {
         buttonContainer.appendChild(reorderButtonsContainer);
 
         const editButton = document.createElement('button');
-        editButton.textContent = '✏️';
+        editButton.textContent = ''; //✏️
         editButton.className = 'edit-button';
         editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
         buttonContainer.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
-        deleteButton.textContent = '🗑️';
+        deleteButton.textContent = ''; //🗑️
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteLink(index); // Pass original index
         buttonContainer.appendChild(deleteButton);
@@ -1942,7 +1956,7 @@ document.addEventListener('keydown', (event) => {
     
     const editBtn = document.createElement('button');
     editBtn.className = 'collapsible-edit-btn';
-    editBtn.textContent = '⚙️';
+    editBtn.textContent = ''; //⚙️
     editBtn.onclick = (e) => {
       e.stopPropagation();
       openEditGroupPopup(groupName);
@@ -2272,7 +2286,7 @@ document.addEventListener('keydown', (event) => {
 
     // Add edit group button (only visible in edit mode)
     const editGroupButton = document.createElement('button');
-    editGroupButton.textContent = '⚙️';
+    editGroupButton.textContent = ''; //⚙️
     editGroupButton.className = 'edit-group-button';
     editGroupButton.onclick = () => openEditGroupPopup(groupName);
     groupHeaderContainer.appendChild(editGroupButton);
@@ -2975,6 +2989,6 @@ setInterval(updateDateTime, 1000);
 
   </div>
   
-  <!-- Generated on 2025-08-19 11:51:36 -->
+  <!-- Generated on 2025-08-20 10:20:27 -->
 </body>
 </html>
