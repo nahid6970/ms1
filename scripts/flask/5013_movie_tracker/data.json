@@ -3,7 +3,7 @@
         "id": 4,
         "title": "AVP Alien vs. Predator (2004)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ySWu5bCnnmgV1cVacvFnFIhgOjp.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\AVP Alien vs. Predator (2004)",
         "rating": null,
         "files": [
@@ -12,28 +12,14 @@
                 "title": "\u5f02\u5f62\u5927\u6218\u94c1\u8840\u6218\u58eb \u672a\u5206\u7ea7\u7248 AVP Alien vs. Predator 2004 UNRATED.BD1080P.x264.DD5.1.\u4e2d\u82f1\u53cc\u5b57\u5e55.ENG&CHS.taobaobt",
                 "added_date": "2025-08-19T21:39:45.494959"
             }
-        ]
-    },
-    {
-        "id": 5,
-        "title": "Furiosa (2024)",
-        "year": "",
-        "cover_image": "",
-        "directory_path": "D:\\Downloads\\@Radarr\\Furiosa (2024)",
-        "rating": null,
-        "files": [
-            {
-                "id": 1,
-                "title": "Furiosa A Mad Max Saga 2024 BDRip 1080p HEVC HDR10 EAC3 Atmos OEP 8A88D77B mkv",
-                "added_date": "2025-08-19T21:39:46.172978"
-            }
-        ]
+        ],
+        "radarr_id": "395"
     },
     {
         "id": 6,
         "title": "Inside Out 2 (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Inside Out 2 (2024)",
         "rating": null,
         "files": [
@@ -42,7 +28,9 @@
                 "title": "Inside Out 2 (2024) [1080p] [BluRay] [5.1] [YTS.MX]",
                 "added_date": "2025-08-19T21:39:46.933311"
             }
-        ]
+        ],
+        "radarr_id": "1022789",
+        "seen": false
     },
     {
         "id": 7,
@@ -318,7 +306,7 @@
         "id": 25,
         "title": "Arrival (2016)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Arrival (2016)",
         "rating": null,
         "files": [
@@ -328,13 +316,14 @@
                 "added_date": "2025-08-19T21:43:48.816065"
             }
         ],
-        "seen": false
+        "seen": false,
+        "radarr_id": "329865"
     },
     {
         "id": 27,
         "title": "Alien Covenant (2017)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/zecMELPbU5YMQpC81Z8ImaaXuf9.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Alien Covenant (2017)",
         "rating": "3",
         "files": [
@@ -351,7 +340,7 @@
         "id": 28,
         "title": "Aliens vs Predator Requiem (2007)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/jCyJN1vj8jqJJ0vNw4hDH2KlySO.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Aliens vs Predator Requiem (2007)",
         "rating": null,
         "files": [
@@ -360,6 +349,23 @@
                 "title": "Aliens Vs. Predator Requiem (2007) [1080p] [BluRay] [5.1] [YTS.MX]",
                 "added_date": "2025-08-19T23:36:00.251171"
             }
-        ]
+        ],
+        "radarr_id": "440"
+    },
+    {
+        "id": 29,
+        "title": "Furiosa (2024)",
+        "year": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/iADOJ8Zymht2JPMoy3R7xceZprc.jpg",
+        "directory_path": "D:\\Downloads\\@Radarr\\Furiosa (2024)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Furiosa A Mad Max Saga 2024 BDRip 1080p HEVC HDR10 EAC3 Atmos OEP 8A88D77B mkv",
+                "added_date": "2025-08-20T19:01:08.548967"
+            }
+        ],
+        "radarr_id": "786892"
     }
 ]
