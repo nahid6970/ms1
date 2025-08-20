@@ -136,6 +136,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            const movieId = button.dataset.movieId;
+            if (confirm('Are you sure you want to delete this movie?')) {
+                fetch(`/delete_movie/${movieId}`, {
+                    method: 'GET', // Or 'DELETE', but the route is defined with GET
+                }).then(response => {
+                    if (response.ok) {
+                        button.closest('.show-card').remove();
+                    } else {
+                        alert('Failed to delete movie.');
+                    }
+                });
+            }
+        });
+    });
 });
 
 // Sort Menu Functions

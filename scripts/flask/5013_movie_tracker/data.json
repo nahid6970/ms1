@@ -78,36 +78,6 @@
         ]
     },
     {
-        "id": 11,
-        "title": "Justice League Warworld (2023)",
-        "year": "",
-        "cover_image": "",
-        "directory_path": "D:\\Downloads\\@Radarr\\Justice League Warworld (2023)",
-        "rating": null,
-        "files": [
-            {
-                "id": 1,
-                "title": "Justice League Warworld (2023) [1080p] [BluRay] [5.1] [YTS.MX]",
-                "added_date": "2025-08-19T21:39:58.884249"
-            }
-        ]
-    },
-    {
-        "id": 12,
-        "title": "Justice Society World War II (2021)",
-        "year": "",
-        "cover_image": "",
-        "directory_path": "D:\\Downloads\\@Radarr\\Justice Society World War II (2021)",
-        "rating": null,
-        "files": [
-            {
-                "id": 1,
-                "title": "Justice Society World War II (2021) + Extras (1080p BluRay x265 HEVC 10bit EAC3 5.1 English + French + German + Spanish SAMPA) [QxR]",
-                "added_date": "2025-08-19T21:39:59.348681"
-            }
-        ]
-    },
-    {
         "id": 13,
         "title": "Kingdom of the Planet of the Apes (2024)",
         "year": "",
@@ -352,5 +322,50 @@
             }
         ],
         "radarr_id": "786892"
+    },
+    {
+        "id": 30,
+        "title": "Justice League Crisis on Infinite Earths Part Three ()",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice League Crisis on Infinite Earths Part Three ()",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice.League.Crisis.on.Infinite.Earths.Part.Three.2024.1080p.BluRay.DDP5.1.x265.10bit-GalaxyRG265[TGx]",
+                "added_date": "2025-08-20T19:15:46.286356"
+            }
+        ]
+    },
+    {
+        "id": 31,
+        "title": "Justice League Warworld (2023)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice League Warworld (2023)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice League Warworld (2023) [1080p] [BluRay] [5.1] [YTS.MX]",
+                "added_date": "2025-08-20T19:15:47.252284"
+            }
+        ]
+    },
+    {
+        "id": 32,
+        "title": "Justice Society World War II (2021)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Justice Society World War II (2021)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Justice Society World War II (2021) + Extras (1080p BluRay x265 HEVC 10bit EAC3 5.1 English + French + German + Spanish SAMPA) [QxR]",
+                "added_date": "2025-08-20T19:15:47.919939"
+            }
+        ]
     }
 ]
