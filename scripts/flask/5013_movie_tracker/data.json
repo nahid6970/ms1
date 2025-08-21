@@ -132,7 +132,7 @@
         "id": 16,
         "title": "Madgaon Express (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/oIh4I9tORjptI9V5Zw0Rs10h9AG.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Madgaon Express (2024)",
         "rating": null,
         "files": [
@@ -141,13 +141,14 @@
                 "title": "Madgaon Express (2024) [1080p] [WEBRip] [5.1] [YTS.MX]",
                 "added_date": "2025-08-19T21:40:01.291807"
             }
-        ]
+        ],
+        "radarr_id": "1201015"
     },
     {
         "id": 17,
         "title": "Oppenheimer (2023)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Oppenheimer (2023)",
         "rating": null,
         "files": [
@@ -156,13 +157,14 @@
                 "title": "Oppenheimer 2023 1080p BluRay DDP5 1 x265 10bit GalaxyRG265",
                 "added_date": "2025-08-19T21:40:01.817432"
             }
-        ]
+        ],
+        "radarr_id": "872585"
     },
     {
         "id": 18,
         "title": "Pushpa 2 - The Rule (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/gpNcQfQ4YGtFwEcrjcK9HxVM2KF.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Pushpa 2 - The Rule (2024)",
         "rating": null,
         "files": [
@@ -171,13 +173,14 @@
                 "title": "Pushpa The Rule Part 2 2024 Hindi 1080p 10bit ET WEBRip AC3 x265 - mkvAnime",
                 "added_date": "2025-08-19T21:40:02.337514"
             }
-        ]
+        ],
+        "radarr_id": "857598"
     },
     {
         "id": 19,
         "title": "Superman (2025)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ombsmhYUqR4qqOLOxAyr5V8hbyv.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Superman (2025)",
         "rating": null,
         "files": [
@@ -186,13 +189,14 @@
                 "title": "Superman (2025) 1080p BluRay-LAMA",
                 "added_date": "2025-08-19T21:40:02.848067"
             }
-        ]
+        ],
+        "radarr_id": "1061474"
     },
     {
         "id": 20,
         "title": "The Conjuring (2013)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\The Conjuring (2013)",
         "rating": null,
         "files": [
@@ -201,7 +205,8 @@
                 "title": "The Conjuring (2013) (1080p BluRay x265 SDR DDP 5.1 English - DarQ HONE)",
                 "added_date": "2025-08-19T21:40:03.254388"
             }
-        ]
+        ],
+        "radarr_id": "138843"
     },
     {
         "id": 21,
