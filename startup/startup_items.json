@@ -357,5 +357,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5013_movie_tracker\\app.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Huntarr",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\Huntarr\\Huntarr.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
   }
 ]
