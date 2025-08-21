@@ -69,17 +69,6 @@
         "created_date": "2025-08-16T23:49:13.387175"
     },
     {
-        "id": 7,
-        "company": "BRAC",
-        "position": "Young Professional - Finance & Accounting",
-        "job_url": "https://careers.brac.net/jobs/young-professional-finance-and-accounts-2367?bulk=false",
-        "applied_date": "",
-        "deadline": "2025-08-20",
-        "status": "Interested",
-        "notes": "",
-        "created_date": "2025-08-17T12:33:20.470301"
-    },
-    {
         "id": 8,
         "company": "BOU (BANGLADESH OPEN UNIVERSITY)",
         "position": "Accountant (grade 11) (salary12500-30000)",
@@ -100,38 +89,5 @@
         "status": "Interested",
         "notes": "",
         "created_date": "2025-08-17T12:54:28.266927"
-    },
-    {
-        "id": 10,
-        "company": "BARI (\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6 \u0995\u09c3\u09b7\u09bf \u0997\u09ac\u09c7\u09b7\u09a3\u09be \u0987\u09a8\u09b8\u09cd\u099f\u09bf\u099f\u09bf\u0989\u099f)",
-        "position": "\u09b8\u09b9\u0995\u09be\u09b0\u09c0 \u09aa\u09b0\u09bf\u099a\u09be\u09b2\u0995 (\u0985\u09b0\u09cd\u09a5 \u0993 \u09b9\u09bf\u09b8\u09be\u09ac) grade9",
-        "job_url": "http://bari.teletalk.com.bd/",
-        "applied_date": "",
-        "deadline": "2025-08-21",
-        "status": "Interested",
-        "notes": "",
-        "created_date": "2025-08-18T15:40:54.905777"
-    },
-    {
-        "id": 11,
-        "company": "niyd (National Institute of Youth Development)",
-        "position": "\u09b8\u09b9\u0995\u09be\u09b0\u09c0 \u09aa\u09b0\u09bf\u099a\u09be\u09b2\u0995 grade9 vacancy2",
-        "job_url": "https://niyd.teletalk.com.bd/",
-        "applied_date": "",
-        "deadline": "2025-08-21",
-        "status": "Interested",
-        "notes": "",
-        "created_date": "2025-08-18T15:46:05.773593"
-    },
-    {
-        "id": 12,
-        "company": "dcsunamganj (DC Office Sunamganj)",
-        "position": "\u0985\u09ab\u09bf\u09b8 \u09b8\u09b9\u0995\u09be\u09b0\u09c0 \u0995\u09be\u09ae-\u0995\u09ae\u09cd\u09aa\u09bf\u0989\u099f\u09be\u09b0 \u09ae\u09c1\u09a6\u09cd\u09b0\u09be\u0995\u09cd\u09b7\u09b0\u09bf\u0995 (\u0997\u09cd\u09b0\u09c7\u09a1-\u09e7\u09ec) (\u09ef\u09e9\u09e6\u09e6-\u09e8\u09e8\u09ea\u09ef\u09e6)",
-        "job_url": "https://dcsunamganj.teletalk.com.bd/dcsunamganj072025/",
-        "applied_date": "",
-        "deadline": "2025-08-21",
-        "status": "Interested",
-        "notes": "",
-        "created_date": "2025-08-18T15:51:32.072038"
     }
 ]
