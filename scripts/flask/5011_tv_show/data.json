@@ -685,6 +685,12 @@
         "directory_path": "D:\\Downloads\\@Sonarr\\DrStone",
         "episodes": [
             {
+                "id": 4,
+                "title": "Dr. STONE - s04e19 - [77] - Stone Sanctuary HDTV-1080p - [SubsPlease]",
+                "watched": true,
+                "added_date": "2025-08-21T21:38:15.529318"
+            },
+            {
                 "id": 3,
                 "title": "Dr. STONE - s04e18 - [76] - Diamond Heart HDTV-1080p - [SubsPlease]",
                 "watched": true,

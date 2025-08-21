@@ -382,5 +382,21 @@
             }
         ],
         "radarr_id": "736069"
+    },
+    {
+        "id": 33,
+        "title": "Mission Impossible 8 (2025)",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Radarr\\Mission Impossible 8 (2025)",
+        "rating": null,
+        "files": [
+            {
+                "id": 1,
+                "title": "Mission Impossible The Final Reckoning 2025 FullHD 1080p.H264 Ita Eng AC3 5.1 Multisub realDMDJ",
+                "added_date": "2025-08-22T01:57:39.205215"
+            }
+        ],
+        "seen": true
     }
 ]
