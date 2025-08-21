@@ -930,8 +930,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 border_radius: document.getElementById('edit-link-border-radius').value || undefined,
                 title: document.getElementById('edit-link-title').value || undefined,
                 font_size: document.getElementById('edit-link-font-size').value || undefined,
-                li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
-                li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
+                li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
+                li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
                 hidden: document.getElementById('edit-link-hidden').checked || undefined,
             };
 
