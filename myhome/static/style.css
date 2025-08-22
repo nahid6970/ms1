@@ -717,3 +717,7 @@ div.toggle-container {
   display: inline-block;
   font-weight: bold;
 }
+
+#horizontal-stack-popup .popup-content-inner .link-item { 
+  flex-grow: 1;                                           
+}                                                         
