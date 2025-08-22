@@ -342,11 +342,21 @@ input:checked+.slider:before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-
   width: 100%;
   max-width: fit-content;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+  /* max-width: 90vw; */
+  /* max-height: 90vh; */
 }
+
+ #horizontal-stack-popup .popup-content-inner {                                   
+   display: flex;                                                                 
+   flex-wrap: wrap;                                                               
+   gap: 10px;                                                                     
+   max-height: calc(90vh - 100px); /* Adjust based on padding and header height */
+   overflow-y: auto;                                                              
+ }                                                                                
 
 .popup-content .close-button {
   position: absolute;
@@ -728,7 +738,14 @@ div.toggle-container {
 
 #horizontal-stack-popup .popup-content-inner .link-item { 
   flex-grow: 1;                                           
-}                                                         </style>
+}                                                         
+
+@media (max-width: 600px) {
+.popup-content {
+  max-width: 90vw;
+  max-height: 90vh;
+}
+}</style>
 </head>
 
 <body>
@@ -3234,82 +3251,88 @@ document.addEventListener('keydown', (event) => {
     "default_type": "img",
     "display_style": "flex",
     "group": "Download PKG",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "http://fitgirl-repacks.site/wp-content/uploads/2016/08/cropped-icon-192x192.jpg",
     "name": "Fitgirl",
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
     "top_text_color": "#ffffff",
-    "url": "https://fitgirl-repacks.site/"
+    "url": "https://fitgirl-repacks.site/",
+    "password_protect": false
   },
   {
     "collapsible": false,
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Download PKG",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "romsfun",
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
     "top_text_color": "#ffffff",
-    "url": "https://romsfun.com/"
+    "url": "https://romsfun.com/",
+    "password_protect": false
   },
   {
     "collapsible": false,
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Download PKG",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "DODI",
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
     "top_text_color": "#ffffff",
-    "url": "https://dodi-repacks.site/"
+    "url": "https://dodi-repacks.site/",
+    "password_protect": false
   },
   {
     "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Download PKG",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://avatars.githubusercontent.com/u/16618068?s=30",
     "name": "Scoop",
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
     "top_text_color": "#ffffff",
-    "url": "https://scoop.sh/#/"
+    "url": "https://scoop.sh/#/",
+    "password_protect": false
   },
   {
     "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Download PKG",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MC40OTIiIGhlaWdodD0iNDUuOTg2IiB2aWV3Qm94PSIwIDAgNDAuNDkyIDQ1Ljk4NiI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTgzNS4xMzEgLTcyLjEzNikiPjxsaW5lIHkyPSIyMS41NDciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgOTUuMjExKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxOC45NiIgeTI9IjExLjAyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkyPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgMTA2LjA2NykiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5Mj0iMjEuODc2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NzQuMjU1IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguOTYiIHkxPSIxMC42OTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgNzMuNSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB5MT0iMTAuNjkxIiB4Mj0iMTguNzk1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSA3My41KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgyPSIxOC43OTUiIHkyPSIxMS4wMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODM2LjUgODQuMTkxKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSIyMS44NzYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgzNi41IDg0LjE5MSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4MT0iMTguNzk1IiB5MT0iMTAuNjkxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDYuMDY3KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkxPSI1LjA5OSIgeDI9IjguNzM4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MzYuNSAxMDAuOTY4KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHkyPSIxMS42NzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg0NS4yMzggODkuMjkpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjEwLjA1NyIgeTI9IjUuNzU3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NDUuMjM4IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTE9IjUuNzU3IiB4Mj0iMTAuMjIyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDEwMC45NjgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjExLjY3OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY1LjUxNyA4OS4yOSkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48bGluZSB4Mj0iMTAuMjIyIiB5Mj0iNi4wODYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg1NS4yOTUgODMuMjA0KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxsaW5lIHgxPSIxMC4wNTciIHkyPSI2LjA4NiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODQ1LjIzOCA4My4yMDQpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeTI9IjkuNzA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4NTUuMjk1IDczLjUpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PGxpbmUgeDI9IjguNzM4IiB5Mj0iNS4wOTkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg2NS41MTcgMTAwLjk2OCkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjZmZmIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L2c+PC9zdmc+",
     "name": "Winget",
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
     "top_text_color": "#ffffff",
-    "url": "https://winget.run/"
+    "url": "https://winget.run/",
+    "password_protect": false
   },
   {
     "collapsible": false,
     "default_type": "img",
     "display_style": "flex",
     "group": "Download PKG",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://apps.evozi.com/apk-downloader/assets/img/mini_icon.png",
     "name": "evozi",
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
     "top_text_color": "#ffffff",
-    "url": "https://apps.evozi.com/apk-downloader/"
+    "url": "https://apps.evozi.com/apk-downloader/",
+    "password_protect": false
   },
   {
     "collapsible": false,
@@ -3317,7 +3340,7 @@ document.addEventListener('keydown', (event) => {
     "display_style": "flex",
     "font_size": "35px",
     "group": "Download PKG",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "icon_class": "nf nf-fa-microsoft",
     "img_src": "https://store.rg-adguard.net/img/Store.png",
     "name": "MS-Store",
@@ -3325,15 +3348,17 @@ document.addEventListener('keydown', (event) => {
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
     "top_text_color": "#ffffff",
-    "url": "https://store.rg-adguard.net/"
+    "url": "https://store.rg-adguard.net/",
+    "password_protect": false
   },
   {
     "collapsible": false,
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Linux",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "protondb",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3345,8 +3370,9 @@ document.addEventListener('keydown', (event) => {
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Linux",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "ProtonPLUS",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3358,8 +3384,9 @@ document.addEventListener('keydown', (event) => {
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Linux",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "Wayland-Protocol addoption info",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3371,8 +3398,9 @@ document.addEventListener('keydown', (event) => {
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Linux",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "niri",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3486,9 +3514,10 @@ document.addEventListener('keydown', (event) => {
     "default_type": "img",
     "display_style": "flex",
     "group": "Git-Projects",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://avatars.githubusercontent.com/u/241032?s=48&v=4",
     "name": "copyparty",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3500,9 +3529,10 @@ document.addEventListener('keydown', (event) => {
     "default_type": "img",
     "display_style": "flex",
     "group": "Git-Projects",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://avatars.githubusercontent.com/u/585534?s=48&v=4",
     "name": "ublock Origin",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3514,8 +3544,9 @@ document.addEventListener('keydown', (event) => {
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Git-Projects",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "glance",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3527,8 +3558,9 @@ document.addEventListener('keydown', (event) => {
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Git-Projects",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "corsproxy",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3540,8 +3572,9 @@ document.addEventListener('keydown', (event) => {
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Git-Projects",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "CrapFixer",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3553,9 +3586,10 @@ document.addEventListener('keydown', (event) => {
     "default_type": "img",
     "display_style": "flex",
     "group": "Android-Apps",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://play-lh.googleusercontent.com/Sg6FawqRvKQYeebQcbZ-DTtF8nzVpnZIWxNSzdF4PjgopILrvX6AP6beOb3AE6WDKSg=w240-h480-rw",
     "name": "Blackr: OLED Screen Off",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3567,9 +3601,10 @@ document.addEventListener('keydown', (event) => {
     "default_type": "img",
     "display_style": "flex",
     "group": "Android-Apps",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://play-lh.googleusercontent.com/k1Qzd6BjDsg2nYJWo_krDVIOBxpw0WUvB-V2HbDjRObUKL0nqa3nWruDBhys5OudD1qCgQztsYP0cU9-TniHzQ=w240-h480-rw",
     "name": "Athena",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3581,9 +3616,10 @@ document.addEventListener('keydown', (event) => {
     "default_type": "img",
     "display_style": "flex",
     "group": "Android-Apps",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://avatars.githubusercontent.com/u/75154889?s=48&v=4",
     "name": "AppLock",
+    "password_protect": false,
     "title": "AppLock",
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
@@ -3596,8 +3632,9 @@ document.addEventListener('keydown', (event) => {
     "default_type": "nerd-font",
     "display_style": "flex",
     "group": "Android-Apps",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "name": "myapk",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3609,9 +3646,10 @@ document.addEventListener('keydown', (event) => {
     "default_type": "img",
     "display_style": "flex",
     "group": "Android-Apps",
-    "horizontal_stack": false,
+    "horizontal_stack": true,
     "img_src": "https://play-lh.googleusercontent.com/_tTQatRSbDfLSZe-eUKy9C4ktIwJ59wsBkSoqORymZ6C4T44q3TtUasA81HCbOz-JY4=w240-h480-rw",
     "name": "NotiNotes",
+    "password_protect": false,
     "top_bg_color": "#2d2d2d",
     "top_border_color": "#444444",
     "top_hover_color": "#3a3a3a",
@@ -3930,4 +3968,4 @@ document.addEventListener('keydown', (event) => {
   </script>
 </body>
 
-<!-- Generated on 2025-08-22 21:47:14 --></html>
+<!-- Generated on 2025-08-22 22:48:53 --></html>
