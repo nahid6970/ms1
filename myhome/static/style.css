@@ -108,6 +108,7 @@ img {
   /* Remove default list bullets */
   padding: 10px;
   /* Remove default padding */
+  display: flex;
   flex-wrap: wrap;
   justify-content: left;
   background-color: #252525;
@@ -688,11 +689,12 @@ div.toggle-container {
 
 .horizontal-stack .link-group-content {
   flex-direction: row; /* Items inside this group will be in a row */
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
+  align-items: center;
 }
 
-.horizontal-stack .link-item:not(:first-child) {
+.horizontal-stack .link-item:not(:first-child):not(.add-link-item) {
   display: none;
 }
 

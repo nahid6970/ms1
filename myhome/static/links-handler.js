@@ -604,6 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const icon = document.createElement('div');
         icon.className = 'extend-icon';
         icon.textContent = '...'; // Or use an icon font
+        icon.draggable = false;
         icon.onclick = () => {
             const popup = document.getElementById('horizontal-stack-popup');
             const popupContent = popup.querySelector('.popup-content-inner');
@@ -619,6 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add button for adding new links to this group
     const addLinkItem = document.createElement('li');
     addLinkItem.className = 'link-item add-link-item';
+    addLinkItem.draggable = false;
 
     const addLinkSpan = document.createElement('span');
     addLinkSpan.textContent = '+';
@@ -1091,6 +1093,10 @@ document.addEventListener('DOMContentLoaded', function() {
   let draggedIndex = null;
 
   function handleDragStart(e) {
+    if (e.target.classList.contains('add-link-item') || e.target.classList.contains('extend-icon')) {
+        e.preventDefault();
+        return;
+    }
     draggedElement = this;
     draggedIndex = parseInt(this.dataset.linkIndex);
     this.classList.add('dragging');
