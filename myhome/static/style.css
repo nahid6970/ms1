@@ -298,7 +298,6 @@ input:checked+.slider:before {
   width: 100vw !important;
   height: 100vh !important;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999 !important;
   display: flex;
   justify-content: center !important;
   align-items: center !important;
@@ -310,6 +309,16 @@ input:checked+.slider:before {
   border-radius: 0 !important;
   /* Ensure it's not affected by parent container */
   pointer-events: auto;
+}
+
+#add-link-popup,
+#edit-link-popup,
+#edit-group-popup {
+  z-index: 10001 !important;
+}
+
+#horizontal-stack-popup {
+  z-index: 10000 !important;
 }
 
 .hidden {
