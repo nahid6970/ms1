@@ -616,6 +616,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 clonedElement.addEventListener('drop', handleDrop);
                 clonedElement.addEventListener('dragend', handleDragEnd);
 
+                if (linkData.link.li_bg_color) {
+                  clonedElement.style.backgroundColor = linkData.link.li_bg_color;
+                }
+                if (linkData.link.li_hover_color) {
+                  clonedElement.addEventListener('mouseover', () => {
+                    clonedElement.style.backgroundColor = linkData.link.li_hover_color;
+                  });
+                  clonedElement.addEventListener('mouseout', () => {
+                    clonedElement.style.backgroundColor = linkData.link.li_bg_color || '';
+                  });
+                }
+
                 const editButton = clonedElement.querySelector('.edit-button');
                 if (editButton && linkData) {
                     editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
