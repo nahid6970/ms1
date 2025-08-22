@@ -603,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
         const icon = document.createElement('div');
         icon.className = 'extend-icon';
-        icon.textContent = '...'; // Or use an icon font
+        icon.innerHTML = '<i class="nf nf-md-google_circles_extended"></i>'; // Or use an icon font
         icon.draggable = false;
         icon.onclick = () => {
             const popup = document.getElementById('horizontal-stack-popup');
