@@ -1230,6 +1230,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const response = await fetch('/api/links');
       let currentLinks = await response.json();
 
+      const movedLink = currentLinks[oldIndex];
+      const groupName = movedLink.group || 'Ungrouped';
+
       // Remove the dragged link from its original position
       const [draggedLink] = currentLinks.splice(oldIndex, 1);
 
@@ -1245,7 +1248,16 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify(currentLinks),
       });
 
-      fetchAndDisplayLinks(); // Re-render the UI
+      await fetchAndDisplayLinks(); // Re-render the UI
+
+      // Re-open the popup if it was open
+      const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
+      if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
+          const icon = groupDiv.querySelector('.extend-icon');
+          if (icon) {
+              icon.click();
+          }
+      }
 
     } catch (error) {
       console.error('Error reordering link:', error);
