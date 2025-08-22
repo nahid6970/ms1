@@ -620,6 +620,23 @@ document.addEventListener('DOMContentLoaded', function() {
     groupList.appendChild(addLinkItem);
 
     groupDiv.appendChild(groupList);
+
+    if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
+      const icon = document.createElement('div');
+      icon.className = 'horizontal-stack-icon';
+      icon.textContent = '...'; // Or use an icon font
+      icon.onclick = () => {
+        const popup = document.getElementById('horizontal-stack-popup');
+        const popupContent = popup.querySelector('.popup-content-inner');
+        popupContent.innerHTML = '';
+        elements.forEach(element => {
+          popupContent.appendChild(element.cloneNode(true));
+        });
+        popup.classList.remove('hidden');
+      };
+      groupDiv.appendChild(icon);
+    }
+
     return groupDiv;
   }  
 // Function to open edit group popup

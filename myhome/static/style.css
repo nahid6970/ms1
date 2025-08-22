@@ -691,3 +691,17 @@ div.toggle-container {
   flex-wrap: wrap;
   gap: 10px;
 }
+
+.horizontal-stack .link-item:not(:first-child) {
+  display: none;
+}
+
+.horizontal-stack-icon {
+  cursor: pointer;
+  padding: 5px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  margin-left: 10px;
+  display: inline-block;
+}
