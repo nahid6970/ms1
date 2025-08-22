@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.forEach(element => {
                 const clonedElement = element.cloneNode(true);
                 const linkIndex = parseInt(clonedElement.dataset.linkIndex);
-                const link = links[linkIndex];
+                const linkData = links.find(l => l.index === linkIndex);
 
                 clonedElement.addEventListener('dragstart', handleDragStart);
                 clonedElement.addEventListener('dragover', handleDragOver);
@@ -620,8 +620,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 clonedElement.addEventListener('dragend', handleDragEnd);
 
                 const editButton = clonedElement.querySelector('.edit-button');
-                if (editButton) {
-                    editButton.onclick = () => openEditLinkPopup(link, linkIndex);
+                if (editButton && linkData) {
+                    editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
                 }
 
                 const deleteButton = clonedElement.querySelector('.delete-button');
