@@ -611,10 +611,24 @@ document.addEventListener('DOMContentLoaded', function() {
             popupContent.innerHTML = '';
             elements.forEach(element => {
                 const clonedElement = element.cloneNode(true);
+                const linkIndex = parseInt(clonedElement.dataset.linkIndex);
+                const link = links[linkIndex];
+
                 clonedElement.addEventListener('dragstart', handleDragStart);
                 clonedElement.addEventListener('dragover', handleDragOver);
                 clonedElement.addEventListener('drop', handleDrop);
                 clonedElement.addEventListener('dragend', handleDragEnd);
+
+                const editButton = clonedElement.querySelector('.edit-button');
+                if (editButton) {
+                    editButton.onclick = () => openEditLinkPopup(link, linkIndex);
+                }
+
+                const deleteButton = clonedElement.querySelector('.delete-button');
+                if (deleteButton) {
+                    deleteButton.onclick = () => deleteLink(linkIndex);
+                }
+
                 popupContent.appendChild(clonedElement);
             });
             popup.classList.remove('hidden');
@@ -1034,13 +1048,24 @@ document.addEventListener('DOMContentLoaded', function() {
   async function deleteLink(linkId) {
     if (confirm('Are you sure you want to delete this link?')) {
       try {
+        const linkToDelete = links[linkId];
+        const groupName = linkToDelete.group || 'Ungrouped';
+
         const response = await fetch(`/api/links/${linkId}`, {
           method: 'DELETE',
         });
 
         if (response.ok) {
           alert('Link deleted successfully!');
-          fetchAndDisplayLinks();
+          await fetchAndDisplayLinks();
+
+          const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
+          if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
+              const icon = groupDiv.querySelector('.extend-icon');
+              if (icon) {
+                  icon.click();
+              }
+          }
         } else {
           alert('Failed to delete link.');
         }
