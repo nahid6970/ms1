@@ -707,6 +707,8 @@ div.toggle-container {
   flex: 0 0 auto; /* Allow to sit side-by-side, fixed width */
   margin-right: 10px; /* Add some space between horizontally stacked groups */
   vertical-align: top; /* Align groups at the top */
+  border: 1px greenyellow solid;
+  border-radius: 0px;
 }
 
 .horizontal-stack .link-group-content {
@@ -723,9 +725,18 @@ div.toggle-container {
 .extend-icon {
   cursor: pointer;
   padding: 5px;
-  margin-left: 10px;
   display: inline-block;
   font-weight: bold;
+  border: 1px rgb(193, 214, 182) solid;
+  border-radius: 0px;
+  align-self: center;
+  text-align: center;
+  width: 100%;
+}
+.extend-icon:hover  {
+  background-color: #4CAF50;
+  color: black;
+  /* Green color on hover */
 }
 
 #horizontal-stack-popup .popup-content-inner .link-item { 

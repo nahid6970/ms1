@@ -1759,5 +1759,22 @@
                 "added_date": "2025-08-14T22:12:37.611945"
             }
         ]
+    },
+    {
+        "id": 29,
+        "title": "Peacemaker",
+        "year": "",
+        "cover_image": "",
+        "directory_path": "D:\\Downloads\\@Sonarr\\Peacemaker",
+        "rating": null,
+        "status": "Continuing",
+        "episodes": [
+            {
+                "id": 1,
+                "title": "Peacemaker - S02E01 - The Ties That Grind WEBDL-1080p",
+                "watched": false,
+                "added_date": "2025-08-23T00:21:15.135304"
+            }
+        ]
     }
 ]
