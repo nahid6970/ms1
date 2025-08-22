@@ -606,32 +606,37 @@ document.addEventListener('DOMContentLoaded', function() {
         icon.innerHTML = '<i class="nf nf-md-google_circles_extended"></i>'; // Or use an icon font
         icon.draggable = false;
         icon.onclick = () => {
-            const popup = document.getElementById('horizontal-stack-popup');
-            const popupContent = popup.querySelector('.popup-content-inner');
-            popupContent.innerHTML = '';
-            elements.forEach(element => {
-                const clonedElement = element.cloneNode(true);
-                const linkIndex = parseInt(clonedElement.dataset.linkIndex);
-                const linkData = links.find(l => l.index === linkIndex);
+            const password = prompt("Please enter the password to extend the group:");
+            if (password === "1823") {
+                const popup = document.getElementById('horizontal-stack-popup');
+                const popupContent = popup.querySelector('.popup-content-inner');
+                popupContent.innerHTML = '';
+                elements.forEach(element => {
+                    const clonedElement = element.cloneNode(true);
+                    const linkIndex = parseInt(clonedElement.dataset.linkIndex);
+                    const linkData = links.find(l => l.index === linkIndex);
 
-                clonedElement.addEventListener('dragstart', handleDragStart);
-                clonedElement.addEventListener('dragover', handleDragOver);
-                clonedElement.addEventListener('drop', handleDrop);
-                clonedElement.addEventListener('dragend', handleDragEnd);
+                    clonedElement.addEventListener('dragstart', handleDragStart);
+                    clonedElement.addEventListener('dragover', handleDragOver);
+                    clonedElement.addEventListener('drop', handleDrop);
+                    clonedElement.addEventListener('dragend', handleDragEnd);
 
-                const editButton = clonedElement.querySelector('.edit-button');
-                if (editButton && linkData) {
-                    editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
-                }
+                    const editButton = clonedElement.querySelector('.edit-button');
+                    if (editButton && linkData) {
+                        editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
+                    }
 
-                const deleteButton = clonedElement.querySelector('.delete-button');
-                if (deleteButton) {
-                    deleteButton.onclick = () => deleteLink(linkIndex);
-                }
+                    const deleteButton = clonedElement.querySelector('.delete-button');
+                    if (deleteButton) {
+                        deleteButton.onclick = () => deleteLink(linkIndex);
+                    }
 
-                popupContent.appendChild(clonedElement);
-            });
-            popup.classList.remove('hidden');
+                    popupContent.appendChild(clonedElement);
+                });
+                popup.classList.remove('hidden');
+            } else {
+                alert("Incorrect password!");
+            }
         };
         groupList.appendChild(icon);
     }
