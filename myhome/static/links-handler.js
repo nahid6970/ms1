@@ -558,7 +558,7 @@ document.addEventListener('DOMContentLoaded', function() {
     groupReorderButtons.className = 'group-reorder-buttons';
     
     const groupUpButton = document.createElement('button');
-    groupUpButton.textContent = '↑';
+    groupUpButton.textContent = ''; //↑
     groupUpButton.className = 'reorder-btn';
     groupUpButton.onclick = (e) => {
       e.stopPropagation();
@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function() {
     groupReorderButtons.appendChild(groupUpButton);
     
     const groupDownButton = document.createElement('button');
-    groupDownButton.textContent = '↓';
+    groupDownButton.textContent = ''; //↓
     groupDownButton.className = 'reorder-btn';
     groupDownButton.onclick = (e) => {
       e.stopPropagation();
