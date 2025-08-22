@@ -358,7 +358,7 @@ input:checked+.slider:before {
 .link-group h3 {
   color: #ffffff;
   margin-bottom: 10px;
-  padding-bottom: 5px;
+  padding-bottom: 0px;
 }
 
 .edit-button,
@@ -493,11 +493,14 @@ input:checked+.slider:before {
 
 /* items modified to make it look good */
 ul.link-group-content {
-  margin-top: 0;
+  /* margin-top: 0; */
+  margin: 0;
 }
 
 div.group-header-container {
-  margin-top: 0;
+  /* margin-top: 0; */
+  margin: 0;
+  padding-left: 10px;
 }
 
 html body {
