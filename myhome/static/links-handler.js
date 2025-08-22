@@ -586,20 +586,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     groupDiv.appendChild(groupHeaderContainer);
 
-    const groupList = document.createElement('ul');
-    groupList.className = 'link-group-content';
-    // Set display style based on the first link in the group, or default to flex
-    const firstLinkInGroupDisplay = links[0];
-    if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
-      groupList.style.display = firstLinkInGroupDisplay.link.display_style;
-    } else {
-      groupList.style.display = 'flex'; // Default display style
-    }
-
-    elements.forEach(element => {
-      groupList.appendChild(element);
-    });
-
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
         const icon = document.createElement('div');
         icon.className = 'extend-icon';
@@ -663,12 +649,22 @@ document.addEventListener('DOMContentLoaded', function() {
             popupContent.appendChild(addLinkItem);
             popup.classList.remove('hidden');
         };
-        groupList.appendChild(icon);
-    }
+        groupDiv.appendChild(icon);
+    } else {
+        const groupList = document.createElement('ul');
+        groupList.className = 'link-group-content';
+        // Set display style based on the first link in the group, or default to flex
+        const firstLinkInGroupDisplay = links[0];
+        if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
+          groupList.style.display = firstLinkInGroupDisplay.link.display_style;
+        } else {
+          groupList.style.display = 'flex'; // Default display style
+        }
 
-    
+        elements.forEach(element => {
+          groupList.appendChild(element);
+        });
 
-    if (!firstLinkInGroup || !firstLinkInGroup.link.horizontal_stack) {
         // Add button for adding new links to this group
         const addLinkItem = document.createElement('li');
         addLinkItem.className = 'link-item add-link-item';
@@ -688,9 +684,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         addLinkItem.appendChild(addLinkSpan);
         groupList.appendChild(addLinkItem);
-    }
 
-    groupDiv.appendChild(groupList);
+        groupDiv.appendChild(groupList);
+    }
+    
     return groupDiv;
   }  
 // Function to open edit group popup
