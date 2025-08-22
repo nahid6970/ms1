@@ -605,38 +605,44 @@ document.addEventListener('DOMContentLoaded', function() {
         icon.className = 'extend-icon';
         icon.innerHTML = '<i class="nf nf-md-google_circles_extended"></i>'; // Or use an icon font
         icon.draggable = false;
+
+        const isPasswordProtected = firstLinkInGroup.link.password_protect;
+
         icon.onclick = () => {
-            const password = prompt("Please enter the password to extend the group:");
-            if (password === "1823") {
-                const popup = document.getElementById('horizontal-stack-popup');
-                const popupContent = popup.querySelector('.popup-content-inner');
-                popupContent.innerHTML = '';
-                elements.forEach(element => {
-                    const clonedElement = element.cloneNode(true);
-                    const linkIndex = parseInt(clonedElement.dataset.linkIndex);
-                    const linkData = links.find(l => l.index === linkIndex);
-
-                    clonedElement.addEventListener('dragstart', handleDragStart);
-                    clonedElement.addEventListener('dragover', handleDragOver);
-                    clonedElement.addEventListener('drop', handleDrop);
-                    clonedElement.addEventListener('dragend', handleDragEnd);
-
-                    const editButton = clonedElement.querySelector('.edit-button');
-                    if (editButton && linkData) {
-                        editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
-                    }
-
-                    const deleteButton = clonedElement.querySelector('.delete-button');
-                    if (deleteButton) {
-                        deleteButton.onclick = () => deleteLink(linkIndex);
-                    }
-
-                    popupContent.appendChild(clonedElement);
-                });
-                popup.classList.remove('hidden');
-            } else {
-                alert("Incorrect password!");
+            if (isPasswordProtected) {
+                const password = prompt("Please enter the password to extend the group:");
+                if (password !== "1823") {
+                    alert("Incorrect password!");
+                    return;
+                }
             }
+
+            const popup = document.getElementById('horizontal-stack-popup');
+            const popupContent = popup.querySelector('.popup-content-inner');
+            popupContent.innerHTML = '';
+            elements.forEach(element => {
+                const clonedElement = element.cloneNode(true);
+                const linkIndex = parseInt(clonedElement.dataset.linkIndex);
+                const linkData = links.find(l => l.index === linkIndex);
+
+                clonedElement.addEventListener('dragstart', handleDragStart);
+                clonedElement.addEventListener('dragover', handleDragOver);
+                clonedElement.addEventListener('drop', handleDrop);
+                clonedElement.addEventListener('dragend', handleDragEnd);
+
+                const editButton = clonedElement.querySelector('.edit-button');
+                if (editButton && linkData) {
+                    editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
+                }
+
+                const deleteButton = clonedElement.querySelector('.delete-button');
+                if (deleteButton) {
+                    deleteButton.onclick = () => deleteLink(linkIndex);
+                }
+
+                popupContent.appendChild(clonedElement);
+            });
+            popup.classList.remove('hidden');
         };
         groupList.appendChild(icon);
     }
@@ -672,6 +678,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editGroupDisplaySelect = document.getElementById('edit-group-display');
     const editGroupCollapsibleCheckbox = document.getElementById('edit-group-collapsible');
     const editGroupHorizontalStackCheckbox = document.getElementById('edit-group-horizontal-stack');
+    const editGroupPasswordProtectCheckbox = document.getElementById('edit-group-password-protect');
     const editGroupTopNameInput = document.getElementById('edit-group-top-name');
     const editGroupTopBgColorInput = document.getElementById('edit-group-top-bg-color');
     const editGroupTopTextColorInput = document.getElementById('edit-group-top-text-color');
@@ -688,6 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
       editGroupDisplaySelect.value = linksInGroup[0].display_style || 'flex';
       editGroupCollapsibleCheckbox.checked = linksInGroup[0].collapsible || false;
       editGroupHorizontalStackCheckbox.checked = linksInGroup[0].horizontal_stack || false;
+      editGroupPasswordProtectCheckbox.checked = linksInGroup[0].password_protect || false;
       editGroupTopNameInput.value = linksInGroup[0].top_name || '';
       editGroupTopBgColorInput.value = linksInGroup[0].top_bg_color || '#2d2d2d';
       editGroupTopTextColorInput.value = linksInGroup[0].top_text_color || '#ffffff';
@@ -697,6 +705,7 @@ document.addEventListener('DOMContentLoaded', function() {
       editGroupDisplaySelect.value = 'flex'; // Default if no links in group
       editGroupCollapsibleCheckbox.checked = false;
       editGroupHorizontalStackCheckbox.checked = false;
+      editGroupPasswordProtectCheckbox.checked = false;
       editGroupTopNameInput.value = '';
       editGroupTopBgColorInput.value = '#2d2d2d';
       editGroupTopTextColorInput.value = '#ffffff';
@@ -815,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, topName, topBgColor, topTextColor, topBorderColor, topHoverColor) {
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
@@ -833,6 +842,7 @@ document.addEventListener('DOMContentLoaded', function() {
           updatedLink.display_style = newDisplayStyle;
           updatedLink.collapsible = isCollapsible;
           updatedLink.horizontal_stack = isHorizontalStack;
+          updatedLink.password_protect = isPasswordProtected;
           
           // Handle top group styling options
           if (topName && topName !== '') {
@@ -1026,6 +1036,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const newDisplayStyle = document.getElementById('edit-group-display').value;
         const isCollapsible = document.getElementById('edit-group-collapsible').checked;
         const isHorizontalStack = document.getElementById('edit-group-horizontal-stack').checked;
+        const isPasswordProtected = document.getElementById('edit-group-password-protect').checked;
         const topName = document.getElementById('edit-group-top-name').value;
         const topBgColor = document.getElementById('edit-group-top-bg-color').value;
         const topTextColor = document.getElementById('edit-group-top-text-color').value;
@@ -1033,7 +1044,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const topHoverColor = document.getElementById('edit-group-top-hover-color').value;
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, topName, topBgColor, topTextColor, topBorderColor, topHoverColor);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor);
           if (success) {
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();
