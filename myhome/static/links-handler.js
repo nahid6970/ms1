@@ -642,30 +642,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 popupContent.appendChild(clonedElement);
             });
+
+            const addLinkItem = document.createElement('li');
+            addLinkItem.className = 'link-item add-link-item';
+            addLinkItem.draggable = false;
+
+            const addLinkSpan = document.createElement('span');
+            addLinkSpan.textContent = '+';
+            addLinkSpan.style.cursor = 'pointer';
+            addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+            addLinkSpan.style.fontSize = '25px';
+            addLinkSpan.style.alignContent = 'center';
+
+            addLinkSpan.addEventListener('click', () => {
+              document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+              const addLinkPopup = document.getElementById('add-link-popup');
+              addLinkPopup.classList.remove('hidden'); // Remove hidden class
+            });
+            addLinkItem.appendChild(addLinkSpan);
+            popupContent.appendChild(addLinkItem);
             popup.classList.remove('hidden');
         };
         groupList.appendChild(icon);
     }
 
-    // Add button for adding new links to this group
-    const addLinkItem = document.createElement('li');
-    addLinkItem.className = 'link-item add-link-item';
-    addLinkItem.draggable = false;
+    
 
-    const addLinkSpan = document.createElement('span');
-    addLinkSpan.textContent = '+';
-    addLinkSpan.style.cursor = 'pointer';
-    addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-    addLinkSpan.style.fontSize = '25px';
-    addLinkSpan.style.alignContent = 'center';
+    if (!firstLinkInGroup || !firstLinkInGroup.link.horizontal_stack) {
+        // Add button for adding new links to this group
+        const addLinkItem = document.createElement('li');
+        addLinkItem.className = 'link-item add-link-item';
+        addLinkItem.draggable = false;
 
-    addLinkSpan.addEventListener('click', () => {
-      document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-      const addLinkPopup = document.getElementById('add-link-popup');
-      addLinkPopup.classList.remove('hidden'); // Remove hidden class
-    });
-    addLinkItem.appendChild(addLinkSpan);
-    groupList.appendChild(addLinkItem);
+        const addLinkSpan = document.createElement('span');
+        addLinkSpan.textContent = '+';
+        addLinkSpan.style.cursor = 'pointer';
+        addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+        addLinkSpan.style.fontSize = '25px';
+        addLinkSpan.style.alignContent = 'center';
+
+        addLinkSpan.addEventListener('click', () => {
+          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+          const addLinkPopup = document.getElementById('add-link-popup');
+          addLinkPopup.classList.remove('hidden'); // Remove hidden class
+        });
+        addLinkItem.appendChild(addLinkSpan);
+        groupList.appendChild(addLinkItem);
+    }
 
     groupDiv.appendChild(groupList);
     return groupDiv;
