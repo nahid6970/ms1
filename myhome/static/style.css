@@ -696,12 +696,10 @@ div.toggle-container {
   display: none;
 }
 
-.horizontal-stack-icon {
+.extend-icon {
   cursor: pointer;
   padding: 5px;
-  background-color: #4CAF50;
-  color: white;
-  border-radius: 50%;
   margin-left: 10px;
   display: inline-block;
+  font-weight: bold;
 }
