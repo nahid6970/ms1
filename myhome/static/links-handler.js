@@ -610,7 +610,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const popupContent = popup.querySelector('.popup-content-inner');
             popupContent.innerHTML = '';
             elements.forEach(element => {
-                popupContent.appendChild(element.cloneNode(true));
+                const clonedElement = element.cloneNode(true);
+                clonedElement.addEventListener('dragstart', handleDragStart);
+                clonedElement.addEventListener('dragover', handleDragOver);
+                clonedElement.addEventListener('drop', handleDrop);
+                clonedElement.addEventListener('dragend', handleDragEnd);
+                popupContent.appendChild(clonedElement);
             });
             popup.classList.remove('hidden');
         };
