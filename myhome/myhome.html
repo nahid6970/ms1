@@ -715,6 +715,8 @@ div.toggle-container {
   flex: 0 0 auto; /* Allow to sit side-by-side, fixed width */
   margin-right: 10px; /* Add some space between horizontally stacked groups */
   vertical-align: top; /* Align groups at the top */
+  border: 1px greenyellow solid;
+  border-radius: 0px;
 }
 
 .horizontal-stack .link-group-content {
@@ -731,9 +733,18 @@ div.toggle-container {
 .extend-icon {
   cursor: pointer;
   padding: 5px;
-  margin-left: 10px;
   display: inline-block;
   font-weight: bold;
+  border: 1px rgb(193, 214, 182) solid;
+  border-radius: 0px;
+  align-self: center;
+  text-align: center;
+  width: 100%;
+}
+.extend-icon:hover  {
+  background-color: #4CAF50;
+  color: black;
+  /* Green color on hover */
 }
 
 #horizontal-stack-popup .popup-content-inner .link-item { 
@@ -3639,17 +3650,17 @@ document.addEventListener('keydown', (event) => {
     "url": "https://github.com/PranavPurwar/AppLock"
   },
   {
-    "name": "myapk",
-    "group": "Android-Apps",
-    "url": "https://1drv.ms/u/c/da530b4cfac2c115/EQuEqLjroUBNlt-57R4sLyQB9DuqqSRZ61fmk_yWgEYuTQ?e=AwU9Bd",
-    "default_type": "nerd-font",
     "collapsible": false,
+    "default_type": "nerd-font",
     "display_style": "flex",
+    "group": "Android-Apps",
     "horizontal_stack": true,
+    "name": "myapk",
     "top_bg_color": "#2d2d2d",
-    "top_text_color": "#ffffff",
     "top_border_color": "#444444",
-    "top_hover_color": "#3a3a3a"
+    "top_hover_color": "#3a3a3a",
+    "top_text_color": "#ffffff",
+    "url": "https://1drv.ms/u/c/da530b4cfac2c115/EQuEqLjroUBNlt-57R4sLyQB9DuqqSRZ61fmk_yWgEYuTQ?e=AwU9Bd"
   },
   {
     "collapsible": false,
@@ -3978,4 +3989,4 @@ document.addEventListener('keydown', (event) => {
   </script>
 </body>
 
-<!-- Generated on 2025-08-23 00:30:52 --></html>
+<!-- Generated on 2025-08-23 01:31:27 --></html>
