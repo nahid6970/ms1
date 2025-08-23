@@ -800,6 +800,7 @@ div.toggle-container {
   vertical-align: top; /* Align groups at the top */
   border: #0056b3 solid 1px;
   border-radius: 0px;
+  font-family: jetbrainsmono nfp;
 }
 
 .horizontal-stack .link-group-content {
