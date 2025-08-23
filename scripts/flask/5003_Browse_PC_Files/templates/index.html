@@ -461,14 +461,43 @@
             border: none;
         }
 
+        .bookmark-controls {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .bookmark-move-up,
+        .bookmark-move-down,
+        .bookmark-remove {
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+
+        .bookmark-move-up {
+            color: #4CAF50;
+        }
+
+        .bookmark-move-up:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .bookmark-move-down {
+            color: #2196F3;
+        }
+
+        .bookmark-move-down:hover {
+            background-color: #2196F3;
+            color: white;
+        }
+
         .bookmark-remove {
             color: #ff6b6b;
-            cursor: pointer;
-            margin-left: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 3px;
         }
 
         .bookmark-remove:hover {
@@ -827,8 +856,17 @@
                                 onclick="closeBookmarkDropdown()">
                                 <i class="nf nf-fa-folder"></i> {{ bookmark.name }}
                             </a>
-                            <span class="bookmark-remove"
-                                onclick="event.stopPropagation(); removeBookmark('{{ bookmark.path | replace("'", "\\'") }}');">×</span>
+                            <div class="bookmark-controls">
+                                <span class="bookmark-move-up"
+                                    onclick="event.stopPropagation(); moveBookmark('{{ bookmark.path | replace("'", "\\'") }}', 'up');"
+                                    title="Move up">↑</span>
+                                <span class="bookmark-move-down"
+                                    onclick="event.stopPropagation(); moveBookmark('{{ bookmark.path | replace("'", "\\'") }}', 'down');"
+                                    title="Move down">↓</span>
+                                <span class="bookmark-remove"
+                                    onclick="event.stopPropagation(); removeBookmark('{{ bookmark.path | replace("'", "\\'") }}');"
+                                    title="Remove">×</span>
+                            </div>
                         </div>
                         {% endfor %}
                         {% if not bookmarks %}
@@ -919,11 +957,12 @@
         <div class="current-path">
             {% set path_parts = current_dir.replace('\\', '/').split('/') %}
             {% for part in path_parts %}
-                {% if part %}
-                    {% set accumulated_path = path_parts[:loop.index] | join('/') %}
-                    <a href="/?dir_path={{ accumulated_path | urlencode }}&drive={{ current_drive | urlencode }}" class="path-link">{{ part }}</a>
-                    {% if not loop.last %}<span class="path-separator">/</span>{% endif %}
-                {% endif %}
+            {% if part %}
+            {% set accumulated_path = path_parts[:loop.index] | join('/') %}
+            <a href="/?dir_path={{ accumulated_path | urlencode }}&drive={{ current_drive | urlencode }}"
+                class="path-link">{{ part }}</a>
+            {% if not loop.last %}<span class="path-separator">/</span>{% endif %}
+            {% endif %}
             {% endfor %}
         </div>
     </div>
@@ -1054,7 +1093,7 @@
         // Toggle the visibility of the dropdown menu
         function showContextMenu(event, fileName) {
             event.preventDefault();
-            
+
             // Hide all context menus
             const allMenus = document.querySelectorAll('.context-menu');
             allMenus.forEach(menu => {
@@ -1158,6 +1197,37 @@
                         alert('Request failed: ' + error);
                     });
             }
+        }
+
+        function moveBookmark(path, direction) {
+            console.log('Moving bookmark:', path, direction);
+
+            fetch('/move_bookmark', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    path: path,
+                    direction: direction
+                })
+            })
+                .then(response => {
+                    console.log('Move response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Move response data:', data);
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Move request failed:', error);
+                    alert('Request failed: ' + error);
+                });
         }
 
         function toggleBookmarkDropdown(event) {

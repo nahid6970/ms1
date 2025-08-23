@@ -352,6 +352,46 @@ def remove_bookmark():
     else:
         return jsonify({"error": "Failed to remove bookmark"}), 500
 
+@app.route('/move_bookmark', methods=['POST'])
+def move_bookmark():
+    """Move a bookmark up or down in the list."""
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    direction = data.get('direction', '').strip()
+    
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+    
+    if direction not in ['up', 'down']:
+        return jsonify({"error": "Direction must be 'up' or 'down'"}), 400
+    
+    bookmarks = load_bookmarks()
+    
+    # Find the bookmark index
+    bookmark_index = -1
+    for i, bookmark in enumerate(bookmarks):
+        if bookmark['path'] == path:
+            bookmark_index = i
+            break
+    
+    if bookmark_index == -1:
+        return jsonify({"error": "Bookmark not found"}), 404
+    
+    # Move the bookmark
+    if direction == 'up' and bookmark_index > 0:
+        # Swap with previous bookmark
+        bookmarks[bookmark_index], bookmarks[bookmark_index - 1] = bookmarks[bookmark_index - 1], bookmarks[bookmark_index]
+    elif direction == 'down' and bookmark_index < len(bookmarks) - 1:
+        # Swap with next bookmark
+        bookmarks[bookmark_index], bookmarks[bookmark_index + 1] = bookmarks[bookmark_index + 1], bookmarks[bookmark_index]
+    else:
+        return jsonify({"error": "Cannot move bookmark in that direction"}), 400
+    
+    if save_bookmarks(bookmarks):
+        return jsonify({"success": "Bookmark moved successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to move bookmark"}), 500
+
 @app.route('/open_explorer', methods=['POST'])
 def open_explorer():
     """Open the specified directory in Windows Explorer."""
