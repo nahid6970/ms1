@@ -912,9 +912,9 @@ html.table-view-active .show-card-buttons .btn {
 }
 
 .btn-seen {
-    background-color: #dc3545;
+    background-color: #6c757d;
     color: white;
-    border: 2px solid #dc3545;
+    border: 2px solid #6c757d;
 }
 
 .btn-seen.seen {
@@ -924,4 +924,8 @@ html.table-view-active .show-card-buttons .btn {
 
 .btn-seen:hover {
     opacity: 0.8;
+}
+/* Hide normal folder button in table mode */
+html.table-view-active .show-card-buttons .btn-folder-normal {
+    display: none;
 }
