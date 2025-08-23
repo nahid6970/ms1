@@ -851,9 +851,14 @@ html.table-view-active .show-card p:nth-of-type(4) { display: none; }
 
 html.table-view-active .show-card p:nth-of-type(5) { display: none; }
 
+/* Hide folder button cell in normal mode */
+.folder-button-cell {
+    display: none;
+}
+
 html.table-view-active .folder-button-cell {
-    grid-area: folder;
     display: flex;
+    grid-area: folder;
     justify-content: center;
     align-items: center;
 }
