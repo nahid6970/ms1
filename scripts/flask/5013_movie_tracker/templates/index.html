@@ -18,9 +18,9 @@
         const defaultHomePage = localStorage.getItem('defaultHomePage') || 'default';
         
         // Only redirect if we're on the base home page (no sort_by parameter and no search query)
-        if (!currentSortBy && !currentQuery && defaultHomePage === 'last_episode') {
-            // Redirect to last episode sort immediately
-            window.location.replace('/?sort_by=last_episode&order=desc');
+        if (!currentSortBy && !currentQuery && defaultHomePage === 'last_movie') {
+            // Redirect to last movie added sort immediately
+            window.location.replace('/?sort_by=added&order=desc');
         }
     </script>
 </head>
@@ -162,6 +162,7 @@
                 <label for="defaultHomePage">Default Home Page</label>
                 <select id="defaultHomePage" class="setting-select">
                     <option value="default">Default (Title A-Z)</option>
+                    <option value="last_movie">Last Movie Added</option>
                 </select>
             </div>
         </div>
