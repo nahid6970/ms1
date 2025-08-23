@@ -220,6 +220,11 @@ img {
 .add-link-item {
   max-height: fit-content;
   align-self: center;
+  cursor: pointer !important;
+}
+
+.add-link-item * {
+  cursor: pointer !important;
 }
 
 .add-link-item:hover {

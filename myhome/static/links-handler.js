@@ -647,12 +647,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const addLinkSpan = document.createElement('span');
         addLinkSpan.textContent = '+';
-        addLinkSpan.style.cursor = 'pointer';
         addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
         addLinkSpan.style.fontSize = '25px';
-        addLinkSpan.style.alignContent = 'center';
+        addLinkSpan.style.width = '100%';
+        addLinkSpan.style.height = '100%';
+        addLinkSpan.style.display = 'flex';
+        addLinkSpan.style.alignItems = 'center';
+        addLinkSpan.style.justifyContent = 'center';
 
-        addLinkSpan.addEventListener('click', () => {
+        addLinkItem.addEventListener('click', () => {
           document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
           const addLinkPopup = document.getElementById('add-link-popup');
           addLinkPopup.classList.remove('hidden'); // Remove hidden class
@@ -684,12 +687,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const addLinkSpan = document.createElement('span');
       addLinkSpan.textContent = '+';
-      addLinkSpan.style.cursor = 'pointer';
       addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
       addLinkSpan.style.fontSize = '25px';
-      addLinkSpan.style.alignContent = 'center';
+      addLinkSpan.style.width = '100%';
+      addLinkSpan.style.height = '100%';
+      addLinkSpan.style.display = 'flex';
+      addLinkSpan.style.alignItems = 'center';
+      addLinkSpan.style.justifyContent = 'center';
 
-      addLinkSpan.addEventListener('click', () => {
+      addLinkItem.addEventListener('click', () => {
         document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
         const addLinkPopup = document.getElementById('add-link-popup');
         addLinkPopup.classList.remove('hidden'); // Remove hidden class
