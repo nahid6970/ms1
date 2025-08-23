@@ -352,6 +352,12 @@ def remove_bookmark():
     else:
         return jsonify({"error": "Failed to remove bookmark"}), 500
 
+@app.route('/get_bookmarks', methods=['GET'])
+def get_bookmarks():
+    """Get bookmarks as JSON for dynamic updates."""
+    bookmarks = load_bookmarks()
+    return jsonify({"bookmarks": bookmarks}), 200
+
 @app.route('/move_bookmark', methods=['POST'])
 def move_bookmark():
     """Move a bookmark up or down in the list."""
