@@ -212,7 +212,7 @@
         "id": 21,
         "title": "The Lord of the Rings The War of the Rohirrim (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/hE9SAMyMSUGAPsHUGdyl6irv11v.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\The Lord of the Rings The War of the Rohirrim (2024)",
         "rating": null,
         "files": [
@@ -221,13 +221,14 @@
                 "title": "The Lord of the Rings The War of the Rohirrim 2024 1080p BluRay AAC5 1 YTS",
                 "added_date": "2025-08-19T21:40:03.673101"
             }
-        ]
+        ],
+        "radarr_id": "839033"
     },
     {
         "id": 22,
         "title": "Thunderbolts (2025)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Thunderbolts (2025)",
         "rating": null,
         "files": [
@@ -236,13 +237,14 @@
                 "title": "www.UIndex.org    -    Thunderbolts 2025 1080p HFR BluRay H265 10bit HDR-Robo29",
                 "added_date": "2025-08-19T21:40:04.101533"
             }
-        ]
+        ],
+        "radarr_id": "986056"
     },
     {
         "id": 23,
         "title": "Toofan (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/5TS3piPf3ZqISbRSrJ8lYeGQvfQ.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Toofan (2024)",
         "rating": null,
         "files": [
@@ -251,13 +253,14 @@
                 "title": "Toofan (2024) [1080p] [WEBRip] [YTS.MX]",
                 "added_date": "2025-08-19T21:40:04.616146"
             }
-        ]
+        ],
+        "radarr_id": "1216385"
     },
     {
         "id": 24,
         "title": "Transformers One (2024)",
         "year": "",
-        "cover_image": "",
+        "cover_image": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/iRCgqpdVE4wyLQvGYU3ZP7pAtUc.jpg",
         "directory_path": "D:\\Downloads\\@Radarr\\Transformers One (2024)",
         "rating": null,
         "files": [
@@ -266,7 +269,8 @@
                 "title": "Transformers One 2024 1080p BluRay AAC5 1 YTS",
                 "added_date": "2025-08-19T21:40:05.059286"
             }
-        ]
+        ],
+        "radarr_id": "698687"
     },
     {
         "id": 25,
