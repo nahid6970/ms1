@@ -794,7 +794,7 @@ html.table-view-active .show-grid {
 html.table-view-active .show-card {
     width: auto;
     display: grid;
-    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 1fr 0.5fr 0.5fr;
+    grid-template-columns: 2fr 1fr 1.5fr 1fr 1.2fr 2fr;
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -843,14 +843,21 @@ html.table-view-active .show-card p:nth-of-type(3) { grid-column: 4; display: bl
 
 html.table-view-active .show-card p:nth-of-type(4) { grid-column: 5; display: block; }
 
-html.table-view-active .show-card p:nth-of-type(5) { grid-column: 6; display: block; }
-
-html.table-view-active .show-card .btn-edit { grid-column: 7; }
-
-html.table-view-active .show-card .btn-delete { grid-column: 8; }
+html.table-view-active .show-card p:nth-of-type(5) { display: none; }
 
 html.table-view-active .show-card-buttons {
-    display: contents;
+    grid-column: 6;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+}
+
+html.table-view-active .show-card-buttons .btn {
+    padding: 6px 8px;
+    font-size: 0.9em;
+    margin: 0;
 }
 
 /* Form Action Buttons */

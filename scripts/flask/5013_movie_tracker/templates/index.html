@@ -78,14 +78,14 @@
                 <p class="show-status"></p>
                 <div class="show-card-buttons">
                     <a href="javascript:void(0)" onclick="toggleSeen({{ movie.id }})" class="btn btn-seen {% if movie.seen %}seen{% endif %}">{% if movie.seen %}<i class="nf nf-fa-check_circle"></i>{% else %}<i class="nf nf-fa-times_circle"></i>{% endif %}</a>
-                    <a href="javascript:void(0)" onclick="openEditMovieModal({{ movie.id }})" class="btn btn-edit">Edit</a>
-                    <a href="javascript:void(0)" data-movie-id="{{ movie.id }}" class="btn btn-delete">Delete</a>
                     {% if movie.get('folder_exists', True) %}
                         <a href="javascript:void(0)" onclick="openFolder({{ movie.id }})" class="btn btn-folder"><i class="nf nf-fa-folder"></i></a>
                     {% endif %}
                     {% if movie.radarr_id %}
                         <a href="http://192.168.0.101:7878/movie/{{ movie.radarr_id }}" target="_blank" class="btn btn-radarr"><i class="nf nf-fa-external_link"></i></a>
                     {% endif %}
+                    <a href="javascript:void(0)" onclick="openEditMovieModal({{ movie.id }})" class="btn btn-edit">Edit</a>
+                    <a href="javascript:void(0)" data-movie-id="{{ movie.id }}" class="btn btn-delete">Delete</a>
                 </div>
             </div>
         {% endfor %}
