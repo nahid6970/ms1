@@ -497,6 +497,29 @@
         .current-path {
             font-weight: bold;
             margin: 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .path-link {
+            color: #2196F3;
+            text-decoration: none;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+
+        .path-link:hover {
+            background-color: rgba(33, 150, 243, 0.1);
+            text-decoration: underline;
+        }
+
+        .path-separator {
+            color: #666;
+            margin: 0 2px;
+            user-select: none;
         }
 
         .content-area {
@@ -893,7 +916,16 @@
 
     <!-- Path Section -->
     <div class="path-section">
-        <div class="current-path">{{ current_dir }}</div>
+        <div class="current-path">
+            {% set path_parts = current_dir.replace('\\', '/').split('/') %}
+            {% for part in path_parts %}
+                {% if part %}
+                    {% set accumulated_path = path_parts[:loop.index] | join('/') %}
+                    <a href="/?dir_path={{ accumulated_path | urlencode }}&drive={{ current_drive | urlencode }}" class="path-link">{{ part }}</a>
+                    {% if not loop.last %}<span class="path-separator">/</span>{% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
 
     <!-- Scrollable Content Area -->
