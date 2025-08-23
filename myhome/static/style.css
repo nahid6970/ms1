@@ -146,14 +146,13 @@ img {
   overflow: hidden;
   /* width: 80px;
   height: 80px; */
-  min-width: 80px;
-  min-height: 80px;
+  min-width: 40px;
+  /* min-height: 80px; */
   cursor: pointer !important;
 }
 
 .link-item * {
   cursor: pointer !important;
-  border: #0056b3 solid 1px;
 }
 
 /* Text links should be rectangular */
