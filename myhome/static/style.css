@@ -142,6 +142,23 @@ img {
   justify-content: center;
   position: relative;
   overflow: hidden;
+  /* width: 80px;
+  height: 80px; */
+  min-width: 80px;
+  min-height: 80px;
+}
+
+/* Text links should be rectangular */
+.link-item.link-type-text {
+  width: 120px;
+  height: 60px;
+  min-width: 120px;
+  min-height: 60px;
+}
+
+/* Icon and image links stay square */
+.link-item.link-type-nerd-font,
+.link-item.link-type-img {
   width: 80px;
   height: 80px;
   min-width: 80px;
@@ -642,6 +659,14 @@ div.toggle-container {
   min-height: 80px;
 }
 
+/* Text links in collapsible groups should be rectangular */
+.collapsible-group-content .link-item.link-type-text {
+  width: 120px;
+  height: 60px;
+  min-width: 120px;
+  min-height: 60px;
+}
+
 .collapsible-group-content .link-item::before {
   content: '';
   position: absolute;
@@ -789,6 +814,14 @@ div.toggle-container {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+}
+
+/* Text links in horizontal stack popup should be rectangular */
+#horizontal-stack-popup .popup-content-inner .link-item.link-type-text {
+  width: 120px;
+  height: 60px;
+  min-width: 120px;
+  min-height: 60px;
 }
 
 #horizontal-stack-popup .popup-content-inner .link-item::before {
