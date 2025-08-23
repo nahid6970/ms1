@@ -164,6 +164,7 @@
             padding: 10px;
             border-radius: 0px;
             background-color: #282a36;
+            width: 100%;
         }
 
         .file-name {
@@ -378,8 +379,16 @@
             }
 
             .action-buttons {
+                display: flex;
+                gap: 5px;
                 flex-shrink: 0;
                 margin-top: 5px;
+                justify-content: flex-start;
+            }
+
+            .edit-btn,
+            .download-btn {
+                margin-left: 0;
             }
         }
 
@@ -646,11 +655,17 @@
 
 
         .action-buttons {
-            display: contents;
-            align-items: end;
-            gap: 0px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             flex-shrink: 0;
-            white-space: nowrap;            
+        }
+
+        /* Desktop: Use contents for right alignment */
+        @media screen and (min-width: 769px) {
+            .action-buttons {
+                display: contents;
+            }
         }
 
         .file-actions {
@@ -898,14 +913,9 @@
                         </div>
                         <div class="action-buttons">
                             {% if file.endswith(editable_extensions) %}
-                            <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn">
-                                <!-- <i class="nf nf-fa-edit"></i> -->
-                            </a>
+                            <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn"></a>
                             {% endif %}
-                            <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn">
-                                <!-- <i class="nf nf-oct-download"></i> -->
-                            </a>
-
+                            <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn"></a>
                         </div>
 
                         <!-- Right-click context menu (hidden by default) -->
