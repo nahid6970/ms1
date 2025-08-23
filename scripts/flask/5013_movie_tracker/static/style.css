@@ -794,7 +794,8 @@ html.table-view-active .show-grid {
 html.table-view-active .show-card {
     width: auto;
     display: grid;
-    grid-template-columns: 4fr 1fr 1.5fr 2fr;
+    grid-template-columns: 4fr 1fr 0.8fr 1.5fr 2fr;
+    grid-template-areas: "title year folder rating buttons";
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -828,7 +829,7 @@ html.table-view-active .show-card h3 {
     margin: 0;
     height: auto;
     text-align: left;
-    grid-column: 1;
+    grid-area: title;
 }
 
 html.table-view-active .show-card p {
@@ -836,8 +837,13 @@ html.table-view-active .show-card p {
     text-align: center;
 }
 
-html.table-view-active .show-card p:nth-of-type(1) { grid-column: 2; }
-html.table-view-active .show-card p:nth-of-type(2) { grid-column: 3; }
+html.table-view-active .show-card p:nth-of-type(1) { 
+    grid-area: year;
+}
+
+html.table-view-active .show-card p:nth-of-type(2) { 
+    grid-area: rating;
+}
 
 html.table-view-active .show-card p:nth-of-type(3) { display: none; }
 
@@ -845,13 +851,26 @@ html.table-view-active .show-card p:nth-of-type(4) { display: none; }
 
 html.table-view-active .show-card p:nth-of-type(5) { display: none; }
 
+html.table-view-active .folder-button-cell {
+    grid-area: folder;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 html.table-view-active .show-card-buttons {
-    grid-column: 4;
+    grid-area: buttons;
     display: flex;
     justify-content: center;
     gap: 5px;
     margin: 0;
     padding: 0;
+}
+
+html.table-view-active .show-card-buttons .btn {
+    padding: 6px 8px;
+    font-size: 0.9em;
+    margin: 0;
 }
 
 html.table-view-active .show-card-buttons .btn {
