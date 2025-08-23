@@ -382,21 +382,30 @@
             }
 
             .file-item {
-                flex-wrap: wrap;
-                align-items: flex-start;
+                flex-wrap: nowrap;
+                align-items: center;
+            }
+
+            .file-name {
+                flex: 1;
+                min-width: 0;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+                max-width: calc(100% - 80px);
             }
 
             .action-buttons {
                 display: flex;
                 gap: 5px;
                 flex-shrink: 0;
-                margin-top: 5px;
                 justify-content: flex-start;
             }
 
             .edit-btn,
             .download-btn {
                 margin-left: 0;
+                margin-right: 0;
             }
         }
 
