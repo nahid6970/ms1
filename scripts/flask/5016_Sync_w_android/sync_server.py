@@ -13,7 +13,7 @@ app.secret_key = 'folder_sync_secret_key'
 # Configuration
 SYNC_BASE_FOLDER = os.path.expanduser('~/Desktop/SyncFolders')
 app.config['SYNC_BASE_FOLDER'] = SYNC_BASE_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
+app.config['MAX_CONTENT_LENGTH'] = None  # No file size limit
 
 # Ensure sync base folder exists
 if not os.path.exists(SYNC_BASE_FOLDER):
@@ -351,7 +351,7 @@ def health_check():
 if __name__ == "__main__":
     print(f"🚀 Folder Sync Server starting...")
     print(f"📁 Sync base folder: {SYNC_BASE_FOLDER}")
-    print(f"🌐 Server will be available at: http://localhost:5013")
+    print(f"🌐 Server will be available at: http://localhost:5016")
     print(f"💡 Make sure your Android device is on the same network")
     
     # Optimized server settings for better performance
