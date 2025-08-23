@@ -126,7 +126,6 @@ img {
 .link-group-content[style*="display: list-item"] .link-item {
   margin-bottom: 10px;
   width: 100%;
-  
 }
 
 .link-item {
@@ -679,12 +678,14 @@ div.toggle-container {
   cursor: pointer !important;
 }
 
-/* Text links in collapsible groups should be rectangular */
+/* Text links in collapsible groups should be flexible */
 .collapsible-group-content .link-item.link-type-text {
-  width: 120px;
-  height: 60px;
-  min-width: 120px;
-  min-height: 60px;
+  width: auto;
+  height: auto;
+  min-width: 80px;
+  min-height: 40px;
+  max-width: 200px;
+  padding: 8px 12px;
 }
 
 .collapsible-group-content .link-item::before {
