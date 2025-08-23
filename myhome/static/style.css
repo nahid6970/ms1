@@ -113,6 +113,7 @@ img {
   justify-content: left;
   background-color: #252525;
   border-radius: 10px;
+  border: #0056b3 solid 1px;
 }
 
 .link-group-content[style*="display: list-item"] {
@@ -125,6 +126,7 @@ img {
 .link-group-content[style*="display: list-item"] .link-item {
   margin-bottom: 10px;
   width: 100%;
+  
 }
 
 .link-item {
@@ -144,13 +146,14 @@ img {
   overflow: hidden;
   /* width: 80px;
   height: 80px; */
-  /* min-width: 80px;
-  min-height: 80px; */
+  min-width: 80px;
+  min-height: 80px;
   cursor: pointer !important;
 }
 
 .link-item * {
   cursor: pointer !important;
+  border: #0056b3 solid 1px;
 }
 
 /* Text links should be rectangular */
@@ -787,7 +790,7 @@ div.toggle-container {
   flex: 0 0 auto; /* Allow to sit side-by-side, fixed width */
   margin-right: 10px; /* Add some space between horizontally stacked groups */
   vertical-align: top; /* Align groups at the top */
-  border: 1px greenyellow solid;
+  border: #0056b3 solid 1px;
   border-radius: 0px;
 }
 
@@ -808,15 +811,16 @@ div.toggle-container {
   display: inline-block;
   font-weight: bold;
   border: 1px rgb(193, 214, 182) solid;
-  border-radius: 0px;
+  border-radius: 15px;
   align-self: center;
   text-align: center;
   width: 100%;
 }
 .extend-icon:hover  {
-  background-color: #4CAF50;
-  color: black;
-  /* Green color on hover */
+  background-color: #474747;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #horizontal-stack-popup .popup-content-inner .link-item { 
