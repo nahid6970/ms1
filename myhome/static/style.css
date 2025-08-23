@@ -221,6 +221,9 @@ img {
   max-height: fit-content;
   align-self: center;
   cursor: pointer !important;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  flex-basis: auto !important;
 }
 
 .add-link-item * {
