@@ -134,7 +134,7 @@ img {
   /* Center the link and buttons horizontally */
   margin: 5px;
   /* Add some margin around each item */
-  padding: 5px;
+  padding: 0;
   background-color: #474747;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -142,10 +142,15 @@ img {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  /* width: 80px;
-  height: 80px; */
+  width: 80px;
+  height: 80px;
   min-width: 80px;
   min-height: 80px;
+  cursor: pointer !important;
+}
+
+.link-item * {
+  cursor: pointer !important;
 }
 
 /* Text links should be rectangular */
@@ -188,18 +193,18 @@ img {
 
 .link-item a {
   /* Styles for the link itself within the container */
-  display: block;
-  /* Make the span take full width */
-  padding: 10px 5px;
-  width: fit-content;
-  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 5px;
   font-family: jetbrainsmono nfp;
-  align-content: center;
   background-color: transparent;
-  /* Remove background from the span itself */
   box-shadow: none;
   margin: 0;
-  /* Remove margin from the span */
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .link-buttons {
@@ -647,7 +652,7 @@ div.toggle-container {
 
 .collapsible-group-content .link-item {
   margin: 5px 0;
-  padding: 8px;
+  padding: 0;
   background-color: #3a3a3a;
   flex: 0 0 auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -657,6 +662,11 @@ div.toggle-container {
   height: 80px;
   min-width: 80px;
   min-height: 80px;
+  cursor: pointer !important;
+}
+
+.collapsible-group-content .link-item * {
+  cursor: pointer !important;
 }
 
 /* Text links in collapsible groups should be rectangular */
@@ -814,6 +824,11 @@ div.toggle-container {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  cursor: pointer !important;
+}
+
+#horizontal-stack-popup .popup-content-inner .link-item * {
+  cursor: pointer !important;
 }
 
 /* Text links in horizontal stack popup should be rectangular */

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const linksContainer = document.getElementById('links-container');
   const addLinkForm = document.getElementById('add-link-form');
   let links = []; // Declare links here so it's accessible globally
@@ -27,23 +27,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const listItem = document.createElement('li');
-        listItem.className = 'link-item';
+        listItem.className = `link-item ${link.default_type ? 'link-type-' + link.default_type : 'link-type-default'}`;
         listItem.draggable = true;
         listItem.dataset.linkIndex = index;
-        
+
         // Add drag event listeners
         listItem.addEventListener('dragstart', handleDragStart);
         listItem.addEventListener('dragover', handleDragOver);
         listItem.addEventListener('drop', handleDrop);
         listItem.addEventListener('dragend', handleDragEnd);
-        
+
         // Add visual indicator for hidden items in edit mode
         if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
           listItem.classList.add('hidden-item');
           listItem.style.opacity = '0.5';
           listItem.style.border = '2px dashed #666';
         }
-        
+
         if (link.li_bg_color) {
           listItem.style.backgroundColor = link.li_bg_color;
         }
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add reorder buttons
         const reorderButtonsContainer = document.createElement('div');
         reorderButtonsContainer.className = 'reorder-buttons';
-        
+
         const upButton = document.createElement('button');
         upButton.textContent = '↑';
         upButton.className = 'reorder-btn';
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
           moveLink(index, -1);
         };
         reorderButtonsContainer.appendChild(upButton);
-        
+
         const downButton = document.createElement('button');
         downButton.textContent = '↓';
         downButton.className = 'reorder-btn';
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
           moveLink(index, 1);
         };
         reorderButtonsContainer.appendChild(downButton);
-        
+
         buttonContainer.appendChild(reorderButtonsContainer);
 
         const editButton = document.createElement('button');
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         listItem.appendChild(buttonContainer);
         groupedElements[groupName].push(listItem);
-        groupedLinks[groupName].push({link, index});
+        groupedLinks[groupName].push({ link, index });
 
         // Check if this group should be collapsible
         if (link.collapsible) {
@@ -135,25 +135,25 @@ document.addEventListener('DOMContentLoaded', function() {
       if (collapsibleGroupNames.length > 0) {
         const collapsibleContainer = document.createElement('div');
         collapsibleContainer.className = 'collapsible-groups-container';
-        
+
         // Create regular row for collapsed groups
         const regularRow = document.createElement('div');
         regularRow.className = 'collapsible-groups-row regular-row';
-        
+
         // Sort groups by their original order in the links array to maintain consistent positioning
         const sortedGroupNames = collapsibleGroupNames.sort((a, b) => {
           const aFirstIndex = links.findIndex(link => (link.group || 'Ungrouped') === a);
           const bFirstIndex = links.findIndex(link => (link.group || 'Ungrouped') === b);
           return aFirstIndex - bFirstIndex;
         });
-        
+
         sortedGroupNames.forEach((groupName, index) => {
           if (groupedElements[groupName] && groupedElements[groupName].length > 0) {
             const collapsibleGroup = createCollapsibleGroup(groupName, groupedElements[groupName], groupedLinks[groupName], index);
             regularRow.appendChild(collapsibleGroup);
           }
         });
-        
+
         collapsibleContainer.appendChild(regularRow);
         linksContainer.appendChild(collapsibleContainer);
       }
@@ -162,12 +162,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const groupNames = Object.keys(groupedElements);
       for (let i = 0; i < groupNames.length; i++) {
         const groupName = groupNames[i];
-        
+
         // Skip collapsible groups as they're already rendered above
         if (collapsibleGroups[groupName]) {
           continue;
         }
-        
+
         // Skip empty groups (when all items are hidden)
         if (groupedElements[groupName].length === 0) {
           continue;
@@ -187,46 +187,46 @@ document.addEventListener('DOMContentLoaded', function() {
     collapsibleGroup.className = 'collapsible-group';
     collapsibleGroup.dataset.groupName = groupName;
     collapsibleGroup.draggable = true;
-    
+
     // Store original position for proper restoration
     collapsibleGroup.dataset.originalIndex = originalIndex;
-    
+
     // Add drag event listeners for the group itself
     collapsibleGroup.addEventListener('dragstart', handleGroupDragStart);
     collapsibleGroup.addEventListener('dragover', handleGroupDragOver);
     collapsibleGroup.addEventListener('drop', handleGroupDrop);
     collapsibleGroup.addEventListener('dragend', handleGroupDragEnd);
-    
+
     const header = document.createElement('div');
     header.className = 'collapsible-group-header';
-    
+
     const title = document.createElement('h4');
     title.className = 'collapsible-group-title';
-    
+
     // Use custom top name if available, otherwise use group name
     const firstLink = links[0];
     const displayName = (firstLink && firstLink.link.top_name) ? firstLink.link.top_name : groupName;
     title.textContent = displayName;
-    
+
     // Apply custom styling if available
     if (firstLink && firstLink.link) {
       const linkData = firstLink.link;
-      
+
       // Apply background color
       if (linkData.top_bg_color) {
         collapsibleGroup.style.backgroundColor = linkData.top_bg_color;
       }
-      
+
       // Apply text color
       if (linkData.top_text_color) {
         title.style.color = linkData.top_text_color;
       }
-      
+
       // Apply border color
       if (linkData.top_border_color) {
         collapsibleGroup.style.border = `1px solid ${linkData.top_border_color}`;
       }
-      
+
       // Apply hover color
       if (linkData.top_hover_color) {
         collapsibleGroup.addEventListener('mouseenter', () => {
@@ -237,11 +237,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
     }
-    
+
     // Add edit buttons container
     const editButtons = document.createElement('div');
     editButtons.className = 'edit-buttons';
-    
+
     const editBtn = document.createElement('button');
     editBtn.className = 'collapsible-edit-btn';
     editBtn.textContent = ''; //⚙️
@@ -250,48 +250,48 @@ document.addEventListener('DOMContentLoaded', function() {
       openEditGroupPopup(groupName);
     };
     editButtons.appendChild(editBtn);
-    
+
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'collapsible-toggle-btn';
     toggleBtn.textContent = '▼';
-    
+
     header.appendChild(title);
     header.appendChild(editButtons);
     header.appendChild(toggleBtn);
-    
+
     const content = document.createElement('ul');
     content.className = 'collapsible-group-content';
-    
+
     // Create elements for collapsible group with full functionality
     elements.forEach((element, index) => {
       const clonedElement = element.cloneNode(true);
-      
+
       // Re-add drag functionality to cloned elements
       clonedElement.addEventListener('dragstart', handleDragStart);
       clonedElement.addEventListener('dragover', handleDragOver);
       clonedElement.addEventListener('drop', handleDrop);
       clonedElement.addEventListener('dragend', handleDragEnd);
-      
+
       // Keep edit buttons but update their functionality for top groups
       const buttons = clonedElement.querySelector('.link-buttons');
       if (buttons) {
         const editButton = buttons.querySelector('.edit-button');
         const deleteButton = buttons.querySelector('.delete-button');
-        
+
         if (editButton) {
           const originalIndex = parseInt(clonedElement.dataset.linkIndex);
           editButton.onclick = () => openEditLinkPopup(links.find(l => l.index === originalIndex).link, originalIndex);
         }
-        
+
         if (deleteButton) {
           const originalIndex = parseInt(clonedElement.dataset.linkIndex);
           deleteButton.onclick = () => deleteLink(originalIndex);
         }
       }
-      
+
       content.appendChild(clonedElement);
     });
-    
+
     // Add button for adding new links to this collapsible group
     const addLinkItem = document.createElement('li');
     addLinkItem.className = 'link-item add-link-item';
@@ -310,11 +310,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     addLinkItem.appendChild(addLinkSpan);
     content.appendChild(addLinkItem);
-    
+
     // Add toggle functionality with repositioning
     let isDragging = false;
     let dragTimeout = null;
-    
+
     // Create a more robust drag state management
     const setDragState = (dragging) => {
       isDragging = dragging;
@@ -332,30 +332,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
       }
     };
-    
+
     // Track drag state on the content area
     content.addEventListener('dragstart', (e) => {
       setDragState(true);
       e.stopPropagation();
     });
-    
+
     content.addEventListener('dragend', (e) => {
       setDragState(false);
     });
-    
+
     // Prevent all drag-related events from bubbling to header
     content.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.stopPropagation();
     });
-    
+
     content.addEventListener('drop', (e) => {
       e.preventDefault();
       e.stopPropagation();
       // Reset drag state after drop
       setDragState(false);
     });
-    
+
     // Also listen for mouse events during drag to prevent accidental clicks
     content.addEventListener('mousedown', (e) => {
       if (e.target.closest('.link-item')) {
@@ -367,23 +367,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 50);
       }
     });
-    
+
     header.addEventListener('click', (e) => {
       // Don't trigger if clicking on edit button or during drag operations
-      if (e.target.classList.contains('collapsible-edit-btn') || 
-          isDragging || 
-          collapsibleGroup.classList.contains('drag-active')) {
+      if (e.target.classList.contains('collapsible-edit-btn') ||
+        isDragging ||
+        collapsibleGroup.classList.contains('drag-active')) {
         e.preventDefault();
         e.stopPropagation();
         return false;
       }
-      
+
       const wasExpanded = content.classList.contains('expanded');
-      
+
       // Close all other expanded groups first and properly restore them
       const allGroups = document.querySelectorAll('.collapsible-group');
       const groupsToRestore = [];
-      
+
       allGroups.forEach(group => {
         const groupContent = group.querySelector('.collapsible-group-content');
         const groupToggle = group.querySelector('.collapsible-toggle-btn');
@@ -392,26 +392,26 @@ document.addEventListener('DOMContentLoaded', function() {
           groupContent.classList.remove('expanded');
           groupToggle.textContent = '▼';
           group.classList.remove('expanded');
-          
+
           // Collect groups that need to be moved back
           if (group.closest('.expanded-row')) {
             groupsToRestore.push(group);
           }
         }
       });
-      
+
       // Move all groups back to regular row in their original order
       groupsToRestore.forEach(group => {
         moveToRegularRowInOrder(group);
       });
-      
+
       // Clean up empty expanded rows
       cleanupEmptyRows();
-      
+
       // Toggle current group
       content.classList.toggle('expanded');
       toggleBtn.textContent = content.classList.contains('expanded') ? '▲' : '▼';
-      
+
       // Move expanded group to top by adding expanded class
       if (content.classList.contains('expanded')) {
         collapsibleGroup.classList.add('expanded');
@@ -425,42 +425,42 @@ document.addEventListener('DOMContentLoaded', function() {
         cleanupEmptyRows();
       }
     });
-    
+
     collapsibleGroup.appendChild(header);
     collapsibleGroup.appendChild(content);
-    
+
     return collapsibleGroup;
   }
-  
+
   // Function to move group to expanded row (top)
   function moveToExpandedRow(group) {
     const container = document.querySelector('.collapsible-groups-container');
     let expandedRow = container.querySelector('.expanded-row');
-    
+
     if (!expandedRow) {
       expandedRow = document.createElement('div');
       expandedRow.className = 'collapsible-groups-row expanded-row';
       container.insertBefore(expandedRow, container.firstChild);
     }
-    
+
     expandedRow.appendChild(group);
   }
-  
+
   // Function to move group back to regular row (maintain original position)
   function moveToRegularRow(group) {
     const container = document.querySelector('.collapsible-groups-container');
     let regularRow = container.querySelector('.regular-row');
-    
+
     if (!regularRow) {
       regularRow = document.createElement('div');
       regularRow.className = 'collapsible-groups-row regular-row';
       container.appendChild(regularRow);
     }
-    
+
     // Get the original index to maintain position
     const originalIndex = parseInt(group.dataset.originalIndex) || 0;
     const existingGroups = Array.from(regularRow.children);
-    
+
     // Find the correct position to insert based on original index
     let insertPosition = 0;
     for (let i = 0; i < existingGroups.length; i++) {
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       insertPosition = i + 1;
     }
-    
+
     // Insert at the correct position
     if (insertPosition >= existingGroups.length) {
       regularRow.appendChild(group);
@@ -479,22 +479,22 @@ document.addEventListener('DOMContentLoaded', function() {
       regularRow.insertBefore(group, existingGroups[insertPosition]);
     }
   }
-  
+
   // Function to move group back to regular row maintaining original order
   function moveToRegularRowInOrder(group) {
     const container = document.querySelector('.collapsible-groups-container');
     let regularRow = container.querySelector('.regular-row');
-    
+
     if (!regularRow) {
       regularRow = document.createElement('div');
       regularRow.className = 'collapsible-groups-row regular-row';
       container.appendChild(regularRow);
     }
-    
+
     // Get the original index to maintain position
     const originalIndex = parseInt(group.dataset.originalIndex) || 0;
     const existingGroups = Array.from(regularRow.children);
-    
+
     // Find the correct position to insert based on original index
     let insertPosition = 0;
     for (let i = 0; i < existingGroups.length; i++) {
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       insertPosition = i + 1;
     }
-    
+
     // Insert at the correct position
     if (insertPosition >= existingGroups.length) {
       regularRow.appendChild(group);
@@ -518,14 +518,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function cleanupEmptyRows() {
     const container = document.querySelector('.collapsible-groups-container');
     if (!container) return;
-    
+
     const expandedRows = container.querySelectorAll('.expanded-row');
     expandedRows.forEach(row => {
       if (row.children.length === 0) {
         row.remove();
       }
     });
-    
+
     const regularRows = container.querySelectorAll('.regular-row');
     regularRows.forEach(row => {
       if (row.children.length === 0) {
@@ -556,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add group reorder buttons
     const groupReorderButtons = document.createElement('div');
     groupReorderButtons.className = 'group-reorder-buttons';
-    
+
     const groupUpButton = document.createElement('button');
     groupUpButton.textContent = ''; //↑
     groupUpButton.className = 'reorder-btn';
@@ -565,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function() {
       moveGroup(groupName, -1);
     };
     groupReorderButtons.appendChild(groupUpButton);
-    
+
     const groupDownButton = document.createElement('button');
     groupDownButton.textContent = ''; //↓
     groupDownButton.className = 'reorder-btn';
@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
       moveGroup(groupName, 1);
     };
     groupReorderButtons.appendChild(groupDownButton);
-    
+
     groupHeaderContainer.appendChild(groupReorderButtons);
 
     // Add edit group button (only visible in edit mode)
@@ -587,97 +587,60 @@ document.addEventListener('DOMContentLoaded', function() {
     groupDiv.appendChild(groupHeaderContainer);
 
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
-        const icon = document.createElement('div');
-        icon.className = 'extend-icon';
-        icon.innerHTML = '<i class="nf nf-md-google_circles_extended"></i>'; // Or use an icon font
-        icon.draggable = false;
+      const icon = document.createElement('div');
+      icon.className = 'extend-icon';
+      icon.innerHTML = '<i class="nf nf-md-google_circles_extended"></i>'; // Or use an icon font
+      icon.draggable = false;
 
-        const isPasswordProtected = firstLinkInGroup.link.password_protect;
+      const isPasswordProtected = firstLinkInGroup.link.password_protect;
 
-        icon.onclick = () => {
-            if (isPasswordProtected) {
-                const password = prompt("Please enter the password to extend the group:");
-                if (password !== "1823") {
-                    alert("Incorrect password!");
-                    return;
-                }
-            }
-
-            const popup = document.getElementById('horizontal-stack-popup');
-            const popupContent = popup.querySelector('.popup-content-inner');
-            popupContent.innerHTML = '';
-            elements.forEach(element => {
-                const clonedElement = element.cloneNode(true);
-                const linkIndex = parseInt(clonedElement.dataset.linkIndex);
-                const linkData = links.find(l => l.index === linkIndex);
-
-                clonedElement.addEventListener('dragstart', handleDragStart);
-                clonedElement.addEventListener('dragover', handleDragOver);
-                clonedElement.addEventListener('drop', handleDrop);
-                clonedElement.addEventListener('dragend', handleDragEnd);
-
-                if (linkData.link.li_bg_color) {
-                  clonedElement.style.backgroundColor = linkData.link.li_bg_color;
-                }
-                if (linkData.link.li_hover_color) {
-                  clonedElement.addEventListener('mouseover', () => {
-                    clonedElement.style.backgroundColor = linkData.link.li_hover_color;
-                  });
-                  clonedElement.addEventListener('mouseout', () => {
-                    clonedElement.style.backgroundColor = linkData.link.li_bg_color || '';
-                  });
-                }
-
-                const editButton = clonedElement.querySelector('.edit-button');
-                if (editButton && linkData) {
-                    editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
-                }
-
-                const deleteButton = clonedElement.querySelector('.delete-button');
-                if (deleteButton) {
-                    deleteButton.onclick = () => deleteLink(linkIndex);
-                }
-
-                popupContent.appendChild(clonedElement);
-            });
-
-            const addLinkItem = document.createElement('li');
-            addLinkItem.className = 'link-item add-link-item';
-            addLinkItem.draggable = false;
-
-            const addLinkSpan = document.createElement('span');
-            addLinkSpan.textContent = '+';
-            addLinkSpan.style.cursor = 'pointer';
-            addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-            addLinkSpan.style.fontSize = '25px';
-            addLinkSpan.style.alignContent = 'center';
-
-            addLinkSpan.addEventListener('click', () => {
-              document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-              const addLinkPopup = document.getElementById('add-link-popup');
-              addLinkPopup.classList.remove('hidden'); // Remove hidden class
-            });
-            addLinkItem.appendChild(addLinkSpan);
-            popupContent.appendChild(addLinkItem);
-            popup.classList.remove('hidden');
-        };
-        groupDiv.appendChild(icon);
-    } else {
-        const groupList = document.createElement('ul');
-        groupList.className = 'link-group-content';
-        // Set display style based on the first link in the group, or default to flex
-        const firstLinkInGroupDisplay = links[0];
-        if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
-          groupList.style.display = firstLinkInGroupDisplay.link.display_style;
-        } else {
-          groupList.style.display = 'flex'; // Default display style
+      icon.onclick = () => {
+        if (isPasswordProtected) {
+          const password = prompt("Please enter the password to extend the group:");
+          if (password !== "1823") {
+            alert("Incorrect password!");
+            return;
+          }
         }
 
+        const popup = document.getElementById('horizontal-stack-popup');
+        const popupContent = popup.querySelector('.popup-content-inner');
+        popupContent.innerHTML = '';
         elements.forEach(element => {
-          groupList.appendChild(element);
+          const clonedElement = element.cloneNode(true);
+          const linkIndex = parseInt(clonedElement.dataset.linkIndex);
+          const linkData = links.find(l => l.index === linkIndex);
+
+          clonedElement.addEventListener('dragstart', handleDragStart);
+          clonedElement.addEventListener('dragover', handleDragOver);
+          clonedElement.addEventListener('drop', handleDrop);
+          clonedElement.addEventListener('dragend', handleDragEnd);
+
+          if (linkData.link.li_bg_color) {
+            clonedElement.style.backgroundColor = linkData.link.li_bg_color;
+          }
+          if (linkData.link.li_hover_color) {
+            clonedElement.addEventListener('mouseover', () => {
+              clonedElement.style.backgroundColor = linkData.link.li_hover_color;
+            });
+            clonedElement.addEventListener('mouseout', () => {
+              clonedElement.style.backgroundColor = linkData.link.li_bg_color || '';
+            });
+          }
+
+          const editButton = clonedElement.querySelector('.edit-button');
+          if (editButton && linkData) {
+            editButton.onclick = () => openEditLinkPopup(linkData.link, linkIndex);
+          }
+
+          const deleteButton = clonedElement.querySelector('.delete-button');
+          if (deleteButton) {
+            deleteButton.onclick = () => deleteLink(linkIndex);
+          }
+
+          popupContent.appendChild(clonedElement);
         });
 
-        // Add button for adding new links to this group
         const addLinkItem = document.createElement('li');
         addLinkItem.className = 'link-item add-link-item';
         addLinkItem.draggable = false;
@@ -695,14 +658,51 @@ document.addEventListener('DOMContentLoaded', function() {
           addLinkPopup.classList.remove('hidden'); // Remove hidden class
         });
         addLinkItem.appendChild(addLinkSpan);
-        groupList.appendChild(addLinkItem);
+        popupContent.appendChild(addLinkItem);
+        popup.classList.remove('hidden');
+      };
+      groupDiv.appendChild(icon);
+    } else {
+      const groupList = document.createElement('ul');
+      groupList.className = 'link-group-content';
+      // Set display style based on the first link in the group, or default to flex
+      const firstLinkInGroupDisplay = links[0];
+      if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
+        groupList.style.display = firstLinkInGroupDisplay.link.display_style;
+      } else {
+        groupList.style.display = 'flex'; // Default display style
+      }
 
-        groupDiv.appendChild(groupList);
+      elements.forEach(element => {
+        groupList.appendChild(element);
+      });
+
+      // Add button for adding new links to this group
+      const addLinkItem = document.createElement('li');
+      addLinkItem.className = 'link-item add-link-item';
+      addLinkItem.draggable = false;
+
+      const addLinkSpan = document.createElement('span');
+      addLinkSpan.textContent = '+';
+      addLinkSpan.style.cursor = 'pointer';
+      addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+      addLinkSpan.style.fontSize = '25px';
+      addLinkSpan.style.alignContent = 'center';
+
+      addLinkSpan.addEventListener('click', () => {
+        document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+        const addLinkPopup = document.getElementById('add-link-popup');
+        addLinkPopup.classList.remove('hidden'); // Remove hidden class
+      });
+      addLinkItem.appendChild(addLinkSpan);
+      groupList.appendChild(addLinkItem);
+
+      groupDiv.appendChild(groupList);
     }
-    
+
     return groupDiv;
-  }  
-// Function to open edit group popup
+  }
+  // Function to open edit group popup
   function openEditGroupPopup(currentGroupName) {
     const editGroupPopup = document.getElementById('edit-group-popup');
     const editGroupNameInput = document.getElementById('edit-group-name');
@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.stopPropagation) {
       e.stopPropagation();
     }
-    
+
     if (draggedGroup !== this) {
       const draggedGroupName = draggedGroup.dataset.groupName;
       const targetGroupName = this.dataset.groupName;
@@ -804,30 +804,30 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
-      
+
       // Find all links in both groups
       const group1Links = [];
       const group2Links = [];
       const otherLinks = [];
-      
+
       links.forEach((link, index) => {
         const linkGroup = link.group || 'Ungrouped';
         if (linkGroup === group1Name) {
-          group1Links.push({link, index});
+          group1Links.push({ link, index });
         } else if (linkGroup === group2Name) {
-          group2Links.push({link, index});
+          group2Links.push({ link, index });
         } else {
-          otherLinks.push({link, index});
+          otherLinks.push({ link, index });
         }
       });
-      
+
       // Create new links array with swapped group positions
       const newLinks = [];
-      
+
       // Add other groups first (maintain their positions)
       const processedGroups = new Set([group1Name, group2Name]);
       const groupOrder = [...new Set(links.map(link => link.group || 'Ungrouped'))];
-      
+
       groupOrder.forEach(groupName => {
         if (groupName === group1Name) {
           group2Links.forEach(item => newLinks.push(item.link));
@@ -838,7 +838,7 @@ document.addEventListener('DOMContentLoaded', function() {
           groupLinks.forEach(link => newLinks.push(link));
         }
       });
-      
+
       // Update the entire list of links on the server
       await fetch('/api/links', {
         method: 'PUT',
@@ -847,9 +847,9 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         body: JSON.stringify(newLinks),
       });
-      
+
       fetchAndDisplayLinks();
-      
+
     } catch (error) {
       console.error('Error swapping collapsible groups:', error);
     }
@@ -860,7 +860,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
-      
+
       // Create a new array with the updated group names, display styles, collapsible setting, and styling options
       const newLinks = links.map(link => {
         const linkGroupName = link.group || 'Ungrouped';
@@ -875,19 +875,19 @@ document.addEventListener('DOMContentLoaded', function() {
           updatedLink.collapsible = isCollapsible;
           updatedLink.horizontal_stack = isHorizontalStack;
           updatedLink.password_protect = isPasswordProtected;
-          
+
           // Handle top group styling options
           if (topName && topName !== '') {
             updatedLink.top_name = topName;
           } else {
             delete updatedLink.top_name;
           }
-          
+
           updatedLink.top_bg_color = topBgColor || '#2d2d2d';
           updatedLink.top_text_color = topTextColor || '#ffffff';
           updatedLink.top_border_color = topBorderColor || '#444444';
           updatedLink.top_hover_color = topHoverColor || '#3a3a3a';
-          
+
           return updatedLink;
         }
         return link;
@@ -915,7 +915,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Handle form submission for adding new links
   if (addLinkForm) {
-    addLinkForm.addEventListener('submit', async function(event) {
+    addLinkForm.addEventListener('submit', async function (event) {
       event.preventDefault();
 
       const newLink = {
@@ -995,64 +995,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (editLinkForm) {
     if (!editLinkForm.hasAttribute('data-listener-attached')) {
-        editLinkForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
+      editLinkForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
 
-            const linkId = editLinkIndexInput.value;
-            const updatedLink = {
-                name: document.getElementById('edit-link-name').value,
-                group: document.getElementById('edit-link-group').value || undefined,
-                url: document.getElementById('edit-link-url').value,
-                icon_class: document.getElementById('edit-link-icon-class').value || undefined,
-                color: document.getElementById('edit-link-color').value || undefined,
-                img_src: document.getElementById('edit-link-img-src').value || undefined,
-                width: document.getElementById('edit-link-width').value || undefined,
-                height: document.getElementById('edit-link-height').value || undefined,
-                text: document.getElementById('edit-link-text').value || undefined,
-                default_type: document.getElementById('edit-link-default-type').value || undefined,
-                background_color: document.getElementById('edit-link-background-color').value || undefined,
-                border_radius: document.getElementById('edit-link-border-radius').value || undefined,
-                title: document.getElementById('edit-link-title').value || undefined,
-                font_size: document.getElementById('edit-link-font-size').value || undefined,
-                li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
-                li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
-                hidden: document.getElementById('edit-link-hidden').checked || undefined,
-            };
+        const linkId = editLinkIndexInput.value;
+        const updatedLink = {
+          name: document.getElementById('edit-link-name').value,
+          group: document.getElementById('edit-link-group').value || undefined,
+          url: document.getElementById('edit-link-url').value,
+          icon_class: document.getElementById('edit-link-icon-class').value || undefined,
+          color: document.getElementById('edit-link-color').value || undefined,
+          img_src: document.getElementById('edit-link-img-src').value || undefined,
+          width: document.getElementById('edit-link-width').value || undefined,
+          height: document.getElementById('edit-link-height').value || undefined,
+          text: document.getElementById('edit-link-text').value || undefined,
+          default_type: document.getElementById('edit-link-default-type').value || undefined,
+          background_color: document.getElementById('edit-link-background-color').value || undefined,
+          border_radius: document.getElementById('edit-link-border-radius').value || undefined,
+          title: document.getElementById('edit-link-title').value || undefined,
+          font_size: document.getElementById('edit-link-font-size').value || undefined,
+          li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
+          li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
+          hidden: document.getElementById('edit-link-hidden').checked || undefined,
+        };
 
-            // Preserve group-level properties if not explicitly changed in link edit
-            const originalLink = links[linkId];
-            if (originalLink) {
-                updatedLink.collapsible = originalLink.collapsible;
-                updatedLink.display_style = originalLink.display_style;
-                updatedLink.horizontal_stack = originalLink.horizontal_stack;
-                updatedLink.top_name = originalLink.top_name;
-                updatedLink.top_bg_color = originalLink.top_bg_color;
-                updatedLink.top_text_color = originalLink.top_text_color;
-                updatedLink.top_border_color = originalLink.top_border_color;
-                updatedLink.top_hover_color = originalLink.top_hover_color;
-            }
+        // Preserve group-level properties if not explicitly changed in link edit
+        const originalLink = links[linkId];
+        if (originalLink) {
+          updatedLink.collapsible = originalLink.collapsible;
+          updatedLink.display_style = originalLink.display_style;
+          updatedLink.horizontal_stack = originalLink.horizontal_stack;
+          updatedLink.top_name = originalLink.top_name;
+          updatedLink.top_bg_color = originalLink.top_bg_color;
+          updatedLink.top_text_color = originalLink.top_text_color;
+          updatedLink.top_border_color = originalLink.top_border_color;
+          updatedLink.top_hover_color = originalLink.top_hover_color;
+        }
 
-            try {
-                const response = await fetch(`/api/links/${linkId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(updatedLink),
-                });
+        try {
+          const response = await fetch(`/api/links/${linkId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedLink),
+          });
 
-                if (response.ok) {
-                    editLinkPopup.classList.add('hidden');
-                    fetchAndDisplayLinks();
-                } else {
-                    alert('Failed to update link.');
-                }
-            } catch (error) {
-                console.error('Error updating link:', error);
-                alert('Error updating link.');
-            }
-        });
-        editLinkForm.setAttribute('data-listener-attached', 'true');
+          if (response.ok) {
+            editLinkPopup.classList.add('hidden');
+            fetchAndDisplayLinks();
+          } else {
+            alert('Failed to update link.');
+          }
+        } catch (error) {
+          console.error('Error updating link:', error);
+          alert('Error updating link.');
+        }
+      });
+      editLinkForm.setAttribute('data-listener-attached', 'true');
     }
   }
 
@@ -1060,7 +1060,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const editGroupForm = document.getElementById('edit-group-form');
   if (editGroupForm) {
     if (!editGroupForm.hasAttribute('data-listener-attached')) {
-      editGroupForm.addEventListener('submit', async function(event) {
+      editGroupForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
         const originalGroupName = document.getElementById('edit-group-original-name').value;
@@ -1109,10 +1109,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
           const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
           if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
-              const icon = groupDiv.querySelector('.extend-icon');
-              if (icon) {
-                  icon.click();
-              }
+            const icon = groupDiv.querySelector('.extend-icon');
+            if (icon) {
+              icon.click();
+            }
           }
         } else {
           alert('Failed to delete link.');
@@ -1132,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const flexContainer2 = document.querySelector('.flex-container2');
 
   if (editModeToggle && flexContainer2) {
-    editModeToggle.addEventListener('change', async function() {
+    editModeToggle.addEventListener('change', async function () {
       const expandedGroups = [];
       // Capture currently expanded groups before re-rendering
       document.querySelectorAll('.collapsible-group.expanded').forEach(group => {
@@ -1144,7 +1144,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         flexContainer2.classList.remove('edit-mode');
       }
-      
+
       // Refresh the display when edit mode is toggled to show/hide items
       await fetchAndDisplayLinks();
 
@@ -1172,8 +1172,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function handleDragStart(e) {
     if (e.target.classList.contains('add-link-item') || e.target.classList.contains('extend-icon')) {
-        e.preventDefault();
-        return;
+      e.preventDefault();
+      return;
     }
     draggedElement = this;
     draggedIndex = parseInt(this.dataset.linkIndex);
@@ -1181,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', function() {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.outerHTML);
     e.stopPropagation(); // Prevent bubbling to group header
-    
+
     // Disable group toggle during drag
     document.body.classList.add('dragging-active');
   }
@@ -1198,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.stopPropagation) {
       e.stopPropagation();
     }
-    
+
     if (draggedElement !== this) {
       const targetIndex = parseInt(this.dataset.linkIndex);
       reorderLink(draggedIndex, targetIndex);
@@ -1210,7 +1210,7 @@ document.addEventListener('DOMContentLoaded', function() {
     this.classList.remove('dragging');
     draggedElement = null;
     draggedIndex = null;
-    
+
     // Re-enable group toggle after drag
     document.body.classList.remove('dragging-active');
   }
@@ -1220,27 +1220,27 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
-      
+
       const currentLink = links[linkIndex];
       const currentGroup = currentLink.group || 'Ungrouped';
-      
+
       // Find all links in the same group
-      const groupLinks = links.map((link, index) => ({link, index}))
-                              .filter(item => (item.link.group || 'Ungrouped') === currentGroup);
-      
+      const groupLinks = links.map((link, index) => ({ link, index }))
+        .filter(item => (item.link.group || 'Ungrouped') === currentGroup);
+
       // Find current position within the group
       const currentGroupIndex = groupLinks.findIndex(item => item.index === linkIndex);
       const targetGroupIndex = currentGroupIndex + direction;
-      
+
       // Check bounds
       if (targetGroupIndex < 0 || targetGroupIndex >= groupLinks.length) {
         return;
       }
-      
+
       // Swap with target
       const targetLinkIndex = groupLinks[targetGroupIndex].index;
       reorderLink(linkIndex, targetLinkIndex);
-      
+
     } catch (error) {
       console.error('Error moving link:', error);
     }
@@ -1251,20 +1251,20 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
-      
+
       // Get all unique group names in their current order
       const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
       const currentIndex = groupNames.indexOf(groupName);
       const targetIndex = currentIndex + direction;
-      
+
       // Check bounds
       if (targetIndex < 0 || targetIndex >= groupNames.length) {
         return;
       }
-      
+
       // Swap the group names
       [groupNames[currentIndex], groupNames[targetIndex]] = [groupNames[targetIndex], groupNames[currentIndex]];
-      
+
       // Rebuild the links array based on the new group order
       const newLinks = [];
       const linksByGroup = links.reduce((acc, link) => {
@@ -1275,11 +1275,11 @@ document.addEventListener('DOMContentLoaded', function() {
         acc[group].push(link);
         return acc;
       }, {});
-      
+
       groupNames.forEach(group => {
         newLinks.push(...(linksByGroup[group] || []));
       });
-      
+
       // Update the entire list of links on the server
       await fetch('/api/links', {
         method: 'PUT',
@@ -1288,9 +1288,9 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         body: JSON.stringify(newLinks),
       });
-      
+
       fetchAndDisplayLinks();
-      
+
     } catch (error) {
       console.error('Error moving group:', error);
     }
@@ -1326,10 +1326,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // Re-open the popup if it was open
       const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
       if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
-          const icon = groupDiv.querySelector('.extend-icon');
-          if (icon) {
-              icon.click();
-          }
+        const icon = groupDiv.querySelector('.extend-icon');
+        if (icon) {
+          icon.click();
+        }
       }
 
     } catch (error) {
