@@ -72,6 +72,11 @@ def scan_and_update_movie_files():
         if 'directory_path' in movie and movie['directory_path']:
             dir_path = movie['directory_path']
             if os.path.isdir(dir_path):
+                # Mark folder as existing
+                if movie.get('folder_exists') != True:
+                    movie['folder_exists'] = True
+                    updated_movies = True
+                
                 existing_file_titles = {f['title'] for f in movie['files']}
                 files_added = False
                 for root, _, files in os.walk(dir_path):
@@ -89,12 +94,21 @@ def scan_and_update_movie_files():
                                 updated_movies = True
                                 files_added = True
             else:
+                # Mark folder as not existing
+                if movie.get('folder_exists') != False:
+                    movie['folder_exists'] = False
+                    updated_movies = True
                 print(f"Directory not found for {movie['title']}: {dir_path}")
+        else:
+            # No directory path, mark as no folder
+            if movie.get('folder_exists') != False:
+                movie['folder_exists'] = False
+                updated_movies = True
     if updated_movies:
         save_data(movies)
-        print("New movie files found and updated.")
+        print("Movie folder status updated.")
     else:
-        print("No new movie files found.")
+        print("No changes to movie folder status.")
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=scan_and_update_movie_files, trigger="interval", hours=1)
@@ -155,16 +169,18 @@ def toggle_seen(movie_id):
 def add_movie():
     if request.method == 'POST':
         movies = load_data()
+        directory_path = request.form.get('directory_path', '')
         new_movie = {
             'id': len(movies) + 1,
             'title': request.form['title'],
             'year': request.form.get('year', ''),
             'cover_image': request.form.get('cover_image', ''),
-            'directory_path': request.form.get('directory_path', ''),
+            'directory_path': directory_path,
             'radarr_id': request.form.get('radarr_id', ''),
             'rating': request.form.get('rating', None),
             'seen': False,
-            'files': []
+            'files': [],
+            'folder_exists': bool(directory_path and os.path.isdir(directory_path))
         }
         movies.append(new_movie)
         save_data(movies)
@@ -261,7 +277,8 @@ def add_missing_movie():
             'cover_image': '',
             'directory_path': full_path,
             'rating': None,
-            'files': []
+            'files': [],
+            'folder_exists': True
         }
         
         # Scan for files in this directory
