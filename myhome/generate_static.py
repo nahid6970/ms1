@@ -123,8 +123,8 @@ def generate_static_html():
     static_html = static_html.replace('</body>', f'{data_script}</body>')
     
     # Add a generation timestamp
-    timestamp_comment = f'<!-- Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} -->'
-    static_html = static_html.replace('</html>', f'{timestamp_comment}</html>')
+    # timestamp_comment = f'<!-- Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} -->'
+    # static_html = static_html.replace('</html>', f'{timestamp_comment}</html>')
 
 
     # Write the static HTML file
