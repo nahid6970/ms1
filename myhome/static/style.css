@@ -3,19 +3,21 @@
 
 /* Top center controls styling */
 .top-center-controls {
-  position: sticky;
+  position: fixed;
   top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 15px;
   padding: 10px 0;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .add-button {
-  color: #1c1c1c;
-  background-color: #ffffff;
+  color: #000000 !important;
+  background-color: #ffffff !important;
   padding: 10px 14px;
   border: none;
   border-radius: 4px;
@@ -30,14 +32,20 @@
 
 .add-button:hover {
   transform: scale(1.05);
-  background: #e0e0e0;
+  background: #e0e0e0 !important;
+  color: #000000 !important;
 }
 
-/* Scan button styling */
+/* Scan button styling - also white background, black text */
 .scan-button {
-  background-color: #4CAF50 !important;
-  color: white !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
   position: relative;
+}
+
+.scan-button:hover {
+  background-color: #e0e0e0 !important;
+  color: #000000 !important;
 }
 
 .scan-button:hover {
@@ -457,13 +465,14 @@ input:checked+.slider:before {
   /* max-height: 90vh; */
 }
 
- #horizontal-stack-popup .popup-content-inner {                                   
-   display: flex;                                                                 
-   flex-wrap: wrap;                                                               
-   gap: 10px;                                                                     
-   max-height: calc(90vh - 100px); /* Adjust based on padding and header height */
-   overflow-y: auto;                                                              
- }                                                                                
+#horizontal-stack-popup .popup-content-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-height: calc(90vh - 100px);
+  /* Adjust based on padding and header height */
+  overflow-y: auto;
+}
 
 .popup-content .close-button {
   position: absolute;
@@ -851,23 +860,30 @@ div.toggle-container {
   min-width: 200px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  display: flex; /* Default to flex container */
-  flex-direction: column; /* Default to vertical stacking of content */
-  flex: 1 0 100%; /* Take full width by default */
+  display: flex;
+  /* Default to flex container */
+  flex-direction: column;
+  /* Default to vertical stacking of content */
+  flex: 1 0 100%;
+  /* Take full width by default */
 }
 
 /* Horizontal stacking for groups */
 .horizontal-stack {
-  flex: 0 0 auto; /* Allow to sit side-by-side, fixed width */
-  margin-right: 10px; /* Add some space between horizontally stacked groups */
-  vertical-align: top; /* Align groups at the top */
+  flex: 0 0 auto;
+  /* Allow to sit side-by-side, fixed width */
+  margin-right: 10px;
+  /* Add some space between horizontally stacked groups */
+  vertical-align: top;
+  /* Align groups at the top */
   border: #0056b3 solid 1px;
   border-radius: 0px;
   font-family: jetbrainsmono nfp;
 }
 
 .horizontal-stack .link-group-content {
-  flex-direction: row; /* Items inside this group will be in a row */
+  flex-direction: row;
+  /* Items inside this group will be in a row */
   flex-wrap: nowrap;
   gap: 10px;
   align-items: center;
@@ -888,15 +904,16 @@ div.toggle-container {
   text-align: center;
   width: 100%;
 }
-.extend-icon:hover  {
+
+.extend-icon:hover {
   background-color: #474747;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px rgb(255, 118, 83) solid;
+  border: 1px rgb(255, 118, 83) solid;
 }
 
-#horizontal-stack-popup .popup-content-inner .link-item { 
+#horizontal-stack-popup .popup-content-inner .link-item {
   flex-grow: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -934,11 +951,11 @@ div.toggle-container {
 
 #horizontal-stack-popup .popup-content-inner .link-item:hover::before {
   left: 100%;
-}                                                         
+}
 
 @media (max-width: 600px) {
-.popup-content {
-  max-width: 90vw;
-  max-height: 90vh;
-}
+  .popup-content {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
 }
