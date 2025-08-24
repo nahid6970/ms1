@@ -1,6 +1,38 @@
 /* Import the JetBrains Mono font */
 @import url("https://www.nerdfonts.com/assets/css/webfont.css");
 
+/* Top center controls styling */
+.top-center-controls {
+  position: sticky;
+  top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 0;
+  z-index: 100;
+}
+
+.add-button {
+  color: #1c1c1c;
+  background-color: #ffffff;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: transform 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.add-button:hover {
+  transform: scale(1.05);
+  background: #e0e0e0;
+}
+
 /* Thin scrollbar with custom styles for html and body */
 * {
   box-sizing: border-box;
