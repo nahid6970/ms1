@@ -7,7 +7,7 @@ from pystray import MenuItem as item, Icon as icon, Menu as menu
 from PIL import Image, ImageDraw
 
 # --- Configuration ---
-LOG_FILE = r"C:\Users\nahid\ms\msBackups\clipboard.txt"
+LOG_FILE = r"C:\Users\nahid\ms\db\clipboard\clipboard.txt"
 SEPARATOR = "-----x-----"
 PAUSE_COLOR = 'red'
 RESUME_COLOR = 'green'
