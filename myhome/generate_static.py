@@ -23,7 +23,7 @@ MAIN_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'main.js')
 LINKS_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'links-handler.js')
 
 # Path to the output file
-OUTPUT_HTML_FILE = os.path.join(PROJECT_ROOT, 'myhome.html')
+OUTPUT_HTML_FILE = r"C:\Users\nahid\ms\db\5000_myhome\myhome.html"
 
 
 def read_data():
