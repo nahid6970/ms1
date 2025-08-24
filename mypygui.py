@@ -935,33 +935,37 @@ Radarr_bt.pack(pady=(2,2), side="left", anchor="w", padx=(1,10))
 
 
 # Command config
+# Ensure log folder exists
+LOG_DIR = r"C:\Users\nahid\script_output\rclone"
+os.makedirs(LOG_DIR, exist_ok=True)
+
 commands = {
     "msBackups": {
         "cmd": "rclone check src dst --fast-list --size-only",
         "src": "C:/Users/nahid/ms/msBackups",
         "dst": "o0:/msBackups",
-        "log": "C:/Users/nahid/script_output/rclone/msBackups_check.log",
+        "log": f"{LOG_DIR}/msBackups_check.log",
         "label": "\udb85\ude32"
     },
     "software": {
         "cmd": "rclone check src dst --fast-list --size-only",
         "src": "D:/software",
         "dst": "gu:/software",
-        "log": "C:/Users/nahid/script_output/rclone/software_check.log",
+        "log": f"{LOG_DIR}/software_check.log",
         "label": "\uf40e"
     },
     "song": {
         "cmd": "rclone check src dst --fast-list --size-only",
         "src": "D:/song",
         "dst": "gu:/song",
-        "log": "C:/Users/nahid/script_output/rclone/song_check.log",
+        "log": f"{LOG_DIR}/song_check.log",
         "label": "\uec1b"
     },
     "ms1": {
         "cmd": 'rclone check src dst --fast-list --size-only --exclude ".git/**" --exclude "__pycache__/**"',
         "src": "C:/Users/nahid/ms/ms1/",
         "dst": "o0:/ms1/",
-        "log": "C:/Users/nahid/script_output/rclone/ms1_check.log",
+        "log": f"{LOG_DIR}/ms1_check.log",
         "label": "ms1",
         "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
@@ -971,7 +975,7 @@ commands = {
         "cmd": 'rclone check src dst --fast-list --size-only --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --exclude \".stfolder (1)/**\"',
         "src": "C:/Users/nahid/Pictures/",
         "dst": "o0:/Pictures/",
-        "log": "C:/Users/nahid/script_output/rclone/Pictures_check.log",
+        "log": f"{LOG_DIR}/Pictures_check.log",
         "label": "\uf03e",
         "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\"",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
