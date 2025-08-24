@@ -1,5 +1,5 @@
 /* For Showing Markdown Table in HTML properly but lines also show */
- function parseMarkdownTable(markdown) {
+function parseMarkdownTable(markdown) {
   const rows = markdown.trim().split('\n');
   const headers = rows[1].split('|').map(header => header.trim()).filter(Boolean);
   const data = rows.slice(2, -1).map(row => row.split('|').map(cell => cell.trim()).filter(Boolean));
@@ -14,21 +14,21 @@ function renderTable(headers, data) {
 
   const headerRow = document.createElement('tr');
   headers.forEach(header => {
-      const thElement = document.createElement('th');
-      thElement.textContent = header;
-      headerRow.appendChild(thElement);
+    const thElement = document.createElement('th');
+    thElement.textContent = header;
+    headerRow.appendChild(thElement);
   });
 
   theadElement.appendChild(headerRow);
 
   data.forEach(rowData => {
-      const rowElement = document.createElement('tr');
-      rowData.forEach(cellData => {
-          const tdElement = document.createElement('td');
-          tdElement.textContent = cellData;
-          rowElement.appendChild(tdElement);
-      });
-      tbodyElement.appendChild(rowElement);
+    const rowElement = document.createElement('tr');
+    rowData.forEach(cellData => {
+      const tdElement = document.createElement('td');
+      tdElement.textContent = cellData;
+      rowElement.appendChild(tdElement);
+    });
+    tbodyElement.appendChild(rowElement);
   });
 
   tableElement.appendChild(theadElement);
@@ -40,16 +40,16 @@ function renderTable(headers, data) {
 function convertMarkdownTables() {
   const elements = document.querySelectorAll('[id^="markdown-table-"]');
   elements.forEach(element => {
-      const markdownContent = element.innerHTML;
-      const { headers, data } = parseMarkdownTable(markdownContent);
-      const tableElement = renderTable(headers, data);
-      element.innerHTML = ''; // Clear the original content
-      element.appendChild(tableElement);
+    const markdownContent = element.innerHTML;
+    const { headers, data } = parseMarkdownTable(markdownContent);
+    const tableElement = renderTable(headers, data);
+    element.innerHTML = ''; // Clear the original content
+    element.appendChild(tableElement);
   });
 }
 // Call the function to convert Markdown tables on page load
-window.addEventListener('load', convertMarkdownTables); 
- 
+window.addEventListener('load', convertMarkdownTables);
+
 
 /* // Get all the spans
 const spans = document.querySelectorAll('span');
@@ -134,3 +134,77 @@ document.addEventListener('keydown', (event) => {
     toggle.dispatchEvent(changeEvent);
   }
 });
+
+// Trigger scans function - triggers actual TV show and movie scans
+async function triggerScans() {
+  const scanButton = document.getElementById('scan-button');
+  const scanStatus = document.getElementById('scan-status');
+
+  // Show scanning status
+  scanButton.disabled = true;
+  scanButton.style.opacity = '0.6';
+  scanStatus.textContent = 'TV...';
+  scanStatus.style.display = 'inline';
+  scanStatus.style.color = '#ffffff';
+
+  try {
+    console.log('Starting external scans...');
+
+    // Trigger both TV show scan (blue button) and movie sync (green button)
+    const response = await fetch('/api/trigger-scan', {
+      method: 'POST'
+    });
+
+    if (response.ok) {
+      const results = await response.json();
+      console.log('Scan results:', results);
+
+      // Update status to show movie scanning
+      scanStatus.textContent = 'Movie...';
+
+      // Wait a bit then show results
+      setTimeout(() => {
+        // Show success/failure status
+        const tvSuccess = results.tv_scan.success;
+        const movieSuccess = results.movie_scan.success;
+
+        if (tvSuccess && movieSuccess) {
+          scanStatus.textContent = '✓✓';
+          scanStatus.style.color = '#4CAF50';
+        } else if (tvSuccess || movieSuccess) {
+          scanStatus.textContent = '✓✗';
+          scanStatus.style.color = '#FFA500';
+        } else {
+          scanStatus.textContent = '✗✗';
+          scanStatus.style.color = '#f44336';
+        }
+
+        // Show detailed results in console
+        console.log('TV Scan:', results.tv_scan.message);
+        console.log('Movie Scan:', results.movie_scan.message);
+
+        setTimeout(() => {
+          scanStatus.style.display = 'none';
+          scanButton.disabled = false;
+          scanButton.style.opacity = '1';
+        }, 3000);
+      }, 2000);
+
+    } else {
+      throw new Error('Scan request failed');
+    }
+
+  } catch (error) {
+    console.error('Scan trigger failed:', error);
+
+    // Show error status briefly
+    scanStatus.textContent = '✗';
+    scanStatus.style.color = '#f44336';
+
+    setTimeout(() => {
+      scanStatus.style.display = 'none';
+      scanButton.disabled = false;
+      scanButton.style.opacity = '1';
+    }, 2000);
+  }
+}

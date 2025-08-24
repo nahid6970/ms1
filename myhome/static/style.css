@@ -33,6 +33,37 @@
   background: #e0e0e0;
 }
 
+/* Scan button styling */
+.scan-button {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  position: relative;
+}
+
+.scan-button:hover {
+  background-color: #45a049 !important;
+}
+
+.scan-button:disabled {
+  cursor: not-allowed;
+}
+
+.scan-status {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
 /* Thin scrollbar with custom styles for html and body */
 * {
   box-sizing: border-box;

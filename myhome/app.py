@@ -111,5 +111,41 @@ def manual_generate_static():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/trigger-scan', methods=['POST'])
+def trigger_scan():
+    """Trigger scan for both TV shows and movies"""
+    try:
+        results = {
+            'tv_scan': {'success': False, 'message': ''},
+            'movie_scan': {'success': False, 'message': ''}
+        }
+        
+        # Trigger TV show scan (blue scan button on port 5011)
+        try:
+            tv_scan_response = requests.post('http://192.168.0.101:5011/scan', timeout=30)
+            if tv_scan_response.status_code == 200:
+                results['tv_scan']['success'] = True
+                results['tv_scan']['message'] = 'TV show scan completed'
+            else:
+                results['tv_scan']['message'] = f'TV scan failed with status {tv_scan_response.status_code}'
+        except requests.exceptions.RequestException as e:
+            results['tv_scan']['message'] = f'TV scan error: {str(e)}'
+        
+        # Trigger movie scan (green sync button on port 5013)
+        try:
+            movie_scan_response = requests.post('http://192.168.0.101:5013/sync', timeout=30)
+            if movie_scan_response.status_code == 200:
+                results['movie_scan']['success'] = True
+                results['movie_scan']['message'] = 'Movie sync completed'
+            else:
+                results['movie_scan']['message'] = f'Movie sync failed with status {movie_scan_response.status_code}'
+        except requests.exceptions.RequestException as e:
+            results['movie_scan']['message'] = f'Movie sync error: {str(e)}'
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
