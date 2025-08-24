@@ -7,7 +7,7 @@ import pyperclip
 app = Flask(__name__)
 
 # Updated log file path and separator
-log_file = "C:/Users/nahid/ms/msBackups/Shared_Text.log"
+log_file = "C:/Users/nahid/ms/db/shared_text/Shared_Text.log"
 separator = "-----x-----"
 
 def write_to_log(text):
