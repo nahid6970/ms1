@@ -123,7 +123,7 @@ function nw_pwsh {
 $menu = [ordered]@{
     "[+] Initial Setup" = [ordered]@{
         "PKG Manager & Must Apps" = {
-            nw_pwsh -Command {
+            nw_powershell -Command {
                 if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
                     Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
                 } else {
