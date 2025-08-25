@@ -220,15 +220,7 @@ def delete_movie(movie_id):
 
 
 
-@app.route('/scan_manual_movie/<int:movie_id>')
-def scan_manual_movie(movie_id):
-    scan_and_update_movie_files()
-    return redirect(url_for('movie', movie_id=movie_id))
 
-@app.route('/scan_all_movies')
-def scan_all_movies():
-    scan_and_update_movie_files()
-    return redirect(url_for('index'))
 
 @app.route('/open_movie_folder/<int:movie_id>')
 def open_movie_folder(movie_id):
@@ -259,47 +251,58 @@ def open_movie_folder(movie_id):
 @app.route('/sync_movies')
 def sync_movies():
     missing_movies = scan_for_missing_movies()
-    return render_template('sync_movies.html', missing_movies=missing_movies)
-
-@app.route('/add_missing_movie', methods=['POST'])
-def add_missing_movie():
-    movie_name = request.form.get('movie_name')
-    full_path = request.form.get('full_path')
+    added_movies_list = []
     
-    if movie_name and full_path and os.path.exists(full_path):
+    # Auto-add all missing movies
+    if missing_movies:
         movies = load_data()
         
-        # Create new movie entry
-        new_movie = {
-            'id': max([movie['id'] for movie in movies], default=0) + 1,
-            'title': movie_name,
-            'year': '',
-            'cover_image': '',
-            'directory_path': full_path,
-            'rating': None,
-            'files': [],
-            'folder_exists': True
-        }
+        for missing_movie in missing_movies:
+            # Create new movie entry
+            new_movie = {
+                'id': max([movie['id'] for movie in movies], default=0) + 1,
+                'title': missing_movie['movie_name'],
+                'year': '',
+                'cover_image': '',
+                'directory_path': missing_movie['full_path'],
+                'rating': None,
+                'files': [],
+                'folder_exists': True
+            }
+            
+            # Scan for files in this directory
+            existing_file_titles = set()
+            file_count = 0
+            for root, _, files in os.walk(missing_movie['full_path']):
+                for filename in files:
+                    name, ext = os.path.splitext(filename)
+                    if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                        if name not in existing_file_titles:
+                            file_entry = {
+                                'id': len(new_movie['files']) + 1,
+                                'title': name,
+                                'added_date': datetime.now().isoformat()
+                            }
+                            new_movie['files'].append(file_entry)
+                            existing_file_titles.add(name)
+                            file_count += 1
+            
+            movies.append(new_movie)
+            added_movies_list.append({
+                'title': missing_movie['movie_name'],
+                'file_count': file_count,
+                'path': missing_movie['full_path']
+            })
         
-        # Scan for files in this directory
-        existing_file_titles = set()
-        for root, _, files in os.walk(full_path):
-            for filename in files:
-                name, ext = os.path.splitext(filename)
-                if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                    if name not in existing_file_titles:
-                        file_entry = {
-                            'id': len(new_movie['files']) + 1,
-                            'title': name,
-                            'added_date': datetime.now().isoformat()
-                        }
-                        new_movie['files'].append(file_entry)
-                        existing_file_titles.add(name)
-        
-        movies.append(new_movie)
-        save_data(movies)
+        if len(added_movies_list) > 0:
+            save_data(movies)
+            print(f"Auto-added {len(added_movies_list)} movies during sync")
     
-    return redirect(url_for('sync_movies'))
+    return render_template('sync_movies.html', 
+                         movies_added=len(added_movies_list), 
+                         added_movies_list=added_movies_list)
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5013)

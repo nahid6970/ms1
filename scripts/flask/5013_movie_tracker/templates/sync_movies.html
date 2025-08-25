@@ -12,69 +12,55 @@
     </div>
 
     <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
-        <h1>Sync Movies</h1>
-        <p>Found {{ missing_movies|length }} movie folders that are not in your library:</p>
+        <h1>Auto-Sync Movies</h1>
         
-        {% if missing_movies %}
-            <div class="missing-movies-container">
-                {% for movie in missing_movies %}
-                    <div class="missing-movie-card">
-                        <div class="missing-movie-info">
-                            <h3>{{ movie.folder_name }}</h3>
-                            <p class="folder-path">{{ movie.full_path }}</p>
+        {% if movies_added > 0 %}
+            <div class="sync-success">
+                <p>✅ Successfully added {{ movies_added }} new movie{{ 's' if movies_added != 1 else '' }} to your library!</p>
+                <p>The system automatically scanned for missing movie folders and added them with their video files.</p>
+                
+                <div class="added-movies-list">
+                    <h3>Added Movies:</h3>
+                    {% for movie in added_movies_list %}
+                        <div class="added-movie-item">
+                            {{ movie.title }}
                         </div>
-                        <div class="missing-movie-actions">
-                            <form action="{{ url_for('add_missing_movie') }}" method="post" style="display: inline;">
-                                <input type="hidden" name="movie_name" value="{{ movie.movie_name }}">
-                                <input type="hidden" name="full_path" value="{{ movie.full_path }}">
-                                <button type="submit" class="add-button" style="background-color: #1db954; color: white;">
-                                    <i class="nf nf-cod-add"></i> Add Movie
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
+                
+                <a href="{{ url_for('index') }}" class="add-button">Back to Library</a>
             </div>
         {% else %}
             <div class="no-missing-movies">
                 <p>✅ All movie folders are already in your library!</p>
+                <p>No new movies were found to add.</p>
                 <a href="{{ url_for('index') }}" class="add-button">Back to Library</a>
             </div>
         {% endif %}
+        
+
     </div>
 
     <style>
-        .missing-movies-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .sync-success {
+            text-align: center;
+            padding: 40px;
+            background-color: #1e3a1e;
+            border: 2px solid #1db954;
+            border-radius: 8px;
             margin-top: 20px;
         }
         
-        .missing-movie-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #282828;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #444;
+        .sync-success p:first-child {
+            font-size: 1.3em;
+            color: #1db954;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
         
-        .missing-movie-info h3 {
-            margin: 0 0 5px 0;
-            color: #e0e0e0;
-        }
-        
-        .folder-path {
-            margin: 0;
-            color: #888;
-            font-size: 0.9em;
-            font-family: monospace;
-        }
-        
-        .missing-movie-actions {
-            flex-shrink: 0;
+        .sync-success p:nth-child(2) {
+            color: #b3b3b3;
+            margin-bottom: 25px;
         }
         
         .no-missing-movies {
@@ -85,11 +71,40 @@
             margin-top: 20px;
         }
         
-        .no-missing-movies p {
+        .no-missing-movies p:first-child {
             font-size: 1.2em;
             color: #1db954;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
+        
+        .no-missing-movies p:nth-child(2) {
+            color: #b3b3b3;
+            margin-bottom: 25px;
+        }
+        
+        .added-movies-list {
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .added-movies-list h3 {
+            color: #1db954;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .added-movie-item {
+            background-color: #1a2e1a;
+            border: 1px solid #1db954;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        
+
     </style>
 </body>
 </html>
