@@ -91,12 +91,12 @@ body {
 
 /* Sync button */
 .sync-button {
-    background-color: #1db954 !important;
+    background-color: #007bff !important;
     color: white !important;
 }
 
 .sync-button:hover {
-    background-color: #158a3e !important;
+    background-color: #0056b3 !important;
 }
 
 /* Modal Styles */
