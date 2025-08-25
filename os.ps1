@@ -122,14 +122,17 @@ function nw_pwsh {
 # Define the menu structure
 $menu = [ordered]@{
     "[+] Initial Setup" = [ordered]@{
-        "PKG Manager & Must Apps" = {
-            nw_pwsh -Command {
+        "install scoop" = {
+            nw_powershell -Command {
                 if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
                     Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
                 } else {
                     Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
                 }
-
+            }
+        }
+        "ffks" = {
+            nw_powershell -Command {
                 Write-Host "Change cache Path" -ForegroundColor Green
                 scoop config cache_path D:\@install\scoop\cache
 
