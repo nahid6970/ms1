@@ -670,3 +670,7 @@ function Show-MainMenu {
 
 # Run the main menu with submenu system
 Show-MainMenu
+
+
+#! important Commands for easier setup
+# Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
