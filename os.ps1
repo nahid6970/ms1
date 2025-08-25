@@ -144,7 +144,7 @@ $menu = [ordered]@{
                 }
             }
         }
-        "pkgs" = {
+        "bucket + git" = {
             nw_powershell -Command {
                 scoop install git
 
@@ -154,7 +154,10 @@ $menu = [ordered]@{
                 scoop bucket add extras
                 scoop bucket add versions
                 scoop bucket add games
-
+            }
+        }
+        "scoop pkgs" = {
+            nw_powershell -Command {
                 scoop install sudo
                 scoop install python312
                 scoop install oh-my-posh
@@ -167,7 +170,10 @@ $menu = [ordered]@{
                 scoop install ffmpeg
                 scoop install highlight
                 scoop install zoxide
-
+            }
+        }
+        "winget upgrade +pwsh +notepad +ahk" = {
+            nw_powershell -Command {
                 winget upgrade --source msstore
                 winget upgrade --source winget
                 Write-Host "winget Source updated successfully!" -ForegroundColor Green
