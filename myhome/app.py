@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 import json
 import os
 import subprocess
+import requests
 from datetime import datetime
 
 app = Flask(__name__)
@@ -146,6 +147,30 @@ def trigger_scan():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/tv-notifications')
+def get_tv_notifications():
+    """Get unseen episode count from TV show app"""
+    try:
+        response = requests.get('http://192.168.0.101:5011/api/unseen_count', timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return jsonify({'unseen_count': 0, 'error': 'Failed to fetch count'})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'unseen_count': 0, 'error': str(e)})
+
+@app.route('/api/mark-all-tv-seen', methods=['POST'])
+def mark_all_tv_seen():
+    """Mark all TV episodes as seen"""
+    try:
+        response = requests.post('http://192.168.0.101:5011/api/mark_all_seen', timeout=30)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return jsonify({'success': False, 'error': 'Failed to mark episodes as seen'})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
