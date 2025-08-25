@@ -125,6 +125,7 @@ $menu = [ordered]@{
         "install scoop" = {
             nw_powershell -Command {
                 if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+                    Import-Module Microsoft.PowerShell.Archive -Force
                     Invoke-Expression (New-Object Net.WebClient).DownloadString('https://get.scoop.sh')
                 } else {
                     Write-Host "Scoop is already installed. Skipping installation." -ForegroundColor Yellow
