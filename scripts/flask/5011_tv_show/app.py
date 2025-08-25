@@ -467,5 +467,35 @@ def mark_notify_unseen(show_id, episode_id):
             return jsonify({'success': True, 'notify': 'unseen'})
     return jsonify({'success': False, 'message': 'Episode not found'}), 404
 
+@app.route('/api/unseen_count')
+def get_unseen_count():
+    """Get count of all unseen episodes across all shows"""
+    shows = load_data()
+    unseen_count = 0
+    
+    for show in shows:
+        for episode in show.get('episodes', []):
+            if episode.get('notify', 'unseen') == 'unseen':
+                unseen_count += 1
+    
+    return jsonify({'unseen_count': unseen_count})
+
+@app.route('/api/mark_all_seen', methods=['POST'])
+def mark_all_episodes_seen():
+    """Mark all episodes as seen"""
+    shows = load_data()
+    updated_count = 0
+    
+    for show in shows:
+        for episode in show.get('episodes', []):
+            if episode.get('notify', 'unseen') == 'unseen':
+                episode['notify'] = 'seen'
+                updated_count += 1
+    
+    if updated_count > 0:
+        save_data(shows)
+    
+    return jsonify({'success': True, 'updated_count': updated_count})
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5011)
