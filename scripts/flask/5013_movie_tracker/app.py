@@ -74,6 +74,7 @@ def scan_for_missing_movies():
     return missing_movies
 
 def scan_and_update_movie_files():
+    """Scan for new movie files in existing folders"""
     print("Scanning for new movie files...")
     movies = load_data()
     updated_movies = False
@@ -119,8 +120,62 @@ def scan_and_update_movie_files():
     else:
         print("No changes to movie folder status.")
 
+def auto_add_new_movies():
+    """Automatically add new movie folders found in the root directory"""
+    print("Scanning for new movie folders...")
+    missing_movies = scan_for_missing_movies()
+    
+    if missing_movies:
+        movies = load_data()
+        movies_added = 0
+        
+        for missing_movie in missing_movies:
+            # Create new movie entry
+            new_movie = {
+                'id': max([movie['id'] for movie in movies], default=0) + 1,
+                'title': missing_movie['movie_name'],
+                'year': '',
+                'cover_image': '',
+                'directory_path': missing_movie['full_path'],
+                'rating': None,
+                'files': [],
+                'folder_exists': True,
+                'notify': 'unseen'
+            }
+            
+            # Scan for files in this directory
+            existing_file_titles = set()
+            for root, _, files in os.walk(missing_movie['full_path']):
+                for filename in files:
+                    name, ext = os.path.splitext(filename)
+                    if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                        if name not in existing_file_titles:
+                            file_entry = {
+                                'id': len(new_movie['files']) + 1,
+                                'title': name,
+                                'added_date': datetime.now().isoformat()
+                            }
+                            new_movie['files'].append(file_entry)
+                            existing_file_titles.add(name)
+            
+            movies.append(new_movie)
+            movies_added += 1
+        
+        if movies_added > 0:
+            save_data(movies)
+            print(f"Auto-added {movies_added} new movies during scheduled scan")
+    else:
+        print("No new movie folders found.")
+
+def comprehensive_movie_scan():
+    """Combined function that adds new movies AND scans existing ones for new files"""
+    print("Starting comprehensive movie scan...")
+    auto_add_new_movies()  # First add any new movie folders
+    scan_and_update_movie_files()  # Then scan existing folders for new files
+    print("Comprehensive movie scan completed.")
+
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=scan_and_update_movie_files, trigger="interval", hours=1)
+scheduler.add_job(func=comprehensive_movie_scan, trigger="interval", hours=1)
 scheduler.start()
 
 @app.route('/')
