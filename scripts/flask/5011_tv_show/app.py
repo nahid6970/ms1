@@ -344,6 +344,62 @@ def scan_all():
     scan_and_update_episodes()
     return redirect(url_for('index'))
 
+@app.route('/scan_and_add_all')
+def scan_and_add_all():
+    """Combined function: scan existing shows for new episodes AND auto-add missing shows"""
+    # First, scan existing shows for new episodes
+    scan_and_update_episodes()
+    
+    # Then, auto-add any missing shows
+    missing_shows = scan_for_missing_shows()
+    shows = load_data()
+    added_count = 0
+    
+    for missing_show in missing_shows:
+        folder_name = missing_show['folder_name']
+        full_path = missing_show['full_path']
+        
+        if os.path.exists(full_path):
+            # Create new show entry
+            new_show = {
+                'id': max([show['id'] for show in shows], default=0) + 1,
+                'title': folder_name,
+                'year': '',
+                'cover_image': '',
+                'directory_path': full_path,
+                'rating': None,
+                'status': 'Continuing',
+                'episodes': []
+            }
+            
+            # Scan for episodes in this directory
+            existing_episode_titles = set()
+            for root, _, files in os.walk(full_path):
+                for filename in files:
+                    name, ext = os.path.splitext(filename)
+                    if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                        if name not in existing_episode_titles:
+                            episode = {
+                                'id': len(new_show['episodes']) + 1,
+                                'title': name,
+                                'watched': False,
+                                'added_date': datetime.now().isoformat(),
+                                'notify': 'unseen'
+                            }
+                            new_show['episodes'].append(episode)
+                            existing_episode_titles.add(name)
+            
+            # Sort episodes by title (newest first by default)
+            new_show['episodes'].reverse()
+            
+            shows.append(new_show)
+            added_count += 1
+    
+    if added_count > 0:
+        save_data(shows)
+    
+    return redirect(url_for('index'))
+
 @app.route('/open_folder/<int:show_id>')
 def open_folder(show_id):
     import subprocess
@@ -374,6 +430,64 @@ def open_folder(show_id):
 def sync_shows():
     missing_shows = scan_for_missing_shows()
     return render_template('sync_shows.html', missing_shows=missing_shows)
+
+@app.route('/auto_add_all_shows', methods=['POST'])
+def auto_add_all_shows():
+    """Automatically add all missing shows to the library"""
+    missing_shows = scan_for_missing_shows()
+    shows = load_data()
+    added_count = 0
+    
+    for missing_show in missing_shows:
+        folder_name = missing_show['folder_name']
+        full_path = missing_show['full_path']
+        
+        if os.path.exists(full_path):
+            # Create new show entry
+            new_show = {
+                'id': max([show['id'] for show in shows], default=0) + 1,
+                'title': folder_name,
+                'year': '',
+                'cover_image': '',
+                'directory_path': full_path,
+                'rating': None,
+                'status': 'Continuing',
+                'episodes': []
+            }
+            
+            # Scan for episodes in this directory
+            existing_episode_titles = set()
+            for root, _, files in os.walk(full_path):
+                for filename in files:
+                    name, ext = os.path.splitext(filename)
+                    if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+                        if name not in existing_episode_titles:
+                            episode = {
+                                'id': len(new_show['episodes']) + 1,
+                                'title': name,
+                                'watched': False,
+                                'added_date': datetime.now().isoformat(),
+                                'notify': 'unseen'
+                            }
+                            new_show['episodes'].append(episode)
+                            existing_episode_titles.add(name)
+            
+            # Sort episodes by title (newest first by default)
+            new_show['episodes'].reverse()
+            
+            shows.append(new_show)
+            added_count += 1
+    
+    if added_count > 0:
+        save_data(shows)
+    
+    return redirect(url_for('sync_shows'))
+
+@app.route('/rescan_library', methods=['POST'])
+def rescan_library():
+    """Rescan the entire library for new episodes"""
+    scan_and_update_episodes()
+    return redirect(url_for('sync_shows'))
 
 @app.route('/add_missing_show', methods=['POST'])
 def add_missing_show():

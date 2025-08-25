@@ -29,8 +29,7 @@
         <button onclick="openAddShowModal()" class="add-button"><i class="nf nf-cod-add"></i></button>
         <a href="{{ url_for('index') }}" class="add-button"><i class="nf nf-fa-home"></i></a>
         <a href="http://192.168.0.101:5013" class="add-button"><i class="nf nf-md-movie_roll"></i></a>
-        <a href="{{ url_for('scan_all') }}" class="add-button scan-button"><i class="nf nf-fa-refresh"></i></a>
-        <a href="{{ url_for('sync_shows') }}" class="add-button sync-button"><i class="nf nf-fa-refresh"></i></a>
+        <a href="{{ url_for('scan_and_add_all') }}" class="add-button scan-button" title="Scan for episodes and auto-add missing shows"><i class="nf nf-fa-refresh"></i></a>
         <button onclick="openSettingsModal()" class="add-button settings-button"><i class="nf nf-fa-cog"></i></button>
     </div>
 

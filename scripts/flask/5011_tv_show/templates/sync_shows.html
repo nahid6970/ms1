@@ -13,9 +13,33 @@
 
     <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
         <h1>Sync TV Shows</h1>
+        
+        <!-- Scan Controls -->
+        <div class="scan-controls">
+            <form action="{{ url_for('rescan_library') }}" method="post" style="display: inline;">
+                <button type="submit" class="scan-button blue-scan">
+                    <i class="nf nf-fa-search"></i> Blue Scan
+                </button>
+            </form>
+            <form action="{{ url_for('sync_shows') }}" method="get" style="display: inline;">
+                <button type="submit" class="scan-button regular-scan">
+                    <i class="nf nf-fa-refresh"></i> Regular Scan
+                </button>
+            </form>
+        </div>
+        
         <p>Found {{ missing_shows|length }} TV show folders that are not in your library:</p>
         
         {% if missing_shows %}
+            <!-- Auto-add all button -->
+            <div class="auto-add-section">
+                <form action="{{ url_for('auto_add_all_shows') }}" method="post">
+                    <button type="submit" class="auto-add-button">
+                        <i class="nf nf-cod-add"></i> Automatically Add All {{ missing_shows|length }} Shows
+                    </button>
+                </form>
+            </div>
+            
             <div class="missing-shows-container">
                 {% for show in missing_shows %}
                     <div class="missing-show-card">
@@ -23,14 +47,8 @@
                             <h3>{{ show.folder_name }}</h3>
                             <p class="folder-path">{{ show.full_path }}</p>
                         </div>
-                        <div class="missing-show-actions">
-                            <form action="{{ url_for('add_missing_show') }}" method="post" style="display: inline;">
-                                <input type="hidden" name="folder_name" value="{{ show.folder_name }}">
-                                <input type="hidden" name="full_path" value="{{ show.full_path }}">
-                                <button type="submit" class="add-button" style="background-color: #1db954; color: white;">
-                                    <i class="nf nf-cod-add"></i> Add Show
-                                </button>
-                            </form>
+                        <div class="missing-show-status">
+                            <span class="pending-status">Pending Auto-Add</span>
                         </div>
                     </div>
                 {% endfor %}
@@ -44,6 +62,71 @@
     </div>
 
     <style>
+        .scan-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .scan-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .blue-scan {
+            background-color: #007acc;
+            color: white;
+        }
+        
+        .blue-scan:hover {
+            background-color: #005a99;
+            transform: translateY(-2px);
+        }
+        
+        .regular-scan {
+            background-color: #666;
+            color: white;
+        }
+        
+        .regular-scan:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+        }
+        
+        .auto-add-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .auto-add-button {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .auto-add-button:hover {
+            background-color: #e55a2b;
+            transform: translateY(-2px);
+        }
+        
         .missing-shows-container {
             display: flex;
             flex-direction: column;
@@ -73,8 +156,17 @@
             font-family: monospace;
         }
         
-        .missing-show-actions {
+        .missing-show-status {
             flex-shrink: 0;
+        }
+        
+        .pending-status {
+            background-color: #ff6b35;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
         }
         
         .no-missing-shows {

@@ -89,15 +89,7 @@ body {
     background-color: #0056b3 !important; /* Darker blue on hover */
 }
 
-/* Sync button specific styles */
-.sync-button {
-    background-color: #1db954 !important; /* Green background for sync */
-    color: white !important;
-}
 
-.sync-button:hover {
-    background-color: #158a3e !important; /* Darker green on hover */
-}
 
 /* Settings button specific styles */
 /* .settings-button {
