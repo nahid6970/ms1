@@ -160,6 +160,19 @@ def get_tv_notifications():
     except requests.exceptions.RequestException as e:
         return jsonify({'unseen_count': 0, 'error': str(e)})
 
+@app.route('/api/movie-notifications')
+def get_movie_notifications():
+    """Get unseen movie count from movie app"""
+    try:
+        response = requests.get('http://192.168.0.101:5013/get_unseen_notifications', timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify({'unseen_count': data.get('count', 0), 'movies': data.get('movies', [])})
+        else:
+            return jsonify({'unseen_count': 0, 'error': 'Failed to fetch movie count'})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'unseen_count': 0, 'error': str(e)})
+
 @app.route('/api/mark-all-tv-seen', methods=['POST'])
 def mark_all_tv_seen():
     """Mark all TV episodes as seen"""
@@ -169,6 +182,36 @@ def mark_all_tv_seen():
             return response.json()
         else:
             return jsonify({'success': False, 'error': 'Failed to mark episodes as seen'})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/mark-all-movies-seen', methods=['POST'])
+def mark_all_movies_seen():
+    """Mark all movies as seen"""
+    try:
+        # First get all unseen movies
+        response = requests.get('http://192.168.0.101:5013/get_unseen_notifications', timeout=10)
+        if response.status_code != 200:
+            return jsonify({'success': False, 'error': 'Failed to fetch unseen movies'})
+        
+        data = response.json()
+        movies = data.get('movies', [])
+        updated_count = 0
+        
+        # Mark each movie as seen
+        for movie in movies:
+            movie_id = movie.get('id')
+            if movie_id:
+                update_response = requests.post(
+                    f'http://192.168.0.101:5013/update_notify/{movie_id}',
+                    json={'notify': 'seen'},
+                    timeout=10
+                )
+                if update_response.status_code == 200:
+                    updated_count += 1
+        
+        return jsonify({'success': True, 'updated_count': updated_count})
+        
     except requests.exceptions.RequestException as e:
         return jsonify({'success': False, 'error': str(e)})
 
