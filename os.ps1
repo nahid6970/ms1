@@ -132,11 +132,20 @@ $menu = [ordered]@{
                 }
             }
         }
-        "ffks" = {
+        "Scoop Cache Path" = {
             nw_powershell -Command {
                 Write-Host "Change cache Path" -ForegroundColor Green
-                scoop config cache_path D:\@install\scoop\cache
-
+                $drive = Read-Host "Enter drive for scoop cache (C or D) [D]"
+                if ($drive.ToLower() -eq 'c') {
+                    scoop config cache_path C:\@install\scoop\cache
+                }
+                else {
+                    scoop config cache_path D:\@install\scoop\cache
+                }
+            }
+        }
+        "pkgs" = {
+            nw_powershell -Command {
                 scoop install git
 
                 Write-Host "Add Buckets" -ForegroundColor Green
