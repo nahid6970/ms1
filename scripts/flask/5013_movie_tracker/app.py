@@ -20,7 +20,16 @@ ROOT_MOVIES_FOLDER = r"D:\Downloads\@Radarr"
 def load_data():
     try:
         with open(DATA_FILE, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            # Add notify field to existing movies that don't have it
+            updated = False
+            for movie in data:
+                if 'notify' not in movie:
+                    movie['notify'] = 'unseen'
+                    updated = True
+            if updated:
+                save_data(data)
+            return data
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
@@ -165,6 +174,36 @@ def toggle_seen(movie_id):
         return jsonify({'success': True})
     return jsonify({'success': False}), 404
 
+@app.route('/update_notify/<int:movie_id>', methods=['POST'])
+def update_notify(movie_id):
+    """API endpoint to update notify status - for use by other Flask apps"""
+    movies = load_data()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if movie:
+        data = request.get_json()
+        if data and 'notify' in data and data['notify'] in ['seen', 'unseen']:
+            movie['notify'] = data['notify']
+            save_data(movies)
+            return jsonify({'success': True, 'notify': movie['notify']})
+        return jsonify({'success': False, 'error': 'Invalid notify value'}), 400
+    return jsonify({'success': False, 'error': 'Movie not found'}), 404
+
+@app.route('/get_unseen_notifications')
+def get_unseen_notifications():
+    """API endpoint to get all movies with unseen notifications"""
+    movies = load_data()
+    unseen_movies = [
+        {
+            'id': movie['id'],
+            'title': movie['title'],
+            'year': movie.get('year', ''),
+            'notify': movie.get('notify', 'unseen')
+        }
+        for movie in movies 
+        if movie.get('notify', 'unseen') == 'unseen'
+    ]
+    return jsonify({'movies': unseen_movies, 'count': len(unseen_movies)})
+
 @app.route('/add_movie', methods=['GET', 'POST'])
 def add_movie():
     if request.method == 'POST':
@@ -180,7 +219,8 @@ def add_movie():
             'rating': request.form.get('rating', None),
             'seen': False,
             'files': [],
-            'folder_exists': bool(directory_path and os.path.isdir(directory_path))
+            'folder_exists': bool(directory_path and os.path.isdir(directory_path)),
+            'notify': 'unseen'
         }
         movies.append(new_movie)
         save_data(movies)
@@ -267,7 +307,8 @@ def sync_movies():
                 'directory_path': missing_movie['full_path'],
                 'rating': None,
                 'files': [],
-                'folder_exists': True
+                'folder_exists': True,
+                'notify': 'unseen'
             }
             
             # Scan for files in this directory
