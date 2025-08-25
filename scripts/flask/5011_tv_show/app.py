@@ -65,6 +65,24 @@ def scan_for_missing_shows():
     
     return missing_shows
 
+def update_existing_episodes_with_notify():
+    """Add notify field to existing episodes that don't have it"""
+    print("Updating existing episodes with notify field...")
+    shows = load_data()
+    updated = False
+    
+    for show in shows:
+        for episode in show.get('episodes', []):
+            if 'notify' not in episode:
+                episode['notify'] = 'unseen'
+                updated = True
+    
+    if updated:
+        save_data(shows)
+        print("Episodes updated with notify field.")
+    else:
+        print("All episodes already have notify field.")
+
 def scan_and_update_episodes():
     print("Scanning for new episodes...")
     shows = load_data()
@@ -84,7 +102,8 @@ def scan_and_update_episodes():
                                     'id': len(show['episodes']) + 1,
                                     'title': name,
                                     'watched': False,
-                                    'added_date': datetime.now().isoformat()
+                                    'added_date': datetime.now().isoformat(),
+                                    'notify': 'unseen'
                                 }
                                 show['episodes'].insert(0, new_episode)
                                 existing_episode_titles.add(name)
@@ -263,7 +282,8 @@ def add_episode(show_id):
             'id': len(show['episodes']) + 1,
             'title': request.form['title'],
             'watched': False,
-            'added_date': datetime.now().isoformat()
+            'added_date': datetime.now().isoformat(),
+            'notify': 'unseen'
         }
         show['episodes'].insert(0, new_episode)
         
@@ -386,7 +406,8 @@ def add_missing_show():
                             'id': len(new_show['episodes']) + 1,
                             'title': name,
                             'watched': False,
-                            'added_date': datetime.now().isoformat()
+                            'added_date': datetime.now().isoformat(),
+                            'notify': 'unseen'
                         }
                         new_show['episodes'].append(episode)
                         existing_episode_titles.add(name)
@@ -398,6 +419,53 @@ def add_missing_show():
         save_data(shows)
     
     return redirect(url_for('sync_shows'))
+
+@app.route('/update_notify_fields')
+def update_notify_fields():
+    """Route to update existing episodes with notify field"""
+    update_existing_episodes_with_notify()
+    return redirect(url_for('index'))
+
+@app.route('/toggle_notify/<int:show_id>/<int:episode_id>')
+def toggle_notify(show_id, episode_id):
+    """Toggle notify status between 'seen' and 'unseen'"""
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if show:
+        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
+        if episode:
+            # Toggle between 'seen' and 'unseen'
+            current_status = episode.get('notify', 'unseen')
+            episode['notify'] = 'seen' if current_status == 'unseen' else 'unseen'
+            save_data(shows)
+            return redirect(url_for('show', show_id=show_id))
+    return 'Episode not found', 404
+
+@app.route('/mark_notify_seen/<int:show_id>/<int:episode_id>')
+def mark_notify_seen(show_id, episode_id):
+    """Mark episode notify status as 'seen'"""
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if show:
+        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
+        if episode:
+            episode['notify'] = 'seen'
+            save_data(shows)
+            return jsonify({'success': True, 'notify': 'seen'})
+    return jsonify({'success': False, 'message': 'Episode not found'}), 404
+
+@app.route('/mark_notify_unseen/<int:show_id>/<int:episode_id>')
+def mark_notify_unseen(show_id, episode_id):
+    """Mark episode notify status as 'unseen'"""
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if show:
+        episode = next((e for e in show['episodes'] if e['id'] == episode_id), None)
+        if episode:
+            episode['notify'] = 'unseen'
+            save_data(shows)
+            return jsonify({'success': True, 'notify': 'unseen'})
+    return jsonify({'success': False, 'message': 'Episode not found'}), 404
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5011)
