@@ -25,7 +25,7 @@
             <div id="apps-list">
                 {% if applications %}
                     {% for app in applications %}
-                    <div class="item app-item" data-name="{{ app.name }}">
+                    <div class="item app-item" data-name="{{ app.name }}" onclick="toggleActions('{{ app.name }}')">
                         <div class="item-header">
                             <div class="item-name">
                                 <span class="status-indicator {{ 'installed' if app.status.installed else 'not-installed' }}">
@@ -35,14 +35,24 @@
                                     {{ app.name }}
                                 </span>
                             </div>
-                            <div class="item-actions">
-                                <button onclick="toggleActions('{{ app.name }}')" class="btn btn-secondary btn-small">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                            </div>
                         </div>
                         
-                        <!-- Action buttons (initially hidden) -->
+                        <div class="item-details">
+                            {% if app.scoop_name %}
+                                <div><strong>Scoop:</strong> {{ app.scoop_name }}</div>
+                            {% endif %}
+                            {% if app.winget_name %}
+                                <div><strong>Winget:</strong> {{ app.winget_name }}</div>
+                            {% endif %}
+                            {% if app.scoop_path %}
+                                <div><strong>Scoop Path:</strong> <span class="path">{{ app.scoop_path }}</span></div>
+                            {% endif %}
+                            {% if app.winget_path %}
+                                <div><strong>Winget Path:</strong> <span class="path">{{ app.winget_path }}</span></div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Action buttons (initially hidden) - Now at the very end -->
                         <div class="action-buttons" id="actions-{{ app.name }}" style="display: none;">
                             {% if app.scoop_name or app.winget_name %}
                                 <button onclick="installApp('{{ app.name }}')" class="btn btn-success btn-small">
@@ -63,21 +73,6 @@
                             <button onclick="deleteApp('{{ app.name }}')" class="btn btn-danger btn-small">
                                 <i class="fas fa-times"></i> Delete
                             </button>
-                        </div>
-                        
-                        <div class="item-details">
-                            {% if app.scoop_name %}
-                                <div><strong>Scoop:</strong> {{ app.scoop_name }}</div>
-                            {% endif %}
-                            {% if app.winget_name %}
-                                <div><strong>Winget:</strong> {{ app.winget_name }}</div>
-                            {% endif %}
-                            {% if app.scoop_path %}
-                                <div><strong>Scoop Path:</strong> <span class="path">{{ app.scoop_path }}</span></div>
-                            {% endif %}
-                            {% if app.winget_path %}
-                                <div><strong>Winget Path:</strong> <span class="path">{{ app.winget_path }}</span></div>
-                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -294,11 +289,24 @@
 
 .action-buttons {
     margin-top: 12px;
-    padding-top: 12px;
+    padding: 12px;
     border-top: 1px solid var(--border);
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: flex-end;
+    background: var(--bg-primary);
+    border-radius: 0 0 8px 8px;
+}
+
+.app-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.app-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow);
 }
 
 .btn-success {
@@ -327,9 +335,14 @@ let currentAction = null;
 let currentAppName = null;
 
 // Toggle action buttons visibility
-function toggleActions(appName) {
+function toggleActions(appName, event) {
+    // Prevent event bubbling if called from button click
+    if (event) {
+        event.stopPropagation();
+    }
+    
     const actionsDiv = document.getElementById(`actions-${appName}`);
-    if (actionsDiv.style.display === 'none') {
+    if (actionsDiv.style.display === 'none' || !actionsDiv.style.display) {
         // Hide all other action buttons first
         document.querySelectorAll('.action-buttons').forEach(div => {
             div.style.display = 'none';
@@ -658,13 +671,30 @@ function filterApps() {
     });
 }
 
-// Hide action buttons when clicking outside
+// Prevent action button clicks from triggering card click
 document.addEventListener('click', function(event) {
-    if (!event.target.closest('.item-actions') && !event.target.closest('.action-buttons')) {
+    // If clicking on action buttons, stop propagation
+    if (event.target.closest('.action-buttons')) {
+        event.stopPropagation();
+        return;
+    }
+    
+    // Hide action buttons when clicking outside cards
+    if (!event.target.closest('.app-item')) {
         document.querySelectorAll('.action-buttons').forEach(div => {
             div.style.display = 'none';
         });
     }
+});
+
+// Add click event listeners to all action buttons to prevent card toggle
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners to prevent button clicks from bubbling
+    document.addEventListener('click', function(event) {
+        if (event.target.closest('.action-buttons button')) {
+            event.stopPropagation();
+        }
+    });
 });
 </script>
 {% endblock %}
