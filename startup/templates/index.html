@@ -2,20 +2,20 @@
 
 {% block content %}
 <div class="controls">
-    <button onclick="openModal('add-modal')" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Add New Item
+    <button onclick="openModal('add-modal')" class="btn btn-primary" title="Add New Item">
+        <i class="fas fa-plus"></i>
     </button>
-    <button onclick="scanStartupFolders()" class="btn btn-secondary" id="scan-btn">
-        <i class="fas fa-search"></i> Scan Startup Folders
+    <button onclick="scanStartupFolders()" class="btn btn-secondary" id="scan-btn" title="Scan Startup Folders">
+        <i class="fas fa-search"></i>
     </button>
-    <button onclick="refreshItems()" class="btn btn-secondary" id="refresh-btn">
-        <i class="fas fa-sync-alt"></i> Refresh
+    <button onclick="refreshItems()" class="btn btn-secondary" id="refresh-btn" title="Refresh">
+        <i class="fas fa-sync-alt"></i>
     </button>
-    <button onclick="copyRegistryPath()" class="btn btn-secondary">
-        <i class="fas fa-copy"></i> Copy Registry Path
+    <button onclick="copyRegistryPath()" class="btn btn-secondary" title="Copy Registry Path">
+        <i class="fas fa-copy"></i>
     </button>
-    <button onclick="deleteMatchingShortcuts()" class="btn btn-danger" id="delete-matching-btn">
-        <i class="fas fa-trash-alt"></i> Delete Matching Shortcuts
+    <button onclick="deleteMatchingShortcuts()" class="btn btn-danger" id="delete-matching-btn" title="Delete Matching Files">
+        <i class="fas fa-trash-alt"></i>
     </button>
     <div class="search-container">
         <input type="text" id="search-input" class="search-input" placeholder="Search items..." onkeyup="filterItems()">
