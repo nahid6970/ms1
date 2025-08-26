@@ -24,7 +24,25 @@
             border: 1px solid #ddd;
         }
         input[type="file"] {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 400px;
+        }
+        input[type="text"] {
+            margin-bottom: 10px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-left: 3px solid #4CAF50;
+            background-color: #f9f9f9;
+        }
+        small {
+            display: block;
+            margin-top: 5px;
         }
         button {
             padding: 10px 15px;
@@ -120,6 +138,59 @@
                 document.getElementById('cleanAllForm').submit();
             }
         }
+
+        // Show selected file count
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('files');
+            const fileLabel = document.querySelector('label[for="files"]');
+            
+            fileInput.addEventListener('change', function() {
+                const fileCount = this.files.length;
+                if (fileCount > 0) {
+                    fileLabel.textContent = `Choose multiple images to upload: (${fileCount} files selected)`;
+                } else {
+                    fileLabel.textContent = 'Choose multiple images to upload:';
+                }
+            });
+
+            // Add folder browser button
+            const folderInput = document.getElementById('folder_path');
+            const browseBtn = document.createElement('button');
+            browseBtn.type = 'button';
+            browseBtn.textContent = 'Browse Folder';
+            browseBtn.style.marginLeft = '10px';
+            browseBtn.style.padding = '8px 12px';
+            browseBtn.style.backgroundColor = '#007BFF';
+            browseBtn.style.color = 'white';
+            browseBtn.style.border = 'none';
+            browseBtn.style.borderRadius = '4px';
+            browseBtn.style.cursor = 'pointer';
+            
+            browseBtn.addEventListener('click', function() {
+                // Create a hidden file input for folder selection
+                const folderSelector = document.createElement('input');
+                folderSelector.type = 'file';
+                folderSelector.webkitdirectory = true;
+                folderSelector.style.display = 'none';
+                
+                folderSelector.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        // Get the folder path from the first file
+                        const firstFile = this.files[0];
+                        const folderPath = firstFile.webkitRelativePath.split('/')[0];
+                        // This won't give us the full system path, but we can show the folder name
+                        folderInput.value = folderPath;
+                        alert(`Selected folder: ${folderPath}\nNote: You may need to manually enter the full path for the folder import to work.`);
+                    }
+                });
+                
+                document.body.appendChild(folderSelector);
+                folderSelector.click();
+                document.body.removeChild(folderSelector);
+            });
+            
+            folderInput.parentNode.insertBefore(browseBtn, folderInput.nextSibling);
+        });
     </script>
 </head>
 <body>
@@ -127,9 +198,19 @@
     <h1>Share Images Locally</h1>
 
     <form method="POST" action="/" enctype="multipart/form-data">
-        <label for="file">Choose image to upload:</label><br>
-        <input type="file" name="file" id="file" accept="image/*"><br><br>
-        <button type="submit">Upload Image</button>
+        <div class="form-section">
+            <label for="files">Choose multiple images to upload:</label><br>
+            <input type="file" name="files" id="files" accept="image/*" multiple>
+            <small style="color: #666;">Hold Ctrl (or Cmd on Mac) to select multiple files</small>
+        </div>
+        
+        <div class="form-section">
+            <label for="folder_path">Or enter folder path to import all images (including subfolders):</label><br>
+            <input type="text" name="folder_path" id="folder_path" placeholder="C:\path\to\your\image\folder" style="width: 400px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <small style="color: #666;">All images from this folder and its subfolders will be copied to the shared folder</small>
+        </div>
+        
+        <button type="submit">Upload Images</button>
     </form>
 
     <div class="image-gallery">

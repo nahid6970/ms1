@@ -3,6 +3,7 @@ import datetime
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort
 from werkzeug.utils import secure_filename
 import json
+import glob
 
 app = Flask(__name__)
 
@@ -22,6 +23,68 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def get_images_from_folder(folder_path):
+    """Recursively gets all image files from a folder and its subfolders."""
+    image_files = []
+    for ext in ALLOWED_EXTENSIONS:
+        # Search recursively for each extension
+        pattern = os.path.join(folder_path, '**', f'*.{ext}')
+        image_files.extend(glob.glob(pattern, recursive=True))
+        # Also search for uppercase extensions
+        pattern = os.path.join(folder_path, '**', f'*.{ext.upper()}')
+        image_files.extend(glob.glob(pattern, recursive=True))
+    return image_files
+
+def process_uploaded_file(file, metadata):
+    """Process a single uploaded file and add to metadata."""
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    # Handle duplicate filenames: append a number
+    counter = 1
+    original_filename_no_ext, ext = os.path.splitext(filename)
+    while os.path.exists(filepath):
+        filename = f"{original_filename_no_ext}_{counter}{ext}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        counter += 1
+
+    file.save(filepath)
+
+    # Add metadata
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
+    metadata.append({
+        "filename": filename,
+        "timestamp": timestamp,
+        "filepath": filepath
+    })
+    return filename
+
+def copy_file_to_upload_folder(source_path, metadata):
+    """Copy a file from source path to upload folder and add to metadata."""
+    filename = secure_filename(os.path.basename(source_path))
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    # Handle duplicate filenames: append a number
+    counter = 1
+    original_filename_no_ext, ext = os.path.splitext(filename)
+    while os.path.exists(filepath):
+        filename = f"{original_filename_no_ext}_{counter}{ext}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        counter += 1
+
+    # Copy the file
+    import shutil
+    shutil.copy2(source_path, filepath)
+
+    # Add metadata
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
+    metadata.append({
+        "filename": filename,
+        "timestamp": timestamp,
+        "filepath": filepath
+    })
+    return filename
+
 def load_image_metadata():
     """Loads image metadata from the JSON file."""
     if os.path.exists(METADATA_FILE):
@@ -40,36 +103,32 @@ def save_image_metadata(metadata):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        if 'file' not in request.files:
-            return redirect(request.url)
-        file = request.files['file']
+        metadata = load_image_metadata()
+        uploaded_count = 0
 
-        if file.filename == '':
-            return redirect(request.url)
+        # Handle multiple file uploads
+        if 'files' in request.files:
+            files = request.files.getlist('files')
+            for file in files:
+                if file and file.filename != '' and allowed_file(file.filename):
+                    process_uploaded_file(file, metadata)
+                    uploaded_count += 1
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # Handle folder selection (via folder_path form field)
+        if 'folder_path' in request.form and request.form['folder_path']:
+            folder_path = request.form['folder_path']
+            if os.path.exists(folder_path) and os.path.isdir(folder_path):
+                image_files = get_images_from_folder(folder_path)
+                for image_path in image_files:
+                    try:
+                        copy_file_to_upload_folder(image_path, metadata)
+                        uploaded_count += 1
+                    except Exception as e:
+                        print(f"Error copying {image_path}: {e}")
 
-            # Handle duplicate filenames: append a number
-            counter = 1
-            original_filename_no_ext, ext = os.path.splitext(filename)
-            while os.path.exists(filepath):
-                filename = f"{original_filename_no_ext}_{counter}{ext}"
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                counter += 1
-
-            file.save(filepath)
-
-            # Save metadata
-            metadata = load_image_metadata()
-            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
-            metadata.append({
-                "filename": filename,
-                "timestamp": timestamp,
-                "filepath": filepath # Store full path for easier deletion/access
-            })
+        if uploaded_count > 0:
             save_image_metadata(metadata)
+        
         return redirect(url_for('index'))
 
     # Display images
