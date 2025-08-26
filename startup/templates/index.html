@@ -5,6 +5,9 @@
     <button onclick="openModal('add-modal')" class="btn btn-primary">
         <i class="fas fa-plus"></i> Add New Item
     </button>
+    <button onclick="scanStartupFolders()" class="btn btn-secondary" id="scan-btn">
+        <i class="fas fa-search"></i> Scan Startup Folders
+    </button>
     <button onclick="refreshItems()" class="btn btn-secondary" id="refresh-btn">
         <i class="fas fa-sync-alt"></i> Refresh
     </button>
@@ -734,6 +737,177 @@ function showEmptyStateIfNeeded(commandsVisible, appsVisible) {
         }
     } else if (appsEmptyState) {
         appsEmptyState.remove();
+    }
+}
+
+// Startup folder scanning functionality
+async function scanStartupFolders() {
+    const scanBtn = document.getElementById('scan-btn');
+    const originalText = scanBtn.innerHTML;
+    
+    scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+    scanBtn.disabled = true;
+    
+    try {
+        const result = await apiCall('/api/scan-startup-folders');
+        
+        if (result.success) {
+            if (result.items.length > 0) {
+                showScanResultsModal(result.items);
+            } else {
+                showStatus('No new startup items found in folders', 'success');
+            }
+        } else {
+            showStatus('Failed to scan startup folders', 'error');
+        }
+    } catch (error) {
+        showStatus(`Error scanning folders: ${error.message}`, 'error');
+    } finally {
+        scanBtn.innerHTML = originalText;
+        scanBtn.disabled = false;
+    }
+}
+
+function showScanResultsModal(items) {
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'scan-results-modal';
+    
+    const itemsHtml = items.map((item, index) => `
+        <div class="scan-item" style="background: var(--bg-tertiary); border-radius: 6px; padding: 12px; margin-bottom: 8px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <input type="checkbox" id="item-${index}" checked style="transform: scale(1.2);">
+                <div style="flex: 1;">
+                    <div style="font-weight: 500; color: var(--text-primary);">
+                        <i class="fas ${item.type === 'App' ? 'fa-desktop' : 'fa-terminal'}"></i>
+                        ${item.name}
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
+                        <strong>Type:</strong> ${item.type} (${item.extension}) | 
+                        <strong>Folder:</strong> ${item.folder}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace; margin-top: 4px; word-break: break-all;">
+                        ${item.path}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px; max-height: 80vh;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-search"></i> Found Startup Items (${items.length})
+                </h2>
+                <button class="modal-close" onclick="closeModal('scan-results-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div style="margin: 20px 0; max-height: 400px; overflow-y: auto;">
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">
+                    Select the items you want to add to your startup manager:
+                </p>
+                <div style="margin-bottom: 16px;">
+                    <button onclick="toggleAllScanItems(true)" class="btn btn-secondary btn-small" style="margin-right: 8px;">
+                        <i class="fas fa-check-square"></i> Select All
+                    </button>
+                    <button onclick="toggleAllScanItems(false)" class="btn btn-secondary btn-small">
+                        <i class="fas fa-square"></i> Deselect All
+                    </button>
+                </div>
+                ${itemsHtml}
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="addSelectedItems()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Selected Items
+                </button>
+                <button onclick="closeModal('scan-results-modal')" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function toggleAllScanItems(checked) {
+    const checkboxes = document.querySelectorAll('#scan-results-modal input[type="checkbox"]');
+    checkboxes.forEach(checkbox => checkbox.checked = checked);
+}
+
+async function addSelectedItems() {
+    const modal = document.getElementById('scan-results-modal');
+    const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
+    
+    if (checkboxes.length === 0) {
+        showStatus('No items selected', 'error');
+        return;
+    }
+    
+    const addBtn = modal.querySelector('.btn-primary');
+    const originalText = addBtn.innerHTML;
+    addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+    addBtn.disabled = true;
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Get the original scan data
+    const result = await apiCall('/api/scan-startup-folders');
+    const items = result.items;
+    
+    for (let i = 0; i < checkboxes.length; i++) {
+        const checkbox = checkboxes[i];
+        const index = parseInt(checkbox.id.split('-')[1]);
+        const item = items[index];
+        
+        const formData = {
+            name: item.name,
+            type: item.type,
+            path: item.path,
+            command: '',
+            executable_type: 'other'
+        };
+        
+        try {
+            const addResult = await apiCall('/add', 'POST', formData);
+            if (addResult.success) {
+                successCount++;
+            } else {
+                errorCount++;
+                console.error(`Failed to add ${item.name}:`, addResult.error);
+            }
+        } catch (error) {
+            errorCount++;
+            console.error(`Error adding ${item.name}:`, error);
+        }
+    }
+    
+    // Close modal and show results
+    closeModal('scan-results-modal');
+    
+    if (successCount > 0) {
+        showStatus(`Successfully added ${successCount} item(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
+        // Refresh the page to show new items
+        setTimeout(() => window.location.reload(), 1500);
+    } else {
+        showStatus(`Failed to add items (${errorCount} errors)`, 'error');
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        // Remove dynamically created modals
+        if (modalId === 'scan-results-modal') {
+            setTimeout(() => modal.remove(), 300);
+        }
     }
 }
 </script>

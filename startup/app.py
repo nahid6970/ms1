@@ -272,5 +272,50 @@ def copy_registry_path():
     registry_path = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
     return jsonify({"success": True, "path": registry_path})
 
+@app.route('/api/scan-startup-folders', methods=['GET'])
+def scan_startup_folders():
+    """Scan Windows startup folders for items"""
+    startup_folders = [
+        r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup",
+        r"C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+    ]
+    
+    found_items = []
+    existing_items = startup_manager.load_items()
+    existing_names = {item["name"].lower() for item in existing_items}
+    
+    for folder in startup_folders:
+        try:
+            if os.path.exists(folder):
+                for filename in os.listdir(folder):
+                    file_path = os.path.join(folder, filename)
+                    
+                    # Skip directories and non-executable files
+                    if os.path.isfile(file_path):
+                        name, ext = os.path.splitext(filename)
+                        
+                        # Check if it's an executable type
+                        if ext.lower() in ['.exe', '.bat', '.cmd', '.lnk', '.url']:
+                            # Skip if already exists in our items
+                            if name.lower() not in existing_names:
+                                item_type = "App" if ext.lower() == '.exe' else "Command"
+                                
+                                found_items.append({
+                                    "name": name,
+                                    "type": item_type,
+                                    "path": file_path,
+                                    "extension": ext.lower(),
+                                    "folder": "System" if "ProgramData" in folder else "User"
+                                })
+        except Exception as e:
+            print(f"Error scanning folder {folder}: {e}")
+            continue
+    
+    return jsonify({
+        "success": True,
+        "items": found_items,
+        "count": len(found_items)
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4999)
