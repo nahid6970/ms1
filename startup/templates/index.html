@@ -303,7 +303,9 @@ async function toggleStartup(itemName, button) {
             // Update title state
             title.className = `item-title ${isEnabled ? 'enabled' : 'disabled'}`;
             
-            showStatus(`${itemName} ${result.action}`, 'success');
+            // Show appropriate toast color based on action
+            const toastType = isEnabled ? 'success' : 'error';
+            showStatus(`${itemName} ${result.action}`, toastType);
         } else {
             showStatus(`Failed to toggle ${itemName}: ${result.error}`, 'error');
         }
