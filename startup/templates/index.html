@@ -33,11 +33,11 @@
     <div class="tab-buttons">
         <button class="tab-button active" onclick="switchTab('commands')" id="commands-tab">
             <i class="fas fa-terminal"></i>
-            <span>Commands ({{ commands|length }})</span>
+            <span>Commands ({{ commands|selectattr('is_enabled')|list|length }}/{{ commands|length }})</span>
         </button>
         <button class="tab-button" onclick="switchTab('apps')" id="apps-tab">
             <i class="fas fa-desktop"></i>
-            <span>Apps ({{ apps|length }})</span>
+            <span>Apps ({{ apps|selectattr('is_enabled')|list|length }}/{{ apps|length }})</span>
         </button>
     </div>
 </div>
@@ -45,7 +45,7 @@
 <div class="sections">
     <div class="section active" id="commands-section">
         <h2 class="section-title">
-            <i class="fas fa-terminal"></i> Commands ({{ commands|length }})
+            <i class="fas fa-terminal"></i> Commands ({{ commands|selectattr('is_enabled')|list|length }}/{{ commands|length }})
         </h2>
         <div class="section-content">
             <div id="commands-list">
@@ -93,7 +93,7 @@
 
     <div class="section" id="apps-section">
         <h2 class="section-title">
-            <i class="fas fa-desktop"></i> Applications ({{ apps|length }})
+            <i class="fas fa-desktop"></i> Applications ({{ apps|selectattr('is_enabled')|list|length }}/{{ apps|length }})
         </h2>
         <div class="section-content">
             <div id="apps-list">
@@ -737,16 +737,20 @@ function filterItems() {
 }
 
 function updateSectionCounts(commandsVisible, appsVisible) {
+    // Calculate enabled counts for visible items
+    const commandsEnabled = getEnabledCount('#commands-section', commandsVisible);
+    const appsEnabled = getEnabledCount('#apps-section', appsVisible);
+    
     // Update section titles
     const commandsTitle = document.querySelector('#commands-section .section-title');
     const appsTitle = document.querySelector('#apps-section .section-title');
     
     if (commandsTitle) {
-        commandsTitle.innerHTML = `<i class="fas fa-terminal"></i> Commands (${commandsVisible})`;
+        commandsTitle.innerHTML = `<i class="fas fa-terminal"></i> Commands (${commandsEnabled}/${commandsVisible})`;
     }
     
     if (appsTitle) {
-        appsTitle.innerHTML = `<i class="fas fa-desktop"></i> Applications (${appsVisible})`;
+        appsTitle.innerHTML = `<i class="fas fa-desktop"></i> Applications (${appsEnabled}/${appsVisible})`;
     }
     
     // Update tab buttons if they exist
@@ -754,12 +758,26 @@ function updateSectionCounts(commandsVisible, appsVisible) {
     const appsTab = document.getElementById('apps-tab');
     
     if (commandsTab) {
-        commandsTab.innerHTML = `<i class="fas fa-terminal"></i><span>Commands (${commandsVisible})</span>`;
+        commandsTab.innerHTML = `<i class="fas fa-terminal"></i><span>Commands (${commandsEnabled}/${commandsVisible})</span>`;
     }
     
     if (appsTab) {
-        appsTab.innerHTML = `<i class="fas fa-desktop"></i><span>Apps (${appsVisible})</span>`;
+        appsTab.innerHTML = `<i class="fas fa-desktop"></i><span>Apps (${appsEnabled}/${appsVisible})</span>`;
     }
+}
+
+function getEnabledCount(sectionSelector, totalVisible) {
+    const section = document.querySelector(sectionSelector);
+    if (!section) return 0;
+    
+    const visibleItems = Array.from(section.querySelectorAll('.item')).filter(item => {
+        return item.style.display !== 'none' && item.style.opacity !== '0';
+    });
+    
+    return visibleItems.filter(item => {
+        const toggleBtn = item.querySelector('.toggle-btn');
+        return toggleBtn && toggleBtn.classList.contains('enabled');
+    }).length;
 }
 
 function showEmptyStateIfNeeded(commandsVisible, appsVisible) {
