@@ -24,8 +24,6 @@ import tkinter as tk
 import win32gui
 import win32process
 
-from Reference import *
-
 def calculate_time_to_appear(start_time):
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -1428,7 +1426,16 @@ run_last_button.pack(side="left", padx=(0, 0), pady=(0, 0))
 
 
 
-
+def force_shutdown(event):
+    confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to shutdown?")
+    if confirmed:
+        subprocess.run(["shutdown", "/s", "/f", "/t", "0"])
+        # subprocess.run(["shutdown", "/s", "/t", "0"])
+def force_restart(event):
+    confirmed = messagebox.askyesno("Confirmation", "Are you sure you want to restart?")
+    if confirmed:
+        subprocess.run(["shutdown", "/r", "/f", "/t", "0"])
+        # subprocess.run(["shutdown", "/r", "/t", "0"])
 
 Shut_Reboot=CTkButton(ROOT2, text="\udb82\udc20",fg_color="#1d2027",text_color="#fa0000", corner_radius=5,height=10,width=0, anchor="center",font=("JetBrainsMono NFP",25,"bold"))
 Shut_Reboot.pack(side="left",padx=(1,1),pady=(0,0))
