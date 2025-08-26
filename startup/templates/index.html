@@ -366,6 +366,9 @@ async function toggleStartup(itemName, button) {
             // Show appropriate toast color based on action
             const toastType = isEnabled ? 'success' : 'error';
             showStatus(`${itemName} ${result.action}`, toastType);
+            
+            // Update counts after toggle
+            updateCountsAfterChange();
         } else {
             showStatus(`Failed to toggle ${itemName}: ${result.error}`, 'error');
         }
@@ -778,6 +781,26 @@ function getEnabledCount(sectionSelector, totalVisible) {
         const toggleBtn = item.querySelector('.toggle-btn');
         return toggleBtn && toggleBtn.classList.contains('enabled');
     }).length;
+}
+
+function updateCountsAfterChange() {
+    // Count all visible items (not just filtered ones)
+    const commandsSection = document.querySelector('#commands-section');
+    const appsSection = document.querySelector('#apps-section');
+    
+    let commandsVisible = 0;
+    let appsVisible = 0;
+    
+    if (commandsSection) {
+        commandsVisible = commandsSection.querySelectorAll('.item').length;
+    }
+    
+    if (appsSection) {
+        appsVisible = appsSection.querySelectorAll('.item').length;
+    }
+    
+    // Update the counts
+    updateSectionCounts(commandsVisible, appsVisible);
 }
 
 function showEmptyStateIfNeeded(commandsVisible, appsVisible) {
