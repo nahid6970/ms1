@@ -86,6 +86,10 @@ class StartupManager:
                     command = item.get("Command", "")
                     executable_type = item.get("ExecutableType", "other")
 
+                    # Auto-detect executable type if not set and path contains pythonw.exe
+                    if executable_type == "other" and "pythonw.exe" in path.lower():
+                        executable_type = "pythonw"
+
                     # Build command based on executable type
                     if executable_type == "pythonw":
                         full_command = f'"{path}" {command}'
@@ -109,12 +113,18 @@ class StartupManager:
             return {"success": False, "error": str(e)}
 
     def launch_item(self, item):
-        """Launch an item"""
+        """Launch an item - using exact same method as startup.py"""
         try:
+            # Retrieve the first path, the command, and the executable type
             path = item["paths"][0]
             command = item.get("Command", "")
             executable_type = item.get("ExecutableType", "other")
             
+            # Auto-detect executable type if not set and path contains pythonw.exe
+            if executable_type == "other" and "pythonw.exe" in path.lower():
+                executable_type = "pythonw"
+            
+            full_command = ""
             if executable_type == "pythonw":
                 full_command = f'"{path}" {command}'
             elif executable_type == "pwsh":
@@ -125,13 +135,41 @@ class StartupManager:
                 full_command = f'"{path}" -Command {command}'
             elif executable_type == "ahk_v2":
                 full_command = f'"C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe" "{path}" {command}'
-            else:
+            else: # other
                 if command:
                     full_command = f'"{path}" {command}'
                 else:
                     full_command = f'"{path}"'
             
-            subprocess.Popen(full_command, shell=True)
+            # Debug: Log the command being executed
+            debug_log = os.path.join(os.path.dirname(__file__), 'launch_debug.log')
+            try:
+                with open(debug_log, 'a') as f:
+                    f.write(f"{datetime.now()}: Launching item '{item['name']}'\n")
+                    f.write(f"  Path: {path}\n")
+                    f.write(f"  Command: {command}\n")
+                    f.write(f"  ExecutableType: {executable_type}\n")
+                    f.write(f"  Full command: {full_command}\n")
+                    f.write(f"  Final os.system command: start \"\" {full_command}\n\n")
+            except:
+                pass
+            
+            # Use subprocess.Popen with proper process detachment for Windows
+            try:
+                # Create a fully detached process that won't be affected by parent process
+                subprocess.Popen(
+                    full_command,
+                    shell=True,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
+                    close_fds=True
+                )
+            except Exception as e:
+                # Fallback to the exact same method as startup.py
+                os.system(f'start "" {full_command}')
+            
             return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -541,4 +579,35 @@ def delete_matching_shortcuts():
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=4999)
+    # For pythonw.exe compatibility - suppress all console output and run silently
+    import logging
+    import sys
+    
+    try:
+        # Redirect stdout and stderr to suppress all output when using pythonw.exe
+        if sys.executable.endswith('pythonw.exe'):
+            sys.stdout = open(os.devnull, 'w')
+            sys.stderr = open(os.devnull, 'w')
+        
+        # Disable Flask and Werkzeug logging
+        logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
+        app.logger.setLevel(logging.CRITICAL)
+        
+        # Try to run Flask, with fallback port handling
+        try:
+            app.run(debug=False, host='0.0.0.0', port=4999, use_reloader=False, threaded=True)
+        except OSError as port_error:
+            # If port 4999 is busy, try port 5000
+            if "Address already in use" in str(port_error):
+                app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False, threaded=True)
+            else:
+                raise
+        
+    except Exception as e:
+        # If running with pythonw.exe, errors won't be visible, so try to log to a file
+        try:
+            error_log = os.path.join(os.path.dirname(__file__), 'flask_error.log')
+            with open(error_log, 'a') as f:
+                f.write(f"{datetime.now()}: Flask startup error: {str(e)}\n")
+        except:
+            pass  # If we can't even log, just fail silently

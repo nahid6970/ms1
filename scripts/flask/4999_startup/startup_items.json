@@ -22,7 +22,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5001_share_text\\share_text.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5001_share_text\\share_text.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -30,7 +31,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -38,7 +40,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -46,7 +49,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5005_GameARR\\GameARR.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5005_GameARR\\GameARR.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -54,7 +58,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5006_Run_Commands\\Run_Commands.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5006_Run_Commands\\Run_Commands.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -62,7 +67,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5007_Controlby_Android\\Android_Control_PC.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -70,7 +76,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -78,7 +85,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5009_MCQ\\app.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5009_MCQ\\app.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -86,7 +94,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py",
+    "ExecutableType": "pythonw"
   },
   {
     "type": "Command",
@@ -416,9 +425,18 @@
     "name": "Flask - 4999 - Startup Setup",
     "type": "Command",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup\\app.py",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Flask - 4998 - Applist",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4998_Applist\\applist_app.py",
     "ExecutableType": "pythonw"
   }
 ]
