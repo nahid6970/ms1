@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="header">
-    <h1><i class="fas fa-rocket"></i> Startup Manager</h1>
-    <p>Manage your Windows startup applications and commands</p>
-</div>
-
 <div class="controls">
     <button onclick="openModal('add-modal')" class="btn btn-primary">
         <i class="fas fa-plus"></i> Add New Item
@@ -39,7 +34,8 @@
         <h2 class="section-title">
             <i class="fas fa-terminal"></i> Commands ({{ commands|length }})
         </h2>
-        <div id="commands-list">
+        <div class="section-content">
+            <div id="commands-list">
             {% if commands %}
                 {% for item in commands %}
                 <div class="item" data-name="{{ item.name }}">
@@ -78,6 +74,7 @@
                     <p>No commands configured</p>
                 </div>
             {% endif %}
+            </div>
         </div>
     </div>
 
@@ -85,7 +82,8 @@
         <h2 class="section-title">
             <i class="fas fa-desktop"></i> Applications ({{ apps|length }})
         </h2>
-        <div id="apps-list">
+        <div class="section-content">
+            <div id="apps-list">
             {% if apps %}
                 {% for item in apps %}
                 <div class="item" data-name="{{ item.name }}">
@@ -123,6 +121,7 @@
                     <p>No applications configured</p>
                 </div>
             {% endif %}
+            </div>
         </div>
     </div>
 </div>

@@ -211,6 +211,41 @@
             padding: 24px;
             box-shadow: 0 4px 20px var(--shadow);
             border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+        }
+
+        .section-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        /* Custom scrollbar styling */
+        .section-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .section-content::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        .section-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .section-content::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Firefox scrollbar */
+        .section-content {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) var(--bg-tertiary);
         }
 
         .section-title {
