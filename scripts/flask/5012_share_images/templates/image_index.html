@@ -5,7 +5,7 @@
     <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
     <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/4400/4400968.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Sharing</title>
+    <title>Gallery</title>
     <style>
         body {
             font-family: 'JetBrains Mono', monospace;
@@ -125,6 +125,40 @@
         .clean-all-btn:hover {
             background-color: #c0392b;
         }
+        .upload-toggle {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .upload-toggle-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #333;
+        }
+        .upload-toggle-header:hover {
+            background-color: #f8f9fa;
+        }
+        .upload-arrow {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+            color: #666;
+        }
+        .upload-arrow.expanded {
+            transform: rotate(90deg);
+        }
+        .upload-content {
+            display: none;
+            padding: 0 15px 15px 15px;
+        }
+        .upload-content.show {
+            display: block;
+        }
     </style>
     <script>
         function confirmDelete(filename) {
@@ -136,6 +170,19 @@
         function confirmCleanAll() {
             if (confirm("Are you sure you want to delete ALL images? This action cannot be undone.")) {
                 document.getElementById('cleanAllForm').submit();
+            }
+        }
+
+        function toggleUpload() {
+            const content = document.getElementById('uploadContent');
+            const arrow = document.querySelector('.upload-arrow');
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                arrow.classList.remove('expanded');
+            } else {
+                content.classList.add('show');
+                arrow.classList.add('expanded');
             }
         }
 
@@ -195,23 +242,31 @@
 </head>
 <body>
 
-    <h1>Share Images Locally</h1>
+    <h1>Gallery</h1>
 
-    <form method="POST" action="/" enctype="multipart/form-data">
-        <div class="form-section">
-            <label for="files">Choose multiple images to upload:</label><br>
-            <input type="file" name="files" id="files" accept="image/*" multiple>
-            <small style="color: #666;">Hold Ctrl (or Cmd on Mac) to select multiple files</small>
+    <div class="upload-toggle">
+        <div class="upload-toggle-header" onclick="toggleUpload()">
+            <span>Upload Images</span>
+            <span class="upload-arrow">▶</span>
         </div>
-        
-        <div class="form-section">
-            <label for="folder_path">Or enter folder path to import all images (including subfolders):</label><br>
-            <input type="text" name="folder_path" id="folder_path" placeholder="C:\path\to\your\image\folder" style="width: 400px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-            <small style="color: #666;">All images from this folder and its subfolders will be copied to the shared folder</small>
+        <div class="upload-content" id="uploadContent">
+            <form method="POST" action="/" enctype="multipart/form-data">
+                <div class="form-section">
+                    <label for="files">Choose multiple images to upload:</label><br>
+                    <input type="file" name="files" id="files" accept="image/*" multiple>
+                    <small style="color: #666;">Hold Ctrl (or Cmd on Mac) to select multiple files</small>
+                </div>
+                
+                <div class="form-section">
+                    <label for="folder_path">Or enter folder path to import all images (including subfolders):</label><br>
+                    <input type="text" name="folder_path" id="folder_path" placeholder="C:\path\to\your\image\folder" style="width: 400px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <small style="color: #666;">All images from this folder and its subfolders will be copied to the shared folder</small>
+                </div>
+                
+                <button type="submit">Upload Images</button>
+            </form>
         </div>
-        
-        <button type="submit">Upload Images</button>
-    </form>
+    </div>
 
     <div class="image-gallery">
         {% for image in images %}
