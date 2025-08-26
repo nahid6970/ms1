@@ -425,10 +425,10 @@
     "name": "Flask - 4999 - Startup Setup",
     "type": "Command",
     "paths": [
-      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\python.exe"
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup\\app.py",
-    "ExecutableType": "other"
+    "ExecutableType": "pythonw"
   },
   {
     "name": "Flask - 4998 - Applist",
