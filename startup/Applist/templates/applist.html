@@ -1,0 +1,639 @@
+{% extends "base.html" %}
+
+{% block title %}App List Manager{% endblock %}
+
+{% block content %}
+<div class="controls">
+    <button onclick="openModal('add-app-modal')" class="btn btn-primary" title="Add New Application">
+        <i class="fas fa-plus"></i> Add App
+    </button>
+    <button onclick="refreshApps()" class="btn btn-secondary" id="refresh-btn" title="Refresh Applications">
+        <i class="fas fa-sync-alt"></i> Refresh
+    </button>
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search applications..." onkeyup="filterApps()">
+        <i class="fas fa-search search-icon"></i>
+    </div>
+</div>
+
+<div class="sections">
+    <div class="section">
+        <h2 class="section-title">
+            <i class="fas fa-desktop"></i> Applications ({{ applications|length }})
+        </h2>
+        <div class="section-content">
+            <div id="apps-list">
+                {% if applications %}
+                    {% for app in applications %}
+                    <div class="item app-item" data-name="{{ app.name }}">
+                        <div class="item-header">
+                            <div class="item-name">
+                                <span class="status-indicator {{ 'installed' if app.status.installed else 'not-installed' }}">
+                                    {{ app.status.display }}
+                                </span>
+                                <span class="item-title {{ 'installed' if app.status.installed else 'not-installed' }}">
+                                    {{ app.name }}
+                                </span>
+                            </div>
+                            <div class="item-actions">
+                                <button onclick="toggleActions('{{ app.name }}')" class="btn btn-secondary btn-small">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Action buttons (initially hidden) -->
+                        <div class="action-buttons" id="actions-{{ app.name }}" style="display: none;">
+                            {% if app.scoop_name or app.winget_name %}
+                                <button onclick="installApp('{{ app.name }}')" class="btn btn-success btn-small">
+                                    <i class="fas fa-download"></i> Install
+                                </button>
+                                <button onclick="uninstallApp('{{ app.name }}')" class="btn btn-danger btn-small">
+                                    <i class="fas fa-trash"></i> Uninstall
+                                </button>
+                            {% endif %}
+                            {% if app.scoop_path or app.winget_path %}
+                                <button onclick="openLocation('{{ app.name }}')" class="btn btn-warning btn-small">
+                                    <i class="fas fa-folder-open"></i> Open
+                                </button>
+                            {% endif %}
+                            <button onclick="editApp('{{ app.name }}')" class="btn btn-secondary btn-small">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteApp('{{ app.name }}')" class="btn btn-danger btn-small">
+                                <i class="fas fa-times"></i> Delete
+                            </button>
+                        </div>
+                        
+                        <div class="item-details">
+                            {% if app.scoop_name %}
+                                <div><strong>Scoop:</strong> {{ app.scoop_name }}</div>
+                            {% endif %}
+                            {% if app.winget_name %}
+                                <div><strong>Winget:</strong> {{ app.winget_name }}</div>
+                            {% endif %}
+                            {% if app.scoop_path %}
+                                <div><strong>Scoop Path:</strong> <span class="path">{{ app.scoop_path }}</span></div>
+                            {% endif %}
+                            {% if app.winget_path %}
+                                <div><strong>Winget Path:</strong> <span class="path">{{ app.winget_path }}</span></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-desktop"></i>
+                        <p>No applications configured</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Application Modal -->
+<div id="add-app-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-plus"></i> Add New Application
+            </h2>
+            <button class="modal-close" onclick="closeModal('add-app-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="add-app-form">
+            <div class="form-group">
+                <label class="form-label" for="add-name">
+                    <i class="fas fa-tag"></i> App Name *
+                </label>
+                <input type="text" id="add-name" class="form-input" placeholder="Enter application name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-scoop-name">
+                    <i class="fas fa-cube"></i> Scoop Name
+                </label>
+                <input type="text" id="add-scoop-name" class="form-input" placeholder="Scoop package name (optional)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-scoop-path">
+                    <i class="fas fa-folder"></i> Scoop Path
+                </label>
+                <input type="text" id="add-scoop-path" class="form-input" placeholder="Path to Scoop executable (optional)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-winget-name">
+                    <i class="fas fa-box"></i> Winget Name
+                </label>
+                <input type="text" id="add-winget-name" class="form-input" placeholder="Winget package name (optional)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-winget-path">
+                    <i class="fas fa-folder"></i> Winget Path
+                </label>
+                <input type="text" id="add-winget-path" class="form-input" placeholder="Path to Winget executable (optional)">
+            </div>
+        </form>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="saveNewApp()" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Application
+            </button>
+            <button type="button" onclick="closeModal('add-app-modal')" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Application Modal -->
+<div id="edit-app-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-edit"></i> Edit Application
+            </h2>
+            <button class="modal-close" onclick="closeModal('edit-app-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="edit-app-form">
+            <input type="hidden" id="edit-original-name">
+            
+            <div class="form-group">
+                <label class="form-label" for="edit-name">
+                    <i class="fas fa-tag"></i> App Name *
+                </label>
+                <input type="text" id="edit-name" class="form-input" placeholder="Enter application name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-scoop-name">
+                    <i class="fas fa-cube"></i> Scoop Name
+                </label>
+                <input type="text" id="edit-scoop-name" class="form-input" placeholder="Scoop package name (optional)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-scoop-path">
+                    <i class="fas fa-folder"></i> Scoop Path
+                </label>
+                <input type="text" id="edit-scoop-path" class="form-input" placeholder="Path to Scoop executable (optional)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-winget-name">
+                    <i class="fas fa-box"></i> Winget Name
+                </label>
+                <input type="text" id="edit-winget-name" class="form-input" placeholder="Winget package name (optional)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-winget-path">
+                    <i class="fas fa-folder"></i> Winget Path
+                </label>
+                <input type="text" id="edit-winget-path" class="form-input" placeholder="Path to Winget executable (optional)">
+            </div>
+        </form>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="saveEditApp()" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Application
+            </button>
+            <button type="button" onclick="closeModal('edit-app-modal')" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Source Selection Modal -->
+<div id="source-modal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-list"></i> Select Source
+            </h2>
+            <button class="modal-close" onclick="closeModal('source-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="source-options" style="padding: 20px 0;">
+            <!-- Source options will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.status-indicator {
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+
+.status-indicator.installed {
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--success);
+}
+
+.status-indicator.not-installed {
+    background: rgba(255, 68, 68, 0.2);
+    color: var(--danger);
+}
+
+.item-title.installed {
+    color: var(--text-primary);
+}
+
+.item-title.not-installed {
+    color: var(--text-muted);
+}
+
+.action-buttons {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-success {
+    background: var(--success);
+    color: var(--bg-primary);
+}
+
+.btn-success:hover {
+    background: #00cc66;
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: var(--bg-primary);
+}
+
+.btn-warning:hover {
+    background: #cc8800;
+    transform: translateY(-1px);
+}
+</style>
+
+<script>
+let currentAction = null;
+let currentAppName = null;
+
+// Toggle action buttons visibility
+function toggleActions(appName) {
+    const actionsDiv = document.getElementById(`actions-${appName}`);
+    if (actionsDiv.style.display === 'none') {
+        // Hide all other action buttons first
+        document.querySelectorAll('.action-buttons').forEach(div => {
+            div.style.display = 'none';
+        });
+        actionsDiv.style.display = 'flex';
+    } else {
+        actionsDiv.style.display = 'none';
+    }
+}
+
+// Install application
+async function installApp(appName) {
+    currentAction = 'install';
+    currentAppName = appName;
+    
+    // Get app data to check available sources
+    const apps = await apiCall('/api/apps');
+    const app = apps.find(a => a.name === appName);
+    
+    if (!app) {
+        showStatus('Application not found', 'error');
+        return;
+    }
+    
+    const sources = [];
+    if (app.scoop_name) sources.push({name: 'scoop', label: 'Scoop', color: '#FFFFFF'});
+    if (app.winget_name) sources.push({name: 'winget', label: 'Winget', color: '#0078D7'});
+    
+    if (sources.length === 0) {
+        showStatus('No installation sources available', 'error');
+        return;
+    }
+    
+    if (sources.length === 1) {
+        // Only one source available, use it directly
+        performAction('install', appName, sources[0].name);
+    } else {
+        // Multiple sources, show selection modal
+        showSourceModal(sources);
+    }
+}
+
+// Uninstall application
+async function uninstallApp(appName) {
+    currentAction = 'uninstall';
+    currentAppName = appName;
+    
+    // Get app data to check available sources
+    const apps = await apiCall('/api/apps');
+    const app = apps.find(a => a.name === appName);
+    
+    if (!app) {
+        showStatus('Application not found', 'error');
+        return;
+    }
+    
+    const sources = [];
+    if (app.scoop_name) sources.push({name: 'scoop', label: 'Scoop', color: '#FFFFFF'});
+    if (app.winget_name) sources.push({name: 'winget', label: 'Winget', color: '#0078D7'});
+    
+    if (sources.length === 0) {
+        showStatus('No uninstallation sources available', 'error');
+        return;
+    }
+    
+    if (sources.length === 1) {
+        // Only one source available, use it directly
+        performAction('uninstall', appName, sources[0].name);
+    } else {
+        // Multiple sources, show selection modal
+        showSourceModal(sources);
+    }
+}
+
+// Open file location
+async function openLocation(appName) {
+    currentAction = 'open-location';
+    currentAppName = appName;
+    
+    // Get app data to check available paths
+    const apps = await apiCall('/api/apps');
+    const app = apps.find(a => a.name === appName);
+    
+    if (!app) {
+        showStatus('Application not found', 'error');
+        return;
+    }
+    
+    const sources = [];
+    if (app.scoop_path) sources.push({name: 'scoop', label: 'Scoop Path', color: '#FFFFFF'});
+    if (app.winget_path) sources.push({name: 'winget', label: 'Winget Path', color: '#0078D7'});
+    
+    if (sources.length === 0) {
+        showStatus('No paths available', 'error');
+        return;
+    }
+    
+    if (sources.length === 1) {
+        // Only one path available, use it directly
+        performAction('open-location', appName, sources[0].name);
+    } else {
+        // Multiple paths, show selection modal
+        showSourceModal(sources);
+    }
+}
+
+// Show source selection modal
+function showSourceModal(sources) {
+    const optionsDiv = document.getElementById('source-options');
+    optionsDiv.innerHTML = '';
+    
+    sources.forEach(source => {
+        const button = document.createElement('button');
+        button.className = 'btn btn-primary';
+        button.style.backgroundColor = source.color;
+        button.style.color = source.color === '#FFFFFF' ? '#000000' : '#FFFFFF';
+        button.style.margin = '5px';
+        button.innerHTML = `<i class="fas fa-${source.name === 'scoop' ? 'cube' : 'box'}"></i> ${source.label}`;
+        button.onclick = () => {
+            closeModal('source-modal');
+            performAction(currentAction, currentAppName, source.name);
+        };
+        optionsDiv.appendChild(button);
+    });
+    
+    openModal('source-modal');
+}
+
+// Perform the actual action
+async function performAction(action, appName, source) {
+    let endpoint = '';
+    let method = 'POST';
+    
+    switch (action) {
+        case 'install':
+            endpoint = `/api/install/${encodeURIComponent(appName)}`;
+            break;
+        case 'uninstall':
+            endpoint = `/api/uninstall/${encodeURIComponent(appName)}`;
+            break;
+        case 'open-location':
+            endpoint = `/api/open-location/${encodeURIComponent(appName)}`;
+            break;
+    }
+    
+    try {
+        const result = await apiCall(endpoint, method, {source: source});
+        
+        if (result.success) {
+            showStatus(result.message, 'success');
+            // Hide action buttons
+            const actionsDiv = document.getElementById(`actions-${appName}`);
+            if (actionsDiv) actionsDiv.style.display = 'none';
+        } else {
+            showStatus(result.error, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error: ${error.message}`, 'error');
+    }
+}
+
+// Edit application
+async function editApp(appName) {
+    try {
+        const apps = await apiCall('/api/apps');
+        const app = apps.find(a => a.name === appName);
+        
+        if (!app) {
+            showStatus('Application not found', 'error');
+            return;
+        }
+        
+        // Populate form
+        document.getElementById('edit-original-name').value = app.name;
+        document.getElementById('edit-name').value = app.name;
+        document.getElementById('edit-scoop-name').value = app.scoop_name || '';
+        document.getElementById('edit-scoop-path').value = app.scoop_path || '';
+        document.getElementById('edit-winget-name').value = app.winget_name || '';
+        document.getElementById('edit-winget-path').value = app.winget_path || '';
+        
+        openModal('edit-app-modal');
+    } catch (error) {
+        showStatus(`Error loading app data: ${error.message}`, 'error');
+    }
+}
+
+// Delete application
+async function deleteApp(appName) {
+    if (!confirm(`Are you sure you want to delete '${appName}'?`)) {
+        return;
+    }
+    
+    try {
+        const result = await apiCall(`/api/delete/${encodeURIComponent(appName)}`, 'DELETE');
+        
+        if (result.success) {
+            // Remove item from DOM
+            const item = document.querySelector(`[data-name="${appName}"]`);
+            if (item) {
+                item.style.transition = 'all 0.3s ease';
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-20px)';
+                setTimeout(() => item.remove(), 300);
+            }
+            
+            showStatus(result.message, 'success');
+        } else {
+            showStatus(result.error, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error deleting app: ${error.message}`, 'error');
+    }
+}
+
+// Save new application
+async function saveNewApp() {
+    const formData = {
+        name: document.getElementById('add-name').value.trim(),
+        scoop_name: document.getElementById('add-scoop-name').value.trim(),
+        scoop_path: document.getElementById('add-scoop-path').value.trim(),
+        winget_name: document.getElementById('add-winget-name').value.trim(),
+        winget_path: document.getElementById('add-winget-path').value.trim()
+    };
+    
+    if (!formData.name) {
+        showStatus('App name is required', 'error');
+        return;
+    }
+    
+    const saveBtn = document.querySelector('#add-app-modal .btn-primary');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    saveBtn.disabled = true;
+    
+    try {
+        const result = await apiCall('/api/add', 'POST', formData);
+        
+        if (result.success) {
+            showStatus(result.message, 'success');
+            closeModal('add-app-modal');
+            document.getElementById('add-app-form').reset();
+            setTimeout(() => refreshApps(), 1000);
+        } else {
+            showStatus(result.error, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error adding app: ${error.message}`, 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
+// Save edited application
+async function saveEditApp() {
+    const originalName = document.getElementById('edit-original-name').value;
+    const formData = {
+        name: document.getElementById('edit-name').value.trim(),
+        scoop_name: document.getElementById('edit-scoop-name').value.trim(),
+        scoop_path: document.getElementById('edit-scoop-path').value.trim(),
+        winget_name: document.getElementById('edit-winget-name').value.trim(),
+        winget_path: document.getElementById('edit-winget-path').value.trim()
+    };
+    
+    if (!formData.name) {
+        showStatus('App name is required', 'error');
+        return;
+    }
+    
+    const saveBtn = document.querySelector('#edit-app-modal .btn-primary');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+    saveBtn.disabled = true;
+    
+    try {
+        const result = await apiCall(`/api/edit/${encodeURIComponent(originalName)}`, 'POST', formData);
+        
+        if (result.success) {
+            showStatus(result.message, 'success');
+            closeModal('edit-app-modal');
+            setTimeout(() => refreshApps(), 1000);
+        } else {
+            showStatus(result.error, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error updating app: ${error.message}`, 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
+// Refresh applications
+async function refreshApps() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    const originalText = refreshBtn.innerHTML;
+    
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    refreshBtn.disabled = true;
+    
+    try {
+        setTimeout(() => {
+            location.reload();
+        }, 500);
+    } catch (error) {
+        showStatus(`Error refreshing: ${error.message}`, 'error');
+        refreshBtn.innerHTML = originalText;
+        refreshBtn.disabled = false;
+    }
+}
+
+// Filter applications
+function filterApps() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+    const allItems = document.querySelectorAll('.app-item');
+    
+    allItems.forEach(item => {
+        const appName = item.querySelector('.item-title').textContent.toLowerCase();
+        const scoopName = item.querySelector('.item-details')?.textContent.toLowerCase() || '';
+        
+        if (appName.includes(searchTerm) || scoopName.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Hide action buttons when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.item-actions') && !event.target.closest('.action-buttons')) {
+        document.querySelectorAll('.action-buttons').forEach(div => {
+            div.style.display = 'none';
+        });
+    }
+});
+</script>
+{% endblock %}
