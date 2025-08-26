@@ -17,6 +17,9 @@
     <button onclick="deleteMatchingShortcuts()" class="btn btn-danger" id="delete-matching-btn" title="Delete Matching Files">
         <i class="fas fa-trash-alt"></i>
     </button>
+    <button onclick="openModal('settings-modal')" class="btn btn-secondary" title="Settings">
+        <i class="fas fa-cog"></i>
+    </button>
     <div class="search-container">
         <input type="text" id="search-input" class="search-input" placeholder="Search items..." onkeyup="filterItems()">
         <i class="fas fa-search search-icon"></i>
@@ -273,6 +276,63 @@
             </button>
             <button type="button" onclick="closeModal('edit-modal')" class="btn btn-secondary">
                 <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-cog"></i> Settings
+            </h2>
+            <button class="modal-close" onclick="closeModal('settings-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="settings-content">
+            <div class="setting-group">
+                <h3 class="setting-title">
+                    <i class="fas fa-eye"></i> View Options
+                </h3>
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <input type="checkbox" id="compact-mode" onchange="toggleCompactMode()">
+                        <span class="checkmark"></span>
+                        Compact Mode
+                    </label>
+                    <p class="setting-description">Hide detailed information (type, path, arguments) and show only essential controls</p>
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <h3 class="setting-title">
+                    <i class="fas fa-sort"></i> Sorting Options
+                </h3>
+                <div class="setting-item">
+                    <label class="setting-label">Sort By:</label>
+                    <select id="sort-by" class="form-select" onchange="applySorting()">
+                        <option value="default">Default (Registry Order)</option>
+                        <option value="name">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="modified">Last Modified</option>
+                        <option value="type">Type</option>
+                        <option value="enabled">Status (Enabled First)</option>
+                        <option value="disabled">Status (Disabled First)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="resetSettings()" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> Reset to Default
+            </button>
+            <button type="button" onclick="closeModal('settings-modal')" class="btn btn-primary">
+                <i class="fas fa-check"></i> Done
             </button>
         </div>
     </div>
@@ -982,5 +1042,118 @@ function closeModal(modalId) {
         }
     }
 }
+
+// Settings Functions
+function toggleCompactMode() {
+    const compactMode = document.getElementById('compact-mode').checked;
+    const body = document.body;
+    
+    if (compactMode) {
+        body.classList.add('compact-mode');
+    } else {
+        body.classList.remove('compact-mode');
+    }
+    
+    // Save setting to localStorage
+    localStorage.setItem('compactMode', compactMode);
+    
+    showStatus(`Compact mode ${compactMode ? 'enabled' : 'disabled'}`, 'success');
+}
+
+function applySorting() {
+    const sortBy = document.getElementById('sort-by').value;
+    
+    // Save setting to localStorage
+    localStorage.setItem('sortBy', sortBy);
+    
+    // Apply sorting to both sections
+    sortSection('commands-list', sortBy);
+    sortSection('apps-list', sortBy);
+    
+    showStatus(`Sorted by ${document.getElementById('sort-by').selectedOptions[0].text}`, 'success');
+}
+
+function sortSection(sectionId, sortBy) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    
+    const items = Array.from(section.querySelectorAll('.item'));
+    if (items.length === 0) return;
+    
+    items.sort((a, b) => {
+        switch (sortBy) {
+            case 'name':
+                return a.querySelector('.item-title').textContent.localeCompare(b.querySelector('.item-title').textContent);
+            
+            case 'name-desc':
+                return b.querySelector('.item-title').textContent.localeCompare(a.querySelector('.item-title').textContent);
+            
+            case 'type':
+                const aType = a.querySelector('.item-details div:first-child')?.textContent || '';
+                const bType = b.querySelector('.item-details div:first-child')?.textContent || '';
+                return aType.localeCompare(bType);
+            
+            case 'enabled':
+                const aEnabled = a.querySelector('.toggle-btn').classList.contains('enabled');
+                const bEnabled = b.querySelector('.toggle-btn').classList.contains('enabled');
+                return bEnabled - aEnabled; // Enabled first
+            
+            case 'disabled':
+                const aDisabled = a.querySelector('.toggle-btn').classList.contains('disabled');
+                const bDisabled = b.querySelector('.toggle-btn').classList.contains('disabled');
+                return bDisabled - aDisabled; // Disabled first
+            
+            case 'modified':
+                // For now, we'll sort by name as we don't have modification dates
+                // This could be enhanced later with actual modification data
+                return a.querySelector('.item-title').textContent.localeCompare(b.querySelector('.item-title').textContent);
+            
+            case 'default':
+            default:
+                return 0; // Keep original order
+        }
+    });
+    
+    // Re-append items in sorted order
+    items.forEach(item => section.appendChild(item));
+}
+
+function resetSettings() {
+    // Reset compact mode
+    document.getElementById('compact-mode').checked = false;
+    document.body.classList.remove('compact-mode');
+    
+    // Reset sorting
+    document.getElementById('sort-by').value = 'default';
+    sortSection('commands-list', 'default');
+    sortSection('apps-list', 'default');
+    
+    // Clear localStorage
+    localStorage.removeItem('compactMode');
+    localStorage.removeItem('sortBy');
+    
+    showStatus('Settings reset to default', 'success');
+}
+
+// Load settings on page load
+function loadSettings() {
+    // Load compact mode setting
+    const compactMode = localStorage.getItem('compactMode') === 'true';
+    document.getElementById('compact-mode').checked = compactMode;
+    if (compactMode) {
+        document.body.classList.add('compact-mode');
+    }
+    
+    // Load sorting setting
+    const sortBy = localStorage.getItem('sortBy') || 'default';
+    document.getElementById('sort-by').value = sortBy;
+    if (sortBy !== 'default') {
+        sortSection('commands-list', sortBy);
+        sortSection('apps-list', sortBy);
+    }
+}
+
+// Initialize settings when page loads
+document.addEventListener('DOMContentLoaded', loadSettings);
 </script>
 {% endblock %}
