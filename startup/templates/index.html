@@ -372,14 +372,82 @@ async function copyRegistryPath() {
     const registryPath = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
     
     try {
-        const success = await copyToClipboard(registryPath);
-        if (success) {
+        // Try modern clipboard API first
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(registryPath);
+            showStatus('Registry path copied to clipboard', 'success');
+            return;
+        }
+        
+        // Fallback to older method
+        const textArea = document.createElement('textarea');
+        textArea.value = registryPath;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
             showStatus('Registry path copied to clipboard', 'success');
         } else {
-            showStatus('Failed to copy registry path', 'error');
+            // Final fallback - show the path for manual copying
+            showRegistryPathModal(registryPath);
         }
     } catch (error) {
-        showStatus('Failed to copy registry path', 'error');
+        console.error('Copy failed:', error);
+        // Show the path for manual copying
+        showRegistryPathModal(registryPath);
+    }
+}
+
+function showRegistryPathModal(registryPath) {
+    // Create a temporary modal to show the registry path
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-copy"></i> Registry Path
+                </h2>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="margin: 20px 0;">
+                <p style="margin-bottom: 10px; color: var(--text-secondary);">Copy this registry path manually:</p>
+                <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 6px; font-family: monospace; word-break: break-all; border: 1px solid var(--border);">
+                    ${registryPath}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="selectRegistryText()" class="btn btn-primary">
+                    <i class="fas fa-mouse-pointer"></i> Select Text
+                </button>
+                <button onclick="this.closest('.modal').remove()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    showStatus('Please copy the registry path manually', 'error');
+}
+
+function selectRegistryText() {
+    const textDiv = document.querySelector('.modal.show div[style*="font-family: monospace"]');
+    if (textDiv) {
+        const range = document.createRange();
+        range.selectNodeContents(textDiv);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
     }
 }
 
