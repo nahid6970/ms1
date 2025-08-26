@@ -11,6 +11,10 @@
     <button onclick="copyRegistryPath()" class="btn btn-secondary">
         <i class="fas fa-copy"></i> Copy Registry Path
     </button>
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search items..." onkeyup="filterItems()">
+        <i class="fas fa-search search-icon"></i>
+    </div>
 </div>
 
 <div class="status" id="status"></div>
@@ -550,6 +554,119 @@ function switchTab(tabName) {
         }
         console.log('Active section:', activeSection); // Debug log
     }, 10);
+}
+
+// Search functionality
+function filterItems() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+    const allItems = document.querySelectorAll('.item');
+    let commandsVisible = 0;
+    let appsVisible = 0;
+    
+    allItems.forEach(item => {
+        const itemName = item.querySelector('.item-title').textContent.toLowerCase();
+        const itemPath = item.querySelector('.path').textContent.toLowerCase();
+        const itemArgs = item.querySelector('.item-details div:last-child')?.textContent.toLowerCase() || '';
+        
+        // Check if search term matches name, path, or arguments
+        const matches = itemName.includes(searchTerm) || 
+                       itemPath.includes(searchTerm) || 
+                       itemArgs.includes(searchTerm);
+        
+        if (matches || searchTerm === '') {
+            item.style.display = 'block';
+            item.style.opacity = '1';
+            
+            // Count visible items for each section
+            const section = item.closest('.section');
+            if (section && section.id === 'commands-section') {
+                commandsVisible++;
+            } else if (section && section.id === 'apps-section') {
+                appsVisible++;
+            }
+        } else {
+            item.style.display = 'none';
+            item.style.opacity = '0';
+        }
+    });
+    
+    // Update section titles with filtered counts
+    updateSectionCounts(commandsVisible, appsVisible);
+    
+    // Show empty state if no results
+    showEmptyStateIfNeeded(commandsVisible, appsVisible);
+}
+
+function updateSectionCounts(commandsVisible, appsVisible) {
+    // Update section titles
+    const commandsTitle = document.querySelector('#commands-section .section-title');
+    const appsTitle = document.querySelector('#apps-section .section-title');
+    
+    if (commandsTitle) {
+        commandsTitle.innerHTML = `<i class="fas fa-terminal"></i> Commands (${commandsVisible})`;
+    }
+    
+    if (appsTitle) {
+        appsTitle.innerHTML = `<i class="fas fa-desktop"></i> Applications (${appsVisible})`;
+    }
+    
+    // Update tab buttons if they exist
+    const commandsTab = document.getElementById('commands-tab');
+    const appsTab = document.getElementById('apps-tab');
+    
+    if (commandsTab) {
+        commandsTab.innerHTML = `<i class="fas fa-terminal"></i><span>Commands (${commandsVisible})</span>`;
+    }
+    
+    if (appsTab) {
+        appsTab.innerHTML = `<i class="fas fa-desktop"></i><span>Apps (${appsVisible})</span>`;
+    }
+}
+
+function showEmptyStateIfNeeded(commandsVisible, appsVisible) {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+    
+    if (searchTerm === '') {
+        // Remove any search empty states
+        document.querySelectorAll('.search-empty-state').forEach(el => el.remove());
+        return;
+    }
+    
+    // Handle commands section
+    const commandsList = document.getElementById('commands-list');
+    let commandsEmptyState = commandsList.querySelector('.search-empty-state');
+    
+    if (commandsVisible === 0) {
+        if (!commandsEmptyState) {
+            commandsEmptyState = document.createElement('div');
+            commandsEmptyState.className = 'search-empty-state empty-state';
+            commandsEmptyState.innerHTML = `
+                <i class="fas fa-search"></i>
+                <p>No commands match "${searchTerm}"</p>
+            `;
+            commandsList.appendChild(commandsEmptyState);
+        }
+    } else if (commandsEmptyState) {
+        commandsEmptyState.remove();
+    }
+    
+    // Handle apps section
+    const appsList = document.getElementById('apps-list');
+    let appsEmptyState = appsList.querySelector('.search-empty-state');
+    
+    if (appsVisible === 0) {
+        if (!appsEmptyState) {
+            appsEmptyState = document.createElement('div');
+            appsEmptyState.className = 'search-empty-state empty-state';
+            appsEmptyState.innerHTML = `
+                <i class="fas fa-search"></i>
+                <p>No applications match "${searchTerm}"</p>
+            `;
+            appsList.appendChild(appsEmptyState);
+        }
+    } else if (appsEmptyState) {
+        appsEmptyState.remove();
+    }
 }
 </script>
 {% endblock %}
