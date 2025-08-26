@@ -14,6 +14,9 @@
     <button onclick="copyRegistryPath()" class="btn btn-secondary">
         <i class="fas fa-copy"></i> Copy Registry Path
     </button>
+    <button onclick="deleteMatchingShortcuts()" class="btn btn-danger" id="delete-matching-btn">
+        <i class="fas fa-trash-alt"></i> Delete Matching Shortcuts
+    </button>
     <div class="search-container">
         <input type="text" id="search-input" class="search-input" placeholder="Search items..." onkeyup="filterItems()">
         <i class="fas fa-search search-icon"></i>
@@ -915,6 +918,123 @@ async function addSelectedItems() {
         setTimeout(() => window.location.reload(), 1500);
     } else {
         showStatus(`Failed to add items (${errorCount} errors)`, 'error');
+    }
+}
+
+async function deleteSelectedShortcuts() {
+    const modal = document.getElementById('scan-results-modal');
+    const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
+    
+    if (checkboxes.length === 0) {
+        showStatus('No items selected for deletion', 'error');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete ${checkboxes.length} selected shortcut(s) from the startup folders?`)) {
+        return;
+    }
+    
+    const deleteBtn = modal.querySelector('.btn-danger');
+    const originalText = deleteBtn.innerHTML;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    deleteBtn.disabled = true;
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Get the original scan data
+    const result = await apiCall('/api/scan-startup-folders');
+    const items = result.items;
+    
+    for (let i = 0; i < checkboxes.length; i++) {
+        const checkbox = checkboxes[i];
+        const index = parseInt(checkbox.id.split('-')[1]);
+        const item = items[index];
+        
+        // Only delete if it has an original shortcut path
+        if (item.original_shortcut) {
+            try {
+                const deleteResult = await apiCall('/api/delete-shortcut', 'POST', {
+                    shortcut_path: item.original_shortcut
+                });
+                
+                if (deleteResult.success) {
+                    successCount++;
+                    // Remove the item from the modal display
+                    checkbox.closest('.scan-item').style.opacity = '0.5';
+                    checkbox.disabled = true;
+                } else {
+                    errorCount++;
+                    console.error(`Failed to delete ${item.original_shortcut}:`, deleteResult.error);
+                }
+            } catch (error) {
+                errorCount++;
+                console.error(`Error deleting ${item.original_shortcut}:`, error);
+            }
+        } else {
+            // Skip non-shortcut items
+            console.log(`Skipping ${item.name} - not a shortcut`);
+        }
+    }
+    
+    // Restore button
+    deleteBtn.innerHTML = originalText;
+    deleteBtn.disabled = false;
+    
+    if (successCount > 0) {
+        showStatus(`Successfully deleted ${successCount} shortcut(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
+    } else if (errorCount > 0) {
+        showStatus(`Failed to delete shortcuts (${errorCount} errors)`, 'error');
+    } else {
+        showStatus('No shortcuts to delete (selected items are not shortcuts)', 'info');
+    }
+}
+
+async function deleteMatchingShortcuts() {
+    if (!confirm('This will delete all shortcuts from startup folders that match items already in your startup list. Continue?')) {
+        return;
+    }
+    
+    const deleteBtn = document.getElementById('delete-matching-btn');
+    const originalText = deleteBtn.innerHTML;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    deleteBtn.disabled = true;
+    
+    try {
+        const result = await apiCall('/api/delete-matching-shortcuts', 'POST');
+        
+        if (result.success) {
+            const deletedCount = result.deleted_count;
+            const errorCount = result.error_count;
+            
+            if (deletedCount > 0) {
+                let message = `Successfully deleted ${deletedCount} matching shortcut(s)`;
+                if (errorCount > 0) {
+                    message += ` (${errorCount} errors)`;
+                }
+                showStatus(message, 'success');
+                
+                // Show details of deleted shortcuts
+                if (result.deleted_shortcuts.length > 0) {
+                    console.log('Deleted shortcuts:', result.deleted_shortcuts);
+                }
+            } else if (errorCount > 0) {
+                showStatus(`Failed to delete shortcuts (${errorCount} errors)`, 'error');
+            } else {
+                showStatus('No matching shortcuts found to delete', 'info');
+            }
+            
+            if (result.errors.length > 0) {
+                console.error('Deletion errors:', result.errors);
+            }
+        } else {
+            showStatus(`Error: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error deleting shortcuts: ${error.message}`, 'error');
+    } finally {
+        deleteBtn.innerHTML = originalText;
+        deleteBtn.disabled = false;
     }
 }
 

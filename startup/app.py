@@ -484,5 +484,57 @@ def delete_shortcut():
         print(f"Error deleting shortcut: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/delete-matching-shortcuts', methods=['POST'])
+def delete_matching_shortcuts():
+    """Delete shortcuts from startup folders that match existing items in the startup list"""
+    try:
+        # Get existing startup items
+        existing_items = startup_manager.load_items()
+        existing_names = {item["name"].lower() for item in existing_items}
+        
+        startup_folders = [
+            r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup",
+            r"C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+        ]
+        
+        deleted_shortcuts = []
+        errors = []
+        
+        for folder in startup_folders:
+            try:
+                if os.path.exists(folder):
+                    for filename in os.listdir(folder):
+                        if filename.lower().endswith('.lnk'):
+                            file_path = os.path.join(folder, filename)
+                            name = os.path.splitext(filename)[0]
+                            
+                            # Check if this shortcut matches an existing item
+                            if name.lower() in existing_names:
+                                try:
+                                    os.remove(file_path)
+                                    deleted_shortcuts.append({
+                                        'name': name,
+                                        'path': file_path,
+                                        'folder': os.path.basename(folder)
+                                    })
+                                    print(f"Deleted matching shortcut: {file_path}")
+                                except Exception as e:
+                                    errors.append(f"Failed to delete {file_path}: {str(e)}")
+                                    print(f"Error deleting {file_path}: {e}")
+            except Exception as e:
+                errors.append(f"Error scanning folder {folder}: {str(e)}")
+                print(f"Error scanning folder {folder}: {e}")
+        
+        return jsonify({
+            'success': True,
+            'deleted_shortcuts': deleted_shortcuts,
+            'deleted_count': len(deleted_shortcuts),
+            'errors': errors,
+            'error_count': len(errors)
+        })
+    except Exception as e:
+        print(f"Error in delete_matching_shortcuts: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4999)

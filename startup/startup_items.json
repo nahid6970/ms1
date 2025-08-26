@@ -402,5 +402,14 @@
     ],
     "Command": "",
     "ExecutableType": "other"
+  },
+  {
+    "name": "Jackett",
+    "type": "App",
+    "paths": [
+      "C:\\ProgramData\\Jackett\\JackettTray.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
   }
 ]
