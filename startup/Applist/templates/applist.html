@@ -33,13 +33,13 @@
                             <div class="item-name">
                                 <div class="status-indicators">
                                     {% if app.status.scoop_installed %}
-                                        <i class="fas fa-check status-tick scoop-tick" title="Installed via Scoop"></i>
+                                        <i class="fas fa-check-circle status-check scoop-check" title="Installed via Scoop"></i>
                                     {% endif %}
                                     {% if app.status.winget_installed %}
-                                        <i class="fas fa-check status-tick winget-tick" title="Installed via Winget"></i>
+                                        <i class="fas fa-check-circle status-check winget-check" title="Installed via Winget"></i>
                                     {% endif %}
                                     {% if not app.status.installed %}
-                                        <i class="fas fa-times status-tick not-installed-tick" title="Not Installed"></i>
+                                        <i class="fas fa-circle status-check not-installed-check" title="Not Installed"></i>
                                     {% endif %}
                                 </div>
                                 <span class="item-title {{ 'installed' if app.status.installed else 'not-installed' }}">
@@ -313,38 +313,31 @@
 .status-indicators {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     margin-right: 12px;
 }
 
-.status-tick {
-    font-size: 0.9rem;
-    padding: 2px;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
+.status-check {
+    font-size: 1.1rem;
+    cursor: default;
+    transition: all 0.2s ease;
 }
 
-.scoop-tick {
-    color: #00ff88;
-    background: rgba(0, 255, 136, 0.15);
-    border: 1px solid rgba(0, 255, 136, 0.3);
+.scoop-check {
+    color: var(--success);
 }
 
-.winget-tick {
+.winget-check {
     color: #0078D7;
-    background: rgba(0, 120, 215, 0.15);
-    border: 1px solid rgba(0, 120, 215, 0.3);
 }
 
-.not-installed-tick {
+.not-installed-check {
     color: var(--danger);
-    background: rgba(255, 68, 68, 0.15);
-    border: 1px solid rgba(255, 68, 68, 0.3);
+    opacity: 0.6;
+}
+
+.status-check:hover {
+    transform: scale(1.1);
 }
 
 .item-title.installed {
