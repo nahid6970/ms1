@@ -38,12 +38,13 @@ def check_installation_status(app):
     scoop_installed = os.path.exists(app["scoop_path"]) if app["scoop_path"] else False
     winget_installed = os.path.exists(app["winget_path"]) if app["winget_path"] else False
     
-    if scoop_installed:
-        return {"installed": True, "source": "scoop", "display": "[S]"}
-    elif winget_installed:
-        return {"installed": True, "source": "winget", "display": "[W]"}
-    else:
-        return {"installed": False, "source": None, "display": "[X]"}
+    return {
+        "installed": scoop_installed or winget_installed,
+        "scoop_installed": scoop_installed,
+        "winget_installed": winget_installed,
+        "source": "both" if (scoop_installed and winget_installed) else ("scoop" if scoop_installed else ("winget" if winget_installed else None)),
+        "display": "[S]" if scoop_installed and not winget_installed else "[W]" if winget_installed and not scoop_installed else "[S][W]" if (scoop_installed and winget_installed) else "[X]"
+    }
 
 @app.route('/')
 def index():
