@@ -89,5 +89,16 @@
         "status": "Interested",
         "notes": "",
         "created_date": "2025-08-17T12:54:28.266927"
+    },
+    {
+        "id": 10,
+        "company": "EBL Career",
+        "position": "?",
+        "job_url": "https://ebl.bdjobs.com/EditOptions.asp",
+        "applied_date": "2025-08-26",
+        "deadline": "",
+        "status": "Applied",
+        "notes": "id: 750171\r\npass: 6123009m",
+        "created_date": "2025-08-26T18:01:39.758863"
     }
 ]
