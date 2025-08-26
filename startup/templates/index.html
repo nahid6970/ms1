@@ -65,7 +65,7 @@
                     </div>
                     <div class="item-details">
                         <div><strong>Type:</strong> {{ item.ExecutableType|title }}</div>
-                        <div class="path">{{ item.paths[0] }}</div>
+                        <div><strong>Path:</strong> <span class="path">{{ item.paths[0] }}</span></div>
                         {% if item.Command %}
                         <div><strong>Args:</strong> {{ item.Command }}</div>
                         {% endif %}
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                     <div class="item-details">
-                        <div class="path">{{ item.paths[0] }}</div>
+                        <div><strong>Path:</strong> <span class="path">{{ item.paths[0] }}</span></div>
                         {% if item.Command %}
                         <div><strong>Args:</strong> {{ item.Command }}</div>
                         {% endif %}
