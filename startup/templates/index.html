@@ -787,7 +787,9 @@ function showScanResultsModal(items) {
                         <strong>Folder:</strong> ${item.folder}
                     </div>
                     <div style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace; margin-top: 4px; word-break: break-all;">
-                        ${item.path}
+                        <strong>Target:</strong> ${item.path}
+                        ${item.original_shortcut ? `<br><strong>Shortcut:</strong> ${item.original_shortcut}` : ''}
+                        ${item.command ? `<br><strong>Args:</strong> ${item.command}` : ''}
                     </div>
                 </div>
             </div>
@@ -869,8 +871,8 @@ async function addSelectedItems() {
             name: item.name,
             type: item.type,
             path: item.path,
-            command: '',
-            executable_type: 'other'
+            command: item.command || '',
+            executable_type: item.executable_type || 'other'
         };
         
         try {

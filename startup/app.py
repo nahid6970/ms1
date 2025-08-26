@@ -6,6 +6,14 @@ import subprocess
 import threading
 from datetime import datetime
 
+# Try to import win32com.client, fallback if not available
+try:
+    import win32com.client
+    WIN32_AVAILABLE = True
+except ImportError:
+    WIN32_AVAILABLE = False
+    print("pywin32 not available, shortcuts will not be resolved")
+
 app = Flask(__name__)
 
 class StartupManager:
@@ -272,6 +280,88 @@ def copy_registry_path():
     registry_path = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
     return jsonify({"success": True, "path": registry_path})
 
+def resolve_shortcut_powershell(shortcut_path):
+    """Resolve a .lnk shortcut using PowerShell"""
+    try:
+        # Use PowerShell to resolve the shortcut
+        ps_command = f'''
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut("{shortcut_path}")
+        Write-Output "TARGET:$($shortcut.TargetPath)"
+        Write-Output "ARGS:$($shortcut.Arguments)"
+        Write-Output "WORKDIR:$($shortcut.WorkingDirectory)"
+        '''
+        
+        result = subprocess.run(
+            ["powershell", "-Command", ps_command],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            lines = result.stdout.strip().split('\n')
+            target_path = ""
+            arguments = ""
+            working_dir = ""
+            
+            for line in lines:
+                if line.startswith("TARGET:"):
+                    target_path = line[7:].strip()
+                elif line.startswith("ARGS:"):
+                    arguments = line[5:].strip()
+                elif line.startswith("WORKDIR:"):
+                    working_dir = line[8:].strip()
+            
+            if target_path:
+                # If target path is relative, try to make it absolute using working directory
+                if not os.path.isabs(target_path) and working_dir:
+                    target_path = os.path.join(working_dir, target_path)
+                
+                return {
+                    "target": target_path,
+                    "arguments": arguments,
+                    "working_dir": working_dir
+                }
+        
+        print(f"PowerShell shortcut resolution failed: {result.stderr}")
+        return None
+        
+    except Exception as e:
+        print(f"Error resolving shortcut with PowerShell {shortcut_path}: {e}")
+        return None
+
+def resolve_shortcut(shortcut_path):
+    """Resolve a .lnk shortcut to its target path"""
+    # Try PowerShell method first (more reliable)
+    result = resolve_shortcut_powershell(shortcut_path)
+    if result:
+        return result
+    
+    # Fallback to win32com if available
+    if not WIN32_AVAILABLE:
+        return None
+        
+    try:
+        shell = win32com.client.Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortCut(shortcut_path)
+        target_path = shortcut.Targetpath
+        arguments = shortcut.Arguments
+        working_directory = shortcut.WorkingDirectory
+        
+        # If target path is relative, try to make it absolute using working directory
+        if target_path and not os.path.isabs(target_path) and working_directory:
+            target_path = os.path.join(working_directory, target_path)
+        
+        return {
+            "target": target_path,
+            "arguments": arguments,
+            "working_dir": working_directory
+        }
+    except Exception as e:
+        print(f"Error resolving shortcut {shortcut_path}: {e}")
+        return None
+
 @app.route('/api/scan-startup-folders', methods=['GET'])
 def scan_startup_folders():
     """Scan Windows startup folders for items"""
@@ -287,7 +377,11 @@ def scan_startup_folders():
     for folder in startup_folders:
         try:
             if os.path.exists(folder):
-                for filename in os.listdir(folder):
+                files_in_folder = os.listdir(folder)
+                print(f"Scanning folder: {folder}")
+                print(f"Found {len(files_in_folder)} files: {files_in_folder}")
+                
+                for filename in files_in_folder:
                     file_path = os.path.join(folder, filename)
                     
                     # Skip directories and non-executable files
@@ -296,17 +390,65 @@ def scan_startup_folders():
                         
                         # Check if it's an executable type
                         if ext.lower() in ['.exe', '.bat', '.cmd', '.lnk', '.url']:
+                            print(f"Found executable file: {filename} (type: {ext.lower()})")
                             # Skip if already exists in our items
                             if name.lower() not in existing_names:
-                                item_type = "App" if ext.lower() == '.exe' else "Command"
+                                actual_path = file_path
+                                command_args = ""
+                                executable_type = "other"
+                                original_shortcut = None
                                 
-                                found_items.append({
-                                    "name": name,
-                                    "type": item_type,
-                                    "path": file_path,
-                                    "extension": ext.lower(),
-                                    "folder": "System" if "ProgramData" in folder else "User"
-                                })
+                                # Handle shortcuts
+                                if ext.lower() == '.lnk':
+                                    original_shortcut = file_path
+                                    shortcut_info = resolve_shortcut(file_path)
+                                    
+                                    if shortcut_info and shortcut_info["target"] and os.path.exists(shortcut_info["target"]):
+                                        # Successfully resolved shortcut
+                                        actual_path = shortcut_info["target"]
+                                        command_args = shortcut_info["arguments"] or ""
+                                        
+                                        # Determine executable type based on target
+                                        target_ext = os.path.splitext(actual_path)[1].lower()
+                                        if "python" in actual_path.lower():
+                                            executable_type = "pythonw"
+                                        elif target_ext in ['.ps1'] or "powershell" in actual_path.lower():
+                                            executable_type = "pwsh"
+                                        elif target_ext in ['.bat', '.cmd']:
+                                            executable_type = "cmd"
+                                    else:
+                                        # Fallback: use shortcut path as-is
+                                        print(f"Could not resolve shortcut {file_path}, using as-is")
+                                        actual_path = file_path
+                                        executable_type = "other"
+                                
+                                # Determine item type
+                                if ext.lower() == '.exe' or (ext.lower() == '.lnk' and actual_path.endswith('.exe')):
+                                    item_type = "App"
+                                else:
+                                    item_type = "Command"
+                                
+                                # Add item (check if actual path exists, or use original for shortcuts)
+                                path_to_check = actual_path if ext.lower() != '.lnk' or os.path.exists(actual_path) else file_path
+                                
+                                if os.path.exists(path_to_check):
+                                    found_items.append({
+                                        "name": name,
+                                        "type": item_type,
+                                        "path": actual_path,
+                                        "command": command_args,
+                                        "executable_type": executable_type,
+                                        "extension": ext.lower(),
+                                        "folder": "System" if "ProgramData" in folder else "User",
+                                        "original_shortcut": original_shortcut
+                                    })
+                                    print(f"Added item: {name} -> {actual_path}")
+                                else:
+                                    print(f"Path does not exist: {path_to_check}")
+                            else:
+                                print(f"Item already exists: {name}")
+                        else:
+                            print(f"Skipping non-executable file: {filename}")
         except Exception as e:
             print(f"Error scanning folder {folder}: {e}")
             continue
