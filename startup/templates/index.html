@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1><i class="fas fa-rocket"></i> Startup Manager</h1>
+    <p>Manage your Windows startup applications and commands</p>
+</div>
+
+<div class="controls">
+    <a href="{{ url_for('add_item') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Item
+    </a>
+    <button onclick="refreshItems()" class="btn btn-secondary" id="refresh-btn">
+        <i class="fas fa-sync-alt"></i> Refresh
+    </button>
+    <button onclick="copyRegistryPath()" class="btn btn-secondary">
+        <i class="fas fa-copy"></i> Copy Registry Path
+    </button>
+</div>
+
+<div class="status" id="status"></div>
+
+<div class="sections">
+    <div class="section">
+        <h2 class="section-title">
+            <i class="fas fa-terminal"></i> Commands ({{ commands|length }})
+        </h2>
+        <div id="commands-list">
+            {% if commands %}
+                {% for item in commands %}
+                <div class="item" data-name="{{ item.name }}">
+                    <div class="item-header">
+                        <div class="item-name">
+                            <button class="toggle-btn {{ 'enabled' if item.is_enabled else 'disabled' }}" 
+                                    onclick="toggleStartup('{{ item.name }}', this)">
+                                <i class="fas {{ 'fa-check-circle' if item.is_enabled else 'fa-circle' }}"></i>
+                            </button>
+                            <span class="item-title {{ 'enabled' if item.is_enabled else 'disabled' }}" 
+                                  onclick="launchItem('{{ item.name }}')">
+                                {{ item.name }}
+                            </span>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{{ url_for('edit_item', item_name=item.name) }}" class="btn btn-secondary btn-small">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button onclick="deleteItem('{{ item.name }}')" class="btn btn-danger btn-small">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="item-details">
+                        <div><strong>Type:</strong> {{ item.ExecutableType|title }}</div>
+                        <div class="path">{{ item.paths[0] }}</div>
+                        {% if item.Command %}
+                        <div><strong>Args:</strong> {{ item.Command }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-terminal"></i>
+                    <p>No commands configured</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">
+            <i class="fas fa-desktop"></i> Applications ({{ apps|length }})
+        </h2>
+        <div id="apps-list">
+            {% if apps %}
+                {% for item in apps %}
+                <div class="item" data-name="{{ item.name }}">
+                    <div class="item-header">
+                        <div class="item-name">
+                            <button class="toggle-btn {{ 'enabled' if item.is_enabled else 'disabled' }}" 
+                                    onclick="toggleStartup('{{ item.name }}', this)">
+                                <i class="fas {{ 'fa-check-circle' if item.is_enabled else 'fa-circle' }}"></i>
+                            </button>
+                            <span class="item-title {{ 'enabled' if item.is_enabled else 'disabled' }}" 
+                                  onclick="launchItem('{{ item.name }}')">
+                                {{ item.name }}
+                            </span>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{{ url_for('edit_item', item_name=item.name) }}" class="btn btn-secondary btn-small">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button onclick="deleteItem('{{ item.name }}')" class="btn btn-danger btn-small">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="item-details">
+                        <div class="path">{{ item.paths[0] }}</div>
+                        {% if item.Command %}
+                        <div><strong>Args:</strong> {{ item.Command }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-desktop"></i>
+                    <p>No applications configured</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function toggleStartup(itemName, button) {
+    const item = button.closest('.item');
+    const icon = button.querySelector('i');
+    const title = item.querySelector('.item-title');
+    
+    // Show loading state
+    item.classList.add('loading');
+    icon.className = 'fas fa-spinner fa-spin';
+    
+    try {
+        const result = await apiCall(`/api/toggle/${encodeURIComponent(itemName)}`, 'POST');
+        
+        if (result.success) {
+            const isEnabled = result.action === 'enabled';
+            
+            // Update button state
+            button.className = `toggle-btn ${isEnabled ? 'enabled' : 'disabled'}`;
+            icon.className = `fas ${isEnabled ? 'fa-check-circle' : 'fa-circle'}`;
+            
+            // Update title state
+            title.className = `item-title ${isEnabled ? 'enabled' : 'disabled'}`;
+            
+            showStatus(`${itemName} ${result.action}`, 'success');
+        } else {
+            showStatus(`Failed to toggle ${itemName}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error toggling ${itemName}: ${error.message}`, 'error');
+    } finally {
+        item.classList.remove('loading');
+    }
+}
+
+async function launchItem(itemName) {
+    showStatus(`Launching ${itemName}...`, 'success');
+    
+    try {
+        const result = await apiCall(`/api/launch/${encodeURIComponent(itemName)}`, 'POST');
+        
+        if (result.success) {
+            showStatus(`${itemName} launched successfully`, 'success');
+        } else {
+            showStatus(`Failed to launch ${itemName}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error launching ${itemName}: ${error.message}`, 'error');
+    }
+}
+
+async function deleteItem(itemName) {
+    if (!confirm(`Are you sure you want to delete '${itemName}'?`)) {
+        return;
+    }
+    
+    try {
+        const result = await apiCall(`/api/delete/${encodeURIComponent(itemName)}`, 'DELETE');
+        
+        if (result.success) {
+            // Remove item from DOM
+            const item = document.querySelector(`[data-name="${itemName}"]`);
+            if (item) {
+                item.style.transition = 'all 0.3s ease';
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-20px)';
+                setTimeout(() => item.remove(), 300);
+            }
+            
+            showStatus(`${itemName} deleted successfully`, 'success');
+        } else {
+            showStatus(`Failed to delete ${itemName}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error deleting ${itemName}: ${error.message}`, 'error');
+    }
+}
+
+async function refreshItems() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    const originalText = refreshBtn.innerHTML;
+    
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    refreshBtn.disabled = true;
+    
+    try {
+        // Simple page reload for now - could be made more sophisticated
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    } catch (error) {
+        showStatus(`Error refreshing: ${error.message}`, 'error');
+        refreshBtn.innerHTML = originalText;
+        refreshBtn.disabled = false;
+    }
+}
+
+async function copyRegistryPath() {
+    const registryPath = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+    
+    try {
+        const success = await copyToClipboard(registryPath);
+        if (success) {
+            showStatus('Registry path copied to clipboard', 'success');
+        } else {
+            showStatus('Failed to copy registry path', 'error');
+        }
+    } catch (error) {
+        showStatus('Failed to copy registry path', 'error');
+    }
+}
+</script>
+{% endblock %}
