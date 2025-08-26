@@ -815,8 +815,11 @@ function showScanResultsModal(items) {
                     <button onclick="toggleAllScanItems(true)" class="btn btn-secondary btn-small" style="margin-right: 8px;">
                         <i class="fas fa-check-square"></i> Select All
                     </button>
-                    <button onclick="toggleAllScanItems(false)" class="btn btn-secondary btn-small">
+                    <button onclick="toggleAllScanItems(false)" class="btn btn-secondary btn-small" style="margin-right: 8px;">
                         <i class="fas fa-square"></i> Deselect All
+                    </button>
+                    <button onclick="deleteSelectedShortcuts()" class="btn btn-danger btn-small">
+                        <i class="fas fa-trash"></i> Delete Selected Shortcuts
                     </button>
                 </div>
                 ${itemsHtml}
@@ -879,6 +882,20 @@ async function addSelectedItems() {
             const addResult = await apiCall('/add', 'POST', formData);
             if (addResult.success) {
                 successCount++;
+                
+                // Delete the shortcut after successfully adding it
+                if (item.original_shortcut) {
+                    try {
+                        const deleteResult = await apiCall('/api/delete-shortcut', 'POST', {
+                            shortcut_path: item.original_shortcut
+                        });
+                        if (!deleteResult.success) {
+                            console.warn(`Failed to delete shortcut ${item.original_shortcut}:`, deleteResult.error);
+                        }
+                    } catch (deleteError) {
+                        console.warn(`Error deleting shortcut ${item.original_shortcut}:`, deleteError);
+                    }
+                }
             } else {
                 errorCount++;
                 console.error(`Failed to add ${item.name}:`, addResult.error);
@@ -893,7 +910,7 @@ async function addSelectedItems() {
     closeModal('scan-results-modal');
     
     if (successCount > 0) {
-        showStatus(`Successfully added ${successCount} item(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
+        showStatus(`Successfully added ${successCount} item(s) and deleted shortcuts${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
         // Refresh the page to show new items
         setTimeout(() => window.location.reload(), 1500);
     } else {

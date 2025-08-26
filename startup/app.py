@@ -459,5 +459,30 @@ def scan_startup_folders():
         "count": len(found_items)
     })
 
+@app.route('/api/delete-shortcut', methods=['POST'])
+def delete_shortcut():
+    """Delete a shortcut file from the startup folder"""
+    try:
+        data = request.get_json()
+        shortcut_path = data.get('shortcut_path')
+        
+        if not shortcut_path:
+            return jsonify({'success': False, 'error': 'No shortcut path provided'})
+        
+        if not os.path.exists(shortcut_path):
+            return jsonify({'success': False, 'error': 'Shortcut file not found'})
+        
+        # Delete the shortcut file
+        os.remove(shortcut_path)
+        print(f"Deleted shortcut: {shortcut_path}")
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Successfully deleted shortcut: {os.path.basename(shortcut_path)}'
+        })
+    except Exception as e:
+        print(f"Error deleting shortcut: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4999)

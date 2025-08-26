@@ -384,5 +384,23 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5012_share_images\\share_images.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "KDE Connect",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\KDE Connect\\bin\\kdeconnect-indicator.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Tailscale",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\Tailscale\\tailscale-ipn.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
   }
 ]
