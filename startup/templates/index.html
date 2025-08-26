@@ -20,8 +20,22 @@
 
 <div class="status" id="status"></div>
 
+<!-- Tab Controls (shown on smaller screens) -->
+<div class="tab-controls">
+    <div class="tab-buttons">
+        <button class="tab-button active" onclick="switchTab('commands')" id="commands-tab">
+            <i class="fas fa-terminal"></i>
+            <span>Commands ({{ commands|length }})</span>
+        </button>
+        <button class="tab-button" onclick="switchTab('apps')" id="apps-tab">
+            <i class="fas fa-desktop"></i>
+            <span>Apps ({{ apps|length }})</span>
+        </button>
+    </div>
+</div>
+
 <div class="sections">
-    <div class="section">
+    <div class="section active" id="commands-section">
         <h2 class="section-title">
             <i class="fas fa-terminal"></i> Commands ({{ commands|length }})
         </h2>
@@ -67,7 +81,7 @@
         </div>
     </div>
 
-    <div class="section">
+    <div class="section" id="apps-section">
         <h2 class="section-title">
             <i class="fas fa-desktop"></i> Applications ({{ apps|length }})
         </h2>
@@ -503,6 +517,17 @@ async function saveEditItem() {
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = false;
     }
+}
+
+// Tab switching functionality
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabName + '-tab').classList.add('active');
+    
+    // Update sections
+    document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+    document.getElementById(tabName + '-section').classList.add('active');
 }
 </script>
 {% endblock %}
