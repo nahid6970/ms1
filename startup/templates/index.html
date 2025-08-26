@@ -818,11 +818,8 @@ function showScanResultsModal(items) {
                     <button onclick="toggleAllScanItems(true)" class="btn btn-secondary btn-small" style="margin-right: 8px;">
                         <i class="fas fa-check-square"></i> Select All
                     </button>
-                    <button onclick="toggleAllScanItems(false)" class="btn btn-secondary btn-small" style="margin-right: 8px;">
+                    <button onclick="toggleAllScanItems(false)" class="btn btn-secondary btn-small">
                         <i class="fas fa-square"></i> Deselect All
-                    </button>
-                    <button onclick="deleteSelectedShortcuts()" class="btn btn-danger btn-small">
-                        <i class="fas fa-trash"></i> Delete Selected Shortcuts
                     </button>
                 </div>
                 ${itemsHtml}
@@ -918,75 +915,6 @@ async function addSelectedItems() {
         setTimeout(() => window.location.reload(), 1500);
     } else {
         showStatus(`Failed to add items (${errorCount} errors)`, 'error');
-    }
-}
-
-async function deleteSelectedShortcuts() {
-    const modal = document.getElementById('scan-results-modal');
-    const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
-    
-    if (checkboxes.length === 0) {
-        showStatus('No items selected for deletion', 'error');
-        return;
-    }
-    
-    if (!confirm(`Are you sure you want to delete ${checkboxes.length} selected shortcut(s) from the startup folders?`)) {
-        return;
-    }
-    
-    const deleteBtn = modal.querySelector('.btn-danger');
-    const originalText = deleteBtn.innerHTML;
-    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
-    deleteBtn.disabled = true;
-    
-    let successCount = 0;
-    let errorCount = 0;
-    
-    // Get the original scan data
-    const result = await apiCall('/api/scan-startup-folders');
-    const items = result.items;
-    
-    for (let i = 0; i < checkboxes.length; i++) {
-        const checkbox = checkboxes[i];
-        const index = parseInt(checkbox.id.split('-')[1]);
-        const item = items[index];
-        
-        // Only delete if it has an original shortcut path
-        if (item.original_shortcut) {
-            try {
-                const deleteResult = await apiCall('/api/delete-shortcut', 'POST', {
-                    shortcut_path: item.original_shortcut
-                });
-                
-                if (deleteResult.success) {
-                    successCount++;
-                    // Remove the item from the modal display
-                    checkbox.closest('.scan-item').style.opacity = '0.5';
-                    checkbox.disabled = true;
-                } else {
-                    errorCount++;
-                    console.error(`Failed to delete ${item.original_shortcut}:`, deleteResult.error);
-                }
-            } catch (error) {
-                errorCount++;
-                console.error(`Error deleting ${item.original_shortcut}:`, error);
-            }
-        } else {
-            // Skip non-shortcut items
-            console.log(`Skipping ${item.name} - not a shortcut`);
-        }
-    }
-    
-    // Restore button
-    deleteBtn.innerHTML = originalText;
-    deleteBtn.disabled = false;
-    
-    if (successCount > 0) {
-        showStatus(`Successfully deleted ${successCount} shortcut(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
-    } else if (errorCount > 0) {
-        showStatus(`Failed to delete shortcuts (${errorCount} errors)`, 'error');
-    } else {
-        showStatus('No shortcuts to delete (selected items are not shortcuts)', 'info');
     }
 }
 
