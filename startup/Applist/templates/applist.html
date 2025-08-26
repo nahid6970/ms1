@@ -235,20 +235,35 @@
 
 {% block scripts %}
 <style>
-/* Fix spacing issues */
+/* Fix spacing issues and center everything */
 .container {
     padding: 10px 20px !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
 }
 
 .controls {
     margin: 0 0 10px 0 !important;
     padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 .sections {
     margin: 0 !important;
     padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+.section {
+    max-width: 1200px !important;
+    width: 100% !important;
 }
 
 .status-indicator {

@@ -95,14 +95,16 @@ def install_app(app_name):
             else:
                 return jsonify({"success": False, "error": "No installation method available"})
         
-        # Run installation in background
+        # Run installation in new terminal window
         def run_install():
-            subprocess.Popen(cmd, shell=True)
+            # Create a new terminal window to show the output
+            terminal_cmd = f'start "Installing {app_name}" cmd /k "{cmd}"'
+            subprocess.Popen(terminal_cmd, shell=True)
         
         thread = threading.Thread(target=run_install)
         thread.start()
         
-        return jsonify({"success": True, "message": f"Installing {app_name} via {source}"})
+        return jsonify({"success": True, "message": f"Installing {app_name} via {source} in new terminal"})
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -136,14 +138,16 @@ def uninstall_app(app_name):
             else:
                 return jsonify({"success": False, "error": "Application not installed"})
         
-        # Run uninstallation in background
+        # Run uninstallation in new terminal window
         def run_uninstall():
-            subprocess.Popen(cmd, shell=True)
+            # Create a new terminal window to show the output
+            terminal_cmd = f'start "Uninstalling {app_name}" cmd /k "{cmd}"'
+            subprocess.Popen(terminal_cmd, shell=True)
         
         thread = threading.Thread(target=run_uninstall)
         thread.start()
         
-        return jsonify({"success": True, "message": f"Uninstalling {app_name} via {source}"})
+        return jsonify({"success": True, "message": f"Uninstalling {app_name} via {source} in new terminal"})
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
