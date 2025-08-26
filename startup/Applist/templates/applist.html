@@ -221,7 +221,7 @@
             </button>
         </div>
         
-        <div id="source-options" style="padding: 20px 0;">
+        <div id="source-options" style="padding: 20px 0; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
             <!-- Source options will be populated by JavaScript -->
         </div>
     </div>
@@ -468,7 +468,6 @@ function showSourceModal(sources) {
         button.className = 'btn btn-primary';
         button.style.backgroundColor = source.color;
         button.style.color = source.color === '#FFFFFF' ? '#000000' : '#FFFFFF';
-        button.style.margin = '5px';
         button.innerHTML = `<i class="fas fa-${source.name === 'scoop' ? 'cube' : 'box'}"></i> ${source.label}`;
         button.onclick = () => {
             closeModal('source-modal');
@@ -704,6 +703,51 @@ document.addEventListener('DOMContentLoaded', function() {
             event.stopPropagation();
         }
     });
+    
+    // Restore scroll position after page load
+    restoreScrollPosition();
+});
+
+// Save scroll position before page unload
+window.addEventListener('beforeunload', function() {
+    saveScrollPosition();
+});
+
+// Save scroll position to localStorage
+function saveScrollPosition() {
+    const sectionContent = document.querySelector('.section-content');
+    if (sectionContent) {
+        const scrollTop = sectionContent.scrollTop;
+        localStorage.setItem('applist_scroll_position', scrollTop.toString());
+    }
+}
+
+// Restore scroll position from localStorage
+function restoreScrollPosition() {
+    const savedScrollTop = localStorage.getItem('applist_scroll_position');
+    if (savedScrollTop !== null) {
+        // Use setTimeout to ensure the page is fully rendered
+        setTimeout(() => {
+            const sectionContent = document.querySelector('.section-content');
+            if (sectionContent) {
+                sectionContent.scrollTop = parseInt(savedScrollTop, 10);
+                // Clear the saved position after restoring
+                localStorage.removeItem('applist_scroll_position');
+            }
+        }, 100);
+    }
+}
+
+// Also save scroll position periodically while scrolling in the section
+let scrollTimeout;
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionContent = document.querySelector('.section-content');
+    if (sectionContent) {
+        sectionContent.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(saveScrollPosition, 150);
+        });
+    }
 });
 </script>
 {% endblock %}
