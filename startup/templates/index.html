@@ -520,13 +520,36 @@ async function saveEditItem() {
 
 // Tab switching functionality
 function switchTab(tabName) {
+    console.log('Switching to tab:', tabName); // Debug log
+    
     // Update tab buttons
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName + '-tab').classList.add('active');
+    const activeTab = document.getElementById(tabName + '-tab');
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
     
-    // Update sections
-    document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
-    document.getElementById(tabName + '-section').classList.add('active');
+    // Update sections - be very explicit about hiding/showing
+    const allSections = document.querySelectorAll('.section');
+    allSections.forEach(section => {
+        section.classList.remove('active');
+        section.style.display = 'none';
+        section.style.visibility = 'hidden';
+        section.style.opacity = '0';
+    });
+    
+    // Small delay to ensure hiding is complete
+    setTimeout(() => {
+        // Show only the selected section
+        const activeSection = document.getElementById(tabName + '-section');
+        if (activeSection) {
+            activeSection.classList.add('active');
+            activeSection.style.display = 'block';
+            activeSection.style.visibility = 'visible';
+            activeSection.style.opacity = '1';
+        }
+        console.log('Active section:', activeSection); // Debug log
+    }, 10);
 }
 </script>
 {% endblock %}

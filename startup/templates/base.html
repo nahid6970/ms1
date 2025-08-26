@@ -141,9 +141,13 @@
         }
 
         .sections {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 24px;
+            align-items: flex-start;
+        }
+        
+        .sections > .section {
+            flex: 1;
         }
 
         /* Tab System for smaller screens */
@@ -189,7 +193,7 @@
 
         @media (max-width: 1024px) {
             .sections {
-                grid-template-columns: 1fr;
+                flex-direction: column;
             }
             
             .tab-controls {
@@ -197,11 +201,23 @@
             }
             
             .section {
-                display: none;
+                display: none !important;
+                max-height: none;
+                flex-direction: initial;
+                position: relative;
+                z-index: 1;
             }
             
             .section.active {
-                display: block;
+                display: block !important;
+                z-index: 2;
+            }
+            
+            .section-content {
+                overflow-y: visible;
+                max-height: none;
+                flex: none;
+                padding-right: 0;
             }
         }
 
@@ -214,12 +230,15 @@
             display: flex;
             flex-direction: column;
             max-height: 85vh;
+            min-height: 200px;
+            width: 100%;
         }
 
         .section-content {
             flex: 1;
             overflow-y: auto;
             padding-right: 8px;
+            contain: layout;
         }
 
         /* Custom scrollbar styling */
