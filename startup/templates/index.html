@@ -14,7 +14,8 @@
     <button onclick="copyRegistryPath()" class="btn btn-secondary" title="Copy Registry Path">
         <i class="fas fa-copy"></i>
     </button>
-    <button onclick="deleteMatchingShortcuts()" class="btn btn-danger" id="delete-matching-btn" title="Delete Matching Files">
+    <button onclick="deleteMatchingShortcuts()" class="btn btn-danger" id="delete-matching-btn"
+        title="Delete Matching Files">
         <i class="fas fa-trash-alt"></i>
     </button>
     <button onclick="openModal('settings-modal')" class="btn btn-secondary" title="Settings">
@@ -45,21 +46,22 @@
 <div class="sections">
     <div class="section active" id="commands-section">
         <h2 class="section-title">
-            <i class="fas fa-terminal"></i> Commands ({{ commands|selectattr('is_enabled')|list|length }}/{{ commands|length }})
+            <i class="fas fa-terminal"></i> Commands ({{ commands|selectattr('is_enabled')|list|length }}/{{
+            commands|length }})
         </h2>
         <div class="section-content">
             <div id="commands-list">
-            {% if commands %}
+                {% if commands %}
                 {% for item in commands %}
                 <div class="item" data-name="{{ item.name }}">
                     <div class="item-header">
                         <div class="item-name">
-                            <button class="toggle-btn {{ 'enabled' if item.is_enabled else 'disabled' }}" 
-                                    onclick="toggleStartup('{{ item.name }}', this)">
+                            <button class="toggle-btn {{ 'enabled' if item.is_enabled else 'disabled' }}"
+                                onclick="toggleStartup('{{ item.name }}', this)">
                                 <i class="fas {{ 'fa-check-circle' if item.is_enabled else 'fa-circle' }}"></i>
                             </button>
-                            <span class="item-title {{ 'enabled' if item.is_enabled else 'disabled' }}" 
-                                  onclick="launchItem('{{ item.name }}')">
+                            <span class="item-title {{ 'enabled' if item.is_enabled else 'disabled' }}"
+                                onclick="launchItem('{{ item.name }}')">
                                 {{ item.name }}
                             </span>
                         </div>
@@ -81,33 +83,34 @@
                     </div>
                 </div>
                 {% endfor %}
-            {% else %}
+                {% else %}
                 <div class="empty-state">
                     <i class="fas fa-terminal"></i>
                     <p>No commands configured</p>
                 </div>
-            {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>
 
     <div class="section" id="apps-section">
         <h2 class="section-title">
-            <i class="fas fa-desktop"></i> Applications ({{ apps|selectattr('is_enabled')|list|length }}/{{ apps|length }})
+            <i class="fas fa-desktop"></i> Applications ({{ apps|selectattr('is_enabled')|list|length }}/{{ apps|length
+            }})
         </h2>
         <div class="section-content">
             <div id="apps-list">
-            {% if apps %}
+                {% if apps %}
                 {% for item in apps %}
                 <div class="item" data-name="{{ item.name }}">
                     <div class="item-header">
                         <div class="item-name">
-                            <button class="toggle-btn {{ 'enabled' if item.is_enabled else 'disabled' }}" 
-                                    onclick="toggleStartup('{{ item.name }}', this)">
+                            <button class="toggle-btn {{ 'enabled' if item.is_enabled else 'disabled' }}"
+                                onclick="toggleStartup('{{ item.name }}', this)">
                                 <i class="fas {{ 'fa-check-circle' if item.is_enabled else 'fa-circle' }}"></i>
                             </button>
-                            <span class="item-title {{ 'enabled' if item.is_enabled else 'disabled' }}" 
-                                  onclick="launchItem('{{ item.name }}')">
+                            <span class="item-title {{ 'enabled' if item.is_enabled else 'disabled' }}"
+                                onclick="launchItem('{{ item.name }}')">
                                 {{ item.name }}
                             </span>
                         </div>
@@ -128,12 +131,12 @@
                     </div>
                 </div>
                 {% endfor %}
-            {% else %}
+                {% else %}
                 <div class="empty-state">
                     <i class="fas fa-desktop"></i>
                     <p>No applications configured</p>
                 </div>
-            {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -150,7 +153,7 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <form id="add-form">
             <div class="form-group">
                 <label class="form-label" for="add-name">
@@ -194,10 +197,11 @@
                 <label class="form-label" for="add-command">
                     <i class="fas fa-terminal"></i> Arguments/Command
                 </label>
-                <input type="text" id="add-command" class="form-input" placeholder="Enter command line arguments (optional)">
+                <input type="text" id="add-command" class="form-input"
+                    placeholder="Enter command line arguments (optional)">
             </div>
         </form>
-        
+
         <div class="modal-footer">
             <button type="button" onclick="saveNewItem()" class="btn btn-primary">
                 <i class="fas fa-save"></i> Save Item
@@ -220,10 +224,10 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <form id="edit-form">
             <input type="hidden" id="edit-original-name">
-            
+
             <div class="form-group">
                 <label class="form-label" for="edit-name">
                     <i class="fas fa-tag"></i> Name *
@@ -266,10 +270,11 @@
                 <label class="form-label" for="edit-command">
                     <i class="fas fa-terminal"></i> Arguments/Command
                 </label>
-                <input type="text" id="edit-command" class="form-input" placeholder="Enter command line arguments (optional)">
+                <input type="text" id="edit-command" class="form-input"
+                    placeholder="Enter command line arguments (optional)">
             </div>
         </form>
-        
+
         <div class="modal-footer">
             <button type="button" onclick="saveEditItem()" class="btn btn-primary">
                 <i class="fas fa-save"></i> Update Item
@@ -292,7 +297,7 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <div class="settings-content">
             <div class="setting-group">
                 <h3 class="setting-title">
@@ -304,10 +309,11 @@
                         <span class="checkmark"></span>
                         Compact Mode
                     </label>
-                    <p class="setting-description">Hide detailed information (type, path, arguments) and show only essential controls</p>
+                    <p class="setting-description">Hide detailed information (type, path, arguments) and show only
+                        essential controls</p>
                 </div>
             </div>
-            
+
             <div class="setting-group">
                 <h3 class="setting-title">
                     <i class="fas fa-sort"></i> Sorting Options
@@ -326,7 +332,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="modal-footer">
             <button type="button" onclick="resetSettings()" class="btn btn-secondary">
                 <i class="fas fa-undo"></i> Reset to Default
@@ -341,148 +347,148 @@
 
 {% block scripts %}
 <script>
-async function toggleStartup(itemName, button) {
-    const item = button.closest('.item');
-    const icon = button.querySelector('i');
-    const title = item.querySelector('.item-title');
-    
-    // Show loading state
-    item.classList.add('loading');
-    icon.className = 'fas fa-spinner fa-spin';
-    
-    try {
-        const result = await apiCall(`/api/toggle/${encodeURIComponent(itemName)}`, 'POST');
-        
-        if (result.success) {
-            const isEnabled = result.action === 'enabled';
-            
-            // Update button state
-            button.className = `toggle-btn ${isEnabled ? 'enabled' : 'disabled'}`;
-            icon.className = `fas ${isEnabled ? 'fa-check-circle' : 'fa-circle'}`;
-            
-            // Update title state
-            title.className = `item-title ${isEnabled ? 'enabled' : 'disabled'}`;
-            
-            // Show appropriate toast color based on action
-            const toastType = isEnabled ? 'success' : 'error';
-            showStatus(`${itemName} ${result.action}`, toastType);
-            
-            // Update counts after toggle
-            updateCountsAfterChange();
-        } else {
-            showStatus(`Failed to toggle ${itemName}: ${result.error}`, 'error');
-        }
-    } catch (error) {
-        showStatus(`Error toggling ${itemName}: ${error.message}`, 'error');
-    } finally {
-        item.classList.remove('loading');
-    }
-}
+    async function toggleStartup(itemName, button) {
+        const item = button.closest('.item');
+        const icon = button.querySelector('i');
+        const title = item.querySelector('.item-title');
 
-async function launchItem(itemName) {
-    showStatus(`Launching ${itemName}...`, 'success');
-    
-    try {
-        const result = await apiCall(`/api/launch/${encodeURIComponent(itemName)}`, 'POST');
-        
-        if (result.success) {
-            showStatus(`${itemName} launched successfully`, 'success');
-        } else {
-            showStatus(`Failed to launch ${itemName}: ${result.error}`, 'error');
-        }
-    } catch (error) {
-        showStatus(`Error launching ${itemName}: ${error.message}`, 'error');
-    }
-}
+        // Show loading state
+        item.classList.add('loading');
+        icon.className = 'fas fa-spinner fa-spin';
 
-async function deleteItem(itemName) {
-    if (!confirm(`Are you sure you want to delete '${itemName}'?`)) {
-        return;
-    }
-    
-    try {
-        const result = await apiCall(`/api/delete/${encodeURIComponent(itemName)}`, 'DELETE');
-        
-        if (result.success) {
-            // Remove item from DOM
-            const item = document.querySelector(`[data-name="${itemName}"]`);
-            if (item) {
-                item.style.transition = 'all 0.3s ease';
-                item.style.opacity = '0';
-                item.style.transform = 'translateX(-20px)';
-                setTimeout(() => item.remove(), 300);
+        try {
+            const result = await apiCall(`/api/toggle/${encodeURIComponent(itemName)}`, 'POST');
+
+            if (result.success) {
+                const isEnabled = result.action === 'enabled';
+
+                // Update button state
+                button.className = `toggle-btn ${isEnabled ? 'enabled' : 'disabled'}`;
+                icon.className = `fas ${isEnabled ? 'fa-check-circle' : 'fa-circle'}`;
+
+                // Update title state
+                title.className = `item-title ${isEnabled ? 'enabled' : 'disabled'}`;
+
+                // Show appropriate toast color based on action
+                const toastType = isEnabled ? 'success' : 'error';
+                showStatus(`${itemName} ${result.action}`, toastType);
+
+                // Update counts after toggle
+                updateCountsAfterChange();
+            } else {
+                showStatus(`Failed to toggle ${itemName}: ${result.error}`, 'error');
             }
-            
-            showStatus(`${itemName} deleted successfully`, 'success');
-        } else {
-            showStatus(`Failed to delete ${itemName}: ${result.error}`, 'error');
+        } catch (error) {
+            showStatus(`Error toggling ${itemName}: ${error.message}`, 'error');
+        } finally {
+            item.classList.remove('loading');
         }
-    } catch (error) {
-        showStatus(`Error deleting ${itemName}: ${error.message}`, 'error');
     }
-}
 
-async function refreshItems() {
-    const refreshBtn = document.getElementById('refresh-btn');
-    const originalText = refreshBtn.innerHTML;
-    
-    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-    refreshBtn.disabled = true;
-    
-    try {
-        // Refresh items without page reload
-        setTimeout(() => {
-            refreshItems();
-        }, 500);
-    } catch (error) {
-        showStatus(`Error refreshing: ${error.message}`, 'error');
-        refreshBtn.innerHTML = originalText;
-        refreshBtn.disabled = false;
+    async function launchItem(itemName) {
+        showStatus(`Launching ${itemName}...`, 'success');
+
+        try {
+            const result = await apiCall(`/api/launch/${encodeURIComponent(itemName)}`, 'POST');
+
+            if (result.success) {
+                showStatus(`${itemName} launched successfully`, 'success');
+            } else {
+                showStatus(`Failed to launch ${itemName}: ${result.error}`, 'error');
+            }
+        } catch (error) {
+            showStatus(`Error launching ${itemName}: ${error.message}`, 'error');
+        }
     }
-}
 
-async function copyRegistryPath() {
-    const registryPath = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-    
-    try {
-        // Try modern clipboard API first
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(registryPath);
-            showStatus('Registry path copied to clipboard', 'success');
+    async function deleteItem(itemName) {
+        if (!confirm(`Are you sure you want to delete '${itemName}'?`)) {
             return;
         }
-        
-        // Fallback to older method
-        const textArea = document.createElement('textarea');
-        textArea.value = registryPath;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        
-        if (successful) {
-            showStatus('Registry path copied to clipboard', 'success');
-        } else {
-            // Final fallback - show the path for manual copying
+
+        try {
+            const result = await apiCall(`/api/delete/${encodeURIComponent(itemName)}`, 'DELETE');
+
+            if (result.success) {
+                // Remove item from DOM
+                const item = document.querySelector(`[data-name="${itemName}"]`);
+                if (item) {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(-20px)';
+                    setTimeout(() => item.remove(), 300);
+                }
+
+                showStatus(`${itemName} deleted successfully`, 'success');
+            } else {
+                showStatus(`Failed to delete ${itemName}: ${result.error}`, 'error');
+            }
+        } catch (error) {
+            showStatus(`Error deleting ${itemName}: ${error.message}`, 'error');
+        }
+    }
+
+    async function refreshItems() {
+        const refreshBtn = document.getElementById('refresh-btn');
+        const originalText = refreshBtn.innerHTML;
+
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+        refreshBtn.disabled = true;
+
+        try {
+            // Refresh items without page reload
+            setTimeout(() => {
+                refreshItems();
+            }, 500);
+        } catch (error) {
+            showStatus(`Error refreshing: ${error.message}`, 'error');
+            refreshBtn.innerHTML = originalText;
+            refreshBtn.disabled = false;
+        }
+    }
+
+    async function copyRegistryPath() {
+        const registryPath = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+
+        try {
+            // Try modern clipboard API first
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(registryPath);
+                showStatus('Registry path copied to clipboard', 'success');
+                return;
+            }
+
+            // Fallback to older method
+            const textArea = document.createElement('textarea');
+            textArea.value = registryPath;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            if (successful) {
+                showStatus('Registry path copied to clipboard', 'success');
+            } else {
+                // Final fallback - show the path for manual copying
+                showRegistryPathModal(registryPath);
+            }
+        } catch (error) {
+            console.error('Copy failed:', error);
+            // Show the path for manual copying
             showRegistryPathModal(registryPath);
         }
-    } catch (error) {
-        console.error('Copy failed:', error);
-        // Show the path for manual copying
-        showRegistryPathModal(registryPath);
     }
-}
 
-function showRegistryPathModal(registryPath) {
-    // Create a temporary modal to show the registry path
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.innerHTML = `
+    function showRegistryPathModal(registryPath) {
+        // Create a temporary modal to show the registry path
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.innerHTML = `
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h2 class="modal-title">
@@ -508,392 +514,425 @@ function showRegistryPathModal(registryPath) {
             </div>
         </div>
     `;
-    
-    document.body.appendChild(modal);
-    showStatus('Please copy the registry path manually', 'error');
-}
 
-function selectRegistryText() {
-    const textDiv = document.querySelector('.modal.show div[style*="font-family: monospace"]');
-    if (textDiv) {
-        const range = document.createRange();
-        range.selectNodeContents(textDiv);
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
+        document.body.appendChild(modal);
+        showStatus('Please copy the registry path manually', 'error');
     }
-}
 
-// Modal functions
-const commonPaths = {
-    pythonw: "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe",
-    pwsh: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    cmd: "C:\\Windows\\System32\\cmd.exe",
-    powershell: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    ahk_v2: "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
-};
-
-function updateAddPathPlaceholder() {
-    const executableType = document.getElementById('add-executable-type').value;
-    const pathInput = document.getElementById('add-path');
-    
-    if (commonPaths[executableType]) {
-        pathInput.value = commonPaths[executableType];
-        pathInput.placeholder = commonPaths[executableType];
-    } else {
-        pathInput.placeholder = "Enter executable path";
-    }
-}
-
-function updateEditPathPlaceholder() {
-    const executableType = document.getElementById('edit-executable-type').value;
-    const pathInput = document.getElementById('edit-path');
-    
-    if (commonPaths[executableType] && !pathInput.value) {
-        pathInput.value = commonPaths[executableType];
-    }
-}
-
-async function saveNewItem() {
-    const formData = {
-        name: document.getElementById('add-name').value.trim(),
-        type: document.getElementById('add-type').value,
-        path: document.getElementById('add-path').value.trim(),
-        command: document.getElementById('add-command').value.trim(),
-        executable_type: document.getElementById('add-executable-type').value
-    };
-    
-    // Validate required fields
-    if (!formData.name || !formData.path) {
-        showStatus('Name and Path are required fields', 'error');
-        return;
-    }
-    
-    // Show loading state
-    const saveBtn = document.querySelector('#add-modal .btn-primary');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-    saveBtn.disabled = true;
-    
-    try {
-        const result = await apiCall('/add', 'POST', formData);
-        
-        if (result.success) {
-            showStatus('Item added successfully!', 'success');
-            closeModal('add-modal');
-            // Clear form
-            document.getElementById('add-form').reset();
-            updateAddPathPlaceholder();
-            // Refresh items without page reload
-            setTimeout(() => refreshItems(), 1000);
-        } else {
-            showStatus(`Failed to add item: ${result.error}`, 'error');
+    function selectRegistryText() {
+        const textDiv = document.querySelector('.modal.show div[style*="font-family: monospace"]');
+        if (textDiv) {
+            const range = document.createRange();
+            range.selectNodeContents(textDiv);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
         }
-    } catch (error) {
-        showStatus(`Error adding item: ${error.message}`, 'error');
-    } finally {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
     }
-}
 
-async function openEditModal(itemName) {
-    try {
-        // Get item data
-        const items = await apiCall('/api/items');
-        const item = items.find(i => i.name === itemName);
-        
-        if (!item) {
-            showStatus('Item not found', 'error');
+    // Modal functions
+    const commonPaths = {
+        pythonw: "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe",
+        pwsh: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        cmd: "C:\\Windows\\System32\\cmd.exe",
+        powershell: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        ahk_v2: "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
+    };
+
+    function updateAddPathPlaceholder() {
+        const executableType = document.getElementById('add-executable-type').value;
+        const pathInput = document.getElementById('add-path');
+
+        if (commonPaths[executableType]) {
+            pathInput.value = commonPaths[executableType];
+            pathInput.placeholder = commonPaths[executableType];
+        } else {
+            pathInput.placeholder = "Enter executable path";
+        }
+    }
+
+    function updateEditPathPlaceholder() {
+        const executableType = document.getElementById('edit-executable-type').value;
+        const pathInput = document.getElementById('edit-path');
+
+        if (commonPaths[executableType] && !pathInput.value) {
+            pathInput.value = commonPaths[executableType];
+        }
+    }
+
+    async function saveNewItem() {
+        const formData = {
+            name: document.getElementById('add-name').value.trim(),
+            type: document.getElementById('add-type').value,
+            path: document.getElementById('add-path').value.trim(),
+            command: document.getElementById('add-command').value.trim(),
+            executable_type: document.getElementById('add-executable-type').value
+        };
+
+        // Validate required fields
+        if (!formData.name || !formData.path) {
+            showStatus('Name and Path are required fields', 'error');
             return;
         }
-        
-        // Populate form
-        document.getElementById('edit-original-name').value = item.name;
-        document.getElementById('edit-name').value = item.name;
-        document.getElementById('edit-type').value = item.type;
-        document.getElementById('edit-executable-type').value = item.ExecutableType || 'other';
-        document.getElementById('edit-path').value = item.paths[0];
-        document.getElementById('edit-command').value = item.Command || '';
-        
-        // Open modal
-        openModal('edit-modal');
-    } catch (error) {
-        showStatus(`Error loading item data: ${error.message}`, 'error');
-    }
-}
 
-async function saveEditItem() {
-    const originalName = document.getElementById('edit-original-name').value;
-    const formData = {
-        name: document.getElementById('edit-name').value.trim(),
-        type: document.getElementById('edit-type').value,
-        path: document.getElementById('edit-path').value.trim(),
-        command: document.getElementById('edit-command').value.trim(),
-        executable_type: document.getElementById('edit-executable-type').value
-    };
-    
-    // Validate required fields
-    if (!formData.name || !formData.path) {
-        showStatus('Name and Path are required fields', 'error');
-        return;
-    }
-    
-    // Show loading state
-    const saveBtn = document.querySelector('#edit-modal .btn-primary');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-    saveBtn.disabled = true;
-    
-    try {
-        const result = await apiCall(`/edit/${encodeURIComponent(originalName)}`, 'POST', formData);
-        
-        if (result.success) {
-            showStatus('Item updated successfully!', 'success');
-            closeModal('edit-modal');
-            // Refresh items without page reload
-            setTimeout(() => refreshItems(), 1000);
-        } else {
-            showStatus(`Failed to update item: ${result.error}`, 'error');
-        }
-    } catch (error) {
-        showStatus(`Error updating item: ${error.message}`, 'error');
-    } finally {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
-    }
-}
+        // Show loading state
+        const saveBtn = document.querySelector('#add-modal .btn-primary');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
 
-// Tab switching functionality
-function switchTab(tabName) {
-    console.log('Switching to tab:', tabName); // Debug log
-    
-    // Update tab buttons
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    const activeTab = document.getElementById(tabName + '-tab');
-    if (activeTab) {
-        activeTab.classList.add('active');
-    }
-    
-    // Get the sections container and both sections
-    const sectionsContainer = document.querySelector('.sections');
-    const commandsSection = document.getElementById('commands-section');
-    const appsSection = document.getElementById('apps-section');
-    
-    if (!sectionsContainer || !commandsSection || !appsSection) return;
-    
-    // Show both sections
-    const allSections = document.querySelectorAll('.section');
-    allSections.forEach(section => {
-        section.style.display = 'block';
-        section.style.visibility = 'visible';
-        section.style.opacity = '1';
-        section.classList.remove('active');
-    });
-    
-    // Mark the active section
-    const activeSection = document.getElementById(tabName + '-section');
-    if (activeSection) {
-        activeSection.classList.add('active');
-    }
-    
-    // Reorder sections: active section first, then the other
-    if (tabName === 'commands') {
-        sectionsContainer.appendChild(commandsSection);
-        sectionsContainer.appendChild(appsSection);
-    } else if (tabName === 'apps') {
-        sectionsContainer.appendChild(appsSection);
-        sectionsContainer.appendChild(commandsSection);
-    }
-    
-    console.log('Active section:', activeSection); // Debug log
-}
+        try {
+            const result = await apiCall('/add', 'POST', formData);
 
-// Search functionality
-function filterItems() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
-    const allItems = document.querySelectorAll('.item');
-    let commandsVisible = 0;
-    let appsVisible = 0;
-    
-    allItems.forEach(item => {
-        const itemName = item.querySelector('.item-title').textContent.toLowerCase();
-        const itemPath = item.querySelector('.path').textContent.toLowerCase();
-        const itemArgs = item.querySelector('.item-details div:last-child')?.textContent.toLowerCase() || '';
-        
-        // Check if search term matches name, path, or arguments
-        const matches = itemName.includes(searchTerm) || 
-                       itemPath.includes(searchTerm) || 
-                       itemArgs.includes(searchTerm);
-        
-        if (matches || searchTerm === '') {
-            item.style.display = 'block';
-            item.style.opacity = '1';
-            
-            // Count visible items for each section
-            const section = item.closest('.section');
-            if (section && section.id === 'commands-section') {
-                commandsVisible++;
-            } else if (section && section.id === 'apps-section') {
-                appsVisible++;
+            if (result.success) {
+                showStatus('Item added successfully!', 'success');
+                closeModal('add-modal');
+                // Clear form
+                document.getElementById('add-form').reset();
+                updateAddPathPlaceholder();
+                // Refresh items without page reload
+                setTimeout(() => refreshItems(), 1000);
+            } else {
+                showStatus(`Failed to add item: ${result.error}`, 'error');
             }
-        } else {
-            item.style.display = 'none';
-            item.style.opacity = '0';
+        } catch (error) {
+            showStatus(`Error adding item: ${error.message}`, 'error');
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
         }
-    });
-    
-    // Update section titles with filtered counts
-    updateSectionCounts(commandsVisible, appsVisible);
-    
-    // Show empty state if no results
-    showEmptyStateIfNeeded(commandsVisible, appsVisible);
-}
+    }
 
-function updateSectionCounts(commandsVisible, appsVisible) {
-    // Calculate enabled counts for visible items
-    const commandsEnabled = getEnabledCount('#commands-section', commandsVisible);
-    const appsEnabled = getEnabledCount('#apps-section', appsVisible);
-    
-    // Update section titles
-    const commandsTitle = document.querySelector('#commands-section .section-title');
-    const appsTitle = document.querySelector('#apps-section .section-title');
-    
-    if (commandsTitle) {
-        commandsTitle.innerHTML = `<i class="fas fa-terminal"></i> Commands (${commandsEnabled}/${commandsVisible})`;
-    }
-    
-    if (appsTitle) {
-        appsTitle.innerHTML = `<i class="fas fa-desktop"></i> Applications (${appsEnabled}/${appsVisible})`;
-    }
-    
-    // Update tab buttons if they exist
-    const commandsTab = document.getElementById('commands-tab');
-    const appsTab = document.getElementById('apps-tab');
-    
-    if (commandsTab) {
-        commandsTab.innerHTML = `<i class="fas fa-terminal"></i><span>Commands (${commandsEnabled}/${commandsVisible})</span>`;
-    }
-    
-    if (appsTab) {
-        appsTab.innerHTML = `<i class="fas fa-desktop"></i><span>Apps (${appsEnabled}/${appsVisible})</span>`;
-    }
-}
+    async function openEditModal(itemName) {
+        try {
+            // Get item data
+            const items = await apiCall('/api/items');
+            const item = items.find(i => i.name === itemName);
 
-function getEnabledCount(sectionSelector, totalVisible) {
-    const section = document.querySelector(sectionSelector);
-    if (!section) return 0;
-    
-    const visibleItems = Array.from(section.querySelectorAll('.item')).filter(item => {
-        return item.style.display !== 'none' && item.style.opacity !== '0';
-    });
-    
-    return visibleItems.filter(item => {
-        const toggleBtn = item.querySelector('.toggle-btn');
-        return toggleBtn && toggleBtn.classList.contains('enabled');
-    }).length;
-}
+            if (!item) {
+                showStatus('Item not found', 'error');
+                return;
+            }
 
-function updateCountsAfterChange() {
-    // Count all visible items (not just filtered ones)
-    const commandsSection = document.querySelector('#commands-section');
-    const appsSection = document.querySelector('#apps-section');
-    
-    let commandsVisible = 0;
-    let appsVisible = 0;
-    
-    if (commandsSection) {
-        commandsVisible = commandsSection.querySelectorAll('.item').length;
-    }
-    
-    if (appsSection) {
-        appsVisible = appsSection.querySelectorAll('.item').length;
-    }
-    
-    // Update the counts
-    updateSectionCounts(commandsVisible, appsVisible);
-}
+            // Populate form
+            document.getElementById('edit-original-name').value = item.name;
+            document.getElementById('edit-name').value = item.name;
+            document.getElementById('edit-type').value = item.type;
+            document.getElementById('edit-executable-type').value = item.ExecutableType || 'other';
+            document.getElementById('edit-path').value = item.paths[0];
+            document.getElementById('edit-command').value = item.Command || '';
 
-function showEmptyStateIfNeeded(commandsVisible, appsVisible) {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
-    
-    if (searchTerm === '') {
-        // Remove any search empty states
-        document.querySelectorAll('.search-empty-state').forEach(el => el.remove());
-        return;
+            // Open modal
+            openModal('edit-modal');
+        } catch (error) {
+            showStatus(`Error loading item data: ${error.message}`, 'error');
+        }
     }
-    
-    // Handle commands section
-    const commandsList = document.getElementById('commands-list');
-    let commandsEmptyState = commandsList.querySelector('.search-empty-state');
-    
-    if (commandsVisible === 0) {
-        if (!commandsEmptyState) {
-            commandsEmptyState = document.createElement('div');
-            commandsEmptyState.className = 'search-empty-state empty-state';
-            commandsEmptyState.innerHTML = `
+
+    async function saveEditItem() {
+        const originalName = document.getElementById('edit-original-name').value;
+        const formData = {
+            name: document.getElementById('edit-name').value.trim(),
+            type: document.getElementById('edit-type').value,
+            path: document.getElementById('edit-path').value.trim(),
+            command: document.getElementById('edit-command').value.trim(),
+            executable_type: document.getElementById('edit-executable-type').value
+        };
+
+        // Validate required fields
+        if (!formData.name || !formData.path) {
+            showStatus('Name and Path are required fields', 'error');
+            return;
+        }
+
+        // Show loading state
+        const saveBtn = document.querySelector('#edit-modal .btn-primary');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        saveBtn.disabled = true;
+
+        try {
+            const result = await apiCall(`/edit/${encodeURIComponent(originalName)}`, 'POST', formData);
+
+            if (result.success) {
+                showStatus('Item updated successfully!', 'success');
+                closeModal('edit-modal');
+                // Refresh items without page reload
+                setTimeout(() => refreshItems(), 1000);
+            } else {
+                showStatus(`Failed to update item: ${result.error}`, 'error');
+            }
+        } catch (error) {
+            showStatus(`Error updating item: ${error.message}`, 'error');
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+        }
+    }
+
+    // Tab switching functionality
+    function switchTab(tabName) {
+        console.log('Switching to tab:', tabName); // Debug log
+
+        // Update tab buttons
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        const activeTab = document.getElementById(tabName + '-tab');
+        if (activeTab) {
+            activeTab.classList.add('active');
+        }
+
+        // Get the sections container and both sections
+        const sectionsContainer = document.querySelector('.sections');
+        const commandsSection = document.getElementById('commands-section');
+        const appsSection = document.getElementById('apps-section');
+
+        if (!sectionsContainer || !commandsSection || !appsSection) return;
+
+        // Show both sections
+        const allSections = document.querySelectorAll('.section');
+        allSections.forEach(section => {
+            section.style.display = 'block';
+            section.style.visibility = 'visible';
+            section.style.opacity = '1';
+            section.classList.remove('active');
+        });
+
+        // Mark the active section
+        const activeSection = document.getElementById(tabName + '-section');
+        if (activeSection) {
+            activeSection.classList.add('active');
+        }
+
+        // Reorder sections: active section first, then the other
+        if (tabName === 'commands') {
+            sectionsContainer.appendChild(commandsSection);
+            sectionsContainer.appendChild(appsSection);
+        } else if (tabName === 'apps') {
+            sectionsContainer.appendChild(appsSection);
+            sectionsContainer.appendChild(commandsSection);
+        }
+
+        // Scroll to the active section on small screens
+        if (window.innerWidth <= 1024 && activeSection) {
+            // Small delay to ensure DOM reordering is complete
+            setTimeout(() => {
+                // Find the first item in the active section
+                const firstItem = activeSection.querySelector('.item');
+                const sectionTitle = activeSection.querySelector('.section-title');
+
+                // Scroll to section title or first item
+                const targetElement = sectionTitle || firstItem || activeSection;
+
+                if (targetElement) {
+                    // Calculate offset to account for sticky headers
+                    const tabControls = document.querySelector('.tab-controls');
+                    const controls = document.querySelector('.controls');
+                    let offset = 0;
+
+                    if (controls) offset += controls.offsetHeight;
+                    if (tabControls) offset += tabControls.offsetHeight;
+
+                    // Add some extra padding
+                    offset += 20;
+
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - offset;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        }
+
+        console.log('Active section:', activeSection); // Debug log
+    }
+
+    // Search functionality
+    function filterItems() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+        const allItems = document.querySelectorAll('.item');
+        let commandsVisible = 0;
+        let appsVisible = 0;
+
+        allItems.forEach(item => {
+            const itemName = item.querySelector('.item-title').textContent.toLowerCase();
+            const itemPath = item.querySelector('.path').textContent.toLowerCase();
+            const itemArgs = item.querySelector('.item-details div:last-child')?.textContent.toLowerCase() || '';
+
+            // Check if search term matches name, path, or arguments
+            const matches = itemName.includes(searchTerm) ||
+                itemPath.includes(searchTerm) ||
+                itemArgs.includes(searchTerm);
+
+            if (matches || searchTerm === '') {
+                item.style.display = 'block';
+                item.style.opacity = '1';
+
+                // Count visible items for each section
+                const section = item.closest('.section');
+                if (section && section.id === 'commands-section') {
+                    commandsVisible++;
+                } else if (section && section.id === 'apps-section') {
+                    appsVisible++;
+                }
+            } else {
+                item.style.display = 'none';
+                item.style.opacity = '0';
+            }
+        });
+
+        // Update section titles with filtered counts
+        updateSectionCounts(commandsVisible, appsVisible);
+
+        // Show empty state if no results
+        showEmptyStateIfNeeded(commandsVisible, appsVisible);
+    }
+
+    function updateSectionCounts(commandsVisible, appsVisible) {
+        // Calculate enabled counts for visible items
+        const commandsEnabled = getEnabledCount('#commands-section', commandsVisible);
+        const appsEnabled = getEnabledCount('#apps-section', appsVisible);
+
+        // Update section titles
+        const commandsTitle = document.querySelector('#commands-section .section-title');
+        const appsTitle = document.querySelector('#apps-section .section-title');
+
+        if (commandsTitle) {
+            commandsTitle.innerHTML = `<i class="fas fa-terminal"></i> Commands (${commandsEnabled}/${commandsVisible})`;
+        }
+
+        if (appsTitle) {
+            appsTitle.innerHTML = `<i class="fas fa-desktop"></i> Applications (${appsEnabled}/${appsVisible})`;
+        }
+
+        // Update tab buttons if they exist
+        const commandsTab = document.getElementById('commands-tab');
+        const appsTab = document.getElementById('apps-tab');
+
+        if (commandsTab) {
+            commandsTab.innerHTML = `<i class="fas fa-terminal"></i><span>Commands (${commandsEnabled}/${commandsVisible})</span>`;
+        }
+
+        if (appsTab) {
+            appsTab.innerHTML = `<i class="fas fa-desktop"></i><span>Apps (${appsEnabled}/${appsVisible})</span>`;
+        }
+    }
+
+    function getEnabledCount(sectionSelector, totalVisible) {
+        const section = document.querySelector(sectionSelector);
+        if (!section) return 0;
+
+        const visibleItems = Array.from(section.querySelectorAll('.item')).filter(item => {
+            return item.style.display !== 'none' && item.style.opacity !== '0';
+        });
+
+        return visibleItems.filter(item => {
+            const toggleBtn = item.querySelector('.toggle-btn');
+            return toggleBtn && toggleBtn.classList.contains('enabled');
+        }).length;
+    }
+
+    function updateCountsAfterChange() {
+        // Count all visible items (not just filtered ones)
+        const commandsSection = document.querySelector('#commands-section');
+        const appsSection = document.querySelector('#apps-section');
+
+        let commandsVisible = 0;
+        let appsVisible = 0;
+
+        if (commandsSection) {
+            commandsVisible = commandsSection.querySelectorAll('.item').length;
+        }
+
+        if (appsSection) {
+            appsVisible = appsSection.querySelectorAll('.item').length;
+        }
+
+        // Update the counts
+        updateSectionCounts(commandsVisible, appsVisible);
+    }
+
+    function showEmptyStateIfNeeded(commandsVisible, appsVisible) {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+
+        if (searchTerm === '') {
+            // Remove any search empty states
+            document.querySelectorAll('.search-empty-state').forEach(el => el.remove());
+            return;
+        }
+
+        // Handle commands section
+        const commandsList = document.getElementById('commands-list');
+        let commandsEmptyState = commandsList.querySelector('.search-empty-state');
+
+        if (commandsVisible === 0) {
+            if (!commandsEmptyState) {
+                commandsEmptyState = document.createElement('div');
+                commandsEmptyState.className = 'search-empty-state empty-state';
+                commandsEmptyState.innerHTML = `
                 <i class="fas fa-search"></i>
                 <p>No commands match "${searchTerm}"</p>
             `;
-            commandsList.appendChild(commandsEmptyState);
+                commandsList.appendChild(commandsEmptyState);
+            }
+        } else if (commandsEmptyState) {
+            commandsEmptyState.remove();
         }
-    } else if (commandsEmptyState) {
-        commandsEmptyState.remove();
-    }
-    
-    // Handle apps section
-    const appsList = document.getElementById('apps-list');
-    let appsEmptyState = appsList.querySelector('.search-empty-state');
-    
-    if (appsVisible === 0) {
-        if (!appsEmptyState) {
-            appsEmptyState = document.createElement('div');
-            appsEmptyState.className = 'search-empty-state empty-state';
-            appsEmptyState.innerHTML = `
+
+        // Handle apps section
+        const appsList = document.getElementById('apps-list');
+        let appsEmptyState = appsList.querySelector('.search-empty-state');
+
+        if (appsVisible === 0) {
+            if (!appsEmptyState) {
+                appsEmptyState = document.createElement('div');
+                appsEmptyState.className = 'search-empty-state empty-state';
+                appsEmptyState.innerHTML = `
                 <i class="fas fa-search"></i>
                 <p>No applications match "${searchTerm}"</p>
             `;
-            appsList.appendChild(appsEmptyState);
-        }
-    } else if (appsEmptyState) {
-        appsEmptyState.remove();
-    }
-}
-
-// Startup folder scanning functionality
-async function scanStartupFolders() {
-    const scanBtn = document.getElementById('scan-btn');
-    const originalText = scanBtn.innerHTML;
-    
-    scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
-    scanBtn.disabled = true;
-    
-    try {
-        const result = await apiCall('/api/scan-startup-folders');
-        
-        if (result.success) {
-            if (result.items.length > 0) {
-                showScanResultsModal(result.items);
-            } else {
-                showStatus('No new startup items found in folders', 'success');
+                appsList.appendChild(appsEmptyState);
             }
-        } else {
-            showStatus('Failed to scan startup folders', 'error');
+        } else if (appsEmptyState) {
+            appsEmptyState.remove();
         }
-    } catch (error) {
-        showStatus(`Error scanning folders: ${error.message}`, 'error');
-    } finally {
-        scanBtn.innerHTML = originalText;
-        scanBtn.disabled = false;
     }
-}
 
-function showScanResultsModal(items) {
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.id = 'scan-results-modal';
-    
-    const itemsHtml = items.map((item, index) => `
+    // Startup folder scanning functionality
+    async function scanStartupFolders() {
+        const scanBtn = document.getElementById('scan-btn');
+        const originalText = scanBtn.innerHTML;
+
+        scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+        scanBtn.disabled = true;
+
+        try {
+            const result = await apiCall('/api/scan-startup-folders');
+
+            if (result.success) {
+                if (result.items.length > 0) {
+                    showScanResultsModal(result.items);
+                } else {
+                    showStatus('No new startup items found in folders', 'success');
+                }
+            } else {
+                showStatus('Failed to scan startup folders', 'error');
+            }
+        } catch (error) {
+            showStatus(`Error scanning folders: ${error.message}`, 'error');
+        } finally {
+            scanBtn.innerHTML = originalText;
+            scanBtn.disabled = false;
+        }
+    }
+
+    function showScanResultsModal(items) {
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.id = 'scan-results-modal';
+
+        const itemsHtml = items.map((item, index) => `
         <div class="scan-item" style="background: var(--bg-tertiary); border-radius: 6px; padding: 12px; margin-bottom: 8px; border: 1px solid var(--border);">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <input type="checkbox" id="item-${index}" checked style="transform: scale(1.2);">
@@ -915,8 +954,8 @@ function showScanResultsModal(items) {
             </div>
         </div>
     `).join('');
-    
-    modal.innerHTML = `
+
+        modal.innerHTML = `
         <div class="modal-content" style="max-width: 700px; max-height: 80vh;">
             <div class="modal-header">
                 <h2 class="modal-title">
@@ -952,260 +991,260 @@ function showScanResultsModal(items) {
             </div>
         </div>
     `;
-    
-    document.body.appendChild(modal);
-}
 
-function toggleAllScanItems(checked) {
-    const checkboxes = document.querySelectorAll('#scan-results-modal input[type="checkbox"]');
-    checkboxes.forEach(checkbox => checkbox.checked = checked);
-}
-
-async function addSelectedItems() {
-    const modal = document.getElementById('scan-results-modal');
-    const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
-    
-    if (checkboxes.length === 0) {
-        showStatus('No items selected', 'error');
-        return;
+        document.body.appendChild(modal);
     }
-    
-    const addBtn = modal.querySelector('.btn-primary');
-    const originalText = addBtn.innerHTML;
-    addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-    addBtn.disabled = true;
-    
-    let successCount = 0;
-    let errorCount = 0;
-    
-    // Get the original scan data
-    const result = await apiCall('/api/scan-startup-folders');
-    const items = result.items;
-    
-    for (let i = 0; i < checkboxes.length; i++) {
-        const checkbox = checkboxes[i];
-        const index = parseInt(checkbox.id.split('-')[1]);
-        const item = items[index];
-        
-        const formData = {
-            name: item.name,
-            type: item.type,
-            path: item.path,
-            command: item.command || '',
-            executable_type: item.executable_type || 'other'
-        };
-        
-        try {
-            const addResult = await apiCall('/add', 'POST', formData);
-            if (addResult.success) {
-                successCount++;
-                
-                // Delete the shortcut after successfully adding it
-                if (item.original_shortcut) {
-                    try {
-                        const deleteResult = await apiCall('/api/delete-shortcut', 'POST', {
-                            shortcut_path: item.original_shortcut
-                        });
-                        if (!deleteResult.success) {
-                            console.warn(`Failed to delete shortcut ${item.original_shortcut}:`, deleteResult.error);
+
+    function toggleAllScanItems(checked) {
+        const checkboxes = document.querySelectorAll('#scan-results-modal input[type="checkbox"]');
+        checkboxes.forEach(checkbox => checkbox.checked = checked);
+    }
+
+    async function addSelectedItems() {
+        const modal = document.getElementById('scan-results-modal');
+        const checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked');
+
+        if (checkboxes.length === 0) {
+            showStatus('No items selected', 'error');
+            return;
+        }
+
+        const addBtn = modal.querySelector('.btn-primary');
+        const originalText = addBtn.innerHTML;
+        addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        addBtn.disabled = true;
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        // Get the original scan data
+        const result = await apiCall('/api/scan-startup-folders');
+        const items = result.items;
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            const checkbox = checkboxes[i];
+            const index = parseInt(checkbox.id.split('-')[1]);
+            const item = items[index];
+
+            const formData = {
+                name: item.name,
+                type: item.type,
+                path: item.path,
+                command: item.command || '',
+                executable_type: item.executable_type || 'other'
+            };
+
+            try {
+                const addResult = await apiCall('/add', 'POST', formData);
+                if (addResult.success) {
+                    successCount++;
+
+                    // Delete the shortcut after successfully adding it
+                    if (item.original_shortcut) {
+                        try {
+                            const deleteResult = await apiCall('/api/delete-shortcut', 'POST', {
+                                shortcut_path: item.original_shortcut
+                            });
+                            if (!deleteResult.success) {
+                                console.warn(`Failed to delete shortcut ${item.original_shortcut}:`, deleteResult.error);
+                            }
+                        } catch (deleteError) {
+                            console.warn(`Error deleting shortcut ${item.original_shortcut}:`, deleteError);
                         }
-                    } catch (deleteError) {
-                        console.warn(`Error deleting shortcut ${item.original_shortcut}:`, deleteError);
                     }
+                } else {
+                    errorCount++;
+                    console.error(`Failed to add ${item.name}:`, addResult.error);
+                }
+            } catch (error) {
+                errorCount++;
+                console.error(`Error adding ${item.name}:`, error);
+            }
+        }
+
+        // Close modal and show results
+        closeModal('scan-results-modal');
+
+        if (successCount > 0) {
+            showStatus(`Successfully added ${successCount} item(s) and deleted shortcuts${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
+            // Refresh items without page reload
+            setTimeout(() => refreshItems(), 1000);
+        } else {
+            showStatus(`Failed to add items (${errorCount} errors)`, 'error');
+        }
+    }
+
+    async function deleteMatchingShortcuts() {
+        if (!confirm('This will delete all shortcuts from startup folders that match items already in your startup list. Continue?')) {
+            return;
+        }
+
+        const deleteBtn = document.getElementById('delete-matching-btn');
+        const originalText = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+        deleteBtn.disabled = true;
+
+        try {
+            const result = await apiCall('/api/delete-matching-shortcuts', 'POST');
+
+            if (result.success) {
+                const deletedCount = result.deleted_count;
+                const errorCount = result.error_count;
+
+                if (deletedCount > 0) {
+                    let message = `Successfully deleted ${deletedCount} matching shortcut(s)`;
+                    if (errorCount > 0) {
+                        message += ` (${errorCount} errors)`;
+                    }
+                    showStatus(message, 'success');
+
+                    // Show details of deleted shortcuts
+                    if (result.deleted_shortcuts.length > 0) {
+                        console.log('Deleted shortcuts:', result.deleted_shortcuts);
+                    }
+                } else if (errorCount > 0) {
+                    showStatus(`Failed to delete shortcuts (${errorCount} errors)`, 'error');
+                } else {
+                    showStatus('No matching shortcuts found to delete', 'info');
+                }
+
+                if (result.errors.length > 0) {
+                    console.error('Deletion errors:', result.errors);
                 }
             } else {
-                errorCount++;
-                console.error(`Failed to add ${item.name}:`, addResult.error);
+                showStatus(`Error: ${result.error}`, 'error');
             }
         } catch (error) {
-            errorCount++;
-            console.error(`Error adding ${item.name}:`, error);
+            showStatus(`Error deleting shortcuts: ${error.message}`, 'error');
+        } finally {
+            deleteBtn.innerHTML = originalText;
+            deleteBtn.disabled = false;
         }
     }
-    
-    // Close modal and show results
-    closeModal('scan-results-modal');
-    
-    if (successCount > 0) {
-        showStatus(`Successfully added ${successCount} item(s) and deleted shortcuts${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
-        // Refresh items without page reload
-        setTimeout(() => refreshItems(), 1000);
-    } else {
-        showStatus(`Failed to add items (${errorCount} errors)`, 'error');
-    }
-}
 
-async function deleteMatchingShortcuts() {
-    if (!confirm('This will delete all shortcuts from startup folders that match items already in your startup list. Continue?')) {
-        return;
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            // Remove dynamically created modals
+            if (modalId === 'scan-results-modal') {
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
     }
-    
-    const deleteBtn = document.getElementById('delete-matching-btn');
-    const originalText = deleteBtn.innerHTML;
-    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
-    deleteBtn.disabled = true;
-    
-    try {
-        const result = await apiCall('/api/delete-matching-shortcuts', 'POST');
-        
-        if (result.success) {
-            const deletedCount = result.deleted_count;
-            const errorCount = result.error_count;
-            
-            if (deletedCount > 0) {
-                let message = `Successfully deleted ${deletedCount} matching shortcut(s)`;
-                if (errorCount > 0) {
-                    message += ` (${errorCount} errors)`;
-                }
-                showStatus(message, 'success');
-                
-                // Show details of deleted shortcuts
-                if (result.deleted_shortcuts.length > 0) {
-                    console.log('Deleted shortcuts:', result.deleted_shortcuts);
-                }
-            } else if (errorCount > 0) {
-                showStatus(`Failed to delete shortcuts (${errorCount} errors)`, 'error');
-            } else {
-                showStatus('No matching shortcuts found to delete', 'info');
-            }
-            
-            if (result.errors.length > 0) {
-                console.error('Deletion errors:', result.errors);
-            }
+
+    // Settings Functions
+    function toggleCompactMode() {
+        const compactMode = document.getElementById('compact-mode').checked;
+        const body = document.body;
+
+        if (compactMode) {
+            body.classList.add('compact-mode');
         } else {
-            showStatus(`Error: ${result.error}`, 'error');
+            body.classList.remove('compact-mode');
         }
-    } catch (error) {
-        showStatus(`Error deleting shortcuts: ${error.message}`, 'error');
-    } finally {
-        deleteBtn.innerHTML = originalText;
-        deleteBtn.disabled = false;
+
+        // Save setting to localStorage
+        localStorage.setItem('compactMode', compactMode);
+
+        showStatus(`Compact mode ${compactMode ? 'enabled' : 'disabled'}`, 'success');
     }
-}
 
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = 'auto';
-        // Remove dynamically created modals
-        if (modalId === 'scan-results-modal') {
-            setTimeout(() => modal.remove(), 300);
-        }
-    }
-}
+    function applySorting() {
+        const sortBy = document.getElementById('sort-by').value;
 
-// Settings Functions
-function toggleCompactMode() {
-    const compactMode = document.getElementById('compact-mode').checked;
-    const body = document.body;
-    
-    if (compactMode) {
-        body.classList.add('compact-mode');
-    } else {
-        body.classList.remove('compact-mode');
-    }
-    
-    // Save setting to localStorage
-    localStorage.setItem('compactMode', compactMode);
-    
-    showStatus(`Compact mode ${compactMode ? 'enabled' : 'disabled'}`, 'success');
-}
+        // Save setting to localStorage
+        localStorage.setItem('sortBy', sortBy);
 
-function applySorting() {
-    const sortBy = document.getElementById('sort-by').value;
-    
-    // Save setting to localStorage
-    localStorage.setItem('sortBy', sortBy);
-    
-    // Apply sorting to both sections
-    sortSection('commands-list', sortBy);
-    sortSection('apps-list', sortBy);
-    
-    showStatus(`Sorted by ${document.getElementById('sort-by').selectedOptions[0].text}`, 'success');
-}
-
-function sortSection(sectionId, sortBy) {
-    const section = document.getElementById(sectionId);
-    if (!section) return;
-    
-    const items = Array.from(section.querySelectorAll('.item'));
-    if (items.length === 0) return;
-    
-    items.sort((a, b) => {
-        switch (sortBy) {
-            case 'name':
-                return a.querySelector('.item-title').textContent.localeCompare(b.querySelector('.item-title').textContent);
-            
-            case 'name-desc':
-                return b.querySelector('.item-title').textContent.localeCompare(a.querySelector('.item-title').textContent);
-            
-            case 'type':
-                const aType = a.querySelector('.item-details div:first-child')?.textContent || '';
-                const bType = b.querySelector('.item-details div:first-child')?.textContent || '';
-                return aType.localeCompare(bType);
-            
-            case 'enabled':
-                const aEnabled = a.querySelector('.toggle-btn').classList.contains('enabled');
-                const bEnabled = b.querySelector('.toggle-btn').classList.contains('enabled');
-                return bEnabled - aEnabled; // Enabled first
-            
-            case 'disabled':
-                const aDisabled = a.querySelector('.toggle-btn').classList.contains('disabled');
-                const bDisabled = b.querySelector('.toggle-btn').classList.contains('disabled');
-                return bDisabled - aDisabled; // Disabled first
-            
-            case 'modified':
-                // For now, we'll sort by name as we don't have modification dates
-                // This could be enhanced later with actual modification data
-                return a.querySelector('.item-title').textContent.localeCompare(b.querySelector('.item-title').textContent);
-            
-            case 'default':
-            default:
-                return 0; // Keep original order
-        }
-    });
-    
-    // Re-append items in sorted order
-    items.forEach(item => section.appendChild(item));
-}
-
-function resetSettings() {
-    // Reset compact mode
-    document.getElementById('compact-mode').checked = false;
-    document.body.classList.remove('compact-mode');
-    
-    // Reset sorting
-    document.getElementById('sort-by').value = 'default';
-    sortSection('commands-list', 'default');
-    sortSection('apps-list', 'default');
-    
-    // Clear localStorage
-    localStorage.removeItem('compactMode');
-    localStorage.removeItem('sortBy');
-    
-    showStatus('Settings reset to default', 'success');
-}
-
-// Load settings on page load
-function loadSettings() {
-    // Load compact mode setting
-    const compactMode = localStorage.getItem('compactMode') === 'true';
-    document.getElementById('compact-mode').checked = compactMode;
-    if (compactMode) {
-        document.body.classList.add('compact-mode');
-    }
-    
-    // Load sorting setting
-    const sortBy = localStorage.getItem('sortBy') || 'default';
-    document.getElementById('sort-by').value = sortBy;
-    if (sortBy !== 'default') {
+        // Apply sorting to both sections
         sortSection('commands-list', sortBy);
         sortSection('apps-list', sortBy);
-    }
-}
 
-// Initialize settings when page loads
-document.addEventListener('DOMContentLoaded', loadSettings);
+        showStatus(`Sorted by ${document.getElementById('sort-by').selectedOptions[0].text}`, 'success');
+    }
+
+    function sortSection(sectionId, sortBy) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        const items = Array.from(section.querySelectorAll('.item'));
+        if (items.length === 0) return;
+
+        items.sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    return a.querySelector('.item-title').textContent.localeCompare(b.querySelector('.item-title').textContent);
+
+                case 'name-desc':
+                    return b.querySelector('.item-title').textContent.localeCompare(a.querySelector('.item-title').textContent);
+
+                case 'type':
+                    const aType = a.querySelector('.item-details div:first-child')?.textContent || '';
+                    const bType = b.querySelector('.item-details div:first-child')?.textContent || '';
+                    return aType.localeCompare(bType);
+
+                case 'enabled':
+                    const aEnabled = a.querySelector('.toggle-btn').classList.contains('enabled');
+                    const bEnabled = b.querySelector('.toggle-btn').classList.contains('enabled');
+                    return bEnabled - aEnabled; // Enabled first
+
+                case 'disabled':
+                    const aDisabled = a.querySelector('.toggle-btn').classList.contains('disabled');
+                    const bDisabled = b.querySelector('.toggle-btn').classList.contains('disabled');
+                    return bDisabled - aDisabled; // Disabled first
+
+                case 'modified':
+                    // For now, we'll sort by name as we don't have modification dates
+                    // This could be enhanced later with actual modification data
+                    return a.querySelector('.item-title').textContent.localeCompare(b.querySelector('.item-title').textContent);
+
+                case 'default':
+                default:
+                    return 0; // Keep original order
+            }
+        });
+
+        // Re-append items in sorted order
+        items.forEach(item => section.appendChild(item));
+    }
+
+    function resetSettings() {
+        // Reset compact mode
+        document.getElementById('compact-mode').checked = false;
+        document.body.classList.remove('compact-mode');
+
+        // Reset sorting
+        document.getElementById('sort-by').value = 'default';
+        sortSection('commands-list', 'default');
+        sortSection('apps-list', 'default');
+
+        // Clear localStorage
+        localStorage.removeItem('compactMode');
+        localStorage.removeItem('sortBy');
+
+        showStatus('Settings reset to default', 'success');
+    }
+
+    // Load settings on page load
+    function loadSettings() {
+        // Load compact mode setting
+        const compactMode = localStorage.getItem('compactMode') === 'true';
+        document.getElementById('compact-mode').checked = compactMode;
+        if (compactMode) {
+            document.body.classList.add('compact-mode');
+        }
+
+        // Load sorting setting
+        const sortBy = localStorage.getItem('sortBy') || 'default';
+        document.getElementById('sort-by').value = sortBy;
+        if (sortBy !== 'default') {
+            sortSection('commands-list', sortBy);
+            sortSection('apps-list', sortBy);
+        }
+    }
+
+    // Initialize settings when page loads
+    document.addEventListener('DOMContentLoaded', loadSettings);
 </script>
 {% endblock %}
