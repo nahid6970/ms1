@@ -141,19 +141,6 @@ class StartupManager:
                 else:
                     full_command = f'"{path}"'
             
-            # Debug: Log the command being executed
-            debug_log = os.path.join(os.path.dirname(__file__), 'launch_debug.log')
-            try:
-                with open(debug_log, 'a') as f:
-                    f.write(f"{datetime.now()}: Launching item '{item['name']}'\n")
-                    f.write(f"  Path: {path}\n")
-                    f.write(f"  Command: {command}\n")
-                    f.write(f"  ExecutableType: {executable_type}\n")
-                    f.write(f"  Full command: {full_command}\n")
-                    f.write(f"  Final os.system command: start \"\" {full_command}\n\n")
-            except:
-                pass
-            
             # Use subprocess.Popen with proper process detachment for Windows
             try:
                 # Create a fully detached process that won't be affected by parent process
