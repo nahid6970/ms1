@@ -42,6 +42,21 @@
             margin: 0 auto;
             padding: 20px;
         }
+        
+        @media (max-width: 1024px) {
+            .container {
+                padding: 0;
+            }
+            
+            .container > * {
+                padding: 0 20px;
+            }
+            
+            .container > .controls,
+            .container > .tab-controls {
+                padding: 20px;
+            }
+        }
 
         .header {
             background: var(--bg-secondary);
@@ -320,14 +335,36 @@
         }
 
         @media (max-width: 1024px) {
+            /* Make controls sticky at top */
+            .controls {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: var(--bg-primary);
+                padding: 20px;
+                margin: -20px -20px 20px -20px;
+                border-bottom: 1px solid var(--border);
+                backdrop-filter: blur(10px);
+            }
+            
+            /* Make tab controls sticky below main controls */
+            .tab-controls {
+                display: block;
+                position: sticky;
+                top: 80px; /* Adjust based on controls height */
+                z-index: 99;
+                margin: 0 -20px 20px -20px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                backdrop-filter: blur(10px);
+            }
+            
             .sections {
                 flex-direction: column;
                 gap: 24px;
                 align-items: stretch;
-            }
-            
-            .tab-controls {
-                display: block;
+                margin-top: 20px;
             }
             
             .section {
