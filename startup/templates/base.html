@@ -161,24 +161,101 @@
             transform: translateY(-1px);
         }
 
-        .status {
-            padding: 12px 20px;
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
             font-weight: 500;
-            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            backdrop-filter: blur(10px);
         }
 
-        .status.success {
-            background: rgba(0, 255, 136, 0.1);
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-success {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--success);
             color: var(--success);
-            border: 1px solid rgba(0, 255, 136, 0.2);
         }
 
-        .status.error {
-            background: rgba(255, 68, 68, 0.1);
+        .toast-error {
+            background: rgba(255, 68, 68, 0.15);
+            border-color: var(--danger);
             color: var(--danger);
-            border: 1px solid rgba(255, 68, 68, 0.2);
+        }
+
+        .toast-info {
+            background: rgba(0, 122, 204, 0.15);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .toast-warning {
+            background: rgba(255, 170, 0, 0.15);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .toast i {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .toast span {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mobile responsiveness for toasts */
+        @media (max-width: 768px) {
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .toast {
+                padding: 12px 16px;
+            }
         }
 
         .sections {
@@ -594,16 +671,47 @@
         }
 
         function showStatus(message, type = 'success') {
-            const status = document.querySelector('.status');
-            if (status) {
-                status.textContent = message;
-                status.className = `status ${type}`;
-                status.style.display = 'block';
-                
-                setTimeout(() => {
-                    status.style.display = 'none';
-                }, 3000);
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container';
+                document.body.appendChild(toastContainer);
             }
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Add icon based on type
+            let icon = '';
+            switch(type) {
+                case 'success': icon = '<i class="fas fa-check-circle"></i>'; break;
+                case 'error': icon = '<i class="fas fa-exclamation-circle"></i>'; break;
+                case 'info': icon = '<i class="fas fa-info-circle"></i>'; break;
+                case 'warning': icon = '<i class="fas fa-exclamation-triangle"></i>'; break;
+                default: icon = '<i class="fas fa-check-circle"></i>';
+            }
+            
+            toast.innerHTML = `
+                ${icon}
+                <span>${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add toast to container
+            toastContainer.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
 
         // Copy to clipboard function

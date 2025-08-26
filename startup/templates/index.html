@@ -363,9 +363,9 @@ async function refreshItems() {
     refreshBtn.disabled = true;
     
     try {
-        // Simple page reload for now - could be made more sophisticated
+        // Refresh items without page reload
         setTimeout(() => {
-            window.location.reload();
+            refreshItems();
         }, 500);
     } catch (error) {
         showStatus(`Error refreshing: ${error.message}`, 'error');
@@ -516,8 +516,8 @@ async function saveNewItem() {
             // Clear form
             document.getElementById('add-form').reset();
             updateAddPathPlaceholder();
-            // Refresh the page to show new item
-            setTimeout(() => window.location.reload(), 1000);
+            // Refresh items without page reload
+            setTimeout(() => refreshItems(), 1000);
         } else {
             showStatus(`Failed to add item: ${result.error}`, 'error');
         }
@@ -583,8 +583,8 @@ async function saveEditItem() {
         if (result.success) {
             showStatus('Item updated successfully!', 'success');
             closeModal('edit-modal');
-            // Refresh the page to show updated item
-            setTimeout(() => window.location.reload(), 1000);
+            // Refresh items without page reload
+            setTimeout(() => refreshItems(), 1000);
         } else {
             showStatus(`Failed to update item: ${result.error}`, 'error');
         }
@@ -911,8 +911,8 @@ async function addSelectedItems() {
     
     if (successCount > 0) {
         showStatus(`Successfully added ${successCount} item(s) and deleted shortcuts${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
-        // Refresh the page to show new items
-        setTimeout(() => window.location.reload(), 1500);
+        // Refresh items without page reload
+        setTimeout(() => refreshItems(), 1000);
     } else {
         showStatus(`Failed to add items (${errorCount} errors)`, 'error');
     }
