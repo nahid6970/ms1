@@ -10,6 +10,9 @@
     <button onclick="refreshApps()" class="btn btn-secondary" id="refresh-btn" title="Refresh Applications">
         <i class="fas fa-sync-alt"></i> Refresh
     </button>
+    <button onclick="openModal('settings-modal')" class="btn btn-secondary" title="Settings">
+        <i class="fas fa-cog"></i> Settings
+    </button>
     <div class="search-container">
         <input type="text" id="search-input" class="search-input" placeholder="Search applications..." onkeyup="filterApps()">
         <i class="fas fa-search search-icon"></i>
@@ -226,35 +229,61 @@
         </div>
     </div>
 </div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-cog"></i> Settings
+            </h2>
+            <button class="modal-close" onclick="closeModal('settings-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="settings-content">
+            <div class="setting-group">
+                <div class="setting-title">
+                    <i class="fas fa-eye"></i> Display Options
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <input type="checkbox" id="compact-mode-toggle" onchange="toggleCompactMode()">
+                        <span class="checkmark"></span>
+                        Compact Mode
+                    </label>
+                    <div class="setting-description">
+                        Hide application details and show only names for a cleaner view
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="closeModal('settings-modal')" class="btn btn-primary">
+                <i class="fas fa-check"></i> Done
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <style>
-/* Fix spacing issues and center everything */
-.container {
-    padding: 80px 20px 10px 20px !important;
-    margin: 0 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-}
-
+/* Full height layout adjustments */
 .controls {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 1000 !important;
-    margin: 0 !important;
+    flex-shrink: 0;
+    margin-bottom: 20px !important;
     padding: 12px 20px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
-    background: var(--bg-primary) !important;
-    border-bottom: 1px solid var(--border) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
 }
 
 .sections {
@@ -263,11 +292,14 @@
     display: flex !important;
     justify-content: center !important;
     width: 100% !important;
+    flex: 1 !important;
+    overflow: hidden !important;
 }
 
 .section {
     max-width: 1200px !important;
     width: 100% !important;
+    height: 100% !important;
 }
 
 .status-indicator {
@@ -336,6 +368,26 @@
 .btn-warning:hover {
     background: #cc8800;
     transform: translateY(-1px);
+}
+
+/* Compact mode specific styles */
+.compact-mode .item-details {
+    display: none !important;
+}
+
+.compact-mode .item {
+    padding: 8px 16px !important;
+    margin-bottom: 8px !important;
+}
+
+.compact-mode .item-header {
+    margin-bottom: 0 !important;
+    min-height: auto !important;
+}
+
+.compact-mode .action-buttons {
+    margin-top: 8px !important;
+    padding: 8px !important;
 }
 </style>
 
@@ -748,6 +800,45 @@ document.addEventListener('DOMContentLoaded', function() {
             scrollTimeout = setTimeout(saveScrollPosition, 150);
         });
     }
+    
+    // Load compact mode setting
+    loadCompactModeSetting();
 });
+
+// Toggle compact mode
+function toggleCompactMode() {
+    const isCompact = document.getElementById('compact-mode-toggle').checked;
+    const appsContainer = document.getElementById('apps-list');
+    
+    if (isCompact) {
+        appsContainer.classList.add('compact-mode');
+    } else {
+        appsContainer.classList.remove('compact-mode');
+    }
+    
+    // Save setting to localStorage
+    localStorage.setItem('applist_compact_mode', isCompact.toString());
+    
+    // Show status message
+    showStatus(isCompact ? 'Compact mode enabled' : 'Compact mode disabled', 'info');
+}
+
+// Load compact mode setting from localStorage
+function loadCompactModeSetting() {
+    const savedCompactMode = localStorage.getItem('applist_compact_mode');
+    const isCompact = savedCompactMode === 'true';
+    
+    // Set checkbox state
+    const compactToggle = document.getElementById('compact-mode-toggle');
+    if (compactToggle) {
+        compactToggle.checked = isCompact;
+    }
+    
+    // Apply compact mode if enabled
+    const appsContainer = document.getElementById('apps-list');
+    if (isCompact && appsContainer) {
+        appsContainer.classList.add('compact-mode');
+    }
+}
 </script>
 {% endblock %}
