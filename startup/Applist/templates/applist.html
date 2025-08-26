@@ -232,7 +232,7 @@
 <style>
 /* Fix spacing issues and center everything */
 .container {
-    padding: 10px 20px !important;
+    padding: 80px 20px 10px 20px !important;
     margin: 0 auto !important;
     display: flex !important;
     flex-direction: column !important;
@@ -240,12 +240,21 @@
 }
 
 .controls {
-    margin: 0 0 10px 0 !important;
-    padding: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    margin: 0 !important;
+    padding: 12px 20px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
+    background: var(--bg-primary) !important;
+    border-bottom: 1px solid var(--border) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
 }
 
 .sections {
