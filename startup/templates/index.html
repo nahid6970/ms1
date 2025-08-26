@@ -675,27 +675,38 @@ function switchTab(tabName) {
         activeTab.classList.add('active');
     }
     
-    // Update sections - be very explicit about hiding/showing
+    // Get the sections container and both sections
+    const sectionsContainer = document.querySelector('.sections');
+    const commandsSection = document.getElementById('commands-section');
+    const appsSection = document.getElementById('apps-section');
+    
+    if (!sectionsContainer || !commandsSection || !appsSection) return;
+    
+    // Show both sections
     const allSections = document.querySelectorAll('.section');
     allSections.forEach(section => {
+        section.style.display = 'block';
+        section.style.visibility = 'visible';
+        section.style.opacity = '1';
         section.classList.remove('active');
-        section.style.display = 'none';
-        section.style.visibility = 'hidden';
-        section.style.opacity = '0';
     });
     
-    // Small delay to ensure hiding is complete
-    setTimeout(() => {
-        // Show only the selected section
-        const activeSection = document.getElementById(tabName + '-section');
-        if (activeSection) {
-            activeSection.classList.add('active');
-            activeSection.style.display = 'block';
-            activeSection.style.visibility = 'visible';
-            activeSection.style.opacity = '1';
-        }
-        console.log('Active section:', activeSection); // Debug log
-    }, 10);
+    // Mark the active section
+    const activeSection = document.getElementById(tabName + '-section');
+    if (activeSection) {
+        activeSection.classList.add('active');
+    }
+    
+    // Reorder sections: active section first, then the other
+    if (tabName === 'commands') {
+        sectionsContainer.appendChild(commandsSection);
+        sectionsContainer.appendChild(appsSection);
+    } else if (tabName === 'apps') {
+        sectionsContainer.appendChild(appsSection);
+        sectionsContainer.appendChild(commandsSection);
+    }
+    
+    console.log('Active section:', activeSection); // Debug log
 }
 
 // Search functionality

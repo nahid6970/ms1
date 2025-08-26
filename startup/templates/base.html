@@ -328,6 +328,8 @@
             .sections {
                 flex-direction: column;
                 padding-top: 70px; /* Add space for fixed tabs */
+                gap: 0; /* Remove gap since sections now have their own margins */
+                align-items: stretch;
             }
             
             .tab-controls {
@@ -340,16 +342,25 @@
             }
             
             .section {
-                display: none !important;
+                display: block !important;
                 max-height: none;
                 flex-direction: initial;
                 position: relative;
                 z-index: 1;
+                margin-bottom: 40px;
+                background: var(--bg-primary);
+                border-radius: 8px;
+                padding: 20px;
+                border: 1px solid var(--border);
+                clear: both;
+                overflow: visible;
             }
             
             .section.active {
-                display: block !important;
                 z-index: 2;
+                border: 2px solid var(--accent-primary);
+                background: var(--bg-secondary);
+                box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
             }
             
             .section-content {
@@ -357,6 +368,8 @@
                 max-height: none;
                 flex: none;
                 padding-right: 0;
+                width: 100%;
+                clear: both;
             }
         }
 
@@ -368,16 +381,14 @@
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            max-height: 85vh;
             min-height: 200px;
             width: 100%;
         }
 
         .section-content {
             flex: 1;
-            overflow-y: auto;
+            overflow-y: visible;
             padding: 4px 8px 4px 4px;
-            contain: layout;
         }
 
         /* Custom scrollbar styling */
