@@ -319,7 +319,7 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\myhome\\app.py",
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5000_myhome\\app.py",
     "ExecutableType": "pythonw"
   },
   {

@@ -10,7 +10,7 @@ class ProcessManager:
     def __init__(self):
         # Define your target processes here
         self.target_processes = {
-            r"C:\Users\nahid\ms\ms1\myhome\app.py": "MyHome",
+            r"C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\app.py": "MyHome",
             r"C:\Users\nahid\ms\ms1\scripts\flask\5001_share_text\share_text.py": "5001_share_text",
             r"C:\Users\nahid\ms\ms1\scripts\flask\5002_upload_files\upload_files.py": "5002_upload_files"
         }
