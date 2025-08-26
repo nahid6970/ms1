@@ -375,5 +375,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5016_Sync_w_android\\sync_server.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5012 - Gallery",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5012_share_images\\share_images.py",
+    "ExecutableType": "pythonw"
   }
 ]
