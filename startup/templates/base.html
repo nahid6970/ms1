@@ -271,13 +271,16 @@
         /* Tab System for smaller screens */
         .tab-controls {
             display: none;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
             background: var(--bg-primary);
             padding: 10px 0;
-            margin-bottom: 20px;
             border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .tab-buttons {
@@ -324,10 +327,16 @@
         @media (max-width: 1024px) {
             .sections {
                 flex-direction: column;
+                padding-top: 70px; /* Add space for fixed tabs */
             }
             
             .tab-controls {
                 display: block;
+            }
+            
+            /* Add padding to controls when tabs are visible */
+            .controls {
+                padding-top: 70px;
             }
             
             .section {
