@@ -176,80 +176,74 @@ def get_items():
     
     return jsonify(items)
 
-@app.route('/add', methods=['GET', 'POST'])
+@app.route('/add', methods=['POST'])
 def add_item():
-    """Add new item page"""
-    if request.method == 'POST':
-        data = request.get_json()
-        
-        # Validate required fields
-        if not data.get('name') or not data.get('path'):
-            return jsonify({"success": False, "error": "Name and Path are required"})
-        
-        # Check if path exists
-        if not os.path.exists(data['path']):
-            return jsonify({"success": False, "error": "The specified path does not exist"})
-        
-        # Check if item already exists
-        items = startup_manager.load_items()
-        if any(item["name"] == data['name'] for item in items):
-            return jsonify({"success": False, "error": "An item with this name already exists"})
-        
-        # Create new item
-        new_item = {
-            "name": data['name'],
-            "type": data.get('type', 'App'),
-            "paths": [data['path']],
-            "Command": data.get('command', ''),
-            "ExecutableType": data.get('executable_type', 'other')
-        }
-        
-        items.append(new_item)
-        if startup_manager.save_items(items):
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "error": "Failed to save item"})
+    """Add new item API endpoint"""
+    data = request.get_json()
     
-    return render_template('add_item.html')
+    # Validate required fields
+    if not data.get('name') or not data.get('path'):
+        return jsonify({"success": False, "error": "Name and Path are required"})
+    
+    # Check if path exists
+    if not os.path.exists(data['path']):
+        return jsonify({"success": False, "error": "The specified path does not exist"})
+    
+    # Check if item already exists
+    items = startup_manager.load_items()
+    if any(item["name"] == data['name'] for item in items):
+        return jsonify({"success": False, "error": "An item with this name already exists"})
+    
+    # Create new item
+    new_item = {
+        "name": data['name'],
+        "type": data.get('type', 'App'),
+        "paths": [data['path']],
+        "Command": data.get('command', ''),
+        "ExecutableType": data.get('executable_type', 'other')
+    }
+    
+    items.append(new_item)
+    if startup_manager.save_items(items):
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "error": "Failed to save item"})
 
-@app.route('/edit/<item_name>', methods=['GET', 'POST'])
+@app.route('/edit/<item_name>', methods=['POST'])
 def edit_item(item_name):
-    """Edit item page"""
+    """Edit item API endpoint"""
     items = startup_manager.load_items()
     item = next((item for item in items if item["name"] == item_name), None)
     
     if not item:
-        return redirect(url_for('index'))
+        return jsonify({"success": False, "error": "Item not found"})
     
-    if request.method == 'POST':
-        data = request.get_json()
-        
-        # Validate required fields
-        if not data.get('name') or not data.get('path'):
-            return jsonify({"success": False, "error": "Name and Path are required"})
-        
-        # Check if path exists
-        if not os.path.exists(data['path']):
-            return jsonify({"success": False, "error": "The specified path does not exist"})
-        
-        # Update item
-        for i, stored_item in enumerate(items):
-            if stored_item["name"] == item_name:
-                items[i] = {
-                    "name": data['name'],
-                    "type": data.get('type', 'App'),
-                    "paths": [data['path']],
-                    "Command": data.get('command', ''),
-                    "ExecutableType": data.get('executable_type', 'other')
-                }
-                break
-        
-        if startup_manager.save_items(items):
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "error": "Failed to save item"})
+    data = request.get_json()
     
-    return render_template('edit_item.html', item=item)
+    # Validate required fields
+    if not data.get('name') or not data.get('path'):
+        return jsonify({"success": False, "error": "Name and Path are required"})
+    
+    # Check if path exists
+    if not os.path.exists(data['path']):
+        return jsonify({"success": False, "error": "The specified path does not exist"})
+    
+    # Update item
+    for i, stored_item in enumerate(items):
+        if stored_item["name"] == item_name:
+            items[i] = {
+                "name": data['name'],
+                "type": data.get('type', 'App'),
+                "paths": [data['path']],
+                "Command": data.get('command', ''),
+                "ExecutableType": data.get('executable_type', 'other')
+            }
+            break
+    
+    if startup_manager.save_items(items):
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "error": "Failed to save item"})
 
 @app.route('/api/delete/<item_name>', methods=['DELETE'])
 def delete_item(item_name):

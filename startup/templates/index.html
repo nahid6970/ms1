@@ -7,9 +7,9 @@
 </div>
 
 <div class="controls">
-    <a href="{{ url_for('add_item') }}" class="btn btn-primary">
+    <button onclick="openModal('add-modal')" class="btn btn-primary">
         <i class="fas fa-plus"></i> Add New Item
-    </a>
+    </button>
     <button onclick="refreshItems()" class="btn btn-secondary" id="refresh-btn">
         <i class="fas fa-sync-alt"></i> Refresh
     </button>
@@ -41,9 +41,9 @@
                             </span>
                         </div>
                         <div class="item-actions">
-                            <a href="{{ url_for('edit_item', item_name=item.name) }}" class="btn btn-secondary btn-small">
+                            <button onclick="openEditModal('{{ item.name }}')" class="btn btn-secondary btn-small">
                                 <i class="fas fa-edit"></i> Edit
-                            </a>
+                            </button>
                             <button onclick="deleteItem('{{ item.name }}')" class="btn btn-danger btn-small">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
@@ -87,9 +87,9 @@
                             </span>
                         </div>
                         <div class="item-actions">
-                            <a href="{{ url_for('edit_item', item_name=item.name) }}" class="btn btn-secondary btn-small">
+                            <button onclick="openEditModal('{{ item.name }}')" class="btn btn-secondary btn-small">
                                 <i class="fas fa-edit"></i> Edit
-                            </a>
+                            </button>
                             <button onclick="deleteItem('{{ item.name }}')" class="btn btn-danger btn-small">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
@@ -109,6 +109,146 @@
                     <p>No applications configured</p>
                 </div>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Item Modal -->
+<div id="add-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-plus"></i> Add New Item
+            </h2>
+            <button class="modal-close" onclick="closeModal('add-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="add-form">
+            <div class="form-group">
+                <label class="form-label" for="add-name">
+                    <i class="fas fa-tag"></i> Name *
+                </label>
+                <input type="text" id="add-name" class="form-input" placeholder="Enter item name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-type">
+                    <i class="fas fa-list"></i> Type
+                </label>
+                <select id="add-type" class="form-select">
+                    <option value="App">Application</option>
+                    <option value="Command">Command</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-executable-type">
+                    <i class="fas fa-cog"></i> Executable Type
+                </label>
+                <select id="add-executable-type" class="form-select" onchange="updateAddPathPlaceholder()">
+                    <option value="other">Other</option>
+                    <option value="pythonw">Python (pythonw)</option>
+                    <option value="pwsh">PowerShell</option>
+                    <option value="cmd">Command Prompt</option>
+                    <option value="powershell">Windows PowerShell</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-path">
+                    <i class="fas fa-folder"></i> Path *
+                </label>
+                <input type="text" id="add-path" class="form-input" placeholder="Enter executable path" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="add-command">
+                    <i class="fas fa-terminal"></i> Arguments/Command
+                </label>
+                <input type="text" id="add-command" class="form-input" placeholder="Enter command line arguments (optional)">
+            </div>
+        </form>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="saveNewItem()" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Item
+            </button>
+            <button type="button" onclick="closeModal('add-modal')" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Item Modal -->
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <i class="fas fa-edit"></i> Edit Item
+            </h2>
+            <button class="modal-close" onclick="closeModal('edit-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="edit-form">
+            <input type="hidden" id="edit-original-name">
+            
+            <div class="form-group">
+                <label class="form-label" for="edit-name">
+                    <i class="fas fa-tag"></i> Name *
+                </label>
+                <input type="text" id="edit-name" class="form-input" placeholder="Enter item name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-type">
+                    <i class="fas fa-list"></i> Type
+                </label>
+                <select id="edit-type" class="form-select">
+                    <option value="App">Application</option>
+                    <option value="Command">Command</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-executable-type">
+                    <i class="fas fa-cog"></i> Executable Type
+                </label>
+                <select id="edit-executable-type" class="form-select" onchange="updateEditPathPlaceholder()">
+                    <option value="other">Other</option>
+                    <option value="pythonw">Python (pythonw)</option>
+                    <option value="pwsh">PowerShell</option>
+                    <option value="cmd">Command Prompt</option>
+                    <option value="powershell">Windows PowerShell</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-path">
+                    <i class="fas fa-folder"></i> Path *
+                </label>
+                <input type="text" id="edit-path" class="form-input" placeholder="Enter executable path" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit-command">
+                    <i class="fas fa-terminal"></i> Arguments/Command
+                </label>
+                <input type="text" id="edit-command" class="form-input" placeholder="Enter command line arguments (optional)">
+            </div>
+        </form>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="saveEditItem()" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Item
+            </button>
+            <button type="button" onclick="closeModal('edit-modal')" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </button>
         </div>
     </div>
 </div>
@@ -223,6 +363,145 @@ async function copyRegistryPath() {
         }
     } catch (error) {
         showStatus('Failed to copy registry path', 'error');
+    }
+}
+
+// Modal functions
+const commonPaths = {
+    pythonw: "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe",
+    pwsh: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    cmd: "C:\\Windows\\System32\\cmd.exe",
+    powershell: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+};
+
+function updateAddPathPlaceholder() {
+    const executableType = document.getElementById('add-executable-type').value;
+    const pathInput = document.getElementById('add-path');
+    
+    if (commonPaths[executableType]) {
+        pathInput.value = commonPaths[executableType];
+        pathInput.placeholder = commonPaths[executableType];
+    } else {
+        pathInput.placeholder = "Enter executable path";
+    }
+}
+
+function updateEditPathPlaceholder() {
+    const executableType = document.getElementById('edit-executable-type').value;
+    const pathInput = document.getElementById('edit-path');
+    
+    if (commonPaths[executableType] && !pathInput.value) {
+        pathInput.value = commonPaths[executableType];
+    }
+}
+
+async function saveNewItem() {
+    const formData = {
+        name: document.getElementById('add-name').value.trim(),
+        type: document.getElementById('add-type').value,
+        path: document.getElementById('add-path').value.trim(),
+        command: document.getElementById('add-command').value.trim(),
+        executable_type: document.getElementById('add-executable-type').value
+    };
+    
+    // Validate required fields
+    if (!formData.name || !formData.path) {
+        showStatus('Name and Path are required fields', 'error');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('#add-modal .btn-primary');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    saveBtn.disabled = true;
+    
+    try {
+        const result = await apiCall('/add', 'POST', formData);
+        
+        if (result.success) {
+            showStatus('Item added successfully!', 'success');
+            closeModal('add-modal');
+            // Clear form
+            document.getElementById('add-form').reset();
+            updateAddPathPlaceholder();
+            // Refresh the page to show new item
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showStatus(`Failed to add item: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error adding item: ${error.message}`, 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
+async function openEditModal(itemName) {
+    try {
+        // Get item data
+        const items = await apiCall('/api/items');
+        const item = items.find(i => i.name === itemName);
+        
+        if (!item) {
+            showStatus('Item not found', 'error');
+            return;
+        }
+        
+        // Populate form
+        document.getElementById('edit-original-name').value = item.name;
+        document.getElementById('edit-name').value = item.name;
+        document.getElementById('edit-type').value = item.type;
+        document.getElementById('edit-executable-type').value = item.ExecutableType || 'other';
+        document.getElementById('edit-path').value = item.paths[0];
+        document.getElementById('edit-command').value = item.Command || '';
+        
+        // Open modal
+        openModal('edit-modal');
+    } catch (error) {
+        showStatus(`Error loading item data: ${error.message}`, 'error');
+    }
+}
+
+async function saveEditItem() {
+    const originalName = document.getElementById('edit-original-name').value;
+    const formData = {
+        name: document.getElementById('edit-name').value.trim(),
+        type: document.getElementById('edit-type').value,
+        path: document.getElementById('edit-path').value.trim(),
+        command: document.getElementById('edit-command').value.trim(),
+        executable_type: document.getElementById('edit-executable-type').value
+    };
+    
+    // Validate required fields
+    if (!formData.name || !formData.path) {
+        showStatus('Name and Path are required fields', 'error');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('#edit-modal .btn-primary');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+    saveBtn.disabled = true;
+    
+    try {
+        const result = await apiCall(`/edit/${encodeURIComponent(originalName)}`, 'POST', formData);
+        
+        if (result.success) {
+            showStatus('Item updated successfully!', 'success');
+            closeModal('edit-modal');
+            // Refresh the page to show updated item
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showStatus(`Failed to update item: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        showStatus(`Error updating item: ${error.message}`, 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
     }
 }
 </script>
