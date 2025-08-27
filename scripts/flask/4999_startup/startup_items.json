@@ -438,5 +438,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4998_Applist\\applist_app.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5555 - Terminal",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5555_terminal\\myterminal.py",
+    "ExecutableType": "pythonw"
   }
 ]
