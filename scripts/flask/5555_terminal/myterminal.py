@@ -12,11 +12,11 @@ app = Flask(__name__)
 class PowerShellSession:
     def __init__(self):
         self.current_directory = os.path.expanduser('~')  # Start in home directory
-        self.history_file = os.path.join(os.path.expanduser('~'), '.pwsh_web_history.json')
+        self.app_directory = os.path.dirname(os.path.abspath(__file__))
+        self.history_file = os.path.join(self.app_directory, '.pwsh_web_history.json')
         self.command_history = self._load_history()
         self.profile_loaded = False
         self.profile_error = None
-        self.app_directory = os.path.dirname(os.path.abspath(__file__))
         self.profile_path = os.path.join(self.app_directory, 'Microsoft.PowerShell_profile.ps1')
         
         # Try to load PowerShell profile on initialization
