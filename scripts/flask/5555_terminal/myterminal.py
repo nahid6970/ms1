@@ -14,6 +14,54 @@ class PowerShellSession:
         self.current_directory = os.path.expanduser('~')  # Start in home directory
         self.history_file = os.path.join(os.path.expanduser('~'), '.pwsh_web_history.json')
         self.command_history = self._load_history()
+        self.profile_loaded = False
+        self.profile_error = None
+        self.app_directory = os.path.dirname(os.path.abspath(__file__))
+        self.profile_path = os.path.join(self.app_directory, 'Microsoft.PowerShell_profile.ps1')
+        
+        # Try to load PowerShell profile on initialization
+        self._load_profile()
+    
+    def _load_profile(self):
+        """Load PowerShell profile if it exists"""
+        self.profile_error = None
+        try:
+            if os.path.exists(self.profile_path):
+                print(f"Found PowerShell profile: {self.profile_path}")
+                # First, validate the profile syntax
+                validate_result = subprocess.run(
+                    ['powershell', '-Command', f'Get-Command -Syntax; $null = Get-Content "{self.profile_path}" | ForEach-Object {{ [System.Management.Automation.PSParser]::Tokenize($_, [ref]$null) }}'],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+                )
+                
+                # Try to load the profile
+                result = subprocess.run(
+                    ['powershell', '-Command', f'. "{self.profile_path}"'],
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    cwd=self.current_directory,
+                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+                )
+                
+                if result.returncode == 0:
+                    self.profile_loaded = True
+                    print("✓ PowerShell profile loaded successfully")
+                    if result.stdout.strip():
+                        print(f"Profile output: {result.stdout.strip()}")
+                else:
+                    self.profile_error = result.stderr.strip()
+                    print(f"✗ Error loading profile: {self.profile_error}")
+                    print("Tip: Check your PowerShell profile for syntax errors")
+                    print(f"Profile location: {self.profile_path}")
+            else:
+                print(f"ℹ No PowerShell profile found at: {self.profile_path}")
+        except Exception as e:
+            self.profile_error = str(e)
+            print(f"Exception loading profile: {e}")
     
     def _load_history(self):
         """Load command history from file"""
@@ -52,6 +100,15 @@ class PowerShellSession:
         """Get command history"""
         return self.command_history
     
+    def get_profile_status(self):
+        """Get profile loading status"""
+        return {
+            'profile_loaded': self.profile_loaded,
+            'profile_path': self.profile_path,
+            'profile_exists': os.path.exists(self.profile_path),
+            'profile_error': self.profile_error
+        }
+    
     def execute_command(self, command):
         """Execute a command in PowerShell with persistent directory"""
         # Add to history before executing
@@ -62,9 +119,15 @@ class PowerShellSession:
             if command.strip().lower().startswith('cd ') or command.strip().lower() == 'cd':
                 return self._handle_cd_command(command.strip())
             
+            # Build the command with profile loading
+            full_command = command
+            if self.profile_loaded and os.path.exists(self.profile_path):
+                # Load profile before executing the command
+                full_command = f'. "{self.profile_path}"; {command}'
+            
             # For other commands, run in the current directory
             result = subprocess.run(
-                ['powershell', '-Command', command],
+                ['powershell', '-Command', full_command],
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -169,6 +232,17 @@ def get_history():
         'history': pwsh_session.get_history()
     })
 
+@app.route('/profile-status', methods=['GET'])
+def get_profile_status():
+    """Get PowerShell profile status"""
+    return jsonify(pwsh_session.get_profile_status())
+
+@app.route('/reload-profile', methods=['POST'])
+def reload_profile():
+    """Reload PowerShell profile"""
+    pwsh_session._load_profile()
+    return jsonify(pwsh_session.get_profile_status())
+
 # HTML Template (inline for simplicity)
 terminal_html = '''
 <!DOCTYPE html>
@@ -198,12 +272,62 @@ terminal_html = '''
             padding: 10px 20px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
         
         .header h1 {
             font-size: 18px;
             font-weight: normal;
+        }
+        
+        .profile-status {
+            font-size: 12px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .profile-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .profile-loaded {
+            background-color: #4CAF50;
+        }
+        
+        .profile-not-loaded {
+            background-color: #ff6b6b;
+        }
+        
+        .reload-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .reload-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .reload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .terminal-container {
@@ -292,6 +416,11 @@ terminal_html = '''
             margin-bottom: 10px;
         }
         
+        .success-text {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
         .loading {
             color: #888;
             font-style: italic;
@@ -317,14 +446,22 @@ terminal_html = '''
 </head>
 <body>
     <div class="header">
-        <h1>🔷 PowerShell Web Terminal</h1>
-        <span style="font-size: 12px; opacity: 0.8;">Local Session - Port 5555</span>
+        <div class="header-left">
+            <h1>🔷 PowerShell Web Terminal</h1>
+            <span style="font-size: 12px; opacity: 0.8;">Local Session - Port 5555</span>
+        </div>
+        <div class="profile-status" id="profile-status">
+            <span class="profile-indicator profile-not-loaded"></span>
+            <span>Profile: Loading...</span>
+            <button id="reload-profile-btn" class="reload-btn" title="Reload PowerShell Profile">🔄</button>
+        </div>
     </div>
     
     <div class="terminal-container">
         <div id="terminal-output" class="terminal-output">
             <div class="output-text">PowerShell Web Terminal Ready</div>
             <div class="output-text">Type your PowerShell commands below...</div>
+            <div id="profile-info" class="output-text" style="margin-top: 10px;"></div>
             <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333;">
             </div>
         </div>
@@ -340,9 +477,80 @@ terminal_html = '''
         const outputDiv = document.getElementById('terminal-output');
         const commandInput = document.getElementById('command-input');
         const executeBtn = document.getElementById('execute-btn');
+        const profileStatus = document.getElementById('profile-status');
+        const profileInfo = document.getElementById('profile-info');
+        const reloadProfileBtn = document.getElementById('reload-profile-btn');
         
         let commandHistory = [];
         let historyIndex = -1;
+        
+        // Load profile status
+        async function loadProfileStatus() {
+            try {
+                const response = await fetch('/profile-status');
+                const status = await response.json();
+                updateProfileDisplay(status);
+            } catch (error) {
+                console.error('Error loading profile status:', error);
+                const indicator = profileStatus.querySelector('.profile-indicator');
+                const text = profileStatus.querySelector('span:last-child');
+                indicator.className = 'profile-indicator profile-not-loaded';
+                text.textContent = 'Profile: Error';
+            }
+        }
+        
+        function updateProfileDisplay(status) {
+            const indicator = profileStatus.querySelector('.profile-indicator');
+            const text = profileStatus.querySelector('span:nth-child(2)');
+            
+            if (status.profile_loaded) {
+                indicator.className = 'profile-indicator profile-loaded';
+                text.textContent = 'Profile: Loaded';
+                profileInfo.innerHTML = `✓ PowerShell profile loaded successfully<br>📁 ${status.profile_path}`;
+                profileInfo.className = 'success-text';
+            } else if (status.profile_exists && status.profile_error) {
+                indicator.className = 'profile-indicator profile-not-loaded';
+                text.textContent = 'Profile: Error';
+                profileInfo.innerHTML = `✗ PowerShell profile has syntax errors:<br>📁 ${status.profile_path}<br>🔴 ${status.profile_error}<br><br>💡 Fix the syntax error and click the reload button (🔄) to try again.`;
+                profileInfo.className = 'error-text';
+            } else if (status.profile_exists) {
+                indicator.className = 'profile-indicator profile-not-loaded';
+                text.textContent = 'Profile: Error';
+                profileInfo.innerHTML = `⚠ PowerShell profile found but failed to load<br>📁 ${status.profile_path}`;
+                profileInfo.className = 'error-text';
+            } else {
+                indicator.className = 'profile-indicator profile-not-loaded';
+                text.textContent = 'Profile: Not Found';
+                profileInfo.innerHTML = `ℹ No PowerShell profile found<br>📁 Expected at: ${status.profile_path}`;
+                profileInfo.className = 'output-text';
+            }
+        }
+        
+        // Reload profile
+        async function reloadProfile() {
+            reloadProfileBtn.disabled = true;
+            reloadProfileBtn.textContent = '⏳';
+            
+            try {
+                const response = await fetch('/reload-profile', { method: 'POST' });
+                const status = await response.json();
+                updateProfileDisplay(status);
+                
+                // Add reload message to terminal
+                if (status.profile_loaded) {
+                    addToOutput('✓ PowerShell profile reloaded successfully', 'success-text');
+                } else if (status.profile_error) {
+                    addToOutput(`✗ Failed to reload profile: ${status.profile_error}`, 'error-text');
+                } else {
+                    addToOutput('⚠ Profile reload attempted but still not loaded', 'error-text');
+                }
+            } catch (error) {
+                addToOutput(`Error reloading profile: ${error.message}`, 'error-text');
+            } finally {
+                reloadProfileBtn.disabled = false;
+                reloadProfileBtn.textContent = '🔄';
+            }
+        }
         
         // Load command history on page load
         async function loadHistory() {
@@ -430,6 +638,7 @@ terminal_html = '''
         
         // Event listeners
         executeBtn.addEventListener('click', executeCommand);
+        reloadProfileBtn.addEventListener('click', reloadProfile);
         
         commandInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
@@ -452,9 +661,9 @@ terminal_html = '''
             }
         });
         
-        // Load history when page loads
-        loadHistory().then(() => {
-            // Focus input after history is loaded
+        // Load history and profile status when page loads
+        Promise.all([loadHistory(), loadProfileStatus()]).then(() => {
+            // Focus input after everything is loaded
             commandInput.focus();
         });
         
@@ -483,5 +692,15 @@ with open('templates/terminal.html', 'w', encoding='utf-8') as f:
 
 if __name__ == '__main__':
     print("Starting PowerShell Web Terminal on http://localhost:5555")
+    profile_status = pwsh_session.get_profile_status()
+    if profile_status['profile_loaded']:
+        print(f"✓ PowerShell profile loaded: {profile_status['profile_path']}")
+    elif profile_status['profile_exists']:
+        print(f"✗ PowerShell profile found but failed to load: {profile_status['profile_path']}")
+        if profile_status.get('profile_error'):
+            print(f"   Error: {profile_status['profile_error']}")
+        print("   Tip: Fix the syntax error in your profile and use the reload button in the web interface")
+    else:
+        print(f"ℹ No PowerShell profile found: {profile_status['profile_path']}")
     print("Press Ctrl+C to stop the server")
     app.run(host='0.0.0.0', port=5555, debug=True)
