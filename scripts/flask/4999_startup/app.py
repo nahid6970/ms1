@@ -134,7 +134,7 @@ class StartupManager:
             elif executable_type == "powershell":
                 full_command = f'"{path}" -Command {command}'
             elif executable_type == "ahk_v2":
-                full_command = f'"C:\Program Files\AutoHotkey\v2\AutoHotkey.exe" "{path}" {command}'
+                full_command = f'"C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe" "{path}" {command}'
             else: # other
                 if command:
                     full_command = f'"{path}" {command}'
