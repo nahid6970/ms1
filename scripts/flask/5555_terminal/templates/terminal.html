@@ -172,6 +172,18 @@
         let commandHistory = [];
         let historyIndex = -1;
         
+        // Load command history on page load
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const result = await response.json();
+                commandHistory = result.history || [];
+                console.log(`Loaded ${commandHistory.length} commands from history`);
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+        
         function addToOutput(content, className = 'output-text') {
             const div = document.createElement('div');
             div.className = className;
@@ -191,10 +203,9 @@
             const command = commandInput.value.trim();
             if (!command) return;
             
-            // Add command to history
-            commandHistory.unshift(command);
-            if (commandHistory.length > 100) {
-                commandHistory = commandHistory.slice(0, 100);
+            // Add command to local history (it's also saved server-side)
+            if (commandHistory[commandHistory.length - 1] !== command) {
+                commandHistory.push(command);
             }
             historyIndex = -1;
             
@@ -255,13 +266,13 @@
                 event.preventDefault();
                 if (historyIndex < commandHistory.length - 1) {
                     historyIndex++;
-                    commandInput.value = commandHistory[historyIndex];
+                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
                 }
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
                 if (historyIndex > 0) {
                     historyIndex--;
-                    commandInput.value = commandHistory[historyIndex];
+                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
                 } else if (historyIndex === 0) {
                     historyIndex = -1;
                     commandInput.value = '';
@@ -269,8 +280,11 @@
             }
         });
         
-        // Focus input on page load
-        commandInput.focus();
+        // Load history when page loads
+        loadHistory().then(() => {
+            // Focus input after history is loaded
+            commandInput.focus();
+        });
         
         // Clear command
         commandInput.addEventListener('keydown', function(event) {

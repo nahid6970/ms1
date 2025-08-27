@@ -4,6 +4,7 @@ import json
 import os
 import threading
 import time
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -11,9 +12,51 @@ app = Flask(__name__)
 class PowerShellSession:
     def __init__(self):
         self.current_directory = os.path.expanduser('~')  # Start in home directory
+        self.history_file = os.path.join(os.path.expanduser('~'), '.pwsh_web_history.json')
+        self.command_history = self._load_history()
+    
+    def _load_history(self):
+        """Load command history from file"""
+        try:
+            if os.path.exists(self.history_file):
+                with open(self.history_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    return data.get('commands', [])
+            return []
+        except Exception as e:
+            print(f"Error loading history: {e}")
+            return []
+    
+    def _save_history(self):
+        """Save command history to file"""
+        try:
+            history_data = {
+                'commands': self.command_history[-1000:],  # Keep only last 1000 commands
+                'last_updated': datetime.now().isoformat(),
+                'current_directory': self.current_directory
+            }
+            with open(self.history_file, 'w', encoding='utf-8') as f:
+                json.dump(history_data, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Error saving history: {e}")
+    
+    def _add_to_history(self, command):
+        """Add command to history"""
+        if command.strip():
+            # Avoid duplicates at the end of history
+            if not self.command_history or self.command_history[-1] != command:
+                self.command_history.append(command)
+            self._save_history()
+    
+    def get_history(self):
+        """Get command history"""
+        return self.command_history
     
     def execute_command(self, command):
         """Execute a command in PowerShell with persistent directory"""
+        # Add to history before executing
+        self._add_to_history(command)
+        
         try:
             # Handle cd commands specially to maintain directory state
             if command.strip().lower().startswith('cd ') or command.strip().lower() == 'cd':
@@ -54,6 +97,9 @@ class PowerShellSession:
     
     def _handle_cd_command(self, command):
         """Handle cd command to maintain directory state"""
+        # Add to history
+        self._add_to_history(command)
+        
         try:
             parts = command.split(' ', 1)
             if len(parts) == 1:  # Just 'cd' - go to home directory
@@ -81,6 +127,8 @@ class PowerShellSession:
             
             if os.path.exists(new_path) and os.path.isdir(new_path):
                 self.current_directory = new_path
+                # Save updated directory to history file
+                self._save_history()
                 return f"Location: {self.current_directory}", False
             else:
                 return f"cd: cannot access '{target}': No such file or directory\nLocation: {self.current_directory}", True
@@ -112,6 +160,13 @@ def execute_command():
     return jsonify({
         'output': output,
         'error': has_error
+    })
+
+@app.route('/history', methods=['GET'])
+def get_history():
+    """Get command history"""
+    return jsonify({
+        'history': pwsh_session.get_history()
     })
 
 # HTML Template (inline for simplicity)
@@ -289,6 +344,18 @@ terminal_html = '''
         let commandHistory = [];
         let historyIndex = -1;
         
+        // Load command history on page load
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const result = await response.json();
+                commandHistory = result.history || [];
+                console.log(`Loaded ${commandHistory.length} commands from history`);
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+        
         function addToOutput(content, className = 'output-text') {
             const div = document.createElement('div');
             div.className = className;
@@ -308,10 +375,9 @@ terminal_html = '''
             const command = commandInput.value.trim();
             if (!command) return;
             
-            // Add command to history
-            commandHistory.unshift(command);
-            if (commandHistory.length > 100) {
-                commandHistory = commandHistory.slice(0, 100);
+            // Add command to local history (it's also saved server-side)
+            if (commandHistory[commandHistory.length - 1] !== command) {
+                commandHistory.push(command);
             }
             historyIndex = -1;
             
@@ -372,13 +438,13 @@ terminal_html = '''
                 event.preventDefault();
                 if (historyIndex < commandHistory.length - 1) {
                     historyIndex++;
-                    commandInput.value = commandHistory[historyIndex];
+                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
                 }
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
                 if (historyIndex > 0) {
                     historyIndex--;
-                    commandInput.value = commandHistory[historyIndex];
+                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
                 } else if (historyIndex === 0) {
                     historyIndex = -1;
                     commandInput.value = '';
@@ -386,8 +452,11 @@ terminal_html = '''
             }
         });
         
-        // Focus input on page load
-        commandInput.focus();
+        // Load history when page loads
+        loadHistory().then(() => {
+            // Focus input after history is loaded
+            commandInput.focus();
+        });
         
         // Clear command
         commandInput.addEventListener('keydown', function(event) {
