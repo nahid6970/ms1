@@ -134,28 +134,14 @@ class StartupManager:
             elif executable_type == "powershell":
                 full_command = f'"{path}" -Command {command}'
             elif executable_type == "ahk_v2":
-                full_command = f'"C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe" "{path}" {command}'
+                full_command = f'"C:\Program Files\AutoHotkey\v2\AutoHotkey.exe" "{path}" {command}'
             else: # other
                 if command:
                     full_command = f'"{path}" {command}'
                 else:
                     full_command = f'"{path}"'
             
-            # Use subprocess.Popen with proper process detachment for Windows
-            try:
-                # Create a fully detached process that won't be affected by parent process
-                subprocess.Popen(
-                    full_command,
-                    shell=True,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
-                    close_fds=True
-                )
-            except Exception as e:
-                # Fallback to the exact same method as startup.py
-                os.system(f'start "" {full_command}')
+            os.system(f'start "" {full_command}')
             
             return {"success": True}
         except Exception as e:
