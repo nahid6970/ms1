@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerShell Web Terminal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #0078d4;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: normal;
+        }
+        
+        .terminal-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .terminal-output {
+            flex: 1;
+            background: #000000;
+            border: 1px solid #333;
+            padding: 15px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .terminal-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .prompt {
+            color: #0078d4;
+            font-weight: bold;
+        }
+        
+        .terminal-input {
+            flex: 1;
+            background: #2d2d30;
+            border: 1px solid #3e3e42;
+            color: #ffffff;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+        
+        .terminal-input:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 1px #0078d4;
+        }
+        
+        .execute-btn {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .execute-btn:hover {
+            background: #106ebe;
+        }
+        
+        .execute-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .command-line {
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        
+        .command-text {
+            color: #ffff00;
+        }
+        
+        .output-text {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        
+        .error-text {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            color: #888;
+            font-style: italic;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔷 PowerShell Web Terminal</h1>
+        <span style="font-size: 12px; opacity: 0.8;">Local Session - Port 5555</span>
+    </div>
+    
+    <div class="terminal-container">
+        <div id="terminal-output" class="terminal-output">
+            <div class="output-text">PowerShell Web Terminal Ready</div>
+            <div class="output-text">Type your PowerShell commands below...</div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333;">
+            </div>
+        </div>
+        
+        <div class="terminal-input-container">
+            <span class="prompt">PS></span>
+            <input type="text" id="command-input" class="terminal-input" placeholder="Enter PowerShell command..." autocomplete="off">
+            <button id="execute-btn" class="execute-btn">Execute</button>
+        </div>
+    </div>
+
+    <script>
+        const outputDiv = document.getElementById('terminal-output');
+        const commandInput = document.getElementById('command-input');
+        const executeBtn = document.getElementById('execute-btn');
+        
+        let commandHistory = [];
+        let historyIndex = -1;
+        
+        function addToOutput(content, className = 'output-text') {
+            const div = document.createElement('div');
+            div.className = className;
+            div.textContent = content;
+            outputDiv.appendChild(div);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+        
+        function addCommandToOutput(command) {
+            const div = document.createElement('div');
+            div.className = 'command-line';
+            div.innerHTML = `<span class="prompt">PS></span> <span class="command-text">${command}</span>`;
+            outputDiv.appendChild(div);
+        }
+        
+        async function executeCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+            
+            // Add command to history
+            commandHistory.unshift(command);
+            if (commandHistory.length > 100) {
+                commandHistory = commandHistory.slice(0, 100);
+            }
+            historyIndex = -1;
+            
+            // Show command in output
+            addCommandToOutput(command);
+            
+            // Clear input and disable button
+            commandInput.value = '';
+            executeBtn.disabled = true;
+            executeBtn.textContent = 'Executing...';
+            
+            // Show loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.textContent = 'Executing command...';
+            outputDiv.appendChild(loadingDiv);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+            
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command: command })
+                });
+                
+                const result = await response.json();
+                
+                // Remove loading indicator
+                outputDiv.removeChild(loadingDiv);
+                
+                // Add output
+                if (result.output) {
+                    const className = result.error ? 'error-text' : 'output-text';
+                    addToOutput(result.output, className);
+                }
+                
+            } catch (error) {
+                // Remove loading indicator
+                outputDiv.removeChild(loadingDiv);
+                addToOutput(`Error: ${error.message}`, 'error-text');
+            } finally {
+                // Re-enable button
+                executeBtn.disabled = false;
+                executeBtn.textContent = 'Execute';
+                commandInput.focus();
+            }
+        }
+        
+        // Event listeners
+        executeBtn.addEventListener('click', executeCommand);
+        
+        commandInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                executeCommand();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    commandInput.value = commandHistory[historyIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    commandInput.value = commandHistory[historyIndex];
+                } else if (historyIndex === 0) {
+                    historyIndex = -1;
+                    commandInput.value = '';
+                }
+            }
+        });
+        
+        // Focus input on page load
+        commandInput.focus();
+        
+        // Clear command
+        commandInput.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'l') {
+                event.preventDefault();
+                outputDiv.innerHTML = `
+                    <div class="output-text">Terminal cleared</div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333;"></div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
