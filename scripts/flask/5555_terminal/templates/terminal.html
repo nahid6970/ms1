@@ -319,7 +319,7 @@
         function addToOutput(content, className = 'output-text') {
             const div = document.createElement('div');
             div.className = className;
-            div.textContent = content;
+            div.innerHTML = content;
             outputDiv.appendChild(div);
             outputDiv.scrollTop = outputDiv.scrollHeight;
         }

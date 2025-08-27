@@ -1,8 +1,11 @@
 {
   "commands": [
     "ls",
-    "lsd"
+    "lsd",
+    "ls",
+    "lsd",
+    "cd"
   ],
-  "last_updated": "2025-08-27T15:13:55.053385",
+  "last_updated": "2025-08-27T15:19:14.272227",
   "current_directory": "C:\\Users\\nahid"
 }

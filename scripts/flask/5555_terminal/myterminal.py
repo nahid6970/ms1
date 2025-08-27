@@ -91,8 +91,8 @@ class PowerShellSession:
     def _add_to_history(self, command):
         """Add command to history"""
         if command.strip():
-            # Avoid duplicates at the end of history
-            if not self.command_history or self.command_history[-1] != command:
+            # Avoid duplicates in history
+            if command not in self.command_history:
                 self.command_history.append(command)
             self._save_history()
     
@@ -146,7 +146,7 @@ class PowerShellSession:
                 full_output.append(errors)
             
             # Show current directory
-            full_output.append(f"Location: {self.current_directory}")
+            full_output.append(f"<span class=\"command-text\">Location: {self.current_directory}</span>")
             
             final_output = '\n'.join(full_output) if full_output else 'Command completed successfully'
             has_error = bool(result.returncode != 0 or errors)
@@ -565,7 +565,7 @@ terminal_html = '''
         function addToOutput(content, className = 'output-text') {
             const div = document.createElement('div');
             div.className = className;
-            div.textContent = content;
+            div.innerHTML = content;
             outputDiv.appendChild(div);
             outputDiv.scrollTop = outputDiv.scrollHeight;
         }
