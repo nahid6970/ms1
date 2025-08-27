@@ -459,8 +459,6 @@ terminal_html = '''
     
     <div class="terminal-container">
         <div id="terminal-output" class="terminal-output">
-            <div class="output-text">PowerShell Web Terminal Ready</div>
-            <div class="output-text">Type your PowerShell commands below...</div>
             <div id="profile-info" class="output-text" style="margin-top: 10px;"></div>
             <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333;">
             </div>
