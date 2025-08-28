@@ -568,12 +568,10 @@ if __name__ == '__main__':
         
         # Try to run Flask, with fallback port handling
         try:
-            app.run(debug=False, host='0.0.0.0', port=4999, use_reloader=False, threaded=True)
+            app.run(debug=True, host='0.0.0.0', port=4999, use_reloader=False, threaded=True)
         except OSError as port_error:
             # If port 4999 is busy, try port 5000
             if "Address already in use" in str(port_error):
-                app.run(debug=False, host='0.0.0.0', port=5000, use_reloader=False, threaded=True)
-            else:
                 raise
         
     except Exception as e:
