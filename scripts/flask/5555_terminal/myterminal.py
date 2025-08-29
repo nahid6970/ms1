@@ -200,6 +200,14 @@ class PowerShellSession:
         except Exception as e:
             return f"Error changing directory: {str(e)}\nLocation: {self.current_directory}", True
 
+    def delete_from_history(self, command):
+        """Delete a command from history"""
+        if command.strip() and command in self.command_history:
+            self.command_history.remove(command)
+            self._save_history()
+            return True
+        return False
+
 # Global session (you could extend this to support multiple sessions)
 pwsh_session = PowerShellSession()
 
@@ -232,6 +240,16 @@ def get_history():
     return jsonify({
         'history': pwsh_session.get_history()
     })
+
+@app.route('/history/delete', methods=['POST'])
+def delete_history():
+    """Delete a command from history"""
+    data = request.json
+    command = data.get('command', '').strip()
+    if pwsh_session.delete_from_history(command):
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Command not found in history'})
 
 @app.route('/profile-status', methods=['GET'])
 def get_profile_status():

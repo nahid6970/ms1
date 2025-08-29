@@ -144,6 +144,20 @@
         .execute-btn:hover {
             background: #106ebe;
         }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .delete-btn:hover {
+            background: #ff4c4c;
+        }
         
         .execute-btn:disabled {
             background: #666;
@@ -221,6 +235,7 @@
             <span class="prompt">PS></span>
             <input type="text" id="command-input" class="terminal-input" placeholder="Enter PowerShell command..." autocomplete="off">
             <button id="execute-btn" class="execute-btn">Execute</button>
+            <button id="delete-btn" class="delete-btn" style="display: none;">Delete</button>
         </div>
     </div>
 
@@ -228,6 +243,7 @@
         const outputDiv = document.getElementById('terminal-output');
         const commandInput = document.getElementById('command-input');
         const executeBtn = document.getElementById('execute-btn');
+        const deleteBtn = document.getElementById('delete-btn');
         const profileStatus = document.getElementById('profile-status');
         const profileInfo = document.getElementById('profile-info');
         const reloadProfileBtn = document.getElementById('reload-profile-btn');
@@ -335,6 +351,7 @@
             if (!command) return;
 
             historyIndex = -1;
+            deleteBtn.style.display = 'none';
             
             // Show command in output
             addCommandToOutput(command);
@@ -349,7 +366,6 @@
             loadingDiv.className = 'loading';
             loadingDiv.textContent = 'Executing command...';
             outputDiv.appendChild(loadingDiv);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
             
             try {
                 const response = await fetch('/execute', {
@@ -385,9 +401,39 @@
                 commandInput.focus();
             }
         }
+
+        async function deleteCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+
+            try {
+                const response = await fetch('/history/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command: command })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    addToOutput(`Command deleted: ${command}`, 'success-text');
+                    commandInput.value = '';
+                    await loadHistory();
+                } else {
+                    addToOutput(`Error deleting command: ${result.error}`, 'error-text');
+                }
+            } catch (error) {
+                addToOutput(`Error: ${error.message}`, 'error-text');
+            }
+        }
+
+        // Event listeners
         
         // Event listeners
         executeBtn.addEventListener('click', executeCommand);
+        deleteBtn.addEventListener('click', deleteCommand);
         reloadProfileBtn.addEventListener('click', reloadProfile);
         
         commandInput.addEventListener('keydown', function(event) {
@@ -398,15 +444,18 @@
                 if (historyIndex < commandHistory.length - 1) {
                     historyIndex++;
                     commandInput.value = commandHistory[historyIndex];
+                    deleteBtn.style.display = 'inline-block';
                 }
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
                 if (historyIndex > 0) {
                     historyIndex--;
                     commandInput.value = commandHistory[historyIndex];
+                    deleteBtn.style.display = 'inline-block';
                 } else if (historyIndex === 0) {
                     historyIndex = -1;
                     commandInput.value = '';
+                    deleteBtn.style.display = 'none';
                 }
             }
         });
