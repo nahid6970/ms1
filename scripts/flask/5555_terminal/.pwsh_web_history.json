@@ -1,0 +1,10 @@
+{
+  "commands": [
+    "ls",
+    "lsd",
+    "cd",
+    "cd D:"
+  ],
+  "last_updated": "2025-08-29T11:06:17.344687",
+  "current_directory": "C:\\Users\\nahid"
+}
