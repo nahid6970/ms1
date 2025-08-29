@@ -539,6 +539,13 @@
         "winget_path": "C:\\Program Files\\qBittorrent\\qbittorrent.exe"
     },
     {
+        "name": "QuickLook",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "QL-Win.QuickLook",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
+    },
+    {
         "name": "Radarr",
         "scoop_name": "",
         "scoop_path": "",
@@ -819,10 +826,10 @@
         "winget_path": ""
     },
     {
-        "name": "QuickLook",
+        "name": "Twinkle Tray",
         "scoop_name": "",
         "scoop_path": "",
-        "winget_name": "QL-Win.QuickLook",
-        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
+        "winget_name": "xanderfrangos.twinkletray",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\twinkle-tray\\Twinkle Tray.exe"
     }
 ]
