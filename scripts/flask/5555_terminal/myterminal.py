@@ -208,6 +208,12 @@ class PowerShellSession:
             return True
         return False
 
+    def search_history(self, term):
+        """Search for a term in the history"""
+        if not term:
+            return self.get_history()
+        return [cmd for cmd in self.command_history if term in cmd][::-1]
+
 # Global session (you could extend this to support multiple sessions)
 pwsh_session = PowerShellSession()
 
@@ -250,6 +256,13 @@ def delete_history():
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': 'Command not found in history'})
+
+@app.route('/history/search', methods=['POST'])
+def search_history():
+    """Search for a term in the history"""
+    data = request.json
+    term = data.get('term', '').strip()
+    return jsonify({'history': pwsh_session.search_history(term)})
 
 @app.route('/profile-status', methods=['GET'])
 def get_profile_status():

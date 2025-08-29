@@ -4,8 +4,10 @@
     "cd D:",
     "clear",
     "ls",
-    "lsd"
+    "lsd",
+    "cls",
+    "cd c:"
   ],
-  "last_updated": "2025-08-29T11:25:37.323225",
-  "current_directory": "C:\\Users\\nahid"
+  "last_updated": "2025-08-29T11:27:24.236734",
+  "current_directory": "C:\\"
 }
