@@ -333,11 +333,7 @@
         async function executeCommand() {
             const command = commandInput.value.trim();
             if (!command) return;
-            
-            // Add command to local history (it's also saved server-side)
-            if (commandHistory[commandHistory.length - 1] !== command) {
-                commandHistory.push(command);
-            }
+
             historyIndex = -1;
             
             // Show command in output
@@ -374,6 +370,9 @@
                     const className = result.error ? 'error-text' : 'output-text';
                     addToOutput(result.output, className);
                 }
+
+                // Reload history
+                await loadHistory();
                 
             } catch (error) {
                 // Remove loading indicator
@@ -398,13 +397,13 @@
                 event.preventDefault();
                 if (historyIndex < commandHistory.length - 1) {
                     historyIndex++;
-                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                    commandInput.value = commandHistory[historyIndex];
                 }
             } else if (event.key === 'ArrowDown') {
                 event.preventDefault();
                 if (historyIndex > 0) {
                     historyIndex--;
-                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
+                    commandInput.value = commandHistory[historyIndex];
                 } else if (historyIndex === 0) {
                     historyIndex = -1;
                     commandInput.value = '';

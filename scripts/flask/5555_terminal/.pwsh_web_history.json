@@ -1,10 +1,13 @@
 {
   "commands": [
+    "cd",
+    "cd D:",
+    "lsdcd",
+    "clear",
     "ls",
     "lsd",
-    "cd",
-    "cd D:"
+    "cls"
   ],
-  "last_updated": "2025-08-29T11:06:17.344687",
+  "last_updated": "2025-08-29T11:18:10.135271",
   "current_directory": "C:\\Users\\nahid"
 }

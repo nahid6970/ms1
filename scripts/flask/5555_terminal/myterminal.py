@@ -91,14 +91,15 @@ class PowerShellSession:
     def _add_to_history(self, command):
         """Add command to history"""
         if command.strip():
-            # Avoid duplicates in history
-            if command not in self.command_history:
-                self.command_history.append(command)
+            # If command exists, remove it to re-add it at the end
+            if command in self.command_history:
+                self.command_history.remove(command)
+            self.command_history.append(command)
             self._save_history()
     
     def get_history(self):
-        """Get command history"""
-        return self.command_history
+        """Get command history in reverse order (latest first)"""
+        return self.command_history[::-1]
     
     def get_profile_status(self):
         """Get profile loading status"""
