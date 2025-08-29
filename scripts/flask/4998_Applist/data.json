@@ -672,6 +672,13 @@
         "winget_path": ""
     },
     {
+        "name": "UniGetUI ",
+        "scoop_name": "unigetui",
+        "scoop_path": "",
+        "winget_name": "MartiCliment.UniGetUI",
+        "winget_path": ""
+    },
+    {
         "name": "VCredist-aio",
         "scoop_name": "vcredist-aio",
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\vcredist-aio\\current\\VisualCppRedist_AIO_x86_x64.exe",
@@ -812,10 +819,10 @@
         "winget_path": ""
     },
     {
-        "name": "UniGetUI ",
-        "scoop_name": "unigetui",
+        "name": "QuickLook",
+        "scoop_name": "",
         "scoop_path": "",
-        "winget_name": "MartiCliment.UniGetUI",
-        "winget_path": ""
+        "winget_name": "QL-Win.QuickLook",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
     }
 ]

@@ -447,5 +447,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5555_terminal\\myterminal.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "QuickLook",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
+    ],
+    "Command": "/autorun",
+    "ExecutableType": "other"
   }
 ]
