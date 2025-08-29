@@ -3,11 +3,12 @@
     "cd",
     "cd D:",
     "clear",
-    "ls",
     "lsd",
     "cd c:",
-    "cls"
+    "cls",
+    "ls",
+    "echo fku"
   ],
-  "last_updated": "2025-08-29T19:52:53.021724",
+  "last_updated": "2025-08-29T21:02:10.670617",
   "current_directory": "C:\\Users\\nahid"
 }
