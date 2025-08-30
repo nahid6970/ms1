@@ -4,6 +4,8 @@ import threading
 import queue
 import time
 import json
+import subprocess
+import sys
 
 app = Flask(__name__)
 
@@ -18,23 +20,97 @@ audio_settings = {
     'bitrate': 128
 }
 stream_thread = None
-audio_stream = None
+virtual_cable_available = False
+
+def check_virtual_cable():
+    """Check if VB-Audio Virtual Cable is installed"""
+    global virtual_cable_available
+    p = pyaudio.PyAudio()
+    
+    try:
+        for i in range(p.get_device_count()):
+            device_info = p.get_device_info_by_index(i)
+            device_name = device_info['name'].lower()
+            
+            if ('cable' in device_name and 'output' in device_name) or 'virtual' in device_name:
+                if device_info['maxInputChannels'] > 0:
+                    virtual_cable_available = True
+                    print(f"Virtual audio device found: {device_info['name']}")
+                    break
+    except Exception as e:
+        print(f"Error checking for virtual cable: {e}")
+    finally:
+        p.terminate()
+    
+    return virtual_cable_available
+
+def setup_system_audio_capture():
+    """Setup system to route audio through virtual cable"""
+    if not virtual_cable_available:
+        return False
+    
+    try:
+        # This would require additional Windows API calls to automatically
+        # set the default audio device to virtual cable
+        # For now, we'll provide instructions to the user
+        return True
+    except Exception as e:
+        print(f"Error setting up system audio: {e}")
+        return False
+
+def get_virtual_audio_device():
+    """Get the virtual audio device for recording"""
+    p = pyaudio.PyAudio()
+    
+    try:
+        for i in range(p.get_device_count()):
+            device_info = p.get_device_info_by_index(i)
+            device_name = device_info['name'].lower()
+            
+            # Look for virtual cable output (which we use as input)
+            if (('cable' in device_name and 'output' in device_name) or 
+                ('virtual' in device_name and device_info['maxInputChannels'] > 0)):
+                print(f"Using virtual device: {device_info['name']}")
+                return i
+                
+    except Exception as e:
+        print(f"Error finding virtual device: {e}")
+    finally:
+        p.terminate()
+    
+    return None
 
 def audio_callback():
-    """Audio recording callback function"""
+    """Audio recording callback function using virtual audio device"""
     global is_streaming, audio_queue
     
     p = pyaudio.PyAudio()
     
-    # Get default input device
+    # Get virtual audio device
+    device_index = get_virtual_audio_device()
+    
+    if device_index is None:
+        print("No virtual audio device found!")
+        return
+    
     try:
+        device_info = p.get_device_info_by_index(device_index)
+        print(f"Recording from: {device_info['name']}")
+        
+        # Use device's native settings
+        channels = min(audio_settings['channels'], device_info['maxInputChannels'])
+        sample_rate = min(audio_settings['sample_rate'], int(device_info['defaultSampleRate']))
+        
         stream = p.open(
             format=audio_settings['format'],
-            channels=audio_settings['channels'],
-            rate=audio_settings['sample_rate'],
+            channels=channels,
+            rate=sample_rate,
             input=True,
+            input_device_index=device_index,
             frames_per_buffer=audio_settings['chunk_size']
         )
+        
+        print(f"Stream opened: {channels} channels, {sample_rate} Hz")
         
         while is_streaming:
             try:
@@ -55,7 +131,7 @@ def audio_callback():
     except Exception as e:
         print(f"Audio device error: {e}")
     finally:
-        if 'stream' in locals():
+        if 'stream' in locals() and stream:
             stream.stop_stream()
             stream.close()
         p.terminate()
@@ -102,7 +178,7 @@ def index():
         }
         
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -152,6 +228,16 @@ def index():
             min-width: 120px;
         }
         
+        .setup-btn {
+            background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+            color: white;
+        }
+        
+        .setup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4);
+        }
+        
         .start-btn {
             background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
@@ -167,6 +253,11 @@ def index():
             color: white;
         }
         
+        .stop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+        
         .hear-btn {
             background: linear-gradient(45deg, #2196F3, #1976D2);
             color: white;
@@ -179,11 +270,6 @@ def index():
         
         .hear-btn.playing {
             background: linear-gradient(45deg, #FF9800, #F57C00);
-        }
-        
-        .stop-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
         }
         
         .setting-group {
@@ -238,6 +324,11 @@ def index():
             color: white;
         }
         
+        .status.ready {
+            background: linear-gradient(45deg, #9C27B0, #BA68C8);
+            color: white;
+        }
+        
         .audio-controls {
             text-align: center;
             margin: 20px 0;
@@ -270,6 +361,26 @@ def index():
         .quality-low { background: #ffeb3b; color: #333; }
         .quality-medium { background: #ff9800; color: white; }
         .quality-high { background: #4caf50; color: white; }
+        
+        .setup-instructions {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .setup-instructions.error {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+        
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -277,15 +388,37 @@ def index():
         <h1>🎵 PC Audio Streamer</h1>
         
         <div id="status" class="status stopped">
-            Stream Stopped
+            Virtual Audio Setup Required
         </div>
         
         <div class="control-section">
-            <h3>🎛️ Stream Controls</h3>
+            <h3>🔧 Virtual Audio Setup</h3>
             <div class="button-group">
+                <button class="setup-btn" onclick="downloadVirtualCable()">📥 Download VB-Audio Cable</button>
                 <button class="start-btn" onclick="startStream()">Start Streaming</button>
                 <button class="stop-btn" onclick="stopStream()">Stop Streaming</button>
                 <button class="hear-btn" onclick="toggleAudio()" id="hearBtn" style="display: none;">🎧 Hear Stream</button>
+            </div>
+            
+            <div class="setup-instructions" id="setupInstructions">
+                <h4>📋 Setup Instructions:</h4>
+                <div class="step">
+                    <strong>Step 1:</strong> Download and install VB-Audio Virtual Cable (free software)
+                </div>
+                <div class="step">
+                    <strong>Step 2:</strong> After installation, go to Windows Sound Settings:
+                    <br>• Right-click speaker icon → Open Sound settings
+                    <br>• Select "CABLE Input" as your output device
+                </div>
+                <div class="step">
+                    <strong>Step 3:</strong> Your system audio will now route through the virtual cable
+                </div>
+                <div class="step">
+                    <strong>Step 4:</strong> Click "Start Streaming" - the app will automatically use "CABLE Output" to capture the audio
+                </div>
+                <div class="step">
+                    <strong>Step 5:</strong> Access the stream from your Android at: <strong>http://YOUR_PC_IP:5017</strong>
+                </div>
             </div>
             
             <div class="audio-controls">
@@ -305,7 +438,7 @@ def index():
             <div class="setting-group">
                 <label for="sampleRate">Sample Rate:</label>
                 <select id="sampleRate" onchange="updateSettings()">
-                    <option value="22050">22.05 kHz (Low)</option>
+                    <option value="22050">22.05 kHz (Low - Faster)</option>
                     <option value="44100" selected>44.1 kHz (CD Quality)</option>
                     <option value="48000">48 kHz (Professional)</option>
                 </select>
@@ -322,8 +455,8 @@ def index():
             <div class="setting-group">
                 <label for="channels">Channels:</label>
                 <select id="channels" onchange="updateSettings()">
-                    <option value="1">Mono</option>
-                    <option value="2" selected>Stereo</option>
+                    <option value="1">Mono (Faster)</option>
+                    <option value="2" selected>Stereo (Better)</option>
                 </select>
             </div>
             
@@ -332,7 +465,7 @@ def index():
                 <select id="chunkSize" onchange="updateSettings()">
                     <option value="512">512 (Low Latency)</option>
                     <option value="1024" selected>1024 (Balanced)</option>
-                    <option value="2048">2048 (High Quality)</option>
+                    <option value="2048">2048 (Stable)</option>
                 </select>
             </div>
         </div>
@@ -341,13 +474,47 @@ def index():
             <h3>📱 Connection Info</h3>
             <p><strong>Server Port:</strong> 5017</p>
             <p><strong>Stream Endpoint:</strong> /audio_stream</p>
-            <p><strong>Control Interface:</strong> This page</p>
-            <p><strong>Android Access:</strong> Use your PC's IP address with port 5017</p>
+            <p><strong>Android Access:</strong> http://YOUR_PC_IP:5017</p>
+            <p><strong>Current Setup Status:</strong> <span id="setupStatus">Checking...</span></p>
         </div>
     </div>
 
     <script>
         let isStreaming = false;
+        let virtualCableReady = false;
+        
+        function downloadVirtualCable() {
+            window.open('https://vb-audio.com/Cable/', '_blank');
+        }
+        
+        function checkSetup() {
+            fetch('/check_setup')
+                .then(response => response.json())
+                .then(data => {
+                    virtualCableReady = data.virtual_cable_available;
+                    document.getElementById('setupStatus').textContent = 
+                        virtualCableReady ? 'Virtual Cable Ready ✅' : 'Virtual Cable Not Found ❌';
+                    
+                    const instructions = document.getElementById('setupInstructions');
+                    if (virtualCableReady) {
+                        instructions.className = 'setup-instructions';
+                        instructions.innerHTML = `
+                            <h4>✅ Virtual Cable Detected!</h4>
+                            <div class="step">
+                                <strong>Quick Setup:</strong> Set "CABLE Input" as your Windows default audio device, then click "Start Streaming"
+                            </div>
+                            <div class="step">
+                                To change audio output: Right-click speaker icon → Open Sound settings → Select "CABLE Input" as output device
+                            </div>
+                        `;
+                    } else {
+                        instructions.className = 'setup-instructions error';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking setup:', error);
+                });
+        }
         
         function updateStatus(streaming) {
             const status = document.getElementById('status');
@@ -369,42 +536,28 @@ def index():
                 hearBtn.style.display = 'inline-block';
                 streamUrl.style.display = 'block';
                 audioPlayer.load();
-            } else {
-                status.textContent = 'Stream Stopped ⏹️';
-                status.className = 'status stopped';
+            } else if (virtualCableReady) {
+                status.textContent = 'Ready to Stream 🟢';
+                status.className = 'status ready';
                 hearBtn.style.display = 'none';
                 streamUrl.style.display = 'none';
                 audioPlayer.pause();
                 hearBtn.textContent = '🎧 Hear Stream';
                 hearBtn.className = 'hear-btn';
-            }
-        }
-        
-        function toggleAudio() {
-            const audioPlayer = document.getElementById('audioPlayer');
-            const hearBtn = document.getElementById('hearBtn');
-            
-            if (audioPlayer.paused) {
-                // Force reload the audio source to get fresh stream
-                const streamUrlPath = window.location.origin + '/audio_stream?t=' + Date.now();
-                document.getElementById('audioSource').src = streamUrlPath;
-                audioPlayer.load();
-                
-                audioPlayer.play().then(() => {
-                    hearBtn.textContent = '🔇 Stop Hearing';
-                    hearBtn.className = 'hear-btn playing';
-                }).catch(error => {
-                    console.error('Error playing audio:', error);
-                    alert('Error playing audio. Try refreshing the page or check if your browser supports audio streaming.');
-                });
             } else {
-                audioPlayer.pause();
-                hearBtn.textContent = '🎧 Hear Stream';
-                hearBtn.className = 'hear-btn';
+                status.textContent = 'Setup Required ⚙️';
+                status.className = 'status stopped';
+                hearBtn.style.display = 'none';
+                streamUrl.style.display = 'none';
             }
         }
         
         function startStream() {
+            if (!virtualCableReady) {
+                alert('Please install VB-Audio Virtual Cable first and restart the application.');
+                return;
+            }
+            
             fetch('/start_stream', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
@@ -429,6 +582,30 @@ def index():
                 .catch(error => {
                     console.error('Error:', error);
                 });
+        }
+        
+        function toggleAudio() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const hearBtn = document.getElementById('hearBtn');
+            
+            if (audioPlayer.paused) {
+                // Force reload the audio source to get fresh stream
+                const streamUrlPath = window.location.origin + '/audio_stream?t=' + Date.now();
+                document.getElementById('audioSource').src = streamUrlPath;
+                audioPlayer.load();
+                
+                audioPlayer.play().then(() => {
+                    hearBtn.textContent = '🔇 Stop Hearing';
+                    hearBtn.className = 'hear-btn playing';
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    alert('Error playing audio. Make sure the stream is active and try refreshing.');
+                });
+            } else {
+                audioPlayer.pause();
+                hearBtn.textContent = '🎧 Hear Stream';
+                hearBtn.className = 'hear-btn';
+            }
         }
         
         function updateSettings() {
@@ -493,8 +670,10 @@ def index():
             }
         }
         
-        // Check stream status on page load
+        // Check setup and stream status on page load
         window.onload = function() {
+            checkSetup();
+            
             fetch('/status')
                 .then(response => response.json())
                 .then(data => {
@@ -525,6 +704,15 @@ def index():
     """
     return render_template_string(html_template)
 
+@app.route('/check_setup')
+def check_setup():
+    """Check if virtual audio cable is available"""
+    cable_available = check_virtual_cable()
+    return jsonify({
+        'virtual_cable_available': cable_available,
+        'message': 'Virtual Cable Ready' if cable_available else 'Install VB-Audio Virtual Cable'
+    })
+
 @app.route('/start_stream', methods=['POST'])
 def start_stream():
     """Start audio streaming"""
@@ -532,6 +720,9 @@ def start_stream():
     
     if is_streaming:
         return jsonify({'status': 'already_running', 'message': 'Stream is already active'})
+    
+    if not virtual_cable_available:
+        return jsonify({'status': 'error', 'message': 'Virtual audio cable not available. Please install VB-Audio Virtual Cable.'})
     
     try:
         is_streaming = True
@@ -613,7 +804,8 @@ def get_status():
     """Get current streaming status and settings"""
     return jsonify({
         'streaming': is_streaming,
-        'settings': audio_settings
+        'settings': audio_settings,
+        'virtual_cable_available': virtual_cable_available
     })
 
 @app.route('/update_settings', methods=['POST'])
@@ -641,9 +833,18 @@ def update_settings():
 if __name__ == '__main__':
     print("PC Audio Streamer Server")
     print("=" * 40)
+    
+    # Check for virtual cable on startup
+    if check_virtual_cable():
+        print("✅ Virtual Audio Cable detected!")
+        print("Ready to stream system audio")
+    else:
+        print("❌ Virtual Audio Cable not found")
+        print("Please install VB-Audio Virtual Cable for system audio capture")
+        print("Download from: https://vb-audio.com/Cable/")
+    
     print(f"Starting server on port 5017...")
     print(f"Access the control panel at: http://localhost:5017")
-    print(f"Audio stream endpoint: http://localhost:5017/audio_stream")
     print(f"For Android access, use your PC's IP address instead of localhost")
     print("=" * 40)
     
