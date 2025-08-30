@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'dark_mode_toggle': 'Dark Mode - Inverts page colors',
       'text_highlighter': 'Text Highlighter - Highlight selected text',
       'youtube_ad_skipper': 'YouTube Ad Skipper - Skip/speed up ads',
+      'element_popper': 'Element Popper - Pop out elements with Ctrl+Click',
       'auto_clicker': 'Auto Clicker - Automated clicking functionality',
       'page_monitor': 'Page Monitor - Track page changes',
       'form_filler': 'Form Filler - Auto-fill form fields',
