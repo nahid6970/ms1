@@ -568,9 +568,9 @@ def index():
             <div class="setting-group">
                 <label for="sampleRate">Sample Rate:</label>
                 <select id="sampleRate" onchange="updateSettings()">
-                    <option value="22050">22kHz</option>
-                    <option value="44100" selected>44kHz</option>
-                    <option value="48000">48kHz</option>
+                    <option value="22050">22kHz (Fast)</option>
+                    <option value="44100" selected>44kHz (CD Quality)</option>
+                    <option value="48000">48kHz (Pro)</option>
                 </select>
                 <span class="quality-indicator quality-medium" id="sampleQuality">Medium</span>
             </div>
@@ -585,17 +585,17 @@ def index():
             <div class="setting-group">
                 <label for="channels">Channels:</label>
                 <select id="channels" onchange="updateSettings()">
-                    <option value="1">Mono</option>
-                    <option value="2" selected>Stereo</option>
+                    <option value="1">Mono (Fast)</option>
+                    <option value="2" selected>Stereo (Better)</option>
                 </select>
             </div>
             
             <div class="setting-group">
                 <label for="chunkSize">Buffer:</label>
                 <select id="chunkSize" onchange="updateSettings()">
-                    <option value="512">512</option>
-                    <option value="1024" selected>1024</option>
-                    <option value="2048">2048</option>
+                    <option value="512">512 (Low Delay)</option>
+                    <option value="1024" selected>1024 (Balanced)</option>
+                    <option value="2048">2048 (Stable)</option>
                 </select>
             </div>
             
