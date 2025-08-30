@@ -76,9 +76,17 @@ WordFormatNormal() {
     }
     WinActivate("ahk_exe WINWORD.EXE")
     Sleep(200)  ; Wait for activation
+    
+    ; Multiple methods to ensure ALL formatting is removed
     Send("^{Space}")  ; Remove character formatting
+    Sleep(50)
     Send("^q")        ; Remove paragraph formatting
-    ToolTip("Applied: Normal")
+    Sleep(50)
+    Send("^+n")       ; Apply Normal style
+    Sleep(50)
+    Send("^+z")       ; Clear formatting (alternative)
+    
+    ToolTip("Applied: Normal (all formatting cleared)")
     SetTimer(() => ToolTip(), -800)
 }
 
