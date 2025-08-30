@@ -202,6 +202,8 @@ def index():
             border: 2px solid #e0e0e0;
             border-radius: 15px;
             background: #f8f9fa;
+            overflow: hidden;
+            position: relative;
         }
         
         .control-section h3 {
@@ -277,20 +279,148 @@ def index():
             align-items: center;
             margin: 15px 0;
             gap: 15px;
+            flex-wrap: wrap;
         }
         
         .setting-group label {
             min-width: 120px;
             font-weight: 600;
             color: #555;
+            flex-shrink: 0;
         }
         
         select, input[type="range"] {
             flex: 1;
+            min-width: 0;
             padding: 8px 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
+            max-width: 100%;
+            box-sizing: border-box;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        select option {
+            padding: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+                max-width: calc(100vw - 20px);
+                overflow-x: hidden;
+            }
+            
+            .setting-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                overflow: hidden;
+            }
+            
+            .setting-group label {
+                min-width: auto;
+                text-align: left;
+            }
+            
+            select {
+                width: 100%;
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 12px;
+                max-width: calc(100vw - 80px); /* Ensure it fits within viewport */
+                overflow: hidden;
+            }
+            
+            select option {
+                font-size: 14px;
+                padding: 8px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            button {
+                width: 100%;
+                padding: 15px;
+                font-size: 16px;
+                max-width: 100%;
+                overflow: hidden;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .control-section {
+                padding: 15px;
+                margin: 15px 0;
+                overflow: hidden;
+            }
+            
+            .quality-indicator {
+                margin-left: 0;
+                margin-top: 5px;
+                display: block;
+                text-align: center;
+            }
+            
+            .step {
+                font-size: 13px;
+                padding: 8px;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .container {
+                margin: 5px;
+                padding: 15px;
+                border-radius: 10px;
+            }
+            
+            .setting-group {
+                margin: 10px 0;
+            }
+            
+            .setting-group label {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            
+            select, input[type="range"] {
+                width: 100%;
+                max-width: 100%;
+                font-size: 16px;
+            }
+            
+            .quality-indicator {
+                font-size: 11px;
+                padding: 3px 6px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 15px;
+            }
         }
         
         select:focus, input:focus {
@@ -438,34 +568,34 @@ def index():
             <div class="setting-group">
                 <label for="sampleRate">Sample Rate:</label>
                 <select id="sampleRate" onchange="updateSettings()">
-                    <option value="22050">22.05 kHz (Low - Faster)</option>
-                    <option value="44100" selected>44.1 kHz (CD Quality)</option>
-                    <option value="48000">48 kHz (Professional)</option>
+                    <option value="22050">22kHz</option>
+                    <option value="44100" selected>44kHz</option>
+                    <option value="48000">48kHz</option>
                 </select>
                 <span class="quality-indicator quality-medium" id="sampleQuality">Medium</span>
             </div>
             
             <div class="setting-group">
-                <label for="bitrate">Bitrate (kbps):</label>
+                <label for="bitrate">Bitrate:</label>
                 <input type="range" id="bitrate" min="64" max="320" value="128" step="32" onchange="updateBitrate()">
-                <span id="bitrateValue">128 kbps</span>
+                <span id="bitrateValue">128k</span>
                 <span class="quality-indicator quality-medium" id="bitrateQuality">Medium</span>
             </div>
             
             <div class="setting-group">
                 <label for="channels">Channels:</label>
                 <select id="channels" onchange="updateSettings()">
-                    <option value="1">Mono (Faster)</option>
-                    <option value="2" selected>Stereo (Better)</option>
+                    <option value="1">Mono</option>
+                    <option value="2" selected>Stereo</option>
                 </select>
             </div>
             
             <div class="setting-group">
-                <label for="chunkSize">Buffer Size:</label>
+                <label for="chunkSize">Buffer:</label>
                 <select id="chunkSize" onchange="updateSettings()">
-                    <option value="512">512 (Low Latency)</option>
-                    <option value="1024" selected>1024 (Balanced)</option>
-                    <option value="2048">2048 (Stable)</option>
+                    <option value="512">512</option>
+                    <option value="1024" selected>1024</option>
+                    <option value="2048">2048</option>
                 </select>
             </div>
             
@@ -678,7 +808,7 @@ def index():
         
         function updateBitrate() {
             const bitrate = document.getElementById('bitrate').value;
-            document.getElementById('bitrateValue').textContent = bitrate + ' kbps';
+            document.getElementById('bitrateValue').textContent = bitrate + 'k';
             updateSettings();
         }
         
