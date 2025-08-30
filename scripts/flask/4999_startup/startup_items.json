@@ -474,5 +474,14 @@
     ],
     "Command": "",
     "ExecutableType": "other"
+  },
+  {
+    "name": "Flask - 5017 - Audio Stream",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5017_audio_stream\\app.py",
+    "ExecutableType": "pythonw"
   }
 ]
