@@ -9,6 +9,76 @@ WordToggleItalic() {
     Send("^i")
     ToolTip("Toggled Italic")
     SetTimer(() => ToolTip(), -800)
+}
+
+WordColorRed() {
+    if (!WinExist("ahk_exe WINWORD.EXE")) {
+        ToolTip("Word not found!")
+        SetTimer(() => ToolTip(), -1000)
+        return
+    }
+    WinActivate("ahk_exe WINWORD.EXE")
+    Sleep(200)
+    
+    ; Open font color dropdown
+    Send("!hfc")        ; Alt+H (Home) + FC (Font Color)
+    Sleep(300)
+    
+    ; Search for red color #ee0000 and click it
+    try {
+        if (PixelSearch(&px, &py, 0, 0, A_ScreenWidth, A_ScreenHeight, 0xee0000, 3)) {
+            Click(px, py)
+            ToolTip("Applied: Red Color")
+            SetTimer(() => ToolTip(), -800)
+        } else {
+            ; Fallback: use arrow keys
+            Send("{Right}{Right}{Right}{Right}{Right}")
+            Send("{Enter}")
+            ToolTip("Applied: Red Color (fallback)")
+            SetTimer(() => ToolTip(), -800)
+        }
+    } catch {
+        ; If pixel search fails, use arrow navigation
+        Send("{Right}{Right}{Right}{Right}{Right}")
+        Send("{Enter}")
+        ToolTip("Applied: Red Color (fallback)")
+        SetTimer(() => ToolTip(), -800)
+    }
+}
+
+WordColorGreen() {
+    if (!WinExist("ahk_exe WINWORD.EXE")) {
+        ToolTip("Word not found!")
+        SetTimer(() => ToolTip(), -1000)
+        return
+    }
+    WinActivate("ahk_exe WINWORD.EXE")
+    Sleep(200)
+    
+    ; Open font color dropdown
+    Send("!hfc")        ; Alt+H (Home) + FC (Font Color)
+    Sleep(300)
+    
+    ; Search for green color #00b050 and click it
+    try {
+        if (PixelSearch(&px, &py, 0, 0, A_ScreenWidth, A_ScreenHeight, 0x00b050, 3)) {
+            Click(px, py)
+            ToolTip("Applied: Green Color")
+            SetTimer(() => ToolTip(), -800)
+        } else {
+            ; Fallback: use arrow keys
+            Send("{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}")
+            Send("{Enter}")
+            ToolTip("Applied: Green Color (fallback)")
+            SetTimer(() => ToolTip(), -800)
+        }
+    } catch {
+        ; If pixel search fails, use arrow navigation
+        Send("{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}")
+        Send("{Enter}")
+        ToolTip("Applied: Green Color (fallback)")
+        SetTimer(() => ToolTip(), -800)
+    }
 }#Requires AutoHotkey v2.0
 
 myGui := Gui("+AlwaysOnTop -Caption +ToolWindow -SysMenu +Owner", "Control Panel")
@@ -53,6 +123,12 @@ myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "B").OnEvent("C
 
 ; Italic toggle
 myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "I").OnEvent("Click", (*) => WordToggleItalic())
+
+; Red text color
+myGui.Add("Text", "xm y+5 Backgroundffffff cFF0000 w40 +Center", "R").OnEvent("Click", (*) => WordColorRed())
+
+; Green text color
+myGui.Add("Text", "xm y+5 Backgroundffffff c00FF00 w40 +Center", "G").OnEvent("Click", (*) => WordColorGreen())
 
 ; Show temporarily to calculate actual size
 myGui.Show("x0 y0 AutoSize")
