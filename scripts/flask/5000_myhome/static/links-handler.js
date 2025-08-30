@@ -1011,6 +1011,9 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
 
         const linkId = editLinkIndexInput.value;
+        const originalLink = links[linkId];
+        const groupName = originalLink.group || 'Ungrouped';
+
         const updatedLink = {
           name: document.getElementById('edit-link-name').value,
           group: document.getElementById('edit-link-group').value || undefined,
@@ -1032,7 +1035,6 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         // Preserve group-level properties if not explicitly changed in link edit
-        const originalLink = links[linkId];
         if (originalLink) {
           updatedLink.collapsible = originalLink.collapsible;
           updatedLink.display_style = originalLink.display_style;
@@ -1056,7 +1058,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
           if (response.ok) {
             editLinkPopup.classList.add('hidden');
-            fetchAndDisplayLinks();
+            await fetchAndDisplayLinks();
+
+            // Re-open the collapsible group if it was open
+            if (originalLink.collapsible) {
+              const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+              if (groupElement) {
+                const content = groupElement.querySelector('.collapsible-group-content');
+                const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+                if (content && toggleBtn) {
+                  content.classList.add('expanded');
+                  toggleBtn.textContent = '▲';
+                  groupElement.classList.add('expanded');
+                  moveToExpandedRow(groupElement);
+                }
+              }
+            }
+
           } else {
             alert('Failed to update link.');
           }
