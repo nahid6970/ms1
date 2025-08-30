@@ -28,6 +28,13 @@
         "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Microsoft\\WinGet\\Links\\aria2c.exe"
     },
     {
+        "name": "Audio Share (cmd)",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "mkckr0.AudioShare",
+        "winget_path": ""
+    },
+    {
         "name": "AudioRelay",
         "scoop_name": "",
         "scoop_path": "",
@@ -679,6 +686,13 @@
         "winget_path": ""
     },
     {
+        "name": "Twinkle Tray",
+        "scoop_name": "",
+        "scoop_path": "",
+        "winget_name": "xanderfrangos.twinkletray",
+        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\twinkle-tray\\Twinkle Tray.exe"
+    },
+    {
         "name": "UniGetUI ",
         "scoop_name": "unigetui",
         "scoop_path": "",
@@ -824,12 +838,5 @@
         "scoop_path": "C:\\Users\\nahid\\scoop\\apps\\zoxide\\current\\zoxide.exe",
         "winget_name": "",
         "winget_path": ""
-    },
-    {
-        "name": "Twinkle Tray",
-        "scoop_name": "",
-        "scoop_path": "",
-        "winget_name": "xanderfrangos.twinkletray",
-        "winget_path": "C:\\Users\\nahid\\AppData\\Local\\Programs\\twinkle-tray\\Twinkle Tray.exe"
     }
 ]
