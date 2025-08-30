@@ -913,6 +913,11 @@ div.toggle-container {
   border: 1px rgb(255, 118, 83) solid;
 }
 
+.lock-icon {
+  margin-left: 5px;
+  color: #ffc107;
+}
+
 #horizontal-stack-popup .popup-content-inner .link-item {
   flex-grow: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

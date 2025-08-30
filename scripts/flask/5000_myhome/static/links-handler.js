@@ -534,13 +534,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Function to create a regular group
-  function createRegularGroup(groupName, elements, links) {
+  function createRegularGroup(groupName, elements, linksInGroup) {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'link-group';
     groupDiv.dataset.groupName = groupName;
 
-    const firstLinkInGroup = links[0];
+    const firstLinkInGroup = linksInGroup[0];
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
       groupDiv.classList.add('horizontal-stack');
     }
@@ -594,6 +593,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const isPasswordProtected = firstLinkInGroup.link.password_protect;
 
+      if (isPasswordProtected) {
+        const lockIcon = document.createElement('span');
+        lockIcon.className = 'lock-icon';
+        lockIcon.innerHTML = '<i class="nf nf-fa-lock"></i>';
+        groupTitle.appendChild(lockIcon);
+      }
+
       icon.onclick = () => {
         if (isPasswordProtected) {
           const password = prompt("Please enter the password to extend the group:");
@@ -609,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function () {
         elements.forEach(element => {
           const clonedElement = element.cloneNode(true);
           const linkIndex = parseInt(clonedElement.dataset.linkIndex);
-          const linkData = links.find(l => l.index === linkIndex);
+          const linkData = linksInGroup.find(l => l.index === linkIndex);
 
           clonedElement.addEventListener('dragstart', handleDragStart);
           clonedElement.addEventListener('dragover', handleDragOver);
@@ -669,7 +675,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const groupList = document.createElement('ul');
       groupList.className = 'link-group-content';
       // Set display style based on the first link in the group, or default to flex
-      const firstLinkInGroupDisplay = links[0];
+      const firstLinkInGroupDisplay = linksInGroup[0];
       if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
         groupList.style.display = firstLinkInGroupDisplay.link.display_style;
       } else {
@@ -1031,6 +1037,7 @@ document.addEventListener('DOMContentLoaded', function () {
           updatedLink.collapsible = originalLink.collapsible;
           updatedLink.display_style = originalLink.display_style;
           updatedLink.horizontal_stack = originalLink.horizontal_stack;
+          updatedLink.password_protect = originalLink.password_protect;
           updatedLink.top_name = originalLink.top_name;
           updatedLink.top_bg_color = originalLink.top_bg_color;
           updatedLink.top_text_color = originalLink.top_text_color;
@@ -1312,11 +1319,31 @@ document.addEventListener('DOMContentLoaded', function () {
       const movedLink = currentLinks[oldIndex];
       const groupName = movedLink.group || 'Ungrouped';
 
+      // Preserve group-level properties
+      const groupProperties = {
+        collapsible: movedLink.collapsible,
+        display_style: movedLink.display_style,
+        horizontal_stack: movedLink.horizontal_stack,
+        password_protect: movedLink.password_protect,
+        top_name: movedLink.top_name,
+        top_bg_color: movedLink.top_bg_color,
+        top_text_color: movedLink.top_text_color,
+        top_border_color: movedLink.top_border_color,
+        top_hover_color: movedLink.top_hover_color,
+      };
+
       // Remove the dragged link from its original position
       const [draggedLink] = currentLinks.splice(oldIndex, 1);
 
       // Insert the dragged link at the new position
       currentLinks.splice(newIndex, 0, draggedLink);
+
+      // Update all links in the same group with the preserved properties
+      currentLinks.forEach(link => {
+        if ((link.group || 'Ungrouped') === groupName) {
+          Object.assign(link, groupProperties);
+        }
+      });
 
       // Update the entire list of links on the server
       await fetch('/api/links', {
