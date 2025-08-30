@@ -527,7 +527,6 @@ def index():
                 <button class="setup-btn" onclick="downloadVirtualCable()">📥 Download VB-Audio Cable</button>
                 <button class="start-btn" onclick="startStream()">Start Streaming</button>
                 <button class="stop-btn" onclick="stopStream()">Stop Streaming</button>
-                <button class="hear-btn" onclick="toggleAudio()" id="hearBtn" style="display: none;">🎧 Hear Stream</button>
             </div>
             
             <div class="setup-instructions" id="setupInstructions">
@@ -602,6 +601,12 @@ def index():
             <div style="text-align: center; margin-top: 20px;">
                 <button class="hear-btn" onclick="applyAndListen()" style="font-size: 18px; padding: 15px 30px;">
                     🎵 Apply Settings & Listen
+                </button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="hear-btn" onclick="toggleAudio()" id="hearBtn" style="display: none; font-size: 16px; padding: 12px 25px;">
+                    🎧 Hear Stream
                 </button>
             </div>
         </div>
