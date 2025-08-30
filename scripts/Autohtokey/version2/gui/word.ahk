@@ -1,4 +1,15 @@
-#Requires AutoHotkey v2.0
+WordToggleItalic() {
+    if (!WinExist("ahk_exe WINWORD.EXE")) {
+        ToolTip("Word not found!")
+        SetTimer(() => ToolTip(), -1000)
+        return
+    }
+    WinActivate("ahk_exe WINWORD.EXE")
+    Sleep(200)
+    Send("^i")
+    ToolTip("Toggled Italic")
+    SetTimer(() => ToolTip(), -800)
+}#Requires AutoHotkey v2.0
 
 myGui := Gui("+AlwaysOnTop -Caption +ToolWindow -SysMenu +Owner", "Control Panel")
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
@@ -13,9 +24,14 @@ myGui.Add("Text", "xm y+5 Backgroundffffff cec2d47 w40 +Center", "󰅗").OnEvent
 myGui.Add("Text", "xm y+5 Backgroundffffff c1E90FF w40 +Center", "󰜉").OnEvent("Click", (*) => Reload())
 
 ; === NEW WORD FORMATTING BUTTONS ===
+; Add separator line
+myGui.Add("Text", "xm y+10 Backgroundcccccc w40 h2", "")
 
 ; Normal text (remove formatting)
 myGui.Add("Text", "xm y+5 Backgroundffffff c000000 w40 +Center", "N").OnEvent("Click", (*) => WordFormatNormal())
+
+; Normal text but keep bullets
+myGui.Add("Text", "xm y+5 Backgroundffffff c800080 w40 +Center", "N•").OnEvent("Click", (*) => WordFormatNormalKeepBullets())
 
 ; Title formatting
 myGui.Add("Text", "xm y+5 Backgroundffffff c8B4513 w40 +Center", "T").OnEvent("Click", (*) => WordFormatTitle())
@@ -162,7 +178,7 @@ WordToggleBold() {
     SetTimer(() => ToolTip(), -800)
 }
 
-WordToggleItalic() {
+WordFormatNormalKeepBullets() {
     if (!WinExist("ahk_exe WINWORD.EXE")) {
         ToolTip("Word not found!")
         SetTimer(() => ToolTip(), -1000)
@@ -170,8 +186,12 @@ WordToggleItalic() {
     }
     WinActivate("ahk_exe WINWORD.EXE")
     Sleep(200)
-    Send("^i")
-    ToolTip("Toggled Italic")
+    
+    ; Only remove character formatting (bold, italic, font changes)
+    ; but keep paragraph formatting (bullets, numbering, etc.)
+    Send("^{Space}")  ; Remove character formatting only
+    
+    ToolTip("Applied: Normal (kept bullets)")
     SetTimer(() => ToolTip(), -800)
 }
 
