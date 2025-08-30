@@ -1,85 +1,4 @@
-WordToggleItalic() {
-    if (!WinExist("ahk_exe WINWORD.EXE")) {
-        ToolTip("Word not found!")
-        SetTimer(() => ToolTip(), -1000)
-        return
-    }
-    WinActivate("ahk_exe WINWORD.EXE")
-    Sleep(200)
-    Send("^i")
-    ToolTip("Toggled Italic")
-    SetTimer(() => ToolTip(), -800)
-}
-
-WordColorRed() {
-    if (!WinExist("ahk_exe WINWORD.EXE")) {
-        ToolTip("Word not found!")
-        SetTimer(() => ToolTip(), -1000)
-        return
-    }
-    WinActivate("ahk_exe WINWORD.EXE")
-    Sleep(200)
-    
-    ; Open font color dropdown
-    Send("!hfc")        ; Alt+H (Home) + FC (Font Color)
-    Sleep(300)
-    
-    ; Search for red color #ee0000 and click it
-    try {
-        if (PixelSearch(&px, &py, 0, 0, A_ScreenWidth, A_ScreenHeight, 0xee0000, 3)) {
-            Click(px, py)
-            ToolTip("Applied: Red Color")
-            SetTimer(() => ToolTip(), -800)
-        } else {
-            ; Fallback: use arrow keys
-            Send("{Right}{Right}{Right}{Right}{Right}")
-            Send("{Enter}")
-            ToolTip("Applied: Red Color (fallback)")
-            SetTimer(() => ToolTip(), -800)
-        }
-    } catch {
-        ; If pixel search fails, use arrow navigation
-        Send("{Right}{Right}{Right}{Right}{Right}")
-        Send("{Enter}")
-        ToolTip("Applied: Red Color (fallback)")
-        SetTimer(() => ToolTip(), -800)
-    }
-}
-
-WordColorGreen() {
-    if (!WinExist("ahk_exe WINWORD.EXE")) {
-        ToolTip("Word not found!")
-        SetTimer(() => ToolTip(), -1000)
-        return
-    }
-    WinActivate("ahk_exe WINWORD.EXE")
-    Sleep(200)
-    
-    ; Open font color dropdown
-    Send("!hfc")        ; Alt+H (Home) + FC (Font Color)
-    Sleep(300)
-    
-    ; Search for green color #00b050 and click it
-    try {
-        if (PixelSearch(&px, &py, 0, 0, A_ScreenWidth, A_ScreenHeight, 0x00b050, 3)) {
-            Click(px, py)
-            ToolTip("Applied: Green Color")
-            SetTimer(() => ToolTip(), -800)
-        } else {
-            ; Fallback: use arrow keys
-            Send("{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}")
-            Send("{Enter}")
-            ToolTip("Applied: Green Color (fallback)")
-            SetTimer(() => ToolTip(), -800)
-        }
-    } catch {
-        ; If pixel search fails, use arrow navigation
-        Send("{Right}{Right}{Right}{Right}{Right}{Right}{Right}{Right}")
-        Send("{Enter}")
-        ToolTip("Applied: Green Color (fallback)")
-        SetTimer(() => ToolTip(), -800)
-    }
-}#Requires AutoHotkey v2.0
+#Requires AutoHotkey v2.0
 
 myGui := Gui("+AlwaysOnTop -Caption +ToolWindow -SysMenu +Owner", "Control Panel")
 myGui.SetFont("s12 Bold", "Jetbrainsmono nfp")
@@ -262,6 +181,19 @@ WordToggleBold() {
     SetTimer(() => ToolTip(), -800)
 }
 
+WordToggleItalic() {
+    if (!WinExist("ahk_exe WINWORD.EXE")) {
+        ToolTip("Word not found!")
+        SetTimer(() => ToolTip(), -1000)
+        return
+    }
+    WinActivate("ahk_exe WINWORD.EXE")
+    Sleep(200)
+    Send("^i")
+    ToolTip("Toggled Italic")
+    SetTimer(() => ToolTip(), -800)
+}
+
 WordFormatNormalKeepBullets() {
     if (!WinExist("ahk_exe WINWORD.EXE")) {
         ToolTip("Word not found!")
@@ -277,6 +209,116 @@ WordFormatNormalKeepBullets() {
     
     ToolTip("Applied: Normal (kept bullets)")
     SetTimer(() => ToolTip(), -800)
+}
+
+; === IMPROVED COLOR FUNCTIONS ===
+WordColorRed() {
+    if (!WinExist("ahk_exe WINWORD.EXE")) {
+        ToolTip("Word not found!")
+        SetTimer(() => ToolTip(), -1000)
+        return
+    }
+    WinActivate("ahk_exe WINWORD.EXE")
+    Sleep(200)
+    
+    ; Open font color dropdown
+    Send("!hfc")        ; Alt+H (Home) + FC (Font Color)
+    Sleep(400)
+    
+    ; Try to find the color palette by looking for the standard color row
+    if (FindColorPalette(&paletteX, &paletteY)) {
+        ; Click on red color (2nd position in the standard row)
+        Click(paletteX + 25, paletteY)  ; Approximate offset for red
+        ToolTip("Applied: Red Color")
+        SetTimer(() => ToolTip(), -800)
+    } else {
+        ; Fallback: use keyboard navigation to standard colors
+        Send("{Down}{Down}")  ; Navigate to standard colors row
+        Send("{Right}{Right}")  ; Navigate to red position
+        Send("{Enter}")
+        ToolTip("Applied: Red Color (keyboard)")
+        SetTimer(() => ToolTip(), -800)
+    }
+}
+
+WordColorGreen() {
+    if (!WinExist("ahk_exe WINWORD.EXE")) {
+        ToolTip("Word not found!")
+        SetTimer(() => ToolTip(), -1000)
+        return
+    }
+    WinActivate("ahk_exe WINWORD.EXE")
+    Sleep(200)
+    
+    ; Open font color dropdown
+    Send("!hfc")        ; Alt+H (Home) + FC (Font Color)
+    Sleep(400)
+    
+    ; Try to find the color palette by looking for the standard color row
+    if (FindColorPalette(&paletteX, &paletteY)) {
+        ; Click on green color (6th position in the standard row)
+        Click(paletteX + 125, paletteY)  ; Approximate offset for green
+        ToolTip("Applied: Green Color")
+        SetTimer(() => ToolTip(), -800)
+    } else {
+        ; Fallback: use keyboard navigation to standard colors
+        Send("{Down}{Down}")  ; Navigate to standard colors row
+        Send("{Right}{Right}{Right}{Right}{Right}{Right}")  ; Navigate to green position
+        Send("{Enter}")
+        ToolTip("Applied: Green Color (keyboard)")
+        SetTimer(() => ToolTip(), -800)
+    }
+}
+
+; Function to find the color palette by looking for multiple consecutive palette colors
+FindColorPalette(&paletteX, &paletteY) {
+    ; Search in a limited area where the color dropdown typically appears
+    ; (top portion of screen where ribbon/menus are)
+    searchTop := 0
+    searchBottom := A_ScreenHeight // 3  ; Only search top third of screen
+    
+    ; Standard Word color palette row colors (in hex)
+    ; c00000 ee0000 ffc000 ffff00 92d050 00b050 00b0f0 0070c0 002060 7030a0
+    
+    ; Method 1: Look for dark red (c00000) and verify the sequence
+    if (PixelSearch(&x1, &y1, 0, searchTop, A_ScreenWidth, searchBottom, 0xc00000, 8)) {
+        ; Verify this is part of the palette by checking for red (ee0000) nearby
+        if (PixelSearch(&x2, &y2, x1 + 10, y1 - 8, x1 + 40, y1 + 8, 0xee0000, 8)) {
+            ; Further verify by checking for yellow (ffff00) in the sequence
+            if (PixelSearch(&x3, &y3, x1 + 50, y1 - 8, x1 + 100, y1 + 8, 0xffff00, 8)) {
+                paletteX := x1
+                paletteY := y1
+                return true
+            }
+        }
+    }
+    
+    ; Method 2: Look for yellow and work backwards/forwards
+    if (PixelSearch(&x1, &y1, 0, searchTop, A_ScreenWidth, searchBottom, 0xffff00, 8)) {
+        ; Check if we can find red to the left (indicating this is the palette)
+        if (PixelSearch(&x2, &y2, x1 - 60, y1 - 8, x1 - 20, y1 + 8, 0xee0000, 8)) {
+            ; Check for green to the right
+            if (PixelSearch(&x3, &y3, x1 + 10, y1 - 8, x1 + 50, y1 + 8, 0x00b050, 8)) {
+                ; Calculate start position (red should be about 25 pixels left of yellow)
+                paletteX := x1 - 50
+                paletteY := y1
+                return true
+            }
+        }
+    }
+    
+    ; Method 3: Look for green and verify context
+    if (PixelSearch(&x1, &y1, 0, searchTop, A_ScreenWidth, searchBottom, 0x00b050, 8)) {
+        ; Check if yellow is to the left
+        if (PixelSearch(&x2, &y2, x1 - 50, y1 - 8, x1 - 10, y1 + 8, 0xffff00, 8)) {
+            ; Calculate approximate start of palette
+            paletteX := x1 - 100  ; Green is about 100 pixels from start
+            paletteY := y1
+            return true
+        }
+    }
+    
+    return false
 }
 
 ; === WORD HOTKEYS (Only active in Word) ===
