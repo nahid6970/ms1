@@ -468,6 +468,12 @@ def index():
                     <option value="2048">2048 (Stable)</option>
                 </select>
             </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="hear-btn" onclick="applyAndListen()" style="font-size: 18px; padding: 15px 30px;">
+                    🎵 Apply Settings & Listen
+                </button>
+            </div>
         </div>
         
         <div class="control-section">
@@ -606,6 +612,43 @@ def index():
                 hearBtn.textContent = '🎧 Hear Stream';
                 hearBtn.className = 'hear-btn';
             }
+        }
+        
+        function applyAndListen() {
+            // First update settings
+            updateSettings();
+            
+            // Wait a moment for settings to apply
+            setTimeout(() => {
+                const audioPlayer = document.getElementById('audioPlayer');
+                const hearBtn = document.getElementById('hearBtn');
+                
+                // If currently playing, stop first
+                if (!audioPlayer.paused) {
+                    audioPlayer.pause();
+                }
+                
+                // If stream is active, restart audio with new settings
+                if (isStreaming) {
+                    // Reload audio with new settings
+                    const streamUrlPath = window.location.origin + '/audio_stream?t=' + Date.now();
+                    document.getElementById('audioSource').src = streamUrlPath;
+                    audioPlayer.load();
+                    
+                    // Start playing with new settings
+                    audioPlayer.play().then(() => {
+                        if (hearBtn.style.display !== 'none') {
+                            hearBtn.textContent = '🔇 Stop Hearing';
+                            hearBtn.className = 'hear-btn playing';
+                        }
+                    }).catch(error => {
+                        console.error('Error playing audio:', error);
+                        alert('Error applying new settings. Try stopping and starting the stream.');
+                    });
+                } else {
+                    alert('Please start streaming first, then use this button to apply settings and listen.');
+                }
+            }, 500);
         }
         
         function updateSettings() {
