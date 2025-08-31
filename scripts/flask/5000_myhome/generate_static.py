@@ -13,14 +13,16 @@ from datetime import datetime
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = SCRIPT_DIR  # Assuming the script is in the project root
 
-# Path to the data file.
+# Path to the data files
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\data.json'
+SIDEBAR_BUTTONS_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\sidebar_buttons.json'
 
 # Paths to source files
 TEMPLATE_FILE = os.path.join(PROJECT_ROOT, 'templates', 'index.html')
 CSS_FILE = os.path.join(PROJECT_ROOT, 'static', 'style.css')
 MAIN_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'main.js')
 LINKS_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'links-handler.js')
+SIDEBAR_HANDLER_JS_FILE = os.path.join(PROJECT_ROOT, 'static', 'sidebar-handler.js')
 
 # Path to the output file
 OUTPUT_HTML_FILE = r"C:\Users\nahid\ms\db\5000_myhome\myhome.html"
@@ -32,6 +34,15 @@ def read_data():
         print(f"Warning: Data file not found at {DATA_FILE}")
         return []
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def read_sidebar_buttons():
+    """Read sidebar buttons from JSON file"""
+    if not os.path.exists(SIDEBAR_BUTTONS_FILE):
+        print(f"Warning: Sidebar buttons file not found at {SIDEBAR_BUTTONS_FILE}")
+        return []
+    with open(SIDEBAR_BUTTONS_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
@@ -58,15 +69,18 @@ def generate_static_html():
     css_content = read_file(CSS_FILE)
     main_js_content = read_file(MAIN_JS_FILE)
     links_handler_js_content = read_file(LINKS_HANDLER_JS_FILE)
+    sidebar_handler_js_content = read_file(SIDEBAR_HANDLER_JS_FILE)
 
     # Read the data
     links_data = read_data()
+    sidebar_buttons_data = read_sidebar_buttons()
 
     # Create the script to embed data and override fetch
     data_script = f"""
   <script>
     // Embedded data
     const STATIC_LINKS_DATA = {json.dumps(links_data, indent=2)};
+    const STATIC_SIDEBAR_BUTTONS_DATA = {json.dumps(sidebar_buttons_data, indent=2)};
     
     // Override fetch for static version
     const originalFetch = window.fetch;
@@ -75,6 +89,19 @@ def generate_static_html():
         return Promise.resolve({{
           ok: true,
           json: () => Promise.resolve(STATIC_LINKS_DATA)
+        }});
+      }}
+      if (url === '/api/sidebar-buttons' && (!options || options.method === 'GET' || !options.method)) {{
+        return Promise.resolve({{
+          ok: true,
+          json: () => Promise.resolve(STATIC_SIDEBAR_BUTTONS_DATA)
+        }});
+      }}
+      // For notification APIs, return empty data
+      if (url === '/api/tv-notifications' || url === '/api/movie-notifications') {{
+        return Promise.resolve({{
+          ok: true,
+          json: () => Promise.resolve({{ unseen_count: 0 }})
         }});
       }}
       // For other requests, show a message that editing is not available
@@ -96,7 +123,8 @@ def generate_static_html():
       // Remove edit buttons and functionality
       const style = document.createElement('style');
       style.textContent = `
-        .edit-button, .delete-button, .add-link-item, .edit-group-button, .collapsible-edit-btn {{
+        .edit-button, .delete-button, .add-link-item, .edit-group-button, .collapsible-edit-btn,
+        .sidebar-edit-buttons, .sidebar-add-button {{
           display: none !important;
         }}
         .link-item {{
@@ -117,6 +145,7 @@ def generate_static_html():
 
     # Replace JS files with embedded scripts
     static_html = static_html.replace('<script src="../static/links-handler.js"></script>', f'<script>{links_handler_js_content}</script>')
+    static_html = static_html.replace('<script src="../static/sidebar-handler.js"></script>', f'<script>{sidebar_handler_js_content}</script>')
     static_html = static_html.replace('<script src="../static/main.js"></script>', f'<script>{main_js_content}</script>')
 
     # Inject the data script before the closing </body> tag
@@ -133,6 +162,7 @@ def generate_static_html():
 
     print(f"[SUCCESS] Static HTML generated successfully: {os.path.basename(OUTPUT_HTML_FILE)}")
     print(f"[INFO] Included {len(links_data)} links")
+    print(f"[INFO] Included {len(sidebar_buttons_data)} sidebar buttons")
     print(f"[INFO] Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
