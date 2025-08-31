@@ -248,23 +248,28 @@ class StartupManager(tk.Tk):
         # Management buttons frame
         button_frame = tk.Frame(main_frame, bg="#2e2f3e")
         button_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        button_frame.grid_columnconfigure(4, weight=1)  # Make space flexible after search box
+        button_frame.grid_columnconfigure(6, weight=1)  # Make space flexible after search box
         
-        tk.Button(button_frame, text="Add New Item", command=self.add_new_item, 
-                 bg="#4a4b5a", fg="white", font=("Arial", 10), width=15).grid(row=0, column=0, padx=5)
+        # First row of buttons
+        tk.Button(button_frame, text="Add", command=self.add_new_item, 
+                 bg="#4a4b5a", fg="white", font=("Arial", 9), width=8).grid(row=0, column=0, padx=2)
         
         self.refresh_btn = tk.Button(button_frame, text="Refresh", command=self.smooth_refresh, 
-                                    bg="#4a4b5a", fg="white", font=("Arial", 10), width=15)
-        self.refresh_btn.grid(row=0, column=1, padx=5)
+                                    bg="#4a4b5a", fg="white", font=("Arial", 9), width=8)
+        self.refresh_btn.grid(row=0, column=1, padx=2)
         
-        # Add Copy Registry Paths button
-        copy_btn = tk.Button(button_frame, text="Copy Registry Path", command=self.copy_registry_paths, 
-                           bg="#4a4b5a", fg="white", font=("Arial", 10), width=18)
-        copy_btn.grid(row=0, column=2, padx=5)
+        tk.Button(button_frame, text="Scan", command=self.scan_startup_folders, 
+                 bg="#4a4b5a", fg="white", font=("Arial", 9), width=8).grid(row=0, column=2, padx=2)
         
-        # Search frame - moved to left side after copy button
+        tk.Button(button_frame, text="Copy Reg", command=self.copy_registry_paths, 
+                 bg="#4a4b5a", fg="white", font=("Arial", 9), width=8).grid(row=0, column=3, padx=2)
+        
+        tk.Button(button_frame, text="Del Match", command=self.delete_matching_shortcuts, 
+                 bg="#d32f2f", fg="white", font=("Arial", 9), width=8).grid(row=0, column=4, padx=2)
+        
+        # Search frame - moved to left side after buttons
         search_frame = tk.Frame(button_frame, bg="#2e2f3e")
-        search_frame.grid(row=0, column=3, padx=(10, 5))
+        search_frame.grid(row=0, column=5, padx=(10, 5))
         
         tk.Label(search_frame, text="Search:", bg="#2e2f3e", fg="white", 
                 font=("Arial", 9)).pack(side=tk.LEFT, padx=(0, 5))
@@ -282,7 +287,7 @@ class StartupManager(tk.Tk):
         # Status label for feedback - now on the far right with fixed position
         self.status_label = tk.Label(button_frame, text="Ready", bg="#2e2f3e", fg="#9ef959", 
                                     font=("Arial", 9))
-        self.status_label.grid(row=0, column=5, padx=5, sticky="e")
+        self.status_label.grid(row=0, column=7, padx=5, sticky="e")
         
         # Items frame
         self.items_frame = tk.Frame(main_frame, bg="#2e2f3e")
@@ -784,6 +789,142 @@ class StartupManager(tk.Tk):
     def clear_search(self):
         """Clear the search field"""
         self.search_var.set('')
+
+    def scan_startup_folders(self):
+        """Scan Windows startup folders for items"""
+        try:
+            startup_folders = [
+                r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup",
+                r"C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+            ]
+            
+            found_items = []
+            existing_items = self.load_items()
+            existing_names = {item["name"].lower() for item in existing_items}
+            
+            for folder in startup_folders:
+                try:
+                    if os.path.exists(folder):
+                        files_in_folder = os.listdir(folder)
+                        
+                        for filename in files_in_folder:
+                            file_path = os.path.join(folder, filename)
+                            
+                            # Skip directories and non-executable files
+                            if os.path.isfile(file_path):
+                                name, ext = os.path.splitext(filename)
+                                
+                                # Check if it's an executable type
+                                if ext.lower() in ['.exe', '.bat', '.cmd', '.lnk', '.url']:
+                                    # Skip if already exists in our items
+                                    if name.lower() not in existing_names:
+                                        actual_path = file_path
+                                        command_args = ""
+                                        executable_type = "other"
+                                        
+                                        # Handle shortcuts - simplified version
+                                        if ext.lower() == '.lnk':
+                                            # For now, just use the shortcut path as-is
+                                            actual_path = file_path
+                                            executable_type = "other"
+                                        
+                                        # Determine item type
+                                        if ext.lower() == '.exe':
+                                            item_type = "App"
+                                        else:
+                                            item_type = "Command"
+                                        
+                                        if os.path.exists(actual_path):
+                                            found_items.append({
+                                                "name": name,
+                                                "type": item_type,
+                                                "paths": [actual_path],
+                                                "Command": command_args,
+                                                "ExecutableType": executable_type
+                                            })
+                except Exception as e:
+                    print(f"Error scanning folder {folder}: {e}")
+                    continue
+            
+            if found_items:
+                # Show dialog with found items
+                result = messagebox.askyesno("Scan Results", 
+                    f"Found {len(found_items)} new items in startup folders.\n\n"
+                    f"Items: {', '.join([item['name'] for item in found_items[:5]])}"
+                    f"{'...' if len(found_items) > 5 else ''}\n\n"
+                    f"Add all items to the list?")
+                
+                if result:
+                    # Add all found items
+                    all_items = self.load_items()
+                    all_items.extend(found_items)
+                    self.save_items(all_items)
+                    self.smooth_refresh()
+                    self.show_status(f"Added {len(found_items)} items from startup folders", "#9ef959")
+                else:
+                    self.show_status("Scan completed - no items added", "#63dbff")
+            else:
+                self.show_status("No new items found in startup folders", "#63dbff")
+                
+        except Exception as e:
+            self.show_status(f"Scan failed: {str(e)}", "#ff6b6b")
+
+    def delete_matching_shortcuts(self):
+        """Delete shortcuts from startup folders that match existing items"""
+        try:
+            # Get existing startup items
+            existing_items = self.load_items()
+            existing_names = {item["name"].lower() for item in existing_items}
+            
+            startup_folders = [
+                r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup",
+                r"C:\Users\nahid\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+            ]
+            
+            deleted_shortcuts = []
+            errors = []
+            
+            for folder in startup_folders:
+                try:
+                    if os.path.exists(folder):
+                        for filename in os.listdir(folder):
+                            if filename.lower().endswith('.lnk'):
+                                file_path = os.path.join(folder, filename)
+                                name = os.path.splitext(filename)[0]
+                                
+                                # Check if this shortcut matches an existing item
+                                if name.lower() in existing_names:
+                                    try:
+                                        os.remove(file_path)
+                                        deleted_shortcuts.append(name)
+                                    except Exception as e:
+                                        errors.append(f"Failed to delete {name}: {str(e)}")
+                except Exception as e:
+                    errors.append(f"Error scanning folder {folder}: {str(e)}")
+            
+            # Show results
+            if deleted_shortcuts:
+                message = f"Deleted {len(deleted_shortcuts)} matching shortcuts:\n\n"
+                message += "\n".join(deleted_shortcuts[:10])  # Show first 10
+                if len(deleted_shortcuts) > 10:
+                    message += f"\n... and {len(deleted_shortcuts) - 10} more"
+                
+                if errors:
+                    message += f"\n\nErrors: {len(errors)}"
+                
+                messagebox.showinfo("Delete Results", message)
+                self.show_status(f"Deleted {len(deleted_shortcuts)} matching shortcuts", "#9ef959")
+            else:
+                self.show_status("No matching shortcuts found to delete", "#63dbff")
+                
+            if errors:
+                error_msg = "\n".join(errors[:5])  # Show first 5 errors
+                if len(errors) > 5:
+                    error_msg += f"\n... and {len(errors) - 5} more errors"
+                messagebox.showerror("Errors Occurred", error_msg)
+                
+        except Exception as e:
+            self.show_status(f"Delete operation failed: {str(e)}", "#ff6b6b")
 
     def center_window(self):
         self.update_idletasks()
