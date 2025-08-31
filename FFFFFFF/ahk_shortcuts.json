@@ -19,7 +19,7 @@
             "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\", \"\", \"Hide\")"
         },
         {
-            "name": "Monitor External", 
+            "name": "Monitor External",
             "description": "Switch to external monitor only",
             "hotkey": "RAlt & Numpad2",
             "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /external\", \"\", \"Hide\")"
@@ -27,7 +27,7 @@
         {
             "name": "Monitor Extend",
             "description": "Extend display to both monitors",
-            "hotkey": "RAlt & Numpad3", 
+            "hotkey": "RAlt & Numpad3",
             "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /extend\", \"\", \"Hide\")"
         },
         {
@@ -39,7 +39,7 @@
         {
             "name": "Ultimate GUI",
             "description": "Opens Ultimate_Gui.py",
-            "hotkey": "!u", 
+            "hotkey": "!u",
             "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Ultimate_Gui.py\", \"\", \"Hide\")"
         },
         {
@@ -69,7 +69,7 @@
             "replacement": "#Requires AutoHotkey v1.0"
         },
         {
-            "name": "AutoHotkey Version 2", 
+            "name": "AutoHotkey Version 2",
             "description": "Inserts AHK v2 header requirement",
             "trigger": ";v2",
             "replacement": "#Requires AutoHotkey v2.0"

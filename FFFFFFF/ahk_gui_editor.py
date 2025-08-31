@@ -416,9 +416,9 @@ class AHKShortcutEditor(ctk.CTk):
             name = shortcut.get('name', 'Unnamed')
             hotkey = shortcut.get('hotkey', '')
             description = shortcut.get('description', '')
-            display_text = f"{name} ({hotkey})"
+            display_text = f"{hotkey} - {name}"
             if description:
-                display_text += f" - {description[:30]}..."
+                display_text += f" ({description[:30]}...)" if len(description) > 30 else f" ({description})"
             
             label = ctk.CTkLabel(self.script_scroll_frame, text=display_text, anchor="w", font=self.app_font)
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
@@ -444,9 +444,9 @@ class AHKShortcutEditor(ctk.CTk):
             name = shortcut.get('name', 'Unnamed')
             trigger = shortcut.get('trigger', '')
             description = shortcut.get('description', '')
-            display_text = f"{name} ({trigger})"
+            display_text = f"{trigger} - {name}"
             if description:
-                display_text += f" - {description[:30]}..."
+                display_text += f" ({description[:30]}...)" if len(description) > 30 else f" ({description})"
             
             label = ctk.CTkLabel(self.text_scroll_frame, text=display_text, anchor="w", font=self.app_font)
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
