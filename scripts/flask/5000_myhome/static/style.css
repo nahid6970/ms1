@@ -450,9 +450,11 @@ input:checked+.slider:before {
 
 
 .popup-content {
-  background-color: #31343a;
+  background-color: var(--popup-bg-color, #31343a);
+  color: var(--popup-text-color, #ffffff);
+  border: 1px solid var(--popup-border-color, transparent);
+  border-radius: var(--popup-border-radius, 8px);
   padding: 20px;
-  border-radius: 8px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -876,9 +878,16 @@ div.toggle-container {
   /* Add some space between horizontally stacked groups */
   vertical-align: top;
   /* Align groups at the top */
-  border: #0056b3 solid 1px;
+  border: var(--horizontal-border-color, #0056b3) solid 1px;
   border-radius: 0px;
   font-family: jetbrainsmono nfp;
+  background-color: var(--horizontal-bg-color, #2d2d2d);
+  color: var(--horizontal-text-color, #ffffff);
+  transition: background-color 0.3s ease;
+}
+
+.horizontal-stack:hover {
+  background-color: var(--horizontal-hover-color, #3a3a3a);
 }
 
 .horizontal-stack .link-group-content {

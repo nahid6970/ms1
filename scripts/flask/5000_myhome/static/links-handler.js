@@ -307,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
       const addLinkPopup = document.getElementById('add-link-popup');
       addLinkPopup.classList.remove('hidden'); // Remove hidden class
+      applyPopupStyling(groupName);
     });
     addLinkItem.appendChild(addLinkSpan);
     content.appendChild(addLinkItem);
@@ -542,6 +543,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const firstLinkInGroup = linksInGroup[0];
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
       groupDiv.classList.add('horizontal-stack');
+      
+      // Apply custom horizontal stack styling
+      const linkData = firstLinkInGroup.link;
+      if (linkData.horizontal_bg_color) {
+        groupDiv.style.setProperty('--horizontal-bg-color', linkData.horizontal_bg_color);
+      }
+      if (linkData.horizontal_text_color) {
+        groupDiv.style.setProperty('--horizontal-text-color', linkData.horizontal_text_color);
+      }
+      if (linkData.horizontal_border_color) {
+        groupDiv.style.setProperty('--horizontal-border-color', linkData.horizontal_border_color);
+      }
+      if (linkData.horizontal_hover_color) {
+        groupDiv.style.setProperty('--horizontal-hover-color', linkData.horizontal_hover_color);
+      }
     }
 
     const groupHeaderContainer = document.createElement('div');
@@ -665,10 +681,12 @@ document.addEventListener('DOMContentLoaded', function () {
           document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
           const addLinkPopup = document.getElementById('add-link-popup');
           addLinkPopup.classList.remove('hidden'); // Remove hidden class
+          applyPopupStyling(groupName);
         });
         addLinkItem.appendChild(addLinkSpan);
         popupContent.appendChild(addLinkItem);
         popup.classList.remove('hidden');
+        applyPopupStyling(groupName);
       };
       groupDiv.appendChild(icon);
     } else {
@@ -705,6 +723,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
         const addLinkPopup = document.getElementById('add-link-popup');
         addLinkPopup.classList.remove('hidden'); // Remove hidden class
+        applyPopupStyling(groupName);
       });
       addLinkItem.appendChild(addLinkSpan);
       groupList.appendChild(addLinkItem);
@@ -728,6 +747,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const editGroupTopTextColorInput = document.getElementById('edit-group-top-text-color');
     const editGroupTopBorderColorInput = document.getElementById('edit-group-top-border-color');
     const editGroupTopHoverColorInput = document.getElementById('edit-group-top-hover-color');
+    const editGroupPopupBgColorInput = document.getElementById('edit-group-popup-bg-color');
+    const editGroupPopupTextColorInput = document.getElementById('edit-group-popup-text-color');
+    const editGroupPopupBorderColorInput = document.getElementById('edit-group-popup-border-color');
+    const editGroupPopupBorderRadiusInput = document.getElementById('edit-group-popup-border-radius');
+    const editGroupHorizontalBgColorInput = document.getElementById('edit-group-horizontal-bg-color');
+    const editGroupHorizontalTextColorInput = document.getElementById('edit-group-horizontal-text-color');
+    const editGroupHorizontalBorderColorInput = document.getElementById('edit-group-horizontal-border-color');
+    const editGroupHorizontalHoverColorInput = document.getElementById('edit-group-horizontal-hover-color');
     const collapsibleRenameSection = document.getElementById('collapsible-rename-section');
 
     editGroupNameInput.value = currentGroupName === 'Ungrouped' ? '' : currentGroupName;
@@ -745,6 +772,14 @@ document.addEventListener('DOMContentLoaded', function () {
       editGroupTopTextColorInput.value = linksInGroup[0].top_text_color || '#ffffff';
       editGroupTopBorderColorInput.value = linksInGroup[0].top_border_color || '#444444';
       editGroupTopHoverColorInput.value = linksInGroup[0].top_hover_color || '#3a3a3a';
+      editGroupPopupBgColorInput.value = linksInGroup[0].popup_bg_color || '#31343a';
+      editGroupPopupTextColorInput.value = linksInGroup[0].popup_text_color || '#ffffff';
+      editGroupPopupBorderColorInput.value = linksInGroup[0].popup_border_color || 'transparent';
+      editGroupPopupBorderRadiusInput.value = linksInGroup[0].popup_border_radius || '8px';
+      editGroupHorizontalBgColorInput.value = linksInGroup[0].horizontal_bg_color || '#2d2d2d';
+      editGroupHorizontalTextColorInput.value = linksInGroup[0].horizontal_text_color || '#ffffff';
+      editGroupHorizontalBorderColorInput.value = linksInGroup[0].horizontal_border_color || '#0056b3';
+      editGroupHorizontalHoverColorInput.value = linksInGroup[0].horizontal_hover_color || '#3a3a3a';
     } else {
       editGroupDisplaySelect.value = 'flex'; // Default if no links in group
       editGroupCollapsibleCheckbox.checked = false;
@@ -755,6 +790,14 @@ document.addEventListener('DOMContentLoaded', function () {
       editGroupTopTextColorInput.value = '#ffffff';
       editGroupTopBorderColorInput.value = '#444444';
       editGroupTopHoverColorInput.value = '#3a3a3a';
+      editGroupPopupBgColorInput.value = '#31343a';
+      editGroupPopupTextColorInput.value = '#ffffff';
+      editGroupPopupBorderColorInput.value = 'transparent';
+      editGroupPopupBorderRadiusInput.value = '8px';
+      editGroupHorizontalBgColorInput.value = '#2d2d2d';
+      editGroupHorizontalTextColorInput.value = '#ffffff';
+      editGroupHorizontalBorderColorInput.value = '#0056b3';
+      editGroupHorizontalHoverColorInput.value = '#3a3a3a';
     }
 
     // Show/hide the rename section based on collapsible checkbox
@@ -773,6 +816,7 @@ document.addEventListener('DOMContentLoaded', function () {
     editGroupCollapsibleCheckbox.addEventListener('change', toggleRenameSection);
 
     editGroupPopup.classList.remove('hidden');
+    applyPopupStyling(currentGroupName);
   }
 
   // Drag and Drop functionality for collapsible groups
@@ -868,7 +912,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Function to update group name for all links in that group
-  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor) {
+  async function updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor, popupBgColor, popupTextColor, popupBorderColor, popupBorderRadius, horizontalBgColor, horizontalTextColor, horizontalBorderColor, horizontalHoverColor) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
@@ -899,6 +943,18 @@ document.addEventListener('DOMContentLoaded', function () {
           updatedLink.top_text_color = topTextColor || '#ffffff';
           updatedLink.top_border_color = topBorderColor || '#444444';
           updatedLink.top_hover_color = topHoverColor || '#3a3a3a';
+
+          // Handle popup styling options
+          updatedLink.popup_bg_color = popupBgColor || '#31343a';
+          updatedLink.popup_text_color = popupTextColor || '#ffffff';
+          updatedLink.popup_border_color = popupBorderColor || 'transparent';
+          updatedLink.popup_border_radius = popupBorderRadius || '8px';
+
+          // Handle horizontal stack styling options
+          updatedLink.horizontal_bg_color = horizontalBgColor || '#2d2d2d';
+          updatedLink.horizontal_text_color = horizontalTextColor || '#ffffff';
+          updatedLink.horizontal_border_color = horizontalBorderColor || '#0056b3';
+          updatedLink.horizontal_hover_color = horizontalHoverColor || '#3a3a3a';
 
           return updatedLink;
         }
@@ -1026,6 +1082,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
     document.getElementById('edit-link-hidden').checked = link.hidden || false;
     editLinkPopup.classList.remove('hidden');
+    applyPopupStyling(link.group || 'Ungrouped');
   }
 
   if (editLinkForm) {
@@ -1136,9 +1193,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const topTextColor = document.getElementById('edit-group-top-text-color').value;
         const topBorderColor = document.getElementById('edit-group-top-border-color').value;
         const topHoverColor = document.getElementById('edit-group-top-hover-color').value;
+        const popupBgColor = document.getElementById('edit-group-popup-bg-color').value;
+        const popupTextColor = document.getElementById('edit-group-popup-text-color').value;
+        const popupBorderColor = document.getElementById('edit-group-popup-border-color').value;
+        const popupBorderRadius = document.getElementById('edit-group-popup-border-radius').value;
+        const horizontalBgColor = document.getElementById('edit-group-horizontal-bg-color').value;
+        const horizontalTextColor = document.getElementById('edit-group-horizontal-text-color').value;
+        const horizontalBorderColor = document.getElementById('edit-group-horizontal-border-color').value;
+        const horizontalHoverColor = document.getElementById('edit-group-horizontal-hover-color').value;
 
         try {
-          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor);
+          const success = await updateGroupName(originalGroupName, newGroupName, newDisplayStyle, isCollapsible, isHorizontalStack, isPasswordProtected, topName, topBgColor, topTextColor, topBorderColor, topHoverColor, popupBgColor, popupTextColor, popupBorderColor, popupBorderRadius, horizontalBgColor, horizontalTextColor, horizontalBorderColor, horizontalHoverColor);
           if (success) {
             document.getElementById('edit-group-popup').classList.add('hidden');
             fetchAndDisplayLinks();

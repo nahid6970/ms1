@@ -69,6 +69,49 @@ spans.forEach(span => {
 }); */
 
 
+// Function to apply popup styling based on group settings
+function applyPopupStyling(groupName) {
+  // Fetch current links to get group styling
+  fetch('/api/links')
+    .then(response => response.json())
+    .then(links => {
+      const groupLinks = links.filter(link => (link.group || 'Ungrouped') === groupName);
+      if (groupLinks.length > 0) {
+        const groupSettings = groupLinks[0];
+        const popupContents = document.querySelectorAll('.popup-content');
+        
+        popupContents.forEach(popup => {
+          if (groupSettings.popup_bg_color) {
+            popup.style.setProperty('--popup-bg-color', groupSettings.popup_bg_color);
+          }
+          if (groupSettings.popup_text_color) {
+            popup.style.setProperty('--popup-text-color', groupSettings.popup_text_color);
+          }
+          if (groupSettings.popup_border_color) {
+            popup.style.setProperty('--popup-border-color', groupSettings.popup_border_color);
+          }
+          if (groupSettings.popup_border_radius) {
+            popup.style.setProperty('--popup-border-radius', groupSettings.popup_border_radius);
+          }
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching group settings for popup styling:', error);
+    });
+}
+
+// Function to reset popup styling to defaults
+function resetPopupStyling() {
+  const popupContents = document.querySelectorAll('.popup-content');
+  popupContents.forEach(popup => {
+    popup.style.removeProperty('--popup-bg-color');
+    popup.style.removeProperty('--popup-text-color');
+    popup.style.removeProperty('--popup-border-color');
+    popup.style.removeProperty('--popup-border-radius');
+  });
+}
+
 // Popup functionality
 document.addEventListener('DOMContentLoaded', () => {
   const addLinkPopup = document.getElementById('add-link-popup');
@@ -81,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (addCloseButton) {
     addCloseButton.addEventListener('click', () => {
       addLinkPopup.classList.add('hidden');
+      resetPopupStyling();
     });
   }
 
@@ -89,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (editCloseButton) {
     editCloseButton.addEventListener('click', () => {
       editLinkPopup.classList.add('hidden');
+      resetPopupStyling();
     });
   }
 
@@ -97,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (editGroupCloseButton) {
     editGroupCloseButton.addEventListener('click', () => {
       editGroupPopup.classList.add('hidden');
+      resetPopupStyling();
     });
   }
 
@@ -105,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (horizontalStackCloseButton) {
     horizontalStackCloseButton.addEventListener('click', () => {
       horizontalStackPopup.classList.add('hidden');
+      resetPopupStyling();
     });
   }
 
@@ -112,15 +159,19 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('click', (event) => {
     if (event.target === addLinkPopup) {
       addLinkPopup.classList.add('hidden');
+      resetPopupStyling();
     }
     if (event.target === editLinkPopup) {
       editLinkPopup.classList.add('hidden');
+      resetPopupStyling();
     }
     if (event.target === editGroupPopup) {
       editGroupPopup.classList.add('hidden');
+      resetPopupStyling();
     }
     if (event.target === horizontalStackPopup) {
       horizontalStackPopup.classList.add('hidden');
+      resetPopupStyling();
     }
   });
 });
