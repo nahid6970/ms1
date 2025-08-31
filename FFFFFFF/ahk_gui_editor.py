@@ -37,6 +37,11 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
         self.name_entry = ctk.CTkEntry(self, placeholder_text="e.g., Open Terminal, Version 1 Text", font=self.font)
         self.name_entry.pack(padx=20, pady=5, fill="x")
         
+        # Category input (for both types)
+        ctk.CTkLabel(self, text="Category:", font=self.font).pack(padx=20, pady=5, anchor="w")
+        self.category_entry = ctk.CTkEntry(self, placeholder_text="e.g., System, Navigation, Text", font=self.font)
+        self.category_entry.pack(padx=20, pady=5, fill="x")
+        
         # Description input (for both types)
         ctk.CTkLabel(self, text="Description:", font=self.font).pack(padx=20, pady=5, anchor="w")
         self.description_entry = ctk.CTkEntry(self, placeholder_text="Brief description of what this does", font=self.font)
@@ -73,6 +78,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
 
     def populate_fields(self):
         self.name_entry.insert(0, self.shortcut_data.get("name", ""))
+        self.category_entry.insert(0, self.shortcut_data.get("category", ""))
         self.description_entry.insert(0, self.shortcut_data.get("description", ""))
         
         if self.shortcut_type == "script":
@@ -84,6 +90,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
 
     def add_shortcut(self):
         name = self.name_entry.get().strip()
+        category = self.category_entry.get().strip()
         description = self.description_entry.get().strip()
         
         if not name:
@@ -100,6 +107,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
                 
             new_shortcut = {
                 "name": name,
+                "category": category or "General",
                 "description": description,
                 "hotkey": hotkey, 
                 "action": action
@@ -116,6 +124,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
                 
             new_shortcut = {
                 "name": name,
+                "category": category or "General",
                 "description": description,
                 "trigger": trigger, 
                 "replacement": replacement
@@ -128,6 +137,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
 
     def save_changes(self):
         name = self.name_entry.get().strip()
+        category = self.category_entry.get().strip()
         description = self.description_entry.get().strip()
         
         if not name:
@@ -135,6 +145,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
             return
         
         self.shortcut_data["name"] = name
+        self.shortcut_data["category"] = category or "General"
         self.shortcut_data["description"] = description
         
         if self.shortcut_type == "script":
@@ -275,6 +286,7 @@ class AHKShortcutEditor(ctk.CTk):
         self.script_shortcuts = [
             {
                 "name": "Open Terminal",
+                "category": "System",
                 "description": "Opens PowerShell as admin",
                 "hotkey": "!x",
                 "action": 'RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide")'
@@ -283,12 +295,14 @@ class AHKShortcutEditor(ctk.CTk):
         self.text_shortcuts = [
             {
                 "name": "AHK Version 1",
+                "category": "AutoHotkey",
                 "description": "AutoHotkey v1 header",
                 "trigger": ";v1",
                 "replacement": "#Requires AutoHotkey v1.0"
             },
             {
                 "name": "AHK Version 2", 
+                "category": "AutoHotkey",
                 "description": "AutoHotkey v2 header",
                 "trigger": ";v2",
                 "replacement": "#Requires AutoHotkey v2.0"
@@ -346,6 +360,7 @@ class AHKShortcutEditor(ctk.CTk):
                 replacement = text_match.group(2)
                 self.text_shortcuts.append({
                     "name": f"Text: {trigger}",
+                    "category": "Imported",
                     "description": "Imported from AHK script",
                     "trigger": trigger, 
                     "replacement": replacement
@@ -381,6 +396,7 @@ class AHKShortcutEditor(ctk.CTk):
                 
                 self.script_shortcuts.append({
                     "name": f"Script: {hotkey}",
+                    "category": "Imported",
                     "description": "Imported from AHK script",
                     "hotkey": hotkey, 
                     "action": action
@@ -406,27 +422,49 @@ class AHKShortcutEditor(ctk.CTk):
         self.script_list_items.clear()
         self.selected_script_shortcut = None
 
-        # Filter and sort script shortcuts by hotkey
+        # Filter shortcuts
         filtered_shortcuts = [
             shortcut for shortcut in self.script_shortcuts
-            if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('hotkey', '')} {shortcut.get('description', '')}".lower()
+            if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('hotkey', '')} {shortcut.get('description', '')} {shortcut.get('category', '')}".lower()
         ]
-        filtered_shortcuts.sort(key=lambda x: x.get('hotkey', '').lower())
-
-        for i, shortcut in enumerate(filtered_shortcuts):
-            name = shortcut.get('name', 'Unnamed')
-            hotkey = shortcut.get('hotkey', '')
-            description = shortcut.get('description', '')
-            display_text = f"{hotkey} 󰌌 {name}"
-            if description:
-                display_text += f" ({description[:30]}...)" if len(description) > 30 else f" ({description})"
+        
+        # Group by category
+        categories = {}
+        for shortcut in filtered_shortcuts:
+            category = shortcut.get('category', 'General')
+            if category not in categories:
+                categories[category] = []
+            categories[category].append(shortcut)
+        
+        # Sort categories and shortcuts within each category
+        row = 0
+        for category in sorted(categories.keys()):
+            # Add category header
+            category_label = ctk.CTkLabel(self.script_scroll_frame, text=f"📁 {category}", 
+                                        anchor="w", font=self.bold_font, 
+                                        text_color=("gray10", "gray90"))
+            category_label.grid(row=row, column=0, padx=5, pady=(10, 2), sticky="ew")
+            self.script_list_items.append(category_label)
+            row += 1
             
-            label = ctk.CTkLabel(self.script_scroll_frame, text=display_text, anchor="w", font=self.app_font)
-            label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
-            label.shortcut_obj = shortcut
-            label.bind("<Button-1>", lambda event, l=label: self.select_script_shortcut(l))
-            label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
-            self.script_list_items.append(label)
+            # Sort shortcuts within category by hotkey
+            category_shortcuts = sorted(categories[category], key=lambda x: x.get('hotkey', '').lower())
+            
+            for shortcut in category_shortcuts:
+                name = shortcut.get('name', 'Unnamed')
+                hotkey = shortcut.get('hotkey', '')
+                description = shortcut.get('description', '')
+                display_text = f"  {hotkey} 󰌌 {name}"
+                if description:
+                    display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                
+                label = ctk.CTkLabel(self.script_scroll_frame, text=display_text, anchor="w", font=self.app_font)
+                label.grid(row=row, column=0, padx=5, pady=1, sticky="ew")
+                label.shortcut_obj = shortcut
+                label.bind("<Button-1>", lambda event, l=label: self.select_script_shortcut(l))
+                label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
+                self.script_list_items.append(label)
+                row += 1
 
     def update_text_display(self, search_query=""):
         # Clear existing items
@@ -435,27 +473,49 @@ class AHKShortcutEditor(ctk.CTk):
         self.text_list_items.clear()
         self.selected_text_shortcut = None
 
-        # Filter and sort text shortcuts by trigger
+        # Filter shortcuts
         filtered_shortcuts = [
             shortcut for shortcut in self.text_shortcuts
-            if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('trigger', '')} {shortcut.get('description', '')}".lower()
+            if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('trigger', '')} {shortcut.get('description', '')} {shortcut.get('category', '')}".lower()
         ]
-        filtered_shortcuts.sort(key=lambda x: x.get('trigger', '').lower())
-
-        for i, shortcut in enumerate(filtered_shortcuts):
-            name = shortcut.get('name', 'Unnamed')
-            trigger = shortcut.get('trigger', '')
-            description = shortcut.get('description', '')
-            display_text = f"{trigger} 󰌌 {name}"
-            if description:
-                display_text += f" ({description[:30]}...)" if len(description) > 30 else f" ({description})"
+        
+        # Group by category
+        categories = {}
+        for shortcut in filtered_shortcuts:
+            category = shortcut.get('category', 'General')
+            if category not in categories:
+                categories[category] = []
+            categories[category].append(shortcut)
+        
+        # Sort categories and shortcuts within each category
+        row = 0
+        for category in sorted(categories.keys()):
+            # Add category header
+            category_label = ctk.CTkLabel(self.text_scroll_frame, text=f"📁 {category}", 
+                                        anchor="w", font=self.bold_font, 
+                                        text_color=("gray10", "gray90"))
+            category_label.grid(row=row, column=0, padx=5, pady=(10, 2), sticky="ew")
+            self.text_list_items.append(category_label)
+            row += 1
             
-            label = ctk.CTkLabel(self.text_scroll_frame, text=display_text, anchor="w", font=self.app_font)
-            label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
-            label.shortcut_obj = shortcut
-            label.bind("<Button-1>", lambda event, l=label: self.select_text_shortcut(l))
-            label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
-            self.text_list_items.append(label)
+            # Sort shortcuts within category by trigger
+            category_shortcuts = sorted(categories[category], key=lambda x: x.get('trigger', '').lower())
+            
+            for shortcut in category_shortcuts:
+                name = shortcut.get('name', 'Unnamed')
+                trigger = shortcut.get('trigger', '')
+                description = shortcut.get('description', '')
+                display_text = f"  {trigger} 󰌌 {name}"
+                if description:
+                    display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                
+                label = ctk.CTkLabel(self.text_scroll_frame, text=display_text, anchor="w", font=self.app_font)
+                label.grid(row=row, column=0, padx=5, pady=1, sticky="ew")
+                label.shortcut_obj = shortcut
+                label.bind("<Button-1>", lambda event, l=label: self.select_text_shortcut(l))
+                label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
+                self.text_list_items.append(label)
+                row += 1
 
     def select_script_shortcut(self, label):
         # Deselect previous selections

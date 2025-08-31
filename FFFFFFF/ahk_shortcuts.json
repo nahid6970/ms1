@@ -10,7 +10,8 @@
             "name": "Run Python Script",
             "description": "Opens run.py in the ms1 directory",
             "hotkey": "!Space",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\run.py\", , \"Show\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\run.py\", , \"Show\")",
+            "category": "Launch"
         },
         {
             "name": "Monitor Internal",
@@ -34,13 +35,15 @@
             "name": "Bio GUI",
             "description": "Opens Bio.ahk GUI",
             "hotkey": "!b",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")",
+            "category": "Launch"
         },
         {
             "name": "Ultimate GUI",
             "description": "Opens Ultimate_Gui.py",
             "hotkey": "!u",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Ultimate_Gui.py\", \"\", \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Ultimate_Gui.py\", \"\", \"Hide\")",
+            "category": "Launch"
         },
         {
             "name": "Always On Top Toggle",
