@@ -82,7 +82,7 @@
         },
         {
             "name": "Registry Run Path",
-            "description": "Windows startup registry path",
+            "description": "Windows startup registry path run",
             "trigger": ";run",
             "replacement": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
             "category": "Path"
