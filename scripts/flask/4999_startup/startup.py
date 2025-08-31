@@ -248,7 +248,7 @@ class StartupManager(tk.Tk):
         # Management buttons frame
         button_frame = tk.Frame(main_frame, bg="#2e2f3e")
         button_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        button_frame.grid_columnconfigure(3, weight=1)  # Make space between buttons and search flexible
+        button_frame.grid_columnconfigure(4, weight=1)  # Make space flexible after search box
         
         tk.Button(button_frame, text="Add New Item", command=self.add_new_item, 
                  bg="#4a4b5a", fg="white", font=("Arial", 10), width=15).grid(row=0, column=0, padx=5)
@@ -262,9 +262,9 @@ class StartupManager(tk.Tk):
                            bg="#4a4b5a", fg="white", font=("Arial", 10), width=18)
         copy_btn.grid(row=0, column=2, padx=5)
         
-        # Search frame
+        # Search frame - moved to left side after copy button
         search_frame = tk.Frame(button_frame, bg="#2e2f3e")
-        search_frame.grid(row=0, column=4, padx=(5, 0))
+        search_frame.grid(row=0, column=3, padx=(10, 5))
         
         tk.Label(search_frame, text="Search:", bg="#2e2f3e", fg="white", 
                 font=("Arial", 9)).pack(side=tk.LEFT, padx=(0, 5))
@@ -279,10 +279,10 @@ class StartupManager(tk.Tk):
                             bg="#4a4b5a", fg="white", font=("Arial", 8), width=2)
         clear_btn.pack(side=tk.LEFT)
         
-        # Status label for feedback
+        # Status label for feedback - now on the far right with fixed position
         self.status_label = tk.Label(button_frame, text="Ready", bg="#2e2f3e", fg="#9ef959", 
                                     font=("Arial", 9))
-        self.status_label.grid(row=0, column=5, padx=5)
+        self.status_label.grid(row=0, column=5, padx=5, sticky="e")
         
         # Items frame
         self.items_frame = tk.Frame(main_frame, bg="#2e2f3e")
