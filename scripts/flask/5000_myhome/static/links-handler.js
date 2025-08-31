@@ -1096,9 +1096,9 @@ document.addEventListener('DOMContentLoaded', function () {
                   moveToExpandedRow(groupElement);
                 }
               }
-            } else if (originalLink.horizontal_stack) {
+            } else {
               const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
-              if (groupDiv) {
+              if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
                 const icon = groupDiv.querySelector('.extend-icon');
                 if (icon) {
                   icon.click();
