@@ -43,14 +43,16 @@
   },
   {
     "bg_color": "transparent",
+    "border_color": "#cccccc",
+    "border_radius": "4px",
     "display_type": "image",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-md-book_education",
     "id": "education-button",
-    "img_src": "https://cdn-icons-png.flaticon.com/512/2936/2936630.png",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/3588/3588110.png",
     "name": "Education",
-    "text_color": "#000000",
+    "text_color": "white",
     "url": "http://192.168.0.101:5015/"
   },
   {
