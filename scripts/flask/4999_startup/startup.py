@@ -525,22 +525,24 @@ class StartupManager(tk.Tk):
         # Configure the parent frame to expand the item frames
         parent_frame.grid_columnconfigure(0, weight=1)
         
-        # Left side - checkbox and name
-        left_frame = tk.Frame(frame, bg="#2e2f3e")
-        left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        # Main container with grid layout for better control
+        main_container = tk.Frame(frame, bg="#2e2f3e")
+        main_container.pack(fill=tk.BOTH, expand=True, padx=5, pady=3)
+        main_container.grid_columnconfigure(1, weight=1)  # Name column expands
         
+        # Checkbox icon
         checked = self.is_checked(item)
-        
-        icon_label = tk.Label(left_frame, text="\uf205" if checked else "\uf204", 
+        icon_label = tk.Label(main_container, text="\uf205" if checked else "\uf204", 
                              font=("Jetbrainsmono nfp", 12, "bold"), 
                              fg="#9ef959" if checked else "gray", bg="#2e2f3e")
         icon_label.bind("<Button-1>", lambda event, item=item: self.toggle_startup_smooth(item))
-        icon_label.pack(side=tk.LEFT, padx=0)
+        icon_label.grid(row=0, column=0, padx=(0, 5), sticky="nw")
 
-        name_label = tk.Label(left_frame, text=item["name"], font=("Jetbrainsmono nfp", 10), bg="#2e2f3e", 
-                             wraplength=200, justify=tk.LEFT)  # Add text wrapping for long names
+        # Name label with wrapping
+        name_label = tk.Label(main_container, text=item["name"], font=("Jetbrainsmono nfp", 10), bg="#2e2f3e", 
+                             anchor="nw", justify=tk.LEFT, wraplength=200)  # Wrap at 200 pixels
         name_label.bind("<Button-1>", lambda event, item=item: self.launch_command(item))
-        name_label.pack(side=tk.LEFT, padx=(5, 0), fill=tk.X, expand=True)
+        name_label.grid(row=0, column=1, padx=(0, 5), sticky="ew")
         
         self.update_label_color(name_label, checked)
         
@@ -552,15 +554,15 @@ class StartupManager(tk.Tk):
             'item_data': item
         }
         
-        # Right side - edit and delete buttons
-        right_frame = tk.Frame(frame, bg="#2e2f3e")
-        right_frame.pack(side=tk.RIGHT, padx=(5, 0))
+        # Right side - edit and delete buttons (always visible)
+        button_frame = tk.Frame(main_container, bg="#2e2f3e")
+        button_frame.grid(row=0, column=2, sticky="ne")
         
-        edit_btn = tk.Button(right_frame, text="Edit", command=lambda: self.edit_item(item),
+        edit_btn = tk.Button(button_frame, text="Edit", command=lambda: self.edit_item(item),
                             bg="#4a4b5a", fg="white", font=("Arial", 8), width=6)
         edit_btn.pack(side=tk.LEFT, padx=2)
         
-        delete_btn = tk.Button(right_frame, text="Delete", command=lambda: self.delete_item(item),
+        delete_btn = tk.Button(button_frame, text="Delete", command=lambda: self.delete_item(item),
                               bg="#d32f2f", fg="white", font=("Arial", 8), width=6)
         delete_btn.pack(side=tk.LEFT, padx=2)
 
