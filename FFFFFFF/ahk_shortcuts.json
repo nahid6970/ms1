@@ -49,12 +49,6 @@
             "action": "Always_on_Top()\nAlways_on_Top(){\n    static alwaysOnTop := false\n    if (alwaysOnTop) {\n        WinSetAlwaysOnTop(false, \"A\")\n    } else {\n        WinSetAlwaysOnTop(true, \"A\")\n    }\n    alwaysOnTop := !alwaysOnTop\n}"
         },
         {
-            "name": "Center Window",
-            "description": "Centers the focused window on screen",
-            "hotkey": "LAlt & c",
-            "action": "Center_Focused_Window()\nCenter_Focused_Window() {\n    hwnd := WinGetID(\"A\")\n    WinGetPos(&x, &y, &w, &h, \"ahk_id \" hwnd)\n    ScreenWidth := SysGet(78)\n    ScreenHeight := SysGet(79)\n    newX := (ScreenWidth - w) / 2\n    newY := (ScreenHeight - h) / 2\n    WinMove(newX, newY, , , \"ahk_id \" hwnd)\n}"
-        },
-        {
             "name": "Kill Foreground Process",
             "description": "Forcefully kills the process under mouse cursor",
             "hotkey": "!q",

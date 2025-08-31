@@ -46,21 +46,6 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
     }
 }
 
-;! Center Window
-;! Centers the focused window on screen
-LAlt & c:: {
-    Center_Focused_Window()
-    Center_Focused_Window() {
-        hwnd := WinGetID("A")
-        WinGetPos(&x, &y, &w, &h, "ahk_id " hwnd)
-        ScreenWidth := SysGet(78)
-        ScreenHeight := SysGet(79)
-        newX := (ScreenWidth - w) / 2
-        newY := (ScreenHeight - h) / 2
-        WinMove(newX, newY, , , "ahk_id " hwnd)
-    }
-}
-
 ;! Kill Foreground Process
 ;! Forcefully kills the process under mouse cursor
 !q:: {

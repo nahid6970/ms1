@@ -20,7 +20,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
         self.font = font if font else ("sans-serif", 12, "normal")
         self.transient(master)
         self.grab_set()
-        self.geometry("500x400")
+        self.geometry("500x500")
 
         if self.shortcut_data:
             self.title(f"Edit {shortcut_type.capitalize()} Shortcut")
@@ -406,17 +406,18 @@ class AHKShortcutEditor(ctk.CTk):
         self.script_list_items.clear()
         self.selected_script_shortcut = None
 
-        # Filter and display script shortcuts
+        # Filter and sort script shortcuts by hotkey
         filtered_shortcuts = [
             shortcut for shortcut in self.script_shortcuts
             if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('hotkey', '')} {shortcut.get('description', '')}".lower()
         ]
+        filtered_shortcuts.sort(key=lambda x: x.get('hotkey', '').lower())
 
         for i, shortcut in enumerate(filtered_shortcuts):
             name = shortcut.get('name', 'Unnamed')
             hotkey = shortcut.get('hotkey', '')
             description = shortcut.get('description', '')
-            display_text = f"{hotkey} - {name}"
+            display_text = f"{hotkey} 󰌌 {name}"
             if description:
                 display_text += f" ({description[:30]}...)" if len(description) > 30 else f" ({description})"
             
@@ -434,17 +435,18 @@ class AHKShortcutEditor(ctk.CTk):
         self.text_list_items.clear()
         self.selected_text_shortcut = None
 
-        # Filter and display text shortcuts
+        # Filter and sort text shortcuts by trigger
         filtered_shortcuts = [
             shortcut for shortcut in self.text_shortcuts
             if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('trigger', '')} {shortcut.get('description', '')}".lower()
         ]
+        filtered_shortcuts.sort(key=lambda x: x.get('trigger', '').lower())
 
         for i, shortcut in enumerate(filtered_shortcuts):
             name = shortcut.get('name', 'Unnamed')
             trigger = shortcut.get('trigger', '')
             description = shortcut.get('description', '')
-            display_text = f"{trigger} - {name}"
+            display_text = f"{trigger} 󰌌 {name}"
             if description:
                 display_text += f" ({description[:30]}...)" if len(description) > 30 else f" ({description})"
             
