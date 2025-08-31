@@ -155,6 +155,8 @@ class StartupManager(tk.Tk):
         self.title("Startup Manager - PowerShell")
         self.configure(bg="#2e2f3e")
         self.geometry("1000x700")  # Set a larger default size for better scrolling
+        self.minsize(800, 500)  # Set minimum window size
+        self.resizable(True, True)  # Make window resizable
         
         self.json_file = os.path.join(os.path.dirname(__file__), "startup_items.json")
         self.items = self.filter_existing_items(self.load_items())  # Load and filter items
@@ -231,34 +233,38 @@ class StartupManager(tk.Tk):
             self.show_status(f"Failed to copy registry path: {e}", "#ff6b6b")
 
     def create_widgets(self):
+        # Configure root window to be resizable
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        
         # Main frame
         main_frame = tk.Frame(self, bg="#2e2f3e")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
+        # Configure main frame grid weights
+        main_frame.grid_rowconfigure(1, weight=1)  # Items frame row
+        main_frame.grid_columnconfigure(0, weight=1)
+        
         # Management buttons frame
         button_frame = tk.Frame(main_frame, bg="#2e2f3e")
-        button_frame.pack(fill=tk.X, pady=(0, 10))
+        button_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        button_frame.grid_columnconfigure(3, weight=1)  # Make space between buttons and search flexible
         
         tk.Button(button_frame, text="Add New Item", command=self.add_new_item, 
-                 bg="#4a4b5a", fg="white", font=("Arial", 10), width=15).pack(side=tk.LEFT, padx=5)
+                 bg="#4a4b5a", fg="white", font=("Arial", 10), width=15).grid(row=0, column=0, padx=5)
         
         self.refresh_btn = tk.Button(button_frame, text="Refresh", command=self.smooth_refresh, 
                                     bg="#4a4b5a", fg="white", font=("Arial", 10), width=15)
-        self.refresh_btn.pack(side=tk.LEFT, padx=5)
+        self.refresh_btn.grid(row=0, column=1, padx=5)
         
         # Add Copy Registry Paths button
         copy_btn = tk.Button(button_frame, text="Copy Registry Path", command=self.copy_registry_paths, 
                            bg="#4a4b5a", fg="white", font=("Arial", 10), width=18)
-        copy_btn.pack(side=tk.LEFT, padx=5)
-        
-        # Status label for feedback
-        self.status_label = tk.Label(button_frame, text="Ready", bg="#2e2f3e", fg="#9ef959", 
-                                    font=("Arial", 9))
-        self.status_label.pack(side=tk.RIGHT, padx=5)
+        copy_btn.grid(row=0, column=2, padx=5)
         
         # Search frame
         search_frame = tk.Frame(button_frame, bg="#2e2f3e")
-        search_frame.pack(side=tk.RIGHT, padx=(5, 0))
+        search_frame.grid(row=0, column=4, padx=(5, 0))
         
         tk.Label(search_frame, text="Search:", bg="#2e2f3e", fg="white", 
                 font=("Arial", 9)).pack(side=tk.LEFT, padx=(0, 5))
@@ -273,9 +279,14 @@ class StartupManager(tk.Tk):
                             bg="#4a4b5a", fg="white", font=("Arial", 8), width=2)
         clear_btn.pack(side=tk.LEFT)
         
+        # Status label for feedback
+        self.status_label = tk.Label(button_frame, text="Ready", bg="#2e2f3e", fg="#9ef959", 
+                                    font=("Arial", 9))
+        self.status_label.grid(row=0, column=5, padx=5)
+        
         # Items frame
         self.items_frame = tk.Frame(main_frame, bg="#2e2f3e")
-        self.items_frame.pack(fill=tk.BOTH, expand=True)
+        self.items_frame.grid(row=1, column=0, sticky="nsew")
         
         self.create_items_display()
 
@@ -416,8 +427,12 @@ class StartupManager(tk.Tk):
             widget.destroy()
         self.item_widgets.clear()
         
-        self.items_frame.grid_columnconfigure(0, weight=1)
-        self.items_frame.grid_columnconfigure(2, weight=1)
+        # Configure grid weights for proper resizing
+        self.items_frame.grid_columnconfigure(0, weight=1)  # Commands column
+        self.items_frame.grid_columnconfigure(1, weight=0)  # Separator column (fixed width)
+        self.items_frame.grid_columnconfigure(2, weight=1)  # Apps column
+        self.items_frame.grid_rowconfigure(0, weight=0)     # Header row (fixed height)
+        self.items_frame.grid_rowconfigure(1, weight=1)     # Content row (expandable)
         
         # Separate commands and apps
         commands = sorted([item for item in self.items if item["type"] == "Command"], key=lambda x: x["name"].lower())
@@ -429,6 +444,7 @@ class StartupManager(tk.Tk):
         # Vertical Separator
         separator = tk.Frame(self.items_frame, width=2, bg="#4a4b5a")
         separator.grid(row=0, column=1, rowspan=2, sticky="ns", padx=5)
+        separator.grid_propagate(False)  # Maintain fixed width
         
         # Apps Section with scrollable frame
         self.create_scrollable_section("Apps", apps, column=2)
@@ -456,7 +472,16 @@ class StartupManager(tk.Tk):
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
         
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        # Create window in canvas and configure it to expand with canvas width
+        canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        
+        # Bind canvas width changes to update scrollable_frame width
+        def configure_scroll_frame(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+            # Make scrollable_frame width match canvas width
+            canvas.itemconfig(canvas_window, width=event.width)
+        
+        canvas.bind('<Configure>', configure_scroll_frame)
         canvas.configure(yscrollcommand=scrollbar.set)
         
         # Pack canvas and scrollbar
@@ -477,7 +502,6 @@ class StartupManager(tk.Tk):
         
         # Configure grid weights for proper expansion
         scrollable_frame.grid_columnconfigure(0, weight=1)
-        self.items_frame.grid_rowconfigure(1, weight=1)
         
         # Bind mousewheel to canvas
         def _on_mousewheel(event):
@@ -485,11 +509,21 @@ class StartupManager(tk.Tk):
         
         canvas.bind("<MouseWheel>", _on_mousewheel)
         scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
+        
+        # Bind mousewheel to scrollable_frame and all its children
+        def bind_mousewheel_recursive(widget):
+            widget.bind("<MouseWheel>", _on_mousewheel)
+            for child in widget.winfo_children():
+                bind_mousewheel_recursive(child)
+        
+        bind_mousewheel_recursive(scrollable_frame)
 
     def create_item_widget_in_frame(self, item, row, parent_frame):
         frame = tk.Frame(parent_frame, bg="#2e2f3e", relief="solid", bd=1)
         frame.grid(row=row, column=0, padx=5, pady=2, sticky="ew")
-        frame.grid_columnconfigure(0, weight=1)
+        
+        # Configure the parent frame to expand the item frames
+        parent_frame.grid_columnconfigure(0, weight=1)
         
         # Left side - checkbox and name
         left_frame = tk.Frame(frame, bg="#2e2f3e")
@@ -503,9 +537,10 @@ class StartupManager(tk.Tk):
         icon_label.bind("<Button-1>", lambda event, item=item: self.toggle_startup_smooth(item))
         icon_label.pack(side=tk.LEFT, padx=0)
 
-        name_label = tk.Label(left_frame, text=item["name"], font=("Jetbrainsmono nfp", 10), bg="#2e2f3e")
+        name_label = tk.Label(left_frame, text=item["name"], font=("Jetbrainsmono nfp", 10), bg="#2e2f3e", 
+                             wraplength=200, justify=tk.LEFT)  # Add text wrapping for long names
         name_label.bind("<Button-1>", lambda event, item=item: self.launch_command(item))
-        name_label.pack(side=tk.LEFT, padx=(5, 0))
+        name_label.pack(side=tk.LEFT, padx=(5, 0), fill=tk.X, expand=True)
         
         self.update_label_color(name_label, checked)
         
@@ -519,7 +554,7 @@ class StartupManager(tk.Tk):
         
         # Right side - edit and delete buttons
         right_frame = tk.Frame(frame, bg="#2e2f3e")
-        right_frame.pack(side=tk.RIGHT)
+        right_frame.pack(side=tk.RIGHT, padx=(5, 0))
         
         edit_btn = tk.Button(right_frame, text="Edit", command=lambda: self.edit_item(item),
                             bg="#4a4b5a", fg="white", font=("Arial", 8), width=6)
