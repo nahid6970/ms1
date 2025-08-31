@@ -809,37 +809,11 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    // Show/hide styling sections based on group type
-    function toggleStylingSections() {
-      const popupStylingSection = document.getElementById('popup-styling-section');
-      const horizontalStackStylingSection = document.getElementById('horizontal-stack-styling-section');
-      
-      // Show popup styling for collapsible groups
-      if (editGroupCollapsibleCheckbox.checked) {
-        popupStylingSection.style.display = 'block';
-      } else {
-        popupStylingSection.style.display = 'none';
-      }
-      
-      // Show horizontal stack styling for horizontal stack groups
-      if (editGroupHorizontalStackCheckbox.checked) {
-        horizontalStackStylingSection.style.display = 'block';
-      } else {
-        horizontalStackStylingSection.style.display = 'none';
-      }
-    }
-
     // Initial toggle
     toggleRenameSection();
-    toggleStylingSections();
 
     // Add event listener for checkbox changes
-    editGroupCollapsibleCheckbox.addEventListener('change', () => {
-      toggleRenameSection();
-      toggleStylingSections();
-    });
-    
-    editGroupHorizontalStackCheckbox.addEventListener('change', toggleStylingSections);
+    editGroupCollapsibleCheckbox.addEventListener('change', toggleRenameSection);
 
     editGroupPopup.classList.remove('hidden');
     applyPopupStyling(currentGroupName);
