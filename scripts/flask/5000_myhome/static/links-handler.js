@@ -982,6 +982,15 @@ document.addEventListener('DOMContentLoaded', function () {
               moveToExpandedRow(groupElement);
             }
           }
+
+          // Re-open the horizontal stack popup if it was open
+          const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
+          if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
+            const icon = groupDiv.querySelector('.extend-icon');
+            if (icon) {
+              icon.click();
+            }
+          }
         } else {
           alert('Failed to add link.');
         }
