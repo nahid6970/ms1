@@ -17,19 +17,22 @@
             "name": "Monitor Internal",
             "description": "Switch to internal monitor only",
             "hotkey": "RAlt & Numpad1",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\", \"\", \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\", \"\", \"Hide\")",
+            "category": "Launch"
         },
         {
             "name": "Monitor External",
             "description": "Switch to external monitor only",
             "hotkey": "RAlt & Numpad2",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /external\", \"\", \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /external\", \"\", \"Hide\")",
+            "category": "Launch"
         },
         {
             "name": "Monitor Extend",
             "description": "Extend display to both monitors",
             "hotkey": "RAlt & Numpad3",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /extend\", \"\", \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /extend\", \"\", \"Hide\")",
+            "category": "Launch"
         },
         {
             "name": "Bio GUI",
@@ -81,19 +84,22 @@
             "name": "Registry Run Path",
             "description": "Windows startup registry path",
             "trigger": ";run",
-            "replacement": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+            "replacement": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+            "category": "Path"
         },
         {
             "name": "PowerShell Symlink",
             "description": "PowerShell command to create symbolic link",
             "trigger": ";mklink",
-            "replacement": "New-Item -ItemType SymbolicLink -Path \"Fake\" -Target \"Original\" -Force"
+            "replacement": "New-Item -ItemType SymbolicLink -Path \"Fake\" -Target \"Original\" -Force",
+            "category": "Shell"
         },
         {
             "name": "Arrow Symbol",
             "description": "Right-pointing arrow symbol",
             "trigger": ";--",
-            "replacement": "➔"
+            "replacement": "➔",
+            "category": "Icon/Emoji/Sign"
         }
     ]
 }
