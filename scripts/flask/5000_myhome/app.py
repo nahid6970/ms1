@@ -32,55 +32,90 @@ def read_sidebar_buttons():
             {
                 "id": "tv-button",
                 "name": "TV Shows",
+                "display_type": "icon",
                 "icon_class": "nf nf-md-television_classic",
+                "img_src": "",
                 "url": "http://192.168.0.101:5011/",
                 "has_notification": True,
                 "notification_api": "/api/tv-notifications",
-                "mark_seen_api": "/api/mark-all-tv-seen"
+                "mark_seen_api": "/api/mark-all-tv-seen",
+                "bg_color": "#ffffff",
+                "text_color": "#000000",
+                "hover_color": "#e0e0e0"
             },
             {
                 "id": "movie-button", 
                 "name": "Movies",
+                "display_type": "icon",
                 "icon_class": "nf nf-md-movie_roll",
+                "img_src": "",
                 "url": "http://192.168.0.101:5013/",
                 "has_notification": True,
                 "notification_api": "/api/movie-notifications",
-                "mark_seen_api": "/api/mark-all-movies-seen"
+                "mark_seen_api": "/api/mark-all-movies-seen",
+                "bg_color": "#ffffff",
+                "text_color": "#000000",
+                "hover_color": "#e0e0e0"
             },
             {
                 "id": "drive-button",
                 "name": "Drive",
+                "display_type": "icon",
                 "icon_class": "nf nf-fa-hard_drive",
+                "img_src": "",
                 "url": "http://192.168.0.101:5003/",
-                "has_notification": False
+                "has_notification": False,
+                "bg_color": "#ffffff",
+                "text_color": "#000000",
+                "hover_color": "#e0e0e0"
             },
             {
                 "id": "education-button",
                 "name": "Education",
+                "display_type": "icon",
                 "icon_class": "nf nf-md-book_education", 
+                "img_src": "",
                 "url": "http://192.168.0.101:5015/",
-                "has_notification": False
+                "has_notification": False,
+                "bg_color": "#ffffff",
+                "text_color": "#000000",
+                "hover_color": "#e0e0e0"
             },
             {
                 "id": "rocket-button",
                 "name": "Rocket",
+                "display_type": "icon",
                 "icon_class": "nf nf-fa-rocket",
+                "img_src": "",
                 "url": "http://192.168.0.101:4999/",
-                "has_notification": False
+                "has_notification": False,
+                "bg_color": "#ffffff",
+                "text_color": "#000000",
+                "hover_color": "#e0e0e0"
             },
             {
                 "id": "apps-button",
                 "name": "Apps",
+                "display_type": "icon",
                 "icon_class": "nf nf-oct-apps",
+                "img_src": "",
                 "url": "http://192.168.0.101:4998/",
-                "has_notification": False
+                "has_notification": False,
+                "bg_color": "#ffffff",
+                "text_color": "#000000",
+                "hover_color": "#e0e0e0"
             },
             {
                 "id": "terminal-button",
                 "name": "Terminal",
+                "display_type": "icon",
                 "icon_class": "nf nf-dev-terminal",
+                "img_src": "",
                 "url": "http://192.168.0.101:5555/",
-                "has_notification": False
+                "has_notification": False,
+                "bg_color": "#ffffff",
+                "text_color": "#000000",
+                "hover_color": "#e0e0e0"
             }
         ]
         write_sidebar_buttons(default_buttons)

@@ -51,32 +51,74 @@ function createSidebarButtonElement(button, index) {
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'notification-button-container';
     
-    let buttonHtml = '';
+    // Create the button element
+    const buttonElement = document.createElement('a');
+    buttonElement.className = 'add-button';
+    buttonElement.title = button.name;
+    buttonElement.id = button.id;
     
-    if (button.has_notification) {
-        buttonHtml = `
-            <a href="#" id="${button.id}" class="add-button" title="${button.name}">
-                <i class="${button.icon_class}"></i>
-            </a>
-            <span id="${button.id}-notification-badge" class="notification-badge" style="display: none;">0</span>
-        `;
+    // Apply custom styling
+    if (button.bg_color) {
+        buttonElement.style.backgroundColor = button.bg_color + ' !important';
+    }
+    if (button.text_color) {
+        buttonElement.style.color = button.text_color + ' !important';
+    }
+    
+    // Set up hover effects
+    if (button.hover_color) {
+        buttonElement.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = button.hover_color + ' !important';
+        });
+        buttonElement.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = (button.bg_color || '#ffffff') + ' !important';
+        });
+    }
+    
+    // Set content based on display type
+    if (button.display_type === 'image' && button.img_src) {
+        const img = document.createElement('img');
+        img.src = button.img_src;
+        img.style.width = '25px';
+        img.style.height = '25px';
+        img.alt = button.name;
+        buttonElement.appendChild(img);
     } else {
-        buttonHtml = `
-            <a href="${button.url}" class="add-button" target="_blank" title="${button.name}">
-                <i class="${button.icon_class}"></i>
-            </a>
-        `;
+        const icon = document.createElement('i');
+        icon.className = button.icon_class || 'nf nf-fa-question';
+        buttonElement.appendChild(icon);
+    }
+    
+    // Set up click behavior
+    if (button.has_notification) {
+        buttonElement.href = '#';
+    } else {
+        buttonElement.href = button.url;
+        buttonElement.target = '_blank';
+    }
+    
+    buttonContainer.appendChild(buttonElement);
+    
+    // Add notification badge if needed
+    if (button.has_notification) {
+        const badge = document.createElement('span');
+        badge.id = `${button.id}-notification-badge`;
+        badge.className = 'notification-badge';
+        badge.style.display = 'none';
+        badge.textContent = '0';
+        buttonContainer.appendChild(badge);
     }
     
     // Add edit and delete buttons (hidden by default)
-    buttonHtml += `
-        <div class="sidebar-edit-buttons" style="display: none;">
-            <button class="edit-sidebar-btn" onclick="editSidebarButton(${index})" title="Edit">✏️</button>
-            <button class="delete-sidebar-btn" onclick="deleteSidebarButton(${index})" title="Delete">🗑️</button>
-        </div>
+    const editButtons = document.createElement('div');
+    editButtons.className = 'sidebar-edit-buttons';
+    editButtons.style.display = 'none';
+    editButtons.innerHTML = `
+        <button class="edit-sidebar-btn" onclick="editSidebarButton(${index})" title="Edit">✏️</button>
+        <button class="delete-sidebar-btn" onclick="deleteSidebarButton(${index})" title="Delete">🗑️</button>
     `;
+    buttonContainer.appendChild(editButtons);
     
-    buttonContainer.innerHTML = buttonHtml;
     return buttonContainer;
 }
 
@@ -105,6 +147,37 @@ function setupSidebarEventListeners() {
         editForm.addEventListener('submit', function(e) {
             e.preventDefault();
             saveSidebarButtonEdit();
+        });
+    }
+
+    // Display type handlers
+    const displayTypeSelect = document.getElementById('sidebar-button-display-type');
+    if (displayTypeSelect) {
+        displayTypeSelect.addEventListener('change', function() {
+            const iconSettings = document.getElementById('icon-settings');
+            const imageSettings = document.getElementById('image-settings');
+            if (this.value === 'image') {
+                iconSettings.style.display = 'none';
+                imageSettings.style.display = 'block';
+            } else {
+                iconSettings.style.display = 'block';
+                imageSettings.style.display = 'none';
+            }
+        });
+    }
+
+    const editDisplayTypeSelect = document.getElementById('edit-sidebar-button-display-type');
+    if (editDisplayTypeSelect) {
+        editDisplayTypeSelect.addEventListener('change', function() {
+            const iconSettings = document.getElementById('edit-icon-settings');
+            const imageSettings = document.getElementById('edit-image-settings');
+            if (this.value === 'image') {
+                iconSettings.style.display = 'none';
+                imageSettings.style.display = 'block';
+            } else {
+                iconSettings.style.display = 'block';
+                imageSettings.style.display = 'none';
+            }
         });
     }
 
@@ -169,21 +242,36 @@ function showAddSidebarButtonPopup() {
     // Reset form
     document.getElementById('add-sidebar-button-form').reset();
     document.getElementById('notification-settings').style.display = 'none';
+    
+    // Reset display type settings
+    document.getElementById('icon-settings').style.display = 'block';
+    document.getElementById('image-settings').style.display = 'none';
+    document.getElementById('sidebar-button-display-type').value = 'icon';
 }
 
 // Add new sidebar button
 function addSidebarButton() {
     const name = document.getElementById('sidebar-button-name').value;
-    const iconClass = document.getElementById('sidebar-button-icon').value;
     const url = document.getElementById('sidebar-button-url').value;
+    const displayType = document.getElementById('sidebar-button-display-type').value;
+    const iconClass = document.getElementById('sidebar-button-icon').value;
+    const imgSrc = document.getElementById('sidebar-button-img-src').value;
+    const bgColor = document.getElementById('sidebar-button-bg-color').value;
+    const textColor = document.getElementById('sidebar-button-text-color').value;
+    const hoverColor = document.getElementById('sidebar-button-hover-color').value;
     const hasNotification = document.getElementById('sidebar-button-notification').checked;
     
     const newButton = {
         id: `custom-button-${Date.now()}`,
         name: name,
+        display_type: displayType,
         icon_class: iconClass,
+        img_src: imgSrc,
         url: url,
-        has_notification: hasNotification
+        has_notification: hasNotification,
+        bg_color: bgColor || '#ffffff',
+        text_color: textColor || '#000000',
+        hover_color: hoverColor || '#e0e0e0'
     };
 
     if (hasNotification) {
@@ -218,9 +306,26 @@ function editSidebarButton(index) {
     // Fill form with current values
     document.getElementById('edit-sidebar-button-index').value = index;
     document.getElementById('edit-sidebar-button-name').value = button.name;
-    document.getElementById('edit-sidebar-button-icon').value = button.icon_class;
     document.getElementById('edit-sidebar-button-url').value = button.url;
+    document.getElementById('edit-sidebar-button-display-type').value = button.display_type || 'icon';
+    document.getElementById('edit-sidebar-button-icon').value = button.icon_class || '';
+    document.getElementById('edit-sidebar-button-img-src').value = button.img_src || '';
+    document.getElementById('edit-sidebar-button-bg-color').value = button.bg_color || '';
+    document.getElementById('edit-sidebar-button-text-color').value = button.text_color || '';
+    document.getElementById('edit-sidebar-button-hover-color').value = button.hover_color || '';
     document.getElementById('edit-sidebar-button-notification').checked = button.has_notification || false;
+    
+    // Show/hide settings based on display type
+    const displayType = button.display_type || 'icon';
+    const iconSettings = document.getElementById('edit-icon-settings');
+    const imageSettings = document.getElementById('edit-image-settings');
+    if (displayType === 'image') {
+        iconSettings.style.display = 'none';
+        imageSettings.style.display = 'block';
+    } else {
+        iconSettings.style.display = 'block';
+        imageSettings.style.display = 'none';
+    }
     
     if (button.has_notification) {
         document.getElementById('edit-notification-settings').style.display = 'block';
@@ -237,16 +342,26 @@ function editSidebarButton(index) {
 function saveSidebarButtonEdit() {
     const index = parseInt(document.getElementById('edit-sidebar-button-index').value);
     const name = document.getElementById('edit-sidebar-button-name').value;
-    const iconClass = document.getElementById('edit-sidebar-button-icon').value;
     const url = document.getElementById('edit-sidebar-button-url').value;
+    const displayType = document.getElementById('edit-sidebar-button-display-type').value;
+    const iconClass = document.getElementById('edit-sidebar-button-icon').value;
+    const imgSrc = document.getElementById('edit-sidebar-button-img-src').value;
+    const bgColor = document.getElementById('edit-sidebar-button-bg-color').value;
+    const textColor = document.getElementById('edit-sidebar-button-text-color').value;
+    const hoverColor = document.getElementById('edit-sidebar-button-hover-color').value;
     const hasNotification = document.getElementById('edit-sidebar-button-notification').checked;
     
     const updatedButton = {
         ...sidebarButtons[index],
         name: name,
+        display_type: displayType,
         icon_class: iconClass,
+        img_src: imgSrc,
         url: url,
-        has_notification: hasNotification
+        has_notification: hasNotification,
+        bg_color: bgColor || '#ffffff',
+        text_color: textColor || '#000000',
+        hover_color: hoverColor || '#e0e0e0'
     };
 
     if (hasNotification) {
