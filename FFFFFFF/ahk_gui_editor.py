@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox, filedialog
+import json
 import re
 import os
 
@@ -8,6 +9,7 @@ ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
 AHK_SCRIPT_PATH = "ahk_v2.ahk"
+SHORTCUTS_JSON_PATH = "ahk_shortcuts.json"
 
 class AddEditShortcutDialog(ctk.CTkToplevel):
     def __init__(self, master, shortcut_type, shortcut_data=None, *, font=None):
@@ -18,7 +20,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
         self.font = font if font else ("sans-serif", 12, "normal")
         self.transient(master)
         self.grab_set()
-        self.geometry("500x300")
+        self.geometry("500x400")
 
         if self.shortcut_data:
             self.title(f"Edit {shortcut_type.capitalize()} Shortcut")
@@ -30,6 +32,16 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
             self.populate_fields()
 
     def create_widgets(self):
+        # Name input (for both types)
+        ctk.CTkLabel(self, text="Name:", font=self.font).pack(padx=20, pady=5, anchor="w")
+        self.name_entry = ctk.CTkEntry(self, placeholder_text="e.g., Open Terminal, Version 1 Text", font=self.font)
+        self.name_entry.pack(padx=20, pady=5, fill="x")
+        
+        # Description input (for both types)
+        ctk.CTkLabel(self, text="Description:", font=self.font).pack(padx=20, pady=5, anchor="w")
+        self.description_entry = ctk.CTkEntry(self, placeholder_text="Brief description of what this does", font=self.font)
+        self.description_entry.pack(padx=20, pady=5, fill="x")
+        
         if self.shortcut_type == "script":
             # Hotkey input
             ctk.CTkLabel(self, text="Hotkey:", font=self.font).pack(padx=20, pady=5, anchor="w")
@@ -60,6 +72,9 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
         save_button.pack(padx=20, pady=10)
 
     def populate_fields(self):
+        self.name_entry.insert(0, self.shortcut_data.get("name", ""))
+        self.description_entry.insert(0, self.shortcut_data.get("description", ""))
+        
         if self.shortcut_type == "script":
             self.hotkey_entry.insert(0, self.shortcut_data.get("hotkey", ""))
             self.action_entry.insert("1.0", self.shortcut_data.get("action", ""))
@@ -68,6 +83,13 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
             self.replacement_entry.insert("1.0", self.shortcut_data.get("replacement", ""))
 
     def add_shortcut(self):
+        name = self.name_entry.get().strip()
+        description = self.description_entry.get().strip()
+        
+        if not name:
+            messagebox.showwarning("Warning", "Name is required.", parent=self)
+            return
+        
         if self.shortcut_type == "script":
             hotkey = self.hotkey_entry.get().strip()
             action = self.action_entry.get("1.0", "end-1c").strip()
@@ -76,7 +98,12 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
                 messagebox.showwarning("Warning", "Both hotkey and action are required.", parent=self)
                 return
                 
-            new_shortcut = {"hotkey": hotkey, "action": action}
+            new_shortcut = {
+                "name": name,
+                "description": description,
+                "hotkey": hotkey, 
+                "action": action
+            }
             self.master.script_shortcuts.append(new_shortcut)
             
         else:  # text shortcut
@@ -87,13 +114,29 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
                 messagebox.showwarning("Warning", "Both trigger and replacement are required.", parent=self)
                 return
                 
-            new_shortcut = {"trigger": trigger, "replacement": replacement}
+            new_shortcut = {
+                "name": name,
+                "description": description,
+                "trigger": trigger, 
+                "replacement": replacement
+            }
             self.master.text_shortcuts.append(new_shortcut)
 
         self.master.update_list_displays()
+        self.master.save_shortcuts_json()
         self.destroy()
 
     def save_changes(self):
+        name = self.name_entry.get().strip()
+        description = self.description_entry.get().strip()
+        
+        if not name:
+            messagebox.showwarning("Warning", "Name is required.", parent=self)
+            return
+        
+        self.shortcut_data["name"] = name
+        self.shortcut_data["description"] = description
+        
         if self.shortcut_type == "script":
             hotkey = self.hotkey_entry.get().strip()
             action = self.action_entry.get("1.0", "end-1c").strip()
@@ -117,6 +160,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
             self.shortcut_data["replacement"] = replacement
 
         self.master.update_list_displays()
+        self.master.save_shortcuts_json()
         self.destroy()
 
 
@@ -134,7 +178,7 @@ class AHKShortcutEditor(ctk.CTk):
         self.text_shortcuts = []
         self.other_content = []  # Store non-shortcut content
         
-        self.load_ahk_script()
+        self.load_shortcuts_json()
         self.create_widgets()
         self.update_list_displays()
 
@@ -208,13 +252,64 @@ class AHKShortcutEditor(ctk.CTk):
                                          fg_color="red", command=self.remove_selected_item, font=self.app_font)
         self.remove_button.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-        self.save_button = ctk.CTkButton(self.button_frame, text="Save AHK Script", 
-                                       fg_color="green", command=self.save_ahk_script, font=self.app_font)
+        self.save_button = ctk.CTkButton(self.button_frame, text="Generate AHK Script", 
+                                       fg_color="green", command=self.generate_ahk_script, font=self.app_font)
         self.save_button.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
 
-    def load_ahk_script(self):
+    def load_shortcuts_json(self):
+        if os.path.exists(SHORTCUTS_JSON_PATH):
+            try:
+                with open(SHORTCUTS_JSON_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.script_shortcuts = data.get("script_shortcuts", [])
+                    self.text_shortcuts = data.get("text_shortcuts", [])
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load shortcuts JSON: {e}")
+                self.create_default_shortcuts()
+        else:
+            # If JSON doesn't exist, try to parse existing AHK script
+            self.import_from_ahk_script()
+
+    def create_default_shortcuts(self):
+        """Create some default shortcuts as examples"""
+        self.script_shortcuts = [
+            {
+                "name": "Open Terminal",
+                "description": "Opens PowerShell as admin",
+                "hotkey": "!x",
+                "action": 'RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide")'
+            }
+        ]
+        self.text_shortcuts = [
+            {
+                "name": "AHK Version 1",
+                "description": "AutoHotkey v1 header",
+                "trigger": ";v1",
+                "replacement": "#Requires AutoHotkey v1.0"
+            },
+            {
+                "name": "AHK Version 2", 
+                "description": "AutoHotkey v2 header",
+                "trigger": ";v2",
+                "replacement": "#Requires AutoHotkey v2.0"
+            }
+        ]
+
+    def save_shortcuts_json(self):
+        try:
+            data = {
+                "script_shortcuts": self.script_shortcuts,
+                "text_shortcuts": self.text_shortcuts
+            }
+            with open(SHORTCUTS_JSON_PATH, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save shortcuts JSON: {e}")
+
+    def import_from_ahk_script(self):
+        """Import shortcuts from existing AHK script if JSON doesn't exist"""
         if not os.path.exists(AHK_SCRIPT_PATH):
-            messagebox.showerror("Error", f"AHK script not found at {AHK_SCRIPT_PATH}")
+            self.create_default_shortcuts()
             return
 
         try:
@@ -222,9 +317,12 @@ class AHKShortcutEditor(ctk.CTk):
                 content = f.read()
             
             self.parse_ahk_content(content)
+            # Save the imported shortcuts to JSON
+            self.save_shortcuts_json()
             
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to load AHK script: {e}")
+            messagebox.showerror("Error", f"Failed to import from AHK script: {e}")
+            self.create_default_shortcuts()
 
     def parse_ahk_content(self, content):
         lines = content.split('\n')
@@ -246,7 +344,12 @@ class AHKShortcutEditor(ctk.CTk):
             if text_match:
                 trigger = text_match.group(1)
                 replacement = text_match.group(2)
-                self.text_shortcuts.append({"trigger": trigger, "replacement": replacement})
+                self.text_shortcuts.append({
+                    "name": f"Text: {trigger}",
+                    "description": "Imported from AHK script",
+                    "trigger": trigger, 
+                    "replacement": replacement
+                })
                 i += 1
                 continue
             
@@ -276,7 +379,12 @@ class AHKShortcutEditor(ctk.CTk):
                     action = action_start
                     i += 1
                 
-                self.script_shortcuts.append({"hotkey": hotkey, "action": action})
+                self.script_shortcuts.append({
+                    "name": f"Script: {hotkey}",
+                    "description": "Imported from AHK script",
+                    "hotkey": hotkey, 
+                    "action": action
+                })
                 continue
             
             # Everything else goes to other_content
@@ -301,11 +409,17 @@ class AHKShortcutEditor(ctk.CTk):
         # Filter and display script shortcuts
         filtered_shortcuts = [
             shortcut for shortcut in self.script_shortcuts
-            if search_query.lower() in f"{shortcut['hotkey']} {shortcut['action']}".lower()
+            if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('hotkey', '')} {shortcut.get('description', '')}".lower()
         ]
 
         for i, shortcut in enumerate(filtered_shortcuts):
-            display_text = f"{shortcut['hotkey']} → {shortcut['action'][:50]}..."
+            name = shortcut.get('name', 'Unnamed')
+            hotkey = shortcut.get('hotkey', '')
+            description = shortcut.get('description', '')
+            display_text = f"{name} ({hotkey})"
+            if description:
+                display_text += f" - {description[:30]}..."
+            
             label = ctk.CTkLabel(self.script_scroll_frame, text=display_text, anchor="w", font=self.app_font)
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.shortcut_obj = shortcut
@@ -323,11 +437,17 @@ class AHKShortcutEditor(ctk.CTk):
         # Filter and display text shortcuts
         filtered_shortcuts = [
             shortcut for shortcut in self.text_shortcuts
-            if search_query.lower() in f"{shortcut['trigger']} {shortcut['replacement']}".lower()
+            if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('trigger', '')} {shortcut.get('description', '')}".lower()
         ]
 
         for i, shortcut in enumerate(filtered_shortcuts):
-            display_text = f"{shortcut['trigger']} → {shortcut['replacement'][:30]}..."
+            name = shortcut.get('name', 'Unnamed')
+            trigger = shortcut.get('trigger', '')
+            description = shortcut.get('description', '')
+            display_text = f"{name} ({trigger})"
+            if description:
+                display_text += f" - {description[:30]}..."
+            
             label = ctk.CTkLabel(self.text_scroll_frame, text=display_text, anchor="w", font=self.app_font)
             label.grid(row=i, column=0, padx=5, pady=2, sticky="ew")
             label.shortcut_obj = shortcut
@@ -390,52 +510,69 @@ class AHKShortcutEditor(ctk.CTk):
             if self.selected_script_shortcut in self.script_shortcuts:
                 self.script_shortcuts.remove(self.selected_script_shortcut)
                 self.update_list_displays()
+                self.save_shortcuts_json()
             self.selected_script_shortcut = None
         elif self.selected_text_shortcut:
             if self.selected_text_shortcut in self.text_shortcuts:
                 self.text_shortcuts.remove(self.selected_text_shortcut)
                 self.update_list_displays()
+                self.save_shortcuts_json()
             self.selected_text_shortcut = None
         else:
             messagebox.showwarning("Warning", "No shortcut selected to remove.")
 
-    def save_ahk_script(self):
+    def generate_ahk_script(self):
         try:
             # Build the new script content
             output_lines = []
             
-            # Add other content (includes, comments, functions, etc.)
-            output_lines.extend(self.other_content)
+            # Add AHK header
+            output_lines.append("#Requires AutoHotkey v2.0")
+            output_lines.append("#SingleInstance")
+            output_lines.append("Persistent")
+            output_lines.append("")
             
             # Add script shortcuts
             if self.script_shortcuts:
-                output_lines.append("\n;! Script Shortcuts")
+                output_lines.append(";! === SCRIPT SHORTCUTS ===")
                 for shortcut in self.script_shortcuts:
-                    if '\n' in shortcut['action']:
+                    # Add comment with name and description
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+                    
+                    if '\n' in shortcut.get('action', ''):
                         # Multi-line action
-                        output_lines.append(f"{shortcut['hotkey']}:: {{")
-                        for line in shortcut['action'].split('\n'):
+                        output_lines.append(f"{shortcut.get('hotkey', '')}:: {{")
+                        for line in shortcut.get('action', '').split('\n'):
                             if line.strip():
-                                output_lines.append(line)
+                                output_lines.append(f"    {line}")
                         output_lines.append("}")
                     else:
                         # Single line action
-                        output_lines.append(f"{shortcut['hotkey']}::{shortcut['action']}")
+                        output_lines.append(f"{shortcut.get('hotkey', '')}::{shortcut.get('action', '')}")
+                    output_lines.append("")
             
             # Add text shortcuts
             if self.text_shortcuts:
-                output_lines.append("\n;! Text Shortcuts")
+                output_lines.append(";! === TEXT SHORTCUTS ===")
                 for shortcut in self.text_shortcuts:
-                    output_lines.append(f"::{shortcut['trigger']}::{shortcut['replacement']}")
+                    # Add comment with name and description
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+                    output_lines.append(f"::{shortcut.get('trigger', '')}::{shortcut.get('replacement', '')}")
+                    output_lines.append("")
             
             # Write to file
-            with open(AHK_SCRIPT_PATH, 'w', encoding='utf-8') as f:
+            output_file = "generated_shortcuts.ahk"
+            with open(output_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(output_lines))
             
-            messagebox.showinfo("Success", "AHK script saved successfully!")
+            messagebox.showinfo("Success", f"AHK script generated successfully as '{output_file}'!")
             
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to save AHK script: {e}")
+            messagebox.showerror("Error", f"Failed to generate AHK script: {e}")
 
 
 if __name__ == "__main__":

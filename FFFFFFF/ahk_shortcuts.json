@@ -1,0 +1,96 @@
+{
+    "script_shortcuts": [
+        {
+            "name": "Open Terminal Admin",
+            "description": "Opens PowerShell as administrator",
+            "hotkey": "!x",
+            "action": "RunWait(\"pwsh -Command `\"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`\"\", , \"Hide\")"
+        },
+        {
+            "name": "Run Python Script",
+            "description": "Opens run.py in the ms1 directory",
+            "hotkey": "!Space",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\run.py\", , \"Show\")"
+        },
+        {
+            "name": "Monitor Internal",
+            "description": "Switch to internal monitor only",
+            "hotkey": "RAlt & Numpad1",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\", \"\", \"Hide\")"
+        },
+        {
+            "name": "Monitor External", 
+            "description": "Switch to external monitor only",
+            "hotkey": "RAlt & Numpad2",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /external\", \"\", \"Hide\")"
+        },
+        {
+            "name": "Monitor Extend",
+            "description": "Extend display to both monitors",
+            "hotkey": "RAlt & Numpad3", 
+            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /extend\", \"\", \"Hide\")"
+        },
+        {
+            "name": "Bio GUI",
+            "description": "Opens Bio.ahk GUI",
+            "hotkey": "!b",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\gui\\Bio.ahk\", \"\", \"Hide\")"
+        },
+        {
+            "name": "Ultimate GUI",
+            "description": "Opens Ultimate_Gui.py",
+            "hotkey": "!u", 
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\Ultimate_Gui.py\", \"\", \"Hide\")"
+        },
+        {
+            "name": "Always On Top Toggle",
+            "description": "Toggles always on top for active window",
+            "hotkey": "#t",
+            "action": "Always_on_Top()\nAlways_on_Top(){\n    static alwaysOnTop := false\n    if (alwaysOnTop) {\n        WinSetAlwaysOnTop(false, \"A\")\n    } else {\n        WinSetAlwaysOnTop(true, \"A\")\n    }\n    alwaysOnTop := !alwaysOnTop\n}"
+        },
+        {
+            "name": "Center Window",
+            "description": "Centers the focused window on screen",
+            "hotkey": "LAlt & c",
+            "action": "Center_Focused_Window()\nCenter_Focused_Window() {\n    hwnd := WinGetID(\"A\")\n    WinGetPos(&x, &y, &w, &h, \"ahk_id \" hwnd)\n    ScreenWidth := SysGet(78)\n    ScreenHeight := SysGet(79)\n    newX := (ScreenWidth - w) / 2\n    newY := (ScreenHeight - h) / 2\n    WinMove(newX, newY, , , \"ahk_id \" hwnd)\n}"
+        },
+        {
+            "name": "Kill Foreground Process",
+            "description": "Forcefully kills the process under mouse cursor",
+            "hotkey": "!q",
+            "action": "KillForeground()\nKillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}"
+        }
+    ],
+    "text_shortcuts": [
+        {
+            "name": "AutoHotkey Version 1",
+            "description": "Inserts AHK v1 header requirement",
+            "trigger": ";v1",
+            "replacement": "#Requires AutoHotkey v1.0"
+        },
+        {
+            "name": "AutoHotkey Version 2", 
+            "description": "Inserts AHK v2 header requirement",
+            "trigger": ";v2",
+            "replacement": "#Requires AutoHotkey v2.0"
+        },
+        {
+            "name": "Registry Run Path",
+            "description": "Windows startup registry path",
+            "trigger": ";run",
+            "replacement": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+        },
+        {
+            "name": "PowerShell Symlink",
+            "description": "PowerShell command to create symbolic link",
+            "trigger": ";mklink",
+            "replacement": "New-Item -ItemType SymbolicLink -Path \"Fake\" -Target \"Original\" -Force"
+        },
+        {
+            "name": "Arrow Symbol",
+            "description": "Right-pointing arrow symbol",
+            "trigger": ";--",
+            "replacement": "➔"
+        }
+    ]
+}
