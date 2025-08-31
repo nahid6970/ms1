@@ -72,6 +72,31 @@ LAlt & c:: {
     }
 }
 
+;! Copy Path
+^!m:: {
+    CopyPath_File()
+    CopyPath_File() {
+        ClipboardBackup := ClipboardAll()
+        A_Clipboard := "" 
+        Send("^c")
+        Errorlevel := !ClipWait(1)
+        if ErrorLevel
+        {
+        MsgBox("No valid file path found.")
+        }
+        else
+        {
+        ClipBoardContent := A_Clipboard
+        ; V1toV2: StrReplace() is not case sensitive
+        ; check for StringCaseSense in v1 source script
+        ; and change the CaseSense param in StrReplace() if necessary
+        ClipBoardContent := StrReplace(ClipBoardContent, "`n", "`t")
+        A_Clipboard := ClipboardBackup
+        A_Clipboard := ClipBoardContent
+        TrayTip("Copy as Path", "Copied `"" ClipBoardContent "`" to clipboard.")
+        }}
+}
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
@@ -91,4 +116,4 @@ LAlt & c:: {
 
 ;! Arrow Symbol
 ;! Right-pointing arrow symbol
-::;--::nigga
+::;--::➔

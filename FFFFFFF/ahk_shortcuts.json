@@ -59,6 +59,12 @@
             "description": "Forcefully kills the process under mouse cursor",
             "hotkey": "!q",
             "action": "KillForeground()\nKillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}"
+        },
+        {
+            "name": "Copy Path",
+            "description": "",
+            "hotkey": "^!m",
+            "action": "CopyPath_File()\nCopyPath_File() {\n    ClipboardBackup := ClipboardAll()\n    A_Clipboard := \"\" \n    Send(\"^c\")\n    Errorlevel := !ClipWait(1)\n    if ErrorLevel\n    {\n    MsgBox(\"No valid file path found.\")\n    }\n    else\n    {\n    ClipBoardContent := A_Clipboard\n    ; V1toV2: StrReplace() is not case sensitive\n    ; check for StringCaseSense in v1 source script\n    ; and change the CaseSense param in StrReplace() if necessary\n    ClipBoardContent := StrReplace(ClipBoardContent, \"`n\", \"`t\")\n    A_Clipboard := ClipboardBackup\n    A_Clipboard := ClipBoardContent\n    TrayTip(\"Copy as Path\", \"Copied `\"\" ClipBoardContent \"`\" to clipboard.\")\n    }}"
         }
     ],
     "text_shortcuts": [
