@@ -1160,6 +1160,19 @@ document.addEventListener('DOMContentLoaded', function () {
           alert('Link deleted successfully!');
           await fetchAndDisplayLinks();
 
+          // Re-open the collapsible group if it was open
+          const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+          if (groupElement) {
+            const content = groupElement.querySelector('.collapsible-group-content');
+            const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+            if (content && toggleBtn) {
+              content.classList.add('expanded');
+              toggleBtn.textContent = '▲';
+              groupElement.classList.add('expanded');
+              moveToExpandedRow(groupElement);
+            }
+          }
+
           const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
           if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
             const icon = groupDiv.querySelector('.extend-icon');
