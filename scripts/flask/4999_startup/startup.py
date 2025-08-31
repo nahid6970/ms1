@@ -6,50 +6,153 @@ import json
 import threading
 import time
 
+# Try to import customtkinter, fallback to regular tkinter if not available
+try:
+    import customtkinter as ctk
+    CTK_AVAILABLE = True
+    # Set appearance mode and color theme
+    ctk.set_appearance_mode("dark")
+    ctk.set_default_color_theme("blue")
+except ImportError:
+    CTK_AVAILABLE = False
+    print("CustomTkinter not available, using standard tkinter")
+
 def create_custom_border(parent):
     BORDER_FRAME = tk.Frame(parent, bg="#1d2027", bd=0, highlightthickness=1, highlightbackground="red")
     BORDER_FRAME.place(relwidth=1, relheight=1)
     return BORDER_FRAME
 
-class ItemDialog(tk.Toplevel):
+class ItemDialog:
     def __init__(self, parent, item=None):
-        super().__init__(parent)
         self.parent = parent
         self.item = item
         self.result = None
         
-        self.title("Add New Item" if item is None else "Edit Item")
-        self.geometry("500x300")
-        self.configure(bg="#2e2f3e")
-        self.resizable(False, False)
-        
-        # Make dialog modal
-        self.transient(parent)
-        self.grab_set()
-        
-        self.create_widgets()
+        if CTK_AVAILABLE:
+            self.create_ctk_dialog()
+        else:
+            self.create_tk_dialog()
         
         if item:
             self.load_item_data()
         
         # Center the dialog
         self.center_window()
+    
+    def create_ctk_dialog(self):
+        """Create modern dialog using CustomTkinter"""
+        self.dialog = ctk.CTkToplevel(self.parent)
+        self.dialog.title("Add New Item" if self.item is None else "Edit Item")
+        self.dialog.geometry("500x400")
+        self.dialog.resizable(False, False)
         
-    def create_widgets(self):
+        # Make dialog modal
+        self.dialog.transient(self.parent)
+        self.dialog.grab_set()
+        
+        # Configure grid
+        self.dialog.grid_columnconfigure(0, weight=1)
+        
+        # Main frame with compact padding
+        main_frame = ctk.CTkFrame(self.dialog)
+        main_frame.grid(row=0, column=0, padx=15, pady=15, sticky="nsew")
+        main_frame.grid_columnconfigure(1, weight=1)
+        
+        # Title
+        title_label = ctk.CTkLabel(main_frame, 
+                                  text="Add New Item" if self.item is None else "Edit Item",
+                                  font=ctk.CTkFont(size=16, weight="bold"))
+        title_label.grid(row=0, column=0, columnspan=2, pady=(15, 20))
+        
+        # Name field
+        ctk.CTkLabel(main_frame, text="Name *", 
+                    font=ctk.CTkFont(size=12, weight="bold")).grid(row=1, column=0, sticky="w", padx=15, pady=(5, 2))
+        self.name_entry = ctk.CTkEntry(main_frame, placeholder_text="Enter item name", 
+                                      font=ctk.CTkFont(size=11), height=28)
+        self.name_entry.grid(row=2, column=0, columnspan=2, padx=15, pady=(0, 8), sticky="ew")
+        
+        # Type field
+        ctk.CTkLabel(main_frame, text="Type", 
+                    font=ctk.CTkFont(size=12, weight="bold")).grid(row=3, column=0, sticky="w", padx=15, pady=(5, 2))
+        self.type_var = tk.StringVar(value="App")
+        self.type_combo = ctk.CTkComboBox(main_frame, values=["App", "Command"], 
+                                         variable=self.type_var, font=ctk.CTkFont(size=11), height=28)
+        self.type_combo.grid(row=4, column=0, columnspan=2, padx=15, pady=(0, 8), sticky="ew")
+        
+        # Executable Type field
+        ctk.CTkLabel(main_frame, text="Executable Type", 
+                    font=ctk.CTkFont(size=12, weight="bold")).grid(row=5, column=0, sticky="w", padx=15, pady=(5, 2))
+        self.executable_type_var = tk.StringVar(value="other")
+        self.executable_type_combo = ctk.CTkComboBox(main_frame, 
+                                                    values=["other", "pythonw", "pwsh", "cmd", "powershell", "ahk_v2"],
+                                                    variable=self.executable_type_var, 
+                                                    font=ctk.CTkFont(size=11), height=28,
+                                                    command=self.on_executable_type_selected)
+        self.executable_type_combo.grid(row=6, column=0, columnspan=2, padx=15, pady=(0, 8), sticky="ew")
+        
+        # Path field
+        ctk.CTkLabel(main_frame, text="Path *", 
+                    font=ctk.CTkFont(size=12, weight="bold")).grid(row=7, column=0, sticky="w", padx=15, pady=(5, 2))
+        
+        path_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        path_frame.grid(row=8, column=0, columnspan=2, padx=15, pady=(0, 8), sticky="ew")
+        path_frame.grid_columnconfigure(0, weight=1)
+        
+        self.path_entry = ctk.CTkEntry(path_frame, placeholder_text="Enter executable path", 
+                                      font=ctk.CTkFont(size=11), height=28)
+        self.path_entry.grid(row=0, column=0, padx=(0, 8), sticky="ew")
+        
+        browse_btn = ctk.CTkButton(path_frame, text="Browse", command=self.browse_file,
+                                  font=ctk.CTkFont(size=10), width=65, height=28)
+        browse_btn.grid(row=0, column=1)
+        
+        # Arguments field
+        ctk.CTkLabel(main_frame, text="Arguments", 
+                    font=ctk.CTkFont(size=12, weight="bold")).grid(row=9, column=0, sticky="w", padx=15, pady=(5, 2))
+        self.command_entry = ctk.CTkEntry(main_frame, placeholder_text="Command line arguments (optional)", 
+                                         font=ctk.CTkFont(size=11), height=28)
+        self.command_entry.grid(row=10, column=0, columnspan=2, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Buttons
+        button_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        button_frame.grid(row=11, column=0, columnspan=2, pady=(5, 15))
+        
+        save_btn = ctk.CTkButton(button_frame, text="Save", command=self.save_item,
+                                font=ctk.CTkFont(size=12, weight="bold"), 
+                                width=100, height=32)
+        save_btn.pack(side=tk.LEFT, padx=8)
+        
+        cancel_btn = ctk.CTkButton(button_frame, text="Cancel", command=self.cancel,
+                                  font=ctk.CTkFont(size=12), 
+                                  width=100, height=32, fg_color="gray", hover_color="darkgray")
+        cancel_btn.pack(side=tk.LEFT, padx=8)
+    
+    def create_tk_dialog(self):
+        """Fallback to standard tkinter dialog"""
+        self.dialog = tk.Toplevel(self.parent)
+        self.dialog.title("Add New Item" if self.item is None else "Edit Item")
+        self.dialog.geometry("500x400")
+        self.dialog.configure(bg="#2e2f3e")
+        self.dialog.resizable(False, False)
+        
+        # Make dialog modal
+        self.dialog.transient(self.parent)
+        self.dialog.grab_set()
+        
         # Name
-        tk.Label(self, text="Name:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=0, column=0, sticky="w", padx=10, pady=5)
-        self.name_entry = tk.Entry(self, width=50, font=("Arial", 10))
+        tk.Label(self.dialog, text="Name:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        self.name_entry = tk.Entry(self.dialog, width=50, font=("Arial", 10))
         self.name_entry.grid(row=0, column=1, padx=10, pady=5)
         
         # Type
-        tk.Label(self, text="Type:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        tk.Label(self.dialog, text="Type:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=1, column=0, sticky="w", padx=10, pady=5)
         self.type_var = tk.StringVar(value="App")
-        type_combo = ttk.Combobox(self, textvariable=self.type_var, values=["App", "Command"], state="readonly", width=47)
+        type_combo = ttk.Combobox(self.dialog, textvariable=self.type_var, values=["App", "Command"], state="readonly", width=47)
         type_combo.grid(row=1, column=1, padx=10, pady=5)
         
         # Path
-        tk.Label(self, text="Path:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=2, column=0, sticky="w", padx=10, pady=5)
-        path_frame = tk.Frame(self, bg="#2e2f3e")
+        tk.Label(self.dialog, text="Path:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        path_frame = tk.Frame(self.dialog, bg="#2e2f3e")
         path_frame.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
         
         self.path_entry = tk.Entry(path_frame, width=40, font=("Arial", 10))
@@ -59,19 +162,19 @@ class ItemDialog(tk.Toplevel):
         browse_btn.pack(side=tk.RIGHT, padx=(5, 0))
         
         # Executable Type
-        tk.Label(self, text="Executable Type:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
+        tk.Label(self.dialog, text="Executable Type:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
         self.executable_type_var = tk.StringVar(value="other")
-        executable_type_combo = ttk.Combobox(self, textvariable=self.executable_type_var, values=["pythonw", "pwsh", "cmd", "powershell", "other"], state="readonly", width=47)
+        executable_type_combo = ttk.Combobox(self.dialog, textvariable=self.executable_type_var, values=["pythonw", "pwsh", "cmd", "powershell", "other"], state="readonly", width=47)
         executable_type_combo.grid(row=3, column=1, padx=10, pady=5)
         executable_type_combo.bind("<<ComboboxSelected>>", self.on_executable_type_selected)
 
         # Command/Arguments
-        tk.Label(self, text="Arguments:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=4, column=0, sticky="w", padx=10, pady=5)
-        self.command_entry = tk.Entry(self, width=50, font=("Arial", 10))
+        tk.Label(self.dialog, text="Arguments:", bg="#2e2f3e", fg="white", font=("Arial", 10)).grid(row=4, column=0, sticky="w", padx=10, pady=5)
+        self.command_entry = tk.Entry(self.dialog, width=50, font=("Arial", 10))
         self.command_entry.grid(row=4, column=1, padx=10, pady=5)
         
         # Buttons
-        button_frame = tk.Frame(self, bg="#2e2f3e")
+        button_frame = tk.Frame(self.dialog, bg="#2e2f3e")
         button_frame.grid(row=5, column=0, columnspan=2, pady=20)
         
         tk.Button(button_frame, text="Save", command=self.save_item, bg="#4a4b5a", fg="white", font=("Arial", 10), width=10).pack(side=tk.LEFT, padx=5)
@@ -82,35 +185,49 @@ class ItemDialog(tk.Toplevel):
             title="Select executable file",
             filetypes=[("Executable files", "*.exe"), ("All files", "*.*")])
         if filename:
-            self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, filename)
+            if CTK_AVAILABLE:
+                self.path_entry.delete(0, tk.END)
+                self.path_entry.insert(0, filename)
+            else:
+                self.path_entry.delete(0, tk.END)
+                self.path_entry.insert(0, filename)
     
-    def on_executable_type_selected(self, event):
-        selected_type = self.executable_type_var.get()
-        if selected_type == "pythonw":
-            self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe")
-        elif selected_type == "pwsh":
-            self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
-        elif selected_type == "cmd":
-            self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, r"C:\Windows\System32\cmd.exe")
-        elif selected_type == "powershell":
-            self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe")
+    def on_executable_type_selected(self, choice=None):
+        # Handle both CTK (choice parameter) and regular tkinter (event parameter)
+        if choice is not None:
+            selected_type = choice
         else:
-            self.path_entry.delete(0, tk.END)
-            # Clear the path if "other" is selected, or keep it as is if it's already a valid path
-            if not os.path.exists(self.path_entry.get()):
-                self.path_entry.insert(0, "")
+            selected_type = self.executable_type_var.get()
+            
+        common_paths = {
+            "pythonw": r"C:\Users\nahid\scoop\apps\python312\current\pythonw.exe",
+            "pwsh": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+            "cmd": r"C:\Windows\System32\cmd.exe",
+            "powershell": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+            "ahk_v2": r"C:\Program Files\AutoHotkey\v2\AutoHotkey.exe"
+        }
+        
+        if selected_type in common_paths:
+            if CTK_AVAILABLE:
+                self.path_entry.delete(0, tk.END)
+                self.path_entry.insert(0, common_paths[selected_type])
+            else:
+                self.path_entry.delete(0, tk.END)
+                self.path_entry.insert(0, common_paths[selected_type])
 
     def load_item_data(self):
-        self.name_entry.insert(0, self.item["name"])
-        self.type_var.set(self.item["type"])
-        self.path_entry.insert(0, self.item["paths"][0])
-        self.command_entry.insert(0, self.item.get("Command", ""))
-        self.executable_type_var.set(self.item.get("ExecutableType", "other"))
+        if CTK_AVAILABLE:
+            self.name_entry.insert(0, self.item["name"])
+            self.type_var.set(self.item["type"])
+            self.path_entry.insert(0, self.item["paths"][0])
+            self.command_entry.insert(0, self.item.get("Command", ""))
+            self.executable_type_var.set(self.item.get("ExecutableType", "other"))
+        else:
+            self.name_entry.insert(0, self.item["name"])
+            self.type_var.set(self.item["type"])
+            self.path_entry.insert(0, self.item["paths"][0])
+            self.command_entry.insert(0, self.item.get("Command", ""))
+            self.executable_type_var.set(self.item.get("ExecutableType", "other"))
     
     def save_item(self):
         name = self.name_entry.get().strip()
@@ -140,13 +257,16 @@ class ItemDialog(tk.Toplevel):
     def cancel(self):
         self.destroy()
     
+    def destroy(self):
+        self.dialog.destroy()
+    
     def center_window(self):
-        self.update_idletasks()
-        width = self.winfo_width()
-        height = self.winfo_height()
-        x = (self.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.winfo_screenheight() // 2) - (height // 2)
-        self.geometry(f'{width}x{height}+{x}+{y}')
+        self.dialog.update_idletasks()
+        width = self.dialog.winfo_width()
+        height = self.dialog.winfo_height()
+        x = (self.dialog.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.dialog.winfo_screenheight() // 2) - (height // 2)
+        self.dialog.geometry(f'{width}x{height}+{x}+{y}')
 
 class StartupManager(tk.Tk):
     def __init__(self):
@@ -625,7 +745,7 @@ class StartupManager(tk.Tk):
 
     def add_new_item(self):
         dialog = ItemDialog(self)
-        self.wait_window(dialog)
+        self.wait_window(dialog.dialog)
         
         if dialog.result:
             # Check if item with same name already exists
@@ -644,7 +764,7 @@ class StartupManager(tk.Tk):
 
     def edit_item(self, item):
         dialog = ItemDialog(self, item)
-        self.wait_window(dialog)
+        self.wait_window(dialog.dialog)
         
         if dialog.result:
             # Update the item in the JSON file
