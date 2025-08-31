@@ -6,6 +6,7 @@ let sidebarEditMode = false;
 document.addEventListener('DOMContentLoaded', function() {
     loadSidebarButtons();
     setupSidebarEventListeners();
+    setupSidebarToggle();
 });
 
 // Load sidebar buttons from API
@@ -518,4 +519,61 @@ function handleNotificationButtonClick(button) {
         // Just open the URL without marking as seen
         window.open(button.url, '_blank');
     }
+}
+
+// Setup sidebar toggle functionality
+function setupSidebarToggle() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const toggleIcon = sidebarToggle.querySelector('i');
+    let isExpanded = false;
+    
+    // Load saved state from localStorage
+    const savedState = localStorage.getItem('sidebar-expanded');
+    if (savedState === 'true') {
+        isExpanded = true;
+        sidebarContainer.classList.add('expanded');
+        updateToggleIcon();
+    }
+    
+    // Update toggle icon based on state
+    function updateToggleIcon() {
+        if (isExpanded) {
+            toggleIcon.className = 'nf nf-fa-chevron_left';
+            sidebarToggle.title = 'Close Sidebar';
+        } else {
+            toggleIcon.className = 'nf nf-fa-chevron_right';
+            sidebarToggle.title = 'Open Sidebar';
+        }
+    }
+    
+    // Toggle sidebar on button click only
+    sidebarToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        isExpanded = !isExpanded;
+        
+        if (isExpanded) {
+            sidebarContainer.classList.add('expanded');
+        } else {
+            sidebarContainer.classList.remove('expanded');
+        }
+        
+        updateToggleIcon();
+        
+        // Save state to localStorage
+        localStorage.setItem('sidebar-expanded', isExpanded.toString());
+    });
+    
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function(e) {
+        if (isExpanded && !sidebarContainer.contains(e.target) && !sidebarToggle.contains(e.target)) {
+            isExpanded = false;
+            sidebarContainer.classList.remove('expanded');
+            updateToggleIcon();
+            localStorage.setItem('sidebar-expanded', 'false');
+        }
+    });
+    
+    // Initialize icon
+    updateToggleIcon();
 }

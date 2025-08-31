@@ -1,19 +1,98 @@
 /* Import the JetBrains Mono font */
 @import url("https://www.nerdfonts.com/assets/css/webfont.css");
 
-/* Left side middle controls styling */
-.top-center-controls {
+/* Sidebar container */
+.sidebar-container {
   position: fixed;
   top: 50%;
-  left: 10px;
+  left: 0;
   transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+/* Sidebar toggle button - moves with sidebar */
+.sidebar-toggle {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #ffffff;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  padding: 8px 4px;
+  cursor: pointer;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 1001;
+  width: 20px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-toggle:hover {
+  background-color: #e0e0e0;
+}
+
+.sidebar-toggle i {
+  font-size: 12px;
+  color: #333;
+  transition: transform 0.3s ease;
+}
+
+/* Sidebar content */
+.top-center-controls {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translate(-100%, -50%);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 0 8px 8px 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px;
+  gap: 8px;
+  padding: 15px 10px;
+  padding-left: 25px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  width: 75px;
   z-index: 1000;
+}
+
+/* Sidebar expanded state */
+.sidebar-container.expanded .top-center-controls {
+  transform: translate(0, -50%);
+}
+
+/* Move toggle button to right side when expanded */
+.sidebar-container.expanded .sidebar-toggle {
+  left: 75px; /* match sidebar width */
+  border-radius: 8px 0 0 8px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Icon changes are handled by JavaScript, no rotation needed */
+
+/* Adjust button styling for sidebar */
+.top-center-controls .add-button {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.top-center-controls .add-button:hover {
+  background-color: rgba(224, 224, 224, 0.95) !important;
+}
+
+/* Make sure the toggle button is always visible */
+.sidebar-toggle {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .add-button {
@@ -644,12 +723,12 @@ div.group-header-container {
 
 html body {
   margin-top: 20px;
-  margin-left: 80px; /* Add left margin to account for left-side buttons */
+  margin-left: 20px; /* Reduced margin since sidebar is now collapsible */
 }
 
 div.toggle-container {
   margin-top: -16px;
-  margin-left: -55px; /* Adjust toggle position to account for body margin */
+  margin-left: -15px; /* Adjust toggle position for new sidebar */
 }
 
 /* Collapsible groups styling */
