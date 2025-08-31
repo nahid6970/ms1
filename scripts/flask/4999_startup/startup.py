@@ -154,11 +154,18 @@ class StartupManager(tk.Tk):
         self.withdraw()  # Hide the window initially
         self.title("Startup Manager - PowerShell")
         self.configure(bg="#2e2f3e")
+        self.geometry("1000x700")  # Set a larger default size for better scrolling
         
         self.json_file = os.path.join(os.path.dirname(__file__), "startup_items.json")
         self.items = self.filter_existing_items(self.load_items())  # Load and filter items
         self.item_widgets = {}  # Store references to item widgets for smooth updates
         self.is_refreshing = False  # Flag to prevent multiple simultaneous refreshes
+        self.search_var = None  # Will be initialized in create_widgets
+        self.search_entry = None
+        self.commands_frame = None
+        self.apps_frame = None
+        self.commands_canvas = None
+        self.apps_canvas = None
         
         self.create_widgets()
         self.center_window()
@@ -248,6 +255,23 @@ class StartupManager(tk.Tk):
         self.status_label = tk.Label(button_frame, text="Ready", bg="#2e2f3e", fg="#9ef959", 
                                     font=("Arial", 9))
         self.status_label.pack(side=tk.RIGHT, padx=5)
+        
+        # Search frame
+        search_frame = tk.Frame(button_frame, bg="#2e2f3e")
+        search_frame.pack(side=tk.RIGHT, padx=(5, 0))
+        
+        tk.Label(search_frame, text="Search:", bg="#2e2f3e", fg="white", 
+                font=("Arial", 9)).pack(side=tk.LEFT, padx=(0, 5))
+        
+        self.search_var = tk.StringVar()
+        self.search_var.trace('w', self.filter_items)
+        self.search_entry = tk.Entry(search_frame, textvariable=self.search_var, 
+                                   bg="#4a4b5a", fg="white", font=("Arial", 9), width=20)
+        self.search_entry.pack(side=tk.LEFT, padx=(0, 5))
+        
+        clear_btn = tk.Button(search_frame, text="✕", command=self.clear_search,
+                            bg="#4a4b5a", fg="white", font=("Arial", 8), width=2)
+        clear_btn.pack(side=tk.LEFT)
         
         # Items frame
         self.items_frame = tk.Frame(main_frame, bg="#2e2f3e")
@@ -399,29 +423,73 @@ class StartupManager(tk.Tk):
         commands = sorted([item for item in self.items if item["type"] == "Command"], key=lambda x: x["name"].lower())
         apps = sorted([item for item in self.items if item["type"] == "App"], key=lambda x: x["name"].lower())
         
-        # Commands Section
-        self.create_section("Commands", commands, column=0)
+        # Commands Section with scrollable frame
+        self.create_scrollable_section("Commands", commands, column=0)
         
         # Vertical Separator
         separator = tk.Frame(self.items_frame, width=2, bg="#4a4b5a")
-        separator.grid(row=1, column=1, rowspan=max(len(commands), len(apps)) + 1, sticky="ns")
+        separator.grid(row=0, column=1, rowspan=2, sticky="ns", padx=5)
         
-        # Apps Section
-        self.create_section("Apps", apps, column=2)
+        # Apps Section with scrollable frame
+        self.create_scrollable_section("Apps", apps, column=2)
 
-    def create_section(self, section_name, items, column):
-        separator = tk.Label(self.items_frame, text=section_name, font=("Helvetica", 10, "bold"), 
-                           bg="#3a3c49", fg="#ffffff")
-        separator.grid(row=0, column=column, pady=5, sticky="ew")
+    def create_scrollable_section(self, section_name, items, column):
+        # Section header
+        header = tk.Label(self.items_frame, text=f"{section_name} ({len(items)})", 
+                         font=("Helvetica", 10, "bold"), bg="#3a3c49", fg="#ffffff")
+        header.grid(row=0, column=column, pady=5, sticky="ew", padx=5)
+        
+        # Create frame for scrollable content
+        section_frame = tk.Frame(self.items_frame, bg="#2e2f3e")
+        section_frame.grid(row=1, column=column, sticky="nsew", padx=5)
+        section_frame.grid_rowconfigure(0, weight=1)
+        section_frame.grid_columnconfigure(0, weight=1)
+        
+        # Create canvas and scrollbar
+        canvas = tk.Canvas(section_frame, bg="#2e2f3e", highlightthickness=0)
+        scrollbar = ttk.Scrollbar(section_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg="#2e2f3e")
+        
+        # Configure scrolling
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        canvas.grid(row=0, column=0, sticky="nsew")
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        # Store references for filtering
+        if section_name == "Commands":
+            self.commands_frame = scrollable_frame
+            self.commands_canvas = canvas
+        else:
+            self.apps_frame = scrollable_frame
+            self.apps_canvas = canvas
+        
+        # Add items to scrollable frame
+        for i, item in enumerate(items):
+            self.create_item_widget_in_frame(item, i, scrollable_frame)
+        
+        # Configure grid weights for proper expansion
+        scrollable_frame.grid_columnconfigure(0, weight=1)
+        self.items_frame.grid_rowconfigure(1, weight=1)
+        
+        # Bind mousewheel to canvas
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        canvas.bind("<MouseWheel>", _on_mousewheel)
+        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
 
-        row = 1
-        for item in items:
-            self.create_item_widget(item, row, column)
-            row += 1
-
-    def create_item_widget(self, item, row, col):
-        frame = tk.Frame(self.items_frame, bg="#2e2f3e")
-        frame.grid(row=row, column=col, padx=5, pady=2, sticky="ew")
+    def create_item_widget_in_frame(self, item, row, parent_frame):
+        frame = tk.Frame(parent_frame, bg="#2e2f3e", relief="solid", bd=1)
+        frame.grid(row=row, column=0, padx=5, pady=2, sticky="ew")
+        frame.grid_columnconfigure(0, weight=1)
         
         # Left side - checkbox and name
         left_frame = tk.Frame(frame, bg="#2e2f3e")
@@ -441,11 +509,12 @@ class StartupManager(tk.Tk):
         
         self.update_label_color(name_label, checked)
         
-        # Store widget references for smooth updates
+        # Store widget references for smooth updates and filtering
         self.item_widgets[item["name"]] = {
             'icon': icon_label,
             'name': name_label,
-            'frame': frame
+            'frame': frame,
+            'item_data': item
         }
         
         # Right side - edit and delete buttons
@@ -649,6 +718,35 @@ class StartupManager(tk.Tk):
             label.config(fg="#63dbff")
         else:
             label.config(fg="red")
+
+    def filter_items(self, *args):
+        """Filter items based on search term"""
+        search_term = self.search_var.get().lower()
+        
+        for item_name, widgets in self.item_widgets.items():
+            frame = widgets.get('frame')
+            item_data = widgets.get('item_data', {})
+            
+            if frame:
+                # Check if item matches search term
+                name_match = item_name.lower().find(search_term) != -1
+                path_match = any(search_term in path.lower() for path in item_data.get('paths', []))
+                command_match = search_term in item_data.get('Command', '').lower()
+                
+                if search_term == '' or name_match or path_match or command_match:
+                    frame.grid()  # Show the item
+                else:
+                    frame.grid_remove()  # Hide the item
+        
+        # Update canvas scroll regions
+        if hasattr(self, 'commands_canvas'):
+            self.commands_canvas.configure(scrollregion=self.commands_canvas.bbox("all"))
+        if hasattr(self, 'apps_canvas'):
+            self.apps_canvas.configure(scrollregion=self.apps_canvas.bbox("all"))
+
+    def clear_search(self):
+        """Clear the search field"""
+        self.search_var.set('')
 
     def center_window(self):
         self.update_idletasks()

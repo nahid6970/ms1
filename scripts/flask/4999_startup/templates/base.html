@@ -100,7 +100,7 @@
 
         .search-input {
             width: 100%;
-            padding: 12px 16px 12px 40px;
+            padding: 12px 40px 12px 40px;
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -128,6 +128,31 @@
             color: var(--text-muted);
             font-size: 0.9rem;
             pointer-events: none;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .search-clear.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .search-clear:hover {
+            color: var(--text-primary);
+            background: var(--bg-primary);
         }
 
         .btn {
@@ -421,7 +446,7 @@
                 display: flex;
                 flex-direction: column;
                 max-height: 85vh;
-                min-height: 200px;
+                min-height: 400px;
                 width: 100%;
             }
 
@@ -430,6 +455,7 @@
                 overflow-y: auto;
                 padding: 4px 8px 4px 4px;
                 contain: layout;
+                max-height: calc(85vh - 120px); /* Account for header and padding */
             }
         }
 
@@ -927,6 +953,91 @@
                 }
             }
         });
+
+        // Search functionality
+        function filterItems() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const allItems = document.querySelectorAll('.item');
+            let visibleCommandsCount = 0;
+            let visibleAppsCount = 0;
+            
+            allItems.forEach(item => {
+                const itemName = item.querySelector('.item-title').textContent.toLowerCase();
+                const itemPath = item.querySelector('.path')?.textContent.toLowerCase() || '';
+                const itemArgs = item.querySelector('.item-details div:last-child')?.textContent.toLowerCase() || '';
+                
+                const isVisible = itemName.includes(searchTerm) || 
+                                itemPath.includes(searchTerm) || 
+                                itemArgs.includes(searchTerm);
+                
+                if (isVisible) {
+                    item.style.display = 'block';
+                    // Count visible items by section
+                    if (item.closest('#commands-section')) {
+                        visibleCommandsCount++;
+                    } else if (item.closest('#apps-section')) {
+                        visibleAppsCount++;
+                    }
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Update empty states
+            updateEmptyStates(visibleCommandsCount, visibleAppsCount, searchTerm);
+        }
+
+        function updateEmptyStates(commandsCount, appsCount, searchTerm) {
+            const commandsList = document.getElementById('commands-list');
+            const appsList = document.getElementById('apps-list');
+            
+            // Handle commands section
+            let commandsEmpty = commandsList.querySelector('.search-empty-state');
+            if (commandsCount === 0 && searchTerm) {
+                if (!commandsEmpty) {
+                    commandsEmpty = document.createElement('div');
+                    commandsEmpty.className = 'search-empty-state empty-state';
+                    commandsEmpty.innerHTML = `
+                        <i class="fas fa-search"></i>
+                        <p>No commands match "${searchTerm}"</p>
+                    `;
+                    commandsList.appendChild(commandsEmpty);
+                }
+            } else if (commandsEmpty) {
+                commandsEmpty.remove();
+            }
+            
+            // Handle apps section
+            let appsEmpty = appsList.querySelector('.search-empty-state');
+            if (appsCount === 0 && searchTerm) {
+                if (!appsEmpty) {
+                    appsEmpty = document.createElement('div');
+                    appsEmpty.className = 'search-empty-state empty-state';
+                    appsEmpty.innerHTML = `
+                        <i class="fas fa-search"></i>
+                        <p>No applications match "${searchTerm}"</p>
+                    `;
+                    appsList.appendChild(appsEmpty);
+                }
+            } else if (appsEmpty) {
+                appsEmpty.remove();
+            }
+        }
+
+        // Clear search function
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            filterItems();
+        }
+
+        // Update counts after changes
+        function updateCountsAfterChange() {
+            // This function can be called after toggling items to update counts
+            // For now, we'll just trigger a search filter to update empty states
+            setTimeout(() => {
+                filterItems();
+            }, 100);
+        }
     </script>
     
     {% block scripts %}{% endblock %}
