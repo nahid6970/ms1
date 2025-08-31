@@ -1,17 +1,17 @@
 [
   {
-    "id": "tv-button",
-    "name": "TV Shows",
-    "display_type": "icon",
-    "icon_class": "nf nf-md-television_classic",
-    "img_src": "",
-    "url": "http://192.168.0.101:5011/",
-    "has_notification": true,
-    "notification_api": "/api/tv-notifications",
-    "mark_seen_api": "/api/mark-all-tv-seen",
     "bg_color": "#ffffff",
+    "display_type": "icon",
+    "has_notification": true,
+    "hover_color": "#e0e0e0",
+    "icon_class": "nf nf-md-television_classic",
+    "id": "tv-button",
+    "img_src": "",
+    "mark_seen_api": "/api/mark-all-tv-seen",
+    "name": "TV Shows",
+    "notification_api": "/api/tv-notifications",
     "text_color": "#000000",
-    "hover_color": "#e0e0e0"
+    "url": "http://192.168.0.101:5011/"
   },
   {
     "id": "movie-button",
@@ -64,15 +64,15 @@
     "hover_color": "#e0e0e0"
   },
   {
-    "bg_color": "red",
+    "bg_color": "#ffffff",
     "display_type": "icon",
     "has_notification": false,
-    "hover_color": "red",
+    "hover_color": "#e0e0e0",
     "icon_class": "nf nf-oct-apps",
     "id": "apps-button",
     "img_src": "",
     "name": "Apps",
-    "text_color": "red",
+    "text_color": "#000000",
     "url": "http://192.168.0.101:4998/"
   },
   {

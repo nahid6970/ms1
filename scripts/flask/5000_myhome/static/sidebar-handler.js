@@ -53,27 +53,34 @@ function createSidebarButtonElement(button, index) {
     
     // Create the button element
     const buttonElement = document.createElement('a');
-    buttonElement.className = 'add-button';
+    buttonElement.className = 'add-button custom-sidebar-button';
     buttonElement.title = button.name;
     buttonElement.id = button.id;
     
-    // Apply custom styling
-    if (button.bg_color) {
-        buttonElement.style.backgroundColor = button.bg_color + ' !important';
-    }
-    if (button.text_color) {
-        buttonElement.style.color = button.text_color + ' !important';
-    }
+    // Apply custom styling using both CSS custom properties and direct styles
+    const bgColor = button.bg_color || '#ffffff';
+    const textColor = button.text_color || '#000000';
+    const hoverColor = button.hover_color || '#e0e0e0';
     
-    // Set up hover effects
-    if (button.hover_color) {
-        buttonElement.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = button.hover_color + ' !important';
-        });
-        buttonElement.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = (button.bg_color || '#ffffff') + ' !important';
-        });
-    }
+    console.log(`Applying colors to ${button.name}: bg=${bgColor}, text=${textColor}, hover=${hoverColor}`);
+    
+    // Set CSS custom properties
+    buttonElement.style.setProperty('--custom-bg-color', bgColor);
+    buttonElement.style.setProperty('--custom-text-color', textColor);
+    buttonElement.style.setProperty('--custom-hover-color', hoverColor);
+    
+    // Also set direct styles as fallback
+    buttonElement.style.setProperty('background-color', bgColor, 'important');
+    buttonElement.style.setProperty('color', textColor, 'important');
+    
+    // Add hover event listeners for guaranteed hover effect
+    buttonElement.addEventListener('mouseenter', function() {
+        this.style.setProperty('background-color', hoverColor, 'important');
+    });
+    
+    buttonElement.addEventListener('mouseleave', function() {
+        this.style.setProperty('background-color', bgColor, 'important');
+    });
     
     // Set content based on display type
     if (button.display_type === 'image' && button.img_src) {

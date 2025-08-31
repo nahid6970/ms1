@@ -1015,6 +1015,24 @@ div.toggle-container {
   background-color: #da190b;
 }
 
+/* Custom sidebar button styling with higher specificity */
+.top-center-controls .notification-button-container .custom-sidebar-button.add-button {
+  background-color: var(--custom-bg-color, #ffffff) !important;
+  color: var(--custom-text-color, #000000) !important;
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+}
+
+.top-center-controls .notification-button-container .custom-sidebar-button.add-button:hover {
+  background-color: var(--custom-hover-color, #e0e0e0) !important;
+  color: var(--custom-text-color, #000000) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Force override for custom buttons */
+a.add-button.custom-sidebar-button[style*="background-color"] {
+  /* This will be overridden by inline styles */
+}
+
 /* Sidebar add button styling */
 .sidebar-add-button {
   background-color: #4CAF50 !important;
