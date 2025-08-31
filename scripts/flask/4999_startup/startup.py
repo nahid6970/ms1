@@ -43,7 +43,7 @@ class ItemDialog:
         """Create modern dialog using CustomTkinter"""
         self.dialog = ctk.CTkToplevel(self.parent)
         self.dialog.title("Add New Item" if self.item is None else "Edit Item")
-        self.dialog.geometry("500x400")
+        self.dialog.geometry("500x450")
         self.dialog.resizable(False, False)
         
         # Make dialog modal
