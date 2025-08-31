@@ -186,6 +186,19 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+// Listen for edit mode changes to update sidebar
+document.addEventListener('DOMContentLoaded', function() {
+  const editModeToggle = document.getElementById('edit-mode-toggle');
+  if (editModeToggle) {
+    editModeToggle.addEventListener('change', function() {
+      // Update sidebar edit mode when main edit mode changes
+      if (typeof toggleSidebarEditMode === 'function') {
+        toggleSidebarEditMode(this.checked);
+      }
+    });
+  }
+});
+
 // Trigger scans function - triggers actual TV show and movie scans
 async function triggerScans() {
   const scanButton = document.getElementById('scan-button');

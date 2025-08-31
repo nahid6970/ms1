@@ -8,6 +8,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 DATA_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\data.json'
+SIDEBAR_BUTTONS_FILE = r'C:\Users\nahid\ms\ms1\scripts\flask\5000_myhome\sidebar_buttons.json'
 
 # Helper function to read data from JSON file
 def read_data():
@@ -22,6 +23,75 @@ def write_data(data):
         json.dump(data, f, indent=2)
     # Auto-generate static HTML after data update
     generate_static_html()
+
+# Helper function to read sidebar buttons from JSON file
+def read_sidebar_buttons():
+    if not os.path.exists(SIDEBAR_BUTTONS_FILE):
+        # Default sidebar buttons
+        default_buttons = [
+            {
+                "id": "tv-button",
+                "name": "TV Shows",
+                "icon_class": "nf nf-md-television_classic",
+                "url": "http://192.168.0.101:5011/",
+                "has_notification": True,
+                "notification_api": "/api/tv-notifications",
+                "mark_seen_api": "/api/mark-all-tv-seen"
+            },
+            {
+                "id": "movie-button", 
+                "name": "Movies",
+                "icon_class": "nf nf-md-movie_roll",
+                "url": "http://192.168.0.101:5013/",
+                "has_notification": True,
+                "notification_api": "/api/movie-notifications",
+                "mark_seen_api": "/api/mark-all-movies-seen"
+            },
+            {
+                "id": "drive-button",
+                "name": "Drive",
+                "icon_class": "nf nf-fa-hard_drive",
+                "url": "http://192.168.0.101:5003/",
+                "has_notification": False
+            },
+            {
+                "id": "education-button",
+                "name": "Education",
+                "icon_class": "nf nf-md-book_education", 
+                "url": "http://192.168.0.101:5015/",
+                "has_notification": False
+            },
+            {
+                "id": "rocket-button",
+                "name": "Rocket",
+                "icon_class": "nf nf-fa-rocket",
+                "url": "http://192.168.0.101:4999/",
+                "has_notification": False
+            },
+            {
+                "id": "apps-button",
+                "name": "Apps",
+                "icon_class": "nf nf-oct-apps",
+                "url": "http://192.168.0.101:4998/",
+                "has_notification": False
+            },
+            {
+                "id": "terminal-button",
+                "name": "Terminal",
+                "icon_class": "nf nf-dev-terminal",
+                "url": "http://192.168.0.101:5555/",
+                "has_notification": False
+            }
+        ]
+        write_sidebar_buttons(default_buttons)
+        return default_buttons
+    with open(SIDEBAR_BUTTONS_FILE, 'r') as f:
+        return json.load(f)
+
+# Helper function to write sidebar buttons to JSON file
+def write_sidebar_buttons(data):
+    with open(SIDEBAR_BUTTONS_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
 
 # Function to generate static HTML
 def generate_static_html():
@@ -214,6 +284,49 @@ def mark_all_movies_seen():
         
     except requests.exceptions.RequestException as e:
         return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/sidebar-buttons', methods=['GET'])
+def get_sidebar_buttons():
+    """Get all sidebar buttons"""
+    buttons = read_sidebar_buttons()
+    return jsonify(buttons)
+
+@app.route('/api/sidebar-buttons', methods=['PUT'])
+def update_sidebar_buttons():
+    """Update all sidebar buttons"""
+    new_buttons = request.json
+    write_sidebar_buttons(new_buttons)
+    return jsonify({'message': 'Sidebar buttons updated successfully'})
+
+@app.route('/api/sidebar-buttons', methods=['POST'])
+def add_sidebar_button():
+    """Add a new sidebar button"""
+    new_button = request.json
+    buttons = read_sidebar_buttons()
+    buttons.append(new_button)
+    write_sidebar_buttons(buttons)
+    return jsonify({'message': 'Sidebar button added successfully'}), 201
+
+@app.route('/api/sidebar-buttons/<int:button_index>', methods=['PUT'])
+def edit_sidebar_button(button_index):
+    """Edit a sidebar button"""
+    updated_button = request.json
+    buttons = read_sidebar_buttons()
+    if 0 <= button_index < len(buttons):
+        buttons[button_index] = updated_button
+        write_sidebar_buttons(buttons)
+        return jsonify({'message': 'Sidebar button updated successfully'})
+    return jsonify({'message': 'Button not found'}), 404
+
+@app.route('/api/sidebar-buttons/<int:button_index>', methods=['DELETE'])
+def delete_sidebar_button(button_index):
+    """Delete a sidebar button"""
+    buttons = read_sidebar_buttons()
+    if 0 <= button_index < len(buttons):
+        deleted_button = buttons.pop(button_index)
+        write_sidebar_buttons(buttons)
+        return jsonify({'message': 'Sidebar button deleted successfully', 'deleted_button': deleted_button})
+    return jsonify({'message': 'Button not found'}), 404
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

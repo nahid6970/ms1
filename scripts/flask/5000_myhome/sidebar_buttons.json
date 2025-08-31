@@ -1,0 +1,55 @@
+[
+  {
+    "id": "tv-button",
+    "name": "TV Shows",
+    "icon_class": "nf nf-md-television_classic",
+    "url": "http://192.168.0.101:5011/",
+    "has_notification": true,
+    "notification_api": "/api/tv-notifications",
+    "mark_seen_api": "/api/mark-all-tv-seen"
+  },
+  {
+    "id": "movie-button", 
+    "name": "Movies",
+    "icon_class": "nf nf-md-movie_roll",
+    "url": "http://192.168.0.101:5013/",
+    "has_notification": true,
+    "notification_api": "/api/movie-notifications",
+    "mark_seen_api": "/api/mark-all-movies-seen"
+  },
+  {
+    "id": "drive-button",
+    "name": "Drive",
+    "icon_class": "nf nf-fa-hard_drive",
+    "url": "http://192.168.0.101:5003/",
+    "has_notification": false
+  },
+  {
+    "id": "education-button",
+    "name": "Education",
+    "icon_class": "nf nf-md-book_education", 
+    "url": "http://192.168.0.101:5015/",
+    "has_notification": false
+  },
+  {
+    "id": "rocket-button",
+    "name": "Rocket",
+    "icon_class": "nf nf-fa-rocket",
+    "url": "http://192.168.0.101:4999/",
+    "has_notification": false
+  },
+  {
+    "id": "apps-button",
+    "name": "Apps",
+    "icon_class": "nf nf-oct-apps",
+    "url": "http://192.168.0.101:4998/",
+    "has_notification": false
+  },
+  {
+    "id": "terminal-button",
+    "name": "Terminal",
+    "icon_class": "nf nf-dev-terminal",
+    "url": "http://192.168.0.101:5555/",
+    "has_notification": false
+  }
+]

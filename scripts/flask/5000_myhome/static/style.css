@@ -976,6 +976,56 @@ div.toggle-container {
   left: 100%;
 }
 
+/* Sidebar edit buttons */
+.sidebar-edit-buttons {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1001;
+}
+
+.edit-sidebar-btn,
+.delete-sidebar-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-sidebar-btn {
+  background-color: #f44336;
+}
+
+.edit-sidebar-btn:hover {
+  background-color: #45a049;
+}
+
+.delete-sidebar-btn:hover {
+  background-color: #da190b;
+}
+
+/* Sidebar add button styling */
+.sidebar-add-button {
+  background-color: #4CAF50 !important;
+  color: white !important;
+}
+
+.sidebar-add-button:hover {
+  background-color: #45a049 !important;
+  color: white !important;
+}
+
 @media (max-width: 600px) {
   .popup-content {
     max-width: 90vw;
