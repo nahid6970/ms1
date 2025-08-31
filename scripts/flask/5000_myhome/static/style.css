@@ -1107,15 +1107,17 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   /* This will be overridden by inline styles */
 }
 
-/* Sidebar add button styling */
-.sidebar-add-button {
-  background-color: #4CAF50 !important;
-  color: white !important;
+/* Sidebar add button styling - black background with higher specificity */
+.top-center-controls .add-button.sidebar-add-button {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #333333 !important;
 }
 
-.sidebar-add-button:hover {
-  background-color: #45a049 !important;
-  color: white !important;
+.top-center-controls .add-button.sidebar-add-button:hover {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
 }
 
 @media (max-width: 600px) {
