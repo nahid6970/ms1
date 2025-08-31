@@ -2,8 +2,9 @@
   {
     "bg_color": "transparent",
     "border_color": "red",
-    "border_radius": "4px",
+    "border_radius": "50%",
     "display_type": "image",
+    "font_size": "16px",
     "has_notification": true,
     "hover_color": "red",
     "icon_class": "nf nf-md-television_classic",
@@ -13,8 +14,7 @@
     "name": "TV Shows",
     "notification_api": "/api/tv-notifications",
     "text_color": "white",
-    "url": "http://192.168.0.101:5011/",
-    "font_size": "16px"
+    "url": "http://192.168.0.101:5011/"
   },
   {
     "bg_color": "white",
