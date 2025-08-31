@@ -77,8 +77,9 @@ function createSidebarButtonElement(button, index) {
     const hoverColor = button.hover_color || '#e0e0e0';
     const borderColor = button.border_color || '#cccccc';
     const borderRadius = button.border_radius || '4px';
+    const fontSize = button.font_size || '16px';
     
-    console.log(`Applying styles to ${button.name}: text=${textColor}, bg=${bgColor}, hover=${hoverColor}, border=${borderColor}, radius=${borderRadius}`);
+    console.log(`Applying styles to ${button.name}: text=${textColor}, bg=${bgColor}, hover=${hoverColor}, border=${borderColor}, radius=${borderRadius}, fontSize=${fontSize}`);
     
     // Set CSS custom properties
     buttonElement.style.setProperty('--custom-text-color', textColor);
@@ -86,12 +87,14 @@ function createSidebarButtonElement(button, index) {
     buttonElement.style.setProperty('--custom-hover-color', hoverColor);
     buttonElement.style.setProperty('--custom-border-color', borderColor);
     buttonElement.style.setProperty('--custom-border-radius', borderRadius);
+    buttonElement.style.setProperty('--custom-font-size', fontSize);
     
     // Also set direct styles as fallback
     buttonElement.style.setProperty('color', textColor, 'important');
     buttonElement.style.setProperty('background-color', bgColor, 'important');
     buttonElement.style.setProperty('border', `2px solid ${borderColor}`, 'important');
     buttonElement.style.setProperty('border-radius', borderRadius, 'important');
+    buttonElement.style.setProperty('font-size', fontSize, 'important');
     
     // Add hover event listeners for guaranteed hover effect
     buttonElement.addEventListener('mouseenter', function() {
@@ -283,9 +286,12 @@ function addSidebarButton() {
     const displayType = document.getElementById('sidebar-button-display-type').value;
     const iconClass = document.getElementById('sidebar-button-icon').value;
     const imgSrc = document.getElementById('sidebar-button-img-src').value;
-    const bgColor = document.getElementById('sidebar-button-bg-color').value;
     const textColor = document.getElementById('sidebar-button-text-color').value;
+    const bgColor = document.getElementById('sidebar-button-bg-color').value;
     const hoverColor = document.getElementById('sidebar-button-hover-color').value;
+    const borderColor = document.getElementById('sidebar-button-border-color').value;
+    const borderRadius = document.getElementById('sidebar-button-border-radius').value;
+    const fontSize = document.getElementById('sidebar-button-font-size').value;
     const hasNotification = document.getElementById('sidebar-button-notification').checked;
     
     const newButton = {
@@ -296,9 +302,12 @@ function addSidebarButton() {
         img_src: imgSrc,
         url: url,
         has_notification: hasNotification,
-        bg_color: bgColor || '#ffffff',
         text_color: textColor || '#000000',
-        hover_color: hoverColor || '#e0e0e0'
+        bg_color: bgColor || '#ffffff',
+        hover_color: hoverColor || '#e0e0e0',
+        border_color: borderColor || '#cccccc',
+        border_radius: borderRadius || '4px',
+        font_size: fontSize || '16px'
     };
 
     if (hasNotification) {
@@ -342,6 +351,7 @@ function editSidebarButton(index) {
     document.getElementById('edit-sidebar-button-hover-color').value = button.hover_color || '';
     document.getElementById('edit-sidebar-button-border-color').value = button.border_color || '';
     document.getElementById('edit-sidebar-button-border-radius').value = button.border_radius || '';
+    document.getElementById('edit-sidebar-button-font-size').value = button.font_size || '';
     document.getElementById('edit-sidebar-button-notification').checked = button.has_notification || false;
     
     // Show/hide settings based on display type
@@ -380,6 +390,7 @@ function saveSidebarButtonEdit() {
     const hoverColor = document.getElementById('edit-sidebar-button-hover-color').value;
     const borderColor = document.getElementById('edit-sidebar-button-border-color').value;
     const borderRadius = document.getElementById('edit-sidebar-button-border-radius').value;
+    const fontSize = document.getElementById('edit-sidebar-button-font-size').value;
     const hasNotification = document.getElementById('edit-sidebar-button-notification').checked;
     
     const updatedButton = {
@@ -394,7 +405,8 @@ function saveSidebarButtonEdit() {
         bg_color: bgColor || '#ffffff',
         hover_color: hoverColor || '#e0e0e0',
         border_color: borderColor || '#cccccc',
-        border_radius: borderRadius || '4px'
+        border_radius: borderRadius || '4px',
+        font_size: fontSize || '16px'
     };
 
     if (hasNotification) {

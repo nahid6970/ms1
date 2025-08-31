@@ -13,11 +13,13 @@
     "name": "TV Shows",
     "notification_api": "/api/tv-notifications",
     "text_color": "white",
-    "url": "http://192.168.0.101:5011/"
+    "url": "http://192.168.0.101:5011/",
+    "font_size": "16px"
   },
   {
-    "bg_color": "transparent",
+    "bg_color": "white",
     "display_type": "image",
+    "font_size": "16px",
     "has_notification": true,
     "hover_color": "red",
     "icon_class": "nf nf-md-movie_roll",
@@ -27,7 +29,9 @@
     "name": "Movies",
     "notification_api": "/api/movie-notifications",
     "text_color": "white",
-    "url": "http://192.168.0.101:5013/"
+    "url": "http://192.168.0.101:5013/",
+    "border_color": "#cccccc",
+    "border_radius": "4px"
   },
   {
     "bg_color": "transparent",
@@ -39,7 +43,8 @@
     "img_src": "https://cdn-icons-png.flaticon.com/512/2250/2250195.png",
     "name": "Drive",
     "text_color": "#000000",
-    "url": "http://192.168.0.101:5003/"
+    "url": "http://192.168.0.101:5003/",
+    "font_size": "16px"
   },
   {
     "bg_color": "transparent",
@@ -53,42 +58,52 @@
     "img_src": "https://cdn-icons-png.flaticon.com/512/3588/3588110.png",
     "name": "Education",
     "text_color": "white",
-    "url": "http://192.168.0.101:5015/"
+    "url": "http://192.168.0.101:5015/",
+    "font_size": "16px"
   },
   {
-    "bg_color": "#ffffff",
+    "bg_color": "transparent",
+    "border_color": "#cccccc",
+    "border_radius": "4px",
     "display_type": "icon",
+    "font_size": "25px",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-fa-rocket",
     "id": "rocket-button",
-    "img_src": "",
+    "img_src": "https://upload.wikimedia.org/wikipedia/commons/3/33/Cartoon_space_rocket.png",
     "name": "Rocket",
-    "text_color": "#000000",
+    "text_color": "white",
     "url": "http://192.168.0.101:4999/"
   },
   {
-    "bg_color": "#ffffff",
+    "bg_color": "transparent",
+    "border_color": "#cccccc",
+    "border_radius": "4px",
     "display_type": "icon",
+    "font_size": "25px",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-oct-apps",
     "id": "apps-button",
     "img_src": "",
     "name": "Apps",
-    "text_color": "#000000",
+    "text_color": "white",
     "url": "http://192.168.0.101:4998/"
   },
   {
-    "bg_color": "#ffffff",
+    "bg_color": "transparent",
+    "border_color": "#cccccc",
+    "border_radius": "4px",
     "display_type": "icon",
+    "font_size": "25px",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-dev-terminal",
     "id": "terminal-button",
     "img_src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAz1BMVEX////Y4e06c7RBd7ZnjsGTrM8ASqAAU6QAUaMATqIAOZv4+fuTstgAYbsCaL0Yf8cfiMomm9MNlNCZvOQAcNAAd9MAdNIoqOomqus1uPJS3f/4+/xfrekQhdoAhd4QftcnoOVQ2f881v8tmOQLjuFNm+HV5ffg7PmBseYchsNJz/txpOADZrQAnuiPuegAac7I2fHm6u48c6BZjtdPvPE8g9UHXccBU5seleBMsuoXdLEAYLUYhdIDVL0AYYccbI4gfKM8p+IooNqQvd/z7uoze/D7AAABAElEQVR4AczQBYKDMBBAUeouSDJTCQx1d/f2/ofaYQU7wX6ch0b7tyWSKb9kOoaZbC6Xy3sVCoViKYrlSrVarXF1XdeNGJqWEBIQsdHkWv75tlK2rXjlEAA0XNftBHd2ez3leAkDGZuMrRCq/mA4kkKOiQgnXHBnz1batK9NLTmTUioAmLcCdBaDpWWultZMCKH40bQOUCyGyyXj8g9h46MSjjaaatsAcefjXlr71Wp7WC6PVU6cEM8+Opa1PBwOvFyu1+uNCCDA7eG3u46302lORAF6rR/P5/OlYwNPpxPRO4JDg8f7g17AN8cQMIhOFMHS1xxRgDNqlLmggIFLkQDP2ivwBjDtwwAAAABJRU5ErkJggg==",
     "name": "Terminal",
-    "text_color": "#000000",
+    "text_color": "white",
     "url": "http://192.168.0.101:5555/"
   }
 ]

@@ -39,9 +39,12 @@ def read_sidebar_buttons():
                 "has_notification": True,
                 "notification_api": "/api/tv-notifications",
                 "mark_seen_api": "/api/mark-all-tv-seen",
-                "bg_color": "#ffffff",
                 "text_color": "#000000",
-                "hover_color": "#e0e0e0"
+                "bg_color": "#ffffff",
+                "hover_color": "#e0e0e0",
+                "border_color": "#cccccc",
+                "border_radius": "4px",
+                "font_size": "16px"
             },
             {
                 "id": "movie-button", 
@@ -53,9 +56,12 @@ def read_sidebar_buttons():
                 "has_notification": True,
                 "notification_api": "/api/movie-notifications",
                 "mark_seen_api": "/api/mark-all-movies-seen",
-                "bg_color": "#ffffff",
                 "text_color": "#000000",
-                "hover_color": "#e0e0e0"
+                "bg_color": "#ffffff",
+                "hover_color": "#e0e0e0",
+                "border_color": "#cccccc",
+                "border_radius": "4px",
+                "font_size": "16px"
             },
             {
                 "id": "drive-button",
@@ -65,9 +71,12 @@ def read_sidebar_buttons():
                 "img_src": "",
                 "url": "http://192.168.0.101:5003/",
                 "has_notification": False,
-                "bg_color": "#ffffff",
                 "text_color": "#000000",
-                "hover_color": "#e0e0e0"
+                "bg_color": "#ffffff",
+                "hover_color": "#e0e0e0",
+                "border_color": "#cccccc",
+                "border_radius": "4px",
+                "font_size": "16px"
             },
             {
                 "id": "education-button",
@@ -77,9 +86,12 @@ def read_sidebar_buttons():
                 "img_src": "",
                 "url": "http://192.168.0.101:5015/",
                 "has_notification": False,
-                "bg_color": "#ffffff",
                 "text_color": "#000000",
-                "hover_color": "#e0e0e0"
+                "bg_color": "#ffffff",
+                "hover_color": "#e0e0e0",
+                "border_color": "#cccccc",
+                "border_radius": "4px",
+                "font_size": "16px"
             },
             {
                 "id": "rocket-button",
@@ -89,9 +101,12 @@ def read_sidebar_buttons():
                 "img_src": "",
                 "url": "http://192.168.0.101:4999/",
                 "has_notification": False,
-                "bg_color": "#ffffff",
                 "text_color": "#000000",
-                "hover_color": "#e0e0e0"
+                "bg_color": "#ffffff",
+                "hover_color": "#e0e0e0",
+                "border_color": "#cccccc",
+                "border_radius": "4px",
+                "font_size": "16px"
             },
             {
                 "id": "apps-button",
@@ -101,9 +116,12 @@ def read_sidebar_buttons():
                 "img_src": "",
                 "url": "http://192.168.0.101:4998/",
                 "has_notification": False,
-                "bg_color": "#ffffff",
                 "text_color": "#000000",
-                "hover_color": "#e0e0e0"
+                "bg_color": "#ffffff",
+                "hover_color": "#e0e0e0",
+                "border_color": "#cccccc",
+                "border_radius": "4px",
+                "font_size": "16px"
             },
             {
                 "id": "terminal-button",
@@ -113,9 +131,12 @@ def read_sidebar_buttons():
                 "img_src": "",
                 "url": "http://192.168.0.101:5555/",
                 "has_notification": False,
-                "bg_color": "#ffffff",
                 "text_color": "#000000",
-                "hover_color": "#e0e0e0"
+                "bg_color": "#ffffff",
+                "hover_color": "#e0e0e0",
+                "border_color": "#cccccc",
+                "border_radius": "4px",
+                "font_size": "16px"
             }
         ]
         write_sidebar_buttons(default_buttons)
