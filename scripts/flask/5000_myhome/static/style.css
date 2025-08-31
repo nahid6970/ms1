@@ -886,6 +886,10 @@ div.toggle-container {
   transition: background-color 0.3s ease;
 }
 
+.horizontal-stack .group-title {
+  color: inherit;
+}
+
 .horizontal-stack:hover {
   background-color: var(--horizontal-hover-color, #3a3a3a);
 }
