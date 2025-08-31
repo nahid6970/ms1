@@ -1,24 +1,25 @@
 /* Import the JetBrains Mono font */
 @import url("https://www.nerdfonts.com/assets/css/webfont.css");
 
-/* Top center controls styling */
+/* Left side middle controls styling */
 .top-center-controls {
   position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: center;
-  gap: 15px;
-  padding: 10px 0;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
   z-index: 1000;
 }
 
 .add-button {
   color: #000000 !important;
   background-color: #ffffff !important;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border: none;
   border-radius: 4px;
   text-decoration: none;
@@ -28,6 +29,8 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  min-width: 50px;
+  min-height: 50px;
 }
 
 .add-button:hover {
@@ -641,10 +644,12 @@ div.group-header-container {
 
 html body {
   margin-top: 20px;
+  margin-left: 80px; /* Add left margin to account for left-side buttons */
 }
 
 div.toggle-container {
   margin-top: -16px;
+  margin-left: -55px; /* Adjust toggle position to account for body margin */
 }
 
 /* Collapsible groups styling */
