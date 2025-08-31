@@ -4,9 +4,9 @@ let sidebarEditMode = false;
 
 // Load sidebar buttons on page load
 document.addEventListener('DOMContentLoaded', function() {
-    loadSidebarButtons();
-    setupSidebarEventListeners();
-    setupSidebarToggle();
+    setupSidebarToggle(); // Setup toggle first
+    loadSidebarButtons(); // Then load buttons
+    setupSidebarEventListeners(); // Finally setup other listeners
 });
 
 // Load sidebar buttons from API
@@ -17,6 +17,12 @@ function loadSidebarButtons() {
             sidebarButtons = buttons;
             renderSidebarButtons();
             setupNotificationUpdates();
+            // Update toggle position after buttons are rendered
+            setTimeout(() => {
+                if (typeof updateTogglePosition === 'function') {
+                    updateTogglePosition();
+                }
+            }, 100);
         })
         .catch(error => {
             console.error('Error loading sidebar buttons:', error);
@@ -535,12 +541,12 @@ function setupSidebarToggle() {
     const toggleIcon = sidebarToggle.querySelector('i');
     let isExpanded = false;
     
-    // Load saved state from localStorage
-    const savedState = localStorage.getItem('sidebar-expanded');
+    // Load saved state from localStorage (per-window basis)
+    const windowId = Date.now() + Math.random(); // Unique ID for this window
+    const savedState = sessionStorage.getItem('sidebar-expanded'); // Use sessionStorage instead of localStorage
     if (savedState === 'true') {
         isExpanded = true;
         sidebarContainer.classList.add('expanded');
-        updateToggleIcon();
     }
     
     // Update toggle icon based on state
@@ -556,13 +562,17 @@ function setupSidebarToggle() {
     
     // Calculate dynamic toggle button position
     function updateTogglePosition() {
-        if (isExpanded) {
-            const sidebarContent = document.getElementById('sidebar-buttons-container');
-            const sidebarWidth = sidebarContent.offsetWidth;
-            sidebarToggle.style.left = (sidebarWidth + 10) + 'px';
-        } else {
-            sidebarToggle.style.left = '5px';
-        }
+        setTimeout(() => {
+            if (isExpanded) {
+                const sidebarContent = document.getElementById('sidebar-buttons-container');
+                if (sidebarContent) {
+                    const sidebarWidth = sidebarContent.offsetWidth;
+                    sidebarToggle.style.left = (sidebarWidth + 10) + 'px';
+                }
+            } else {
+                sidebarToggle.style.left = '5px';
+            }
+        }, 50); // Small delay to ensure DOM is updated
     }
     
     // Toggle sidebar on button click only
@@ -579,8 +589,8 @@ function setupSidebarToggle() {
         updateToggleIcon();
         updateTogglePosition();
         
-        // Save state to localStorage
-        localStorage.setItem('sidebar-expanded', isExpanded.toString());
+        // Save state to sessionStorage (per-window)
+        sessionStorage.setItem('sidebar-expanded', isExpanded.toString());
     });
     
     // Close sidebar when clicking outside
@@ -590,11 +600,13 @@ function setupSidebarToggle() {
             sidebarContainer.classList.remove('expanded');
             updateToggleIcon();
             updateTogglePosition();
-            localStorage.setItem('sidebar-expanded', 'false');
+            sessionStorage.setItem('sidebar-expanded', 'false');
         }
     });
     
-    // Initialize icon and position
-    updateToggleIcon();
-    updateTogglePosition();
+    // Initialize icon and position after a delay to ensure buttons are rendered
+    setTimeout(() => {
+        updateToggleIcon();
+        updateTogglePosition();
+    }, 200);
 }
