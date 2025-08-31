@@ -925,10 +925,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Handle form submission for adding new links
   if (addLinkForm) {
     addLinkForm.addEventListener('submit', async function (event) {
       event.preventDefault();
+
+      const groupName = document.getElementById('link-group').value || 'Ungrouped';
 
       const newLink = {
         name: document.getElementById('link-name').value,
@@ -967,7 +968,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (response.ok) {
           alert('Link added successfully!');
           addLinkForm.reset(); // Clear form
-          fetchAndDisplayLinks(); // Refresh links
+          await fetchAndDisplayLinks(); // Refresh links
+
+          // Re-open the collapsible group if it was open
+          const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+          if (groupElement) {
+            const content = groupElement.querySelector('.collapsible-group-content');
+            const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+            if (content && toggleBtn) {
+              content.classList.add('expanded');
+              toggleBtn.textContent = '▲';
+              groupElement.classList.add('expanded');
+              moveToExpandedRow(groupElement);
+            }
+          }
         } else {
           alert('Failed to add link.');
         }
@@ -1381,6 +1395,19 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       await fetchAndDisplayLinks(); // Re-render the UI
+
+      // Re-open the collapsible group if it was open
+      const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+      if (groupElement) {
+        const content = groupElement.querySelector('.collapsible-group-content');
+        const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+        if (content && toggleBtn) {
+          content.classList.add('expanded');
+          toggleBtn.textContent = '▲';
+          groupElement.classList.add('expanded');
+          moveToExpandedRow(groupElement);
+        }
+      }
 
       // Re-open the popup if it was open
       const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
