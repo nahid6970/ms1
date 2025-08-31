@@ -72,20 +72,26 @@ function createSidebarButtonElement(button, index) {
     buttonElement.id = button.id;
     
     // Apply custom styling using both CSS custom properties and direct styles
-    const bgColor = button.bg_color || '#ffffff';
     const textColor = button.text_color || '#000000';
+    const bgColor = button.bg_color || '#ffffff';
     const hoverColor = button.hover_color || '#e0e0e0';
+    const borderColor = button.border_color || '#cccccc';
+    const borderRadius = button.border_radius || '4px';
     
-    console.log(`Applying colors to ${button.name}: bg=${bgColor}, text=${textColor}, hover=${hoverColor}`);
+    console.log(`Applying styles to ${button.name}: text=${textColor}, bg=${bgColor}, hover=${hoverColor}, border=${borderColor}, radius=${borderRadius}`);
     
     // Set CSS custom properties
-    buttonElement.style.setProperty('--custom-bg-color', bgColor);
     buttonElement.style.setProperty('--custom-text-color', textColor);
+    buttonElement.style.setProperty('--custom-bg-color', bgColor);
     buttonElement.style.setProperty('--custom-hover-color', hoverColor);
+    buttonElement.style.setProperty('--custom-border-color', borderColor);
+    buttonElement.style.setProperty('--custom-border-radius', borderRadius);
     
     // Also set direct styles as fallback
-    buttonElement.style.setProperty('background-color', bgColor, 'important');
     buttonElement.style.setProperty('color', textColor, 'important');
+    buttonElement.style.setProperty('background-color', bgColor, 'important');
+    buttonElement.style.setProperty('border', `2px solid ${borderColor}`, 'important');
+    buttonElement.style.setProperty('border-radius', borderRadius, 'important');
     
     // Add hover event listeners for guaranteed hover effect
     buttonElement.addEventListener('mouseenter', function() {
@@ -331,9 +337,11 @@ function editSidebarButton(index) {
     document.getElementById('edit-sidebar-button-display-type').value = button.display_type || 'icon';
     document.getElementById('edit-sidebar-button-icon').value = button.icon_class || '';
     document.getElementById('edit-sidebar-button-img-src').value = button.img_src || '';
-    document.getElementById('edit-sidebar-button-bg-color').value = button.bg_color || '';
     document.getElementById('edit-sidebar-button-text-color').value = button.text_color || '';
+    document.getElementById('edit-sidebar-button-bg-color').value = button.bg_color || '';
     document.getElementById('edit-sidebar-button-hover-color').value = button.hover_color || '';
+    document.getElementById('edit-sidebar-button-border-color').value = button.border_color || '';
+    document.getElementById('edit-sidebar-button-border-radius').value = button.border_radius || '';
     document.getElementById('edit-sidebar-button-notification').checked = button.has_notification || false;
     
     // Show/hide settings based on display type
@@ -367,9 +375,11 @@ function saveSidebarButtonEdit() {
     const displayType = document.getElementById('edit-sidebar-button-display-type').value;
     const iconClass = document.getElementById('edit-sidebar-button-icon').value;
     const imgSrc = document.getElementById('edit-sidebar-button-img-src').value;
-    const bgColor = document.getElementById('edit-sidebar-button-bg-color').value;
     const textColor = document.getElementById('edit-sidebar-button-text-color').value;
+    const bgColor = document.getElementById('edit-sidebar-button-bg-color').value;
     const hoverColor = document.getElementById('edit-sidebar-button-hover-color').value;
+    const borderColor = document.getElementById('edit-sidebar-button-border-color').value;
+    const borderRadius = document.getElementById('edit-sidebar-button-border-radius').value;
     const hasNotification = document.getElementById('edit-sidebar-button-notification').checked;
     
     const updatedButton = {
@@ -380,9 +390,11 @@ function saveSidebarButtonEdit() {
         img_src: imgSrc,
         url: url,
         has_notification: hasNotification,
-        bg_color: bgColor || '#ffffff',
         text_color: textColor || '#000000',
-        hover_color: hoverColor || '#e0e0e0'
+        bg_color: bgColor || '#ffffff',
+        hover_color: hoverColor || '#e0e0e0',
+        border_color: borderColor || '#cccccc',
+        border_radius: borderRadius || '4px'
     };
 
     if (hasNotification) {

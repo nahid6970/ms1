@@ -1091,14 +1091,16 @@ div.toggle-container {
 
 /* Custom sidebar button styling with higher specificity */
 .top-center-controls .notification-button-container .custom-sidebar-button.add-button {
-  background-color: var(--custom-bg-color, #ffffff) !important;
   color: var(--custom-text-color, #000000) !important;
+  background-color: var(--custom-bg-color, #ffffff) !important;
+  border: 2px solid var(--custom-border-color, #cccccc) !important;
+  border-radius: var(--custom-border-radius, 4px) !important;
   transition: background-color 0.2s ease, transform 0.2s ease !important;
 }
 
 .top-center-controls .notification-button-container .custom-sidebar-button.add-button:hover {
-  background-color: var(--custom-hover-color, #e0e0e0) !important;
   color: var(--custom-text-color, #000000) !important;
+  background-color: var(--custom-hover-color, #e0e0e0) !important;
   transform: scale(1.05) !important;
 }
 

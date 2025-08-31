@@ -1,7 +1,9 @@
 [
   {
     "bg_color": "transparent",
-    "display_type": "icon",
+    "border_color": "red",
+    "border_radius": "4px",
+    "display_type": "image",
     "has_notification": true,
     "hover_color": "red",
     "icon_class": "nf nf-md-television_classic",
@@ -15,7 +17,7 @@
   },
   {
     "bg_color": "transparent",
-    "display_type": "icon",
+    "display_type": "image",
     "has_notification": true,
     "hover_color": "red",
     "icon_class": "nf nf-md-movie_roll",
@@ -28,25 +30,25 @@
     "url": "http://192.168.0.101:5013/"
   },
   {
-    "bg_color": "#ffffff",
-    "display_type": "icon",
+    "bg_color": "transparent",
+    "display_type": "image",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-fa-hard_drive",
     "id": "drive-button",
-    "img_src": "",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2250/2250195.png",
     "name": "Drive",
     "text_color": "#000000",
     "url": "http://192.168.0.101:5003/"
   },
   {
-    "bg_color": "#ffffff",
-    "display_type": "icon",
+    "bg_color": "transparent",
+    "display_type": "image",
     "has_notification": false,
     "hover_color": "red",
     "icon_class": "nf nf-md-book_education",
     "id": "education-button",
-    "img_src": "",
+    "img_src": "https://cdn-icons-png.flaticon.com/512/2936/2936630.png",
     "name": "Education",
     "text_color": "#000000",
     "url": "http://192.168.0.101:5015/"
