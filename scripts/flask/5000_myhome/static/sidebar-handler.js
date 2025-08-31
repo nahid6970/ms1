@@ -45,6 +45,13 @@ function renderSidebarButtons() {
 
     // Show/hide edit buttons based on edit mode
     updateSidebarEditMode();
+    
+    // Update toggle position after rendering buttons
+    setTimeout(() => {
+        if (typeof updateTogglePosition === 'function') {
+            updateTogglePosition();
+        }
+    }, 100);
 }
 
 // Create a sidebar button element
@@ -547,6 +554,17 @@ function setupSidebarToggle() {
         }
     }
     
+    // Calculate dynamic toggle button position
+    function updateTogglePosition() {
+        if (isExpanded) {
+            const sidebarContent = document.getElementById('sidebar-buttons-container');
+            const sidebarWidth = sidebarContent.offsetWidth;
+            sidebarToggle.style.left = (sidebarWidth + 10) + 'px';
+        } else {
+            sidebarToggle.style.left = '5px';
+        }
+    }
+    
     // Toggle sidebar on button click only
     sidebarToggle.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -559,6 +577,7 @@ function setupSidebarToggle() {
         }
         
         updateToggleIcon();
+        updateTogglePosition();
         
         // Save state to localStorage
         localStorage.setItem('sidebar-expanded', isExpanded.toString());
@@ -570,10 +589,12 @@ function setupSidebarToggle() {
             isExpanded = false;
             sidebarContainer.classList.remove('expanded');
             updateToggleIcon();
+            updateTogglePosition();
             localStorage.setItem('sidebar-expanded', 'false');
         }
     });
     
-    // Initialize icon
+    // Initialize icon and position
     updateToggleIcon();
+    updateTogglePosition();
 }
