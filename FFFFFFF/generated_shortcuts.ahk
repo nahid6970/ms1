@@ -82,6 +82,18 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
         }}
 }
 
+;! Kill (dnplayer/python/) + Change Display
+^!+r:: {
+    {
+        ; Kill dnplayer.exe
+        Run("taskkill /F /IM dnplayer.exe",,"Hide")
+        ; Kill python.exe
+        Run("taskkill /F /IM python.exe",,"Hide")
+        ; Run the command
+        Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /internal",,"Hide")
+    }
+}
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

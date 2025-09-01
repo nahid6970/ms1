@@ -4,7 +4,8 @@
             "name": "Open Terminal Admin",
             "description": "Opens PowerShell as administrator",
             "hotkey": "!x",
-            "action": "RunWait(\"pwsh -Command `\"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`\"\", , \"Hide\")"
+            "action": "RunWait(\"pwsh -Command `\"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`\"\", , \"Hide\")",
+            "category": "Script"
         },
         {
             "name": "Run Python Script",
@@ -52,19 +53,29 @@
             "name": "Always On Top Toggle",
             "description": "Toggles always on top for active window",
             "hotkey": "#t",
-            "action": "Always_on_Top()\nAlways_on_Top(){\n    static alwaysOnTop := false\n    if (alwaysOnTop) {\n        WinSetAlwaysOnTop(false, \"A\")\n    } else {\n        WinSetAlwaysOnTop(true, \"A\")\n    }\n    alwaysOnTop := !alwaysOnTop\n}"
+            "action": "Always_on_Top()\nAlways_on_Top(){\n    static alwaysOnTop := false\n    if (alwaysOnTop) {\n        WinSetAlwaysOnTop(false, \"A\")\n    } else {\n        WinSetAlwaysOnTop(true, \"A\")\n    }\n    alwaysOnTop := !alwaysOnTop\n}",
+            "category": "Script"
         },
         {
             "name": "Kill Foreground Process",
             "description": "Forcefully kills the process under mouse cursor",
             "hotkey": "!q",
-            "action": "KillForeground()\nKillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}"
+            "action": "KillForeground()\nKillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}",
+            "category": "Script"
         },
         {
             "name": "Copy Path",
             "description": "",
             "hotkey": "^!m",
-            "action": "CopyPath_File()\nCopyPath_File() {\n    ClipboardBackup := ClipboardAll()\n    A_Clipboard := \"\" \n    Send(\"^c\")\n    Errorlevel := !ClipWait(1)\n    if ErrorLevel\n    {\n    MsgBox(\"No valid file path found.\")\n    }\n    else\n    {\n    ClipBoardContent := A_Clipboard\n    ; V1toV2: StrReplace() is not case sensitive\n    ; check for StringCaseSense in v1 source script\n    ; and change the CaseSense param in StrReplace() if necessary\n    ClipBoardContent := StrReplace(ClipBoardContent, \"`n\", \"`t\")\n    A_Clipboard := ClipboardBackup\n    A_Clipboard := ClipBoardContent\n    TrayTip(\"Copy as Path\", \"Copied `\"\" ClipBoardContent \"`\" to clipboard.\")\n    }}"
+            "action": "CopyPath_File()\nCopyPath_File() {\n    ClipboardBackup := ClipboardAll()\n    A_Clipboard := \"\" \n    Send(\"^c\")\n    Errorlevel := !ClipWait(1)\n    if ErrorLevel\n    {\n    MsgBox(\"No valid file path found.\")\n    }\n    else\n    {\n    ClipBoardContent := A_Clipboard\n    ; V1toV2: StrReplace() is not case sensitive\n    ; check for StringCaseSense in v1 source script\n    ; and change the CaseSense param in StrReplace() if necessary\n    ClipBoardContent := StrReplace(ClipBoardContent, \"`n\", \"`t\")\n    A_Clipboard := ClipboardBackup\n    A_Clipboard := ClipBoardContent\n    TrayTip(\"Copy as Path\", \"Copied `\"\" ClipBoardContent \"`\" to clipboard.\")\n    }}",
+            "category": "Script"
+        },
+        {
+            "name": "Kill (dnplayer/python/) + Change Display",
+            "category": "Script",
+            "description": "",
+            "hotkey": "^!+r",
+            "action": "{\n    ; Kill dnplayer.exe\n    Run(\"taskkill /F /IM dnplayer.exe\",,\"Hide\")\n    ; Kill python.exe\n    Run(\"taskkill /F /IM python.exe\",,\"Hide\")\n    ; Run the command\n    Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\",,\"Hide\")\n}"
         }
     ],
     "text_shortcuts": [
@@ -72,13 +83,15 @@
             "name": "AutoHotkey Version 1",
             "description": "Inserts AHK v1 header requirement",
             "trigger": ";v1",
-            "replacement": "#Requires AutoHotkey v1.0"
+            "replacement": "#Requires AutoHotkey v1.0",
+            "category": "AHK"
         },
         {
             "name": "AutoHotkey Version 2",
             "description": "Inserts AHK v2 header requirement",
             "trigger": ";v2",
-            "replacement": "#Requires AutoHotkey v2.0"
+            "replacement": "#Requires AutoHotkey v2.0",
+            "category": "AHK"
         },
         {
             "name": "Registry Run Path",
