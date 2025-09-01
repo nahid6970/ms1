@@ -299,23 +299,30 @@ function getElementData(element) {
         linkUrl = linkElement.href;
     }
     
-    // Create unique identifier
+    // Create page-specific unique identifier
     let elementId = '';
+    
+    // Get element position in DOM to make it page-specific
+    const rect = element.getBoundingClientRect();
+    const positionInfo = `${Math.round(rect.top)}-${Math.round(rect.left)}-${Math.round(rect.width)}-${Math.round(rect.height)}`;
+    
     if (element.id) {
-        elementId = element.id;
+        elementId = `${pageUrl}::${element.id}`;
     } else if (element.src) {
-        elementId = element.src;
+        elementId = `${pageUrl}::${element.src}::${positionInfo}`;
     } else if (linkUrl) {
-        elementId = linkUrl;
+        // Make YouTube videos page-specific by including current page URL
+        elementId = `${pageUrl}::${linkUrl}::${positionInfo}`;
     } else {
-        elementId = element.outerHTML.substring(0, 100);
+        elementId = `${pageUrl}::${element.outerHTML.substring(0, 100)}::${positionInfo}`;
     }
     
     return {
         id: elementId,
         linkUrl: linkUrl,
         pageUrl: pageUrl,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        position: positionInfo
     };
 }
 
@@ -414,19 +421,36 @@ function loadSavedCheckmarks() {
 }
 
 function findElementByData(elementData) {
+    // Extract the original identifier from the page-specific ID
+    const parts = elementData.id.split('::');
+    if (parts.length < 2) return null;
+    
+    const originalId = parts[1];
+    const positionInfo = parts[2];
+    
     // Try to find element by various methods
     if (elementData.linkUrl) {
-        const linkElement = document.querySelector(`a[href="${elementData.linkUrl}"]`);
-        if (linkElement) return linkElement;
+        const linkElements = document.querySelectorAll(`a[href="${elementData.linkUrl}"]`);
+        // If multiple elements with same link, try to match by position
+        if (linkElements.length > 1 && positionInfo) {
+            for (let linkElement of linkElements) {
+                const rect = linkElement.getBoundingClientRect();
+                const currentPos = `${Math.round(rect.top)}-${Math.round(rect.left)}-${Math.round(rect.width)}-${Math.round(rect.height)}`;
+                if (currentPos === positionInfo) {
+                    return linkElement;
+                }
+            }
+        }
+        if (linkElements.length > 0) return linkElements[0];
     }
     
-    if (elementData.id.startsWith('http')) {
-        const imgElement = document.querySelector(`img[src="${elementData.id}"]`);
+    if (originalId.startsWith('http')) {
+        const imgElement = document.querySelector(`img[src="${originalId}"]`);
         if (imgElement) return imgElement;
     }
     
     // Try to find by ID
-    const idElement = document.getElementById(elementData.id);
+    const idElement = document.getElementById(originalId);
     if (idElement) return idElement;
     
     return null;
