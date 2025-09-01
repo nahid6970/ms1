@@ -100,6 +100,15 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 ;! Startup Setup
 #s::Run("C:\Users\nahid\ms\ms1\scripts\flask\4999_startup\startup.py", , "Hide")
 
+;! CrossHair
+^+m::Run("C:\Users\nahid\ms\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
+
+;! Explorer Restart
+LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
+
+;! Replace Space with _
+RAlt & Space::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

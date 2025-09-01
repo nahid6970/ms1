@@ -41,19 +41,10 @@ switchToLastTab() {
 ;! gui
 ; !u::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Ultimate_Gui.ahk", "", "Hide")
 
-;! shortcuts
-^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
-!1::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
-RAlt & -::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
-RAlt & Space::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
-LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 
 
-^+m::Run("C:\Users\nahid\ms\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 
-;! text
-; ::;--:: ⇨
-; ::;--:: 🎯
+   
 
 
 
