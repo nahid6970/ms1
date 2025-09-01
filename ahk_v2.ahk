@@ -47,8 +47,8 @@ switchToLastTab() {
 RAlt & -::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
 RAlt & Space::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
-#x::Run("C:\Users\nahid\ms\ms1\mypygui.py", , "Hide")
-#s::Run("C:\Users\nahid\ms\ms1\startup.py", , "Hide")
+
+
 ^+m::Run("C:\Users\nahid\ms\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 
 ;! text

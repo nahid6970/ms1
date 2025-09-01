@@ -94,6 +94,12 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
     }
 }
 
+;! mypygui
+#x::Run("C:\Users\nahid\ms\ms1\mypygui.py", , "Hide")
+
+;! Startup Setup
+#s::Run("C:\Users\nahid\ms\ms1\scripts\flask\4999_startup\startup.py", , "Hide")
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

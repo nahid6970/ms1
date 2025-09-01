@@ -76,6 +76,20 @@
             "description": "",
             "hotkey": "^!+r",
             "action": "{\n    ; Kill dnplayer.exe\n    Run(\"taskkill /F /IM dnplayer.exe\",,\"Hide\")\n    ; Kill python.exe\n    Run(\"taskkill /F /IM python.exe\",,\"Hide\")\n    ; Run the command\n    Run(\"C:\\Users\\nahid\\ms\\msBackups\\Display\\DisplaySwitch.exe /internal\",,\"Hide\")\n}"
+        },
+        {
+            "name": "mypygui",
+            "category": "Launch",
+            "description": "",
+            "hotkey": "#x",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\mypygui.py\", , \"Hide\")"
+        },
+        {
+            "name": "Startup Setup",
+            "category": "Launch",
+            "description": "",
+            "hotkey": "#s",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup\\startup.py\", , \"Hide\")"
         }
     ],
     "text_shortcuts": [
