@@ -114,6 +114,8 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 সনেট:
 ছোটগল্প/গল্প:
 গদ্যগ্রন্থ-প্রবন্ধ:
+অনুবাদ গ্রন্থ:
+বই:
 অন্যান্য:
 পংক্তি এবং উদ্ধৃতি:
 )
