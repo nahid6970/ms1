@@ -12,6 +12,47 @@ let currentSettings = {
     borderWidth: 3
 };
 
+// URL change detection for single-page apps like YouTube
+let lastUrl = pageUrl;
+
+function handleUrlChange() {
+    const currentUrl = window.location.href;
+    if (currentUrl !== lastUrl) {
+        console.log('URL changed from', lastUrl, 'to', currentUrl);
+        lastUrl = currentUrl;
+        pageUrl = currentUrl;
+        
+        // Clear current checkmarks from display
+        clearCurrentCheckmarks();
+        checkedImages.clear();
+        
+        // Load checkmarks for new page after a short delay
+        setTimeout(() => {
+            loadSavedCheckmarks();
+        }, 1000); // Increased delay for YouTube to load content
+    }
+}
+
+// Listen for browser navigation events
+window.addEventListener('popstate', handleUrlChange);
+
+// Override pushState and replaceState to catch programmatic navigation
+const originalPushState = history.pushState;
+const originalReplaceState = history.replaceState;
+
+history.pushState = function() {
+    originalPushState.apply(history, arguments);
+    setTimeout(handleUrlChange, 100);
+};
+
+history.replaceState = function() {
+    originalReplaceState.apply(history, arguments);
+    setTimeout(handleUrlChange, 100);
+};
+
+// Also check periodically as backup (every 2 seconds)
+setInterval(handleUrlChange, 2000);
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === 'toggleCheckingMode') {
@@ -269,6 +310,17 @@ function removeCheckmark(element) {
 
 function clearAllCheckmarks() {
     // Remove all checkmarks
+    clearCurrentCheckmarks();
+    checkedImages.clear();
+    
+    // Clear from storage for this page
+    clearPageFromStorage();
+    
+    showNotification('All checkmarks cleared!');
+}
+
+function clearCurrentCheckmarks() {
+    // Remove all checkmarks from display only (don't affect storage)
     const checkmarks = document.querySelectorAll('.image-checker-checkmark');
     checkmarks.forEach(checkmark => {
         if (checkmark.cleanup) {
@@ -281,14 +333,10 @@ function clearAllCheckmarks() {
     const markedElements = document.querySelectorAll('[data-checkmark-id]');
     markedElements.forEach(element => {
         element.removeAttribute('data-checkmark-id');
+        // Remove borders too
+        element.style.border = '';
+        element.style.borderRadius = '';
     });
-    
-    checkedImages.clear();
-    
-    // Clear from storage for this page
-    clearPageFromStorage();
-    
-    showNotification('All checkmarks cleared!');
 }
 
 function getElementData(element) {
@@ -299,30 +347,23 @@ function getElementData(element) {
         linkUrl = linkElement.href;
     }
     
-    // Create page-specific unique identifier
+    // Create unique identifier
     let elementId = '';
-    
-    // Get element position in DOM to make it page-specific
-    const rect = element.getBoundingClientRect();
-    const positionInfo = `${Math.round(rect.top)}-${Math.round(rect.left)}-${Math.round(rect.width)}-${Math.round(rect.height)}`;
-    
     if (element.id) {
-        elementId = `${pageUrl}::${element.id}`;
+        elementId = element.id;
     } else if (element.src) {
-        elementId = `${pageUrl}::${element.src}::${positionInfo}`;
+        elementId = element.src;
     } else if (linkUrl) {
-        // Make YouTube videos page-specific by including current page URL
-        elementId = `${pageUrl}::${linkUrl}::${positionInfo}`;
+        elementId = linkUrl;
     } else {
-        elementId = `${pageUrl}::${element.outerHTML.substring(0, 100)}::${positionInfo}`;
+        elementId = element.outerHTML.substring(0, 100);
     }
     
     return {
         id: elementId,
         linkUrl: linkUrl,
         pageUrl: pageUrl,
-        timestamp: Date.now(),
-        position: positionInfo
+        timestamp: Date.now()
     };
 }
 
@@ -421,36 +462,19 @@ function loadSavedCheckmarks() {
 }
 
 function findElementByData(elementData) {
-    // Extract the original identifier from the page-specific ID
-    const parts = elementData.id.split('::');
-    if (parts.length < 2) return null;
-    
-    const originalId = parts[1];
-    const positionInfo = parts[2];
-    
     // Try to find element by various methods
     if (elementData.linkUrl) {
-        const linkElements = document.querySelectorAll(`a[href="${elementData.linkUrl}"]`);
-        // If multiple elements with same link, try to match by position
-        if (linkElements.length > 1 && positionInfo) {
-            for (let linkElement of linkElements) {
-                const rect = linkElement.getBoundingClientRect();
-                const currentPos = `${Math.round(rect.top)}-${Math.round(rect.left)}-${Math.round(rect.width)}-${Math.round(rect.height)}`;
-                if (currentPos === positionInfo) {
-                    return linkElement;
-                }
-            }
-        }
-        if (linkElements.length > 0) return linkElements[0];
+        const linkElement = document.querySelector(`a[href="${elementData.linkUrl}"]`);
+        if (linkElement) return linkElement;
     }
     
-    if (originalId.startsWith('http')) {
-        const imgElement = document.querySelector(`img[src="${originalId}"]`);
+    if (elementData.id.startsWith('http')) {
+        const imgElement = document.querySelector(`img[src="${elementData.id}"]`);
         if (imgElement) return imgElement;
     }
     
     // Try to find by ID
-    const idElement = document.getElementById(originalId);
+    const idElement = document.getElementById(elementData.id);
     if (idElement) return idElement;
     
     return null;
