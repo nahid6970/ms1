@@ -9,6 +9,7 @@ Persistent
 #Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\shadowFight3.ahk
 #Include C:\Users\nahid\ms\ms1\scripts\pyautogui\Clash_of_Clans.ahk
 #Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\math.ahk
+#Include "C:\Users\nahid\ms\ms1\FFFFFFF\generated_shortcuts.ahk"
 
 ;! v1 startups
 ; Run("C:\Users\nahid\ms\ms1\scripts\ahk\old\shadowFight3.ahk")
@@ -44,19 +45,8 @@ switchToLastTab() {
 
 
 
-!Space::Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
-!x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide") ;* cmd as admin
-
-
-;! monitor
-RAlt & Numpad1::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /internal", "", "Hide")
-RAlt & Numpad2::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /external", "", "Hide")
-RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /extend", "", "Hide")
-
 ;! gui
-!b::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Bio.ahk", "", "Hide")
 ; !u::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\gui\Ultimate_Gui.ahk", "", "Hide")
-!u::Run("C:\Users\nahid\ms\ms1\Ultimate_Gui.py", "", "Hide")
 
 ;! shortcuts
 ^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
@@ -69,14 +59,8 @@ LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 ^+m::Run("C:\Users\nahid\ms\ms1\scripts\xy\XY_CroosHair.py", , "Hide")
 
 ;! text
-::;v1:: {#}Requires AutoHotkey v1.0
-::;v2:: {#}Requires AutoHotkey v2.0
-::;run:: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
-::;mklink:: New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
-::;--:: ➔
 ; ::;--:: ⇨
 ; ::;--:: 🎯
-::;--::➔
 
 
 
@@ -102,18 +86,6 @@ Toggle_Reset_Workspace() {
     }
 }
 
-
-
-#t::Always_on_Top()
-Always_on_Top(){
-    static alwaysOnTop := false  ; Static variable to track the AlwaysOnTop state
-    if (alwaysOnTop) {
-        WinSetAlwaysOnTop(false, "A")  ; Remove AlwaysOnTop
-    } else {
-        WinSetAlwaysOnTop(true, "A")   ; Set AlwaysOnTop
-    }
-    alwaysOnTop := !alwaysOnTop  ; Toggle the state
-}
 
 
 
@@ -238,39 +210,6 @@ myGui := ""
         myGui := ""  ; Clear the myGui object
     }
 }
-
-
-!q::KillForeground()
-KillForeground() {
-    ; Get the window handle of the window under the mouse cursor
-    MouseGetPos(, , &WinID)
-    ; Get the process ID of the window
-    ProcessID := WinGetPID("ahk_id " WinID)
-    ; Use taskkill command to forcefully terminate the process by ID
-    Run("taskkill /f /pid " ProcessID, , "Hide")
-}
-
-^!m::CopyPath_File()
-CopyPath_File() {
-    ClipboardBackup := ClipboardAll()
-    A_Clipboard := "" 
-    Send("^c")
-    Errorlevel := !ClipWait(1)
-    if ErrorLevel
-    {
-    MsgBox("No valid file path found.")
-    }
-    else
-    {
-    ClipBoardContent := A_Clipboard
-    ; V1toV2: StrReplace() is not case sensitive
-    ; check for StringCaseSense in v1 source script
-    ; and change the CaseSense param in StrReplace() if necessary
-    ClipBoardContent := StrReplace(ClipBoardContent, "`n", "`t")
-    A_Clipboard := ClipboardBackup
-    A_Clipboard := ClipBoardContent
-    TrayTip("Copy as Path", "Copied `"" ClipBoardContent "`" to clipboard.")
-    }}
 
 
 

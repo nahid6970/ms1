@@ -92,7 +92,7 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 ::;v2::#Requires AutoHotkey v2.0
 
 ;! Registry Run Path
-;! Windows startup registry path
+;! Windows startup registry path run
 ::;run::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
 
 ;! PowerShell Symlink
@@ -102,3 +102,17 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 ;! Arrow Symbol
 ;! Right-pointing arrow symbol
 ::;--::➔
+
+;! Writers list of writings
+::;list::X
+(
+কাব্যগ্রন্থ/গদ্যকাব্য:
+কবিতা:
+উপন্যাস:
+নাটক:
+সনেট:
+ছোটগল্প/গল্প:
+গদ্যগ্রন্থ-প্রবন্ধ:
+অন্যান্য:
+পংক্তি এবং উদ্ধৃতি:
+)
