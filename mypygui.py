@@ -652,6 +652,22 @@ KomoBT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
     shell=True
 ))
 
+AHKPY_BT = tk.Label(ROOT1, text="AHK", bg="#1d2027", fg="#84ff8e",
+                      height=0, width=0, relief="flat", highlightthickness=0,
+                      highlightbackground="#ffffff", anchor="w",
+                      font=("JetBrainsMono NFP", 16, "bold"))
+AHKPY_BT.pack(side="left", padx=(0, 0), pady=(0, 0))
+AHKPY_BT.bind("<Button-1>", lambda event=None: subprocess.Popen(
+    r'cmd /c C:\Users\nahid\ms\ms1\FFFFFFF\ahk_gui_editor.py',
+    cwd=r'C:\Users\nahid\ms\ms1\FFFFFFF',
+    shell=True
+))
+AHKPY_BT.bind("<Control-Button-1>", lambda event=None: subprocess.Popen(
+    r'code C:\Users\nahid\ms\ms1\FFFFFFF\ahk_gui_editor.py',
+    cwd=r'C:\Users\nahid\ms\ms1\FFFFFFF',
+    shell=True
+))
+
 
 #! FFMPEG
 # FFMPEG_bt = CTkButton(ROOT1, text="\uf07cffmpeg",width=0, command=lambda:switch_to_frame(FR_FFmpeg , MAIN_FRAME), font=("JetBrainsMono NFP",14,"bold"), corner_radius=0, border_width=1, hover_color="#6824b6", border_color="#000000", fg_color="#1d2027", text_color="#ffdb75")
