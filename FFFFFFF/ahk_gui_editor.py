@@ -454,7 +454,7 @@ class AHKShortcutEditor(ctk.CTk):
                 name = shortcut.get('name', 'Unnamed')
                 hotkey = shortcut.get('hotkey', '')
                 description = shortcut.get('description', '')
-                display_text = f"  {hotkey} 󰌌 {name}"
+                display_text = f"  {hotkey}  {name}"
                 if description:
                     display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                 
@@ -505,7 +505,7 @@ class AHKShortcutEditor(ctk.CTk):
                 name = shortcut.get('name', 'Unnamed')
                 trigger = shortcut.get('trigger', '')
                 description = shortcut.get('description', '')
-                display_text = f"  {trigger} 󰌌 {name}"
+                display_text = f"  {trigger}  {name}"
                 if description:
                     display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                 
