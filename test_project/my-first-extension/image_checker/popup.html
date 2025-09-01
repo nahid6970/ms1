@@ -35,6 +35,21 @@
             background: #ff4444;
         }
 
+        .clear-btn {
+            width: 100%;
+            padding: 10px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .clear-btn:hover {
+            background: #da190b;
+        }
+
         .button-row {
             display: flex;
             gap: 8px;
@@ -51,14 +66,6 @@
             font-size: 14px;
         }
 
-        .clear-btn {
-            background: #f44336;
-        }
-
-        .clear-btn:hover {
-            background: #da190b;
-        }
-
         .export-btn {
             background: #2196F3;
         }
@@ -73,6 +80,12 @@
 
         .import-btn:hover {
             background: #F57C00;
+        }
+
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
         }
 
         .settings-section {
@@ -141,12 +154,6 @@
             border-radius: 3px;
             cursor: pointer;
         }
-
-        .status {
-            text-align: center;
-            margin: 10px 0;
-            font-size: 14px;
-        }
     </style>
 </head>
 
@@ -213,7 +220,7 @@
             </div>
 
             <div class="setting-item">
-                <label class="setting-label">Border Color</label>
+                <label class="setting-label">Border Color & Width</label>
                 <div class="setting-row">
                     <input type="color" id="borderColor" class="color-input" value="#4CAF50">
                     <input type="range" id="borderWidth" class="setting-input" min="1" max="10" value="3"
@@ -225,7 +232,7 @@
             <div class="setting-item">
                 <div class="setting-row">
                     <button id="resetSettings" class="half-btn clear-btn" style="font-size: 12px;">
-                        Reset to Default
+                        Reset Default
                     </button>
                     <button id="applySettings" class="half-btn export-btn" style="font-size: 12px;">
                         Apply Changes

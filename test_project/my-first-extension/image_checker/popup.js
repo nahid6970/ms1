@@ -29,21 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 chrome.tabs.sendMessage(tabId, {
                     action: 'toggleCheckingMode',
                     enabled: newMode
-                }, function(response) {
-                    if (chrome.runtime.lastError) {
-                        console.log('Image Checker: Error sending message:', chrome.runtime.lastError.message);
-                        // Try to inject content script if it's not loaded
-                        chrome.scripting.executeScript({
-                            target: { tabId: tabId },
-                            files: ['content.js']
-                        }, function() {
-                            // Try sending message again
-                            chrome.tabs.sendMessage(tabId, {
-                                action: 'toggleCheckingMode',
-                                enabled: newMode
-                            });
-                        });
-                    }
                 });
                 
                 updateUI(newMode);
@@ -82,7 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-
+    
+    // Import functionality
     const importBtn = document.getElementById('importData');
     const fileInput = document.getElementById('fileInput');
     
@@ -258,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveSettings(settings) {
         chrome.storage.local.set({ imageCheckerSettings: settings });
     }
-    
+
     function updateUI(isActive) {
         if (isActive) {
             toggleBtn.textContent = 'Stop Mode';
@@ -266,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
             status.textContent = 'Click on images to mark them!';
         } else {
             toggleBtn.textContent = 'Start Mode';
-            toggleBtn.style.background = '#4CAF50';
+            toggleBtn.style.background = '#f44336';
             status.textContent = 'Click to activate image checking';
         }
     }

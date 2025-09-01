@@ -14,10 +14,8 @@ let currentSettings = {
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message) => {
-    console.log('Image Checker: Received message', message);
     if (message.action === 'toggleCheckingMode') {
         checkingMode = message.enabled;
-        console.log('Image Checker: Toggling mode to', checkingMode);
         if (checkingMode) {
             enableImageChecking();
         } else {
@@ -31,62 +29,45 @@ chrome.runtime.onMessage.addListener((message) => {
     }
 });
 
-// Initialize immediately and on DOM ready
-function initialize() {
-    console.log('Image Checker: Initializing...');
-    loadSettings();
-    
-    // Small delay to ensure page elements are loaded
-    setTimeout(() => {
-        loadSavedCheckmarks();
-        
-        // Check if checking mode was previously enabled for this tab
-        const tabId = getTabId();
-        chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
-            if (result[`checkingMode_${tabId}`]) {
-                checkingMode = true;
-                enableImageChecking();
-            }
-        });
-    }, 500);
-}
-
 // Initialize on page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialize);
-} else {
-    initialize();
-}
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
+    loadSavedCheckmarks();
+    
+    // Check if checking mode was previously enabled for this tab
+    const tabId = getTabId();
+    chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
+        if (result[`checkingMode_${tabId}`]) {
+            checkingMode = true;
+            enableImageChecking();
+        }
+    });
+});
 
-// Also try to initialize after a delay for dynamic content
-setTimeout(initialize, 1000);
+// Also initialize if DOM is already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSettings();
+        loadSavedCheckmarks();
+    });
+} else {
+    loadSettings();
+    loadSavedCheckmarks();
+}
 
 function enableImageChecking() {
-    console.log('Image Checker: Enabling image checking mode');
     document.body.style.cursor = 'crosshair';
-    document.body.setAttribute('data-checking-mode', 'true');
-    
-    // Add global click interceptor
-    document.addEventListener('click', globalClickHandler, { capture: true, passive: false });
-    
     addImageClickListeners();
     showNotification('Image checking mode enabled! Click on images to mark them.');
 }
 
 function disableImageChecking() {
-    console.log('Image Checker: Disabling image checking mode');
     document.body.style.cursor = 'default';
-    document.body.removeAttribute('data-checking-mode');
-    
-    // Remove global click interceptor
-    document.removeEventListener('click', globalClickHandler, { capture: true });
-    
     removeImageClickListeners();
     showNotification('Image checking mode disabled.');
 }
 
 function addImageClickListeners() {
-    console.log('Image Checker: Adding click listeners');
     // Add click listeners to all images, videos, thumbnails, and clickable containers
     const selectors = [
         'img', 
@@ -109,10 +90,20 @@ function addImageClickListeners() {
     ];
     
     const elements = document.querySelectorAll(selectors.join(', '));
-    console.log('Image Checker: Found', elements.length, 'elements to add listeners to');
-    
     elements.forEach(element => {
-        addListenerToElement(element);
+        element.addEventListener('click', handleImageClick, true);
+        element.style.cursor = 'pointer';
+        // Add visual indicator when hovering
+        element.addEventListener('mouseenter', () => {
+            if (checkingMode) {
+                element.style.outline = '2px solid #4CAF50';
+                element.style.outlineOffset = '2px';
+            }
+        });
+        element.addEventListener('mouseleave', () => {
+            element.style.outline = '';
+            element.style.outlineOffset = '';
+        });
     });
     
     // Also handle dynamically loaded content (important for YouTube)
@@ -141,30 +132,17 @@ function addImageClickListeners() {
 }
 
 function addListenerToElement(element) {
-    // Add click listener with high priority (capture phase)
-    element.addEventListener('click', handleImageClick, { capture: true, passive: false });
-    
-    // Mark element as having listener
-    element.setAttribute('data-image-checker-listener', 'true');
-    
+    element.addEventListener('click', handleImageClick, true);
+    element.style.cursor = 'pointer';
     element.addEventListener('mouseenter', () => {
         if (checkingMode) {
-            console.log('Image Checker: Hovering over element, adding outline');
-            element.style.outline = '3px solid #4CAF50';
+            element.style.outline = '2px solid #4CAF50';
             element.style.outlineOffset = '2px';
-            element.style.boxShadow = '0 0 10px rgba(76, 175, 80, 0.5)';
-            element.style.cursor = 'crosshair';
         }
     });
     element.addEventListener('mouseleave', () => {
         element.style.outline = '';
         element.style.outlineOffset = '';
-        element.style.boxShadow = '';
-        if (checkingMode) {
-            element.style.cursor = 'crosshair';
-        } else {
-            element.style.cursor = '';
-        }
     });
 }
 
@@ -197,42 +175,25 @@ function removeImageClickListeners() {
 }
 
 function handleImageClick(event) {
-    console.log('Image Checker: Click detected, checkingMode:', checkingMode);
-    if (!checkingMode) {
-        console.log('Image Checker: Not in checking mode, allowing normal click');
-        return;
-    }
+    if (!checkingMode) return;
     
-    console.log('Image Checker: Preventing default click behavior');
     event.preventDefault();
     event.stopPropagation();
-    event.stopImmediatePropagation();
     
-    // Find the actual element to mark (could be parent container)
-    let element = event.target;
-    let linkElement = element.closest('a[href*="/shorts/"], a[href*="/watch"]');
-    if (linkElement) {
-        element = linkElement;
-    }
-    
-    console.log('Image Checker: Clicked element:', element);
+    const element = event.target;
     const elementData = getElementData(element);
     
     if (checkedImages.has(elementData.id)) {
         // Remove checkmark
-        console.log('Image Checker: Removing checkmark');
         removeCheckmark(element);
         checkedImages.delete(elementData.id);
         removeFromStorage(elementData);
     } else {
         // Add checkmark
-        console.log('Image Checker: Adding checkmark');
         addCheckmark(element);
         checkedImages.add(elementData.id);
         saveToStorage(elementData);
     }
-    
-    return false;
 }
 
 function addCheckmark(element) {
@@ -262,7 +223,7 @@ function addCheckmark(element) {
     document.body.appendChild(checkmark);
     
     // Store reference to checkmark on the element
-    const checkmarkId = 'checkmark-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    const checkmarkId = 'checkmark-' + Date.now() + '-' + Math.random().toString(36).substring(2, 11);
     element.setAttribute('data-checkmark-id', checkmarkId);
     checkmark.id = checkmarkId;
     
@@ -470,8 +431,8 @@ function findElementByData(elementData) {
     
     return null;
 }
-functio
-n applyCheckmarkStyles(checkmark, targetElement) {
+
+function applyCheckmarkStyles(checkmark, targetElement) {
     const rect = targetElement.getBoundingClientRect();
     const size = Math.min(rect.width, rect.height) * (currentSettings.checkmarkSize / 100);
     
@@ -517,39 +478,4 @@ function updateExistingCheckmarks() {
             }
         }
     });
-}funct
-ion globalClickHandler(event) {
-    if (!checkingMode) return;
-    
-    console.log('Image Checker: Global click intercepted');
-    
-    // Check if clicked element or its parents match our selectors
-    const selectors = [
-        'img', 
-        'video', 
-        '[style*="background-image"]',
-        'ytd-rich-grid-media',
-        'ytd-video-preview',
-        'ytd-thumbnail',
-        '#thumbnail',
-        '.ytd-thumbnail',
-        'a[href*="/shorts/"]',
-        'a[href*="/watch"]',
-        '[class*="thumbnail"]',
-        '[class*="video"]',
-        '[class*="short"]',
-        '[data-testid*="video"]',
-        '[data-testid*="thumbnail"]'
-    ];
-    
-    let targetElement = event.target;
-    
-    // Check if the clicked element or any parent matches our selectors
-    for (let element = targetElement; element && element !== document; element = element.parentElement) {
-        if (element.matches && element.matches(selectors.join(', '))) {
-            console.log('Image Checker: Found matching element:', element);
-            handleImageClick(event);
-            return;
-        }
-    }
 }
