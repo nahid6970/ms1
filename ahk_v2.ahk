@@ -165,21 +165,21 @@ return
 
 
 
-Persistent
-SetTitleMatchMode(2) ; Allow partial matching of window titles
-; Allow the right mouse button to work normally in other apps
-~RButton::
-{
-    ; Check if 'dnplayer' is the active window
-    if (WinActive("ahk_exe dnplayer.exe")) {
-        ; Keep sending 'j' while the right mouse button is held down
-        while (GetKeyState("RButton", "P") && WinActive("ahk_exe dnplayer.exe")) {
-            Send("j")
-            Sleep(50) ; Adjust the delay for how fast 'j' is sent
-        }
-    }
-    return
-}
+; Persistent
+; SetTitleMatchMode(2) ; Allow partial matching of window titles
+; ; Allow the right mouse button to work normally in other apps
+; ~RButton::
+; {
+;     ; Check if 'dnplayer' is the active window
+;     if (WinActive("ahk_exe dnplayer.exe")) {
+;         ; Keep sending 'j' while the right mouse button is held down
+;         while (GetKeyState("RButton", "P") && WinActive("ahk_exe dnplayer.exe")) {
+;             Send("j")
+;             Sleep(50) ; Adjust the delay for how fast 'j' is sent
+;         }
+;     }
+;     return
+; }
 
 
 ^+y:: {
@@ -284,16 +284,16 @@ StrRepeatf(char, count) {
 ;     Send("{Enter}")
 ; }
 
-^!z:: {
-    SendText("❓")
-    Sleep(100)
-    send("^!{Numpad2}")
-    Sleep(100)
-    SendText(" ➔ ")
-    Sleep(100)
-    send("^!{Numpad1}")
-    Sleep(100)
-    ; SendText(",")
-    Sleep(100)
-    Send("{Enter}")
-}
+; ^!z:: {
+;     SendText("❓")
+;     Sleep(100)
+;     send("^!{Numpad2}")
+;     Sleep(100)
+;     SendText(" ➔ ")
+;     Sleep(100)
+;     send("^!{Numpad1}")
+;     Sleep(100)
+;     ; SendText(",")
+;     Sleep(100)
+;     Send("{Enter}")
+; }
