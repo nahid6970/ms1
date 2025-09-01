@@ -6,11 +6,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to refresh UI state
     function refreshUIState() {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            const tabId = tabs[0].id;
+            const tabUrl = tabs[0].url; // Use URL instead of ID to match content script
             
             // Check current mode status
-            chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
-                const isActive = result[`checkingMode_${tabId}`] || false;
+            chrome.storage.local.get([`checkingMode_${tabUrl}`], function(result) {
+                const isActive = result[`checkingMode_${tabUrl}`] || false;
                 updateUI(isActive);
             });
         });
@@ -37,13 +37,14 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleBtn.addEventListener('click', function() {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             const tabId = tabs[0].id;
+            const tabUrl = tabs[0].url; // Use URL for storage key
             
-            chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
-                const currentMode = result[`checkingMode_${tabId}`] || false;
+            chrome.storage.local.get([`checkingMode_${tabUrl}`], function(result) {
+                const currentMode = result[`checkingMode_${tabUrl}`] || false;
                 const newMode = !currentMode;
                 
                 // Save new mode
-                chrome.storage.local.set({[`checkingMode_${tabId}`]: newMode});
+                chrome.storage.local.set({[`checkingMode_${tabUrl}`]: newMode});
                 
                 // Send message to content script
                 chrome.tabs.sendMessage(tabId, {
