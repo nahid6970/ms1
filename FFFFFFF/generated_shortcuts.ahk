@@ -107,7 +107,44 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 LAlt & e::Run('pwsh -c explorer.exe', , 'Hide')
 
 ;! Replace Space with _
-RAlt & Space::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_space_W_underscore.ahk", "", "Hide")
+RAlt & Space:: {
+    replacewith_()
+    replacewith_()
+    {
+        ; Backup the clipboard
+        ClipboardBackup := ClipboardAll()
+        ; Clear the clipboard
+        A_Clipboard := ""
+        ; Copy the selected text
+        Send("^c")
+        ; Wait for the clipboard to contain the copied text
+        if !ClipWait(1) {
+            MsgBox("No text selected or copying failed.")
+        } else {
+            ; Get the clipboard content
+            ClipboardContent := A_Clipboard
+            ; Replace all spaces with underscores
+            ClipboardContent := StrReplace(ClipboardContent, A_Space, "_")
+            ; Put the modified text back in clipboard
+            A_Clipboard := ClipboardContent
+            ; Paste the modified text (this replaces the selected text)
+            Send("^v")
+            ; Wait a moment for the paste to complete
+            Sleep(50)
+        }
+        ; Restore the original clipboard content
+        A_Clipboard := ClipboardBackup
+    }
+}
+
+;! Replace - w Space
+RAlt & -::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\text\Replace_Dash_W_Space.ahk", "", "Hide")
+
+;! send_to_2nd
+!1::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
+
+;! Open w VScode
+^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
 
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1

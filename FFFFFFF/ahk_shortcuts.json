@@ -110,7 +110,7 @@
             "category": "Text",
             "description": "",
             "hotkey": "RAlt & Space",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version1\\text\\Replace_space_W_underscore.ahk\", \"\", \"Hide\")"
+            "action": "replacewith_()\nreplacewith_()\n{\n    ; Backup the clipboard\n    ClipboardBackup := ClipboardAll()\n    ; Clear the clipboard\n    A_Clipboard := \"\"\n    ; Copy the selected text\n    Send(\"^c\")\n    ; Wait for the clipboard to contain the copied text\n    if !ClipWait(1) {\n        MsgBox(\"No text selected or copying failed.\")\n    } else {\n        ; Get the clipboard content\n        ClipboardContent := A_Clipboard\n        ; Replace all spaces with underscores\n        ClipboardContent := StrReplace(ClipboardContent, A_Space, \"_\")\n        ; Put the modified text back in clipboard\n        A_Clipboard := ClipboardContent\n        ; Paste the modified text (this replaces the selected text)\n        Send(\"^v\")\n        ; Wait a moment for the paste to complete\n        Sleep(50)\n    }\n    ; Restore the original clipboard content\n    A_Clipboard := ClipboardBackup\n}"
         },
         {
             "name": "Replace - w Space",
