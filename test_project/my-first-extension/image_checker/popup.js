@@ -3,15 +3,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearBtn = document.getElementById('clearAll');
     const status = document.getElementById('status');
     
-    // Get current tab and check if checking mode is active
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const tabId = tabs[0].id;
-        
-        // Check current mode status
-        chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
-            const isActive = result[`checkingMode_${tabId}`] || false;
-            updateUI(isActive);
+    // Function to refresh UI state
+    function refreshUIState() {
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            const tabId = tabs[0].id;
+            
+            // Check current mode status
+            chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
+                const isActive = result[`checkingMode_${tabId}`] || false;
+                updateUI(isActive);
+            });
         });
+    }
+    
+    // Initial load
+    refreshUIState();
+    
+    // Refresh state when popup becomes visible (in case ESC was pressed)
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            refreshUIState();
+        }
+    });
+    
+    // Also refresh periodically while popup is open
+    const refreshInterval = setInterval(refreshUIState, 1000);
+    
+    // Clean up interval when popup closes
+    window.addEventListener('beforeunload', function() {
+        clearInterval(refreshInterval);
     });
     
     toggleBtn.addEventListener('click', function() {

@@ -53,6 +53,26 @@ history.replaceState = function() {
 // Also check periodically as backup (every 2 seconds)
 setInterval(handleUrlChange, 2000);
 
+// F2 key to toggle checking mode
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'F2') {
+        // Toggle the mode
+        checkingMode = !checkingMode;
+        
+        if (checkingMode) {
+            enableImageChecking();
+            showNotification('Image checking mode started (F2 pressed)');
+        } else {
+            disableImageChecking();
+            showNotification('Image checking mode stopped (F2 pressed)');
+        }
+        
+        // Update storage to reflect the mode change
+        const tabId = getTabId();
+        chrome.storage.local.set({[`checkingMode_${tabId}`]: checkingMode});
+    }
+});
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message) => {
     if (message.action === 'toggleCheckingMode') {
