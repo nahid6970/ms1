@@ -1,0 +1,48 @@
+/* Image Checker Styles */
+
+.image-checker-checkmark {
+    width: 30px;
+    height: 30px;
+    background: #4CAF50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    animation: checkmarkAppear 0.3s ease-out;
+    border: 2px solid white;
+}
+
+@keyframes checkmarkAppear {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.image-checker-notification {
+    font-family: Arial, sans-serif;
+    transition: all 0.3s ease;
+}
+
+.image-checker-notification:hover {
+    transform: translateY(-2px);
+}
+
+/* Highlight images when in checking mode */
+body[data-checking-mode="true"] img:hover,
+body[data-checking-mode="true"] video:hover {
+    outline: 2px solid #4CAF50;
+    outline-offset: 2px;
+}

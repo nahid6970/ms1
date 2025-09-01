@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 250px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .toggle-btn:hover {
+            background: #45a049;
+        }
+
+        .toggle-btn.active {
+            background: #ff4444;
+        }
+
+        .clear-btn {
+            width: 100%;
+            padding: 10px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .clear-btn:hover {
+            background: #da190b;
+        }
+
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h3>Image Checker</h3>
+    </div>
+
+    <button id="toggleMode" class="toggle-btn">
+        Start Checking Mode
+    </button>
+
+    <div id="status" class="status">
+        Click to activate image checking
+    </div>
+
+    <button id="clearAll" class="clear-btn">
+        Clear All Checkmarks
+    </button>
+
+    <button id="exportData" class="clear-btn" style="background: #2196F3; margin-top: 5px;">
+        Export Saved Data
+    </button>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>
