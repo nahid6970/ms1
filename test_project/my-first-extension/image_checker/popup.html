@@ -75,6 +75,73 @@
             background: #F57C00;
         }
 
+        .settings-section {
+            margin-top: 15px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+
+        .settings-toggle {
+            width: 100%;
+            padding: 8px;
+            background: #666;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .settings-toggle:hover {
+            background: #555;
+        }
+
+        .settings-content {
+            display: none;
+        }
+
+        .settings-content.show {
+            display: block;
+        }
+
+        .setting-item {
+            margin-bottom: 12px;
+        }
+
+        .setting-label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .setting-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .setting-checkbox {
+            margin-right: 6px;
+        }
+
+        .color-input {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
         .status {
             text-align: center;
             margin: 10px 0;
@@ -108,6 +175,64 @@
         <button id="importData" class="half-btn import-btn">
             Import Data
         </button>
+    </div>
+
+    <div class="settings-section">
+        <button id="settingsToggle" class="settings-toggle">
+            ⚙️ Settings
+        </button>
+
+        <div id="settingsContent" class="settings-content">
+            <div class="setting-item">
+                <label class="setting-label">Checkmark Size (% of image)</label>
+                <input type="range" id="checkmarkSize" class="setting-input" min="5" max="50" value="15">
+                <span id="sizeValue">15%</span>
+            </div>
+
+            <div class="setting-item">
+                <label class="setting-label">Checkmark Color</label>
+                <div class="setting-row">
+                    <input type="color" id="checkmarkColor" class="color-input" value="#4CAF50">
+                    <span>Background</span>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label class="setting-label">Text Color</label>
+                <div class="setting-row">
+                    <input type="color" id="textColor" class="color-input" value="#ffffff">
+                    <span>Checkmark ✓</span>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-row">
+                    <input type="checkbox" id="enableBorder" class="setting-checkbox">
+                    <label>Add border to marked images</label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label class="setting-label">Border Color</label>
+                <div class="setting-row">
+                    <input type="color" id="borderColor" class="color-input" value="#4CAF50">
+                    <input type="range" id="borderWidth" class="setting-input" min="1" max="10" value="3"
+                        style="flex: 1; margin-left: 8px;">
+                    <span id="borderValue">3px</span>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-row">
+                    <button id="resetSettings" class="half-btn clear-btn" style="font-size: 12px;">
+                        Reset to Default
+                    </button>
+                    <button id="applySettings" class="half-btn export-btn" style="font-size: 12px;">
+                        Apply Changes
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <input type="file" id="fileInput" accept=".json" style="display: none;">

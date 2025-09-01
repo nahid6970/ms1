@@ -29,6 +29,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 chrome.tabs.sendMessage(tabId, {
                     action: 'toggleCheckingMode',
                     enabled: newMode
+                }, function(response) {
+                    if (chrome.runtime.lastError) {
+                        console.log('Image Checker: Error sending message:', chrome.runtime.lastError.message);
+                        // Try to inject content script if it's not loaded
+                        chrome.scripting.executeScript({
+                            target: { tabId: tabId },
+                            files: ['content.js']
+                        }, function() {
+                            // Try sending message again
+                            chrome.tabs.sendMessage(tabId, {
+                                action: 'toggleCheckingMode',
+                                enabled: newMode
+                            });
+                        });
+                    }
                 });
                 
                 updateUI(newMode);
@@ -142,6 +157,107 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset file input
         fileInput.value = '';
     });
+
+    // Settings functionality
+    const settingsToggle = document.getElementById('settingsToggle');
+    const settingsContent = document.getElementById('settingsContent');
+    const checkmarkSize = document.getElementById('checkmarkSize');
+    const sizeValue = document.getElementById('sizeValue');
+    const checkmarkColor = document.getElementById('checkmarkColor');
+    const textColor = document.getElementById('textColor');
+    const enableBorder = document.getElementById('enableBorder');
+    const borderColor = document.getElementById('borderColor');
+    const borderWidth = document.getElementById('borderWidth');
+    const borderValue = document.getElementById('borderValue');
+    const resetSettings = document.getElementById('resetSettings');
+    const applySettings = document.getElementById('applySettings');
+
+    // Toggle settings panel
+    settingsToggle.addEventListener('click', function() {
+        settingsContent.classList.toggle('show');
+        settingsToggle.textContent = settingsContent.classList.contains('show') ? 
+            '⚙️ Hide Settings' : '⚙️ Settings';
+    });
+
+    // Load saved settings
+    chrome.storage.local.get(['imageCheckerSettings'], function(result) {
+        const settings = result.imageCheckerSettings || getDefaultSettings();
+        loadSettingsToUI(settings);
+    });
+
+    // Update size value display
+    checkmarkSize.addEventListener('input', function() {
+        sizeValue.textContent = this.value + '%';
+    });
+
+    // Update border width display
+    borderWidth.addEventListener('input', function() {
+        borderValue.textContent = this.value + 'px';
+    });
+
+    // Reset to default settings
+    resetSettings.addEventListener('click', function() {
+        const defaults = getDefaultSettings();
+        loadSettingsToUI(defaults);
+        saveSettings(defaults);
+    });
+
+    // Apply settings
+    applySettings.addEventListener('click', function() {
+        const settings = {
+            checkmarkSize: parseInt(checkmarkSize.value),
+            checkmarkColor: checkmarkColor.value,
+            textColor: textColor.value,
+            enableBorder: enableBorder.checked,
+            borderColor: borderColor.value,
+            borderWidth: parseInt(borderWidth.value)
+        };
+        
+        saveSettings(settings);
+        
+        // Send settings to content script
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+                action: 'updateSettings',
+                settings: settings
+            });
+        });
+        
+        // Show confirmation
+        const originalText = applySettings.textContent;
+        applySettings.textContent = 'Applied!';
+        applySettings.style.background = '#4CAF50';
+        setTimeout(() => {
+            applySettings.textContent = originalText;
+            applySettings.style.background = '#2196F3';
+        }, 1000);
+    });
+
+    function getDefaultSettings() {
+        return {
+            checkmarkSize: 15,
+            checkmarkColor: '#4CAF50',
+            textColor: '#ffffff',
+            enableBorder: false,
+            borderColor: '#4CAF50',
+            borderWidth: 3
+        };
+    }
+
+    function loadSettingsToUI(settings) {
+        checkmarkSize.value = settings.checkmarkSize;
+        sizeValue.textContent = settings.checkmarkSize + '%';
+        checkmarkColor.value = settings.checkmarkColor;
+        textColor.value = settings.textColor;
+        enableBorder.checked = settings.enableBorder;
+        borderColor.value = settings.borderColor;
+        borderWidth.value = settings.borderWidth;
+        borderValue.textContent = settings.borderWidth + 'px';
+    }
+
+    function saveSettings(settings) {
+        chrome.storage.local.set({ imageCheckerSettings: settings });
+    }
     
     function updateUI(isActive) {
         if (isActive) {

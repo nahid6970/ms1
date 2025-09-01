@@ -1,12 +1,23 @@
 // Image Checker Content Script
+console.log('Image Checker: Content script loaded');
 let checkingMode = false;
 let checkedImages = new Set();
 let pageUrl = window.location.href;
+let currentSettings = {
+    checkmarkSize: 15,
+    checkmarkColor: '#4CAF50',
+    textColor: '#ffffff',
+    enableBorder: false,
+    borderColor: '#4CAF50',
+    borderWidth: 3
+};
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((message) => {
+    console.log('Image Checker: Received message', message);
     if (message.action === 'toggleCheckingMode') {
         checkingMode = message.enabled;
+        console.log('Image Checker: Toggling mode to', checkingMode);
         if (checkingMode) {
             enableImageChecking();
         } else {
@@ -14,43 +25,68 @@ chrome.runtime.onMessage.addListener((message) => {
         }
     } else if (message.action === 'clearAllCheckmarks') {
         clearAllCheckmarks();
+    } else if (message.action === 'updateSettings') {
+        currentSettings = message.settings;
+        updateExistingCheckmarks();
     }
 });
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadSavedCheckmarks();
+// Initialize immediately and on DOM ready
+function initialize() {
+    console.log('Image Checker: Initializing...');
+    loadSettings();
     
-    // Check if checking mode was previously enabled for this tab
-    const tabId = getTabId();
-    chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
-        if (result[`checkingMode_${tabId}`]) {
-            checkingMode = true;
-            enableImageChecking();
-        }
-    });
-});
-
-// Also initialize if DOM is already loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadSavedCheckmarks);
-} else {
-    loadSavedCheckmarks();
+    // Small delay to ensure page elements are loaded
+    setTimeout(() => {
+        loadSavedCheckmarks();
+        
+        // Check if checking mode was previously enabled for this tab
+        const tabId = getTabId();
+        chrome.storage.local.get([`checkingMode_${tabId}`], function(result) {
+            if (result[`checkingMode_${tabId}`]) {
+                checkingMode = true;
+                enableImageChecking();
+            }
+        });
+    }, 500);
 }
 
+// Initialize on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+} else {
+    initialize();
+}
+
+// Also try to initialize after a delay for dynamic content
+setTimeout(initialize, 1000);
+
 function enableImageChecking() {
+    console.log('Image Checker: Enabling image checking mode');
     document.body.style.cursor = 'crosshair';
+    document.body.setAttribute('data-checking-mode', 'true');
+    
+    // Add global click interceptor
+    document.addEventListener('click', globalClickHandler, { capture: true, passive: false });
+    
     addImageClickListeners();
     showNotification('Image checking mode enabled! Click on images to mark them.');
 }
 
 function disableImageChecking() {
+    console.log('Image Checker: Disabling image checking mode');
     document.body.style.cursor = 'default';
+    document.body.removeAttribute('data-checking-mode');
+    
+    // Remove global click interceptor
+    document.removeEventListener('click', globalClickHandler, { capture: true });
+    
     removeImageClickListeners();
     showNotification('Image checking mode disabled.');
 }
 
 function addImageClickListeners() {
+    console.log('Image Checker: Adding click listeners');
     // Add click listeners to all images, videos, thumbnails, and clickable containers
     const selectors = [
         'img', 
@@ -73,20 +109,10 @@ function addImageClickListeners() {
     ];
     
     const elements = document.querySelectorAll(selectors.join(', '));
+    console.log('Image Checker: Found', elements.length, 'elements to add listeners to');
+    
     elements.forEach(element => {
-        element.addEventListener('click', handleImageClick, true);
-        element.style.cursor = 'pointer';
-        // Add visual indicator when hovering
-        element.addEventListener('mouseenter', () => {
-            if (checkingMode) {
-                element.style.outline = '2px solid #4CAF50';
-                element.style.outlineOffset = '2px';
-            }
-        });
-        element.addEventListener('mouseleave', () => {
-            element.style.outline = '';
-            element.style.outlineOffset = '';
-        });
+        addListenerToElement(element);
     });
     
     // Also handle dynamically loaded content (important for YouTube)
@@ -115,17 +141,30 @@ function addImageClickListeners() {
 }
 
 function addListenerToElement(element) {
-    element.addEventListener('click', handleImageClick, true);
-    element.style.cursor = 'pointer';
+    // Add click listener with high priority (capture phase)
+    element.addEventListener('click', handleImageClick, { capture: true, passive: false });
+    
+    // Mark element as having listener
+    element.setAttribute('data-image-checker-listener', 'true');
+    
     element.addEventListener('mouseenter', () => {
         if (checkingMode) {
-            element.style.outline = '2px solid #4CAF50';
+            console.log('Image Checker: Hovering over element, adding outline');
+            element.style.outline = '3px solid #4CAF50';
             element.style.outlineOffset = '2px';
+            element.style.boxShadow = '0 0 10px rgba(76, 175, 80, 0.5)';
+            element.style.cursor = 'crosshair';
         }
     });
     element.addEventListener('mouseleave', () => {
         element.style.outline = '';
         element.style.outlineOffset = '';
+        element.style.boxShadow = '';
+        if (checkingMode) {
+            element.style.cursor = 'crosshair';
+        } else {
+            element.style.cursor = '';
+        }
     });
 }
 
@@ -158,25 +197,42 @@ function removeImageClickListeners() {
 }
 
 function handleImageClick(event) {
-    if (!checkingMode) return;
+    console.log('Image Checker: Click detected, checkingMode:', checkingMode);
+    if (!checkingMode) {
+        console.log('Image Checker: Not in checking mode, allowing normal click');
+        return;
+    }
     
+    console.log('Image Checker: Preventing default click behavior');
     event.preventDefault();
     event.stopPropagation();
+    event.stopImmediatePropagation();
     
-    const element = event.target;
+    // Find the actual element to mark (could be parent container)
+    let element = event.target;
+    let linkElement = element.closest('a[href*="/shorts/"], a[href*="/watch"]');
+    if (linkElement) {
+        element = linkElement;
+    }
+    
+    console.log('Image Checker: Clicked element:', element);
     const elementData = getElementData(element);
     
     if (checkedImages.has(elementData.id)) {
         // Remove checkmark
+        console.log('Image Checker: Removing checkmark');
         removeCheckmark(element);
         checkedImages.delete(elementData.id);
         removeFromStorage(elementData);
     } else {
         // Add checkmark
+        console.log('Image Checker: Adding checkmark');
         addCheckmark(element);
         checkedImages.add(elementData.id);
         saveToStorage(elementData);
     }
+    
+    return false;
 }
 
 function addCheckmark(element) {
@@ -194,12 +250,14 @@ function addCheckmark(element) {
         targetElement = thumbnail;
     }
     
-    // Position the checkmark
-    const rect = targetElement.getBoundingClientRect();
-    checkmark.style.position = 'fixed';
-    checkmark.style.left = (rect.left + rect.width / 2 - 15) + 'px';
-    checkmark.style.top = (rect.top + rect.height / 2 - 15) + 'px';
-    checkmark.style.zIndex = '10000';
+    // Apply current settings to checkmark
+    applyCheckmarkStyles(checkmark, targetElement);
+    
+    // Apply border if enabled
+    if (currentSettings.enableBorder) {
+        targetElement.style.border = `${currentSettings.borderWidth}px solid ${currentSettings.borderColor}`;
+        targetElement.style.borderRadius = '4px';
+    }
     
     document.body.appendChild(checkmark);
     
@@ -211,18 +269,20 @@ function addCheckmark(element) {
     // Update position on scroll
     const updatePosition = () => {
         const newRect = targetElement.getBoundingClientRect();
-        checkmark.style.left = (newRect.left + newRect.width / 2 - 15) + 'px';
-        checkmark.style.top = (newRect.top + newRect.height / 2 - 15) + 'px';
+        const size = Math.min(newRect.width, newRect.height) * (currentSettings.checkmarkSize / 100);
+        checkmark.style.left = (newRect.left + newRect.width / 2 - size / 2) + 'px';
+        checkmark.style.top = (newRect.top + newRect.height / 2 - size / 2) + 'px';
     };
     
     window.addEventListener('scroll', updatePosition);
     window.addEventListener('resize', updatePosition);
     
-    // Store cleanup function
+    // Store cleanup function and target element reference
     checkmark.cleanup = () => {
         window.removeEventListener('scroll', updatePosition);
         window.removeEventListener('resize', updatePosition);
     };
+    checkmark.targetElement = targetElement;
 }
 
 function removeCheckmark(element) {
@@ -230,6 +290,12 @@ function removeCheckmark(element) {
     if (checkmarkId) {
         const existingCheckmark = document.getElementById(checkmarkId);
         if (existingCheckmark) {
+            // Remove border from target element
+            if (existingCheckmark.targetElement) {
+                existingCheckmark.targetElement.style.border = '';
+                existingCheckmark.targetElement.style.borderRadius = '';
+            }
+            
             // Clean up event listeners
             if (existingCheckmark.cleanup) {
                 existingCheckmark.cleanup();
@@ -403,4 +469,87 @@ function findElementByData(elementData) {
     if (idElement) return idElement;
     
     return null;
+}
+functio
+n applyCheckmarkStyles(checkmark, targetElement) {
+    const rect = targetElement.getBoundingClientRect();
+    const size = Math.min(rect.width, rect.height) * (currentSettings.checkmarkSize / 100);
+    
+    checkmark.style.position = 'fixed';
+    checkmark.style.left = (rect.left + rect.width / 2 - size / 2) + 'px';
+    checkmark.style.top = (rect.top + rect.height / 2 - size / 2) + 'px';
+    checkmark.style.width = size + 'px';
+    checkmark.style.height = size + 'px';
+    checkmark.style.background = currentSettings.checkmarkColor;
+    checkmark.style.color = currentSettings.textColor;
+    checkmark.style.fontSize = (size * 0.6) + 'px';
+    checkmark.style.zIndex = '10000';
+    checkmark.style.borderRadius = '50%';
+    checkmark.style.display = 'flex';
+    checkmark.style.alignItems = 'center';
+    checkmark.style.justifyContent = 'center';
+    checkmark.style.fontWeight = 'bold';
+    checkmark.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+    checkmark.style.border = '2px solid white';
+}
+
+function loadSettings() {
+    chrome.storage.local.get(['imageCheckerSettings'], function(result) {
+        if (result.imageCheckerSettings) {
+            currentSettings = result.imageCheckerSettings;
+        }
+    });
+}
+
+function updateExistingCheckmarks() {
+    const checkmarks = document.querySelectorAll('.image-checker-checkmark');
+    checkmarks.forEach(checkmark => {
+        if (checkmark.targetElement) {
+            applyCheckmarkStyles(checkmark, checkmark.targetElement);
+            
+            // Update border
+            if (currentSettings.enableBorder) {
+                checkmark.targetElement.style.border = `${currentSettings.borderWidth}px solid ${currentSettings.borderColor}`;
+                checkmark.targetElement.style.borderRadius = '4px';
+            } else {
+                checkmark.targetElement.style.border = '';
+                checkmark.targetElement.style.borderRadius = '';
+            }
+        }
+    });
+}funct
+ion globalClickHandler(event) {
+    if (!checkingMode) return;
+    
+    console.log('Image Checker: Global click intercepted');
+    
+    // Check if clicked element or its parents match our selectors
+    const selectors = [
+        'img', 
+        'video', 
+        '[style*="background-image"]',
+        'ytd-rich-grid-media',
+        'ytd-video-preview',
+        'ytd-thumbnail',
+        '#thumbnail',
+        '.ytd-thumbnail',
+        'a[href*="/shorts/"]',
+        'a[href*="/watch"]',
+        '[class*="thumbnail"]',
+        '[class*="video"]',
+        '[class*="short"]',
+        '[data-testid*="video"]',
+        '[data-testid*="thumbnail"]'
+    ];
+    
+    let targetElement = event.target;
+    
+    // Check if the clicked element or any parent matches our selectors
+    for (let element = targetElement; element && element !== document; element = element.parentElement) {
+        if (element.matches && element.matches(selectors.join(', '))) {
+            console.log('Image Checker: Found matching element:', element);
+            handleImageClick(event);
+            return;
+        }
+    }
 }
