@@ -119,3 +119,6 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 অন্যান্য:
 পংক্তি এবং উদ্ধৃতি:
 )
+
+;! Star
+::;star::

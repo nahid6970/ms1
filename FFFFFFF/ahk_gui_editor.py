@@ -31,16 +31,53 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
         if self.shortcut_data:
             self.populate_fields()
 
+    def get_existing_categories(self):
+        """Get list of existing categories from all shortcuts"""
+        categories = set()
+        
+        # Get categories from script shortcuts
+        for shortcut in self.master.script_shortcuts:
+            category = shortcut.get('category', '').strip()
+            if category:
+                categories.add(category)
+        
+        # Get categories from text shortcuts
+        for shortcut in self.master.text_shortcuts:
+            category = shortcut.get('category', '').strip()
+            if category:
+                categories.add(category)
+        
+        # Return sorted list, with common categories first
+        common_categories = ["System", "Navigation", "Text", "Media", "AutoHotkey", "General"]
+        existing_sorted = sorted(categories)
+        
+        # Combine common categories (if they exist) with other existing ones
+        result = []
+        for cat in common_categories:
+            if cat in existing_sorted:
+                result.append(cat)
+                existing_sorted.remove(cat)
+        
+        # Add remaining categories
+        result.extend(existing_sorted)
+        
+        return result
+
     def create_widgets(self):
         # Name input (for both types)
         ctk.CTkLabel(self, text="Name:", font=self.font).pack(padx=20, pady=5, anchor="w")
         self.name_entry = ctk.CTkEntry(self, placeholder_text="e.g., Open Terminal, Version 1 Text", font=self.font)
         self.name_entry.pack(padx=20, pady=5, fill="x")
         
-        # Category input (for both types)
+        # Category input (for both types) - ComboBox with existing categories
         ctk.CTkLabel(self, text="Category:", font=self.font).pack(padx=20, pady=5, anchor="w")
-        self.category_entry = ctk.CTkEntry(self, placeholder_text="e.g., System, Navigation, Text", font=self.font)
-        self.category_entry.pack(padx=20, pady=5, fill="x")
+        
+        # Get existing categories from master
+        existing_categories = self.get_existing_categories()
+        
+        self.category_combobox = ctk.CTkComboBox(self, values=existing_categories, font=self.font)
+        self.category_combobox.pack(padx=20, pady=5, fill="x")
+        self.category_combobox.set("")  # Start with empty value
         
         # Description input (for both types)
         ctk.CTkLabel(self, text="Description:", font=self.font).pack(padx=20, pady=5, anchor="w")
@@ -78,7 +115,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
 
     def populate_fields(self):
         self.name_entry.insert(0, self.shortcut_data.get("name", ""))
-        self.category_entry.insert(0, self.shortcut_data.get("category", ""))
+        self.category_combobox.set(self.shortcut_data.get("category", ""))
         self.description_entry.insert(0, self.shortcut_data.get("description", ""))
         
         if self.shortcut_type == "script":
@@ -90,7 +127,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
 
     def add_shortcut(self):
         name = self.name_entry.get().strip()
-        category = self.category_entry.get().strip()
+        category = self.category_combobox.get().strip()
         description = self.description_entry.get().strip()
         
         if not name:
@@ -137,7 +174,7 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
 
     def save_changes(self):
         name = self.name_entry.get().strip()
-        category = self.category_entry.get().strip()
+        category = self.category_combobox.get().strip()
         description = self.description_entry.get().strip()
         
         if not name:
