@@ -175,11 +175,15 @@ function addImageClickListeners() {
                     // Check if the node itself matches
                     if (node.matches && node.matches(selectors.join(', '))) {
                         addListenerToElement(node);
+                        // Check if this element should have a checkmark
+                        checkForSavedCheckmark(node);
                     }
                     // Check children too
                     const childElements = node.querySelectorAll(selectors.join(', '));
                     childElements.forEach(element => {
                         addListenerToElement(element);
+                        // Check if this element should have a checkmark
+                        checkForSavedCheckmark(element);
                     });
                 }
             });
@@ -481,11 +485,39 @@ function loadSavedCheckmarks() {
     });
 }
 
+function checkForSavedCheckmark(element) {
+    // Check if this specific element should have a checkmark
+    chrome.storage.local.get(['checkedElements'], function(result) {
+        const checkedElements = result.checkedElements || {};
+        const pageElements = checkedElements[pageUrl] || [];
+        
+        // Create element data for this element to compare
+        const elementData = getElementData(element);
+        
+        // Check if this element is in our saved list
+        const isMarked = pageElements.some(saved => saved.id === elementData.id);
+        
+        if (isMarked && !element.getAttribute('data-checkmark-id')) {
+            // Element should be marked but isn't yet
+            addCheckmark(element);
+            checkedImages.add(elementData.id);
+        }
+    });
+}
+
 function findElementByData(elementData) {
     // Try to find element by various methods
     if (elementData.linkUrl) {
-        const linkElement = document.querySelector(`a[href="${elementData.linkUrl}"]`);
+        // Look for exact href match first
+        let linkElement = document.querySelector(`a[href="${elementData.linkUrl}"]`);
         if (linkElement) return linkElement;
+        
+        // YouTube sometimes changes URLs slightly, so try partial match
+        const videoId = extractVideoId(elementData.linkUrl);
+        if (videoId) {
+            linkElement = document.querySelector(`a[href*="${videoId}"]`);
+            if (linkElement) return linkElement;
+        }
     }
     
     if (elementData.id.startsWith('http')) {
@@ -498,6 +530,12 @@ function findElementByData(elementData) {
     if (idElement) return idElement;
     
     return null;
+}
+
+function extractVideoId(url) {
+    // Extract video ID from YouTube URL for better matching
+    const match = url.match(/(?:shorts\/|watch\?v=)([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
 }
 
 function applyCheckmarkStyles(checkmark, targetElement) {
