@@ -1,0 +1,82 @@
+{
+    "script_shortcuts": [
+        {
+            "name": "Script: ^+p",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^+p",
+            "action": "Pause    ; Pause script with Ctrl+Alt+P"
+        },
+        {
+            "name": "Script: ^+s",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^+s",
+            "action": "Suspend  ; Suspend script with Ctrl+Alt+S"
+        },
+        {
+            "name": "Script: ^+r",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^+r",
+            "action": "Reload   ; Reload script with Ctrl+Alt+R"
+        },
+        {
+            "name": "Script: ^Tab",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^Tab",
+            "action": "switchToLastTab()"
+        },
+        {
+            "name": "Script: ^!t",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^!t",
+            "action": "Toggle_Reset_Workspace() ; Define the shortcut outside"
+        },
+        {
+            "name": "Script: !v",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "!v",
+            "action": "Center_Focused_Window_modLDplayer() ; Define the shortcut outside"
+        },
+        {
+            "name": "Script: ^!v",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^!v",
+            "action": "ShowWindowPositionUnderMouse()"
+        },
+        {
+            "name": "Script: ~RButton",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "~RButton",
+            "action": ""
+        },
+        {
+            "name": "Script: ^+y",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^+y",
+            "action": "    ; Copy selected text\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    ClipWait(1)\n    if !A_Clipboard {\n        MsgBox \"Clipboard is empty or no text was selected.\"\n        return\n    }\n    ; Normalize clipboard content\n    raw := A_Clipboard\n    lines := []\n    maxLen := 0\n    for line in StrSplit(raw, \"`n\", \"`r\") {\n        cleanLine := StrReplace(line, \"`t\", \"    \")  ; Replace tabs with 4 spaces\n        cleanLine := Trim(cleanLine)\n        lines.Push(cleanLine)\n        if (StrLen(cleanLine) > maxLen)\n            maxLen := StrLen(cleanLine)\n    }\n    ; Build box border\n    border := \"#\" . StrRepeat(\"#\", maxLen + 1) . \"!\"\n    ; Format box\n    output := border . \"`r`n\"\n    for line in lines {\n        padding := StrRepeat(\" \", maxLen + 1 - StrLen(line))\n        output .= line . padding . \"#!\" . \"`r`n\"\n    }\n    output .= border\n    ; Paste result\n    A_Clipboard := output\n    Sleep(50)\n    Send(\"^v\")"
+        },
+        {
+            "name": "Script: ^+b",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^+b",
+            "action": "    ; Copy selected text\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    ClipWait(1)\n    if !A_Clipboard {\n        MsgBox \"Nothing selected!\"\n        return\n    }\n\n    ; Split into lines and normalize tabs → spaces\n    rawLines := StrSplit(A_Clipboard, \"`n\", \"`r\")\n    maxLen := 0\n\n    for i, line in rawLines {\n        clean := StrReplace(line, \"`t\", \"    \")\n        rawLines[i] := clean\n        if (StrLen(clean) > maxLen)\n            maxLen := StrLen(clean)\n    }\n\n    ; Build top/bottom border (one extra “#” for padding)\n    border := \";!\" . StrRepeatf(\"#\", maxLen + 1) . \"#\"\n\n    ; Assemble boxed output\n    output := border . \"`r`n\"\n    for line in rawLines {\n        padding := StrRepeatf(\" \", maxLen + 1 - StrLen(line))\n        output .= line . padding . \";!#\" . \"`r`n\"\n    }\n    output .= border\n\n    ; Replace selection with box\n    A_Clipboard := output\n    Sleep 50\n    Send(\"^v\")"
+        },
+        {
+            "name": "Script: ^!z",
+            "category": "Imported",
+            "description": "Imported from AHK script",
+            "hotkey": "^!z",
+            "action": "    SendText(\"❓\")\n    Sleep(100)\n    send(\"^!{Numpad2}\")\n    Sleep(100)\n    SendText(\" ➔ \")\n    Sleep(100)\n    send(\"^!{Numpad1}\")\n    Sleep(100)\n    ; SendText(\",\")\n    Sleep(100)\n    Send(\"{Enter}\")"
+        }
+    ],
+    "text_shortcuts": []
+}

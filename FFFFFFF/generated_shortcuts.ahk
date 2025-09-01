@@ -174,6 +174,121 @@ RAlt & -:: {
 ;! Open w VScode
 ^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
 
+;! Center Apps Window
+LAlt & c:: {
+    Center_Focused_Window()
+    Center_Focused_Window() {
+        ; Get the handle of the active (focused) window
+        hwnd := WinGetID("A")
+        ; Get the position and size of the active window
+        WinGetPos(&x, &y, &w, &h, "ahk_id " hwnd)
+        ; Get the screen width and height
+        ScreenWidth := SysGet(78)
+        ScreenHeight := SysGet(79)
+        ; Calculate new position to center the window
+        newX := (ScreenWidth - w) / 2
+        newY := (ScreenHeight - h) / 2
+        ; Move the window to the calculated position
+        WinMove(newX, newY, , , "ahk_id " hwnd)
+    }
+}
+
+;! Black Screen
+^!b:: {
+    Toggle_Screen_Blackout()
+    ; Define a variable to track the state of the screen blackout
+    Toggle_Screen_Blackout() {
+    blackoutState := 0
+    ; Define a global variable to store the Gui object
+    myGui := ""
+    ; Define a function to toggle the screen blackout
+        global blackoutState, myGui  ; Declare the variables as global so they can be accessed inside the function
+        if (blackoutState = 0) {
+            ; If the screen is not blacked out, create a black fullscreen window
+            blackoutState := 1
+            ; Create the black window to cover the entire screen
+            myGui := Gui()
+            myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
+            myGui.BackColor := "Black"
+            myGui.Show("w" . A_ScreenWidth . " h" . A_ScreenHeight . " x0 y0 NoActivate")
+        } else {
+            ; If the screen is already blacked out, close the window
+            blackoutState := 0
+            myGui.Destroy()
+            myGui := ""  ; Clear the myGui object
+        }
+    }
+}
+
+;! White Screen
+^!w:: {
+    Toggle_Screen_Whiteout()
+    ; Define a variable to track the state of the screen blackout
+    Toggle_Screen_Whiteout() {
+    whiteState := 0
+    ; Define a global variable to store the Gui object
+    myGui := ""
+    ; Define a function to toggle the screen blackout
+        global whiteState, myGui  ; Declare the variables as global so they can be accessed inside the function
+        if (whiteState = 0) {
+            ; If the screen is not blacked out, create a black fullscreen window
+            whiteState := 1
+            ; Create the black window to cover the entire screen
+            myGui := Gui()
+            myGui.Opt("+LastFound +AlwaysOnTop -Caption +ToolWindow") ; Remove caption and border
+            myGui.BackColor := "ffffff"
+            myGui.Show("w" . A_ScreenWidth . " h" . A_ScreenHeight . " x0 y0 NoActivate")
+        } else {
+            ; If the screen is already blacked out, close the window
+            whiteState := 0
+            myGui.Destroy()
+            myGui := ""  ; Clear the myGui object
+        }
+    }
+}
+
+;! Execute Script W/O Closing
+^!+Enter:: {
+    {
+        ClipSaved := ClipboardAll()
+        A_Clipboard := ""               ; Clear clipboard
+        ; Get the active window title
+        ActiveTitle := WinGetTitle("A")
+        ; If the active window is VSCode, simulate the shortcut to copy the file path
+        if InStr(ActiveTitle, "Visual Studio Code") {
+            ; Simulate VSCode's shortcut to copy the current file path (Shift + Alt + C)
+            Send("+!c")
+            Errorlevel := !ClipWait(1)               ; Wait until clipboard has content
+        } else {
+            ; Send Ctrl+C to copy the selected file path in other environments
+            Send("^c")
+            Errorlevel := !ClipWait(1)               ; Wait until clipboard has content
+        }
+        if (A_Clipboard != "") {
+            ; Get the selected file path from the clipboard
+            FilePath := A_Clipboard
+            Ext := SubStr(FilePath, (InStr(FilePath, ".", 0, -1) + 1)<1 ? (InStr(FilePath, ".", 0, -1) + 1)-1 : (InStr(FilePath, ".", 0, -1) + 1))
+            ; Check the extension and run the appropriate command
+            if (Ext = "py") {
+                Run("cmd /k python `"" FilePath "`"", , , &PID)
+            } else if (Ext = "ps1") {
+                Run("cmd /k powershell -ExecutionPolicy Bypass -File `"" FilePath "`"", , , &PID)
+            } else if (Ext = "bat") {
+                Run("cmd /k `"" FilePath "`"", , , &PID)
+            } else if (Ext = "ahk") {
+                Run("cmd /k `"" FilePath "`"", , , &PID)
+            } else {
+                MsgBox("Unsupported file type: " Ext)
+            }
+        } else {
+            MsgBox("No file path selected or copied.")
+        }
+        ; Restore original clipboard content
+        A_Clipboard := ClipSaved
+        return
+    }
+}
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement

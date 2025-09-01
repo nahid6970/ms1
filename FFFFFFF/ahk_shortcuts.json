@@ -132,6 +132,34 @@
             "description": "",
             "hotkey": "^!n",
             "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version1\\VScode_OpenWith.ahk\", \"\", \"Hide\")"
+        },
+        {
+            "name": "Center Apps Window",
+            "category": "Display",
+            "description": "",
+            "hotkey": "LAlt & c",
+            "action": "Center_Focused_Window()\nCenter_Focused_Window() {\n    ; Get the handle of the active (focused) window\n    hwnd := WinGetID(\"A\")\n    ; Get the position and size of the active window\n    WinGetPos(&x, &y, &w, &h, \"ahk_id \" hwnd)\n    ; Get the screen width and height\n    ScreenWidth := SysGet(78)\n    ScreenHeight := SysGet(79)\n    ; Calculate new position to center the window\n    newX := (ScreenWidth - w) / 2\n    newY := (ScreenHeight - h) / 2\n    ; Move the window to the calculated position\n    WinMove(newX, newY, , , \"ahk_id \" hwnd)\n}"
+        },
+        {
+            "name": "Black Screen",
+            "category": "Display",
+            "description": "",
+            "hotkey": "^!b",
+            "action": "Toggle_Screen_Blackout()\n; Define a variable to track the state of the screen blackout\nToggle_Screen_Blackout() {\nblackoutState := 0\n; Define a global variable to store the Gui object\nmyGui := \"\"\n; Define a function to toggle the screen blackout\n    global blackoutState, myGui  ; Declare the variables as global so they can be accessed inside the function\n    if (blackoutState = 0) {\n        ; If the screen is not blacked out, create a black fullscreen window\n        blackoutState := 1\n        ; Create the black window to cover the entire screen\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\") ; Remove caption and border\n        myGui.BackColor := \"Black\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        ; If the screen is already blacked out, close the window\n        blackoutState := 0\n        myGui.Destroy()\n        myGui := \"\"  ; Clear the myGui object\n    }\n}"
+        },
+        {
+            "name": "White Screen",
+            "category": "Display",
+            "description": "",
+            "hotkey": "^!w",
+            "action": "Toggle_Screen_Whiteout()\n; Define a variable to track the state of the screen blackout\nToggle_Screen_Whiteout() {\nwhiteState := 0\n; Define a global variable to store the Gui object\nmyGui := \"\"\n; Define a function to toggle the screen blackout\n    global whiteState, myGui  ; Declare the variables as global so they can be accessed inside the function\n    if (whiteState = 0) {\n        ; If the screen is not blacked out, create a black fullscreen window\n        whiteState := 1\n        ; Create the black window to cover the entire screen\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\") ; Remove caption and border\n        myGui.BackColor := \"ffffff\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        ; If the screen is already blacked out, close the window\n        whiteState := 0\n        myGui.Destroy()\n        myGui := \"\"  ; Clear the myGui object\n    }\n}"
+        },
+        {
+            "name": "Execute Script W/O Closing",
+            "category": "General",
+            "description": "",
+            "hotkey": "^!+Enter",
+            "action": "{\n    ClipSaved := ClipboardAll()\n    A_Clipboard := \"\"               ; Clear clipboard\n    ; Get the active window title\n    ActiveTitle := WinGetTitle(\"A\")\n    ; If the active window is VSCode, simulate the shortcut to copy the file path\n    if InStr(ActiveTitle, \"Visual Studio Code\") {\n        ; Simulate VSCode's shortcut to copy the current file path (Shift + Alt + C)\n        Send(\"+!c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    } else {\n        ; Send Ctrl+C to copy the selected file path in other environments\n        Send(\"^c\")\n        Errorlevel := !ClipWait(1)               ; Wait until clipboard has content\n    }\n    if (A_Clipboard != \"\") {\n        ; Get the selected file path from the clipboard\n        FilePath := A_Clipboard\n        Ext := SubStr(FilePath, (InStr(FilePath, \".\", 0, -1) + 1)<1 ? (InStr(FilePath, \".\", 0, -1) + 1)-1 : (InStr(FilePath, \".\", 0, -1) + 1))\n        ; Check the extension and run the appropriate command\n        if (Ext = \"py\") {\n            Run(\"cmd /k python `\"\" FilePath \"`\"\", , , &PID)\n        } else if (Ext = \"ps1\") {\n            Run(\"cmd /k powershell -ExecutionPolicy Bypass -File `\"\" FilePath \"`\"\", , , &PID)\n        } else if (Ext = \"bat\") {\n            Run(\"cmd /k `\"\" FilePath \"`\"\", , , &PID)\n        } else if (Ext = \"ahk\") {\n            Run(\"cmd /k `\"\" FilePath \"`\"\", , , &PID)\n        } else {\n            MsgBox(\"Unsupported file type: \" Ext)\n        }\n    } else {\n        MsgBox(\"No file path selected or copied.\")\n    }\n    ; Restore original clipboard content\n    A_Clipboard := ClipSaved\n    return\n}"
         }
     ],
     "text_shortcuts": [
