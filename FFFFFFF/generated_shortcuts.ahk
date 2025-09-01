@@ -104,8 +104,9 @@ RAlt & Numpad3::Run("C:\Users\nahid\ms\msBackups\Display\DisplaySwitch.exe /exte
 ::;--::➔
 
 ;! Writers list of writings
-::;list::X
+::;list::x
 (
+
 কাব্যগ্রন্থ/গদ্যকাব্য:
 কবিতা:
 উপন্যাস:
