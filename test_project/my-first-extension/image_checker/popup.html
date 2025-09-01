@@ -35,10 +35,15 @@
             background: #ff4444;
         }
 
-        .clear-btn {
-            width: 100%;
+        .button-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .half-btn {
+            flex: 1;
             padding: 10px;
-            background: #f44336;
             color: white;
             border: none;
             border-radius: 5px;
@@ -46,8 +51,28 @@
             font-size: 14px;
         }
 
+        .clear-btn {
+            background: #f44336;
+        }
+
         .clear-btn:hover {
             background: #da190b;
+        }
+
+        .export-btn {
+            background: #2196F3;
+        }
+
+        .export-btn:hover {
+            background: #1976D2;
+        }
+
+        .import-btn {
+            background: #FF9800;
+        }
+
+        .import-btn:hover {
+            background: #F57C00;
         }
 
         .status {
@@ -63,21 +88,29 @@
         <h3>Image Checker</h3>
     </div>
 
-    <button id="toggleMode" class="toggle-btn">
-        Start Checking Mode
-    </button>
-
     <div id="status" class="status">
         Click to activate image checking
     </div>
 
-    <button id="clearAll" class="clear-btn">
-        Clear All Checkmarks
-    </button>
+    <div class="button-row">
+        <button id="toggleMode" class="half-btn clear-btn">
+            Start Mode
+        </button>
+        <button id="clearAll" class="half-btn clear-btn">
+            Clear All
+        </button>
+    </div>
 
-    <button id="exportData" class="clear-btn" style="background: #2196F3; margin-top: 5px;">
-        Export Saved Data
-    </button>
+    <div class="button-row">
+        <button id="exportData" class="half-btn export-btn">
+            Export Data
+        </button>
+        <button id="importData" class="half-btn import-btn">
+            Import Data
+        </button>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
 
     <script src="popup.js"></script>
 </body>
