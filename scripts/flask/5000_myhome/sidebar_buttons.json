@@ -18,6 +18,8 @@
   },
   {
     "bg_color": "white",
+    "border_color": "#cccccc",
+    "border_radius": "50%",
     "display_type": "image",
     "font_size": "16px",
     "has_notification": true,
@@ -29,9 +31,7 @@
     "name": "Movies",
     "notification_api": "/api/movie-notifications",
     "text_color": "white",
-    "url": "http://192.168.0.101:5013/",
-    "border_color": "#cccccc",
-    "border_radius": "4px"
+    "url": "http://192.168.0.101:5013/"
   },
   {
     "bg_color": "transparent",
