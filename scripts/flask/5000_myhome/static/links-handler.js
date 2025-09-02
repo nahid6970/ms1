@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  function createRegularGroup(groupName, elements, linksInGroup) {
+    function createRegularGroup(groupName, elements, linksInGroup) {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'link-group';
     groupDiv.dataset.groupName = groupName;
@@ -641,6 +641,15 @@ document.addEventListener('DOMContentLoaded', function () {
     groupTitle.textContent = groupName;
     groupTitle.className = 'group-title';
     groupHeaderContainer.appendChild(groupTitle);
+
+    const isPasswordProtected = firstLinkInGroup.link.password_protect;
+
+    if (isPasswordProtected) {
+      const lockIcon = document.createElement('span');
+      lockIcon.className = 'lock-icon';
+      lockIcon.innerHTML = '<i class="nf nf-fa-lock"></i>';
+      groupTitle.appendChild(lockIcon);
+    }
 
     // Add group reorder buttons
     const groupReorderButtons = document.createElement('div');
