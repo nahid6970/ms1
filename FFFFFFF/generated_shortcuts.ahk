@@ -400,3 +400,6 @@ LAlt & c:: {
 
 ;! Star
 ::;star::
+
+;! Db path
+::;db::C:\Users\nahid\ms\db

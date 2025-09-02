@@ -131,9 +131,10 @@ function disableImageChecking() {
 function addImageClickListeners() {
     // Add click listeners to all images, videos, thumbnails, and clickable containers
     const selectors = [
-        'img', 
-        'video', 
+        'img',
+        'video',
         '[style*="background-image"]',
+        'a',
         // YouTube specific selectors
         'ytd-rich-grid-media',
         'ytd-video-preview',
@@ -216,6 +217,7 @@ function removeImageClickListeners() {
         'img', 
         'video', 
         '[style*="background-image"]',
+        'a',
         'ytd-rich-grid-media',
         'ytd-video-preview',
         'ytd-thumbnail',
@@ -269,12 +271,8 @@ function addCheckmark(element) {
     checkmark.className = 'image-checker-checkmark';
     checkmark.innerHTML = '✓';
     
-    // Find the best element to position relative to (thumbnail image if available)
+    // The element itself is the target
     let targetElement = element;
-    const thumbnail = element.querySelector('img') || element.querySelector('[style*="background-image"]');
-    if (thumbnail) {
-        targetElement = thumbnail;
-    }
     
     // Apply current settings to checkmark
     applyCheckmarkStyles(checkmark, targetElement);
@@ -296,8 +294,8 @@ function addCheckmark(element) {
     const updatePosition = () => {
         const newRect = targetElement.getBoundingClientRect();
         const size = Math.min(newRect.width, newRect.height) * (currentSettings.checkmarkSize / 100);
-        checkmark.style.left = (newRect.left + newRect.width / 2 - size / 2) + 'px';
-        checkmark.style.top = (newRect.top + newRect.height / 2 - size / 2) + 'px';
+        checkmark.style.left = (newRect.left + window.scrollX + newRect.width / 2 - size / 2) + 'px';
+        checkmark.style.top = (newRect.top + window.scrollY + newRect.height / 2 - size / 2) + 'px';
     };
     
     window.addEventListener('scroll', updatePosition);
@@ -364,25 +362,27 @@ function clearCurrentCheckmarks() {
 }
 
 function getElementData(element) {
-    // Get the link URL for YouTube shorts or videos
     let linkUrl = '';
-    let linkElement = element.closest('a[href*="/shorts/"], a[href*="/watch"]');
+    let elementId = '';
+
+    // Prioritize getting a link URL if the element is a link or inside one
+    const linkElement = element.closest('a');
     if (linkElement) {
         linkUrl = linkElement.href;
     }
-    
-    // Create unique identifier
-    let elementId = '';
-    if (element.id) {
-        elementId = element.id;
+
+    // Create a unique identifier for the element
+    if (linkUrl) {
+        elementId = linkUrl;
     } else if (element.src) {
         elementId = element.src;
-    } else if (linkUrl) {
-        elementId = linkUrl;
+    } else if (element.id) {
+        elementId = element.id;
     } else {
-        elementId = element.outerHTML.substring(0, 100);
+        // Fallback for elements without a clear unique identifier
+        elementId = element.outerHTML.substring(0, 200); // Increased length for more uniqueness
     }
-    
+
     return {
         id: elementId,
         linkUrl: linkUrl,
@@ -542,9 +542,9 @@ function applyCheckmarkStyles(checkmark, targetElement) {
     const rect = targetElement.getBoundingClientRect();
     const size = Math.min(rect.width, rect.height) * (currentSettings.checkmarkSize / 100);
     
-    checkmark.style.position = 'fixed';
-    checkmark.style.left = (rect.left + rect.width / 2 - size / 2) + 'px';
-    checkmark.style.top = (rect.top + rect.height / 2 - size / 2) + 'px';
+    checkmark.style.position = 'absolute';
+    checkmark.style.left = (rect.left + window.scrollX + rect.width / 2 - size / 2) + 'px';
+    checkmark.style.top = (rect.top + window.scrollY + rect.height / 2 - size / 2) + 'px';
     checkmark.style.width = size + 'px';
     checkmark.style.height = size + 'px';
     checkmark.style.background = currentSettings.checkmarkColor;

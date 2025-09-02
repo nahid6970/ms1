@@ -218,6 +218,13 @@
             "description": "",
             "trigger": ";star",
             "replacement": ""
+        },
+        {
+            "name": "Db path",
+            "category": "Path",
+            "description": "",
+            "trigger": ";db",
+            "replacement": "C:\\Users\\nahid\\ms\\db"
         }
     ]
 }
