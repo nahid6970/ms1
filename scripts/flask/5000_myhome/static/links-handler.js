@@ -1055,10 +1055,7 @@ document.addEventListener('DOMContentLoaded', function () {
           // Re-open the horizontal stack popup if it was open
           const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
           if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
-            const icon = groupDiv.querySelector('.extend-icon');
-            if (icon) {
-              icon.click();
-            }
+            groupDiv.click();
           }
         } else {
           alert('Failed to add link.');
@@ -1169,10 +1166,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (originalLink.horizontal_stack) {
               const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
               if (groupDiv) {
-                const icon = groupDiv.querySelector('.extend-icon');
-                if (icon) {
-                  icon.click();
-                }
+                groupDiv.click();
               }
             }
 
@@ -1262,10 +1256,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
           const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
           if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
-            const icon = groupDiv.querySelector('.extend-icon');
-            if (icon) {
-              icon.click();
-            }
+            groupDiv.click();
           }
         } else {
           alert('Failed to delete link.');
@@ -1347,14 +1338,14 @@ document.addEventListener('DOMContentLoaded', function () {
     return false;
   }
 
-  function handleDrop(e) {
+  async function handleDrop(e) {
     if (e.stopPropagation) {
       e.stopPropagation();
     }
 
     if (draggedElement !== this) {
       const targetIndex = parseInt(this.dataset.linkIndex);
-      reorderLink(draggedIndex, targetIndex);
+      await reorderLink(draggedIndex, targetIndex);
     }
     return false;
   }
@@ -1512,10 +1503,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Re-open the popup if it was open
       const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
       if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
-        const icon = groupDiv.querySelector('.extend-icon');
-        if (icon) {
-          icon.click();
-        }
+        groupDiv.click();
       }
 
     } catch (error) {
