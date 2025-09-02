@@ -86,7 +86,6 @@ chrome.runtime.onMessage.addListener((message) => {
         clearAllCheckmarks();
     } else if (message.action === 'updateSettings') {
         currentSettings = message.settings;
-        updateExistingCheckmarks();
     }
 });
 
@@ -257,13 +256,13 @@ function handleImageClick(event) {
         removeFromStorage(elementData);
     } else {
         // Add checkmark
-        addCheckmark(element);
+        addCheckmark(element, currentSettings);
         checkedImages.add(elementData.id);
         saveToStorage(elementData);
     }
 }
 
-function addCheckmark(element) {
+function addCheckmark(element, settings) {
     // Remove existing checkmark if any
     removeCheckmark(element);
     
@@ -274,12 +273,14 @@ function addCheckmark(element) {
     // The element itself is the target
     let targetElement = element;
     
+    const checkmarkSettings = settings || currentSettings;
+
     // Apply current settings to checkmark
-    applyCheckmarkStyles(checkmark, targetElement);
+    applyCheckmarkStyles(checkmark, targetElement, checkmarkSettings);
     
     // Apply border if enabled
-    if (currentSettings.enableBorder) {
-        targetElement.style.border = `${currentSettings.borderWidth}px solid ${currentSettings.borderColor}`;
+    if (checkmarkSettings.enableBorder) {
+        targetElement.style.border = `${checkmarkSettings.borderWidth}px solid ${checkmarkSettings.borderColor}`;
         targetElement.style.borderRadius = '4px';
     }
     
@@ -293,7 +294,7 @@ function addCheckmark(element) {
     // Update position on scroll
     const updatePosition = () => {
         const newRect = targetElement.getBoundingClientRect();
-        const size = Math.min(newRect.width, newRect.height) * (currentSettings.checkmarkSize / 100);
+        const size = Math.min(newRect.width, newRect.height) * (checkmarkSettings.checkmarkSize / 100);
         checkmark.style.left = (newRect.left + window.scrollX + newRect.width / 2 - size / 2) + 'px';
         checkmark.style.top = (newRect.top + window.scrollY + newRect.height / 2 - size / 2) + 'px';
     };
@@ -307,6 +308,7 @@ function addCheckmark(element) {
         window.removeEventListener('resize', updatePosition);
     };
     checkmark.targetElement = targetElement;
+    checkmark.settings = checkmarkSettings;
 }
 
 function removeCheckmark(element) {
@@ -424,6 +426,7 @@ function showNotification(message) {
 
 // Storage functions
 function saveToStorage(elementData) {
+    elementData.settings = currentSettings; // Add settings immediately
     chrome.storage.local.get(['checkedElements'], function(result) {
         const checkedElements = result.checkedElements || {};
         
@@ -431,7 +434,7 @@ function saveToStorage(elementData) {
         if (!checkedElements[pageUrl]) {
             checkedElements[pageUrl] = [];
         }
-        
+
         // Check if element already exists
         const existingIndex = checkedElements[pageUrl].findIndex(item => item.id === elementData.id);
         if (existingIndex === -1) {
@@ -477,7 +480,7 @@ function loadSavedCheckmarks() {
             pageElements.forEach(elementData => {
                 const element = findElementByData(elementData);
                 if (element) {
-                    addCheckmark(element);
+                    addCheckmark(element, elementData.settings);
                     checkedImages.add(elementData.id);
                 }
             });
@@ -495,11 +498,11 @@ function checkForSavedCheckmark(element) {
         const elementData = getElementData(element);
         
         // Check if this element is in our saved list
-        const isMarked = pageElements.some(saved => saved.id === elementData.id);
+        const savedElementData = pageElements.find(saved => saved.id === elementData.id);
         
-        if (isMarked && !element.getAttribute('data-checkmark-id')) {
+        if (savedElementData && !element.getAttribute('data-checkmark-id')) {
             // Element should be marked but isn't yet
-            addCheckmark(element);
+            addCheckmark(element, savedElementData.settings);
             checkedImages.add(elementData.id);
         }
     });
@@ -538,17 +541,18 @@ function extractVideoId(url) {
     return match ? match[1] : null;
 }
 
-function applyCheckmarkStyles(checkmark, targetElement) {
+function applyCheckmarkStyles(checkmark, targetElement, settings) {
     const rect = targetElement.getBoundingClientRect();
-    const size = Math.min(rect.width, rect.height) * (currentSettings.checkmarkSize / 100);
+    const checkmarkSettings = settings || currentSettings;
+    const size = Math.min(rect.width, rect.height) * (checkmarkSettings.checkmarkSize / 100);
     
     checkmark.style.position = 'absolute';
     checkmark.style.left = (rect.left + window.scrollX + rect.width / 2 - size / 2) + 'px';
     checkmark.style.top = (rect.top + window.scrollY + rect.height / 2 - size / 2) + 'px';
     checkmark.style.width = size + 'px';
     checkmark.style.height = size + 'px';
-    checkmark.style.background = currentSettings.checkmarkColor;
-    checkmark.style.color = currentSettings.textColor;
+    checkmark.style.background = checkmarkSettings.checkmarkColor;
+    checkmark.style.color = checkmarkSettings.textColor;
     checkmark.style.fontSize = (size * 0.6) + 'px';
     checkmark.style.zIndex = '10000';
     checkmark.style.borderRadius = '50%';
@@ -568,20 +572,3 @@ function loadSettings() {
     });
 }
 
-function updateExistingCheckmarks() {
-    const checkmarks = document.querySelectorAll('.image-checker-checkmark');
-    checkmarks.forEach(checkmark => {
-        if (checkmark.targetElement) {
-            applyCheckmarkStyles(checkmark, checkmark.targetElement);
-            
-            // Update border
-            if (currentSettings.enableBorder) {
-                checkmark.targetElement.style.border = `${currentSettings.borderWidth}px solid ${currentSettings.borderColor}`;
-                checkmark.targetElement.style.borderRadius = '4px';
-            } else {
-                checkmark.targetElement.style.border = '';
-                checkmark.targetElement.style.borderRadius = '';
-            }
-        }
-    });
-}
