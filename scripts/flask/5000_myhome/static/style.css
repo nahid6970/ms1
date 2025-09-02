@@ -981,28 +981,11 @@ div.toggle-container {
   align-items: center;
 }
 
-.horizontal-stack .link-item:not(:first-child):not(.add-link-item) {
-  display: none;
-}
-
-.extend-icon {
-  cursor: pointer;
-  padding: 5px;
-  display: inline-block;
-  font-weight: bold;
-  border: 1px rgb(193, 214, 182) solid;
-  border-radius: 15px;
-  align-self: center;
-  text-align: center;
-  width: 100%;
-}
-
-.extend-icon:hover {
-  background-color: #474747;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px rgb(255, 118, 83) solid;
+.horizontal-stack .group-header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .lock-icon {

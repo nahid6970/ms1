@@ -558,65 +558,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (linkData.horizontal_hover_color) {
         groupDiv.style.setProperty('--horizontal-hover-color', linkData.horizontal_hover_color);
       }
-    }
 
-    const groupHeaderContainer = document.createElement('div');
-    groupHeaderContainer.className = 'group-header-container';
-
-    const groupTitle = document.createElement('h3');
-    groupTitle.textContent = groupName;
-    groupTitle.className = 'group-title';
-    groupHeaderContainer.appendChild(groupTitle);
-
-    // Add group reorder buttons
-    const groupReorderButtons = document.createElement('div');
-    groupReorderButtons.className = 'group-reorder-buttons';
-
-    const groupUpButton = document.createElement('button');
-    groupUpButton.textContent = ''; //↑
-    groupUpButton.className = 'reorder-btn';
-    groupUpButton.onclick = (e) => {
-      e.stopPropagation();
-      moveGroup(groupName, -1);
-    };
-    groupReorderButtons.appendChild(groupUpButton);
-
-    const groupDownButton = document.createElement('button');
-    groupDownButton.textContent = ''; //↓
-    groupDownButton.className = 'reorder-btn';
-    groupDownButton.onclick = (e) => {
-      e.stopPropagation();
-      moveGroup(groupName, 1);
-    };
-    groupReorderButtons.appendChild(groupDownButton);
-
-    groupHeaderContainer.appendChild(groupReorderButtons);
-
-    // Add edit group button (only visible in edit mode)
-    const editGroupButton = document.createElement('button');
-    editGroupButton.textContent = ''; //⚙️
-    editGroupButton.className = 'edit-group-button';
-    editGroupButton.onclick = () => openEditGroupPopup(groupName);
-    groupHeaderContainer.appendChild(editGroupButton);
-
-    groupDiv.appendChild(groupHeaderContainer);
-
-    if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
-      const icon = document.createElement('div');
-      icon.className = 'extend-icon';
-      icon.innerHTML = '<i class="nf nf-md-google_circles_extended"></i>'; // Or use an icon font
-      icon.draggable = false;
-
-      const isPasswordProtected = firstLinkInGroup.link.password_protect;
-
-      if (isPasswordProtected) {
-        const lockIcon = document.createElement('span');
-        lockIcon.className = 'lock-icon';
-        lockIcon.innerHTML = '<i class="nf nf-fa-lock"></i>';
-        groupTitle.appendChild(lockIcon);
-      }
-
-      icon.onclick = () => {
+      groupDiv.onclick = () => {
+        const isPasswordProtected = firstLinkInGroup.link.password_protect;
         if (isPasswordProtected) {
           const password = prompt("Please enter the password to extend the group:");
           if (password !== "1823") {
@@ -688,8 +632,50 @@ document.addEventListener('DOMContentLoaded', function () {
         popup.classList.remove('hidden');
         applyPopupStyling(groupName);
       };
-      groupDiv.appendChild(icon);
-    } else {
+    }
+
+    const groupHeaderContainer = document.createElement('div');
+    groupHeaderContainer.className = 'group-header-container';
+
+    const groupTitle = document.createElement('h3');
+    groupTitle.textContent = groupName;
+    groupTitle.className = 'group-title';
+    groupHeaderContainer.appendChild(groupTitle);
+
+    // Add group reorder buttons
+    const groupReorderButtons = document.createElement('div');
+    groupReorderButtons.className = 'group-reorder-buttons';
+
+    const groupUpButton = document.createElement('button');
+    groupUpButton.textContent = ''; //↑
+    groupUpButton.className = 'reorder-btn';
+    groupUpButton.onclick = (e) => {
+      e.stopPropagation();
+      moveGroup(groupName, -1);
+    };
+    groupReorderButtons.appendChild(groupUpButton);
+
+    const groupDownButton = document.createElement('button');
+    groupDownButton.textContent = ''; //↓
+    groupDownButton.className = 'reorder-btn';
+    groupDownButton.onclick = (e) => {
+      e.stopPropagation();
+      moveGroup(groupName, 1);
+    };
+    groupReorderButtons.appendChild(groupDownButton);
+
+    groupHeaderContainer.appendChild(groupReorderButtons);
+
+    // Add edit group button (only visible in edit mode)
+    const editGroupButton = document.createElement('button');
+    editGroupButton.textContent = ''; //⚙️
+    editGroupButton.className = 'edit-group-button';
+    editGroupButton.onclick = () => openEditGroupPopup(groupName);
+    groupHeaderContainer.appendChild(editGroupButton);
+
+    groupDiv.appendChild(groupHeaderContainer);
+
+    if (firstLinkInGroup && !firstLinkInGroup.link.horizontal_stack) {
       const groupList = document.createElement('ul');
       groupList.className = 'link-group-content';
       // Set display style based on the first link in the group, or default to flex
