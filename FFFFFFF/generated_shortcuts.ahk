@@ -339,18 +339,16 @@ LAlt & c:: {
             return {type: "line", prefix: "#", border: "#"}
         } else if (InStr(title, ".ps1") || InStr(title, "powershell") || InStr(title, "ise")) {
             return {type: "line", prefix: "#", border: "#"}
-        } else if (InStr(title, ".html") || InStr(title, ".htm") || InStr(title, ".xml")) {
-            return {type: "html", prefix: "<!--", suffix: "-->"}
         } else if (InStr(title, ".css")) {
-            return {type: "block", prefix: "/*", suffix: "*/"}
+            return {type: "line", prefix: "/*", border: "*"}
         } else if (InStr(title, ".js") || InStr(title, ".ts") || InStr(title, ".java") || InStr(title, ".c") || InStr(title, ".cpp")) {
-            return {type: "block", prefix: "/*", suffix: "*/"}
+            return {type: "line", prefix: "//", border: "/"}
         } else if (InStr(title, ".ahk") || InStr(title, "autohotkey")) {
             return {type: "line", prefix: ";", border: "#"}
         } else if (InStr(title, ".bat") || InStr(title, ".cmd")) {
             return {type: "line", prefix: "REM", border: "="}
         } else {
-            ; Default fallback - could add input box here to ask user
+            ; Default fallback
             return {type: "line", prefix: "#", border: "#"}
         }
     }
