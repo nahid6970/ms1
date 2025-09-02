@@ -225,6 +225,13 @@
             "description": "",
             "trigger": ";db",
             "replacement": "C:\\Users\\nahid\\ms\\db"
+        },
+        {
+            "name": "Changes for Ai to know that i made on my files",
+            "category": "General",
+            "description": "",
+            "trigger": ";change",
+            "replacement": "ok i have made some changes from last time  so keep that in mind now"
         }
     ]
 }
