@@ -316,12 +316,12 @@ LAlt & c:: {
         }
         ; Build borders (only borders are commented, content stays as-is)
         borderChar := commentStyle.border
-        topBorder := commentStyle.prefix . " " . StrRepeat(borderChar, maxLen + 4)
+        topBorder := commentStyle.prefix . " " . StrRepeat(borderChar, maxLen + 3)
         bottomBorder := topBorder
         ; Assemble output: commented borders + content with commented side borders
         output := topBorder . "`r`n"
         for line in rawLines {
-            ; Add commented vertical border on right side
+            ; Calculate padding to align vertical border with horizontal border end
             padding := StrRepeat(" ", maxLen + 4 - StrLen(line))
             output .= line . padding . commentStyle.prefix . "`r`n"
         }
