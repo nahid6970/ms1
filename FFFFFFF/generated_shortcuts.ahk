@@ -168,7 +168,7 @@ RAlt & -:: {
     }
 }
 
-;! send_to_2nd
+;! Send Apps to 2nd Display
 !1::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
 
 ;! Open w VScode
@@ -286,6 +286,79 @@ LAlt & c:: {
         ; Restore original clipboard content
         A_Clipboard := ClipSaved
         return
+    }
+}
+
+;! Border
+^+b:: {
+    AddSmartBorder()
+    AddSmartBorder()
+    {
+        ; Copy selected text
+        A_Clipboard := ""
+        Send("^c")
+        ClipWait(1)
+        if !A_Clipboard {
+            MsgBox "Nothing selected!"
+            return
+        }
+        ; Detect language/file type from window title
+        activeTitle := WinGetTitle("A")
+        commentStyle := DetectCommentStyle(activeTitle)
+        ; Split into lines and normalize tabs → spaces
+        rawLines := StrSplit(A_Clipboard, "`n", "`r")
+        maxLen := 0
+        for i, line in rawLines {
+            clean := StrReplace(line, "`t", "    ")
+            rawLines[i] := clean
+            if (StrLen(clean) > maxLen)
+                maxLen := StrLen(clean)
+        }
+        ; Build borders (only borders are commented, content stays as-is)
+        borderChar := commentStyle.border
+        topBorder := commentStyle.prefix . " " . StrRepeat(borderChar, maxLen + 4)
+        bottomBorder := topBorder
+        ; Assemble output: commented borders + content with commented side borders
+        output := topBorder . "`r`n"
+        for line in rawLines {
+            ; Add commented vertical border on right side
+            padding := StrRepeat(" ", maxLen + 4 - StrLen(line))
+            output .= line . padding . commentStyle.prefix . "`r`n"
+        }
+        output .= bottomBorder
+        ; Replace selection with bordered text
+        A_Clipboard := output
+        Sleep 50
+        Send("^v")
+    }
+    DetectCommentStyle(windowTitle) {
+        ; Convert to lowercase for easier matching
+        title := StrLower(windowTitle)
+        ; Detect based on file extension or application
+        if (InStr(title, ".py") || InStr(title, "python") || InStr(title, "pycharm")) {
+            return {type: "line", prefix: "#", border: "#"}
+        } else if (InStr(title, ".ps1") || InStr(title, "powershell") || InStr(title, "ise")) {
+            return {type: "line", prefix: "#", border: "#"}
+        } else if (InStr(title, ".html") || InStr(title, ".htm") || InStr(title, ".xml")) {
+            return {type: "html", prefix: "<!--", suffix: "-->"}
+        } else if (InStr(title, ".css")) {
+            return {type: "block", prefix: "/*", suffix: "*/"}
+        } else if (InStr(title, ".js") || InStr(title, ".ts") || InStr(title, ".java") || InStr(title, ".c") || InStr(title, ".cpp")) {
+            return {type: "block", prefix: "/*", suffix: "*/"}
+        } else if (InStr(title, ".ahk") || InStr(title, "autohotkey")) {
+            return {type: "line", prefix: ";", border: "#"}
+        } else if (InStr(title, ".bat") || InStr(title, ".cmd")) {
+            return {type: "line", prefix: "REM", border: "="}
+        } else {
+            ; Default fallback - could add input box here to ask user
+            return {type: "line", prefix: "#", border: "#"}
+        }
+    }
+    StrRepeat(char, count) {
+        result := ""
+        Loop count
+            result .= char
+        return result
     }
 }
 
