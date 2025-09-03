@@ -3,6 +3,8 @@ import json
 from datetime import datetime
 from flask import Flask, request, render_template, send_file, redirect, url_for, flash, Response
 from flask import jsonify
+import zipfile
+import io
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -428,6 +430,27 @@ def open_explorer():
         return jsonify({"success": "Directory opened in Explorer"}), 200
     except Exception as e:
         return jsonify({"error": f"Error opening Explorer: {e}"}), 500
+
+@app.route('/download_directory')
+def download_directory():
+    dir_path = request.args.get('dir_path')
+    if not dir_path or not os.path.isdir(dir_path):
+        flash('Invalid directory path.')
+        return redirect(url_for('index'))
+
+    # Create a memory file for the zip archive
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for root, _, files in os.walk(dir_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, dir_path)
+                zf.write(file_path, arcname)
+
+    memory_file.seek(0)
+    return send_file(memory_file,
+                     download_name=f'{os.path.basename(dir_path)}.zip',
+                     as_attachment=True)
 
 
 if __name__ == "__main__":
