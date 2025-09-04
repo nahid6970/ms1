@@ -1,3 +1,4 @@
+import tkinter as tk
 import customtkinter as ctk
 from tkinter import messagebox, filedialog
 import json
@@ -230,6 +231,7 @@ class AHKShortcutEditor(ctk.CTk):
         self.other_content = []  # Store non-shortcut content
         self.script_widgets = {}
         self.text_widgets = {}
+        self.show_categories = tk.BooleanVar(value=True)
         
         self.load_shortcuts_json()
         self.create_widgets()
@@ -246,10 +248,13 @@ class AHKShortcutEditor(ctk.CTk):
         # Search Bar
         self.search_frame = ctk.CTkFrame(self)
         self.search_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
-        self.search_frame.grid_columnconfigure(0, weight=1)
+        self.search_frame.grid_columnconfigure(1, weight=1)
+
+        self.settings_button = ctk.CTkButton(self.search_frame, text="⚙", width=30, command=self.toggle_categories)
+        self.settings_button.grid(row=0, column=0, padx=5, pady=5)
         
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search shortcuts...", font=self.app_font)
-        self.search_entry.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+        self.search_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
         self.search_entry.bind("<KeyRelease>", self.filter_list_displays)
 
         # Script Shortcuts Section (Left)
@@ -316,6 +321,7 @@ class AHKShortcutEditor(ctk.CTk):
                     data = json.load(f)
                     self.script_shortcuts = data.get("script_shortcuts", [])
                     self.text_shortcuts = data.get("text_shortcuts", [])
+                    self.show_categories.set(data.get("show_categories", True))
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to load shortcuts JSON: {e}")
                 self.create_default_shortcuts()
@@ -471,29 +477,63 @@ class AHKShortcutEditor(ctk.CTk):
             if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('hotkey', '')} {shortcut.get('description', '')} {shortcut.get('category', '')}".lower()
         ]
         
-        # Group by category
-        categories = {}
-        for shortcut in filtered_shortcuts:
-            category = shortcut.get('category', 'General')
-            if category not in categories:
-                categories[category] = []
-            categories[category].append(shortcut)
-        
-        # Sort categories and shortcuts within each category
         row = 0
-        for category in sorted(categories.keys()):
-            # Add category header
-            category_label = ctk.CTkLabel(self.script_scroll_frame, text=f"📁 {category}", 
-                                        anchor="w", font=self.bold_font, 
-                                        text_color=("gray10", "gray90"))
-            category_label.grid(row=row, column=0, padx=5, pady=(10, 2), sticky="ew")
-            self.script_list_items.append(category_label)
-            row += 1
+        if self.show_categories.get():
+            # Group by category
+            categories = {}
+            for shortcut in filtered_shortcuts:
+                category = shortcut.get('category', 'General')
+                if category not in categories:
+                    categories[category] = []
+                categories[category].append(shortcut)
             
-            # Sort shortcuts within category by hotkey
-            category_shortcuts = sorted(categories[category], key=lambda x: x.get('hotkey', '').lower())
-            
-            for shortcut in category_shortcuts:
+            # Sort categories and shortcuts within each category
+            for category in sorted(categories.keys()):
+                # Add category header
+                category_label = ctk.CTkLabel(self.script_scroll_frame, text=f"📁 {category}", 
+                                            anchor="w", font=self.bold_font, 
+                                            text_color=("gray10", "gray90"))
+                category_label.grid(row=row, column=0, padx=5, pady=(10, 2), sticky="ew")
+                self.script_list_items.append(category_label)
+                row += 1
+                
+                # Sort shortcuts within category by hotkey
+                category_shortcuts = sorted(categories[category], key=lambda x: x.get('hotkey', '').lower())
+                
+                for shortcut in category_shortcuts:
+                    name = shortcut.get('name', 'Unnamed')
+                    hotkey = shortcut.get('hotkey', '')
+                    description = shortcut.get('description', '')
+
+                    item_frame = ctk.CTkFrame(self.script_scroll_frame, fg_color="transparent")
+                    item_frame.grid(row=row, column=0, sticky="ew", pady=1, padx=5)
+                    item_frame.grid_columnconfigure(1, weight=1)
+
+                    enabled = shortcut.get('enabled', True)
+                    icon = "\uf205" if enabled else "\uf204"
+                    color = "#9ef959" if enabled else "gray"
+
+                    icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
+                    icon_label.grid(row=0, column=0)
+                    icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
+
+                    display_text = f"{hotkey}  {name}"
+                    if description:
+                        display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                    
+                    label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
+                    label.grid(row=0, column=1, sticky="ew", padx=5)
+                    label.shortcut_obj = shortcut
+                    label.bind("<Button-1>", lambda event, l=label: self.select_script_shortcut(l))
+                    label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
+
+                    self.script_widgets[shortcut['hotkey']] = {'icon': icon_label, 'label': label}
+                    self.script_list_items.append(item_frame)
+                    row += 1
+        else:
+            # Display as a flat list
+            sorted_shortcuts = sorted(filtered_shortcuts, key=lambda x: x.get('hotkey', '').lower())
+            for shortcut in sorted_shortcuts:
                 name = shortcut.get('name', 'Unnamed')
                 hotkey = shortcut.get('hotkey', '')
                 description = shortcut.get('description', '')
@@ -538,29 +578,63 @@ class AHKShortcutEditor(ctk.CTk):
             if search_query.lower() in f"{shortcut.get('name', '')} {shortcut.get('trigger', '')} {shortcut.get('description', '')} {shortcut.get('category', '')}".lower()
         ]
         
-        # Group by category
-        categories = {}
-        for shortcut in filtered_shortcuts:
-            category = shortcut.get('category', 'General')
-            if category not in categories:
-                categories[category] = []
-            categories[category].append(shortcut)
-        
-        # Sort categories and shortcuts within each category
         row = 0
-        for category in sorted(categories.keys()):
-            # Add category header
-            category_label = ctk.CTkLabel(self.text_scroll_frame, text=f"📁 {category}", 
-                                        anchor="w", font=self.bold_font, 
-                                        text_color=("gray10", "gray90"))
-            category_label.grid(row=row, column=0, padx=5, pady=(10, 2), sticky="ew")
-            self.text_list_items.append(category_label)
-            row += 1
+        if self.show_categories.get():
+            # Group by category
+            categories = {}
+            for shortcut in filtered_shortcuts:
+                category = shortcut.get('category', 'General')
+                if category not in categories:
+                    categories[category] = []
+                categories[category].append(shortcut)
             
-            # Sort shortcuts within category by trigger
-            category_shortcuts = sorted(categories[category], key=lambda x: x.get('trigger', '').lower())
-            
-            for shortcut in category_shortcuts:
+            # Sort categories and shortcuts within each category
+            for category in sorted(categories.keys()):
+                # Add category header
+                category_label = ctk.CTkLabel(self.text_scroll_frame, text=f"📁 {category}", 
+                                            anchor="w", font=self.bold_font, 
+                                            text_color=("gray10", "gray90"))
+                category_label.grid(row=row, column=0, padx=5, pady=(10, 2), sticky="ew")
+                self.text_list_items.append(category_label)
+                row += 1
+                
+                # Sort shortcuts within category by trigger
+                category_shortcuts = sorted(categories[category], key=lambda x: x.get('trigger', '').lower())
+                
+                for shortcut in category_shortcuts:
+                    name = shortcut.get('name', 'Unnamed')
+                    trigger = shortcut.get('trigger', '')
+                    description = shortcut.get('description', '')
+                    
+                    item_frame = ctk.CTkFrame(self.text_scroll_frame, fg_color="transparent")
+                    item_frame.grid(row=row, column=0, sticky="ew", pady=1, padx=5)
+                    item_frame.grid_columnconfigure(1, weight=1)
+
+                    enabled = shortcut.get('enabled', True)
+                    icon = "\uf205" if enabled else "\uf204"
+                    color = "#9ef959" if enabled else "gray"
+
+                    icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
+                    icon_label.grid(row=0, column=0)
+                    icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
+
+                    display_text = f"{trigger}  {name}"
+                    if description:
+                        display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                    
+                    label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
+                    label.grid(row=0, column=1, sticky="ew", padx=5)
+                    label.shortcut_obj = shortcut
+                    label.bind("<Button-1>", lambda event, l=label: self.select_text_shortcut(l))
+                    label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
+
+                    self.text_widgets[shortcut['trigger']] = {'icon': icon_label, 'label': label}
+                    self.text_list_items.append(item_frame)
+                    row += 1
+        else:
+            # Display as a flat list
+            sorted_shortcuts = sorted(filtered_shortcuts, key=lambda x: x.get('trigger', '').lower())
+            for shortcut in sorted_shortcuts:
                 name = shortcut.get('name', 'Unnamed')
                 trigger = shortcut.get('trigger', '')
                 description = shortcut.get('description', '')
@@ -629,6 +703,10 @@ class AHKShortcutEditor(ctk.CTk):
             self.selected_text_shortcut = None
 
     def filter_list_displays(self, event=None):
+        self.update_list_displays(search_query=self.search_entry.get())
+
+    def toggle_categories(self):
+        self.show_categories.set(not self.show_categories.get())
         self.update_list_displays(search_query=self.search_entry.get())
 
     def open_add_script_dialog(self):
