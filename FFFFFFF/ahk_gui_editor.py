@@ -361,7 +361,8 @@ class AHKShortcutEditor(ctk.CTk):
         try:
             data = {
                 "script_shortcuts": self.script_shortcuts,
-                "text_shortcuts": self.text_shortcuts
+                "text_shortcuts": self.text_shortcuts,
+                "show_categories": self.show_categories.get()
             }
             with open(SHORTCUTS_JSON_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
@@ -707,6 +708,7 @@ class AHKShortcutEditor(ctk.CTk):
 
     def toggle_categories(self):
         self.show_categories.set(not self.show_categories.get())
+        self.save_shortcuts_json()
         self.update_list_displays(search_query=self.search_entry.get())
 
     def open_add_script_dialog(self):
