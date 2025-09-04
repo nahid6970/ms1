@@ -176,7 +176,7 @@
             "trigger": ";v1",
             "replacement": "#Requires AutoHotkey v1.0",
             "category": "AHK",
-            "enabled": false
+            "enabled": true
         },
         {
             "name": "AutoHotkey Version 2",

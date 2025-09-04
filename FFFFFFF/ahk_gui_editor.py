@@ -499,8 +499,8 @@ class AHKShortcutEditor(ctk.CTk):
                 item_frame.grid_columnconfigure(1, weight=1)
 
                 enabled = shortcut.get('enabled', True)
-                icon = "✓" if enabled else "✗"
-                color = "green" if enabled else "red"
+                icon = "\uf205" if enabled else "\uf204"
+                color = "#9ef959" if enabled else "gray"
 
                 icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
                 icon_label.grid(row=0, column=0)
@@ -564,8 +564,8 @@ class AHKShortcutEditor(ctk.CTk):
                 item_frame.grid_columnconfigure(1, weight=1)
 
                 enabled = shortcut.get('enabled', True)
-                icon = "✓" if enabled else "✗"
-                color = "green" if enabled else "red"
+                icon = "\uf205" if enabled else "\uf204"
+                color = "#9ef959" if enabled else "gray"
 
                 icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
                 icon_label.grid(row=0, column=0)
