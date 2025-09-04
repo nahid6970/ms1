@@ -483,5 +483,14 @@
     ],
     "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5017_audio_stream\\app.py",
     "ExecutableType": "pythonw"
+  },
+  {
+    "name": "RustDesk",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\rustdesk\\current\\RustDesk.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
   }
 ]
