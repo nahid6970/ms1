@@ -3,6 +3,7 @@ from tkinter import messagebox, filedialog
 import json
 import re
 import os
+import threading
 
 # Set the appearance mode and default color theme
 ctk.set_appearance_mode("System")
@@ -227,6 +228,8 @@ class AHKShortcutEditor(ctk.CTk):
         self.script_shortcuts = []
         self.text_shortcuts = []
         self.other_content = []  # Store non-shortcut content
+        self.script_widgets = {}
+        self.text_widgets = {}
         
         self.load_shortcuts_json()
         self.create_widgets()
@@ -459,6 +462,7 @@ class AHKShortcutEditor(ctk.CTk):
         for item in self.script_list_items:
             item.destroy()
         self.script_list_items.clear()
+        self.script_widgets.clear()
         self.selected_script_shortcut = None
 
         # Filter shortcuts
@@ -504,7 +508,7 @@ class AHKShortcutEditor(ctk.CTk):
 
                 icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
                 icon_label.grid(row=0, column=0)
-                icon_label.bind("<Button-1>", lambda e, s=shortcut: self.toggle_enabled(s))
+                icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
                 display_text = f"{hotkey}  {name}"
                 if description:
@@ -516,6 +520,7 @@ class AHKShortcutEditor(ctk.CTk):
                 label.bind("<Button-1>", lambda event, l=label: self.select_script_shortcut(l))
                 label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
 
+                self.script_widgets[shortcut['hotkey']] = {'icon': icon_label, 'label': label}
                 self.script_list_items.append(item_frame)
                 row += 1
 
@@ -524,6 +529,7 @@ class AHKShortcutEditor(ctk.CTk):
         for item in self.text_list_items:
             item.destroy()
         self.text_list_items.clear()
+        self.text_widgets.clear()
         self.selected_text_shortcut = None
 
         # Filter shortcuts
@@ -569,7 +575,7 @@ class AHKShortcutEditor(ctk.CTk):
 
                 icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
                 icon_label.grid(row=0, column=0)
-                icon_label.bind("<Button-1>", lambda e, s=shortcut: self.toggle_enabled(s))
+                icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
                 display_text = f"{trigger}  {name}"
                 if description:
@@ -581,6 +587,7 @@ class AHKShortcutEditor(ctk.CTk):
                 label.bind("<Button-1>", lambda event, l=label: self.select_text_shortcut(l))
                 label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
 
+                self.text_widgets[shortcut['trigger']] = {'icon': icon_label, 'label': label}
                 self.text_list_items.append(item_frame)
                 row += 1
 
@@ -654,11 +661,38 @@ class AHKShortcutEditor(ctk.CTk):
         else:
             messagebox.showwarning("Warning", "No shortcut selected to remove.")
 
-    def toggle_enabled(self, shortcut):
-        """Toggle the enabled state of a shortcut."""
-        shortcut["enabled"] = not shortcut.get("enabled", True)
-        self.save_shortcuts_json()
-        self.update_list_displays(search_query=self.search_entry.get())
+    def update_shortcut_visuals(self, shortcut):
+        """Update the visuals of a single shortcut widget."""
+        widget_dict = None
+        key = None
+        if 'hotkey' in shortcut:
+            key = shortcut['hotkey']
+            widget_dict = self.script_widgets.get(key)
+        elif 'trigger' in shortcut:
+            key = shortcut['trigger']
+            widget_dict = self.text_widgets.get(key)
+
+        if widget_dict:
+            icon_label = widget_dict['icon']
+            enabled = shortcut.get('enabled', True)
+            icon = "\uf205" if enabled else "\uf204"
+            color = "#9ef959" if enabled else "gray"
+            icon_label.configure(text=icon, text_color=color)
+
+    def toggle_enabled(self, shortcut, icon_label):
+        """Toggle enabled state with smooth visual feedback."""
+        icon_label.configure(text="⟳", text_color="#63dbff")
+
+        def toggle_operation():
+            try:
+                shortcut["enabled"] = not shortcut.get("enabled", True)
+                self.save_shortcuts_json()
+                self.after(100, lambda: self.update_shortcut_visuals(shortcut))
+            except Exception as e:
+                self.after(100, lambda: self.update_shortcut_visuals(shortcut))
+                messagebox.showerror("Error", f"Failed to toggle shortcut: {e}", parent=self)
+
+        threading.Thread(target=toggle_operation, daemon=True).start()
 
     def generate_ahk_script(self):
         try:
