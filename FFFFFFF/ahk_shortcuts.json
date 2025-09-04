@@ -175,14 +175,16 @@
             "description": "Inserts AHK v1 header requirement",
             "trigger": ";v1",
             "replacement": "#Requires AutoHotkey v1.0",
-            "category": "AHK"
+            "category": "AHK",
+            "enabled": false
         },
         {
             "name": "AutoHotkey Version 2",
             "description": "Inserts AHK v2 header requirement",
             "trigger": ";v2",
             "replacement": "#Requires AutoHotkey v2.0",
-            "category": "AHK"
+            "category": "AHK",
+            "enabled": true
         },
         {
             "name": "Registry Run Path",

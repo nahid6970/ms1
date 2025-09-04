@@ -147,7 +147,8 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
                 "category": category or "General",
                 "description": description,
                 "hotkey": hotkey, 
-                "action": action
+                "action": action,
+                "enabled": True
             }
             self.master.script_shortcuts.append(new_shortcut)
             
@@ -164,7 +165,8 @@ class AddEditShortcutDialog(ctk.CTkToplevel):
                 "category": category or "General",
                 "description": description,
                 "trigger": trigger, 
-                "replacement": replacement
+                "replacement": replacement,
+                "enabled": True
             }
             self.master.text_shortcuts.append(new_shortcut)
 
@@ -491,16 +493,30 @@ class AHKShortcutEditor(ctk.CTk):
                 name = shortcut.get('name', 'Unnamed')
                 hotkey = shortcut.get('hotkey', '')
                 description = shortcut.get('description', '')
-                display_text = f"  {hotkey}  {name}"
+
+                item_frame = ctk.CTkFrame(self.script_scroll_frame, fg_color="transparent")
+                item_frame.grid(row=row, column=0, sticky="ew", pady=1, padx=5)
+                item_frame.grid_columnconfigure(1, weight=1)
+
+                enabled = shortcut.get('enabled', True)
+                icon = "✓" if enabled else "✗"
+                color = "green" if enabled else "red"
+
+                icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
+                icon_label.grid(row=0, column=0)
+                icon_label.bind("<Button-1>", lambda e, s=shortcut: self.toggle_enabled(s))
+
+                display_text = f"{hotkey}  {name}"
                 if description:
                     display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                 
-                label = ctk.CTkLabel(self.script_scroll_frame, text=display_text, anchor="w", font=self.app_font)
-                label.grid(row=row, column=0, padx=5, pady=1, sticky="ew")
+                label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
+                label.grid(row=0, column=1, sticky="ew", padx=5)
                 label.shortcut_obj = shortcut
                 label.bind("<Button-1>", lambda event, l=label: self.select_script_shortcut(l))
                 label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
-                self.script_list_items.append(label)
+
+                self.script_list_items.append(item_frame)
                 row += 1
 
     def update_text_display(self, search_query=""):
@@ -542,16 +558,30 @@ class AHKShortcutEditor(ctk.CTk):
                 name = shortcut.get('name', 'Unnamed')
                 trigger = shortcut.get('trigger', '')
                 description = shortcut.get('description', '')
-                display_text = f"  {trigger}  {name}"
+                
+                item_frame = ctk.CTkFrame(self.text_scroll_frame, fg_color="transparent")
+                item_frame.grid(row=row, column=0, sticky="ew", pady=1, padx=5)
+                item_frame.grid_columnconfigure(1, weight=1)
+
+                enabled = shortcut.get('enabled', True)
+                icon = "✓" if enabled else "✗"
+                color = "green" if enabled else "red"
+
+                icon_label = ctk.CTkLabel(item_frame, text=icon, text_color=color, font=self.app_font, width=3)
+                icon_label.grid(row=0, column=0)
+                icon_label.bind("<Button-1>", lambda e, s=shortcut: self.toggle_enabled(s))
+
+                display_text = f"{trigger}  {name}"
                 if description:
                     display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                 
-                label = ctk.CTkLabel(self.text_scroll_frame, text=display_text, anchor="w", font=self.app_font)
-                label.grid(row=row, column=0, padx=5, pady=1, sticky="ew")
+                label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
+                label.grid(row=0, column=1, sticky="ew", padx=5)
                 label.shortcut_obj = shortcut
                 label.bind("<Button-1>", lambda event, l=label: self.select_text_shortcut(l))
                 label.bind("<Double-Button-1>", lambda event: self.open_edit_dialog())
-                self.text_list_items.append(label)
+
+                self.text_list_items.append(item_frame)
                 row += 1
 
     def select_script_shortcut(self, label):
@@ -560,7 +590,7 @@ class AHKShortcutEditor(ctk.CTk):
         
         # Select new script shortcut
         self.selected_script_shortcut = label.shortcut_obj
-        label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
+        label.master.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
 
     def select_text_shortcut(self, label):
         # Deselect previous selections
@@ -568,23 +598,27 @@ class AHKShortcutEditor(ctk.CTk):
         
         # Select new text shortcut
         self.selected_text_shortcut = label.shortcut_obj
-        label.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
+        label.master.configure(fg_color=ctk.ThemeManager.theme["CTkButton"]["fg_color"])
 
     def clear_selections(self):
         # Clear script selection
         if self.selected_script_shortcut:
-            for item_label in self.script_list_items:
-                if hasattr(item_label, 'shortcut_obj') and item_label.shortcut_obj == self.selected_script_shortcut:
-                    item_label.configure(fg_color="transparent")
-                    break
+            for item_frame in self.script_list_items:
+                # The frame itself doesn't have shortcut_obj, the label inside it does.
+                # So we search for the label with the matching shortcut_obj and then configure the frame.
+                for widget in item_frame.winfo_children():
+                    if hasattr(widget, 'shortcut_obj') and widget.shortcut_obj == self.selected_script_shortcut:
+                        item_frame.configure(fg_color="transparent")
+                        break
             self.selected_script_shortcut = None
         
         # Clear text selection
         if self.selected_text_shortcut:
-            for item_label in self.text_list_items:
-                if hasattr(item_label, 'shortcut_obj') and item_label.shortcut_obj == self.selected_text_shortcut:
-                    item_label.configure(fg_color="transparent")
-                    break
+            for item_frame in self.text_list_items:
+                for widget in item_frame.winfo_children():
+                    if hasattr(widget, 'shortcut_obj') and widget.shortcut_obj == self.selected_text_shortcut:
+                        item_frame.configure(fg_color="transparent")
+                        break
             self.selected_text_shortcut = None
 
     def filter_list_displays(self, event=None):
@@ -620,6 +654,12 @@ class AHKShortcutEditor(ctk.CTk):
         else:
             messagebox.showwarning("Warning", "No shortcut selected to remove.")
 
+    def toggle_enabled(self, shortcut):
+        """Toggle the enabled state of a shortcut."""
+        shortcut["enabled"] = not shortcut.get("enabled", True)
+        self.save_shortcuts_json()
+        self.update_list_displays(search_query=self.search_entry.get())
+
     def generate_ahk_script(self):
         try:
             # Build the new script content
@@ -635,6 +675,8 @@ class AHKShortcutEditor(ctk.CTk):
             if self.script_shortcuts:
                 output_lines.append(";! === SCRIPT SHORTCUTS ===")
                 for shortcut in self.script_shortcuts:
+                    if not shortcut.get('enabled', True):
+                        continue
                     # Add comment with name and description
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
@@ -656,6 +698,8 @@ class AHKShortcutEditor(ctk.CTk):
             if self.text_shortcuts:
                 output_lines.append(";! === TEXT SHORTCUTS ===")
                 for shortcut in self.text_shortcuts:
+                    if not shortcut.get('enabled', True):
+                        continue
                     # Add comment with name and description
                     output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):

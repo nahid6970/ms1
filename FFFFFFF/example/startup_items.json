@@ -1,0 +1,487 @@
+[
+  {
+    "type": "Command",
+    "name": "ahk_v2",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "name": "ollama-chat (8000)",
+    "type": "Command",
+    "paths": [
+      "C:\\Windows\\System32\\cmd.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\server.py",
+    "ExecutableType": "cmd"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5001 - Text",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5001_share_text\\share_text.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5002 - Share File",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5002_upload_files\\upload_files.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5003 - Drive",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5005 - GameARR",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5005_GameARR\\GameARR.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5006 - Run Commands",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5006_Run_Commands\\Run_Commands.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5007 - ControlBy Android",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5008 - Valorant Match",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5009 - MCQ",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5009_MCQ\\app.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Flask - 5010 - CoC",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5010_coc\\Clash_of_Clans.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "type": "Command",
+    "name": "Clipboard",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\clipboard.py"
+  },
+  {
+    "type": "Command",
+    "name": "Komorebi",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\komorebi.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "mypygui",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\mypygui.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Open WebUI",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\openwebui.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Remote Control",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\remote_control.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Square-Corner",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\square_corner.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "SSHD",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\sshd.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Sync",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\sync.ps1"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Syncthing",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\syncthing.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Virtual_Monitor",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\Command\\virtual_monitor.ahk"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "Command",
+    "name": "Disable Defender",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\ms1\\scripts\\disable_defender.ps1"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "AMDNoiseSuppression",
+    "paths": [
+      "C:\\WINDOWS\\system32\\AMD\\ANR\\AMDNoiseSuppression.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "BijoyBayanno",
+    "paths": [
+      "C:\\Program Files (x86)\\Ananda Computers\\BijoyBayanno\\BijoyBayanno.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Capture2Text",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Cloudflare WARP",
+    "paths": [
+      "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "DesktopCoral",
+    "paths": [
+      "C:\\Program Files (x86)\\DesktopCoral\\DesktopCoral.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Ditto",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\ditto\\current\\Ditto.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Flow.Launcher",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\FlowLauncher\\app-1.19.4\\Flow.Launcher.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Free Download Manager",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Softdeluxe\\Free Download Manager\\fdm.exe"
+    ],
+    "Command": "--hidden"
+  },
+  {
+    "type": "App",
+    "name": "Ollama",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "name": "Prowlarr",
+    "type": "App",
+    "paths": [
+      "C:/ProgramData/Prowlarr/bin/Prowlarr.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "qBittorrent",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\qBittorrent\\qbittorrent.exe"
+    ],
+    "Command": "\"--profile=\" \"--configuration=\""
+  },
+  {
+    "type": "App",
+    "name": "Radarr",
+    "paths": [
+      "C:\\ProgramData\\Radarr\\bin\\Radarr.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "RssGuard",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\rssguard.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Sonarr",
+    "paths": [
+      "C:\\ProgramData\\Sonarr\\bin\\Sonarr.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "Text-Grab",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\text-grab\\current\\Text-Grab.exe"
+    ],
+    "Command": ""
+  },
+  {
+    "type": "App",
+    "name": "GoogleChromeAutoLaunch_2ABF856BE97FD219EC4C9BF1EB18E55A",
+    "paths": [
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    ],
+    "Command": "--no-startup-window /prefetch:5"
+  },
+  {
+    "type": "App",
+    "name": "MicrosoftEdgeAutoLaunch_A85A975CFCA9AFD77D01E7227175D0CA",
+    "paths": [
+      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "Command": "--no-startup-window --win-session-start"
+  },
+  {
+    "name": "Flask - 5000 - myhome",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5000_myhome\\app.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "KeyWiz",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\keyviz\\current\\keyviz.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Flask - 5011 - TV Show",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5011_tv_show\\app.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5015 - JOB",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5015_job\\job_tracker\\app.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5013 - Movies",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5013_movie_tracker\\app.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Huntarr",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\Huntarr\\Huntarr.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Flask - 5016 - Sync W Android",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5016_Sync_w_android\\sync_server.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5012 - Gallery",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5012_share_images\\share_images.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "KDE Connect",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\KDE Connect\\bin\\kdeconnect-indicator.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Tailscale",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\Tailscale\\tailscale-ipn.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Jackett",
+    "type": "App",
+    "paths": [
+      "C:\\ProgramData\\Jackett\\JackettTray.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Flask - 4999 - Startup Setup",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4999_startup\\app.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 4998 - Applist",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\4998_Applist\\applist_app.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "Flask - 5555 - Terminal",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5555_terminal\\myterminal.py",
+    "ExecutableType": "pythonw"
+  },
+  {
+    "name": "QuickLook",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
+    ],
+    "Command": "/autorun",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Audio Share (cmd)",
+    "type": "Command",
+    "paths": [
+      "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    ],
+    "Command": "as-cmd --bind=192.168.0.101",
+    "ExecutableType": "cmd"
+  },
+  {
+    "name": "Audio Share (app)",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\msBackups\\AudioShareServer.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "Flask - 5017 - Audio Stream",
+    "type": "Command",
+    "paths": [
+      "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
+    ],
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\flask\\5017_audio_stream\\app.py",
+    "ExecutableType": "pythonw"
+  }
+]
