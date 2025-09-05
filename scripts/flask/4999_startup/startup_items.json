@@ -1,11 +1,12 @@
 [
   {
-    "type": "Command",
     "name": "ahk_v2",
+    "type": "Command",
     "paths": [
       "C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk"
     ],
-    "Command": ""
+    "Command": "",
+    "ExecutableType": "other"
   },
   {
     "name": "ollama-chat (8000)",
@@ -491,6 +492,15 @@
       "C:\\Users\\nahid\\scoop\\apps\\rustdesk\\current\\RustDesk.exe"
     ],
     "Command": "",
+    "ExecutableType": "other"
+  },
+  {
+    "name": "RustDesk Tray",
+    "type": "App",
+    "paths": [
+      "C:\\Program Files\\RustDesk\\rustdesk.exe"
+    ],
+    "Command": "--tray",
     "ExecutableType": "other"
   }
 ]
