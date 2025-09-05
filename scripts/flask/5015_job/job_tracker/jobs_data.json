@@ -100,5 +100,27 @@
         "status": "Applied",
         "notes": "id: 750171\r\npass: 6123009m",
         "created_date": "2025-08-26T18:01:39.758863"
+    },
+    {
+        "id": 11,
+        "company": "BCS",
+        "position": "Non Cadre",
+        "job_url": "http://bpsc.teletalk.com.bd/ncad",
+        "applied_date": "",
+        "deadline": "2025-10-20",
+        "status": "Interested",
+        "notes": "",
+        "created_date": "2025-09-05T19:53:57.933698"
+    },
+    {
+        "id": 12,
+        "company": "BCS 47",
+        "position": "Cadre",
+        "job_url": "http://bpsc.teletalk.com.bd/bcs47/admitcard/index.php",
+        "applied_date": "",
+        "deadline": "",
+        "status": "Admit Card Downloaded",
+        "notes": "ID: CSBSBTQY\r\npw: CSAOWRAGDD",
+        "created_date": "2025-09-05T19:55:03.478990"
     }
 ]
