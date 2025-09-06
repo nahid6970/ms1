@@ -11,7 +11,7 @@
 <body>
     <div class="top-center-controls">
         <button onclick="openAddJobModal()" class="add-button"><i class="nf nf-cod-add"></i>Add Job</button>
-        <a href="{{ url_for('index') }}" class="add-button"><i class="nf nf-fa-home"></i>Home</a>
+        <a href="{{ url_for('index', **request.args) }}" class="add-button"><i class="nf nf-fa-home"></i>Home</a>
         <div class="checkbox-container">
             <input type="checkbox" id="hidePastDeadlines" {% if hide_past_deadlines %}checked{% endif %} onchange="togglePastDeadlines()">
             <label for="hidePastDeadlines">Hide Past Deadlines</label>
@@ -48,16 +48,16 @@
                 <span class="sort-chevron">▼</span>
             </button>
             <div class="sort-menu-dropdown" id="sortMenuDropdown">
-                <a href="{{ url_for('index', sort_by='company', order=next_order, query=query, status_filter=status_filter) }}"
+                <a href="{{ url_for('index', sort_by='company', order=next_order, query=query, status_filter=status_filter, hide_past='true' if hide_past_deadlines else 'false') }}"
                     class="sort-menu-item">Company</a>
-                <a href="{{ url_for('index', sort_by='position', order=next_order, query=query, status_filter=status_filter) }}"
+                <a href="{{ url_for('index', sort_by='position', order=next_order, query=query, status_filter=status_filter, hide_past='true' if hide_past_deadlines else 'false') }}"
                     class="sort-menu-item">Position</a>
 
-                <a href="{{ url_for('index', sort_by='applied_date', order=next_order, query=query, status_filter=status_filter) }}"
+                <a href="{{ url_for('index', sort_by='applied_date', order=next_order, query=query, status_filter=status_filter, hide_past='true' if hide_past_deadlines else 'false') }}"
                     class="sort-menu-item">Applied Date</a>
-                <a href="{{ url_for('index', sort_by='deadline', order=next_order, query=query, status_filter=status_filter) }}"
+                <a href="{{ url_for('index', sort_by='deadline', order=next_order, query=query, status_filter=status_filter, hide_past='true' if hide_past_deadlines else 'false') }}"
                     class="sort-menu-item">Deadline</a>
-                <a href="{{ url_for('index', sort_by='status', order=next_order, query=query, status_filter=status_filter) }}"
+                <a href="{{ url_for('index', sort_by='status', order=next_order, query=query, status_filter=status_filter, hide_past='true' if hide_past_deadlines else 'false') }}"
                     class="sort-menu-item">Status</a>
             </div>
         </div>

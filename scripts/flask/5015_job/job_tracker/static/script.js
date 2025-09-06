@@ -1,5 +1,6 @@
 function togglePastDeadlines() {
     const checkbox = document.getElementById('hidePastDeadlines');
+    localStorage.setItem('hidePastDeadlines', checkbox.checked);
     const url = new URL(window.location.href);
     if (checkbox.checked) {
         url.searchParams.set('hide_past', 'true');
@@ -68,19 +69,23 @@ window.onclick = function(event) {
     }
 }
 
-// Close sort menu when clicking on a sort option
 document.addEventListener('DOMContentLoaded', function() {
+    // "Hide Past Deadlines" checkbox
+    const checkbox = document.getElementById('hidePastDeadlines');
+    const hidePastDeadlines = localStorage.getItem('hidePastDeadlines');
+    if (hidePastDeadlines === 'true') {
+        checkbox.checked = true;
+    }
+
+    // Sort menu items
     const sortItems = document.querySelectorAll('.sort-menu-item');
     sortItems.forEach(item => {
         item.addEventListener('click', function() {
             document.getElementById('sortMenuDropdown').classList.remove('show');
         });
     });
-});
 
-// Form validation and enhancements
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-fill applied date when "Applied" status is selected
+    // Auto-fill applied date
     const statusSelects = document.querySelectorAll('select[name="status"]');
     statusSelects.forEach(select => {
         select.addEventListener('change', function() {
