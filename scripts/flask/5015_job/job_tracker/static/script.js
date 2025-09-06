@@ -73,8 +73,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // "Hide Past Deadlines" checkbox
     const checkbox = document.getElementById('hidePastDeadlines');
     const hidePastDeadlines = localStorage.getItem('hidePastDeadlines');
+    const url = new URL(window.location.href);
+    const hidePastParam = url.searchParams.get('hide_past');
+
     if (hidePastDeadlines === 'true') {
         checkbox.checked = true;
+        if (hidePastParam !== 'true') {
+            url.searchParams.set('hide_past', 'true');
+            window.location.href = url.toString();
+        }
     }
 
     // Sort menu items
