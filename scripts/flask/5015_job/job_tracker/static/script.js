@@ -1,3 +1,14 @@
+function togglePastDeadlines() {
+    const checkbox = document.getElementById('hidePastDeadlines');
+    const url = new URL(window.location.href);
+    if (checkbox.checked) {
+        url.searchParams.set('hide_past', 'true');
+    } else {
+        url.searchParams.delete('hide_past');
+    }
+    window.location.href = url.toString();
+}
+
 // Modal functions
 function openAddJobModal() {
     document.getElementById('addJobModal').style.display = 'block';

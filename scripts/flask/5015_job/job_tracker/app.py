@@ -43,6 +43,7 @@ def index():
     order = request.args.get('order', 'asc')
     query = request.args.get('query')
     status_filter = request.args.get('status_filter', 'all')
+    hide_past_deadlines = request.args.get('hide_past', 'false') == 'true'
 
     jobs = load_data()
 
@@ -58,6 +59,10 @@ def index():
     # Filter by status
     if status_filter != 'all':
         jobs = [job for job in jobs if job.get('status', '').lower().replace(' ', '-') == status_filter.lower()]
+
+    # Filter past deadlines
+    if hide_past_deadlines:
+        jobs = [job for job in jobs if job['days_left'] is None or job['days_left'] >= 0]
 
     # Sort jobs
     if sort_by == 'company':
@@ -75,7 +80,8 @@ def index():
     next_order = 'desc' if order == 'asc' else 'asc'
 
     return render_template('index.html', jobs=jobs, sort_by=sort_by, order=order, 
-                         next_order=next_order, query=query, status_filter=status_filter)
+                         next_order=next_order, query=query, status_filter=status_filter,
+                         hide_past_deadlines=hide_past_deadlines)
 
 @app.route('/add_job', methods=['GET', 'POST'])
 def add_job():

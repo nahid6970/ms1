@@ -12,6 +12,10 @@
     <div class="top-center-controls">
         <button onclick="openAddJobModal()" class="add-button"><i class="nf nf-cod-add"></i>Add Job</button>
         <a href="{{ url_for('index') }}" class="add-button"><i class="nf nf-fa-home"></i>Home</a>
+        <div class="checkbox-container">
+            <input type="checkbox" id="hidePastDeadlines" {% if hide_past_deadlines %}checked{% endif %} onchange="togglePastDeadlines()">
+            <label for="hidePastDeadlines">Hide Past Deadlines</label>
+        </div>
     </div>
 
     <div class="controls-container">
