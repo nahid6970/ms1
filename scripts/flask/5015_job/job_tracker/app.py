@@ -39,7 +39,7 @@ def calculate_days_left(deadline_str):
 
 @app.route('/')
 def index():
-    sort_by = request.args.get('sort_by', 'company')
+    sort_by = request.args.get('sort_by', 'deadline')
     order = request.args.get('order', 'asc')
     query = request.args.get('query')
     status_filter = request.args.get('status_filter', 'all')
