@@ -1087,6 +1087,14 @@ document.addEventListener('DOMContentLoaded', function () {
           updatedLink.top_text_color = originalLink.top_text_color;
           updatedLink.top_border_color = originalLink.top_border_color;
           updatedLink.top_hover_color = originalLink.top_hover_color;
+          updatedLink.popup_bg_color = originalLink.popup_bg_color;
+          updatedLink.popup_text_color = originalLink.popup_text_color;
+          updatedLink.popup_border_color = originalLink.popup_border_color;
+          updatedLink.popup_border_radius = originalLink.popup_border_radius;
+          updatedLink.horizontal_bg_color = originalLink.horizontal_bg_color;
+          updatedLink.horizontal_text_color = originalLink.horizontal_text_color;
+          updatedLink.horizontal_border_color = originalLink.horizontal_border_color;
+          updatedLink.horizontal_hover_color = originalLink.horizontal_hover_color;
         }
 
         try {
