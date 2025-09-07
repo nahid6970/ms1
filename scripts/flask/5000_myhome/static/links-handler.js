@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
     addLinkSpan.style.fontSize = '25px';
     addLinkSpan.style.alignContent = 'center';
 
-    addLinkSpan.addEventListener('click', () => {
+    addLinkItem.addEventListener('click', () => {
       document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
       const addLinkPopup = document.getElementById('add-link-popup');
       addLinkPopup.classList.remove('hidden'); // Remove hidden class
