@@ -88,6 +88,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     action: () => openEditLinkPopup(link, index)
                 },
                 {
+                    label: 'Copy',
+                    action: () => copyLink(link, index)
+                },
+                {
                     label: 'Delete',
                     action: () => deleteLink(index)
                 }
@@ -1130,6 +1134,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
       editGroupForm.setAttribute('data-listener-attached', 'true');
+    }
+  }
+
+  // Copy Link functionality
+  async function copyLink(linkToCopy, index) {
+    const newLink = { ...linkToCopy };
+    newLink.name = `${newLink.name} (copy)`;
+
+    try {
+        const response = await fetch('/api/links');
+        const links = await response.json();
+
+        links.splice(index + 1, 0, newLink);
+
+        // Update the entire list on the server
+        const updateResponse = await fetch('/api/links', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(links),
+        });
+
+        if (!updateResponse.ok) {
+            throw new Error('Failed to update links on the server.');
+        }
+
+        fetchAndDisplayLinks();
+
+    } catch (error) {
+        console.error('Error copying link:', error);
+        alert('Error copying link.');
     }
   }
 
