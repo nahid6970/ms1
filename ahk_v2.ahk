@@ -10,6 +10,7 @@ Persistent
 #Include C:\Users\nahid\ms\ms1\scripts\pyautogui\Clash_of_Clans.ahk
 #Include C:\Users\nahid\ms\ms1\scripts\Autohtokey\math.ahk
 #Include "C:\Users\nahid\ms\ms1\FFFFFFF\generated_shortcuts.ahk"
+#Include "C:\Users\nahid\ms\ms1\scripts\Autohtokey\gemini_helper.ahk"
 
 ;! v1 startups
 ; Run("C:\Users\nahid\ms\ms1\scripts\ahk\old\shadowFight3.ahk")
