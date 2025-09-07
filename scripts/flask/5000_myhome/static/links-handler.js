@@ -250,6 +250,26 @@ document.addEventListener('DOMContentLoaded', function () {
       clonedElement.addEventListener('drop', handleDrop);
       clonedElement.addEventListener('dragend', handleDragEnd);
 
+      // Re-add context menu
+      const linkInfo = links[index];
+      clonedElement.addEventListener('contextmenu', (event) => {
+        const items = [
+            {
+                label: 'Edit',
+                action: () => openEditLinkPopup(linkInfo.link, linkInfo.index)
+            },
+            {
+                label: 'Copy',
+                action: () => copyLink(linkInfo.link, linkInfo.index)
+            },
+            {
+                label: 'Delete',
+                action: () => deleteLink(linkInfo.index)
+            }
+        ];
+        showContextMenu(event, items);
+      });
+
       // Keep edit buttons but update their functionality for top groups
       const buttons = clonedElement.querySelector('.link-buttons');
       if (buttons) {
@@ -539,6 +559,27 @@ document.addEventListener('DOMContentLoaded', function () {
           clonedElement.addEventListener('dragover', handleDragOver);
           clonedElement.addEventListener('drop', handleDrop);
           clonedElement.addEventListener('dragend', handleDragEnd);
+
+          // Re-add context menu
+          if (linkData) {
+            clonedElement.addEventListener('contextmenu', (event) => {
+                const items = [
+                    {
+                        label: 'Edit',
+                        action: () => openEditLinkPopup(linkData.link, linkData.index)
+                    },
+                    {
+                        label: 'Copy',
+                        action: () => copyLink(linkData.link, linkData.index)
+                    },
+                    {
+                        label: 'Delete',
+                        action: () => deleteLink(linkData.index)
+                    }
+                ];
+                showContextMenu(event, items);
+            });
+          }
 
           if (linkData.link.li_bg_color) {
             clonedElement.style.backgroundColor = linkData.link.li_bg_color;
