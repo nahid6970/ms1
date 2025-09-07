@@ -4,10 +4,6 @@
     "actions": 
     [
         {
-            "command": "openSystemMenu",
-            "id": "User.openSystemMenu"
-        },
-        {
             "command": 
             {
                 "action": "copy",
@@ -16,12 +12,12 @@
             "id": "User.copy.644BA8F2"
         },
         {
-            "command": "paste",
-            "id": "User.paste"
+            "command": "openSystemMenu",
+            "id": "User.openSystemMenu"
         },
         {
-            "command": "find",
-            "id": "User.find"
+            "command": "paste",
+            "id": "User.paste"
         },
         {
             "command": 
@@ -31,11 +27,14 @@
                 "splitMode": "duplicate"
             },
             "id": "User.splitPane.A6751878"
+        },
+        {
+            "command": "find",
+            "id": "User.find"
         }
     ],
     "autoHideWindow": false,
     "centerOnLaunch": true,
-    "confirmCloseAllTabs": true,
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
@@ -58,12 +57,12 @@
             "keys": "ctrl+alt+space"
         },
         {
-            "id": "User.find",
-            "keys": "ctrl+shift+f"
-        },
-        {
             "id": "User.paste",
             "keys": "ctrl+v"
+        },
+        {
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
         },
         {
             "id": "User.splitPane.A6751878",
@@ -169,5 +168,6 @@
     "tabWidthMode": "titleLength",
     "themes": [],
     "useAcrylicInTabRow": false,
+    "warning.confirmCloseAllTabs": true,
     "windowingBehavior": "useAnyExisting"
 }
