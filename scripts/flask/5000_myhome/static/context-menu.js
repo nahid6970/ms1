@@ -7,6 +7,13 @@ function createContextMenu(items) {
         const menuItem = document.createElement('div');
         menuItem.className = 'context-menu-item';
         menuItem.textContent = item.label;
+        if (item.label === 'Edit') {
+            menuItem.classList.add('context-menu-edit');
+        } else if (item.label === 'Copy') {
+            menuItem.classList.add('context-menu-copy');
+        } else if (item.label === 'Delete') {
+            menuItem.classList.add('context-menu-delete');
+        }
         menuItem.addEventListener('click', () => {
             item.action();
             hideContextMenu();

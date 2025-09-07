@@ -1144,7 +1144,7 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     width: 150px;
     background-color: #383838;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 0;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
 }
 
@@ -1155,6 +1155,30 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 
 .context-menu-item:hover {
     background-color: #4f4f4f;
+}
+
+.context-menu-item.context-menu-edit {
+    color: #4CAF50; /* Green */
+}
+.context-menu-item.context-menu-edit:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.context-menu-item.context-menu-copy {
+    color: #2196F3; /* Blue */
+}
+.context-menu-item.context-menu-copy:hover {
+    background-color: #2196F3;
+    color: white;
+}
+
+.context-menu-item.context-menu-delete {
+    color: #f44336; /* Red */
+}
+.context-menu-item.context-menu-delete:hover {
+    background-color: #f44336;
+    color: white;
 }
 
 .add-link-item {
