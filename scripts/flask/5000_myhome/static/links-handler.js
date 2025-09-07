@@ -1222,7 +1222,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (response.ok) {
-          alert('Link deleted successfully!');
           await fetchAndDisplayLinks();
 
           // Re-open the collapsible group if it was open
