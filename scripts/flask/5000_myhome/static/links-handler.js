@@ -82,19 +82,17 @@ document.addEventListener('DOMContentLoaded', function () {
         listItem.innerHTML = linkContent;
 
         listItem.addEventListener('contextmenu', (event) => {
-            if (document.querySelector('.flex-container2').classList.contains('edit-mode')) {
-                const items = [
-                    {
-                        label: 'Edit',
-                        action: () => openEditLinkPopup(link, index)
-                    },
-                    {
-                        label: 'Delete',
-                        action: () => deleteLink(index)
-                    }
-                ];
-                showContextMenu(event, items);
-            }
+            const items = [
+                {
+                    label: 'Edit',
+                    action: () => openEditLinkPopup(link, index)
+                },
+                {
+                    label: 'Delete',
+                    action: () => deleteLink(index)
+                }
+            ];
+            showContextMenu(event, items);
         });
 
         groupedElements[groupName].push(listItem);
