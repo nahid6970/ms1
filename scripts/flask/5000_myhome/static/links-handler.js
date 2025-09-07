@@ -81,46 +81,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
         listItem.innerHTML = linkContent;
 
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'link-buttons';
+        listItem.addEventListener('contextmenu', (event) => {
+            if (document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+                const items = [
+                    {
+                        label: 'Edit',
+                        action: () => openEditLinkPopup(link, index)
+                    },
+                    {
+                        label: 'Delete',
+                        action: () => deleteLink(index)
+                    }
+                ];
+                showContextMenu(event, items);
+            }
+        });
 
-        // Add reorder buttons
-        const reorderButtonsContainer = document.createElement('div');
-        reorderButtonsContainer.className = 'reorder-buttons';
-
-        const upButton = document.createElement('button');
-        upButton.textContent = '↑';
-        upButton.className = 'reorder-btn';
-        upButton.onclick = (e) => {
-          e.stopPropagation();
-          moveLink(index, -1);
-        };
-        reorderButtonsContainer.appendChild(upButton);
-
-        const downButton = document.createElement('button');
-        downButton.textContent = '↓';
-        downButton.className = 'reorder-btn';
-        downButton.onclick = (e) => {
-          e.stopPropagation();
-          moveLink(index, 1);
-        };
-        reorderButtonsContainer.appendChild(downButton);
-
-        buttonContainer.appendChild(reorderButtonsContainer);
-
-        const editButton = document.createElement('button');
-        editButton.textContent = ''; //✏️
-        editButton.className = 'edit-button';
-        editButton.onclick = () => openEditLinkPopup(link, index); // Pass original index
-        buttonContainer.appendChild(editButton);
-
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = ''; //🗑️
-        deleteButton.className = 'delete-button';
-        deleteButton.onclick = () => deleteLink(index); // Pass original index
-        buttonContainer.appendChild(deleteButton);
-
-        listItem.appendChild(buttonContainer);
         groupedElements[groupName].push(listItem);
         groupedLinks[groupName].push({ link, index });
 
@@ -291,26 +267,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       content.appendChild(clonedElement);
     });
-
-    // Add button for adding new links to this collapsible group
-    const addLinkItem = document.createElement('li');
-    addLinkItem.className = 'link-item add-link-item';
-
-    const addLinkSpan = document.createElement('span');
-    addLinkSpan.textContent = '+';
-    addLinkSpan.style.cursor = 'pointer';
-    addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-    addLinkSpan.style.fontSize = '25px';
-    addLinkSpan.style.alignContent = 'center';
-
-    addLinkSpan.addEventListener('click', () => {
-      document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-      const addLinkPopup = document.getElementById('add-link-popup');
-      addLinkPopup.classList.remove('hidden'); // Remove hidden class
-      applyPopupStyling(groupName);
-    });
-    addLinkItem.appendChild(addLinkSpan);
-    content.appendChild(addLinkItem);
 
     // Add toggle functionality with repositioning
     let isDragging = false;
@@ -606,29 +562,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
           popupContent.appendChild(clonedElement);
         });
-
-        const addLinkItem = document.createElement('li');
-        addLinkItem.className = 'link-item add-link-item';
-        addLinkItem.draggable = false;
-
-        const addLinkSpan = document.createElement('span');
-        addLinkSpan.textContent = '+';
-        addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-        addLinkSpan.style.fontSize = '25px';
-        addLinkSpan.style.width = '100%';
-        addLinkSpan.style.height = '100%';
-        addLinkSpan.style.display = 'flex';
-        addLinkSpan.style.alignItems = 'center';
-        addLinkSpan.style.justifyContent = 'center';
-
-        addLinkItem.addEventListener('click', () => {
-          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-          const addLinkPopup = document.getElementById('add-link-popup');
-          addLinkPopup.classList.remove('hidden'); // Remove hidden class
-          applyPopupStyling(groupName);
-        });
-        addLinkItem.appendChild(addLinkSpan);
-        popupContent.appendChild(addLinkItem);
         popup.classList.remove('hidden');
         applyPopupStyling(groupName);
       };
@@ -698,30 +631,6 @@ document.addEventListener('DOMContentLoaded', function () {
       elements.forEach(element => {
         groupList.appendChild(element);
       });
-
-      // Add button for adding new links to this group
-      const addLinkItem = document.createElement('li');
-      addLinkItem.className = 'link-item add-link-item';
-      addLinkItem.draggable = false;
-
-      const addLinkSpan = document.createElement('span');
-      addLinkSpan.textContent = '+';
-      addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-      addLinkSpan.style.fontSize = '25px';
-      addLinkSpan.style.width = '100%';
-      addLinkSpan.style.height = '100%';
-      addLinkSpan.style.display = 'flex';
-      addLinkSpan.style.alignItems = 'center';
-      addLinkSpan.style.justifyContent = 'center';
-
-      addLinkItem.addEventListener('click', () => {
-        document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-        const addLinkPopup = document.getElementById('add-link-popup');
-        addLinkPopup.classList.remove('hidden'); // Remove hidden class
-        applyPopupStyling(groupName);
-      });
-      addLinkItem.appendChild(addLinkSpan);
-      groupList.appendChild(addLinkItem);
 
       groupDiv.appendChild(groupList);
     }
