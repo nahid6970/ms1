@@ -1137,6 +1137,14 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
     max-width: 90vw;
     max-height: 90vh;
   }
+  html, body {
+    margin: 5px;
+    margin-left: -3%;
+  }
+  .flex-container2 {
+    padding: 0px;
+    border-radius: 15px;
+  }
 }
 
 .context-menu {
