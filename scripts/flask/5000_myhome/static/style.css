@@ -1132,20 +1132,6 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   border: 1px solid #555555 !important;
 }
 
-@media (max-width: 600px) {
-  .popup-content {
-    max-width: 90vw;
-    max-height: 90vh;
-  }
-  html, body {
-    margin: 5px;
-    margin-left: -3%;
-  }
-  .flex-container2 {
-    padding: 0px;
-    border-radius: 15px;
-  }
-}
 
 .context-menu {
     position: fixed;
@@ -1197,3 +1183,32 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   min-height: 50px;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 600px) {
+  .popup-content {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+  html, body {
+    margin: 5px;
+    margin-left: -3%;
+  }
+  .flex-container2 {
+    padding: 0px;
+    border-radius: 15px;
+  }
+  .toggle-container span {
+    display: none;
+  }
+}
