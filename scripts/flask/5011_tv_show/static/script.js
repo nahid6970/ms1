@@ -17,6 +17,7 @@ async function openEditShowModal(showId) {
     document.getElementById('editShowYear').value = show.year;
     document.getElementById('editShowCoverImage').value = show.cover_image;
     document.getElementById('editShowDirectoryPath').value = show.directory_path || '';
+    document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
     document.getElementById('editShowStatus').value = show.status || 'Continuing';
 
     // Set the rating radio button

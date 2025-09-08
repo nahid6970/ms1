@@ -27,7 +27,7 @@
                         <i class="nf nf-fa-folder"></i>
                     </a>
                 {% endif %}
-                <a href="http://192.168.0.101:8989/series/{{ show.title.lower().replace(' ', '-').replace(':', '').replace('!', '').replace('?', '').replace(',', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('&', 'and').replace('.', '') }}" target="_blank" class="add-button" style="background-color: #007bff; color: white;" title="Open in Sonarr">
+                <a href="{{ show.sonarr_url if show.sonarr_url else 'http://192.168.0.101:8989/series/' ~ show.title.lower().replace(' ', '-').replace(':', '').replace('!', '').replace('?', '').replace(',', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('&', 'and').replace('.', '') }}" target="_blank" class="add-button" style="background-color: #007bff; color: white;" title="Open in Sonarr">
                     <i class="nf nf-fa-external_link"></i>
                 </a>
                 {% if sort_episodes == 'alphabetical' %}
@@ -89,6 +89,8 @@
                 <input type="url" id="editShowCoverImage" name="cover_image">
                 <label for="editShowDirectoryPath">Directory Path (Optional):</label>
                 <input type="text" id="editShowDirectoryPath" name="directory_path">
+                <label for="editShowSonarrUrl">Sonarr Link:</label>
+                <input type="url" id="editShowSonarrUrl" name="sonarr_url">
                 <label for="editShowStatus">Status:</label>
                 <select id="editShowStatus" name="status" class="setting-select">
                     <option value="Continuing">Continuing</option>

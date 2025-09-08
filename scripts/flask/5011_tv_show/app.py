@@ -322,6 +322,7 @@ def edit_show(show_id):
         show['directory_path'] = request.form.get('directory_path', '')
         show['rating'] = request.form.get('rating', None) # Update rating field
         show['status'] = request.form.get('status', 'Continuing') # Update status field
+        show['sonarr_url'] = request.form.get('sonarr_url', '')
         save_data(shows)
         return redirect(url_for('index'))
     else:
