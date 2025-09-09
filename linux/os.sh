@@ -575,7 +575,7 @@ Container_setup() {
 steam_cont() { sudo pacman -S --needed steam; }
 lutris_cont() { sudo pacman -S --needed lutris; }
 bottles_cont() { yay -S --needed bottles; }
-distroshell() {  }
+# distroshell() {  }
 
 install_wine() {
   echo "Installing Wine (32-bit prefix)..."
