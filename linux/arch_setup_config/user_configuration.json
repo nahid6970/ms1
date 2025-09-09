@@ -46,14 +46,12 @@
   "services": [],
   "swap": true,
   "timezone": "Asia/Dhaka",
-  "users": {
-    "root-password": "1823",
-    "user-accounts": [
-      {
-        "username": "nahid",
-        "password": "1823",
-        "superuser": true
-      }
-    ]
-  }
+  "users": [
+    {
+      "username": "nahid",
+      "password": "1823",
+      "sudo": true
+    }
+  ],
+  "!root-password": "1823"
 }
