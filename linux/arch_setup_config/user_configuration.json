@@ -46,12 +46,5 @@
   "services": [],
   "swap": true,
   "timezone": "Asia/Dhaka",
-  "users": [
-    {
-      "username": "nahid",
-      "password": "1823",
-      "sudo": true
-    }
-  ],
-  "!root-password": "1823"
+  "users": {}
 }

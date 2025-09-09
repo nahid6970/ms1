@@ -131,7 +131,7 @@ source "$HOME/.bashrc"
 
 
 arch_install(){
-    archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json
+    archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
 }
 
 setup_yay() {
