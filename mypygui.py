@@ -991,7 +991,7 @@ commands = {
         "dst": "o0:/Pictures/",
         "log": f"{LOG_DIR}/Pictures_check.log",
         "label": "\uf03e",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\"",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --track-renames --exclude \".globalTrash/**\" --exclude \".stfolder/**\" --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
     },
 }
