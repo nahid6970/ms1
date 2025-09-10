@@ -1176,6 +1176,7 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 
 .simple-link-item {
   padding: 2px 0;
+  list-style-type: none;
 }
 
 .simple-link-item a {
