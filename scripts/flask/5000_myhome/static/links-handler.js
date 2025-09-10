@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-    function createMultiColumnList(elements) {
+    function createMultiColumnList(elements, groupName) {
     const container = document.createElement('div');
     container.style.display = 'flex';
     container.style.flexDirection = 'row';
@@ -579,6 +579,36 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         currentColumn.appendChild(element);
     });
+
+    // Add the '+' button
+    const addLinkItem = document.createElement('li');
+    addLinkItem.className = 'link-item add-link-item';
+    addLinkItem.style.width = 'auto'; // Override default size
+    addLinkItem.style.height = '30px';
+
+    const addLinkSpan = document.createElement('span');
+    addLinkSpan.textContent = '+';
+    addLinkSpan.style.cursor = 'pointer';
+    addLinkSpan.style.fontSize = '20px';
+
+    addLinkItem.addEventListener('click', () => {
+        document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+        const addLinkPopup = document.getElementById('add-link-popup');
+        addLinkPopup.classList.remove('hidden');
+        applyPopupStyling(groupName);
+    });
+
+    addLinkItem.appendChild(addLinkSpan);
+    
+    // Add to the last column, or a new one if the last is full
+    if (elements.length % 5 === 0 && elements.length > 0) {
+        currentColumn = document.createElement('div');
+        currentColumn.style.display = 'flex';
+        currentColumn.style.flexDirection = 'column';
+        container.appendChild(currentColumn);
+    }
+    currentColumn.appendChild(addLinkItem);
+
 
     return container;
 }
@@ -757,7 +787,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (firstLinkInGroup && !firstLinkInGroup.link.horizontal_stack) {
       const firstLinkInGroupDisplay = linksInGroup[0];
       if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style === 'list-item') {
-        const multiColumnList = createMultiColumnList(elements);
+        const multiColumnList = createMultiColumnList(elements, groupName);
         groupDiv.appendChild(multiColumnList);
       } else {
         const groupList = document.createElement('ul');
