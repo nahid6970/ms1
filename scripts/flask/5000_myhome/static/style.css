@@ -955,6 +955,7 @@ div.toggle-container {
   background-color: var(--horizontal-bg-color, #2d2d2d);
   color: var(--horizontal-text-color, #ffffff);
   transition: background-color 0.3s ease;
+  cursor: pointer;
 }
 
 .horizontal-stack .group-title {
