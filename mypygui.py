@@ -981,7 +981,7 @@ commands = {
         "dst": "o0:/ms1/",
         "log": f"{LOG_DIR}/ms1_check.log",
         "label": "ms1",
-        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"",
+        "left_click_cmd": "rclone sync src dst -P --fast-list --exclude \".git/**\" --exclude \"__pycache__/**\"  --log-level INFO",
         "right_click_cmd": "rclone sync dst src -P --fast-list"
     },
 
@@ -1016,7 +1016,7 @@ def on_label_click(event, cfg):
 def ctrl_left_click(event, cfg):
     if event.state & 0x0004:  # Ctrl key mask
         # Replace placeholders and run the left_click_cmd command
-        cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list")
+        cmd = cfg.get("left_click_cmd", "rclone sync src dst -P --fast-list --log-level INFO")
         actual_cmd = cmd.replace("src", cfg["src"]).replace("dst", cfg["dst"])
         run_command(actual_cmd)
 
