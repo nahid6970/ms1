@@ -26,80 +26,106 @@ document.addEventListener('DOMContentLoaded', function () {
           groupedLinks[groupName] = [];
         }
 
-        const listItem = document.createElement('li');
-        listItem.className = `link-item ${link.default_type ? 'link-type-' + link.default_type : 'link-type-default'}`;
-        listItem.draggable = true;
-        listItem.dataset.linkIndex = index;
+        let elementToAdd;
 
-        // Add drag event listeners
-        listItem.addEventListener('dragstart', handleDragStart);
-        listItem.addEventListener('dragover', handleDragOver);
-        listItem.addEventListener('drop', handleDrop);
-        listItem.addEventListener('dragend', handleDragEnd);
+        if ((!link.name || link.name.trim() === '') && link.url) {
+            const simpleListItem = document.createElement('li');
+            simpleListItem.className = 'simple-link-item';
 
-        // Add visual indicator for hidden items in edit mode
-        if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
-          listItem.classList.add('hidden-item');
-          listItem.style.opacity = '0.5';
-          listItem.style.border = '2px dashed #666';
-        }
+            const simpleLink = document.createElement('a');
+            simpleLink.href = link.url;
+            simpleLink.textContent = link.url;
+            simpleLink.target = '_blank';
+            simpleListItem.appendChild(simpleLink);
 
-        if (link.li_bg_color) {
-          listItem.style.backgroundColor = link.li_bg_color;
-        }
-        if (link.li_hover_color) {
-          listItem.addEventListener('mouseover', () => {
-            listItem.style.backgroundColor = link.li_hover_color;
-          });
-          listItem.addEventListener('mouseout', () => {
-            listItem.style.backgroundColor = link.li_bg_color || '';
-          });
-        }
-
-        let linkContent;
-
-        if (link.default_type === 'nerd-font' && link.icon_class) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
-        } else if (link.default_type === 'img' && link.img_src) {
-          const width = link.width || '50';
-          const height = link.height || '50';
-          linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
-        } else if (link.default_type === 'text' && link.text) {
-          linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.text}</a>`;
+            // Add context menu
+            simpleListItem.addEventListener('contextmenu', (event) => {
+                const items = [
+                    { label: 'Edit', action: () => openEditLinkPopup(link, index) },
+                    { label: 'Copy', action: () => copyLink(link, index) },
+                    { label: 'Delete', action: () => deleteLink(index) }
+                ];
+                showContextMenu(event, items);
+            });
+            
+            elementToAdd = simpleListItem;
         } else {
-          // Fallback if default_type is not set or doesn't match available content
-          if (link.icon_class) {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
-          } else if (link.img_src) {
-            const width = link.width || '50';
-            const height = link.height || '50';
-            linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
-          } else {
-            linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.name}</a>`;
-          }
+            const listItem = document.createElement('li');
+            listItem.className = `link-item ${link.default_type ? 'link-type-' + link.default_type : 'link-type-default'}`;
+            listItem.draggable = true;
+            listItem.dataset.linkIndex = index;
+
+            // Add drag event listeners
+            listItem.addEventListener('dragstart', handleDragStart);
+            listItem.addEventListener('dragover', handleDragOver);
+            listItem.addEventListener('drop', handleDrop);
+            listItem.addEventListener('dragend', handleDragEnd);
+
+            // Add visual indicator for hidden items in edit mode
+            if (link.hidden && document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+              listItem.classList.add('hidden-item');
+              listItem.style.opacity = '0.5';
+              listItem.style.border = '2px dashed #666';
+            }
+
+            if (link.li_bg_color) {
+              listItem.style.backgroundColor = link.li_bg_color;
+            }
+            if (link.li_hover_color) {
+              listItem.addEventListener('mouseover', () => {
+                listItem.style.backgroundColor = link.li_hover_color;
+              });
+              listItem.addEventListener('mouseout', () => {
+                listItem.style.backgroundColor = link.li_bg_color || '';
+              });
+            }
+
+            let linkContent;
+
+            if (link.default_type === 'nerd-font' && link.icon_class) {
+              linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
+            } else if (link.default_type === 'img' && link.img_src) {
+              const width = link.width || '50';
+              const height = link.height || '50';
+              linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+            } else if (link.default_type === 'text' && link.text) {
+              linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.text}</a>`;
+            } else {
+              // Fallback if default_type is not set or doesn't match available content
+              if (link.icon_class) {
+                linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}"><i class="${link.icon_class}"></i></a>`;
+              } else if (link.img_src) {
+                const width = link.width || '50';
+                const height = link.height || '50';
+                linkContent = `<a href="${link.url}" title="${link.title || link.name}"><img src="${link.img_src}" width="${width}" height="${height}"></a>`;
+              } else {
+                linkContent = `<a href="${link.url}" style="text-decoration: none; color: ${link.color || 'inherit'}; ${link.background_color ? `background-color: ${link.background_color};` : ''} ${link.border_radius ? `border-radius: ${link.border_radius};` : ''} ${link.font_size ? `font-size: ${link.font_size};` : ''}" title="${link.title || link.name}">${link.name}</a>`;
+              }
+            }
+
+            listItem.innerHTML = linkContent;
+
+            listItem.addEventListener('contextmenu', (event) => {
+                const items = [
+                    {
+                        label: 'Edit',
+                        action: () => openEditLinkPopup(link, index)
+                    },
+                    {
+                        label: 'Copy',
+                        action: () => copyLink(link, index)
+                    },
+                    {
+                        label: 'Delete',
+                        action: () => deleteLink(index)
+                    }
+                ];
+                showContextMenu(event, items);
+            });
+            elementToAdd = listItem;
         }
 
-        listItem.innerHTML = linkContent;
-
-        listItem.addEventListener('contextmenu', (event) => {
-            const items = [
-                {
-                    label: 'Edit',
-                    action: () => openEditLinkPopup(link, index)
-                },
-                {
-                    label: 'Copy',
-                    action: () => copyLink(link, index)
-                },
-                {
-                    label: 'Delete',
-                    action: () => deleteLink(index)
-                }
-            ];
-            showContextMenu(event, items);
-        });
-
-        groupedElements[groupName].push(listItem);
+        groupedElements[groupName].push(elementToAdd);
         groupedLinks[groupName].push({ link, index });
 
         // Check if this group should be collapsible
