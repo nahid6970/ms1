@@ -264,17 +264,7 @@ img {
   border: #0056b3 solid 1px;
 }
 
-.link-group-content[style*="display: list-item"] {
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  width: fit-content;
-  padding-right: 180px;
-}
 
-.link-group-content[style*="display: list-item"] .link-item {
-  margin-bottom: 10px;
-  width: 100%;
-}
 
 .link-item {
   display: flex;

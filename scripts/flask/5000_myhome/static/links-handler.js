@@ -533,6 +533,30 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+    function createMultiColumnList(elements) {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'row';
+    container.style.gap = '20px';
+
+    let currentColumn = document.createElement('div');
+    currentColumn.style.display = 'flex';
+    currentColumn.style.flexDirection = 'column';
+    container.appendChild(currentColumn);
+
+    elements.forEach((element, index) => {
+        if (index > 0 && index % 5 === 0) {
+            currentColumn = document.createElement('div');
+            currentColumn.style.display = 'flex';
+            currentColumn.style.flexDirection = 'column';
+            container.appendChild(currentColumn);
+        }
+        currentColumn.appendChild(element);
+    });
+
+    return container;
+}
+
     function createRegularGroup(groupName, elements, linksInGroup) {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'link-group';
@@ -705,45 +729,49 @@ document.addEventListener('DOMContentLoaded', function () {
     groupDiv.appendChild(groupHeaderContainer);
 
     if (firstLinkInGroup && !firstLinkInGroup.link.horizontal_stack) {
-      const groupList = document.createElement('ul');
-      groupList.className = 'link-group-content';
-      // Set display style based on the first link in the group, or default to flex
       const firstLinkInGroupDisplay = linksInGroup[0];
-      if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
-        groupList.style.display = firstLinkInGroupDisplay.link.display_style;
+      if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style === 'list-item') {
+        const multiColumnList = createMultiColumnList(elements);
+        groupDiv.appendChild(multiColumnList);
       } else {
-        groupList.style.display = 'flex'; // Default display style
+        const groupList = document.createElement('ul');
+        groupList.className = 'link-group-content';
+        if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
+          groupList.style.display = firstLinkInGroupDisplay.link.display_style;
+        } else {
+          groupList.style.display = 'flex'; // Default display style
+        }
+
+        elements.forEach(element => {
+          groupList.appendChild(element);
+        });
+
+        // Add button for adding new links to this group
+        const addLinkItem = document.createElement('li');
+        addLinkItem.className = 'link-item add-link-item';
+        addLinkItem.draggable = false;
+
+        const addLinkSpan = document.createElement('span');
+        addLinkSpan.textContent = '+';
+        addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
+        addLinkSpan.style.fontSize = '25px';
+        addLinkSpan.style.width = '100%';
+        addLinkSpan.style.height = '100%';
+        addLinkSpan.style.display = 'flex';
+        addLinkSpan.style.alignItems = 'center';
+        addLinkSpan.style.justifyContent = 'center';
+
+        addLinkItem.addEventListener('click', () => {
+          document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+          const addLinkPopup = document.getElementById('add-link-popup');
+          addLinkPopup.classList.remove('hidden'); // Remove hidden class
+          applyPopupStyling(groupName);
+        });
+        addLinkItem.appendChild(addLinkSpan);
+        groupList.appendChild(addLinkItem);
+
+        groupDiv.appendChild(groupList);
       }
-
-      elements.forEach(element => {
-        groupList.appendChild(element);
-      });
-
-      // Add button for adding new links to this group
-      const addLinkItem = document.createElement('li');
-      addLinkItem.className = 'link-item add-link-item';
-      addLinkItem.draggable = false;
-
-      const addLinkSpan = document.createElement('span');
-      addLinkSpan.textContent = '+';
-      addLinkSpan.style.fontFamily = 'jetbrainsmono nfp';
-      addLinkSpan.style.fontSize = '25px';
-      addLinkSpan.style.width = '100%';
-      addLinkSpan.style.height = '100%';
-      addLinkSpan.style.display = 'flex';
-      addLinkSpan.style.alignItems = 'center';
-      addLinkSpan.style.justifyContent = 'center';
-
-      addLinkItem.addEventListener('click', () => {
-        document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-        const addLinkPopup = document.getElementById('add-link-popup');
-        addLinkPopup.classList.remove('hidden'); // Remove hidden class
-        applyPopupStyling(groupName);
-      });
-      addLinkItem.appendChild(addLinkSpan);
-      groupList.appendChild(addLinkItem);
-
-      groupDiv.appendChild(groupList);
     }
 
     return groupDiv;
