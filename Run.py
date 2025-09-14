@@ -39,7 +39,7 @@ Enter choice (1-4): """
             if choice == '1':
                 # Open all files in VSCode
                 for file_path in file_paths:
-                    subprocess.run(['cmd', '/c', 'code', f'"{file_path}"'])
+                    subprocess.run(f'code "{os.path.abspath(file_path)}"', shell=True)
             elif choice == '2':
                 # Open all folder locations
                 for file_path in file_paths:
@@ -159,7 +159,7 @@ def show_fzf_menu():
             if selection.startswith('1.'):
                 # Open all files in VSCode
                 for file_path in file_paths:
-                    subprocess.run(['cmd', '/c', 'code', f'"{file_path}"'])
+                    subprocess.run(f'code "{os.path.abspath(file_path)}"', shell=True)
             elif selection.startswith('2.'):
                 # Open all folder locations
                 for file_path in file_paths:
