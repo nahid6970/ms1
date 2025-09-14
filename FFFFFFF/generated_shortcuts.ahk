@@ -360,6 +360,83 @@ LAlt & c:: {
     }
 }
 
+;! Merge all window in a single
+#e:: {
+    MergeAllExplorerWindows()
+    MergeAllExplorerWindows() {
+        windows := WinGetList("ahk_class CabinetWClass")
+        if windows.Length <= 1 {
+            if windows.Length == 0 {
+                Run("explorer.exe")
+            }
+            return
+        }
+        mainWindow := 0
+        for hwnd in windows {
+            if WinActive("ahk_id " . hwnd) {
+                mainWindow := hwnd
+                break
+            }
+        }
+        if mainWindow == 0 {
+            mainWindow := windows[1]
+        }
+        WinActivate("ahk_id " . mainWindow)
+        WinWaitActive("ahk_id " . mainWindow, , 2)
+        for hwnd in windows {
+            if hwnd != mainWindow {
+                try {
+                    path := GetExplorerPath(hwnd)
+                    if path != "" && path != "Desktop" && path != "This PC" {
+                        WinActivate("ahk_id " . mainWindow)
+                        Sleep(100)
+                        Send("^t")
+                        Sleep(200)
+                        Send("^l")
+                        Sleep(100)
+                        if InStr(path, "file:///") {
+                            path := StrReplace(path, "file:///", "")
+                            path := StrReplace(path, "/", "\")
+                        }
+                        SendText(path)
+                        Send("{Enter}")
+                        Sleep(300)
+                    }
+                    WinClose("ahk_id " . hwnd)
+                    Sleep(100)
+                } catch {
+                    WinClose("ahk_id " . hwnd)
+                }
+            }
+        }
+        WinActivate("ahk_id " . mainWindow)
+    }
+    GetExplorerPath(hwnd) {
+        try {
+            for window in ComObject("Shell.Application").Windows {
+                try {
+                    if window.HWND == hwnd {
+                        url := window.LocationURL
+                        name := window.LocationName
+                        if url != "" {
+                            return url
+                        } else if name != "" {
+                            return name
+                        }
+                    }
+                }
+            }
+            title := WinGetTitle("ahk_id " . hwnd)
+            if InStr(title, " - File Explorer") {
+                title := StrReplace(title, " - File Explorer", "")
+            }
+            return title
+        } catch {
+            return ""
+        }
+    }
+}
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
