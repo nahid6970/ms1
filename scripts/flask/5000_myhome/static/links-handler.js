@@ -785,18 +785,16 @@ document.addEventListener('DOMContentLoaded', function () {
     groupDiv.appendChild(groupHeaderContainer);
 
     if (firstLinkInGroup && !firstLinkInGroup.link.horizontal_stack) {
-      const firstLinkInGroupDisplay = linksInGroup[0];
-      if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style === 'list-item') {
+      const groupLinkWithStyle = linksInGroup.find(l => l.link.display_style);
+      const displayStyle = groupLinkWithStyle ? groupLinkWithStyle.link.display_style : 'flex';
+
+      if (displayStyle === 'list-item') {
         const multiColumnList = createMultiColumnList(elements, groupName);
         groupDiv.appendChild(multiColumnList);
       } else {
         const groupList = document.createElement('ul');
         groupList.className = 'link-group-content';
-        if (firstLinkInGroupDisplay && firstLinkInGroupDisplay.link.display_style) {
-          groupList.style.display = firstLinkInGroupDisplay.link.display_style;
-        } else {
-          groupList.style.display = 'flex'; // Default display style
-        }
+        groupList.style.display = displayStyle;
 
         elements.forEach(element => {
           groupList.appendChild(element);
