@@ -1198,6 +1198,10 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   text-decoration: underline;
 }
 
+.simple-link-item .link-name {
+  color: yellow;
+}
+
 
 
 

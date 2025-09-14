@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
             simpleLink.target = '_blank';
 
             if (link.name && link.name.trim() !== '') {
-                simpleLink.innerHTML = `${link.name}<span class="link-separator">--</span><span class="link-url">${link.url}</span>`;
+                simpleLink.innerHTML = `<span class="link-name">${link.name}</span><span class="link-separator"> </span><span class="link-url">${link.url}</span>`;
             } else {
                 simpleLink.textContent = link.url;
             }
