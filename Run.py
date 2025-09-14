@@ -3,13 +3,18 @@ import subprocess
 import tempfile
 import sys
 
-def show_action_menu(file_path):
-    """Show action menu and execute selected action"""
-    menu_text = f"""Select action for: {os.path.basename(file_path)}
+def show_action_menu(file_paths):
+    """Show action menu and execute selected action for multiple files"""
+    if isinstance(file_paths, str):
+        file_paths = [file_paths]
+    
+    files_display = "\n".join([f"  • {os.path.basename(fp)}" for fp in file_paths])
+    menu_text = f"""Select action for {len(file_paths)} file(s):
+{files_display}
 
 1. Open with VSCode
-2. Open folder location
-3. Run file
+2. Open folder location(s)
+3. Run file(s)
 
 Enter choice (1-3): """
     
@@ -31,12 +36,17 @@ Enter choice (1-3): """
             
             # Execute based on choice
             if choice == '1':
-                subprocess.run(['cmd', '/c', 'code', file_path])
+                # Open all files in VSCode
+                for file_path in file_paths:
+                    subprocess.run(['cmd', '/c', 'code', file_path])
             elif choice == '2':
-                subprocess.run(['explorer.exe', '/select,', file_path])
+                # Open all folder locations
+                for file_path in file_paths:
+                    subprocess.run(['explorer.exe', '/select,', file_path])
             elif choice == '3':
-                subprocess.run(['powershell', '-command', f'Start-Process "{file_path}"'])
-            # Choice 4 or anything else: do nothing (cancel)
+                # Run all files
+                for file_path in file_paths:
+                    subprocess.run(['powershell', '-command', f'Start-Process "{file_path}"'])
             
             # Clean up choice file
             os.remove(choice_file)
@@ -69,11 +79,13 @@ def search_directories_and_files():
     # Shortcut list text for F1 display
     shortcuts_text = r"""
 Shortcuts available:
-  Enter   : Show action menu (VSCode/Folder/Run)
-  Ctrl-o  : Open file location in Explorer
-  Ctrl-c  : Copy full file path to clipboard
-  Ctrl-r  : Run file with PowerShell Start-Process
+  Enter   : Show action menu (VSCode/Folder/Run) - works with multi-select
+  Ctrl-o  : Open file location in Explorer - works with multi-select
+  Ctrl-c  : Copy full file path to clipboard - works with multi-select
+  Ctrl-r  : Run file with PowerShell Start-Process - works with multi-select
   F1      : Show this shortcuts help window
+  
+Multi-select: Use Tab to select multiple files, then use any action
 """
 
     # Create a temp file with shortcuts text
@@ -83,30 +95,36 @@ Shortcuts available:
             temp_file.write(shortcuts_text)
             temp_shortcut_file = temp_file.name
 
-        # Create temp script for action menu
-        current_script = os.path.abspath(__file__)
+        # Create temp script for action menu that handles multiple files
         menu_script = f"""
 import sys
 import subprocess
 import os
 
-def show_action_menu(file_path):
+def show_action_menu(file_paths_str):
+    # Split the file paths (they come as space-separated)
+    file_paths = file_paths_str.strip().split()
+    if not file_paths:
+        return
+        
+    files_display = "\\n".join([f"  • {{os.path.basename(fp)}}" for fp in file_paths])
+    
     menu_options = [
-        f"1. Open with VSCode\t{{file_path}}",
-        f"2. Open folder location\t{{file_path}}", 
-        f"3. Run file\t{{file_path}}"
+        f"1. Open with VSCode\\t{{len(file_paths)}} file(s)",
+        f"2. Open folder location(s)\\t{{len(file_paths)}} file(s)", 
+        f"3. Run file(s)\\t{{len(file_paths)}} file(s)"
     ]
     
     try:
         fzf_menu_args = [
             "fzf",
             "--prompt=Select action: ",
-            "--header=Choose what to do with the selected file",
+            f"--header=Choose action for {{len(file_paths)}} selected file(s):\\n{{files_display}}",
             "--with-nth=1",
             "--delimiter=\\t",
             "--border",
             "--layout=reverse",
-            "--height=10",
+            "--height=15",
             "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54"
         ]
         
@@ -117,24 +135,33 @@ def show_action_menu(file_path):
         if stdout and process.returncode == 0:
             selection = stdout.strip()
             if selection.startswith('1.'):
-                subprocess.run(['cmd', '/c', 'code', file_path])
+                # Open all files in VSCode
+                for file_path in file_paths:
+                    subprocess.run(['cmd', '/c', 'code', file_path])
             elif selection.startswith('2.'):
-                subprocess.run(['explorer.exe', '/select,', file_path])
+                # Open all folder locations
+                for file_path in file_paths:
+                    subprocess.run(['explorer.exe', '/select,', file_path])
             elif selection.startswith('3.'):
-                subprocess.run(['powershell', '-command', f'Start-Process "{{file_path}}"'])
+                # Run all files
+                for file_path in file_paths:
+                    subprocess.run(['powershell', '-command', f'Start-Process "{{file_path}}"'])
     
     except Exception as e:
         print(f"Error in menu: {{e}}")
 
 if __name__ == "__main__":
-    show_action_menu(sys.argv[1])
+    if len(sys.argv) > 1:
+        # Join all arguments as they represent multiple file paths
+        file_paths_str = ' '.join(sys.argv[1:])
+        show_action_menu(file_paths_str)
 """
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as menu_temp:
             menu_temp.write(menu_script)
             menu_script_file = menu_temp.name
 
-        # Prepare fzf arguments
+        # Prepare fzf arguments with fixed bindings for multi-select
         fzf_args = [
             "fzf",
             "--multi",
@@ -145,25 +172,23 @@ if __name__ == "__main__":
             "--border",
             "--layout=reverse",
             "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54",
-            f"--bind=enter:execute(python \"{menu_script_file}\" {{1}})",
-            "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",
-            "--bind=ctrl-c:execute-silent(cmd /c echo {1} | clip)",
-            "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
+            # Fixed: Use {+1} for multi-select instead of {1}
+            f"--bind=enter:execute(python \"{menu_script_file}\" {{+1}})",
+            "--bind=ctrl-o:execute-silent(for %i in ({+1}) do explorer.exe /select,\"%i\")",
+            "--bind=ctrl-c:execute-silent(for %i in ({+1}) do echo %i >> %temp%\\clipboard.txt && type %temp%\\clipboard.txt | clip && del %temp%\\clipboard.txt)",
+            "--bind=ctrl-r:execute-silent(for %i in ({+1}) do powershell -command Start-Process '%i')",
             f"--bind=f1:execute-silent(cmd /c start cmd /k type \"{temp_shortcut_file}\" & pause)",
         ]
 
         # Start fzf process
-        # We use Popen with PIPE for stdin to feed file paths
-        # and inherit stdout/stderr so fzf's TUI is displayed
         process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, text=True, encoding='utf-8')
 
         # Traverse directories and send file paths to fzf's stdin
         for root_dir in directories:
             if not os.path.isdir(root_dir):
-                # print(f"Warning: Directory not found - {root_dir}", file=sys.stderr)
                 continue
 
-            for root, _, files in os.walk(root_dir, onerror=lambda e: None): # onerror to ignore permission errors
+            for root, _, files in os.walk(root_dir, onerror=lambda e: None):
                 for file in files:
                     full_path = os.path.join(root, file)
 
@@ -175,11 +200,10 @@ if __name__ == "__main__":
                     try:
                         process.stdin.write(f"{full_path}\t{directory_name}\n")
                     except BrokenPipeError:
-                        # fzf might have quit early
                         break
-                else: # This else block runs if the inner loop completes without a break
+                else:
                     continue
-                break # This break runs if the inner loop broke (fzf quit)
+                break
         
         # Close stdin to signal end of input to fzf
         process.stdin.close()
