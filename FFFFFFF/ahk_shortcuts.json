@@ -10,7 +10,7 @@
         {
             "name": "Run Python Script",
             "description": "Opens run.py in the ms1 directory",
-            "hotkey": "!Space",
+            "hotkey": "ScrollLock",
             "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\run.py\", , \"Show\")",
             "category": "Launch"
         },

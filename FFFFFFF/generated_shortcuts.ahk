@@ -9,7 +9,7 @@ Persistent
 
 ;! Run Python Script
 ;! Opens run.py in the ms1 directory
-!Space::Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
+ScrollLock::Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
 
 ;! Monitor Internal
 ;! Switch to internal monitor only
