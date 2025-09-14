@@ -107,6 +107,7 @@ def show_action_menu(file_path):
             "--with-nth=1",
             "--delimiter=\\t",
             "--border",
+            "--layout=reverse",
             "--height=10",
             "--color=bg:#1e1e2e,bg+:#313244,fg:#cdd6f4,fg+:#f5e0dc,hl:#f38ba8,hl+:#f9e2af,info:#89b4fa,prompt:#a6e3a1,pointer:#f38ba8,marker:#f9e2af,spinner:#94e2d5,header:#89b4fa,preview-bg:#1e1e2e,border:#74c7ec"
         ]
