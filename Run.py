@@ -15,8 +15,9 @@ def show_action_menu(file_paths):
 1. Open with VSCode
 2. Open folder location(s)
 3. Run file(s)
+4. Copy file path(s) to clipboard
 
-Enter choice (1-3): """
+Enter choice (1-4): """
     
     # Create temp file with menu
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as temp_file:
@@ -38,7 +39,7 @@ Enter choice (1-3): """
             if choice == '1':
                 # Open all files in VSCode
                 for file_path in file_paths:
-                    subprocess.run(['cmd', '/c', 'code', file_path])
+                    subprocess.run(['cmd', '/c', 'code', f'"{file_path}"'])
             elif choice == '2':
                 # Open all folder locations
                 for file_path in file_paths:
@@ -46,7 +47,15 @@ Enter choice (1-3): """
             elif choice == '3':
                 # Run all files
                 for file_path in file_paths:
-                    subprocess.run(['powershell', '-command', f'Start-Process "{file_path}"'])
+                    subprocess.run(['powershell', '-command', f'Start-Process -FilePath "{file_path}"'])
+            elif choice == '4':
+                # Copy all file paths to clipboard
+                paths_text = '\n'.join(file_paths)
+                with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as temp_clip:
+                    temp_clip.write(paths_text)
+                    clip_file = temp_clip.name
+                subprocess.run(['cmd', '/c', f'type "{clip_file}" | clip'], shell=True)
+                os.remove(clip_file)
             
             # Clean up choice file
             os.remove(choice_file)
@@ -79,13 +88,14 @@ def search_directories_and_files():
     # Shortcut list text for F1 display
     shortcuts_text = r"""
 Shortcuts available:
-  Enter   : Show action menu (VSCode/Folder/Run) - works with multi-select
-  Ctrl-o  : Open file location in Explorer - works with multi-select
+  Enter   : Show action menu (VSCode/Folder/Run/Copy) - works with multi-select
+  Ctrl-o  : Open file location in Explorer - works with multi-select  
   Ctrl-c  : Copy full file path to clipboard - works with multi-select
   Ctrl-r  : Run file with PowerShell Start-Process - works with multi-select
   F1      : Show this shortcuts help window
   
 Multi-select: Use Tab to select multiple files, then use any action
+Supports files with spaces in their names!
 """
 
     # Create a temp file with shortcuts text
@@ -95,31 +105,43 @@ Multi-select: Use Tab to select multiple files, then use any action
             temp_file.write(shortcuts_text)
             temp_shortcut_file = temp_file.name
 
-        # Create temp script for action menu that handles multiple files
-        menu_script = f"""
+        # Create the menu handler Python script
+        menu_script_content = '''
 import sys
-import subprocess
 import os
+import subprocess
+import tempfile
 
-def show_action_menu(file_paths_str):
-    # Split the file paths (they come as space-separated)
-    file_paths = file_paths_str.strip().split()
+def show_fzf_menu():
+    # Read file paths from temp file
+    if len(sys.argv) < 2:
+        return
+    
+    temp_file_path = sys.argv[1]
+    file_paths = []
+    
+    if os.path.exists(temp_file_path):
+        with open(temp_file_path, 'r', encoding='utf-8') as f:
+            file_paths = [line.strip() for line in f if line.strip()]
+        os.remove(temp_file_path)
+    
     if not file_paths:
         return
-        
-    files_display = "\\n".join([f"  • {{os.path.basename(fp)}}" for fp in file_paths])
+    
+    files_display = "\\n".join([f"  • {os.path.basename(fp)}" for fp in file_paths])
     
     menu_options = [
-        f"1. Open with VSCode\\t{{len(file_paths)}} file(s)",
-        f"2. Open folder location(s)\\t{{len(file_paths)}} file(s)", 
-        f"3. Run file(s)\\t{{len(file_paths)}} file(s)"
+        f"1. Open with VSCode\\t{len(file_paths)} file(s)",
+        f"2. Open folder location(s)\\t{len(file_paths)} file(s)", 
+        f"3. Run file(s)\\t{len(file_paths)} file(s)",
+        f"4. Copy file path(s) to clipboard\\t{len(file_paths)} file(s)"
     ]
     
     try:
-        fzf_menu_args = [
+        fzf_args = [
             "fzf",
             "--prompt=Select action: ",
-            f"--header=Choose action for {{len(file_paths)}} selected file(s):\\n{{files_display}}",
+            f"--header=Choose action for {len(file_paths)} selected file(s):\\n{files_display}",
             "--with-nth=1",
             "--delimiter=\\t",
             "--border",
@@ -128,7 +150,7 @@ def show_action_menu(file_paths_str):
             "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54"
         ]
         
-        process = subprocess.Popen(fzf_menu_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
+        process = subprocess.Popen(fzf_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
         menu_input = '\\n'.join(menu_options)
         stdout, _ = process.communicate(input=menu_input)
         
@@ -137,7 +159,7 @@ def show_action_menu(file_paths_str):
             if selection.startswith('1.'):
                 # Open all files in VSCode
                 for file_path in file_paths:
-                    subprocess.run(['cmd', '/c', 'code', file_path])
+                    subprocess.run(['cmd', '/c', 'code', f'"{file_path}"'])
             elif selection.startswith('2.'):
                 # Open all folder locations
                 for file_path in file_paths:
@@ -145,23 +167,48 @@ def show_action_menu(file_paths_str):
             elif selection.startswith('3.'):
                 # Run all files
                 for file_path in file_paths:
-                    subprocess.run(['powershell', '-command', f'Start-Process "{{file_path}}"'])
+                    subprocess.run(['powershell', '-command', f'Start-Process -FilePath "{file_path}"'])
+            elif selection.startswith('4.'):
+                # Copy all file paths to clipboard
+                paths_text = '\\n'.join(file_paths)
+                subprocess.run(['powershell', '-command', f'Set-Clipboard -Value "{paths_text}"'], shell=True)
     
     except Exception as e:
-        print(f"Error in menu: {{e}}")
+        print(f"Error in menu: {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        # Join all arguments as they represent multiple file paths
-        file_paths_str = ' '.join(sys.argv[1:])
-        show_action_menu(file_paths_str)
-"""
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as menu_temp:
-            menu_temp.write(menu_script)
-            menu_script_file = menu_temp.name
+    show_fzf_menu()
+'''
 
-        # Prepare fzf arguments with fixed bindings for multi-select
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.py') as menu_script_file:
+            menu_script_file.write(menu_script_content)
+            menu_script_path = menu_script_file.name
+
+        # Create simple batch file
+        batch_content = f'''@echo off
+setlocal enabledelayedexpansion
+
+rem Create a temp file for the selected paths
+set "temp_file=%temp%\\fzf_selected_%random%.txt"
+
+rem Write each argument to the temp file (one per line)
+:writeloop
+if "%~1"=="" goto done
+echo %~1 >> "!temp_file!"
+shift
+goto writeloop
+
+:done
+
+rem Call the Python menu script
+python "{menu_script_path}" "!temp_file!"
+'''
+
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.bat') as batch_temp:
+            batch_temp.write(batch_content)
+            batch_file = batch_temp.name
+
+        # Prepare fzf arguments
         fzf_args = [
             "fzf",
             "--multi",
@@ -170,14 +217,13 @@ if __name__ == "__main__":
             "--preview=bat --style=plain --color=always --line-range :100 {1}",
             "--preview-window=~3",
             "--border",
-            "--layout=reverse",
+            "--layout=reverse", 
             "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54",
-            # Fixed: Use {+1} for multi-select instead of {1}
-            f"--bind=enter:execute(python \"{menu_script_file}\" {{+1}})",
-            "--bind=ctrl-o:execute-silent(for %i in ({+1}) do explorer.exe /select,\"%i\")",
-            "--bind=ctrl-c:execute-silent(for %i in ({+1}) do echo %i >> %temp%\\clipboard.txt && type %temp%\\clipboard.txt | clip && del %temp%\\clipboard.txt)",
-            "--bind=ctrl-r:execute-silent(for %i in ({+1}) do powershell -command Start-Process '%i')",
-            f"--bind=f1:execute-silent(cmd /c start cmd /k type \"{temp_shortcut_file}\" & pause)",
+            f"--bind=enter:execute({batch_file} {{+1}})",
+            "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",
+            "--bind=ctrl-c:execute-silent(echo {1} | clip)",
+            "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
+            f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
         ]
 
         # Start fzf process
@@ -209,9 +255,13 @@ if __name__ == "__main__":
         process.stdin.close()
         process.wait()
 
-        # Clean up menu script
-        if os.path.exists(menu_script_file):
-            os.remove(menu_script_file)
+        # Clean up temp files
+        for temp_file in [batch_file, menu_script_path]:
+            if os.path.exists(temp_file):
+                try:
+                    os.remove(temp_file)
+                except:
+                    pass
 
     except FileNotFoundError:
         print("Error: 'fzf' or 'bat' command not found.", file=sys.stderr)
