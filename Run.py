@@ -10,9 +10,8 @@ def show_action_menu(file_path):
 1. Open with VSCode
 2. Open folder location
 3. Run file
-4. Cancel
 
-Enter choice (1-4): """
+Enter choice (1-3): """
     
     # Create temp file with menu
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as temp_file:
@@ -93,10 +92,9 @@ import os
 
 def show_action_menu(file_path):
     menu_options = [
-        f"1. Open with VSCode\\t{{file_path}}",
-        f"2. Open folder location\\t{{file_path}}", 
-        f"3. Run file\\t{{file_path}}",
-        f"4. Cancel\\t{{file_path}}"
+        f"1. Open with VSCode\t{{file_path}}",
+        f"2. Open folder location\t{{file_path}}", 
+        f"3. Run file\t{{file_path}}"
     ]
     
     try:
