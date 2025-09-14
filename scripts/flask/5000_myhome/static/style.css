@@ -1188,6 +1188,16 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   color: #c58af9;
 }
 
+.simple-link-item .link-separator {
+  color: #ffffff;
+  margin: 0 5px;
+}
+
+.simple-link-item .link-url {
+  color: #8ab4f8;
+  text-decoration: underline;
+}
+
 
 
 

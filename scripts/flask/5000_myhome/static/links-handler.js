@@ -14,6 +14,17 @@ document.addEventListener('DOMContentLoaded', function () {
       const groupedLinks = {}; // Store original links grouped by name
       const collapsibleGroups = {}; // Store collapsible groups separately
 
+      const groupStyles = {};
+      links.forEach(link => {
+        const groupName = link.group || 'Ungrouped';
+        if (!groupStyles[groupName]) {
+            const groupLink = links.find(l => (l.group || 'Ungrouped') === groupName && l.display_style);
+            if (groupLink) {
+                groupStyles[groupName] = groupLink.display_style;
+            }
+        }
+      });
+
       links.forEach((link, index) => { // Use the index from the original links array
         // Skip hidden items unless in edit mode
         if (link.hidden && !document.querySelector('.flex-container2').classList.contains('edit-mode')) {
@@ -26,16 +37,23 @@ document.addEventListener('DOMContentLoaded', function () {
           groupedLinks[groupName] = [];
         }
 
+        const displayStyle = groupStyles[groupName] || 'flex';
         let elementToAdd;
 
-        if ((!link.name || link.name.trim() === '') && link.url) {
+        if (displayStyle === 'list-item') {
             const simpleListItem = document.createElement('li');
             simpleListItem.className = 'simple-link-item';
 
             const simpleLink = document.createElement('a');
             simpleLink.href = link.url;
-            simpleLink.textContent = link.url;
             simpleLink.target = '_blank';
+
+            if (link.name && link.name.trim() !== '') {
+                simpleLink.innerHTML = `${link.name}<span class="link-separator">--</span><span class="link-url">${link.url}</span>`;
+            } else {
+                simpleLink.textContent = link.url;
+            }
+            
             simpleListItem.appendChild(simpleLink);
 
             // Add context menu
