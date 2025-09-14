@@ -107,7 +107,7 @@ def show_action_menu(file_path):
             "--border",
             "--layout=reverse",
             "--height=10",
-            "--color=bg:#1a1b26,bg+:#24283b,fg:#c0caf5,fg+:#c0caf5,hl:#ff9e64,hl+:#ff9e64,info:#7aa2f7,prompt:#7dcfff,pointer:#bb9af7,marker:#9ece6a,spinner:#bb9af7,header:#7aa2f7,preview-bg:#1a1b26,border:#414868"
+            "--color=bg:#282828,bg+:#3c3836,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:#282828,border:#665c54"
         ]
         
         process = subprocess.Popen(fzf_menu_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding='utf-8')
@@ -144,7 +144,7 @@ if __name__ == "__main__":
             "--preview-window=~3",
             "--border",
             "--layout=reverse",
-            "--color=bg:#1a1b26,bg+:#24283b,fg:#c0caf5,fg+:#c0caf5,hl:#ff9e64,hl+:#ff9e64,info:#7aa2f7,prompt:#7dcfff,pointer:#bb9af7,marker:#9ece6a,spinner:#bb9af7,header:#7aa2f7,preview-bg:#1a1b26,border:#414868",
+            "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54",
             f"--bind=enter:execute(python \"{menu_script_file}\" {{1}})",
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",
             "--bind=ctrl-c:execute-silent(cmd /c echo {1} | clip)",
