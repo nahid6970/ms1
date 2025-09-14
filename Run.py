@@ -31,7 +31,7 @@ Enter choice (1-3): """
             
             # Execute based on choice
             if choice == '1':
-                subprocess.run(['code', file_path])
+                subprocess.run(['cmd', '/c', 'code', file_path])
             elif choice == '2':
                 subprocess.run(['explorer.exe', '/select,', file_path])
             elif choice == '3':
@@ -117,7 +117,7 @@ def show_action_menu(file_path):
         if stdout and process.returncode == 0:
             selection = stdout.strip()
             if selection.startswith('1.'):
-                subprocess.run(['code', file_path])
+                subprocess.run(['cmd', '/c', 'code', file_path])
             elif selection.startswith('2.'):
                 subprocess.run(['explorer.exe', '/select,', file_path])
             elif selection.startswith('3.'):
@@ -145,10 +145,10 @@ if __name__ == "__main__":
             "--border",
             "--layout=reverse",
             "--color=bg:#1e1e2e,bg+:#313244,fg:#cdd6f4,fg+:#f5e0dc,hl:#f38ba8,hl+:#f9e2af,info:#89b4fa,prompt:#a6e3a1,pointer:#f38ba8,marker:#f9e2af,spinner:#94e2d5,header:#89b4fa,preview-bg:#1e1e2e,border:#74c7ec",
-            f"--bind=enter:execute(python \"{menu_script_file}\" {{+1}})",
-            "--bind=ctrl-o:execute-silent(explorer.exe /select,{+1})",
-            "--bind=ctrl-c:execute-silent(cmd /c echo {+1} | clip)",
-            "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{+1}')",
+            f"--bind=enter:execute(python \"{menu_script_file}\" {{1}})",
+            "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",
+            "--bind=ctrl-c:execute-silent(cmd /c echo {1} | clip)",
+            "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
             f"--bind=f1:execute-silent(cmd /c start cmd /k type \"{temp_shortcut_file}\" & pause)",
         ]
 
