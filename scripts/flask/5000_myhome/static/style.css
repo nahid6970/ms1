@@ -1246,4 +1246,15 @@ ul.link-group-content {
   /* margin-top: 0; */
   margin: -4px;
   }
+
+  .link-group-content[style*="display: list-item"] {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    max-height: none !important;
+  }
+
+  .link-group-content[style*="display: list-item"] .link-item {
+    width: 100%;
+  }
 }

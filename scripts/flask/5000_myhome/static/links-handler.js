@@ -562,8 +562,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function createMultiColumnList(elements, groupName) {
     const container = document.createElement('div');
     container.style.display = 'flex';
-    container.style.flexDirection = 'row';
-    container.style.gap = '20px';
+
+    if (window.innerWidth <= 600) {
+        // Single column for small screens
+        container.style.flexDirection = 'column';
+    } else {
+        // Multi-column for larger screens
+        container.style.flexDirection = 'row';
+        container.style.gap = '20px';
+    }
 
     let currentColumn = document.createElement('div');
     currentColumn.style.display = 'flex';
@@ -571,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function () {
     container.appendChild(currentColumn);
 
     elements.forEach((element, index) => {
-        if (index > 0 && index % 5 === 0) {
+        if (window.innerWidth > 600 && index > 0 && index % 5 === 0) {
             currentColumn = document.createElement('div');
             currentColumn.style.display = 'flex';
             currentColumn.style.flexDirection = 'column';
@@ -601,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
     addLinkItem.appendChild(addLinkSpan);
     
     // Add to the last column, or a new one if the last is full
-    if (elements.length % 5 === 0 && elements.length > 0) {
+    if (window.innerWidth > 600 && elements.length % 5 === 0 && elements.length > 0) {
         currentColumn = document.createElement('div');
         currentColumn.style.display = 'flex';
         currentColumn.style.flexDirection = 'column';
