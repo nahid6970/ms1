@@ -16,8 +16,9 @@ def show_action_menu(file_paths):
 2. Open folder location(s)
 3. Run file(s)
 4. Copy file path(s) to clipboard
+5. Open terminal in file directory
 
-Enter choice (1-4): """
+Enter choice (1-5): """
     
     # Create temp file with menu
     with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.txt') as temp_file:
@@ -56,6 +57,11 @@ Enter choice (1-4): """
                     clip_file = temp_clip.name
                 subprocess.run(['cmd', '/c', f'type "{clip_file}" | clip'], shell=True)
                 os.remove(clip_file)
+            elif choice == '5':
+                # Open terminal in file directory
+                for file_path in file_paths:
+                    dir_path = os.path.dirname(os.path.abspath(file_path))
+                    subprocess.run(f'start cmd /k "cd /d "{dir_path}""', shell=True)
             
             # Clean up choice file
             os.remove(choice_file)
@@ -88,7 +94,7 @@ def search_directories_and_files():
     # Shortcut list text for F1 display
     shortcuts_text = r"""
 Shortcuts available:
-  Enter   : Show action menu (VSCode/Folder/Run/Copy) - works with multi-select
+  Enter   : Show action menu (VSCode/Folder/Run/Copy/Terminal) - works with multi-select
   Ctrl-o  : Open file location in Explorer - works with multi-select  
   Ctrl-c  : Copy full file path to clipboard - works with multi-select
   Ctrl-r  : Run file with PowerShell Start-Process - works with multi-select
@@ -134,7 +140,8 @@ def show_fzf_menu():
         f"1. Open with VSCode\\t{len(file_paths)} file(s)",
         f"2. Open folder location(s)\\t{len(file_paths)} file(s)", 
         f"3. Run file(s)\\t{len(file_paths)} file(s)",
-        f"4. Copy file path(s) to clipboard\\t{len(file_paths)} file(s)"
+        f"4. Copy file path(s) to clipboard\\t{len(file_paths)} file(s)",
+        f"5. Open terminal in file directory\\t{len(file_paths)} file(s)"
     ]
     
     try:
@@ -172,6 +179,13 @@ def show_fzf_menu():
                 # Copy all file paths to clipboard
                 paths_text = '\\n'.join(file_paths)
                 subprocess.run(['powershell', '-command', f'Set-Clipboard -Value "{paths_text}"'], shell=True)
+            elif selection.startswith('5.'):
+                # Open terminal in file directory
+                for file_path in file_paths:
+                    dir_path = os.path.dirname(os.path.abspath(file_path))
+                    # subprocess.run(f'start cmd /k "cd /d "{dir_path}""', shell=True)
+                    subprocess.run(['start', 'pwsh', '-NoExit', '-Command', f'Set-Location "{dir_path}"'], shell=True)
+
     
     except Exception as e:
         print(f"Error in menu: {e}")
