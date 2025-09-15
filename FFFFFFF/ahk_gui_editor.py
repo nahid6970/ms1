@@ -518,9 +518,9 @@ class AHKShortcutEditor(ctk.CTk):
                     icon_label.grid(row=0, column=0)
                     icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                    display_text = f"{hotkey} || {name}"
-                    if description:
-                        display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                    # Fixed width for hotkey column (12 characters should be enough for most hotkeys)
+                    hotkey_text = hotkey.ljust(12)
+                    display_text = f"{hotkey_text} || {name}"
                     
                     label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
                     label.grid(row=0, column=1, sticky="ew", padx=5)
@@ -551,9 +551,9 @@ class AHKShortcutEditor(ctk.CTk):
                 icon_label.grid(row=0, column=0)
                 icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                display_text = f"{hotkey} || {name}"
-                if description:
-                    display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                # Fixed width for hotkey column
+                hotkey_text = hotkey.ljust(12)
+                display_text = f"{hotkey_text} || {name}"
                 
                 label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
                 label.grid(row=0, column=1, sticky="ew", padx=5)
@@ -619,9 +619,9 @@ class AHKShortcutEditor(ctk.CTk):
                     icon_label.grid(row=0, column=0)
                     icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                    display_text = f"{trigger} || {name}"
-                    if description:
-                        display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                    # Fixed width for trigger column (12 characters)
+                    trigger_text = trigger.ljust(12)
+                    display_text = f"{trigger_text} || {name}"
                     
                     label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
                     label.grid(row=0, column=1, sticky="ew", padx=5)
@@ -652,9 +652,9 @@ class AHKShortcutEditor(ctk.CTk):
                 icon_label.grid(row=0, column=0)
                 icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                display_text = f"{trigger} || {name}"
-                if description:
-                    display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
+                # Fixed width for trigger column
+                trigger_text = trigger.ljust(12)
+                display_text = f"{trigger_text} || {name}"
                 
                 label = ctk.CTkLabel(item_frame, text=display_text, anchor="w", font=self.app_font)
                 label.grid(row=0, column=1, sticky="ew", padx=5)

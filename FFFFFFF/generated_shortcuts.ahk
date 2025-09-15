@@ -454,8 +454,9 @@ LAlt & c:: {
 ;! PowerShell command to create symbolic link
 ::;mklink::New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
 
-;! Arrow Symbol
-;! Right-pointing arrow symbol  ➔
+;! Symbols
+;! 
+  󰩷  󰣉  󰁄 󰁌 󰞘 󰜴 󱞩 󱞫 󰤼
 ::;--::
 
 ;! Writers list of writings
