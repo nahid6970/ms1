@@ -970,6 +970,10 @@ document.addEventListener('DOMContentLoaded', function () {
   let draggedGroup = null;
 
   function handleGroupDragStart(e) {
+    if (!document.querySelector('.flex-container2').classList.contains('edit-mode')) {
+        e.preventDefault();
+        return;
+    }
     draggedGroup = this;
     this.style.opacity = '0.5';
     e.dataTransfer.effectAllowed = 'move';
