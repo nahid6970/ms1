@@ -455,8 +455,7 @@ LAlt & c:: {
 ::;mklink::New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
 
 ;! Symbols
-;! 
-  󰩷  󰣉  󰁄 󰁌 󰞘 󰜴 󱞩 󱞫 󰤼
+;!   󰩷  󰣉  󰁄 󰁌 󰞘 󰜴 󱞩 󱞫 󰤼
 ::;--::
 
 ;! Writers list of writings
