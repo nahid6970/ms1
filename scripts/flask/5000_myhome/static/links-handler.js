@@ -642,6 +642,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'link-group';
     groupDiv.dataset.groupName = groupName;
+    groupDiv.draggable = true;
+
+    // Add drag event listeners for the group itself
+    groupDiv.addEventListener('dragstart', handleGroupDragStart);
+    groupDiv.addEventListener('dragover', handleGroupDragOver);
+    groupDiv.addEventListener('drop', handleGroupDrop);
+    groupDiv.addEventListener('dragend', handleGroupDragEnd);
 
     const firstLinkInGroup = linksInGroup[0];
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
@@ -985,7 +992,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (draggedGroup !== this) {
       const draggedGroupName = draggedGroup.dataset.groupName;
       const targetGroupName = this.dataset.groupName;
-      swapCollapsibleGroups(draggedGroupName, targetGroupName);
+      
+      if (draggedGroup.classList.contains('collapsible-group')) {
+        swapCollapsibleGroups(draggedGroupName, targetGroupName);
+      } else {
+        moveGroup(draggedGroupName, targetGroupName);
+      }
     }
     return false;
   }
@@ -1557,23 +1569,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Move entire group up or down
-  async function moveGroup(groupName, direction) {
+  async function moveGroup(draggedGroupName, targetGroupName) {
     try {
       const response = await fetch('/api/links');
       const links = await response.json();
 
       // Get all unique group names in their current order
       const groupNames = [...new Set(links.map(link => link.group || 'Ungrouped'))];
-      const currentIndex = groupNames.indexOf(groupName);
-      const targetIndex = currentIndex + direction;
+      
+      const draggedIndex = groupNames.indexOf(draggedGroupName);
+      const targetIndex = groupNames.indexOf(targetGroupName);
 
-      // Check bounds
-      if (targetIndex < 0 || targetIndex >= groupNames.length) {
-        return;
-      }
-
-      // Swap the group names
-      [groupNames[currentIndex], groupNames[targetIndex]] = [groupNames[targetIndex], groupNames[currentIndex]];
+      // Remove the dragged group name and insert it at the target position
+      groupNames.splice(draggedIndex, 1);
+      groupNames.splice(targetIndex, 0, draggedGroupName);
 
       // Rebuild the links array based on the new group order
       const newLinks = [];
