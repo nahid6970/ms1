@@ -518,7 +518,7 @@ class AHKShortcutEditor(ctk.CTk):
                     icon_label.grid(row=0, column=0)
                     icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                    display_text = f"{hotkey}  {name}"
+                    display_text = f"{hotkey} || {name}"
                     if description:
                         display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                     
@@ -551,7 +551,7 @@ class AHKShortcutEditor(ctk.CTk):
                 icon_label.grid(row=0, column=0)
                 icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                display_text = f"{hotkey}  {name}"
+                display_text = f"{hotkey} || {name}"
                 if description:
                     display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                 
@@ -619,7 +619,7 @@ class AHKShortcutEditor(ctk.CTk):
                     icon_label.grid(row=0, column=0)
                     icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                    display_text = f"{trigger}  {name}"
+                    display_text = f"{trigger} || {name}"
                     if description:
                         display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                     
@@ -652,7 +652,7 @@ class AHKShortcutEditor(ctk.CTk):
                 icon_label.grid(row=0, column=0)
                 icon_label.bind("<Button-1>", lambda e, s=shortcut, i=icon_label: self.toggle_enabled(s, i))
 
-                display_text = f"{trigger}  {name}"
+                display_text = f"{trigger} || {name}"
                 if description:
                     display_text += f" ({description[:25]}...)" if len(description) > 25 else f" ({description})"
                 

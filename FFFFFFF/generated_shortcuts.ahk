@@ -455,8 +455,8 @@ LAlt & c:: {
 ::;mklink::New-Item -ItemType SymbolicLink -Path "Fake" -Target "Original" -Force
 
 ;! Arrow Symbol
-;! Right-pointing arrow symbol
-::;--::➔
+;! Right-pointing arrow symbol  ➔
+::;--::
 
 ;! Writers list of writings
 ::;list::x

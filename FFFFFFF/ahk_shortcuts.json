@@ -209,10 +209,10 @@
             "category": "Shell"
         },
         {
-            "name": "Arrow Symbol",
-            "description": "Right-pointing arrow symbol",
+            "name": "Symbols",
+            "description": "\n  󰩷  󰣉  󰁄 󰁌 󰞘 󰜴 󱞩 󱞫 󰤼",
             "trigger": ";--",
-            "replacement": "➔",
+            "replacement": "",
             "category": "Icon/Emoji/Sign"
         },
         {
