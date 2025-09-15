@@ -234,7 +234,12 @@ class AHKShortcutEditor(ctk.CTk):
         self.show_categories = tk.BooleanVar(value=True)
         
         self.load_shortcuts_json()
+
+
         self.create_widgets()
+        # sync icon to loaded state
+        icon = "\uf205" if self.show_categories.get() else "\uf204"
+        self.cat_toggle_btn.configure(text=icon)
         self.update_list_displays()
 
     def create_widgets(self):
@@ -250,8 +255,16 @@ class AHKShortcutEditor(ctk.CTk):
         self.search_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         self.search_frame.grid_columnconfigure(1, weight=1)
 
-        self.settings_button = ctk.CTkButton(self.search_frame, text="⚙", width=30, command=self.toggle_categories)
-        self.settings_button.grid(row=0, column=0, padx=5, pady=5)
+        self.cat_toggle_btn = ctk.CTkButton(
+            self.search_frame,
+            text="\uf205",               # folder-open icon (categories ON)
+            width=30,
+            fg_color="transparent",
+            text_color="#63dbff",
+            font=("jetbrainsmono nfp", 20),
+            command=self.toggle_categories
+        )
+        self.cat_toggle_btn.grid(row=0, column=0, padx=5, pady=5)
         
         self.search_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Search shortcuts...", font=self.app_font)
         self.search_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
@@ -708,6 +721,8 @@ class AHKShortcutEditor(ctk.CTk):
 
     def toggle_categories(self):
         self.show_categories.set(not self.show_categories.get())
+        icon = "\uf205" if self.show_categories.get() else "\uf204"  # open / closed folder
+        self.cat_toggle_btn.configure(text=icon)
         self.save_shortcuts_json()
         self.update_list_displays(search_query=self.search_entry.get())
 
