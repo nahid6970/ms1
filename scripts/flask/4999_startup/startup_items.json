@@ -502,5 +502,14 @@
     ],
     "Command": "--tray",
     "ExecutableType": "other"
+  },
+  {
+    "name": "ngnix",
+    "type": "App",
+    "paths": [
+      "C:\\Users\\nahid\\ms\\msBackups\\@nginx\\nginx.exe"
+    ],
+    "Command": "",
+    "ExecutableType": "other"
   }
 ]
