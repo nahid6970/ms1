@@ -31,10 +31,10 @@ StartRecording() {
     ; Show recording indicator
     ToolTip("🔴 RECORDING - Press ESC to stop")
     
-    ; Set up input hooks only for basic keys, not modifier combinations
-    HotKey("*LButton", RecordClick, "On")
-    HotKey("*RButton", RecordClick, "On")
-    HotKey("*MButton", RecordClick, "On")
+    ; Set up input hooks with ~ prefix to let mouse clicks pass through naturally
+    HotKey("~*LButton", RecordClick, "On")
+    HotKey("~*RButton", RecordClick, "On")
+    HotKey("~*MButton", RecordClick, "On")
     
     ; Hook individual keys (letters and numbers)
     Loop 26 {
@@ -86,9 +86,9 @@ StopRecording() {
     SetTimer(ClearToolTip, -2000)
     
     ; Remove all recording hotkeys
-    try HotKey("*LButton", "Off")
-    try HotKey("*RButton", "Off")
-    try HotKey("*MButton", "Off")
+    try HotKey("~*LButton", "Off")
+    try HotKey("~*RButton", "Off")
+    try HotKey("~*MButton", "Off")
     
     Loop 26 {
         key := Chr(64 + A_Index)
@@ -134,7 +134,7 @@ RecordClick(*) {
     
     ; Get mouse position and button
     MouseGetPos(&x, &y)
-    button := StrReplace(A_ThisHotkey, "*")  ; Remove the *
+    button := StrReplace(A_ThisHotkey, "~*")  ; Remove the ~*
     
     ; Calculate delay from previous action
     delay := A_TickCount - StartTime
@@ -146,14 +146,7 @@ RecordClick(*) {
     action := {type: "click", button: button, x: x, y: y, delay: delay, timestamp: A_TickCount}
     Actions.Push(action)
     
-    ; Click passes through automatically since we're not using ~ prefix for mouse
-    if (button = "LButton") {
-        Click()
-    } else if (button = "RButton") {
-        Click("Right")
-    } else if (button = "MButton") {
-        Click("Middle")
-    }
+    ; Don't manually click here - the ~ prefix lets the original click pass through naturally
 }
 
 RecordKey(*) {
@@ -208,27 +201,44 @@ PlayActions() {
     Playing := true
     ToolTip("▶️ Playing " . Actions.Length . " actions...")
     
+    ; Add small delay before starting playback to ensure system is ready
+    Sleep(100)
+    
     Loop Actions.Length {
         action := Actions[A_Index]
         
-        ; Wait for the recorded delay
+        ; Wait for the recorded delay (minimum 10ms to prevent issues)
         if (action.delay > 0) {
-            Sleep(action.delay)
+            Sleep(Max(action.delay, 10))
+        } else {
+            Sleep(10)  ; Minimum delay between actions
         }
         
         ; Execute the action
         if (action.type = "click") {
-            MouseMove(action.x, action.y, 0)
+            ; Move mouse to position first
+            MouseMove(action.x, action.y, 2)  ; Speed 2 for smooth movement
+            Sleep(50)  ; Small delay after mouse movement
+            
+            ; Perform the click
             if (action.button = "LButton") {
-                Click()
+                Click("Left")
             } else if (action.button = "RButton") {
                 Click("Right")
             } else if (action.button = "MButton") {
                 Click("Middle")
             }
+            
         } else if (action.type = "key") {
             ; Send the key - it's already in proper AutoHotkey format
-            Send(action.key)
+            ; Add extra delay for system operations like cut/copy/paste
+            if (InStr(action.key, "^{x}") || InStr(action.key, "^{c}") || InStr(action.key, "^{v}")) {
+                Send(action.key)
+                Sleep(100)  ; Give time for clipboard operations
+            } else {
+                Send(action.key)
+                Sleep(25)   ; Small delay after each keypress
+            }
         }
     }
     
