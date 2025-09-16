@@ -242,6 +242,7 @@ python "{menu_script_path}" "!temp_file!"
             "--bind=ctrl-c:execute-silent(echo {1} | clip)",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
+            "--bind=ctrl-p:toggle-preview",
         ]
 
         # Start fzf process
