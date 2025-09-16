@@ -1,78 +1,55 @@
-#format = """
-#[╭─user───❯](bold blue) $username
-#[┣─system─❯](bold yellow) $hostname
-#[┣─project❯](bold red) $directory$rust$git_branch$git_state$git_status$package$golang$terraform$docker_context$python$docker_context$nodejs
-#[╰─cmd────❯](bold green)
-#"""
-
-# format = """
-# [╭─time────❯](bold bright-blue) $time
-# [├─user────❯](bold green) $username
-# [├─system──❯](bold yellow) $hostname
-# [├─project─❯](bold red) $directory$rust$git_branch$git_state$git_status$package$golang$terraform$docker_context$python$nodejs
-# [╰─cmd─────❯](bold green) 
-# """
-
-# format = """
-# [╭─time────❯](bold bright-blue) $time
-# [├─user────❯](bold green) $username
-# [├─system──❯](bold yellow) $hostname
-# [├─project─❯](bold red) $directory$rust$git_branch$git_state$git_status$package$golang$terraform$docker_context$python$nodejs
-# [╰─cmd─────❯](bold green) """
+# Single line format - input on same line
+format = "$directory$git_branch$git_state$git_status$python$nodejs$golang$rust$docker_context$package$terraform$cmd_duration$character"
 
 [username]
-style_user = "green bold"
-style_root = "red bold"
-format = "[$user]($style) "
-disabled = false
-show_always = true
+disabled = true
 
 [hostname]
-ssh_only = false
-format = 'on [$hostname](bold blue) '
-trim_at = "."
-disabled = false
+disabled = true
 
 # Replace the "❯" symbol in the prompt with "➜"
 [character]
 success_symbol = "[➜](bold green)"
 error_symbol = "[✗](bold red)"
 
-#  
-# configure directory
+#  
+# configure directory with nice styling
 [directory]
-read_only = " "
+read_only = " "
 truncation_length = 10
 truncate_to_repo = true # truncates directory to root folder if in github repo
-style = "bold italic blue"
+style = "bold cyan"
+format = "  $path "
+use_os_path_sep = false
 
 [cmd_duration]
 min_time = 4
 show_milliseconds = true
 disabled = false
 style = "bold italic red"
+format = " ⏱️ [$duration]($style)"
 
-[time]
-disabled = false
-format = '[🕒 $time]($style) '
-time_format = "%A, %I:%M %P, %B %Y"  # 12-hour format
-utc_time_offset = "local"
-style = "bold bright-white"
+# [time]
+# disabled = false
+# format = '[🕒 $time]($style) '
+# time_format = "%A, %I:%M %P, %B %Y"  # 12-hour format
+# utc_time_offset = "local"
+# style = "bold bright-white"
 
 # [aws]
-# symbol = "  "
+# symbol = "  "
 
 # [conda]
-# symbol = " "
+# symbol = " "
 
 # [dart]
-# symbol = " "
+# symbol = " "
 
 #[directory]
-#read_only = " "
+#read_only = " "
 
 # [docker_context]
-# symbol = " "
+# symbol = " "
 # format = "via [$symbol$context]($style) "
 # style = "blue bold"
 # only_with_files = true
@@ -81,13 +58,13 @@ style = "bold bright-white"
 # disabled = false
 
 # [elixir]
-# symbol = " "
+# symbol = " "
 
 # [elm]
-# symbol = " "
+# symbol = " "
 
 # [git_branch]
-# symbol = " "
+# symbol = " "
 
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style) )'
@@ -117,37 +94,37 @@ added_style = "bold green"
 deleted_style = "bold red"
 
 # [golang]
-# symbol = " "
+# symbol = " "
 
 # [hg_branch]
-# symbol = " "
+# symbol = " "
 
 # [java]
-# symbol = " "
+# symbol = " "
 
 # [julia]
-# symbol = " "
+# symbol = " "
 
 # [haskell]
 # symbol = "λ "
 
 # [memory_usage]
-# symbol = " "
+# symbol = " "
 
 # [nim]
-# symbol = " "
+# symbol = " "
 
 # [nix_shell]
-# symbol = " "
+# symbol = " "
 
 # [package]
-# symbol = " "
+# symbol = " "
 
 # [perl]
-# symbol = " "
+# symbol = " "
 
 # [php]
-# symbol = " "
+# symbol = " "
 
 [python]
 disabled = true
@@ -161,21 +138,21 @@ detect_extensions = ["py"]
 version_format = "v${raw}"
 
 # [ruby]
-# symbol = " "
+# symbol = " "
 
 # [rust]
-# symbol = " "
+# symbol = " "
 
 # [scala]
-# symbol = " "
+# symbol = " "
 
 # [shlvl]
-# symbol = " "
+# symbol = " "
 
 # [swift]
 # symbol = "ﯣ "
 
 # [nodejs]
-# format = "via [ Node.js $version](bold green) "
+# format = "via [ Node.js $version](bold green) "
 # detect_files = ["package.json", ".node-version"]
 # detect_folders = ["node_modules"]
