@@ -137,13 +137,13 @@ def show_fzf_menu():
     files_display = "\\n".join([f"  • {os.path.basename(fp)}" for fp in file_paths])
     
     # ---------- coloured, padded menu lines --------------------------
-    pad = "  "          # left-padding so the line looks “fatter”
+    pad = "  "
     menu_options = [
-        f"{pad}\x1b[1;34m1. Open with VSCode\x1b[0m\t{len(file_paths)} file(s)",
-        f"{pad}\x1b[1;33m2. Open folder location(s)\x1b[0m\t{len(file_paths)} file(s)",
-        f"{pad}\x1b[1;31m3. Run file(s)\x1b[0m\t{len(file_paths)} file(s)",
-        f"{pad}\x1b[1;32m4. Copy file path(s) to clipboard\x1b[0m\t{len(file_paths)} file(s)",
-        f"{pad}\x1b[38;5;236m5. Open terminal in file directory\x1b[0m\t{len(file_paths)} file(s)"
+        f"{pad}\x1b[1;34m1.  VSCode\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;33m2.  folder\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;31m3.  Run Script\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;32m4. 󰴠 Copy path\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[38;5;181m5.  Terminal\x1b[0m\t{len(file_paths)}"  # #E0AFA0
     ]
     # ------------------------------------------------------------------
     
