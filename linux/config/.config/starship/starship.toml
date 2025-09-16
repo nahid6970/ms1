@@ -12,15 +12,15 @@ disabled = true
 success_symbol = "[➜](bold green)"
 error_symbol = "[✗](bold red)"
 
-#  
-# configure directory with nice styling
+# configure directory with folder-like blue styling
 [directory]
 read_only = " "
 truncation_length = 10
 truncate_to_repo = true # truncates directory to root folder if in github repo
-style = "bold cyan"
-format = "  $path "
+style = "bold blue"
+format = "📁 [$path]($style)[$read_only]($read_only_style) "
 use_os_path_sep = false
+repo_root_style = "bold blue"
 
 [cmd_duration]
 min_time = 4
@@ -44,9 +44,6 @@ format = " ⏱️ [$duration]($style)"
 
 # [dart]
 # symbol = " "
-
-#[directory]
-#read_only = " "
 
 # [docker_context]
 # symbol = " "
