@@ -136,24 +136,28 @@ def show_fzf_menu():
     
     files_display = "\\n".join([f"  • {os.path.basename(fp)}" for fp in file_paths])
     
+    # ---------- coloured, padded menu lines --------------------------
+    pad = "  "          # left-padding so the line looks “fatter”
     menu_options = [
-        f"1. Open with VSCode\\t{len(file_paths)} file(s)",
-        f"2. Open folder location(s)\\t{len(file_paths)} file(s)", 
-        f"3. Run file(s)\\t{len(file_paths)} file(s)",
-        f"4. Copy file path(s) to clipboard\\t{len(file_paths)} file(s)",
-        f"5. Open terminal in file directory\\t{len(file_paths)} file(s)"
+        f"{pad}\x1b[1;34m1. Open with VSCode\x1b[0m\t{len(file_paths)} file(s)",
+        f"{pad}\x1b[1;33m2. Open folder location(s)\x1b[0m\t{len(file_paths)} file(s)",
+        f"{pad}\x1b[1;31m3. Run file(s)\x1b[0m\t{len(file_paths)} file(s)",
+        f"{pad}\x1b[1;32m4. Copy file path(s) to clipboard\x1b[0m\t{len(file_paths)} file(s)",
+        f"{pad}\x1b[38;5;236m5. Open terminal in file directory\x1b[0m\t{len(file_paths)} file(s)"
     ]
+    # ------------------------------------------------------------------
     
     try:
         fzf_args = [
             "fzf",
+            "--ansi",                       # << keep colours
             "--prompt=Select action: ",
             f"--header=Choose action for {len(file_paths)} selected file(s):\\n{files_display}",
             "--with-nth=1",
             "--delimiter=\\t",
             "--border",
             "--layout=reverse",
-            "--height=15",
+            "--height=40%",                 # taller window
             "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54"
         ]
         
