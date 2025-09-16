@@ -9,10 +9,14 @@ Playing := false
 Actions := []
 StartTime := 0
 
-; Hotkeys
+; Main control hotkeys (always active)
 ^!k::StartRecording  ; Ctrl+Alt+K to start recording
-Esc::StopRecording   ; Esc to stop recording
 ^!l::PlayActions     ; Ctrl+Alt+L to replay actions
+
+; Conditional Esc hotkey - only active during recording
+#HotIf Recording
+Esc::StopRecording
+#HotIf
 
 StartRecording() {
     if (Playing) {
@@ -27,39 +31,48 @@ StartRecording() {
     ; Show recording indicator
     ToolTip("🔴 RECORDING - Press ESC to stop")
     
-    ; Set up input hooks
+    ; Set up input hooks only for basic keys, not modifier combinations
     HotKey("*LButton", RecordClick, "On")
     HotKey("*RButton", RecordClick, "On")
     HotKey("*MButton", RecordClick, "On")
     
-    ; Hook all printable keys and common special keys
+    ; Hook individual keys (letters and numbers)
     Loop 26 {
         key := Chr(64 + A_Index)  ; A-Z
-        HotKey("*" . key, RecordKey, "On")
-        HotKey("*+" . key, RecordKey, "On")  ; Shift combinations
+        HotKey("~*" . key, RecordKey, "On")  ; ~ lets key pass through
     }
     
     Loop 10 {
         key := A_Index - 1  ; 0-9
-        HotKey("*" . key, RecordKey, "On")
+        HotKey("~*" . key, RecordKey, "On")
     }
     
-    ; Special keys
+    ; Special keys with ~ prefix to let them pass through
     SpecialKeys := ["Space", "Enter", "Tab", "Backspace", "Delete", "Home", "End", 
-                   "Up", "Down", "Left", "Right", "PgUp", "PgDn", "Insert",
-                   "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"]
+                   "Up", "Down", "Left", "Right", "PgUp", "PgDn", "Insert"]
     
     for key in SpecialKeys {
-        HotKey("*" . key, RecordKey, "On")
-        HotKey("*+" . key, RecordKey, "On")  ; Shift combinations
+        HotKey("~*" . key, RecordKey, "On")
     }
     
-    ; Common punctuation
+    ; Function keys
+    Loop 12 {
+        key := "F" . A_Index
+        HotKey("~*" . key, RecordKey, "On")
+    }
+    
+    ; Common punctuation with ~ prefix
     PuncKeys := [";", "'", ",", ".", "/", "-", "=", "\", "[", "]", "``"]
     for key in PuncKeys {
-        HotKey("*" . key, RecordKey, "On")
-        HotKey("*+" . key, RecordKey, "On")  ; Shift combinations
+        HotKey("~*" . key, RecordKey, "On")
     }
+    
+    ; Record modifier keys when pressed with other keys
+    HotKey("~*Ctrl", RecordModifier, "On")
+    HotKey("~*Alt", RecordModifier, "On")
+    HotKey("~*Shift", RecordModifier, "On")
+    HotKey("~*LWin", RecordModifier, "On")
+    HotKey("~*RWin", RecordModifier, "On")
 }
 
 StopRecording() {
@@ -72,36 +85,44 @@ StopRecording() {
     ToolTip("✅ Recording stopped. " . Actions.Length . " actions recorded.")
     SetTimer(ClearToolTip, -2000)
     
-    ; Remove all hotkeys
-    HotKey("*LButton", "Off")
-    HotKey("*RButton", "Off")
-    HotKey("*MButton", "Off")
+    ; Remove all recording hotkeys
+    try HotKey("*LButton", "Off")
+    try HotKey("*RButton", "Off")
+    try HotKey("*MButton", "Off")
     
     Loop 26 {
         key := Chr(64 + A_Index)
-        try HotKey("*" . key, "Off")
-        try HotKey("*+" . key, "Off")
+        try HotKey("~*" . key, "Off")
     }
     
     Loop 10 {
         key := A_Index - 1
-        try HotKey("*" . key, "Off")
+        try HotKey("~*" . key, "Off")
     }
     
     SpecialKeys := ["Space", "Enter", "Tab", "Backspace", "Delete", "Home", "End", 
-                   "Up", "Down", "Left", "Right", "PgUp", "PgDn", "Insert",
-                   "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"]
+                   "Up", "Down", "Left", "Right", "PgUp", "PgDn", "Insert"]
     
     for key in SpecialKeys {
-        try HotKey("*" . key, "Off")
-        try HotKey("*+" . key, "Off")
+        try HotKey("~*" . key, "Off")
+    }
+    
+    Loop 12 {
+        key := "F" . A_Index
+        try HotKey("~*" . key, "Off")
     }
     
     PuncKeys := [";", "'", ",", ".", "/", "-", "=", "\", "[", "]", "``"]
     for key in PuncKeys {
-        try HotKey("*" . key, "Off")
-        try HotKey("*+" . key, "Off")
+        try HotKey("~*" . key, "Off")
     }
+    
+    ; Remove modifier key hooks
+    try HotKey("~*Ctrl", "Off")
+    try HotKey("~*Alt", "Off")
+    try HotKey("~*Shift", "Off")
+    try HotKey("~*LWin", "Off")
+    try HotKey("~*RWin", "Off")
 }
 
 RecordClick(*) {
@@ -125,7 +146,7 @@ RecordClick(*) {
     action := {type: "click", button: button, x: x, y: y, delay: delay, timestamp: A_TickCount}
     Actions.Push(action)
     
-    ; Let the click through
+    ; Click passes through automatically since we're not using ~ prefix for mouse
     if (button = "LButton") {
         Click()
     } else if (button = "RButton") {
@@ -142,7 +163,23 @@ RecordKey(*) {
     
     global Actions, StartTime
     
-    key := StrReplace(A_ThisHotkey, "*")  ; Remove *
+    ; Get the actual key pressed
+    key := A_ThisHotkey
+    key := StrReplace(key, "~*", "")  ; Remove ~* prefix
+    
+    ; Build modifier string for AutoHotkey Send format
+    modifiers := ""
+    if GetKeyState("Ctrl", "P")
+        modifiers .= "^"  ; Ctrl = ^
+    if GetKeyState("Alt", "P")
+        modifiers .= "!"  ; Alt = !
+    if GetKeyState("Shift", "P")
+        modifiers .= "+"  ; Shift = +
+    if GetKeyState("LWin", "P") || GetKeyState("RWin", "P")
+        modifiers .= "#"  ; Win = #
+    
+    ; Format key for AutoHotkey Send
+    finalKey := modifiers . "{" . key . "}"
     
     ; Calculate delay from previous action
     delay := A_TickCount - StartTime
@@ -151,11 +188,15 @@ RecordKey(*) {
     }
     
     ; Record the action
-    action := {type: "key", key: key, delay: delay, timestamp: A_TickCount}
+    action := {type: "key", key: finalKey, delay: delay, timestamp: A_TickCount}
     Actions.Push(action)
     
-    ; Let the key through
-    Send("{" . key . "}")
+    ; Key passes through automatically due to ~ prefix
+}
+
+RecordModifier(*) {
+    ; This function exists just to capture modifier key presses
+    ; The actual recording happens in RecordKey when modifiers are combined with other keys
 }
 
 PlayActions() {
@@ -186,7 +227,8 @@ PlayActions() {
                 Click("Middle")
             }
         } else if (action.type = "key") {
-            Send("{" . action.key . "}")
+            ; Send the key - it's already in proper AutoHotkey format
+            Send(action.key)
         }
     }
     
@@ -200,5 +242,5 @@ ClearToolTip() {
 }
 
 ; Show help on startup
-ToolTip("🎯 Macro Recorder Ready!`nCtrl+Alt+K: Start recording`nEsc: Stop recording`nCtrl+Alt+L: Replay actions")
-SetTimer(ClearToolTip, -3000)
+ToolTip("🎯 Macro Recorder Ready!`nCtrl+Alt+K: Start recording`nEsc: Stop recording (only while recording)`nCtrl+Alt+L: Replay actions")
+SetTimer(ClearToolTip, -4000)
