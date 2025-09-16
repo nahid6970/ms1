@@ -234,6 +234,7 @@ python "{menu_script_path}" "!temp_file!"
             "--delimiter=\t",
             "--preview=bat --style=plain --color=always --line-range :100 {1}",
             "--preview-window=~3",
+            "--preview-window=hidden",   # was "~3"
             "--border",
             "--layout=reverse", 
             "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
