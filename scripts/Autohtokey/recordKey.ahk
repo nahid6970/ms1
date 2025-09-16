@@ -8,6 +8,7 @@ Recording := false
 Playing := false
 Actions := []
 StartTime := 0
+SavePath := "C:\Users\nahid\"
 
 ; Main control hotkeys (always active)
 ^!k::StartRecording  ; Ctrl+Alt+K to start recording
@@ -80,10 +81,14 @@ StopRecording() {
         return
     }
     
-    global Recording, Actions
+    global Recording, Actions, SavePath
     Recording := false
-    ToolTip("✅ Recording stopped. " . Actions.Length . " actions recorded.")
-    SetTimer(ClearToolTip, -2000)
+    
+    ; Save to file and show actions
+    SaveAndShowActions()
+    
+    ToolTip("✅ Recording stopped and saved. " . Actions.Length . " actions recorded.")
+    SetTimer(ClearToolTip, -3000)
     
     ; Remove all recording hotkeys
     try HotKey("~*LButton", "Off")
@@ -123,6 +128,80 @@ StopRecording() {
     try HotKey("~*Shift", "Off")
     try HotKey("~*LWin", "Off")
     try HotKey("~*RWin", "Off")
+}
+
+SaveAndShowActions() {
+    global Actions, SavePath
+    
+    if (Actions.Length = 0) {
+        MsgBox("No actions were recorded.", "Recording Summary")
+        return
+    }
+    
+    ; Generate timestamp for filename
+    timestamp := FormatTime(, "yyyy-MM-dd_HH-mm-ss")
+    filename := SavePath . "macro_recording_" . timestamp . ".txt"
+    
+    ; Create the content to save and display
+    content := "Macro Recording - " . FormatTime(, "yyyy-MM-dd HH:mm:ss") . "`n"
+    content .= "=" . StrRepeat("=", 50) . "`n`n"
+    content .= "Total Actions: " . Actions.Length . "`n`n"
+    
+    displayText := "📝 RECORDED ACTIONS (" . Actions.Length . " total):`n`n"
+    
+    Loop Actions.Length {
+        action := Actions[A_Index]
+        actionNum := Format("{:03d}", A_Index)
+        
+        if (action.type = "click") {
+            actionDesc := actionNum . ". CLICK " . action.button . " at (" . action.x . ", " . action.y . ") - Delay: " . action.delay . "ms"
+        } else if (action.type = "key") {
+            ; Clean up the key display
+            cleanKey := StrReplace(action.key, "{", "")
+            cleanKey := StrReplace(cleanKey, "}", "")
+            cleanKey := StrReplace(cleanKey, "^", "Ctrl+")
+            cleanKey := StrReplace(cleanKey, "!", "Alt+")
+            cleanKey := StrReplace(cleanKey, "+", "Shift+")
+            cleanKey := StrReplace(cleanKey, "#", "Win+")
+            
+            actionDesc := actionNum . ". KEY " . cleanKey . " - Delay: " . action.delay . "ms"
+        }
+        
+        content .= actionDesc . "`n"
+        
+        ; Add to display text (limit to first 20 actions for display)
+        if (A_Index <= 20) {
+            displayText .= actionDesc . "`n"
+        } else if (A_Index = 21) {
+            displayText .= "... and " . (Actions.Length - 20) . " more actions`n"
+        }
+    }
+    
+    ; Add replay instructions
+    content .= "`n" . StrRepeat("=", 60) . "`n"
+    content .= "To replay: Press Ctrl+Alt+L`n"
+    content .= "To record new: Press Ctrl+Alt+K`n"
+    content .= StrRepeat("=", 60)
+    
+    ; Save to file
+    try {
+        ; Create directory if it doesn't exist
+        if (!DirExist(SavePath)) {
+            DirCreate(SavePath)
+        }
+        
+        FileAppend(content, filename, "UTF-8")
+        
+        displayText .= "`n💾 Saved to: " . filename
+        displayText .= "`n`n🎮 Press Ctrl+Alt+L to replay these actions"
+        
+    } catch as err {
+        displayText .= "`n❌ Error saving file: " . err.message
+        displayText .= "`n📁 Attempted path: " . filename
+    }
+    
+    ; Show the actions in a message box
+    MsgBox(displayText, "Recording Complete", "OK 64")
 }
 
 RecordClick(*) {
@@ -249,6 +328,15 @@ PlayActions() {
 
 ClearToolTip() {
     ToolTip()
+}
+
+; Helper function for string repetition
+StrRepeat(str, count) {
+    result := ""
+    Loop count {
+        result .= str
+    }
+    return result
 }
 
 ; Show help on startup
