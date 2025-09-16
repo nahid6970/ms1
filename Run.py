@@ -236,7 +236,7 @@ python "{menu_script_path}" "!temp_file!"
             "--preview-window=~3",
             "--border",
             "--layout=reverse", 
-            "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54",
+            "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54",
             f"--bind=enter:execute({batch_file} {{+1}})",
             "--bind=ctrl-o:execute-silent(explorer.exe /select,{1})",
             "--bind=ctrl-c:execute-silent(echo {1} | clip)",
