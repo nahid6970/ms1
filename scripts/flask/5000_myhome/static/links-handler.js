@@ -580,9 +580,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-    function createMultiColumnList(elements, groupName) {
+    function createMultiColumnList(elements, groupName, linksInGroup) {
     const container = document.createElement('div');
     container.className = 'multi-column-container';
+    
+    // Store original elements with their associated link data for context menu
+    const elementData = elements.map((element, index) => {
+        // For list-item elements, get the link data from linksInGroup
+        const linkInfo = linksInGroup[index];
+        return { element, linkData: linkInfo?.link, linkIndex: linkInfo?.index };
+    });
     
     function buildColumns() {
         // Clear existing content
@@ -599,8 +606,20 @@ document.addEventListener('DOMContentLoaded', function () {
             column.style.display = 'flex';
             column.style.flexDirection = 'column';
             
-            elements.forEach(element => {
-                column.appendChild(element.cloneNode(true));
+            elementData.forEach(({ element, linkData, linkIndex }) => {
+                const clonedElement = element.cloneNode(true);
+                // Re-add context menu to cloned element
+                if (linkData) {
+                    clonedElement.addEventListener('contextmenu', (event) => {
+                        const items = [
+                            { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
+                            { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                            { label: 'Delete', action: () => deleteLink(linkIndex) }
+                        ];
+                        showContextMenu(event, items);
+                    });
+                }
+                column.appendChild(clonedElement);
             });
             
             container.appendChild(column);
@@ -615,14 +634,26 @@ document.addEventListener('DOMContentLoaded', function () {
             currentColumn.style.flexDirection = 'column';
             container.appendChild(currentColumn);
             
-            elements.forEach((element, index) => {
+            elementData.forEach(({ element, linkData, linkIndex }, index) => {
                 if (index > 0 && index % 5 === 0) {
                     currentColumn = document.createElement('div');
                     currentColumn.style.display = 'flex';
                     currentColumn.style.flexDirection = 'column';
                     container.appendChild(currentColumn);
                 }
-                currentColumn.appendChild(element.cloneNode(true));
+                const clonedElement = element.cloneNode(true);
+                // Re-add context menu to cloned element
+                if (linkData) {
+                    clonedElement.addEventListener('contextmenu', (event) => {
+                        const items = [
+                            { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
+                            { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                            { label: 'Delete', action: () => deleteLink(linkIndex) }
+                        ];
+                        showContextMenu(event, items);
+                    });
+                }
+                currentColumn.appendChild(clonedElement);
             });
         }
         
@@ -859,7 +890,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const displayStyle = groupLinkWithStyle ? groupLinkWithStyle.link.display_style : 'flex';
 
       if (displayStyle === 'list-item') {
-        const multiColumnList = createMultiColumnList(elements, groupName);
+        const multiColumnList = createMultiColumnList(elements, groupName, linksInGroup);
         groupDiv.appendChild(multiColumnList);
       } else {
         const groupList = document.createElement('ul');
