@@ -49,9 +49,12 @@ document.addEventListener('DOMContentLoaded', function () {
             simpleLink.target = '_blank';
 
             if (link.name && link.name.trim() !== '') {
-                simpleLink.innerHTML = `<span class="link-name">${link.name}</span><span class="link-separator"> </span><span class="link-url">${link.url}</span>`;
+                const truncatedName = link.name.length > 25 ? link.name.substring(0, 25) + '...' : link.name;
+                const truncatedUrl = link.url.length > 25 ? link.url.substring(0, 25) + '...' : link.url;
+                simpleLink.innerHTML = `<span class="link-name">${truncatedName}</span><span class="link-separator"> </span><span class="link-url">${truncatedUrl}</span>`;
             } else {
-                simpleLink.textContent = link.url;
+                const truncatedUrl = link.url.length > 25 ? link.url.substring(0, 25) + '...' : link.url;
+                simpleLink.textContent = truncatedUrl;
             }
             
             simpleListItem.appendChild(simpleLink);
