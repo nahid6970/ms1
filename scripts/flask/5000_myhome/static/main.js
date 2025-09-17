@@ -78,7 +78,7 @@ function applyPopupStyling(groupName) {
       const groupLinks = links.filter(link => (link.group || 'Ungrouped') === groupName);
       if (groupLinks.length > 0) {
         const groupSettings = groupLinks[0];
-        const popupContents = document.querySelectorAll('.popup-content, .horizontal-stack-popup-content');
+        const popupContents = document.querySelectorAll('.group_type_box_expanded, .group_type_box-popup-content');
         
         popupContents.forEach(popup => {
           if (groupSettings.popup_bg_color) {
@@ -103,7 +103,7 @@ function applyPopupStyling(groupName) {
 
 // Function to reset popup styling to defaults
 function resetPopupStyling() {
-  const popupContents = document.querySelectorAll('.popup-content, .horizontal-stack-popup-content');
+  const popupContents = document.querySelectorAll('.group_type_box_expanded, .group_type_box-popup-content');
   popupContents.forEach(popup => {
     popup.style.removeProperty('--popup-bg-color');
     popup.style.removeProperty('--popup-text-color');

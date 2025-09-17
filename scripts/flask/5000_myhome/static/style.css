@@ -251,7 +251,7 @@ img {
   border-radius: 10px;
 }
 
-.link-group-content {
+.group_type_normal {
   list-style: none;
   /* Remove default list bullets */
   padding: 10px;
@@ -517,7 +517,8 @@ input:checked+.slider:before {
 }
 
 
-.popup-content, .horizontal-stack-popup-content {
+.group_type_box_expanded,
+.group_type_box-popup-content {
   background-color: var(--popup-bg-color, #31343a);
   color: var(--popup-text-color, #ffffff);
   border: 1px solid var(--popup-border-color, transparent);
@@ -544,7 +545,8 @@ input:checked+.slider:before {
   overflow-y: auto;
 }
 
-.popup-content .close-button, .horizontal-stack-popup-content .close-button {
+.group_type_box_expanded .close-button,
+.group_type_box-popup-content .close-button {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -661,7 +663,7 @@ input:checked+.slider:before {
 }
 
 /* Additional styling for the edit group popup */
-#edit-group-popup .popup-content {
+#edit-group-popup .group_type_box_expanded {
   min-width: 400px;
 }
 
@@ -697,7 +699,7 @@ input:checked+.slider:before {
 
 
 /* items modified to make it look good */
-ul.link-group-content {
+ul.group_type_normal {
   /* margin-top: 0; */
   margin: 0;
 }
@@ -710,16 +712,18 @@ div.group-header-container {
 
 html body {
   margin-top: 20px;
-  margin-left: 20px; /* Reduced margin since sidebar is now collapsible */
+  margin-left: 20px;
+  /* Reduced margin since sidebar is now collapsible */
 }
 
 div.toggle-container {
   margin-top: -16px;
-  margin-left: -15px; /* Adjust toggle position for new sidebar */
+  margin-left: -15px;
+  /* Adjust toggle position for new sidebar */
 }
 
-/* Collapsible groups styling */
-.collapsible-groups-container {
+/* Top groups styling */
+.group_type_top-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -729,13 +733,13 @@ div.toggle-container {
   border-radius: 10px;
 }
 
-.collapsible-groups-row {
+.group_type_top-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.collapsible-group {
+.group_type_top {
   background-color: #2d2d2d;
   border-radius: 8px;
   padding: 10px;
@@ -744,13 +748,13 @@ div.toggle-container {
   transition: all 0.3s ease;
 }
 
-.collapsible-group.expanded {
+.group_type_top.expanded {
   width: 100%;
   max-width: 100%;
   order: -1;
 }
 
-.collapsible-group-header {
+.group_type_top-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -760,24 +764,24 @@ div.toggle-container {
   margin-bottom: 10px;
 }
 
-.collapsible-group-header .edit-buttons {
+.group_type_top-header .edit-buttons {
   display: none;
   gap: 5px;
   margin-left: 10px;
 }
 
-.edit-mode .collapsible-group-header .edit-buttons {
+.edit-mode .group_type_top-header .edit-buttons {
   display: flex;
 }
 
-.collapsible-group-title {
+.group_type_top-title {
   color: #ffffff;
   margin: 0;
   font-size: 16px;
   flex-grow: 1;
 }
 
-.collapsible-toggle-btn {
+.group_type_top-toggle-btn {
   background: none;
   border: none;
   color: #ffffff;
@@ -791,20 +795,20 @@ div.toggle-container {
   justify-content: center;
 }
 
-.collapsible-group-content {
+.group_type_top-content {
   display: none;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.collapsible-group-content.expanded {
+.group_type_top-content.expanded {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.collapsible-group-content .link-item {
+.group_type_top-content .link-item {
   margin: 5px 0;
   padding: 0;
   background-color: #3a3a3a;
@@ -819,12 +823,12 @@ div.toggle-container {
   cursor: pointer !important;
 }
 
-.collapsible-group-content .link-item * {
+.group_type_top-content .link-item * {
   cursor: pointer !important;
 }
 
-/* Text links in collapsible groups should be flexible */
-.collapsible-group-content .link-item.link-type-text {
+/* Text links in top groups should be flexible */
+.group_type_top-content .link-item.link-type-text {
   width: auto;
   height: auto;
   min-width: 80px;
@@ -833,7 +837,7 @@ div.toggle-container {
   padding: 8px 12px;
 }
 
-.collapsible-group-content .link-item::before {
+.group_type_top-content .link-item::before {
   content: '';
   position: absolute;
   top: 0;
@@ -844,17 +848,17 @@ div.toggle-container {
   transition: left 0.5s;
 }
 
-.collapsible-group-content .link-item:hover {
+.group_type_top-content .link-item:hover {
   background-color: #4a4a4a;
   transform: translateY(-5px) scale(1.02);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
 }
 
-.collapsible-group-content .link-item:hover::before {
+.group_type_top-content .link-item:hover::before {
   left: 100%;
 }
 
-.collapsible-edit-btn {
+.group_type_top-edit-btn {
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -864,48 +868,48 @@ div.toggle-container {
   font-size: 12px;
 }
 
-.collapsible-edit-btn:hover {
+.group_type_top-edit-btn:hover {
   background-color: #45a049;
 }
 
-/* Drag and drop styling for collapsible groups */
-.collapsible-group.dragging {
+/* Drag and drop styling for top groups */
+.group_type_top.dragging {
   opacity: 0.5;
   transform: rotate(2deg);
 }
 
-.collapsible-group {
+.group_type_top {
   cursor: move;
 }
 
-.collapsible-group-header {
+.group_type_top-header {
   cursor: pointer;
 }
 
 /* Prevent header clicks during drag operations */
-.collapsible-group.drag-active .collapsible-group-header {
+.group_type_top.drag-active .group_type_top-header {
   pointer-events: none;
 }
 
-.collapsible-group.drag-active .collapsible-group-content {
+.group_type_top.drag-active .group_type_top-content {
   pointer-events: auto;
 }
 
 /* Enhanced styling for expanded groups */
-.collapsible-groups-row.expanded-row {
+.group_type_top-row.expanded-row {
   order: -1;
   margin-bottom: 15px;
   padding-bottom: 15px;
   border-bottom: 2px solid #444;
 }
 
-.collapsible-groups-row.expanded-row .collapsible-group {
+.group_type_top-row.expanded-row .group_type_top {
   width: 100%;
   max-width: 100%;
 }
 
 /* Ensure expanded row is properly cleaned up */
-.collapsible-groups-row:empty {
+.group_type_top-row:empty {
   display: none;
   margin: 0;
   padding: 0;
@@ -913,7 +917,7 @@ div.toggle-container {
 }
 
 /* Drag over effect */
-.collapsible-group.drag-over {
+.group_type_top.drag-over {
   border: 2px dashed #4CAF50;
   background-color: #2a4a2a;
 }
@@ -941,8 +945,8 @@ div.toggle-container {
   /* Take full width by default */
 }
 
-/* Horizontal stacking for groups */
-.horizontal-stack {
+/* Box stacking for groups */
+.group_type_box {
   flex: 0 0 auto;
   /* Allow to sit side-by-side, fixed width */
   margin-right: 10px;
@@ -958,15 +962,15 @@ div.toggle-container {
   cursor: pointer;
 }
 
-.horizontal-stack .group-title {
+.group_type_box .group-title {
   color: inherit;
 }
 
-.horizontal-stack:hover {
+.group_type_box:hover {
   background-color: var(--horizontal-hover-color, #3a3a3a);
 }
 
-.horizontal-stack .link-group-content {
+.group_type_box .group_type_normal {
   flex-direction: row;
   /* Items inside this group will be in a row */
   flex-wrap: nowrap;
@@ -974,14 +978,14 @@ div.toggle-container {
   align-items: center;
 }
 
-.horizontal-stack .group-header-container {
+.group_type_box .group-header-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
 }
 
-.horizontal-stack .group-title {
+.group_type_box .group-title {
   text-align: center;
 }
 
@@ -1010,7 +1014,7 @@ div.toggle-container {
   color: #ffc107;
 }
 
-#horizontal-stack-popup .popup-content-inner .link-item {
+#group_type_box-popup .popup-content-inner .link-item {
   flex-grow: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -1018,19 +1022,19 @@ div.toggle-container {
   cursor: pointer !important;
 }
 
-#horizontal-stack-popup .popup-content-inner .link-item * {
+#group_type_box-popup .popup-content-inner .link-item * {
   cursor: pointer !important;
 }
 
-/* Text links in horizontal stack popup should be rectangular */
-#horizontal-stack-popup .popup-content-inner .link-item.link-type-text {
+/* Text links in box popup should be rectangular */
+#group_type_box-popup .popup-content-inner .link-item.link-type-text {
   width: 120px;
   height: 60px;
   min-width: 120px;
   min-height: 60px;
 }
 
-#horizontal-stack-popup .popup-content-inner .link-item::before {
+#group_type_box-popup .popup-content-inner .link-item::before {
   content: '';
   position: absolute;
   top: 0;
@@ -1041,12 +1045,12 @@ div.toggle-container {
   transition: left 0.5s;
 }
 
-#horizontal-stack-popup .popup-content-inner .link-item:hover {
+#group_type_box-popup .popup-content-inner .link-item:hover {
   transform: translateY(-5px) scale(1.02);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
 }
 
-#horizontal-stack-popup .popup-content-inner .link-item:hover::before {
+#group_type_box-popup .popup-content-inner .link-item:hover::before {
   left: 100%;
 }
 
@@ -1125,49 +1129,55 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 
 
 .context-menu {
-    position: fixed;
-    z-index: 10002;
-    width: 150px;
-    background-color: #383838;
-    border: 1px solid #ccc;
-    border-radius: 0;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  z-index: 10002;
+  width: 150px;
+  background-color: #383838;
+  border: 1px solid #ccc;
+  border-radius: 0;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .context-menu-item {
-    padding: 8px 12px;
-    cursor: pointer;
+  padding: 8px 12px;
+  cursor: pointer;
 }
 
 .context-menu-item:hover {
-    background-color: #4f4f4f;
+  background-color: #4f4f4f;
 }
 
 .context-menu-item.context-menu-edit {
-    color: #4CAF50; /* Green */
+  color: #4CAF50;
+  /* Green */
 }
+
 .context-menu-item.context-menu-edit:hover {
-    background-color: #4CAF50;
-    color: white;
+  background-color: #4CAF50;
+  color: white;
 }
 
 .context-menu-item.context-menu-copy {
-    color: #2196F3; /* Blue */
+  color: #2196F3;
+  /* Blue */
 }
+
 .context-menu-item.context-menu-copy:hover {
-    background-color: #2196F3;
-    color: white;
+  background-color: #2196F3;
+  color: white;
 }
 
 .context-menu-item.context-menu-delete {
-    color: #f44336; /* Red */
-}
-.context-menu-item.context-menu-delete:hover {
-    background-color: #f44336;
-    color: white;
+  color: #f44336;
+  /* Red */
 }
 
-.collapsible-group-content .link-item.add-link-item {
+.context-menu-item.context-menu-delete:hover {
+  background-color: #f44336;
+  color: white;
+}
+
+.group_type_top-content .link-item.add-link-item {
   width: 50px;
   height: 50px;
   min-width: 50px;
@@ -1215,60 +1225,69 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 
 
 @media (max-width: 600px) {
-  .popup-content, .horizontal-stack-popup-content {
+
+  .group_type_box_expanded,
+  .group_type_box-popup-content {
     max-width: 90vw;
     max-height: 90vh;
   }
-  html, body {
+
+  html,
+  body {
     margin: 5px;
     margin-left: -3%;
   }
+
   .flex-container2 {
     padding: 0px;
     border-radius: 15px;
   }
+
   .toggle-container span {
     display: none;
   }
+
   .link-item a {
-  /* Styles for the link itself within the container */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 100%;
-  height: 100%;
-  padding: 5px;
-  font-family: jetbrainsmono nfp;
-  background-color: transparent;
-  box-shadow: none;
-  margin: 0;
-  }
-  .link-group-content {
-  list-style: none;
-  /* Remove default list bullets */
-  padding: 0px;
-  /* Remove default padding */
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: left;
-  background-color: #252525;
-  border-radius: 10px;
-  border: #0056b3 solid 1px;
-  }
-ul.link-group-content {
-  /* margin-top: 0; */
-  margin: -4px;
+    /* Styles for the link itself within the container */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    font-family: jetbrainsmono nfp;
+    background-color: transparent;
+    box-shadow: none;
+    margin: 0;
   }
 
-  .link-group-content[style*="display: list-item"] {
+  .group_type_normal {
+    list-style: none;
+    /* Remove default list bullets */
+    padding: 0px;
+    /* Remove default padding */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    background-color: #252525;
+    border-radius: 10px;
+    border: #0056b3 solid 1px;
+  }
+
+  ul.group_type_normal {
+    /* margin-top: 0; */
+    margin: -4px;
+  }
+
+  .group_type_normal[style*="display: list-item"] {
     display: flex !important;
     flex-direction: column !important;
     flex-wrap: nowrap !important;
     max-height: none !important;
   }
 
-  .link-group-content[style*="display: list-item"] .link-item {
+  .group_type_normal[style*="display: list-item"] .link-item {
     width: 100%;
   }
 }

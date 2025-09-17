@@ -156,11 +156,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const collapsibleGroupNames = Object.keys(collapsibleGroups);
       if (collapsibleGroupNames.length > 0) {
         const collapsibleContainer = document.createElement('div');
-        collapsibleContainer.className = 'collapsible-groups-container';
+        collapsibleContainer.className = 'group_type_top-container';
 
         // Create regular row for collapsed groups
         const regularRow = document.createElement('div');
-        regularRow.className = 'collapsible-groups-row regular-row';
+        regularRow.className = 'group_type_top-row regular-row';
 
         // Sort groups by their original order in the links array to maintain consistent positioning
         const sortedGroupNames = collapsibleGroupNames.sort((a, b) => {
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Function to create a collapsible group
   function createCollapsibleGroup(groupName, elements, links, originalIndex) {
     const collapsibleGroup = document.createElement('div');
-    collapsibleGroup.className = 'collapsible-group';
+    collapsibleGroup.className = 'group_type_top';
     collapsibleGroup.dataset.groupName = groupName;
     collapsibleGroup.draggable = true;
 
@@ -220,10 +220,10 @@ document.addEventListener('DOMContentLoaded', function () {
     collapsibleGroup.addEventListener('dragend', handleGroupDragEnd);
 
     const header = document.createElement('div');
-    header.className = 'collapsible-group-header';
+    header.className = 'group_type_top-header';
 
     const title = document.createElement('h4');
-    title.className = 'collapsible-group-title';
+    title.className = 'group_type_top-title';
 
     // Use custom top name if available, otherwise use group name
     const firstLink = links[0];
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
     editButtons.className = 'edit-buttons';
 
     const editBtn = document.createElement('button');
-    editBtn.className = 'collapsible-edit-btn';
+    editBtn.className = 'group_type_top-edit-btn';
     editBtn.textContent = ''; //⚙️
     editBtn.onclick = (e) => {
       e.stopPropagation();
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
     editButtons.appendChild(editBtn);
 
     const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'collapsible-toggle-btn';
+    toggleBtn.className = 'group_type_top-toggle-btn';
     toggleBtn.textContent = '▼';
 
     header.appendChild(title);
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
     header.appendChild(toggleBtn);
 
     const content = document.createElement('ul');
-    content.className = 'collapsible-group-content';
+    content.className = 'group_type_top-content';
 
     // Create elements for collapsible group with full functionality
     elements.forEach((element, index) => {
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     header.addEventListener('click', (e) => {
       // Don't trigger if clicking on edit button or during drag operations
-      if (e.target.classList.contains('collapsible-edit-btn') ||
+      if (e.target.classList.contains('group_type_top-edit-btn') ||
         isDragging ||
         collapsibleGroup.classList.contains('drag-active')) {
         e.preventDefault();
@@ -424,12 +424,12 @@ document.addEventListener('DOMContentLoaded', function () {
       const wasExpanded = content.classList.contains('expanded');
 
       // Close all other expanded groups first and properly restore them
-      const allGroups = document.querySelectorAll('.collapsible-group');
+      const allGroups = document.querySelectorAll('.group_type_top');
       const groupsToRestore = [];
 
       allGroups.forEach(group => {
-        const groupContent = group.querySelector('.collapsible-group-content');
-        const groupToggle = group.querySelector('.collapsible-toggle-btn');
+        const groupContent = group.querySelector('.group_type_top-content');
+        const groupToggle = group.querySelector('.group_type_top-toggle-btn');
         if (group !== collapsibleGroup) {
           // Always ensure proper state cleanup for all other groups
           groupContent.classList.remove('expanded');
@@ -477,12 +477,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to move group to expanded row (top)
   function moveToExpandedRow(group) {
-    const container = document.querySelector('.collapsible-groups-container');
+    const container = document.querySelector('.group_type_top-container');
     let expandedRow = container.querySelector('.expanded-row');
 
     if (!expandedRow) {
       expandedRow = document.createElement('div');
-      expandedRow.className = 'collapsible-groups-row expanded-row';
+      expandedRow.className = 'group_type_top-row expanded-row';
       container.insertBefore(expandedRow, container.firstChild);
     }
 
@@ -491,12 +491,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to move group back to regular row (maintain original position)
   function moveToRegularRow(group) {
-    const container = document.querySelector('.collapsible-groups-container');
+    const container = document.querySelector('.group_type_top-container');
     let regularRow = container.querySelector('.regular-row');
 
     if (!regularRow) {
       regularRow = document.createElement('div');
-      regularRow.className = 'collapsible-groups-row regular-row';
+      regularRow.className = 'group_type_top-row regular-row';
       container.appendChild(regularRow);
     }
 
@@ -525,12 +525,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to move group back to regular row maintaining original order
   function moveToRegularRowInOrder(group) {
-    const container = document.querySelector('.collapsible-groups-container');
+    const container = document.querySelector('.group_type_top-container');
     let regularRow = container.querySelector('.regular-row');
 
     if (!regularRow) {
       regularRow = document.createElement('div');
-      regularRow.className = 'collapsible-groups-row regular-row';
+      regularRow.className = 'group_type_top-row regular-row';
       container.appendChild(regularRow);
     }
 
@@ -652,7 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const firstLinkInGroup = linksInGroup[0];
     if (firstLinkInGroup && firstLinkInGroup.link.horizontal_stack) {
-      groupDiv.classList.add('horizontal-stack');
+      groupDiv.classList.add('group_type_box');
       
       // Apply custom horizontal stack styling
       const linkData = firstLinkInGroup.link;
@@ -679,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
 
-        const popup = document.getElementById('horizontal-stack-popup');
+        const popup = document.getElementById('group_type_box-popup');
         const popupContent = popup.querySelector('.popup-content-inner');
         popupContent.innerHTML = '';
         elements.forEach(element => {
@@ -825,7 +825,7 @@ document.addEventListener('DOMContentLoaded', function () {
         groupDiv.appendChild(multiColumnList);
       } else {
         const groupList = document.createElement('ul');
-        groupList.className = 'link-group-content';
+        groupList.className = 'group_type_normal';
         groupList.style.display = displayStyle;
 
         elements.forEach(element => {
@@ -997,7 +997,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const draggedGroupName = draggedGroup.dataset.groupName;
       const targetGroupName = this.dataset.groupName;
       
-      if (draggedGroup.classList.contains('collapsible-group')) {
+      if (draggedGroup.classList.contains('group_type_top')) {
         swapCollapsibleGroups(draggedGroupName, targetGroupName);
       } else {
         moveGroup(draggedGroupName, targetGroupName);
@@ -1182,11 +1182,11 @@ document.addEventListener('DOMContentLoaded', function () {
           addLinkForm.reset(); // Clear form
           await fetchAndDisplayLinks(); // Refresh links
 
-          // Re-open the collapsible group if it was open
-          const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+          // Re-open the top group if it was open
+          const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
           if (groupElement) {
-            const content = groupElement.querySelector('.collapsible-group-content');
-            const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+            const content = groupElement.querySelector('.group_type_top-content');
+            const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
             if (content && toggleBtn) {
               content.classList.add('expanded');
               toggleBtn.textContent = '▲';
@@ -1195,9 +1195,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           }
 
-          // Re-open the horizontal stack popup if it was open
+          // Re-open the box popup if it was open
           const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
-          if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
+          if (groupDiv && groupDiv.classList.contains('group_type_box')) {
             groupDiv.click();
           }
         } else {
@@ -1301,12 +1301,12 @@ document.addEventListener('DOMContentLoaded', function () {
             editLinkPopup.classList.add('hidden');
             await fetchAndDisplayLinks();
 
-            // Re-open the collapsible group if it was open
+            // Re-open the top group if it was open
             if (originalLink.collapsible) {
-              const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+              const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
               if (groupElement) {
-                const content = groupElement.querySelector('.collapsible-group-content');
-                const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+                const content = groupElement.querySelector('.group_type_top-content');
+                const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
                 if (content && toggleBtn) {
                   content.classList.add('expanded');
                   toggleBtn.textContent = '▲';
@@ -1423,11 +1423,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (response.ok) {
           await fetchAndDisplayLinks();
 
-          // Re-open the collapsible group if it was open
-          const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+          // Re-open the top group if it was open
+          const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
           if (groupElement) {
-            const content = groupElement.querySelector('.collapsible-group-content');
-            const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+            const content = groupElement.querySelector('.group_type_top-content');
+            const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
             if (content && toggleBtn) {
               content.classList.add('expanded');
               toggleBtn.textContent = '▲';
@@ -1437,7 +1437,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
 
           const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
-          if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
+          if (groupDiv && groupDiv.classList.contains('group_type_box')) {
             groupDiv.click();
           }
         } else {
@@ -1461,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', function () {
     editModeToggle.addEventListener('change', async function () {
       const expandedGroups = [];
       // Capture currently expanded groups before re-rendering
-      document.querySelectorAll('.collapsible-group.expanded').forEach(group => {
+      document.querySelectorAll('.group_type_top.expanded').forEach(group => {
         expandedGroups.push(group.dataset.groupName);
       });
 
@@ -1476,15 +1476,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Re-expand previously expanded groups
       expandedGroups.forEach(groupName => {
-        const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+        const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
         if (groupElement) {
-          const content = groupElement.querySelector('.collapsible-group-content');
-          const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+          const content = groupElement.querySelector('.group_type_top-content');
+          const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
           if (content && toggleBtn) {
             content.classList.add('expanded');
             toggleBtn.textContent = '▲';
             groupElement.classList.add('expanded');
-            // Move to expanded row if it's a collapsible group
+            // Move to expanded row if it's a top group
             moveToExpandedRow(groupElement);
           }
         }
