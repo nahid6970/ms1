@@ -1736,10 +1736,10 @@ document.addEventListener('DOMContentLoaded', function () {
       await fetchAndDisplayLinks(); // Re-render the UI
 
       // Re-open the collapsible group if it was open
-      const groupElement = document.querySelector(`.collapsible-group[data-group-name="${groupName}"]`);
+      const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
       if (groupElement) {
-        const content = groupElement.querySelector('.collapsible-group-content');
-        const toggleBtn = groupElement.querySelector('.collapsible-toggle-btn');
+        const content = groupElement.querySelector('.group_type_top-content');
+        const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
         if (content && toggleBtn) {
           content.classList.add('expanded');
           toggleBtn.textContent = '▲';
@@ -1750,7 +1750,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Re-open the popup if it was open
       const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
-      if (groupDiv && groupDiv.classList.contains('horizontal-stack')) {
+      if (groupDiv && groupDiv.classList.contains('group_type_box')) {
         groupDiv.click();
       }
 
