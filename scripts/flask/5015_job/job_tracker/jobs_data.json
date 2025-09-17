@@ -122,5 +122,16 @@
         "status": "Admit Card Downloaded",
         "notes": "ID: CSBSBTQY\r\npw: CSAOWRAGDD",
         "created_date": "2025-09-05T19:55:03.478990"
+    },
+    {
+        "id": 13,
+        "company": "Anti-Corruption Commission",
+        "position": "grade9",
+        "job_url": "https://acc.teletalk.com.bd/",
+        "applied_date": "",
+        "deadline": "2025-10-04",
+        "status": "Interested",
+        "notes": "",
+        "created_date": "2025-09-17T19:32:57.976063"
     }
 ]
