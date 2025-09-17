@@ -1452,6 +1452,8 @@ document.addEventListener('DOMContentLoaded', function () {
     newLink.name = `${newLink.name} (copy)`;
 
     try {
+        const groupName = linkToCopy.group || 'Ungrouped';
+        
         const response = await fetch('/api/links');
         const links = await response.json();
 
@@ -1470,7 +1472,26 @@ document.addEventListener('DOMContentLoaded', function () {
             throw new Error('Failed to update links on the server.');
         }
 
-        fetchAndDisplayLinks();
+        await fetchAndDisplayLinks();
+
+        // Re-open the top group if it was open
+        const groupElement = document.querySelector(`.group_type_top[data-group-name="${groupName}"]`);
+        if (groupElement) {
+          const content = groupElement.querySelector('.group_type_top-content');
+          const toggleBtn = groupElement.querySelector('.group_type_top-toggle-btn');
+          if (content && toggleBtn) {
+            content.classList.add('expanded');
+            toggleBtn.textContent = '▲';
+            groupElement.classList.add('expanded');
+            moveToExpandedRow(groupElement);
+          }
+        }
+
+        // Re-open the box popup if it was open
+        const groupDiv = document.querySelector(`.link-group[data-group-name="${groupName}"]`);
+        if (groupDiv && groupDiv.classList.contains('group_type_box')) {
+          groupDiv.click();
+        }
 
     } catch (error) {
         console.error('Error copying link:', error);
