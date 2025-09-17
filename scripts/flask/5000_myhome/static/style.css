@@ -517,8 +517,8 @@ input:checked+.slider:before {
 }
 
 
-.group_type_box_expanded,
-.group_type_box-popup-content {
+.Menu,
+.group_type_box.expanded {
   background-color: var(--popup-bg-color, #31343a);
   color: var(--popup-text-color, #ffffff);
   border: 1px solid var(--popup-border-color, transparent);
@@ -545,8 +545,8 @@ input:checked+.slider:before {
   overflow-y: auto;
 }
 
-.group_type_box_expanded .close-button,
-.group_type_box-popup-content .close-button {
+.Menu .close-button,
+.group_type_box.expanded .close-button {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -663,7 +663,7 @@ input:checked+.slider:before {
 }
 
 /* Additional styling for the edit group popup */
-#edit-group-popup .group_type_box_expanded {
+#edit-group-popup .Menu {
   min-width: 400px;
 }
 
@@ -1226,8 +1226,8 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
 
 @media (max-width: 600px) {
 
-  .group_type_box_expanded,
-  .group_type_box-popup-content {
+  .Menu,
+  .group_type_box.expanded {
     max-width: 90vw;
     max-height: 90vh;
   }
