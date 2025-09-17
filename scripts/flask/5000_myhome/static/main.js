@@ -117,7 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const addLinkPopup = document.getElementById('add-link-popup');
   const editLinkPopup = document.getElementById('edit-link-popup');
   const editGroupPopup = document.getElementById('edit-group-popup');
-  const horizontalStackPopup = document.getElementById('horizontal-stack-popup');
+  const groupTypeBoxPopup = document.getElementById('group_type_box-popup');
+
+  console.log('Popup elements found:', {
+    addLinkPopup: !!addLinkPopup,
+    editLinkPopup: !!editLinkPopup,
+    editGroupPopup: !!editGroupPopup,
+    groupTypeBoxPopup: !!groupTypeBoxPopup
+  });
 
   // Close buttons for addLinkPopup
   const addCloseButton = addLinkPopup ? addLinkPopup.querySelector('.close-button') : null;
@@ -146,11 +153,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Close buttons for horizontalStackPopup
-  const horizontalStackCloseButton = horizontalStackPopup ? horizontalStackPopup.querySelector('.close-button') : null;
-  if (horizontalStackCloseButton) {
-    horizontalStackCloseButton.addEventListener('click', () => {
-      horizontalStackPopup.classList.add('hidden');
+  // Close buttons for groupTypeBoxPopup
+  const groupTypeBoxCloseButton = groupTypeBoxPopup ? groupTypeBoxPopup.querySelector('.close-button') : null;
+  console.log('Group type box close button found:', !!groupTypeBoxCloseButton);
+  if (groupTypeBoxCloseButton) {
+    groupTypeBoxCloseButton.addEventListener('click', (e) => {
+      console.log('Group type box close button clicked');
+      e.preventDefault();
+      e.stopPropagation();
+      groupTypeBoxPopup.classList.add('hidden');
       resetPopupStyling();
     });
   }
@@ -169,8 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
       editGroupPopup.classList.add('hidden');
       resetPopupStyling();
     }
-    if (event.target === horizontalStackPopup) {
-      horizontalStackPopup.classList.add('hidden');
+    if (event.target === groupTypeBoxPopup) {
+      groupTypeBoxPopup.classList.add('hidden');
       resetPopupStyling();
     }
   });

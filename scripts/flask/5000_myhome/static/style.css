@@ -508,7 +508,7 @@ input:checked+.slider:before {
   z-index: 10001 !important;
 }
 
-#horizontal-stack-popup {
+#group_type_box-popup {
   z-index: 10000 !important;
 }
 
@@ -536,7 +536,7 @@ input:checked+.slider:before {
   /* max-height: 90vh; */
 }
 
-#horizontal-stack-popup .popup-content-inner {
+#group_type_box-popup .popup-content-inner {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
