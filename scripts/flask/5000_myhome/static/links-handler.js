@@ -582,62 +582,97 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function createMultiColumnList(elements, groupName) {
     const container = document.createElement('div');
-    container.style.display = 'flex';
-
-    if (window.innerWidth <= 600) {
-        // Single column for small screens
-        container.style.flexDirection = 'column';
-    } else {
-        // Multi-column for larger screens
-        container.style.flexDirection = 'row';
-        container.style.gap = '20px';
-    }
-
-    let currentColumn = document.createElement('div');
-    currentColumn.style.display = 'flex';
-    currentColumn.style.flexDirection = 'column';
-    container.appendChild(currentColumn);
-
-    elements.forEach((element, index) => {
-        if (window.innerWidth > 600 && index > 0 && index % 5 === 0) {
-            currentColumn = document.createElement('div');
+    container.className = 'multi-column-container';
+    
+    function buildColumns() {
+        // Clear existing content
+        container.innerHTML = '';
+        
+        const isSmallScreen = window.innerWidth <= 600;
+        
+        if (isSmallScreen) {
+            // Single column for small screens
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            
+            const column = document.createElement('div');
+            column.style.display = 'flex';
+            column.style.flexDirection = 'column';
+            
+            elements.forEach(element => {
+                column.appendChild(element.cloneNode(true));
+            });
+            
+            container.appendChild(column);
+        } else {
+            // Multi-column for larger screens
+            container.style.display = 'flex';
+            container.style.flexDirection = 'row';
+            container.style.gap = '20px';
+            
+            let currentColumn = document.createElement('div');
             currentColumn.style.display = 'flex';
             currentColumn.style.flexDirection = 'column';
             container.appendChild(currentColumn);
+            
+            elements.forEach((element, index) => {
+                if (index > 0 && index % 5 === 0) {
+                    currentColumn = document.createElement('div');
+                    currentColumn.style.display = 'flex';
+                    currentColumn.style.flexDirection = 'column';
+                    container.appendChild(currentColumn);
+                }
+                currentColumn.appendChild(element.cloneNode(true));
+            });
         }
-        currentColumn.appendChild(element);
-    });
+        
+        // Add the '+' button to the last column
+        const addLinkItem = document.createElement('li');
+        addLinkItem.className = 'link-item add-link-item';
+        addLinkItem.style.width = 'auto';
+        addLinkItem.style.height = '30px';
+        addLinkItem.style.minWidth = '30px';
+        addLinkItem.style.minHeight = '30px';
 
-    // Add the '+' button
-    const addLinkItem = document.createElement('li');
-    addLinkItem.className = 'link-item add-link-item';
-    addLinkItem.style.width = 'auto'; // Override default size
-    addLinkItem.style.height = '30px';
+        const addLinkSpan = document.createElement('span');
+        addLinkSpan.textContent = '+';
+        addLinkSpan.style.cursor = 'pointer';
+        addLinkSpan.style.fontSize = '20px';
+        addLinkSpan.style.display = 'flex';
+        addLinkSpan.style.alignItems = 'center';
+        addLinkSpan.style.justifyContent = 'center';
+        addLinkSpan.style.width = '100%';
+        addLinkSpan.style.height = '100%';
 
-    const addLinkSpan = document.createElement('span');
-    addLinkSpan.textContent = '+';
-    addLinkSpan.style.cursor = 'pointer';
-    addLinkSpan.style.fontSize = '20px';
+        addLinkItem.addEventListener('click', () => {
+            document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
+            const addLinkPopup = document.getElementById('add-link-popup');
+            addLinkPopup.classList.remove('hidden');
+            applyPopupStyling(groupName);
+        });
 
-    addLinkItem.addEventListener('click', () => {
-        document.getElementById('link-group').value = groupName === 'Ungrouped' ? '' : groupName;
-        const addLinkPopup = document.getElementById('add-link-popup');
-        addLinkPopup.classList.remove('hidden');
-        applyPopupStyling(groupName);
-    });
-
-    addLinkItem.appendChild(addLinkSpan);
-    
-    // Add to the last column, or a new one if the last is full
-    if (window.innerWidth > 600 && elements.length % 5 === 0 && elements.length > 0) {
-        currentColumn = document.createElement('div');
-        currentColumn.style.display = 'flex';
-        currentColumn.style.flexDirection = 'column';
-        container.appendChild(currentColumn);
+        addLinkItem.appendChild(addLinkSpan);
+        
+        // Add to the last column
+        const lastColumn = container.lastElementChild;
+        if (lastColumn) {
+            lastColumn.appendChild(addLinkItem);
+        }
     }
-    currentColumn.appendChild(addLinkItem);
-
-
+    
+    // Initial build
+    buildColumns();
+    
+    // Add resize listener to rebuild columns when window is resized
+    const resizeHandler = () => {
+        buildColumns();
+    };
+    
+    window.addEventListener('resize', resizeHandler);
+    
+    // Store the resize handler so it can be removed if needed
+    container._resizeHandler = resizeHandler;
+    
     return container;
 }
 

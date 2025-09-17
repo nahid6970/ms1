@@ -1290,4 +1290,15 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   .group_type_normal[style*="display: list-item"] .link-item {
     width: 100%;
   }
+
+  /* Multi-column list responsive layout */
+  .multi-column-container {
+    width: 100%;
+  }
+
+  .multi-column-container .link-item.add-link-item {
+    max-width: 50px;
+    max-height: 30px;
+    flex-shrink: 0;
+  }
 }
