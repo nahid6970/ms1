@@ -360,7 +360,7 @@ LAlt & c:: {
     }
 }
 
-;! Merge all window in a single
+;! Merge all window in a single explorer
 #e:: {
     MergeAllExplorerWindows()
     MergeAllExplorerWindows() {
@@ -394,6 +394,9 @@ LAlt & c:: {
                         Sleep(200)
                         Send("^l")
                         Sleep(100)
+                        ; Fix spaces in path
+                        path := StrReplace(path, "%20", " ")
+                        ; Handle file:// URLs
                         if InStr(path, "file:///") {
                             path := StrReplace(path, "file:///", "")
                             path := StrReplace(path, "/", "\")
