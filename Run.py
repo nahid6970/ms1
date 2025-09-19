@@ -69,11 +69,11 @@ def show_fzf_menu():
     # ---------- coloured, padded menu lines --------------------------
     pad = "  "
     menu_options = [
-        f"{pad}\x1b[1;31m3.  Run Script\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[1;34m1.  VSCode\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[1;33m2.  folder\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[38;5;181m5.  Terminal\x1b[0m\t{len(file_paths)}",  # #E0AFA0
-        f"{pad}\x1b[1;32m4. 󰴠 Copy path\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;31m Run Script\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;34m VSCode\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;33m folder\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[38;5;181m Terminal\x1b[0m\t{len(file_paths)}",  # #E0AFA0
+        f"{pad}\x1b[1;32m󰴠 Copy path\x1b[0m\t{len(file_paths)}",
     ]
     # ------------------------------------------------------------------
     
@@ -97,23 +97,23 @@ def show_fzf_menu():
         
         if stdout and process.returncode == 0:
             selection = stdout.strip()
-            if selection.startswith('1.'):
+            if selection.startswith(''):
                 # Open all files in VSCode
                 for file_path in file_paths:
                     subprocess.run(f'code "{os.path.abspath(file_path)}"', shell=True)
-            elif selection.startswith('2.'):
+            elif selection.startswith(''):
                 # Open all folder locations
                 for file_path in file_paths:
                     subprocess.run(['explorer.exe', '/select,', file_path])
-            elif selection.startswith('3.'):
+            elif selection.startswith(''):
                 # Run all files
                 for file_path in file_paths:
                     subprocess.run(['powershell', '-command', f'Start-Process -FilePath "{file_path}"'])
-            elif selection.startswith('4.'):
+            elif selection.startswith('󰴠'):
                 # Copy all file paths to clipboard
                 paths_text = '\\n'.join(file_paths)
                 subprocess.run(['powershell', '-command', f'Set-Clipboard -Value "{paths_text}"'], shell=True)
-            elif selection.startswith('5.'):
+            elif selection.startswith(''):
                 # Open terminal in file directory
                 for file_path in file_paths:
                     dir_path = os.path.dirname(os.path.abspath(file_path))
