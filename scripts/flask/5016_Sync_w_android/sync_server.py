@@ -111,16 +111,47 @@ def scan_folder():
         data = request.get_json()
         folder_path = data.get('folder_path', '')
         
+        print(f"🔍 Scan request - folder_path: '{folder_path}'")
+        print(f"📁 SYNC_BASE_FOLDER: '{SYNC_BASE_FOLDER}'")
+        
         if not folder_path:
             return jsonify({'error': 'folder_path is required'}), 400
         
-        full_path = os.path.join(SYNC_BASE_FOLDER, folder_path)
+        # Handle both absolute and relative paths
+        if os.path.isabs(folder_path):
+            # If it's an absolute path, use it directly
+            full_path = folder_path
+            print(f"🔗 Using absolute path: '{full_path}'")
+        else:
+            # If it's a relative path, join with sync base folder
+            full_path = os.path.join(SYNC_BASE_FOLDER, folder_path)
+            print(f"🔗 Using relative path: '{full_path}'")
         
-        # Security check - ensure path is within sync base folder
-        if not os.path.abspath(full_path).startswith(os.path.abspath(SYNC_BASE_FOLDER)):
-            return jsonify({'error': 'Invalid folder path'}), 400
+        print(f"📍 Absolute full path: '{os.path.abspath(full_path)}'")
+        print(f"📍 Absolute base path: '{os.path.abspath(SYNC_BASE_FOLDER)}'")
+        
+        # For relative paths, ensure they're within sync base folder
+        # For absolute paths, allow them but warn the user
+        if not os.path.isabs(folder_path):
+            if not os.path.abspath(full_path).startswith(os.path.abspath(SYNC_BASE_FOLDER)):
+                print(f"❌ Security check failed - relative path outside base folder")
+                return jsonify({'error': 'Invalid folder path'}), 400
+        
+        # Check if folder exists
+        if not os.path.exists(full_path):
+            print(f"❌ Folder does not exist: {full_path}")
+            # Create the folder if it doesn't exist
+            os.makedirs(full_path, exist_ok=True)
+            print(f"✅ Created folder: {full_path}")
         
         files_info = scan_directory(full_path)
+        print(f"📊 Found {len(files_info)} files")
+        
+        # Log some file details for debugging
+        for file_info in files_info[:3]:  # Show first 3 files
+            print(f"  📄 {file_info['path']} - {file_info['size']} bytes")
+        if len(files_info) > 3:
+            print(f"  ... and {len(files_info) - 3} more files")
         
         return jsonify({
             'folder_path': folder_path,
@@ -129,6 +160,7 @@ def scan_folder():
         })
     
     except Exception as e:
+        print(f"❌ Scan error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/upload', methods=['POST'])
@@ -152,7 +184,12 @@ def upload_file():
         
         # Create safe filename and path
         safe_filename = create_safe_filename(original_filename)
-        target_folder = os.path.join(SYNC_BASE_FOLDER, folder_path)
+        
+        # Handle both absolute and relative paths
+        if os.path.isabs(folder_path):
+            target_folder = folder_path
+        else:
+            target_folder = os.path.join(SYNC_BASE_FOLDER, folder_path)
         
         # Ensure target folder exists
         os.makedirs(target_folder, exist_ok=True)
@@ -163,47 +200,54 @@ def upload_file():
         if file_dir and file_dir != target_folder:
             os.makedirs(file_dir, exist_ok=True)
         
-        # Handle duplicate filenames based on user preference
-        if handle_duplicates and os.path.exists(file_path):
-            # Find the next available dup folder number
-            dup_counter = 1
-            while os.path.exists(os.path.join(target_folder, f"dup{dup_counter}")):
-                dup_counter += 1
-            
-            # Create the duplicate folder
-            dup_folder = os.path.join(target_folder, f"dup{dup_counter}")
-            os.makedirs(dup_folder, exist_ok=True)
-            
-            # Prepare file names
-            existing_file_name = os.path.basename(file_path)
-            base_name, extension = os.path.splitext(existing_file_name)
-            
-            # Move existing file to duplicate folder with "_existing" suffix
-            existing_new_name = f"{base_name}_existing{extension}"
-            existing_new_path = os.path.join(dup_folder, existing_new_name)
-            
-            try:
-                import shutil
-                shutil.move(file_path, existing_new_path)
-                print(f"📁 Moved existing file to: dup{dup_counter}/{existing_new_name}")
-            except Exception as e:
-                print(f"⚠️ Could not move existing file: {e}")
-            
-            # Set path for new file with "_new" suffix in the same duplicate folder
-            new_file_name = f"{base_name}_new{extension}"
-            file_path = os.path.join(dup_folder, new_file_name)
-            print(f"📁 Will save new file as: dup{dup_counter}/{new_file_name}")
-            
-        elif not handle_duplicates:
-            # Original behavior - add counter to filename
-            counter = 1
-            base_name, extension = os.path.splitext(safe_filename)
-            original_file_path = file_path
-            
-            while os.path.exists(file_path):
-                safe_filename = f"{base_name} ({counter}){extension}"
-                file_path = os.path.join(target_folder, safe_filename)
-                counter += 1
+        # Get sync mode to determine file handling behavior
+        sync_mode = request.form.get('sync_mode', 'COPY_AND_DELETE')
+        
+        # Handle existing files based on sync mode
+        if os.path.exists(file_path):
+            if sync_mode == 'MIRROR' or sync_mode == 'UPDATE':
+                # For Mirror/Update mode, overwrite existing files
+                print(f"🔄 Overwriting existing file: {safe_filename} (Mirror/Update mode)")
+            elif handle_duplicates:
+                # Find the next available dup folder number
+                dup_counter = 1
+                while os.path.exists(os.path.join(target_folder, f"dup{dup_counter}")):
+                    dup_counter += 1
+                
+                # Create the duplicate folder
+                dup_folder = os.path.join(target_folder, f"dup{dup_counter}")
+                os.makedirs(dup_folder, exist_ok=True)
+                
+                # Prepare file names
+                existing_file_name = os.path.basename(file_path)
+                base_name, extension = os.path.splitext(existing_file_name)
+                
+                # Move existing file to duplicate folder with "_existing" suffix
+                existing_new_name = f"{base_name}_existing{extension}"
+                existing_new_path = os.path.join(dup_folder, existing_new_name)
+                
+                try:
+                    import shutil
+                    shutil.move(file_path, existing_new_path)
+                    print(f"📁 Moved existing file to: dup{dup_counter}/{existing_new_name}")
+                except Exception as e:
+                    print(f"⚠️ Could not move existing file: {e}")
+                
+                # Set path for new file with "_new" suffix in the same duplicate folder
+                new_file_name = f"{base_name}_new{extension}"
+                file_path = os.path.join(dup_folder, new_file_name)
+                print(f"📁 Will save new file as: dup{dup_counter}/{new_file_name}")
+                
+            else:
+                # Add counter to filename
+                counter = 1
+                base_name, extension = os.path.splitext(safe_filename)
+                original_file_path = file_path
+                
+                while os.path.exists(file_path):
+                    safe_filename = f"{base_name} ({counter}){extension}"
+                    file_path = os.path.join(target_folder, safe_filename)
+                    counter += 1
         
         # Save file
         start_time = time.time()
@@ -242,12 +286,17 @@ def download_file(filename):
         if not folder_path:
             return jsonify({'error': 'folder_path is required'}), 400
         
-        target_folder = os.path.join(SYNC_BASE_FOLDER, folder_path)
+        # Handle both absolute and relative paths
+        if os.path.isabs(folder_path):
+            target_folder = folder_path
+        else:
+            target_folder = os.path.join(SYNC_BASE_FOLDER, folder_path)
         
-        # Security check
+        # Security check for relative paths only
         file_path = os.path.join(target_folder, filename)
-        if not os.path.abspath(file_path).startswith(os.path.abspath(SYNC_BASE_FOLDER)):
-            return jsonify({'error': 'Invalid file path'}), 400
+        if not os.path.isabs(folder_path):
+            if not os.path.abspath(file_path).startswith(os.path.abspath(SYNC_BASE_FOLDER)):
+                return jsonify({'error': 'Invalid file path'}), 400
         
         if not os.path.exists(file_path):
             return jsonify({'error': 'File not found'}), 404
@@ -255,6 +304,142 @@ def download_file(filename):
         return send_from_directory(target_folder, filename)
     
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/delete/<path:filename>', methods=['DELETE'])
+def delete_file(filename):
+    """Delete a file from PC (for Mirror mode)"""
+    try:
+        folder_path = request.args.get('folder_path', '')
+        if not folder_path:
+            return jsonify({'error': 'folder_path is required'}), 400
+        
+        print(f"🗑️ Delete request - folder: '{folder_path}', file: '{filename}'")
+        
+        # Handle both absolute and relative paths
+        if os.path.isabs(folder_path):
+            target_folder = folder_path
+        else:
+            target_folder = os.path.join(SYNC_BASE_FOLDER, folder_path)
+        
+        # Build full file path (handle subdirectories)
+        file_path = os.path.join(target_folder, filename)
+        
+        # Security check for relative paths only
+        if not os.path.isabs(folder_path):
+            if not os.path.abspath(file_path).startswith(os.path.abspath(SYNC_BASE_FOLDER)):
+                print(f"❌ Security check failed for: {file_path}")
+                return jsonify({'error': 'Invalid file path'}), 400
+        
+        print(f"🔍 Attempting to delete: {file_path}")
+        
+        if not os.path.exists(file_path):
+            print(f"⚠️ File not found: {file_path}")
+            return jsonify({'error': 'File not found'}), 404
+        
+        if os.path.isdir(file_path):
+            print(f"❌ Cannot delete directory: {file_path}")
+            return jsonify({'error': 'Cannot delete directory, only files'}), 400
+        
+        # Get file info before deletion
+        file_size = os.path.getsize(file_path)
+        
+        # Delete the file
+        os.remove(file_path)
+        
+        print(f"✅ Successfully deleted: {filename} ({file_size} bytes)")
+        
+        # Try to remove empty parent directories (cleanup)
+        try:
+            parent_dir = os.path.dirname(file_path)
+            if parent_dir != target_folder and os.path.exists(parent_dir):
+                if not os.listdir(parent_dir):  # Directory is empty
+                    os.rmdir(parent_dir)
+                    print(f"🧹 Cleaned up empty directory: {os.path.basename(parent_dir)}")
+        except:
+            pass  # Ignore cleanup errors
+        
+        return jsonify({
+            'success': True,
+            'message': f'File {filename} deleted successfully',
+            'size': file_size
+        })
+    
+    except PermissionError:
+        print(f"❌ Permission denied deleting: {filename}")
+        return jsonify({'error': 'Permission denied - file may be in use'}), 403
+    except Exception as e:
+        print(f"❌ Delete error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/delete-multiple', methods=['POST'])
+def delete_multiple_files():
+    """Delete multiple files from PC (for efficient Mirror mode)"""
+    try:
+        data = request.get_json()
+        folder_path = data.get('folder_path', '')
+        files_to_delete = data.get('files', [])
+        
+        if not folder_path:
+            return jsonify({'error': 'folder_path is required'}), 400
+        
+        if not files_to_delete:
+            return jsonify({'error': 'files list is required'}), 400
+        
+        print(f"🗑️ Bulk delete request - folder: '{folder_path}', {len(files_to_delete)} files")
+        
+        # Handle both absolute and relative paths
+        if os.path.isabs(folder_path):
+            target_folder = folder_path
+        else:
+            target_folder = os.path.join(SYNC_BASE_FOLDER, folder_path)
+        
+        deleted_files = []
+        failed_files = []
+        total_size = 0
+        
+        for filename in files_to_delete:
+            try:
+                file_path = os.path.join(target_folder, filename)
+                
+                # Security check for relative paths only
+                if not os.path.isabs(folder_path):
+                    if not os.path.abspath(file_path).startswith(os.path.abspath(SYNC_BASE_FOLDER)):
+                        failed_files.append({'file': filename, 'error': 'Invalid file path'})
+                        continue
+                
+                if not os.path.exists(file_path):
+                    failed_files.append({'file': filename, 'error': 'File not found'})
+                    continue
+                
+                if os.path.isdir(file_path):
+                    failed_files.append({'file': filename, 'error': 'Cannot delete directory'})
+                    continue
+                
+                file_size = os.path.getsize(file_path)
+                os.remove(file_path)
+                
+                deleted_files.append(filename)
+                total_size += file_size
+                print(f"✅ Deleted: {filename} ({file_size} bytes)")
+                
+            except Exception as e:
+                failed_files.append({'file': filename, 'error': str(e)})
+                print(f"❌ Failed to delete {filename}: {e}")
+        
+        print(f"📊 Bulk delete completed: {len(deleted_files)} deleted, {len(failed_files)} failed")
+        
+        return jsonify({
+            'success': True,
+            'deleted_files': deleted_files,
+            'failed_files': failed_files,
+            'total_deleted': len(deleted_files),
+            'total_failed': len(failed_files),
+            'total_size': total_size
+        })
+    
+    except Exception as e:
+        print(f"❌ Bulk delete error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/sync/start', methods=['POST'])
@@ -353,6 +538,8 @@ if __name__ == "__main__":
     print(f"📁 Sync base folder: {SYNC_BASE_FOLDER}")
     print(f"🌐 Server will be available at: http://localhost:5016")
     print(f"💡 Make sure your Android device is on the same network")
+    print(f"🔄 Features: Upload, Download, Delete (Mirror mode supported)")
+    print(f"🗑️ Mirror mode will add/remove files to keep folders identical")
     
     # Optimized server settings for better performance
     app.run(
