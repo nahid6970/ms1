@@ -73,14 +73,16 @@ class GitHubFolderDownloader:
                 print("❌ Invalid URL format. Please check and try again.\n")
         
         # Get download directory
-        home_dir = os.path.expanduser("~")
-        print(f"\n📁 Default download location: {home_dir}")
+        default_dir = os.path.join(os.path.expanduser("~"), "github_downloads")
+        print(f"\n📁 Default download location: {default_dir}")
         
         while True:
             download_dir = input(f"📂 Download directory (press Enter for default): ").strip()
             
             if not download_dir:
-                download_dir = home_dir
+                download_dir = default_dir
+                # Create directory if it doesn't exist
+                os.makedirs(download_dir, exist_ok=True)
                 break
             
             # Check if directory exists or can be created
@@ -100,7 +102,9 @@ class GitHubFolderDownloader:
     def download_folder(self, github_url, download_dir=None):
         """Main function to download folder from GitHub"""
         if download_dir is None:
-            download_dir = os.path.expanduser("~")  # Default to home directory
+            download_dir = os.path.join(os.path.expanduser("~"), "github_downloads")  # Default to ~/github_downloads
+            # Create directory if it doesn't exist
+            os.makedirs(download_dir, exist_ok=True)
         
         print("\n🔍 Parsing GitHub URL...")
         
@@ -254,28 +258,79 @@ def main():
     
     # Check if URL is provided as command line argument
     if len(sys.argv) == 2:
-        # Command line mode
+        # Command line mode - single download
         github_url = sys.argv[1]
         success = downloader.download_folder(github_url)
-    else:
-        # Interactive mode
-        try:
-            github_url, download_dir = downloader.get_user_input()
-            success = downloader.download_folder(github_url, download_dir)
-        except KeyboardInterrupt:
-            print("\n\n❌ Download cancelled by user.")
-            success = False
-        except Exception as e:
-            print(f"\n❌ Error: {e}")
-            success = False
+        
+        print("\n" + "-" * 40)
+        if success:
+            print("Success ✅")
+        else:
+            print("Failed ❌")
+        
+        sys.exit(0 if success else 1)
     
-    print("\n" + "=" * 40)
-    if success:
-        print("🎉 Download completed successfully!")
     else:
-        print("💔 Download failed.")
-    
-    sys.exit(0 if success else 1)
+        # Interactive mode - continuous loop
+        print("🐙 GitHub Folder Downloader - Interactive Mode")
+        print("=" * 50)
+        print("💡 Tip: Press Ctrl+C anytime to exit")
+        print()
+        
+        download_count = 0
+        success_count = 0
+        
+        while True:
+            try:
+                if download_count > 0:
+                    print("\n" + "-" * 30)
+                    print("🔄 Ready for another download!")
+                    print("-" * 30)
+                
+                github_url, download_dir = downloader.get_user_input()
+                success = downloader.download_folder(github_url, download_dir)
+                
+                download_count += 1
+                if success:
+                    success_count += 1
+                
+                # Simple success/failure message
+                print("\n" + "-" * 30)
+                if success:
+                    print("Success ✅")
+                else:
+                    print("Failed ❌")
+                print(f"Session: {success_count}/{download_count} successful")
+                print("-" * 30)
+                
+                # Ask for another download
+                while True:
+                    choice = input("\n🤔 Download another folder? (y/n): ").strip().lower()
+                    if choice in ['y', 'yes', 'yeah', '1']:
+                        break
+                    elif choice in ['n', 'no', 'nope', '0', 'exit', 'quit']:
+                        print(f"\n📊 Final: {success_count}/{download_count} successful downloads")
+                        print("👋 Goodbye!")
+                        sys.exit(0)
+                    else:
+                        print("❓ Please enter 'y' for yes or 'n' for no")
+                        
+            except KeyboardInterrupt:
+                print(f"\n\n📊 Final: {success_count}/{download_count} successful downloads")
+                print("👋 Goodbye!")
+                sys.exit(0)
+            except Exception as e:
+                print(f"\n❌ Error: {e}")
+                download_count += 1
+                
+                while True:
+                    choice = input("\n🤔 Try again? (y/n): ").strip().lower()
+                    if choice in ['y', 'yes']:
+                        break
+                    elif choice in ['n', 'no']:
+                        sys.exit(1)
+                    else:
+                        print("❓ Please enter 'y' for yes or 'n' for no")
 
 if __name__ == "__main__":
     main()
