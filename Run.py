@@ -69,7 +69,7 @@ def show_fzf_menu():
     # ---------- coloured, padded menu lines --------------------------
     pad = "  "
     menu_options = [
-        f"{pad}\x1b[1;31m Run Script\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;31m Run\x1b[0m\t{len(file_paths)}",
         f"{pad}\x1b[1;34m VSCode\x1b[0m\t{len(file_paths)}",
         f"{pad}\x1b[1;33m folder\x1b[0m\t{len(file_paths)}",
         f"{pad}\x1b[38;5;181m Terminal\x1b[0m\t{len(file_paths)}",  # #E0AFA0
