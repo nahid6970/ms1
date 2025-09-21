@@ -13,8 +13,9 @@
     "lsd",
     "cd script",
     "cd script_output",
-    "ls"
+    "ls",
+    "cd d:song/wwe"
   ],
-  "last_updated": "2025-09-04T14:25:26.846599",
-  "current_directory": "C:\\Users\\nahid\\script_output"
+  "last_updated": "2025-09-21T18:15:27.687062",
+  "current_directory": "D:\\song\\wwe"
 }
