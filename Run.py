@@ -147,15 +147,42 @@ def show_fzf_menu():
     
     files_display = "\\n".join([f"  • {os.path.basename(fp)}" for fp in file_paths])
     
+    # ------------------------------------------------------------------
+    # 1.  RGB → 256-colour converter
+    # ------------------------------------------------------------------
+    def rgb_to_256(r: int, g: int, b: int) -> int:
+        """Return the closest xterm-256 colour index for an (r,g,b) triplet."""
+        if r == g == b:                       # greyscale shortcut
+            if r < 8:   return 16
+            if r > 248: return 231
+            return int(((r - 8) / 247) * 24) + 232
+
+        # Colour cube (6×6×6 = 216 colours, indices 16–231)
+        def _cube(x):                       # map 0-255 → 0-5
+            if x < 48:            return 0
+            if x < 115:           return 1
+            return int((x - 55) / 40) if x < 175 else 5
+        r6, g6, b6 = _cube(r), _cube(g), _cube(b)
+        return 16 + 36 * r6 + 6 * g6 + b6
+
+    # ------------------------------------------------------------------
+    # 2.  Helper that builds the escape sequence from an RGB hex string
+    # ------------------------------------------------------------------
+    def esc(rgb: str) -> str:
+        """#rrggbb  ->  \x1b[38;5;NNNm"""
+        rgb = rgb.lstrip('#')
+        r, g, b = int(rgb[0:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16)
+        return f'\x1b[38;5;{rgb_to_256(r,g,b)}m'
+
     # ---------- coloured, padded menu lines --------------------------
     pad = "  "
     menu_options = [
-        f"{pad}\x1b[1;31m  Run\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[94m  VSCode\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[1;33m  folder\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[38;5;181m  Terminal\x1b[0m\t{len(file_paths)}",  # #E0AFA0
-        f"{pad}\x1b[1;32m 󰴠 Copy path\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[1;91m 󰆴 Delete\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#9efa49')}  Run\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#7e96ff')}  VSCode\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#faf069')}  Folder\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#ffffff')}  Terminal\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#ffffff')} 󰴠 Copy path\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#ff5757')} 󰆴 Delete\x1b[0m\t{len(file_paths)}",
     ]
     # ------------------------------------------------------------------
     
