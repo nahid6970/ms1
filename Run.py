@@ -34,12 +34,93 @@ Multi-select: Use Tab to select multiple files, then use any action
 Supports files with spaces in their names!
 """
 
-    # Create a temp file with shortcuts text
+    # Create PowerShell preview script with image support
+    preview_script_content = '''
+param($FilePath)
+
+if (-not (Test-Path $FilePath)) {
+    Write-Host "File not found: $FilePath" -ForegroundColor Red
+    exit 1
+}
+
+$ext = [System.IO.Path]::GetExtension($FilePath).ToLower()
+$imageExtensions = @('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', '.svg', '.ico')
+
+if ($imageExtensions -contains $ext) {
+    # Try chafa for image preview with better sizing
+    try {
+        $chafaPath = Get-Command chafa -ErrorAction Stop
+        # Use smaller dimensions that fit better in preview pane
+        & chafa --size=40x20 --symbols=block --fill=space --stretch $FilePath
+        Write-Host ""
+        # Show file info below image
+        $fileInfo = Get-Item $FilePath
+        Write-Host "File: $(Split-Path $FilePath -Leaf)" -ForegroundColor Cyan
+        Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB" -ForegroundColor Gray
+        Write-Host "Modified: $($fileInfo.LastWriteTime.ToString('yyyy-MM-dd HH:mm'))" -ForegroundColor Gray
+        exit 0
+    }
+    catch {
+        # Try viu with smaller dimensions
+        try {
+            $viuPath = Get-Command viu -ErrorAction Stop
+            & viu -w 40 -h 20 $FilePath
+            Write-Host ""
+            $fileInfo = Get-Item $FilePath
+            Write-Host "File: $(Split-Path $FilePath -Leaf)" -ForegroundColor Cyan
+            Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB" -ForegroundColor Gray
+            exit 0
+        }
+        catch {
+            # Fallback: show image info
+            Write-Host ""
+            Write-Host "[IMAGE FILE]" -ForegroundColor Cyan
+            Write-Host "File: $(Split-Path $FilePath -Leaf)"
+            Write-Host "Extension: $ext"
+            $fileInfo = Get-Item $FilePath
+            Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB"
+            Write-Host "Dimensions: $(try { Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile($FilePath); "$($img.Width)x$($img.Height)"; $img.Dispose() } catch { "Unknown" })"
+            Write-Host "Modified: $($fileInfo.LastWriteTime)"
+            Write-Host ""
+            Write-Host "(Install chafa for image preview: scoop install chafa)" -ForegroundColor Yellow
+            exit 0
+        }
+    }
+}
+
+# For non-image files, try bat first
+try {
+    $batPath = Get-Command bat -ErrorAction Stop
+    & bat --style=plain --color=always --line-range :100 $FilePath
+}
+catch {
+    # Fallback to Get-Content for text files
+    try {
+        Write-Host "[TEXT FILE PREVIEW]" -ForegroundColor Green
+        Get-Content $FilePath -Head 100 -ErrorAction Stop
+    }
+    catch {
+        Write-Host "[BINARY FILE - Cannot preview]" -ForegroundColor Yellow
+        Write-Host "File: $(Split-Path $FilePath -Leaf)"
+        $fileInfo = Get-Item $FilePath
+        Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB"
+        Write-Host "Modified: $($fileInfo.LastWriteTime)"
+    }
+}
+'''
+
+    # Create temp files
     temp_shortcut_file = None
+    preview_script_file = None
+    
     try:
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as temp_file:
             temp_file.write(shortcuts_text)
             temp_shortcut_file = temp_file.name
+
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.ps1') as preview_script:
+            preview_script.write(preview_script_content)
+            preview_script_file = preview_script.name
 
         # Create the menu handler Python script
         menu_script_content = '''
@@ -69,10 +150,10 @@ def show_fzf_menu():
     # ---------- coloured, padded menu lines --------------------------
     pad = "  "
     menu_options = [
-        f"{pad}\x1b[1;31m Run\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[1;34m VSCode\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[1;33m folder\x1b[0m\t{len(file_paths)}",
-        f"{pad}\x1b[38;5;181m Terminal\x1b[0m\t{len(file_paths)}",  # #E0AFA0
+        f"{pad}\x1b[1;31m Run\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;34m VSCode\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;33m folder\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[38;5;181m Terminal\x1b[0m\t{len(file_paths)}",  # #E0AFA0
         f"{pad}\x1b[1;32m󰴠 Copy path\x1b[0m\t{len(file_paths)}",
         f"{pad}\x1b[1;91m󰆴 Delete file(s)\x1b[0m\t{len(file_paths)}",
     ]
@@ -98,15 +179,15 @@ def show_fzf_menu():
         
         if stdout and process.returncode == 0:
             selection = stdout.strip()
-            if selection.startswith(''):
+            if selection.startswith(''):
                 # Open all files in VSCode
                 for file_path in file_paths:
                     subprocess.run(f'code "{os.path.abspath(file_path)}"', shell=True)
-            elif selection.startswith(''):
+            elif selection.startswith(''):
                 # Open all folder locations
                 for file_path in file_paths:
                     subprocess.run(['explorer.exe', '/select,', file_path])
-            elif selection.startswith(''):
+            elif selection.startswith(''):
                 # Run all files
                 for file_path in file_paths:
                     subprocess.run(['powershell', '-command', f'Start-Process -FilePath "{file_path}"'])
@@ -114,7 +195,7 @@ def show_fzf_menu():
                 # Copy all file paths to clipboard
                 paths_text = '\\n'.join(file_paths)
                 subprocess.run(['powershell', '-command', f'Set-Clipboard -Value "{paths_text}"'], shell=True)
-            elif selection.startswith(''):
+            elif selection.startswith(''):
                 # Open terminal in file directory
                 for file_path in file_paths:
                     dir_path = os.path.dirname(os.path.abspath(file_path))
@@ -163,13 +244,13 @@ python "{menu_script_path}" "!temp_file!"
             batch_temp.write(batch_content)
             batch_file = batch_temp.name
 
-        # Prepare fzf arguments
+        # Prepare fzf arguments with PowerShell preview for images
         fzf_args = [
             "fzf",
             "--multi",
             "--with-nth=1",
             "--delimiter=\t",
-            "--preview=bat --style=plain --color=always --line-range :100 {1}",
+            f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{1}}",
             "--preview-window=~3",
             "--preview-window=hidden",   # was "~3"
             "--border",
@@ -213,7 +294,7 @@ python "{menu_script_path}" "!temp_file!"
         process.wait()
 
         # Clean up temp files
-        for temp_file in [batch_file, menu_script_path]:
+        for temp_file in [batch_file, menu_script_path, preview_script_file]:
             if os.path.exists(temp_file):
                 try:
                     os.remove(temp_file)
