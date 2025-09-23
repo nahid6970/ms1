@@ -186,42 +186,36 @@ def show_fzf_menu():
         
         if stdout and process.returncode == 0:
             selection = stdout.strip()
-            if selection.startswith(''):
-                # Open all files in VSCode
+            #! Open all files in VSCode
+            if selection.startswith(''):
                 for file_path in file_paths:
                     subprocess.run(f'code "{os.path.abspath(file_path)}"', shell=True)
-            elif selection.startswith(''):
-                # Open all folder locations
+            #! Open all folder locations
+            elif selection.startswith(''):
                 for file_path in file_paths:
                     subprocess.run(['explorer.exe', '/select,', file_path])
-            elif selection.startswith(''):
-                # Run all files
+            #! Run all files
+            elif selection.startswith(''):
                 for file_path in file_paths:
                     subprocess.run(['powershell', '-command', f'Start-Process -FilePath "{file_path}"'])
             elif selection.startswith('󰴠'):
                 # Copy all file paths to clipboard
                 paths_text = '\\n'.join(file_paths)
                 subprocess.run(['powershell', '-command', f'Set-Clipboard -Value "{paths_text}"'], shell=True)
-            elif selection.startswith(''):
-                # Open terminal in file directory
+            #! Open terminal in file directory
+            elif selection.startswith(''):
                 for file_path in file_paths:
                     dir_path = os.path.dirname(os.path.abspath(file_path))
                     # subprocess.run(f'start cmd /k "cd /d "{dir_path}""', shell=True)
                     subprocess.run(['start', 'pwsh', '-NoExit', '-Command', f'Set-Location "{dir_path}"'], shell=True)
+            #! Delete files without confirmation
             elif selection.startswith('󰆴'): # Delete
-                # Delete files without confirmation
                 for file_path in file_paths:
                     try:
                         os.remove(file_path)
                     except OSError as e:
                         print(f"Error deleting {file_path}: {e}")
-                # Delete files without confirmation
-                for file_path in file_paths:
-                    try:
-                        os.remove(file_path)
-                    except OSError as e:
-                        print(f"Error deleting {file_path}: {e}")
-                        
+
     except Exception as e:
         print(f"Error in menu: {e}")
     finally:
