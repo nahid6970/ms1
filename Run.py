@@ -159,17 +159,24 @@ def show_fzf_menu():
     ]
     # ------------------------------------------------------------------
     
+    preview_file_path = None
     try:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as preview_file:
+            preview_file.write(files_display)
+            preview_file_path = preview_file.name
+
         fzf_args = [
             "fzf",
             "--ansi",                       # << keep colours
             "--prompt=Select action: ",
-            f"--header=Choose action for {len(file_paths)} selected file(s):\\n{files_display}",
+            "--layout=reverse", 
+            f"--header=Choose action for {len(file_paths)} selected file(s):",
             "--with-nth=1",
-            "--delimiter=\\t",
+            "--delimiter=\t",
             "--border",
-            "--layout=reverse",
-            "--height=40%",                 # taller window
+            "--height=100%",                 # taller window
+            f"--preview=bat --color=always --style=plain {preview_file_path} || type {preview_file_path}",
+            "--preview-window=right:60%:border-left",
             "--color=bg:-1,bg+:-1,fg:#ebdbb2,fg+:#ebdbb2,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#b8bb26,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#665c54"
         ]
         
@@ -201,7 +208,13 @@ def show_fzf_menu():
                     dir_path = os.path.dirname(os.path.abspath(file_path))
                     # subprocess.run(f'start cmd /k "cd /d "{dir_path}""', shell=True)
                     subprocess.run(['start', 'pwsh', '-NoExit', '-Command', f'Set-Location "{dir_path}"'], shell=True)
-            elif selection.startswith('󰆴'):
+            elif selection.startswith('󰆴'): # Delete
+                # Delete files without confirmation
+                for file_path in file_paths:
+                    try:
+                        os.remove(file_path)
+                    except OSError as e:
+                        print(f"Error deleting {file_path}: {e}")
                 # Delete files without confirmation
                 for file_path in file_paths:
                     try:
@@ -211,6 +224,9 @@ def show_fzf_menu():
                         
     except Exception as e:
         print(f"Error in menu: {e}")
+    finally:
+        if preview_file_path and os.path.exists(preview_file_path):
+            os.remove(preview_file_path)
 
 if __name__ == "__main__":
     show_fzf_menu()
