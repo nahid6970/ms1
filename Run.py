@@ -74,6 +74,7 @@ def show_fzf_menu():
         f"{pad}\x1b[1;33m folder\x1b[0m\t{len(file_paths)}",
         f"{pad}\x1b[38;5;181m Terminal\x1b[0m\t{len(file_paths)}",  # #E0AFA0
         f"{pad}\x1b[1;32m󰴠 Copy path\x1b[0m\t{len(file_paths)}",
+        f"{pad}\x1b[1;91m󰆴 Delete file(s)\x1b[0m\t{len(file_paths)}",
     ]
     # ------------------------------------------------------------------
     
@@ -119,8 +120,14 @@ def show_fzf_menu():
                     dir_path = os.path.dirname(os.path.abspath(file_path))
                     # subprocess.run(f'start cmd /k "cd /d "{dir_path}""', shell=True)
                     subprocess.run(['start', 'pwsh', '-NoExit', '-Command', f'Set-Location "{dir_path}"'], shell=True)
-
-    
+            elif selection.startswith('󰆴'):
+                # Delete files without confirmation
+                for file_path in file_paths:
+                    try:
+                        os.remove(file_path)
+                    except OSError as e:
+                        print(f"Error deleting {file_path}: {e}")
+                        
     except Exception as e:
         print(f"Error in menu: {e}")
 
