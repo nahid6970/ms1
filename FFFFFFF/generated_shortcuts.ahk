@@ -9,7 +9,17 @@ Persistent
 
 ;! Run Python Script
 ;! Opens run.py in the ms1 directory
-ScrollLock::Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
+ScrollLock:: {
+    run_py_script()
+    run_py_script()
+    {
+        Run("C:\Users\nahid\ms\ms1\run.py", , "Show")
+        ; Wait a moment for the window to appear
+        Sleep(1000)
+        ; Make the window always on top (assumes it's the active window)
+        WinSetAlwaysOnTop(true, "A")
+    }
+}
 
 ;! Monitor Internal
 ;! Switch to internal monitor only
