@@ -51,7 +51,8 @@ if ($imageExtensions -contains $ext) {
     try {
         $chafaPath = Get-Command chafa -ErrorAction Stop
         # Use smaller dimensions that fit better in preview pane
-        & chafa --size=40x20 --symbols=block --fill=space --stretch $FilePath
+        # & chafa --size=40x20 --symbols=block --fill=space --stretch $FilePath
+        & C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe $FilePath
         Write-Host ""
         # Show file info below image
         $fileInfo = Get-Item $FilePath
