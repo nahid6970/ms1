@@ -28,91 +28,166 @@ Shortcuts available:
   Ctrl-o  : Open file location in Explorer - works with multi-select  
   Ctrl-c  : Copy full file path to clipboard - works with multi-select
   Ctrl-r  : Run file with PowerShell Start-Process - works with multi-select
+  Ctrl-p  : Toggle preview window on/off
   F1      : Show this shortcuts help window
+  F2      : Toggle between chafa/viu and QuickLook for image preview
   
 Multi-select: Use Tab to select multiple files, then use any action
 Supports files with spaces in their names!
 """
 
-    # Create PowerShell preview script with image support
-    preview_script_content = '''
+    # Create a state file to track preview mode (chafa vs quicklook)
+    state_file = os.path.join(tempfile.gettempdir(), "fzf_preview_mode.txt")
+    
+    # Initialize with chafa mode if file doesn't exist
+    if not os.path.exists(state_file):
+        with open(state_file, 'w') as f:
+            f.write("chafa")
+
+    # Create PowerShell preview script with image support and toggle functionality
+    preview_script_content = f'''
 param($FilePath)
 
-if (-not (Test-Path $FilePath)) {
+if (-not (Test-Path $FilePath)) {{
     Write-Host "File not found: $FilePath" -ForegroundColor Red
     exit 1
-}
+}}
+
+# Read current preview mode from state file
+$stateFile = "{state_file}"
+$previewMode = "chafa"
+if (Test-Path $stateFile) {{
+    $previewMode = Get-Content $stateFile -Raw
+    $previewMode = $previewMode.Trim()
+}}
 
 $ext = [System.IO.Path]::GetExtension($FilePath).ToLower()
 $imageExtensions = @('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', '.svg', '.ico')
 
-if ($imageExtensions -contains $ext) {
-    # Try chafa for image preview with better sizing
-    try {
-        $chafaPath = Get-Command chafa -ErrorAction Stop
-        # Use smaller dimensions that fit better in preview pane
-        & chafa --size=40x20 --symbols=block --fill=space --stretch $FilePath
-        #! & C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe $FilePath
-        Write-Host ""
-        # Show file info below image
-        $fileInfo = Get-Item $FilePath
-        Write-Host "File: $(Split-Path $FilePath -Leaf)" -ForegroundColor Cyan
-        Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB" -ForegroundColor Gray
-        Write-Host "Modified: $($fileInfo.LastWriteTime.ToString('yyyy-MM-dd HH:mm'))" -ForegroundColor Gray
-        exit 0
-    }
-    catch {
-        # Try viu with smaller dimensions
-        try {
-            $viuPath = Get-Command viu -ErrorAction Stop
-            & viu -w 40 -h 20 $FilePath
+if ($imageExtensions -contains $ext) {{
+    if ($previewMode -eq "quicklook") {{
+        # Use QuickLook for image preview
+        try {{
+            $quickLookPath = "C:\\Users\\nahid\\AppData\\Local\\Programs\\QuickLook\\QuickLook.exe"
+            if (Test-Path $quickLookPath) {{
+                Start-Process $quickLookPath -ArgumentList $FilePath -WindowStyle Hidden
+                Write-Host ""
+                Write-Host "[QUICKLOOK MODE - Image opened in QuickLook]" -ForegroundColor Green
+                $fileInfo = Get-Item $FilePath
+                Write-Host "File: $(Split-Path $FilePath -Leaf)" -ForegroundColor Cyan
+                Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB" -ForegroundColor Gray
+                Write-Host "Modified: $($fileInfo.LastWriteTime.ToString('yyyy-MM-dd HH:mm'))" -ForegroundColor Gray
+                Write-Host ""
+                Write-Host "Press F2 to switch to chafa/viu preview mode" -ForegroundColor Yellow
+                exit 0
+            }} else {{
+                Write-Host "QuickLook not found at expected location" -ForegroundColor Red
+                Write-Host "Falling back to chafa/viu..." -ForegroundColor Yellow
+                $previewMode = "chafa"
+            }}
+        }}
+        catch {{
+            Write-Host "Error launching QuickLook, falling back to chafa/viu" -ForegroundColor Yellow
+            $previewMode = "chafa"
+        }}
+    }}
+    
+    if ($previewMode -eq "chafa") {{
+        # Try chafa for image preview with better sizing
+        try {{
+            $chafaPath = Get-Command chafa -ErrorAction Stop
+            # Use smaller dimensions that fit better in preview pane
+            & chafa --size=40x20 --symbols=block --fill=space --stretch $FilePath
             Write-Host ""
+            # Show file info below image
             $fileInfo = Get-Item $FilePath
+            Write-Host "[CHAFA MODE]" -ForegroundColor Green
             Write-Host "File: $(Split-Path $FilePath -Leaf)" -ForegroundColor Cyan
             Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB" -ForegroundColor Gray
-            exit 0
-        }
-        catch {
-            # Fallback: show image info
+            Write-Host "Modified: $($fileInfo.LastWriteTime.ToString('yyyy-MM-dd HH:mm'))" -ForegroundColor Gray
             Write-Host ""
-            Write-Host "[IMAGE FILE]" -ForegroundColor Cyan
-            Write-Host "File: $(Split-Path $FilePath -Leaf)"
-            Write-Host "Extension: $ext"
-            $fileInfo = Get-Item $FilePath
-            Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB"
-            Write-Host "Dimensions: $(try { Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile($FilePath); "$($img.Width)x$($img.Height)"; $img.Dispose() } catch { "Unknown" })"
-            Write-Host "Modified: $($fileInfo.LastWriteTime)"
-            Write-Host ""
-            Write-Host "(Install chafa for image preview: scoop install chafa)" -ForegroundColor Yellow
+            Write-Host "Press F2 to switch to QuickLook mode" -ForegroundColor Yellow
             exit 0
-        }
-    }
-}
+        }}
+        catch {{
+            # Try viu with smaller dimensions
+            try {{
+                $viuPath = Get-Command viu -ErrorAction Stop
+                & viu -w 40 -h 20 $FilePath
+                Write-Host ""
+                $fileInfo = Get-Item $FilePath
+                Write-Host "[VIU MODE]" -ForegroundColor Green
+                Write-Host "File: $(Split-Path $FilePath -Leaf)" -ForegroundColor Cyan
+                Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB" -ForegroundColor Gray
+                Write-Host ""
+                Write-Host "Press F2 to switch to QuickLook mode" -ForegroundColor Yellow
+                exit 0
+            }}
+            catch {{
+                # Fallback: show image info
+                Write-Host ""
+                Write-Host "[IMAGE FILE - No preview tool available]" -ForegroundColor Cyan
+                Write-Host "File: $(Split-Path $FilePath -Leaf)"
+                Write-Host "Extension: $ext"
+                $fileInfo = Get-Item $FilePath
+                Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB"
+                Write-Host "Dimensions: $(try {{ Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile($FilePath); "$($img.Width)x$($img.Height)"; $img.Dispose() }} catch {{ "Unknown" }})"
+                Write-Host "Modified: $($fileInfo.LastWriteTime)"
+                Write-Host ""
+                Write-Host "(Install chafa: scoop install chafa or viu: scoop install viu)" -ForegroundColor Yellow
+                Write-Host "Press F2 to switch to QuickLook mode" -ForegroundColor Yellow
+                exit 0
+            }}
+        }}
+    }}
+}}
 
 # For non-image files, try bat first
-try {
+try {{
     $batPath = Get-Command bat -ErrorAction Stop
     & bat --style=plain --color=always --line-range :100 $FilePath
-}
-catch {
+}}
+catch {{
     # Fallback to Get-Content for text files
-    try {
+    try {{
         Write-Host "[TEXT FILE PREVIEW]" -ForegroundColor Green
         Get-Content $FilePath -Head 100 -ErrorAction Stop
-    }
-    catch {
+    }}
+    catch {{
         Write-Host "[BINARY FILE - Cannot preview]" -ForegroundColor Yellow
         Write-Host "File: $(Split-Path $FilePath -Leaf)"
         $fileInfo = Get-Item $FilePath
         Write-Host "Size: $([math]::Round($fileInfo.Length / 1KB, 2)) KB"
         Write-Host "Modified: $($fileInfo.LastWriteTime)"
-    }
-}
+    }}
+}}
+'''
+
+    # Create toggle script for F2 functionality
+    toggle_script_content = f'''
+$stateFile = "{state_file}"
+$currentMode = "chafa"
+
+if (Test-Path $stateFile) {{
+    $currentMode = Get-Content $stateFile -Raw
+    $currentMode = $currentMode.Trim()
+}}
+
+if ($currentMode -eq "chafa") {{
+    Set-Content $stateFile "quicklook"
+    Write-Host "Switched to QuickLook mode" -ForegroundColor Green
+}} else {{
+    Set-Content $stateFile "chafa"
+    Write-Host "Switched to chafa/viu mode" -ForegroundColor Green
+}}
+
+Start-Sleep -Milliseconds 500
 '''
 
     # Create temp files
     temp_shortcut_file = None
     preview_script_file = None
+    toggle_script_file = None
     
     try:
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as temp_file:
@@ -122,6 +197,10 @@ catch {
         with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.ps1') as preview_script:
             preview_script.write(preview_script_content)
             preview_script_file = preview_script.name
+
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8', suffix='.ps1') as toggle_script:
+            toggle_script.write(toggle_script_content)
+            toggle_script_file = toggle_script.name
 
         # Create the menu handler Python script
         menu_script_content = '''
@@ -282,7 +361,7 @@ python "{menu_script_path}" "!temp_file!"
             batch_temp.write(batch_content)
             batch_file = batch_temp.name
 
-        # Prepare fzf arguments with PowerShell preview for images
+        # Prepare fzf arguments with PowerShell preview for images and F2 toggle
         fzf_args = [
             "fzf",
             "--multi",
@@ -290,7 +369,7 @@ python "{menu_script_path}" "!temp_file!"
             "--delimiter=\t",
             f"--preview=powershell -ExecutionPolicy Bypass -File \"{preview_script_file}\" {{1}}",
             "--preview-window=~3",
-            "--preview-window=hidden",   # was "~3"
+            "--preview-window=hidden",   # Start with preview hidden
             "--border",
             "--layout=reverse", 
             "--color=bg:-1,bg+:-1,fg:#d1ff94,fg+:#8fdbff,hl:#fe8019,hl+:#fe8019,info:#83a598,prompt:#b8bb26,pointer:#d3869b,marker:#ff4747,spinner:#fe8019,header:#83a598,preview-bg:-1,border:#d782ff",
@@ -299,6 +378,7 @@ python "{menu_script_path}" "!temp_file!"
             "--bind=ctrl-c:execute-silent(echo {1} | clip)",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{1}')",
             f"--bind=f1:execute-silent(cmd /c start cmd /k type {temp_shortcut_file} & pause)",
+            f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             "--bind=ctrl-p:toggle-preview",
         ]
 
@@ -332,7 +412,7 @@ python "{menu_script_path}" "!temp_file!"
         process.wait()
 
         # Clean up temp files
-        for temp_file in [batch_file, menu_script_path, preview_script_file]:
+        for temp_file in [batch_file, menu_script_path, preview_script_file, toggle_script_file]:
             if os.path.exists(temp_file):
                 try:
                     os.remove(temp_file)
@@ -345,9 +425,17 @@ python "{menu_script_path}" "!temp_file!"
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
     finally:
-        # Clean up the temporary file
+        # Clean up the temporary file and state file
         if temp_shortcut_file and os.path.exists(temp_shortcut_file):
             os.remove(temp_shortcut_file)
+        
+        # Clean up state file when program exits
+        state_file = os.path.join(tempfile.gettempdir(), "fzf_preview_mode.txt")
+        if os.path.exists(state_file):
+            try:
+                os.remove(state_file)
+            except:
+                pass
 
 if __name__ == "__main__":
     search_directories_and_files()
