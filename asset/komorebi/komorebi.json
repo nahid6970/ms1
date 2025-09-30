@@ -12,8 +12,8 @@
     "global_work_area_offset": {
         "left": -15,
         "right": -30,
-        "top": -10,
-        "bottom": 15
+        "top": -15,
+        "bottom": 10
     },
     "theme": {
         "palette": "Base16",
