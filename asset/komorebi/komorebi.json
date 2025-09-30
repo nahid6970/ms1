@@ -3,17 +3,17 @@
     "app_specific_configuration_path": "$Env:USERPROFILE/applications.json",
     "window_hiding_behaviour": "Cloak",
     "cross_monitor_move_behaviour": "Insert",
-    "default_workspace_padding": 20,
-    "default_container_padding": 20,
+    "default_workspace_padding": 10,
+    "default_container_padding": 10,
     "border": true,
     "border_style": "Square",
     "border_width": 2,
     "border_offset": -1,
     "global_work_area_offset": {
-        "left": -40,
-        "right": -80,
-        "top": -40,
-        "bottom": -38
+        "left": -15,
+        "right": -30,
+        "top": -10,
+        "bottom": 15
     },
     "theme": {
         "palette": "Base16",
