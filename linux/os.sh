@@ -130,17 +130,28 @@ source "$HOME/.bashrc"
 }
 
 
+arch_install(){
+    archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
+}
+
 # arch_install(){
-#     archinstall --config $HOME/ms1/linux/arch_setup_config/user_configuration.json --creds $HOME/ms1/linux/arch_setup_config/user_credentials.json
+#     # Update mirrorlist to fastest mirrors
+#     reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+#     # Launch archinstall GUI
+#     archinstall
 # }
 
-arch_install(){
-    # Update mirrorlist to fastest mirrors
-    reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+# arch_install(){
+#     # Set Bangladesh mirrors directly
+#     cat > /etc/pacman.d/mirrorlist << 'EOF'
+# Server = https://mirror.xeonbd.com/archlinux/$repo/os/$arch
+# Server = http://mirror.xeonbd.com/archlinux/$repo/os/$arch
+# EOF
     
-    # Launch archinstall GUI
-    archinstall
-}
+#     # Launch archinstall GUI
+#     archinstall
+# }
+
 
 setup_yay() {
     clear
