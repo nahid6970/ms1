@@ -49,6 +49,8 @@ bars:
         - "wallpapers"
         - "disk"
         - "home_folder"
+        - "server_monitor"
+        - "todo"
       right: []
 widgets:
   cpu:
@@ -480,3 +482,92 @@ widgets:
         color: "black"
         radius: 3
         offset: [0, 0]
+  server_monitor:
+    type: "yasb.server_monitor.ServerMonitor"
+    options:
+        label: "<span>\uf510</span>"
+        label_alt: "{online}/{offline} of {total}"
+        ssl_check: false
+        ssl_verify: false
+        ssl_warning: 10
+        timeout: 2
+        update_interval: 60
+        desktop_notifications:
+          ssl: false
+          offline: true
+        servers: [
+          '192.168.0.101:5000',
+          '192.168.0.101:5001',
+          '192.168.0.101:5002',
+          '192.168.0.101:5003',
+        ]
+        menu:
+          blur: True
+          round_corners: True
+          round_corners_type: "normal"
+          border_color: "System"
+          alignment: "right"
+          direction: "down"
+        callbacks:
+          on_left: "toggle_menu"
+          on_right: "toggle_label"
+        container_padding:
+          top: 0
+          left: 10
+          bottom: 0
+          right: 10
+        label_shadow:
+          enabled: false
+          color: "black"
+          radius: 3
+          offset: [0, 0]
+  todo:
+    type: "yasb.todo.TodoWidget"
+    options:
+      label: "\uf0ae {count}/{completed}"
+      label_alt: "\uf0ae Tasks: {count}"
+      menu:
+        blur: true
+        round_corners: true
+        round_corners_type: "normal"
+        border_color: "system"
+        alignment: "center"
+        direction: "down"
+        offset_top: 6
+        offset_left: 0
+      icons:
+        add: "\uf501 New Task"
+        edit: "Edit"
+        delete: "Delete"
+        date: "\ue641"
+        category: "\uf412"
+        checked: "\udb80\udd34"
+        unchecked: "\udb80\udd30"
+        sort: "\ueab4"
+        no_tasks: "\uf4a0"
+      categories:
+        default:
+          label: "General"
+        soon:
+          label: "Complete soon"
+        today:
+          label: "End of day"
+        urgent:
+          label: "Urgent"
+        important:
+          label: "Important"
+      callbacks:
+        on_left: "toggle_menu"
+        on_middle: "do_nothing"
+        on_right: "toggle_label"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
+        
