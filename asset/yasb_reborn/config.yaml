@@ -644,7 +644,7 @@ widgets:
           run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_scoop_count_package.bat"
           run_interval: 300000  # every 5 minutes
           return_format: "json"
-          hide_empty: false
+          hide_empty: true
         callbacks:
           on_left: "exec powershell -Command \"Start-Process powershell -ArgumentList '-NoExit', '-Command', 'scoop update *' -Verb RunAs\""
           on_middle: "toggle_label"
@@ -669,7 +669,7 @@ widgets:
           run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_winget_count_package.bat"
           run_interval: 300000  # every 5 minutes
           return_format: "json"
-          hide_empty: false
+          hide_empty: true
         callbacks:
           on_left: "exec powershell -Command \"Start-Process powershell -ArgumentList '-NoExit', '-Command', 'winget upgrade --all' -Verb RunAs\""
           on_middle: "toggle_label"
