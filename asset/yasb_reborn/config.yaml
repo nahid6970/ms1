@@ -51,6 +51,9 @@ bars:
         - "home_folder"
         - "server_monitor"
         - "todo"
+        - "notes"
+        - "ip_info"
+        - "scoop_updates"
       right: []
 widgets:
   cpu:
@@ -570,4 +573,88 @@ widgets:
         color: "black"
         radius: 3
         offset: [0, 0]
+  notes:
+    type: "yasb.notes.NotesWidget"
+    options:
+      label: "<span>\udb82\udd0c</span> {count}"
+      label_alt: "{count} notes"
+      menu:
+        blur: true
+        round_corners: true
+        round_corners_type: "normal"
+        border_color: "System"
+        alignment: "right"
+        direction: "down"
+        offset_top: 6
+        offset_left: 0
+        max_title_size: 150
+        show_date_time: true
+      icons:
+        note: "\udb82\udd0c"
+        delete: "\ueab8"
+        copy: "\uebcc"
+      callbacks:
+        on_left: "toggle_menu"
+        on_middle: "do_nothing"
+        on_right: "toggle_label"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
+  ip_info:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "<span>\udb81\udd9f</span> {data[ip]}"
+      label_alt: "<span>\uf450</span> {data[city]} {data[region]}, {data[country]}"
+      class_name: "ip-info-widget"
+      exec_options:
+        run_cmd: "curl.exe https://ipinfo.io"
+        run_interval: 120000  # every 5 minutes
+        return_format: "json"
+        hide_empty: false
+      callbacks:
+        on_left: "toggle_label"
+        on_middle: "exec cmd /c ncpa.cpl" # open network settings
+        on_right: "exec cmd /c start https://ipinfo.io/{data[ip]} " # open ipinfo in browser
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
+  scoop_updates:
+      type: "yasb.custom.CustomWidget"
+      options:
+        label: "Scoop {data[count]} updates"
+        label_alt: "<span>\uf466</span> Scoop: {data[count]} packages"
+        class_name: "scoop-widget"
+        exec_options:
+          run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\scoop_count_package.bat"
+          run_interval: 300000  # every 5 minutes
+          return_format: "json"
+          hide_empty: false
+        callbacks:
+          on_left: "exec powershell -Command \"Start-Process powershell -ArgumentList '-NoExit', '-Command', 'scoop update *' -Verb RunAs\""
+          on_middle: "toggle_label"
+          on_right: "exec cmd /c start https://scoop.sh"
+        container_padding:
+          top: 0
+          left: 10
+          bottom: 0
+          right: 10
+        label_shadow:
+          enabled: false
+          color: "black"
+          radius: 3
+          offset: [0, 0]
         
