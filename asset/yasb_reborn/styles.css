@@ -1252,3 +1252,14 @@
 .custom-widget .widget-container .label {}
 .custom-widget .widget-container .label.alt {}
 .custom-widget .widget-container .icon {}
+
+
+.winget-widget {
+    background-color: rgb(0, 0, 0);
+    border-radius: 5%;
+    margin-left:2px;
+}
+.winget-widget .widget-container {}
+.winget-widget .widget-container .label {}
+.winget-widget .widget-container .label.alt {}
+.winget-widget .widget-container .icon {}

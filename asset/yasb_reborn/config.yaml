@@ -54,6 +54,7 @@ bars:
         - "notes"
         - "ip_info"
         - "scoop_updates"
+        - "winget_updates"
       right: []
 widgets:
   cpu:
@@ -639,7 +640,7 @@ widgets:
         label_alt: "<span>\uf466</span> Scoop: {data[count]} packages"
         class_name: "scoop-widget"
         exec_options:
-          run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\scoop_count_package.bat"
+          run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_scoop_count_package.bat"
           run_interval: 300000  # every 5 minutes
           return_format: "json"
           hide_empty: false
@@ -647,6 +648,31 @@ widgets:
           on_left: "exec powershell -Command \"Start-Process powershell -ArgumentList '-NoExit', '-Command', 'scoop update *' -Verb RunAs\""
           on_middle: "toggle_label"
           on_right: "exec cmd /c start https://scoop.sh"
+        container_padding:
+          top: 0
+          left: 10
+          bottom: 0
+          right: 10
+        label_shadow:
+          enabled: false
+          color: "black"
+          radius: 3
+          offset: [0, 0]
+  winget_updates:
+      type: "yasb.custom.CustomWidget"
+      options:
+        label: "Winget {data[count]} updates"
+        label_alt: "<span>\uf17a</span> Winget: {data[count]} packages"
+        class_name: "winget-widget"
+        exec_options:
+          run_cmd: "C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\x_winget_count_package.bat"
+          run_interval: 300000  # every 5 minutes
+          return_format: "json"
+          hide_empty: false
+        callbacks:
+          on_left: "exec powershell -Command \"Start-Process powershell -ArgumentList '-NoExit', '-Command', 'winget upgrade --all' -Verb RunAs\""
+          on_middle: "toggle_label"
+          on_right: "exec cmd /c start https://winget.run"
         container_padding:
           top: 0
           left: 10
