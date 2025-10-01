@@ -637,7 +637,7 @@ widgets:
   scoop_updates:
       type: "yasb.custom.CustomWidget"
       options:
-        label: "Scoop {data[count]} updates"
+        label: "<span>\uf0ab</span> {data[count]}"
         label_alt: "<span>\uf466</span> Scoop: {data[count]} packages"
         class_name: "scoop-widget"
         exec_options:

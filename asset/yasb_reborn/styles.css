@@ -1254,6 +1254,35 @@
 .custom-widget .widget-container .icon {}
 
 
+
+
+.scoop-widget {
+    background-color: transparent;
+    margin-left:2px;
+    font-size: 10px;
+}
+.scoop-widget .widget-container {
+    background: var(--blue);
+    border-radius: 10px;
+    border: 0px solid var(--sapphire);
+    background-color: #8fff79;
+}
+.scoop-widget .widget-container .label {
+    color: black;
+    font-weight: 900;
+    font-size: 14px;
+}
+.scoop-widget .widget-container .label.alt {}
+.scoop-widget .widget-container .icon {
+    color: #16181a;
+    font-size: 20px;
+    margin-right: 5px;
+}
+
+
+
+
+
 .winget-widget {
     background-color: transparent;
     margin-left:2px;
@@ -1268,8 +1297,7 @@
 .winget-widget .widget-container .label {
     color: black;
     font-weight: 900;
-    font-size: 16px;
-    font-family: 'Segoe UI', 'JetBrainsMono NFP';
+    font-size: 14px;
 }
 .winget-widget .widget-container .label.alt {}
 .winget-widget .widget-container .icon {
