@@ -1381,7 +1381,6 @@
 }
 .ai-chat-popup .chat-header .provider-label,
 .ai-chat-popup .chat-header .model-label {
-    font-family: 'Segoe UI';
     font-size: 14px;
     color: #ffffff;
     margin-right: 8px;
@@ -1389,7 +1388,6 @@
 }
 .ai-chat-popup .chat-header .provider-button,
 .ai-chat-popup .chat-header .model-button {
-    font-family: 'Segoe UI';
     background-color: #202020;
     border: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 13px;
@@ -1410,7 +1408,6 @@
     background-color: #202020;
     border: none;
     padding: 4px 0px;
-    font-family: 'Segoe UI';
     font-size: 12px;
     color: #FFFFFF;
 }
@@ -1453,7 +1450,6 @@
 .ai-chat-popup .chat-content .empty-chat .greeting,
 .ai-chat-popup .chat-content .empty-chat .message {
     color: rgba(255, 255, 255, 0.8);
-    font-family: 'Segoe UI';
     font-size: 48px;
     font-weight: 600;
 }
@@ -1469,7 +1465,6 @@
     padding: 8px;
     border-radius: 4px;
     margin: 4px 0;
-    font-family: 'Segoe UI';
     font-size: 14px;
 }
 .ai-chat-popup .chat-content .user-message {
@@ -1483,7 +1478,6 @@
     font-size: 24px;
     color: #8c8d92;
     margin-right: 8px;
-    font-family: "JetBrainsMono NFP";
 }
 
 .ai-chat-popup .chat-footer .chat-input {
@@ -1491,7 +1485,6 @@
     border: 2px solid  #2d2d2d;
     border-radius: 4px;
     padding: 0 8px;
-    font-family: 'Segoe UI';
     font-size: 14px;
     color: #ffffff;
     margin-top: 8px;
@@ -1514,7 +1507,6 @@
     border-radius: 4px;
     margin-top: 8px;
     border: none;
-    font-family: "JetBrainsMono NFP";
 }
 .ai-chat-popup .chat-footer .stop-button {
     background-color: #0078d7;
