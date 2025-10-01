@@ -1270,7 +1270,9 @@
 
 
 .ai-chat-widget {
-    padding: 0 6px 0 6px;
+    background-color: rgb(0, 0, 0);
+    border-radius: 5%;
+    margin-left:2px;
 }
 .ai-chat-widget .icon {
     color: #89b4fa;

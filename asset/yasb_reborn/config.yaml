@@ -716,4 +716,14 @@ widgets:
           models: 
           - name: "gemma3:1b"
             label: "Gemma3"
+      container_padding:
+        top: 0
+        left: 10
+        bottom: 0
+        right: 10
+      label_shadow:
+        enabled: false
+        color: "black"
+        radius: 3
+        offset: [0, 0]
 
