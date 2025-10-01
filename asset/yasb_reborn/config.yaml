@@ -52,9 +52,10 @@ bars:
         - "server_monitor"
         - "todo"
         - "notes"
-        - "ip_info"
+        # - "ip_info"
         - "scoop_updates"
         - "winget_updates"
+        - "ai_chat"
       right: []
 widgets:
   cpu:
@@ -683,4 +684,36 @@ widgets:
           color: "black"
           radius: 3
           offset: [0, 0]
-        
+  ai_chat:
+    type: "yasb.ai_chat.AiChatWidget"
+    options:
+      label: "<span>\uf086</span>"
+      chat:
+        blur: true
+        round_corners: true
+        round_corners_type: "normal"
+        border_color: "system"
+        alignment: "center"
+        direction: "down"
+        offset_left: 0
+        offset_top: 6
+      icons:
+        send: "\uf1d8"
+        stop: "\uf04d"
+        clear: "\uf1f8"
+        assistant: "\udb81\ude74"
+      notification_dot:
+        enabled: false
+        corner: "top_right"
+        color: "red"
+        margin: [ 0, 2 ]
+      callbacks:
+        on_left: "toggle_chat"
+      providers:
+        - provider: "Ollama"
+          api_endpoint: "http://localhost:11434/v1"
+          credential: "ollama"
+          models: 
+          - name: "gemma3:1b"
+            label: "Gemma3"
+
