@@ -662,7 +662,7 @@ widgets:
   winget_updates:
       type: "yasb.custom.CustomWidget"
       options:
-        label: "Winget {data[count]} updates"
+        label: "<span>\uf0ab</span> {data[count]}"
         label_alt: "<span>\uf17a</span> Winget: {data[count]} packages"
         class_name: "winget-widget"
         exec_options:

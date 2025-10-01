@@ -1255,14 +1255,71 @@
 
 
 .winget-widget {
-    background-color: rgb(0, 0, 0);
-    border-radius: 5%;
+    background-color: transparent;
     margin-left:2px;
+    font-size: 10px;
 }
-.winget-widget .widget-container {}
-.winget-widget .widget-container .label {}
+.winget-widget .widget-container {
+    background: var(--blue);
+    border-radius: 10px;
+    border: 0px solid var(--sapphire);
+    background-color: #62a1ff;
+}
+.winget-widget .widget-container .label {
+    color: black;
+    font-weight: 900;
+    font-size: 16px;
+    font-family: 'Segoe UI', 'JetBrainsMono NFP';
+}
 .winget-widget .widget-container .label.alt {}
-.winget-widget .widget-container .icon {}
+.winget-widget .widget-container .icon {
+    color: #16181a;
+    font-size: 20px;
+    margin-right: 5px;
+}
+
+
+
+
+
+.update-widget {
+    padding: 0 4px 0 0px;
+}
+.update-widget .icon {
+    font-size: 16px;
+}
+.update-widget .widget-container.winget,
+.update-widget .widget-container.windows {
+    background: var(--blue);
+    margin: 7px 2px 7px 2px;
+    border-radius: 10px;
+    border: 0px solid var(--sapphire);
+}
+.update-widget .widget-container.winget .icon,
+.update-widget .widget-container.windows .icon {
+    color: var(--base);
+    margin: 0 2px 0 6px;
+}
+.update-widget .widget-container.winget .label,
+.update-widget .widget-container.windows .label {
+    margin: 0 6px 0 1px;
+    color: var(--base);
+    font-weight: 900;
+    font-size: 14px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
