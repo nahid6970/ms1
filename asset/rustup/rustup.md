@@ -4,6 +4,7 @@ Microsoft’s tools completely:
 
 from scoop install rustup only not gnu nor msvc
 
+scoop install mingw-msvcrt
 rustup toolchain install stable-x86_64-pc-windows-gnu
 rustup default stable-x86_64-pc-windows-gnu
 
