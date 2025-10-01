@@ -39,10 +39,6 @@
                 {
                     "name": "II",
                     "layout": "BSP"
-                },
-                {
-                    "name": "III",
-                    "layout": "BSP"
                 }
             ]
         }
