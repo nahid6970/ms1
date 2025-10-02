@@ -123,14 +123,44 @@ class WindowsUtil:
             },
             {
                 "title": "Github-Projects",
-                "description": "Install common development tools and environments",
+                "description": "Run popular Windows utilities and scripts from GitHub",
                 "submenu": [
-                    {"title": "ChrisTitus WinUtility", "action": ('cmd /c start pwsh -Command "iwr -useb https://christitus.com/win | iex"', "Run Chris Titus Tech's Windows Utility")},
-                    {"title": "Microsoft Activation Scripts (MAS)", "action": ('cmd /c start pwsh -Command "irm https://get.activated.win | iex"', "Run Microsoft Activation Scripts")},
-                    {"title": "WIMUtil", "action": ('cmd /c start pwsh -Command "irm \'https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1\' | iex"', "Run WIMUtil from GitHub")},
-                    {"title": "Harden Windows Security Using GUI", "action": ('cmd /c start pwsh -Command "(irm \'https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1\')+\'P\'|iex"', "Harden Windows Security using GUI")},
-                    {"title": "Winhance", "action": ( 'powershell -Command "Start-Process pwsh -ArgumentList \'-NoExit\', \'-Command irm https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1 | iex\' -Verb RunAs"', "Run Winhance Utility as Admin" ) },
-                    { "title": "AppControl Manager", "action": ( 'powershell -Command "Start-Process pwsh -ArgumentList \'-NoExit\', \'-Command (irm https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1)^+\'AppControl\' ^| iex\' -Verb RunAs"', "Run AppControl Manager as Admin" ) }
+                    {"title": "ChrisTitus WinUtility", "action": {
+                        "powershell": [
+                            "Start-Process powershell -ArgumentList '-NoExit', '-Command iwr -useb https://christitus.com/win | iex' -Verb RunAs"
+                        ],
+                        "description": "Run Chris Titus Tech's Windows Utility as Admin"
+                    }},
+                    {"title": "Microsoft Activation Scripts (MAS)", "action": {
+                        "powershell": [
+                            "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://get.activated.win | iex' -Verb RunAs"
+                        ],
+                        "description": "Run Microsoft Activation Scripts as Admin"
+                    }},
+                    {"title": "WIMUtil", "action": {
+                        "powershell": [
+                            "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1 | iex' -Verb RunAs"
+                        ],
+                        "description": "Run WIMUtil from GitHub as Admin"
+                    }},
+                    {"title": "Harden Windows Security Using GUI", "action": {
+                        "powershell": [
+                            "Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy Bypass', '-Command', 'irm https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1 | iex; P' -Verb RunAs"
+                        ],
+                        "description": "Run Harden Windows Security GUI as Admin"
+                    }},
+                    {"title": "Winhance", "action": {
+                        "powershell": [
+                            "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1 | iex' -Verb RunAs"
+                        ],
+                        "description": "Run Winhance Utility as Admin"
+                    }},
+                    {"title": "AppControl Manager", "action": {
+                        "powershell": [
+                            "Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy Bypass', '-Command', 'irm https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1 | iex; AppControl' -Verb RunAs"
+                        ],
+                        "description": "Run AppControl Manager as Admin"
+                    }}
                 ]
             },
             {
