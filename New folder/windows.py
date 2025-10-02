@@ -49,24 +49,24 @@ class WindowsUtil:
                 "submenu": [
                     {"title": "Update Scoop", "action": ("scoop update", "Updating Scoop")},
                     {"title": "Install Scoop", "action": ("powershell -Command \"Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm get.scoop.sh | iex\"", "Installing Scoop package manager")},
-                    {"title": "Install Necessary Packages",
-                        "action": (
-                            "scoop install ack & "
-                            "scoop install adb & "
-                            "scoop install bat & "
-                            "scoop install capture2text & "
-                            "scoop install ditto & "
-                            "scoop install ffmpeg & "
-                            "scoop install highlight & "
-                            "scoop install kitty & "
-                            "scoop install neovim & "
-                            "scoop install putty & "
-                            "scoop install rssguard & "
-                            "scoop install rufus & "
-                            "scoop install yt-dlp",
-                            "Installing Scoop packages"
-                        )
-                    },
+                    {"title": "Install Necessary Packages", "action": {
+                        "commands": [
+                            "scoop install ack",
+                            "scoop install adb", 
+                            "scoop install bat",
+                            "scoop install capture2text",
+                            "scoop install ditto",
+                            "scoop install ffmpeg",
+                            "scoop install highlight",
+                            "scoop install kitty",
+                            "scoop install neovim",
+                            "scoop install putty",
+                            "scoop install rssguard",
+                            "scoop install rufus",
+                            "scoop install yt-dlp"
+                        ],
+                        "description": "Installing Essential Scoop Packages"
+                    }},
                     {"title": "Remove Package", "action": self.remove_package},
                     {"title": "Search Packages", "action": self.search_packages},
                     {"title": "List Installed", "action": ("scoop list", "Listing installed packages")},
@@ -79,7 +79,18 @@ class WindowsUtil:
                 "description": "System cleanup and maintenance tasks",
                 "submenu": [
                     {"title": "Windows Update", "action": ("powershell -Command \"Get-WindowsUpdate -Install -AcceptAll\"", "Running Windows Update")},
-                    {"title": "Clean Temp Files", "action": ("powershell -Command \"Get-ChildItem -Path $env:TEMP -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue\"", "Cleaning temporary files")},
+                    {"title": "Clean Temp Files", "action": {
+                        "powershell": [
+                            "Write-Host 'Cleaning temporary files...' -ForegroundColor Yellow",
+                            "Get-ChildItem -Path $env:TEMP -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+                            "Write-Host 'Cleaning Windows temp folder...' -ForegroundColor Yellow", 
+                            "Get-ChildItem -Path C:\\Windows\\Temp -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+                            "Write-Host 'Cleaning browser cache...' -ForegroundColor Yellow",
+                            "Get-ChildItem -Path \"$env:LOCALAPPDATA\\Microsoft\\Windows\\INetCache\" -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+                            "Write-Host 'Cleanup completed!' -ForegroundColor Green"
+                        ],
+                        "description": "System Cleanup Script"
+                    }},
                     {"title": "Check Disk", "action": ("chkdsk C: /f", "Checking disk for errors")},
                     {"title": "System File Check", "action": ("sfc /scannow", "Running system file checker")},
                     {"title": "DISM Health Check", "action": ("DISM /Online /Cleanup-Image /CheckHealth", "Checking system image health")},
@@ -96,6 +107,18 @@ class WindowsUtil:
                     {"title": "Install Python", "action": ("scoop install python", "Installing Python")},
                     {"title": "Install Visual Studio Code", "action": ("scoop install vscode", "Installing Visual Studio Code")},
                     {"title": "Install Build Tools", "action": ("scoop install mingw", "Installing MinGW build tools")},
+                    {"title": "Install All Dev Tools", "action": {
+                        "commands": [
+                            "scoop install git",
+                            "scoop install nodejs",
+                            "scoop install python",
+                            "scoop install vscode",
+                            "scoop install mingw",
+                            "scoop install docker",
+                            "scoop install postman"
+                        ],
+                        "description": "Installing Complete Development Environment"
+                    }},
                 ]
             },
             {
@@ -112,7 +135,7 @@ class WindowsUtil:
             },
             {
                 "title": "Quit",
-                "description": "Exit ArchUtil",
+                "description": "Exit WindowsUtil",
                 "action": "quit"
             }
         ]
@@ -220,8 +243,74 @@ class WindowsUtil:
         
         win.refresh()
     
-    def execute_command(self, command: str, description: str = ""):
-        """Execute a command in a new window"""
+    def execute_command(self, command, description: str = ""):
+        """Execute a command or list of commands in a new window"""
+        # Save current state
+        curses.def_prog_mode()
+        curses.endwin()
+
+        # ANSI escape codes for colors
+        BLUE = '\033[94m'
+        GREEN = '\033[92m'
+        RED = '\033[91m'
+        YELLOW = '\033[93m'
+        RESET = '\033[0m'
+
+        # Clear the screen before executing the command
+        os.system('cls' if os.name == 'nt' else 'clear')
+        
+        try:
+            print(f"\n{BLUE}{description}{RESET}")
+            
+            # Handle different command types
+            if isinstance(command, list):
+                # Multiple commands
+                print("Executing multiple commands...")
+                failed_commands = []
+                
+                for i, cmd in enumerate(command, 1):
+                    print(f"\n{YELLOW}[{i}/{len(command)}] {cmd}{RESET}")
+                    result = subprocess.run(cmd, shell=True)
+                    
+                    if result.returncode == 0:
+                        print(f"{GREEN}✓ Command {i} completed successfully{RESET}")
+                    else:
+                        print(f"{RED}✗ Command {i} failed with exit code: {result.returncode}{RESET}")
+                        failed_commands.append((i, cmd))
+                
+                # Summary
+                if failed_commands:
+                    print(f"\n{RED}Summary: {len(failed_commands)} command(s) failed:{RESET}")
+                    for i, cmd in failed_commands:
+                        print(f"  {i}: {cmd}")
+                else:
+                    print(f"\n{GREEN}✓ All commands completed successfully{RESET}")
+                    
+            elif isinstance(command, str):
+                # Single command
+                print(f"Command: {command}")
+                result = subprocess.run(command, shell=True)
+                
+                if result.returncode == 0:
+                    print(f"\n{GREEN}✓ Success: {description}{RESET}")
+                else:
+                    print(f"\n{RED}✗ Command failed with exit code: {result.returncode}{RESET}")
+            
+            input("\nPress Enter to continue...")
+            
+        except Exception as e:
+            print(f"{RED}Error: {e}{RESET}")
+            input("Press Enter to continue...")
+        finally:
+            # Restore curses mode
+            curses.reset_prog_mode()
+            curses.curs_set(0)
+    
+    def execute_powershell_script(self, commands: List[str], description: str = ""):
+        """Execute multiple PowerShell commands as a script"""
+        # Create a temporary PowerShell script
+        script_content = "\n".join(commands)
+        
         # Save current state
         curses.def_prog_mode()
         curses.endwin()
@@ -232,20 +321,27 @@ class WindowsUtil:
         RED = '\033[91m'
         RESET = '\033[0m'
 
-        # Clear the screen before executing the command
+        # Clear the screen before executing
         os.system('cls' if os.name == 'nt' else 'clear')
         
         try:
             print(f"\n{BLUE}{description}{RESET}")
-            print(f"Command: {command}")
+            print("PowerShell Script Content:")
+            print("-" * 40)
+            print(script_content)
+            print("-" * 40)
             
-            # Execute command
-            result = subprocess.run(command, shell=True)
+            # Execute the PowerShell script
+            result = subprocess.run(
+                ["powershell", "-Command", script_content],
+                capture_output=False,
+                text=True
+            )
             
             if result.returncode == 0:
-                print(f"\n{GREEN}✓ Success: {description}{RESET}")
+                print(f"\n{GREEN}✓ PowerShell script completed successfully{RESET}")
             else:
-                print(f"\n{RED}✗ Command failed with exit code: {result.returncode}{RESET}")
+                print(f"\n{RED}✗ PowerShell script failed with exit code: {result.returncode}{RESET}")
             
             input("\nPress Enter to continue...")
             
@@ -271,9 +367,44 @@ class WindowsUtil:
         if action:
             if callable(action):
                 action()
-            else:
+            elif isinstance(action, tuple) and len(action) == 2:
                 command, description = action
                 self.execute_command(command, description)
+            elif isinstance(action, dict):
+                # Handle inline command definitions
+                if "commands" in action:
+                    # List of commands
+                    commands = action["commands"]
+                    description = action.get("description", "Executing commands")
+                    self.execute_command(commands, description)
+                elif "powershell" in action:
+                    # PowerShell script
+                    ps_commands = action["powershell"]
+                    description = action.get("description", "Executing PowerShell script")
+                    self.execute_powershell_script(ps_commands, description)
+            else:
+                # Handle other action types if needed
+                pass
+    
+    def install_necessary_packages(self):
+        """Install essential packages using multiple commands"""
+        packages = [
+            "scoop install ack",
+            "scoop install adb", 
+            "scoop install bat",
+            "scoop install capture2text",
+            "scoop install ditto",
+            "scoop install ffmpeg",
+            "scoop install highlight",
+            "scoop install kitty",
+            "scoop install neovim",
+            "scoop install putty",
+            "scoop install rssguard",
+            "scoop install rufus",
+            "scoop install yt-dlp"
+        ]
+        
+        self.execute_command(packages, "Installing Essential Scoop Packages")
     
     def necessarypkgs(self):
         """Install essential packages"""
@@ -376,6 +507,20 @@ class WindowsUtil:
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
+    
+    def clean_system_files(self):
+        """Clean system temporary files using PowerShell script"""
+        powershell_commands = [
+            "Write-Host 'Cleaning temporary files...' -ForegroundColor Yellow",
+            "Get-ChildItem -Path $env:TEMP -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+            "Write-Host 'Cleaning Windows temp folder...' -ForegroundColor Yellow", 
+            "Get-ChildItem -Path C:\\Windows\\Temp -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+            "Write-Host 'Cleaning browser cache...' -ForegroundColor Yellow",
+            "Get-ChildItem -Path \"$env:LOCALAPPDATA\\Microsoft\\Windows\\INetCache\" -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+            "Write-Host 'Cleanup completed!' -ForegroundColor Green"
+        ]
+        
+        self.execute_powershell_script(powershell_commands, "System Cleanup Script")
 
     def update_ms1_repo(self):
         """Update the ms1 repository"""
