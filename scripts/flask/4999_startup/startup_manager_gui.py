@@ -82,12 +82,20 @@ class StartupManagerGUI:
         self.commands_tab = self.notebook.add("Commands")
         self.apps_tab = self.notebook.add("Applications")
         
-        # Create scrollable frames for each tab
-        self.commands_frame = ctk.CTkScrollableFrame(self.commands_tab)
-        self.commands_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        # Create scrollable frames for each tab with optimized settings
+        self.commands_frame = ctk.CTkScrollableFrame(
+            self.commands_tab,
+            scrollbar_button_color="gray30",
+            scrollbar_button_hover_color="gray20"
+        )
+        self.commands_frame.pack(fill="both", expand=True, padx=5, pady=5)
         
-        self.apps_frame = ctk.CTkScrollableFrame(self.apps_tab)
-        self.apps_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.apps_frame = ctk.CTkScrollableFrame(
+            self.apps_tab,
+            scrollbar_button_color="gray30", 
+            scrollbar_button_hover_color="gray20"
+        )
+        self.apps_frame.pack(fill="both", expand=True, padx=5, pady=5)
         
     def load_items_from_json(self):
         """Load items from JSON file"""
@@ -208,114 +216,104 @@ class StartupManagerGUI:
     
     def create_item_widget(self, parent, item):
         """Create a widget for a single startup item"""
-        # Main item frame
+        # Main item frame - simplified structure
         item_frame = ctk.CTkFrame(parent)
-        item_frame.pack(fill="x", padx=5, pady=5)
+        item_frame.pack(fill="x", padx=2, pady=2)
         
-        # Top row with name and controls
-        top_frame = ctk.CTkFrame(item_frame)
-        top_frame.pack(fill="x", padx=10, pady=5)
+        # Single row layout with grid for better performance
+        item_frame.grid_columnconfigure(1, weight=1)
         
-        # Item name and status
-        name_frame = ctk.CTkFrame(top_frame)
-        name_frame.pack(side="left", fill="x", expand=True)
-        
-        # Status indicator and name
-        status_frame = ctk.CTkFrame(name_frame)
-        status_frame.pack(side="left", padx=5, pady=5)
-        
+        # Status indicator
         is_enabled = self.is_startup_enabled(item)
         status_color = "green" if is_enabled else "red"
         status_text = "●" if is_enabled else "○"
         
         status_label = ctk.CTkLabel(
-            status_frame, 
+            item_frame, 
             text=status_text, 
             text_color=status_color,
-            font=ctk.CTkFont(size=16, weight="bold")
+            font=ctk.CTkFont(size=14, weight="bold"),
+            width=20
         )
-        status_label.pack(side="left", padx=5)
+        status_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         
+        # Item info frame
+        info_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
+        info_frame.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        info_frame.grid_columnconfigure(0, weight=1)
+        
+        # Name
         name_label = ctk.CTkLabel(
-            status_frame, 
+            info_frame, 
             text=item["name"], 
-            font=ctk.CTkFont(size=14, weight="bold")
+            font=ctk.CTkFont(size=12, weight="bold"),
+            anchor="w"
         )
-        name_label.pack(side="left", padx=5)
+        name_label.grid(row=0, column=0, sticky="ew", padx=2)
         
-        # Control buttons
-        buttons_frame = ctk.CTkFrame(top_frame)
-        buttons_frame.pack(side="right", padx=5)
+        # Path (truncated for better performance)
+        path_text = item['paths'][0]
+        if len(path_text) > 60:
+            path_text = "..." + path_text[-57:]
+        
+        path_label = ctk.CTkLabel(
+            info_frame, 
+            text=path_text, 
+            font=ctk.CTkFont(size=9),
+            anchor="w",
+            text_color="gray"
+        )
+        path_label.grid(row=1, column=0, sticky="ew", padx=2)
+        
+        # Buttons frame
+        buttons_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
+        buttons_frame.grid(row=0, column=2, padx=5, pady=5)
         
         # Toggle button
         toggle_btn = ctk.CTkButton(
             buttons_frame,
-            text="Disable" if is_enabled else "Enable",
+            text="ON" if is_enabled else "OFF",
             command=lambda: self.toggle_item_startup(item, item_frame),
-            width=80,
-            fg_color="red" if is_enabled else "green"
+            width=50,
+            height=25,
+            fg_color="green" if is_enabled else "red",
+            font=ctk.CTkFont(size=10)
         )
-        toggle_btn.pack(side="left", padx=2, pady=5)
+        toggle_btn.pack(side="left", padx=1)
         
         # Launch button
         launch_btn = ctk.CTkButton(
             buttons_frame,
-            text="Launch",
+            text="▶",
             command=lambda: self.launch_item(item),
-            width=80
+            width=30,
+            height=25,
+            font=ctk.CTkFont(size=10)
         )
-        launch_btn.pack(side="left", padx=2, pady=5)
+        launch_btn.pack(side="left", padx=1)
         
         # Edit button
         edit_btn = ctk.CTkButton(
             buttons_frame,
-            text="Edit",
+            text="✎",
             command=lambda: self.open_edit_dialog(item),
-            width=60
+            width=30,
+            height=25,
+            font=ctk.CTkFont(size=10)
         )
-        edit_btn.pack(side="left", padx=2, pady=5)
+        edit_btn.pack(side="left", padx=1)
         
         # Delete button
         delete_btn = ctk.CTkButton(
             buttons_frame,
-            text="Delete",
+            text="✕",
             command=lambda: self.delete_item(item),
-            width=60,
-            fg_color="red"
+            width=30,
+            height=25,
+            fg_color="red",
+            font=ctk.CTkFont(size=10)
         )
-        delete_btn.pack(side="left", padx=2, pady=5)
-        
-        # Details frame (collapsible)
-        details_frame = ctk.CTkFrame(item_frame)
-        details_frame.pack(fill="x", padx=10, pady=(0, 5))
-        
-        # Path
-        path_label = ctk.CTkLabel(
-            details_frame, 
-            text=f"Path: {item['paths'][0]}", 
-            font=ctk.CTkFont(size=10),
-            anchor="w"
-        )
-        path_label.pack(fill="x", padx=5, pady=2)
-        
-        # Command/Args
-        if item.get("Command"):
-            cmd_label = ctk.CTkLabel(
-                details_frame, 
-                text=f"Args: {item['Command']}", 
-                font=ctk.CTkFont(size=10),
-                anchor="w"
-            )
-            cmd_label.pack(fill="x", padx=5, pady=2)
-        
-        # Executable type
-        type_label = ctk.CTkLabel(
-            details_frame, 
-            text=f"Type: {item.get('ExecutableType', 'other')}", 
-            font=ctk.CTkFont(size=10),
-            anchor="w"
-        )
-        type_label.pack(fill="x", padx=5, pady=2)
+        delete_btn.pack(side="left", padx=1)
         
         return item_frame
     
@@ -347,7 +345,7 @@ class StartupManagerGUI:
             else:
                 messagebox.showerror("Error", f"Failed to delete {item['name']}")
     
-    def load_items(self):
+    def load_items(self, force_recreate=False):
         """Load and display all items"""
         # Load items from JSON
         items = self.filter_existing_items(self.load_items_from_json())
@@ -364,32 +362,70 @@ class StartupManagerGUI:
         enabled_commands = sum(1 for item in commands if self.is_startup_enabled(item))
         enabled_apps = sum(1 for item in apps if self.is_startup_enabled(item))
         
-        # Store current tab
+        # Check if we need to recreate tabs (only if counts changed or forced)
+        new_commands_title = f"Commands ({enabled_commands}/{len(commands)})"
+        new_apps_title = f"Applications ({enabled_apps}/{len(apps)})"
+        
+        recreate_needed = force_recreate
         try:
-            current_tab = self.notebook.get()
+            current_commands_title = self.notebook.tab("Commands")
+            current_apps_title = self.notebook.tab("Applications") 
+            if (current_commands_title != new_commands_title or 
+                current_apps_title != new_apps_title):
+                recreate_needed = True
         except:
-            current_tab = "Commands"
+            recreate_needed = True
         
-        # Destroy and recreate notebook with updated titles
-        self.notebook.destroy()
-        self.notebook = ctk.CTkTabview(self.main_frame)
-        self.notebook.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-        
-        # Recreate tabs with updated titles
-        self.commands_tab = self.notebook.add(f"Commands ({enabled_commands}/{len(commands)})")
-        self.apps_tab = self.notebook.add(f"Applications ({enabled_apps}/{len(apps)})")
-        
-        # Recreate scrollable frames
-        self.commands_frame = ctk.CTkScrollableFrame(self.commands_tab)
-        self.commands_frame.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        self.apps_frame = ctk.CTkScrollableFrame(self.apps_tab)
-        self.apps_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        if recreate_needed:
+            # Store current tab
+            try:
+                current_tab = self.notebook.get()
+            except:
+                current_tab = "Commands"
+            
+            # Destroy and recreate notebook with updated titles
+            self.notebook.destroy()
+            self.notebook = ctk.CTkTabview(self.main_frame)
+            self.notebook.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+            
+            # Recreate tabs with updated titles
+            self.commands_tab = self.notebook.add(new_commands_title)
+            self.apps_tab = self.notebook.add(new_apps_title)
+            
+            # Recreate scrollable frames with optimized settings
+            self.commands_frame = ctk.CTkScrollableFrame(
+                self.commands_tab,
+                scrollbar_button_color="gray30",
+                scrollbar_button_hover_color="gray20"
+            )
+            self.commands_frame.pack(fill="both", expand=True, padx=5, pady=5)
+            
+            self.apps_frame = ctk.CTkScrollableFrame(
+                self.apps_tab,
+                scrollbar_button_color="gray30",
+                scrollbar_button_hover_color="gray20"
+            )
+            self.apps_frame.pack(fill="both", expand=True, padx=5, pady=5)
+            
+            # Try to restore the previous tab selection
+            try:
+                if "Commands" in current_tab:
+                    self.notebook.set(new_commands_title)
+                elif "Applications" in current_tab:
+                    self.notebook.set(new_apps_title)
+            except:
+                pass
+        else:
+            # Just clear existing items without recreating tabs
+            for widget in self.commands_frame.winfo_children():
+                widget.destroy()
+            for widget in self.apps_frame.winfo_children():
+                widget.destroy()
         
         # Create widgets for commands
         if commands:
-            for item in commands:
-                self.create_item_widget(self.commands_frame, item)
+            # Use after_idle to improve performance
+            self.root.after_idle(lambda: self._create_command_widgets(commands))
         else:
             no_commands_label = ctk.CTkLabel(
                 self.commands_frame, 
@@ -400,8 +436,8 @@ class StartupManagerGUI:
         
         # Create widgets for apps
         if apps:
-            for item in apps:
-                self.create_item_widget(self.apps_frame, item)
+            # Use after_idle to improve performance
+            self.root.after_idle(lambda: self._create_app_widgets(apps))
         else:
             no_apps_label = ctk.CTkLabel(
                 self.apps_frame, 
@@ -409,19 +445,35 @@ class StartupManagerGUI:
                 font=ctk.CTkFont(size=14)
             )
             no_apps_label.pack(pady=20)
-        
-        # Try to restore the previous tab selection
-        try:
-            if "Commands" in current_tab:
-                self.notebook.set(f"Commands ({enabled_commands}/{len(commands)})")
-            elif "Applications" in current_tab:
-                self.notebook.set(f"Applications ({enabled_apps}/{len(apps)})")
-        except:
-            pass  # If restoration fails, just use default
+    
+    def _create_command_widgets(self, commands):
+        """Create command widgets in batches for better performance"""
+        for i, item in enumerate(commands):
+            self.create_item_widget(self.commands_frame, item)
+            # Process in small batches to keep UI responsive
+            if i % 5 == 0:
+                self.root.update_idletasks()
+    
+    def _create_app_widgets(self, apps):
+        """Create app widgets in batches for better performance"""
+        for i, item in enumerate(apps):
+            self.create_item_widget(self.apps_frame, item)
+            # Process in small batches to keep UI responsive
+            if i % 5 == 0:
+                self.root.update_idletasks()
     
     def filter_items(self, *args):
-        """Filter items based on search text"""
-        search_text = self.search_var.get().lower()
+        """Filter items based on search text with debouncing"""
+        # Cancel previous filter if it exists
+        if hasattr(self, '_filter_after_id'):
+            self.root.after_cancel(self._filter_after_id)
+        
+        # Schedule filter with small delay to reduce rapid updates
+        self._filter_after_id = self.root.after(300, self._do_filter)
+    
+    def _do_filter(self):
+        """Actually perform the filtering"""
+        search_text = self.search_var.get().lower().strip()
         
         # If no search text, show all items
         if not search_text:
@@ -448,14 +500,10 @@ class StartupManagerGUI:
         commands = [item for item in filtered_items if item["type"] == "Command"]
         apps = [item for item in filtered_items if item["type"] == "App"]
         
-        # Create widgets for filtered items
-        for item in commands:
-            self.create_item_widget(self.commands_frame, item)
-        for item in apps:
-            self.create_item_widget(self.apps_frame, item)
-        
-        # Show "no results" if nothing found
-        if not commands:
+        # Create widgets for filtered items in batches
+        if commands:
+            self._create_filtered_widgets(self.commands_frame, commands)
+        else:
             no_results_label = ctk.CTkLabel(
                 self.commands_frame, 
                 text=f"No commands match '{search_text}'", 
@@ -463,13 +511,23 @@ class StartupManagerGUI:
             )
             no_results_label.pack(pady=20)
         
-        if not apps:
+        if apps:
+            self._create_filtered_widgets(self.apps_frame, apps)
+        else:
             no_results_label = ctk.CTkLabel(
                 self.apps_frame, 
                 text=f"No applications match '{search_text}'", 
                 font=ctk.CTkFont(size=14)
             )
             no_results_label.pack(pady=20)
+    
+    def _create_filtered_widgets(self, parent, items):
+        """Create filtered widgets in batches"""
+        for i, item in enumerate(items):
+            self.create_item_widget(parent, item)
+            # Update UI every few items to keep it responsive
+            if i % 3 == 0:
+                self.root.update_idletasks()
     
     def open_add_dialog(self):
         """Open dialog to add new item"""
