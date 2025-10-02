@@ -771,10 +771,39 @@ class WindowsUtil:
                 else:
                     win.addstr(y, 2, f"  {item['title']}")
         
-        # Always add description if available, unless it's a quit action (handled above)
-        if action != "quit":
-            desc_y = height - 4
-            desc = main_item.get("description", "")
+        # Show appropriate description based on current state
+        desc = ""
+        if action == "quit":
+            desc = "Exit WindowsUtil"
+        elif self.in_submenu and submenu_items and self.current_submenu_selection < len(submenu_items):
+            # Show the selected submenu item's description
+            selected_submenu_item = submenu_items[self.current_submenu_selection]
+            
+            # Extract description from different action formats
+            item_action = selected_submenu_item.get("action")
+            if isinstance(item_action, tuple) and len(item_action) >= 2:
+                # Format: ("command", "description")
+                desc = item_action[1]
+            elif isinstance(item_action, dict) and "description" in item_action:
+                # Format: {"commands": [...], "description": "..."}
+                # Format: {"powershell": [...], "description": "..."}
+                desc = item_action["description"]
+            elif callable(item_action):
+                # Method reference - use a generic description
+                desc = f"Execute {selected_submenu_item.get('title', 'action')}"
+            else:
+                desc = selected_submenu_item.get("description", "No description available")
+                
+        elif submenu_items:
+            # Show main menu description when not in submenu but submenu exists
+            desc = main_item.get("description", "No description available")
+        else:
+            # Show main menu description for direct action items
+            desc = main_item.get("description", "No description available")
+        
+        # Always show description
+        desc_y = height - 4
+        if desc:
             # Word wrap description
             if len(desc) > width - 4:
                 desc = desc[:width-7] + "..."
