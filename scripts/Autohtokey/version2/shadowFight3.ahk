@@ -93,9 +93,10 @@ F15:: ;! Hound
             break
         }
         SendEvent("{i down}")
-        SendEvent("{x down}")
-        SendEvent("jjj")
-        SendEvent("{x up}")
+        ; SendEvent("{x down}")
+        ; SendEvent("jjj")
+        Sleep(3000)
+        ; SendEvent("{x up}")
         SendEvent("{i up}")
     }
     return

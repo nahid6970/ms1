@@ -416,31 +416,6 @@
         "Action": {
             "images": [
                 {
-                    "name": "KOS 2TAP",
-                    "path": "C:/Users/nahid/ms/msBackups/shadowfight3/action",
-                    "confidence": 0.8,
-                    "region": [
-                        187,
-                        100,
-                        383,
-                        265
-                    ],
-                    "action": {
-                        "type": "key_press",
-                        "key": "F13",
-                        "delay": 1.0
-                    },
-                    "enabled": true,
-                    "is_folder": true,
-                    "actions": [
-                        {
-                            "type": "key_press",
-                            "key": "F13",
-                            "delay": 1.0
-                        }
-                    ]
-                },
-                {
                     "name": "Hound",
                     "path": "C:/Users/nahid/ms/msBackups/shadowfight3/action",
                     "confidence": 0.8,
@@ -455,12 +430,37 @@
                         "key": "F15",
                         "delay": 1.0
                     },
-                    "enabled": false,
+                    "enabled": true,
                     "is_folder": true,
                     "actions": [
                         {
                             "type": "key_press",
                             "key": "F15",
+                            "delay": 1.0
+                        }
+                    ]
+                },
+                {
+                    "name": "KOS 2TAP",
+                    "path": "C:/Users/nahid/ms/msBackups/shadowfight3/action",
+                    "confidence": 0.8,
+                    "region": [
+                        187,
+                        100,
+                        383,
+                        265
+                    ],
+                    "action": {
+                        "type": "key_press",
+                        "key": "F13",
+                        "delay": 1.0
+                    },
+                    "enabled": false,
+                    "is_folder": true,
+                    "actions": [
+                        {
+                            "type": "key_press",
+                            "key": "F13",
                             "delay": 1.0
                         }
                     ]
@@ -474,5 +474,5 @@
         }
     },
     "last_selected_event": "Action",
-    "last_selected_image": "KOS 2TAP"
+    "last_selected_image": "Hound"
 }
