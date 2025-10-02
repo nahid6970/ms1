@@ -416,65 +416,100 @@ class WindowsUtil:
             # ═══════════════════════════════════════════════════════════════
             {
                 "title": "Firewall Ports",
-                "description": "Manage Windows Firewall rules for specific ports",
+                "description": "Manage Windows Firewall rules for specific ports (requires admin)",
                 "submenu": [
                     {
                         "title": "Port 22 [SSH]", 
                         "action": {
                             "powershell": [
-                                "New-NetFirewallRule -DisplayName 'Allow_Port_22' -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -Profile Any",
-                                "Write-Host 'Port 22 (SSH) has been opened in Windows Firewall' -ForegroundColor Green"
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'New-NetFirewallRule -DisplayName \"Allow_Port_22\" -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -Profile Any; Write-Host \"Port 22 (SSH) has been opened in Windows Firewall\" -ForegroundColor Green; Read-Host \"Press Enter to continue\"' -Verb RunAs"
                             ],
-                            "description": "Open port 22 for SSH connections"
+                            "description": "Open port 22 for SSH connections (runs as admin)"
                         }
                     },
                     {
                         "title": "Port 5000", 
                         "action": {
                             "powershell": [
-                                "New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any",
-                                "Write-Host 'Port 5000 has been opened in Windows Firewall' -ForegroundColor Green"
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'New-NetFirewallRule -DisplayName \"Allow_Port_5000\" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any; Write-Host \"Port 5000 has been opened in Windows Firewall\" -ForegroundColor Green; Read-Host \"Press Enter to continue\"' -Verb RunAs"
                             ],
-                            "description": "Open port 5000 in Windows Firewall"
+                            "description": "Open port 5000 in Windows Firewall (runs as admin)"
                         }
                     },
                     {
                         "title": "Port 5001", 
                         "action": {
                             "powershell": [
-                                "New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any",
-                                "Write-Host 'Port 5001 has been opened in Windows Firewall' -ForegroundColor Green"
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'New-NetFirewallRule -DisplayName \"Allow_Port_5001\" -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any; Write-Host \"Port 5001 has been opened in Windows Firewall\" -ForegroundColor Green; Read-Host \"Press Enter to continue\"' -Verb RunAs"
                             ],
-                            "description": "Open port 5001 in Windows Firewall"
+                            "description": "Open port 5001 in Windows Firewall (runs as admin)"
                         }
                     },
                     {
                         "title": "Port 5002", 
                         "action": {
                             "powershell": [
-                                "New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any",
-                                "Write-Host 'Port 5002 has been opened in Windows Firewall' -ForegroundColor Green"
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'New-NetFirewallRule -DisplayName \"Allow_Port_5002\" -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any; Write-Host \"Port 5002 has been opened in Windows Firewall\" -ForegroundColor Green; Read-Host \"Press Enter to continue\"' -Verb RunAs"
                             ],
-                            "description": "Open port 5002 in Windows Firewall"
+                            "description": "Open port 5002 in Windows Firewall (runs as admin)"
                         }
                     },
                     {
                         "title": "View All Firewall Rules", 
                         "action": {
                             "powershell": [
-                                "Get-NetFirewallRule | Where-Object {$_.DisplayName -like 'Allow_Port_*'} | Select-Object DisplayName, Direction, Action, Enabled | Format-Table -AutoSize"
+                                "Get-NetFirewallRule | Where-Object {$_.DisplayName -like 'Allow_Port_*'} | Select-Object DisplayName, Direction, Action, Enabled | Sort-Object DisplayName | Format-Table -AutoSize",
+                                "Write-Host 'Firewall rules displayed above' -ForegroundColor Green"
                             ],
-                            "description": "Display all custom port firewall rules"
+                            "description": "Display all custom port firewall rules sorted by name"
+                        }
+                    },
+                    {
+                        "title": "Remove Duplicate Port Rules", 
+                        "action": {
+                            "powershell": [
+                                "$script = @'",
+                                "$allRules = Get-NetFirewallRule | Where-Object {$_.DisplayName -like 'Allow_Port_*'}",
+                                "if ($allRules) {",
+                                "    Write-Host 'Found custom port rules:' -ForegroundColor Yellow",
+                                "    $allRules | Select-Object DisplayName, Direction, Action, Enabled | Sort-Object DisplayName | Format-Table -AutoSize",
+                                "    $duplicates = $allRules | Group-Object DisplayName | Where-Object {$_.Count -gt 1}",
+                                "    if ($duplicates) {",
+                                "        Write-Host 'Found duplicate rules:' -ForegroundColor Red",
+                                "        $duplicates | ForEach-Object { Write-Host \"$($_.Name): $($_.Count) instances\" -ForegroundColor Red }",
+                                "        $confirm = Read-Host 'Do you want to remove duplicate rules (keeping only one of each)? (y/N)'",
+                                "        if ($confirm -match '^[yY]') {",
+                                "            foreach ($duplicate in $duplicates) {",
+                                "                $rulesToRemove = $duplicate.Group | Select-Object -Skip 1",
+                                "                $rulesToRemove | Remove-NetFirewallRule",
+                                "                Write-Host \"Removed $($rulesToRemove.Count) duplicate instances of $($duplicate.Name)\" -ForegroundColor Green",
+                                "            }",
+                                "            Write-Host 'Duplicate removal completed!' -ForegroundColor Green",
+                                "        } else {",
+                                "            Write-Host 'Operation cancelled' -ForegroundColor Yellow",
+                                "        }",
+                                "    } else {",
+                                "        Write-Host 'No duplicate rules found' -ForegroundColor Green",
+                                "    }",
+                                "} else {",
+                                "    Write-Host 'No custom port rules found' -ForegroundColor Yellow",
+                                "}",
+                                "Read-Host 'Press Enter to continue'",
+                                "'@",
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command', $script -Verb RunAs"
+                            ],
+                            "description": "Remove duplicate firewall rules (keeps one instance of each) - runs as admin"
                         }
                     },
                     {
                         "title": "Remove Custom Port Rules", 
                         "action": {
                             "powershell": [
+                                "$script = @'",
                                 "$rules = Get-NetFirewallRule | Where-Object {$_.DisplayName -like 'Allow_Port_*'}",
                                 "if ($rules) {",
                                 "    Write-Host 'Found custom port rules:' -ForegroundColor Yellow",
-                                "    $rules | Select-Object DisplayName | Format-Table -AutoSize",
+                                "    $rules | Select-Object DisplayName | Sort-Object DisplayName | Format-Table -AutoSize",
                                 "    $confirm = Read-Host 'Do you want to remove all custom port rules? (y/N)'",
                                 "    if ($confirm -match '^[yY]') {",
                                 "        $rules | Remove-NetFirewallRule",
@@ -484,9 +519,12 @@ class WindowsUtil:
                                 "    }",
                                 "} else {",
                                 "    Write-Host 'No custom port rules found' -ForegroundColor Yellow",
-                                "}"
+                                "}",
+                                "Read-Host 'Press Enter to continue'",
+                                "'@",
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command', $script -Verb RunAs"
                             ],
-                            "description": "Remove all custom port firewall rules"
+                            "description": "Remove all custom port firewall rules (runs as admin)"
                         }
                     }
                 ]
