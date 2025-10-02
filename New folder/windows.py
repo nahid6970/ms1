@@ -15,12 +15,24 @@ class WindowsUtil:
         
         # Initialize colors
         curses.start_color()
-        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)   # Selected
-        curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)   # Title
-        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Success
-        curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)    # Error
-        curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK) # Warning
-        curses.init_pair(6, curses.COLOR_BLUE, curses.COLOR_BLACK)   # Info
+        
+        # Check if terminal supports 256 colors for better color options
+        if curses.can_change_color() and curses.COLORS >= 256:
+            # Use 256-color mode for better colors
+            curses.init_pair(1, 46, curses.COLOR_BLACK)   # Selected (bright green)
+            curses.init_pair(2, 51, curses.COLOR_BLACK)   # Title (bright cyan)
+            curses.init_pair(3, 82, curses.COLOR_BLACK)   # Success (lime green)
+            curses.init_pair(4, 196, curses.COLOR_BLACK)  # Error (bright red)
+            curses.init_pair(5, 226, curses.COLOR_BLACK)  # Warning (bright yellow)
+            curses.init_pair(6, 117, curses.COLOR_BLACK)  # Info (sky blue)
+        else:
+            # Fallback to basic 8 colors
+            curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)   # Selected
+            curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)    # Title
+            curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)   # Success
+            curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)     # Error
+            curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Warning
+            curses.init_pair(6, curses.COLOR_CYAN, curses.COLOR_BLACK)    # Info (changed from BLUE to CYAN for sky blue)
         
         # Hide cursor
         curses.curs_set(0)
