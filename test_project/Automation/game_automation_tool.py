@@ -512,7 +512,7 @@ class GameAutomationTool(ctk.CTk):
     def show_image_config_dialog(self, event_name, image_index=None):
         dialog = ctk.CTkToplevel(self)
         dialog.title("Image Configuration")
-        dialog.geometry("600x700")
+        dialog.geometry("700x800")
         dialog.transient(self)
         dialog.grab_set()
 
@@ -526,9 +526,13 @@ class GameAutomationTool(ctk.CTk):
         y1_var = ctk.StringVar(value=str(region_data[1]) if region_data and len(region_data) > 1 and region_data[1] is not None else "")
         x2_var = ctk.StringVar(value=str(region_data[2]) if region_data and len(region_data) > 2 and region_data[2] is not None else "")
         y2_var = ctk.StringVar(value=str(region_data[3]) if region_data and len(region_data) > 3 and region_data[3] is not None else "")
-        action_type_var = ctk.StringVar(value=image_data.get("action", {}).get("type", "mouse_click"))
         enabled_var = ctk.BooleanVar(value=image_data.get("enabled", True))
         is_folder_var = ctk.BooleanVar(value=image_data.get("is_folder", False))
+        
+        # Handle backward compatibility - convert single action to actions array
+        existing_actions = image_data.get("actions", [])
+        if not existing_actions and "action" in image_data:
+            existing_actions = [image_data["action"]]
 
         # Image Name
         ctk.CTkLabel(dialog, text="Image Name:").pack(anchor="w", padx=20, pady=(10, 0))
@@ -558,14 +562,61 @@ class GameAutomationTool(ctk.CTk):
         ctk.CTkEntry(region_frame, textvariable=y2_var, width=80).pack(side=ctk.LEFT, padx=(0, 5))
         ctk.CTkButton(region_frame, text="Get Region", command=lambda: self.get_screen_region(x1_var, y1_var, x2_var, y2_var)).pack(side=ctk.RIGHT, padx=(10, 0))
 
-        # Action Type
-        ctk.CTkLabel(dialog, text="Action Type:").pack(anchor="w", padx=20, pady=(10, 0))
-        action_type_options = ["mouse_click", "key_press", "key_sequence", "mouse_sequence", "custom_function", "click_on_found_image", "swipe"]
-        ctk.CTkOptionMenu(dialog, variable=action_type_var, values=action_type_options, command=lambda x: self.on_action_type_select(x, action_frame, image_data.get("action", {}))).pack(padx=20, fill=ctk.X)
-
-        # Action specific inputs frame
-        action_frame = ctk.CTkFrame(dialog)
-        action_frame.pack(padx=20, pady=(10, 0), fill=ctk.BOTH, expand=True)
+        # Actions Section
+        ctk.CTkLabel(dialog, text="Actions:", font=("Arial", 12, "bold")).pack(anchor="w", padx=20, pady=(10, 0))
+        
+        # Actions container with scrollable frame
+        actions_container = ctk.CTkScrollableFrame(dialog, height=300)
+        actions_container.pack(padx=20, pady=(5, 0), fill=ctk.BOTH, expand=True)
+        
+        # Store actions data
+        dialog.actions_data = existing_actions.copy() if existing_actions else []
+        
+        # Function to refresh actions display
+        def refresh_actions_display():
+            # Clear existing widgets
+            for widget in actions_container.winfo_children():
+                widget.destroy()
+            
+            for i, action in enumerate(dialog.actions_data):
+                action_frame = ctk.CTkFrame(actions_container)
+                action_frame.pack(fill=ctk.X, pady=5)
+                
+                # Action header with type and controls
+                header_frame = ctk.CTkFrame(action_frame)
+                header_frame.pack(fill=ctk.X, padx=10, pady=5)
+                
+                ctk.CTkLabel(header_frame, text=f"Action {i+1}: {action.get('type', 'Unknown')}", 
+                           font=("Arial", 10, "bold")).pack(side=ctk.LEFT)
+                
+                # Action controls
+                ctk.CTkButton(header_frame, text="Edit", width=50, 
+                            command=lambda idx=i: edit_action(idx)).pack(side=ctk.RIGHT, padx=2)
+                ctk.CTkButton(header_frame, text="Delete", width=50, fg_color="red", hover_color="darkred",
+                            command=lambda idx=i: delete_action(idx)).pack(side=ctk.RIGHT, padx=2)
+                
+                # Action details preview
+                details = self.get_action_preview(action)
+                ctk.CTkLabel(action_frame, text=details, wraplength=600).pack(padx=10, pady=(0, 5))
+        
+        def add_new_action():
+            self.show_action_config_dialog(dialog, len(dialog.actions_data), refresh_actions_display)
+        
+        def edit_action(index):
+            self.show_action_config_dialog(dialog, index, refresh_actions_display)
+        
+        def delete_action(index):
+            if messagebox.askyesno("Confirm Delete", f"Delete Action {index+1}?"):
+                dialog.actions_data.pop(index)
+                refresh_actions_display()
+        
+        # Add action button
+        add_action_btn = ctk.CTkButton(dialog, text="+ Add Action", 
+                                     command=add_new_action, fg_color="#a8df92", text_color="black")
+        add_action_btn.pack(padx=20, pady=5)
+        
+        # Initial display
+        refresh_actions_display()
 
         # Enabled Checkbox
         ctk.CTkCheckBox(dialog, text="Enabled", variable=enabled_var).pack(anchor="w", padx=20, pady=(10, 0))
@@ -573,11 +624,8 @@ class GameAutomationTool(ctk.CTk):
         # Buttons
         button_frame = ctk.CTkFrame(dialog)
         button_frame.pack(pady=20)
-        ctk.CTkButton(button_frame, text="Save", command=lambda: self.save_image_config(event_name, image_index, name_var.get(), path_var.get(), confidence_var.get(), x1_var.get(), y1_var.get(), x2_var.get(), y2_var.get(), action_type_var.get(), action_frame, enabled_var.get(), is_folder_var.get(), dialog)).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Save", command=lambda: self.save_image_config_new(event_name, image_index, name_var.get(), path_var.get(), confidence_var.get(), x1_var.get(), y1_var.get(), x2_var.get(), y2_var.get(), dialog.actions_data, enabled_var.get(), is_folder_var.get(), dialog)).pack(side=ctk.LEFT, padx=10)
         ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
-
-        # Initial call to set up action fields
-        self.on_action_type_select(action_type_var.get(), action_frame, image_data.get("action", {}))
 
         dialog.wait_window()
 
@@ -697,6 +745,196 @@ class GameAutomationTool(ctk.CTk):
         self.save_config()
         self.refresh_image_list()
         dialog.destroy()
+
+    def save_image_config_new(self, event_name, image_index, name, path, confidence, x1, y1, x2, y2, actions_data, enabled, is_folder, dialog):
+        if not name or not path:
+            messagebox.showerror("Error", "Image Name and Path cannot be empty.")
+            return
+
+        try:
+            confidence = float(confidence)
+            if not (0.1 <= confidence <= 1.0):
+                raise ValueError("Confidence must be between 0.1 and 1.0")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Invalid Confidence: {e}")
+            return
+
+        region = None
+        if x1 and y1 and x2 and y2:
+            try:
+                region = (int(x1), int(y1), int(x2), int(y2))
+            except ValueError:
+                messagebox.showerror("Error", "Region coordinates must be integers.")
+                return
+
+        if not actions_data:
+            messagebox.showerror("Error", "At least one action must be configured.")
+            return
+
+        image_data = {
+            "name": name,
+            "path": path,
+            "confidence": confidence,
+            "region": region,
+            "actions": actions_data,
+            "enabled": enabled,
+            "is_folder": is_folder
+        }
+
+        if image_index is None:
+            # Add new image
+            self.events_data[event_name]["images"].append(image_data)
+            self.log_status(f"Added image '{name}' with {len(actions_data)} action(s) to event '{event_name}'")
+        else:
+            # Update existing image
+            self.events_data[event_name]["images"][image_index] = image_data
+            self.log_status(f"Updated image '{name}' with {len(actions_data)} action(s) in event '{event_name}'")
+
+        self.save_config()
+        self.refresh_image_list()
+        dialog.destroy()
+
+    def get_action_preview(self, action):
+        """Generate a preview string for an action"""
+        action_type = action.get("type", "Unknown")
+        
+        if action_type == "mouse_click":
+            return f"Click at ({action.get('x', '?')}, {action.get('y', '?')}) with {action.get('delay', 0.1)}s delay"
+        elif action_type == "key_press":
+            return f"Press key '{action.get('key', '?')}' with {action.get('delay', 0.1)}s delay"
+        elif action_type == "key_sequence":
+            return f"Key sequence: {action.get('sequence', '?')}"
+        elif action_type == "mouse_sequence":
+            return f"Mouse sequence: {action.get('sequence', '?')}"
+        elif action_type == "custom_function":
+            return f"Function: {action.get('function', '?')} with params: {action.get('params', '{}')}"
+        elif action_type == "click_on_found_image":
+            return "Click on the found image location"
+        elif action_type == "swipe":
+            return f"Swipe sequence: {action.get('sequence', '?')}"
+        else:
+            return f"Unknown action type: {action_type}"
+
+    def show_action_config_dialog(self, parent_dialog, action_index, refresh_callback):
+        """Show dialog to configure a single action"""
+        dialog = ctk.CTkToplevel(parent_dialog)
+        dialog.title(f"Configure Action {action_index + 1}")
+        dialog.geometry("500x600")
+        dialog.transient(parent_dialog)
+        dialog.grab_set()
+
+        # Get existing action data or create new
+        if action_index < len(parent_dialog.actions_data):
+            action_data = parent_dialog.actions_data[action_index].copy()
+        else:
+            action_data = {"type": "mouse_click"}
+
+        # Action Type
+        ctk.CTkLabel(dialog, text="Action Type:").pack(anchor="w", padx=20, pady=(10, 0))
+        action_type_var = ctk.StringVar(value=action_data.get("type", "mouse_click"))
+        action_type_options = ["mouse_click", "key_press", "key_sequence", "mouse_sequence", "custom_function", "click_on_found_image", "swipe"]
+        ctk.CTkOptionMenu(dialog, variable=action_type_var, values=action_type_options, 
+                         command=lambda x: self.on_action_type_select(x, action_frame, action_data)).pack(padx=20, fill=ctk.X)
+
+        # Action specific inputs frame
+        action_frame = ctk.CTkFrame(dialog)
+        action_frame.pack(padx=20, pady=(10, 0), fill=ctk.BOTH, expand=True)
+
+        def save_action():
+            action = {"type": action_type_var.get()}
+            
+            # Collect action-specific data based on type
+            if action_type_var.get() == "key_press":
+                key = action_frame.key_var.get()
+                delay = action_frame.delay_var.get()
+                if not key:
+                    messagebox.showerror("Error", "Key cannot be empty for Key Press action.")
+                    return
+                try:
+                    delay = float(delay)
+                except ValueError:
+                    messagebox.showerror("Error", "Delay must be a number for Key Press action.")
+                    return
+                action.update({"key": key, "delay": delay})
+            elif action_type_var.get() == "key_sequence":
+                sequence = action_frame.sequence_var.get()
+                if not sequence:
+                    messagebox.showerror("Error", "Key Sequence cannot be empty.")
+                    return
+                action.update({"sequence": sequence})
+            elif action_type_var.get() == "mouse_click":
+                x = action_frame.x_var.get()
+                y = action_frame.y_var.get()
+                delay = action_frame.delay_var.get()
+                if not x or not y:
+                    messagebox.showerror("Error", "X and Y coordinates cannot be empty for Mouse Click action.")
+                    return
+                try:
+                    x = int(x)
+                    y = int(y)
+                    delay = float(delay)
+                except ValueError:
+                    messagebox.showerror("Error", "Coordinates and Delay must be numbers for Mouse Click action.")
+                    return
+                action.update({"x": x, "y": y, "delay": delay})
+            elif action_type_var.get() == "mouse_sequence":
+                sequence = action_frame.sequence_var.get()
+                if not sequence:
+                    messagebox.showerror("Error", "Mouse Sequence cannot be empty.")
+                    return
+                action.update({"sequence": sequence})
+            elif action_type_var.get() == "custom_function":
+                function_name = action_frame.function_var.get()
+                params = action_frame.params_var.get()
+                if not function_name:
+                    messagebox.showerror("Error", "Function Name cannot be empty for Custom Function action.")
+                    return
+                try:
+                    json.loads(params) # Validate JSON
+                except json.JSONDecodeError:
+                    messagebox.showerror("Error", "Parameters must be a valid JSON string.")
+                    return
+                action.update({"function": function_name, "params": params})
+            elif action_type_var.get() == "swipe":
+                sequence = action_frame.sequence_var.get()
+                if not sequence:
+                    messagebox.showerror("Error", "Swipe Sequence cannot be empty.")
+                    return
+                # Validate the sequence format
+                parts = [p.strip() for p in sequence.split(",")]
+                if len(parts) % 5 != 0:
+                    messagebox.showerror("Error", "Swipe Sequence must have groups of 5 values (startX,startY,endX,endY,duration).")
+                    return
+                try:
+                    for i in range(len(parts)):
+                        if (i + 1) % 5 == 0: # Duration is a float
+                            float(parts[i])
+                        else: # Coordinates are integers
+                            int(parts[i])
+                except ValueError:
+                    messagebox.showerror("Error", "Swipe Sequence contains invalid numbers.")
+                    return
+                action.update({"sequence": sequence})
+
+            # Save the action
+            if action_index < len(parent_dialog.actions_data):
+                parent_dialog.actions_data[action_index] = action
+            else:
+                parent_dialog.actions_data.append(action)
+            
+            refresh_callback()
+            dialog.destroy()
+
+        # Buttons
+        button_frame = ctk.CTkFrame(dialog)
+        button_frame.pack(pady=20)
+        ctk.CTkButton(button_frame, text="Save", command=save_action).pack(side=ctk.LEFT, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=dialog.destroy).pack(side=ctk.RIGHT, padx=10)
+
+        # Initial call to set up action fields
+        self.on_action_type_select(action_type_var.get(), action_frame, action_data)
+
+        dialog.wait_window()
 
     def browse_image_file(self, path_var, is_folder=False):
         if is_folder:
@@ -914,10 +1152,17 @@ class GameAutomationTool(ctk.CTk):
                     image_entry_frame = ctk.CTkFrame(self.image_frame)
                     image_entry_frame.pack(fill=ctk.X, pady=2)
 
+                    # Count actions for display
+                    actions_count = len(image_data.get("actions", []))
+                    if actions_count == 0 and "action" in image_data:
+                        actions_count = 1  # Backward compatibility
+                    
+                    display_name = f"{image_data['name']} ({actions_count} action{'s' if actions_count != 1 else ''})"
+                    
                     checkbox_var = ctk.BooleanVar(value=image_data.get("enabled", True))
                     checkbox = ctk.CTkCheckBox(
                         image_entry_frame,
-                        text=image_data["name"],
+                        text=display_name,
                         variable=checkbox_var,
                         command=lambda idx=i, var=checkbox_var: self.toggle_image_enabled(idx, var.get())
                     )
@@ -1162,7 +1407,18 @@ class GameAutomationTool(ctk.CTk):
                 )
 
             if location:
-                self.execute_action(image_data["action"], location)
+                # Handle both old single action format and new multiple actions format
+                actions = image_data.get("actions", [])
+                if not actions and "action" in image_data:
+                    # Backward compatibility - convert single action to actions array
+                    actions = [image_data["action"]]
+                
+                # Execute all actions for this image
+                for action in actions:
+                    self.execute_action(action, location)
+                    # Small delay between actions to prevent issues
+                    time.sleep(0.1)
+                
                 return True
         except pyautogui.ImageNotFoundException:
             pass
@@ -1278,6 +1534,13 @@ class GameAutomationTool(ctk.CTk):
                         self.stop_flags[event_name] = False
                         if "target_window" not in event_data:
                             event_data["target_window"] = self.target_window # Set default if not present
+                        
+                        # Handle backward compatibility for actions
+                        for image_data in event_data.get("images", []):
+                            if "action" in image_data and "actions" not in image_data:
+                                # Convert single action to actions array
+                                image_data["actions"] = [image_data["action"]]
+                                # Keep the old action for compatibility but it will be ignored in execution
                 self.log_status(f"Configuration loaded from {self.config_file}")
                 self.refresh_event_list()
                 self.refresh_control_buttons()
