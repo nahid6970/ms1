@@ -25,144 +25,310 @@ class WindowsUtil:
         # Hide cursor
         curses.curs_set(0)
         
-        # Unified menu structure
-        self.menu_data = [
+        # Clean and organized menu structure
+        self.menu_data = self._build_menu_structure()
+    
+    def _build_menu_structure(self):
+        """Build the menu structure in a clean, organized way"""
+        return [
+            # ═══════════════════════════════════════════════════════════════
+            # GIT OPERATIONS
+            # ═══════════════════════════════════════════════════════════════
             {
                 "title": "Git Update",
                 "description": "Update the ms1 repository",
                 "action": self.update_ms1_repo
             },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # SYSTEM INFORMATION
+            # ═══════════════════════════════════════════════════════════════
             {
                 "title": "System Information",
                 "description": "View detailed system information and monitoring",
                 "submenu": [
-                    {"title": "Show System Info", "action": ("systeminfo", "Showing system information")},
-                    {"title": "Hardware Info", "action": ("powershell -Command \"Get-ComputerInfo | Select-Object WindowsProductName, TotalPhysicalMemory, CsProcessors\"", "Showing hardware information")},
-                    {"title": "Network Info", "action": ("ipconfig /all", "Showing network information")},
-                    {"title": "Process Monitor", "action": ("powershell -Command \"Get-Process | Sort-Object CPU -Descending | Select-Object -First 20\"", "Opening process monitor")},
-                    {"title": "Disk Usage", "action": ("powershell -Command \"Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name='Size(GB)';Expression={[math]::Round($_.Size/1GB,2)}}, @{Name='FreeSpace(GB)';Expression={[math]::Round($_.FreeSpace/1GB,2)}}\"", "Showing disk usage")},
+                    {
+                        "title": "Show System Info", 
+                        "action": ("systeminfo", "Showing system information")
+                    },
+                    {
+                        "title": "Hardware Info", 
+                        "action": (
+                            "powershell -Command \"Get-ComputerInfo | Select-Object WindowsProductName, TotalPhysicalMemory, CsProcessors\"", 
+                            "Showing hardware information"
+                        )
+                    },
+                    {
+                        "title": "Network Info", 
+                        "action": ("ipconfig /all", "Showing network information")
+                    },
+                    {
+                        "title": "Process Monitor", 
+                        "action": (
+                            "powershell -Command \"Get-Process | Sort-Object CPU -Descending | Select-Object -First 20\"", 
+                            "Opening process monitor"
+                        )
+                    },
+                    {
+                        "title": "Disk Usage", 
+                        "action": (
+                            "powershell -Command \"Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name='Size(GB)';Expression={[math]::Round($_.Size/1GB,2)}}, @{Name='FreeSpace(GB)';Expression={[math]::Round($_.FreeSpace/1GB,2)}}\"", 
+                            "Showing disk usage"
+                        )
+                    },
                 ]
             },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # PACKAGE MANAGEMENT
+            # ═══════════════════════════════════════════════════════════════
             {
                 "title": "Package Management",
                 "description": "Manage Windows packages with Scoop and Chocolatey",
                 "submenu": [
-                    {"title": "Update Scoop", "action": ("scoop update", "Updating Scoop")},
-                    {"title": "Install Scoop", "action": ("powershell -Command \"Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm get.scoop.sh | iex\"", "Installing Scoop package manager")},
-                    {"title": "Install Necessary Packages", "action": {
-                        "commands": [
-                            "scoop install ack",
-                            "scoop install adb", 
-                            "scoop install bat",
-                            "scoop install capture2text",
-                            "scoop install ditto",
-                            "scoop install ffmpeg",
-                            "scoop install highlight",
-                            "scoop install kitty",
-                            "scoop install neovim",
-                            "scoop install putty",
-                            "scoop install rssguard",
-                            "scoop install rufus",
-                            "scoop install yt-dlp"
-                        ],
-                        "description": "Installing Essential Scoop Packages"
-                    }},
-                    {"title": "Remove Package", "action": self.remove_package},
-                    {"title": "Search Packages", "action": self.search_packages},
-                    {"title": "List Installed", "action": ("scoop list", "Listing installed packages")},
-                    {"title": "Clean Cache", "action": ("scoop cache rm *", "Cleaning package cache")},
-                    {"title": "Package Info", "action": self.package_info},
+                    {
+                        "title": "Update Scoop", 
+                        "action": ("scoop update", "Updating Scoop")
+                    },
+                    {
+                        "title": "Install Scoop", 
+                        "action": (
+                            "powershell -Command \"Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm get.scoop.sh | iex\"", 
+                            "Installing Scoop package manager"
+                        )
+                    },
+                    {
+                        "title": "Install Essential Packages", 
+                        "action": {
+                            "commands": [
+                                "scoop install ack",
+                                "scoop install adb", 
+                                "scoop install bat",
+                                "scoop install capture2text",
+                                "scoop install ditto",
+                                "scoop install ffmpeg",
+                                "scoop install highlight",
+                                "scoop install kitty",
+                                "scoop install neovim",
+                                "scoop install putty",
+                                "scoop install rssguard",
+                                "scoop install rufus",
+                                "scoop install yt-dlp"
+                            ],
+                            "description": "Installing Essential Scoop Packages"
+                        }
+                    },
+                    {
+                        "title": "Remove Package", 
+                        "action": {
+                            "powershell": [
+                                "$package = Read-Host 'Enter package name to remove'",
+                                "if ($package) { scoop uninstall $package }"
+                            ],
+                            "description": "Remove a Scoop package"
+                        }
+                    },
+                    {
+                        "title": "Search Packages", 
+                        "action": {
+                            "powershell": [
+                                "$query = Read-Host 'Enter search term'",
+                                "if ($query) { scoop search $query }"
+                            ],
+                            "description": "Search for Scoop packages"
+                        }
+                    },
+                    {
+                        "title": "List Installed", 
+                        "action": ("scoop list", "Listing installed packages")
+                    },
+                    {
+                        "title": "Clean Cache", 
+                        "action": ("scoop cache rm *", "Cleaning package cache")
+                    },
+                    {
+                        "title": "Package Info", 
+                        "action": {
+                            "powershell": [
+                                "$package = Read-Host 'Enter package name for info'",
+                                "if ($package) { scoop info $package }"
+                            ],
+                            "description": "Show package information"
+                        }
+                    },
                 ]
             },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # SYSTEM MAINTENANCE
+            # ═══════════════════════════════════════════════════════════════
             {
                 "title": "System Maintenance",
                 "description": "System cleanup and maintenance tasks",
                 "submenu": [
-                    {"title": "Windows Update", "action": ("powershell -Command \"Get-WindowsUpdate -Install -AcceptAll\"", "Running Windows Update")},
-                    {"title": "Clean Temp Files", "action": {
-                        "powershell": [
-                            "Write-Host 'Cleaning temporary files...' -ForegroundColor Yellow",
-                            "Get-ChildItem -Path $env:TEMP -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
-                            "Write-Host 'Cleaning Windows temp folder...' -ForegroundColor Yellow", 
-                            "Get-ChildItem -Path C:\\Windows\\Temp -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
-                            "Write-Host 'Cleaning browser cache...' -ForegroundColor Yellow",
-                            "Get-ChildItem -Path \"$env:LOCALAPPDATA\\Microsoft\\Windows\\INetCache\" -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
-                            "Write-Host 'Cleanup completed!' -ForegroundColor Green"
-                        ],
-                        "description": "System Cleanup Script"
-                    }},
-                    {"title": "Check Disk", "action": ("chkdsk C: /f", "Checking disk for errors")},
-                    {"title": "System File Check", "action": ("sfc /scannow", "Running system file checker")},
-                    {"title": "DISM Health Check", "action": ("DISM /Online /Cleanup-Image /CheckHealth", "Checking system image health")},
-                    {"title": "Check Services", "action": ("powershell -Command \"Get-Service | Where-Object {$_.Status -eq 'Stopped' -and $_.StartType -eq 'Automatic'}\"", "Checking stopped services")},
-                    {"title": "Manage Startup Programs", "action": ("powershell -Command \"Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, Location\"", "Managing startup programs")},
+                    {
+                        "title": "Windows Update", 
+                        "action": (
+                            "powershell -Command \"Get-WindowsUpdate -Install -AcceptAll\"", 
+                            "Running Windows Update"
+                        )
+                    },
+                    {
+                        "title": "Clean Temp Files", 
+                        "action": {
+                            "powershell": [
+                                "Write-Host 'Cleaning temporary files...' -ForegroundColor Yellow",
+                                "Get-ChildItem -Path $env:TEMP -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+                                "Write-Host 'Cleaning Windows temp folder...' -ForegroundColor Yellow", 
+                                "Get-ChildItem -Path C:\\Windows\\Temp -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+                                "Write-Host 'Cleaning browser cache...' -ForegroundColor Yellow",
+                                "Get-ChildItem -Path \"$env:LOCALAPPDATA\\Microsoft\\Windows\\INetCache\" -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
+                                "Write-Host 'Cleanup completed!' -ForegroundColor Green"
+                            ],
+                            "description": "System Cleanup Script"
+                        }
+                    },
+                    {
+                        "title": "Check Disk", 
+                        "action": ("chkdsk C: /f", "Checking disk for errors")
+                    },
+                    {
+                        "title": "System File Check", 
+                        "action": ("sfc /scannow", "Running system file checker")
+                    },
+                    {
+                        "title": "DISM Health Check", 
+                        "action": ("DISM /Online /Cleanup-Image /CheckHealth", "Checking system image health")
+                    },
+                    {
+                        "title": "Check Services", 
+                        "action": (
+                            "powershell -Command \"Get-Service | Where-Object {$_.Status -eq 'Stopped' -and $_.StartType -eq 'Automatic'}\"", 
+                            "Checking stopped services"
+                        )
+                    },
+                    {
+                        "title": "Manage Startup Programs", 
+                        "action": (
+                            "powershell -Command \"Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, Location\"", 
+                            "Managing startup programs"
+                        )
+                    },
                 ]
             },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # DEVELOPMENT TOOLS
+            # ═══════════════════════════════════════════════════════════════
             {
                 "title": "Development Tools",
                 "description": "Install common development tools and environments",
                 "submenu": [
-                    {"title": "Install Git", "action": ("scoop install git", "Installing Git")},
-                    {"title": "Install Node.js", "action": ("scoop install nodejs", "Installing Node.js and npm")},
-                    {"title": "Install Python", "action": ("scoop install python", "Installing Python")},
-                    {"title": "Install Visual Studio Code", "action": ("scoop install vscode", "Installing Visual Studio Code")},
-                    {"title": "Install Build Tools", "action": ("scoop install mingw", "Installing MinGW build tools")},
-                    {"title": "Install All Dev Tools", "action": {
-                        "commands": [
-                            "scoop install git",
-                            "scoop install nodejs",
-                            "scoop install python",
-                            "scoop install vscode",
-                            "scoop install mingw",
-                            "scoop install docker",
-                            "scoop install postman"
-                        ],
-                        "description": "Installing Complete Development Environment"
-                    }},
+                    {
+                        "title": "Install Git", 
+                        "action": ("scoop install git", "Installing Git")
+                    },
+                    {
+                        "title": "Install Node.js", 
+                        "action": ("scoop install nodejs", "Installing Node.js and npm")
+                    },
+                    {
+                        "title": "Install Python", 
+                        "action": ("scoop install python", "Installing Python")
+                    },
+                    {
+                        "title": "Install Visual Studio Code", 
+                        "action": ("scoop install vscode", "Installing Visual Studio Code")
+                    },
+                    {
+                        "title": "Install Build Tools", 
+                        "action": ("scoop install mingw", "Installing MinGW build tools")
+                    },
+                    {
+                        "title": "Install Complete Dev Environment", 
+                        "action": {
+                            "commands": [
+                                "scoop install git",
+                                "scoop install nodejs",
+                                "scoop install python",
+                                "scoop install vscode",
+                                "scoop install mingw",
+                                "scoop install docker",
+                                "scoop install postman"
+                            ],
+                            "description": "Installing Complete Development Environment"
+                        }
+                    },
                 ]
             },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # GITHUB PROJECTS
+            # ═══════════════════════════════════════════════════════════════
             {
-                "title": "Github-Projects",
+                "title": "GitHub Projects",
                 "description": "Run popular Windows utilities and scripts from GitHub",
                 "submenu": [
-                    {"title": "ChrisTitus WinUtility", "action": {
-                        "powershell": [
-                            "Start-Process powershell -ArgumentList '-NoExit', '-Command iwr -useb https://christitus.com/win | iex' -Verb RunAs"
-                        ],
-                        "description": "Run Chris Titus Tech's Windows Utility as Admin"
-                    }},
-                    {"title": "Microsoft Activation Scripts (MAS)", "action": {
-                        "powershell": [
-                            "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://get.activated.win | iex' -Verb RunAs"
-                        ],
-                        "description": "Run Microsoft Activation Scripts as Admin"
-                    }},
-                    {"title": "WIMUtil", "action": {
-                        "powershell": [
-                            "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1 | iex' -Verb RunAs"
-                        ],
-                        "description": "Run WIMUtil from GitHub as Admin"
-                    }},
-                    {"title": "Harden Windows Security Using GUI", "action": {
-                        "powershell": [
-                            "Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy Bypass', '-Command', 'irm https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1 | iex; P' -Verb RunAs"
-                        ],
-                        "description": "Run Harden Windows Security GUI as Admin"
-                    }},
-                    {"title": "Winhance", "action": {
-                        "powershell": [
-                            "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1 | iex' -Verb RunAs"
-                        ],
-                        "description": "Run Winhance Utility as Admin"
-                    }},
-                    {"title": "AppControl Manager", "action": {
-                        "powershell": [
-                            "Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy Bypass', '-Command', 'irm https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1 | iex; AppControl' -Verb RunAs"
-                        ],
-                        "description": "Run AppControl Manager as Admin"
-                    }}
+                    {
+                        "title": "ChrisTitus WinUtility", 
+                        "action": {
+                            "powershell": [
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command iwr -useb https://christitus.com/win | iex' -Verb RunAs"
+                            ],
+                            "description": "Run Chris Titus Tech's Windows Utility as Admin"
+                        }
+                    },
+                    {
+                        "title": "Microsoft Activation Scripts (MAS)", 
+                        "action": {
+                            "powershell": [
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://get.activated.win | iex' -Verb RunAs"
+                            ],
+                            "description": "Run Microsoft Activation Scripts as Admin"
+                        }
+                    },
+                    {
+                        "title": "WIMUtil", 
+                        "action": {
+                            "powershell": [
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://github.com/memstechtips/WIMUtil/raw/main/src/WIMUtil.ps1 | iex' -Verb RunAs"
+                            ],
+                            "description": "Run WIMUtil from GitHub as Admin"
+                        }
+                    },
+                    {
+                        "title": "Harden Windows Security GUI", 
+                        "action": {
+                            "powershell": [
+                                "Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy Bypass', '-Command', 'irm https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1 | iex; P' -Verb RunAs"
+                            ],
+                            "description": "Run Harden Windows Security GUI as Admin"
+                        }
+                    },
+                    {
+                        "title": "Winhance", 
+                        "action": {
+                            "powershell": [
+                                "Start-Process powershell -ArgumentList '-NoExit', '-Command irm https://github.com/memstechtips/Winhance/raw/main/Winhance.ps1 | iex' -Verb RunAs"
+                            ],
+                            "description": "Run Winhance Utility as Admin"
+                        }
+                    },
+                    {
+                        "title": "AppControl Manager", 
+                        "action": {
+                            "powershell": [
+                                "Start-Process powershell -ArgumentList '-NoExit', '-ExecutionPolicy Bypass', '-Command', 'irm https://raw.githubusercontent.com/HotCakeX/Harden-Windows-Security/main/Harden-Windows-Security.ps1 | iex; AppControl' -Verb RunAs"
+                            ],
+                            "description": "Run AppControl Manager as Admin"
+                        }
+                    }
                 ]
             },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # EXIT
+            # ═══════════════════════════════════════════════════════════════
             {
                 "title": "Quit",
                 "description": "Exit WindowsUtil",
@@ -415,128 +581,6 @@ class WindowsUtil:
             else:
                 # Handle other action types if needed
                 pass
-    
-    def install_necessary_packages(self):
-        """Install essential packages using multiple commands"""
-        packages = [
-            "scoop install ack",
-            "scoop install adb", 
-            "scoop install bat",
-            "scoop install capture2text",
-            "scoop install ditto",
-            "scoop install ffmpeg",
-            "scoop install highlight",
-            "scoop install kitty",
-            "scoop install neovim",
-            "scoop install putty",
-            "scoop install rssguard",
-            "scoop install rufus",
-            "scoop install yt-dlp"
-        ]
-        
-        self.execute_command(packages, "Installing Essential Scoop Packages")
-    
-    def necessarypkgs(self):
-        """Install essential packages"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            self.execute_command(f"scoop install vim nano", f"Installing vim, nano")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
-
-    def install_package(self):
-        """Install a package with user input"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            package = input("Enter package name: ").strip()
-            if package:
-                self.execute_command(f"scoop install {package}", f"Installing {package}")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
-    
-    def remove_package(self):
-        """Remove a package with user input"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            package = input("Enter package name: ").strip()
-            if package:
-                self.execute_command(f"scoop uninstall {package}", f"Removing {package}")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
-    
-    def search_packages(self):
-        """Search packages with user input"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            query = input("Enter search term: ").strip()
-            if query:
-                self.execute_command(f"scoop search {query}", f"Searching for '{query}'")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
-    
-    def package_info(self):
-        """Show package information"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            package = input("Enter package name: ").strip()
-            if package:
-                self.execute_command(f"scoop info {package}", f"Package info for {package}")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
-    
-    def install_chocolatey_package(self):
-        """Install Chocolatey package with user input"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            package = input("Enter Chocolatey package name: ").strip()
-            if package:
-                self.execute_command(f"choco install {package} -y", f"Installing Chocolatey package {package}")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
-    
-    def search_chocolatey(self):
-        """Search Chocolatey packages"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            query = input("Enter search term: ").strip()
-            if query:
-                self.execute_command(f"choco search {query}", f"Searching Chocolatey for '{query}'")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
-    
-    def remove_chocolatey_package(self):
-        """Remove Chocolatey package"""
-        curses.def_prog_mode()
-        curses.endwin()
-        
-        try:
-            package = input("Enter Chocolatey package name: ").strip()
-            if package:
-                self.execute_command(f"choco uninstall {package} -y", f"Removing Chocolatey package {package}")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
     
     def clean_system_files(self):
         """Clean system temporary files using PowerShell script"""
