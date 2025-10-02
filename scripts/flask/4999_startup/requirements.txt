@@ -1,2 +1,1 @@
-Flask==2.3.3
-pywin32==306
+customtkinter>=5.2.0
