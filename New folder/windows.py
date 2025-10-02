@@ -37,7 +37,49 @@ class WindowsUtil:
             {
                 "title": "Git Update",
                 "description": "Update the ms1 repository",
-                "action": self.update_ms1_repo
+                "action": {
+                    "powershell": [
+                        "Write-Host 'Updating ms1 repository...' -ForegroundColor Blue",
+                        "$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path",
+                        "$gitRoot = $null",
+                        "$currentDir = $scriptDir",
+                        "while ($currentDir -ne (Split-Path -Parent $currentDir)) {",
+                        "    if (Test-Path (Join-Path $currentDir '.git')) {",
+                        "        $gitRoot = $currentDir",
+                        "        break",
+                        "    }",
+                        "    $currentDir = Split-Path -Parent $currentDir",
+                        "}",
+                        "if (-not $gitRoot) {",
+                        "    Write-Host 'Error: Not inside a git repository' -ForegroundColor Red",
+                        "    Write-Host \"Current directory: $scriptDir\"",
+                        "    Read-Host 'Press Enter to continue'",
+                        "    return",
+                        "}",
+                        "Write-Host \"Found git repository at: $gitRoot\"",
+                        "Set-Location $gitRoot",
+                        "$status = git status --porcelain",
+                        "if ($status) {",
+                        "    Write-Host 'Warning: You have uncommitted changes:' -ForegroundColor Yellow",
+                        "    Write-Host $status",
+                        "    $response = Read-Host 'Continue with git pull? This might cause conflicts. (y/N)'",
+                        "    if ($response -notmatch '^[yY]') {",
+                        "        Write-Host 'Operation cancelled.'",
+                        "        Read-Host 'Press Enter to continue'",
+                        "        return",
+                        "    }",
+                        "}",
+                        "$branch = git branch --show-current",
+                        "Write-Host \"Current branch: $branch\"",
+                        "Write-Host 'Fetching latest changes...'",
+                        "git fetch",
+                        "Write-Host 'Pulling changes...'",
+                        "git pull",
+                        "Write-Host 'Git pull completed!' -ForegroundColor Green",
+                        "Read-Host 'Press Enter to continue'"
+                    ],
+                    "description": "Update Git Repository"
+                }
             },
             
             # ═══════════════════════════════════════════════════════════════
@@ -582,118 +624,6 @@ class WindowsUtil:
                 # Handle other action types if needed
                 pass
     
-    def clean_system_files(self):
-        """Clean system temporary files using PowerShell script"""
-        powershell_commands = [
-            "Write-Host 'Cleaning temporary files...' -ForegroundColor Yellow",
-            "Get-ChildItem -Path $env:TEMP -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
-            "Write-Host 'Cleaning Windows temp folder...' -ForegroundColor Yellow", 
-            "Get-ChildItem -Path C:\\Windows\\Temp -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
-            "Write-Host 'Cleaning browser cache...' -ForegroundColor Yellow",
-            "Get-ChildItem -Path \"$env:LOCALAPPDATA\\Microsoft\\Windows\\INetCache\" -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue",
-            "Write-Host 'Cleanup completed!' -ForegroundColor Green"
-        ]
-        
-        self.execute_powershell_script(powershell_commands, "System Cleanup Script")
-
-    def update_ms1_repo(self):
-        """Update the ms1 repository"""
-        curses.def_prog_mode()
-        curses.endwin()
-
-        # ANSI escape codes for colors
-        BLUE = '\033[94m'
-        GREEN = '\033[92m'
-        RED = '\033[91m'
-        YELLOW = '\033[93m'
-        RESET = '\033[0m'
-
-        try:
-            # Clear the screen
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print(f"\n{BLUE}Updating ms1 repository...{RESET}")
-            # Get the current script directory
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            # Try to find git repository root
-            git_root = None
-            current_dir = script_dir
-            # Search up the directory tree for .git folder
-            while current_dir != os.path.dirname(current_dir):  # Stop at filesystem root
-                if os.path.exists(os.path.join(current_dir, '.git')):
-                    git_root = current_dir
-                    break
-                current_dir = os.path.dirname(current_dir)
-            
-            if not git_root:
-                print(f"{RED}Error: Not inside a git repository{RESET}")
-                print(f"Current directory: {script_dir}")
-                input("Press Enter to continue...")
-                return
-            
-            print(f"Found git repository at: {git_root}")
-            
-            # Change to git repository directory
-            os.chdir(git_root)
-            
-            # Check if we're in a git repository
-            result = subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], 
-                                capture_output=True, text=True)
-            if result.returncode != 0:
-                print(f"{RED}Error: Not a valid git repository{RESET}")
-                input("Press Enter to continue...")
-                return
-            
-            # Check for uncommitted changes
-            result = subprocess.run(['git', 'status', '--porcelain'], 
-                                capture_output=True, text=True)
-            if result.stdout.strip():
-                print(f"{YELLOW}Warning: You have uncommitted changes:{RESET}")
-                print(result.stdout)
-                response = input("Continue with git pull? This might cause conflicts. (y/N): ")
-                if response.lower() not in ['y', 'yes']:
-                    print("Operation cancelled.")
-                    input("Press Enter to continue...")
-                    return
-            
-            # Get current branch
-            result = subprocess.run(['git', 'branch', '--show-current'], 
-                                capture_output=True, text=True)
-            if result.returncode == 0:
-                current_branch = result.stdout.strip()
-                print(f"Current branch: {current_branch}")
-            else:
-                print(f"{YELLOW}Warning: Could not determine current branch{RESET}")
-            
-            # Fetch latest changes
-            print("Fetching latest changes...")
-            result = subprocess.run(['git', 'fetch'], capture_output=True, text=True)
-            if result.returncode != 0:
-                print(f"{RED}Error fetching changes: {result.stderr}{RESET}")
-                input("Press Enter to continue...")
-                return
-            
-            # Pull changes - let git handle the output formatting
-            print("Pulling changes...")
-            result = subprocess.run(['git', 'pull'], text=True)
-            
-            if result.returncode == 0:
-                print(f"\n{GREEN}✓ Git pull completed successfully{RESET}")
-            else:
-                print(f"\n{RED}✗ Git pull failed with exit code: {result.returncode}{RESET}")
-                if "merge conflict" in (result.stderr or "").lower():
-                    print(f"{YELLOW}You have merge conflicts. Please resolve them manually.{RESET}")
-            
-            input("\nPress Enter to continue...")
-            
-        except FileNotFoundError:
-            print(f"{RED}Error: Git is not installed or not in PATH{RESET}")
-            input("Press Enter to continue...")
-        except Exception as e:
-            print(f"{RED}Error: {e}{RESET}")
-            input("Press Enter to continue...")
-        finally:
-            curses.reset_prog_mode()
-            curses.curs_set(0)
     
     def run(self):
         """Main application loop"""
