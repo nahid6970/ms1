@@ -153,7 +153,7 @@ class StartupManagerGUI:
         scrollbar = tk.Scrollbar(listbox_frame, bg=self.colors['bg_secondary'])
         scrollbar.pack(side="right", fill="y")
         
-        # Listbox for items
+        # Listbox for items with monospace font for better alignment
         self.listbox = tk.Listbox(
             listbox_frame,
             yscrollcommand=scrollbar.set,
@@ -161,7 +161,7 @@ class StartupManagerGUI:
             fg=self.colors['text_primary'],
             selectbackground=self.colors['bg_tertiary'],
             selectforeground=self.colors['accent_blue'],
-            font=('Segoe UI', 10),
+            font=('Consolas', 10),  # Monospace font for perfect alignment
             activestyle='none',
             borderwidth=0,
             highlightthickness=0
@@ -347,13 +347,19 @@ Write-Host "Starting up applications..." -ForegroundColor Green
         is_enabled = item.get("enabled", False)
         status_text = "✓" if is_enabled else "✗"
         
+        # Truncate name if too long
+        name = item['name']
+        if len(name) > 35:
+            name = name[:32] + "..."
+        
         # Truncate command for display
         cmd_text = item.get("command", "")
-        if len(cmd_text) > 60:
-            cmd_text = cmd_text[:57] + "..."
+        if len(cmd_text) > 80:
+            cmd_text = cmd_text[:77] + "..."
         
-        # Format the display text
-        display_text = f"{status_text} {item['name']:<30} | {cmd_text}"
+        # Format the display text with proper alignment
+        # Use fixed-width formatting to align the pipe separator
+        display_text = f"{status_text} {name:<35} │ {cmd_text}"
         
         # Add to listbox
         self.listbox.insert(tk.END, display_text)

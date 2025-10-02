@@ -215,7 +215,8 @@
     "paths": [
       "C:\\Program Files\\Cloudflare\\Cloudflare WARP\\Cloudflare WARP.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "enabled": false
   },
   {
     "type": "App",
