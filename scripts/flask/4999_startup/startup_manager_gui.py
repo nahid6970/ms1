@@ -1,6 +1,5 @@
-import customtkinter as ctk
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog
 import json
 import os
 import winreg
@@ -8,94 +7,210 @@ import subprocess
 import threading
 from datetime import datetime
 
-# Set appearance mode and color theme
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("blue")
-
 class StartupManagerGUI:
     def __init__(self):
-        self.root = ctk.CTk()
-        self.root.title("Startup Manager")
-        self.root.geometry("1200x800")
+        self.root = tk.Tk()
+        self.root.title("Startup Manager - PowerShell Script Mode")
+        self.root.geometry("1000x700")
+        self.root.configure(bg='#2b2b2b')
         
-        # Initialize startup manager
+        # Initialize paths
         self.json_file = os.path.join(os.path.dirname(__file__), "startup_items.json")
+        self.ps1_file = os.path.join(os.path.expanduser("~"), "Desktop", "myStartup.ps1")
+        
+        # Configure style
+        self.setup_style()
         
         # Create main interface
         self.create_widgets()
         self.load_items()
         
+    def setup_style(self):
+        """Setup ttk styling for dark theme"""
+        self.style = ttk.Style()
+        
+        # Configure dark theme
+        self.style.theme_use('clam')
+        
+        # Configure colors
+        self.style.configure('TFrame', background='#2b2b2b')
+        self.style.configure('TLabel', background='#2b2b2b', foreground='white')
+        self.style.configure('TButton', background='#404040', foreground='white')
+        self.style.map('TButton', background=[('active', '#505050')])
+        self.style.configure('TEntry', background='#404040', foreground='white', fieldbackground='#404040')
+        self.style.configure('TScrollbar', background='#404040', troughcolor='#2b2b2b')
+        
+        # Custom styles
+        self.style.configure('Title.TLabel', font=('Arial', 18, 'bold'), background='#2b2b2b', foreground='#4a9eff')
+        self.style.configure('Info.TLabel', font=('Arial', 10), background='#2b2b2b', foreground='gray')
+        self.style.configure('ItemName.TLabel', font=('Arial', 11, 'bold'), background='#404040', foreground='white')
+        self.style.configure('ItemCommand.TLabel', font=('Arial', 9), background='#404040', foreground='lightblue')
+        self.style.configure('Enabled.TButton', background='#28a745', foreground='white')
+        self.style.configure('Disabled.TButton', background='#dc3545', foreground='white')
+        self.style.configure('Action.TButton', background='#007bff', foreground='white')
+        self.style.configure('Delete.TButton', background='#dc3545', foreground='white')
+        
     def create_widgets(self):
         # Main container
-        self.main_frame = ctk.CTkFrame(self.root)
-        self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        self.main_frame = ttk.Frame(self.root)
+        self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
         # Title
-        title_label = ctk.CTkLabel(
+        title_label = ttk.Label(
             self.main_frame, 
             text="Startup Manager", 
-            font=ctk.CTkFont(size=24, weight="bold")
+            style='Title.TLabel'
         )
-        title_label.pack(pady=(20, 10))
+        title_label.pack(pady=(10, 5))
+        
+        # Info label
+        info_label = ttk.Label(
+            self.main_frame,
+            text=f"PowerShell Script: {self.ps1_file}",
+            style='Info.TLabel'
+        )
+        info_label.pack(pady=(0, 10))
         
         # Control buttons frame
-        controls_frame = ctk.CTkFrame(self.main_frame)
-        controls_frame.pack(fill="x", padx=20, pady=(0, 20))
+        controls_frame = ttk.Frame(self.main_frame)
+        controls_frame.pack(fill="x", pady=(0, 10))
         
         # Control buttons
-        ctk.CTkButton(
+        ttk.Button(
             controls_frame, 
             text="Add Item", 
             command=self.open_add_dialog,
-            width=100
-        ).pack(side="left", padx=5, pady=10)
+            width=12
+        ).pack(side="left", padx=5)
         
-        ctk.CTkButton(
+        ttk.Button(
             controls_frame, 
             text="Refresh", 
             command=self.load_items,
-            width=100
-        ).pack(side="left", padx=5, pady=10)
+            width=12
+        ).pack(side="left", padx=5)
         
-        ctk.CTkButton(
+        ttk.Button(
             controls_frame, 
-            text="Scan Folders", 
-            command=self.scan_startup_folders,
-            width=100
-        ).pack(side="left", padx=5, pady=10)
+            text="Scan Registry", 
+            command=self.scan_registry,
+            width=12
+        ).pack(side="left", padx=5)
+        
+        ttk.Button(
+            controls_frame, 
+            text="Open PS1", 
+            command=self.open_ps1_file,
+            width=12
+        ).pack(side="left", padx=5)
         
         # Search frame
-        search_frame = ctk.CTkFrame(controls_frame)
-        search_frame.pack(side="right", padx=5, pady=10)
+        search_frame = ttk.Frame(controls_frame)
+        search_frame.pack(side="right", padx=5)
         
-        ctk.CTkLabel(search_frame, text="Search:").pack(side="left", padx=5)
+        ttk.Label(search_frame, text="Search:").pack(side="left", padx=5)
         self.search_var = tk.StringVar()
         self.search_var.trace("w", self.filter_items)
-        search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var, width=200)
+        search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=25)
         search_entry.pack(side="left", padx=5)
         
-        # Create notebook for tabs
-        self.notebook = ctk.CTkTabview(self.main_frame)
-        self.notebook.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        # Main items frame with optimized scrolling
+        items_container = ttk.Frame(self.main_frame)
+        items_container.pack(fill="both", expand=True, pady=(0, 10))
         
-        # Create tabs (we'll update titles in load_items)
-        self.commands_tab = self.notebook.add("Commands")
-        self.apps_tab = self.notebook.add("Applications")
+        # Use Treeview for better performance with large lists
+        self.tree = ttk.Treeview(items_container, columns=('status', 'name', 'command'), show='tree headings', height=20)
         
-        # Create scrollable frames for each tab with optimized settings
-        self.commands_frame = ctk.CTkScrollableFrame(
-            self.commands_tab,
-            scrollbar_button_color="gray30",
-            scrollbar_button_hover_color="gray20"
-        )
-        self.commands_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        # Configure columns
+        self.tree.heading('#0', text='', anchor='w')
+        self.tree.heading('status', text='Status', anchor='w')
+        self.tree.heading('name', text='Name', anchor='w')
+        self.tree.heading('command', text='Command', anchor='w')
         
-        self.apps_frame = ctk.CTkScrollableFrame(
-            self.apps_tab,
-            scrollbar_button_color="gray30", 
-            scrollbar_button_hover_color="gray20"
-        )
-        self.apps_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        self.tree.column('#0', width=0, stretch=False)
+        self.tree.column('status', width=80, stretch=False)
+        self.tree.column('name', width=200, stretch=False)
+        self.tree.column('command', width=400, stretch=True)
+        
+        # Configure treeview styling
+        self.style.configure('Treeview', background='#404040', foreground='white', fieldbackground='#404040')
+        self.style.configure('Treeview.Heading', background='#2b2b2b', foreground='white')
+        self.style.map('Treeview', background=[('selected', '#007bff')])
+        
+        # Scrollbar for treeview
+        tree_scrollbar = ttk.Scrollbar(items_container, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=tree_scrollbar.set)
+        
+        self.tree.pack(side="left", fill="both", expand=True)
+        tree_scrollbar.pack(side="right", fill="y")
+        
+        # Bind events
+        self.tree.bind('<Double-1>', self.on_item_double_click)
+        self.tree.bind('<Button-3>', self.on_item_right_click)
+        self.tree.bind('<Return>', self.on_item_enter)
+        
+        # Context menu
+        self.context_menu = tk.Menu(self.root, tearoff=0, bg='#404040', fg='white')
+        self.context_menu.add_command(label="Toggle Enable/Disable", command=self.context_toggle)
+        self.context_menu.add_command(label="Launch", command=self.context_launch)
+        self.context_menu.add_command(label="Edit", command=self.context_edit)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label="Delete", command=self.context_delete)
+        
+        # Store items data for context menu
+        self.items_data = {}
+        
+        # Status bar at bottom
+        status_frame = ttk.Frame(self.main_frame)
+        status_frame.pack(fill="x", pady=(5, 0))
+        
+        self.status_label = ttk.Label(status_frame, text="Ready - Right-click items for actions")
+        self.status_label.pack(side="left", padx=10)
+        
+    def on_item_double_click(self, event):
+        """Handle double-click on item"""
+        item_id = self.tree.selection()[0] if self.tree.selection() else None
+        if item_id and item_id in self.items_data:
+            self.launch_item(self.items_data[item_id])
+    
+    def on_item_right_click(self, event):
+        """Handle right-click on item"""
+        item_id = self.tree.identify_row(event.y)
+        if item_id:
+            self.tree.selection_set(item_id)
+            self.context_menu.post(event.x_root, event.y_root)
+    
+    def on_item_enter(self, event):
+        """Handle Enter key on item"""
+        item_id = self.tree.selection()[0] if self.tree.selection() else None
+        if item_id and item_id in self.items_data:
+            self.toggle_item_enabled(self.items_data[item_id])
+    
+    def context_toggle(self):
+        """Context menu toggle"""
+        item_id = self.tree.selection()[0] if self.tree.selection() else None
+        if item_id and item_id in self.items_data:
+            self.toggle_item_enabled(self.items_data[item_id])
+    
+    def context_launch(self):
+        """Context menu launch"""
+        item_id = self.tree.selection()[0] if self.tree.selection() else None
+        if item_id and item_id in self.items_data:
+            self.launch_item(self.items_data[item_id])
+    
+    def context_edit(self):
+        """Context menu edit"""
+        item_id = self.tree.selection()[0] if self.tree.selection() else None
+        if item_id and item_id in self.items_data:
+            self.open_edit_dialog(self.items_data[item_id])
+    
+    def context_delete(self):
+        """Context menu delete"""
+        item_id = self.tree.selection()[0] if self.tree.selection() else None
+        if item_id and item_id in self.items_data:
+            self.delete_item(self.items_data[item_id])
+    
+
         
     def load_items_from_json(self):
         """Load items from JSON file"""
@@ -120,347 +235,148 @@ class StartupManagerGUI:
             return False
     
     def filter_existing_items(self, items):
-        """Filter out items with no valid paths"""
+        """Filter items (no path validation needed)"""
         filtered_items = []
         for item in items:
-            for path in item["paths"]:
-                if os.path.exists(path):
-                    filtered_items.append({
-                        "type": item["type"],
-                        "name": item["name"],
-                        "paths": [path],
-                        "Command": item.get("Command", ""),
-                        "ExecutableType": item.get("ExecutableType", "other"),
-                    })
-                    break
+            filtered_items.append({
+                "name": item["name"],
+                "command": item.get("command", ""),
+                "enabled": item.get("enabled", False)
+            })
         return filtered_items
     
-    def is_startup_enabled(self, item):
-        """Check if item is in Windows startup registry"""
+    def generate_powershell_script(self):
+        """Generate PowerShell script with enabled items"""
+        items = self.load_items_from_json()
+        enabled_items = [item for item in items if item.get("enabled", False)]
+        
+        script_content = """# Auto-generated startup script
+# Generated by Startup Manager
+Write-Host "Starting up applications..." -ForegroundColor Green
+
+"""
+        
+        for item in enabled_items:
+            command = item.get("command", "")
+            name = item["name"]
+            
+            if command.strip():
+                script_content += f"# {name}\n"
+                script_content += "try {\n"
+                script_content += f'    Write-Host "Executing {name}..." -ForegroundColor Yellow\n'
+                script_content += f'    {command}\n'
+                script_content += f'    Write-Host "{name} executed successfully" -ForegroundColor Green\n'
+                script_content += "} catch {\n"
+                script_content += f'    Write-Host "Failed to execute {name}: $_" -ForegroundColor Red\n'
+                script_content += "}\n\n"
+        
+        script_content += 'Write-Host "Startup complete!" -ForegroundColor Green\n'
+        
         try:
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
-                try:
-                    winreg.QueryValueEx(reg_key, item["name"])
-                    return True
-                except FileNotFoundError:
-                    return False
-        except WindowsError:
+            with open(self.ps1_file, 'w', encoding='utf-8') as f:
+                f.write(script_content)
+            return True
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to generate PowerShell script: {e}")
             return False
     
-    def toggle_startup(self, item):
-        """Toggle startup status of an item"""
-        reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
-        try:
-            if self.is_startup_enabled(item):
-                # Remove from startup
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
-                    winreg.DeleteValue(reg_key, item["name"])
-                return {"success": True, "action": "disabled"}
-            else:
-                # Add to startup
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as reg_key:
-                    path = item["paths"][0]
-                    command = item.get("Command", "")
-                    executable_type = item.get("ExecutableType", "other")
-
-                    # Build command based on executable type
-                    if executable_type == "pythonw":
-                        full_command = f'"{path}" {command}'
-                    elif executable_type == "pwsh":
-                        full_command = f'"{path}" -Command {command}'
-                    elif executable_type == "cmd":
-                        full_command = f'"{path}" /c {command}'
-                    elif executable_type == "powershell":
-                        full_command = f'"{path}" -Command {command}'
-                    elif executable_type == "ahk_v2":
-                        full_command = f'"C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe" "{path}" {command}'
-                    else:
-                        if command:
-                            full_command = f'"{path}" {command}'
-                        else:
-                            full_command = f'"{path}"'
-                    
-                    winreg.SetValueEx(reg_key, item["name"], 0, winreg.REG_SZ, full_command)
-                return {"success": True, "action": "enabled"}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-    
     def launch_item(self, item):
-        """Launch an item"""
+        """Launch an item by executing its command"""
         try:
-            path = item["paths"][0]
-            command = item.get("Command", "")
-            executable_type = item.get("ExecutableType", "other")
+            command = item.get("command", "")
             
-            if executable_type == "pythonw":
-                full_command = f'"{path}" {command}'
-            elif executable_type == "pwsh":
-                full_command = f'"{path}" -Command {command}'
-            elif executable_type == "cmd":
-                full_command = f'"{path}" /c {command}'
-            elif executable_type == "powershell":
-                full_command = f'"{path}" -Command {command}'
-            elif executable_type == "ahk_v2":
-                full_command = f'"C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe" "{path}" {command}'
+            if command.strip():
+                # Execute the command in PowerShell
+                subprocess.run(["powershell", "-Command", command], shell=True)
+                self.status_label.config(text=f"{item['name']} executed successfully")
             else:
-                if command:
-                    full_command = f'"{path}" {command}'
-                else:
-                    full_command = f'"{path}"'
-            
-            os.system(f'start "" {full_command}')
-            messagebox.showinfo("Success", f"{item['name']} launched successfully")
+                self.status_label.config(text=f"No command specified for {item['name']}")
+                messagebox.showwarning("Warning", f"No command specified for {item['name']}")
             
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to launch {item['name']}: {e}")
+            messagebox.showerror("Error", f"Failed to execute {item['name']}: {e}")
     
-    def create_item_widget(self, parent, item):
-        """Create a widget for a single startup item"""
-        # Main item frame - simplified structure
-        item_frame = ctk.CTkFrame(parent)
-        item_frame.pack(fill="x", padx=2, pady=2)
+    def add_item_to_tree(self, item):
+        """Add an item to the treeview"""
+        is_enabled = item.get("enabled", False)
+        status_text = "✓ Enabled" if is_enabled else "✗ Disabled"
         
-        # Single row layout with grid for better performance
-        item_frame.grid_columnconfigure(1, weight=1)
+        # Truncate command for display
+        cmd_text = item.get("command", "")
+        if len(cmd_text) > 80:
+            cmd_text = cmd_text[:77] + "..."
         
-        # Status indicator
-        is_enabled = self.is_startup_enabled(item)
-        status_color = "green" if is_enabled else "red"
-        status_text = "●" if is_enabled else "○"
+        # Insert item into tree
+        item_id = self.tree.insert('', 'end', values=(status_text, item["name"], cmd_text))
         
-        status_label = ctk.CTkLabel(
-            item_frame, 
-            text=status_text, 
-            text_color=status_color,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            width=20
-        )
-        status_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        # Store item data for context menu
+        self.items_data[item_id] = item
         
-        # Item info frame
-        info_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
-        info_frame.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-        info_frame.grid_columnconfigure(0, weight=1)
+        # Configure row colors based on status
+        if is_enabled:
+            self.tree.set(item_id, 'status', '✓ Enabled')
+        else:
+            self.tree.set(item_id, 'status', '✗ Disabled')
         
-        # Name
-        name_label = ctk.CTkLabel(
-            info_frame, 
-            text=item["name"], 
-            font=ctk.CTkFont(size=12, weight="bold"),
-            anchor="w"
-        )
-        name_label.grid(row=0, column=0, sticky="ew", padx=2)
-        
-        # Path (truncated for better performance)
-        path_text = item['paths'][0]
-        if len(path_text) > 60:
-            path_text = "..." + path_text[-57:]
-        
-        path_label = ctk.CTkLabel(
-            info_frame, 
-            text=path_text, 
-            font=ctk.CTkFont(size=9),
-            anchor="w",
-            text_color="gray"
-        )
-        path_label.grid(row=1, column=0, sticky="ew", padx=2)
-        
-        # Buttons frame
-        buttons_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
-        buttons_frame.grid(row=0, column=2, padx=5, pady=5)
-        
-        # Toggle button
-        toggle_btn = ctk.CTkButton(
-            buttons_frame,
-            text="ON" if is_enabled else "OFF",
-            command=lambda: self.toggle_item_startup(item, item_frame),
-            width=50,
-            height=25,
-            fg_color="green" if is_enabled else "red",
-            font=ctk.CTkFont(size=10)
-        )
-        toggle_btn.pack(side="left", padx=1)
-        
-        # Launch button
-        launch_btn = ctk.CTkButton(
-            buttons_frame,
-            text="▶",
-            command=lambda: self.launch_item(item),
-            width=30,
-            height=25,
-            font=ctk.CTkFont(size=10)
-        )
-        launch_btn.pack(side="left", padx=1)
-        
-        # Edit button
-        edit_btn = ctk.CTkButton(
-            buttons_frame,
-            text="✎",
-            command=lambda: self.open_edit_dialog(item),
-            width=30,
-            height=25,
-            font=ctk.CTkFont(size=10)
-        )
-        edit_btn.pack(side="left", padx=1)
-        
-        # Delete button
-        delete_btn = ctk.CTkButton(
-            buttons_frame,
-            text="✕",
-            command=lambda: self.delete_item(item),
-            width=30,
-            height=25,
-            fg_color="red",
-            font=ctk.CTkFont(size=10)
-        )
-        delete_btn.pack(side="left", padx=1)
-        
-        return item_frame
+        return item_id
     
-    def toggle_item_startup(self, item, item_frame):
-        """Toggle startup status and refresh the item widget"""
-        result = self.toggle_startup(item)
-        if result["success"]:
-            messagebox.showinfo("Success", f"{item['name']} {result['action']}")
-            # Refresh the display
+    def toggle_item_enabled(self, item):
+        """Toggle item enabled status"""
+        items = self.load_items_from_json()
+        
+        # Find and update the item
+        for stored_item in items:
+            if stored_item["name"] == item["name"]:
+                stored_item["enabled"] = not stored_item.get("enabled", False)
+                break
+        
+        # Save items and regenerate script
+        if self.save_items_to_json(items):
+            self.generate_powershell_script()
+            action = "enabled" if stored_item["enabled"] else "disabled"
+            self.status_label.config(text=f"{item['name']} {action}")
             self.load_items()
         else:
-            messagebox.showerror("Error", f"Failed to toggle {item['name']}: {result.get('error', 'Unknown error')}")
+            self.status_label.config(text=f"Failed to update {item['name']}")
+            messagebox.showerror("Error", f"Failed to update {item['name']}")
     
     def delete_item(self, item):
         """Delete an item"""
         if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete '{item['name']}'?"):
             items = self.load_items_from_json()
             
-            # Remove from startup if enabled
-            if self.is_startup_enabled(item):
-                self.toggle_startup(item)
-            
             # Remove from items list
             items = [stored_item for stored_item in items if stored_item["name"] != item["name"]]
             
             if self.save_items_to_json(items):
-                messagebox.showinfo("Success", f"{item['name']} deleted successfully")
+                self.generate_powershell_script()
+                self.status_label.config(text=f"{item['name']} deleted successfully")
                 self.load_items()
             else:
+                self.status_label.config(text=f"Failed to delete {item['name']}")
                 messagebox.showerror("Error", f"Failed to delete {item['name']}")
     
-    def load_items(self, force_recreate=False):
+    def load_items(self):
         """Load and display all items"""
+        # Clear existing items
+        for item_id in self.tree.get_children():
+            self.tree.delete(item_id)
+        self.items_data.clear()
+        
         # Load items from JSON
         items = self.filter_existing_items(self.load_items_from_json())
         
-        # Separate commands and apps
-        commands = [item for item in items if item["type"] == "Command"]
-        apps = [item for item in items if item["type"] == "App"]
-        
         # Sort items by name
-        commands.sort(key=lambda x: x["name"].lower())
-        apps.sort(key=lambda x: x["name"].lower())
+        items.sort(key=lambda x: x["name"].lower())
         
-        # Calculate counts for tab titles
-        enabled_commands = sum(1 for item in commands if self.is_startup_enabled(item))
-        enabled_apps = sum(1 for item in apps if self.is_startup_enabled(item))
+        # Add items to tree (much faster than creating widgets)
+        if items:
+            for item in items:
+                self.add_item_to_tree(item)
         
-        # Check if we need to recreate tabs (only if counts changed or forced)
-        new_commands_title = f"Commands ({enabled_commands}/{len(commands)})"
-        new_apps_title = f"Applications ({enabled_apps}/{len(apps)})"
-        
-        recreate_needed = force_recreate
-        try:
-            current_commands_title = self.notebook.tab("Commands")
-            current_apps_title = self.notebook.tab("Applications") 
-            if (current_commands_title != new_commands_title or 
-                current_apps_title != new_apps_title):
-                recreate_needed = True
-        except:
-            recreate_needed = True
-        
-        if recreate_needed:
-            # Store current tab
-            try:
-                current_tab = self.notebook.get()
-            except:
-                current_tab = "Commands"
-            
-            # Destroy and recreate notebook with updated titles
-            self.notebook.destroy()
-            self.notebook = ctk.CTkTabview(self.main_frame)
-            self.notebook.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-            
-            # Recreate tabs with updated titles
-            self.commands_tab = self.notebook.add(new_commands_title)
-            self.apps_tab = self.notebook.add(new_apps_title)
-            
-            # Recreate scrollable frames with optimized settings
-            self.commands_frame = ctk.CTkScrollableFrame(
-                self.commands_tab,
-                scrollbar_button_color="gray30",
-                scrollbar_button_hover_color="gray20"
-            )
-            self.commands_frame.pack(fill="both", expand=True, padx=5, pady=5)
-            
-            self.apps_frame = ctk.CTkScrollableFrame(
-                self.apps_tab,
-                scrollbar_button_color="gray30",
-                scrollbar_button_hover_color="gray20"
-            )
-            self.apps_frame.pack(fill="both", expand=True, padx=5, pady=5)
-            
-            # Try to restore the previous tab selection
-            try:
-                if "Commands" in current_tab:
-                    self.notebook.set(new_commands_title)
-                elif "Applications" in current_tab:
-                    self.notebook.set(new_apps_title)
-            except:
-                pass
-        else:
-            # Just clear existing items without recreating tabs
-            for widget in self.commands_frame.winfo_children():
-                widget.destroy()
-            for widget in self.apps_frame.winfo_children():
-                widget.destroy()
-        
-        # Create widgets for commands
-        if commands:
-            # Use after_idle to improve performance
-            self.root.after_idle(lambda: self._create_command_widgets(commands))
-        else:
-            no_commands_label = ctk.CTkLabel(
-                self.commands_frame, 
-                text="No commands configured", 
-                font=ctk.CTkFont(size=14)
-            )
-            no_commands_label.pack(pady=20)
-        
-        # Create widgets for apps
-        if apps:
-            # Use after_idle to improve performance
-            self.root.after_idle(lambda: self._create_app_widgets(apps))
-        else:
-            no_apps_label = ctk.CTkLabel(
-                self.apps_frame, 
-                text="No applications configured", 
-                font=ctk.CTkFont(size=14)
-            )
-            no_apps_label.pack(pady=20)
-    
-    def _create_command_widgets(self, commands):
-        """Create command widgets in batches for better performance"""
-        for i, item in enumerate(commands):
-            self.create_item_widget(self.commands_frame, item)
-            # Process in small batches to keep UI responsive
-            if i % 5 == 0:
-                self.root.update_idletasks()
-    
-    def _create_app_widgets(self, apps):
-        """Create app widgets in batches for better performance"""
-        for i, item in enumerate(apps):
-            self.create_item_widget(self.apps_frame, item)
-            # Process in small batches to keep UI responsive
-            if i % 5 == 0:
-                self.root.update_idletasks()
+        # Update window title with count
+        enabled_count = sum(1 for item in items if item.get("enabled", False))
+        self.root.title(f"Startup Manager - {enabled_count}/{len(items)} enabled")
     
     def filter_items(self, *args):
         """Filter items based on search text with debouncing"""
@@ -481,10 +397,9 @@ class StartupManagerGUI:
             return
         
         # Clear existing items
-        for widget in self.commands_frame.winfo_children():
-            widget.destroy()
-        for widget in self.apps_frame.winfo_children():
-            widget.destroy()
+        for item_id in self.tree.get_children():
+            self.tree.delete(item_id)
+        self.items_data.clear()
         
         # Load and filter items
         items = self.filter_existing_items(self.load_items_from_json())
@@ -492,42 +407,13 @@ class StartupManagerGUI:
         filtered_items = []
         for item in items:
             if (search_text in item["name"].lower() or 
-                search_text in item["paths"][0].lower() or 
-                search_text in item.get("Command", "").lower()):
+                search_text in item.get("command", "").lower()):
                 filtered_items.append(item)
         
-        # Separate filtered commands and apps
-        commands = [item for item in filtered_items if item["type"] == "Command"]
-        apps = [item for item in filtered_items if item["type"] == "App"]
-        
-        # Create widgets for filtered items in batches
-        if commands:
-            self._create_filtered_widgets(self.commands_frame, commands)
-        else:
-            no_results_label = ctk.CTkLabel(
-                self.commands_frame, 
-                text=f"No commands match '{search_text}'", 
-                font=ctk.CTkFont(size=14)
-            )
-            no_results_label.pack(pady=20)
-        
-        if apps:
-            self._create_filtered_widgets(self.apps_frame, apps)
-        else:
-            no_results_label = ctk.CTkLabel(
-                self.apps_frame, 
-                text=f"No applications match '{search_text}'", 
-                font=ctk.CTkFont(size=14)
-            )
-            no_results_label.pack(pady=20)
-    
-    def _create_filtered_widgets(self, parent, items):
-        """Create filtered widgets in batches"""
-        for i, item in enumerate(items):
-            self.create_item_widget(parent, item)
-            # Update UI every few items to keep it responsive
-            if i % 3 == 0:
-                self.root.update_idletasks()
+        # Add filtered items to tree
+        if filtered_items:
+            for item in filtered_items:
+                self.add_item_to_tree(item)
     
     def open_add_dialog(self):
         """Open dialog to add new item"""
@@ -537,51 +423,68 @@ class StartupManagerGUI:
         """Open dialog to edit existing item"""
         AddEditDialog(self, "Edit Item", item)
     
-    def scan_startup_folders(self):
-        """Scan Windows startup folders for items"""
+    def open_ps1_file(self):
+        """Open the PowerShell script file"""
+        try:
+            if os.path.exists(self.ps1_file):
+                os.startfile(self.ps1_file)
+            else:
+                messagebox.showinfo("Info", "PowerShell script not found. Enable some items first.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open PowerShell script: {e}")
+    
+    def scan_registry(self):
+        """Scan Windows registry for startup items"""
         def scan_thread():
-            startup_folders = [
-                r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup",
-                os.path.expanduser(r"~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup")
-            ]
-            
             found_items = []
             existing_items = self.load_items_from_json()
             existing_names = {item["name"].lower() for item in existing_items}
             
-            for folder in startup_folders:
-                try:
-                    if os.path.exists(folder):
-                        for filename in os.listdir(folder):
-                            file_path = os.path.join(folder, filename)
-                            
-                            if os.path.isfile(file_path):
-                                name, ext = os.path.splitext(filename)
+            # Scan registry
+            try:
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ) as reg_key:
+                    i = 0
+                    while True:
+                        try:
+                            name, value, _ = winreg.EnumValue(reg_key, i)
+                            if name.lower() not in existing_names:
+                                # Parse the command to extract path and arguments
+                                parts = value.split('"')
+                                if len(parts) >= 2:
+                                    path = parts[1]
+                                    args = ' '.join(parts[2:]).strip()
+                                else:
+                                    path = value.split()[0]
+                                    args = ' '.join(value.split()[1:])
                                 
-                                if ext.lower() in ['.exe', '.bat', '.cmd', '.lnk', '.url']:
-                                    if name.lower() not in existing_names:
-                                        item_type = "App" if ext.lower() == '.exe' else "Command"
-                                        found_items.append({
-                                            "name": name,
-                                            "type": item_type,
-                                            "path": file_path,
-                                            "command": "",
-                                            "executable_type": "other"
-                                        })
-                except Exception as e:
-                    print(f"Error scanning folder {folder}: {e}")
+                                # Create a PowerShell command from the registry value
+                                if args:
+                                    ps_command = f'Start-Process -FilePath "{path}" -ArgumentList "{args}"'
+                                else:
+                                    ps_command = f'Start-Process -FilePath "{path}"'
+                                
+                                found_items.append({
+                                    "name": name,
+                                    "command": ps_command,
+                                    "registry_value": value
+                                })
+                            i += 1
+                        except WindowsError:
+                            break
+            except Exception as e:
+                print(f"Error scanning registry: {e}")
             
             # Show results in main thread
             self.root.after(0, lambda: self.show_scan_results(found_items))
         
         # Run scan in background thread
         threading.Thread(target=scan_thread, daemon=True).start()
-        messagebox.showinfo("Scanning", "Scanning startup folders...")
+        messagebox.showinfo("Scanning", "Scanning Windows registry...")
     
     def show_scan_results(self, found_items):
         """Show scan results dialog"""
         if not found_items:
-            messagebox.showinfo("Scan Complete", "No new items found in startup folders")
+            messagebox.showinfo("Scan Complete", "No new items found in registry")
             return
         
         ScanResultsDialog(self, found_items)
@@ -598,17 +501,21 @@ class AddEditDialog:
         self.is_edit = item is not None
         
         # Create dialog window
-        self.dialog = ctk.CTkToplevel(parent.root)
+        self.dialog = tk.Toplevel(parent.root)
         self.dialog.title(title)
-        self.dialog.geometry("500x400")
+        self.dialog.geometry("600x250")
+        self.dialog.configure(bg='#2b2b2b')
         self.dialog.transient(parent.root)
         self.dialog.grab_set()
         
         # Center the dialog
         self.dialog.update_idletasks()
-        x = (self.dialog.winfo_screenwidth() // 2) - (500 // 2)
-        y = (self.dialog.winfo_screenheight() // 2) - (400 // 2)
-        self.dialog.geometry(f"500x400+{x}+{y}")
+        x = (self.dialog.winfo_screenwidth() // 2) - (600 // 2)
+        y = (self.dialog.winfo_screenheight() // 2) - (250 // 2)
+        self.dialog.geometry(f"600x250+{x}+{y}")
+        
+        # Configure style for dialog
+        self.style = ttk.Style()
         
         self.create_widgets()
         
@@ -617,75 +524,46 @@ class AddEditDialog:
     
     def create_widgets(self):
         # Main frame
-        main_frame = ctk.CTkFrame(self.dialog)
+        main_frame = ttk.Frame(self.dialog)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Name field
-        ctk.CTkLabel(main_frame, text="Name:").pack(anchor="w", padx=10, pady=(10, 5))
-        self.name_entry = ctk.CTkEntry(main_frame, width=400)
-        self.name_entry.pack(padx=10, pady=(0, 10))
+        ttk.Label(main_frame, text="Name:").pack(anchor="w", padx=10, pady=(10, 5))
+        self.name_entry = ttk.Entry(main_frame, width=70)
+        self.name_entry.pack(padx=10, pady=(0, 15))
         
-        # Type field
-        ctk.CTkLabel(main_frame, text="Type:").pack(anchor="w", padx=10, pady=(0, 5))
-        self.type_var = tk.StringVar(value="App")
-        type_frame = ctk.CTkFrame(main_frame)
-        type_frame.pack(fill="x", padx=10, pady=(0, 10))
+        # Command field
+        ttk.Label(main_frame, text="PowerShell Command:").pack(anchor="w", padx=10, pady=(0, 5))
         
-        ctk.CTkRadioButton(type_frame, text="Application", variable=self.type_var, value="App").pack(side="left", padx=10, pady=5)
-        ctk.CTkRadioButton(type_frame, text="Command", variable=self.type_var, value="Command").pack(side="left", padx=10, pady=5)
-        
-        # Executable Type field
-        ctk.CTkLabel(main_frame, text="Executable Type:").pack(anchor="w", padx=10, pady=(0, 5))
-        self.exec_type_var = tk.StringVar(value="other")
-        self.exec_type_combo = ctk.CTkComboBox(
-            main_frame, 
-            values=["other", "pythonw", "pwsh", "cmd", "powershell", "ahk_v2"],
-            variable=self.exec_type_var,
-            width=400
+        # Command examples
+        examples_label = ttk.Label(
+            main_frame,
+            text="Examples: Start-Process 'notepad.exe' | python C:\\path\\to\\script.py | & 'C:\\Program Files\\App\\app.exe'",
+            font=('Arial', 9),
+            foreground="gray"
         )
-        self.exec_type_combo.pack(padx=10, pady=(0, 10))
+        examples_label.pack(anchor="w", padx=10, pady=(0, 5))
         
-        # Path field
-        path_frame = ctk.CTkFrame(main_frame)
-        path_frame.pack(fill="x", padx=10, pady=(0, 10))
-        
-        ctk.CTkLabel(path_frame, text="Path:").pack(anchor="w", pady=(10, 5))
-        path_entry_frame = ctk.CTkFrame(path_frame)
-        path_entry_frame.pack(fill="x", pady=(0, 10))
-        
-        self.path_entry = ctk.CTkEntry(path_entry_frame, width=320)
-        self.path_entry.pack(side="left", padx=(10, 5), pady=5)
-        
-        browse_btn = ctk.CTkButton(
-            path_entry_frame, 
-            text="Browse", 
-            command=self.browse_file,
-            width=60
-        )
-        browse_btn.pack(side="right", padx=(5, 10), pady=5)
-        
-        # Command/Arguments field
-        ctk.CTkLabel(main_frame, text="Arguments/Command:").pack(anchor="w", padx=10, pady=(0, 5))
-        self.command_entry = ctk.CTkEntry(main_frame, width=400)
-        self.command_entry.pack(padx=10, pady=(0, 10))
+        self.command_entry = ttk.Entry(main_frame, width=70)
+        self.command_entry.pack(padx=10, pady=(0, 15))
         
         # Buttons
-        button_frame = ctk.CTkFrame(main_frame)
-        button_frame.pack(fill="x", padx=10, pady=20)
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill="x", padx=10, pady=10)
         
-        save_btn = ctk.CTkButton(
+        save_btn = ttk.Button(
             button_frame, 
             text="Save", 
             command=self.save_item,
-            width=100
+            width=12
         )
         save_btn.pack(side="left", padx=10)
         
-        cancel_btn = ctk.CTkButton(
+        cancel_btn = ttk.Button(
             button_frame, 
             text="Cancel", 
             command=self.dialog.destroy,
-            width=100
+            width=12
         )
         cancel_btn.pack(side="right", padx=10)
     
@@ -693,40 +571,16 @@ class AddEditDialog:
         """Populate fields when editing"""
         if self.item:
             self.name_entry.insert(0, self.item["name"])
-            self.type_var.set(self.item["type"])
-            self.exec_type_var.set(self.item.get("ExecutableType", "other"))
-            self.path_entry.insert(0, self.item["paths"][0])
-            self.command_entry.insert(0, self.item.get("Command", ""))
-    
-    def browse_file(self):
-        """Open file browser"""
-        filename = filedialog.askopenfilename(
-            title="Select executable file",
-            filetypes=[
-                ("Executable files", "*.exe"),
-                ("Python files", "*.py"),
-                ("PowerShell files", "*.ps1"),
-                ("Batch files", "*.bat;*.cmd"),
-                ("AutoHotkey files", "*.ahk"),
-                ("All files", "*.*")
-            ]
-        )
-        if filename:
-            self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, filename)
+            self.command_entry.insert(0, self.item.get("command", ""))
     
     def save_item(self):
         """Save the item"""
         # Validate fields
         name = self.name_entry.get().strip()
-        path = self.path_entry.get().strip()
+        command = self.command_entry.get().strip()
         
-        if not name or not path:
-            messagebox.showerror("Error", "Name and Path are required")
-            return
-        
-        if not os.path.exists(path):
-            messagebox.showerror("Error", "The specified path does not exist")
+        if not name or not command:
+            messagebox.showerror("Error", "Name and Command are required")
             return
         
         # Load existing items
@@ -741,24 +595,24 @@ class AddEditDialog:
         # Create new item data
         new_item = {
             "name": name,
-            "type": self.type_var.get(),
-            "paths": [path],
-            "Command": self.command_entry.get().strip(),
-            "ExecutableType": self.exec_type_var.get()
+            "command": command,
+            "enabled": False  # New items start disabled
         }
         
         if self.is_edit:
-            # Update existing item
+            # Update existing item (preserve enabled status)
             for i, stored_item in enumerate(items):
                 if stored_item["name"] == self.item["name"]:
+                    new_item["enabled"] = stored_item.get("enabled", False)
                     items[i] = new_item
                     break
         else:
             # Add new item
             items.append(new_item)
         
-        # Save items
+        # Save items and regenerate script
         if self.parent.save_items_to_json(items):
+            self.parent.generate_powershell_script()
             action = "updated" if self.is_edit else "added"
             messagebox.showinfo("Success", f"Item {action} successfully!")
             self.dialog.destroy()
@@ -773,36 +627,61 @@ class ScanResultsDialog:
         self.found_items = found_items
         
         # Create dialog window
-        self.dialog = ctk.CTkToplevel(parent.root)
-        self.dialog.title(f"Scan Results - {len(found_items)} items found")
-        self.dialog.geometry("600x400")
+        self.dialog = tk.Toplevel(parent.root)
+        self.dialog.title(f"Registry Scan Results - {len(found_items)} items found")
+        self.dialog.geometry("800x500")
+        self.dialog.configure(bg='#2b2b2b')
         self.dialog.transient(parent.root)
         self.dialog.grab_set()
         
         # Center the dialog
         self.dialog.update_idletasks()
-        x = (self.dialog.winfo_screenwidth() // 2) - (600 // 2)
-        y = (self.dialog.winfo_screenheight() // 2) - (400 // 2)
-        self.dialog.geometry(f"600x400+{x}+{y}")
+        x = (self.dialog.winfo_screenwidth() // 2) - (800 // 2)
+        y = (self.dialog.winfo_screenheight() // 2) - (500 // 2)
+        self.dialog.geometry(f"800x500+{x}+{y}")
         
         self.create_widgets()
     
     def create_widgets(self):
         # Main frame
-        main_frame = ctk.CTkFrame(self.dialog)
+        main_frame = ttk.Frame(self.dialog)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Title
-        title_label = ctk.CTkLabel(
+        title_label = ttk.Label(
             main_frame, 
-            text=f"Found {len(self.found_items)} new items in startup folders",
-            font=ctk.CTkFont(size=16, weight="bold")
+            text=f"Found {len(self.found_items)} items in Windows registry",
+            font=('Arial', 14, 'bold')
         )
         title_label.pack(pady=(10, 20))
         
-        # Scrollable frame for items
-        self.items_frame = ctk.CTkScrollableFrame(main_frame)
-        self.items_frame.pack(fill="both", expand=True, padx=10, pady=(0, 20))
+        # Info label
+        info_label = ttk.Label(
+            main_frame,
+            text="Select items to add to your startup list. They will be removed from registry.",
+            font=('Arial', 10),
+            foreground="orange"
+        )
+        info_label.pack(pady=(0, 20))
+        
+        # Create canvas and scrollbar for items
+        items_container = ttk.Frame(main_frame)
+        items_container.pack(fill="both", expand=True, pady=(0, 20))
+        
+        canvas = tk.Canvas(items_container, bg='#2b2b2b', highlightthickness=0)
+        scrollbar = ttk.Scrollbar(items_container, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
         
         # Create checkboxes for each item
         self.item_vars = []
@@ -810,57 +689,57 @@ class ScanResultsDialog:
             var = tk.BooleanVar(value=True)
             self.item_vars.append(var)
             
-            item_frame = ctk.CTkFrame(self.items_frame)
+            item_frame = ttk.Frame(scrollable_frame)
             item_frame.pack(fill="x", padx=5, pady=2)
             
-            checkbox = ctk.CTkCheckBox(
+            checkbox = ttk.Checkbutton(
                 item_frame,
-                text=f"{item['name']} ({item['type']})",
+                text=item['name'],
                 variable=var
             )
-            checkbox.pack(side="left", padx=10, pady=5)
+            checkbox.pack(anchor="w", padx=10, pady=5)
             
-            path_label = ctk.CTkLabel(
+            cmd_label = ttk.Label(
                 item_frame,
-                text=item['path'],
-                font=ctk.CTkFont(size=10),
-                text_color="gray"
+                text=f"Command: {item['command']}",
+                font=('Arial', 9),
+                foreground="lightblue"
             )
-            path_label.pack(side="left", padx=10, pady=5)
+            cmd_label.pack(anchor="w", padx=30, pady=2)
         
         # Buttons
-        button_frame = ctk.CTkFrame(main_frame)
+        button_frame = ttk.Frame(main_frame)
         button_frame.pack(fill="x", padx=10, pady=10)
         
-        select_all_btn = ctk.CTkButton(
+        select_all_btn = ttk.Button(
             button_frame,
             text="Select All",
             command=self.select_all,
-            width=100
+            width=12
         )
         select_all_btn.pack(side="left", padx=5)
         
-        select_none_btn = ctk.CTkButton(
+        select_none_btn = ttk.Button(
             button_frame,
             text="Select None",
             command=self.select_none,
-            width=100
+            width=12
         )
         select_none_btn.pack(side="left", padx=5)
         
-        add_btn = ctk.CTkButton(
+        add_btn = ttk.Button(
             button_frame,
             text="Add Selected",
             command=self.add_selected,
-            width=100
+            width=15
         )
         add_btn.pack(side="right", padx=5)
         
-        cancel_btn = ctk.CTkButton(
+        cancel_btn = ttk.Button(
             button_frame,
             text="Cancel",
             command=self.dialog.destroy,
-            width=100
+            width=12
         )
         cancel_btn.pack(side="right", padx=5)
     
@@ -875,16 +754,17 @@ class ScanResultsDialog:
     def add_selected(self):
         # Get selected items
         selected_items = []
+        items_to_remove_from_registry = []
+        
         for i, var in enumerate(self.item_vars):
             if var.get():
                 item = self.found_items[i]
                 selected_items.append({
                     "name": item["name"],
-                    "type": item["type"],
-                    "paths": [item["path"]],
-                    "Command": item["command"],
-                    "ExecutableType": item["executable_type"]
+                    "command": item["command"],
+                    "enabled": False  # Start disabled
                 })
+                items_to_remove_from_registry.append(item["name"])
         
         if not selected_items:
             messagebox.showwarning("Warning", "No items selected")
@@ -896,7 +776,20 @@ class ScanResultsDialog:
         
         # Save items
         if self.parent.save_items_to_json(existing_items):
-            messagebox.showinfo("Success", f"Added {len(selected_items)} items successfully!")
+            # Remove selected items from registry
+            removed_count = 0
+            for item_name in items_to_remove_from_registry:
+                try:
+                    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS) as reg_key:
+                        winreg.DeleteValue(reg_key, item_name)
+                        removed_count += 1
+                except Exception as e:
+                    print(f"Failed to remove {item_name} from registry: {e}")
+            
+            self.parent.generate_powershell_script()
+            messagebox.showinfo("Success", 
+                f"Added {len(selected_items)} items successfully!\n"
+                f"Removed {removed_count} items from registry.")
             self.dialog.destroy()
             self.parent.load_items()
         else:

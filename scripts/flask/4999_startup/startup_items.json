@@ -1,12 +1,8 @@
 [
   {
     "name": "ahk_v2",
-    "type": "Command",
-    "paths": [
-      "C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk"
-    ],
-    "Command": "",
-    "ExecutableType": "other"
+    "command": "ipconfig",
+    "enabled": true
   },
   {
     "name": "ollama-chat (8000)",
@@ -104,7 +100,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\python312\\current\\pythonw.exe"
     ],
-    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\clipboard.py"
+    "Command": "C:\\Users\\nahid\\ms\\ms1\\scripts\\clipboard.py",
+    "enabled": true
   },
   {
     "type": "Command",
@@ -192,7 +189,8 @@
     "paths": [
       "C:\\WINDOWS\\system32\\AMD\\ANR\\AMDNoiseSuppression.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "enabled": true
   },
   {
     "type": "App",
@@ -208,7 +206,8 @@
     "paths": [
       "C:\\Users\\nahid\\scoop\\apps\\capture2text\\current\\Capture2Text.exe"
     ],
-    "Command": ""
+    "Command": "",
+    "enabled": false
   },
   {
     "type": "App",
@@ -465,7 +464,8 @@
       "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
     ],
     "Command": "as-cmd --bind=192.168.0.101",
-    "ExecutableType": "cmd"
+    "ExecutableType": "cmd",
+    "enabled": true
   },
   {
     "name": "Audio Share (app)",
@@ -474,7 +474,8 @@
       "C:\\Users\\nahid\\ms\\msBackups\\AudioShareServer.exe"
     ],
     "Command": "",
-    "ExecutableType": "other"
+    "ExecutableType": "other",
+    "enabled": false
   },
   {
     "name": "Flask - 5017 - Audio Stream",
