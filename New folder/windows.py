@@ -6,7 +6,7 @@ from typing import Dict, List, Callable, Optional, Tuple
 import threading
 import time
 
-class ArchUtil:
+class WindowsUtil:
     def __init__(self, stdscr):
         self.stdscr = stdscr
         self.current_selection = 0
@@ -37,41 +37,40 @@ class ArchUtil:
                 "description": "View detailed system information and monitoring",
                 "submenu": [
                     {"title": "Show System Info", "action": ("systeminfo", "Showing system information")},
-                    {"title": "Hardware Info", "action": ("lshw -short 2>/dev/null || lscpu && lsmem", "Showing hardware information")},
-                    {"title": "Network Info", "action": ("ipconfig", "Showing network information")},
-                    {"title": "Process Monitor", "action": ("cmd /c pwsh -Command Get-Process", "Opening process monitor")},
-                    {"title": "Disk Usage", "action": ("df -h && du -sh /home/* 2>/dev/null", "Showing disk usage")},
+                    {"title": "Hardware Info", "action": ("powershell -Command \"Get-ComputerInfo | Select-Object WindowsProductName, TotalPhysicalMemory, CsProcessors\"", "Showing hardware information")},
+                    {"title": "Network Info", "action": ("ipconfig /all", "Showing network information")},
+                    {"title": "Process Monitor", "action": ("powershell -Command \"Get-Process | Sort-Object CPU -Descending | Select-Object -First 20\"", "Opening process monitor")},
+                    {"title": "Disk Usage", "action": ("powershell -Command \"Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name='Size(GB)';Expression={[math]::Round($_.Size/1GB,2)}}, @{Name='FreeSpace(GB)';Expression={[math]::Round($_.FreeSpace/1GB,2)}}\"", "Showing disk usage")},
                 ]
             },
             {
                 "title": "Package Management",
-                "description": "Manage Arch packages with pacman",
+                "description": "Manage Windows packages with Scoop and Chocolatey",
                 "submenu": [
-                    {"title": "Update System", "action": ("sudo pacman -Syu", "Updating system packages")},
+                    {"title": "Update Scoop", "action": ("scoop update", "Updating Scoop")},
+                    {"title": "Install Scoop", "action": ("powershell -Command \"Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm get.scoop.sh | iex\"", "Installing Scoop package manager")},
                     {"title": "Install Necessary Packages",
                         "action": (
-                            "scoop install ack && "
-                            "scoop install adb && "
-                            "scoop install bat && "
-                            "scoop install capture2text && "
-                            "scoop install ditto && "
-                            "scoop install ffmpeg && "
-                            "scoop install highlight && "
-                            "scoop install kitty && "
-                            "scoop install neovim && "
-                            "scoop install putty && "
-                            "scoop install rssguard && "
-                            "scoop install rufus && "
-                            # "scoop install ventoy && "
-                            # "scoop install winaero-tweaker && "
+                            "scoop install ack & "
+                            "scoop install adb & "
+                            "scoop install bat & "
+                            "scoop install capture2text & "
+                            "scoop install ditto & "
+                            "scoop install ffmpeg & "
+                            "scoop install highlight & "
+                            "scoop install kitty & "
+                            "scoop install neovim & "
+                            "scoop install putty & "
+                            "scoop install rssguard & "
+                            "scoop install rufus & "
                             "scoop install yt-dlp",
-                            "Installing Scoop packages Successful"
+                            "Installing Scoop packages"
                         )
                     },
                     {"title": "Remove Package", "action": self.remove_package},
                     {"title": "Search Packages", "action": self.search_packages},
-                    {"title": "List Installed", "action": ("pacman -Q | less", "Listing installed packages")},
-                    {"title": "Clean Cache", "action": ("sudo pacman -Sc", "Cleaning package cache")},
+                    {"title": "List Installed", "action": ("scoop list", "Listing installed packages")},
+                    {"title": "Clean Cache", "action": ("scoop cache rm *", "Cleaning package cache")},
                     {"title": "Package Info", "action": self.package_info},
                 ]
             },
@@ -79,23 +78,24 @@ class ArchUtil:
                 "title": "System Maintenance",
                 "description": "System cleanup and maintenance tasks",
                 "submenu": [
-                    {"title": "Update Mirrors", "action": ("sudo reflector --verbose --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist", "Updating mirrors")},
-                    {"title": "Clean System Logs", "action": ("sudo journalctl --vacuum-time=7d", "Cleaning system logs")},
-                    {"title": "Check Filesystem", "action": ("sudo fsck -f /", "Checking filesystem")},
-                    {"title": "Update Locate DB", "action": ("sudo updatedb", "Updating locate database")},
-                    {"title": "Rebuild Initramfs", "action": ("sudo mkinitcpio -P", "Rebuilding initramfs")},
-                    {"title": "Check Services", "action": ("systemctl --failed && systemctl list-unit-files --state=enabled", "Checking services")},
-                    {"title": "Manage Startup Services", "action": ("sudo systemctl list-unit-files --type=service", "Managing startup services")},
+                    {"title": "Windows Update", "action": ("powershell -Command \"Get-WindowsUpdate -Install -AcceptAll\"", "Running Windows Update")},
+                    {"title": "Clean Temp Files", "action": ("powershell -Command \"Get-ChildItem -Path $env:TEMP -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue\"", "Cleaning temporary files")},
+                    {"title": "Check Disk", "action": ("chkdsk C: /f", "Checking disk for errors")},
+                    {"title": "System File Check", "action": ("sfc /scannow", "Running system file checker")},
+                    {"title": "DISM Health Check", "action": ("DISM /Online /Cleanup-Image /CheckHealth", "Checking system image health")},
+                    {"title": "Check Services", "action": ("powershell -Command \"Get-Service | Where-Object {$_.Status -eq 'Stopped' -and $_.StartType -eq 'Automatic'}\"", "Checking stopped services")},
+                    {"title": "Manage Startup Programs", "action": ("powershell -Command \"Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, Location\"", "Managing startup programs")},
                 ]
             },
             {
                 "title": "Development Tools",
                 "description": "Install common development tools and environments",
                 "submenu": [
-                    {"title": "Install Git", "action": ("sudo pacman -S git", "Installing Git")},
-                    {"title": "Install Node.js", "action": ("sudo pacman -S nodejs npm", "Installing Node.js and npm")},
-                    {"title": "Install Python Tools", "action": ("sudo pacman -S python-pip python-virtualenv", "Installing Python tools")},
-                    {"title": "Install Build Tools", "action": ("sudo pacman -S base-devel", "Installing build tools")},
+                    {"title": "Install Git", "action": ("scoop install git", "Installing Git")},
+                    {"title": "Install Node.js", "action": ("scoop install nodejs", "Installing Node.js and npm")},
+                    {"title": "Install Python", "action": ("scoop install python", "Installing Python")},
+                    {"title": "Install Visual Studio Code", "action": ("scoop install vscode", "Installing Visual Studio Code")},
+                    {"title": "Install Build Tools", "action": ("scoop install mingw", "Installing MinGW build tools")},
                 ]
             },
             {
@@ -130,7 +130,7 @@ class ArchUtil:
     def draw_main_menu(self, win):
         """Draw the main menu on the left side"""
         win.clear()
-        self.draw_border(win, "ArchUtil - Main Menu")
+        self.draw_border(win, "WindowsUtil - Main Menu")
         
         height, width = win.getmaxyx()
         
@@ -206,14 +206,15 @@ class ArchUtil:
         win.clear()
         height, width = win.getmaxyx()
         
-        status_text = "ArchUtil v1.0 - Arch Linux System Utility"
+        status_text = "WindowsUtil v1.0 - Windows System Utility"
         win.addstr(0, 2, status_text, curses.color_pair(2) | curses.A_BOLD)
         
-        # Add system info
+        # Add system info (Windows doesn't have load average, show memory usage instead)
         try:
-            load_avg = os.getloadavg()
-            load_text = f"Load: {load_avg[0]:.2f}"
-            win.addstr(0, width - len(load_text) - 2, load_text, curses.color_pair(6))
+            import psutil
+            memory = psutil.virtual_memory()
+            memory_text = f"RAM: {memory.percent:.1f}%"
+            win.addstr(0, width - len(memory_text) - 2, memory_text, curses.color_pair(6))
         except:
             pass
         
@@ -275,12 +276,12 @@ class ArchUtil:
                 self.execute_command(command, description)
     
     def necessarypkgs(self):
-        """Install a package with user input"""
+        """Install essential packages"""
         curses.def_prog_mode()
         curses.endwin()
         
         try:
-            self.execute_command(f"sudo pacman -S vim nano tmux", f"Installing vim, nano, tmux")
+            self.execute_command(f"scoop install vim nano", f"Installing vim, nano")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
@@ -293,7 +294,7 @@ class ArchUtil:
         try:
             package = input("Enter package name: ").strip()
             if package:
-                self.execute_command(f"sudo pacman -S {package}", f"Installing {package}")
+                self.execute_command(f"scoop install {package}", f"Installing {package}")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
@@ -306,7 +307,7 @@ class ArchUtil:
         try:
             package = input("Enter package name: ").strip()
             if package:
-                self.execute_command(f"sudo pacman -R {package}", f"Removing {package}")
+                self.execute_command(f"scoop uninstall {package}", f"Removing {package}")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
@@ -319,7 +320,7 @@ class ArchUtil:
         try:
             query = input("Enter search term: ").strip()
             if query:
-                self.execute_command(f"pacman -Ss {query}", f"Searching for '{query}'")
+                self.execute_command(f"scoop search {query}", f"Searching for '{query}'")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
@@ -332,46 +333,46 @@ class ArchUtil:
         try:
             package = input("Enter package name: ").strip()
             if package:
-                self.execute_command(f"pacman -Si {package} || pacman -Qi {package}", f"Package info for {package}")
+                self.execute_command(f"scoop info {package}", f"Package info for {package}")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
     
-    def install_aur_package(self):
-        """Install AUR package with user input"""
+    def install_chocolatey_package(self):
+        """Install Chocolatey package with user input"""
         curses.def_prog_mode()
         curses.endwin()
         
         try:
-            package = input("Enter AUR package name: ").strip()
+            package = input("Enter Chocolatey package name: ").strip()
             if package:
-                self.execute_command(f"yay -S {package}", f"Installing AUR package {package}")
+                self.execute_command(f"choco install {package} -y", f"Installing Chocolatey package {package}")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
     
-    def search_aur(self):
-        """Search AUR packages"""
+    def search_chocolatey(self):
+        """Search Chocolatey packages"""
         curses.def_prog_mode()
         curses.endwin()
         
         try:
             query = input("Enter search term: ").strip()
             if query:
-                self.execute_command(f"yay -Ss {query}", f"Searching AUR for '{query}'")
+                self.execute_command(f"choco search {query}", f"Searching Chocolatey for '{query}'")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
     
-    def remove_aur_package(self):
-        """Remove AUR package"""
+    def remove_chocolatey_package(self):
+        """Remove Chocolatey package"""
         curses.def_prog_mode()
         curses.endwin()
         
         try:
-            package = input("Enter AUR package name: ").strip()
+            package = input("Enter Chocolatey package name: ").strip()
             if package:
-                self.execute_command(f"yay -R {package}", f"Removing AUR package {package}")
+                self.execute_command(f"choco uninstall {package} -y", f"Removing Chocolatey package {package}")
         finally:
             curses.reset_prog_mode()
             curses.curs_set(0)
@@ -547,13 +548,13 @@ class ArchUtil:
 def main():
     """Main entry point"""
     def app(stdscr):
-        archutil = ArchUtil(stdscr)
-        archutil.run()
+        windowsutil = WindowsUtil(stdscr)
+        windowsutil.run()
     
     try:
         curses.wrapper(app)
     except KeyboardInterrupt:
-        print("\nExiting ArchUtil...")
+        print("\nExiting WindowsUtil...")
         sys.exit(0)
 
 if __name__ == "__main__":
