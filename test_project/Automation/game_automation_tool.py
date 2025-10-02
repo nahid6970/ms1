@@ -595,6 +595,26 @@ class GameAutomationTool(ctk.CTk):
                 ctk.CTkButton(header_frame, text="Delete", width=50, fg_color="red", hover_color="darkred",
                             command=lambda idx=i: delete_action(idx)).pack(side=ctk.RIGHT, padx=2)
                 
+                # Move buttons
+                move_frame = ctk.CTkFrame(header_frame)
+                move_frame.pack(side=ctk.RIGHT, padx=5)
+                
+                # Move up button (disabled if first action)
+                move_up_btn = ctk.CTkButton(move_frame, text="↑", width=30, height=25,
+                                          command=lambda idx=i: move_action_up(idx),
+                                          fg_color="#5cf25c" if i > 0 else "#404040",
+                                          text_color="black" if i > 0 else "#808080",
+                                          state="normal" if i > 0 else "disabled")
+                move_up_btn.pack(side=ctk.LEFT, padx=1)
+                
+                # Move down button (disabled if last action)
+                move_down_btn = ctk.CTkButton(move_frame, text="↓", width=30, height=25,
+                                            command=lambda idx=i: move_action_down(idx),
+                                            fg_color="#5cf25c" if i < len(dialog.actions_data) - 1 else "#404040",
+                                            text_color="black" if i < len(dialog.actions_data) - 1 else "#808080",
+                                            state="normal" if i < len(dialog.actions_data) - 1 else "disabled")
+                move_down_btn.pack(side=ctk.LEFT, padx=1)
+                
                 # Action details preview
                 details = self.get_action_preview(action)
                 ctk.CTkLabel(action_frame, text=details, wraplength=600).pack(padx=10, pady=(0, 5))
@@ -608,6 +628,18 @@ class GameAutomationTool(ctk.CTk):
         def delete_action(index):
             if messagebox.askyesno("Confirm Delete", f"Delete Action {index+1}?"):
                 dialog.actions_data.pop(index)
+                refresh_actions_display()
+        
+        def move_action_up(index):
+            if index > 0:
+                # Swap with previous action
+                dialog.actions_data[index], dialog.actions_data[index-1] = dialog.actions_data[index-1], dialog.actions_data[index]
+                refresh_actions_display()
+        
+        def move_action_down(index):
+            if index < len(dialog.actions_data) - 1:
+                # Swap with next action
+                dialog.actions_data[index], dialog.actions_data[index+1] = dialog.actions_data[index+1], dialog.actions_data[index]
                 refresh_actions_display()
         
         # Add action button
