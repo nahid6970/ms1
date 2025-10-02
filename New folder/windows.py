@@ -305,6 +305,285 @@ class WindowsUtil:
             },
             
             # ═══════════════════════════════════════════════════════════════
+            # SYMBOLIC LINKS (MKLINK)
+            # ═══════════════════════════════════════════════════════════════
+            {
+                "title": "Symbolic Links (mklink)",
+                "description": "Create symbolic links for configuration files and applications",
+                "submenu": [
+                    {
+                        "title": "Komorebi", 
+                        "action": {
+                            "powershell": [
+                                "Write-Host 'Initially after creating with quickstart have to run komorebi with the default profile then we can mklink' -ForegroundColor Green",
+                                "Write-Host 'It will try to replace ms1 komorebi profile just let it and then copy it from git and paste the code in' -ForegroundColor Green",
+                                "komorebic quickstart",
+                                "Remove-Item 'C:\\Users\\nahid\\komorebi.json' -ErrorAction SilentlyContinue",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\komorebi.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\komorebi\\komorebi.json' -Force"
+                            ],
+                            "description": "Setup Komorebi configuration symbolic link"
+                        }
+                    },
+                    {
+                        "title": "Reference.py", 
+                        "action": {
+                            "powershell": [
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\python312\\current\\Lib\\Reference.py' -Target 'C:\\Users\\nahid\\ms\\ms1\\Reference.py' -Force"
+                            ],
+                            "description": "Create symbolic link for Python Reference.py"
+                        }
+                    },
+                    {
+                        "title": "PowerShell Profile", 
+                        "action": {
+                            "powershell": [
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\Powershell\\Microsoft.PowerShell_profile.ps1' -Force"
+                            ],
+                            "description": "Create symbolic link for PowerShell profile"
+                        }
+                    },
+                    {
+                        "title": "Prowlarr", 
+                        "action": {
+                            "powershell": [
+                                "winget install TeamProwlarr.Prowlarr",
+                                "Write-Host 'Do it with manual Restore!' -ForegroundColor Green",
+                                "Start-Process 'C:\\Users\\nahid\\ms\\msBackups\\ARR_timely'"
+                            ],
+                            "description": "Install Prowlarr and open backup restore location"
+                        }
+                    },
+                    {
+                        "title": "Radarr", 
+                        "action": {
+                            "powershell": [
+                                "winget install TeamRadarr.Radarr",
+                                "Write-Host 'Do it with manual Restore!' -ForegroundColor Green",
+                                "Start-Process 'C:\\Users\\nahid\\ms\\msBackups\\ARR_timely'"
+                            ],
+                            "description": "Install Radarr and open backup restore location"
+                        }
+                    },
+                    {
+                        "title": "RssGuard", 
+                        "action": {
+                            "powershell": [
+                                "scoop install rssguard",
+                                "Stop-Process -Name 'rssguard' -ErrorAction SilentlyContinue",
+                                "Remove-Item 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database' -Recurse -ErrorAction SilentlyContinue",
+                                "Remove-Item 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config' -Recurse -ErrorAction SilentlyContinue",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\config' -Target 'C:\\Users\\nahid\\ms\\msBackups\\@mklink\\rssguard\\config' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\scoop\\apps\\rssguard\\current\\data4\\database' -Target 'C:\\Users\\nahid\\ms\\msBackups\\@mklink\\rssguard\\database' -Force"
+                            ],
+                            "description": "Setup RssGuard with symbolic links to backup data"
+                        }
+                    },
+                    {
+                        "title": "Sonarr", 
+                        "action": {
+                            "powershell": [
+                                "winget install TeamSonarr.Sonarr",
+                                "Write-Host 'Do it with manual Restore!' -ForegroundColor Green",
+                                "Start-Process 'C:\\Users\\nahid\\ms\\msBackups\\ARR_timely'"
+                            ],
+                            "description": "Install Sonarr and open backup restore location"
+                        }
+                    },
+                    {
+                        "title": "Terminal Profile", 
+                        "action": {
+                            "powershell": [
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\terminal\\settings.json' -Force"
+                            ],
+                            "description": "Create symbolic link for Windows Terminal settings"
+                        }
+                    },
+                    {
+                        "title": "VSCode", 
+                        "action": {
+                            "powershell": [
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Roaming\\Code\\User\\keybindings.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\vscode\\keybindings.json' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Roaming\\Code\\User\\settings.json' -Target 'C:\\Users\\nahid\\ms\\ms1\\asset\\vscode\\settings.json' -Force"
+                            ],
+                            "description": "Create symbolic links for VSCode settings and keybindings"
+                        }
+                    }
+                ]
+            },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # FIREWALL PORTS
+            # ═══════════════════════════════════════════════════════════════
+            {
+                "title": "Firewall Ports",
+                "description": "Manage Windows Firewall rules for specific ports",
+                "submenu": [
+                    {
+                        "title": "Port 22 [SSH]", 
+                        "action": {
+                            "powershell": [
+                                "New-NetFirewallRule -DisplayName 'Allow_Port_22' -Direction Inbound -Protocol TCP -LocalPort 22 -Action Allow -Profile Any",
+                                "Write-Host 'Port 22 (SSH) has been opened in Windows Firewall' -ForegroundColor Green"
+                            ],
+                            "description": "Open port 22 for SSH connections"
+                        }
+                    },
+                    {
+                        "title": "Port 5000", 
+                        "action": {
+                            "powershell": [
+                                "New-NetFirewallRule -DisplayName 'Allow_Port_5000' -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any",
+                                "Write-Host 'Port 5000 has been opened in Windows Firewall' -ForegroundColor Green"
+                            ],
+                            "description": "Open port 5000 in Windows Firewall"
+                        }
+                    },
+                    {
+                        "title": "Port 5001", 
+                        "action": {
+                            "powershell": [
+                                "New-NetFirewallRule -DisplayName 'Allow_Port_5001' -Direction Inbound -Protocol TCP -LocalPort 5001 -Action Allow -Profile Any",
+                                "Write-Host 'Port 5001 has been opened in Windows Firewall' -ForegroundColor Green"
+                            ],
+                            "description": "Open port 5001 in Windows Firewall"
+                        }
+                    },
+                    {
+                        "title": "Port 5002", 
+                        "action": {
+                            "powershell": [
+                                "New-NetFirewallRule -DisplayName 'Allow_Port_5002' -Direction Inbound -Protocol TCP -LocalPort 5002 -Action Allow -Profile Any",
+                                "Write-Host 'Port 5002 has been opened in Windows Firewall' -ForegroundColor Green"
+                            ],
+                            "description": "Open port 5002 in Windows Firewall"
+                        }
+                    },
+                    {
+                        "title": "View All Firewall Rules", 
+                        "action": {
+                            "powershell": [
+                                "Get-NetFirewallRule | Where-Object {$_.DisplayName -like 'Allow_Port_*'} | Select-Object DisplayName, Direction, Action, Enabled | Format-Table -AutoSize"
+                            ],
+                            "description": "Display all custom port firewall rules"
+                        }
+                    },
+                    {
+                        "title": "Remove Custom Port Rules", 
+                        "action": {
+                            "powershell": [
+                                "$rules = Get-NetFirewallRule | Where-Object {$_.DisplayName -like 'Allow_Port_*'}",
+                                "if ($rules) {",
+                                "    Write-Host 'Found custom port rules:' -ForegroundColor Yellow",
+                                "    $rules | Select-Object DisplayName | Format-Table -AutoSize",
+                                "    $confirm = Read-Host 'Do you want to remove all custom port rules? (y/N)'",
+                                "    if ($confirm -match '^[yY]') {",
+                                "        $rules | Remove-NetFirewallRule",
+                                "        Write-Host 'All custom port rules have been removed' -ForegroundColor Green",
+                                "    } else {",
+                                "        Write-Host 'Operation cancelled' -ForegroundColor Yellow",
+                                "    }",
+                                "} else {",
+                                "    Write-Host 'No custom port rules found' -ForegroundColor Yellow",
+                                "}"
+                            ],
+                            "description": "Remove all custom port firewall rules"
+                        }
+                    }
+                ]
+            },
+            
+            # ═══════════════════════════════════════════════════════════════
+            # APPLICATION SETUP
+            # ═══════════════════════════════════════════════════════════════
+            {
+                "title": "Application Setup",
+                "description": "Configure and setup various applications with custom settings",
+                "submenu": [
+                    {
+                        "title": "Jackett + qBittorrent", 
+                        "action": {
+                            "powershell": [
+                                "# cd C:\\Users\\nahid",
+                                "Write-Host 'Step 1: open qbittorrent -> view -> search engine -> Go To search engine tab -> search plugin -> check for updates -> now nova3 folder will be added' -ForegroundColor Green",
+                                "Write-Host 'Step 2: Start Jackett and add the necessary indexes to the list' -ForegroundColor Green",
+                                "Write-Host 'Step 3: Copy jacket api from webui to jackett.json' -ForegroundColor Green",
+                                "Start-Process 'C:\\Users\\nahid\\AppData\\Local\\qBittorrent\\nova3\\engines'"
+                            ],
+                            "description": "Setup Jackett and qBittorrent integration"
+                        }
+                    },
+                    {
+                        "title": "LDPlayer", 
+                        "action": {
+                            "powershell": [
+                                "Remove-Item 'C:\\Users\\nahid\\AppData\\Roaming\\XuanZhi9\\cache\\*' -Recurse -ErrorAction SilentlyContinue",
+                                "New-NetFirewallRule -DisplayName '@Block_Ld9BoxHeadless_OutInbound' -Direction Outbound -Program 'C:\\LDPlayer\\LDPlayer9\\dnplayer.exe' -Action Block -Enabled True",
+                                "Write-Host 'LDPlayer cache cleared and network blocked' -ForegroundColor Green"
+                            ],
+                            "description": "Clean LDPlayer cache and block network access"
+                        }
+                    },
+                    {
+                        "title": "Neovim Config 1", 
+                        "action": {
+                            "powershell": [
+                                "Write-Host 'Setting up Neovim...' -ForegroundColor Yellow",
+                                "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim' -ErrorAction SilentlyContinue",
+                                "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim-data' -ErrorAction SilentlyContinue",
+                                "New-Item -ItemType Directory -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua' -Target 'C:\\Users\\nahid\\ms\\ms1\\linux\\linux\\neovim\\init.lua' -Force",
+                                "Write-Host 'Neovim configuration 1 setup complete' -ForegroundColor Green"
+                            ],
+                            "description": "Setup Neovim with configuration 1 (init.lua)"
+                        }
+                    },
+                    {
+                        "title": "Neovim Config 2", 
+                        "action": {
+                            "powershell": [
+                                "Write-Host 'Setting up Neovim...' -ForegroundColor Yellow",
+                                "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim' -ErrorAction SilentlyContinue",
+                                "Remove-Item -Force -Recurse -Verbose 'C:\\Users\\nahid\\AppData\\Local\\nvim-data' -ErrorAction SilentlyContinue",
+                                "New-Item -ItemType Directory -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim' -Force",
+                                "New-Item -ItemType SymbolicLink -Path 'C:\\Users\\nahid\\AppData\\Local\\nvim\\init.lua' -Target 'C:\\Users\\nahid\\ms\\ms1\\linux\\linux\\neovim\\init2.lua' -Force",
+                                "Write-Host 'Neovim configuration 2 setup complete' -ForegroundColor Green"
+                            ],
+                            "description": "Setup Neovim with configuration 2 (init2.lua)"
+                        }
+                    },
+                    {
+                        "title": "Notepad++ Theme Setup", 
+                        "action": {
+                            "powershell": [
+                                "Set-Location 'C:\\Users\\nahid'",
+                                "Write-Host 'Dracula Theme' -ForegroundColor Blue",
+                                "git clone https://github.com/dracula/notepad-plus-plus.git",
+                                "Start-Process 'C:\\Users\\nahid\\notepad-plus-plus'",
+                                "# Write-Host 'Material Theme' -ForegroundColor Blue",
+                                "# git clone https://github.com/Codextor/npp-material-theme.git",
+                                "# Start-Process 'C:\\Users\\nahid\\npp-material-theme'",
+                                "Start-Process \"$env:AppData\\Notepad++\\themes\"",
+                                "Write-Host 'step1: Copy Example.xml from github folder to %AppData%\\Notepad++\\themes' -ForegroundColor Green",
+                                "Write-Host 'step2: Restart Notepad++' -ForegroundColor Green",
+                                "Write-Host 'step3: Dracula will be available in Settings > Style Configurator' -ForegroundColor Green"
+                            ],
+                            "description": "Setup Dracula theme for Notepad++ with installation instructions"
+                        }
+                    },
+                    {
+                        "title": "PotPlayer Register", 
+                        "action": {
+                            "powershell": [
+                                "Start-Process 'C:\\Users\\nahid\\ms\\ms1\\asset\\potplayer\\PotPlayerMini64.reg' -Verbose",
+                                "Write-Host 'PotPlayer registry settings applied' -ForegroundColor Green"
+                            ],
+                            "description": "Apply PotPlayer registry settings"
+                        }
+                    }
+                ]
+            },
+            
+            # ═══════════════════════════════════════════════════════════════
             # GITHUB PROJECTS
             # ═══════════════════════════════════════════════════════════════
             {
