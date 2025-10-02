@@ -12,7 +12,7 @@ class StartupManagerGUI:
         self.root = tk.Tk()
         self.root.title("Startup Manager - PowerShell Script Mode")
         self.root.geometry("1000x700")
-        self.root.configure(bg='#2b2b2b')
+        self.root.configure(bg='#1e1e2e')
         
         # Initialize paths
         self.json_file = os.path.join(os.path.dirname(__file__), "startup_items.json")
@@ -26,29 +26,161 @@ class StartupManagerGUI:
         self.load_items()
         
     def setup_style(self):
-        """Setup ttk styling for dark theme"""
+        """Setup ttk styling for modern theme"""
         self.style = ttk.Style()
         
-        # Configure dark theme
-        self.style.theme_use('clam')
+        # List all available themes
+        available_themes = self.style.theme_names()
+        print("Available TTK themes:")
+        for i, theme in enumerate(available_themes):
+            print(f"  {i+1}. {theme}")
         
-        # Configure colors
-        self.style.configure('TFrame', background='#2b2b2b')
-        self.style.configure('TLabel', background='#2b2b2b', foreground='white')
-        self.style.configure('TButton', background='#404040', foreground='white')
-        self.style.map('TButton', background=[('active', '#505050')])
-        self.style.configure('TEntry', background='#404040', foreground='white', fieldbackground='#404040')
-        self.style.configure('TScrollbar', background='#404040', troughcolor='#2b2b2b')
+        # Select your preferred theme here
+        selected_theme = 'winnative'  # Change this to any theme from the list above
+        
+        # Fallback if the selected theme is not available
+        if selected_theme not in available_themes:
+            print(f"Theme '{selected_theme}' not available, falling back to 'clam'")
+            selected_theme = 'alt'
+        
+        print(f"Selected theme: {selected_theme}")
+        self.style.theme_use(selected_theme)
+        
+        # Modern color palette
+        colors = {
+            'bg_primary': '#1e1e2e',      # Dark purple-blue
+            'bg_secondary': '#313244',    # Lighter purple-blue
+            'bg_tertiary': '#45475a',     # Even lighter
+            'accent_blue': '#89b4fa',     # Bright blue
+            'accent_green': '#a6e3a1',    # Bright green
+            'accent_red': '#f38ba8',      # Bright red/pink
+            'accent_yellow': '#f9e2af',   # Bright yellow
+            'accent_purple': '#cba6f7',   # Bright purple
+            'text_primary': '#cdd6f4',    # Light text
+            'text_secondary': '#bac2de',  # Slightly dimmer text
+            'text_muted': '#6c7086'       # Muted text
+        }
+        
+        # Configure base styles
+        self.style.configure('TFrame', background=colors['bg_primary'])
+        self.style.configure('TLabel', 
+                           background=colors['bg_primary'], 
+                           foreground=colors['text_primary'],
+                           font=('Segoe UI', 9))
+        
+        # Modern button styling - no white backgrounds
+        self.style.configure('TButton', 
+                           background=colors['bg_secondary'],
+                           foreground=colors['text_primary'],
+                           borderwidth=1,
+                           focuscolor='none',
+                           relief='solid',
+                           font=('Segoe UI', 9))
+        self.style.map('TButton', 
+                      background=[('active', colors['bg_tertiary']),
+                                ('pressed', colors['bg_tertiary'])],
+                      foreground=[('active', colors['accent_blue']),
+                                ('pressed', colors['accent_purple'])])
+        
+        # Entry styling
+        self.style.configure('TEntry', 
+                           background=colors['bg_secondary'],
+                           foreground=colors['text_primary'],
+                           fieldbackground=colors['bg_secondary'],
+                           borderwidth=1,
+                           insertcolor=colors['accent_blue'],
+                           font=('Segoe UI', 9))
+        self.style.map('TEntry',
+                      focuscolor=[('focus', colors['accent_blue'])])
+        
+        # Scrollbar styling
+        self.style.configure('TScrollbar', 
+                           background=colors['bg_secondary'],
+                           troughcolor=colors['bg_primary'],
+                           borderwidth=0,
+                           arrowcolor=colors['text_secondary'])
+        
+        # Treeview styling - ensure no white backgrounds
+        self.style.configure('Treeview', 
+                           background=colors['bg_secondary'],
+                           foreground=colors['text_primary'],
+                           fieldbackground=colors['bg_secondary'],
+                           borderwidth=0,
+                           font=('Segoe UI', 9))
+        self.style.configure('Treeview.Heading', 
+                           background=colors['bg_tertiary'],
+                           foreground=colors['text_primary'],
+                           borderwidth=1,
+                           font=('Segoe UI', 9, 'bold'))
+        self.style.map('Treeview', 
+                      background=[('selected', colors['bg_tertiary']),
+                                ('focus', colors['bg_secondary']),
+                                ('!focus', colors['bg_secondary'])],
+                      foreground=[('selected', colors['accent_blue'])])
+        self.style.map('Treeview.Heading',
+                      background=[('active', colors['accent_purple'])])
+        
+        # Force treeview item backgrounds
+        self.style.configure('Treeview.Item', 
+                           background=colors['bg_secondary'],
+                           foreground=colors['text_primary'])
         
         # Custom styles
-        self.style.configure('Title.TLabel', font=('Arial', 18, 'bold'), background='#2b2b2b', foreground='#4a9eff')
-        self.style.configure('Info.TLabel', font=('Arial', 10), background='#2b2b2b', foreground='gray')
-        self.style.configure('ItemName.TLabel', font=('Arial', 11, 'bold'), background='#404040', foreground='white')
-        self.style.configure('ItemCommand.TLabel', font=('Arial', 9), background='#404040', foreground='lightblue')
-        self.style.configure('Enabled.TButton', background='#28a745', foreground='white')
-        self.style.configure('Disabled.TButton', background='#dc3545', foreground='white')
-        self.style.configure('Action.TButton', background='#007bff', foreground='white')
-        self.style.configure('Delete.TButton', background='#dc3545', foreground='white')
+        self.style.configure('Title.TLabel', 
+                           font=('Segoe UI', 20, 'bold'), 
+                           background=colors['bg_primary'], 
+                           foreground=colors['accent_blue'])
+        
+        self.style.configure('Info.TLabel', 
+                           font=('Segoe UI', 10), 
+                           background=colors['bg_primary'], 
+                           foreground=colors['text_muted'])
+        
+        self.style.configure('Status.TLabel', 
+                           font=('Segoe UI', 9), 
+                           background=colors['bg_primary'], 
+                           foreground=colors['accent_yellow'])
+        
+        # Action button styles - colored backgrounds
+        self.style.configure('Primary.TButton', 
+                           background='#2d4f7c',  # Dark blue background
+                           foreground=colors['accent_blue'],
+                           borderwidth=1,
+                           relief='solid',
+                           font=('Segoe UI', 9, 'bold'))
+        self.style.map('Primary.TButton',
+                      background=[('active', '#3a5f8c')],
+                      foreground=[('active', '#a3c7ff')])
+        
+        self.style.configure('Success.TButton', 
+                           background='#2d5a3d',  # Dark green background
+                           foreground=colors['accent_green'],
+                           borderwidth=1,
+                           relief='solid',
+                           font=('Segoe UI', 9, 'bold'))
+        self.style.map('Success.TButton',
+                      background=[('active', '#3a6a4d')],
+                      foreground=[('active', '#b6f3b1')])
+        
+        self.style.configure('Danger.TButton', 
+                           background='#5a2d3d',  # Dark red background
+                           foreground=colors['accent_red'],
+                           borderwidth=1,
+                           relief='solid',
+                           font=('Segoe UI', 9, 'bold'))
+        self.style.map('Danger.TButton',
+                      background=[('active', '#6a3a4d')],
+                      foreground=[('active', '#ff9bb8')])
+        
+        self.style.configure('Warning.TButton', 
+                           background='#5a4d2d',  # Dark yellow background
+                           foreground=colors['accent_yellow'],
+                           borderwidth=1,
+                           relief='solid',
+                           font=('Segoe UI', 9, 'bold'))
+        self.style.map('Warning.TButton',
+                      background=[('active', '#6a5d3d')],
+                      foreground=[('active', '#fff2bf')])
         
     def create_widgets(self):
         # Main container
@@ -75,32 +207,60 @@ class StartupManagerGUI:
         controls_frame = ttk.Frame(self.main_frame)
         controls_frame.pack(fill="x", pady=(0, 10))
         
-        # Control buttons
-        ttk.Button(
+        # Control buttons using regular tkinter buttons for full control
+        tk.Button(
             controls_frame, 
-            text="Add Item", 
+            text="➕ Add Item", 
             command=self.open_add_dialog,
-            width=12
+            bg='#2d4f7c',  # Dark blue
+            fg='#89b4fa',  # Light blue text
+            font=('Segoe UI', 9, 'bold'),
+            relief='solid',
+            borderwidth=1,
+            activebackground='#3a5f8c',
+            activeforeground='#a3c7ff',
+            width=15
         ).pack(side="left", padx=5)
         
-        ttk.Button(
+        tk.Button(
             controls_frame, 
-            text="Refresh", 
+            text="🔄 Refresh", 
             command=self.load_items,
+            bg='#313244',  # Default dark
+            fg='#cdd6f4',  # Light text
+            font=('Segoe UI', 9, 'bold'),
+            relief='solid',
+            borderwidth=1,
+            activebackground='#45475a',
+            activeforeground='#89b4fa',
             width=12
         ).pack(side="left", padx=5)
         
-        ttk.Button(
+        tk.Button(
             controls_frame, 
-            text="Scan Registry", 
+            text="🔍 Scan Registry", 
             command=self.scan_registry,
-            width=12
+            bg='#5a4d2d',  # Dark yellow
+            fg='#f9e2af',  # Light yellow text
+            font=('Segoe UI', 9, 'bold'),
+            relief='solid',
+            borderwidth=1,
+            activebackground='#6a5d3d',
+            activeforeground='#fff2bf',
+            width=15
         ).pack(side="left", padx=5)
         
-        ttk.Button(
+        tk.Button(
             controls_frame, 
-            text="Open PS1", 
+            text="📄 Open PS1", 
             command=self.open_ps1_file,
+            bg='#2d5a3d',  # Dark green
+            fg='#a6e3a1',  # Light green text
+            font=('Segoe UI', 9, 'bold'),
+            relief='solid',
+            borderwidth=1,
+            activebackground='#3a6a4d',
+            activeforeground='#b6f3b1',
             width=12
         ).pack(side="left", padx=5)
         
@@ -120,6 +280,10 @@ class StartupManagerGUI:
         
         # Use Treeview for better performance with large lists
         self.tree = ttk.Treeview(items_container, columns=('status', 'name', 'command'), show='tree headings', height=20)
+        
+        # Configure treeview tags for alternating row colors
+        self.tree.tag_configure('evenrow', background='#313244')
+        self.tree.tag_configure('oddrow', background='#2a2a3a')
         
         # Configure columns
         self.tree.heading('#0', text='', anchor='w')
@@ -149,8 +313,11 @@ class StartupManagerGUI:
         self.tree.bind('<Button-3>', self.on_item_right_click)
         self.tree.bind('<Return>', self.on_item_enter)
         
-        # Context menu
-        self.context_menu = tk.Menu(self.root, tearoff=0, bg='#404040', fg='white')
+        # Context menu with modern styling - no white backgrounds
+        self.context_menu = tk.Menu(self.root, tearoff=0, 
+                                   bg='#313244', fg='#cdd6f4',
+                                   activebackground='#45475a', activeforeground='#89b4fa',
+                                   font=('Segoe UI', 9))
         self.context_menu.add_command(label="Toggle Enable/Disable", command=self.context_toggle)
         self.context_menu.add_command(label="Launch", command=self.context_launch)
         self.context_menu.add_command(label="Edit", command=self.context_edit)
@@ -164,7 +331,9 @@ class StartupManagerGUI:
         status_frame = ttk.Frame(self.main_frame)
         status_frame.pack(fill="x", pady=(5, 0))
         
-        self.status_label = ttk.Label(status_frame, text="Ready - Right-click items for actions")
+        self.status_label = ttk.Label(status_frame, 
+                                     text="✨ Ready - Right-click items for actions",
+                                     style='Status.TLabel')
         self.status_label.pack(side="left", padx=10)
         
     def on_item_double_click(self, event):
@@ -306,17 +475,15 @@ Write-Host "Starting up applications..." -ForegroundColor Green
         if len(cmd_text) > 80:
             cmd_text = cmd_text[:77] + "..."
         
-        # Insert item into tree
-        item_id = self.tree.insert('', 'end', values=(status_text, item["name"], cmd_text))
+        # Determine row tag for alternating colors
+        row_count = len(self.tree.get_children())
+        row_tag = 'evenrow' if row_count % 2 == 0 else 'oddrow'
+        
+        # Insert item into tree with alternating row colors
+        item_id = self.tree.insert('', 'end', values=(status_text, item["name"], cmd_text), tags=(row_tag,))
         
         # Store item data for context menu
         self.items_data[item_id] = item
-        
-        # Configure row colors based on status
-        if is_enabled:
-            self.tree.set(item_id, 'status', '✓ Enabled')
-        else:
-            self.tree.set(item_id, 'status', '✗ Disabled')
         
         return item_id
     
@@ -504,7 +671,7 @@ class AddEditDialog:
         self.dialog = tk.Toplevel(parent.root)
         self.dialog.title(title)
         self.dialog.geometry("600x250")
-        self.dialog.configure(bg='#2b2b2b')
+        self.dialog.configure(bg='#1e1e2e')
         self.dialog.transient(parent.root)
         self.dialog.grab_set()
         
@@ -553,15 +720,16 @@ class AddEditDialog:
         
         save_btn = ttk.Button(
             button_frame, 
-            text="Save", 
+            text="💾 Save", 
             command=self.save_item,
-            width=12
+            width=12,
+            style='Primary.TButton'
         )
         save_btn.pack(side="left", padx=10)
         
         cancel_btn = ttk.Button(
             button_frame, 
-            text="Cancel", 
+            text="❌ Cancel", 
             command=self.dialog.destroy,
             width=12
         )
@@ -630,7 +798,7 @@ class ScanResultsDialog:
         self.dialog = tk.Toplevel(parent.root)
         self.dialog.title(f"Registry Scan Results - {len(found_items)} items found")
         self.dialog.geometry("800x500")
-        self.dialog.configure(bg='#2b2b2b')
+        self.dialog.configure(bg='#1e1e2e')
         self.dialog.transient(parent.root)
         self.dialog.grab_set()
         
@@ -668,7 +836,7 @@ class ScanResultsDialog:
         items_container = ttk.Frame(main_frame)
         items_container.pack(fill="both", expand=True, pady=(0, 20))
         
-        canvas = tk.Canvas(items_container, bg='#2b2b2b', highlightthickness=0)
+        canvas = tk.Canvas(items_container, bg='#1e1e2e', highlightthickness=0)
         scrollbar = ttk.Scrollbar(items_container, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
         
@@ -713,31 +881,33 @@ class ScanResultsDialog:
         
         select_all_btn = ttk.Button(
             button_frame,
-            text="Select All",
+            text="✅ Select All",
             command=self.select_all,
-            width=12
+            width=15,
+            style='Success.TButton'
         )
         select_all_btn.pack(side="left", padx=5)
         
         select_none_btn = ttk.Button(
             button_frame,
-            text="Select None",
+            text="❌ Select None",
             command=self.select_none,
-            width=12
+            width=15
         )
         select_none_btn.pack(side="left", padx=5)
         
         add_btn = ttk.Button(
             button_frame,
-            text="Add Selected",
+            text="➕ Add Selected",
             command=self.add_selected,
-            width=15
+            width=18,
+            style='Primary.TButton'
         )
         add_btn.pack(side="right", padx=5)
         
         cancel_btn = ttk.Button(
             button_frame,
-            text="Cancel",
+            text="❌ Cancel",
             command=self.dialog.destroy,
             width=12
         )
