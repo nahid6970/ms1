@@ -32,12 +32,7 @@
   {
     "name": "asdasdsad",
     "command": "sssssssssssssssssss",
-    "enabled": false
-  },
-  {
-    "name": "sdasdasdasdasd",
-    "command": "sdasdasdasds",
-    "enabled": false
+    "enabled": true
   },
   {
     "name": "asdadasdasdsdads",
@@ -52,6 +47,16 @@
   {
     "name": "ahk_v2",
     "command": "Start-Process -FilePath \"C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk\"",
-    "enabled": false
+    "enabled": true
+  },
+  {
+    "name": "adasd",
+    "command": "asdasdasdasd",
+    "enabled": true
+  },
+  {
+    "name": "asdasdsa",
+    "command": "adasdasda",
+    "enabled": true
   }
 ]
