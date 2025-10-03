@@ -1,0 +1,1 @@
+Get-Process | Sort-Object -Property WS -Descending | Select-Object -First 10
