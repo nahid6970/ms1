@@ -97,7 +97,7 @@ widgets:
       callbacks:
         on_left: "do_nothing"
         on_middle: "do_nothing"
-        on_right: "do_nothing"
+        on_right: "toggle_label"
       container_padding:
         top: 0
         left: 0
