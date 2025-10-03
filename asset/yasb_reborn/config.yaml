@@ -99,7 +99,7 @@ widgets:
       label: "<span>\uefc5</span> {virtual_mem_used}/{virtual_mem_total}"
       update_interval: 5000
       callbacks:
-        on_left: "do_nothing"
+        on_left: "exec cmd /c start C:\\Users\\nahid\\ms\\ms1\\test_project\\ollama-chat-app\\ollama_stop_models.ps1"
         on_middle: "do_nothing"
         on_right: "toggle_label"
       container_padding:
