@@ -80,7 +80,7 @@ widgets:
         - "\u2588" # 80%+
       histogram_num_columns: 8
       callbacks:
-        on_left: "toggle_cpu_menu"
+        on_left: "exec cmd /k start C:\\Users\\nahid\\ms\\ms1\\asset\\yasb_reborn\\get_top_processes.ps1"
         on_middle: "exec cmd /c Taskmgr"
         on_right: "toggle_label"
       container_padding:
