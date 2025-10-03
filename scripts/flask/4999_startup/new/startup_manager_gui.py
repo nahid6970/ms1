@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
+import customtkinter
 import json
 import os
 import winreg
@@ -9,6 +10,10 @@ from datetime import datetime
 
 class StartupManagerGUI:
     def __init__(self):
+        # Configure CustomTkinter appearance
+        customtkinter.set_appearance_mode("dark")  # Dark mode to match your theme
+        customtkinter.set_default_color_theme("blue")  # Blue theme for accents
+        
         self.root = tk.Tk()
         self.root.title("Startup Manager - PowerShell Script Mode")
         self.root.geometry("1000x700")
@@ -149,8 +154,8 @@ class StartupManagerGUI:
         listbox_frame = tk.Frame(items_container, bg=self.colors['bg_primary'])
         listbox_frame.pack(fill="both", expand=True)
         
-        # Scrollbar
-        scrollbar = tk.Scrollbar(listbox_frame, bg=self.colors['bg_secondary'])
+        # Modern CustomTkinter Scrollbar
+        scrollbar = customtkinter.CTkScrollbar(listbox_frame, orientation="vertical")
         scrollbar.pack(side="right", fill="y")
         
         # Listbox for items with monospace font for better alignment
@@ -167,7 +172,7 @@ class StartupManagerGUI:
             highlightthickness=0
         )
         self.listbox.pack(side="left", fill="both", expand=True)
-        scrollbar.config(command=self.listbox.yview)
+        scrollbar.configure(command=self.listbox.yview)
         
         # Bind events
         self.listbox.bind('<Double-1>', self.on_item_double_click)
@@ -745,8 +750,8 @@ class ScanResultsDialog:
         items_container = tk.Frame(main_frame, bg=self.parent.colors['bg_primary'])
         items_container.pack(fill="both", expand=True, pady=(0, 20))
         
-        # Scrollbar
-        scrollbar = tk.Scrollbar(items_container, bg=self.parent.colors['bg_secondary'])
+        # Modern CustomTkinter Scrollbar
+        scrollbar = customtkinter.CTkScrollbar(items_container, orientation="vertical")
         scrollbar.pack(side="right", fill="y")
         
         # Frame for checkboxes
@@ -763,7 +768,7 @@ class ScanResultsDialog:
         )
         
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        scrollbar.config(command=canvas.yview)
+        scrollbar.configure(command=canvas.yview)
         
         # Create checkboxes for each item
         self.item_vars = []

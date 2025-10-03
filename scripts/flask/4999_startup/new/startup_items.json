@@ -3,5 +3,55 @@
     "name": "FF",
     "command": "FF",
     "enabled": false
+  },
+  {
+    "name": "asdasdasd",
+    "command": "asdasd",
+    "enabled": false
+  },
+  {
+    "name": "asdasdad",
+    "command": "sdsdadasd",
+    "enabled": false
+  },
+  {
+    "name": "asdasdasdss",
+    "command": "asdasda",
+    "enabled": false
+  },
+  {
+    "name": "ssssssssssssssssssssss",
+    "command": "asd",
+    "enabled": false
+  },
+  {
+    "name": "asdasdasssssss",
+    "command": "sad",
+    "enabled": false
+  },
+  {
+    "name": "asdasdsad",
+    "command": "sssssssssssssssssss",
+    "enabled": false
+  },
+  {
+    "name": "sdasdasdasdasd",
+    "command": "sdasdasdasds",
+    "enabled": false
+  },
+  {
+    "name": "asdadasdasdsdads",
+    "command": "asdasdasdasdsdsd",
+    "enabled": false
+  },
+  {
+    "name": "sdadasdasdasdasdd",
+    "command": "sadasdsddddddddddddddddd",
+    "enabled": false
+  },
+  {
+    "name": "ahk_v2",
+    "command": "Start-Process -FilePath \"C:\\Users\\nahid\\ms\\ms1\\ahk_v2.ahk\"",
+    "enabled": false
   }
 ]
