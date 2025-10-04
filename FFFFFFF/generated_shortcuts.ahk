@@ -182,7 +182,7 @@ RAlt & -:: {
 !1::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
 
 ;! Open w VScode
-^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\VScode_OpenWith.ahk", "", "Hide")
+^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\nvim_OpenWith.ahk", "", "Show")
 
 ;! Center Apps Window
 LAlt & c:: {

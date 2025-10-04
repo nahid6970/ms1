@@ -132,7 +132,7 @@
             "category": "General",
             "description": "",
             "hotkey": "^!n",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version1\\VScode_OpenWith.ahk\", \"\", \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version1\\nvim_OpenWith.ahk\", \"\", \"Show\")"
         },
         {
             "name": "Center Apps Window",
