@@ -322,13 +322,13 @@
         (let* ((level (length (match-string 1)))
                (title (match-string 2))
                (clean-title (replace-regexp-in-string " :.*:$" "" title))
-               (link-id (downcase (replace-regexp-in-string "[^a-zA-Z0-9-]" "-" clean-title))))
+               (link-id (downcase (replace-regexp-in-string "[^a-zA-Z0-9-]" "-" (replace-regexp-in-string "^[ \t]+" "" clean-title)))))
           (unless (string-match ":TOC:" title)
             (setq toc-content 
                   (concat toc-content
                           (make-string (* (1- level) 2) ? )
-                          "- [[#" link-id "][" clean-title "]]\n"))))))
-    toc-content))
+                          "- [[*" clean-title "][" clean-title "]]\n"))))))
+    (concat toc-content "\n")))
 
 ;; Org-mode specific bindings
 (global-set-key (kbd "C-c l") 'org-store-link)
