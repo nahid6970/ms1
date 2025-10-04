@@ -328,11 +328,18 @@
     (if (re-search-forward "^\\* .*:TOC:" nil t)
         (progn
           (forward-line 1)
-          (let ((toc-start (point)))
-            ;; Delete existing TOC content
-            (when (re-search-forward "^\\* " nil t)
-              (beginning-of-line)
-              (delete-region toc-start (point)))
+          (let ((toc-start (point))
+                (toc-end (point)))
+            ;; Find the end of existing TOC content (stop at next heading or end of buffer)
+            (while (and (not (eobp))
+                       (not (looking-at "^\\*"))
+                       (or (looking-at "^[ \t]*$")           ; empty lines
+                           (looking-at "^[ \t]*-")           ; list items
+                           (looking-at "^[ \t]*\\[\\[")))    ; links
+              (forward-line 1)
+              (setq toc-end (point)))
+            ;; Delete only the TOC content, not other content
+            (delete-region toc-start toc-end)
             ;; Generate new TOC
             (goto-char toc-start)
             (insert (my-org-build-toc))))
