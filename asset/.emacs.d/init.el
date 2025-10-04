@@ -79,6 +79,20 @@
                     :font "JetBrainsMono NFP"
                     :height 110)
 
+;; Emoji support
+(when (display-graphic-p)
+  ;; Set emoji font for Unicode blocks
+  (set-fontset-font t 'unicode "Segoe UI Emoji" nil 'prepend)
+  (set-fontset-font t 'unicode "Noto Color Emoji" nil 'prepend)
+  (set-fontset-font t 'unicode "Apple Color Emoji" nil 'prepend)
+  
+  ;; Specific emoji ranges
+  (set-fontset-font t '(#x1F600 . #x1F64F) "Segoe UI Emoji") ; Emoticons
+  (set-fontset-font t '(#x1F300 . #x1F5FF) "Segoe UI Emoji") ; Misc Symbols
+  (set-fontset-font t '(#x1F680 . #x1F6FF) "Segoe UI Emoji") ; Transport
+  (set-fontset-font t '(#x2600 . #x26FF) "Segoe UI Emoji")   ; Misc symbols
+  (set-fontset-font t '(#x1F1E0 . #x1F1FF) "Segoe UI Emoji")) ; Flags
+
 ;; Theme - Doom Themes (popular choice)
 (use-package doom-themes
   :ensure t
