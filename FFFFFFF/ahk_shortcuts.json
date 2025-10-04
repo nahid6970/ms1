@@ -12,7 +12,7 @@
             "name": "Run Python Script",
             "description": "Opens run.py in the ms1 directory",
             "hotkey": "ScrollLock",
-            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\Users\\nahid\\ms\\ms1\\run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    WinSetAlwaysOnTop(true, \"A\")\n}",
+            "action": "run_py_script()\nrun_py_script()\n{\n    Run(\"C:\\Users\\nahid\\ms\\ms1\\run.py\", , \"Show\")\n    ; Wait a moment for the window to appear\n    Sleep(1000)\n    ; Make the window always on top (assumes it's the active window)\n    ;WinSetAlwaysOnTop(true, \"A\")\n}",
             "category": "Launch"
         },
         {

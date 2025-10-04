@@ -13,7 +13,7 @@ ScrollLock:: {
         ; Wait a moment for the window to appear
         Sleep(1000)
         ; Make the window always on top (assumes it's the active window)
-        WinSetAlwaysOnTop(true, "A")
+        ;WinSetAlwaysOnTop(true, "A")
     }
 }
 
