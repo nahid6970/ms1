@@ -2,6 +2,18 @@
 #+AUTHOR: Your Name
 #+DATE: [2025-01-04 Sat]
 
+* Table of Contents :TOC:
+- [[*Python Code Execution Test][Python Code Execution Test]]
+  - [[*Simple Python Example][Simple Python Example]]
+  - [[*Python with Variables][Python with Variables]]
+  - [[*Python with Plot (if matplotlib is available)][Python with Plot (if matplotlib is available)]]
+  - [[*PowerShell Examples][PowerShell Examples]]
+    - [[*Basic PowerShell Commands][Basic PowerShell Commands]]
+    - [[*File System Operations][File System Operations]]
+    - [[*System Information][System Information]]
+- [[*Instructions][Instructions]]
+- [[*Notes][Notes]]
+- [[*Troubleshooting][Troubleshooting]]
 
 * Python Code Execution Test
 
@@ -92,6 +104,7 @@ if ($pythonPath) {
 }
 #+END_SRC
 
+
 *** System Information
 
 #+BEGIN_SRC powershell :results output
@@ -112,6 +125,13 @@ $totalSpace = [math]::Round($disk.Size / 1GB, 2)
 $freeSpace = [math]::Round($disk.FreeSpace / 1GB, 2)
 Write-Host "C: Drive - Total: $totalSpace GB, Free: $freeSpace GB"
 #+END_SRC
+
+#+RESULTS:
+: OS: Microsoft Windows 11 Pro
+: Version: 10.0.26100
+: Total RAM: 13.92 GB
+: Free RAM: 1.79 GB
+: C: Drive - Total: 222.23 GB, Free: 11.98 GB
 
 * Instructions
 

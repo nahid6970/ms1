@@ -356,11 +356,27 @@
                           "- [[*" clean-title "][" clean-title "]]\n"))))))
     (concat toc-content "\n")))
 
+;; Function to remove all #+RESULTS blocks
+(defun my-org-remove-all-results ()
+  "Remove all #+RESULTS blocks in the current org buffer."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((count 0))
+      (while (re-search-forward "^[ \t]*#\\+RESULTS:" nil t)
+        (let ((element (org-element-at-point)))
+          (when (eq (org-element-type element) 'fixed-width)
+            (delete-region (org-element-property :begin element)
+                          (org-element-property :end element))
+            (setq count (1+ count)))))
+      (message "Removed %d #+RESULTS blocks" count))))
+
 ;; Org-mode specific bindings
 (global-set-key (kbd "C-c l") 'org-store-link)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c t") 'my-org-generate-toc)
+(global-set-key (kbd "C-c r") 'my-org-remove-all-results)
 
 ;; Quick access to config file
 (global-set-key (kbd "C-c e") (lambda () (interactive) (find-file "~/.emacs.d/init.el")))
