@@ -47,6 +47,27 @@
 (setq inhibit-startup-message t)
 (setq ring-bell-function 'ignore)
 
+;; Window size and positioning
+(when (display-graphic-p)
+  ;; Set frame size
+  (add-to-list 'default-frame-alist '(width . 160))   ; ~1600px width (10px per char)
+  (add-to-list 'default-frame-alist '(height . 31))   ; ~500px height (16px per line)
+  
+  ;; Center the frame on screen
+  (defun center-frame ()
+    "Center the current frame on the screen."
+    (let* ((frame (selected-frame))
+           (frame-width (frame-pixel-width frame))
+           (frame-height (frame-pixel-height frame))
+           (display-width (display-pixel-width))
+           (display-height (display-pixel-height))
+           (left (/ (- display-width frame-width) 2))
+           (top (/ (- display-height frame-height) 2)))
+      (set-frame-position frame left top)))
+  
+  ;; Center frame on startup
+  (add-hook 'window-setup-hook 'center-frame))
+
 ;; Line numbers and basic UI
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
