@@ -160,43 +160,37 @@
 
 ;; Beautiful org fonts and scaling
 (custom-set-faces
- ;; Org-mode heading sizes
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-block ((t (:background "#1e2029" :extend t))))
+ '(org-block-begin-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
+ '(org-block-end-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
+ '(org-code ((t (:background "#1e2029" :foreground "#98be65"))))
+ '(org-date ((t (:foreground "#ECBE7B"))))
  '(org-document-title ((t (:height 2.0 :weight bold :foreground "#51afef"))))
  '(org-level-1 ((t (:height 1.6 :weight bold :foreground "#51afef"))))
  '(org-level-2 ((t (:height 1.4 :weight semi-bold :foreground "#c678dd"))))
  '(org-level-3 ((t (:height 1.2 :weight normal :foreground "#98be65"))))
  '(org-level-4 ((t (:height 1.1 :weight normal :foreground "#ECBE7B"))))
  '(org-level-5 ((t (:height 1.0 :weight normal :foreground "#46D9FF"))))
- 
- ;; Code blocks
- '(org-block ((t (:background "#1e2029" :extend t))))
- '(org-block-begin-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
- '(org-block-end-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
- '(org-code ((t (:background "#1e2029" :foreground "#98be65"))))
- '(org-verbatim ((t (:background "#1e2029" :foreground "#c678dd"))))
- 
- ;; Other org elements
- '(org-quote ((t (:background "#1e2029" :slant italic :extend t))))
- '(org-table ((t (:foreground "#51afef"))))
  '(org-link ((t (:foreground "#51afef" :underline t))))
- '(org-date ((t (:foreground "#ECBE7B"))))
+ '(org-meta-line ((t (:foreground "#5B6268"))))
+ '(org-quote ((t (:background "#1e2029" :slant italic :extend t))))
  '(org-special-keyword ((t (:foreground "#5B6268"))))
- '(org-meta-line ((t (:foreground "#5B6268")))))
+ '(org-table ((t (:foreground "#51afef"))))
+ '(org-verbatim ((t (:background "#1e2029" :foreground "#c678dd")))))
 
 ;; ============================================================================
 ;; ORG BABEL - CODE EXECUTION (FIXED)
 ;; ============================================================================
 
-;; Enable code execution for essential languages (including Python for testing)
-(with-eval-after-load 'org
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (shell . t)
-     (python . t)))
-  
-  ;; Ensure Python is available
-  (require 'ob-python nil t))
+;; Enable code execution for essential languages only (load others on demand)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (shell . t)))     ; Load only essential languages at startup
 
 ;; Don't ask for confirmation before executing code
 (setq org-confirm-babel-evaluate nil)
@@ -304,3 +298,9 @@
 (message "Emacs configuration loaded successfully! Enjoy your beautiful setup!")
 
 ;; End of configuration
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages nil))

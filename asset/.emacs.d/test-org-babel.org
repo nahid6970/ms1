@@ -1,0 +1,82 @@
+#+TITLE: Test Org-Babel Python Execution
+#+AUTHOR: Your Name
+#+DATE: [2025-01-04 Sat]
+
+* Python Code Execution Test
+
+This file contains Python code blocks to test if org-babel is working correctly in your Emacs setup.
+
+** Simple Python Example
+
+Press =C-c C-c= on the code block below to execute it:
+
+#+BEGIN_SRC python :results output
+print("Hello from Python in Org-mode!")
+print("Current time:", end=" ")
+
+import datetime
+now = datetime.datetime.now()
+print(now.strftime("%Y-%m-%d %H:%M:%S"))
+
+# Simple calculation
+numbers = [1, 2, 3, 4, 5]
+total = sum(numbers)
+print(f"Sum of {numbers} = {total}")
+#+END_SRC
+
+** Python with Variables
+
+You can also use variables and return values:
+
+#+BEGIN_SRC python :var name="World" :results value
+greeting = f"Hello, {name}!"
+calculation = 2 + 2
+return f"{greeting} Math check: 2+2={calculation}"
+#+END_SRC
+
+** Python with Plot (if matplotlib is available)
+
+#+BEGIN_SRC python :results file :file plot.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create simple plot
+x = np.linspace(0, 10, 100)
+y = np.sin(x)
+
+plt.figure(figsize=(8, 4))
+plt.plot(x, y, 'b-', linewidth=2)
+plt.title('Sine Wave')
+plt.xlabel('x')
+plt.ylabel('sin(x)')
+plt.grid(True)
+plt.savefig('plot.png', dpi=150, bbox_inches='tight')
+plt.close()
+
+return 'plot.png'
+#+END_SRC
+
+* Instructions
+
+1. Open this file in Emacs
+2. Place your cursor inside any code block
+3. Press =C-c C-c= to execute the code
+4. Results will appear below the code block
+
+* Notes
+
+- If Python execution doesn't work, you may need to add Python back to org-babel-load-languages
+- Make sure Python is installed and accessible from your PATH
+- For the plot example, you'll need matplotlib: =pip install matplotlib=
+
+* Troubleshooting
+
+If code execution doesn't work, add this to your init.el:
+
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (shell . t)
+   (python . t)))  ; Add python back
+#+END_SRC
