@@ -329,6 +329,14 @@
   :config
   (evil-collection-init))
 
+;; Emojify - Emoji insertion and display
+(use-package emojify
+  :ensure t
+  :config
+  (global-emojify-mode 1)
+  (setq emojify-display-style 'unicode)
+  (setq emojify-emoji-styles '(unicode)))
+
 ;; ============================================================================
 ;; KEY BINDINGS
 ;; ============================================================================
@@ -401,6 +409,9 @@
 
 ;; Quick access to config file
 (global-set-key (kbd "C-c e") (lambda () (interactive) (find-file "~/.emacs.d/init.el")))
+
+;; Emoji insertion
+(global-set-key (kbd "C-c i") 'emojify-insert-emoji)
 
 ;; ============================================================================
 ;; PERFORMANCE & MISC
