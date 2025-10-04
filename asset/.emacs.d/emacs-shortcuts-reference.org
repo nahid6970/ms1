@@ -1,0 +1,247 @@
+#+TITLE: Emacs Shortcuts Reference Guide
+#+AUTHOR: Your Personal Emacs Cheatsheet
+#+DATE: [2025-01-04 Sat]
+#+STARTUP: overview
+
+* Table of Contents :TOC:
+- [[#help-system][Help System]]
+- [[#file-and-buffer-operations][File and Buffer Operations]]
+- [[#window-management][Window Management]]
+- [[#editing-commands][Editing Commands]]
+- [[#search-and-replace][Search and Replace]]
+- [[#org-mode-shortcuts][Org-Mode Shortcuts]]
+- [[#version-control-git][Version Control (Git)]]
+- [[#which-key-navigation][Which-Key Navigation]]
+- [[#bookmarks-and-registers][Bookmarks and Registers]]
+- [[#custom-shortcuts-from-your-config][Custom Shortcuts (From Your Config)]]
+- [[#useful-meta-commands][Useful Meta Commands]]
+- [[#emergency-shortcuts][Emergency Shortcuts]]
+
+* Help System
+| Shortcut | Description                           |
+|----------+---------------------------------------|
+| =C-h ?=  | Show all help options                 |
+| =C-h b=  | Show ALL current keybindings          |
+| =C-h k=  | Describe what a specific key does     |
+| =C-h m=  | Show current mode's keybindings       |
+| =C-h f=  | Describe function                     |
+| =C-h v=  | Describe variable                     |
+| =C-h a=  | Search for commands (apropos)         |
+| =C-h i=  | Open Info documentation               |
+| =C-h t=  | Start Emacs tutorial                  |
+
+* File and Buffer Operations
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-x C-f=  | Find/open file                        |
+| =C-x C-s=  | Save current buffer                   |
+| =C-x C-w=  | Save as (write file)                  |
+| =C-x C-c=  | Exit Emacs                            |
+| =C-x b=    | Switch to buffer                      |
+| =C-x C-b=  | List all buffers                      |
+| =C-x k=    | Kill (close) buffer                   |
+| =C-x C-r=  | Open recent files (from your config)  |
+| =C-x s=    | Save some buffers                     |
+| =C-x C-q=  | Toggle read-only mode                 |
+
+* Window Management
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-x 0=    | Close current window                  |
+| =C-x 1=    | Keep only current window              |
+| =C-x 2=    | Split window horizontally             |
+| =C-x 3=    | Split window vertically               |
+| =C-x o=    | Switch to other window                |
+| =C-x +=    | Balance window sizes                  |
+| =C-x ^=    | Make window taller                    |
+| =C-x }=    | Make window wider                     |
+| =C-x {=    | Make window narrower                  |
+
+* Editing Commands
+| Shortcut     | Description                           |
+|--------------+---------------------------------------|
+| =C-a=        | Beginning of line                     |
+| =C-e=        | End of line                           |
+| =M-a=        | Beginning of sentence                 |
+| =M-e=        | End of sentence                       |
+| =C-f=        | Forward character                     |
+| =C-b=        | Backward character                    |
+| =M-f=        | Forward word                          |
+| =M-b=        | Backward word                         |
+| =C-n=        | Next line                             |
+| =C-p=        | Previous line                         |
+| =C-v=        | Page down                             |
+| =M-v=        | Page up                               |
+| =M-<=        | Beginning of buffer                   |
+| =M->=        | End of buffer                         |
+| =C-d=        | Delete character forward              |
+| =M-d=        | Delete word forward                   |
+| =C-k=        | Kill line (cut from cursor to end)   |
+| =C-w=        | Kill region (cut selection)          |
+| =M-w=        | Copy region                           |
+| =C-y=        | Yank (paste)                          |
+| =M-y=        | Cycle through kill ring               |
+| =C-/= or =C-_= | Undo                                |
+| =C-x u=      | Undo                                  |
+| =C-SPC=      | Set mark (start selection)            |
+| =C-x C-x=    | Exchange point and mark               |
+
+* Search and Replace
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-s=      | Search forward (Swiper in your config)|
+| =C-r=      | Search backward                       |
+| =M-%=      | Query replace                         |
+| =C-M-s=    | Regex search forward                  |
+| =C-M-r=    | Regex search backward                 |
+| =C-M-%=    | Regex query replace                   |
+| =M-x occur= | Show all lines matching pattern      |
+
+* Org-Mode Shortcuts
+** Structure Editing
+| Shortcut     | Description                           |
+|--------------+---------------------------------------|
+| =TAB=        | Cycle visibility of current subtree   |
+| =S-TAB=      | Cycle visibility of whole buffer      |
+| =M-RET=      | Insert new heading/item               |
+| =M-S-RET=    | Insert new TODO heading               |
+| =M-LEFT/RIGHT= | Promote/demote heading              |
+| =M-UP/DOWN=  | Move subtree up/down                  |
+| =C-c C-t=    | Cycle TODO state                      |
+| =C-c C-d=    | Add deadline                          |
+| =C-c C-s=    | Add scheduled date                    |
+
+** Code Blocks and Links
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-c C-c=  | Execute code block                    |
+| =C-c C-l=  | Insert/edit link                      |
+| =C-c C-o=  | Open link                             |
+| =<s TAB=   | Insert source code block              |
+| =<py TAB=  | Insert Python code block (your config)|
+| =<ps TAB=  | Insert PowerShell block (your config) |
+| =<sh TAB=  | Insert shell code block (your config)|
+
+** Your Custom Org Bindings
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-c l=    | Store link                            |
+| =C-c a=    | Open agenda                           |
+| =C-c c=    | Capture note/task                     |
+
+* Version Control (Git)
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-x v v=  | Commit changes                        |
+| =C-x v ==  | Show diff                             |
+| =C-x v l=  | Show log                              |
+| =C-x v u=  | Revert file                           |
+| =C-x v +=  | Update from repository                |
+| =C-x v i=  | Add file to version control           |
+
+* Which-Key Navigation
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =n=        | Next page in which-key popup          |
+| =p=        | Previous page in which-key popup      |
+| =C-h-n=    | Next page (alternative)               |
+| =C-h-p=    | Previous page (alternative)           |
+| =C-h-u=    | Go up one level                       |
+| =?=        | Show which-key help                   |
+
+* Bookmarks and Registers
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-x r m=  | Set bookmark                          |
+| =C-x r b=  | Jump to bookmark                      |
+| =C-x r l=  | List bookmarks                        |
+| =C-x r s=  | Save text to register                 |
+| =C-x r i=  | Insert text from register             |
+| =C-x r w=  | Save window configuration             |
+| =C-x r j=  | Jump to window configuration          |
+
+* Custom Shortcuts (From Your Config)
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-c e=    | Open Emacs config file (init.el)      |
+| =C-c l=    | Store org link                        |
+| =C-c a=    | Open org agenda                       |
+| =C-c c=    | Org capture                           |
+| =C-x C-r=  | Open recent files                     |
+| =M-x=      | Execute command (counsel-M-x)         |
+| =C-x C-f=  | Find file (counsel-find-file)         |
+| =C-x b=    | Switch buffer (counsel-switch-buffer) |
+| =C-s=      | Search (swiper)                       |
+
+* Useful Meta Commands
+| Command                    | Description                           |
+|----------------------------+---------------------------------------|
+| =M-x package-list-packages= | Open package manager                 |
+| =M-x customize=            | Open customization interface         |
+| =M-x eval-buffer=          | Execute all elisp in current buffer  |
+| =M-x eval-region=          | Execute selected elisp code          |
+| =M-x load-file=            | Load elisp file                      |
+| =M-x describe-mode=        | Describe current mode                 |
+| =M-x auto-fill-mode=       | Toggle automatic line wrapping       |
+| =M-x visual-line-mode=     | Toggle visual line mode              |
+| =M-x whitespace-mode=      | Show whitespace characters           |
+| =M-x toggle-truncate-lines= | Toggle line wrapping                |
+
+* Emergency Shortcuts
+| Shortcut   | Description                           |
+|------------+---------------------------------------|
+| =C-g=      | Cancel current command/escape         |
+| =C-]=      | Abort recursive edit                  |
+| =C-x C-c=  | Exit Emacs                            |
+| =M-x recover-file= | Recover auto-saved file       |
+| =M-x recover-session= | Recover crashed session    |
+
+* Tips and Tricks
+
+** Discovering More Shortcuts
+- Press any prefix key (like =C-x=, =C-c=) and wait for which-key popup
+- Use =C-h b= to see ALL keybindings
+- Use =C-h m= to see mode-specific shortcuts
+- Look for =[+]= or =...= in which-key - means more pages available
+
+** Customizing Shortcuts
+- Add to your =init.el=: =(global-set-key (kbd "C-c x") 'your-function)=
+- Use =C-h k= followed by a key to see what it currently does
+- Your custom shortcuts will appear in which-key and =C-h b=
+
+** Prefix Key Summary
+- =C-h= → Help system
+- =C-c= → User/mode commands (safe for customization)
+- =C-x= → File, buffer, window operations
+- =M-x= → Execute any command by name
+- =C-u= → Universal argument (modifies next command)
+- =C-g= → Cancel/escape
+
+** Remember
+- =C-= means Ctrl key
+- =M-= means Alt key (Meta)
+- =S-= means Shift key
+- =RET= means Enter key
+- =SPC= means Space key
+- =TAB= means Tab key
+
+* Quick Reference Card
+For the most essential shortcuts, keep these handy:
+
+| Category | Shortcut | Action |
+|----------|----------|--------|
+| Help | =C-h k= | What does this key do? |
+| Files | =C-x C-f= | Open file |
+| Files | =C-x C-s= | Save file |
+| Buffers | =C-x b= | Switch buffer |
+| Windows | =C-x 2= | Split horizontal |
+| Windows | =C-x o= | Other window |
+| Edit | =C-SPC= | Start selection |
+| Edit | =C-w= | Cut |
+| Edit | =M-w= | Copy |
+| Edit | =C-y= | Paste |
+| Search | =C-s= | Search |
+| Org | =C-c C-c= | Execute/Do it |
+| Emergency | =C-g= | Cancel |
+
+Happy Emacs-ing! 🎉
