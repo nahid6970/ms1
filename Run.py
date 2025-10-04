@@ -258,6 +258,7 @@ def show_fzf_menu():
     pad = "  "
     menu_options = [
         f"{pad}{esc('#9efa49')}  Run\x1b[0m\t{len(file_paths)}",
+        f"{pad}{esc('#19d600')}  nvim\x1b[0m\t{len(file_paths)}",
         f"{pad}{esc('#7e96ff')}  VSCode\x1b[0m\t{len(file_paths)}",
         f"{pad}{esc('#faf069')}  Folder\x1b[0m\t{len(file_paths)}",
         f"{pad}{esc('#ffffff')}  Terminal\x1b[0m\t{len(file_paths)}",
@@ -297,6 +298,13 @@ def show_fzf_menu():
             if selection.startswith(''):
                 for file_path in file_paths:
                     subprocess.run(f'code "{os.path.abspath(file_path)}"', shell=True)
+            #! Open all files in nvim
+            if selection.startswith(''):
+                if file_paths:
+                    # Open all files in tabs explicitly
+                    files_args = ' '.join([f'"{os.path.abspath(fp)}"' for fp in file_paths])
+                    subprocess.run(f'nvim -p {files_args}', shell=True)
+
             #! Open all folder locations
             elif selection.startswith(''):
                 for file_path in file_paths:
