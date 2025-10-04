@@ -181,28 +181,27 @@
 
 ;; Beautiful org fonts and scaling
 (custom-set-faces
- ;; Org-mode heading sizes
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-block ((t (:background "#1e2029" :extend t))))
+ '(org-block-begin-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
+ '(org-block-end-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
+ '(org-code ((t (:background "#1e2029" :foreground "#98be65"))))
+ '(org-date ((t (:foreground "#ECBE7B"))))
  '(org-document-title ((t (:height 2.0 :weight bold :foreground "#51afef"))))
  '(org-level-1 ((t (:height 1.6 :weight bold :foreground "#51afef"))))
  '(org-level-2 ((t (:height 1.4 :weight semi-bold :foreground "#c678dd"))))
  '(org-level-3 ((t (:height 1.2 :weight normal :foreground "#98be65"))))
  '(org-level-4 ((t (:height 1.1 :weight normal :foreground "#ECBE7B"))))
  '(org-level-5 ((t (:height 1.0 :weight normal :foreground "#46D9FF"))))
- 
- ;; Code blocks
- '(org-block ((t (:background "#1e2029" :extend t))))
- '(org-block-begin-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
- '(org-block-end-line ((t (:background "#1c1f24" :foreground "#5B6268" :extend t))))
- '(org-code ((t (:background "#1e2029" :foreground "#98be65"))))
- '(org-verbatim ((t (:background "#1e2029" :foreground "#c678dd"))))
- 
- ;; Other org elements
- '(org-quote ((t (:background "#1e2029" :slant italic :extend t))))
- '(org-table ((t (:foreground "#51afef"))))
  '(org-link ((t (:foreground "#51afef" :underline t))))
- '(org-date ((t (:foreground "#ECBE7B"))))
+ '(org-meta-line ((t (:foreground "#5B6268"))))
+ '(org-quote ((t (:background "#1e2029" :slant italic :extend t))))
  '(org-special-keyword ((t (:foreground "#5B6268"))))
- '(org-meta-line ((t (:foreground "#5B6268")))))
+ '(org-table ((t (:foreground "#51afef"))))
+ '(org-verbatim ((t (:background "#1e2029" :foreground "#c678dd")))))
 
 ;; ============================================================================
 ;; ORG BABEL - CODE EXECUTION (FIXED)
@@ -242,6 +241,11 @@
   :hook (org-mode . org-bullets-mode)
   :config
   (setq org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+;; Org Make TOC - Automatic table of contents
+(use-package org-make-toc
+  :ensure t
+  :hook (org-mode . org-make-toc-mode))
 
 ;; Visual Line Mode for org files
 (add-hook 'org-mode-hook 'visual-line-mode)
@@ -289,10 +293,48 @@
 ;; KEY BINDINGS
 ;; ============================================================================
 
+;; Custom function to generate TOC
+(defun my-org-generate-toc ()
+  "Generate a simple table of contents for the current org buffer."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (if (re-search-forward "^\\* .*:TOC:" nil t)
+        (progn
+          (forward-line 1)
+          (let ((toc-start (point)))
+            ;; Delete existing TOC content
+            (when (re-search-forward "^\\* " nil t)
+              (beginning-of-line)
+              (delete-region toc-start (point)))
+            ;; Generate new TOC
+            (goto-char toc-start)
+            (insert (my-org-build-toc))))
+      (message "No TOC heading found. Add '* Table of Contents :TOC:' first."))))
+
+(defun my-org-build-toc ()
+  "Build TOC content from org headings."
+  (let ((toc-content "")
+        (current-pos (point)))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "^\\(\\*+\\) \\(.*\\)" nil t)
+        (let* ((level (length (match-string 1)))
+               (title (match-string 2))
+               (clean-title (replace-regexp-in-string " :.*:$" "" title))
+               (link-id (downcase (replace-regexp-in-string "[^a-zA-Z0-9-]" "-" clean-title))))
+          (unless (string-match ":TOC:" title)
+            (setq toc-content 
+                  (concat toc-content
+                          (make-string (* (1- level) 2) ? )
+                          "- [[#" link-id "][" clean-title "]]\n"))))))
+    toc-content))
+
 ;; Org-mode specific bindings
 (global-set-key (kbd "C-c l") 'org-store-link)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c t") 'my-org-generate-toc)
 
 ;; Quick access to config file
 (global-set-key (kbd "C-c e") (lambda () (interactive) (find-file "~/.emacs.d/init.el")))
@@ -328,3 +370,12 @@
 (message "Emacs configuration loaded successfully! Enjoy your beautiful setup!")
 
 ;; End of configuration
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(all-the-icons company counsel dashboard doom-modeline doom-themes
+		   ob-powershell org-bullets org-make-toc org-real
+		   rainbow-delimiters toc-org)))

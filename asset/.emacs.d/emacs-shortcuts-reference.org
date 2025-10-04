@@ -1,21 +1,9 @@
 #+TITLE: Emacs Shortcuts Reference Guide
 #+AUTHOR: Your Personal Emacs Cheatsheet
 #+DATE: [2025-01-04 Sat]
-#+STARTUP: overview
+
 
 * Table of Contents :TOC:
-- [[#help-system][Help System]]
-- [[#file-and-buffer-operations][File and Buffer Operations]]
-- [[#window-management][Window Management]]
-- [[#editing-commands][Editing Commands]]
-- [[#search-and-replace][Search and Replace]]
-- [[#org-mode-shortcuts][Org-Mode Shortcuts]]
-- [[#version-control-git][Version Control (Git)]]
-- [[#which-key-navigation][Which-Key Navigation]]
-- [[#bookmarks-and-registers][Bookmarks and Registers]]
-- [[#custom-shortcuts-from-your-config][Custom Shortcuts (From Your Config)]]
-- [[#useful-meta-commands][Useful Meta Commands]]
-- [[#emergency-shortcuts][Emergency Shortcuts]]
 
 * Help System
 | Shortcut | Description                           |
