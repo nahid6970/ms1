@@ -1,6 +1,7 @@
 * :TOC:
-- [[*install PARU pkg manager --> better version of pacman][install PARU pkg manager --> better version of pacman]]
-- [[*install yay pkg manager][install yay pkg manager]]
+- [[*ArchLinux][ArchLinux]]
+  - [[*install PARU pkg manager --> better version of pacman][install PARU pkg manager --> better version of pacman]]
+  - [[*install yay pkg manager][install yay pkg manager]]
 - [[*nixos][nixos]]
 - [[*Arch Desktop Environment (DE) xfce4][Arch Desktop Environment (DE) xfce4]]
 - [[*Remove Usr Password][Remove Usr Password]]
@@ -47,13 +48,9 @@ wsl --set-default-version 2
 ## localectl set-locale LANG=en_US.UTF-8
 https://www.tecmint.com/fix-failed-to-set-locale-defaulting-to-c-utf-8-in-centos/
 
-#?   █████╗ ██████╗  ██████╗██╗  ██╗██╗     ██╗███╗   ██╗██╗   ██╗██╗  ██╗
-#?  ██╔══██╗██╔══██╗██╔════╝██║  ██║██║     ██║████╗  ██║██║   ██║╚██╗██╔╝
-#?  ███████║██████╔╝██║     ███████║██║     ██║██╔██╗ ██║██║   ██║ ╚███╔╝ 
-#?  ██╔══██║██╔══██╗██║     ██╔══██║██║     ██║██║╚██╗██║██║   ██║ ██╔██╗ 
-#?  ██║  ██║██║  ██║╚██████╗██║  ██║███████╗██║██║ ╚████║╚██████╔╝██╔╝ ██╗
-#?  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝
-pacman -Syu archlinux-keyring					# This step is necessary to use pacman
+* ArchLinux
+pacman -Syu archlinux-keyring
+# This step is necessary to use pacman
 
 
 su root 
@@ -82,7 +79,7 @@ sudo pacman -Syu
 sudo pacman -S bash-completion
 sudo pacman -S zsh
 
-* install PARU pkg manager --> better version of pacman
+** install PARU pkg manager --> better version of pacman
 sudo pacman -S --needed base-devel
 git clone https://aur.archlinux.org/paru.git
 cd paru
@@ -91,7 +88,7 @@ makepkg -si
 now install using
 paru -S x [double tap TAB twice for suggestion]
 
-* install yay pkg manager
+** install yay pkg manager
 sudo pacman -Syu
 sudo pacman -S --needed base-devel git
 git clone https://aur.archlinux.org/yay.git
@@ -180,20 +177,22 @@ tput # color text
 rm PKGBUILD # remove pkgbuilds after installin
 makepkg -si # build packages
 
-** sudo pacman -Rns $(pacman -Qdtq) # remove all dependency packages
-pacman -Q    /  -Q   x # list pkgs
-pacman -Qi   /  -Qi  x # faster of -Si
-pacman -Ql   /  -Ql  x # list pkg dir and files
-pacman -Rc   /  -Rc  x #  if -Rns doesnt work it will
-pacman -Rn   /  -Rn  x # Remove a package(s) and its configuration files
-pacman -Rns  /  -Rns x # Remove a package(s) and all dependencies and configuration files
-pacman -Rs   /  -Rs  x # Remove a package(s) and all dependencies by name
-pacman -S    /  -S   x # install pkg
-pacman -Sc   /  -Sc  x # Clean up all local caches. Options might limit what is actually cleaned.
-pacman -Si   /  -Si  x # Show all or most information about a package. The tools' verbosity for the default command vary. But with options, the tools are on par with each other.
-pacman -Ss   /  -Ss  x # search pkg
-pacman -Sy   /  -Sy  x # Refresh the local package repository
-pacman -Syu	/ paru  # Upgrade Packages - Install packages which have an older version already installed
+| cmd         | cmd             | info                                                                                |
+|-------------+-----------------+-------------------------------------------------------------------------------------|
+| pacman -Rns | $(pacman -Qdtq) | # remove all dependency packages                                                    |
+| pacman -Q   | -Q              | # list pkgs                                                                         |
+| pacman -Qi  | -Qi             | # faster of -Si                                                                     |
+| pacman -Ql  | -Ql             | # list pkg dir and files                                                            |
+| pacman -Rc  | -Rc             | #  if -Rns doesnt work it will                                                      |
+| pacman -Rn  | -Rn             | # Remove a package(s) and its configuration files                                   |
+| pacman -Rns | -Rns            | # Remove a package(s) and all dependencies and configuration files                  |
+| pacman -Rs  | -Rs             | # Remove a package(s) and all dependencies by name                                  |
+| pacman -S   | -S              | # install pkg                                                                       |
+| pacman -Sc  | -Sc             | # Clean up all local caches. Options might limit what is actually cleaned.          |
+| pacman -Si  | -Si             | # Show all or most information about a package.                                     |
+| pacman -Ss  | -Ss             | # search pkg                                                                        |
+| pacman -Sy  | -Sy             | # Refresh the local package repository                                              |
+| pacman -Syu | paru            | # Upgrade Packages - Install packages which have an older version already installed |
 
 rm * -r -f
 here rm = remove
