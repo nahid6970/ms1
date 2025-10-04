@@ -187,16 +187,18 @@
 ;; ORG BABEL - CODE EXECUTION (FIXED)
 ;; ============================================================================
 
-;; Enable code execution for essential languages (including Python for testing)
+;; Enable code execution for essential languages (including Python and PowerShell for testing)
 (with-eval-after-load 'org
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
      (shell . t)
-     (python . t)))
+     (python . t)
+     (powershell . t))) ; Added PowerShell for Windows users
   
-  ;; Ensure Python is available
-  (require 'ob-python nil t))
+  ;; Ensure Python and PowerShell are available
+  (require 'ob-python nil t)
+  (require 'ob-powershell nil t))
 
 ;; Don't ask for confirmation before executing code
 (setq org-confirm-babel-evaluate nil)
@@ -205,6 +207,7 @@
 (require 'org-tempo)
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
 (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+(add-to-list 'org-structure-template-alist '("ps" . "src powershell"))
 (add-to-list 'org-structure-template-alist '("js" . "src js"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 

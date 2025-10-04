@@ -5,7 +5,8 @@
             "description": "Opens PowerShell as administrator",
             "hotkey": "!x",
             "action": "RunWait(\"pwsh -Command `\"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`\"\", , \"Hide\")",
-            "category": "Script"
+            "category": "Script",
+            "enabled": false
         },
         {
             "name": "Run Python Script",

@@ -3,10 +3,6 @@
 Persistent
 
 ;! === SCRIPT SHORTCUTS ===
-;! Open Terminal Admin
-;! Opens PowerShell as administrator
-!x::RunWait("pwsh -Command `"cd $env:USERPROFILE; Start-Process pwsh -Verb RunAs`"", , "Hide")
-
 ;! Run Python Script
 ;! Opens run.py in the ms1 directory
 ScrollLock:: {

@@ -56,6 +56,62 @@ plt.close()
 return 'plot.png'
 #+END_SRC
 
+** PowerShell Examples
+
+Since you're on Windows, here are some PowerShell examples:
+
+*** Basic PowerShell Commands
+
+#+BEGIN_SRC powershell :results output
+Write-Host "Hello from PowerShell in Org-mode!"
+Write-Host "Current date and time: $(Get-Date)"
+
+# System information
+Write-Host "Computer name: $env:COMPUTERNAME"
+Write-Host "Username: $env:USERNAME"
+Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+#+END_SRC
+
+*** File System Operations
+
+#+BEGIN_SRC powershell :results output
+# Get current directory
+Write-Host "Current directory: $(Get-Location)"
+
+# List files in current directory
+Write-Host "`nFiles in current directory:"
+Get-ChildItem -Name | Select-Object -First 5 | ForEach-Object { Write-Host "  $_" }
+
+# Check if Python is available
+$pythonPath = Get-Command python -ErrorAction SilentlyContinue
+if ($pythonPath) {
+    Write-Host "`nPython found at: $($pythonPath.Source)"
+} else {
+    Write-Host "`nPython not found in PATH"
+}
+#+END_SRC
+
+*** System Information
+
+#+BEGIN_SRC powershell :results output
+# Get system info
+$os = Get-CimInstance -ClassName Win32_OperatingSystem
+Write-Host "OS: $($os.Caption)"
+Write-Host "Version: $($os.Version)"
+
+# Memory info
+$totalRAM = [math]::Round($os.TotalVisibleMemorySize / 1MB, 2)
+$freeRAM = [math]::Round($os.FreePhysicalMemory / 1MB, 2)
+Write-Host "Total RAM: $totalRAM GB"
+Write-Host "Free RAM: $freeRAM GB"
+
+# Disk space
+$disk = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='C:'"
+$totalSpace = [math]::Round($disk.Size / 1GB, 2)
+$freeSpace = [math]::Round($disk.FreeSpace / 1GB, 2)
+Write-Host "C: Drive - Total: $totalSpace GB, Free: $freeSpace GB"
+#+END_SRC
+
 * Instructions
 
 1. Open this file in Emacs
