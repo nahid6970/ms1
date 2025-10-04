@@ -50,7 +50,7 @@
 ;; Window size and positioning
 (when (display-graphic-p)
   ;; Set frame size
-  (add-to-list 'default-frame-alist '(width . 160))   ; ~1600px width (10px per char)
+  (add-to-list 'default-frame-alist '(width . 120))   ; ~1200px width (10px per char)
   (add-to-list 'default-frame-alist '(height . 31))   ; ~500px height (16px per line)
   
   ;; Center the frame on screen
@@ -76,7 +76,7 @@
 
 ;; Font setup
 (set-face-attribute 'default nil
-                    :font "Consolas"
+                    :font "JetBrainsMono NFP"
                     :height 110)
 
 ;; Theme - Doom Themes (popular choice)
