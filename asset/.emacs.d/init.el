@@ -289,6 +289,32 @@
   (setq company-idle-delay 0.3      ; Slightly longer delay
         company-minimum-prefix-length 3))
 
+;; Evil Mode - Vim keybindings in Emacs
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-want-C-u-scroll t
+        evil-want-C-i-jump nil)
+  :config
+  (evil-mode 1)
+  
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  
+  ;; Set initial state for some modes
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
+;; Evil Collection - Evil bindings for many Emacs modes
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (evil-collection-init))
+
 ;; ============================================================================
 ;; KEY BINDINGS
 ;; ============================================================================
@@ -375,7 +401,4 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(all-the-icons company counsel dashboard doom-modeline doom-themes
-		   ob-powershell org-bullets org-make-toc org-real
-		   rainbow-delimiters toc-org)))
+ '(package-selected-packages nil))
