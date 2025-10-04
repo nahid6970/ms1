@@ -1,13 +1,31 @@
 ;; Emacs Configuration with Beautiful UI and Org-mode Setup
 ;; Place this in ~/AppDate/Roaming/.emacs.d/init.el
 
+;; ============================================================================
+;; STARTUP PERFORMANCE OPTIMIZATIONS
+;; ============================================================================
+
+;; Temporarily increase GC threshold during startup
+(setq gc-cons-threshold most-positive-fixnum)
+
+;; Disable file-name-handler-alist during startup
+(defvar file-name-handler-alist-original file-name-handler-alist)
+(setq file-name-handler-alist nil)
+
+;; Restore settings after startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold 800000)
+            (setq file-name-handler-alist file-name-handler-alist-original)
+            (makunbound 'file-name-handler-alist-original)))
+
 ;; Package management setup
 (require 'package)
 (setq package-archives
       '(("melpa" . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/melpa/")
         ("org"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/org/")
         ("gnu"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/")))
-;; (setq package-check-signature nil) ;; probably not necessary
+(setq package-check-signature nil) ;; Skip signature checking for speed
 (package-initialize)
 
 ;; Bootstrap use-package
@@ -70,19 +88,16 @@
   :ensure t
   :if (display-graphic-p))
 
-;; Dashboard - Beautiful startup screen
+;; Dashboard - Beautiful startup screen (optimized)
 (use-package dashboard
   :ensure t
   :config
   (dashboard-setup-startup-hook)
   (setq dashboard-startup-banner 'logo
         dashboard-center-content t
-        dashboard-items '((recents  . 5)
-                         (bookmarks . 5)
-                         (projects . 5)
-                         (agenda . 5))
-        dashboard-set-heading-icons t
-        dashboard-set-file-icons t))
+        dashboard-items '((recents  . 3))  ; Reduced items for faster loading
+        dashboard-set-heading-icons nil    ; Disable icons for speed
+        dashboard-set-file-icons nil))
 
 ;; Rainbow delimiters - Colorful parentheses
 (use-package rainbow-delimiters
@@ -172,15 +187,11 @@
 ;; ORG BABEL - CODE EXECUTION (FIXED)
 ;; ============================================================================
 
-;; Enable code execution for multiple languages
+;; Enable code execution for essential languages only (load others on demand)
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((python . t)
-   (shell . t)
-   (emacs-lisp . t)
-   (js . t)          ; Fixed: was 'javascript', should be 'js'
-   (sql . t)
-   (C . t)))         ; Removed languages that might not be available
+ '((emacs-lisp . t)
+   (shell . t)))     ; Load only essential languages at startup
 
 ;; Don't ask for confirmation before executing code
 (setq org-confirm-babel-evaluate nil)
@@ -236,13 +247,14 @@
   :ensure t
   :bind ("C-s" . swiper))
 
-;; Company - Auto-completion
+;; Company - Auto-completion (lazy loading)
 (use-package company
   :ensure t
-  :init (global-company-mode)
+  :defer t
+  :hook (prog-mode . company-mode)  ; Only load in programming modes
   :config
-  (setq company-idle-delay 0.2
-        company-minimum-prefix-length 2))
+  (setq company-idle-delay 0.3      ; Slightly longer delay
+        company-minimum-prefix-length 3))
 
 ;; ============================================================================
 ;; KEY BINDINGS
@@ -260,11 +272,10 @@
 ;; PERFORMANCE & MISC
 ;; ============================================================================
 
-;; Increase garbage collection threshold
-(setq gc-cons-threshold 100000000)
+;; Additional performance settings
+(setq read-process-output-max (* 1024 1024)) ; 1MB
 
-;; Increase the amount of data which Emacs reads from the process
-(setq read-process-output-max (* 1024 1024))
+
 
 ;; Backup settings
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
