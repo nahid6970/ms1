@@ -114,7 +114,6 @@ vim.keymap.set('v', '<C-A-Down>', function() copy_visual_selection('down') end, 
 -- First, let's set up a simple package manager (lazy.nvim)
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  print("Installing lazy.nvim plugin manager...")
   local result = vim.fn.system({
     "git",
     "clone",
@@ -124,8 +123,6 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   })
   if vim.v.shell_error ~= 0 then
-    print("Error installing lazy.nvim: " .. result)
-    print("Please check your git installation and internet connection")
     return
   end
 end
@@ -134,11 +131,101 @@ vim.opt.rtp:prepend(lazypath)
 -- Plugin setup with error handling
 local lazy_ok, lazy = pcall(require, "lazy")
 if not lazy_ok then
-  print("Lazy.nvim not found. Please restart Neovim to install plugins.")
   return
 end
 
 lazy.setup({
+  -- Which-key for keybinding hints
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    config = function()
+      local wk = require("which-key")
+      
+      wk.setup({
+        preset = "modern",
+        delay = 300,
+        expand = 1,
+        notify = false,
+        replace = {
+          ["<leader>"] = "SPC",
+          ["<cr>"] = "RET",
+          ["<tab>"] = "TAB",
+        },
+      })
+
+      -- Leader key mappings
+      wk.add({
+        { "<leader>f", group = "File" },
+        { "<leader>ff", ":e ", desc = "Find file", mode = "n" },
+        { "<leader>fs", ":w<CR>", desc = "Save file", mode = "n" },
+        { "<leader>fq", ":q<CR>", desc = "Quit", mode = "n" },
+        { "<leader>fx", ":x<CR>", desc = "Save and quit", mode = "n" },
+        { "<leader>fn", ":enew<CR>", desc = "New file", mode = "n" },
+        
+        { "<leader>b", group = "Buffer" },
+        { "<leader>bd", ":bd<CR>", desc = "Delete buffer", mode = "n" },
+        { "<leader>bn", ":bnext<CR>", desc = "Next buffer", mode = "n" },
+        { "<leader>bp", ":bprev<CR>", desc = "Previous buffer", mode = "n" },
+        { "<leader>bl", ":ls<CR>", desc = "List buffers", mode = "n" },
+        
+        { "<leader>w", group = "Window" },
+        { "<leader>wh", "<C-w>h", desc = "Go to left window", mode = "n" },
+        { "<leader>wj", "<C-w>j", desc = "Go to bottom window", mode = "n" },
+        { "<leader>wk", "<C-w>k", desc = "Go to top window", mode = "n" },
+        { "<leader>wl", "<C-w>l", desc = "Go to right window", mode = "n" },
+        { "<leader>ws", "<C-w>s", desc = "Split horizontal", mode = "n" },
+        { "<leader>wv", "<C-w>v", desc = "Split vertical", mode = "n" },
+        { "<leader>wc", "<C-w>c", desc = "Close window", mode = "n" },
+        { "<leader>wo", "<C-w>o", desc = "Close other windows", mode = "n" },
+        
+        { "<leader>s", group = "Search" },
+        { "<leader>sf", "/", desc = "Search forward", mode = "n" },
+        { "<leader>sb", "?", desc = "Search backward", mode = "n" },
+        { "<leader>sn", "n", desc = "Next match", mode = "n" },
+        { "<leader>sp", "N", desc = "Previous match", mode = "n" },
+        { "<leader>sc", ":nohl<CR>", desc = "Clear search", mode = "n" },
+        
+        { "<leader>e", group = "Edit" },
+        { "<leader>er", ":%s/", desc = "Replace in file", mode = "n" },
+        { "<leader>el", ":s/", desc = "Replace in line", mode = "n" },
+        { "<leader>eu", "u", desc = "Undo", mode = "n" },
+        { "<leader>er", "<C-r>", desc = "Redo", mode = "n" },
+        
+        { "<leader>g", group = "Go to" },
+        { "<leader>gg", "gg", desc = "Go to top", mode = "n" },
+        { "<leader>gG", "G", desc = "Go to bottom", mode = "n" },
+        { "<leader>gl", "$", desc = "Go to end of line", mode = "n" },
+        { "<leader>gh", "0", desc = "Go to start of line", mode = "n" },
+        
+        { "<leader>t", group = "Toggle" },
+        { "<leader>tn", ":set number!<CR>", desc = "Toggle line numbers", mode = "n" },
+        { "<leader>tr", ":set relativenumber!<CR>", desc = "Toggle relative numbers", mode = "n" },
+        { "<leader>tw", ":set wrap!<CR>", desc = "Toggle word wrap", mode = "n" },
+        { "<leader>th", ":set hlsearch!<CR>", desc = "Toggle search highlight", mode = "n" },
+        
+        { "<leader>c", group = "Code" },
+        { "<leader>cc", "gcc", desc = "Comment line", mode = "n", remap = true },
+        { "<leader>cb", "gbc", desc = "Comment block", mode = "n", remap = true },
+        { "<leader>cd", "<C-S-d>", desc = "Duplicate line", mode = "n" },
+        
+        { "<leader>m", group = "Multi-cursor" },
+        { "<leader>md", "<C-d>", desc = "Select next occurrence", mode = "n" },
+        { "<leader>mk", "<C-k>", desc = "Skip current", mode = "n" },
+        { "<leader>mq", "<C-q>", desc = "Remove selection", mode = "n" },
+        { "<leader>ma", "<C-S-a>", desc = "Select all occurrences", mode = "n" },
+      })
+      
+      -- Visual mode mappings
+      wk.add({
+        { "<leader>c", "gc", desc = "Comment selection", mode = "v", remap = true },
+        { "<leader>r", ":s/", desc = "Replace in selection", mode = "v" },
+        { "<leader>y", "y", desc = "Yank selection", mode = "v" },
+        { "<leader>d", "d", desc = "Delete selection", mode = "v" },
+      })
+    end
+  },
+  
   -- Multi-cursor plugin for Ctrl+D functionality
   {
     "mg979/vim-visual-multi",
@@ -163,7 +250,6 @@ lazy.setup({
     end,
     config = function()
       -- Additional configuration after plugin loads
-      print("vim-visual-multi loaded - Use Ctrl+D to select next occurrence")
     end
   },
   
@@ -177,8 +263,7 @@ lazy.setup({
         if vim.fn.executable("zig") == 1 then
           vim.cmd("TSUpdate")
         else
-          print("Treesitter: C compiler not found. Skipping compilation.")
-          print("Install zig or Visual Studio Build Tools for Treesitter support.")
+          -- Silently skip compilation if no compiler found
         end
       else
         vim.cmd("TSUpdate")
@@ -188,7 +273,6 @@ lazy.setup({
       -- Only setup if treesitter loaded successfully
       local status_ok, treesitter = pcall(require, "nvim-treesitter.configs")
       if not status_ok then
-        print("Treesitter not available - using default syntax highlighting")
         return
       end
       
@@ -223,8 +307,19 @@ vim.keymap.set('v', '<C-S-d>', 'y`>p', { desc = 'Duplicate selection' })
 vim.keymap.set('n', '<C-/>', 'gcc', { desc = 'Toggle comment', remap = true })
 vim.keymap.set('v', '<C-/>', 'gc', { desc = 'Toggle comment', remap = true })
 
-print("Neovim config loaded with VS Code-like keybindings!")
-print("Alt+Up/Down: Move lines")
-print("Alt+Shift+Up/Down OR Ctrl+Alt+Up/Down: Copy lines") 
-print("Ctrl+D: Multi-cursor select | Ctrl+K: Skip | Ctrl+Q: Remove selection")
-print("Ctrl+J/U: Add cursor down/up | Use 'yy' and 'p' for default copy/paste")
+-- Quick access keybindings (non-leader)
+vim.keymap.set('n', '<Esc>', ':nohl<CR>', { desc = 'Clear search highlight', silent = true })
+vim.keymap.set('n', 'H', '^', { desc = 'Go to first non-blank character' })
+vim.keymap.set('n', 'L', '$', { desc = 'Go to end of line' })
+vim.keymap.set('n', 'Y', 'y$', { desc = 'Yank to end of line' })
+
+-- Better window navigation
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Go to left window' })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to bottom window' })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to top window' })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to right window' })
+
+-- Buffer navigation
+vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next buffer' })
+vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Previous buffer' })
+
