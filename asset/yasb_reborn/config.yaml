@@ -735,7 +735,7 @@ widgets:
   launchpad:
     type: "yasb.launchpad.LaunchpadWidget"
     options:
-      label: "<span>\udb85\udcde</span>"
+      label: "<span>\uf40e</span>"
       search_placeholder: "Search apps..."
       app_icon_size: 48
       shortcuts:
@@ -790,7 +790,7 @@ widgets:
         show_layout_icon: true
         layout_icon: "\uf11c"
       label_shadow:
-        enabled: true
+        enabled: false
         color: "black"
         radius: 3
         offset: [ 1, 1 ]

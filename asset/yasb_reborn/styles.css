@@ -1529,6 +1529,9 @@
 /* Widget style */
 .launchpad-widget {
     padding: 0 6px 0 6px;
+    background-color: black;
+    border-radius: 5%;
+    margin-left:2px;
 }
 .launchpad-widget .label {}
 .launchpad-widget .icon {
@@ -1751,6 +1754,20 @@
 }
 
 
+.language-widget {
+    padding: 0 6px 0 6px;
+    background-color: white;
+    border-radius: 5%;
+    margin-left:2px;
+}
+.language-widget .label {
+color: Black;
+font-weight:900;
+}
+.language-widget .icon {
+    font-size: 16px;
+    color: black;
+}
 .language-menu {
     background-color: rgba(17, 17, 27, 0.4);
     min-width: 300px;
