@@ -1723,7 +1723,7 @@
     margin: 24px 6px 6px 6px;
     max-width: 110px;
     min-width: 110px;
-    min-height: 110px;
+    min-height: fit-content;
     max-height: 110px; 
 }
 .launchpad .app-icon:focus {
