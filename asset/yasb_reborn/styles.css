@@ -1749,3 +1749,68 @@
     padding: 0;
     margin: 0
 }
+
+
+.language-menu {
+    background-color: rgba(17, 17, 27, 0.4);
+    min-width: 300px;
+}
+.language-menu .header {
+    font-family: 'Segoe UI';
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    padding: 12px;
+    background-color: rgba(17, 17, 27, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.language-menu .footer {
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px;
+    margin-top: 2px;
+    color: #9399b2;
+    background-color: rgba(17, 17, 27, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.language-menu .footer:hover {
+    background-color: rgba(36, 36, 51, 0.6);
+    color: #fff;
+}
+.language-menu .language-item {
+    padding: 6px 12px;
+    margin: 2px 4px;
+}
+.language-menu .language-item.active {
+    background-color:rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+.language-menu .language-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.language-menu .language-item.active:hover {
+    background-color:rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+.language-menu .language-item .code {
+    font-weight: 900;
+    font-size: 14px;
+    min-width: 40px;
+    text-transform: uppercase;
+}
+.language-menu .language-item .icon {
+    font-size: 16px;
+    margin-right: 8px;
+    color: #fff;
+}
+.language-menu .language-item .name {
+    font-weight: 600;
+    font-family: 'Segoe UI';
+    font-size: 14px;
+}
+.language-menu .language-item .layout {
+    font-weight: 600;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+}
