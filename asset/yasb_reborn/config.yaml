@@ -45,7 +45,6 @@ bars:
         - "clock"
         - "volume"
         - "media"
-        - "notifications"
         - "wallpapers"
         - "disk"
         - "home_folder"
@@ -57,6 +56,7 @@ bars:
         - "winget_updates"
         - "ai_chat"
         - "launchpad"
+        - "notifications"
       right: []
 widgets:
   cpu:
