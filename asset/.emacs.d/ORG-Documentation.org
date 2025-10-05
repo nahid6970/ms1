@@ -42,6 +42,7 @@
 /Italic/
 _Underline_
 +Strike+
+[[https://google.com][LINK]]
 [[Link]]
 =Code=
 ~Code~
