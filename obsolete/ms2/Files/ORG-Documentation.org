@@ -1,7 +1,5 @@
-
 * ORG Documentation
 ** Org Functionality
-#+BEGIN_SRC 
 | ORG Functionality  | Sign                            | Example                                | Details / Usage                  |
 |--------------------+---------------------------------+----------------------------------------+----------------------------------|
 | <A                 |                                 |                                        | #+ASCII:                         |
@@ -18,7 +16,7 @@
 | <s                 |                                 |                                        | #+BEGIN_SRC #+END_SRC            |
 | <v                 |                                 |                                        | #+BEGIN_VERBATIM #+END_VERBATIM  |
 | <v                 |                                 |                                        | #+BEGIN_VERSE #+END_VERSE        |
-| Bold               | **                              | **Hello World**                        | ** before and after text         |
+| Bold               | **                              | *Hello World*             | ** before and after text         |
 | Check / Uncheck    | - [ ]                           | - [ ] Not Done                         |                                  |
 | Check / Uncheck    | - [X]                           | - [X] Done                             |                                  |
 | Code               | = or ~                          | =Hello World=                          | = or ~ befor and after text      |
@@ -26,9 +24,6 @@
 | Hide Word          | \                               | \This                                  | \ before the word                |
 | Horizontal Rule    | -----                           | -----                                  | ----- in a line without any text |
 | Inline Math Mode:  | $                               | $E=mc^2$                               | left side                        |
-| Italicize          | /                               | /Hello World/                          | / before and after text          |
-| Strikethrough      | +                               | +Hello World+                          | + before and after text          |
-| Underline          | _                               | _Hello World_                          | _ before and after text          |
 | Span               | [[]]                            | [[text]]                               |                                  |
 | Span               | \{}{}                           | \textcolor{red}{Text}                  |                                  |
 | Span               | \( \)                           | \( Text \)                             |                                  |
@@ -41,6 +36,18 @@
 | FootNote           | [[fn:number]]                   |                                        |                                  |
 
 #+END_SRC
+
+* ORG Styling
+*Bold*
+/Italic/
+_Underline_
++Strike+
+[[Link]]
+=Code=
+~Code~
+Superscript^S
+Subscript_S
+
 
 
 
