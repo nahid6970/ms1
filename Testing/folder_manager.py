@@ -67,6 +67,25 @@ class FolderManager(QObject):
             folder['id'] = i
         self.save_folders()
     
+    @pyqtSlot(int, bool)
+    def move_folder(self, folder_id, move_up):
+        """Move folder up or down in the list"""
+        if folder_id < 0 or folder_id >= len(self.folders):
+            return
+        
+        if move_up and folder_id > 0:
+            # Move up (swap with previous)
+            self.folders[folder_id], self.folders[folder_id - 1] = self.folders[folder_id - 1], self.folders[folder_id]
+        elif not move_up and folder_id < len(self.folders) - 1:
+            # Move down (swap with next)
+            self.folders[folder_id], self.folders[folder_id + 1] = self.folders[folder_id + 1], self.folders[folder_id]
+        
+        # Reassign IDs after reordering
+        for i, folder in enumerate(self.folders):
+            folder['id'] = i
+        
+        self.save_folders()
+    
     @pyqtSlot(str)
     def open_folder(self, folder_path):
         """Open folder in file explorer"""
@@ -329,6 +348,20 @@ class FolderWindow(QMainWindow):
                 .delete-btn:hover {
                     background: rgba(255,0,0,0.6);
                 }
+                .move-btn {
+                    background: rgba(255,255,255,0.2);
+                    border: none;
+                    color: white;
+                    padding: 6px 8px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: background 0.2s ease;
+                    font-size: 14px;
+                    user-select: none;
+                }
+                .move-btn:hover {
+                    background: rgba(0,150,255,0.6);
+                }
                 .empty-state {
                     text-align: center;
                     padding: 40px;
@@ -504,6 +537,10 @@ class FolderWindow(QMainWindow):
                                 </div>
                             </div>
                             <div class="folder-actions">
+                                <button class="move-btn" 
+                                        onmousedown="handleMoveClick(event, ${folder.id})" 
+                                        oncontextmenu="return false"
+                                        title="Left click: Move Up | Right click: Move Down">↕</button>
                                 <button class="action-btn delete-btn" onclick="removeFolder(${folder.id})">Delete</button>
                             </div>
                         `;
@@ -535,6 +572,23 @@ class FolderWindow(QMainWindow):
                     }
                     
                     pendingDeleteId = null;
+                }
+                
+                function handleMoveClick(event, folderId) {
+                    event.preventDefault();
+                    
+                    if (manager) {
+                        if (event.button === 0) {
+                            // Left click - move up
+                            manager.move_folder(folderId, true);
+                        } else if (event.button === 2) {
+                            // Right click - move down
+                            manager.move_folder(folderId, false);
+                        }
+                        
+                        // Reload folders to show new order
+                        setTimeout(loadFolders, 100);
+                    }
                 }
                 
                 function openFolder(folderPath) {
