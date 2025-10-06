@@ -87,8 +87,8 @@ class FolderWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Folder Manager")
         
-        # Center the window on screen
-        self.resize(800, 600)
+        # Center the window on screen - make it more compact
+        self.resize(700, 500)
         self.center_window()
         
         # Remove window frame and title bar for clean look
@@ -193,7 +193,7 @@ class FolderWindow(QMainWindow):
                     overflow: hidden;
                 }
                 .content-area {
-                    padding: 20px;
+                    padding: 15px;
                     height: 100vh;
                     overflow: hidden;
                 }
@@ -206,66 +206,73 @@ class FolderWindow(QMainWindow):
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 15px;
                     user-select: none;
                     padding: 10px;
                     border-radius: 10px;
                 }
-                .title {
-                    font-size: 2em;
-                    font-weight: bold;
-                    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                .header-buttons {
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
                 }
-                .close-btn {
+                .search-bar {
+                    flex: 1;
+                    background: rgba(255,255,255,0.1);
+                    border: 2px solid rgba(255,255,255,0.2);
+                    border-radius: 20px;
+                    padding: 8px 15px;
+                    color: white;
+                    font-size: 14px;
+                    outline: none;
+                    transition: all 0.2s ease;
+                }
+                .search-bar::placeholder {
+                    color: rgba(255,255,255,0.6);
+                }
+                .search-bar:focus {
+                    border-color: rgba(255,255,255,0.5);
+                    background: rgba(255,255,255,0.15);
+                }
+                .header-btn {
                     background: rgba(255,255,255,0.2);
                     border: none;
                     color: white;
-                    font-size: 20px;
+                    font-size: 18px;
                     cursor: pointer;
                     padding: 8px 12px;
                     border-radius: 50%;
-                    transition: background 0.2s ease;
+                    transition: all 0.2s ease;
                     user-select: none;
                     z-index: 1000;
+                    width: 36px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .add-btn:hover {
+                    background: rgba(0,255,0,0.6);
+                    transform: scale(1.1);
                 }
                 .close-btn:hover {
                     background: rgba(255,0,0,0.6);
                     transform: scale(1.1);
                 }
-                .add-folder-btn {
-                    background: rgba(0,255,0,0.3);
-                    border: 2px solid rgba(255,255,255,0.3);
-                    color: white;
-                    font-size: 24px;
-                    cursor: pointer;
-                    padding: 15px;
-                    border-radius: 15px;
-                    transition: all 0.2s ease;
-                    user-select: none;
-                    margin-bottom: 20px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 10px;
-                }
-                .add-folder-btn:hover {
-                    background: rgba(0,255,0,0.5);
-                    border-color: rgba(255,255,255,0.5);
-                    transform: translateY(-2px);
-                }
+
                 .folders-container {
                     flex: 1;
                     background: rgba(255,255,255,0.1);
                     border-radius: 15px;
-                    padding: 20px;
+                    padding: 15px;
                     backdrop-filter: blur(10px);
                     overflow-y: auto;
                 }
                 .folder-item {
                     background: rgba(255,255,255,0.1);
-                    border-radius: 10px;
-                    padding: 15px;
-                    margin-bottom: 10px;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-bottom: 8px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -281,15 +288,26 @@ class FolderWindow(QMainWindow):
                 .folder-info {
                     flex: 1;
                 }
-                .folder-name {
-                    font-size: 1.2em;
+                .folder-display {
+                    font-size: 1.05em;
                     font-weight: bold;
-                    margin-bottom: 5px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+                .folder-name {
+                    color: white;
                 }
                 .folder-path {
                     font-size: 0.9em;
                     opacity: 0.7;
+                    font-weight: normal;
                     word-break: break-all;
+                }
+                .path-separator {
+                    opacity: 0.5;
+                    font-weight: normal;
                 }
                 .folder-actions {
                     display: flex;
@@ -326,14 +344,12 @@ class FolderWindow(QMainWindow):
             <div class="content-area">
                 <div class="container">
                     <div class="header">
-                        <div class="title">📁 Folder Manager</div>
-                        <button class="close-btn" onclick="closeWindow()">×</button>
+                        <input type="text" class="search-bar" placeholder="🔍 Search folders..." oninput="filterFolders(this.value)">
+                        <div class="header-buttons">
+                            <button class="header-btn add-btn" onclick="addFolder()" title="Add Folder">+</button>
+                            <button class="header-btn close-btn" onclick="closeWindow()" title="Close">×</button>
+                        </div>
                     </div>
-                
-                <button class="add-folder-btn" onclick="addFolder()">
-                    <span style="font-size: 30px;">+</span>
-                    <span>Add Folder</span>
-                </button>
                 
                 <div class="folders-container">
                     <div id="folders-list" class="loading">Loading folders...</div>
@@ -351,8 +367,8 @@ class FolderWindow(QMainWindow):
                 function loadFolders() {
                     if (manager) {
                         manager.get_folders(function(result) {
-                            const folders = JSON.parse(result);
-                            displayFolders(folders);
+                            allFolders = JSON.parse(result);
+                            displayFolders(allFolders);
                         });
                     }
                 }
@@ -361,12 +377,22 @@ class FolderWindow(QMainWindow):
                     const listElement = document.getElementById('folders-list');
                     
                     if (folders.length === 0) {
-                        listElement.innerHTML = `
-                            <div class="empty-state">
-                                <h3>No folders added yet</h3>
-                                <p>Click the "Add Folder" button to get started!</p>
-                            </div>
-                        `;
+                        const searchValue = document.querySelector('.search-bar').value;
+                        if (searchValue) {
+                            listElement.innerHTML = `
+                                <div class="empty-state">
+                                    <h3>No folders found</h3>
+                                    <p>No folders match your search criteria</p>
+                                </div>
+                            `;
+                        } else {
+                            listElement.innerHTML = `
+                                <div class="empty-state">
+                                    <h3>No folders added yet</h3>
+                                    <p>Click the "+" button to get started!</p>
+                                </div>
+                            `;
+                        }
                         return;
                     }
                     
@@ -377,11 +403,13 @@ class FolderWindow(QMainWindow):
                         item.className = 'folder-item';
                         item.innerHTML = `
                             <div class="folder-info" onclick="openFolder('${folder.path}')">
-                                <div class="folder-name">📁 ${folder.name}</div>
-                                <div class="folder-path">${folder.path}</div>
+                                <div class="folder-display">
+                                    <span class="folder-name">📁 ${folder.name}</span>
+                                    <span class="path-separator">—</span>
+                                    <span class="folder-path">${folder.path}</span>
+                                </div>
                             </div>
                             <div class="folder-actions">
-                                <button class="action-btn" onclick="openFolder('${folder.path}')">Open</button>
                                 <button class="action-btn delete-btn" onclick="removeFolder(${folder.id})">Delete</button>
                             </div>
                         `;
@@ -414,6 +442,16 @@ class FolderWindow(QMainWindow):
                     if (manager) {
                         manager.close_window();
                     }
+                }
+                
+                let allFolders = [];
+                
+                function filterFolders(searchTerm) {
+                    const filteredFolders = allFolders.filter(folder => 
+                        folder.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        folder.path.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                    displayFolders(filteredFolders);
                 }
             </script>
         </body>

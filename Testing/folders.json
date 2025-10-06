@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "name": ".glzr",
+    "path": "C:/Users/nahid/.glzr",
+    "id": 0
+  },
+  {
+    "name": ".skiko",
+    "path": "C:/Users/nahid/.skiko",
+    "id": 1
+  },
+  {
+    "name": ".claude",
+    "path": "C:/Users/nahid/.claude",
+    "id": 2
+  },
+  {
+    "name": ".templateengine",
+    "path": "C:/Users/nahid/.templateengine",
+    "id": 3
+  },
+  {
+    "name": ".skiko",
+    "path": "C:/Users/nahid/.skiko",
+    "id": 4
+  }
+]
