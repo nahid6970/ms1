@@ -7,7 +7,9 @@ function createContextMenu(items) {
         const menuItem = document.createElement('div');
         menuItem.className = 'context-menu-item';
         menuItem.textContent = item.label;
-        if (item.label === 'Edit') {
+        if (item.label === 'New-Tab') {
+            menuItem.classList.add('context-menu-new-tab');
+        } else if (item.label === 'Edit') {
             menuItem.classList.add('context-menu-edit');
         } else if (item.label === 'Copy') {
             menuItem.classList.add('context-menu-copy');

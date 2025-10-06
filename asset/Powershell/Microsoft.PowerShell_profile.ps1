@@ -1,6 +1,13 @@
 using namespace System.Management.Automation
 using namespace System.Management.Automation.Language
 
+# Force enable PSReadLine to avoid screen reader warning
+Import-Module PSReadLine -Force
+
+
+
+
+
 #* This is an example profile for PSReadLine.
 #* This is roughly what I use so there is some emphasis on emacs bindings,
 #* but most of these bindings make sense in Windows mode as well.

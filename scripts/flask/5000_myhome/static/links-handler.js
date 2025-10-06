@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Add context menu
             simpleListItem.addEventListener('contextmenu', (event) => {
                 const items = [
+                    { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
                     { label: 'Edit', action: () => openEditLinkPopup(link, index) },
                     { label: 'Copy', action: () => copyLink(link, index) },
                     { label: 'Delete', action: () => deleteLink(index) }
@@ -128,6 +129,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             listItem.addEventListener('contextmenu', (event) => {
                 const items = [
+                    {
+                        label: 'New-Tab',
+                        action: () => window.open(link.url, '_blank')
+                    },
                     {
                         label: 'Edit',
                         action: () => openEditLinkPopup(link, index)
@@ -301,6 +306,10 @@ document.addEventListener('DOMContentLoaded', function () {
       const linkInfo = links[index];
       clonedElement.addEventListener('contextmenu', (event) => {
         const items = [
+            {
+                label: 'New-Tab',
+                action: () => window.open(linkInfo.link.url, '_blank')
+            },
             {
                 label: 'Edit',
                 action: () => openEditLinkPopup(linkInfo.link, linkInfo.index)
@@ -612,6 +621,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (linkData) {
                     clonedElement.addEventListener('contextmenu', (event) => {
                         const items = [
+                            { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
                             { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
                             { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
                             { label: 'Delete', action: () => deleteLink(linkIndex) }
@@ -646,6 +656,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (linkData) {
                     clonedElement.addEventListener('contextmenu', (event) => {
                         const items = [
+                            { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
                             { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
                             { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
                             { label: 'Delete', action: () => deleteLink(linkIndex) }
@@ -765,6 +776,10 @@ document.addEventListener('DOMContentLoaded', function () {
           if (linkData) {
             clonedElement.addEventListener('contextmenu', (event) => {
                 const items = [
+                    {
+                        label: 'New-Tab',
+                        action: () => window.open(linkData.link.url, '_blank')
+                    },
                     {
                         label: 'Edit',
                         action: () => openEditLinkPopup(linkData.link, linkData.index)
