@@ -393,13 +393,25 @@ def open_file():
         return jsonify({'error': 'No file path provided'}), 400
     
     try:
+        # URL decode the file path
+        import urllib.parse
+        decoded_path = urllib.parse.unquote(file_path)
+        
+        # Convert forward slashes to backslashes for Windows
+        if os.name == 'nt':  # Windows
+            decoded_path = decoded_path.replace('/', '\\')
+        
+        # Check if file exists
+        if not os.path.exists(decoded_path):
+            return jsonify({'error': f'File not found: {decoded_path}'}), 404
+        
         # Use subprocess to open the file with the default application
         if os.name == 'nt':  # Windows
-            os.startfile(file_path)
+            os.startfile(decoded_path)
         elif os.name == 'posix':  # macOS and Linux
-            subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', file_path])
+            subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', decoded_path])
         
-        return jsonify({'success': True, 'message': f'Opened {file_path}'})
+        return jsonify({'success': True, 'message': f'Opened {decoded_path}'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
