@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 import json
 import os
 import subprocess
+import sys
 import requests
 from datetime import datetime
 
@@ -383,6 +384,24 @@ def delete_sidebar_button(button_index):
         write_sidebar_buttons(buttons)
         return jsonify({'message': 'Sidebar button deleted successfully', 'deleted_button': deleted_button})
     return jsonify({'message': 'Button not found'}), 404
+
+@app.route('/open-file')
+def open_file():
+    """Open local files using the default system application"""
+    file_path = request.args.get('path')
+    if not file_path:
+        return jsonify({'error': 'No file path provided'}), 400
+    
+    try:
+        # Use subprocess to open the file with the default application
+        if os.name == 'nt':  # Windows
+            os.startfile(file_path)
+        elif os.name == 'posix':  # macOS and Linux
+            subprocess.run(['open' if sys.platform == 'darwin' else 'xdg-open', file_path])
+        
+        return jsonify({'success': True, 'message': f'Opened {file_path}'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

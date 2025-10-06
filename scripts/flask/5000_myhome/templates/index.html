@@ -402,6 +402,30 @@
     <script src="../static/links-handler.js"></script>
     <script src="../static/sidebar-handler.js"></script>
     <script src="../static/main.js"></script>
+    
+    <script>
+    // Handle file:// URLs by intercepting clicks
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (link && link.href && link.href.startsWith('file:///')) {
+            e.preventDefault();
+            const filePath = link.href.replace('file:///', '');
+            
+            fetch(`/open-file?path=${encodeURIComponent(filePath)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        console.error('Failed to open file:', data.error);
+                        alert('Failed to open file: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error opening file:', error);
+                    alert('Error opening file: ' + error);
+                });
+        }
+    });
+    </script>
 
 
 
