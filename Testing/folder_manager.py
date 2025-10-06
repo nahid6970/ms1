@@ -357,6 +357,70 @@ class FolderWindow(QMainWindow):
                 .folders-container::-webkit-scrollbar-corner {
                     background: transparent;
                 }
+                
+                /* Custom Confirmation Dialog */
+                .confirm-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: none;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 9999;
+                }
+                .confirm-dialog {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 15px;
+                    padding: 25px;
+                    text-align: center;
+                    min-width: 300px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                }
+                .confirm-title {
+                    font-size: 1.3em;
+                    font-weight: bold;
+                    margin-bottom: 15px;
+                    color: white;
+                }
+                .confirm-message {
+                    margin-bottom: 20px;
+                    color: rgba(255, 255, 255, 0.9);
+                    line-height: 1.4;
+                }
+                .confirm-buttons {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: center;
+                }
+                .confirm-btn {
+                    padding: 8px 20px;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: bold;
+                    transition: all 0.2s ease;
+                }
+                .confirm-yes {
+                    background: rgba(255, 0, 0, 0.8);
+                    color: white;
+                }
+                .confirm-yes:hover {
+                    background: rgba(255, 0, 0, 1);
+                    transform: scale(1.05);
+                }
+                .confirm-no {
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                }
+                .confirm-no:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: scale(1.05);
+                }
             </style>
         </head>
         <body>
@@ -372,6 +436,18 @@ class FolderWindow(QMainWindow):
                 
                 <div class="folders-container">
                     <div id="folders-list" class="loading">Loading folders...</div>
+                </div>
+            </div>
+            
+            <!-- Custom Confirmation Dialog -->
+            <div id="confirm-overlay" class="confirm-overlay">
+                <div class="confirm-dialog">
+                    <div class="confirm-title">🗑️ Delete Folder</div>
+                    <div class="confirm-message" id="confirm-message">Are you sure you want to remove this folder from the list?</div>
+                    <div class="confirm-buttons">
+                        <button class="confirm-btn confirm-yes" onclick="confirmDelete(true)">Delete</button>
+                        <button class="confirm-btn confirm-no" onclick="confirmDelete(false)">Cancel</button>
+                    </div>
                 </div>
             </div>
             
@@ -443,11 +519,22 @@ class FolderWindow(QMainWindow):
                     }
                 }
                 
+                let pendingDeleteId = null;
+                
                 function removeFolder(folderId) {
-                    if (manager && confirm('Are you sure you want to remove this folder?')) {
-                        manager.remove_folder(folderId);
+                    pendingDeleteId = folderId;
+                    document.getElementById('confirm-overlay').style.display = 'flex';
+                }
+                
+                function confirmDelete(confirmed) {
+                    document.getElementById('confirm-overlay').style.display = 'none';
+                    
+                    if (confirmed && pendingDeleteId !== null && manager) {
+                        manager.remove_folder(pendingDeleteId);
                         loadFolders();
                     }
+                    
+                    pendingDeleteId = null;
                 }
                 
                 function openFolder(folderPath) {
