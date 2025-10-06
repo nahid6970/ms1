@@ -1,9 +1,10 @@
 import sys
 import json
 import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDesktopWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDesktopWidget, QWidget, QVBoxLayout, QLabel
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import Qt, pyqtSlot, QObject, QPoint
+from PyQt5.QtGui import QPalette
 from PyQt5.QtWebChannel import QWebChannel
 
 class FolderManager(QObject):
@@ -111,13 +112,14 @@ class FolderWindow(QMainWindow):
     def mousePressEvent(self, event):
         """Handle mouse press for window dragging"""
         if event.button() == Qt.LeftButton:
-            # Check if click is in the drag area (top 30 pixels)
-            if event.y() <= 30:
+            # Check if the click is on the drag handle
+            drag_handle_rect = self.drag_handle.geometry()
+            if drag_handle_rect.contains(event.pos()):
                 self.dragging = True
                 self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
                 event.accept()
-            else:
-                super().mousePressEvent(event)
+                return
+        super().mousePressEvent(event)
     
     def mouseMoveEvent(self, event):
         """Handle mouse move for window dragging"""
@@ -135,6 +137,29 @@ class FolderWindow(QMainWindow):
     
     def setup_ui(self):
         """Setup the web view and HTML content"""
+        # Create main widget and layout
+        main_widget = QWidget()
+        layout = QVBoxLayout(main_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Create drag handle
+        self.drag_handle = QLabel("⋮⋮⋮ Drag to move ⋮⋮⋮")
+        self.drag_handle.setFixedHeight(30)
+        self.drag_handle.setAlignment(Qt.AlignCenter)
+        self.drag_handle.setStyleSheet("""
+            QLabel {
+                background: rgba(102, 126, 234, 0.3);
+                color: white;
+                font-size: 12px;
+                border: none;
+            }
+            QLabel:hover {
+                background: rgba(102, 126, 234, 0.5);
+            }
+        """)
+        self.drag_handle.setCursor(Qt.SizeAllCursor)
+        
         # Create web view and channel
         self.web_view = QWebEngineView()
         self.channel = QWebChannel()
@@ -143,6 +168,13 @@ class FolderWindow(QMainWindow):
         # Register the manager object with the web channel
         self.channel.registerObject('manager', self.manager)
         self.web_view.page().setWebChannel(self.channel)
+        
+        # Add widgets to layout
+        layout.addWidget(self.drag_handle)
+        layout.addWidget(self.web_view)
+        
+        # Set main widget
+        self.setCentralWidget(main_widget)
         
         # Load HTML content
         html_content = """
@@ -160,25 +192,9 @@ class FolderWindow(QMainWindow):
                     height: 100vh;
                     overflow: hidden;
                 }
-                .drag-area {
-                    height: 30px;
-                    background: rgba(255,255,255,0.05);
-                    cursor: move;
-                    user-select: none;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 12px;
-                    opacity: 0.7;
-                    transition: all 0.2s ease;
-                }
-                .drag-area:hover {
-                    background: rgba(255,255,255,0.1);
-                    opacity: 1;
-                }
                 .content-area {
                     padding: 20px;
-                    height: calc(100vh - 30px);
+                    height: 100vh;
                     overflow: hidden;
                 }
                 .container {
@@ -307,7 +323,6 @@ class FolderWindow(QMainWindow):
             </style>
         </head>
         <body>
-            <div class="drag-area">⋮⋮⋮ Drag to move ⋮⋮⋮</div>
             <div class="content-area">
                 <div class="container">
                     <div class="header">
@@ -323,7 +338,6 @@ class FolderWindow(QMainWindow):
                 <div class="folders-container">
                     <div id="folders-list" class="loading">Loading folders...</div>
                 </div>
-            </div>
             </div>
             
             <script>
@@ -407,7 +421,6 @@ class FolderWindow(QMainWindow):
         """
         
         self.web_view.setHtml(html_content)
-        self.setCentralWidget(self.web_view)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
