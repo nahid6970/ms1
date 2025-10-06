@@ -386,7 +386,13 @@ class FolderWindow(QMainWindow):
                 }
                 .folder-actions {
                     display: flex;
-                    gap: 5px;
+                    align-items: center;
+                }
+                .folder-actions button {
+                    margin-left: 8px;
+                }
+                .folder-actions button:first-child {
+                    margin-left: 0;
                 }
                 .empty-state {
                     text-align: center;
