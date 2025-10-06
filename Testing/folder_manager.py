@@ -338,6 +338,25 @@ class FolderWindow(QMainWindow):
                     text-align: center;
                     padding: 20px;
                 }
+                
+                /* Custom Scrollbar Styling */
+                .folders-container::-webkit-scrollbar {
+                    width: 8px;
+                }
+                .folders-container::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .folders-container::-webkit-scrollbar-thumb {
+                    background: rgba(255, 0, 0, 0.7);
+                    border-radius: 4px;
+                    transition: background 0.2s ease;
+                }
+                .folders-container::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 0, 0, 0.9);
+                }
+                .folders-container::-webkit-scrollbar-corner {
+                    background: transparent;
+                }
             </style>
         </head>
         <body>
