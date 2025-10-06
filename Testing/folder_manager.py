@@ -145,7 +145,7 @@ class FolderWindow(QMainWindow):
         
         # Create drag handle
         self.drag_handle = QLabel("⋮⋮⋮ Drag to move ⋮⋮⋮")
-        self.drag_handle.setFixedHeight(30)
+        self.drag_handle.setFixedHeight(15)
         self.drag_handle.setAlignment(Qt.AlignCenter)
         self.drag_handle.setStyleSheet("""
             QLabel {
@@ -194,7 +194,7 @@ class FolderWindow(QMainWindow):
                 }
                 .content-area {
                     padding: 15px;
-                    height: calc(100vh - 30px);
+                    height: calc(100vh - 15px);
                     overflow: hidden;
                 }
                 .container {

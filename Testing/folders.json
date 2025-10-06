@@ -1,27 +1,37 @@
 [
   {
-    "name": ".glzr",
-    "path": "C:/Users/nahid/.glzr",
-    "id": 0
-  },
-  {
-    "name": ".skiko",
-    "path": "C:/Users/nahid/.skiko",
-    "id": 1
-  },
-  {
     "name": ".claude",
     "path": "C:/Users/nahid/.claude",
-    "id": 2
+    "id": 0
   },
   {
     "name": ".templateengine",
     "path": "C:/Users/nahid/.templateengine",
-    "id": 3
+    "id": 1
   },
   {
     "name": ".Ld9VirtualBox",
     "path": "C:/Users/nahid/.Ld9VirtualBox",
+    "id": 2
+  },
+  {
+    "name": ".ssh",
+    "path": "C:/Users/nahid/.ssh",
+    "id": 3
+  },
+  {
+    "name": ".config",
+    "path": "C:/Users/nahid/.config",
     "id": 4
+  },
+  {
+    "name": ".claude",
+    "path": "C:/Users/nahid/.claude",
+    "id": 5
+  },
+  {
+    "name": ".config",
+    "path": "C:/Users/nahid/.config",
+    "id": 6
   }
 ]
