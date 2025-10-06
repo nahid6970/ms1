@@ -228,6 +228,11 @@
             "kind": "Exe",
             "id": "emacs.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "WHKD Keybinds",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
