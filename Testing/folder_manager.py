@@ -88,7 +88,7 @@ class FolderWindow(QMainWindow):
         self.setWindowTitle("Folder Manager")
         
         # Center the window on screen - make it more compact
-        self.resize(700, 500)
+        self.resize(720, 520)
         self.center_window()
         
         # Remove window frame and title bar for clean look
@@ -194,7 +194,7 @@ class FolderWindow(QMainWindow):
                 }
                 .content-area {
                     padding: 15px;
-                    height: 100vh;
+                    height: calc(100vh - 30px);
                     overflow: hidden;
                 }
                 .container {
@@ -424,8 +424,7 @@ class FolderWindow(QMainWindow):
                             <div class="folder-info" onclick="openFolder('${folder.path}')">
                                 <div class="folder-display">
                                     <span class="folder-name">📁 ${folder.name}</span>
-                                    <span class="path-separator">—</span>
-                                    <span class="folder-path">${folder.path}</span>
+                                    <span class="folder-path">&nbsp;&nbsp;${folder.path}</span>
                                 </div>
                             </div>
                             <div class="folder-actions">
