@@ -86,6 +86,17 @@ class FolderManager(QObject):
         
         self.save_folders()
     
+    @pyqtSlot(int, str, str)
+    def edit_folder(self, folder_id, new_name, new_path):
+        """Edit folder name and path"""
+        if folder_id < 0 or folder_id >= len(self.folders):
+            return
+        
+        if new_name.strip() and new_path.strip():
+            self.folders[folder_id]['name'] = new_name.strip()
+            self.folders[folder_id]['path'] = new_path.strip()
+            self.save_folders()
+    
     @pyqtSlot(str)
     def open_folder(self, folder_path):
         """Open folder in file explorer"""
@@ -328,10 +339,7 @@ class FolderWindow(QMainWindow):
                     opacity: 0.5;
                     font-weight: normal;
                 }
-                .folder-actions {
-                    display: flex;
-                    gap: 10px;
-                }
+
                 .action-btn {
                     background: rgba(255,255,255,0.2);
                     border: none;
@@ -362,6 +370,24 @@ class FolderWindow(QMainWindow):
                 .move-btn:hover {
                     background: rgba(0,150,255,0.6);
                 }
+                .edit-btn {
+                    background: rgba(255,255,255,0.2);
+                    border: none;
+                    color: white;
+                    padding: 6px 8px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: background 0.2s ease;
+                    font-size: 12px;
+                    user-select: none;
+                }
+                .edit-btn:hover {
+                    background: rgba(255,165,0,0.6);
+                }
+                .folder-actions {
+                    display: flex;
+                    gap: 5px;
+                }
                 .empty-state {
                     text-align: center;
                     padding: 40px;
@@ -391,7 +417,19 @@ class FolderWindow(QMainWindow):
                     background: transparent;
                 }
                 
-                /* Custom Confirmation Dialog */
+                /* Custom Dialogs */
+                .dialog-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: none;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 9999;
+                }
                 .confirm-overlay {
                     position: fixed;
                     top: 0;
@@ -454,6 +492,72 @@ class FolderWindow(QMainWindow):
                     background: rgba(255, 255, 255, 0.3);
                     transform: scale(1.05);
                 }
+                
+                /* Edit Dialog */
+                .edit-dialog {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 15px;
+                    padding: 25px;
+                    min-width: 400px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                }
+                .edit-title {
+                    font-size: 1.3em;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                    color: white;
+                    text-align: center;
+                }
+                .edit-field {
+                    margin-bottom: 15px;
+                }
+                .edit-label {
+                    display: block;
+                    margin-bottom: 5px;
+                    color: white;
+                    font-weight: bold;
+                }
+                .edit-input {
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 14px;
+                    outline: none;
+                    box-sizing: border-box;
+                }
+                .edit-input:focus {
+                    border-color: rgba(255, 255, 255, 0.6);
+                    background: rgba(255, 255, 255, 0.15);
+                }
+                .edit-input::placeholder {
+                    color: rgba(255, 255, 255, 0.5);
+                }
+                .edit-buttons {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: center;
+                    margin-top: 20px;
+                }
+                .edit-save {
+                    background: rgba(0, 255, 0, 0.8);
+                    color: white;
+                }
+                .edit-save:hover {
+                    background: rgba(0, 255, 0, 1);
+                    transform: scale(1.05);
+                }
+                .edit-cancel {
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                }
+                .edit-cancel:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: scale(1.05);
+                }
             </style>
         </head>
         <body>
@@ -480,6 +584,25 @@ class FolderWindow(QMainWindow):
                     <div class="confirm-buttons">
                         <button class="confirm-btn confirm-yes" onclick="confirmDelete(true)">Delete</button>
                         <button class="confirm-btn confirm-no" onclick="confirmDelete(false)">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edit Dialog -->
+            <div id="edit-overlay" class="dialog-overlay">
+                <div class="edit-dialog">
+                    <div class="edit-title">✏️ Edit Folder</div>
+                    <div class="edit-field">
+                        <label class="edit-label">Folder Name:</label>
+                        <input type="text" id="edit-name" class="edit-input" placeholder="Enter folder name">
+                    </div>
+                    <div class="edit-field">
+                        <label class="edit-label">Folder Path:</label>
+                        <input type="text" id="edit-path" class="edit-input" placeholder="Enter folder path">
+                    </div>
+                    <div class="edit-buttons">
+                        <button class="confirm-btn edit-save" onclick="saveEdit()">Save</button>
+                        <button class="confirm-btn edit-cancel" onclick="cancelEdit()">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -537,6 +660,7 @@ class FolderWindow(QMainWindow):
                                 </div>
                             </div>
                             <div class="folder-actions">
+                                <button class="edit-btn" onclick="editFolder(${folder.id})" title="Edit folder name and path">✏️</button>
                                 <button class="move-btn" 
                                         onmousedown="handleMoveClick(event, ${folder.id})" 
                                         oncontextmenu="return false"
@@ -589,6 +713,35 @@ class FolderWindow(QMainWindow):
                         // Reload folders to show new order
                         setTimeout(loadFolders, 100);
                     }
+                }
+                
+                let editingFolderId = null;
+                
+                function editFolder(folderId) {
+                    const folder = allFolders.find(f => f.id === folderId);
+                    if (!folder) return;
+                    
+                    editingFolderId = folderId;
+                    document.getElementById('edit-name').value = folder.name;
+                    document.getElementById('edit-path').value = folder.path;
+                    document.getElementById('edit-overlay').style.display = 'flex';
+                }
+                
+                function saveEdit() {
+                    const newName = document.getElementById('edit-name').value.trim();
+                    const newPath = document.getElementById('edit-path').value.trim();
+                    
+                    if (newName && newPath && editingFolderId !== null && manager) {
+                        manager.edit_folder(editingFolderId, newName, newPath);
+                        setTimeout(loadFolders, 100);
+                    }
+                    
+                    cancelEdit();
+                }
+                
+                function cancelEdit() {
+                    document.getElementById('edit-overlay').style.display = 'none';
+                    editingFolderId = null;
                 }
                 
                 function openFolder(folderPath) {

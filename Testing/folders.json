@@ -1,22 +1,22 @@
 [
   {
-    "name": ".templateengine",
-    "path": "C:/Users/nahid/.templateengine",
+    "name": "CCC",
+    "path": "C:/Users/nahid/.claude",
     "id": 0
   },
   {
-    "name": ".claude",
-    "path": "C:/Users/nahid/.claude",
+    "name": ".templateengine",
+    "path": "C:/Users/nahid/.templateengine",
     "id": 1
-  },
-  {
-    "name": ".Ld9VirtualBox",
-    "path": "C:/Users/nahid/.Ld9VirtualBox",
-    "id": 2
   },
   {
     "name": ".ssh",
     "path": "C:/Users/nahid/.ssh",
+    "id": 2
+  },
+  {
+    "name": ".Ld9VirtualBox",
+    "path": "C:/Users/nahid/.Ld9VirtualBox",
     "id": 3
   },
   {
