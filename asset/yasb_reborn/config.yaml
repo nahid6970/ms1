@@ -829,7 +829,8 @@ widgets:
       app_list:
         - {icon: "\uf0a2", launch: "notification_center", name: "Notification Center"} # launch notification center
         - {icon: "\ueb51", launch: "quick_settings"} # launch quick settings
-        - {icon: "\ue632", launch: "cmd /c powershell -c emacs"} # launch search
+        - {icon: "\ue632", launch: "cmd /c powershell -c emacs"}
+        - {icon: "\ue6ae", launch: "cmd /c start pwsh -Command cd ~ ; nvim"}
         - {icon: "\uf489", launch: "wt", name: "Windows Terminal"} # launch terminal
       label_shadow:
         enabled: true
