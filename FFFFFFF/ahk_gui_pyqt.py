@@ -305,10 +305,10 @@ class AHKShortcutEditor(QMainWindow):
         self.category_toggle.setStyleSheet("""
             QCheckBox {
                 font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
-                font-size: 16px;
-                padding: 8px;
-                min-width: 40px;
-                min-height: 40px;
+                font-size: 20px;
+                padding: 12px;
+                min-width: 48px;
+                min-height: 48px;
                 color: #61dafb;
             }
             QCheckBox::indicator {
