@@ -1906,3 +1906,25 @@ font-weight:900;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
 }
+
+
+
+
+.apps-widget {
+    padding: 0 6px 0 6px;
+    background-color: white;
+    border-radius: 5%;
+    margin-left:2px;
+}
+.apps-widget .label {
+color: Black;
+font-weight:900;
+}
+.apps-widget .icon {
+    font-size: 16px;
+    color: black;
+}
+.apps-widget .widget-container {
+width: fit-content
+}
+.apps-widget .widget-container .label { /*icons*/ }

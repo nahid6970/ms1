@@ -59,6 +59,7 @@ bars:
         - "language"
         - "whkd"
         - "notifications"
+        - "apps"
       right: []
 widgets:
   cpu:
@@ -820,4 +821,18 @@ widgets:
         enabled: false
         color: "black"
         radius: 3
-        offset: [ 1, 1 ]        
+        offset: [ 1, 1 ]
+  apps:
+    type: "yasb.applications.ApplicationsWidget"
+    options:
+      label: "{data}"
+      app_list:
+        - {icon: "\uf0a2", launch: "notification_center", name: "Notification Center"} # launch notification center
+        - {icon: "\ueb51", launch: "quick_settings"} # launch quick settings
+        - {icon: "\uf422", launch: "search"} # launch search
+        - {icon: "\uf489", launch: "wt", name: "Windows Terminal"} # launch terminal
+      label_shadow:
+        enabled: true
+        color: "black"
+        radius: 3
+        offset: [ 1, 1 ]
