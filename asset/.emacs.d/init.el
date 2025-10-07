@@ -413,6 +413,15 @@
 ;; Emoji insertion
 (global-set-key (kbd "C-c i") 'emojify-insert-emoji)
 
+;; Custom function to open PDF at specific page using Foxit PDF Reader
+(defun open-pdf-at-page (file page)
+  "Open PDF file at specific page using Foxit PDF Reader."
+  (interactive "fPDF file: \nnPage number: ")
+  (start-process "foxit" nil "FoxitPDFReader.exe" file "/A" (concat "page=" (number-to-string page))))
+
+;; Keybinding for PDF page opener
+(global-set-key (kbd "C-c p") 'open-pdf-at-page)
+
 ;; ============================================================================
 ;; PERFORMANCE & MISC
 ;; ============================================================================
