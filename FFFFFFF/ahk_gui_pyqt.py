@@ -489,8 +489,8 @@ class AHKShortcutEditor(QMainWindow):
                     border-radius: 5px;
                     background: #404040;
                 }
-                .category-header:first-child {
-                    margin-top: 5px;
+                .category-header.first-in-section {
+                    margin-top: 8px;
                 }
                 .shortcut-item { 
                     padding: 8px 12px; 
@@ -550,9 +550,10 @@ class AHKShortcutEditor(QMainWindow):
                     script_categories[category] = []
                 script_categories[category].append(shortcut)
             
-            for category in sorted(script_categories.keys()):
+            for i, category in enumerate(sorted(script_categories.keys())):
                 color = self.get_category_color(category)
-                html += f'<div class="category-header" style="color: {color};">📁 {category}</div>'
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
                 
                 for shortcut in sorted(script_categories[category], key=lambda x: x.get('hotkey', '').lower()):
                     original_index = self.script_shortcuts.index(shortcut)
@@ -578,9 +579,10 @@ class AHKShortcutEditor(QMainWindow):
                     text_categories[category] = []
                 text_categories[category].append(shortcut)
             
-            for category in sorted(text_categories.keys()):
+            for i, category in enumerate(sorted(text_categories.keys())):
                 color = self.get_category_color(category)
-                html += f'<div class="category-header" style="color: {color};">📁 {category}</div>'
+                first_class = " first-in-section" if i == 0 else ""
+                html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
                 
                 for shortcut in sorted(text_categories[category], key=lambda x: x.get('trigger', '').lower()):
                     original_index = self.text_shortcuts.index(shortcut)
