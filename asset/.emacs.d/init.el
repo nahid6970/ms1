@@ -417,7 +417,9 @@
 (defun open-pdf-at-page (file page)
   "Open PDF file at specific page using Foxit PDF Reader."
   (interactive "fPDF file: \nnPage number: ")
-  (start-process "foxit" nil "FoxitPDFReader.exe" file "/A" (concat "page=" (number-to-string page))))
+  (call-process-shell-command 
+   (format "powershell -Command \"Start-Process 'FoxitPDFReader.exe' -ArgumentList '\"%s\"', '/A', 'page=%d'\"" file page) nil 0)
+  (message "Opening PDF at page %d..." page))
 
 ;; Keybinding for PDF page opener
 (global-set-key (kbd "C-c p") 'open-pdf-at-page)
