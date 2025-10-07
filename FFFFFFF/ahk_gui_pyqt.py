@@ -298,15 +298,30 @@ class AHKShortcutEditor(QMainWindow):
         self.add_btn.setMenu(self.add_menu)
         top_layout.addWidget(self.add_btn)
         
+        self.category_toggle = QCheckBox("\uf205")
+        self.category_toggle.setChecked(True)
+        self.category_toggle.toggled.connect(self.on_category_toggle)
+        self.category_toggle.setToolTip("Group by Category")
+        self.category_toggle.setStyleSheet("""
+            QCheckBox {
+                font-family: 'JetBrainsMono NFP', 'JetBrains Mono', monospace;
+                font-size: 16px;
+                padding: 8px;
+                min-width: 40px;
+                min-height: 40px;
+                color: #61dafb;
+            }
+            QCheckBox::indicator {
+                width: 0px;
+                height: 0px;
+            }
+        """)
+        top_layout.addWidget(self.category_toggle)
+        
         self.search_edit = QLineEdit()
         self.search_edit.setPlaceholderText("Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
         top_layout.addWidget(self.search_edit)
-        
-        self.category_toggle = QCheckBox("Group by Category")
-        self.category_toggle.setChecked(True)
-        self.category_toggle.toggled.connect(self.on_category_toggle)
-        top_layout.addWidget(self.category_toggle)
         
         layout.addLayout(top_layout)
         
@@ -355,6 +370,12 @@ class AHKShortcutEditor(QMainWindow):
     
     def on_category_toggle(self):
         """Handle category toggle change"""
+        # Update icon based on state
+        if self.category_toggle.isChecked():
+            self.category_toggle.setText("\uf205")  # Enabled icon
+        else:
+            self.category_toggle.setText("\uf204")  # Disabled icon
+        
         self.save_settings()
         self.update_display()
     
