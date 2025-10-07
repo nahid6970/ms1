@@ -5,8 +5,8 @@ import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, 
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
-                            QSplitter, QFrame, QTextBrowser)
-from PyQt6.QtCore import Qt, pyqtSignal
+                            QSplitter, QFrame, QTextBrowser, QMenu)
+from PyQt6.QtCore import Qt, pyqtSignal, QSettings
 from PyQt6.QtGui import QFont, QTextCursor
 
 AHK_SCRIPT_PATH = "ahk_v2.ahk"
@@ -269,8 +269,12 @@ class AHKShortcutEditor(QMainWindow):
             "Imported": "#FFA07A", "Tools": "#98D8C8", "Window": "#F7DC6F", "File": "#BB8FCE"
         }
         
+        # Settings for remembering preferences
+        self.settings = QSettings("AHKEditor", "ShortcutEditor")
+        
         self.load_shortcuts_json()
         self.setup_ui()
+        self.load_settings()
         self.update_display()
     
     def setup_ui(self):
@@ -285,6 +289,15 @@ class AHKShortcutEditor(QMainWindow):
         # Top controls
         top_layout = QHBoxLayout()
         
+        # Add button with menu
+        self.add_btn = QPushButton("+ Add")
+        self.add_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 8px 16px;")
+        self.add_menu = QMenu()
+        self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
+        self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
+        self.add_btn.setMenu(self.add_menu)
+        top_layout.addWidget(self.add_btn)
+        
         self.search_edit = QLineEdit()
         self.search_edit.setPlaceholderText("Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
@@ -292,7 +305,7 @@ class AHKShortcutEditor(QMainWindow):
         
         self.category_toggle = QCheckBox("Group by Category")
         self.category_toggle.setChecked(True)
-        self.category_toggle.toggled.connect(self.update_display)
+        self.category_toggle.toggled.connect(self.on_category_toggle)
         top_layout.addWidget(self.category_toggle)
         
         layout.addLayout(top_layout)
@@ -305,14 +318,6 @@ class AHKShortcutEditor(QMainWindow):
         
         # Buttons
         button_layout = QHBoxLayout()
-        
-        add_script_btn = QPushButton("Add Script Shortcut")
-        add_script_btn.clicked.connect(lambda: self.open_add_dialog("script"))
-        button_layout.addWidget(add_script_btn)
-        
-        add_text_btn = QPushButton("Add Text Shortcut")
-        add_text_btn.clicked.connect(lambda: self.open_add_dialog("text"))
-        button_layout.addWidget(add_text_btn)
         
         edit_btn = QPushButton("Edit Selected")
         edit_btn.clicked.connect(self.edit_selected)
@@ -343,6 +348,25 @@ class AHKShortcutEditor(QMainWindow):
         
         self.selected_shortcut = None
         self.selected_type = None
+    
+    def load_settings(self):
+        """Load saved settings"""
+        group_by_category = self.settings.value("group_by_category", True, type=bool)
+        self.category_toggle.setChecked(group_by_category)
+    
+    def save_settings(self):
+        """Save current settings"""
+        self.settings.setValue("group_by_category", self.category_toggle.isChecked())
+    
+    def on_category_toggle(self):
+        """Handle category toggle change"""
+        self.save_settings()
+        self.update_display()
+    
+    def closeEvent(self, event):
+        """Save settings when closing"""
+        self.save_settings()
+        event.accept()
     
     def handle_click(self, url):
         """Handle clicks on shortcuts"""

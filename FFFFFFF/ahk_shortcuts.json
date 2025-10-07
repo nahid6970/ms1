@@ -126,7 +126,8 @@
             "category": "Display",
             "description": "",
             "hotkey": "!1",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\display\\send_to_2nd.ahk\", \"\", \"Hide\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version2\\display\\send_to_2nd.ahk\", \"\", \"Hide\")",
+            "enabled": true
         },
         {
             "name": "Open w VScode",
@@ -245,6 +246,5 @@
             "trigger": ";change",
             "replacement": "ok i have made some changes from last time  so keep that in mind now"
         }
-    ],
-    "show_categories": false
+    ]
 }
