@@ -481,7 +481,7 @@ class AHKShortcutEditor(QMainWindow):
                     margin: 15px 0 8px 0; 
                     padding: 5px 10px;
                     border-radius: 5px;
-                    background: rgba(255,255,255,0.1);
+                    background: #404040;
                 }
                 .shortcut-item { 
                     padding: 8px 12px; 
