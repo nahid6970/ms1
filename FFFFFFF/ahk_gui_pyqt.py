@@ -323,11 +323,6 @@ class AHKShortcutEditor(QMainWindow):
         edit_btn.clicked.connect(self.edit_selected)
         button_layout.addWidget(edit_btn)
         
-        toggle_btn = QPushButton("Toggle Selected")
-        toggle_btn.setStyleSheet("background-color: #f39c12; color: white;")
-        toggle_btn.clicked.connect(self.toggle_selected)
-        button_layout.addWidget(toggle_btn)
-        
         remove_btn = QPushButton("Remove Selected")
         remove_btn.setStyleSheet("background-color: #ff4444; color: white;")
         remove_btn.clicked.connect(self.remove_selected)
@@ -637,22 +632,7 @@ class AHKShortcutEditor(QMainWindow):
         dialog = AddEditShortcutDialog(self, self.selected_type, self.selected_shortcut)
         dialog.exec()
     
-    def toggle_selected(self):
-        if not self.selected_shortcut or not self.selected_type:
-            QMessageBox.warning(self, "Warning", "Please select a shortcut to toggle.")
-            return
-        
-        # Toggle the enabled state
-        current_state = self.selected_shortcut.get("enabled", True)
-        self.selected_shortcut["enabled"] = not current_state
-        
-        # Save and update display
-        self.save_shortcuts_json()
-        self.update_display()
-        
-        status = "enabled" if not current_state else "disabled"
-        QMessageBox.information(self, "Success", f"Shortcut {status}!")
-    
+
     def remove_selected(self):
         if not self.selected_shortcut or not self.selected_type:
             QMessageBox.warning(self, "Warning", "Please select a shortcut to remove.")
