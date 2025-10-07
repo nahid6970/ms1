@@ -318,6 +318,11 @@ class AHKShortcutEditor(QMainWindow):
         edit_btn.clicked.connect(self.edit_selected)
         button_layout.addWidget(edit_btn)
         
+        toggle_btn = QPushButton("Toggle Selected")
+        toggle_btn.setStyleSheet("background-color: #f39c12; color: white;")
+        toggle_btn.clicked.connect(self.toggle_selected)
+        button_layout.addWidget(toggle_btn)
+        
         remove_btn = QPushButton("Remove Selected")
         remove_btn.setStyleSheet("background-color: #ff4444; color: white;")
         remove_btn.clicked.connect(self.remove_selected)
@@ -356,6 +361,24 @@ class AHKShortcutEditor(QMainWindow):
                     self.selected_type = "text"
                 
                 # Update display to show selection
+                self.update_display()
+        
+        elif url_str.startswith("toggle://"):
+            parts = url_str.replace("toggle://", "").split("/")
+            if len(parts) == 2:
+                shortcut_type, index = parts
+                index = int(index)
+                
+                # Toggle the enabled state
+                if shortcut_type == "script" and index < len(self.script_shortcuts):
+                    shortcut = self.script_shortcuts[index]
+                    shortcut["enabled"] = not shortcut.get("enabled", True)
+                elif shortcut_type == "text" and index < len(self.text_shortcuts):
+                    shortcut = self.text_shortcuts[index]
+                    shortcut["enabled"] = not shortcut.get("enabled", True)
+                
+                # Save and update display
+                self.save_shortcuts_json()
                 self.update_display()
     
     def load_shortcuts_json(self):
@@ -443,6 +466,8 @@ class AHKShortcutEditor(QMainWindow):
                     cursor: pointer; 
                     transition: background 0.2s;
                     border-left: 3px solid transparent;
+                    display: flex;
+                    align-items: center;
                 }
                 .shortcut-item:hover { 
                     background: rgba(255,255,255,0.1); 
@@ -563,15 +588,17 @@ class AHKShortcutEditor(QMainWindow):
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
         
         return f'''
-        <a href="select://{shortcut_type}/{index}">
-            <div class="shortcut-item {indent_class} {status_class} {selected_class}">
-                <span class="{status_class}">{status}</span>
+        <div class="shortcut-item {indent_class} {status_class} {selected_class}">
+            <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none; margin-right: 8px;">
+                <span class="{status_class}" style="cursor: pointer; font-size: 14px;">{status}</span>
+            </a>
+            <a href="select://{shortcut_type}/{index}" style="text-decoration: none; color: inherit; flex: 1;">
                 <span class="shortcut-key">{key}</span>
                 <span class="shortcut-separator">󰌌</span>
                 <span class="shortcut-name">{name}</span>
                 {desc_html}
-            </div>
-        </a>
+            </a>
+        </div>
         '''
     
     def open_add_dialog(self, shortcut_type):
@@ -585,6 +612,22 @@ class AHKShortcutEditor(QMainWindow):
         
         dialog = AddEditShortcutDialog(self, self.selected_type, self.selected_shortcut)
         dialog.exec()
+    
+    def toggle_selected(self):
+        if not self.selected_shortcut or not self.selected_type:
+            QMessageBox.warning(self, "Warning", "Please select a shortcut to toggle.")
+            return
+        
+        # Toggle the enabled state
+        current_state = self.selected_shortcut.get("enabled", True)
+        self.selected_shortcut["enabled"] = not current_state
+        
+        # Save and update display
+        self.save_shortcuts_json()
+        self.update_display()
+        
+        status = "enabled" if not current_state else "disabled"
+        QMessageBox.information(self, "Success", f"Shortcut {status}!")
     
     def remove_selected(self):
         if not self.selected_shortcut or not self.selected_type:
