@@ -1,0 +1,132 @@
+#+TITLE: 49th BCS (Special) Examination - 2025
+#+SUBTITLE: Subject: Finance
+#+AUTHOR: BCS Preparation
+#+DATE: 2025
+
+* Exam Information
+- *Subject Code:* 711
+- *Total Marks:* 100
+
+-----
+
+* PART I - Business Finance (50 Marks)
+
+** 1. Business Finance Fundamentals
+- Nature, objectives, and scope of Business Finance
+- Goals and functions of business finance
+- Financial Manager roles: Controller and Treasurer Functions
+- Sources of financial information
+- Sources of financing:
+  - Short term financing
+  - Intermediate term financing
+  - Long term financing
+
+** 2. Financial Management & Planning
+- Corporate Planning and Financial Management
+- Funds Flow Analysis
+- Approaches to Financial Forecasting [[pdf:D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf::137][📖 Page 137]]
+- Managing Cash Position
+- Management of Working Capital
+- Capital Budgeting [[shell:powershell -c start 'FoxitPDFReader.exe "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=313'][📖 Page 313]]
+- Cost of Capital Structure Theory [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=496][📖 Page 496]]
+- Financial Leverage [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=568][📖 Page 568]]
+- Planning the Capital Structure [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=568][📖 Page 568]]
+- Corporate Taxes (Personal and Corporate) [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\Corporate Finance 10 edition.pdf" /A page=551][📖 Page 551]]
+
+** 3. Financial Analysis & Markets
+- Ratio Analysis [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=103][📖 Page 103]]
+- Time-series Analysis [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=142][📖 Chapter 5/6]]
+- Projection of Financial Requirements [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=142][📖 Page 142]]
+- Pro-forma Statements [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=142][📖 Page 142]] + [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=309][📖 Page 309]]
+- Role of Financial Markets
+- Primary and Secondary Securities Market [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=61][📖 Page 61]] 
+- Dividend policy [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=607][📖 Page 607]]
+- Issue of Bonus Shares and Right shares [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=551][📖 Page 551]]
+- Valuation of Shares [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\F-303- Fundamentals of Corporate Finance, 10th edition (Ross,Westerfield, Jordan).pdf" /A page=281][📖 Page 281]]
+
+** 4. Insurance
+- *Meaning & Objectives:* Functions and types (Life, Property, and others)
+- *Principles of Insurance:*
+  - Insurable interest
+  - Indemnity
+  - Subrogation
+  - Contribution
+  - Utmost Good Faith
+  - Proximate Cause
+- *Operations:* Reinsurance, Insurance marketing, Insurance pricing
+- *Bangladesh Context:* Insurance Corporations and Private Insurance Company Operations
+
+** 5. Financial Institutions
+- BSB, BSRS and ICB operations
+- Securities Exchange Commission operations
+- Stock exchange operations in Bangladesh
+
+-----
+
+* PART II - Banking & Financial Services (50 Marks)
+
+** 1. Banking Fundamentals
+- Need for Banks and Banking [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\Frederic Mishkin - The Economics of Money, Banking and Financial Markets11edition.pdf" /A page=281][📖 Page 281]]
+- Commercial and Central Banking [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\Frederic Mishkin - The Economics of Money, Banking and Financial Markets11edition.pdf" /A page=281][📖 Page 281]]
+- Banker-customer relationship [[shell:start "" "FoxitPDFReader.exe" "D:\MEGA\academic\@Book\Frederic Mishkin - The Economics of Money, Banking and Financial Markets11edition.pdf" /A page=361][📖 Page 361]]
+- Negotiable Instrument Act
+- Comparative Banking
+- Fund Management and Performance Measures
+
+** 2. Bank Management Operations
+- *Deposit Management*
+- *Capital Management*
+- *Management of Reserves*
+- *Liquidity Management*
+- *Credit Operations:*
+  - Loans and advances
+  - Cash Credit
+  - Overdrafts
+  - Loan Management and policy
+  - Tools of credit analysis
+  - Classification of loans
+  - Problem loans: symptoms, causes, and remedies
+
+** 3. Financial Services & Products
+- Financial Service Consumer identification
+- Targeting Financial Prospects
+- Development and Management of Financial Products
+- Pricing of Financial Services
+- *Islamic Banking:*
+  - Mode of Investment
+  - Characteristics
+
+** 4. Rural Finance & Development
+- Rural Economy of Bangladesh
+- Need for Funds in Rural Areas
+- Role of Rural Credit
+- Micro Finance and sustainability
+- Foreign Exchange Reserve Management
+
+** 5. Banking Regulations & Technology
+- *Regulatory Framework:*
+  - Banking Reforms committee recommendations
+  - Regulatory Arrangement of Banks
+  - Impact of Regulation and Supervision
+  - Investment Management of Bank Funds
+
+- *Electronic Banking:*
+  - Opportunities and Legal Framework
+  - E-payment Systems
+  - Cheques Collections
+  - Debit and Credit Cards
+  - Lock Box and Clearing House
+  - ATM and Tele Banking
+
+** 6. Bangladesh Banking System
+- Bangladesh Bank (Central Bank)
+- Nationalized Commercial Banks
+- Private Commercial Banks
+- Development Bank Operations in Bangladesh
+
+-----
+
+#+BEGIN_QUOTE
+*Exam Reference:* 49th BCS (Special) Examination - 2025
+*Page Reference:* 81/104
+#+END_QUOTE

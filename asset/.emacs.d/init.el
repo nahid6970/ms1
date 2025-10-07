@@ -421,6 +421,19 @@
    (format "powershell -Command \"Start-Process 'FoxitPDFReader.exe' -ArgumentList '\"%s\"', '/A', 'page=%d'\"" file page) nil 0)
   (message "Opening PDF at page %d..." page))
 
+;; Custom org link type for PDF pages
+(defun org-pdf-page-open (path)
+  "Open PDF at specific page. Path format: file.pdf::page"
+  (let* ((parts (split-string path "::"))
+         (file (car parts))
+         (page (string-to-number (cadr parts))))
+    (call-process-shell-command 
+     (format "powershell -Command \"Start-Process 'FoxitPDFReader.exe' -ArgumentList '\"%s\"', '/A', 'page=%d'\"" file page) nil 0)
+    (message "Opening %s at page %d" (file-name-nondirectory file) page)))
+
+;; Register the custom link type
+(org-link-set-parameters "pdf" :follow #'org-pdf-page-open)
+
 ;; Keybinding for PDF page opener
 (global-set-key (kbd "C-c p") 'open-pdf-at-page)
 
