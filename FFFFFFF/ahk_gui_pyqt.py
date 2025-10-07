@@ -438,6 +438,10 @@ class AHKShortcutEditor(QMainWindow):
         return self.category_colors.get(category, "#B0B0B0")
     
     def update_display(self):
+        # Save current scroll position
+        scrollbar = self.text_browser.verticalScrollBar()
+        scroll_position = scrollbar.value()
+        
         search_query = self.search_edit.text().lower()
         group_by_category = self.category_toggle.isChecked()
         
@@ -449,6 +453,10 @@ class AHKShortcutEditor(QMainWindow):
         
         html = self.generate_html(filtered_script, filtered_text, group_by_category)
         self.text_browser.setHtml(html)
+        
+        # Restore scroll position after a brief delay to allow HTML to load
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(10, lambda: scrollbar.setValue(scroll_position))
     
     def generate_html(self, script_shortcuts, text_shortcuts, group_by_category):
         html = """
@@ -467,16 +475,22 @@ class AHKShortcutEditor(QMainWindow):
                 .section-title { 
                     font-size: 18px; 
                     font-weight: bold; 
-                    margin-bottom: 15px; 
+                    margin: 25px 0 8px 0; 
                     color: #61dafb;
+                }
+                .section-title:first-child {
+                    margin-top: 5px;
                 }
                 .category-header { 
                     font-size: 16px; 
                     font-weight: bold; 
-                    margin: 15px 0 8px 0; 
+                    margin: 25px 0 5px 0; 
                     padding: 5px 10px;
                     border-radius: 5px;
                     background: #404040;
+                }
+                .category-header:first-child {
+                    margin-top: 5px;
                 }
                 .shortcut-item { 
                     padding: 8px 12px; 
