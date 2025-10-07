@@ -174,8 +174,14 @@ lazy.setup({
 
       -- Leader key mappings
       wk.add({
-        { "<leader>f", group = "File" },
-        { "<leader>ff", ":e ", desc = "Find file", mode = "n" },
+        { "<leader>f", group = "File & Find" },
+        { "<leader>ff", ":Files<CR>", desc = "Find files (FZF)", mode = "n" },
+        { "<leader>fg", ":GFiles<CR>", desc = "Find git files", mode = "n" },
+        { "<leader>fr", ":History<CR>", desc = "Recent files", mode = "n" },
+        { "<leader>fb", ":Buffers<CR>", desc = "Find buffers", mode = "n" },
+        { "<leader>fl", ":BLines<CR>", desc = "Find lines in current buffer", mode = "n" },
+        { "<leader>fL", ":Lines<CR>", desc = "Find lines in all buffers", mode = "n" },
+        { "<leader>ft", ":Filetypes<CR>", desc = "Select filetype", mode = "n" },
         { "<leader>fs", ":w<CR>", desc = "Save file", mode = "n" },
         { "<leader>fq", ":q<CR>", desc = "Quit", mode = "n" },
         { "<leader>fx", ":x<CR>", desc = "Save and quit", mode = "n" },
@@ -200,9 +206,16 @@ lazy.setup({
         { "<leader>s", group = "Search" },
         { "<leader>sf", "/", desc = "Search forward", mode = "n" },
         { "<leader>sb", "?", desc = "Search backward", mode = "n" },
+        { "<leader>sg", ":Rg<CR>", desc = "Search with ripgrep", mode = "n" },
+        { "<leader>sw", ":Rg <C-R><C-W><CR>", desc = "Search word under cursor", mode = "n" },
+        { "<leader>sl", ":BLines<CR>", desc = "Search lines in current buffer", mode = "n" },
+        { "<leader>sL", ":Lines<CR>", desc = "Search lines in all buffers", mode = "n" },
+        { "<leader>sh", ":Helptags<CR>", desc = "Search help tags", mode = "n" },
+        { "<leader>sc", ":Commands<CR>", desc = "Search commands", mode = "n" },
+        { "<leader>sk", ":Maps<CR>", desc = "Search keymaps", mode = "n" },
         { "<leader>sn", "n", desc = "Next match", mode = "n" },
         { "<leader>sp", "N", desc = "Previous match", mode = "n" },
-        { "<leader>sc", ":nohl<CR>", desc = "Clear search", mode = "n" },
+        { "<leader>sx", ":nohl<CR>", desc = "Clear search", mode = "n" },
         
         { "<leader>e", group = "Edit" },
         { "<leader>er", ":%s/", desc = "Replace in file", mode = "n" },
@@ -244,6 +257,12 @@ lazy.setup({
         { "<leader>h4", function() require("harpoon"):list():select(4) end, desc = "Go to harpoon file 4", mode = "n" },
         { "<leader>hn", function() require("harpoon"):list():next() end, desc = "Next harpoon file", mode = "n" },
         { "<leader>hp", function() require("harpoon"):list():prev() end, desc = "Previous harpoon file", mode = "n" },
+        
+        { "<leader>k", group = "Bookmarks" },
+        { "<leader>ka", function() require("bookmarks").add_bookmarks() end, desc = "Add bookmark", mode = "n" },
+        { "<leader>kk", function() require("bookmarks").toggle_bookmarks() end, desc = "Toggle bookmarks", mode = "n" },
+        { "<leader>kd", function() require("bookmarks").delete_on_virt() end, desc = "Delete bookmark", mode = "n" },
+        { "<leader>kc", function() require("bookmarks").delete_all_bookmarks() end, desc = "Clear all bookmarks", mode = "n" },
       })
       
       -- Visual mode mappings
@@ -263,7 +282,67 @@ lazy.setup({
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local harpoon = require("harpoon")
-      harpoon:setup()
+      harpoon:setup({
+        settings = {
+          save_on_toggle = true,
+          sync_on_ui_close = true,
+          key = function()
+            return "C:\\Users\\nahid"
+          end,
+        },
+      })
+    end
+  },
+
+  -- Simple bookmark system
+  {
+    "crusj/bookmarks.nvim",
+    keys = {{ "<tab><tab>", mode = { "n" } }},
+    branch = "main",
+    config = function()
+      require("bookmarks").setup({
+        storage_dir = "C:\\Users\\nahid\\.nvim-bookmarks",
+        mappings_enabled = true,
+        keymap = {
+          toggle = "<tab><tab>",
+          close = "q",
+          delete = "dd",
+          order = "<space>o",
+        }
+      })
+    end
+  },
+
+  -- FZF for fuzzy file finding
+  {
+    "junegunn/fzf",
+    build = ":call fzf#install()"
+  },
+  
+  {
+    "junegunn/fzf.vim",
+    dependencies = { "junegunn/fzf" },
+    config = function()
+      -- FZF configuration
+      vim.g.fzf_preview_window = {'right:50%', 'ctrl-/'}
+      vim.g.fzf_layout = { window = { width = 0.9, height = 0.6 } }
+      
+      -- Custom FZF colors to match theme
+      vim.g.fzf_colors = {
+        fg = {'fg', 'Normal'},
+        bg = {'bg', 'Normal'},
+        hl = {'fg', 'Comment'},
+        ['fg+'] = {'fg', 'CursorLine', 'CursorColumn', 'Normal'},
+        ['bg+'] = {'bg', 'CursorLine', 'CursorColumn'},
+        ['hl+'] = {'fg', 'Statement'},
+        info = {'fg', 'PreProc'},
+        border = {'fg', 'Ignore'},
+        prompt = {'fg', 'Conditional'},
+        pointer = {'fg', 'Exception'},
+        marker = {'fg', 'Keyword'},
+        spinner = {'fg', 'Label'},
+        header = {'fg', 'Comment'}
+      }
     end
   },
 
@@ -334,8 +413,13 @@ vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to right window' })
 vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Previous buffer' })
 
--- Harpoon quick access keybindings
+-- Quick access keybindings
+vim.keymap.set('n', '<C-p>', ':Files<CR>', { desc = 'Find files (FZF)' })
 vim.keymap.set('n', '<C-e>', function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, { desc = 'Toggle harpoon menu' })
+vim.keymap.set('n', '<C-b>', function() require("bookmarks").toggle_bookmarks() end, { desc = 'Toggle bookmarks' })
+vim.keymap.set('n', '<C-g>', ':Rg<CR>', { desc = 'Search with ripgrep' })
+
+-- Harpoon quick access
 vim.keymap.set('n', '<C-1>', function() require("harpoon"):list():select(1) end, { desc = 'Harpoon file 1' })
 vim.keymap.set('n', '<C-2>', function() require("harpoon"):list():select(2) end, { desc = 'Harpoon file 2' })
 vim.keymap.set('n', '<C-3>', function() require("harpoon"):list():select(3) end, { desc = 'Harpoon file 3' })
