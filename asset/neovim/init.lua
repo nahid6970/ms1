@@ -17,6 +17,16 @@ vim.opt.incsearch = true
 -- Leader key
 vim.g.mapleader = " "
 
+-- Disable unused providers to clean up health check
+vim.g.loaded_node_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+
+-- Immediately set filetype for current buffer if empty
+if vim.bo.filetype == '' then
+  vim.bo.filetype = 'text'
+end
+
 -- Function to move lines up/down
 local function move_line(direction)
   local line_count = vim.fn.line('$')
@@ -135,6 +145,14 @@ if not lazy_ok then
 end
 
 lazy.setup({
+  -- Icons for file types and UI
+  {
+    "nvim-tree/nvim-web-devicons",
+    config = function()
+      require("nvim-web-devicons").setup()
+    end
+  },
+
   -- Which-key for keybinding hints
   {
     "folke/which-key.nvim",
@@ -190,7 +208,7 @@ lazy.setup({
         { "<leader>er", ":%s/", desc = "Replace in file", mode = "n" },
         { "<leader>el", ":s/", desc = "Replace in line", mode = "n" },
         { "<leader>eu", "u", desc = "Undo", mode = "n" },
-        { "<leader>er", "<C-r>", desc = "Redo", mode = "n" },
+        { "<leader>eR", "<C-r>", desc = "Redo", mode = "n" },
         
         { "<leader>g", group = "Go to" },
         { "<leader>gg", "gg", desc = "Go to top", mode = "n" },
@@ -203,6 +221,8 @@ lazy.setup({
         { "<leader>tr", ":set relativenumber!<CR>", desc = "Toggle relative numbers", mode = "n" },
         { "<leader>tw", ":set wrap!<CR>", desc = "Toggle word wrap", mode = "n" },
         { "<leader>th", ":set hlsearch!<CR>", desc = "Toggle search highlight", mode = "n" },
+        { "<leader>tf", ":filetype detect<CR>", desc = "Detect filetype", mode = "n" },
+        { "<leader>ti", function() print("Filetype: " .. vim.bo.filetype) end, desc = "Show filetype info", mode = "n" },
         
         { "<leader>c", group = "Code" },
         { "<leader>cc", "gcc", desc = "Comment line", mode = "n", remap = true },
@@ -214,6 +234,16 @@ lazy.setup({
         { "<leader>mk", "<C-k>", desc = "Skip current", mode = "n" },
         { "<leader>mq", "<C-q>", desc = "Remove selection", mode = "n" },
         { "<leader>ma", "<C-S-a>", desc = "Select all occurrences", mode = "n" },
+        
+        { "<leader>h", group = "Harpoon" },
+        { "<leader>ha", function() require("harpoon"):list():add() end, desc = "Add file to harpoon", mode = "n" },
+        { "<leader>hh", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Toggle harpoon menu", mode = "n" },
+        { "<leader>h1", function() require("harpoon"):list():select(1) end, desc = "Go to harpoon file 1", mode = "n" },
+        { "<leader>h2", function() require("harpoon"):list():select(2) end, desc = "Go to harpoon file 2", mode = "n" },
+        { "<leader>h3", function() require("harpoon"):list():select(3) end, desc = "Go to harpoon file 3", mode = "n" },
+        { "<leader>h4", function() require("harpoon"):list():select(4) end, desc = "Go to harpoon file 4", mode = "n" },
+        { "<leader>hn", function() require("harpoon"):list():next() end, desc = "Next harpoon file", mode = "n" },
+        { "<leader>hp", function() require("harpoon"):list():prev() end, desc = "Previous harpoon file", mode = "n" },
       })
       
       -- Visual mode mappings
@@ -226,6 +256,17 @@ lazy.setup({
     end
   },
   
+  -- Harpoon for quick file navigation
+  {
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local harpoon = require("harpoon")
+      harpoon:setup()
+    end
+  },
+
   -- Multi-cursor plugin for Ctrl+D functionality
   {
     "mg979/vim-visual-multi",
@@ -253,42 +294,12 @@ lazy.setup({
     end
   },
   
-  -- Optional: Better syntax highlighting (with Windows compatibility)
-  {
-    "nvim-treesitter/nvim-treesitter",
-    build = function()
-      -- Check if we're on Windows and have a C compiler
-      if vim.fn.has("win32") == 1 then
-        -- Try to use zig as compiler if available, otherwise skip
-        if vim.fn.executable("zig") == 1 then
-          vim.cmd("TSUpdate")
-        else
-          -- Silently skip compilation if no compiler found
-        end
-      else
-        vim.cmd("TSUpdate")
-      end
-    end,
-    config = function()
-      -- Only setup if treesitter loaded successfully
-      local status_ok, treesitter = pcall(require, "nvim-treesitter.configs")
-      if not status_ok then
-        return
-      end
-      
-      treesitter.setup({
-        ensure_installed = {},  -- Don't auto-install on Windows
-        auto_install = false,   -- Disable auto-install to prevent errors
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = false,
-        },
-        indent = {
-          enable = true,
-        },
-      })
-    end
-  }
+
+}, {
+  -- Lazy.nvim configuration
+  rocks = {
+    enabled = false,  -- Disable luarocks support to avoid warnings
+  },
 })
 
 -- Additional useful keybindings similar to VS Code
@@ -322,4 +333,209 @@ vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to right window' })
 -- Buffer navigation
 vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Previous buffer' })
+
+-- Harpoon quick access keybindings
+vim.keymap.set('n', '<C-e>', function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, { desc = 'Toggle harpoon menu' })
+vim.keymap.set('n', '<C-1>', function() require("harpoon"):list():select(1) end, { desc = 'Harpoon file 1' })
+vim.keymap.set('n', '<C-2>', function() require("harpoon"):list():select(2) end, { desc = 'Harpoon file 2' })
+vim.keymap.set('n', '<C-3>', function() require("harpoon"):list():select(3) end, { desc = 'Harpoon file 3' })
+vim.keymap.set('n', '<C-4>', function() require("harpoon"):list():select(4) end, { desc = 'Harpoon file 4' })
+
+-- Enable built-in syntax highlighting and filetype detection
+vim.cmd('syntax enable')
+vim.cmd('filetype plugin indent on')
+vim.opt.syntax = 'on'
+
+-- Better filetype detection
+vim.filetype.add({
+  extension = {
+    js = 'javascript',
+    jsx = 'javascriptreact',
+    ts = 'typescript',
+    tsx = 'typescriptreact',
+    py = 'python',
+    lua = 'lua',
+    html = 'html',
+    css = 'css',
+    scss = 'scss',
+    sass = 'sass',
+    json = 'json',
+    md = 'markdown',
+    yml = 'yaml',
+    yaml = 'yaml',
+    toml = 'toml',
+    xml = 'xml',
+    sh = 'sh',
+    bash = 'bash',
+    zsh = 'zsh',
+    ps1 = 'ps1',
+    psm1 = 'ps1',
+    psd1 = 'ps1',
+    vim = 'vim',
+    txt = 'text',
+  },
+  filename = {
+    ['.gitignore'] = 'gitignore',
+    ['.env'] = 'sh',
+    ['Dockerfile'] = 'dockerfile',
+    ['docker-compose.yml'] = 'yaml',
+    ['docker-compose.yaml'] = 'yaml',
+  },
+  pattern = {
+    ['.*%.env%..*'] = 'sh',
+    ['.*%.config%.js'] = 'javascript',
+    ['.*%.config%.ts'] = 'typescript',
+  },
+})
+
+-- Force filetype detection on buffer enter
+vim.api.nvim_create_autocmd({'BufRead', 'BufNewFile'}, {
+  pattern = '*',
+  callback = function()
+    vim.cmd('filetype detect')
+  end,
+})
+
+-- Set default filetype for empty/new buffers
+vim.api.nvim_create_autocmd({'BufEnter', 'BufNewFile'}, {
+  pattern = '*',
+  callback = function()
+    -- If buffer has no name and no filetype, it's likely an empty buffer
+    if vim.bo.filetype == '' then
+      if vim.fn.expand('%') == '' then
+        -- Empty buffer (no filename)
+        vim.bo.filetype = 'text'
+      else
+        -- File with name but no detected filetype
+        vim.bo.filetype = 'text'
+      end
+    end
+  end,
+})
+
+-- Ensure filetype is set immediately on startup
+vim.api.nvim_create_autocmd('VimEnter', {
+  callback = function()
+    if vim.bo.filetype == '' then
+      vim.bo.filetype = 'text'
+    end
+  end,
+})
+
+-- Force filetype to never be empty
+vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter', 'FileType'}, {
+  pattern = '*',
+  callback = function()
+    vim.schedule(function()
+      if vim.bo.filetype == '' or vim.bo.filetype == 'unknown' then
+        vim.bo.filetype = 'text'
+      end
+    end)
+  end,
+})
+
+-- Nice looking statusline
+vim.opt.laststatus = 2  -- Always show status line
+
+-- Define statusline colors
+vim.api.nvim_set_hl(0, 'StatusLineMode', { fg = '#1e1e2e', bg = '#89b4fa', bold = true })
+vim.api.nvim_set_hl(0, 'StatusLineFile', { fg = '#cdd6f4', bg = '#313244' })
+vim.api.nvim_set_hl(0, 'StatusLineModified', { fg = '#f38ba8', bg = '#313244', bold = true })
+vim.api.nvim_set_hl(0, 'StatusLineGit', { fg = '#a6e3a1', bg = '#313244' })
+vim.api.nvim_set_hl(0, 'StatusLineInfo', { fg = '#89b4fa', bg = '#313244' })
+vim.api.nvim_set_hl(0, 'StatusLinePosition', { fg = '#1e1e2e', bg = '#fab387', bold = true })
+vim.api.nvim_set_hl(0, 'StatusLineFiletype', { fg = '#cba6f7', bg = '#313244' })
+
+-- Function to get current mode with nice names
+local function get_mode()
+  local modes = {
+    n = 'NORMAL',
+    i = 'INSERT',
+    v = 'VISUAL',
+    V = 'V-LINE',
+    [''] = 'V-BLOCK',
+    c = 'COMMAND',
+    s = 'SELECT',
+    S = 'S-LINE',
+    [''] = 'S-BLOCK',
+    R = 'REPLACE',
+    r = 'REPLACE',
+    ['!'] = 'SHELL',
+    t = 'TERMINAL'
+  }
+  return modes[vim.fn.mode()] or 'UNKNOWN'
+end
+
+-- Function to get git branch (simple version)
+local function get_git_branch()
+  local branch = vim.fn.system("git branch --show-current 2>/dev/null | tr -d '\n'")
+  if vim.v.shell_error == 0 and branch ~= "" then
+    return " " .. branch
+  end
+  return ""
+end
+
+-- Function to get file icon (simple version without devicons dependency)
+local function get_file_icon()
+  local filename = vim.fn.expand('%:t')
+  local ext = vim.fn.expand('%:e')
+  
+  local icons = {
+    lua = '🌙',
+    js = '📜',
+    ts = '📘',
+    py = '🐍',
+    html = '🌐',
+    css = '🎨',
+    json = '📋',
+    md = '📝',
+    txt = '📄',
+    vim = '💚',
+  }
+  
+  return icons[ext] or '📄'
+end
+
+-- Custom statusline function
+local function statusline()
+  local mode = get_mode()
+  local file_icon = get_file_icon()
+  local filename = vim.fn.expand('%:t')
+  if filename == '' then filename = '[No Name]' end
+  
+  local modified = vim.bo.modified and ' ●' or ''
+  local readonly = vim.bo.readonly and ' 🔒' or ''
+  local git_branch = get_git_branch()
+  local filetype = vim.bo.filetype ~= '' and vim.bo.filetype or 'text'
+  local line = vim.fn.line('.')
+  local col = vim.fn.col('.')
+  local total_lines = vim.fn.line('$')
+  local percentage = math.floor((line / total_lines) * 100)
+  
+  return table.concat({
+    '%#StatusLineMode#',
+    ' ' .. mode .. ' ',
+    '%#StatusLineFile#',
+    ' ' .. file_icon .. ' ' .. filename,
+    '%#StatusLineModified#',
+    modified,
+    '%#StatusLineFile#',
+    readonly,
+    '%#StatusLineGit#',
+    git_branch,
+    '%=',  -- Right align from here
+    '%#StatusLineInfo#',
+    ' ' .. line .. ':' .. col .. ' ',
+    '%#StatusLinePosition#',
+    ' ' .. percentage .. '%% ',
+    '%#StatusLineFiletype#',
+    ' ' .. filetype .. ' ',
+  })
+end
+
+-- Set the custom statusline
+vim.opt.statusline = '%!v:lua.statusline()'
+
+-- Make statusline function global
+_G.statusline = statusline
 
