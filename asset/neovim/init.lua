@@ -272,6 +272,56 @@ lazy.setup({
         { "<leader>y", "y", desc = "Yank selection", mode = "v" },
         { "<leader>d", "d", desc = "Delete selection", mode = "v" },
       })
+      
+      -- Visual mode space menu for selected text operations
+      wk.add({
+        { " ", group = "Selected Text", mode = "v" },
+        { " s", function()
+            -- Get selected text
+            vim.cmd('normal! "vy')
+            local selected = vim.fn.getreg('v')
+            -- Start multi-cursor on selected text
+            vim.cmd('normal! gv')
+            vim.fn.feedkeys('\\<Plug>(VM-Find-Under)')
+          end, desc = "Select all matching", mode = "v" },
+        { " r", function()
+            -- Get selected text and start replace
+            vim.cmd('normal! "vy')
+            local selected = vim.fn.getreg('v')
+            vim.fn.feedkeys(':%s/' .. vim.fn.escape(selected, '/\\') .. '/')
+          end, desc = "Replace all occurrences", mode = "v" },
+        { " f", function()
+            -- Search for selected text
+            vim.cmd('normal! "vy')
+            local selected = vim.fn.getreg('v')
+            vim.fn.setreg('/', selected)
+            vim.cmd('normal! n')
+          end, desc = "Find next occurrence", mode = "v" },
+        { " g", function()
+            -- Search selected text with FZF
+            vim.cmd('normal! "vy')
+            local selected = vim.fn.getreg('v')
+            vim.cmd('Rg ' .. vim.fn.shellescape(selected))
+          end, desc = "Search in files", mode = "v" },
+        { " c", "gc", desc = "Comment selection", mode = "v", remap = true },
+        { " y", "y", desc = "Copy selection", mode = "v" },
+        { " d", "d", desc = "Delete selection", mode = "v" },
+        { " u", "u", desc = "Lowercase", mode = "v" },
+        { " U", "U", desc = "Uppercase", mode = "v" },
+        { " w", function()
+            -- Wrap selection with characters
+            vim.ui.input({ prompt = 'Wrap with (e.g., ", \', (, [, {): ' }, function(wrapper)
+              if wrapper and wrapper ~= '' then
+                local close_map = {
+                  ['('] = ')', ['['] = ']', ['{'] = '}', 
+                  ['<'] = '>', ['"'] = '"', ["'"] = "'", ['`'] = '`'
+                }
+                local close = close_map[wrapper] or wrapper
+                vim.cmd('normal! `<i' .. wrapper .. '\\<Esc>`>a' .. close .. '\\<Esc>')
+              end
+            end)
+          end, desc = "Wrap with characters", mode = "v" },
+      })
     end
   },
   
