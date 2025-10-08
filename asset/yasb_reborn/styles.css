@@ -1911,11 +1911,18 @@ font-weight:900;
 
 
 
-
+.apps-widget {
+  padding: 0 6px 0 6px;
+  background-color: black;
+  border-radius: 5%;
+  margin-left:2px;
+}
 .apps-widget .label {
-    font-size: 16px;
+    font-size: 20px;
     padding: 0 1px;
+    color: white;
 }
 .apps-widget .label:hover {
     color: red;
 }
+

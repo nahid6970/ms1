@@ -33,7 +33,8 @@ bars:
       bottom: -1
       right: 0
     widgets:
-      left: []
+      left:
+        - "apps"
       center:
         # - "systray"
         - "komorebi_active_layout"
@@ -52,15 +53,14 @@ bars:
         # - "todo"
         - "notes"
         # - "ip_info"
-        - "scoop_updates"
-        - "winget_updates"
         - "ai_chat"
         - "launchpad"
         - "language"
         - "whkd"
         - "notifications"
-        - "apps"
-      right: []
+      right:
+        - "scoop_updates"
+        - "winget_updates"
 widgets:
   cpu:
     type: "yasb.cpu.CpuWidget"
@@ -827,13 +827,13 @@ widgets:
     options:
       label: "{data}"
       app_list:
-        - {icon: "\uf0a2", launch: "notification_center", name: "Notification Center"} # launch notification center
-        - {icon: "\ueb51", launch: "quick_settings"} # launch quick settings
+        # - {icon: "\uf0a2", launch: "notification_center", name: "Notification Center"} # launch notification center
+        # - {icon: "\ueb51", launch: "quick_settings"} # launch quick settings
         - {icon: "\ue632", launch: "cmd /c powershell -c emacs"}
         - {icon: "\ue6ae", launch: "cmd /c start powershell -c cd ~ ; nvim"}
-        - {icon: "\uf489", launch: "wt", name: "Windows Terminal"} # launch terminal
+        # - {icon: "\uf489", launch: "wt", name: "Windows Terminal"} # launch terminal
       label_shadow:
-        enabled: true
+        enabled: false
         color: "black"
         radius: 3
         offset: [ 1, 1 ]
