@@ -1912,10 +1912,10 @@ font-weight:900;
 
 
 .apps-widget {
-  padding: 0 6px 0 6px;
   background-color: black;
-  border-radius: 5%;
+  padding: 0 6px 0 6px;
   margin-left:2px;
+  border-radius: 5%;
 }
 .apps-widget .label {
     font-size: 20px;
