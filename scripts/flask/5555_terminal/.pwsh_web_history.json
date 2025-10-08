@@ -14,8 +14,9 @@
     "cd script",
     "cd script_output",
     "ls",
-    "cd d:song/wwe"
+    "cd d:song/wwe",
+    "pkill qbit"
   ],
-  "last_updated": "2025-09-21T18:15:27.687062",
-  "current_directory": "D:\\song\\wwe"
+  "last_updated": "2025-10-08T21:41:12.105064",
+  "current_directory": "C:\\Users\\nahid"
 }
