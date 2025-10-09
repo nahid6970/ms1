@@ -705,12 +705,12 @@ def FameFunction(button):
                         press_keys_with_delays(window, '5',1, 'x',0, 'z',0)
                         press_keys_with_delays(window, '0',1, 'y',0)
                     #! 2nd troops
-                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
+                    if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1176, 893, 1281, 969)): 
                         press_keys_with_delays(window, 'f',4)
-                        press_keys_with_delays(window, '6',0, 'x',0, '7',0, 'z',0)
-                        press_keys_with_delays(window, '0',0, 'x',0, '1',0, 'y',0, '2',0, 'z',0)
-                        press_keys_with_delays(window, '3',1, 'y',1, '3',1)
-                        press_keys_with_delays(window, '4',0, 'x',0, '5',0, 'z',0)
+                        press_keys_with_delays(window, '7',0, 'x',0, 'y',0, 'z',0, 'x',0, 'y',0, 'z',0)
+                        press_keys_with_delays(window, '4',1, 'y',1, '4',1)
+                        press_keys_with_delays(window, '5',0, 'x',0, 'z',0)
+                        press_keys_with_delays(window, '0',1, 'y',0)
 
                     time.sleep(2)
             except KeyboardInterrupt: print("Script stopped by user.")
