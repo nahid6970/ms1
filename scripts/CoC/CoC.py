@@ -700,9 +700,10 @@ def FameFunction(button):
                     if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase1.png", confidence=0.8, region=(359, 657, 652, 761)): 
                         # press_keys_with_delays(window, 'x',1, 'y',1, 'z',1)
                         press_keys_with_delays(window, 't',4)
-                        press_keys_with_delays(window, '0',1, 'x',0, 'y',0, 'z',0)
-                        press_keys_with_delays(window, '3',1, 'y',1, '3',1)
-                        press_keys_with_delays(window, '4',1, 'x',0, 'z',0)
+                        press_keys_with_delays(window, '1',1, 'x',0, 'y',0, 'z',0)
+                        press_keys_with_delays(window, '4',1, 'y',1, '4',1)
+                        press_keys_with_delays(window, '5',1, 'x',0, 'z',0)
+                        press_keys_with_delays(window, '0',1, 'y',0)
                     #! 2nd troops
                     if find_image(r"C:\Users\nahid\ms\msBackups\CoC\builder\phase2.png", confidence=0.8, region=(1151, 816, 1273, 978)): 
                         press_keys_with_delays(window, 'f',4)
