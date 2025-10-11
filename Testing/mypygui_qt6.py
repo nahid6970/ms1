@@ -216,7 +216,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #6bc0f8;
                 background-color: #1d2027;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsmono nfp';
                 padding: 2px 8px;
                 border-radius: 3px;
             }
@@ -230,7 +230,7 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(os_btn)
         
         # Update Button
-        update_btn = HoverLabel("", "#16a2ff", "#ffffff", 20)
+        update_btn = HoverLabel("", "#16a2ff", "#ffffff", 20)
         update_btn.bind_click(lambda: self.run_script("update.ps1"))
         update_btn.bind_ctrl_click(lambda: self.edit_script("update.ps1"))
         left_layout.addWidget(update_btn)
