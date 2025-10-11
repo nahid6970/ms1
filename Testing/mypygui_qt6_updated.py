@@ -160,6 +160,7 @@ class HoverLabel(QLabel):
         
         # Priority list of fonts to try
         preferred_fonts = [
+            "JetBrainsMono Nerd Font Propo",
             "JetBrainsMono Nerd Font",
             "JetBrainsMono Nerd Font Mono", 
             "JetBrainsMono Nerd Font",
