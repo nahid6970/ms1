@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PyQt6 conversion of mypygui.py
+PyQt6 conversion of mypygui.py with individual button styling
 A comprehensive system monitoring and utility GUI application
 """
 
@@ -218,7 +218,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #6bc0f8;
                 background-color: #1d2027;
-                font: bold 16px 'JetBrainsmono nfp';
+                font: bold 16px 'JetBrains Mono';
                 padding: 2px 8px;
                 border-radius: 3px;
             }
@@ -252,63 +252,259 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(os_btn)
         
         # Update Button
-        update_btn = HoverLabel("", "#16a2ff", "#ffffff", 20)
-        update_btn.bind_click(lambda: self.run_script("update.ps1"))
-        update_btn.bind_ctrl_click(lambda: self.edit_script("update.ps1"))
+        update_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #16a2ff;
+                    background-color: #1d2027;
+                    font: bold 20px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #16a2ff;
+                    font: bold 20px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        update_btn.bind_left_click(lambda: self.run_script("update.ps1"))
+        update_btn.bind_ctrl_left_click(lambda: self.edit_script("update.ps1"))
         left_layout.addWidget(update_btn)
         
         # Tools Button
-        tools_btn = HoverLabel("", "#ffffff", "#cccccc", 20)
-        tools_btn.bind_click(lambda: self.run_script("tools.py"))
-        tools_btn.bind_ctrl_click(lambda: self.edit_script("tools.py"))
+        tools_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #1d2027;
+                    font: bold 20px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #1d2027;
+                    background-color: #ffffff;
+                    font: bold 20px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        tools_btn.bind_left_click(lambda: self.run_script("tools.py"))
+        tools_btn.bind_ctrl_left_click(lambda: self.edit_script("tools.py"))
         left_layout.addWidget(tools_btn)
         
         # Startup Button
-        startup_btn = HoverLabel("", "#10b153", "#ffffff", 25)
-        startup_btn.bind_click(lambda: self.run_script("startup.py"))
-        startup_btn.bind_ctrl_click(lambda: self.edit_script("startup.py"))
+        startup_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #10b153;
+                    background-color: #1d2027;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #10b153;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        startup_btn.bind_left_click(lambda: self.run_script("startup.py"))
+        startup_btn.bind_ctrl_left_click(lambda: self.edit_script("startup.py"))
         left_layout.addWidget(startup_btn)
         
         # App Management Button
-        app_btn = HoverLabel("", "#26b2f3", "#ffffff", 25)
-        app_btn.bind_click(lambda: self.run_script("applist.py"))
-        app_btn.bind_ctrl_click(lambda: self.edit_script("applist.py"))
+        app_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #26b2f3;
+                    background-color: #1d2027;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #26b2f3;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        app_btn.bind_left_click(lambda: self.run_script("applist.py"))
+        app_btn.bind_ctrl_left_click(lambda: self.edit_script("applist.py"))
+        app_btn.bind_right_click(lambda: self.run_script("app_store.py"))
+        app_btn.bind_ctrl_right_click(lambda: self.edit_script("app_store.py"))
         left_layout.addWidget(app_btn)
         
         # Rclone Button
-        rclone_btn = HoverLabel("", "#fcfcfc", "#cccccc", 25)
-        rclone_btn.bind_click(lambda: self.run_script("rclone_Script.py"))
-        rclone_btn.bind_ctrl_click(lambda: self.edit_script("rclone_Script.py"))
+        rclone_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #fcfcfc;
+                    background-color: #1d2027;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #1d2027;
+                    background-color: #fcfcfc;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        rclone_btn.bind_left_click(lambda: self.run_script("rclone_Script.py"))
+        rclone_btn.bind_ctrl_left_click(lambda: self.edit_script("rclone_Script.py"))
         left_layout.addWidget(rclone_btn)
         
         # Folder Button
-        folder_btn = HoverLabel("", "#ffd900", "#ffffff", 25)
-        folder_btn.bind_click(lambda: self.run_script("folder.py"))
-        folder_btn.bind_ctrl_click(lambda: self.edit_script("folder.py"))
+        folder_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #ffd900;
+                    background-color: #1d2027;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #1d2027;
+                    background-color: #ffd900;
+                    font: bold 25px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        folder_btn.bind_left_click(lambda: self.run_script("folder.py"))
+        folder_btn.bind_ctrl_left_click(lambda: self.edit_script("folder.py"))
         left_layout.addWidget(folder_btn)
         
         # Position/CrossHair Button
-        pos_btn = HoverLabel("", "#ffffff", "#cccccc", 16)
-        pos_btn.bind_click(lambda: self.run_script("XY_CroosHair.py"))
-        pos_btn.bind_ctrl_click(lambda: self.edit_script("XY_CroosHair.py"))
+        pos_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #1d2027;
+                    font: bold 16px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #1d2027;
+                    background-color: #ffffff;
+                    font: bold 16px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        pos_btn.bind_left_click(lambda: self.run_script("XY_CroosHair.py"))
+        pos_btn.bind_ctrl_left_click(lambda: self.edit_script("XY_CroosHair.py"))
+        pos_btn.bind_right_click(lambda: self.run_script("XY_CroosHairGemini.py"))
+        pos_btn.bind_ctrl_right_click(lambda: self.edit_script("XY_CroosHairGemini.py"))
         left_layout.addWidget(pos_btn)
         
         # Color Tool Button
-        color_btn = HoverLabel("", "#c588fd", "#ffffff", 16)
-        color_btn.bind_click(lambda: self.run_script("color_picker.py"))
-        color_btn.bind_ctrl_click(lambda: self.edit_script("color_picker.py"))
+        color_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #c588fd;
+                    background-color: #1d2027;
+                    font: bold 16px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #c588fd;
+                    font: bold 16px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        color_btn.bind_left_click(lambda: self.run_script("color_picker.py"))
+        color_btn.bind_ctrl_left_click(lambda: self.edit_script("color_picker.py"))
+        color_btn.bind_right_click(lambda: self.run_script("color_pallet_rand_fg_bgFF00.py"))
+        color_btn.bind_ctrl_right_click(lambda: self.edit_script("color_pallet_rand_fg_bgFF00.py"))
         left_layout.addWidget(color_btn)
         
         # Info Button
-        info_btn = HoverLabel("", "#ffffff", "#cccccc", 20)
-        info_btn.bind_click(lambda: self.run_script("info.py"))
-        info_btn.bind_ctrl_click(lambda: self.edit_script("info.py"))
+        info_btn = HoverLabel("", 
+            custom_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #1d2027;
+                    font: bold 20px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #1d2027;
+                    background-color: #ffffff;
+                    font: bold 20px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        info_btn.bind_left_click(lambda: self.run_script("info.py"))
+        info_btn.bind_ctrl_left_click(lambda: self.edit_script("info.py"))
         left_layout.addWidget(info_btn)
         
         # Virtual Monitor Button
-        vm_btn = HoverLabel("2nd", "#8ab9ff", "#ffffff", 16)
-        vm_btn.bind_click(lambda: self.run_script("2nd_Monitor.py"))
-        vm_btn.bind_ctrl_click(lambda: self.edit_script("2nd_Monitor.py"))
+        vm_btn = HoverLabel("2nd", 
+            custom_style="""
+                QLabel {
+                    color: #8ab9ff;
+                    background-color: #1d2027;
+                    font: bold 16px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #8ab9ff;
+                    font: bold 16px 'JetBrains Mono';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        vm_btn.bind_left_click(lambda: self.run_script("2nd_Monitor.py"))
+        vm_btn.bind_ctrl_left_click(lambda: self.edit_script("2nd_Monitor.py"))
         left_layout.addWidget(vm_btn)
         
         main_layout.addWidget(left_frame)
