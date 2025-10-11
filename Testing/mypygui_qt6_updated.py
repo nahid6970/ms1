@@ -14,7 +14,7 @@ from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                             QVBoxLayout, QLabel, QPushButton, QFrame)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread, QPoint
-from PyQt6.QtGui import QFont, QPalette, QColor, QMouseEvent
+from PyQt6.QtGui import QFont, QPalette, QColor, QMouseEvent, QFontDatabase
 
 def calculate_time_to_appear(start_time):
     end_time = time.time()
@@ -23,19 +23,7 @@ def calculate_time_to_appear(start_time):
 
 start_time = time.time()
 
-# Print ASCII art in the console
-print(r"""
 
-$\   $\           $\       $\       $\ $\   $\  $$$\
-$$\  $ |          $ |      \__|      $ |$$\  $ |$  __$\
-$$\ $ | $$$\  $$$$\  $\  $$$$ |$$\ $ |$ /  $ |
-$ $\$ | \____$\ $  __$\ $ |$  __$ |$ $\$ |$$$$ |
-$ \$$ | $$$$ |$ |  $ |$ |$ /  $ |$ \$$ |$  __$ |
-$ |\$$ |$  __$ |$ |  $ |$ |$ |  $ |$ |\$$ |$ |  $ |
-$ | \$ |\$$$$ |$ |  $ |$ |\$$$$ |$ | \$ |$ |  $ |
-\__|  \__| \_______|\__|  \__|\__| \_______|\__|  \__|\__|  \__|
-
-""")
 
 class SystemInfoThread(QThread):
     """Background thread for system information updates"""
@@ -84,8 +72,12 @@ class HoverLabel(QLabel):
     """Custom label with hover effects and click handling"""
     
     def __init__(self, text="", custom_style="", hover_style="", 
-                 font_size=16, font_family="JetBrains Mono"):
+                 font_size=16, font_family=None):
         super().__init__(text)
+        
+        # Get the best available font
+        if font_family is None:
+            font_family = self.get_best_font()
         
         # Store styles
         self.default_style = custom_style if custom_style else f"""
@@ -160,6 +152,28 @@ class HoverLabel(QLabel):
     def bind_ctrl_right_click(self, command):
         """Bind Ctrl+right click command"""
         self.ctrl_right_click_command = command
+    
+    @staticmethod
+    def get_best_font():
+        """Get the best available monospace font"""
+        available_fonts = QFontDatabase.families()
+        
+        # Priority list of fonts to try
+        preferred_fonts = [
+            "JetBrainsMono Nerd Font",
+            "JetBrainsMono Nerd Font Mono", 
+            "JetBrainsMono Nerd Font",
+            "JetBrains Mono",
+            "Consolas",
+            "Courier New",
+            "monospace"
+        ]
+        
+        for font_name in preferred_fonts:
+            if font_name in available_fonts:
+                return font_name
+        
+        return "Consolas"  # Final fallback
 
 class MainWindow(QMainWindow):
     """Main application window"""
@@ -218,7 +232,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #6bc0f8;
                 background-color: #1d2027;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
             }
@@ -231,7 +245,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #59e3a7;
                     background-color: #1d2027;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -240,7 +254,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #59e3a7;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -257,7 +271,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #16a2ff;
                     background-color: #1d2027;
-                    font: bold 20px 'JetBrains Mono';
+                    font: bold 20px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -266,7 +280,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #16a2ff;
-                    font: bold 20px 'JetBrains Mono';
+                    font: bold 20px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -282,7 +296,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #1d2027;
-                    font: bold 20px 'JetBrains Mono';
+                    font: bold 20px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -291,7 +305,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #1d2027;
                     background-color: #ffffff;
-                    font: bold 20px 'JetBrains Mono';
+                    font: bold 20px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -307,7 +321,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #10b153;
                     background-color: #1d2027;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -316,7 +330,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #10b153;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -332,7 +346,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #26b2f3;
                     background-color: #1d2027;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -341,7 +355,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #26b2f3;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -359,7 +373,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #fcfcfc;
                     background-color: #1d2027;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -368,7 +382,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #1d2027;
                     background-color: #fcfcfc;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -384,7 +398,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffd900;
                     background-color: #1d2027;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -393,7 +407,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #1d2027;
                     background-color: #ffd900;
-                    font: bold 25px 'JetBrains Mono';
+                    font: bold 25px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -409,7 +423,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #1d2027;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -418,7 +432,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #1d2027;
                     background-color: #ffffff;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -436,7 +450,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #c588fd;
                     background-color: #1d2027;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -445,7 +459,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #c588fd;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -463,7 +477,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #1d2027;
-                    font: bold 20px 'JetBrains Mono';
+                    font: bold 20px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -472,7 +486,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #1d2027;
                     background-color: #ffffff;
-                    font: bold 20px 'JetBrains Mono';
+                    font: bold 20px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -488,7 +502,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #8ab9ff;
                     background-color: #1d2027;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -497,7 +511,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #8ab9ff;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 4px;
                     border-radius: 3px;
                 }
@@ -525,7 +539,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #14bcff;
                 background-color: #1d2027;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
                 min-width: 40px;
@@ -539,7 +553,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #ff934b;
                 background-color: #1d2027;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
                 min-width: 40px;
@@ -553,7 +567,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #00ff21;
                 background-color: #1d2027;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
                 min-width: 40px;
@@ -567,7 +581,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #ffffff;
                 background-color: #044568;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
                 min-width: 50px;
@@ -581,7 +595,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #ffffff;
                 background-color: #044568;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
                 min-width: 50px;
@@ -595,7 +609,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #ffffff;
                 background-color: #1d2027;
-                font: bold 14px 'JetBrains Mono';
+                font: bold 14px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
                 min-width: 60px;
@@ -609,7 +623,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #ffffff;
                 background-color: #1d2027;
-                font: bold 14px 'JetBrains Mono';
+                font: bold 14px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
                 min-width: 60px;
@@ -623,7 +637,7 @@ class MainWindow(QMainWindow):
             QLabel {
                 color: #ffffff;
                 background-color: #1d2027;
-                font: bold 16px 'JetBrains Mono';
+                font: bold 16px 'JetBrainsMono Nerd Font';
                 padding: 2px 8px;
                 border-radius: 3px;
             }
@@ -660,7 +674,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #1d2027;
                     background-color: #14bcff;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 8px;
                     border-radius: 3px;
                     min-width: 40px;
@@ -671,7 +685,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #14bcff;
                     background-color: #1d2027;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 8px;
                     border-radius: 3px;
                     min-width: 40px;
@@ -686,7 +700,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #1d2027;
                     background-color: #ff934b;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 8px;
                     border-radius: 3px;
                     min-width: 40px;
@@ -697,7 +711,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ff934b;
                     background-color: #1d2027;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 8px;
                     border-radius: 3px;
                     min-width: 40px;
@@ -712,7 +726,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #f12c2f;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 8px;
                     border-radius: 3px;
                     min-width: 50px;
@@ -726,7 +740,7 @@ class MainWindow(QMainWindow):
                 QLabel {
                     color: #ffffff;
                     background-color: #f12c2f;
-                    font: bold 16px 'JetBrains Mono';
+                    font: bold 16px 'JetBrainsMono Nerd Font';
                     padding: 2px 8px;
                     border-radius: 3px;
                     min-width: 50px;
@@ -759,7 +773,7 @@ class MainWindow(QMainWindow):
                 QLabel {{
                     color: {fg_color};
                     background-color: {bg_color};
-                    font: bold 14px 'JetBrains Mono';
+                    font: bold 14px 'JetBrainsMono Nerd Font';
                     padding: 2px 8px;
                     border-radius: 3px;
                     min-width: 60px;
@@ -824,6 +838,25 @@ def main():
     # PyQt6 handles high DPI automatically, no need to set attributes
     
     app = QApplication(sys.argv)
+    
+    # Check available fonts and set default font
+    available_fonts = QFontDatabase.families()
+    
+    # Try different variations of the font name
+    font_names = ["JetBrainsMono Nerd Font", "JetBrainsMono Nerd Font Mono", "JetBrainsMono Nerd Font", "JetBrains Mono", "Consolas"]
+    selected_font = "Consolas"  # Fallback font
+    
+    for font_name in font_names:
+        if font_name in available_fonts:
+            selected_font = font_name
+            print(f"Using font: {selected_font}")
+            break
+    else:
+        print(f"JetBrainsMono Nerd Font not found. Available fonts: {[f for f in available_fonts if 'jet' in f.lower() or 'mono' in f.lower()]}")
+        print(f"Using fallback font: {selected_font}")
+    
+    # Set application default font
+    app.setFont(QFont(selected_font, 12))
     
     # Set application properties
     app.setApplicationName("Python GUI - PyQt6")
