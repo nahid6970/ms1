@@ -85,8 +85,9 @@ class HoverLabel(QLabel):
                 color: #ffffff;
                 background-color: #1d2027;
                 font: bold {font_size}px '{font_family}';
-                padding: 2px 4px;
+                padding: 2px 3px;
                 border-radius: 3px;
+                text-align: center;
             }}
         """
         
@@ -95,8 +96,9 @@ class HoverLabel(QLabel):
                 color: #ffffff;
                 background-color: #2d3037;
                 font: bold {font_size}px '{font_family}';
-                padding: 2px 4px;
+                padding: 2px 3px;
                 border-radius: 3px;
+                text-align: center;
             }}
         """
         
@@ -176,6 +178,46 @@ class HoverLabel(QLabel):
         
         return "Consolas"  # Final fallback
 
+class IconLabel(HoverLabel):
+    """Special label for Nerd Font icons with optimized padding"""
+    
+    def __init__(self, icon_text="", color="#ffffff", bg_color="#1d2027", 
+                 hover_color="#1d2027", hover_bg_color="#ffffff", font_size=16):
+        
+        # Get the best available font
+        font_family = self.get_best_font()
+        
+        # Custom style for icons with minimal padding and perfect centering
+        custom_style = f"""
+            QLabel {{
+                color: {color};
+                background-color: {bg_color};
+                font: bold {font_size}px '{font_family}';
+                padding: 1px 1px;
+                border-radius: 3px;
+                text-align: center;
+                qproperty-alignment: AlignCenter;
+                min-width: {font_size + 4}px;
+                max-width: {font_size + 8}px;
+            }}
+        """
+        
+        hover_style = f"""
+            QLabel {{
+                color: {hover_color};
+                background-color: {hover_bg_color};
+                font: bold {font_size}px '{font_family}';
+                padding: 1px 1px;
+                border-radius: 3px;
+                text-align: center;
+                qproperty-alignment: AlignCenter;
+                min-width: {font_size + 4}px;
+                max-width: {font_size + 8}px;
+            }}
+        """
+        
+        super().__init__(icon_text, custom_style, hover_style, font_size, font_family)
+
 class MainWindow(QMainWindow):
     """Main application window"""
     
@@ -241,7 +283,7 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(self.uptime_label)
         
         # OS Button
-        os_btn = HoverLabel("OS", 
+        os_btn = HoverLabel("", 
             custom_style="""
                 QLabel {
                     color: #59e3a7;
@@ -267,75 +309,36 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(os_btn)
         
         # Update Button
-        update_btn = HoverLabel("", 
-            custom_style="""
-                QLabel {
-                    color: #16a2ff;
-                    background-color: #1d2027;
-                    font: bold 20px 'JetBrainsMono Nerd Font';
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-            """,
-            hover_style="""
-                QLabel {
-                    color: #ffffff;
-                    background-color: #16a2ff;
-                    font: bold 20px 'JetBrainsMono Nerd Font';
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-            """
+        update_btn = IconLabel("", 
+            color="#16a2ff", 
+            bg_color="#1d2027",
+            hover_color="#ffffff", 
+            hover_bg_color="#16a2ff",
+            font_size=20
         )
         update_btn.bind_left_click(lambda: self.run_script("update.ps1"))
         update_btn.bind_ctrl_left_click(lambda: self.edit_script("update.ps1"))
         left_layout.addWidget(update_btn)
         
         # Tools Button
-        tools_btn = HoverLabel("", 
-            custom_style="""
-                QLabel {
-                    color: #ffffff;
-                    background-color: #1d2027;
-                    font: bold 20px 'JetBrainsMono Nerd Font';
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-            """,
-            hover_style="""
-                QLabel {
-                    color: #1d2027;
-                    background-color: #ffffff;
-                    font: bold 20px 'JetBrainsMono Nerd Font';
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-            """
+        tools_btn = IconLabel("", 
+            color="#ffffff", 
+            bg_color="#1d2027",
+            hover_color="#1d2027", 
+            hover_bg_color="#ffffff",
+            font_size=20
         )
         tools_btn.bind_left_click(lambda: self.run_script("tools.py"))
         tools_btn.bind_ctrl_left_click(lambda: self.edit_script("tools.py"))
         left_layout.addWidget(tools_btn)
         
         # Startup Button
-        startup_btn = HoverLabel("", 
-            custom_style="""
-                QLabel {
-                    color: #10b153;
-                    background-color: #1d2027;
-                    font: bold 25px 'JetBrainsMono Nerd Font';
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-            """,
-            hover_style="""
-                QLabel {
-                    color: #ffffff;
-                    background-color: #10b153;
-                    font: bold 25px 'JetBrainsMono Nerd Font';
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-            """
+        startup_btn = IconLabel("", 
+            color="#10b153", 
+            bg_color="#1d2027",
+            hover_color="#ffffff", 
+            hover_bg_color="#10b153",
+            font_size=25
         )
         startup_btn.bind_left_click(lambda: self.run_script("startup.py"))
         startup_btn.bind_ctrl_left_click(lambda: self.edit_script("startup.py"))
