@@ -15,9 +15,9 @@
     "cd script_output",
     "ls",
     "cd d:song/wwe",
-    "pkill qbit",
-    "shutdown"
+    "shutdown",
+    "pkill qbit"
   ],
-  "last_updated": "2025-10-11T16:51:40.528472",
+  "last_updated": "2025-10-12T21:53:36.068973",
   "current_directory": "C:\\Users\\nahid"
 }
