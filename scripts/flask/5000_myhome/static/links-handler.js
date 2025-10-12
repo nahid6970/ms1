@@ -1240,6 +1240,7 @@ document.addEventListener('DOMContentLoaded', function () {
         border_radius: document.getElementById('link-border-radius').value || undefined,
         font_size: document.getElementById('link-font-size').value || undefined,
         title: document.getElementById('link-title').value || undefined,
+        note: document.getElementById('link-note').value || undefined,
         li_bg_color: document.getElementById('link-li-bg-color').value || undefined,
         li_hover_color: document.getElementById('link-li-hover-color').value || undefined,
         hidden: document.getElementById('link-hidden').checked || undefined,
@@ -1314,6 +1315,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-link-background-color').value = link.background_color || '';
     document.getElementById('edit-link-border-radius').value = link.border_radius || '';
     document.getElementById('edit-link-title').value = link.title || '';
+    document.getElementById('edit-link-note').value = link.note || '';
     document.getElementById('edit-link-font-size').value = link.font_size || '';
     document.getElementById('edit-link-li-bg-color').value = link.li_bg_color || '';
     document.getElementById('edit-link-li-hover-color').value = link.li_hover_color || '';
@@ -1345,6 +1347,7 @@ document.addEventListener('DOMContentLoaded', function () {
           background_color: document.getElementById('edit-link-background-color').value || undefined,
           border_radius: document.getElementById('edit-link-border-radius').value || undefined,
           title: document.getElementById('edit-link-title').value || undefined,
+          note: document.getElementById('edit-link-note').value || undefined,
           font_size: document.getElementById('edit-link-font-size').value || undefined,
           li_bg_color: document.getElementById('edit-link-li-bg-color').value || undefined,
           li_hover_color: document.getElementById('edit-link-li-hover-color').value || undefined,
