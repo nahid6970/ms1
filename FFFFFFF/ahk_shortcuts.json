@@ -178,6 +178,14 @@
             "hotkey": "#e",
             "action": "MergeAllExplorerWindows()\nMergeAllExplorerWindows() {\n    windows := WinGetList(\"ahk_class CabinetWClass\")\n    \n    if windows.Length <= 1 {\n        if windows.Length == 0 {\n            Run(\"explorer.exe\")\n        }\n        return\n    }\n    \n    mainWindow := 0\n    for hwnd in windows {\n        if WinActive(\"ahk_id \" . hwnd) {\n            mainWindow := hwnd\n            break\n        }\n    }\n    \n    if mainWindow == 0 {\n        mainWindow := windows[1]\n    }\n    \n    WinActivate(\"ahk_id \" . mainWindow)\n    WinWaitActive(\"ahk_id \" . mainWindow, , 2)\n    \n    for hwnd in windows {\n        if hwnd != mainWindow {\n            try {\n                path := GetExplorerPath(hwnd)\n                \n                if path != \"\" && path != \"Desktop\" && path != \"This PC\" {\n                    WinActivate(\"ahk_id \" . mainWindow)\n                    Sleep(100)\n                    Send(\"^t\")\n                    Sleep(200)\n                    Send(\"^l\")\n                    Sleep(100)\n                    \n                    ; Fix spaces in path\n                    path := StrReplace(path, \"%20\", \" \")\n                    \n                    ; Handle file:// URLs\n                    if InStr(path, \"file:///\") {\n                        path := StrReplace(path, \"file:///\", \"\")\n                        path := StrReplace(path, \"/\", \"\\\")\n                    }\n                    \n                    SendText(path)\n                    Send(\"{Enter}\")\n                    Sleep(300)\n                }\n                \n                WinClose(\"ahk_id \" . hwnd)\n                Sleep(100)\n            } catch {\n                WinClose(\"ahk_id \" . hwnd)\n            }\n        }\n    }\n    \n    WinActivate(\"ahk_id \" . mainWindow)\n}\n\nGetExplorerPath(hwnd) {\n    try {\n        for window in ComObject(\"Shell.Application\").Windows {\n            try {\n                if window.HWND == hwnd {\n                    url := window.LocationURL\n                    name := window.LocationName\n                    \n                    if url != \"\" {\n                        return url\n                    } else if name != \"\" {\n                        return name\n                    }\n                }\n            }\n        }\n        \n        title := WinGetTitle(\"ahk_id \" . hwnd)\n        \n        if InStr(title, \" - File Explorer\") {\n            title := StrReplace(title, \" - File Explorer\", \"\")\n        }\n        \n        return title\n        \n    } catch {\n        return \"\"\n    }\n}",
             "enabled": true
+        },
+        {
+            "name": "autofill job field",
+            "category": "General",
+            "description": "",
+            "hotkey": "!n",
+            "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\@JOB\\autofill.ahk\", \"\", \"Hide\")",
+            "enabled": true
         }
     ],
     "text_shortcuts": [
@@ -246,5 +254,6 @@
             "trigger": ";change",
             "replacement": "ok i have made some changes from last time  so keep that in mind now"
         }
-    ]
+    ],
+    "show_categories": false
 }

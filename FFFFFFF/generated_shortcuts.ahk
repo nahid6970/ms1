@@ -446,6 +446,9 @@ LAlt & c:: {
     }
 }
 
+;! autofill job field
+!n::Run("C:\Users\nahid\ms\msBackups\@JOB\autofill.ahk", "", "Hide")
+
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
