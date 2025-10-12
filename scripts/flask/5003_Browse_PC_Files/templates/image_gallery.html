@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery - {{ current_image }}</title>
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/2250/2250195.png" type="image/x-icon">
+    <style>
+        @import url("https://www.nerdfonts.com/assets/css/webfont.css");
+
+        body {
+            font-family: JetBrainsMono NFP, sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: white;
+        }
+
+        .gallery-header {
+            background-color: #2d2d2d;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .gallery-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .image-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .image-counter {
+            font-size: 14px;
+            color: #aaa;
+            background-color: #444;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .gallery-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .control-btn:hover {
+            background-color: #555;
+        }
+
+        .control-btn:disabled {
+            background-color: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            background-color: #2196F3;
+        }
+
+        .back-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .image-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+
+        .main-image.zoomed {
+            transform: scale(1.5);
+            cursor: zoom-out;
+            max-width: none;
+            max-height: none;
+            transform-origin: center center;
+        }
+
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            font-size: 24px;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            z-index: 10;
+        }
+
+        .nav-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .nav-arrow:disabled {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .nav-arrow.prev {
+            left: 20px;
+        }
+
+        .nav-arrow.next {
+            right: 20px;
+        }
+
+        .keyboard-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #aaa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .image-container.zoomed {
+            overflow: auto;
+            cursor: grab;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .image-container.zoomed:active {
+            cursor: grabbing;
+        }
+
+        .image-container.zoomed .main-image {
+            position: relative;
+            margin: auto;
+        }
+
+        /* Mobile responsive */
+        @media screen and (max-width: 768px) {
+            .gallery-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .gallery-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .nav-arrow {
+                font-size: 20px;
+                padding: 12px 15px;
+            }
+
+            .nav-arrow.prev {
+                left: 10px;
+            }
+
+            .nav-arrow.next {
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="gallery-header">
+        <div class="gallery-info">
+            <div class="image-title">{{ current_image }}</div>
+            <div class="image-counter">{{ current_index }} of {{ total_images }}</div>
+        </div>
+        <div class="gallery-controls">
+            <button class="control-btn back-btn" onclick="goBack()">
+                <i class="nf nf-fa-arrow_left"></i> Back to Files
+            </button>
+        </div>
+    </div>
+
+    <div class="image-container" id="imageContainer">
+        <img src="/serve_image/{{ dir_path }}/{{ current_image }}" alt="{{ current_image }}" class="main-image"
+            id="mainImage" onclick="toggleZoom()">
+
+        {% if prev_image %}
+        <button class="nav-arrow prev" onclick="navigateImage('prev')" id="prevBtn">
+            <i class="nf nf-fa-chevron_left"></i>
+        </button>
+        {% else %}
+        <button class="nav-arrow prev" disabled>
+            <i class="nf nf-fa-chevron_left"></i>
+        </button>
+        {% endif %}
+
+        {% if next_image %}
+        <button class="nav-arrow next" onclick="navigateImage('next')" id="nextBtn">
+            <i class="nf nf-fa-chevron_right"></i>
+        </button>
+        {% else %}
+        <button class="nav-arrow next" disabled>
+            <i class="nf nf-fa-chevron_right"></i>
+        </button>
+        {% endif %}
+
+        <div class="keyboard-hint">
+            Use ← → arrow keys to navigate • Click image to zoom
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = '/?dir_path={{ dir_path | urlencode }}&drive={{ current_drive | urlencode }}';
+        }
+
+        function navigateImage(direction) {
+            const currentImage = '{{ current_image }}';
+            const dirPath = '{{ dir_path }}';
+            const drive = '{{ current_drive }}';
+
+            let targetImage = '';
+            if (direction === 'prev' && '{{ prev_image }}') {
+                targetImage = '{{ prev_image }}';
+            } else if (direction === 'next' && '{{ next_image }}') {
+                targetImage = '{{ next_image }}';
+            }
+
+            if (targetImage) {
+                window.location.href = `/image_gallery?dir_path=${encodeURIComponent(dirPath)}&filename=${encodeURIComponent(targetImage)}&drive=${encodeURIComponent(drive)}`;
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowLeft' && '{{ prev_image }}') {
+                navigateImage('prev');
+            } else if (event.key === 'ArrowRight' && '{{ next_image }}') {
+                navigateImage('next');
+            } else if (event.key === 'Escape') {
+                goBack();
+            }
+        });
+
+        let isZoomed = false;
+        let isDragging = false;
+        let startX, startY, scrollLeft, scrollTop;
+
+        function toggleZoom() {
+            const image = document.getElementById('mainImage');
+            const container = document.getElementById('imageContainer');
+
+            if (!isZoomed) {
+                // Zoom in to 150%
+                image.classList.add('zoomed');
+                container.classList.add('zoomed');
+                isZoomed = true;
+
+                // Center the image after zoom
+                setTimeout(() => {
+                    const containerRect = container.getBoundingClientRect();
+                    const imageRect = image.getBoundingClientRect();
+
+                    // Calculate center position
+                    const centerX = (imageRect.width * 1.5 - containerRect.width) / 2;
+                    const centerY = (imageRect.height * 1.5 - containerRect.height) / 2;
+
+                    container.scrollLeft = Math.max(0, centerX);
+                    container.scrollTop = Math.max(0, centerY);
+                }, 50);
+            } else {
+                // Reset to default
+                image.classList.remove('zoomed');
+                container.classList.remove('zoomed');
+                container.scrollLeft = 0;
+                container.scrollTop = 0;
+                isZoomed = false;
+            }
+        }
+
+        // Pan functionality when zoomed
+        function startDrag(e) {
+            if (!isZoomed) return;
+            isDragging = true;
+            const container = document.getElementById('imageContainer');
+            startX = e.pageX - container.offsetLeft;
+            startY = e.pageY - container.offsetTop;
+            scrollLeft = container.scrollLeft;
+            scrollTop = container.scrollTop;
+        }
+
+        function drag(e) {
+            if (!isDragging || !isZoomed) return;
+            e.preventDefault();
+            const container = document.getElementById('imageContainer');
+            const x = e.pageX - container.offsetLeft;
+            const y = e.pageY - container.offsetTop;
+            const walkX = (x - startX) * 2;
+            const walkY = (y - startY) * 2;
+            container.scrollLeft = scrollLeft - walkX;
+            container.scrollTop = scrollTop - walkY;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        // Add drag event listeners
+        document.getElementById('imageContainer').addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', function (event) {
+            // Disable navigation when zoomed to prevent accidental image changes
+            if (isZoomed) {
+                if (event.key === 'Escape') {
+                    toggleZoom(); // Reset zoom on ESC
+                }
+                return;
+            }
+
+            if (event.key === 'ArrowLeft' && '{{ prev_image }}') {
+                navigateImage('prev');
+            } else if (event.key === 'ArrowRight' && '{{ next_image }}') {
+                navigateImage('next');
+            } else if (event.key === 'Escape') {
+                goBack();
+            }
+        });
+
+        // Preload adjacent images for smoother navigation
+        function preloadImages() {
+            {% if prev_image %}
+            const prevImg = new Image();
+            prevImg.src = '/serve_image/{{ dir_path }}/{{ prev_image }}';
+            {% endif %}
+
+            {% if next_image %}
+            const nextImg = new Image();
+            nextImg.src = '/serve_image/{{ dir_path }}/{{ next_image }}';
+            {% endif %}
+        }
+
+        // Load preload images after main image loads
+        document.getElementById('mainImage').addEventListener('load', preloadImages);
+    </script>
+</body>
+
+</html>

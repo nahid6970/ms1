@@ -170,11 +170,11 @@ def view_file(file_path):
     full_file_path = os.path.join(file_path)
     # Detect file type to open or serve the file in the browser
     if os.path.exists(full_file_path):
-        if full_file_path.endswith(('.png', '.jpg', '.jpeg', '.gif')):
-            # Open the image and serve it directly
-            with open(full_file_path, 'rb') as image_file:
-                image_data = image_file.read()
-                return Response(image_data, mimetype='image/jpeg')  # Update mimetype based on actual file extension
+        if full_file_path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg', '.webp', '.ico')):
+            # Redirect to image gallery viewer
+            directory = os.path.dirname(full_file_path)
+            filename = os.path.basename(full_file_path)
+            return redirect(url_for('image_gallery', dir_path=directory, filename=filename))
         elif full_file_path.endswith(('.txt', '.py', '.ps1', '.log', 'opml', 'ini', '.html', '.css', '.js')):
             return send_file(full_file_path, mimetype='text/plain')
         elif full_file_path.endswith(('.mkv','.mp4', '.webm', '.ogg', '.mp3')):
@@ -353,6 +353,70 @@ def remove_bookmark():
         return jsonify({"success": "Bookmark removed successfully"}), 200
     else:
         return jsonify({"error": "Failed to remove bookmark"}), 500
+
+@app.route("/image_gallery")
+def image_gallery():
+    """Display image gallery with navigation."""
+    dir_path = request.args.get('dir_path', 'C:/')
+    filename = request.args.get('filename', '')
+    
+    try:
+        # Get all image files in the directory
+        image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg', '.webp', '.ico')
+        all_files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+        image_files = [f for f in all_files if f.lower().endswith(image_extensions)]
+        image_files.sort()  # Sort alphabetically
+        
+        if not image_files:
+            flash("No images found in this directory")
+            return redirect(url_for('index', dir_path=dir_path))
+        
+        # Find current image index
+        current_index = 0
+        if filename in image_files:
+            current_index = image_files.index(filename)
+        
+        current_image = image_files[current_index]
+        
+        # Get previous and next images
+        prev_image = image_files[current_index - 1] if current_index > 0 else None
+        next_image = image_files[current_index + 1] if current_index < len(image_files) - 1 else None
+        
+        return render_template('image_gallery.html',
+                             current_image=current_image,
+                             prev_image=prev_image,
+                             next_image=next_image,
+                             current_index=current_index + 1,
+                             total_images=len(image_files),
+                             dir_path=dir_path,
+                             current_drive=request.args.get('drive', dir_path))
+    
+    except Exception as e:
+        flash(f"Error loading image gallery: {e}")
+        return redirect(url_for('index', dir_path=dir_path))
+
+@app.route("/serve_image/<path:file_path>")
+def serve_image(file_path):
+    """Serve individual image files."""
+    full_file_path = os.path.join(file_path)
+    if os.path.exists(full_file_path):
+        # Determine correct mimetype
+        ext = os.path.splitext(full_file_path)[1].lower()
+        mimetype_map = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.bmp': 'image/bmp',
+            '.svg': 'image/svg+xml',
+            '.webp': 'image/webp',
+            '.ico': 'image/x-icon'
+        }
+        mimetype = mimetype_map.get(ext, 'image/jpeg')
+        
+        return send_file(full_file_path, mimetype=mimetype)
+    else:
+        return "Image not found", 404
 
 @app.route('/get_bookmarks', methods=['GET'])
 def get_bookmarks():
