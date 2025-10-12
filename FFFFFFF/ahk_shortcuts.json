@@ -193,7 +193,7 @@
             "name": "AutoHotkey Version 1",
             "description": "Inserts AHK v1 header requirement",
             "trigger": ";v1",
-            "replacement": "#Requires AutoHotkey v1.0",
+            "replacement": "{#}Requires AutoHotkey v1.0",
             "category": "AHK",
             "enabled": true
         },
@@ -201,7 +201,7 @@
             "name": "AutoHotkey Version 2",
             "description": "Inserts AHK v2 header requirement",
             "trigger": ";v2",
-            "replacement": "#Requires AutoHotkey v2.0",
+            "replacement": "{#}Requires AutoHotkey v2.0",
             "category": "AHK",
             "enabled": true
         },

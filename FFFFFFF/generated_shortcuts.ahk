@@ -452,11 +452,11 @@ LAlt & c:: {
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1
 ;! Inserts AHK v1 header requirement
-::;v1::#Requires AutoHotkey v1.0
+::;v1::{#}Requires AutoHotkey v1.0
 
 ;! AutoHotkey Version 2
 ;! Inserts AHK v2 header requirement
-::;v2::#Requires AutoHotkey v2.0
+::;v2::{#}Requires AutoHotkey v2.0
 
 ;! Registry Run Path
 ;! Windows startup registry path run
