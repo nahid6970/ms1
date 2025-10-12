@@ -13,6 +13,8 @@ function createContextMenu(items) {
             menuItem.classList.add('context-menu-edit');
         } else if (item.label === 'Copy') {
             menuItem.classList.add('context-menu-copy');
+        } else if (item.label === 'Copy Note') {
+            menuItem.classList.add('context-menu-copy-note');
         } else if (item.label === 'Delete') {
             menuItem.classList.add('context-menu-delete');
         }

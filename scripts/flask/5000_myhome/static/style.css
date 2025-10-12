@@ -1167,6 +1167,17 @@ a.add-button.custom-sidebar-button[style*="background-color"] {
   color: white;
 }
 
+.context-menu-item.context-menu-copy-note {
+  color: #9C27B0;
+  /* Purple */
+  font-style: italic;
+}
+
+.context-menu-item.context-menu-copy-note:hover {
+  background-color: #9C27B0;
+  color: white;
+}
+
 .context-menu-item.context-menu-delete {
   color: #f44336;
   /* Red */
