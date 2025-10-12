@@ -155,6 +155,12 @@
             border-radius: 4px;
             font-size: 12px;
             opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-container.zoomed .keyboard-hint {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .image-container.zoomed {
