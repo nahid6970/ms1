@@ -103,8 +103,8 @@
         .image-wrapper.zoomed {
             padding: 30px;
             box-sizing: border-box;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-start;
+            align-items: flex-start;
         }
 
         .main-image {
@@ -122,7 +122,7 @@
             cursor: zoom-out;
             max-width: none;
             max-height: none;
-            transform-origin: center center;
+            transform-origin: top left;
         }
 
         .nav-arrow {
@@ -172,27 +172,9 @@
             transition: opacity 0.3s ease;
         }
 
-        .image-container.zoomed .keyboard-hint {
+        .zoomed .keyboard-hint {
             opacity: 0;
             pointer-events: none;
-        }
-
-        .image-container.zoomed {
-            overflow: auto;
-            cursor: grab;
-            display: flex;
-            justify-content: flex-start;
-            align-items: flex-start;
-            padding: 20px;
-        }
-
-        .image-container.zoomed:active {
-            cursor: grabbing;
-        }
-
-        .image-container.zoomed .main-image {
-            position: relative;
-            margin: auto;
         }
 
         /* Mobile responsive */
