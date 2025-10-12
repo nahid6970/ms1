@@ -101,6 +101,70 @@
       .notification-badge.zero {
         display: none !important;
       }
+
+      /* Copy notification styles */
+      .copy-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+        z-index: 10000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        max-width: 300px;
+        word-wrap: break-word;
+      }
+
+      .copy-notification.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .copy-notification.success {
+        background-color: #4CAF50;
+        border-left: 4px solid #45a049;
+      }
+
+      .copy-notification.error {
+        background-color: #f44336;
+        border-left: 4px solid #da190b;
+      }
+
+      .copy-notification.info {
+        background-color: #2196F3;
+        border-left: 4px solid #0b7dda;
+      }
+
+      /* Add animation for better visual feedback */
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOutRight {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
     </style>
 
     <div id="links-container"

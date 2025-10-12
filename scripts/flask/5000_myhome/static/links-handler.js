@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     { label: 'New-Tab', action: () => window.open(link.url, '_blank') },
                     { label: 'Edit', action: () => openEditLinkPopup(link, index) },
                     { label: 'Copy', action: () => copyLink(link, index) },
+                    { label: 'Copy Note', action: () => copyNote(link) },
                     { label: 'Delete', action: () => deleteLink(index) }
                 ];
                 showContextMenu(event, items);
@@ -140,6 +141,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     {
                         label: 'Copy',
                         action: () => copyLink(link, index)
+                    },
+                    {
+                        label: 'Copy Note',
+                        action: () => copyNote(link)
                     },
                     {
                         label: 'Delete',
@@ -317,6 +322,10 @@ document.addEventListener('DOMContentLoaded', function () {
             {
                 label: 'Copy',
                 action: () => copyLink(linkInfo.link, linkInfo.index)
+            },
+            {
+                label: 'Copy Note',
+                action: () => copyNote(linkInfo.link)
             },
             {
                 label: 'Delete',
@@ -624,6 +633,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
                             { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
                             { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                            { label: 'Copy Note', action: () => copyNote(linkData) },
                             { label: 'Delete', action: () => deleteLink(linkIndex) }
                         ];
                         showContextMenu(event, items);
@@ -659,6 +669,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             { label: 'New-Tab', action: () => window.open(linkData.url, '_blank') },
                             { label: 'Edit', action: () => openEditLinkPopup(linkData, linkIndex) },
                             { label: 'Copy', action: () => copyLink(linkData, linkIndex) },
+                            { label: 'Copy Note', action: () => copyNote(linkData) },
                             { label: 'Delete', action: () => deleteLink(linkIndex) }
                         ];
                         showContextMenu(event, items);
@@ -787,6 +798,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     {
                         label: 'Copy',
                         action: () => copyLink(linkData.link, linkData.index)
+                    },
+                    {
+                        label: 'Copy Note',
+                        action: () => copyNote(linkData.link)
                     },
                     {
                         label: 'Delete',
@@ -1462,6 +1477,84 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       editGroupForm.setAttribute('data-listener-attached', 'true');
     }
+  }
+
+  // Copy Note functionality
+  function copyNote(link) {
+    if (!link.note || !link.note.trim()) {
+      showNotification('No note to copy', 'error');
+      return;
+    }
+
+    // Try modern clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(link.note).then(() => {
+        showNotification('Note copied to clipboard!', 'success');
+      }).catch(() => {
+        // Fallback to older method
+        fallbackCopyTextToClipboard(link.note);
+      });
+    } else {
+      // Fallback to older method
+      fallbackCopyTextToClipboard(link.note);
+    }
+  }
+
+  // Fallback copy method for older browsers or non-secure contexts
+  function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showNotification('Note copied to clipboard!', 'success');
+      } else {
+        showNotification('Failed to copy note', 'error');
+      }
+    } catch (err) {
+      showNotification('Failed to copy note', 'error');
+    }
+    
+    document.body.removeChild(textArea);
+  }
+
+  // Show notification function
+  function showNotification(message, type = 'info') {
+    // Remove any existing notifications
+    const existingNotification = document.querySelector('.copy-notification');
+    if (existingNotification) {
+      existingNotification.remove();
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `copy-notification ${type}`;
+    notification.textContent = message;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+      notification.classList.add('show');
+    }, 10);
+    
+    // Hide and remove notification after 3 seconds
+    setTimeout(() => {
+      notification.classList.remove('show');
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
   }
 
   // Copy Link functionality
