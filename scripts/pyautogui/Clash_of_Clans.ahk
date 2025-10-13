@@ -99,81 +99,81 @@ F12:: ;! main base event attack
 
 
 
-; The tilde (~) prefix allows the right mouse button's original function
-; (e.g., context menu) to still occur, in addition to triggering this hotkey.
-; This hotkey triggers when the RButton is pressed down.
-~RButton::
-{
-    ; Loop indefinitely while the right mouse button is physically held down.
-    ; GetKeyState("RButton", "P") checks if the physical key state of RButton is 'pressed'.
-    While GetKeyState("RButton", "P")
-    {
-        ; Send the 'x' key. SendEvent is used for more reliable key sending.
-        SendEvent("x")
-        ; Pause for a short duration to ensure the game registers the key press.
-        Sleep(1) ; Adjust this value (in milliseconds) to control speed.
+; ; The tilde (~) prefix allows the right mouse button's original function
+; ; (e.g., context menu) to still occur, in addition to triggering this hotkey.
+; ; This hotkey triggers when the RButton is pressed down.
+; ~RButton::
+; {
+;     ; Loop indefinitely while the right mouse button is physically held down.
+;     ; GetKeyState("RButton", "P") checks if the physical key state of RButton is 'pressed'.
+;     While GetKeyState("RButton", "P")
+;     {
+;         ; Send the 'x' key. SendEvent is used for more reliable key sending.
+;         SendEvent("x")
+;         ; Pause for a short duration to ensure the game registers the key press.
+;         Sleep(1) ; Adjust this value (in milliseconds) to control speed.
 
-        ; Send the 'y' key.
-        SendEvent("y")
-        ; Pause again.
-        Sleep(1)
+;         ; Send the 'y' key.
+;         SendEvent("y")
+;         ; Pause again.
+;         Sleep(1)
 
-        ; Send the 'z' key.
-        SendEvent("z")
-        ; Pause for a short duration.
-        Sleep(1)
+;         ; Send the 'z' key.
+;         SendEvent("z")
+;         ; Pause for a short duration.
+;         Sleep(1)
 
-        ; Send the 'x' key. SendEvent is used for more reliable key sending.
-        SendEvent("i")
-        ; Pause for a short duration to ensure the game registers the key press.
-        Sleep(1) ; Adjust this value (in milliseconds) to control speed.
+;         ; Send the 'x' key. SendEvent is used for more reliable key sending.
+;         SendEvent("i")
+;         ; Pause for a short duration to ensure the game registers the key press.
+;         Sleep(1) ; Adjust this value (in milliseconds) to control speed.
 
-        ; Send the 'y' key.
-        SendEvent("o")
-        ; Pause again.
-        Sleep(1)
+;         ; Send the 'y' key.
+;         SendEvent("o")
+;         ; Pause again.
+;         Sleep(1)
 
-        ; Send the 'z' key.
-        SendEvent("p")
-        ; Pause for a short duration.
-        Sleep(1)
+;         ; Send the 'z' key.
+;         SendEvent("p")
+;         ; Pause for a short duration.
+;         Sleep(1)
 
-        ; Send the 'x' key. SendEvent is used for more reliable key sending.
-        SendEvent("g")
-        ; Pause for a short duration to ensure the game registers the key press.
-        Sleep(1) ; Adjust this value (in milliseconds) to control speed.
+;         ; Send the 'x' key. SendEvent is used for more reliable key sending.
+;         SendEvent("g")
+;         ; Pause for a short duration to ensure the game registers the key press.
+;         Sleep(1) ; Adjust this value (in milliseconds) to control speed.
 
-        ; Send the 'y' key.
-        SendEvent("h")
-        ; Pause again.
-        Sleep(1)
+;         ; Send the 'y' key.
+;         SendEvent("h")
+;         ; Pause again.
+;         Sleep(1)
 
-        ; Send the 'z' key.
-        SendEvent("t")
-        ; Pause for a short duration.
-        Sleep(1)
+;         ; Send the 'z' key.
+;         SendEvent("t")
+;         ; Pause for a short duration.
+;         Sleep(1)
 
-        ; Send the 'x' key. SendEvent is used for more reliable key sending.
-        SendEvent("s")
-        ; Pause for a short duration to ensure the game registers the key press.
-        Sleep(1) ; Adjust this value (in milliseconds) to control speed.
+;         ; Send the 'x' key. SendEvent is used for more reliable key sending.
+;         SendEvent("s")
+;         ; Pause for a short duration to ensure the game registers the key press.
+;         Sleep(1) ; Adjust this value (in milliseconds) to control speed.
 
-        ; Send the 'y' key.
-        SendEvent("f")
-        ; Pause again.
-        Sleep(1)
+;         ; Send the 'y' key.
+;         SendEvent("f")
+;         ; Pause again.
+;         Sleep(1)
 
-        ; Send the 'z' key.
-        SendEvent("k")
-        ; Pause for a short duration.
-        Sleep(1)
+;         ; Send the 'z' key.
+;         SendEvent("k")
+;         ; Pause for a short duration.
+;         Sleep(1)
 
-        ; You can add a slightly longer sleep here if you want a pause after
-        ; each 'x', 'y', 'z' cycle before it repeats.
-        ; Sleep(100)
-    }
-    ; The loop automatically stops when the right mouse button is released.
-}
+;         ; You can add a slightly longer sleep here if you want a pause after
+;         ; each 'x', 'y', 'z' cycle before it repeats.
+;         ; Sleep(100)
+;     }
+;     ; The loop automatically stops when the right mouse button is released.
+; }
 
 
 
