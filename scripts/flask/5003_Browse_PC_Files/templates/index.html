@@ -934,6 +934,10 @@
 
         <div class="filter-section">
             <button id="filter-btn" onclick="toggleFilterPanel()">Filter</button>
+            <button id="resetFilterBtn" onclick="resetFilter()"
+                style="display: none; background-color: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 0px; cursor: pointer; margin-top: 5px; font-family: JetBrainsMono NFP, sans-serif;">
+                Reset Filter
+            </button>
         </div>
     </div>
 
@@ -994,8 +998,6 @@
         </div>
 
         <button onclick="applyFilter()">Apply Filter</button>
-        <button id="resetFilterBtn" onclick="resetFilter()"
-            style="display: none; background-color: #ff6b6b; margin-top: 10px;">Reset Filter</button>
     </div>
 
 
