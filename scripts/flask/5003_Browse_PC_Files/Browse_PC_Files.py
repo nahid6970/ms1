@@ -537,6 +537,8 @@ def move_move_folder():
     path = data.get('path', '').strip()
     direction = data.get('direction', '').strip()
     
+    print(f"Move folder request: path='{path}', direction='{direction}'")
+    
     if not path:
         return jsonify({"error": "Path is required"}), 400
     
@@ -544,31 +546,46 @@ def move_move_folder():
         return jsonify({"error": "Direction must be 'up' or 'down'"}), 400
     
     move_folders = load_move_folders()
+    print(f"Total move folders: {len(move_folders)}")
     
     # Find the move folder index
     folder_index = -1
     for i, folder in enumerate(move_folders):
+        print(f"Checking folder {i}: '{folder['path']}' == '{path}' ? {folder['path'] == path}")
         if folder['path'] == path:
             folder_index = i
             break
     
     if folder_index == -1:
-        return jsonify({"error": "Move folder not found"}), 404
+        print(f"Move folder not found. Available paths: {[f['path'] for f in move_folders]}")
+        return jsonify({"error": f"Move folder not found. Path: '{path}'"}), 404
     
-    # Move the folder
-    if direction == 'up' and folder_index > 0:
-        # Swap with previous folder
-        move_folders[folder_index], move_folders[folder_index - 1] = move_folders[folder_index - 1], move_folders[folder_index]
-    elif direction == 'down' and folder_index < len(move_folders) - 1:
-        # Swap with next folder
-        move_folders[folder_index], move_folders[folder_index + 1] = move_folders[folder_index + 1], move_folders[folder_index]
-    else:
-        return jsonify({"error": "Cannot move folder in that direction"}), 400
+    print(f"Found folder at index {folder_index}")
+    
+    # Check boundaries and move
+    if direction == 'up':
+        if folder_index > 0:
+            print(f"Moving folder up from index {folder_index} to {folder_index - 1}")
+            # Swap with previous folder
+            move_folders[folder_index], move_folders[folder_index - 1] = move_folders[folder_index - 1], move_folders[folder_index]
+        else:
+            print("Cannot move up - already at top")
+            return jsonify({"error": "Cannot move up - folder is already at the top"}), 400
+    elif direction == 'down':
+        if folder_index < len(move_folders) - 1:
+            print(f"Moving folder down from index {folder_index} to {folder_index + 1}")
+            # Swap with next folder
+            move_folders[folder_index], move_folders[folder_index + 1] = move_folders[folder_index + 1], move_folders[folder_index]
+        else:
+            print("Cannot move down - already at bottom")
+            return jsonify({"error": "Cannot move down - folder is already at the bottom"}), 400
     
     if save_move_folders(move_folders):
+        print("Move folder operation successful")
         return jsonify({"success": "Move folder moved successfully"}), 200
     else:
-        return jsonify({"error": "Failed to move folder"}), 500
+        print("Failed to save move folders")
+        return jsonify({"error": "Failed to save move folders"}), 500
 
 @app.route('/move_bookmark', methods=['POST'])
 def move_bookmark():

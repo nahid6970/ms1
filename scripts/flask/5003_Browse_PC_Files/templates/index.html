@@ -1493,6 +1493,39 @@
                 });
         }
 
+        function refreshMoveFolderDropdown() {
+            fetch('/get_move_folders')
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('moveFolderDropdown');
+                    if (data.folders && data.folders.length > 0) {
+                        dropdown.innerHTML = data.folders.map(folder => `
+                            <div class="bookmark-item">
+                                <a href="/?dir_path=${encodeURIComponent(folder.path)}&drive=${encodeURIComponent(folder.path)}">
+                                    <i class="nf nf-fa-folder"></i> ${folder.name}
+                                </a>
+                                <div class="bookmark-controls">
+                                    <span class="bookmark-move-up" 
+                                        onclick="event.stopPropagation(); moveMoveFolder('${folder.path.replace(/'/g, "\\'")}', 'up');"
+                                        title="Move up">↑</span>
+                                    <span class="bookmark-move-down" 
+                                        onclick="event.stopPropagation(); moveMoveFolder('${folder.path.replace(/'/g, "\\'")}', 'down');"
+                                        title="Move down">↓</span>
+                                    <span class="bookmark-remove"
+                                        onclick="event.stopPropagation(); removeMoveFolder('${folder.path.replace(/'/g, "\\'")}');"
+                                        title="Remove">×</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        dropdown.innerHTML = '<div style="padding: 10px 15px; color: #999; font-style: italic; text-align: center;">No move folders yet</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to refresh move folders:', error);
+                });
+        }
+
         function addMoveFolder() {
             const currentPath = "{{ current_dir }}";
             const defaultName = currentPath.split('/').pop() || currentPath.split('\\').pop() || "Folder";
@@ -1512,7 +1545,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            loadMoveFoldersMain();
+                            refreshMoveFolderDropdown();
                         } else {
                             alert('Error: ' + data.error);
                         }
@@ -1538,7 +1571,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            loadMoveFoldersMain();
+                            refreshMoveFolderDropdown();
                         } else {
                             alert('Error: ' + data.error);
                         }
@@ -1551,6 +1584,8 @@
         }
 
         function moveMoveFolder(path, direction) {
+            console.log('Moving move folder:', path, direction);
+
             fetch('/move_move_folder', {
                 method: 'POST',
                 headers: {
@@ -1561,11 +1596,16 @@
                     direction: direction
                 })
             })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Move response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Move response data:', data);
                     if (data.success) {
-                        loadMoveFoldersMain();
+                        refreshMoveFolderDropdown();
                     } else {
+                        console.error('Move error:', data.error);
                         alert('Error: ' + data.error);
                     }
                 })
@@ -1574,6 +1614,31 @@
                     alert('Request failed: ' + error);
                 });
         }
+
+        function toggleMoveFolderDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('moveFolderDropdown');
+
+            // Close all other dropdowns first
+            document.querySelectorAll('.bookmark-dropdown-content').forEach(menu => {
+                menu.classList.remove('show');
+            });
+
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            } else {
+                loadMoveFoldersMain();
+                dropdown.classList.add('show');
+            }
+        }
+
+        // Close move folder dropdown when clicking outside
+        window.addEventListener('click', function (event) {
+            const moveFolderDropdown = document.getElementById('moveFolderDropdown');
+            if (!event.target.closest('.bookmark-dropdown') || event.target.closest('#bookmarkDropdown')) {
+                moveFolderDropdown.classList.remove('show');
+            }
+        });
     </script>
 
 
