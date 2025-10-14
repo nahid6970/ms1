@@ -205,6 +205,103 @@
             margin-right: 8px;
         }
 
+        .quick-move-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .quick-move-item .quick-move-folder {
+            flex: 1;
+            margin-bottom: 0;
+            margin-right: 5px;
+        }
+
+        .color-btn {
+            background-color: #666;
+            border: none;
+            color: white;
+            padding: 4px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .color-btn:hover {
+            background-color: #777;
+        }
+
+        .color-picker-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .color-picker-content {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            min-width: 300px;
+        }
+
+        .color-picker-content h3 {
+            color: white;
+            margin: 0 0 15px 0;
+            text-align: center;
+        }
+
+        .color-input-group {
+            margin-bottom: 15px;
+        }
+
+        .color-input-group label {
+            display: block;
+            color: white;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .color-input-group input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .color-picker-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .color-picker-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .save-color-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .cancel-color-btn {
+            background-color: #666;
+            color: white;
+        }
+
         .image-counter {
             font-size: 14px;
             color: #aaa;
@@ -437,6 +534,25 @@
 
         <div class="keyboard-hint">
             Use ← → arrow keys to navigate • Click image to zoom
+        </div>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div class="color-picker-modal" id="colorPickerModal">
+        <div class="color-picker-content">
+            <h3 id="colorPickerTitle">Customize Folder Colors</h3>
+            <div class="color-input-group">
+                <label for="bgColorInput">Background Color:</label>
+                <input type="color" id="bgColorInput" value="#444444">
+            </div>
+            <div class="color-input-group">
+                <label for="textColorInput">Text Color:</label>
+                <input type="color" id="textColorInput" value="#ffffff">
+            </div>
+            <div class="color-picker-buttons">
+                <button class="save-color-btn" onclick="saveColors()">Save</button>
+                <button class="cancel-color-btn" onclick="closeColorPicker()">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -781,9 +897,16 @@
                     const container = document.getElementById('quickMoveFolders');
                     if (data.folders && data.folders.length > 0) {
                         container.innerHTML = data.folders.map(folder => `
-                            <button class="quick-move-folder" onclick="quickMoveImage('${folder.path.replace(/'/g, "\\'")}')">
-                                <i class="nf nf-fa-folder"></i> ${folder.name}
-                            </button>
+                            <div class="quick-move-item">
+                                <button class="quick-move-folder" 
+                                    onclick="quickMoveImage('${folder.path.replace(/'/g, "\\'")}'))"
+                                    style="background-color: ${folder.bg_color || '#444'}; color: ${folder.text_color || '#ffffff'};">
+                                    <i class="nf nf-fa-folder"></i> ${folder.name}
+                                </button>
+                                <button class="color-btn" onclick="showColorPicker('${folder.path.replace(/'/g, "\\'")}', '${folder.name}', '${folder.bg_color || '#444'}', '${folder.text_color || '#ffffff'}')" title="Change colors">
+                                    🎨
+                                </button>
+                            </div>
                         `).join('');
                     } else {
                         container.innerHTML = '<div style="color: #999; text-align: center; font-size: 12px;">No move folders</div>';
@@ -841,6 +964,59 @@
                 loadQuickMoveFolders();
             } else {
                 toggleBtn.style.backgroundColor = '#444';
+            }
+        });
+
+        // Color picker functionality
+        let currentColorPath = '';
+
+        function showColorPicker(path, name, bgColor, textColor) {
+            currentColorPath = path;
+            document.getElementById('colorPickerTitle').textContent = `Customize Colors: ${name}`;
+            document.getElementById('bgColorInput').value = bgColor;
+            document.getElementById('textColorInput').value = textColor;
+            document.getElementById('colorPickerModal').style.display = 'flex';
+        }
+
+        function closeColorPicker() {
+            document.getElementById('colorPickerModal').style.display = 'none';
+            currentColorPath = '';
+        }
+
+        function saveColors() {
+            const bgColor = document.getElementById('bgColorInput').value;
+            const textColor = document.getElementById('textColorInput').value;
+
+            fetch('/update_move_folder_color', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    path: currentColorPath,
+                    bg_color: bgColor,
+                    text_color: textColor
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeColorPicker();
+                    loadQuickMoveFolders(); // Refresh the folders to show new colors
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Request failed:', error);
+                alert('Request failed: ' + error);
+            });
+        }
+
+        // Close color picker when clicking outside
+        document.getElementById('colorPickerModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeColorPicker();
             }
         });
 

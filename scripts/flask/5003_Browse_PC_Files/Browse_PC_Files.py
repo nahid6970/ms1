@@ -151,6 +151,40 @@ def save_move_folders(move_folders):
         print(f"Error saving move folders to {MOVE_FOLDERS_FILE}: {e}")
         return False
 
+@app.route('/update_move_folder_color', methods=['POST'])
+def update_move_folder_color():
+    """Update the color of a move folder."""
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    bg_color = data.get('bg_color', '#444').strip()
+    text_color = data.get('text_color', '#ffffff').strip()
+    
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+    
+    # Normalize the path
+    normalized_path = os.path.normpath(path).replace('\\', '/')
+    
+    move_folders = load_move_folders()
+    
+    # Find and update the folder
+    folder_found = False
+    for folder in move_folders:
+        folder_normalized = os.path.normpath(folder['path']).replace('\\', '/')
+        if folder_normalized == normalized_path:
+            folder['bg_color'] = bg_color
+            folder['text_color'] = text_color
+            folder_found = True
+            break
+    
+    if not folder_found:
+        return jsonify({"error": "Move folder not found"}), 404
+    
+    if save_move_folders(move_folders):
+        return jsonify({"success": "Folder color updated successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to update folder color"}), 500
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     drive = request.args.get('drive', 'C:/')
@@ -448,15 +482,21 @@ def get_move_folders():
     """Get move folders as JSON for dynamic updates."""
     move_folders = load_move_folders()
     
-    # Clean up and normalize paths if needed
+    # Clean up and normalize paths if needed, add default colors
     cleaned_folders = []
     for folder in move_folders:
         normalized_path = os.path.normpath(folder['path']).replace('\\', '/')
-        cleaned_folders.append({"path": normalized_path, "name": folder['name']})
+        cleaned_folder = {
+            "path": normalized_path, 
+            "name": folder['name'],
+            "bg_color": folder.get('bg_color', '#444'),
+            "text_color": folder.get('text_color', '#ffffff')
+        }
+        cleaned_folders.append(cleaned_folder)
     
     # Save cleaned folders if any changes were made
     if cleaned_folders != move_folders:
-        print("Cleaning up inconsistent move folder paths...")
+        print("Cleaning up move folder paths and adding default colors...")
         save_move_folders(cleaned_folders)
         move_folders = cleaned_folders
     
@@ -484,8 +524,13 @@ def add_move_folder():
         if existing_normalized == normalized_path:
             return jsonify({"error": "Folder already exists in move list"}), 400
     
-    # Add new folder with normalized path
-    move_folders.append({"path": normalized_path, "name": name})
+    # Add new folder with normalized path and default colors
+    move_folders.append({
+        "path": normalized_path, 
+        "name": name,
+        "bg_color": "#444",
+        "text_color": "#ffffff"
+    })
     
     if save_move_folders(move_folders):
         return jsonify({"success": "Move folder added successfully"}), 200
