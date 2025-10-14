@@ -5,38 +5,38 @@
     "bg_color": "#ff8f8f",
     "text_color": "#000000",
     "hover_bg_color": "#ff9800",
-    "hover_text_color": "#ffffff"
+    "hover_text_color": "#000000"
   },
   {
     "path": "C:/Users/nahid/ms/msBackups/@JOB/job_solution_downloads/Done",
     "name": "Done",
     "bg_color": "#4dff61",
     "text_color": "#000000",
-    "hover_bg_color": "#FF9800",
-    "hover_text_color": "#ffffff"
+    "hover_bg_color": "#ff9800",
+    "hover_text_color": "#000000"
   },
   {
     "path": "C:/Users/nahid/Pictures/Title",
     "name": "Title",
-    "bg_color": "#444",
+    "bg_color": "#000000",
     "text_color": "#ffffff",
-    "hover_bg_color": "#FF9800",
-    "hover_text_color": "#ffffff"
+    "hover_bg_color": "#ff9800",
+    "hover_text_color": "#000000"
   },
   {
     "path": "C:/Users/nahid/Pictures/Medicine",
     "name": "Medicine",
-    "bg_color": "#444",
+    "bg_color": "#000000",
     "text_color": "#ffffff",
-    "hover_bg_color": "#FF9800",
-    "hover_text_color": "#ffffff"
+    "hover_bg_color": "#ff9800",
+    "hover_text_color": "#000000"
   },
   {
     "path": "C:/Users/nahid/Pictures/sassybaka",
     "name": "sussy",
     "bg_color": "#ff70f3",
     "text_color": "#000000",
-    "hover_bg_color": "#FF9800",
-    "hover_text_color": "#ffffff"
+    "hover_bg_color": "#ff9800",
+    "hover_text_color": "#000000"
   }
 ]
