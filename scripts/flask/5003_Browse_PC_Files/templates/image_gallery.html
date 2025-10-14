@@ -161,6 +161,50 @@
             background-color: #F57C00;
         }
 
+        .quick-move-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 15px;
+            z-index: 100;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .quick-move-panel h4 {
+            color: #fff;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .quick-move-folder {
+            display: block;
+            width: 100%;
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: left;
+            transition: background-color 0.2s;
+        }
+
+        .quick-move-folder:hover {
+            background-color: #FF9800;
+        }
+
+        .quick-move-folder i {
+            margin-right: 8px;
+        }
+
         .image-counter {
             font-size: 14px;
             color: #aaa;
@@ -350,6 +394,9 @@
                     <!-- Move folders will be loaded here -->
                 </div>
             </div>
+            <button class="control-btn" onclick="toggleQuickMove()" id="quickMoveToggle">
+                <i class="nf nf-fa-eye"></i> Quick Move
+            </button>
             <button class="control-btn back-btn" onclick="goBack()">
                 <i class="nf nf-fa-arrow_left"></i> Back to Files
             </button>
@@ -357,6 +404,12 @@
     </div>
 
     <div class="image-container" id="imageContainer">
+        <div class="quick-move-panel" id="quickMovePanel" style="display: none;">
+            <h4>Quick Move</h4>
+            <div id="quickMoveFolders">
+                <!-- Quick move folders will be loaded here -->
+            </div>
+        </div>
         <div class="image-wrapper" id="imageWrapper">
             <img src="/serve_image/{{ dir_path }}/{{ current_image }}" alt="{{ current_image }}" class="main-image"
                 id="mainImage" onclick="toggleZoom()">
@@ -700,6 +753,96 @@
                     });
             }
         }
+
+        // Quick Move functionality
+        let quickMoveEnabled = localStorage.getItem('quickMoveEnabled') === 'true';
+
+        function toggleQuickMove() {
+            const panel = document.getElementById('quickMovePanel');
+            const toggleBtn = document.getElementById('quickMoveToggle');
+            
+            quickMoveEnabled = !quickMoveEnabled;
+            localStorage.setItem('quickMoveEnabled', quickMoveEnabled);
+            
+            if (quickMoveEnabled) {
+                panel.style.display = 'block';
+                toggleBtn.style.backgroundColor = '#4CAF50';
+                loadQuickMoveFolders();
+            } else {
+                panel.style.display = 'none';
+                toggleBtn.style.backgroundColor = '#444';
+            }
+        }
+
+        function loadQuickMoveFolders() {
+            fetch('/get_move_folders')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('quickMoveFolders');
+                    if (data.folders && data.folders.length > 0) {
+                        container.innerHTML = data.folders.map(folder => `
+                            <button class="quick-move-folder" onclick="quickMoveImage('${folder.path.replace(/'/g, "\\'")}')">
+                                <i class="nf nf-fa-folder"></i> ${folder.name}
+                            </button>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<div style="color: #999; text-align: center; font-size: 12px;">No move folders</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load quick move folders:', error);
+                });
+        }
+
+        function quickMoveImage(targetPath) {
+            const currentImage = '{{ current_image }}';
+            const currentDir = '{{ dir_path }}';
+            
+            // Move without confirmation for quick move
+            fetch('/move_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    source_dir: currentDir,
+                    filename: currentImage,
+                    target_dir: targetPath
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show next image or go back if no more images
+                    {% if next_image %}
+                    window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ next_image | urlencode }}&drive={{ current_drive | urlencode }}`;
+                    {% elif prev_image %}
+                    window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ prev_image | urlencode }}&drive={{ current_drive | urlencode }}`;
+                    {% else %}
+                    // No more images, go back to file browser
+                    window.location.href = '/?dir_path={{ dir_path | urlencode }}&drive={{ current_drive | urlencode }}';
+                    {% endif %}
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Request failed:', error);
+                alert('Request failed: ' + error);
+            });
+        }
+
+        // Initialize quick move on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('quickMoveToggle');
+            if (quickMoveEnabled) {
+                document.getElementById('quickMovePanel').style.display = 'block';
+                toggleBtn.style.backgroundColor = '#4CAF50';
+                loadQuickMoveFolders();
+            } else {
+                toggleBtn.style.backgroundColor = '#444';
+            }
+        });
 
         // Close dropdown when clicking outside
         window.addEventListener('click', function (event) {
