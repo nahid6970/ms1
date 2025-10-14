@@ -994,6 +994,8 @@
         </div>
 
         <button onclick="applyFilter()">Apply Filter</button>
+        <button id="resetFilterBtn" onclick="resetFilter()"
+            style="display: none; background-color: #ff6b6b; margin-top: 10px;">Reset Filter</button>
     </div>
 
 
@@ -1131,10 +1133,62 @@
                 }
             });
 
+            // Save filter state to localStorage
+            localStorage.setItem('fileFilters', JSON.stringify(selectedFilters));
+
+            // Show/hide reset button
+            const resetBtn = document.getElementById('resetFilterBtn');
+            if (selectedFilters.length > 0) {
+                resetBtn.style.display = 'block';
+            } else {
+                resetBtn.style.display = 'none';
+            }
+
             // Close the filter panel after applying
             const filterPanel = document.getElementById('filter-panel');
             filterPanel.style.display = 'none';
         }
+
+        // Reset all filters
+        function resetFilter() {
+            // Uncheck all filter checkboxes
+            document.querySelectorAll('.file-filter').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // Show all files
+            document.querySelectorAll('.file-item').forEach(file => {
+                file.style.display = 'flex';
+            });
+
+            // Clear saved filter state
+            localStorage.removeItem('fileFilters');
+
+            // Hide reset button
+            document.getElementById('resetFilterBtn').style.display = 'none';
+        }
+
+        // Load saved filters on page load
+        function loadSavedFilters() {
+            const savedFilters = localStorage.getItem('fileFilters');
+            if (savedFilters) {
+                const filterArray = JSON.parse(savedFilters);
+
+                // Check the saved filter checkboxes
+                filterArray.forEach(filterValue => {
+                    const checkbox = document.querySelector(`.file-filter[value="${filterValue}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+
+                // Apply the saved filters
+                applyFilter();
+            }
+        }
+
+        // Load saved filters when page loads
+        document.addEventListener('DOMContentLoaded', loadSavedFilters);
 
         // Toggle the visibility of the dropdown menu
         function showContextMenu(event, fileName) {
