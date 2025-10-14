@@ -447,6 +447,19 @@ def serve_image(file_path):
 def get_move_folders():
     """Get move folders as JSON for dynamic updates."""
     move_folders = load_move_folders()
+    
+    # Clean up and normalize paths if needed
+    cleaned_folders = []
+    for folder in move_folders:
+        normalized_path = os.path.normpath(folder['path']).replace('\\', '/')
+        cleaned_folders.append({"path": normalized_path, "name": folder['name']})
+    
+    # Save cleaned folders if any changes were made
+    if cleaned_folders != move_folders:
+        print("Cleaning up inconsistent move folder paths...")
+        save_move_folders(cleaned_folders)
+        move_folders = cleaned_folders
+    
     return jsonify({"folders": move_folders}), 200
 
 @app.route('/add_move_folder', methods=['POST'])
@@ -459,15 +472,20 @@ def add_move_folder():
     if not path or not name:
         return jsonify({"error": "Path and name are required"}), 400
     
+    # Normalize the path to use forward slashes consistently
+    normalized_path = os.path.normpath(path).replace('\\', '/')
+    print(f"Original path: '{path}' -> Normalized path: '{normalized_path}'")
+    
     move_folders = load_move_folders()
     
-    # Check if folder already exists
+    # Check if folder already exists (compare normalized paths)
     for folder in move_folders:
-        if folder['path'] == path:
+        existing_normalized = os.path.normpath(folder['path']).replace('\\', '/')
+        if existing_normalized == normalized_path:
             return jsonify({"error": "Folder already exists in move list"}), 400
     
-    # Add new folder
-    move_folders.append({"path": path, "name": name})
+    # Add new folder with normalized path
+    move_folders.append({"path": normalized_path, "name": name})
     
     if save_move_folders(move_folders):
         return jsonify({"success": "Move folder added successfully"}), 200
@@ -548,11 +566,16 @@ def move_move_folder():
     move_folders = load_move_folders()
     print(f"Total move folders: {len(move_folders)}")
     
+    # Normalize the search path
+    normalized_search_path = os.path.normpath(path).replace('\\', '/')
+    print(f"Normalized search path: '{normalized_search_path}'")
+    
     # Find the move folder index
     folder_index = -1
     for i, folder in enumerate(move_folders):
-        print(f"Checking folder {i}: '{folder['path']}' == '{path}' ? {folder['path'] == path}")
-        if folder['path'] == path:
+        folder_normalized = os.path.normpath(folder['path']).replace('\\', '/')
+        print(f"Checking folder {i}: '{folder_normalized}' == '{normalized_search_path}' ? {folder_normalized == normalized_search_path}")
+        if folder_normalized == normalized_search_path:
             folder_index = i
             break
     
