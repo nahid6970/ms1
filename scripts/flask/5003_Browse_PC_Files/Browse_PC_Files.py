@@ -158,6 +158,8 @@ def update_move_folder_color():
     path = data.get('path', '').strip()
     bg_color = data.get('bg_color', '#444').strip()
     text_color = data.get('text_color', '#ffffff').strip()
+    hover_bg_color = data.get('hover_bg_color', '#FF9800').strip()
+    hover_text_color = data.get('hover_text_color', '#ffffff').strip()
     
     if not path:
         return jsonify({"error": "Path is required"}), 400
@@ -174,6 +176,8 @@ def update_move_folder_color():
         if folder_normalized == normalized_path:
             folder['bg_color'] = bg_color
             folder['text_color'] = text_color
+            folder['hover_bg_color'] = hover_bg_color
+            folder['hover_text_color'] = hover_text_color
             folder_found = True
             break
     
@@ -490,7 +494,9 @@ def get_move_folders():
             "path": normalized_path, 
             "name": folder['name'],
             "bg_color": folder.get('bg_color', '#444'),
-            "text_color": folder.get('text_color', '#ffffff')
+            "text_color": folder.get('text_color', '#ffffff'),
+            "hover_bg_color": folder.get('hover_bg_color', '#FF9800'),
+            "hover_text_color": folder.get('hover_text_color', '#ffffff')
         }
         cleaned_folders.append(cleaned_folder)
     
@@ -529,7 +535,9 @@ def add_move_folder():
         "path": normalized_path, 
         "name": name,
         "bg_color": "#444",
-        "text_color": "#ffffff"
+        "text_color": "#ffffff",
+        "hover_bg_color": "#FF9800",
+        "hover_text_color": "#ffffff"
     })
     
     if save_move_folders(move_folders):

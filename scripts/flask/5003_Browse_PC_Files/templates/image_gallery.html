@@ -549,6 +549,14 @@
                 <label for="textColorInput">Text Color:</label>
                 <input type="color" id="textColorInput" value="#ffffff">
             </div>
+            <div class="color-input-group">
+                <label for="hoverBgColorInput">Hover Background Color:</label>
+                <input type="color" id="hoverBgColorInput" value="#FF9800">
+            </div>
+            <div class="color-input-group">
+                <label for="hoverTextColorInput">Hover Text Color:</label>
+                <input type="color" id="hoverTextColorInput" value="#ffffff">
+            </div>
             <div class="color-picker-buttons">
                 <button class="save-color-btn" onclick="saveColors()">Save</button>
                 <button class="cancel-color-btn" onclick="closeColorPicker()">Cancel</button>
@@ -896,17 +904,23 @@
                 .then(data => {
                     const container = document.getElementById('quickMoveFolders');
                     if (data.folders && data.folders.length > 0) {
-                        container.innerHTML = data.folders.map(folder => `
+                        container.innerHTML = data.folders.map((folder, index) => `
                             <div class="quick-move-item">
-                                <button class="quick-move-folder" 
+                                <button class="quick-move-folder quick-move-folder-${index}" 
                                     onclick="quickMoveImage('${folder.path.replace(/'/g, "\\'")}'))"
                                     style="background-color: ${folder.bg_color || '#444'}; color: ${folder.text_color || '#ffffff'};">
                                     <i class="nf nf-fa-folder"></i> ${folder.name}
                                 </button>
-                                <button class="color-btn" onclick="showColorPicker('${folder.path.replace(/'/g, "\\'")}', '${folder.name}', '${folder.bg_color || '#444'}', '${folder.text_color || '#ffffff'}')" title="Change colors">
+                                <button class="color-btn" onclick="showColorPicker('${folder.path.replace(/'/g, "\\'")}', '${folder.name}', '${folder.bg_color || '#444'}', '${folder.text_color || '#ffffff'}', '${folder.hover_bg_color || '#FF9800'}', '${folder.hover_text_color || '#ffffff'}')" title="Change colors">
                                     🎨
                                 </button>
                             </div>
+                            <style>
+                                .quick-move-folder-${index}:hover {
+                                    background-color: ${folder.hover_bg_color || '#FF9800'} !important;
+                                    color: ${folder.hover_text_color || '#ffffff'} !important;
+                                }
+                            </style>
                         `).join('');
                     } else {
                         container.innerHTML = '<div style="color: #999; text-align: center; font-size: 12px;">No move folders</div>';
@@ -970,11 +984,13 @@
         // Color picker functionality
         let currentColorPath = '';
 
-        function showColorPicker(path, name, bgColor, textColor) {
+        function showColorPicker(path, name, bgColor, textColor, hoverBgColor, hoverTextColor) {
             currentColorPath = path;
             document.getElementById('colorPickerTitle').textContent = `Customize Colors: ${name}`;
             document.getElementById('bgColorInput').value = bgColor;
             document.getElementById('textColorInput').value = textColor;
+            document.getElementById('hoverBgColorInput').value = hoverBgColor;
+            document.getElementById('hoverTextColorInput').value = hoverTextColor;
             document.getElementById('colorPickerModal').style.display = 'flex';
         }
 
@@ -986,6 +1002,8 @@
         function saveColors() {
             const bgColor = document.getElementById('bgColorInput').value;
             const textColor = document.getElementById('textColorInput').value;
+            const hoverBgColor = document.getElementById('hoverBgColorInput').value;
+            const hoverTextColor = document.getElementById('hoverTextColorInput').value;
 
             fetch('/update_move_folder_color', {
                 method: 'POST',
@@ -995,7 +1013,9 @@
                 body: JSON.stringify({
                     path: currentColorPath,
                     bg_color: bgColor,
-                    text_color: textColor
+                    text_color: textColor,
+                    hover_bg_color: hoverBgColor,
+                    hover_text_color: hoverTextColor
                 })
             })
             .then(response => response.json())
