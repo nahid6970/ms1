@@ -329,7 +329,9 @@
 
         .filter-section {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
         }
 
         /* Responsive behavior */
@@ -619,6 +621,28 @@
         #filter-btn:hover {
             background-color: #555;
             /* Lighter color on hover */
+        }
+
+        #resetFilterBtn {
+            font-family: JetBrainsMono NFP, sans-serif;
+            position: fixed;
+            /* Fix it at the top */
+            top: 60px;
+            /* 60px from the top (below filter button) */
+            right: 10px;
+            /* 10px from the right (same as filter button) */
+            z-index: 9998;
+            /* Below filter button but above other elements */
+            background-color: #ff6b6b;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 0px;
+            cursor: pointer;
+        }
+
+        #resetFilterBtn:hover {
+            background-color: #ff5252;
         }
 
         #filter-panel {
@@ -934,8 +958,7 @@
 
         <div class="filter-section">
             <button id="filter-btn" onclick="toggleFilterPanel()">Filter</button>
-            <button id="resetFilterBtn" onclick="resetFilter()"
-                style="display: none; background-color: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 0px; cursor: pointer; margin-top: 5px; font-family: JetBrainsMono NFP, sans-serif;">
+            <button id="resetFilterBtn" onclick="resetFilter()" style="display: none;">
                 Reset Filter
             </button>
         </div>
