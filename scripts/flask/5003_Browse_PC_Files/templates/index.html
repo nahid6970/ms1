@@ -256,6 +256,24 @@
             background-color: #1976D2 !important;
         }
 
+        /* Make download link look exactly like explorer button */
+        a.explorer-btn {
+            display: inline-block;
+            background-color: #2196F3 !important;
+            color: white !important;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        a.explorer-btn:hover {
+            background-color: #1976D2 !important;
+        }
+
         .download-btn-custom {
             background-color: #4CAF50 !important;
         }
@@ -699,8 +717,8 @@
 
         .download-btn {
             padding: 5px 10px;
-            background-color: rgb(119, 255, 119);
-            color: black !important;
+            background-color: #2196F3 !important;
+            color: white !important;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -709,7 +727,7 @@
         }
 
         .download-btn:hover {
-            background-color: #45a049;
+            background-color: #1976D2 !important;
         }
 
         .edit-btn {
@@ -907,8 +925,8 @@
                 <button class="explorer-btn" onclick="openInExplorer()">
                     <i class="nf nf-fa-folder_open"></i> Explorer
                 </button>
-                <a href="/download_directory?dir_path={{ current_dir | urlencode }}"
-                    class="explorer-btn download-btn-custom" style="text-decoration: none;">
+                <a href="/download_directory?dir_path={{ current_dir | urlencode }}" class="explorer-btn"
+                    style="text-decoration: none;">
                     <i class="nf nf-fa-download"></i> Download
                 </a>
             </div>
