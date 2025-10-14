@@ -60,6 +60,36 @@
             background-color: #45a049;
         }
 
+        .zoom-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #444;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .zoom-control label {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .zoom-input {
+            width: 50px;
+            padding: 2px 5px;
+            border: 1px solid #666;
+            border-radius: 3px;
+            background-color: #333;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .zoom-input:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+
         .image-counter {
             font-size: 14px;
             color: #aaa;
@@ -136,7 +166,6 @@
         }
 
         .main-image.zoomed {
-            transform: scale(1.5);
             cursor: zoom-out;
             max-width: none;
             max-height: none;
@@ -237,6 +266,11 @@
             <div class="image-counter">{{ current_index }} of {{ total_images }}</div>
         </div>
         <div class="gallery-controls">
+            <div class="zoom-control">
+                <label>Zoom:</label>
+                <input type="number" class="zoom-input" id="zoomInput" value="150" min="100" max="500" step="10">
+                <span style="font-size: 12px; color: #aaa;">%</span>
+            </div>
             <button class="control-btn back-btn" onclick="goBack()">
                 <i class="nf nf-fa-arrow_left"></i> Back to Files
             </button>
@@ -335,9 +369,14 @@
         function toggleZoom() {
             const image = document.getElementById('mainImage');
             const wrapper = document.getElementById('imageWrapper');
+            const zoomInput = document.getElementById('zoomInput');
 
             if (!isZoomed) {
-                // Zoom in to 150%
+                // Get zoom level from input (convert percentage to decimal)
+                const zoomLevel = parseInt(zoomInput.value) / 100;
+
+                // Apply custom zoom level
+                image.style.transform = `scale(${zoomLevel})`;
                 image.classList.add('zoomed');
                 wrapper.classList.add('zoomed');
                 isZoomed = true;
@@ -349,6 +388,7 @@
                 }, 10);
             } else {
                 // Reset to default
+                image.style.transform = 'scale(1)';
                 image.classList.remove('zoomed');
                 wrapper.classList.remove('zoomed');
                 wrapper.scrollLeft = 0;
@@ -356,6 +396,15 @@
                 isZoomed = false;
             }
         }
+
+        // Update zoom when input changes (if already zoomed)
+        document.getElementById('zoomInput').addEventListener('input', function () {
+            if (isZoomed) {
+                const image = document.getElementById('mainImage');
+                const zoomLevel = parseInt(this.value) / 100;
+                image.style.transform = `scale(${zoomLevel})`;
+            }
+        });
 
         // Pan functionality when zoomed
         function startDrag(e) {
