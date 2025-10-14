@@ -530,6 +530,46 @@ def get_bookmarks():
     bookmarks = load_bookmarks()
     return jsonify({"bookmarks": bookmarks}), 200
 
+@app.route('/move_move_folder', methods=['POST'])
+def move_move_folder():
+    """Move a move folder up or down in the list."""
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    direction = data.get('direction', '').strip()
+    
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+    
+    if direction not in ['up', 'down']:
+        return jsonify({"error": "Direction must be 'up' or 'down'"}), 400
+    
+    move_folders = load_move_folders()
+    
+    # Find the move folder index
+    folder_index = -1
+    for i, folder in enumerate(move_folders):
+        if folder['path'] == path:
+            folder_index = i
+            break
+    
+    if folder_index == -1:
+        return jsonify({"error": "Move folder not found"}), 404
+    
+    # Move the folder
+    if direction == 'up' and folder_index > 0:
+        # Swap with previous folder
+        move_folders[folder_index], move_folders[folder_index - 1] = move_folders[folder_index - 1], move_folders[folder_index]
+    elif direction == 'down' and folder_index < len(move_folders) - 1:
+        # Swap with next folder
+        move_folders[folder_index], move_folders[folder_index + 1] = move_folders[folder_index + 1], move_folders[folder_index]
+    else:
+        return jsonify({"error": "Cannot move folder in that direction"}), 400
+    
+    if save_move_folders(move_folders):
+        return jsonify({"success": "Move folder moved successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to move folder"}), 500
+
 @app.route('/move_bookmark', methods=['POST'])
 def move_bookmark():
     """Move a bookmark up or down in the list."""

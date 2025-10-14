@@ -682,8 +682,15 @@
                     .then(data => {
                         if (data.success) {
                             alert('Image moved successfully!');
-                            // Go back to file browser in the original directory
+                            // Show next image or go back if no more images
+                            {% if next_image %}
+                            window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ next_image | urlencode }}&drive={{ current_drive | urlencode }}`;
+                            {% elif prev_image %}
+                            window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ prev_image | urlencode }}&drive={{ current_drive | urlencode }}`;
+                            {% else %}
+                            // No more images, go back to file browser
                             window.location.href = '/?dir_path={{ dir_path | urlencode }}&drive={{ current_drive | urlencode }}';
+                            {% endif %}
                         } else {
                             alert('Error: ' + data.error);
                         }

@@ -886,12 +886,29 @@
                 </div>
             </div>
 
+            <!-- Move Folders Group -->
+            <div class="bookmark-group" style="background-color: #666;">
+                <button class="bookmark-add-btn" onclick="addMoveFolder()" style="background-color: #FF9800;">
+                    <i class="nf nf-fa-folder_open"></i> Add Move
+                </button>
+
+                <div class="bookmark-dropdown">
+                    <button onclick="toggleMoveFolderDropdown(event)" style="background-color: #FF9800;">
+                        <i class="nf nf-fa-chevron_down"></i> Move Folders
+                    </button>
+                    <div class="bookmark-dropdown-content" id="moveFolderDropdown">
+                        <!-- Move folders will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Explorer Group -->
             <div class="explorer-group">
                 <button class="explorer-btn" onclick="openInExplorer()">
                     <i class="nf nf-fa-folder_open"></i> Explorer
                 </button>
-                <a href="/download_directory?dir_path={{ current_dir | urlencode }}" class="explorer-btn download-btn-custom" style="text-decoration: none;">
+                <a href="/download_directory?dir_path={{ current_dir | urlencode }}"
+                    class="explorer-btn download-btn-custom" style="text-decoration: none;">
                     <i class="nf nf-fa-download"></i> Download
                 </a>
             </div>
@@ -1332,6 +1349,134 @@
                 dropdown.style.display = 'none';
             }
         });
+
+        // Move folder functionality for main browser
+        function toggleMoveFolderDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('moveFolderDropdown');
+
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            } else {
+                loadMoveFoldersMain();
+                dropdown.classList.add('show');
+            }
+        }
+
+        function loadMoveFoldersMain() {
+            fetch('/get_move_folders')
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('moveFolderDropdown');
+                    if (data.folders && data.folders.length > 0) {
+                        dropdown.innerHTML = data.folders.map(folder => `
+                            <div class="bookmark-item">
+                                <a href="/?dir_path=${encodeURIComponent(folder.path)}&drive=${encodeURIComponent(folder.path)}">
+                                    <i class="nf nf-fa-folder"></i> ${folder.name}
+                                </a>
+                                <div class="bookmark-controls">
+                                    <span class="bookmark-move-up" 
+                                        onclick="event.stopPropagation(); moveMoveFolder('${folder.path.replace(/'/g, "\\'")}', 'up');"
+                                        title="Move up">↑</span>
+                                    <span class="bookmark-move-down" 
+                                        onclick="event.stopPropagation(); moveMoveFolder('${folder.path.replace(/'/g, "\\'")}', 'down');"
+                                        title="Move down">↓</span>
+                                    <span class="bookmark-remove"
+                                        onclick="event.stopPropagation(); removeMoveFolder('${folder.path.replace(/'/g, "\\'")}');"
+                                        title="Remove">×</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        dropdown.innerHTML = '<div style="padding: 10px 15px; color: #999; font-style: italic; text-align: center;">No move folders yet</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load move folders:', error);
+                });
+        }
+
+        function addMoveFolder() {
+            const currentPath = "{{ current_dir }}";
+            const defaultName = currentPath.split('/').pop() || currentPath.split('\\').pop() || "Folder";
+            const folderName = prompt("Enter move folder name:", defaultName);
+
+            if (folderName && folderName.trim()) {
+                fetch('/add_move_folder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path: currentPath,
+                        name: folderName.trim()
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadMoveFoldersMain();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Request failed:', error);
+                        alert('Request failed: ' + error);
+                    });
+            }
+        }
+
+        function removeMoveFolder(path) {
+            if (confirm('Remove this move folder?')) {
+                fetch('/remove_move_folder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path: path
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadMoveFoldersMain();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Request failed:', error);
+                        alert('Request failed: ' + error);
+                    });
+            }
+        }
+
+        function moveMoveFolder(path, direction) {
+            fetch('/move_move_folder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    path: path,
+                    direction: direction
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadMoveFoldersMain();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Request failed:', error);
+                    alert('Request failed: ' + error);
+                });
+        }
     </script>
 
 
