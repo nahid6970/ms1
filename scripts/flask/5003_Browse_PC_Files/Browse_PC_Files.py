@@ -10,6 +10,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 BOOKMARKS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bookmarks.json')
+MOVE_FOLDERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'move_folders.json')
 
 EDITABLE_EXTENSIONS = (".py", ".ps1", ".txt", ".log", ".html", ".css", ".ahk", ".md")
 
@@ -124,6 +125,30 @@ def save_bookmarks(bookmarks):
         return True
     except Exception as e:
         print(f"Error saving bookmarks to {BOOKMARKS_FILE}: {e}")
+        return False
+
+def load_move_folders():
+    """Load move folders from JSON file."""
+    try:
+        if os.path.exists(MOVE_FOLDERS_FILE):
+            with open(MOVE_FOLDERS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading move folders: {e}")
+    return []
+
+def save_move_folders(move_folders):
+    """Save move folders to JSON file."""
+    try:
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(MOVE_FOLDERS_FILE), exist_ok=True)
+        
+        with open(MOVE_FOLDERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(move_folders, f, indent=2, ensure_ascii=False)
+        print(f"Move folders saved successfully to {MOVE_FOLDERS_FILE}")
+        return True
+    except Exception as e:
+        print(f"Error saving move folders to {MOVE_FOLDERS_FILE}: {e}")
         return False
 
 @app.route("/", methods=["GET", "POST"])
@@ -417,6 +442,87 @@ def serve_image(file_path):
         return send_file(full_file_path, mimetype=mimetype)
     else:
         return "Image not found", 404
+
+@app.route('/get_move_folders', methods=['GET'])
+def get_move_folders():
+    """Get move folders as JSON for dynamic updates."""
+    move_folders = load_move_folders()
+    return jsonify({"folders": move_folders}), 200
+
+@app.route('/add_move_folder', methods=['POST'])
+def add_move_folder():
+    """Add a new move folder."""
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    name = data.get('name', '').strip()
+    
+    if not path or not name:
+        return jsonify({"error": "Path and name are required"}), 400
+    
+    move_folders = load_move_folders()
+    
+    # Check if folder already exists
+    for folder in move_folders:
+        if folder['path'] == path:
+            return jsonify({"error": "Folder already exists in move list"}), 400
+    
+    # Add new folder
+    move_folders.append({"path": path, "name": name})
+    
+    if save_move_folders(move_folders):
+        return jsonify({"success": "Move folder added successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to add move folder"}), 500
+
+@app.route('/remove_move_folder', methods=['POST'])
+def remove_move_folder():
+    """Remove a move folder."""
+    data = request.get_json()
+    path = data.get('path', '').strip()
+    
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+    
+    move_folders = load_move_folders()
+    move_folders = [folder for folder in move_folders if folder['path'] != path]
+    
+    if save_move_folders(move_folders):
+        return jsonify({"success": "Move folder removed successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to remove move folder"}), 500
+
+@app.route('/move_image', methods=['POST'])
+def move_image():
+    """Move an image file to a different directory."""
+    data = request.get_json()
+    source_dir = data.get('source_dir', '').strip()
+    filename = data.get('filename', '').strip()
+    target_dir = data.get('target_dir', '').strip()
+    
+    if not source_dir or not filename or not target_dir:
+        return jsonify({"error": "Source directory, filename, and target directory are required"}), 400
+    
+    source_path = os.path.join(source_dir, filename)
+    target_path = os.path.join(target_dir, filename)
+    
+    # Check if source file exists
+    if not os.path.exists(source_path):
+        return jsonify({"error": "Source file does not exist"}), 404
+    
+    # Check if target directory exists
+    if not os.path.exists(target_dir):
+        return jsonify({"error": "Target directory does not exist"}), 404
+    
+    # Check if target file already exists
+    if os.path.exists(target_path):
+        return jsonify({"error": "File already exists in target directory"}), 409
+    
+    try:
+        import shutil
+        shutil.move(source_path, target_path)
+        return jsonify({"success": "Image moved successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to move image: {e}"}), 500
 
 @app.route('/get_bookmarks', methods=['GET'])
 def get_bookmarks():

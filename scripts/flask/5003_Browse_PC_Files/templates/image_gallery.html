@@ -90,6 +90,77 @@
             border-color: #2196F3;
         }
 
+        .move-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .move-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #2e2e2e;
+            min-width: 250px;
+            max-width: 400px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .move-dropdown-content.show {
+            display: block;
+        }
+
+        .move-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+        }
+
+        .move-item:hover {
+            background-color: #444;
+        }
+
+        .move-item a {
+            flex-grow: 1;
+            padding: 0;
+            border: none;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .move-remove {
+            color: #ff6b6b;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .move-remove:hover {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .move-btn {
+            background-color: #FF9800;
+        }
+
+        .move-btn:hover {
+            background-color: #F57C00;
+        }
+
         .image-counter {
             font-size: 14px;
             color: #aaa;
@@ -271,9 +342,17 @@
                 <input type="number" class="zoom-input" id="zoomInput" value="150" min="100" max="500" step="10">
                 <span style="font-size: 12px; color: #aaa;">%</span>
             </div>
+            <div class="move-dropdown">
+                <button class="control-btn move-btn" onclick="toggleMoveDropdown(event)">
+                    <i class="nf nf-fa-folder_open"></i> Move to
+                </button>
+                <div class="move-dropdown-content" id="moveDropdown">
+                    <!-- Move folders will be loaded here -->
+                </div>
+            </div>
             <button class="control-btn back-btn" onclick="goBack()">
                 <i class="nf nf-fa-arrow_left"></i> Back to Files
-            </button>
+            </button>div>
         </div>
     </div>
 
@@ -472,6 +551,157 @@
 
         // Load preload images after main image loads
         document.getElementById('mainImage').addEventListener('load', preloadImages);
+
+        // Move folder functionality
+        function toggleMoveDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('moveDropdown');
+
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            } else {
+                loadMoveFolders();
+                dropdown.classList.add('show');
+            }
+        }
+
+        function loadMoveFolders() {
+            fetch('/get_move_folders')
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('moveDropdown');
+                    if (data.folders && data.folders.length > 0) {
+                        dropdown.innerHTML = data.folders.map(folder => `
+                            <div class="move-item">
+                                <a onclick="moveImageToFolder('${folder.path.replace(/'/g, "\\'")}'); return false;">
+                                    <i class="nf nf-fa-folder"></i> ${folder.name}
+                                </a>
+                                <span class="move-remove"
+                                    onclick="event.stopPropagation(); removeMoveFolder('${folder.path.replace(/'/g, "\\'")}');"
+                                    title="Remove">×</span>
+                            </div>
+                        `).join('') + `
+                            <div class="move-item" style="border-top: 1px solid #666;">
+                                <a onclick="addMoveFolder(); return false;" style="color: #4CAF50;">
+                                    <i class="nf nf-fa-plus"></i> Add Current Directory
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        dropdown.innerHTML = `
+                            <div style="padding: 10px 15px; color: #999; font-style: italic; text-align: center;">
+                                No move folders yet
+                            </div>
+                            <div class="move-item">
+                                <a onclick="addMoveFolder(); return false;" style="color: #4CAF50;">
+                                    <i class="nf nf-fa-plus"></i> Add Current Directory
+                                </a>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load move folders:', error);
+                });
+        }
+
+        function addMoveFolder() {
+            const currentPath = "{{ dir_path }}";
+            const defaultName = currentPath.split('/').pop() || currentPath.split('\\').pop() || "Folder";
+            const folderName = prompt("Enter folder name:", defaultName);
+
+            if (folderName && folderName.trim()) {
+                fetch('/add_move_folder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path: currentPath,
+                        name: folderName.trim()
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadMoveFolders(); // Refresh dropdown
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Request failed:', error);
+                        alert('Request failed: ' + error);
+                    });
+            }
+        }
+
+        function removeMoveFolder(path) {
+            if (confirm('Remove this move folder?')) {
+                fetch('/remove_move_folder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path: path
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadMoveFolders(); // Refresh dropdown
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Request failed:', error);
+                        alert('Request failed: ' + error);
+                    });
+            }
+        }
+
+        function moveImageToFolder(targetPath) {
+            const currentImage = '{{ current_image }}';
+            const currentDir = '{{ dir_path }}';
+
+            if (confirm(`Move "${currentImage}" to "${targetPath}"?`)) {
+                fetch('/move_image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        source_dir: currentDir,
+                        filename: currentImage,
+                        target_dir: targetPath
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Image moved successfully!');
+                            // Go back to file browser in the original directory
+                            window.location.href = '/?dir_path={{ dir_path | urlencode }}&drive={{ current_drive | urlencode }}';
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Request failed:', error);
+                        alert('Request failed: ' + error);
+                    });
+            }
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('moveDropdown');
+            if (!event.target.closest('.move-dropdown')) {
+                dropdown.classList.remove('show');
+            }
+        });
     </script>
 </body>
 
