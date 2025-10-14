@@ -177,9 +177,6 @@ RAlt & -:: {
 ;! Send Apps to 2nd Display
 !1::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version2\display\send_to_2nd.ahk", "", "Hide")
 
-;! Open w VScode
-^!n::Run("C:\Users\nahid\ms\ms1\scripts\Autohtokey\version1\nvim_OpenWith.ahk", "", "Show")
-
 ;! Center Apps Window
 LAlt & c:: {
     Center_Focused_Window()
@@ -448,6 +445,42 @@ LAlt & c:: {
 
 ;! autofill job field
 !n::Run("C:\Users\nahid\ms\msBackups\@JOB\autofill.ahk", "", "Hide")
+
+;! Open With Preferred Editor
+^!n:: {
+    OpenWithEditor()
+    OpenWithEditor() {
+    ; Configuration - Change this to switch editors easily
+    EDITOR := "zed"  ; Options: "nvim", "vscode", "zed"
+        ; Backup current clipboard content
+        ClipboardBackup := ClipboardAll()
+        ; Clear clipboard and copy the selected file path
+        A_Clipboard := ""
+        Send("^c")
+        if !ClipWait(1) {
+            MsgBox("No valid file path found.")
+            A_Clipboard := ClipboardBackup
+            return
+        }
+        ClipBoardContent := A_Clipboard
+        if InStr(ClipBoardContent, "\") {
+            switch EDITOR {
+                case "nvim":
+                    Run('wt.exe nvim "' . ClipBoardContent . '"')
+                case "vscode":
+                    Run('"C:\Users\nahid\AppData\Local\Programs\Microsoft VS Code\Code.exe" "' . ClipBoardContent . '"')
+                case "zed":
+                    Run('zed "' . ClipBoardContent . '"')
+                default:
+                    MsgBox("Unknown editor: " . EDITOR)
+            }
+        } else {
+            MsgBox("No valid file path found.")
+        }
+        ; Restore original clipboard content
+        A_Clipboard := ClipboardBackup
+    }
+}
 
 ;! === TEXT SHORTCUTS ===
 ;! AutoHotkey Version 1

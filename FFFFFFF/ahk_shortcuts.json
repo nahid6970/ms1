@@ -134,7 +134,8 @@
             "category": "General",
             "description": "",
             "hotkey": "^!n",
-            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version1\\nvim_OpenWith.ahk\", \"\", \"Show\")"
+            "action": "Run(\"C:\\Users\\nahid\\ms\\ms1\\scripts\\Autohtokey\\version1\\nvim_OpenWith.ahk\", \"\", \"Show\")",
+            "enabled": false
         },
         {
             "name": "Center Apps Window",
@@ -185,6 +186,14 @@
             "description": "",
             "hotkey": "!n",
             "action": "Run(\"C:\\Users\\nahid\\ms\\msBackups\\@JOB\\autofill.ahk\", \"\", \"Hide\")",
+            "enabled": true
+        },
+        {
+            "name": "Open With Preferred Editor",
+            "category": "General",
+            "description": "",
+            "hotkey": "^!n",
+            "action": "OpenWithEditor()\nOpenWithEditor() {\n; Configuration - Change this to switch editors easily\nEDITOR := \"zed\"  ; Options: \"nvim\", \"vscode\", \"zed\"\n    ; Backup current clipboard content\n    ClipboardBackup := ClipboardAll()\n    \n    ; Clear clipboard and copy the selected file path\n    A_Clipboard := \"\"\n    Send(\"^c\")\n    \n    if !ClipWait(1) {\n        MsgBox(\"No valid file path found.\")\n        A_Clipboard := ClipboardBackup\n        return\n    }\n    \n    ClipBoardContent := A_Clipboard\n    \n    if InStr(ClipBoardContent, \"\\\") {\n        switch EDITOR {\n            case \"nvim\":\n                Run('wt.exe nvim \"' . ClipBoardContent . '\"')\n            case \"vscode\":\n                Run('\"C:\\Users\\nahid\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe\" \"' . ClipBoardContent . '\"')\n            case \"zed\":\n                Run('zed \"' . ClipBoardContent . '\"')\n            default:\n                MsgBox(\"Unknown editor: \" . EDITOR)\n        }\n    } else {\n        MsgBox(\"No valid file path found.\")\n    }\n    \n    ; Restore original clipboard content\n    A_Clipboard := ClipboardBackup\n}",
             "enabled": true
         }
     ],
