@@ -293,20 +293,8 @@
                             
                             const button = document.createElement('button');
                             button.className = 'quick-move-folder';
-                            button.style.backgroundColor = folder.bg_color || '#444';
-                            button.style.color = folder.text_color || '#ffffff';
                             button.innerHTML = `<i class="nf nf-fa-folder"></i>${folder.name}`;
                             button.onclick = () => movePDFToFolder(folder.path, folder.name);
-                            
-                            // Add hover effects
-                            button.onmouseover = () => {
-                                button.style.backgroundColor = folder.hover_bg_color || '#FF9800';
-                                button.style.color = folder.hover_text_color || '#000000';
-                            };
-                            button.onmouseout = () => {
-                                button.style.backgroundColor = folder.bg_color || '#444';
-                                button.style.color = folder.text_color || '#ffffff';
-                            };
                             
                             item.appendChild(button);
                             container.appendChild(item);
