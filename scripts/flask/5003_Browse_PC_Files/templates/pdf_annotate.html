@@ -350,8 +350,18 @@
                 .then(data => {
                     if (data.success) {
                         alert(`PDF moved to "${folderName}" successfully!`);
-                        // Redirect back to the source directory
-                        window.location.href = '/?dir_path={{ dir_path }}';
+                        
+                        // Check if there's a next PDF to navigate to
+                        {% if next_pdf %}
+                            // Navigate to the next PDF
+                            window.location.href = `/pdf_annotate?dir_path={{ dir_path }}&filename={{ next_pdf | urlencode }}`;
+                        {% elif prev_pdf %}
+                            // If no next PDF, try previous PDF
+                            window.location.href = `/pdf_annotate?dir_path={{ dir_path }}&filename={{ prev_pdf | urlencode }}`;
+                        {% else %}
+                            // If this was the last PDF, go back to directory
+                            window.location.href = '/?dir_path={{ dir_path }}';
+                        {% endif %}
                     } else {
                         alert('Error: ' + data.error);
                     }
