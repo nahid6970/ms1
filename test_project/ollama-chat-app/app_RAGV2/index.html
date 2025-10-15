@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ollama Web UI</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -12,36 +13,172 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
   <style>
     @import url("https://www.nerdfonts.com/assets/css/webfont.css");
-    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
-    body { background-color: #f8f9fa; display: flex; flex-direction: column; }
-    .container-fluid { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-top: 1rem; padding-bottom: 1rem; }
-    .card { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    .card-body { flex: 1; display: flex; flex-direction: column; min-height: 0; gap: 1rem; }
-    .main-container { flex: 1; display: flex; gap: 1rem; min-height: 0; }
-    .chat-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .code-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .panel-header { background-color: #e9ecef; padding: 0.5rem 1rem; border-top-left-radius: 0.375rem; border-top-right-radius: 0.375rem; font-weight: 600; border-bottom: 1px solid #dee2e6; }
-    #chat-window, #code-window { flex: 1; overflow-y: auto; border: 1px solid #dee2e6; border-top: none; padding: 1rem; background-color: white; border-bottom-left-radius: 0.375rem; border-bottom-right-radius: 0.375rem; }
-    #code-window { background-color: #f8f9fa; font-family: 'JetBrains Mono', monospace; }
-    .message { margin-bottom: 1rem; }
-    .user-message { text-align: right; }
-    .user-message .card-body { white-space: pre-wrap; text-align: left; }
-    .assistant-message .card-body { background-color: #e9ecef; }
-    .code-block { background-color: #2d2d2d; color: #e0e0e0; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; position: relative; overflow-x: auto; }
-    .code-block code { display: block; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; }
-    .code-language { position: absolute; top: 0.5rem; right: 0.5rem; background-color: rgba(255,255,255,0.1); color: #ccc; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
-    .copy-button { position: absolute; bottom: 0.5rem; right: 0.5rem; font-size: 0.75rem; padding: 0.25rem 0.5rem; z-index: 10; background-color: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #ccc; }
-    .copy-button:hover { background-color: rgba(255,255,255,0.2); }
-    .header-select-group { display: flex; align-items: center; gap: 0.5rem; }
-    .header-select-group label { margin-bottom: 0; font-weight: 500; }
-    .drag-over {
-  background-color: #e3f2fd !important;
-  border: 2px dashed #2196F3 !important;
-}
 
-.file-message .card {
-  border-left: 4px solid #28a745;
-}
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background-color: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container-fluid {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+
+    .card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: 1rem;
+    }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      gap: 1rem;
+      min-height: 0;
+    }
+
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .code-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .panel-header {
+      background-color: #e9ecef;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.375rem;
+      border-top-right-radius: 0.375rem;
+      font-weight: 600;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    #chat-window,
+    #code-window {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #dee2e6;
+      border-top: none;
+      padding: 1rem;
+      background-color: white;
+      border-bottom-left-radius: 0.375rem;
+      border-bottom-right-radius: 0.375rem;
+    }
+
+    #code-window {
+      background-color: #f8f9fa;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .message {
+      margin-bottom: 1rem;
+    }
+
+    .user-message {
+      text-align: right;
+    }
+
+    .user-message .card-body {
+      white-space: pre-wrap;
+      text-align: left;
+    }
+
+    .assistant-message .card-body {
+      background-color: #e9ecef;
+    }
+
+    .code-block {
+      background-color: #2d2d2d;
+      color: #e0e0e0;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      display: block;
+      white-space: pre-wrap;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .code-language {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+    }
+
+    .copy-button {
+      position: absolute;
+      bottom: 0.5rem;
+      right: 0.5rem;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      z-index: 10;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ccc;
+    }
+
+    .copy-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .header-select-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-select-group label {
+      margin-bottom: 0;
+      font-weight: 500;
+    }
+
+    .drag-over {
+      background-color: #e3f2fd !important;
+      border: 2px dashed #2196F3 !important;
+    }
+
+    .file-message .card {
+      border-left: 4px solid #28a745;
+    }
+
     /* Enhanced styling for code block notification */
     .code-block-notification {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -58,314 +195,456 @@
       gap: 0.5rem;
       animation: slideIn 0.3s ease-out;
     }
+
     .code-block-notification.static {
       animation: none;
     }
+
     .code-block-notification::before {
       content: "📝";
       font-size: 1.1rem;
       opacity: 0.8;
     }
-    
+
     .code-block-notification strong {
       color: #ffd700;
       font-weight: 600;
     }
-    
+
     @keyframes slideIn {
       from {
         opacity: 0;
         transform: translateX(-10px);
       }
+
       to {
         opacity: 1;
         transform: translateX(0);
       }
     }
-    
+
     /* Alternative dark theme notification */
     .code-block-notification.dark {
       background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
       border-left-color: #68d391;
       box-shadow: 0 2px 8px rgba(104, 211, 145, 0.2);
     }
-    
+
     .code-block-notification.dark::before {
       content: "⚡";
     }
-    
+
     .code-block-notification.dark strong {
       color: #68d391;
     }
-    
-    .ollama-header {
-      background: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient background */
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 0.375rem 0.375rem 0 0;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .ollama-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    }
-    .ollama-model-select-group label {
-      color: rgba(255, 255, 255, 0.8);
-    }
-    .ollama-model-select {
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 0.25rem;
-      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 16px 12px;
-      transition: all 0.3s ease;
-    }
-    .ollama-model-select:focus {
-      border-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
-      outline: 0;
-    }
-    .ollama-model-select option {
-      background-color: #0056b3; /* Darker blue for options */
-      color: white;
-    }
-    .ollama-model-select option:hover {
-      background-color: #007bff; /* Lighter blue on hover */
-    }
-    .ollama-header {
-      background: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient background */
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 0.375rem 0.375rem 0 0;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .ollama-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    }
-    .ollama-model-select-group label {
-      color: rgba(255, 255, 255, 0.8);
-    }
-    .ollama-model-select {
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 0.25rem;
-      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 16px 12px;
-      transition: all 0.3s ease;
-    }
-    .ollama-model-select:focus {
-      border-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
-      outline: 0;
-    }
-    .ollama-model-select option {
-      background-color: #0056b3; /* Darker blue for options */
-      color: white;
-    }
-    .ollama-model-select option:hover {
-      background-color: #007bff; /* Lighter blue on hover */
-    }
-        .ollama-header {
-      background: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient background */
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 0.375rem 0.375rem 0 0;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .ollama-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    }
-    .ollama-model-select-group label {
-      color: rgba(255, 255, 255, 0.8);
-    }
-    .ollama-model-select {
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 0.25rem;
-      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 16px 12px;
-      transition: all 0.3s ease;
-    }
-    .ollama-model-select:focus {
-      border-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
-      outline: 0;
-    }
-    .ollama-model-select option {
-      background-color: #0056b3; /* Darker blue for options */
-      color: white;
-    }
-    .ollama-model-select option:hover {
-      background-color: #007bff; /* Lighter blue on hover */
-    }
-    .ollama-header {
-      background: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient background */
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 0.375rem 0.375rem 0 0;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .ollama-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    }
-    .ollama-model-select-group label {
-      color: rgba(255, 255, 255, 0.8);
-    }
-    .ollama-model-select {
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 0.25rem;
-      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 16px 12px;
-      transition: all 0.3s ease;
-    }
-    .ollama-model-select:focus {
-      border-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
-      outline: 0;
-    }
-    .ollama-model-select option {
-      background-color: #0056b3; /* Darker blue for options */
-      color: white;
-    }
-    .ollama-model-select option:hover {
-      background-color: #007bff; /* Lighter blue on hover */
-    }
-    .ollama-header {
-      background: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient background */
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 0.375rem 0.375rem 0 0;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .ollama-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    }
-    .ollama-model-select-group label {
-      color: rgba(255, 255, 255, 0.8);
-    }
-    .ollama-model-select {
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 0.25rem;
-      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 16px 12px;
-      transition: all 0.3s ease;
-    }
-    .ollama-model-select:focus {
-      border-color: rgba(255, 255, 255, 0.6);
-      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
-      outline: 0;
-    }
-    .ollama-model-select option {
-      background-color: #0056b3; /* Darker blue for options */
-      color: white;
-    }
-    .ollama-model-select option:hover {
-      background-color: #007bff; /* Lighter blue on hover */
-    }
-    @media (max-width: 992px) { .main-container { flex-direction: column; } .chat-panel, .code-panel { min-height: 300px; } .header-select-group { flex-direction: column; align-items: flex-start; } }
-    #message-input { background-color: #d0ffc6; resize: none; overflow: hidden; min-height: 1.5em; max-height: 7.5em; line-height: 1.5em; }
-    .input-group > button { height: 38px; max-height: 38px; align-self: center; flex-shrink: 0; border-radius: 2%; }
-    .input-group > textarea { border-top-right-radius: 0; border-bottom-right-radius: 0; }
-    .input-group > button:first-of-type { border-top-left-radius: 0; border-bottom-left-radius: 0; }
-    .dropup .btn { height: 38px; max-height: 38px; }
-    .clear-code-btn { position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.75rem; padding: 0.25rem 0.5rem; z-index: 10; }
-    .shrink-button { position: absolute; bottom: 0.5rem; right: 4rem; font-size: 0.75rem; padding: 0.25rem 0.5rem; z-index: 10; background-color: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #ccc; }
-    .shrink-button:hover { background-color: rgba(255,255,255,0.2); }
-    .code-block.collapsed { max-height: 150px; overflow: hidden; }
-    .code-block.collapsed::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to bottom, transparent, #2d2d2d); }
-    .code-block.collapsed .shrink-button::before { content: "⇣"; }
-    .code-block:not(.collapsed) .shrink-button::before { content: "⇡"; }
-  /* Centered compact input row */
-.input-row-center {
-  max-width: 50%;
-  margin: 0 auto;
-  display: flex;
-  gap: .5rem;
-}
-/* Let the textarea fill the available space */
-.input-row-center textarea {
-  flex: 1 1 auto;
-}
-@media (max-width: 992px) {
-  /* … existing rules … */
-  .input-row-center {
-    max-width: 100%;   /* full width on small screens */
-  }
-}
 
-.success-notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #28a745;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 1.1em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  z-index: 9999; /* Ensure it's on top of everything */
-}
+    .ollama-header {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      /* Blue gradient background */
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.375rem 0.375rem 0 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-.success-notification.show {
-  opacity: 1;
-}
+    .ollama-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
 
-.success-notification .check-icon {
-  font-size: 1.5em;
-}
+    .ollama-model-select-group label {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .ollama-model-select {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 0.25rem;
+      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .ollama-model-select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+      outline: 0;
+    }
+
+    .ollama-model-select option {
+      background-color: #0056b3;
+      /* Darker blue for options */
+      color: white;
+    }
+
+    .ollama-model-select option:hover {
+      background-color: #007bff;
+      /* Lighter blue on hover */
+    }
+
+    .ollama-header {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      /* Blue gradient background */
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.375rem 0.375rem 0 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ollama-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .ollama-model-select-group label {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .ollama-model-select {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 0.25rem;
+      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .ollama-model-select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+      outline: 0;
+    }
+
+    .ollama-model-select option {
+      background-color: #0056b3;
+      /* Darker blue for options */
+      color: white;
+    }
+
+    .ollama-model-select option:hover {
+      background-color: #007bff;
+      /* Lighter blue on hover */
+    }
+
+    .ollama-header {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      /* Blue gradient background */
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.375rem 0.375rem 0 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ollama-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .ollama-model-select-group label {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .ollama-model-select {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 0.25rem;
+      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .ollama-model-select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+      outline: 0;
+    }
+
+    .ollama-model-select option {
+      background-color: #0056b3;
+      /* Darker blue for options */
+      color: white;
+    }
+
+    .ollama-model-select option:hover {
+      background-color: #007bff;
+      /* Lighter blue on hover */
+    }
+
+    .ollama-header {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      /* Blue gradient background */
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.375rem 0.375rem 0 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ollama-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .ollama-model-select-group label {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .ollama-model-select {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 0.25rem;
+      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .ollama-model-select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+      outline: 0;
+    }
+
+    .ollama-model-select option {
+      background-color: #0056b3;
+      /* Darker blue for options */
+      color: white;
+    }
+
+    .ollama-model-select option:hover {
+      background-color: #007bff;
+      /* Lighter blue on hover */
+    }
+
+    .ollama-header {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      /* Blue gradient background */
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.375rem 0.375rem 0 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ollama-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .ollama-model-select-group label {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .ollama-model-select {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 0.25rem;
+      padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .ollama-model-select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+      outline: 0;
+    }
+
+    .ollama-model-select option {
+      background-color: #0056b3;
+      /* Darker blue for options */
+      color: white;
+    }
+
+    .ollama-model-select option:hover {
+      background-color: #007bff;
+      /* Lighter blue on hover */
+    }
+
+    @media (max-width: 992px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .chat-panel,
+      .code-panel {
+        min-height: 300px;
+      }
+
+      .header-select-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    #message-input {
+      background-color: #d0ffc6;
+      resize: none;
+      overflow: hidden;
+      min-height: 1.5em;
+      max-height: 7.5em;
+      line-height: 1.5em;
+    }
+
+    .input-group>button {
+      height: 38px;
+      max-height: 38px;
+      align-self: center;
+      flex-shrink: 0;
+      border-radius: 2%;
+    }
+
+    .input-group>textarea {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .input-group>button:first-of-type {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .dropup .btn {
+      height: 38px;
+      max-height: 38px;
+    }
+
+    .clear-code-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      z-index: 10;
+    }
+
+    .shrink-button {
+      position: absolute;
+      bottom: 0.5rem;
+      right: 4rem;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      z-index: 10;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ccc;
+    }
+
+    .shrink-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .code-block.collapsed {
+      max-height: 150px;
+      overflow: hidden;
+    }
+
+    .code-block.collapsed::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(to bottom, transparent, #2d2d2d);
+    }
+
+    .code-block.collapsed .shrink-button::before {
+      content: "⇣";
+    }
+
+    .code-block:not(.collapsed) .shrink-button::before {
+      content: "⇡";
+    }
+
+    /* Centered compact input row */
+    .input-row-center {
+      max-width: 50%;
+      margin: 0 auto;
+      display: flex;
+      gap: .5rem;
+    }
+
+    /* Let the textarea fill the available space */
+    .input-row-center textarea {
+      flex: 1 1 auto;
+    }
+
+    @media (max-width: 992px) {
+
+      /* … existing rules … */
+      .input-row-center {
+        max-width: 100%;
+        /* full width on small screens */
+      }
+    }
+
+    .success-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 1.1em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      z-index: 9999;
+      /* Ensure it's on top of everything */
+    }
+
+    .success-notification.show {
+      opacity: 1;
+    }
+
+    .success-notification .check-icon {
+      font-size: 1.5em;
+    }
   </style>
 </head>
+
 <body>
   <div class="container-fluid">
     <div class="card">
@@ -397,30 +676,75 @@
           </div>
         </div>
 
-<form id="chat-form">
-  <div class="input-row-center">
-    <textarea id="message-input" class="form-control" placeholder="Type your message..." rows="3" required></textarea>
-    <div class="dropup">
-      <button class="btn btn-info dropdown-toggle" type="button" id="suggestionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        Suggestions
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="suggestionsDropdown">
-        <li><a class="dropdown-item suggestion-item" href="#" data-suggestion="give me a example of python script">Give me an example of python script</a></li>
-        <li><a class="dropdown-item suggestion-item" href="#" data-suggestion="make a goodlooking webpage">Make a goodlooking webpage</a></li>
-      </ul>
+        <form id="chat-form">
+          <div class="input-row-center">
+            <textarea id="message-input" class="form-control" placeholder="Type your message..." rows="3"
+              required></textarea>
+            <div class="dropup">
+              <button class="btn btn-info dropdown-toggle" type="button" id="suggestionsDropdown"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                Suggestions
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="suggestionsDropdown" id="suggestionsList">
+                <!-- Suggestions will be loaded dynamically -->
+              </ul>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
+          </div>
+        </form>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary"><i class="nf nf-md-send"></i></button>
   </div>
-</form>
+
+  <!-- Suggestions Management Modal -->
+  <div class="modal fade" id="suggestionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">💡 Manage Suggestions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Add New Suggestion -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <h6 class="mb-0">➕ Add New Suggestion</h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="newSuggestionText" class="form-label">Suggestion Text:</label>
+                <input type="text" class="form-control" id="newSuggestionText"
+                  placeholder="e.g., Create a Python calculator">
+              </div>
+              <button class="btn btn-success" onclick="addNewSuggestion()">Add Suggestion</button>
+            </div>
+          </div>
+
+          <!-- Existing Suggestions -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">📝 Existing Suggestions</h6>
+            </div>
+            <div class="card-body">
+              <div id="existingSuggestions">
+                <!-- Existing suggestions will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="resetToDefaults()">Reset to Defaults</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
       const modelSelect = document.getElementById("model-select");
-      
+
       // Add to your DOMContentLoaded event listener
       const chatWindow = document.getElementById("chat-window");
 
@@ -455,7 +779,7 @@
       async function readFileContent(file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
-          
+
           reader.onload = (e) => {
             const content = e.target.result;
             resolve({
@@ -465,9 +789,9 @@
               content: content
             });
           };
-          
+
           reader.onerror = () => reject(reader.error);
-          
+
           const textExtensions = ['.py', '.ps1', '.html', '.txt', '.md', '.json', '.js', '.css'];
           const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
 
@@ -490,7 +814,7 @@
       async function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
-        
+
         for (let file of files) {
           try {
             const fileData = await readFileContent(file);
@@ -501,61 +825,118 @@
         }
       }
 
+      function getFileIcon(fileName) {
+        const extension = fileName.toLowerCase().split('.').pop();
+        const iconMap = {
+          // Programming languages
+          'py': '🐍',
+          'js': '🟨',
+          'ts': '🔷',
+          'html': '🌐',
+          'css': '🎨',
+          'java': '☕',
+          'cpp': '⚙️',
+          'c': '⚙️',
+          'cs': '🔷',
+          'php': '🐘',
+          'rb': '💎',
+          'go': '🐹',
+          'rs': '🦀',
+          'kt': '🟣',
+          'swift': '🍎',
+          'scala': '🔴',
+          'r': '📊',
+          'matlab': '📊',
+          'perl': '🐪',
+          'lua': '🌙',
+          'dart': '🎯',
+
+          // Scripts
+          'ps1': '💙',
+          'sh': '🐚',
+          'bash': '🐚',
+          'bat': '⚫',
+          'cmd': '⚫',
+
+          // Data formats
+          'json': '📋',
+          'xml': '📄',
+          'yaml': '📝',
+          'yml': '📝',
+          'csv': '📊',
+          'sql': '🗃️',
+
+          // Documents
+          'md': '📝',
+          'txt': '📄',
+          'pdf': '📕',
+          'doc': '📘',
+          'docx': '📘',
+
+          // Images
+          'png': '🖼️',
+          'jpg': '🖼️',
+          'jpeg': '🖼️',
+          'gif': '🖼️',
+          'svg': '🎨',
+
+          // Archives
+          'zip': '📦',
+          'rar': '📦',
+          '7z': '📦',
+          'tar': '📦',
+
+          // Config files
+          'ini': '⚙️',
+          'conf': '⚙️',
+          'config': '⚙️',
+          'env': '🔧',
+
+          // Default
+          'default': '📄'
+        };
+
+        return iconMap[extension] || iconMap['default'];
+      }
+
       function displayFileMessage(fileData) {
         const fileMessage = `**File uploaded:** ${fileData.name} (${formatFileSize(fileData.size)})\n\n`;
-        
+
         // Create a special file message
         const messageElement = document.createElement("div");
         messageElement.classList.add("message", "user-message", "file-message");
-        
+
         const messageContent = document.createElement('div');
         messageContent.classList.add('d-flex', 'align-items-center', 'justify-content-end');
-        
+
         const card = document.createElement("div");
         card.classList.add("card", "d-inline-block");
         card.style.maxWidth = "80%";
-        
+
         const cardBody = document.createElement("div");
         cardBody.classList.add("card-body");
-        
-        // File header
+
+        // Get appropriate file icon
+        const fileIcon = getFileIcon(fileData.name);
+
+        // File header with icon
         const fileHeader = document.createElement("div");
-        fileHeader.innerHTML = `<strong>📎 ${fileData.name}</strong> <small class="text-muted">(${formatFileSize(fileData.size)})</small>`;
+        fileHeader.innerHTML = `<strong>${fileIcon} ${fileData.name}</strong> <small class="text-muted">(${formatFileSize(fileData.size)})</small>`;
         cardBody.appendChild(fileHeader);
-        
-        // Only show content preview if it's not binary
-        if (fileData.content && 
-            fileData.content !== '[Binary file - content not displayed]') {
-          const contentPreview = document.createElement("pre");
-          contentPreview.style.fontSize = "0.8rem";
-          contentPreview.style.maxHeight = "200px";
-          contentPreview.style.overflow = "auto";
-          contentPreview.style.backgroundColor = "#f8f9fa";
-          contentPreview.style.padding = "0.5rem";
-          contentPreview.style.borderRadius = "4px";
-          contentPreview.style.marginTop = "0.5rem";
-          
-          const truncatedContent = fileData.content.length > 1000 
-            ? fileData.content.substring(0, 1000) + "...\n[Content truncated]"
-            : fileData.content;
-          
-          contentPreview.textContent = truncatedContent;
-          cardBody.appendChild(contentPreview);
-        }
-        
+
         card.appendChild(cardBody);
         messageContent.appendChild(card);
         messageElement.appendChild(messageContent);
-        
+
         chatWindow.appendChild(messageElement);
         chatWindow.scrollTop = chatWindow.scrollHeight;
-        
+
         // Add to conversation history - only include actual content, not hidden messages
-        const historyContent = fileData.content === '[Content hidden for security]' || 
-                              fileData.content === '[Binary file - content not displayed]'
+        const historyContent = fileData.content === '[Content hidden for security]' ||
+          fileData.content === '[Binary file - content not displayed]'
           ? `File uploaded: ${fileData.name}`
           : `${fileMessage}\`\`\`\n${fileData.content}\n\`\`\``;
-          
+
         conversationHistory.push({
           role: "user",
           content: historyContent
@@ -650,7 +1031,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ settings })
           });
-          
+
           const data = await response.json();
           if (data.success) {
             showSuccessNotification('Settings saved successfully!');
@@ -677,7 +1058,7 @@
         topPValue.textContent = settingsToApply.top_p;
       }
 
-      window.resetModelSettings = function() {
+      window.resetModelSettings = function () {
         maxTokensSlider.value = DEFAULT_MODEL_SETTINGS.num_predict;
         contextWindowSlider.value = DEFAULT_MODEL_SETTINGS.num_ctx;
         temperatureSlider.value = DEFAULT_MODEL_SETTINGS.temperature;
@@ -695,7 +1076,7 @@
       function saveRAGSettings() {
         const ragEnabled = document.getElementById('rag-enabled');
         const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
-        
+
         if (ragEnabled && ragMaxResultsSlider) {
           const settings = {
             rag_enabled: ragEnabled.checked,
@@ -706,7 +1087,7 @@
         }
       }
 
-      
+
 
       async function loadRAGSettings() {
         const localSettings = JSON.parse(localStorage.getItem('ollamaRAGSettings'));
@@ -740,7 +1121,7 @@
             const data = await response.json();
             const docCount = data.documents.length;
             const totalChunks = data.documents.reduce((sum, doc) => sum + doc.chunk_count, 0);
-            
+
             statusDiv.innerHTML = `
               <div class="d-flex justify-content-between">
                 <span><strong>${docCount}</strong> documents</span>
@@ -756,13 +1137,13 @@
         }
       }
 
-      window.resetRAGSettings = function() {
+      window.resetRAGSettings = function () {
         const ragEnabled = document.getElementById('rag-enabled');
         const ragMaxResultsSlider = document.getElementById('rag-max-results-slider');
-        
+
         if (ragEnabled) ragEnabled.checked = DEFAULT_RAG_SETTINGS.rag_enabled;
         if (ragMaxResultsSlider) ragMaxResultsSlider.value = DEFAULT_RAG_SETTINGS.rag_max_results;
-        
+
         saveRAGSettings();
         loadRAGSettings();
       };
@@ -774,14 +1155,14 @@
         const ragMaxResultsValue = document.getElementById('rag-max-results-value');
 
         if (ragEnabled) {
-          ragEnabled.addEventListener('change', function() {
+          ragEnabled.addEventListener('change', function () {
             console.log('RAG toggle changed to:', this.checked);
             saveRAGSettings();
           });
         }
 
         if (ragMaxResultsSlider && ragMaxResultsValue) {
-          ragMaxResultsSlider.addEventListener('input', function(e) {
+          ragMaxResultsSlider.addEventListener('input', function (e) {
             ragMaxResultsValue.textContent = e.target.value;
             console.log('RAG max results changed to:', e.target.value);
             saveRAGSettings();
@@ -798,23 +1179,23 @@
       });
 
       maxTokensSlider.addEventListener('input', (e) => {
-          maxTokensValue.textContent = e.target.value;
-          saveModelSettings();
+        maxTokensValue.textContent = e.target.value;
+        saveModelSettings();
       });
 
       contextWindowSlider.addEventListener('input', (e) => {
-          contextWindowValue.textContent = e.target.value;
-          saveModelSettings();
+        contextWindowValue.textContent = e.target.value;
+        saveModelSettings();
       });
 
       temperatureSlider.addEventListener('input', (e) => {
-          temperatureValue.textContent = e.target.value;
-          saveModelSettings();
+        temperatureValue.textContent = e.target.value;
+        saveModelSettings();
       });
 
       topPSlider.addEventListener('input', (e) => {
-          topPValue.textContent = e.target.value;
-          saveModelSettings();
+        topPValue.textContent = e.target.value;
+        saveModelSettings();
       });
 
       // RAG Settings Event Listeners
@@ -870,20 +1251,20 @@
           const data = await response.json();
           const savedModel = loadSelectedModel();
           let modelFound = false;
-          
+
           data.models.forEach((model) => {
             const option = document.createElement("option");
             option.value = model.name;
             option.textContent = model.name;
             modelSelect.appendChild(option);
-            
+
             // Check if this is the previously saved model
             if (savedModel && model.name === savedModel) {
               option.selected = true;
               modelFound = true;
             }
           });
-          
+
           // If saved model wasn't found but we have models, select the first one
           if (!modelFound && data.models.length > 0) {
             modelSelect.selectedIndex = 0;
@@ -1115,9 +1496,9 @@
           const response = await fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              model: selectedModel, 
-              messages: history, 
+            body: JSON.stringify({
+              model: selectedModel,
+              messages: history,
               stream: true,
               options: {
                 num_predict: parseInt(maxTokensSlider.value, 10),
@@ -1195,20 +1576,20 @@
       }
 
       // Save settings to localStorage and server
-      window.saveSettings = async function() {
+      window.saveSettings = async function () {
         const settings = {
           instructions: currentInstructions,
         };
-        
+
         // Save to localStorage
         localStorage.setItem('ollamaSettings', JSON.stringify(settings));
-        
+
         // Save all settings to server
         await saveSettingsToServer();
       }
 
       // Instructions Management
-      window.addNewInstruction = function() {
+      window.addNewInstruction = function () {
         editingInstructionId = null;
         document.getElementById('instructionModalTitle').textContent = 'Add Instruction';
         document.getElementById('instruction-name').value = '';
@@ -1216,7 +1597,7 @@
         new bootstrap.Modal(document.getElementById('instructionModal')).show();
       }
 
-      window.editInstruction = function(id) {
+      window.editInstruction = function (id) {
         const instruction = currentInstructions.find(i => i.id === id);
         if (instruction) {
           editingInstructionId = id;
@@ -1227,10 +1608,10 @@
         }
       }
 
-      window.saveInstruction = function() {
+      window.saveInstruction = function () {
         const name = document.getElementById('instruction-name').value.trim();
         const content = document.getElementById('instruction-content').value.trim();
-        
+
         if (!name || !content) {
           alert('Please fill in both name and content');
           return;
@@ -1256,7 +1637,7 @@
         bootstrap.Modal.getInstance(document.getElementById('instructionModal')).hide();
       }
 
-      window.toggleInstruction = function(id) {
+      window.toggleInstruction = function (id) {
         const instruction = currentInstructions.find(i => i.id === id);
         if (instruction) {
           instruction.enabled = !instruction.enabled;
@@ -1265,7 +1646,7 @@
         }
       }
 
-      window.deleteInstruction = function(id) {
+      window.deleteInstruction = function (id) {
         if (confirm('Are you sure you want to delete this instruction?')) {
           currentInstructions = currentInstructions.filter(i => i.id !== id);
           updateInstructionsList();
@@ -1315,7 +1696,7 @@
       fetchModels();
 
       document.querySelectorAll('.suggestion-item').forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
           e.preventDefault();
           if (messageInput.value !== '') {
             messageInput.value += ' ';
@@ -1325,173 +1706,386 @@
         });
       });
     });
+
+    // ===== SUGGESTIONS MANAGEMENT =====
+
+    // Default suggestions
+    const defaultSuggestions = [
+      "give me a example of python script",
+      "make a goodlooking webpage",
+      "create a simple calculator",
+      "build a todo list app",
+      "write a PowerShell script",
+      "design a responsive navbar"
+    ];
+
+    // Load suggestions from localStorage or use defaults
+    function loadSuggestions() {
+      const saved = localStorage.getItem('chatSuggestions');
+      return saved ? JSON.parse(saved) : [...defaultSuggestions];
+    }
+
+    // Save suggestions to localStorage
+    function saveSuggestions(suggestions) {
+      localStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
+    }
+
+    // Render suggestions dropdown
+    function renderSuggestions() {
+      const suggestions = loadSuggestions();
+      const suggestionsList = document.getElementById('suggestionsList');
+
+      suggestionsList.innerHTML = '';
+
+      // Add suggestions
+      suggestions.forEach((suggestion, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a class="dropdown-item suggestion-item" href="#" data-suggestion="${suggestion}">${suggestion}</a>`;
+        suggestionsList.appendChild(li);
+      });
+
+      // Add divider and manage option
+      if (suggestions.length > 0) {
+        const divider = document.createElement('li');
+        divider.innerHTML = '<hr class="dropdown-divider">';
+        suggestionsList.appendChild(divider);
+      }
+
+      const manageItem = document.createElement('li');
+      manageItem.innerHTML = '<a class="dropdown-item text-primary" href="#" onclick="openSuggestionsManager()"><i class="nf nf-md-cog"></i> Manage Suggestions</a>';
+      suggestionsList.appendChild(manageItem);
+
+      // Add click handlers for suggestions
+      document.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const suggestion = e.target.getAttribute('data-suggestion');
+          document.getElementById('message-input').value = suggestion;
+          document.getElementById('message-input').focus();
+        });
+      });
+    }
+
+    // Open suggestions manager modal
+    function openSuggestionsManager() {
+      renderExistingSuggestions();
+      const modal = new bootstrap.Modal(document.getElementById('suggestionsModal'));
+      modal.show();
+    }
+
+    // Render existing suggestions in the modal
+    function renderExistingSuggestions() {
+      const suggestions = loadSuggestions();
+      const container = document.getElementById('existingSuggestions');
+
+      if (suggestions.length === 0) {
+        container.innerHTML = '<p class="text-muted">No suggestions yet. Add some above!</p>';
+        return;
+      }
+
+      container.innerHTML = '';
+
+      suggestions.forEach((suggestion, index) => {
+        const suggestionDiv = document.createElement('div');
+        suggestionDiv.className = 'suggestion-item-edit mb-2 p-2 border rounded';
+        suggestionDiv.innerHTML = `
+          <div class="d-flex align-items-center">
+            <input type="text" class="form-control me-2" value="${suggestion}" id="suggestion-${index}">
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="updateSuggestion(${index})">💾</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteSuggestion(${index})">🗑️</button>
+          </div>
+        `;
+        container.appendChild(suggestionDiv);
+      });
+    }
+
+    // Add new suggestion
+    function addNewSuggestion() {
+      const input = document.getElementById('newSuggestionText');
+      const text = input.value.trim();
+
+      if (!text) {
+        alert('Please enter a suggestion text');
+        return;
+      }
+
+      const suggestions = loadSuggestions();
+
+      // Check for duplicates
+      if (suggestions.includes(text)) {
+        alert('This suggestion already exists');
+        return;
+      }
+
+      suggestions.push(text);
+      saveSuggestions(suggestions);
+
+      input.value = '';
+      renderSuggestions();
+      renderExistingSuggestions();
+
+      // Show success message
+      showNotification('Suggestion added successfully!');
+    }
+
+    // Update existing suggestion
+    function updateSuggestion(index) {
+      const input = document.getElementById(`suggestion-${index}`);
+      const newText = input.value.trim();
+
+      if (!newText) {
+        alert('Suggestion cannot be empty');
+        return;
+      }
+
+      const suggestions = loadSuggestions();
+
+      // Check for duplicates (excluding current item)
+      const otherSuggestions = suggestions.filter((_, i) => i !== index);
+      if (otherSuggestions.includes(newText)) {
+        alert('This suggestion already exists');
+        return;
+      }
+
+      suggestions[index] = newText;
+      saveSuggestions(suggestions);
+
+      renderSuggestions();
+      renderExistingSuggestions();
+
+      showNotification('Suggestion updated successfully!');
+    }
+
+    // Delete suggestion
+    function deleteSuggestion(index) {
+      if (!confirm('Are you sure you want to delete this suggestion?')) {
+        return;
+      }
+
+      const suggestions = loadSuggestions();
+      suggestions.splice(index, 1);
+      saveSuggestions(suggestions);
+
+      renderSuggestions();
+      renderExistingSuggestions();
+
+      showNotification('Suggestion deleted successfully!');
+    }
+
+    // Reset to default suggestions
+    function resetToDefaults() {
+      if (!confirm('This will replace all your suggestions with the defaults. Are you sure?')) {
+        return;
+      }
+
+      saveSuggestions([...defaultSuggestions]);
+      renderSuggestions();
+      renderExistingSuggestions();
+
+      showNotification('Suggestions reset to defaults!');
+    }
+
+    // Show notification
+    function showNotification(message) {
+      // Create a simple toast notification
+      const toast = document.createElement('div');
+      toast.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-dismissible';
+      toast.style.zIndex = '9999';
+      toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+
+      document.body.appendChild(toast);
+
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 3000);
+    }
+
+    // Initialize suggestions on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSuggestions();
+
+      // Add Enter key support for new suggestion input
+      document.getElementById('newSuggestionText').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          addNewSuggestion();
+        }
+      });
+    });
+
   </script>
   <!-- Settings Modal -->
-<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Settings Tabs -->
-        <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="model-settings-tab" data-bs-toggle="tab" data-bs-target="#model-settings" type="button">Model</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="instructions-tab" data-bs-toggle="tab" data-bs-target="#instructions" type="button">Instructions</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="rag-tab" data-bs-toggle="tab" data-bs-target="#rag-settings" type="button">RAG</button>
-          </li>
-        </ul>
+  <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Settings Tabs -->
+          <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="model-settings-tab" data-bs-toggle="tab"
+                data-bs-target="#model-settings" type="button">Model</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="instructions-tab" data-bs-toggle="tab" data-bs-target="#instructions"
+                type="button">Instructions</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="rag-tab" data-bs-toggle="tab" data-bs-target="#rag-settings"
+                type="button">RAG</button>
+            </li>
+          </ul>
 
-        <div class="tab-content" id="settingsTabContent">
-          <!-- Model Settings Tab -->
-          <div class="tab-pane fade show active" id="model-settings" role="tabpanel">
-            <div class="mb-3">
-              <label for="max-tokens-slider" class="form-label">
-                <i class="nf nf-fa-info_circle text-muted me-2" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="right" 
-                   title="How long the next answer can be.">
-                </i>Max Tokens: <span id="max-tokens-value">2048</span>
-              </label>
-              <input type="range" class="form-range" min="512" max="8192" step="512" id="max-tokens-slider" value="2048">
-            </div>
-            <div class="mb-3">
-              <label for="context-window-slider" class="form-label">
-                <i class="nf nf-fa-info_circle text-muted me-2" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="right" 
-                   title="How much of the past conversation the model remembers.">
-                </i>Context Window Size: <span id="context-window-value">4096</span>
-              </label>
-              <input type="range" class="form-range" min="2048" max="16384" step="2048" id="context-window-slider" value="4096">
-            </div>
-            <div class="mb-3">
-              <label for="temperature-slider" class="form-label">
-                <i class="nf nf-fa-info_circle text-muted me-2" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="right" 
-                   title="Controls the randomness of the output. Higher is more creative.">
-                </i>Temperature: <span id="temperature-value">0.8</span>
-              </label>
-              <input type="range" class="form-range" min="0" max="2" step="0.1" id="temperature-slider" value="0.8">
-            </div>
-            <div class="mb-3">
-              <label for="top-p-slider" class="form-label">
-                <i class="nf nf-fa-info_circle text-muted me-2" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="right" 
-                   title="Controls nucleus sampling. Higher values consider more words.">
-                </i>Top P: <span id="top-p-value">0.9</span>
-              </label>
-              <input type="range" class="form-range" min="0" max="1" step="0.05" id="top-p-slider" value="0.9">
-            </div>
-            <div class="d-flex justify-content-end">
-              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetModelSettings()">Reset to Defaults</button>
-            </div>
-          </div>
-
-          <!-- Instructions Tab -->
-          <div class="tab-pane fade" id="instructions" role="tabpanel">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6>System Instructions</h6>
-              <button class="btn btn-sm btn-primary" onclick="addNewInstruction()">+ Add New</button>
-            </div>
-            <div id="instructions-list">
-              <!-- Instructions will be loaded here -->
-            </div>
-            
-            <!-- Add/Edit Instruction Modal -->
-            <div class="modal fade" id="instructionModal" tabindex="-1">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="instructionModalTitle">Add Instruction</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="mb-3">
-                      <label for="instruction-name" class="form-label">Name</label>
-                      <input type="text" class="form-control" id="instruction-name" placeholder="e.g., Code Assistant, Creative Writer">
-                    </div>
-                    <div class="mb-3">
-                      <label for="instruction-content" class="form-label">Content</label>
-                      <textarea class="form-control" id="instruction-content" rows="8" placeholder="Enter your system instruction here..."></textarea>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveInstruction()">Save</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- RAG Settings Tab -->
-          <div class="tab-pane fade" id="rag-settings" role="tabpanel">
-            <div class="mb-4">
-              <h6>RAG (Retrieval-Augmented Generation) Settings</h6>
-              <p class="text-muted small">Configure how the AI uses your knowledge base to enhance responses.</p>
-            </div>
-            
-            <div class="mb-3">
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="rag-enabled" checked>
-                <label class="form-check-label" for="rag-enabled">
-                  <strong>Enable RAG</strong>
+          <div class="tab-content" id="settingsTabContent">
+            <!-- Model Settings Tab -->
+            <div class="tab-pane fade show active" id="model-settings" role="tabpanel">
+              <div class="mb-3">
+                <label for="max-tokens-slider" class="form-label">
+                  <i class="nf nf-fa-info_circle text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="How long the next answer can be.">
+                  </i>Max Tokens: <span id="max-tokens-value">2048</span>
                 </label>
+                <input type="range" class="form-range" min="512" max="8192" step="512" id="max-tokens-slider"
+                  value="2048">
               </div>
-              <small class="text-muted">When enabled, the AI will search your knowledge base for relevant context before responding.</small>
+              <div class="mb-3">
+                <label for="context-window-slider" class="form-label">
+                  <i class="nf nf-fa-info_circle text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="How much of the past conversation the model remembers.">
+                  </i>Context Window Size: <span id="context-window-value">4096</span>
+                </label>
+                <input type="range" class="form-range" min="2048" max="16384" step="2048" id="context-window-slider"
+                  value="4096">
+              </div>
+              <div class="mb-3">
+                <label for="temperature-slider" class="form-label">
+                  <i class="nf nf-fa-info_circle text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="Controls the randomness of the output. Higher is more creative.">
+                  </i>Temperature: <span id="temperature-value">0.8</span>
+                </label>
+                <input type="range" class="form-range" min="0" max="2" step="0.1" id="temperature-slider" value="0.8">
+              </div>
+              <div class="mb-3">
+                <label for="top-p-slider" class="form-label">
+                  <i class="nf nf-fa-info_circle text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="Controls nucleus sampling. Higher values consider more words.">
+                  </i>Top P: <span id="top-p-value">0.9</span>
+                </label>
+                <input type="range" class="form-range" min="0" max="1" step="0.05" id="top-p-slider" value="0.9">
+              </div>
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetModelSettings()">Reset to
+                  Defaults</button>
+              </div>
             </div>
 
-            <div class="mb-3">
-              <label for="rag-max-results-slider" class="form-label">
-                <i class="nf nf-fa-info_circle text-muted me-2" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="right" 
-                   title="Maximum number of relevant chunks to include as context for each query.">
-                </i>Max Context Chunks: <span id="rag-max-results-value">3</span>
-              </label>
-              <input type="range" class="form-range" min="1" max="10" step="1" id="rag-max-results-slider" value="3">
-              <small class="text-muted">Higher values provide more context but may slow down responses.</small>
-            </div>
+            <!-- Instructions Tab -->
+            <div class="tab-pane fade" id="instructions" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6>System Instructions</h6>
+                <button class="btn btn-sm btn-primary" onclick="addNewInstruction()">+ Add New</button>
+              </div>
+              <div id="instructions-list">
+                <!-- Instructions will be loaded here -->
+              </div>
 
-            <div class="mb-3">
-              <div class="card bg-light">
-                <div class="card-body">
-                  <h6 class="card-title">📚 Knowledge Base Status</h6>
-                  <div id="rag-status">
-                    <div class="d-flex align-items-center">
-                      <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                      <span>Loading...</span>
+              <!-- Add/Edit Instruction Modal -->
+              <div class="modal fade" id="instructionModal" tabindex="-1">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="instructionModalTitle">Add Instruction</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="mb-3">
+                        <label for="instruction-name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="instruction-name"
+                          placeholder="e.g., Code Assistant, Creative Writer">
+                      </div>
+                      <div class="mb-3">
+                        <label for="instruction-content" class="form-label">Content</label>
+                        <textarea class="form-control" id="instruction-content" rows="8"
+                          placeholder="Enter your system instruction here..."></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="button" class="btn btn-primary" onclick="saveInstruction()">Save</button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="d-flex justify-content-between">
-              <a href="rag_interface.html" class="btn btn-outline-primary" target="_blank">
-                📚 Manage Knowledge Base
-              </a>
-              <button type="button" class="btn btn-outline-secondary" onclick="resetRAGSettings()">Reset to Defaults</button>
+            <!-- RAG Settings Tab -->
+            <div class="tab-pane fade" id="rag-settings" role="tabpanel">
+              <div class="mb-4">
+                <h6>RAG (Retrieval-Augmented Generation) Settings</h6>
+                <p class="text-muted small">Configure how the AI uses your knowledge base to enhance responses.</p>
+              </div>
+
+              <div class="mb-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="rag-enabled" checked>
+                  <label class="form-check-label" for="rag-enabled">
+                    <strong>Enable RAG</strong>
+                  </label>
+                </div>
+                <small class="text-muted">When enabled, the AI will search your knowledge base for relevant context
+                  before responding.</small>
+              </div>
+
+              <div class="mb-3">
+                <label for="rag-max-results-slider" class="form-label">
+                  <i class="nf nf-fa-info_circle text-muted me-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="Maximum number of relevant chunks to include as context for each query.">
+                  </i>Max Context Chunks: <span id="rag-max-results-value">3</span>
+                </label>
+                <input type="range" class="form-range" min="1" max="10" step="1" id="rag-max-results-slider" value="3">
+                <small class="text-muted">Higher values provide more context but may slow down responses.</small>
+              </div>
+
+              <div class="mb-3">
+                <div class="card bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title">📚 Knowledge Base Status</h6>
+                    <div id="rag-status">
+                      <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Loading...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <a href="rag_interface.html" class="btn btn-outline-primary" target="_blank">
+                  📚 Manage Knowledge Base
+                </a>
+                <button type="button" class="btn btn-outline-secondary" onclick="resetRAGSettings()">Reset to
+                  Defaults</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </body>
+
 </html>
 
 <div id="success-notification" class="success-notification">
