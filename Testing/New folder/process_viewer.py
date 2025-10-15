@@ -1,7 +1,7 @@
 import sys
 import psutil
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QLineEdit, QTableWidget, QTableWidgetItem, QLabel, QHeaderView, QPushButton
 )
 from PyQt6.QtCore import QTimer, Qt
@@ -31,7 +31,7 @@ class ProcessViewer(QWidget):
         self.search_bar = QLineEdit()
         self.search_bar.textChanged.connect(self.filter_processes)
         search_layout.addWidget(self.search_bar)
-        
+
         # Add red round button to kill matching processes
         self.kill_button = QPushButton("●")
         self.kill_button.setStyleSheet("""
@@ -55,7 +55,7 @@ class ProcessViewer(QWidget):
         self.kill_button.setFixedSize(30, 30)
         self.kill_button.clicked.connect(self.kill_matching_processes)
         search_layout.addWidget(self.kill_button)
-        
+
         layout.addLayout(search_layout)
 
         # Process table
@@ -68,7 +68,7 @@ class ProcessViewer(QWidget):
         self.process_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.process_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.process_table)
-        
+
         # Focus on search bar by default
         self.search_bar.setFocus()
 
@@ -77,7 +77,7 @@ class ProcessViewer(QWidget):
     def load_processes(self):
         # Store the current search text
         search_text = self.search_bar.text().lower()
-        
+
         # Get all processes with their information
         self.processes = []
         for proc in psutil.process_iter(['pid', 'name', 'exe', 'cmdline']):
@@ -99,7 +99,7 @@ class ProcessViewer(QWidget):
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 # Process might have terminated or we don't have access
                 pass
-        
+
         # Update the table with filtered processes if there's a search term,
         # otherwise show all processes
         if search_text:
@@ -113,11 +113,11 @@ class ProcessViewer(QWidget):
             # If search bar is empty, show all processes
             self.update_table(self.processes)
             return
-        
+
         # Filter processes based on search text
         filtered_processes = [
-            proc for proc in self.processes 
-            if search_text in proc['name'].lower() or 
+            proc for proc in self.processes
+            if search_text in proc['name'].lower() or
                search_text in proc['exe'].lower()
         ]
         self.update_table(filtered_processes)
@@ -125,8 +125,8 @@ class ProcessViewer(QWidget):
     def update_table_with_filter(self, search_text):
         # Filter processes based on search text
         filtered_processes = [
-            proc for proc in self.processes 
-            if search_text in proc['name'].lower() or 
+            proc for proc in self.processes
+            if search_text in proc['name'].lower() or
                search_text in proc['exe'].lower()
         ]
         self.update_table(filtered_processes)
@@ -136,14 +136,14 @@ class ProcessViewer(QWidget):
         search_text = self.search_bar.text().lower()
         if not search_text:
             return  # Don't kill all processes if no search term
-        
+
         # Find matching processes
         matching_processes = [
-            proc for proc in self.processes 
-            if search_text in proc['name'].lower() or 
+            proc for proc in self.processes
+            if search_text in proc['name'].lower() or
                search_text in proc['exe'].lower()
         ]
-        
+
         # Terminate matching processes
         for proc in matching_processes:
             try:
@@ -152,22 +152,22 @@ class ProcessViewer(QWidget):
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 # Process might have already terminated or we don't have permission
                 pass
-        
+
         # Refresh the process list after termination
         self.load_processes()
 
     def update_table(self, processes):
         # Clear the table
         self.process_table.setRowCount(0)
-        
+
         # Add processes to the table
         for proc in processes:
             row_position = self.process_table.rowCount()
             self.process_table.insertRow(row_position)
-            
+
             # Add process name
             self.process_table.setItem(row_position, 0, QTableWidgetItem(proc['name']))
-            
+
             # Add command path
             self.process_table.setItem(row_position, 1, QTableWidgetItem(proc['exe']))
 
