@@ -318,10 +318,24 @@ class AHKShortcutEditor(QMainWindow):
         """)
         top_layout.addWidget(self.category_toggle)
         
+        # Color button
+        self.colors_btn = QPushButton("Color")
+        self.colors_btn.setStyleSheet("background-color: #8e44ad; color: white;")
+        self.colors_btn.clicked.connect(self.open_color_dialog)
+        top_layout.addWidget(self.colors_btn)
+        
         self.search_edit = QLineEdit()
         self.search_edit.setPlaceholderText("Search shortcuts...")
         self.search_edit.textChanged.connect(self.update_display)
+        self.search_edit.setStyleSheet("border-radius: 10px; padding: 5px;")
+        self.search_edit.setMinimumWidth(200)
         top_layout.addWidget(self.search_edit)
+        
+        # Generate button
+        generate_btn = QPushButton("Generate AHK Script")
+        generate_btn.setStyleSheet("background-color: #27ae60; color: white;")
+        generate_btn.clicked.connect(self.generate_ahk_script)
+        top_layout.addWidget(generate_btn)
         
         layout.addLayout(top_layout)
         
@@ -340,20 +354,6 @@ class AHKShortcutEditor(QMainWindow):
         self.edit_action.triggered.connect(self.edit_selected)
         self.remove_action.triggered.connect(self.remove_selected)
         
-        # Buttons (keeping Generate and Colors buttons)
-        button_layout = QHBoxLayout()
-        
-        colors_btn = QPushButton("Category Colors")
-        colors_btn.setStyleSheet("background-color: #8e44ad; color: white;")
-        colors_btn.clicked.connect(self.open_color_dialog)
-        button_layout.addWidget(colors_btn)
-        
-        generate_btn = QPushButton("Generate AHK Script")
-        generate_btn.setStyleSheet("background-color: #27ae60; color: white;")
-        generate_btn.clicked.connect(self.generate_ahk_script)
-        button_layout.addWidget(generate_btn)
-        
-        layout.addLayout(button_layout)
         central_widget.setLayout(layout)
         
         self.selected_shortcut = None
