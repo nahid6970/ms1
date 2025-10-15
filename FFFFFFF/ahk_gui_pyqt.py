@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu)
-from PyQt6.QtCore import Qt, pyqtSignal, QSettings
+from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint
 from PyQt6.QtGui import QFont, QTextCursor
 
 AHK_SCRIPT_PATH = "ahk_v2.ahk"
@@ -329,19 +329,19 @@ class AHKShortcutEditor(QMainWindow):
         self.text_browser = QTextBrowser()
         self.text_browser.setOpenExternalLinks(False)
         self.text_browser.anchorClicked.connect(self.handle_click)
+        self.text_browser.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.text_browser.customContextMenuRequested.connect(self.show_context_menu)
         layout.addWidget(self.text_browser)
         
-        # Buttons
+        # Context menu for shortcuts
+        self.context_menu = QMenu(self)
+        self.edit_action = self.context_menu.addAction("Edit")
+        self.remove_action = self.context_menu.addAction("Remove")
+        self.edit_action.triggered.connect(self.edit_selected)
+        self.remove_action.triggered.connect(self.remove_selected)
+        
+        # Buttons (keeping Generate and Colors buttons)
         button_layout = QHBoxLayout()
-        
-        edit_btn = QPushButton("Edit Selected")
-        edit_btn.clicked.connect(self.edit_selected)
-        button_layout.addWidget(edit_btn)
-        
-        remove_btn = QPushButton("Remove Selected")
-        remove_btn.setStyleSheet("background-color: #ff4444; color: white;")
-        remove_btn.clicked.connect(self.remove_selected)
-        button_layout.addWidget(remove_btn)
         
         colors_btn = QPushButton("Category Colors")
         colors_btn.setStyleSheet("background-color: #8e44ad; color: white;")
@@ -420,6 +420,20 @@ class AHKShortcutEditor(QMainWindow):
                 # Save and update display
                 self.save_shortcuts_json()
                 self.update_display()
+    
+    def show_context_menu(self, position):
+        """Show context menu on right-click"""
+        # Only show context menu if a shortcut is selected
+        if self.selected_shortcut and self.selected_type:
+            # Enable/disable actions based on selection
+            self.edit_action.setEnabled(True)
+            self.remove_action.setEnabled(True)
+            self.context_menu.exec(self.text_browser.mapToGlobal(position))
+        else:
+            # Optionally show a disabled menu or no menu at all
+            self.edit_action.setEnabled(False)
+            self.remove_action.setEnabled(False)
+            # For a cleaner UX, we won't show the menu if nothing is selected
     
     def load_shortcuts_json(self):
         if os.path.exists(SHORTCUTS_JSON_PATH):
