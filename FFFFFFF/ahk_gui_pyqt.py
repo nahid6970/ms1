@@ -366,6 +366,9 @@ class AHKShortcutEditor(QMainWindow):
         self.text_browser.anchorClicked.connect(self.handle_click)
         self.text_browser.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.text_browser.customContextMenuRequested.connect(self.show_context_menu)
+        # Enable mouse tracking for double-click detection
+        self.text_browser.setMouseTracking(True)
+        self.text_browser.viewport().installEventFilter(self)
         layout.addWidget(self.text_browser)
 
         # Context menu for shortcuts
@@ -455,6 +458,25 @@ class AHKShortcutEditor(QMainWindow):
             self.edit_action.setEnabled(False)
             self.remove_action.setEnabled(False)
             # For a cleaner UX, we won't show the menu if nothing is selected
+
+    def eventFilter(self, obj, event):
+        """Handle double-click events on the text browser"""
+        if obj == self.text_browser.viewport() and event.type() == event.Type.MouseButtonDblClick:
+            if event.button() == Qt.MouseButton.LeftButton:
+                # Get the position of the click
+                pos = event.pos()
+                # Get the anchor at the click position
+                anchor = self.text_browser.anchorAt(pos)
+                
+                if anchor:
+                    # Handle the click to select the item first
+                    from PyQt6.QtCore import QUrl
+                    self.handle_click(QUrl(anchor))
+                    # Then open the edit dialog
+                    self.edit_selected()
+                    
+                return True  # Event handled
+        return super().eventFilter(obj, event)
 
     def load_shortcuts_json(self):
         if os.path.exists(SHORTCUTS_JSON_PATH):
