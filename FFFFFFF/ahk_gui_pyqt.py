@@ -334,7 +334,7 @@ class AHKShortcutEditor(QMainWindow):
 
         # Generate button
         generate_btn = QPushButton("Generate AHK Script")
-        generate_btn.setStyleSheet("background-color: #27ae60; color: white;")
+        generate_btn.setStyleSheet("background-color: #27ae60; color: black;")
         generate_btn.clicked.connect(self.generate_ahk_script)
         top_layout.addWidget(generate_btn)
 
