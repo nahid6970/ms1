@@ -11,6 +11,7 @@ import threading
 import subprocess
 import psutil
 from datetime import datetime
+from queue import Queue
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QHBoxLayout, 
                             QVBoxLayout, QLabel, QPushButton, QFrame)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread, QPoint
@@ -22,6 +23,78 @@ def calculate_time_to_appear(start_time):
     print(f"Time taken to appear: {elapsed_time:.2f} seconds")
 
 start_time = time.time()
+
+# Github status
+# Define your repositories here
+queue = Queue()
+repos = [
+    {"name": "ms1", "path": "C:\\Users\\nahid\\ms\\ms1", "label": "ms1"},
+    {"name": "db", "path": "C:\\Users\\nahid\\ms\\db", "label": "db"},
+    {"name": "test", "path": "C:\\Users\\nahid\\ms\\test", "label": "test"},
+    # {"name": "ms2", "path": "C:\\ms2", "label": "2"},
+    # {"name": "ms3", "path": "C:\\ms3", "label": "3"},
+    # Add more as needed
+]
+
+status_labels = {}
+
+def check_git_status(git_path, queue):
+    if not os.path.exists(git_path):
+        queue.put((git_path, "Invalid", "#000000"))
+        return
+    os.chdir(git_path)
+    git_status = subprocess.run(["git", "status"], capture_output=True, text=True)
+    
+    label_text = next((r["label"] for r in repos if r["path"] == git_path), "?")
+    
+    if "nothing to commit, working tree clean" in git_status.stdout:
+        queue.put((git_path, label_text, "#00ff21"))  # Green
+    else:
+        queue.put((git_path, label_text, "#fe1616"))  # Red
+
+
+def show_git_changes(git_path):
+    if not os.path.exists(git_path):
+        print("Invalid path")
+        return
+    os.chdir(git_path)
+    subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", "git status && git diff --stat"])
+
+def git_backup(event):
+    commands = " ; ".join([f"{r['path']}\\scripts\\Github\\{r['name']}u.ps1" for r in repos])
+    subprocess.Popen([
+        "Start", "pwsh", "-NoExit", "-Command",
+        f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; {commands} ; cd ~}}"
+    ], shell=True)
+
+def delete_git_lock_files(event=None):
+    for repo in repos:
+        lock_file = os.path.join(repo["path"], ".git", "index.lock")
+        try:
+            if os.path.exists(lock_file):
+                os.remove(lock_file)
+                print(f"Deleted: {lock_file}")
+            else:
+                print(f"File not found: {lock_file}")
+        except Exception as e:
+            print(f"Error deleting {lock_file}: {e}")
+
+def update_status():
+    while True:
+        for repo in repos:
+            check_git_status(repo["path"], queue)
+        time.sleep(1)
+
+def update_gui():
+    while True:
+        try:
+            git_path, text, color = queue.get_nowait()
+            for repo in repos:
+                if git_path == repo["path"]:
+                    status_labels[repo["name"]].config(text=text, fg=color)
+        except:
+            pass
+        time.sleep(0.1)
 
 
 
@@ -525,6 +598,95 @@ class MainWindow(QMainWindow):
         vm_btn.bind_ctrl_left_click(lambda: self.edit_script("2nd_Monitor.py"))
         left_layout.addWidget(vm_btn)
         
+        # Git Backup All Icon
+        bkup = HoverLabel("\udb80\udea2", 
+            custom_style="""
+                QLabel {
+                    color: #009fff;
+                    background-color: #1d2027;
+                    font: bold 18px 'JetBrainsMono Nerd Font';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #009fff;
+                    font: bold 18px 'JetBrainsMono Nerd Font';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        bkup.bind_left_click(self.git_backup)
+        left_layout.addWidget(bkup)
+        
+        # Add repo-specific labels and bindings dynamically
+        self.repo_labels = {}
+        for repo in repos:
+            label = HoverLabel(repo["label"], 
+                custom_style="""
+                    QLabel {
+                        color: #FFFFFF;
+                        background-color: #1d2027;
+                        font: bold 12px 'JetBrainsMono Nerd Font';
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                    }
+                """,
+                hover_style="""
+                    QLabel {
+                        color: #1d2027;
+                        background-color: #FFFFFF;
+                        font: bold 12px 'JetBrainsMono Nerd Font';
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                    }
+                """
+            )
+            
+            # Bind click events
+            repo_path = repo["path"]
+            label.bind_left_click(lambda p=repo_path: subprocess.Popen(
+                ["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd {p.replace(os.sep, '/')} ; gitter}}"], shell=True
+            ))
+            label.bind_ctrl_left_click(lambda p=repo_path: subprocess.Popen(
+                f'explorer "{p}"', shell=True
+            ))
+            label.bind_right_click(lambda p=repo_path: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=p, shell=True))
+            label.bind_ctrl_right_click(lambda p=repo_path: subprocess.Popen(
+                ["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd {p.replace(os.sep, '/')} ; git restore . }}"], shell=True
+            ))
+            
+            left_layout.addWidget(label)
+            self.repo_labels[repo["name"]] = label
+            status_labels[repo["name"]] = label
+        
+        # Git Lock File Cleaner Icon
+        DelGitIgnore = HoverLabel("\udb82\udde7", 
+            custom_style="""
+                QLabel {
+                    color: #ffffff;
+                    background-color: #1d2027;
+                    font: bold 18px 'JetBrainsMono Nerd Font';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """,
+            hover_style="""
+                QLabel {
+                    color: #1d2027;
+                    background-color: #ffffff;
+                    font: bold 18px 'JetBrainsMono Nerd Font';
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+            """
+        )
+        DelGitIgnore.bind_left_click(self.delete_git_lock_files)
+        left_layout.addWidget(DelGitIgnore)
+        
         main_layout.addWidget(left_frame)
         
     def create_right_section(self, main_layout):
@@ -668,6 +830,20 @@ class MainWindow(QMainWindow):
         self.time_timer.timeout.connect(self.update_time)
         self.time_timer.start(1000)  # Update every second
         
+        # Git status timer
+        self.git_timer = QTimer()
+        self.git_timer.timeout.connect(self.update_git_status_gui)
+        self.git_timer.start(100)  # Update every 100ms
+        
+        # Start background threads for git status
+        self.start_git_monitoring()
+    
+    def start_git_monitoring(self):
+        """Start git status monitoring threads"""
+        # Start background threads
+        status_thread = threading.Thread(target=update_status, daemon=True)
+        status_thread.start()
+        
     def update_system_info(self, info):
         """Update system information labels"""
         # CPU
@@ -801,6 +977,45 @@ class MainWindow(QMainWindow):
         """Update current time"""
         current_time = datetime.now().strftime("%H:%M:%S")
         self.time_label.setText(current_time)
+    
+    def git_backup(self):
+        """Execute git backup for all repositories"""
+        commands = " ; ".join([f"{r['path']}\\scripts\\Github\\{r['name']}u.ps1" for r in repos])
+        subprocess.Popen([
+            "Start", "pwsh", "-NoExit", "-Command",
+            f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; {commands} ; cd ~}}"
+        ], shell=True)
+    
+    def delete_git_lock_files(self):
+        """Delete git lock files from all repositories"""
+        for repo in repos:
+            lock_file = os.path.join(repo["path"], ".git", "index.lock")
+            try:
+                if os.path.exists(lock_file):
+                    os.remove(lock_file)
+                    print(f"Deleted: {lock_file}")
+                else:
+                    print(f"File not found: {lock_file}")
+            except Exception as e:
+                print(f"Error deleting {lock_file}: {e}")
+    
+    def update_git_status_gui(self):
+        """Update git status in GUI"""
+        try:
+            while not queue.empty():
+                git_path, text, color = queue.get_nowait()
+                for repo in repos:
+                    if git_path == repo["path"] and repo["name"] in self.repo_labels:
+                        label = self.repo_labels[repo["name"]]
+                        # Update the label text and color
+                        label.setText(text)
+                        # Update the color by modifying the stylesheet
+                        current_style = label.default_style
+                        new_style = current_style.replace("color: #FFFFFF;", f"color: {color};")
+                        label.default_style = new_style
+                        label.setStyleSheet(new_style)
+        except Exception as e:
+            pass
     
     def run_script(self, script_name):
         """Run a script file"""
