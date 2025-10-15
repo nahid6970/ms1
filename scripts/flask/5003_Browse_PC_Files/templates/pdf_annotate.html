@@ -349,7 +349,10 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(`PDF moved to "${folderName}" successfully!`);
+                        // Save current quick move panel state before navigating
+                        const panel = document.getElementById('quickMovePanel');
+                        const isQuickMoveOpen = panel && panel.style.display === 'block';
+                        saveQuickMoveState(isQuickMoveOpen);
                         
                         // Check if there's a next PDF to navigate to
                         {% if next_pdf %}
@@ -374,6 +377,11 @@
         }
 
         function navigateToPDF(filename) {
+            // Save current quick move panel state before navigating
+            const panel = document.getElementById('quickMovePanel');
+            const isQuickMoveOpen = panel && panel.style.display === 'block';
+            saveQuickMoveState(isQuickMoveOpen);
+            
             window.location.href = `/pdf_annotate?dir_path={{ dir_path }}&filename=${encodeURIComponent(filename)}`;
         }
 
