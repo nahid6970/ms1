@@ -380,9 +380,12 @@
             // Save current quick move panel state before navigating
             const panel = document.getElementById('quickMovePanel');
             const isQuickMoveOpen = panel && panel.style.display === 'block';
+            console.log('Saving quick move state before navigation:', isQuickMoveOpen);
             saveQuickMoveState(isQuickMoveOpen);
             
-            window.location.href = `/pdf_annotate?dir_path={{ dir_path }}&filename=${encodeURIComponent(filename)}`;
+            // Add URL parameter to maintain quick move state
+            const quickMoveParam = isQuickMoveOpen ? '&quick_move=open' : '';
+            window.location.href = `/pdf_annotate?dir_path={{ dir_path }}&filename=${encodeURIComponent(filename)}${quickMoveParam}`;
         }
 
         function openInFoxit() {
@@ -411,15 +414,22 @@
 
         // Save quick move panel state
         function saveQuickMoveState(isVisible) {
+            console.log('Saving quick move state:', isVisible);
             localStorage.setItem('quickMovePanel_visible', isVisible.toString());
         }
 
         // Load quick move panel state
         function loadQuickMoveState() {
             const isVisible = localStorage.getItem('quickMovePanel_visible') === 'true';
+            console.log('Loading quick move state:', isVisible);
             if (isVisible) {
                 setTimeout(() => {
-                    toggleQuickMove();
+                    console.log('Reopening quick move panel');
+                    const panel = document.getElementById('quickMovePanel');
+                    if (panel) {
+                        loadQuickMoveFolders();
+                        panel.style.display = 'block';
+                    }
                 }, 500); // Small delay to ensure DOM is ready
             }
         }
@@ -454,7 +464,23 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadQuickMoveState();
+            // Check URL parameters first
+            const urlParams = new URLSearchParams(window.location.search);
+            const quickMoveFromUrl = urlParams.get('quick_move') === 'open';
+            
+            if (quickMoveFromUrl) {
+                console.log('Quick move state from URL: open');
+                setTimeout(() => {
+                    const panel = document.getElementById('quickMovePanel');
+                    if (panel) {
+                        loadQuickMoveFolders();
+                        panel.style.display = 'block';
+                        saveQuickMoveState(true);
+                    }
+                }, 500);
+            } else {
+                loadQuickMoveState();
+            }
             
             // Debug: Log the PDF URL
             console.log('PDF URL:', '/view/{{ dir_path }}/{{ current_pdf }}');
