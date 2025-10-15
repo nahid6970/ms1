@@ -217,20 +217,7 @@
             margin-right: 5px;
         }
 
-        .color-btn {
-            background-color: #666;
-            border: none;
-            color: white;
-            padding: 4px 6px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
 
-        .color-btn:hover {
-            background-color: #777;
-        }
 
         .color-picker-modal {
             position: fixed;
@@ -884,10 +871,10 @@
         function toggleQuickMove() {
             const panel = document.getElementById('quickMovePanel');
             const toggleBtn = document.getElementById('quickMoveToggle');
-            
+
             quickMoveEnabled = !quickMoveEnabled;
             localStorage.setItem('quickMoveEnabled', quickMoveEnabled);
-            
+
             if (quickMoveEnabled) {
                 panel.style.display = 'block';
                 toggleBtn.style.backgroundColor = '#4CAF50';
@@ -896,6 +883,16 @@
                 panel.style.display = 'none';
                 toggleBtn.style.backgroundColor = '#444';
             }
+        }
+
+        function showColorPalette(event, index, folderPath, folderName, bgColor, textColor, hoverBgColor, hoverTextColor) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Right-click detected on folder', index, 'opening color palette');
+            
+            // Directly open the color picker
+            showColorPicker(folderPath, folderName, bgColor, textColor, hoverBgColor, hoverTextColor);
         }
 
         function loadQuickMoveFolders() {
@@ -908,12 +905,11 @@
                             <div class="quick-move-item">
                                 <button class="quick-move-folder quick-move-folder-${index}" 
                                     onclick="quickMoveImage('${folder.path.replace(/'/g, "\\'")}')"
+                                    data-folder-index="${index}"
                                     style="background-color: ${folder.bg_color || '#444'}; color: ${folder.text_color || '#ffffff'};">
                                     <i class="nf nf-fa-folder"></i> ${folder.name}
                                 </button>
-                                <button class="color-btn" onclick="showColorPicker('${folder.path.replace(/'/g, "\\'")}', '${folder.name}', '${folder.bg_color || '#444'}', '${folder.text_color || '#ffffff'}', '${folder.hover_bg_color || '#FF9800'}', '${folder.hover_text_color || '#000000'}')" title="Change colors">
-                                    🎨
-                                </button>
+
                             </div>
                             <style>
                                 .quick-move-folder-${index}:hover {
@@ -922,6 +918,29 @@
                                 }
                             </style>
                         `).join('');
+                        
+                        // Add right-click event listeners after creating the elements
+                        setTimeout(() => {
+                            data.folders.forEach((folder, index) => {
+                                const folderBtn = document.querySelector(`.quick-move-folder-${index}`);
+                                if (folderBtn) {
+                                    folderBtn.addEventListener('contextmenu', function(event) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        showColorPalette(
+                                            event, 
+                                            index, 
+                                            folder.path, 
+                                            folder.name, 
+                                            folder.bg_color || '#444', 
+                                            folder.text_color || '#ffffff', 
+                                            folder.hover_bg_color || '#FF9800', 
+                                            folder.hover_text_color || '#000000'
+                                        );
+                                    });
+                                }
+                            });
+                        }, 100);
                     } else {
                         container.innerHTML = '<div style="color: #999; text-align: center; font-size: 12px;">No move folders</div>';
                     }
@@ -934,7 +953,7 @@
         function quickMoveImage(targetPath) {
             const currentImage = '{{ current_image }}';
             const currentDir = '{{ dir_path }}';
-            
+
             // Move without confirmation for quick move
             fetch('/move_image', {
                 method: 'POST',
@@ -947,30 +966,30 @@
                     target_dir: targetPath
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show next image or go back if no more images
-                    {% if next_image %}
-                    window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ next_image | urlencode }}&drive={{ current_drive | urlencode }}`;
-                    {% elif prev_image %}
-                    window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ prev_image | urlencode }}&drive={{ current_drive | urlencode }}`;
-                    {% else %}
-                    // No more images, go back to file browser
-                    window.location.href = '/?dir_path={{ dir_path | urlencode }}&drive={{ current_drive | urlencode }}';
-                    {% endif %}
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Request failed:', error);
-                alert('Request failed: ' + error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show next image or go back if no more images
+                        {% if next_image %}
+                        window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ next_image | urlencode }}&drive={{ current_drive | urlencode }}`;
+                        {% elif prev_image %}
+                        window.location.href = `/image_gallery?dir_path={{ dir_path | urlencode }}&filename={{ prev_image | urlencode }}&drive={{ current_drive | urlencode }}`;
+                        {% else %}
+                        // No more images, go back to file browser
+                        window.location.href = '/?dir_path={{ dir_path | urlencode }}&drive={{ current_drive | urlencode }}';
+                        {% endif %}
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Request failed:', error);
+                    alert('Request failed: ' + error);
+                });
         }
 
         // Initialize quick move on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const toggleBtn = document.getElementById('quickMoveToggle');
             if (quickMoveEnabled) {
                 document.getElementById('quickMovePanel').style.display = 'block';
@@ -1018,23 +1037,23 @@
                     hover_text_color: hoverTextColor
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeColorPicker();
-                    loadQuickMoveFolders(); // Refresh the folders to show new colors
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Request failed:', error);
-                alert('Request failed: ' + error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeColorPicker();
+                        loadQuickMoveFolders(); // Refresh the folders to show new colors
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Request failed:', error);
+                    alert('Request failed: ' + error);
+                });
         }
 
         // Close color picker when clicking outside
-        document.getElementById('colorPickerModal').addEventListener('click', function(event) {
+        document.getElementById('colorPickerModal').addEventListener('click', function (event) {
             if (event.target === this) {
                 closeColorPicker();
             }
@@ -1047,6 +1066,8 @@
                 dropdown.classList.remove('show');
             }
         });
+
+
     </script>
 </body>
 
