@@ -2,7 +2,7 @@ import sys
 import psutil
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
-    QLineEdit, QTableWidget, QTableWidgetItem, QLabel, QHeaderView
+    QLineEdit, QTableWidget, QTableWidgetItem, QLabel, QHeaderView, QPushButton
 )
 from PyQt6.QtCore import QTimer, Qt
 
@@ -31,6 +31,31 @@ class ProcessViewer(QWidget):
         self.search_bar = QLineEdit()
         self.search_bar.textChanged.connect(self.filter_processes)
         search_layout.addWidget(self.search_bar)
+        
+        # Add red round button to kill matching processes
+        self.kill_button = QPushButton("●")
+        self.kill_button.setStyleSheet("""
+            QPushButton {
+                background-color: red;
+                border: none;
+                border-radius: 15px;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                width: 30px;
+                height: 30px;
+            }
+            QPushButton:hover {
+                background-color: darkred;
+            }
+            QPushButton:pressed {
+                background-color: crimson;
+            }
+        """)
+        self.kill_button.setFixedSize(30, 30)
+        self.kill_button.clicked.connect(self.kill_matching_processes)
+        search_layout.addWidget(self.kill_button)
+        
         layout.addLayout(search_layout)
 
         # Process table
@@ -43,6 +68,9 @@ class ProcessViewer(QWidget):
         self.process_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.process_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.process_table)
+        
+        # Focus on search bar by default
+        self.search_bar.setFocus()
 
         self.setLayout(layout)
 
@@ -52,8 +80,9 @@ class ProcessViewer(QWidget):
         
         # Get all processes with their information
         self.processes = []
-        for proc in psutil.process_iter(['name', 'exe', 'cmdline']):
+        for proc in psutil.process_iter(['pid', 'name', 'exe', 'cmdline']):
             try:
+                pid = proc.info['pid']
                 name = proc.info['name']
                 # Try to get the full command line first, fallback to exe if not available
                 if proc.info['cmdline']:
@@ -63,6 +92,7 @@ class ProcessViewer(QWidget):
                 else:
                     exe = proc.info['exe'] if proc.info['exe'] else 'N/A'
                 self.processes.append({
+                    'pid': pid,
                     'name': name,
                     'exe': exe
                 })
@@ -100,6 +130,31 @@ class ProcessViewer(QWidget):
                search_text in proc['exe'].lower()
         ]
         self.update_table(filtered_processes)
+
+    def kill_matching_processes(self):
+        # Get the current search text
+        search_text = self.search_bar.text().lower()
+        if not search_text:
+            return  # Don't kill all processes if no search term
+        
+        # Find matching processes
+        matching_processes = [
+            proc for proc in self.processes 
+            if search_text in proc['name'].lower() or 
+               search_text in proc['exe'].lower()
+        ]
+        
+        # Terminate matching processes
+        for proc in matching_processes:
+            try:
+                process = psutil.Process(proc['pid'])
+                process.terminate()
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                # Process might have already terminated or we don't have permission
+                pass
+        
+        # Refresh the process list after termination
+        self.load_processes()
 
     def update_table(self, processes):
         # Clear the table
