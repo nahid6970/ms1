@@ -90,6 +90,18 @@
             border-color: #2196F3;
         }
 
+        /* Hide number input spinner arrows */
+        .zoom-input::-webkit-outer-spin-button,
+        .zoom-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        .zoom-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         .move-dropdown {
             position: relative;
             display: inline-block;
