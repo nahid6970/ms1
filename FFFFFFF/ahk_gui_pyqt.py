@@ -28,57 +28,75 @@ class AddEditShortcutDialog(QDialog):
             self.populate_fields()
 
     def setup_ui(self):
+        # Create main layout
         layout = QVBoxLayout()
-
+        
+        # Create top layout for name, category, description
+        top_layout = QHBoxLayout()
+        
+        # Left side - form fields
+        form_layout = QVBoxLayout()
+        
         # Name
-        layout.addWidget(QLabel("Name:"))
+        form_layout.addWidget(QLabel("Name:"))
         self.name_edit = QLineEdit()
         self.name_edit.setPlaceholderText("e.g., Open Terminal, Version 1 Text")
-        layout.addWidget(self.name_edit)
-
+        form_layout.addWidget(self.name_edit)
+        
         # Category
-        layout.addWidget(QLabel("Category:"))
+        form_layout.addWidget(QLabel("Category:"))
         self.category_combo = QComboBox()
         self.category_combo.setEditable(True)
         existing_categories = self.get_existing_categories()
         self.category_combo.addItems(existing_categories)
-        layout.addWidget(self.category_combo)
-
+        form_layout.addWidget(self.category_combo)
+        
         # Description
-        layout.addWidget(QLabel("Description:"))
+        form_layout.addWidget(QLabel("Description:"))
         self.description_edit = QLineEdit()
         self.description_edit.setPlaceholderText("Brief description of what this does")
-        layout.addWidget(self.description_edit)
-
+        form_layout.addWidget(self.description_edit)
+        
         # Enabled checkbox
         self.enabled_checkbox = QCheckBox("Enabled (include in generated script)")
         self.enabled_checkbox.setChecked(True)
-        layout.addWidget(self.enabled_checkbox)
-
+        form_layout.addWidget(self.enabled_checkbox)
+        
         if self.shortcut_type == "script":
             # Hotkey
-            layout.addWidget(QLabel("Hotkey:"))
+            form_layout.addWidget(QLabel("Hotkey:"))
             self.hotkey_edit = QLineEdit()
             self.hotkey_edit.setPlaceholderText("e.g., !Space, ^!n, #x")
-            layout.addWidget(self.hotkey_edit)
-
-            # Action
-            layout.addWidget(QLabel("Action:"))
-            self.action_edit = QTextEdit()
-            self.action_edit.setMaximumHeight(100)
-            layout.addWidget(self.action_edit)
+            form_layout.addWidget(self.hotkey_edit)
         else:
             # Trigger
-            layout.addWidget(QLabel("Trigger (without ::):"))
+            form_layout.addWidget(QLabel("Trigger (without ::):"))
             self.trigger_edit = QLineEdit()
             self.trigger_edit.setPlaceholderText("e.g., ;v1, ;run")
-            layout.addWidget(self.trigger_edit)
-
+            form_layout.addWidget(self.trigger_edit)
+        
+        # Add form layout to top layout
+        top_layout.addLayout(form_layout)
+        
+        # Right side - action/replacement with bigger height
+        if self.shortcut_type == "script":
+            # Action
+            action_layout = QVBoxLayout()
+            action_layout.addWidget(QLabel("Action:"))
+            self.action_edit = QTextEdit()
+            self.action_edit.setMinimumHeight(300)  # Bigger height
+            action_layout.addWidget(self.action_edit)
+            top_layout.addLayout(action_layout)
+        else:
             # Replacement
-            layout.addWidget(QLabel("Replacement Text:"))
+            replacement_layout = QVBoxLayout()
+            replacement_layout.addWidget(QLabel("Replacement Text:"))
             self.replacement_edit = QTextEdit()
-            self.replacement_edit.setMaximumHeight(100)
-            layout.addWidget(self.replacement_edit)
+            self.replacement_edit.setMinimumHeight(300)  # Bigger height
+            replacement_layout.addWidget(self.replacement_edit)
+            top_layout.addLayout(replacement_layout)
+        
+        layout.addLayout(top_layout)
 
         # Buttons
         button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
