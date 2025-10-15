@@ -243,7 +243,13 @@ def view_file(file_path):
         elif full_file_path.endswith(('.mkv','.mp4', '.webm', '.ogg', '.mp3')):
             return stream_video(full_file_path)  # Stream the video for playing
         elif full_file_path.endswith('.pdf'):
-            return send_file(full_file_path, mimetype='application/pdf')  # Serve PDF files
+            # Check if annotation mode is requested
+            if request.args.get('annotate') == 'true':
+                directory = os.path.dirname(full_file_path)
+                filename = os.path.basename(full_file_path)
+                return redirect(url_for('pdf_annotate', dir_path=directory, filename=filename))
+            else:
+                return send_file(full_file_path, mimetype='application/pdf')  # Serve PDF files directly
         else:
             flash("File type is not supported for direct viewing")
             return redirect(url_for('index', dir_path=os.path.dirname(full_file_path)))
@@ -480,6 +486,47 @@ def serve_image(file_path):
         return send_file(full_file_path, mimetype=mimetype)
     else:
         return "Image not found", 404
+
+@app.route("/pdf_annotate")
+def pdf_annotate():
+    """Display PDF with quick move functionality."""
+    dir_path = request.args.get('dir_path', 'C:/')
+    filename = request.args.get('filename', '')
+    
+    try:
+        # Get all PDF files in the directory
+        pdf_extensions = ('.pdf',)
+        all_files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+        pdf_files = [f for f in all_files if f.lower().endswith(pdf_extensions)]
+        pdf_files.sort()  # Sort alphabetically
+        
+        if not pdf_files:
+            flash("No PDF files found in this directory")
+            return redirect(url_for('index', dir_path=dir_path))
+        
+        # Find current PDF index
+        current_index = 0
+        if filename in pdf_files:
+            current_index = pdf_files.index(filename)
+        
+        current_pdf = pdf_files[current_index]
+        
+        # Get previous and next PDFs
+        prev_pdf = pdf_files[current_index - 1] if current_index > 0 else None
+        next_pdf = pdf_files[current_index + 1] if current_index < len(pdf_files) - 1 else None
+        
+        return render_template('pdf_annotate.html',
+                             current_pdf=current_pdf,
+                             prev_pdf=prev_pdf,
+                             next_pdf=next_pdf,
+                             current_index=current_index + 1,
+                             total_pdfs=len(pdf_files),
+                             dir_path=dir_path,
+                             current_drive=request.args.get('drive', dir_path))
+    
+    except Exception as e:
+        flash(f"Error loading PDF viewer: {e}")
+        return redirect(url_for('index', dir_path=dir_path))
 
 @app.route('/get_move_folders', methods=['GET'])
 def get_move_folders():

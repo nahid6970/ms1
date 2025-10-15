@@ -769,6 +769,25 @@
             /* Change hover effect */
         }
 
+        .pdf-btn {
+            padding: 5px 10px;
+            background-color: #ff9800;
+            color: black !important;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pdf-btn:hover {
+            background-color: #f57c00;
+        }
+
         button:hover {
             background-color: #45a049;
         }
@@ -1077,11 +1096,19 @@
                             {% if file.endswith(editable_extensions) %}
                             <a href="/edit/{{ current_dir }}/{{ file }}" class="edit-btn"></a>
                             {% endif %}
+                            {% if file.lower().endswith('.pdf') %}
+                            <a href="/view/{{ current_dir }}/{{ file | urlencode }}?annotate=true" class="pdf-btn" title="Quick Move PDF">📁</a>
+                            {% endif %}
                             <a href="/download/{{ current_dir }}/{{ file | urlencode }}" class="download-btn"></a>
                         </div>
 
                         <!-- Right-click context menu (hidden by default) -->
                         <div class="context-menu" id="context-{{ file }}">
+                            {% if file.lower().endswith('.pdf') %}
+                            <a href="/view/{{ current_dir }}/{{ file | urlencode }}?annotate=true">
+                                <i class="nf nf-md-draw"></i> Quick Move PDF
+                            </a>
+                            {% endif %}
                             <a href="#" class="rename-btn" onclick="renameFile('{{ current_dir }}', '{{ file }}')">
                                 <i class="nf nf-md-rename_box"></i> Rename
                             </a>

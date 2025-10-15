@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer - {{ current_pdf }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .pdf-header {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            position: relative;
+        }
+
+        .pdf-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .pdf-tools {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-btn {
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #3c4043;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tool-btn:hover {
+            background: #f8f9fa;
+            border-color: #1a73e8;
+        }
+
+        .back-btn {
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #3c4043;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #e8f0fe;
+            border-color: #1a73e8;
+            color: #1a73e8;
+        }
+
+        .pdf-container {
+            height: calc(100vh - 70px);
+            position: relative;
+            background: #525659;
+        }
+
+        .pdf-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .navigation-panel {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navigation-panel:hover {
+            background: rgba(0,0,0,0.9);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .navigation-panel:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-prev {
+            left: 20px;
+        }
+
+        .nav-next {
+            right: 20px;
+        }
+
+        .quick-move-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 200px;
+            max-width: 300px;
+            z-index: 500;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .quick-move-panel h4 {
+            font-size: 14px;
+            color: #fff;
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+
+        .quick-move-folder {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: left;
+            transition: background-color 0.2s;
+            color: white;
+            text-decoration: none;
+        }
+
+        .quick-move-folder:hover {
+            background-color: #FF9800;
+        }
+
+        .quick-move-folder i {
+            margin-right: 8px;
+        }
+
+        .quick-move-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .quick-move-item .quick-move-folder {
+            flex: 1;
+            margin-bottom: 0;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .pdf-header {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .pdf-tools {
+                gap: 5px;
+            }
+
+            .tool-btn {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .navigation-panel {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .nav-prev {
+                left: 10px;
+            }
+
+            .nav-next {
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pdf-header">
+        <a href="/?dir_path={{ dir_path }}" class="back-btn">
+            ← Back to Files
+        </a>
+        
+        <div class="pdf-title">{{ current_pdf }} - Quick Move</div>
+        
+        <div class="pdf-tools">
+            <button class="tool-btn" onclick="toggleQuickMove()" title="Quick Move PDF">
+                📁 Quick Move
+            </button>
+        </div>
+    </div>
+
+    <div class="pdf-container">
+        <!-- Quick Move Panel -->
+        <div class="quick-move-panel" id="quickMovePanel" style="display: none;">
+            <h4>Quick Move PDF</h4>
+            <div id="quickMoveFolders">
+                <!-- Quick move folders will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Navigation buttons for other PDFs -->
+        {% if prev_pdf %}
+        <button class="navigation-panel nav-prev" onclick="navigateToPDF('{{ prev_pdf }}')" title="Previous PDF">
+            ‹
+        </button>
+        {% endif %}
+        
+        {% if next_pdf %}
+        <button class="navigation-panel nav-next" onclick="navigateToPDF('{{ next_pdf }}')" title="Next PDF">
+            ›
+        </button>
+        {% endif %}
+
+        <!-- PDF iframe -->
+        <div id="loading-message" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 18px;">
+            Loading PDF...
+        </div>
+        <iframe id="pdf-frame" class="pdf-frame" src="/view/{{ dir_path }}/{{ current_pdf }}" onload="hideLoading()" onerror="showError()"></iframe>
+    </div>
+
+    <script>
+        // Quick Move functionality
+        function toggleQuickMove() {
+            const panel = document.getElementById('quickMovePanel');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                loadQuickMoveFolders();
+                panel.style.display = 'block';
+                saveQuickMoveState(true);
+            } else {
+                panel.style.display = 'none';
+                saveQuickMoveState(false);
+            }
+        }
+
+        function loadQuickMoveFolders() {
+            fetch('/get_move_folders')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('quickMoveFolders');
+                    container.innerHTML = '';
+                    
+                    if (data.folders && data.folders.length > 0) {
+                        data.folders.forEach(folder => {
+                            const item = document.createElement('div');
+                            item.className = 'quick-move-item';
+                            
+                            const button = document.createElement('button');
+                            button.className = 'quick-move-folder';
+                            button.style.backgroundColor = folder.bg_color || '#444';
+                            button.style.color = folder.text_color || '#ffffff';
+                            button.innerHTML = `<i class="nf nf-fa-folder"></i>${folder.name}`;
+                            button.onclick = () => movePDFToFolder(folder.path, folder.name);
+                            
+                            // Add hover effects
+                            button.onmouseover = () => {
+                                button.style.backgroundColor = folder.hover_bg_color || '#FF9800';
+                                button.style.color = folder.hover_text_color || '#000000';
+                            };
+                            button.onmouseout = () => {
+                                button.style.backgroundColor = folder.bg_color || '#444';
+                                button.style.color = folder.text_color || '#ffffff';
+                            };
+                            
+                            item.appendChild(button);
+                            container.appendChild(item);
+                        });
+                    } else {
+                        container.innerHTML = '<div style="color: #999; text-align: center; padding: 10px;">No move folders configured</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading move folders:', error);
+                    document.getElementById('quickMoveFolders').innerHTML = '<div style="color: #f44336; text-align: center; padding: 10px;">Error loading folders</div>';
+                });
+        }
+
+        function movePDFToFolder(targetPath, folderName) {
+            if (confirm(`Move "{{ current_pdf }}" to "${folderName}"?`)) {
+                fetch('/move_image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        source_dir: '{{ dir_path }}',
+                        filename: '{{ current_pdf }}',
+                        target_dir: targetPath
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`PDF moved to "${folderName}" successfully!`);
+                        // Redirect back to the source directory
+                        window.location.href = '/?dir_path={{ dir_path }}';
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error moving PDF:', error);
+                    alert('Error moving PDF: ' + error);
+                });
+            }
+        }
+
+        function navigateToPDF(filename) {
+            window.location.href = `/pdf_annotate?dir_path={{ dir_path }}&filename=${encodeURIComponent(filename)}`;
+        }
+
+        // Save quick move panel state
+        function saveQuickMoveState(isVisible) {
+            localStorage.setItem('quickMovePanel_visible', isVisible.toString());
+        }
+
+        // Load quick move panel state
+        function loadQuickMoveState() {
+            const isVisible = localStorage.getItem('quickMovePanel_visible') === 'true';
+            if (isVisible) {
+                setTimeout(() => {
+                    toggleQuickMove();
+                }, 500); // Small delay to ensure DOM is ready
+            }
+        }
+
+        // Close quick move panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('quickMovePanel');
+            const quickMoveBtn = event.target.closest('[onclick="toggleQuickMove()"]');
+            
+            if (!panel.contains(event.target) && !quickMoveBtn && panel.style.display === 'block') {
+                panel.style.display = 'none';
+                saveQuickMoveState(false);
+            }
+        });
+
+        // Handle iframe loading
+        function hideLoading() {
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+                loadingMessage.style.display = 'none';
+            }
+            console.log('PDF loaded successfully');
+        }
+
+        function showError() {
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+                loadingMessage.innerHTML = 'Error loading PDF. <a href="/view/{{ dir_path }}/{{ current_pdf }}" target="_blank" style="color: #1a73e8;">Open in new tab</a>';
+            }
+            console.error('Error loading PDF in iframe');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuickMoveState();
+            
+            // Debug: Log the PDF URL
+            console.log('PDF URL:', '/view/{{ dir_path }}/{{ current_pdf }}');
+        });
+    </script>
+</body>
+</html>
