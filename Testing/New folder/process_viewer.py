@@ -1,0 +1,126 @@
+import sys
+import psutil
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
+    QLineEdit, QTableWidget, QTableWidgetItem, QLabel, QHeaderView
+)
+from PyQt6.QtCore import QTimer, Qt
+
+
+class ProcessViewer(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+        self.processes = []
+        self.load_processes()
+        # Update processes every 2 seconds
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.load_processes)
+        self.timer.start(2000)
+
+    def init_ui(self):
+        self.setWindowTitle('Process Viewer')
+        self.setGeometry(100, 100, 1000, 600)
+
+        # Main layout
+        layout = QVBoxLayout()
+
+        # Search bar
+        search_layout = QHBoxLayout()
+        search_layout.addWidget(QLabel('Search:'))
+        self.search_bar = QLineEdit()
+        self.search_bar.textChanged.connect(self.filter_processes)
+        search_layout.addWidget(self.search_bar)
+        layout.addLayout(search_layout)
+
+        # Process table
+        self.process_table = QTableWidget()
+        self.process_table.setColumnCount(2)
+        self.process_table.setHorizontalHeaderLabels(['Name', 'Command Path'])
+        self.process_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.process_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.process_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        layout.addWidget(self.process_table)
+
+        self.setLayout(layout)
+
+    def load_processes(self):
+        # Store the current search text
+        search_text = self.search_bar.text().lower()
+        
+        # Get all processes with their information
+        self.processes = []
+        for proc in psutil.process_iter(['name', 'exe', 'cmdline']):
+            try:
+                name = proc.info['name']
+                # Try to get the full command line first, fallback to exe if not available
+                if proc.info['cmdline']:
+                    # Join the command line arguments into a single string
+                    cmdline = ' '.join(proc.info['cmdline'])
+                    exe = cmdline if cmdline else (proc.info['exe'] if proc.info['exe'] else 'N/A')
+                else:
+                    exe = proc.info['exe'] if proc.info['exe'] else 'N/A'
+                self.processes.append({
+                    'name': name,
+                    'exe': exe
+                })
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                # Process might have terminated or we don't have access
+                pass
+        
+        # Update the table with filtered processes if there's a search term,
+        # otherwise show all processes
+        if search_text:
+            self.update_table_with_filter(search_text)
+        else:
+            self.update_table(self.processes)
+
+    def filter_processes(self):
+        search_text = self.search_bar.text().lower()
+        if not search_text:
+            # If search bar is empty, show all processes
+            self.update_table(self.processes)
+            return
+        
+        # Filter processes based on search text
+        filtered_processes = [
+            proc for proc in self.processes 
+            if search_text in proc['name'].lower() or 
+               search_text in proc['exe'].lower()
+        ]
+        self.update_table(filtered_processes)
+
+    def update_table_with_filter(self, search_text):
+        # Filter processes based on search text
+        filtered_processes = [
+            proc for proc in self.processes 
+            if search_text in proc['name'].lower() or 
+               search_text in proc['exe'].lower()
+        ]
+        self.update_table(filtered_processes)
+
+    def update_table(self, processes):
+        # Clear the table
+        self.process_table.setRowCount(0)
+        
+        # Add processes to the table
+        for proc in processes:
+            row_position = self.process_table.rowCount()
+            self.process_table.insertRow(row_position)
+            
+            # Add process name
+            self.process_table.setItem(row_position, 0, QTableWidgetItem(proc['name']))
+            
+            # Add command path
+            self.process_table.setItem(row_position, 1, QTableWidgetItem(proc['exe']))
+
+
+def main():
+    app = QApplication(sys.argv)
+    viewer = ProcessViewer()
+    viewer.show()
+    sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()
