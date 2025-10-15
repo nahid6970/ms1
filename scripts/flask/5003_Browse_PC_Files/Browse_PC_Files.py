@@ -750,6 +750,54 @@ def move_bookmark():
     else:
         return jsonify({"error": "Failed to move bookmark"}), 500
 
+@app.route('/open_in_foxit', methods=['POST'])
+def open_in_foxit():
+    """Open the specified PDF in Foxit PDF Reader."""
+    import subprocess
+    
+    data = request.get_json()
+    pdf_path = data.get('pdf_path', '').strip()
+    
+    if not pdf_path:
+        return jsonify({"error": "PDF path is required"}), 400
+    
+    # Normalize the path for Windows
+    normalized_path = os.path.normpath(pdf_path)
+    
+    if not os.path.exists(normalized_path):
+        return jsonify({"error": f"PDF file does not exist: {normalized_path}"}), 400
+    
+    if not normalized_path.lower().endswith('.pdf'):
+        return jsonify({"error": "File is not a PDF"}), 400
+    
+    try:
+        # Try to open with Foxit PDF Reader
+        foxit_paths = [
+            r"C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
+            r"C:\Program Files\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe",
+            "FoxitPDFReader.exe"  # If it's in PATH
+        ]
+        
+        foxit_found = False
+        for foxit_path in foxit_paths:
+            try:
+                if os.path.exists(foxit_path) or foxit_path == "FoxitPDFReader.exe":
+                    result = subprocess.run([foxit_path, normalized_path], shell=True, capture_output=True)
+                    foxit_found = True
+                    break
+            except Exception as e:
+                continue
+        
+        if not foxit_found:
+            # Fallback to default PDF viewer
+            result = subprocess.run(['start', '', normalized_path], shell=True, capture_output=True)
+            return jsonify({"success": "PDF opened in default viewer (Foxit not found)"}), 200
+        
+        return jsonify({"success": "PDF opened in Foxit PDF Reader"}), 200
+    
+    except Exception as e:
+        return jsonify({"error": f"Failed to open PDF: {e}"}), 500
+
 @app.route('/open_explorer', methods=['POST'])
 def open_explorer():
     """Open the specified directory in Windows Explorer."""

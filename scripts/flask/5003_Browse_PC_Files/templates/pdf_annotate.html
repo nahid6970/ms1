@@ -233,6 +233,9 @@
             <button class="tool-btn" onclick="toggleQuickMove()" title="Quick Move PDF">
                 📁 Quick Move
             </button>
+            <button class="tool-btn" onclick="openInFoxit()" title="Open in Foxit PDF Reader">
+                📖 Foxit
+            </button>
         </div>
     </div>
 
@@ -293,8 +296,20 @@
                             
                             const button = document.createElement('button');
                             button.className = 'quick-move-folder';
+                            button.style.backgroundColor = folder.bg_color || '#444';
+                            button.style.color = folder.text_color || '#ffffff';
                             button.innerHTML = `<i class="nf nf-fa-folder"></i>${folder.name}`;
                             button.onclick = () => movePDFToFolder(folder.path, folder.name);
+                            
+                            // Add hover effects
+                            button.onmouseover = () => {
+                                button.style.backgroundColor = folder.hover_bg_color || '#FF9800';
+                                button.style.color = folder.hover_text_color || '#000000';
+                            };
+                            button.onmouseout = () => {
+                                button.style.backgroundColor = folder.bg_color || '#444';
+                                button.style.color = folder.text_color || '#ffffff';
+                            };
                             
                             item.appendChild(button);
                             container.appendChild(item);
@@ -341,6 +356,30 @@
 
         function navigateToPDF(filename) {
             window.location.href = `/pdf_annotate?dir_path={{ dir_path }}&filename=${encodeURIComponent(filename)}`;
+        }
+
+        function openInFoxit() {
+            fetch('/open_in_foxit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    pdf_path: '{{ dir_path }}/{{ current_pdf }}'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('PDF opened in Foxit PDF Reader');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error opening PDF in Foxit:', error);
+                alert('Error opening PDF in Foxit: ' + error);
+            });
         }
 
         // Save quick move panel state
