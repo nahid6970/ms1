@@ -833,13 +833,18 @@ class MainWindow(QMainWindow):
         # Git status timer
         self.git_timer = QTimer()
         self.git_timer.timeout.connect(self.update_git_status_gui)
-        self.git_timer.start(100)  # Update every 100ms
+        self.git_timer.start(500)  # Update every 500ms (less frequent)
         
         # Start background threads for git status
         self.start_git_monitoring()
     
     def start_git_monitoring(self):
         """Start git status monitoring threads"""
+        # Initialize status tracking
+        self.last_git_status = {}
+        for repo in repos:
+            self.last_git_status[repo["name"]] = None
+        
         # Start background threads
         status_thread = threading.Thread(target=update_status, daemon=True)
         status_thread.start()
@@ -1006,14 +1011,46 @@ class MainWindow(QMainWindow):
                 git_path, text, color = queue.get_nowait()
                 for repo in repos:
                     if git_path == repo["path"] and repo["name"] in self.repo_labels:
+                        # Check if status actually changed
+                        current_status = (text, color)
+                        if self.last_git_status.get(repo["name"]) == current_status:
+                            continue  # Skip if no change
+                        
+                        # Update tracking
+                        self.last_git_status[repo["name"]] = current_status
+                        
                         label = self.repo_labels[repo["name"]]
-                        # Update the label text and color
+                        # Update the label text
                         label.setText(text)
-                        # Update the color by modifying the stylesheet
-                        current_style = label.default_style
-                        new_style = current_style.replace("color: #FFFFFF;", f"color: {color};")
-                        label.default_style = new_style
-                        label.setStyleSheet(new_style)
+                        
+                        # Update both default and hover styles with new color
+                        new_default_style = f"""
+                            QLabel {{
+                                color: {color};
+                                background-color: #1d2027;
+                                font: bold 12px 'JetBrainsMono Nerd Font';
+                                padding: 2px 4px;
+                                border-radius: 3px;
+                            }}
+                        """
+                        
+                        new_hover_style = f"""
+                            QLabel {{
+                                color: #1d2027;
+                                background-color: {color};
+                                font: bold 12px 'JetBrainsMono Nerd Font';
+                                padding: 2px 4px;
+                                border-radius: 3px;
+                            }}
+                        """
+                        
+                        # Update the label's stored styles
+                        label.default_style = new_default_style
+                        label.hover_style = new_hover_style
+                        
+                        # Only apply default style if not currently being hovered
+                        if not label.underMouse():
+                            label.setStyleSheet(new_default_style)
         except Exception as e:
             pass
     
